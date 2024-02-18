@@ -13,18 +13,158 @@
 *
 ********************************************************************************************/
 
+#include "raylib.h"
+#include "raymath.h"
+#include "Camera.hpp"
+#include "Mesh.hpp"
+#include "CollisionSystem.hpp"
+
+#define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
 
-#include "App.h"
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main()
 {
+    // Initialization
+    //--------------------------------------------------------------------------------------
+    const int screenWidth = 1280;
+    const int screenHeight = 720;
 
-    sage::App app;
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - mesh picking");
 
-    app.Update();
+    sage::Camera sCamera;
+
+    Ray ray = { 0 };        // Picking ray
+    
+    sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
+    sage::Mesh towerMesh(LoadModel("resources/models/obj/turret.obj"),mat);
+    towerMesh.SetPosition({ 0.0f, 0.0f, 0.0f });
+    towerMesh.SetScale(1.0f);
+
+    sage::CollisionSystem colSystem;
+    colSystem.AddCollideable(towerMesh.boundingBox);
+
+    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
+        // Update
+        //----------------------------------------------------------------------------------
+        sCamera.HandleInput();
+        sCamera.Update();
+
+        // Display information about closest hit
+        RayCollision collision = { 0 };
+        char* hitObjectName = "None";
+        collision.distance = FLT_MAX;
+        collision.hit = false;
+        Color cursorColor = WHITE;
+
+        // Get ray and test against objects
+        ray = GetMouseRay(GetMousePosition(), *sCamera.getCamera());
+
+
+        RayCollision boxHitInfo = colSystem.CheckRayCollision(ray);
+
+        if ((boxHitInfo.hit) && (boxHitInfo.distance < collision.distance))
+        {
+            collision = boxHitInfo;
+            cursorColor = ORANGE;
+            hitObjectName = "Box";
+
+            // Check ray collision against model meshes
+            RayCollision meshHitInfo = { 0 };
+            for (int m = 0; m < towerMesh.model.meshCount; m++)
+            {
+                // NOTE: We consider the model.transform for the collision check but 
+                // it can be checked against any transform Matrix, used when checking against same
+                // model drawn multiple times with multiple transforms
+                meshHitInfo = GetRayCollisionMesh(ray, towerMesh.model.meshes[m], towerMesh.model.transform);
+                if (meshHitInfo.hit)
+                {
+                    // Save the closest hit mesh
+                    if ((!collision.hit) || (collision.distance > meshHitInfo.distance)) collision = meshHitInfo;
+
+                    break;  // Stop once one mesh collision is detected, the colliding mesh is m
+                }
+            }
+
+            if (meshHitInfo.hit)
+            {
+                collision = meshHitInfo;
+                cursorColor = ORANGE;
+                hitObjectName = "Mesh";
+            }
+        }
+        //----------------------------------------------------------------------------------
+
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+
+        BeginMode3D(*sCamera.getCamera());
+
+        // Draw the tower
+        // WARNING: If scale is different than 1.0f,
+        // not considered by GetRayCollisionModel()
+        towerMesh.Draw();
+
+        // Draw the mesh bbox if we hit it
+        if (boxHitInfo.hit) DrawBoundingBox(towerMesh.boundingBox, LIME);
+
+        // If we hit something, draw the cursor at the hit point
+        if (collision.hit)
+        {
+            DrawCube(collision.point, 0.3f, 0.3f, 0.3f, cursorColor);
+            DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
+
+            Vector3 normalEnd;
+            normalEnd.x = collision.point.x + collision.normal.x;
+            normalEnd.y = collision.point.y + collision.normal.y;
+            normalEnd.z = collision.point.z + collision.normal.z;
+
+            DrawLine3D(collision.point, normalEnd, RED);
+        }
+
+        DrawRay(ray, MAROON);
+
+        DrawGrid(10, 10.0f);
+
+        EndMode3D();
+
+        // Draw some debug GUI text
+        DrawText(TextFormat("Hit Object: %s", hitObjectName), 10, 50, 10, BLACK);
+
+        if (collision.hit)
+        {
+            int ypos = 70;
+
+            DrawText(TextFormat("Distance: %3.2f", collision.distance), 10, ypos, 10, BLACK);
+
+            DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
+                                collision.point.x,
+                                collision.point.y,
+                                collision.point.z), 10, ypos + 15, 10, BLACK);
+
+            DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
+                                collision.normal.x,
+                                collision.normal.y,
+                                collision.normal.z), 10, ypos + 30, 10, BLACK);
+        }
+
+        DrawFPS(10, 10);
+
+        EndDrawing();
+        //----------------------------------------------------------------------------------
+    }
+
+    CloseWindow();              // Close window and OpenGL context
+    //--------------------------------------------------------------------------------------
 
     return 0;
 }
