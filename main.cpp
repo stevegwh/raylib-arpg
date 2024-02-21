@@ -1,10 +1,8 @@
-#include "App.hpp"
+#include "Game.hpp"
 
 
 int main()
 {
-    sage::App app;
-    app.Update();
-
+    sage::Game::GetInstance().Update();
     return 0;
 }

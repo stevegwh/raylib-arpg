@@ -9,7 +9,7 @@ namespace sage
 {
     void CollisionSystem::AddCollideable(Collideable& collideable)
     {
-        collideables[collideable.entityId] = std::make_unique<Collideable>(collideable);
+        collideables.emplace(collideable.entityId, std::make_unique<Collideable>(collideable));
     }
 
     const Collideable& CollisionSystem::GetComponent(EntityID entityId)

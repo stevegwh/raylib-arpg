@@ -4,6 +4,7 @@
 
 #include "RenderSystem.hpp"
 #include "raylib.h"
+#include "Game.hpp"
 
 namespace sage
 {
@@ -21,9 +22,8 @@ namespace sage
     {
         for (const auto& renderable : renderables)
         {
-            //Transform transform = app->transformSystem->GetComponent(renderable->entityId);
-            //DrawModel(renderable->model, transform.position, transform.scale, WHITE);
-            DrawModel(renderable->model, {0, 0, 0}, 1.0f, WHITE);
+            Transform transform = sage::Game::GetInstance().transformSystem->GetComponent(renderable->entityId);
+            DrawModel(renderable->model, transform.position, transform.scale, WHITE);
         }
     }
 

@@ -24,8 +24,8 @@ endif()
 
 add_executable(BG_Raylib
         main.cpp
-        App.cpp
-        App.hpp
+        Game.cpp
+        Game.hpp
         Camera.cpp
         Camera.hpp
         Renderable.hpp

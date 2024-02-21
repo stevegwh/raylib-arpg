@@ -2,13 +2,13 @@
 // Created by steve on 18/02/2024.
 //
 
-#include "App.hpp"
+#include "Game.hpp"
 
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
 namespace sage
 {
-    void App::init()
+    void Game::init()
     {
         // Initialization
         //--------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ namespace sage
         
     }
 
-    void App::Update()
+    void Game::Update()
     {
         Ray ray = { 0 };        // Picking ray
 
@@ -164,12 +164,12 @@ namespace sage
 
     }
 
-    void App::draw()
+    void Game::draw()
     {
         
     };
 
-    void App::cleanup()
+    void Game::cleanup()
     {
         CloseWindow();
     }
