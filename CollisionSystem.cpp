@@ -7,19 +7,10 @@
 
 namespace sage
 {
-    void CollisionSystem::AddCollideable(Collideable& collideable)
-    {
-        collideables.emplace(collideable.entityId, std::make_unique<Collideable>(collideable));
-    }
-
-    const Collideable& CollisionSystem::GetComponent(EntityID entityId)
-    {
-        return *collideables.at(entityId);
-    }
 
     CollisionInfo CollisionSystem::CheckRayCollision(const Ray& ray)
     {
-        for (const auto& c : collideables)
+        for (const auto& c : components)
         {
             auto col = GetRayCollisionBox(ray, c.second->boundingBox);
             if (col.hit) 

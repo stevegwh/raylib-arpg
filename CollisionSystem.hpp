@@ -7,18 +7,14 @@
 #include <map>
 #include <raylib.h>
 #include "Collideable.hpp"
+#include "BaseSystem.hpp"
 
 namespace sage
 {
-    class CollisionSystem
-    {
-        std::map<EntityID, std::unique_ptr<Collideable>> collideables;
-
-    public:
-        // Make const ref and store pointers to the actual bounding boxes?
-        void AddCollideable(Collideable& collideable);
-        CollisionInfo CheckRayCollision(const Ray& ray);
-        const Collideable& GetComponent(EntityID entityId);
-    };
+class CollisionSystem : public BaseSystem<Collideable>
+{
+public:
+    CollisionInfo CheckRayCollision(const Ray& ray);
+};
 }
 

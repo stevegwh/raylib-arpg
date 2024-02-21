@@ -7,14 +7,10 @@
 #include <map>
 #include "Transform.hpp"
 #include <memory>
-
+#include "BaseSystem.hpp"
 namespace sage
 {
-    class TransformSystem
-    {
-        std::map<EntityID, std::unique_ptr<Transform>> transforms;
-    public:
-        void AddTransform(Transform& transform);
-        const Transform& GetComponent(EntityID entityId);
-    };
+class TransformSystem : public BaseSystem<Transform>
+{
+};
 }

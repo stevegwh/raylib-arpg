@@ -3,19 +3,18 @@
 //
 
 #pragma once
-#include <vector>
+#include <map>
 
 #include "Renderable.hpp"
+#include "BaseSystem.hpp"
 
 namespace sage
 {
-    class RenderSystem
-    {
-        std::vector<std::unique_ptr<Renderable>> renderables;
-    public:
-        ~RenderSystem();
-        void AddRenderable(Renderable& renderable);
-        void Draw() const;
-    };
+class RenderSystem : public BaseSystem<Renderable>
+{
+public:
+    ~RenderSystem();
+    void Draw() const;
+};
 }
 

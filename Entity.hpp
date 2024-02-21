@@ -4,16 +4,15 @@
 
 #pragma once
 
-#include <utility>
-
-//#include "EntityRegistry.hpp"
 namespace sage
 {
     typedef int EntityID;
     
     struct Entity
     {
+    private:
         static EntityID entityIdCounter;
+    public:
         const EntityID entityId;
         explicit Entity()
         : entityId(++entityIdCounter)

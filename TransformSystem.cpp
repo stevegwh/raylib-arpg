@@ -6,13 +6,4 @@
 
 namespace sage
 {
-    void TransformSystem::AddTransform(Transform& transform)
-    {
-        transforms.emplace(transform.entityId, std::make_unique<Transform>(transform));
-    }
-    
-    const Transform& TransformSystem::GetComponent(EntityID entityId)
-    {
-        return *transforms.at(entityId);
-    }
 }

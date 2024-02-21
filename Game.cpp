@@ -47,15 +47,15 @@ namespace sage
             Color cursorColor = WHITE;
 
 
-            // Check ray collision against ground quad
-            RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
-
-            if ((groundHitInfo.hit) && (groundHitInfo.distance < collision.distance))
-            {
-                collision = groundHitInfo;
-                cursorColor = GREEN;
-                hitObjectName = "Ground";
-            }
+//            // Check ray collision against ground quad
+//            RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
+//
+//            if ((groundHitInfo.hit) && (groundHitInfo.distance < collision.distance))
+//            {
+//                collision = groundHitInfo;
+//                cursorColor = GREEN;
+//                hitObjectName = "Ground";
+//            }
 
             // Get ray and test against objects
             ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
@@ -67,7 +67,12 @@ namespace sage
             {
                 collision = boxHitInfo.rayCollision;
                 cursorColor = ORANGE;
-                hitObjectName = "Box";
+                
+                if (renderSystem->EntityExists(boxHitInfo.collidedObject))
+                {
+                    hitObjectName = renderSystem->GetComponent(boxHitInfo.collidedObject).name;
+                }
+                
                 
                 /*
                 // Check ray collision against model meshes

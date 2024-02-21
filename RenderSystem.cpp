@@ -13,20 +13,13 @@ namespace sage
     
     }
     
-    void RenderSystem::AddRenderable(Renderable& renderable)
-    {
-        renderables.push_back(std::make_unique<Renderable>(renderable));
-    }
-    
     void RenderSystem::Draw() const
     {
-        for (const auto& renderable : renderables)
+        for (const auto& renderable : components)
         {
-            Transform transform = sage::Game::GetInstance().transformSystem->GetComponent(renderable->entityId);
-            DrawModel(renderable->model, transform.position, transform.scale, WHITE);
+            Transform transform = sage::Game::GetInstance().transformSystem->GetComponent(renderable.second->entityId);
+            DrawModel(renderable.second->model, transform.position, transform.scale, WHITE);
         }
     }
-
-
 }
 

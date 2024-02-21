@@ -25,6 +25,7 @@ namespace sage
         std::unique_ptr<sage::Camera> sCamera;
         std::unique_ptr<Entity> tower;
         std::unique_ptr<Entity> tower2;
+        std::unique_ptr<Entity> floor;
         std::unique_ptr<sage::Cursor> cursor;
 
         void init();
@@ -49,6 +50,8 @@ namespace sage
             // init entities
             tower = std::make_unique<Entity>();
             tower2 = std::make_unique<Entity>();
+            floor = std::make_unique<Entity>();
+            
             
 
             // init components
@@ -78,16 +81,25 @@ namespace sage
             towerCollidable2->boundingBox = GetMeshBoundingBox(towerRenderable2->model.meshes[0]);
             towerCollidable2->boundingBox.min = Vector3Add(towerCollidable2->boundingBox.min, towerTransform2->position);
             towerCollidable2->boundingBox.max = Vector3Add(towerCollidable2->boundingBox.max, towerTransform2->position);
+            
+            // Ground quad
+            Vector3 g0 = (Vector3){ -50.0f, 0.0f, -50.0f };
+            Vector3 g2 = (Vector3){  50.0f, 1.0f,  50.0f };
+            auto floorCollidable = new Collideable(floor->entityId);
+            floorCollidable->boundingBox.min = g0;
+            floorCollidable->boundingBox.max = g2;
+            floorCollidable->collisionLayer = FLOOR;
 
             // add components to systems
-            transformSystem->AddTransform(*towerTransform1);
-            transformSystem->AddTransform(*towerTransform2);
+            transformSystem->AddComponent(*towerTransform1);
+            transformSystem->AddComponent(*towerTransform2);
             
-            renderSystem->AddRenderable(*towerRenderable1);
-            renderSystem->AddRenderable(*towerRenderable2);
+            renderSystem->AddComponent(*towerRenderable1);
+            renderSystem->AddComponent(*towerRenderable2);
             
-            collisionSystem->AddCollideable(*towerCollidable1);
-            collisionSystem->AddCollideable(*towerCollidable2);
+            collisionSystem->AddComponent(*towerCollidable1);
+            collisionSystem->AddComponent(*towerCollidable2);
+            collisionSystem->AddComponent(*floorCollidable);
         }
 
         ~Game()
