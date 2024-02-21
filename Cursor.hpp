@@ -4,11 +4,16 @@
 
 #pragma once
 
+#include "raylib.h"
+
 namespace sage
 {
     class Cursor
     {
-        
+        Color defaultColor = WHITE;
+        Color hoverColor = LIME;
+    public:
+        void Draw(const RayCollision& collision);
     
     };
 }

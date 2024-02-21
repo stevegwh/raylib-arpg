@@ -7,26 +7,31 @@
 
 namespace sage
 {
-    void CollisionSystem::AddCollideable(BoundingBox boundingBox)
+    void CollisionSystem::AddCollideable(Collideable collideable)
     {
-        collideableBoundingBoxes.push_back(boundingBox);
+        collideables.push_back(collideable);
     }
 
-    RayCollision CollisionSystem::CheckRayCollision(const Ray& ray)
+    CollisionInfo CollisionSystem::CheckRayCollision(const Ray& ray)
     {
-        for (const auto& bb : collideableBoundingBoxes)
+        for (const auto& c : collideables)
         {
-            auto col = GetRayCollisionBox(ray, bb);
-            if (col.hit)
+            auto col = GetRayCollisionBox(ray, c.boundingBox);
+            if (col.hit) 
             {
+                //c.OnCollisionHit.callback();
+
+                CollisionInfo info = {
+                    .collidedObject= c,
+                    .rayCollision = col
+                };
+                
                 // TODO: add to an array and return all collisions
-                return col;
+                return info;
             }
         }
 
-        RayCollision col;
-        col.hit = false;
-        return col;
+        return {0};
     }
 
 }

@@ -16,67 +16,72 @@ namespace sage
         const int screenHeight = 720;
 
         InitWindow(screenWidth, screenHeight, "raylib [models] example - mesh picking");
-
-        // Display information about closest hit
-        hitObjectName = "None";
-        collision.distance = FLT_MAX;
-        collision.hit = false;
-        cursorColor = WHITE;
-    }
-
-    void App::cleanup()
-    {
-        CloseWindow();
+        
     }
 
     void App::Update()
     {
+        Ray ray = { 0 };        // Picking ray
+
+        // Ground quad
+        Vector3 g0 = (Vector3){ -50.0f, 0.0f, -50.0f };
+        Vector3 g1 = (Vector3){ -50.0f, 0.0f,  50.0f };
+        Vector3 g2 = (Vector3){  50.0f, 0.0f,  50.0f };
+        Vector3 g3 = (Vector3){  50.0f, 0.0f, -50.0f };
+
         SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
         // Main game loop
         while (!WindowShouldClose())        // Detect window close button or ESC key
         {
-
             // Update
             //----------------------------------------------------------------------------------
             sCamera->HandleInput();
             sCamera->Update();
+
+            // Display information about closest hit
+            RayCollision collision = { 0 };
+            hitObjectName = "None";
+            collision.distance = FLT_MAX;
+            collision.hit = false;
+            Color cursorColor = WHITE;
+
+
+            // Check ray collision against ground quad
+            RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
+
+            if ((groundHitInfo.hit) && (groundHitInfo.distance < collision.distance))
+            {
+                collision = groundHitInfo;
+                cursorColor = GREEN;
+                hitObjectName = "Ground";
+            }
+
             // Get ray and test against objects
             ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
 
 
-//        // Check ray collision against ground quad
-//        RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
-//
-//        if ((groundHitInfo.hit) && (groundHitInfo.distance < collision.distance))
-//        {
-//            collision = groundHitInfo;
-//            cursorColor = GREEN;
-//            hitObjectName = "Ground";
-//        }
-//
+            CollisionInfo boxHitInfo = colSystem->CheckRayCollision(ray);
 
-            boxHitInfo = colSystem->CheckRayCollision(ray);
-
-            if ((boxHitInfo.hit) && (boxHitInfo.distance < collision.distance))
+            if ((boxHitInfo.rayCollision.hit) && (boxHitInfo.rayCollision.distance < collision.distance))
             {
-                collision = boxHitInfo;
+                collision = boxHitInfo.rayCollision;
                 cursorColor = ORANGE;
                 hitObjectName = "Box";
-
+                
+                /*
                 // Check ray collision against model meshes
-                RayCollision meshHitInfo = {false};
-                for (int m = 0; m < towerMesh->model.meshCount; m++)
+                RayCollision meshHitInfo = { 0 };
+                for (int m = 0; m < tower->model.meshCount; m++)
                 {
-                    // NOTE: We consider the model.transform for the collision check but
+                    // NOTE: We consider the model.transform for the collision check but 
                     // it can be checked against any transform Matrix, used when checking against same
                     // model drawn multiple times with multiple transforms
-                    meshHitInfo = GetRayCollisionMesh(ray, towerMesh->model.meshes[m], towerMesh->model.transform);
+                    meshHitInfo = GetRayCollisionMesh(ray, tower->model.meshes[m], tower->model.transform);
                     if (meshHitInfo.hit)
                     {
                         // Save the closest hit mesh
-                        if ((!collision.hit) || (collision.distance > meshHitInfo.distance))
-                            collision = meshHitInfo;
+                        if ((!collision.hit) || (collision.distance > meshHitInfo.distance)) collision = meshHitInfo;
 
                         break;  // Stop once one mesh collision is detected, the colliding mesh is m
                     }
@@ -86,78 +91,85 @@ namespace sage
                 {
                     collision = meshHitInfo;
                     cursorColor = ORANGE;
-                    hitObjectName = "Mesh";
+                    hitObjectName = "Renderable";
                 }
+                 */
             }
             //----------------------------------------------------------------------------------
-            draw();
+
+            // Draw
+            //----------------------------------------------------------------------------------
+            BeginDrawing();
+
+            ClearBackground(RAYWHITE);
+
+            BeginMode3D(*sCamera->getCamera());
+
+            // Draw the tower
+            // WARNING: If scale is different than 1.0f,
+            // not considered by GetRayCollisionModel()
+            scene->Draw();
+
+            // Draw the mesh bbox if we hit it
+            if (boxHitInfo.rayCollision.hit) 
+            {
+                DrawBoundingBox(boxHitInfo.collidedObject.boundingBox, LIME);
+            }
+
+            // If we hit something, draw the cursor at the hit point
+            cursor->Draw(collision);
+//            if (collision.hit)
+//            {
+//                DrawCube(collision.point, 0.3f, 0.3f, 0.3f, cursorColor);
+//                DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
+//
+//                Vector3 normalEnd;
+//                normalEnd.x = collision.point.x + collision.normal.x;
+//                normalEnd.y = collision.point.y + collision.normal.y;
+//                normalEnd.z = collision.point.z + collision.normal.z;
+//
+//                DrawLine3D(collision.point, normalEnd, RED);
+//            }
+
+            DrawGrid(10, 10.0f);
+
+            EndMode3D();
+
+            // Draw some debug GUI text
+            DrawText(TextFormat("Hit Object: %s", hitObjectName.c_str()), 10, 50, 10, BLACK);
+
+            if (collision.hit)
+            {
+                int ypos = 70;
+
+                DrawText(TextFormat("Distance: %3.2f", collision.distance), 10, ypos, 10, BLACK);
+
+                DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
+                                    collision.point.x,
+                                    collision.point.y,
+                                    collision.point.z), 10, ypos + 15, 10, BLACK);
+
+                DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
+                                    collision.normal.x,
+                                    collision.normal.y,
+                                    collision.normal.z), 10, ypos + 30, 10, BLACK);
+            }
+
+            DrawFPS(10, 10);
+
+            EndDrawing();
+            //----------------------------------------------------------------------------------
         }
 
     }
 
     void App::draw()
     {
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-        ClearBackground(RAYWHITE);
-
-        BeginMode3D(*sCamera->getCamera());
-
-        // Draw the tower
-        // WARNING: If scale is different than 1.0f,
-        // not considered by GetRayCollisionModel()
-        towerMesh->Draw();
-
-        // Draw the mesh bbox if we hit it
-        if (boxHitInfo.hit) DrawBoundingBox(towerMesh->boundingBox, LIME);
-
-        // If we hit something, draw the cursor at the hit point
-        if (collision.hit)
-        {
-            DrawCube(collision.point, 0.3f, 0.3f, 0.3f, cursorColor);
-            DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
-
-            Vector3 normalEnd;
-            normalEnd.x = collision.point.x + collision.normal.x;
-            normalEnd.y = collision.point.y + collision.normal.y;
-            normalEnd.z = collision.point.z + collision.normal.z;
-
-            DrawLine3D(collision.point, normalEnd, RED);
-        }
-
-        DrawRay(ray, MAROON);
-
-        DrawGrid(10, 10.0f);
-
-        EndMode3D();
-
-        // Draw some debug GUI text
-        DrawText(TextFormat("Hit Object: %s", hitObjectName.c_str()), 10, 50, 10, BLACK);
-
-        if (collision.hit)
-        {
-            int ypos = 70;
-
-            DrawText(TextFormat("Distance: %3.2f", collision.distance), 10, ypos, 10, BLACK);
-
-            DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
-                                collision.point.x,
-                                collision.point.y,
-                                collision.point.z), 10, ypos + 15, 10, BLACK);
-
-            DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
-                                collision.normal.x,
-                                collision.normal.y,
-                                collision.normal.z), 10, ypos + 30, 10, BLACK);
-        }
-
-        DrawFPS(10, 10);
-
-        EndDrawing();
-        //----------------------------------------------------------------------------------
+        
     };
 
-
+    void App::cleanup()
+    {
+        CloseWindow();
+    }
 }

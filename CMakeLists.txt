@@ -26,8 +26,8 @@ add_executable(BG_Raylib
         main.cpp
         Camera.cpp
         Camera.hpp
-        Mesh.cpp
-        Mesh.hpp
+        Renderable.cpp
+        Renderable.hpp
         Material.hpp
         Cursor.cpp
         Cursor.hpp
@@ -35,6 +35,21 @@ add_executable(BG_Raylib
         CollisionSystem.hpp
         App.cpp
         App.h
+        Collideable.hpp
+        Event.cpp
+        Event.hpp
+        Observer.hpp
+        raygui.h
+        Scene.cpp
+        Scene.hpp
+        Entity.cpp
+        Entity.hpp
+        Transform.cpp
+        Transform.hpp
+        GameObject.cpp
+        GameObject.hpp
+        ComponentManager.cpp
+        ComponentManager.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
