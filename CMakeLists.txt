@@ -22,34 +22,31 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     endif()
 endif()
 
-add_executable(BG_Raylib 
+add_executable(BG_Raylib
         main.cpp
+        App.cpp
+        App.hpp
         Camera.cpp
         Camera.hpp
-        Renderable.cpp
         Renderable.hpp
         Material.hpp
         Cursor.cpp
         Cursor.hpp
         CollisionSystem.cpp
         CollisionSystem.hpp
-        App.cpp
-        App.h
         Collideable.hpp
         Event.cpp
         Event.hpp
         Observer.hpp
         raygui.h
-        Scene.cpp
-        Scene.hpp
-        Entity.cpp
         Entity.hpp
-        Transform.cpp
         Transform.hpp
-        GameObject.cpp
-        GameObject.hpp
-        ComponentManager.cpp
-        ComponentManager.hpp
+        RenderSystem.cpp
+        RenderSystem.hpp
+        Component.hpp
+        TransformSystem.cpp
+        TransformSystem.hpp
+        Entity.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

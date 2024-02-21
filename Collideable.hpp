@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <raylib.h>
-#include "Event.hpp"
-#include "Renderable.hpp"
+#include "Component.hpp"
+#include "raylib.h"
+
 
 namespace sage
 {
@@ -17,17 +17,17 @@ namespace sage
         BUILDING
     };
 
-    struct Collideable
+    struct Collideable : public Component
     {
-        // Entity GUID
         BoundingBox boundingBox{};
         CollisionLayer collisionLayer = DEFAULT;
         //Event OnCollisionHit;
+        explicit Collideable(EntityID _entityId) : Component(_entityId) {}
     };
 
     struct CollisionInfo
     {
-        Collideable collidedObject;
+        EntityID collidedObject{};
         RayCollision rayCollision{};
     };
 }

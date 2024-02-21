@@ -3,27 +3,34 @@
 //
 
 #pragma once
-#include <raylib.h>
-#include "Material.hpp"
-#include "Transform.hpp"
+#include "raylib.h"
 #include <string>
+
+#include "Material.hpp"
+#include "Component.hpp"
+
+
 namespace sage
 {
-    class Renderable
+    struct Renderable : public sage::Component
     {
         sage::Material material;
-    public:
-        const sage::Transform* const transform;
+        Model model;
         std::string name = "Default";
-        Renderable(Model _model, sage::Material _material, Transform* _transform)
-        : model(_model), material(_material), transform(_transform)
+        
+        Renderable(EntityID entityId, Model _model, sage::Material _material)
+        : Component(entityId), model(_model), material(_material)
         {
             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = material.diffuse;
             // TODO: Need to update bounding box based on model position
         }
-        ~Renderable();
-        void Draw() const;
-        Model model;
+        
+        ~Renderable()
+        {
+            UnloadModel(model);
+            UnloadTexture(material.diffuse);
+        }
+
     };
 }
 

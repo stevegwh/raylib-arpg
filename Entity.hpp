@@ -4,12 +4,20 @@
 
 #pragma once
 
+#include <utility>
+
+//#include "EntityRegistry.hpp"
 namespace sage
 {
+    typedef int EntityID;
+    
     struct Entity
     {
-        // Need a way to store components
-        // Need a way to add/retrieve/delete components
+        static EntityID entityIdCounter;
+        const EntityID entityId;
+        explicit Entity()
+        : entityId(++entityIdCounter)
+        {}
     };
 }
 

@@ -2,7 +2,7 @@
 // Created by steve on 18/02/2024.
 //
 
-#include "App.h"
+#include "App.hpp"
 
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
@@ -61,7 +61,7 @@ namespace sage
             ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
 
 
-            CollisionInfo boxHitInfo = colSystem->CheckRayCollision(ray);
+            CollisionInfo boxHitInfo = collisionSystem->CheckRayCollision(ray);
 
             if ((boxHitInfo.rayCollision.hit) && (boxHitInfo.rayCollision.distance < collision.distance))
             {
@@ -108,12 +108,13 @@ namespace sage
             // Draw the tower
             // WARNING: If scale is different than 1.0f,
             // not considered by GetRayCollisionModel()
-            scene->Draw();
+            renderSystem->Draw();
 
             // Draw the mesh bbox if we hit it
             if (boxHitInfo.rayCollision.hit) 
             {
-                DrawBoundingBox(boxHitInfo.collidedObject.boundingBox, LIME);
+                BoundingBox boundingBox = collisionSystem->GetComponent(boxHitInfo.collidedObject).boundingBox;
+                DrawBoundingBox(boundingBox, LIME);
             }
 
             // If we hit something, draw the cursor at the hit point

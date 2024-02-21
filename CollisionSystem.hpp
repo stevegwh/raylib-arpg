@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <vector>
+#include <map>
 #include <raylib.h>
 #include "Collideable.hpp"
 
@@ -12,12 +12,13 @@ namespace sage
 {
     class CollisionSystem
     {
-        std::vector<Collideable> collideables;
+        std::map<EntityID, std::unique_ptr<Collideable>> collideables;
 
     public:
         // Make const ref and store pointers to the actual bounding boxes?
-        void AddCollideable(Collideable collideable);
+        void AddCollideable(Collideable& collideable);
         CollisionInfo CheckRayCollision(const Ray& ray);
+        const Collideable& GetComponent(EntityID entityId);
     };
 }
 
