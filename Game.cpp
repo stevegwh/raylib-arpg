@@ -31,6 +31,13 @@ namespace sage
             sCamera->Update();
             cursor->GetMouseRayCollision(*sCamera->getCamera(), *collisionSystem, *renderSystem);
 
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                cursor->OnClick();
+
+                // Place a model when mouse clicked
+            }
+
             //----------------------------------------------------------------------------------
 
             // Draw

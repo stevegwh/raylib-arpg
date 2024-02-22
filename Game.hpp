@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 
+#include "Registry.hpp"
 #include "Renderable.hpp"
 #include "CollisionSystem.hpp"
 #include "Cursor.hpp"
@@ -23,9 +24,6 @@ namespace sage
     {
 
         std::unique_ptr<sage::Camera> sCamera;
-        std::unique_ptr<Entity> tower;
-        std::unique_ptr<Entity> tower2;
-        std::unique_ptr<Entity> floor;
         std::unique_ptr<sage::Cursor> cursor;
 
         static void init();
@@ -44,35 +42,37 @@ namespace sage
             collisionSystem = std::make_unique<sage::CollisionSystem>();
             transformSystem = std::make_unique<sage::TransformSystem>();
 
+            EntityID tower = Registry::GetInstance().CreateEntity();
+            EntityID tower2 = Registry::GetInstance().CreateEntity();
+            EntityID floor = Registry::GetInstance().CreateEntity();
+
             // init entities
-            tower = std::make_unique<Entity>();
-            tower2 = std::make_unique<Entity>();
-            floor = std::make_unique<Entity>();
+
 
             // init components
             sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
 
-            auto towerRenderable1 = new Renderable(tower->entityId, LoadModel("resources/models/obj/turret.obj"), mat);
+            auto towerRenderable1 = new Renderable(tower, LoadModel("resources/models/obj/turret.obj"), mat);
             towerRenderable1->name = "Tower";
 
-            auto towerRenderable2 = new Renderable(tower2->entityId, LoadModel("resources/models/obj/turret.obj"), mat);
+            auto towerRenderable2 = new Renderable(tower2, LoadModel("resources/models/obj/turret.obj"), mat);
             towerRenderable2->name = "Tower 2";
 
-            auto towerTransform1 = new Transform(tower->entityId);
+            auto towerTransform1 = new Transform(tower);
             towerTransform1->position = { 0.0f, 0.0f, 0.0f };
             towerTransform1->scale = 1.0f;
 
-            auto towerTransform2 = new Transform(tower2->entityId);
+            auto towerTransform2 = new Transform(tower2);
             towerTransform2->position = { 10.0f, 0.0f, 20.0f };
             towerTransform2->scale = 1.0f;
 
             // TODO: Below needs to be moved to the collision system update or something.
-            auto towerCollidable1 = new Collideable(tower->entityId);
+            auto towerCollidable1 = new Collideable(tower);
             towerCollidable1->boundingBox = GetMeshBoundingBox(towerRenderable1->model.meshes[0]);
             towerCollidable1->boundingBox.min = Vector3Add(towerCollidable1->boundingBox.min, towerTransform1->position);
             towerCollidable1->boundingBox.max = Vector3Add(towerCollidable1->boundingBox.max, towerTransform1->position);
 
-            auto towerCollidable2 = new Collideable(tower2->entityId);
+            auto towerCollidable2 = new Collideable(tower2);
             towerCollidable2->boundingBox = GetMeshBoundingBox(towerRenderable2->model.meshes[0]);
             towerCollidable2->boundingBox.min = Vector3Add(towerCollidable2->boundingBox.min, towerTransform2->position);
             towerCollidable2->boundingBox.max = Vector3Add(towerCollidable2->boundingBox.max, towerTransform2->position);
@@ -80,7 +80,7 @@ namespace sage
             // Ground quad
             Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
             Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
-            auto floorCollidable = new Collideable(floor->entityId);
+            auto floorCollidable = new Collideable(floor);
             floorCollidable->boundingBox.min = g0;
             floorCollidable->boundingBox.max = g2;
             floorCollidable->collisionLayer = FLOOR;

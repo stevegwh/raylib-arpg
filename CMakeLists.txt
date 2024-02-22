@@ -48,6 +48,7 @@ add_executable(BG_Raylib
         TransformSystem.hpp
         Entity.cpp
         BaseSystem.hpp
+        Registry.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

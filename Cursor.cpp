@@ -3,6 +3,7 @@
 //
 
 #include "Cursor.hpp"
+#include <iostream>
 
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
@@ -21,18 +22,22 @@ namespace sage
         ray = GetMouseRay(GetMousePosition(), raylibCamera);
 
 
-        boxHitInfo = colSystem.CheckRayCollision(ray);
+        rayCollisionResultInfo = colSystem.CheckRayCollision(ray);
 
-        if ((boxHitInfo.rayCollision.hit) && (boxHitInfo.rayCollision.distance < collision.distance))
+        if ((rayCollisionResultInfo.rayCollision.hit) && (rayCollisionResultInfo.rayCollision.distance < collision.distance))
         {
-            collision = boxHitInfo.rayCollision;
+            collision = rayCollisionResultInfo.rayCollision;
 
-            if (renderSystem.EntityExists(boxHitInfo.collidedEntityId))
+            if (renderSystem.EntityExists(rayCollisionResultInfo.collidedEntityId))
             {
-                hitObjectName = renderSystem.GetComponent(boxHitInfo.collidedEntityId).name;
+                hitObjectName = renderSystem.GetComponent(rayCollisionResultInfo.collidedEntityId).name;
             }
         }
+    }
 
+    void Cursor::OnClick()
+    {
+        std::cout << "Hit object position: " << collision.point.x << ", " << collision.point.y << ", " << collision.point.z << "\n";
     }
 
     void Cursor::Draw(const CollisionSystem& colSystem)
@@ -58,16 +63,16 @@ namespace sage
 
 
         // Draw the mesh bbox if we hit it
-        if (boxHitInfo.rayCollision.hit)
+        if (rayCollisionResultInfo.rayCollision.hit)
         {
-            auto col = colSystem.GetComponent(boxHitInfo.collidedEntityId);
+            auto col = colSystem.GetComponent(rayCollisionResultInfo.collidedEntityId);
             if (col.collisionLayer == FLOOR)
             {
-                colSystem.BoundingBoxDraw(boxHitInfo.collidedEntityId, ORANGE);
+                colSystem.BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId, ORANGE);
             }
             else
             {
-                colSystem.BoundingBoxDraw(boxHitInfo.collidedEntityId);
+                colSystem.BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId);
             }
 
         }
