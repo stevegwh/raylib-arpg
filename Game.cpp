@@ -34,6 +34,25 @@ namespace sage
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 cursor->OnClick();
+                EntityID newTower = Registry::GetInstance().CreateEntity();
+                sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
+
+                auto towerRenderable1 = new Renderable(newTower, LoadModel("resources/models/obj/turret.obj"), mat);
+                towerRenderable1->name = "Tower Instance";
+
+                auto towerTransform1 = new Transform(newTower);
+                towerTransform1->position = cursor->collision.point;
+                towerTransform1->scale = 1.0f;
+
+                auto towerCollidable1 = new Collideable(newTower);
+                towerCollidable1->boundingBox = GetMeshBoundingBox(towerRenderable1->model.meshes[0]);
+                towerCollidable1->boundingBox.min = Vector3Add(towerCollidable1->boundingBox.min, towerTransform1->position);
+                towerCollidable1->boundingBox.max = Vector3Add(towerCollidable1->boundingBox.max, towerTransform1->position);
+
+                transformSystem->AddComponent(*towerTransform1);
+                renderSystem->AddComponent(*towerRenderable1);
+                collisionSystem->AddComponent(*towerCollidable1);
+
 
                 // Place a model when mouse clicked
             }

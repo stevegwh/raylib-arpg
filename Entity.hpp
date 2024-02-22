@@ -13,6 +13,7 @@ namespace sage
     private:
         static EntityID entityIdCounter;
     public:
+        bool deleted = false;
         const EntityID entityId;
         explicit Entity()
         : entityId(++entityIdCounter)

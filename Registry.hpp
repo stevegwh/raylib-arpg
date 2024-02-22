@@ -33,9 +33,9 @@ namespace sage
             return id;
         }
 
-        void DeleteEntity()
+        void DeleteEntity(EntityID entityId)
         {
-            return;
+            entities.at(entityId)->deleted = true;
         }
     };
 }

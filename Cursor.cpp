@@ -21,8 +21,9 @@ namespace sage
         // Get ray and test against objects
         ray = GetMouseRay(GetMousePosition(), raylibCamera);
 
+        auto collisions = colSystem.CheckRayCollision(ray);
+        rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){0, {}} : colSystem.CheckRayCollision(ray).at(0);
 
-        rayCollisionResultInfo = colSystem.CheckRayCollision(ray);
 
         if ((rayCollisionResultInfo.rayCollision.hit) && (rayCollisionResultInfo.rayCollision.distance < collision.distance))
         {

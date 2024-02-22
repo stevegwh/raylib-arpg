@@ -2,32 +2,40 @@
 // Created by Steve Wheeler on 18/02/2024.
 //
 
+#include <algorithm>
+
 #include "CollisionSystem.hpp"
+
+bool compareCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
+{
+    return a.rayCollision.distance < b.rayCollision.distance;
+}
 
 
 namespace sage
 {
 
-    CollisionInfo CollisionSystem::CheckRayCollision(const Ray& ray) const
+    std::vector<CollisionInfo> CollisionSystem::CheckRayCollision(const Ray& ray) const
     {
+        std::vector<CollisionInfo> collisions;
+
         for (const auto& c : components)
         {
             auto col = GetRayCollisionBox(ray, c.second->boundingBox);
             if (col.hit) 
             {
-                //c.OnCollisionHit.callback();
 
                 CollisionInfo info = {
                     .collidedEntityId= c.second->entityId,
                     .rayCollision = col
                 };
-                
-                // TODO: add to an array and return all collisions
-                return info;
+                collisions.push_back(info);
             }
         }
 
-        return {0};
+        std::sort(collisions.begin(), collisions.end(), compareCollisionDistances);
+
+        return collisions;
     }
 
     void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color) const
