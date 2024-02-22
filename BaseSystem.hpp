@@ -9,11 +9,11 @@
 
 namespace sage
 {
-    template <typename Derived>
+    template <typename ComponentName>
     class BaseSystem
     {
     protected:
-        std::map<EntityID, std::unique_ptr<Derived>> components;
+        std::map<EntityID, std::unique_ptr<ComponentName>> components;
     public:
         
         bool EntityExists(EntityID entityId) 
@@ -21,16 +21,14 @@ namespace sage
             return components.find(entityId) != components.end();
         };
 
-        const Derived& GetComponent(EntityID entityId)
+        const ComponentName& GetComponent(EntityID entityId)
         {
             return *components.at(entityId);
         }
 
-        void AddComponent(Derived &component)
+        void AddComponent(ComponentName &component)
         {
-            components.emplace(component.entityId, std::make_unique<Derived>(component));
+            components.emplace(component.entityId, std::make_unique<ComponentName>(component));
         }
-    
-    
     };
 }
