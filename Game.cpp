@@ -4,8 +4,6 @@
 
 #include "Game.hpp"
 
-#define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
-
 namespace sage
 {
     void Game::init()
@@ -21,7 +19,6 @@ namespace sage
 
     void Game::Update()
     {
-        Ray ray = { 0 };        // Picking ray
 
         SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
@@ -32,29 +29,8 @@ namespace sage
             //----------------------------------------------------------------------------------
             sCamera->HandleInput();
             sCamera->Update();
+            cursor->GetMouseRayCollision(*sCamera->getCamera(), *collisionSystem, *renderSystem);
 
-            // Display information about closest hit
-            RayCollision collision = { 0 };
-            hitObjectName = "None";
-            collision.distance = FLT_MAX;
-            collision.hit = false;
-
-
-            // Get ray and test against objects
-            ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
-
-
-            CollisionInfo boxHitInfo = collisionSystem->CheckRayCollision(ray);
-
-            if ((boxHitInfo.rayCollision.hit) && (boxHitInfo.rayCollision.distance < collision.distance))
-            {
-                collision = boxHitInfo.rayCollision;
-                
-                if (renderSystem->EntityExists(boxHitInfo.collidedEntityId))
-                {
-                    hitObjectName = renderSystem->GetComponent(boxHitInfo.collidedEntityId).name;
-                }
-            }
             //----------------------------------------------------------------------------------
 
             // Draw
@@ -70,47 +46,14 @@ namespace sage
             // not considered by GetRayCollisionModel()
             renderSystem->Draw();
 
-            // Draw the mesh bbox if we hit it
-            if (boxHitInfo.rayCollision.hit) 
-            {
-                auto col = collisionSystem->GetComponent(boxHitInfo.collidedEntityId);
-                if (col.collisionLayer == FLOOR)
-                {
-                    collisionSystem->BoundingBoxDraw(boxHitInfo.collidedEntityId, ORANGE);
-                }
-                else
-                {
-                    collisionSystem->BoundingBoxDraw(boxHitInfo.collidedEntityId);
-                }
-
-            }
-
             // If we hit something, draw the cursor at the hit point
-            cursor->Draw(collision);
+            cursor->Draw(*collisionSystem);
 
             DrawGrid(10, 10.0f);
 
             EndMode3D();
 
-            // Draw some debug GUI text
-            DrawText(TextFormat("Hit Object: %s", hitObjectName.c_str()), 10, 50, 10, BLACK);
-
-            if (collision.hit)
-            {
-                int ypos = 70;
-
-                DrawText(TextFormat("Distance: %3.2f", collision.distance), 10, ypos, 10, BLACK);
-
-                DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
-                                    collision.point.x,
-                                    collision.point.y,
-                                    collision.point.z), 10, ypos + 15, 10, BLACK);
-
-                DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
-                                    collision.normal.x,
-                                    collision.normal.y,
-                                    collision.normal.z), 10, ypos + 30, 10, BLACK);
-            }
+            cursor->DrawDebugText();
 
             DrawFPS(10, 10);
 

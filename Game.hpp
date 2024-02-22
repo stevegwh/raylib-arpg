@@ -32,9 +32,6 @@ namespace sage
         static void cleanup();
         void draw();
 
-        Ray ray {0};
-        std::string hitObjectName{};
-
         Game()
         {
             init();
@@ -51,8 +48,6 @@ namespace sage
             tower = std::make_unique<Entity>();
             tower2 = std::make_unique<Entity>();
             floor = std::make_unique<Entity>();
-            
-            
 
             // init components
             sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };

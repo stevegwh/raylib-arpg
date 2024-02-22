@@ -16,12 +16,12 @@ namespace sage
         std::map<EntityID, std::unique_ptr<ComponentName>> components;
     public:
         
-        bool EntityExists(EntityID entityId) 
+        [[nodiscard]] bool EntityExists(EntityID entityId) const
         {
             return components.find(entityId) != components.end();
         };
 
-        const ComponentName& GetComponent(EntityID entityId)
+        const ComponentName& GetComponent(EntityID entityId) const
         {
             return *components.at(entityId);
         }

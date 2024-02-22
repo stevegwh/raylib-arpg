@@ -8,7 +8,7 @@
 namespace sage
 {
 
-    CollisionInfo CollisionSystem::CheckRayCollision(const Ray& ray)
+    CollisionInfo CollisionSystem::CheckRayCollision(const Ray& ray) const
     {
         for (const auto& c : components)
         {
@@ -30,7 +30,7 @@ namespace sage
         return {0};
     }
 
-    void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color)
+    void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color) const
     {
         auto bb = GetComponent(entityId).boundingBox;
         DrawBoundingBox(bb, color);
