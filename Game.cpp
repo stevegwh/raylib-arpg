@@ -33,7 +33,7 @@ namespace sage
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                cursor->OnClick();
+                cursor->OnClick(*collisionSystem);
                 EntityID newTower = Registry::GetInstance().CreateEntity();
                 sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
 

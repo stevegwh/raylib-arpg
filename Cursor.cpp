@@ -36,8 +36,19 @@ namespace sage
         }
     }
 
-    void Cursor::OnClick()
+    void Cursor::OnClick(const CollisionSystem& colSystem)
     {
+        if (colSystem.GetComponent(rayCollisionResultInfo.collidedEntityId).collisionLayer == FLOOR)
+        {
+            // Place model
+        }
+        else
+        {
+            // Select model
+            // Store entityID of selected model
+            // Change bounding box colour
+
+        }
         std::cout << "Hit object position: " << collision.point.x << ", " << collision.point.y << ", " << collision.point.z << "\n";
     }
 

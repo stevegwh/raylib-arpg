@@ -25,7 +25,7 @@ namespace sage
     public:
         RayCollision collision {0};
         CollisionInfo rayCollisionResultInfo;
-        void OnClick();
+        void OnClick(const CollisionSystem& colSystem);
         void GetMouseRayCollision(Camera3D raylibCamera, const CollisionSystem& colSystem, const RenderSystem& renderSystem);
         void Draw(const CollisionSystem& colSystem);
         void DrawDebugText() const;
