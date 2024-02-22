@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <vector>
+#include <memory>
 #include "Observer.hpp"
 
 namespace sage

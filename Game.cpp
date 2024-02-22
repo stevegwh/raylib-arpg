@@ -23,12 +23,6 @@ namespace sage
     {
         Ray ray = { 0 };        // Picking ray
 
-        // Ground quad
-        Vector3 g0 = (Vector3){ -50.0f, 0.0f, -50.0f };
-        Vector3 g1 = (Vector3){ -50.0f, 0.0f,  50.0f };
-        Vector3 g2 = (Vector3){  50.0f, 0.0f,  50.0f };
-        Vector3 g3 = (Vector3){  50.0f, 0.0f, -50.0f };
-
         SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
         // Main game loop
@@ -44,18 +38,7 @@ namespace sage
             hitObjectName = "None";
             collision.distance = FLT_MAX;
             collision.hit = false;
-            Color cursorColor = WHITE;
 
-
-//            // Check ray collision against ground quad
-//            RayCollision groundHitInfo = GetRayCollisionQuad(ray, g0, g1, g2, g3);
-//
-//            if ((groundHitInfo.hit) && (groundHitInfo.distance < collision.distance))
-//            {
-//                collision = groundHitInfo;
-//                cursorColor = GREEN;
-//                hitObjectName = "Ground";
-//            }
 
             // Get ray and test against objects
             ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
@@ -66,39 +49,11 @@ namespace sage
             if ((boxHitInfo.rayCollision.hit) && (boxHitInfo.rayCollision.distance < collision.distance))
             {
                 collision = boxHitInfo.rayCollision;
-                cursorColor = ORANGE;
                 
-                if (renderSystem->EntityExists(boxHitInfo.collidedObject))
+                if (renderSystem->EntityExists(boxHitInfo.collidedEntityId))
                 {
-                    hitObjectName = renderSystem->GetComponent(boxHitInfo.collidedObject).name;
+                    hitObjectName = renderSystem->GetComponent(boxHitInfo.collidedEntityId).name;
                 }
-                
-                
-                /*
-                // Check ray collision against model meshes
-                RayCollision meshHitInfo = { 0 };
-                for (int m = 0; m < tower->model.meshCount; m++)
-                {
-                    // NOTE: We consider the model.transform for the collision check but 
-                    // it can be checked against any transform Matrix, used when checking against same
-                    // model drawn multiple times with multiple transforms
-                    meshHitInfo = GetRayCollisionMesh(ray, tower->model.meshes[m], tower->model.transform);
-                    if (meshHitInfo.hit)
-                    {
-                        // Save the closest hit mesh
-                        if ((!collision.hit) || (collision.distance > meshHitInfo.distance)) collision = meshHitInfo;
-
-                        break;  // Stop once one mesh collision is detected, the colliding mesh is m
-                    }
-                }
-
-                if (meshHitInfo.hit)
-                {
-                    collision = meshHitInfo;
-                    cursorColor = ORANGE;
-                    hitObjectName = "Renderable";
-                }
-                 */
             }
             //----------------------------------------------------------------------------------
 
@@ -118,24 +73,20 @@ namespace sage
             // Draw the mesh bbox if we hit it
             if (boxHitInfo.rayCollision.hit) 
             {
-                BoundingBox boundingBox = collisionSystem->GetComponent(boxHitInfo.collidedObject).boundingBox;
-                DrawBoundingBox(boundingBox, LIME);
+                auto col = collisionSystem->GetComponent(boxHitInfo.collidedEntityId);
+                if (col.collisionLayer == FLOOR)
+                {
+                    collisionSystem->BoundingBoxDraw(boxHitInfo.collidedEntityId, ORANGE);
+                }
+                else
+                {
+                    collisionSystem->BoundingBoxDraw(boxHitInfo.collidedEntityId);
+                }
+
             }
 
             // If we hit something, draw the cursor at the hit point
             cursor->Draw(collision);
-//            if (collision.hit)
-//            {
-//                DrawCube(collision.point, 0.3f, 0.3f, 0.3f, cursorColor);
-//                DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
-//
-//                Vector3 normalEnd;
-//                normalEnd.x = collision.point.x + collision.normal.x;
-//                normalEnd.y = collision.point.y + collision.normal.y;
-//                normalEnd.z = collision.point.z + collision.normal.z;
-//
-//                DrawLine3D(collision.point, normalEnd, RED);
-//            }
 
             DrawGrid(10, 10.0f);
 
@@ -179,3 +130,30 @@ namespace sage
         CloseWindow();
     }
 }
+
+
+/*
+// Check ray collision against model meshes
+RayCollision meshHitInfo = { 0 };
+for (int m = 0; m < tower->model.meshCount; m++)
+{
+    // NOTE: We consider the model.transform for the collision check but
+    // it can be checked against any transform Matrix, used when checking against same
+    // model drawn multiple times with multiple transforms
+    meshHitInfo = GetRayCollisionMesh(ray, tower->model.meshes[m], tower->model.transform);
+    if (meshHitInfo.hit)
+    {
+        // Save the closest hit mesh
+        if ((!collision.hit) || (collision.distance > meshHitInfo.distance)) collision = meshHitInfo;
+
+        break;  // Stop once one mesh collision is detected, the colliding mesh is m
+    }
+}
+
+if (meshHitInfo.hit)
+{
+    collision = meshHitInfo;
+    cursorColor = ORANGE;
+    hitObjectName = "Renderable";
+}
+ */

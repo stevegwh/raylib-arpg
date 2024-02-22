@@ -27,7 +27,7 @@ namespace sage
 
     struct CollisionInfo
     {
-        EntityID collidedObject{};
+        EntityID collidedEntityId{};
         RayCollision rayCollision{};
     };
 }

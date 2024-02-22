@@ -15,6 +15,7 @@ class CollisionSystem : public BaseSystem<Collideable>
 {
 public:
     CollisionInfo CheckRayCollision(const Ray& ray);
+    void BoundingBoxDraw(EntityID entityId, Color color = LIME);
 };
 }
 

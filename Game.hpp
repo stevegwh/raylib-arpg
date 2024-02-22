@@ -28,8 +28,8 @@ namespace sage
         std::unique_ptr<Entity> floor;
         std::unique_ptr<sage::Cursor> cursor;
 
-        void init();
-        void cleanup();
+        static void init();
+        static void cleanup();
         void draw();
 
         Ray ray {0};
@@ -83,8 +83,8 @@ namespace sage
             towerCollidable2->boundingBox.max = Vector3Add(towerCollidable2->boundingBox.max, towerTransform2->position);
             
             // Ground quad
-            Vector3 g0 = (Vector3){ -50.0f, 0.0f, -50.0f };
-            Vector3 g2 = (Vector3){  50.0f, 1.0f,  50.0f };
+            Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
+            Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
             auto floorCollidable = new Collideable(floor->entityId);
             floorCollidable->boundingBox.min = g0;
             floorCollidable->boundingBox.max = g2;

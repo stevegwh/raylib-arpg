@@ -18,7 +18,7 @@ namespace sage
                 //c.OnCollisionHit.callback();
 
                 CollisionInfo info = {
-                    .collidedObject= c.second->entityId,
+                    .collidedEntityId= c.second->entityId,
                     .rayCollision = col
                 };
                 
@@ -28,6 +28,12 @@ namespace sage
         }
 
         return {0};
+    }
+
+    void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color)
+    {
+        auto bb = GetComponent(entityId).boundingBox;
+        DrawBoundingBox(bb, color);
     }
 
 }
