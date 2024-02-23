@@ -16,7 +16,7 @@ namespace sage
         std::map<EntityID, std::unique_ptr<ComponentName>> components;
     public:
         
-        [[nodiscard]] bool EntityExists(EntityID entityId) const
+        [[nodiscard]] bool FindEntity(EntityID entityId) const
         {
             return components.find(entityId) != components.end();
         };
@@ -26,7 +26,7 @@ namespace sage
             return *components.at(entityId);
         }
 
-        void AddComponent(ComponentName &component)
+        void AddComponent(ComponentName& component)
         {
             components.emplace(component.entityId, std::make_unique<ComponentName>(component));
         }

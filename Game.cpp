@@ -4,6 +4,8 @@
 
 #include "Game.hpp"
 
+#include <utility>
+
 namespace sage
 {
     void Game::init()
@@ -17,19 +19,19 @@ namespace sage
         
     }
     
-    void Game::CreateTower()
+    void Game::CreateTower(Vector3 position, const char* name)
     {
-        EntityID newTower = Registry::GetInstance().CreateEntity();
+        EntityID newTowerId = Registry::GetInstance().CreateEntity();
         sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
 
-        auto towerRenderable1 = new Renderable(newTower, LoadModel("resources/models/obj/turret.obj"), mat);
-        towerRenderable1->name = "Tower Instance";
+        auto towerRenderable1 = new Renderable(newTowerId, LoadModel("resources/models/obj/turret.obj"), mat);
+        towerRenderable1->name = name;
 
-        auto towerTransform1 = new Transform(newTower);
-        towerTransform1->position = cursor->collision.point;
+        auto towerTransform1 = new Transform(newTowerId);
+        towerTransform1->position = position;
         towerTransform1->scale = 1.0f;
 
-        auto towerCollidable1 = new Collideable(newTower);
+        auto towerCollidable1 = new Collideable(newTowerId);
         towerCollidable1->boundingBox = GetMeshBoundingBox(towerRenderable1->model.meshes[0]);
         towerCollidable1->boundingBox.min = Vector3Add(towerCollidable1->boundingBox.min, towerTransform1->position);
         towerCollidable1->boundingBox.max = Vector3Add(towerCollidable1->boundingBox.max, towerTransform1->position);
@@ -37,6 +39,8 @@ namespace sage
         transformSystem->AddComponent(*towerTransform1);
         renderSystem->AddComponent(*towerRenderable1);
         collisionSystem->AddComponent(*towerCollidable1);
+        auto towerWorldObject1 = new WorldObject(newTowerId);
+        worldSystem->AddComponent(*towerWorldObject1);
         
     }
 
@@ -57,7 +61,10 @@ namespace sage
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 cursor->OnClick(*collisionSystem);
-                CreateTower();
+                if (cursor->collision.hit)
+                {
+                    CreateTower(cursor->collision.point, "Tower Instance");                    
+                }
             }
 
             //----------------------------------------------------------------------------------

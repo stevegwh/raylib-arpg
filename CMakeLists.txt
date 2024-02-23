@@ -51,6 +51,9 @@ add_executable(BG_Raylib
         Registry.hpp
         Editor.cpp
         Editor.hpp
+        WorldObject.hpp
+        WorldSystem.cpp
+        WorldSystem.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

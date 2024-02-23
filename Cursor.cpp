@@ -29,7 +29,7 @@ namespace sage
         {
             collision = rayCollisionResultInfo.rayCollision;
 
-            if (renderSystem.EntityExists(rayCollisionResultInfo.collidedEntityId))
+            if (renderSystem.FindEntity(rayCollisionResultInfo.collidedEntityId))
             {
                 hitObjectName = renderSystem.GetComponent(rayCollisionResultInfo.collidedEntityId).name;
             }
