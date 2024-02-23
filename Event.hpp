@@ -6,21 +6,20 @@
 
 #include <functional>
 #include <vector>
-#include <memory>
-#include "Observer.hpp"
+#include "EventCallback.hpp"
 
 namespace sage
 {
 
 class Event
 {
-private:
-    std::vector<std::shared_ptr<Observer>> observerList{};
-
-public:
-    void Subscribe(const std::shared_ptr<Observer>& observer);
-    void Unsubscribe(const std::shared_ptr<Observer>& observer);
-    void InvokeAllCallbacks() const;
-};
+    private:
+        std::vector<std::shared_ptr<EventCallback>> callbacks{};
+    
+    public:
+        // Shared pointers (ownership) so I can unsubscribe using an EventCallback stored elsewhere.
+        void Subscribe(const std::shared_ptr<EventCallback>& callback);
+        void Unsubscribe(const std::shared_ptr<EventCallback>& callback);
+        void InvokeAllCallbacks() const;
+    };
 }
-

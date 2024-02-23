@@ -9,24 +9,24 @@ namespace sage
 
 void Event::InvokeAllCallbacks() const
 {
-    for (const std::shared_ptr<Observer>& ob : observerList)
+    for (const std::shared_ptr<EventCallback>& ob : callbacks)
     {
         ob->callback();
     }
 }
 
-void Event::Subscribe(const std::shared_ptr<Observer>& observer)
+void Event::Subscribe(const std::shared_ptr<EventCallback>& callback)
 {
-    observerList.push_back(observer);
+    callbacks.push_back(callback);
 }
 
-void Event::Unsubscribe(const std::shared_ptr<Observer>& observer)
+void Event::Unsubscribe(const std::shared_ptr<EventCallback>& callback)
 {
-    for (auto it = observerList.begin(); it != observerList.end(); ++it)
+    for (auto it = callbacks.begin(); it != callbacks.end(); ++it)
     {
-        if (*it == observer)
+        if (*it == callback)
         {
-            observerList.erase(it);
+            callbacks.erase(it);
             break;
         }
     }

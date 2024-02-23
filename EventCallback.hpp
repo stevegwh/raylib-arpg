@@ -4,10 +4,10 @@
 
 namespace sage
 {
-struct Observer
+struct EventCallback
 {
     std::function<void()> callback;
-    explicit Observer(std::function<void()> func):callback(std::move(func)){}
+    explicit EventCallback(std::function<void()> func): callback(std::move(func)){}
 };
 }
 

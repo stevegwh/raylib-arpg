@@ -37,7 +37,7 @@ add_executable(BG_Raylib
         Collideable.hpp
         Event.cpp
         Event.hpp
-        Observer.hpp
+        EventCallback.hpp
         raygui.h
         Entity.hpp
         Transform.hpp

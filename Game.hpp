@@ -18,6 +18,8 @@
 #include "Entity.hpp"
 #include "TransformSystem.hpp"
 
+#include "Editor.hpp"
+
 namespace sage
 {
     class Game
@@ -25,6 +27,7 @@ namespace sage
 
         std::unique_ptr<sage::Camera> sCamera;
         std::unique_ptr<sage::Cursor> cursor;
+        std::unique_ptr<sage::Editor> gameEditor;
 
         static void init();
         static void cleanup();
@@ -35,7 +38,8 @@ namespace sage
             init();
 
             sCamera = std::make_unique<sage::Camera>();
-            cursor = std::make_unique<Cursor>();
+            cursor = std::make_unique<sage::Cursor>();
+            gameEditor = std::make_unique<sage::Editor>(cursor.get());
 
             // init systems
             renderSystem = std::make_unique<RenderSystem>();
@@ -117,6 +121,7 @@ namespace sage
         void operator=(Game const&)  = delete;
         
         void Update();
+        void CreateTower();
     };
 }
 
