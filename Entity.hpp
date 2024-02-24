@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include <memory>
+
+#include "Event.hpp"
+
 namespace sage
 {
     typedef int EntityID;
@@ -13,11 +17,15 @@ namespace sage
     private:
         static EntityID entityIdCounter;
     public:
-        bool deleted = false;
+        std::unique_ptr<Event> OnDelete;
         const EntityID entityId;
         explicit Entity()
-        : entityId(++entityIdCounter)
+        : entityId(++entityIdCounter), OnDelete(std::make_unique<Event>())
         {}
+        ~Entity()
+        {
+            OnDelete->InvokeAllCallbacks();
+        }
     };
 }
 

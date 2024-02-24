@@ -5,7 +5,9 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <memory>
+
 
 #include "Entity.hpp"
 
@@ -14,7 +16,8 @@ namespace sage
     class Registry
     {
         explicit Registry() = default;
-        std::vector<std::unique_ptr<Entity>> entities;
+        std::unordered_map<EntityID, std::unique_ptr<Entity>> entities;
+        std::vector<EntityID> stagedForDeletion;
     public:
         static Registry& GetInstance()
         {
@@ -29,13 +32,30 @@ namespace sage
         {
             auto entity = std::make_unique<Entity>();
             EntityID id = entity->entityId;
-            entities.push_back(std::move(entity));
+            entities.emplace(id, std::move(entity));
             return id;
         }
+        
+        const Entity* GetEntity(EntityID id)
+        {
+            return entities.at(id).get();
+        }
 
+        // Stages an entity for deletion (does not immediately remove entity)
         void DeleteEntity(EntityID entityId)
         {
-            entities.at(entityId)->deleted = true;
+            stagedForDeletion.push_back(entityId);
+        }
+        
+        // Should run at end of update loop
+        void RunMaintainance()
+        {
+            if (stagedForDeletion.empty()) return;
+            for (auto id: stagedForDeletion) 
+            {
+                entities.erase(id); // Destructor of Entity will be called and trigger OnDelete event for all components
+            }
+            stagedForDeletion.clear();
         }
     };
 }

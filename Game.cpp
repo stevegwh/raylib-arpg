@@ -19,6 +19,11 @@ namespace sage
         
     }
     
+    void Game::removeTower(EntityID entityId)
+    {
+        Registry::GetInstance().DeleteEntity(entityId);
+    }
+    
     void Game::createTower(Vector3 position, const char* name) const
     {
         EntityID newTowerId = Registry::GetInstance().CreateEntity();
@@ -64,6 +69,7 @@ namespace sage
             }
             //----------------------------------------------------------------------------------
             draw();
+            Registry::GetInstance().RunMaintainance();
         }
 
     }

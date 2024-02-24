@@ -35,6 +35,7 @@ namespace sage
         static void cleanup();
         void draw();
         void createTower(Vector3 position, const char* name) const;
+        void removeTower(EntityID entityId);
 
         Game() :
         sCamera(std::make_unique<sage::Camera>()), cursor(std::make_unique<sage::Cursor>()),

@@ -4,8 +4,9 @@
 
 #pragma once
 #include "Component.hpp"
-#include "map"
+#include "unordered_map"
 #include "memory"
+#include "Registry.hpp"
 
 namespace sage
 {
@@ -13,7 +14,7 @@ namespace sage
     class BaseSystem
     {
     protected:
-        std::map<EntityID, std::unique_ptr<ComponentName>> components;
+        std::unordered_map<EntityID, std::unique_ptr<ComponentName>> components;
     public:
         
         [[nodiscard]] bool FindEntity(EntityID entityId) const
@@ -28,7 +29,16 @@ namespace sage
 
         void AddComponent(ComponentName& component)
         {
+            // Subscribe to parent entity's "OnDelete" event
+            const std::function<void()> f1 = [p = this, &component] { p->RemoveComponent(component.entityId); };
+            Registry::GetInstance().GetEntity(component.entityId)->OnDelete.get()->Subscribe(std::make_shared<EventCallback>(f1));
+            
             components.emplace(component.entityId, std::make_unique<ComponentName>(component));
+        }
+        
+        void RemoveComponent(EntityID entityId)
+        {
+            components.erase(entityId);
         }
     };
 }

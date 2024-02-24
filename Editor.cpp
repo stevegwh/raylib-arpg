@@ -46,7 +46,9 @@ namespace sage
                 }
                 break;
             case BUILDING:
-                selectedObject = cursor->rayCollisionResultInfo.collidedEntityId;
+                
+                Game::GetInstance().removeTower(cursor->rayCollisionResultInfo.collidedEntityId);
+                //selectedObject = cursor->rayCollisionResultInfo.collidedEntityId;
                 break;
             }
         }
