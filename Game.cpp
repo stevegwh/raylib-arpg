@@ -19,7 +19,7 @@ namespace sage
         
     }
     
-    void Game::CreateTower(Vector3 position, const char* name)
+    void Game::createTower(Vector3 position, const char* name) const
     {
         EntityID newTowerId = Registry::GetInstance().CreateEntity();
         sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
@@ -31,10 +31,10 @@ namespace sage
         towerTransform1->position = position;
         towerTransform1->scale = 1.0f;
 
-        auto towerCollidable1 = new Collideable(newTowerId);
-        towerCollidable1->boundingBox = GetMeshBoundingBox(towerRenderable1->model.meshes[0]);
-        towerCollidable1->boundingBox.min = Vector3Add(towerCollidable1->boundingBox.min, towerTransform1->position);
-        towerCollidable1->boundingBox.max = Vector3Add(towerCollidable1->boundingBox.max, towerTransform1->position);
+        auto towerCollidable1 = new Collideable(newTowerId, towerRenderable1->meshBoundingBox);
+        towerCollidable1->worldBoundingBox.min = Vector3Add(towerCollidable1->worldBoundingBox.min, towerTransform1->position);
+        towerCollidable1->worldBoundingBox.max = Vector3Add(towerCollidable1->worldBoundingBox.max, towerTransform1->position);
+        towerCollidable1->collisionLayer = BUILDING;
 
         transformSystem->AddComponent(*towerTransform1);
         renderSystem->AddComponent(*towerRenderable1);
@@ -61,10 +61,6 @@ namespace sage
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 cursor->OnClick(*collisionSystem);
-                if (cursor->collision.hit)
-                {
-                    CreateTower(cursor->collision.point, "Tower Instance");                    
-                }
             }
 
             //----------------------------------------------------------------------------------
@@ -80,10 +76,14 @@ namespace sage
             // Draw the tower
             // WARNING: If scale is different than 1.0f,
             // not considered by GetRayCollisionModel()
+            gameEditor->Draw();
+
             renderSystem->Draw();
 
             // If we hit something, draw the cursor at the hit point
             cursor->Draw(*collisionSystem);
+
+
 
             DrawGrid(10, 10.0f);
 

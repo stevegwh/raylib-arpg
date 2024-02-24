@@ -8,11 +8,14 @@
 
 namespace sage
 {
+
+// NB: "Game" is friend
 class Editor
 {
     Cursor* cursor;
     void OnCursorClick();
     void OnCollisionHit();
+    EntityID selectedObject = 0;
     
 public:
     Editor(Cursor* _cursor)
@@ -22,8 +25,9 @@ public:
         cursor->OnClickEvent->Subscribe(std::make_shared<EventCallback>(f1));
         const std::function<void()> f2 = [p = this] { p->OnCollisionHit(); };
         cursor->OnCollisionHitEvent->Subscribe(std::make_shared<EventCallback>(f2));
-        
     }
+
+    void Draw();
     // OnClickEvent()
     // OnCursorHit(CollisionInfo collision
     //

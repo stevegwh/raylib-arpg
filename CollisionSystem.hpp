@@ -18,6 +18,7 @@ namespace sage
 class CollisionSystem : public BaseSystem<Collideable>
 {
 public:
+    void SetBoundingBox(EntityID entityId, BoundingBox bb);
     [[nodiscard]] std::vector<CollisionInfo> CheckRayCollision(const Ray& ray) const;
     void BoundingBoxDraw(EntityID entityId, Color color = LIME) const;
 };

@@ -19,10 +19,12 @@ namespace sage
 
     struct Collideable : public Component
     {
-        BoundingBox boundingBox{};
+        const BoundingBox localBoundingBox; // BoundingBox in local space
+        BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb pos + world pos)
         CollisionLayer collisionLayer = DEFAULT;
         //Event OnCollisionHit;
-        explicit Collideable(EntityID _entityId) : Component(_entityId) {}
+        explicit Collideable(EntityID _entityId, BoundingBox _boundingBox) :
+            Component(_entityId), localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox) {}
     };
 
     struct CollisionInfo

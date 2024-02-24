@@ -34,37 +34,32 @@ namespace sage
         static void init();
         static void cleanup();
         void draw();
+        void createTower(Vector3 position, const char* name) const;
 
-        Game()
+        Game() :
+        sCamera(std::make_unique<sage::Camera>()), cursor(std::make_unique<sage::Cursor>()),
+        gameEditor(std::make_unique<sage::Editor>(cursor.get())), renderSystem(std::make_unique<RenderSystem>()),
+        collisionSystem(std::make_unique<sage::CollisionSystem>()), transformSystem(std::make_unique<sage::TransformSystem>())
         {
             init();
-
-            sCamera = std::make_unique<sage::Camera>();
-            cursor = std::make_unique<sage::Cursor>();
-            gameEditor = std::make_unique<sage::Editor>(cursor.get());
-
-            // init systems
-            renderSystem = std::make_unique<RenderSystem>();
-            collisionSystem = std::make_unique<sage::CollisionSystem>();
-            transformSystem = std::make_unique<sage::TransformSystem>();
             
             EntityID rootNodeId = Registry::GetInstance().CreateEntity();
             auto rootNodeObject = new WorldObject(rootNodeId);
             worldSystem = std::make_unique<sage::WorldSystem>(rootNodeId);
             worldSystem->AddComponent(*rootNodeObject);
-            
-            
 
-            CreateTower({ 0.0f, 0.0f, 0.0f }, "Tower");
-            CreateTower({ 10.0f, 0.0f, 20.0f }, "Tower 2");
+            createTower({0.0f, 0.0f, 0.0f}, "Tower");
+            createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
 
             // Ground quad
             EntityID floor = Registry::GetInstance().CreateEntity();
             Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
             Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
-            auto floorCollidable = new Collideable(floor);
-            floorCollidable->boundingBox.min = g0;
-            floorCollidable->boundingBox.max = g2;
+            BoundingBox bb = {
+                .min = g0,
+                .max = g2
+            };
+            auto floorCollidable = new Collideable(floor, bb);
             floorCollidable->collisionLayer = FLOOR;
             collisionSystem->AddComponent(*floorCollidable);
             
@@ -95,7 +90,8 @@ namespace sage
         void operator=(Game const&)  = delete;
         
         void Update();
-        void CreateTower(Vector3 position, const char* name);
+
+        friend class Editor;
     };
 }
 

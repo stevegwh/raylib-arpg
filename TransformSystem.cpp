@@ -6,4 +6,8 @@
 
 namespace sage
 {
+    void TransformSystem::SetComponent(EntityID entityId, Transform newTransform)
+    {
+        components.at(entityId)->position = newTransform.position;
+    }
 }

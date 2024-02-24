@@ -6,6 +6,8 @@
 
 #include <functional>
 #include <vector>
+#include <memory>
+
 #include "EventCallback.hpp"
 
 namespace sage

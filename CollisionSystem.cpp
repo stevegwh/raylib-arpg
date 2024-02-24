@@ -21,7 +21,7 @@ namespace sage
 
         for (const auto& c : components)
         {
-            auto col = GetRayCollisionBox(ray, c.second->boundingBox);
+            auto col = GetRayCollisionBox(ray, c.second->worldBoundingBox);
             if (col.hit) 
             {
 
@@ -40,8 +40,13 @@ namespace sage
 
     void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color) const
     {
-        auto bb = GetComponent(entityId).boundingBox;
+        auto bb = GetComponent(entityId).worldBoundingBox;
         DrawBoundingBox(bb, color);
+    }
+
+    void CollisionSystem::SetBoundingBox(EntityID entityId, BoundingBox bb)
+    {
+        components.at(entityId)->worldBoundingBox = bb;
     }
 
 }
