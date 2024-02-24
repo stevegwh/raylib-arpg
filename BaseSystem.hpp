@@ -27,13 +27,13 @@ namespace sage
             return components.at(entityId).get();
         }
 
-        void AddComponent(ComponentName& component)
+        void AddComponent(std::unique_ptr<ComponentName> component)
         {
             // Subscribe to parent entity's "OnDelete" event
-            const std::function<void()> f1 = [p = this, &component] { p->RemoveComponent(component.entityId); };
-            Registry::GetInstance().GetEntity(component.entityId)->OnDelete.get()->Subscribe(std::make_shared<EventCallback>(f1));
+            const std::function<void()> f1 = [p = this, id = component->entityId] { p->RemoveComponent(id); };
+            Registry::GetInstance().GetEntity(component->entityId)->OnDelete->Subscribe(std::make_shared<EventCallback>(f1));
             
-            components.emplace(component.entityId, std::make_unique<ComponentName>(component));
+            components.emplace(component->entityId, std::move(component));
         }
         
         void RemoveComponent(EntityID entityId)

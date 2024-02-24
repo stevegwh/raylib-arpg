@@ -29,24 +29,24 @@ namespace sage
         EntityID newTowerId = Registry::GetInstance().CreateEntity();
         sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
 
-        auto towerRenderable1 = new Renderable(newTowerId, LoadModel("resources/models/obj/turret.obj"), mat);
+        auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, LoadModel("resources/models/obj/turret.obj"), mat);
         towerRenderable1->name = name;
 
-        auto towerTransform1 = new Transform(newTowerId);
+        auto towerTransform1 = std::make_unique<Transform>(newTowerId);
         towerTransform1->position = position;
         towerTransform1->scale = 1.0f;
 
-        auto towerCollidable1 = new Collideable(newTowerId, towerRenderable1->meshBoundingBox);
+        auto towerCollidable1 = std::make_unique<Collideable>(newTowerId, towerRenderable1->meshBoundingBox);
         towerCollidable1->worldBoundingBox.min = Vector3Add(towerCollidable1->worldBoundingBox.min, towerTransform1->position);
         towerCollidable1->worldBoundingBox.max = Vector3Add(towerCollidable1->worldBoundingBox.max, towerTransform1->position);
         towerCollidable1->collisionLayer = BUILDING;
 
-        transformSystem->AddComponent(*towerTransform1);
-        renderSystem->AddComponent(*towerRenderable1);
-        collisionSystem->AddComponent(*towerCollidable1);
-        auto towerWorldObject1 = new WorldObject(newTowerId);
-        worldSystem->AddComponent(*towerWorldObject1);
-        
+        auto towerWorldObject1 = std::make_unique<WorldObject>(newTowerId);
+
+        renderSystem->AddComponent(std::move(towerRenderable1));
+        transformSystem->AddComponent(std::move(towerTransform1));
+        collisionSystem->AddComponent(std::move(towerCollidable1));
+        worldSystem->AddComponent(std::move(towerWorldObject1));
     }
 
     void Game::Update()

@@ -9,18 +9,22 @@
 
 namespace sage
 {    
-    void WorldSystem::AddComponent(sage::WorldObject& component)
+    void WorldSystem::AddComponent(std::unique_ptr<WorldObject> component)
     {
-        components.emplace(component.entityId, std::make_unique<WorldObject>(component));
-        // Not sure if I am able to modify the component object after I call make_unique
-        if (component.entityId != root)
+        // Subscribe to parent entity's "OnDelete" event
+        const std::function<void()> f1 = [p = this, id = component->entityId] { p->RemoveComponent(id); };
+        Registry::GetInstance().GetEntity(component->entityId)->OnDelete->Subscribe(std::make_shared<EventCallback>(f1));
+        
+        if (component->entityId != root)
         {
-            if (component.parent == 0)
+            if (component->parent == 0)
             {
-                component.parent = root;
+                component->parent = root;
             }
-            components.at(root)->children.push_back(component.entityId);
+            components.at(root)->children.push_back(component->entityId);
         }
+
+        components.emplace(component->entityId, std::move(component));
         
     }
 }

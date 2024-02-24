@@ -45,9 +45,9 @@ namespace sage
             init();
             
             EntityID rootNodeId = Registry::GetInstance().CreateEntity();
-            auto rootNodeObject = new WorldObject(rootNodeId);
+            auto rootNodeObject = std::make_unique<WorldObject>(rootNodeId);
             worldSystem = std::make_unique<sage::WorldSystem>(rootNodeId);
-            worldSystem->AddComponent(*rootNodeObject);
+            worldSystem->AddComponent(std::move(rootNodeObject));
 
             createTower({0.0f, 0.0f, 0.0f}, "Tower");
             createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
@@ -60,12 +60,12 @@ namespace sage
                 .min = g0,
                 .max = g2
             };
-            auto floorCollidable = new Collideable(floor, bb);
+            auto floorCollidable = std::make_unique<Collideable>(floor, bb);
             floorCollidable->collisionLayer = FLOOR;
-            collisionSystem->AddComponent(*floorCollidable);
+            collisionSystem->AddComponent(std::move(floorCollidable));
             
-            auto floorWorldObject = new WorldObject(floor);
-            worldSystem->AddComponent(*floorWorldObject);
+            auto floorWorldObject = std::make_unique<WorldObject>(floor);
+            worldSystem->AddComponent(std::move(floorWorldObject));
             
         }
 
