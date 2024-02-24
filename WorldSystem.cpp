@@ -4,7 +4,6 @@
 
 #include "WorldSystem.hpp"
 #include <memory>
-#include <iostream>
 
 
 namespace sage
