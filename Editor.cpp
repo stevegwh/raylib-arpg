@@ -11,40 +11,48 @@
 
 namespace sage
 {
+    void Editor::moveSelectedObjectToCursorHit()
+    {
+        Transform newTransform(selectedObject);
+        newTransform.position = cursor->collision.point;
+
+        const Renderable* renderable = Game::GetInstance().renderSystem->GetComponent(selectedObject);
+
+        BoundingBox bb;
+        bb.min = Vector3Add(renderable->meshBoundingBox.min, newTransform.position);
+        bb.max = Vector3Add(renderable->meshBoundingBox.max, newTransform.position);
+        Game::GetInstance().transformSystem->SetComponent(selectedObject, newTransform);
+        Game::GetInstance().collisionSystem->SetBoundingBox(selectedObject, bb);
+        
+    }
+    
     void Editor::OnCursorClick()
     {
         if (cursor->collision.hit)
         {
-            if (Game::GetInstance().collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer
-                == FLOOR)
+            switch (Game::GetInstance().collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
             {
+            case DEFAULT:
+                break;
+            case FLOOR:
                 if (selectedObject == 0)
                 {
                     Game::GetInstance().createTower(cursor->collision.point, "Tower Instance");
                 }
                 else
                 {
-                    Transform newTransform(selectedObject);
-                    newTransform.position = cursor->collision.point;
-
-                    auto renderable = Game::GetInstance().renderSystem->GetComponent(selectedObject);
-
-                    BoundingBox bb;
-                    bb.min = Vector3Add(renderable.meshBoundingBox.min, newTransform.position);
-                    bb.max = Vector3Add(renderable.meshBoundingBox.max, newTransform.position);
-                    Game::GetInstance().transformSystem->SetComponent(selectedObject, newTransform);
-                    Game::GetInstance().collisionSystem->SetBoundingBox(selectedObject, bb);
+                    moveSelectedObjectToCursorHit();
+                    selectedObject = 0;
                 }
-            }
-            else if (Game::GetInstance().collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer
-                == BUILDING)
-            {
+                break;
+            case BUILDING:
                 selectedObject = cursor->rayCollisionResultInfo.collidedEntityId;
+                break;
             }
-            else
-            {
-                selectedObject = 0;
-            }
+        }
+        else
+        {
+            selectedObject = 0;
         }
     }
 
@@ -65,10 +73,9 @@ namespace sage
 
     void Editor::Draw()
     {
-        if (selectedObject != 0)
+        if (selectedObject > 0)
         {
             Game::GetInstance().collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
         }
-
     }
 }

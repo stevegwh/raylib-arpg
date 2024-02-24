@@ -16,6 +16,7 @@ class Editor
     void OnCursorClick();
     void OnCollisionHit();
     EntityID selectedObject = 0;
+    void moveSelectedObjectToCursorHit();
     
 public:
     Editor(Cursor* _cursor)

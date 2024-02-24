@@ -21,9 +21,9 @@ namespace sage
             return components.find(entityId) != components.end();
         };
 
-        const ComponentName& GetComponent(EntityID entityId) const
+        const ComponentName* GetComponent(EntityID entityId) const
         {
-            return *components.at(entityId);
+            return components.at(entityId).get();
         }
 
         void AddComponent(ComponentName& component)

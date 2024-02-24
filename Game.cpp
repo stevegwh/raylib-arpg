@@ -62,45 +62,39 @@ namespace sage
             {
                 cursor->OnClick(*collisionSystem);
             }
-
             //----------------------------------------------------------------------------------
-
-            // Draw
-            //----------------------------------------------------------------------------------
-            BeginDrawing();
-
-            ClearBackground(RAYWHITE);
-
-            BeginMode3D(*sCamera->getCamera());
-
-            // Draw the tower
-            // WARNING: If scale is different than 1.0f,
-            // not considered by GetRayCollisionModel()
-            gameEditor->Draw();
-
-            renderSystem->Draw();
-
-            // If we hit something, draw the cursor at the hit point
-            cursor->Draw(*collisionSystem);
-
-
-
-            DrawGrid(10, 10.0f);
-
-            EndMode3D();
-
-            cursor->DrawDebugText();
-
-            DrawFPS(10, 10);
-
-            EndDrawing();
-            //----------------------------------------------------------------------------------
+            draw();
         }
 
     }
 
     void Game::draw()
     {
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+
+        BeginMode3D(*sCamera->getCamera());
+
+        // If we hit something, draw the cursor at the hit point
+        cursor->Draw(*collisionSystem);
+
+        renderSystem->Draw();
+
+        gameEditor->Draw();
+
+        DrawGrid(100, 1.0f);
+
+        EndMode3D();
+
+        cursor->DrawDebugText();
+
+        DrawFPS(10, 10);
+
+        EndDrawing();
+        //----------------------------------------------------------------------------------
         
     };
 

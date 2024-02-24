@@ -40,7 +40,7 @@ namespace sage
 
     void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color) const
     {
-        auto bb = GetComponent(entityId).worldBoundingBox;
+        auto bb = GetComponent(entityId)->worldBoundingBox;
         DrawBoundingBox(bb, color);
     }
 

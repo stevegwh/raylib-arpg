@@ -24,12 +24,10 @@ namespace sage
         : Component(entityId), model(_model), material(_material), meshBoundingBox(GetMeshBoundingBox(model.meshes[0]))
         {
             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = material.diffuse;
-            // TODO: Need to update bounding box based on model position
         }
         
         ~Renderable()
         {
-            // TODO: Attempting to move tower causes the pointer to be freed from memory and causes a seg fault.
             UnloadModel(model);
             UnloadTexture(material.diffuse);
         }

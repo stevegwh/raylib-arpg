@@ -17,9 +17,10 @@ namespace sage
     {
         for (const auto& renderable : components)
         {
-            Transform transform = sage::Game::GetInstance().transformSystem->GetComponent(renderable.second->entityId);
-            DrawModel(renderable.second->model, transform.position, transform.scale, WHITE);
+            const Transform* transform = sage::Game::GetInstance().transformSystem->GetComponent(renderable.second->entityId);
+            DrawModel(renderable.second->model, transform->position, transform->scale, WHITE);
         }
+        
     }
 }
 

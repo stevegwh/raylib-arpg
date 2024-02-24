@@ -31,7 +31,7 @@ namespace sage
 
             if (renderSystem.FindEntity(rayCollisionResultInfo.collidedEntityId))
             {
-                hitObjectName = renderSystem.GetComponent(rayCollisionResultInfo.collidedEntityId).name;
+                hitObjectName = renderSystem.GetComponent(rayCollisionResultInfo.collidedEntityId)->name;
             }
 
             OnCollisionHitEvent->InvokeAllCallbacks();
@@ -70,7 +70,7 @@ namespace sage
         if (rayCollisionResultInfo.rayCollision.hit)
         {
             auto col = colSystem.GetComponent(rayCollisionResultInfo.collidedEntityId);
-            if (col.collisionLayer == FLOOR)
+            if (col->collisionLayer == FLOOR)
             {
                 colSystem.BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId, ORANGE);
             }
