@@ -43,6 +43,7 @@ namespace sage
                 {
                     moveSelectedObjectToCursorHit();
                     selectedObject = 0;
+                    currentEditorMode = IDLE;
                 }
                 break;
             case BUILDING:
@@ -60,8 +61,8 @@ namespace sage
     void Editor::OnDeleteModeKeyPressed()
     {
         if (currentEditorMode != SELECT) return;
+        std::cout << "Delete Key Pressed" << std::endl;
         Game::GetInstance().removeTower(selectedObject);
-        selectedObject = 0;
         currentEditorMode = IDLE;
     }
 
@@ -69,6 +70,7 @@ namespace sage
     {
         if (currentEditorMode == CREATE) currentEditorMode = IDLE;
         else if (currentEditorMode == IDLE) currentEditorMode = CREATE;
+        selectedObject = 0;
     }
 
     void Editor::OnCollisionHit()

@@ -20,11 +20,11 @@ enum EditorMode
 // NB: "Game" is friend
 class Editor
 {
-    EditorMode currentEditorMode = IDLE;
+    EditorMode currentEditorMode;
     UserInput* cursor;
     void OnCursorClick();
     void OnCollisionHit();
-    EntityID selectedObject = 0;
+    EntityID selectedObject;
     void moveSelectedObjectToCursorHit();
     
 public:
