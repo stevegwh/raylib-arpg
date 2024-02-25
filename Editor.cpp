@@ -61,8 +61,8 @@ namespace sage
     void Editor::OnDeleteModeKeyPressed()
     {
         if (currentEditorMode != SELECT) return;
-        std::cout << "Delete Key Pressed" << std::endl;
         Game::GetInstance().removeTower(selectedObject);
+        selectedObject = 0;
         currentEditorMode = IDLE;
     }
 
@@ -90,7 +90,7 @@ namespace sage
 
     void Editor::Draw()
     {
-        if (selectedObject > 0)
+        if (currentEditorMode == SELECT)
         {
             Game::GetInstance().collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
         }

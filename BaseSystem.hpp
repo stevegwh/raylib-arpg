@@ -19,6 +19,7 @@ namespace sage
         
         [[nodiscard]] bool FindEntity(EntityID entityId) const
         {
+
             return components.find(entityId) != components.end();
         };
 

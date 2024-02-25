@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <memory>
 
 
@@ -16,7 +16,7 @@ namespace sage
     class Registry
     {
         explicit Registry() = default;
-        std::unordered_map<EntityID, std::unique_ptr<Entity>> entities;
+        std::map<EntityID, std::unique_ptr<Entity>> entities;
         std::vector<EntityID> stagedForDeletion;
     public:
         static Registry& GetInstance()
