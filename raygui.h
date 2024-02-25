@@ -1365,7 +1365,7 @@ static const char *guiTooltipPtr = NULL;        // Tooltip string pointer (strin
 static bool guiControlExclusiveMode = false;    // Gui control exclusive mode (no inputs processed except current control)
 static Rectangle guiControlExclusiveRec = { 0 }; // Gui control exclusive bounds rectangle, used as an unique identifier
 
-static int textBoxCursorIndex = 0;              // Cursor index, shared by all GuiTextBox*()
+static int textBoxCursorIndex = 0;              // UserInput index, shared by all GuiTextBox*()
 //static int blinkCursorFrameCounter = 0;       // Frame counter for cursor blinking
 static int autoCursorCooldownCounter = 0;       // Cooldown frame counter for automatic cursor movement on key-down
 static int autoCursorDelayCounter = 0;          // Delay frame counter for automatic cursor movement
@@ -2458,7 +2458,7 @@ int GuiTextBox(Rectangle bounds, char *text, int bufferSize, bool editMode)
     int textWidth = GetTextWidth(text) - GetTextWidth(text + textBoxCursorIndex);
     int textIndexOffset = 0;    // Text index offset to start drawing in the box
 
-    // Cursor rectangle
+    // UserInput rectangle
     // NOTE: Position X value should be updated
     Rectangle cursor = {
         textBounds.x + textWidth + GuiGetStyle(DEFAULT, TEXT_SPACING),
@@ -2477,12 +2477,12 @@ int GuiTextBox(Rectangle bounds, char *text, int bufferSize, bool editMode)
     mouseCursor.width = 1;
 
     // Auto-cursor movement logic
-    // NOTE: Cursor moves automatically when key down after some time
+    // NOTE: UserInput moves automatically when key down after some time
     if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_BACKSPACE) || IsKeyDown(KEY_DELETE)) autoCursorCooldownCounter++;
     else
     {
-        autoCursorCooldownCounter = 0;      // GLOBAL: Cursor cooldown counter
-        autoCursorDelayCounter = 0;         // GLOBAL: Cursor delay counter
+        autoCursorCooldownCounter = 0;      // GLOBAL: UserInput cooldown counter
+        autoCursorDelayCounter = 0;         // GLOBAL: UserInput delay counter
     }
 
     // Blink-cursor frame counter

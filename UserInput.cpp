@@ -2,16 +2,21 @@
 // Created by Steve Wheeler on 18/02/2024.
 //
 
-#include "Cursor.hpp"
+#include "UserInput.hpp"
 #include <iostream>
 
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
+#include "Game.hpp"
+
 namespace sage
 {
 
-    void Cursor::GetMouseRayCollision(Camera3D raylibCamera, const CollisionSystem& colSystem, const RenderSystem& renderSystem)
+    void UserInput::GetMouseRayCollision()
     {
+        auto collisionSystem = Game::GetInstance().collisionSystem.get();
+        auto renderSystem = Game::GetInstance().renderSystem.get();
+        auto sCamera = Game::GetInstance().sCamera.get();
         // Display information about closest hit
         collision = {};
         hitObjectName = "None";
@@ -19,32 +24,42 @@ namespace sage
         collision.hit = false;
 
         // Get ray and test against objects
-        ray = GetMouseRay(GetMousePosition(), raylibCamera);
+        ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
 
-        auto collisions = colSystem.CheckRayCollision(ray);
-        rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){0, {}} : colSystem.CheckRayCollision(ray).at(0);
+        auto collisions = collisionSystem->CheckRayCollision(ray);
+        rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){0, {}} : collisionSystem->CheckRayCollision(ray).at(0);
 
 
         if ((rayCollisionResultInfo.rayCollision.hit) && (rayCollisionResultInfo.rayCollision.distance < collision.distance))
         {
             collision = rayCollisionResultInfo.rayCollision;
 
-            if (renderSystem.FindEntity(rayCollisionResultInfo.collidedEntityId))
+            if (renderSystem->FindEntity(rayCollisionResultInfo.collidedEntityId))
             {
-                hitObjectName = renderSystem.GetComponent(rayCollisionResultInfo.collidedEntityId)->name;
+                hitObjectName = renderSystem->GetComponent(rayCollisionResultInfo.collidedEntityId)->name;
             }
 
             OnCollisionHitEvent->InvokeAllCallbacks();
         }
     }
 
-    void Cursor::OnClick(const CollisionSystem& colSystem)
+    void UserInput::OnClick() const
     {
         OnClickEvent->InvokeAllCallbacks();
         //std::cout << "Hit object position: " << collision.point.x << ", " << collision.point.y << ", " << collision.point.z << "\n";
     }
 
-    void Cursor::Draw(const CollisionSystem& colSystem)
+    void UserInput::OnDeleteKeyPressed() const
+    {
+        OnDeleteKeyPressedEvent->InvokeAllCallbacks();
+    }
+
+    void UserInput::OnCreateKeyPressed() const
+    {
+        OnCreateKeyPressedEvent->InvokeAllCallbacks();
+    }
+
+    void UserInput::Draw()
     {
         
         if (collision.hit)
@@ -69,20 +84,21 @@ namespace sage
         // Draw the mesh bbox if we hit it
         if (rayCollisionResultInfo.rayCollision.hit)
         {
-            auto col = colSystem.GetComponent(rayCollisionResultInfo.collidedEntityId);
+            auto collisionSystem = Game::GetInstance().collisionSystem.get();
+            auto col = collisionSystem->GetComponent(rayCollisionResultInfo.collidedEntityId);
             if (col->collisionLayer == FLOOR)
             {
-                colSystem.BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId, ORANGE);
+                collisionSystem->BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId, ORANGE);
             }
             else
             {
-                colSystem.BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId);
+                collisionSystem->BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId);
             }
 
         }
     }
 
-    void Cursor::DrawDebugText() const
+    void UserInput::DrawDebugText() const
     {
         // Draw some debug GUI text
         DrawText(TextFormat("Hit Object: %s", hitObjectName.c_str()), 10, 50, 10, BLACK);
@@ -103,6 +119,26 @@ namespace sage
                                 collision.normal.y,
                                 collision.normal.z), 10, ypos + 30, 10, BLACK);
         }
+    }
+
+    void UserInput::ListenForInput()
+    {
+        GetMouseRayCollision();
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            OnClick();
+        }
+
+        if (IsKeyPressed(KEY_DELETE))
+        {
+            OnDeleteKeyPressed();
+        }
+        else if (IsKeyPressed(KEY_P))
+        {
+            OnCreateKeyPressed();
+        }
+
     }
 
 }

@@ -30,8 +30,8 @@ add_executable(BG_Raylib
         Camera.hpp
         Renderable.hpp
         Material.hpp
-        Cursor.cpp
-        Cursor.hpp
+        UserInput.cpp
+        UserInput.hpp
         CollisionSystem.cpp
         CollisionSystem.hpp
         Collideable.hpp

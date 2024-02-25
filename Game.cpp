@@ -6,14 +6,16 @@
 
 #include <utility>
 
+
+
 namespace sage
 {
     void Game::init()
     {
         // Initialization
         //--------------------------------------------------------------------------------------
-        const int screenWidth = 1280;
-        const int screenHeight = 720;
+        const int screenWidth = SCREEN_WIDTH;
+        const int screenHeight = SCREEN_HEIGHT;
 
         InitWindow(screenWidth, screenHeight, "raylib [models] example - mesh picking");
         
@@ -59,14 +61,10 @@ namespace sage
         {
             // Update
             //----------------------------------------------------------------------------------
-            sCamera->HandleInput();
+            sCamera->HandleInput(); // Should merge this with userInput
             sCamera->Update();
-            cursor->GetMouseRayCollision(*sCamera->getCamera(), *collisionSystem, *renderSystem);
+            userInput->ListenForInput();
 
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-            {
-                cursor->OnClick(*collisionSystem);
-            }
             //----------------------------------------------------------------------------------
             draw();
             Registry::GetInstance().RunMaintainance();
@@ -85,7 +83,7 @@ namespace sage
         BeginMode3D(*sCamera->getCamera());
 
         // If we hit something, draw the cursor at the hit point
-        cursor->Draw(*collisionSystem);
+        userInput->Draw();
 
         renderSystem->Draw();
 
@@ -95,7 +93,8 @@ namespace sage
 
         EndMode3D();
 
-        cursor->DrawDebugText();
+        userInput->DrawDebugText();
+        gameEditor->DrawDebugText();
 
         DrawFPS(10, 10);
 

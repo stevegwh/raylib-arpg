@@ -3,32 +3,46 @@
 //
 
 #pragma once
-#include "Cursor.hpp"
+#include "UserInput.hpp"
 #include "EventCallback.hpp"
 
 namespace sage
 {
 
+enum EditorMode
+{
+    IDLE,
+    SELECT,
+    MOVE,
+    CREATE
+};
+
 // NB: "Game" is friend
 class Editor
 {
-    Cursor* cursor;
+    EditorMode currentEditorMode = IDLE;
+    UserInput* cursor;
     void OnCursorClick();
     void OnCollisionHit();
     EntityID selectedObject = 0;
     void moveSelectedObjectToCursorHit();
     
 public:
-    Editor(Cursor* _cursor)
+    Editor(UserInput* _cursor)
     : cursor(_cursor)
     {
         const std::function<void()> f1 = [p = this] { p->OnCursorClick(); };
         cursor->OnClickEvent->Subscribe(std::make_shared<EventCallback>(f1));
         const std::function<void()> f2 = [p = this] { p->OnCollisionHit(); };
         cursor->OnCollisionHitEvent->Subscribe(std::make_shared<EventCallback>(f2));
+        const std::function<void()> f3 = [p = this] { p->OnDeleteModeKeyPressed(); };
+        cursor->OnDeleteKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f3));
+        const std::function<void()> f4 = [p = this] { p->OnCreateModeKeyPressed(); };
+        cursor->OnCreateKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f4));
     }
 
     void Draw();
+    void DrawDebugText();
     // OnClickEvent()
     // OnCursorHit(CollisionInfo collision
     //
@@ -39,6 +53,8 @@ public:
 
     // Store the majority of functionality in "cursor" in this class, as it will be used for editing the map.
 
+    void OnDeleteModeKeyPressed();
+    void OnCreateModeKeyPressed();
 };
 
 }

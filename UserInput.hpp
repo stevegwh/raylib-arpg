@@ -16,28 +16,35 @@
 
 namespace sage
 {
-    class Cursor
+    class UserInput
     {
         Ray ray {0};
 
         std::string hitObjectName{};
         Color defaultColor = WHITE;
         Color hoverColor = LIME;
+        void OnClick() const;
+        void OnDeleteKeyPressed() const;
+        void OnCreateKeyPressed() const;
     public:
         std::unique_ptr<Event> OnClickEvent;
         std::unique_ptr<Event> OnCollisionHitEvent;
+        std::unique_ptr<Event> OnDeleteKeyPressedEvent;
+        std::unique_ptr<Event> OnCreateKeyPressedEvent;
 
         RayCollision collision {0};
         CollisionInfo rayCollisionResultInfo;
-        void OnClick(const CollisionSystem& colSystem);
-        void GetMouseRayCollision(Camera3D raylibCamera, const CollisionSystem& colSystem, const RenderSystem& renderSystem);
-        void Draw(const CollisionSystem& colSystem);
-        void DrawDebugText() const;
 
-        Cursor()
+        void GetMouseRayCollision();
+        void Draw();
+        void DrawDebugText() const;
+        void ListenForInput();
+
+        UserInput()
+        :
+        OnClickEvent(std::make_unique<Event>()), OnCollisionHitEvent(std::make_unique<Event>()),
+        OnDeleteKeyPressedEvent(std::make_unique<Event>()), OnCreateKeyPressedEvent(std::make_unique<Event>())
         {
-            OnClickEvent = std::make_unique<Event>();
-            OnCollisionHitEvent = std::make_unique<Event>();
         }
     };
 }

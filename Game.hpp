@@ -12,7 +12,7 @@
 #include "Registry.hpp"
 #include "Renderable.hpp"
 #include "CollisionSystem.hpp"
-#include "Cursor.hpp"
+#include "UserInput.hpp"
 #include "Camera.hpp"
 #include "RenderSystem.hpp"
 #include "Entity.hpp"
@@ -24,11 +24,12 @@
 
 namespace sage
 {
+    static constexpr int SCREEN_WIDTH = 1280;
+    static constexpr int SCREEN_HEIGHT = 720;
     class Game
     {
 
-        std::unique_ptr<sage::Camera> sCamera;
-        std::unique_ptr<sage::Cursor> cursor;
+        std::unique_ptr<sage::UserInput> userInput;
         std::unique_ptr<sage::Editor> gameEditor;
 
         static void init();
@@ -38,10 +39,14 @@ namespace sage
         void removeTower(EntityID entityId);
 
         Game() :
-        sCamera(std::make_unique<sage::Camera>()), cursor(std::make_unique<sage::Cursor>()),
-        gameEditor(std::make_unique<sage::Editor>(cursor.get())), renderSystem(std::make_unique<RenderSystem>()),
-        collisionSystem(std::make_unique<sage::CollisionSystem>()), transformSystem(std::make_unique<sage::TransformSystem>())
+        sCamera(std::make_unique<sage::Camera>()),
+        renderSystem(std::make_unique<RenderSystem>()),
+        collisionSystem(std::make_unique<sage::CollisionSystem>()),
+        transformSystem(std::make_unique<sage::TransformSystem>())
         {
+            userInput = std::make_unique<sage::UserInput>();
+            gameEditor = std::make_unique<sage::Editor>(userInput.get());
+
             init();
             
             EntityID rootNodeId = Registry::GetInstance().CreateEntity();
@@ -80,6 +85,7 @@ namespace sage
         std::unique_ptr<sage::RenderSystem> renderSystem;
         std::unique_ptr<sage::TransformSystem> transformSystem;
         std::unique_ptr<sage::WorldSystem> worldSystem;
+        std::unique_ptr<sage::Camera> sCamera;
 
         static Game& GetInstance()
         {

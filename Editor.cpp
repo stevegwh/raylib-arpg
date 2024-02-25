@@ -35,20 +35,19 @@ namespace sage
             case DEFAULT:
                 break;
             case FLOOR:
-                if (selectedObject == 0)
+                if (currentEditorMode == CREATE)
                 {
                     Game::GetInstance().createTower(cursor->collision.point, "Tower Instance");
                 }
-                else
+                else if (currentEditorMode == SELECT)
                 {
                     moveSelectedObjectToCursorHit();
                     selectedObject = 0;
                 }
                 break;
             case BUILDING:
-                
-                Game::GetInstance().removeTower(cursor->rayCollisionResultInfo.collidedEntityId);
-                //selectedObject = cursor->rayCollisionResultInfo.collidedEntityId;
+                currentEditorMode = SELECT;
+                selectedObject = cursor->rayCollisionResultInfo.collidedEntityId;
                 break;
             }
         }
@@ -56,6 +55,20 @@ namespace sage
         {
             selectedObject = 0;
         }
+    }
+
+    void Editor::OnDeleteModeKeyPressed()
+    {
+        if (currentEditorMode != SELECT) return;
+        Game::GetInstance().removeTower(selectedObject);
+        selectedObject = 0;
+        currentEditorMode = IDLE;
+    }
+
+    void Editor::OnCreateModeKeyPressed()
+    {
+        if (currentEditorMode == CREATE) currentEditorMode = IDLE;
+        else if (currentEditorMode == IDLE) currentEditorMode = CREATE;
     }
 
     void Editor::OnCollisionHit()
@@ -79,5 +92,17 @@ namespace sage
         {
             Game::GetInstance().collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
         }
+    }
+
+
+    void Editor::DrawDebugText()
+    {
+        std::string mode = "NONE";
+        if (currentEditorMode == IDLE) mode = "IDLE";
+        else if (currentEditorMode == SELECT) mode = "SELECT";
+        else if (currentEditorMode == MOVE) mode = "MOVE";
+        else if (currentEditorMode == CREATE) mode = "CREATE";
+
+        DrawText(TextFormat("Editor Mode: %s", mode.c_str()), SCREEN_WIDTH - 150, 50, 10, BLACK);
     }
 }
