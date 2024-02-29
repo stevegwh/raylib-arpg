@@ -36,8 +36,11 @@ namespace sage
                 collisionSystem.AddComponent(std::move(collideable));
                 auto gridSquare = std::make_unique<NavigationGridSquare>(id);
                 AddComponent(std::move(gridSquare));
+
             }
         }
+        const auto& test = components;
+
     }
 
     // It would make a lot more sense just to iterate over all buildings etc.
@@ -45,7 +48,6 @@ namespace sage
     {
         CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
         unoccupiedSquares.clear();
-        
         for (const auto& gridSquare : components)
         {
 //            gridSquare.second->collisionsWithSquare = collisionSystem.GetCollisions(gridSquare.second->entityId);

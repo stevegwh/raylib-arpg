@@ -97,8 +97,9 @@ namespace sage
         const Collideable& targetCol = *components.at(entity);
         for (const auto& c : components)
         {
-            if (c.second->entityId == entity) continue;
+
             if (!checkCollisionMatrix(targetCol.collisionLayer, c.second->collisionLayer)) continue;
+            if (Vector3Distance(targetCol.worldBoundingBox.min, c.second->worldBoundingBox.min) > 10.0f) continue;
             bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.second->worldBoundingBox);
             if (colHit) return true;
         }

@@ -64,6 +64,11 @@ add_executable(BG_Raylib
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 # Checks if OSX and links appropriate frameworks (Only required on MacOS)
 #if (APPLE)
 #    target_link_libraries(${PROJECT_NAME} "-framework IOKit")

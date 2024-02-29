@@ -4,7 +4,7 @@
 
 #pragma once
 
-//#define EDITOR_MODE
+#define EDITOR_MODE
 
 #include "raylib.h"
 #include "raymath.h"
