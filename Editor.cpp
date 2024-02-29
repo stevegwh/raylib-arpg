@@ -18,11 +18,8 @@ namespace sage
 
         const Renderable* renderable = Game::GetInstance().renderSystem->GetComponent(selectedObject);
 
-        BoundingBox bb;
-        bb.min = Vector3Add(renderable->meshBoundingBox.min, newTransform.position);
-        bb.max = Vector3Add(renderable->meshBoundingBox.max, newTransform.position);
         Game::GetInstance().transformSystem->SetComponent(selectedObject, newTransform);
-        Game::GetInstance().collisionSystem->SetBoundingBox(selectedObject, bb);
+        Game::GetInstance().collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
         
     }
     

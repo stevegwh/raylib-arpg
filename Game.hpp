@@ -3,6 +3,9 @@
 //
 
 #pragma once
+
+//#define EDITOR_MODE
+
 #include "raylib.h"
 #include "raymath.h"
 

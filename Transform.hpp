@@ -3,7 +3,11 @@
 //
 
 #pragma once
+
+#include <memory>
+
 #include "raylib.h"
+
 #include "Component.hpp"
 
 namespace sage
@@ -15,6 +19,7 @@ namespace sage
         Vector3 direction{};
         float scale{};
         Vector3 rotation{};
+
         explicit Transform(EntityID _entityId) : Component(_entityId) {}
     };
 }

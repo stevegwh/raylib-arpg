@@ -8,6 +8,8 @@
 
 #include "raylib.h"
 
+
+
 #include <unordered_map>
 
 
@@ -24,12 +26,15 @@ namespace sage
 
     struct Collideable : public Component
     {
+    private:
+
+    public:
         const BoundingBox localBoundingBox; // BoundingBox in local space
         BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb pos + world pos)
         CollisionLayer collisionLayer = DEFAULT;
-        //Event OnCollisionHit;
         explicit Collideable(EntityID _entityId, BoundingBox _boundingBox) :
-            Component(_entityId), localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox) {}
+            Component(_entityId), localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
+            {}
     };
 
     struct CollisionInfo

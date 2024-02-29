@@ -46,8 +46,17 @@ namespace sage
         DrawBoundingBox(bb, color);
     }
 
-    void CollisionSystem::SetBoundingBox(EntityID entityId, BoundingBox bb)
+    /**
+     * Takes the local bounding box and moves it to the provided position
+     * @param entityId The id of the entity
+     * @param pos The world position of the desired centre of the bounding box
+     */
+    void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Vector3 pos)
     {
+        const auto comp = components.at(entityId).get();
+        BoundingBox bb;
+        bb.min = Vector3Add(comp->localBoundingBox.min, pos);
+        bb.max = Vector3Add(comp->localBoundingBox.max, pos);
         components.at(entityId)->worldBoundingBox = bb;
     }
     
