@@ -19,6 +19,7 @@
 #include "TransformSystem.hpp"
 #include "WorldObject.hpp"
 #include "WorldSystem.hpp"
+#include "NavigationGridSystem.hpp"
 
 #include "Editor.hpp"
 
@@ -31,10 +32,13 @@ namespace sage
 
         std::unique_ptr<sage::UserInput> userInput;
         std::unique_ptr<sage::Editor> gameEditor;
+        
+        std::vector<Vector3> grid;
 
         static void init();
         static void cleanup();
         void draw();
+        void initGrid(int slices, float spacing) const;
         void createTower(Vector3 position, const char* name) const;
         void removeTower(EntityID entityId);
 
@@ -46,6 +50,7 @@ namespace sage
         {
             userInput = std::make_unique<sage::UserInput>();
             gameEditor = std::make_unique<sage::Editor>(userInput.get());
+            navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f, *collisionSystem);
 
             init();
             
@@ -68,10 +73,9 @@ namespace sage
             auto floorCollidable = std::make_unique<Collideable>(floor, bb);
             floorCollidable->collisionLayer = FLOOR;
             collisionSystem->AddComponent(std::move(floorCollidable));
-            
+
             auto floorWorldObject = std::make_unique<WorldObject>(floor);
             worldSystem->AddComponent(std::move(floorWorldObject));
-            
         }
 
         ~Game()
@@ -85,6 +89,7 @@ namespace sage
         std::unique_ptr<sage::RenderSystem> renderSystem;
         std::unique_ptr<sage::TransformSystem> transformSystem;
         std::unique_ptr<sage::WorldSystem> worldSystem;
+        std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
         std::unique_ptr<sage::Camera> sCamera;
 
         static Game& GetInstance()

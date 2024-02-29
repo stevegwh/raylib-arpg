@@ -69,8 +69,12 @@ namespace sage
     void Editor::OnCreateModeKeyPressed()
     {
         if (currentEditorMode == CREATE) currentEditorMode = IDLE;
-        else if (currentEditorMode == IDLE) currentEditorMode = CREATE;
-        selectedObject = 0;
+        else currentEditorMode = CREATE;
+    }
+    
+    void Editor::OnGenGridKeyPressed()
+    {
+        Game::GetInstance().navigationGridSystem->FindOccupiedGridSquares();
     }
 
     void Editor::OnCollisionHit()

@@ -54,6 +54,9 @@ add_executable(BG_Raylib
         WorldObject.hpp
         WorldSystem.cpp
         WorldSystem.hpp
+        NavigationGridSystem.cpp
+        NavigationGridSystem.hpp
+        NavigationGridSquare.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

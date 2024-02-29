@@ -26,11 +26,13 @@ namespace sage
         void OnClick() const;
         void OnDeleteKeyPressed() const;
         void OnCreateKeyPressed() const;
+        void OnGenGridKeyPressed() const;
     public:
         std::unique_ptr<Event> OnClickEvent;
         std::unique_ptr<Event> OnCollisionHitEvent;
         std::unique_ptr<Event> OnDeleteKeyPressedEvent;
         std::unique_ptr<Event> OnCreateKeyPressedEvent;
+        std::unique_ptr<Event> OnGenGridKeyPressedEvent;
 
         RayCollision collision {0};
         CollisionInfo rayCollisionResultInfo;
@@ -43,7 +45,8 @@ namespace sage
         UserInput()
         :
         OnClickEvent(std::make_unique<Event>()), OnCollisionHitEvent(std::make_unique<Event>()),
-        OnDeleteKeyPressedEvent(std::make_unique<Event>()), OnCreateKeyPressedEvent(std::make_unique<Event>())
+        OnDeleteKeyPressedEvent(std::make_unique<Event>()), OnCreateKeyPressedEvent(std::make_unique<Event>()),
+        OnGenGridKeyPressedEvent(std::make_unique<Event>())
         {
         }
     };

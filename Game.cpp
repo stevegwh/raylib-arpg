@@ -7,7 +7,6 @@
 #include <utility>
 
 
-
 namespace sage
 {
     void Game::init()
@@ -18,7 +17,6 @@ namespace sage
         const int screenHeight = SCREEN_HEIGHT;
 
         InitWindow(screenWidth, screenHeight, "raylib [models] example - mesh picking");
-        
     }
     
     void Game::removeTower(EntityID entityId)
@@ -53,7 +51,6 @@ namespace sage
 
     void Game::Update()
     {
-
         SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
         // Main game loop
@@ -90,6 +87,13 @@ namespace sage
         gameEditor->Draw();
 
         DrawGrid(100, 1.0f);
+        
+        for (const auto& gridSquare : navigationGridSystem->unoccupiedSquares)
+        {
+            auto bb = collisionSystem->GetComponent(gridSquare.entityId)->worldBoundingBox;
+            bb.max.y = 0.1f;
+            DrawBoundingBox(bb, PURPLE);
+        }
 
         EndMode3D();
 

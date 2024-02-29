@@ -26,8 +26,9 @@ namespace sage
         // Get ray and test against objects
         ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
 
-        auto collisions = collisionSystem->CheckRayCollision(ray);
-        rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){0, {}} : collisionSystem->CheckRayCollision(ray).at(0);
+        auto collisions = collisionSystem->GetCollisionsWithRay(ray);
+        rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){0, {}} : collisionSystem
+            ->GetCollisionsWithRay(ray).at(0);
 
 
         if ((rayCollisionResultInfo.rayCollision.hit) && (rayCollisionResultInfo.rayCollision.distance < collision.distance))
@@ -57,6 +58,11 @@ namespace sage
     void UserInput::OnCreateKeyPressed() const
     {
         OnCreateKeyPressedEvent->InvokeAllCallbacks();
+    }
+
+    void UserInput::OnGenGridKeyPressed() const
+    {
+        OnGenGridKeyPressedEvent->InvokeAllCallbacks();
     }
 
     void UserInput::Draw()
@@ -137,6 +143,10 @@ namespace sage
         else if (IsKeyPressed(KEY_P))
         {
             OnCreateKeyPressed();
+        } 
+        else if (IsKeyPressed(KEY_G))
+        {
+            OnGenGridKeyPressed();
         }
 
     }

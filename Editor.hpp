@@ -39,6 +39,8 @@ public:
         cursor->OnDeleteKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f3));
         const std::function<void()> f4 = [p = this] { p->OnCreateModeKeyPressed(); };
         cursor->OnCreateKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f4));
+        const std::function<void()> f5 = [p = this] { p->OnGenGridKeyPressed(); };
+        cursor->OnGenGridKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f5));
     }
 
     void Draw();
@@ -55,6 +57,7 @@ public:
 
     void OnDeleteModeKeyPressed();
     void OnCreateModeKeyPressed();
+    void OnGenGridKeyPressed();
 };
 
 }

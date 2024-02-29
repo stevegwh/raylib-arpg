@@ -5,7 +5,10 @@
 #pragma once
 
 #include "Component.hpp"
+
 #include "raylib.h"
+
+#include <unordered_map>
 
 
 namespace sage
@@ -14,7 +17,9 @@ namespace sage
     {
         DEFAULT,
         FLOOR,
-        BUILDING
+        BUILDING,
+        NAVIGATION,
+        PLAYER
     };
 
     struct Collideable : public Component
@@ -30,6 +35,7 @@ namespace sage
     struct CollisionInfo
     {
         EntityID collidedEntityId{};
+        BoundingBox collidedBB{};
         RayCollision rayCollision{};
     };
 }
