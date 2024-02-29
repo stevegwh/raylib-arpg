@@ -20,8 +20,11 @@
 #include "WorldObject.hpp"
 #include "WorldSystem.hpp"
 #include "NavigationGridSystem.hpp"
+#include "ActorMovementSystem.hpp"
 
+#ifdef EDITOR_MODE
 #include "Editor.hpp"
+#endif
 
 namespace sage
 {
@@ -31,34 +34,42 @@ namespace sage
     {
 
         std::unique_ptr<sage::UserInput> userInput;
+        
+#ifdef EDITOR_MODE
         std::unique_ptr<sage::Editor> gameEditor;
+#endif
         
         std::vector<Vector3> grid;
 
         static void init();
         static void cleanup();
         void draw();
-        void initGrid(int slices, float spacing) const;
         void createTower(Vector3 position, const char* name) const;
+        EntityID createPlayer(Vector3 position, const char* name) const;
         void removeTower(EntityID entityId);
 
         Game() :
         sCamera(std::make_unique<sage::Camera>()),
         renderSystem(std::make_unique<RenderSystem>()),
         collisionSystem(std::make_unique<sage::CollisionSystem>()),
-        transformSystem(std::make_unique<sage::TransformSystem>())
+        transformSystem(std::make_unique<sage::TransformSystem>()),
+        userInput(std::make_unique<sage::UserInput>())
         {
-            userInput = std::make_unique<sage::UserInput>();
-            gameEditor = std::make_unique<sage::Editor>(userInput.get());
-            navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f, *collisionSystem);
-
             init();
-            
+
             EntityID rootNodeId = Registry::GetInstance().CreateEntity();
             auto rootNodeObject = std::make_unique<WorldObject>(rootNodeId);
             worldSystem = std::make_unique<sage::WorldSystem>(rootNodeId);
             worldSystem->AddComponent(std::move(rootNodeObject));
-
+            
+#ifdef EDITOR_MODE
+            gameEditor = std::make_unique<sage::Editor>(userInput.get());
+#endif
+            auto playerId = createPlayer({20.0f, 0, 20.0f}, "Player");
+            actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(userInput.get(), playerId);
+            
+            navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f, *collisionSystem);
+            
             createTower({0.0f, 0.0f, 0.0f}, "Tower");
             createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
 
@@ -90,6 +101,7 @@ namespace sage
         std::unique_ptr<sage::TransformSystem> transformSystem;
         std::unique_ptr<sage::WorldSystem> worldSystem;
         std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
+        std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
         std::unique_ptr<sage::Camera> sCamera;
 
         static Game& GetInstance()
@@ -102,7 +114,7 @@ namespace sage
         void operator=(Game const&)  = delete;
         
         void Update();
-
+        
         friend class Editor;
     };
 }

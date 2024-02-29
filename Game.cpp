@@ -24,6 +24,32 @@ namespace sage
         Registry::GetInstance().DeleteEntity(entityId);
     }
     
+    EntityID Game::createPlayer(Vector3 position, const char* name) const
+    {
+        EntityID id = Registry::GetInstance().CreateEntity();
+        sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png") };
+
+        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat);
+        renderable->name = name;
+
+        auto transform = std::make_unique<Transform>(id);
+        transform->position = position;
+        transform->scale = 1.0f;
+
+        auto collideable = std::make_unique<Collideable>(id, renderable->meshBoundingBox);
+        collideable->worldBoundingBox.min = Vector3Add(collideable->worldBoundingBox.min, transform->position);
+        collideable->worldBoundingBox.max = Vector3Add(collideable->worldBoundingBox.max, transform->position);
+        collideable->collisionLayer = PLAYER;
+
+        auto towerWorldObject1 = std::make_unique<WorldObject>(id);
+
+        renderSystem->AddComponent(std::move(renderable));
+        transformSystem->AddComponent(std::move(transform));
+        collisionSystem->AddComponent(std::move(collideable));
+        worldSystem->AddComponent(std::move(towerWorldObject1));
+        return id;
+    }
+    
     void Game::createTower(Vector3 position, const char* name) const
     {
         EntityID newTowerId = Registry::GetInstance().CreateEntity();
@@ -51,6 +77,7 @@ namespace sage
 
     void Game::Update()
     {
+        
         SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
         //--------------------------------------------------------------------------------------
         // Main game loop
@@ -61,6 +88,7 @@ namespace sage
             sCamera->HandleInput(); // Should merge this with userInput
             sCamera->Update();
             userInput->ListenForInput();
+            transformSystem->Update();
 
             //----------------------------------------------------------------------------------
             draw();
@@ -84,7 +112,9 @@ namespace sage
 
         renderSystem->Draw();
 
+#ifdef EDITOR_MODE
         gameEditor->Draw();
+#endif
 
         DrawGrid(100, 1.0f);
         
@@ -98,7 +128,10 @@ namespace sage
         EndMode3D();
 
         userInput->DrawDebugText();
+        
+#ifdef EDITOR_MODE
         gameEditor->DrawDebugText();
+#endif
 
         DrawFPS(10, 10);
 

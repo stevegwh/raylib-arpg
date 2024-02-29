@@ -57,9 +57,19 @@ add_executable(BG_Raylib
         NavigationGridSystem.cpp
         NavigationGridSystem.hpp
         NavigationGridSquare.hpp
+        ActorMovementSystem.cpp
+        ActorMovementSystem.hpp
+        Actor.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+
+option(ENABLE_EDITOR_MODE "Enable editor mode" OFF)
+if(ENABLE_EDITOR_MODE)
+    add_compile_definitions(EDITOR_MODE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC EDITOR_MODE)
+endif()
+
 
 # Checks if OSX and links appropriate frameworks (Only required on MacOS)
 #if (APPLE)

@@ -11,6 +11,8 @@ namespace sage
     struct Transform : public Component
     {
         Vector3 position{};
+        Vector3 target{};
+        Vector3 direction{};
         float scale{};
         Vector3 rotation{};
         explicit Transform(EntityID _entityId) : Component(_entityId) {}
