@@ -10,7 +10,7 @@
 namespace sage
 {
 
-    inline void NavigationGridSystem::init(int slices, float spacing, CollisionSystem& collisionSystem)
+    inline void NavigationGridSystem::init(CollisionSystem& collisionSystem)
     {
         int halfSlices = slices / 2;
 
@@ -34,22 +34,41 @@ namespace sage
                 
                 EntityID id = Registry::GetInstance().CreateEntity();
                 
-                // Add clickable grid to collision system
+                // Collisions necessary to see if grid square is occupied or not
                 auto collideable = std::make_unique<Collideable>(Collideable(id, boundingBox));
                 collideable->collisionLayer = NAVIGATION;
                 collisionSystem.AddComponent(std::move(collideable));
                 
-                // TODO: this needs to be stored in a systematic way for pathfinding to work
                 auto gridSquare = std::make_unique<NavigationGridSquare>(id);
+                // Store grid squares in an ordered way so we can navigate
                 gridSquares.push_back(gridSquare.get());
                 AddComponent(std::move(gridSquare));
 
             }
         }
-
     }
 
-    // It would make a lot more sense just to iterate over all buildings etc.
+    /**
+     * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+     * @return A vector of "nodes" to travel to in sequential order
+     */
+    std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& start, const Vector3& finish)
+    {
+        std::vector<Vector3> nodes;
+
+        // gridSquares 1000.
+        int x = static_cast<int>(start.x) % static_cast<int>(spacing);
+        int y = static_cast<int>(start.y) % static_cast<int>(spacing);
+        int i = x * spacing + y * spacing;
+
+        // Find where start/finish are in terms of grid position.
+        // I assume just modulo to grid dimensions
+
+        // Flood fill algorithm
+
+        return nodes;
+    }
+
     void NavigationGridSystem::PopulateGrid()
     {
         CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
