@@ -71,7 +71,7 @@ namespace sage
     
     void Editor::OnGenGridKeyPressed()
     {
-        Game::GetInstance().navigationGridSystem->FindOccupiedGridSquares();
+        Game::GetInstance().navigationGridSystem->PopulateGrid();
     }
 
     void Editor::OnCollisionHit()

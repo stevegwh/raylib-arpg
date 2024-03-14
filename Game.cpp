@@ -118,13 +118,12 @@ namespace sage
 
         DrawGrid(100, 1.0f);
         
-        for (const auto& gridSquare : navigationGridSystem->unoccupiedSquares)
+        for (const auto& gridSquare : navigationGridSystem->GetGridSquares())
         {
-            auto bb = collisionSystem->GetComponent(gridSquare.entityId)->worldBoundingBox;
+            auto bb = collisionSystem->GetComponent(gridSquare->entityId)->worldBoundingBox;
             bb.max.y = 0.1f;
-            Color color = gridSquare.occupied ? RED : GREEN;
+            Color color = gridSquare->occupied ? RED : GREEN;
             DrawBoundingBox(bb, color);
-            
         }
 
         EndMode3D();

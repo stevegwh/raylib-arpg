@@ -13,11 +13,6 @@ namespace sage
         components.at(entityId)->position = newTransform.position;
     }
 
-    void findExistingTransform(EntityID entityId)
-    {
-
-    }
-
     void TransformSystem::MoveToLocation(EntityID entityId, Vector3 location)
     {
         // Prune existing move commands

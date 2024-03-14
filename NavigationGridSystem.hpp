@@ -15,9 +15,10 @@ namespace sage
 class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
 {
     void init(int slices, float spacing, CollisionSystem& collisionSystem);
+    std::vector<NavigationGridSquare*> gridSquares;
 public:
-    std::vector<NavigationGridSquare> unoccupiedSquares;
-    void FindOccupiedGridSquares();
+    void PopulateGrid();
+    const std::vector<NavigationGridSquare*>& GetGridSquares();
 
     NavigationGridSystem(int slices, float spacing, CollisionSystem& collisionSystem)
     {

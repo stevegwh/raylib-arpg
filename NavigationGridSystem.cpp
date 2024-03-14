@@ -10,7 +10,7 @@
 namespace sage
 {
 
-    void NavigationGridSystem::init(int slices, float spacing, CollisionSystem& collisionSystem)
+    inline void NavigationGridSystem::init(int slices, float spacing, CollisionSystem& collisionSystem)
     {
         int halfSlices = slices / 2;
 
@@ -41,31 +41,27 @@ namespace sage
                 
                 // TODO: this needs to be stored in a systematic way for pathfinding to work
                 auto gridSquare = std::make_unique<NavigationGridSquare>(id);
+                gridSquares.push_back(gridSquare.get());
                 AddComponent(std::move(gridSquare));
 
             }
         }
-        const auto& test = components;
 
     }
 
     // It would make a lot more sense just to iterate over all buildings etc.
-    void NavigationGridSystem::FindOccupiedGridSquares()
+    void NavigationGridSystem::PopulateGrid()
     {
         CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
-        unoccupiedSquares.clear();
-        for (const auto& gridSquare : components)
+        for (auto& gridSquare : gridSquares)
         {
-            
-//            gridSquare.second->collisionsWithSquare = collisionSystem.GetCollisions(gridSquare.second->entityId);
-//            if (gridSquare.second->collisionsWithSquare.empty())
-//            {
-//                unoccupiedSquares.push_back(*gridSquare.second);
-//            }
-
-            gridSquare.second->occupied = collisionSystem.GetFirstCollision(gridSquare.second->entityId);
-            unoccupiedSquares.push_back(*gridSquare.second);
+            gridSquare->occupied = collisionSystem.GetFirstCollision(gridSquare->entityId);
         }
     }
-    
+
+    const std::vector<NavigationGridSquare*>& NavigationGridSystem::GetGridSquares()
+    {
+        return gridSquares;
+    }
+
 } // sage
