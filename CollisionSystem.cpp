@@ -65,7 +65,7 @@ namespace sage
         return CheckCollisionBoxes(col1, col2);
     }
     
-    bool CollisionSystem::checkCollisionMatrix(CollisionLayer layer1, CollisionLayer layer2)
+    bool CollisionSystem::checkCollisionMatrix(const CollisionLayer& layer1, const CollisionLayer& layer2)
     {
         const auto& layerMatrix = collisionMatrix.at(layer1);
         return std::find(layerMatrix.begin(), layerMatrix.end(), layer2) != layerMatrix.end();
@@ -97,9 +97,7 @@ namespace sage
         const Collideable& targetCol = *components.at(entity);
         for (const auto& c : components)
         {
-
-            if (!checkCollisionMatrix(targetCol.collisionLayer, c.second->collisionLayer)) continue;
-            if (Vector3Distance(targetCol.worldBoundingBox.min, c.second->worldBoundingBox.min) > 10.0f) continue;
+            if (c.second->collisionLayer != BUILDING) continue; // TODO: Wanted to query the collision matrix but is far too slow
             bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.second->worldBoundingBox);
             if (colHit) return true;
         }

@@ -124,6 +124,12 @@ namespace sage
                                 collision.normal.x,
                                 collision.normal.y,
                                 collision.normal.z), 10, ypos + 30, 10, BLACK);
+
+            DrawText(TextFormat("Entity ID: %d", rayCollisionResultInfo.collidedEntityId), 10, 
+                     ypos + 45, 10, BLACK);
+
+
+            
         }
     }
 

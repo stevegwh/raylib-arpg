@@ -122,7 +122,9 @@ namespace sage
         {
             auto bb = collisionSystem->GetComponent(gridSquare.entityId)->worldBoundingBox;
             bb.max.y = 0.1f;
-            DrawBoundingBox(bb, PURPLE);
+            Color color = gridSquare.occupied ? RED : GREEN;
+            DrawBoundingBox(bb, color);
+            
         }
 
         EndMode3D();

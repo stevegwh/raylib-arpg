@@ -18,6 +18,7 @@ namespace sage
     {
         Vector3 squareCentre{};
         std::vector<CollisionInfo> collisionsWithSquare;
+        bool occupied = false;
         
         explicit NavigationGridSquare(EntityID id) : Component(id) {}
         
