@@ -13,8 +13,25 @@ namespace sage
         components.at(entityId)->position = newTransform.position;
     }
 
+    void findExistingTransform(EntityID entityId)
+    {
+
+    }
+
     void TransformSystem::MoveToLocation(EntityID entityId, Vector3 location)
     {
+        // Prune existing move commands
+        // TODO: improve
+        for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
+        {
+            if ((*it)->entityId == entityId)
+            {
+                moveTowardsTransforms.erase(it);
+                continue;
+            }
+            ++it;
+        }
+
         auto transform = components.at(entityId).get();
         transform->target = location;
         transform->direction = Vector3Normalize(Vector3Subtract(transform->target, transform->position));
@@ -27,9 +44,6 @@ namespace sage
         {
             const auto& transform = *it;
             
-//            if (transform->target.x == transform->position.x &&
-//                transform->target.y == transform->position.y &&
-//                transform->target.z == transform->position.z) 
             if (Vector3Distance(transform->target, transform->position) < 0.5f)
             {
                 it = moveTowardsTransforms.erase(it);
