@@ -15,7 +15,9 @@ namespace sage
             switch (Game::GetInstance().collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
             {
             case FLOOR:
-                Game::GetInstance().transformSystem->MoveToLocation(playerId, cursor->collision.point);
+                //Game::GetInstance().transformSystem->MoveToLocation(playerId, cursor->collision.point);
+                int idx = Game::GetInstance().navigationGridSystem->WorldToGridSpace(cursor->collision.point);
+                std::cout << idx << std::endl;
                 
             }
         }
