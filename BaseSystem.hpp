@@ -37,6 +37,11 @@ namespace sage
         {
             return components.at(entityId).get();
         }
+        
+        const std::unordered_map<EntityID, std::unique_ptr<ComponentName>>& GetComponents() const
+        {
+            return components;
+        }
 
         // Hideable
         void AddComponent(std::unique_ptr<ComponentName> component)

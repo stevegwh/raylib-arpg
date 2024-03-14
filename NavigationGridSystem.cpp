@@ -17,17 +17,21 @@ namespace sage
      */
     int NavigationGridSystem::WorldToGridSpace(Vector3 worldPos)
     {
-        // Grid's centre is 0,0.
-        // 'Translate' grid's centre to 0,0 then translate back after?
-        int x = std::floor(worldPos.z) / spacing;
-        int y = std::floor(worldPos.x) / spacing;
-        // 0,0 in world space is the centre of the grid. Therefore, need to offset the position by half of the grid.
-        // + (slices/2) is likely a hack and not needed if I calculate x/y better, but (slices/2) is just the width of one grid space.
-        int offset = (slices * slices) / 2 + (slices/2);
-        int idx = (x * slices + y) + offset;
-        
+        // Calculate the grid indices for the given world position
+        int x = std::floor(worldPos.x / spacing) + (slices / 2);
+        int y = std::floor(worldPos.z / spacing) + (slices / 2);
+
+        // Ensure the indices are within bounds
+        if (y < 0 || y >= slices || x < 0 || x >= slices) {
+            return -1; // Return -1 for positions outside the grid
+        }
+
+        // Calculate the array index corresponding to the grid position
+        int idx = x * slices + y;
+
         return idx;
     }
+
 
     inline void NavigationGridSystem::init(CollisionSystem& collisionSystem)
     {
@@ -57,8 +61,8 @@ namespace sage
                 auto collideable = std::make_unique<Collideable>(Collideable(id, boundingBox));
                 collideable->collisionLayer = NAVIGATION;
                 collisionSystem.AddComponent(std::move(collideable));
-                
-                auto gridSquare = std::make_unique<NavigationGridSquare>(id, gridSquares.size() + 1);
+
+                auto gridSquare = std::make_unique<NavigationGridSquare>(id, ((i + halfSlices) * slices) + (j + halfSlices));
                 // Store grid squares in an ordered way so we can navigate
                 gridSquares.push_back(gridSquare.get());
                 AddComponent(std::move(gridSquare));
@@ -87,14 +91,39 @@ namespace sage
         return nodes;
     }
 
-    void NavigationGridSystem::PopulateGrid()
+void NavigationGridSystem::PopulateGrid()
+{
+    for (auto& gridSquare : gridSquares)
     {
-        CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
-        for (auto& gridSquare : gridSquares)
+        gridSquare->occupied = false;
+    }
+
+    CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
+    const auto& collisionComponents = collisionSystem.GetComponents();
+    for (const auto& bb : collisionComponents)
+    {
+        if (bb.second->collisionLayer != BUILDING) continue;
+
+        int topleftidx = WorldToGridSpace(bb.second->worldBoundingBox.min);
+        int bottomrightidx = WorldToGridSpace(bb.second->worldBoundingBox.max);
+
+        int min_x = std::min(topleftidx % slices, bottomrightidx % slices);
+        int max_x = std::max(topleftidx % slices, bottomrightidx % slices);
+        int min_y = std::min(topleftidx / slices, bottomrightidx / slices);
+        int max_y = std::max(topleftidx / slices, bottomrightidx / slices);
+
+        for (int y = min_y; y <= max_y; ++y)
         {
-            gridSquare->occupied = collisionSystem.GetFirstCollision(gridSquare->entityId);
+            for (int x = min_x; x <= max_x; ++x)
+            {
+                int idx = y * slices + x;
+                gridSquares[idx]->occupied = true;
+            }
         }
     }
+}
+
+
 
     const std::vector<NavigationGridSquare*>& NavigationGridSystem::GetGridSquares()
     {
