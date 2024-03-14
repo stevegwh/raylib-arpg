@@ -85,7 +85,7 @@ namespace sage
         {
             // Update
             //----------------------------------------------------------------------------------
-            sCamera->HandleInput(); // Should merge this with userInput
+            sCamera->HandleInput(); // TODO: Should merge this with userInput
             sCamera->Update();
             userInput->ListenForInput();
             transformSystem->Update();
@@ -118,9 +118,18 @@ namespace sage
 
         DrawGrid(100, 1.0f);
         
+//        for (const auto& gridSquare : navigationGridSystem->GetGridSquares())
+//        {
+//            auto bb = collisionSystem->GetComponent(gridSquare->entityId)->worldBoundingBox;
+//            bb.max.y = 0.1f;
+//            Color color = gridSquare->occupied ? RED : GREEN;
+//            DrawBoundingBox(bb, color);
+//        }
         for (const auto& gridSquare : navigationGridSystem->GetGridSquares())
         {
-            auto bb = collisionSystem->GetComponent(gridSquare->entityId)->worldBoundingBox;
+            BoundingBox bb;
+            bb.min = gridSquare->worldPosMin;
+            bb.max = gridSquare->worldPosMax;
             bb.max.y = 0.1f;
             Color color = gridSquare->occupied ? RED : GREEN;
             DrawBoundingBox(bb, color);

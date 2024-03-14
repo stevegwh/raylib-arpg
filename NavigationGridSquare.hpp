@@ -16,12 +16,16 @@ namespace sage
 {
     struct NavigationGridSquare : public Component
     {
-        Vector3 squareCentre{};
+        const Vector3 worldPosMin; // Top Left
+        const Vector3  worldPosMax; // Bottom Right
+        const Vector3 worldPosCentre;
         std::vector<CollisionInfo> collisionsWithSquare;
         bool occupied = false;
-        const int gridSquareIndex;
+        int gridSquareIndex;
         
-        explicit NavigationGridSquare(EntityID id, int _gridSquareIndex) : gridSquareIndex(_gridSquareIndex), Component(id) {}
+        explicit NavigationGridSquare(EntityID id, int _gridSquareIndex, Vector3 _worldPosMin, Vector3 _worldPosMax, Vector3 _worldPosCentre) 
+        : gridSquareIndex(_gridSquareIndex), worldPosMin(_worldPosMin), worldPosMax(_worldPosMax), worldPosCentre(_worldPosCentre),
+        Component(id) {}
         
     };
 }

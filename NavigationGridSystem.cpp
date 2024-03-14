@@ -43,26 +43,14 @@ namespace sage
             {
                 Vector3 v1 = {(float)i * spacing, 0, (float)j * spacing};
                 Vector3 v3 = {(float)(i + 1) * spacing, 1.0f, (float)(j + 1) * spacing};
-
-                BoundingBox boundingBox;
-                boundingBox.min = v1;
-                boundingBox.max = v3; // Diagonal opposite
-
-                // Padding
-                float padding = 0.01f;
-                boundingBox.min.x += padding;
-                boundingBox.min.z += padding;
-                boundingBox.max.x -= padding;
-                boundingBox.max.z -= padding;
                 
                 EntityID id = Registry::GetInstance().CreateEntity();
                 
-                // Collisions necessary to see if grid square is occupied or not
-                auto collideable = std::make_unique<Collideable>(Collideable(id, boundingBox));
-                collideable->collisionLayer = NAVIGATION;
-                collisionSystem.AddComponent(std::move(collideable));
-
-                auto gridSquare = std::make_unique<NavigationGridSquare>(id, ((i + halfSlices) * slices) + (j + halfSlices));
+                auto gridSquare = std::make_unique<NavigationGridSquare>(id, 
+                                                                         ((i + halfSlices) * slices) + (j + halfSlices),
+                                                                         v1,
+                                                                         v3,
+                                                                         Vector3Subtract(v3, v1));
                 // Store grid squares in an ordered way so we can navigate
                 gridSquares.push_back(gridSquare.get());
                 AddComponent(std::move(gridSquare));
@@ -80,8 +68,8 @@ namespace sage
     {
         std::vector<Vector3> nodes;
         
-        const NavigationGridSquare* const startGridSquare = GetComponent(startGridId);
-        const NavigationGridSquare* const finishGridSquare = GetComponent(finishGridId);
+        int startGridSquare = WorldToGridSpace(startPos);
+        int finishGridSquare = WorldToGridSpace(finishPos);
 
         // Find where start/finish are in terms of grid position.
         // I assume just modulo to grid dimensions
@@ -91,37 +79,37 @@ namespace sage
         return nodes;
     }
 
-void NavigationGridSystem::PopulateGrid()
-{
-    for (auto& gridSquare : gridSquares)
+    void NavigationGridSystem::PopulateGrid()
     {
-        gridSquare->occupied = false;
-    }
-
-    CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
-    const auto& collisionComponents = collisionSystem.GetComponents();
-    for (const auto& bb : collisionComponents)
-    {
-        if (bb.second->collisionLayer != BUILDING) continue;
-
-        int topleftidx = WorldToGridSpace(bb.second->worldBoundingBox.min);
-        int bottomrightidx = WorldToGridSpace(bb.second->worldBoundingBox.max);
-
-        int min_x = std::min(topleftidx % slices, bottomrightidx % slices);
-        int max_x = std::max(topleftidx % slices, bottomrightidx % slices);
-        int min_y = std::min(topleftidx / slices, bottomrightidx / slices);
-        int max_y = std::max(topleftidx / slices, bottomrightidx / slices);
-
-        for (int y = min_y; y <= max_y; ++y)
+        for (auto& gridSquare : gridSquares)
         {
-            for (int x = min_x; x <= max_x; ++x)
+            gridSquare->occupied = false;
+        }
+    
+        CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
+        const auto& collisionComponents = collisionSystem.GetComponents();
+        for (const auto& bb : collisionComponents)
+        {
+            if (bb.second->collisionLayer != BUILDING) continue;
+    
+            int topleftidx = WorldToGridSpace(bb.second->worldBoundingBox.min);
+            int bottomrightidx = WorldToGridSpace(bb.second->worldBoundingBox.max);
+    
+            int min_x = std::min(topleftidx % slices, bottomrightidx % slices);
+            int max_x = std::max(topleftidx % slices, bottomrightidx % slices);
+            int min_y = std::min(topleftidx / slices, bottomrightidx / slices);
+            int max_y = std::max(topleftidx / slices, bottomrightidx / slices);
+    
+            for (int y = min_y; y <= max_y; ++y)
             {
-                int idx = y * slices + x;
-                gridSquares[idx]->occupied = true;
+                for (int x = min_x; x <= max_x; ++x)
+                {
+                    int idx = y * slices + x;
+                    gridSquares[idx]->occupied = true;
+                }
             }
         }
     }
-}
 
 
 
