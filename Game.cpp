@@ -125,14 +125,17 @@ namespace sage
 //            Color color = gridSquare->occupied ? RED : GREEN;
 //            DrawBoundingBox(bb, color);
 //        }
-        for (const auto& gridSquare : navigationGridSystem->GetGridSquares())
+        for (const auto& gridSquareRow : navigationGridSystem->GetGridSquares())
         {
-            BoundingBox bb;
-            bb.min = gridSquare->worldPosMin;
-            bb.max = gridSquare->worldPosMax;
-            bb.max.y = 0.1f;
-            Color color = gridSquare->occupied ? RED : GREEN;
-            DrawBoundingBox(bb, color);
+            for (const auto& gridSquare : gridSquareRow) 
+            {
+                BoundingBox bb;
+                bb.min = gridSquare->worldPosMin;
+                bb.max = gridSquare->worldPosMax;
+                bb.max.y = 0.1f;
+                Color color = gridSquare->occupied ? RED : GREEN;
+                DrawBoundingBox(bb, color);
+            }
         }
 
         EndMode3D();

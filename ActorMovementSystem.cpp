@@ -16,8 +16,8 @@ namespace sage
             {
             case FLOOR:
                 //Game::GetInstance().transformSystem->MoveToLocation(playerId, cursor->collision.point);
-                int idx = Game::GetInstance().navigationGridSystem->WorldToGridSpace(cursor->collision.point);
-                std::cout << idx << std::endl;
+                Vector2 idx = Game::GetInstance().navigationGridSystem->WorldToGridSpace(cursor->collision.point);
+                std::cout << "x: " << idx.x << " y: " << idx.y << std::endl;
                 
             }
         }

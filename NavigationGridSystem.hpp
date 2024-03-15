@@ -14,21 +14,21 @@ namespace sage
 
 class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
 {
-    void init(CollisionSystem& collisionSystem);
-    std::vector<NavigationGridSquare*> gridSquares;
+    void init();
+    std::vector<std::vector<NavigationGridSquare*>> gridSquares;
     float spacing;
     int slices;
 public:
     void PopulateGrid();
-    int WorldToGridSpace(Vector3 worldPos);
+    Vector2 WorldToGridSpace(Vector3 worldPos);
     std::vector<Vector3> Pathfind(const Vector3& startPos, const Vector3& finishPos,
                                   EntityID startGridId, EntityID finishGridId);
-    const std::vector<NavigationGridSquare*>& GetGridSquares();
+    const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
 
-    NavigationGridSystem(int _slices, float _spacing, CollisionSystem& collisionSystem)
+    NavigationGridSystem(int _slices, float _spacing)
     : slices(_slices), spacing(_spacing)
     {
-        init(collisionSystem);
+        init();
     }
 };
 

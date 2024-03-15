@@ -71,7 +71,7 @@ namespace sage
             auto playerId = createPlayer({20.0f, 0, 20.0f}, "Player");
             actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(userInput.get(), playerId);
             
-            navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f, *collisionSystem);
+            navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f);
             
             createTower({0.0f, 0.0f, 0.0f}, "Tower");
             createTower({10.0f, 0.0f, 20.0f}, "Tower 2");

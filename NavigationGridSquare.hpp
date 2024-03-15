@@ -21,9 +21,9 @@ namespace sage
         const Vector3 worldPosCentre;
         std::vector<CollisionInfo> collisionsWithSquare;
         bool occupied = false;
-        int gridSquareIndex;
+        Vector2 gridSquareIndex;
         
-        explicit NavigationGridSquare(EntityID id, int _gridSquareIndex, Vector3 _worldPosMin, Vector3 _worldPosMax, Vector3 _worldPosCentre) 
+        explicit NavigationGridSquare(EntityID id, Vector2 _gridSquareIndex, Vector3 _worldPosMin, Vector3 _worldPosMax, Vector3 _worldPosCentre) 
         : gridSquareIndex(_gridSquareIndex), worldPosMin(_worldPosMin), worldPosMax(_worldPosMax), worldPosCentre(_worldPosCentre),
         Component(id) {}
         
