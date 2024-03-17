@@ -6,6 +6,9 @@
 
 #include <map>
 #include <memory>
+#include <utility>
+#include <queue>
+#include <vector>
 
 #include "Transform.hpp"
 #include "BaseSystem.hpp"
@@ -20,6 +23,7 @@ class TransformSystem : public BaseSystem<Transform>
 public:
     // TODO: Overload this so you can just update one field at a time if needed
     void SetComponent(EntityID entityId, Transform newTransform);
+    void PathfindToLocation(EntityID entityId, const std::vector<Vector3>& path);
     void MoveToLocation(EntityID entityId, Vector3 location);
     void Update();
 };

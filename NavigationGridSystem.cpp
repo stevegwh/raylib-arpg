@@ -2,6 +2,9 @@
 // Created by Steve Wheeler on 25/02/2024.
 //
 
+#include <queue>
+#include <unordered_map>
+#include <utility>
 #include "NavigationGridSystem.hpp"
 #include "Collideable.hpp"
 #include "CollisionSystem.hpp"
@@ -57,26 +60,79 @@ namespace sage
         }
         
     }
-
+    
+    struct PathfinderNode
+    {
+        std::vector<NavigationGridSquare*> neighbours;
+    };
+    
+    
     /**
      * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
      * @return A vector of "nodes" to travel to in sequential order
      */
-    std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos
-    , EntityID startGridId, EntityID finishGridId)
-    {
+    std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos)
+    {        
+        auto startGridSquare = WorldToGridSpace(startPos);
+        auto finishGridSquare = WorldToGridSpace(finishPos);
+        
+        // Remember X = Col, Y = Row. To access 2D array, make sure to do so as [row][col] (i.e., [y][x])
+        int startrow = startGridSquare.y;
+        int startcol = startGridSquare.x;
+
+        int finishrow = finishGridSquare.y;
+        int finishcol = finishGridSquare.x;
+        
+        int W = gridSquares.at(0).size();
+        int H = gridSquares.size();
+        auto inside = [&](int row, int col) { return 0 <= row && row < H && 0 <= col && col < W;  };
+        
+        //std::vector<std::vector<bool>> reached(H, std::vector<bool>(W)); // Change this to a table of "came from"
+        
+        std::vector<std::vector<std::pair<int, int>>> came_from(H, std::vector<std::pair<int, int>>(W, std::pair<int, int>(-1, -1)));
+        
+        std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+        std::queue<std::pair<int,int>> frontier;
+        
+        frontier.emplace(startrow, startcol);
+        //reached[startrow][startcol] = true;
+        while (!frontier.empty())
+        {
+            std::pair<int, int> current = frontier.front();
+            frontier.pop();
+            // Expand the frontier and look at neighbours
+            for (const auto& dir : directions) 
+            {
+                int next_row = current.first + dir.first;
+                int next_col = current.second + dir.second;
+                if (inside(next_row, next_col) && came_from[next_row][next_col].second == -1 && !gridSquares[next_row][next_col]->occupied)
+                {
+                    frontier.emplace(next_row, next_col);
+                    came_from[next_row][next_col] = std::pair<int, int>(current.first, current.second);
+                    
+                    // Should quit if you reach goal.
+                }
+
+            }
+        }
+        
+        // Calculate path for nodes.
+        std::pair<int, int> current = came_from[finishrow][finishcol];
+        std::vector<std::pair<int, int>> path;
+        while (current.first != startrow && current.second != startcol)
+        {
+            path.push_back(current);
+            current = came_from[current.first][current.second];
+        }
         std::vector<Vector3> nodes;
+
+        for (const auto& pair: path) 
+        {
+            auto node = gridSquares[pair.first][pair.second];
+            nodes.push_back(node->worldPosMin);
+        }
         
-        //int startGridSquare = WorldToGridSpace(startPos);
-        //int finishGridSquare = WorldToGridSpace(finishPos);
         
-
-
-        // Find where start/finish are in terms of grid position.
-        // I assume just modulo to grid dimensions
-
-        // Flood fill algorithm
-
         return nodes;
     }
 

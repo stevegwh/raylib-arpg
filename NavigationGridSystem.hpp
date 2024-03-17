@@ -21,8 +21,7 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
 public:
     void PopulateGrid();
     Vector2 WorldToGridSpace(Vector3 worldPos);
-    std::vector<Vector3> Pathfind(const Vector3& startPos, const Vector3& finishPos,
-                                  EntityID startGridId, EntityID finishGridId);
+    std::vector<Vector3> Pathfind(const Vector3& startPos, const Vector3& finishPos);
     const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
 
     NavigationGridSystem(int _slices, float _spacing)

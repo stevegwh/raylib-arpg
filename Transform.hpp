@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <queue>
 
 #include "raylib.h"
 
@@ -15,7 +16,7 @@ namespace sage
     struct Transform : public Component
     {
         Vector3 position{};
-        Vector3 target{};
+        std::queue<Vector3> targets{};
         Vector3 direction{};
         float scale{};
         Vector3 rotation{};
