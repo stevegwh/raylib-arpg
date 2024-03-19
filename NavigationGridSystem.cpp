@@ -61,10 +61,6 @@ namespace sage
         
     }
     
-    struct PathfinderNode
-    {
-        std::vector<NavigationGridSquare*> neighbours;
-    };
     
     
     /**
@@ -72,65 +68,75 @@ namespace sage
      * @return A vector of "nodes" to travel to in sequential order
      */
     std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos)
-    {        
+    {
         auto startGridSquare = WorldToGridSpace(startPos);
         auto finishGridSquare = WorldToGridSpace(finishPos);
-        
-        // Remember X = Col, Y = Row. To access 2D array, make sure to do so as [row][col] (i.e., [y][x])
+
         int startrow = startGridSquare.y;
         int startcol = startGridSquare.x;
 
         int finishrow = finishGridSquare.y;
         int finishcol = finishGridSquare.x;
-        
+
         int W = gridSquares.at(0).size();
         int H = gridSquares.size();
-        auto inside = [&](int row, int col) { return 0 <= row && row < H && 0 <= col && col < W;  };
-        
-        //std::vector<std::vector<bool>> reached(H, std::vector<bool>(W)); // Change this to a table of "came from"
-        
+        auto inside = [&](int row, int col) { return 0 <= row && row < H && 0 <= col && col < W; };
+
+        std::vector<std::vector<bool>> visited(H, std::vector<bool>(W, false));
         std::vector<std::vector<std::pair<int, int>>> came_from(H, std::vector<std::pair<int, int>>(W, std::pair<int, int>(-1, -1)));
-        
-        std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+
+        std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1} };
         std::queue<std::pair<int,int>> frontier;
-        
+
         frontier.emplace(startrow, startcol);
-        //reached[startrow][startcol] = true;
+        visited[startrow][startcol] = true;
+
+        bool pathFound = false;
+
         while (!frontier.empty())
         {
-            std::pair<int, int> current = frontier.front();
+            auto current = frontier.front();
             frontier.pop();
-            if (current.first == finishrow && current.second == finishcol) break;
-            // Expand the frontier and look at neighbours
-            for (const auto& dir : directions) 
+
+            if (current.first == finishrow && current.second == finishcol) {
+                pathFound = true;
+                break;
+            }
+
+            for (const auto& dir : directions)
             {
                 int next_row = current.first + dir.first;
                 int next_col = current.second + dir.second;
-                if (inside(next_row, next_col) && came_from[next_row][next_col].second == -1 && !gridSquares[next_row][next_col]->occupied)
+
+                if (inside(next_row, next_col) && !visited[next_row][next_col] && !gridSquares[next_row][next_col]->occupied)
                 {
                     frontier.emplace(next_row, next_col);
-                    came_from[next_row][next_col] = std::pair<int, int>(current.first, current.second);
+                    visited[next_row][next_col] = true;
+                    came_from[next_row][next_col] = current;
                 }
-                
-                
             }
         }
         
-        // Calculate path for nodes.
-        std::vector<Vector3> nodes;
-        std::pair<int, int> current = came_from[finishrow][finishcol];
-        while (current.first != startrow && current.second != startcol)
+        if (!pathFound) {
+            return {}; 
+        }
+
+        // Trace path back from finish to start
+        std::vector<Vector3> path;
+        std::pair<int, int> current = {finishrow, finishcol};
+        while (current.first != startrow || current.second != startcol)
         {
             auto node = gridSquares[current.first][current.second];
-            nodes.push_back(node->worldPosMin);
+            path.push_back(node->worldPosMin);
             current = came_from[current.first][current.second];
         }
-        std::reverse(nodes.begin(), nodes.end());       
-        
-        return nodes;
+        std::reverse(path.begin(), path.end());
+
+        return path;
     }
 
-    void NavigationGridSystem::PopulateGrid()
+
+void NavigationGridSystem::PopulateGrid()
     {
         for (auto& row : gridSquares)
         {

@@ -10,7 +10,7 @@
 
 namespace sage
 {
-    void TransformSystem::SetComponent(EntityID entityId, Transform newTransform)
+    void TransformSystem::SetComponent(EntityID entityId, const Transform& newTransform)
     {
         components.at(entityId)->position = newTransform.position;
     }
