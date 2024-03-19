@@ -30,12 +30,7 @@ namespace sage
             ++it;
         }
         auto transform = components.at(entityId).get();
-
-        for (auto it = path.end() - 1; it != path.begin(); --it)
-        {
-            
-            transform->targets.emplace(*it);
-        }
+        for (auto n : path) transform->targets.emplace(n);
         transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
         moveTowardsTransforms.push_back(transform);
     }

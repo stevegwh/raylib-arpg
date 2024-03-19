@@ -100,6 +100,7 @@ namespace sage
         {
             std::pair<int, int> current = frontier.front();
             frontier.pop();
+            if (current.first == finishrow && current.second == finishcol) break;
             // Expand the frontier and look at neighbours
             for (const auto& dir : directions) 
             {
@@ -109,29 +110,22 @@ namespace sage
                 {
                     frontier.emplace(next_row, next_col);
                     came_from[next_row][next_col] = std::pair<int, int>(current.first, current.second);
-                    
-                    // Should quit if you reach goal.
                 }
-
+                
+                
             }
         }
         
         // Calculate path for nodes.
+        std::vector<Vector3> nodes;
         std::pair<int, int> current = came_from[finishrow][finishcol];
-        std::vector<std::pair<int, int>> path;
         while (current.first != startrow && current.second != startcol)
         {
-            path.push_back(current);
+            auto node = gridSquares[current.first][current.second];
+            nodes.push_back(node->worldPosMin);
             current = came_from[current.first][current.second];
         }
-        std::vector<Vector3> nodes;
-
-        for (const auto& pair: path) 
-        {
-            auto node = gridSquares[pair.first][pair.second];
-            nodes.push_back(node->worldPosMin);
-        }
-        
+        std::reverse(nodes.begin(), nodes.end());       
         
         return nodes;
     }

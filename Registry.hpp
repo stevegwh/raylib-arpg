@@ -16,7 +16,7 @@ namespace sage
     class Registry
     {
         explicit Registry() = default;
-        std::unordered_map<EntityID, std::unique_ptr<Entity>> entities;
+        std::unordered_map<EntityID, std::unique_ptr<Entity>> entities; // TODO: Change to vector and entityId can be an index
         std::vector<EntityID> stagedForDeletion;
     public:
         static Registry& GetInstance()

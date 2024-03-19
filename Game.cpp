@@ -29,12 +29,14 @@ namespace sage
         EntityID id = Registry::GetInstance().CreateEntity();
         sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png") };
 
-        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat);
-        renderable->name = name;
-
         auto transform = std::make_unique<Transform>(id);
         transform->position = position;
         transform->scale = 1.0f;
+
+        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat);
+        renderable->name = name;
+
+
 
         auto collideable = std::make_unique<Collideable>(id, renderable->meshBoundingBox);
         collideable->worldBoundingBox.min = Vector3Add(collideable->worldBoundingBox.min, transform->position);
