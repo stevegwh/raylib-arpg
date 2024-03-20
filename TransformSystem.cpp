@@ -30,6 +30,11 @@ namespace sage
             ++it;
         }
         auto transform = components.at(entityId).get();
+        
+        // Clear queue of previous commands
+        std::queue<Vector3> empty;
+        std::swap(transform->targets, empty);
+
         for (auto n : path) transform->targets.emplace(n);
         transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
         moveTowardsTransforms.push_back(transform);
