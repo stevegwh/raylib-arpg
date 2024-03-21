@@ -60,6 +60,8 @@ add_executable(BG_Raylib
         ActorMovementSystem.cpp
         ActorMovementSystem.hpp
         Actor.hpp
+        GameObjectFactory.cpp
+        GameObjectFactory.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib)

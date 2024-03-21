@@ -12,15 +12,20 @@
 #include <memory>
 #include <string>
 
-#include "Registry.hpp"
-#include "Renderable.hpp"
-#include "CollisionSystem.hpp"
-#include "UserInput.hpp"
 #include "Camera.hpp"
-#include "RenderSystem.hpp"
+#include "UserInput.hpp"
+
+#include "Registry.hpp"
 #include "Entity.hpp"
-#include "TransformSystem.hpp"
+
+#include "Collideable.hpp"
 #include "WorldObject.hpp"
+
+#include "GameObjectFactory.hpp"
+
+#include "RenderSystem.hpp"
+#include "CollisionSystem.hpp"
+#include "TransformSystem.hpp"
 #include "WorldSystem.hpp"
 #include "NavigationGridSystem.hpp"
 #include "ActorMovementSystem.hpp"
@@ -44,11 +49,9 @@ namespace sage
         
         std::vector<Vector3> grid;
 
-        static void init();
+        void init();
         static void cleanup();
         void draw();
-        void createTower(Vector3 position, const char* name) const;
-        EntityID createPlayer(Vector3 position, const char* name) const;
         void removeTower(EntityID entityId);
 
         Game() :
@@ -58,38 +61,15 @@ namespace sage
         transformSystem(std::make_unique<sage::TransformSystem>()),
         userInput(std::make_unique<sage::UserInput>())
         {
-            init();
-
             EntityID rootNodeId = Registry::GetInstance().CreateEntity();
             auto rootNodeObject = std::make_unique<WorldObject>(rootNodeId);
             worldSystem = std::make_unique<sage::WorldSystem>(rootNodeId);
             worldSystem->AddComponent(std::move(rootNodeObject));
+            navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f);
             
 #ifdef EDITOR_MODE
             gameEditor = std::make_unique<sage::Editor>(userInput.get());
 #endif
-            auto playerId = createPlayer({20.0f, 0, 20.0f}, "Player");
-            actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(userInput.get(), playerId);
-            
-            navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f);
-            
-            createTower({0.0f, 0.0f, 0.0f}, "Tower");
-            createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
-
-            // Ground quad
-            EntityID floor = Registry::GetInstance().CreateEntity();
-            Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
-            Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
-            BoundingBox bb = {
-                .min = g0,
-                .max = g2
-            };
-            auto floorCollidable = std::make_unique<Collideable>(floor, bb);
-            floorCollidable->collisionLayer = FLOOR;
-            collisionSystem->AddComponent(std::move(floorCollidable));
-
-            auto floorWorldObject = std::make_unique<WorldObject>(floor);
-            worldSystem->AddComponent(std::move(floorWorldObject));
         }
 
         ~Game()

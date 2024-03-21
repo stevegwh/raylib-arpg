@@ -34,7 +34,7 @@ namespace sage
             case FLOOR:
                 if (currentEditorMode == CREATE)
                 {
-                    Game::GetInstance().createTower(cursor->collision.point, "Tower Instance");
+                    GameObjectFactory::createTower(cursor->collision.point, "Tower Instance");
                 }
                 else if (currentEditorMode == SELECT)
                 {
