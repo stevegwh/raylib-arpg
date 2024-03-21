@@ -21,7 +21,7 @@ namespace sage
         float scale{};
         Vector3 rotation{};
         
-        std::string SerializeImpl()
+        [[nodiscard]] std::string SerializeImpl() const
         {
             return {TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)};
         }

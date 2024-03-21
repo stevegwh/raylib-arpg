@@ -42,6 +42,8 @@ public:
         cursor->OnCreateKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f4));
         const std::function<void()> f5 = [p = this] { p->OnGenGridKeyPressed(); };
         cursor->OnGenGridKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f5));
+        const std::function<void()> f6 = [p = this] { p->OnSerializeButton(); };
+        cursor->OnSerializeKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f6));
     }
 
     void Draw();

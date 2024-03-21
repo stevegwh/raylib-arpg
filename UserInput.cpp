@@ -64,6 +64,11 @@ namespace sage
     {
         OnGenGridKeyPressedEvent->InvokeAllCallbacks();
     }
+    
+    void UserInput::OnSerializeKeyPressed() const
+    {
+        OnSerializeKeyPressedEvent->InvokeAllCallbacks();
+    }
 
     void UserInput::Draw()
     {
@@ -153,6 +158,10 @@ namespace sage
         else if (IsKeyPressed(KEY_G))
         {
             OnGenGridKeyPressed();
+        }
+        else if (IsKeyPressed(KEY_Z))
+        {
+            OnSerializeKeyPressed();
         }
 
     }

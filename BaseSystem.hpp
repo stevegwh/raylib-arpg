@@ -3,9 +3,14 @@
 //
 
 #pragma once
+
 #include "Component.hpp"
-#include "unordered_map"
-#include "memory"
+
+#include <unordered_map>
+#include <memory>
+#include <vector>
+#include <string>
+
 #include "Registry.hpp"
 
 namespace sage
@@ -54,12 +59,14 @@ namespace sage
             components.erase(entityId);
         }
         
-        void SerializeComponents()
+        std::vector<std::string> SerializeComponents()
         {
+            std::vector<std::string> toReturn;
             for (const auto& c: components) 
             {
-
+                toReturn.push_back(c.second->Serialize());
             }
+            return toReturn;
         }
         
         void DeserializeComponents()

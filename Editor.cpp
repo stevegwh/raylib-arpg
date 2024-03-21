@@ -57,6 +57,7 @@ namespace sage
     
     void Editor::OnSerializeButton()
     {
+        auto strings = Game::GetInstance().transformSystem->SerializeComponents();
         
     }
 
