@@ -30,6 +30,8 @@
 #include "NavigationGridSystem.hpp"
 #include "ActorMovementSystem.hpp"
 
+// Friends
+#include "Serializer.hpp"
 #ifdef EDITOR_MODE
 #include "Editor.hpp"
 #endif
@@ -99,6 +101,7 @@ namespace sage
         void Update();
         
         friend class Editor;
+        friend class Serializer;
     };
 }
 

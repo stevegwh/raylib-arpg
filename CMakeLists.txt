@@ -22,6 +22,12 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     endif()
 endif()
 
+# Json
+include(FetchContent)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+
 add_executable(BG_Raylib
         main.cpp
         Game.cpp
@@ -62,9 +68,11 @@ add_executable(BG_Raylib
         Actor.hpp
         GameObjectFactory.cpp
         GameObjectFactory.hpp
+        Serializer.cpp
+        Serializer.hpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json)
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
