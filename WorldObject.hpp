@@ -8,7 +8,7 @@
 
 namespace sage
 {
-    struct WorldObject : sage::Component
+    struct WorldObject : public Component<WorldObject>
     {
         EntityID parent{};
         std::vector<EntityID> children;

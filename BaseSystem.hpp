@@ -53,5 +53,18 @@ namespace sage
         {
             components.erase(entityId);
         }
+        
+        void SerializeComponents()
+        {
+            for (const auto& c: components) 
+            {
+
+            }
+        }
+        
+        void DeserializeComponents()
+        {
+            
+        }
     };
 }

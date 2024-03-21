@@ -13,7 +13,7 @@
 
 namespace sage
 {
-    struct Renderable : public sage::Component
+    struct Renderable : public Component<Renderable>
     {
         sage::Material material;
         const Model model;

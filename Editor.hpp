@@ -24,6 +24,7 @@ class Editor
     UserInput* cursor;
     void OnCursorClick();
     void OnCollisionHit();
+    void OnSerializeButton();
     EntityID selectedObject;
     void moveSelectedObjectToCursorHit();
     

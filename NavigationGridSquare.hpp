@@ -14,7 +14,7 @@
 
 namespace sage
 {
-    struct NavigationGridSquare : public Component
+    struct NavigationGridSquare : public Component<NavigationGridSquare>
     {
         const Vector3 worldPosMin; // Top Left
         const Vector3  worldPosMax; // Bottom Right

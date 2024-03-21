@@ -54,6 +54,11 @@ namespace sage
             selectedObject = 0;
         }
     }
+    
+    void Editor::OnSerializeButton()
+    {
+        
+    }
 
     void Editor::OnDeleteModeKeyPressed()
     {

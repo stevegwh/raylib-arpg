@@ -8,7 +8,7 @@
 
 namespace sage
 {
-    struct Actor : public Component
+    struct Actor : public Component<Actor>
     {
         explicit Actor(EntityID entityId) : Component(entityId) {}
     };

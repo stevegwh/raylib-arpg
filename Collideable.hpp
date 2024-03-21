@@ -24,7 +24,7 @@ namespace sage
         PLAYER
     };
 
-    struct Collideable : public Component
+    struct Collideable : public Component<Collideable>
     {
     private:
 
