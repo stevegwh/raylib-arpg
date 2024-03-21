@@ -21,9 +21,9 @@ namespace sage
         float scale{};
         Vector3 rotation{};
         
-        [[nodiscard]] std::string SerializeImpl() const
+        [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
         {
-            return {TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)};
+            return {{"Position", TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)}};
         }
 
         explicit Transform(EntityID _entityId) : Component(_entityId) {}

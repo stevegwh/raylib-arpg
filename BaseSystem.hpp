@@ -58,14 +58,16 @@ namespace sage
         {
             components.erase(entityId);
         }
-        
-        std::vector<std::string> SerializeComponents()
+
+        std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>> SerializeComponents()
         {
-            std::vector<std::string> toReturn;
+            std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>> toReturn;
+            toReturn.first = "Transform";
             for (const auto& c: components) 
             {
-                toReturn.push_back(c.second->Serialize());
+                toReturn.second.push_back(c.second->Serialize());
             }
+
             return toReturn;
         }
         

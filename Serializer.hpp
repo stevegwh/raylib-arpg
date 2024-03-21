@@ -5,6 +5,8 @@
 #pragma once
 
 #include <vector>
+#include <utility>
+#include <unordered_map>
 #include <string>
 
 namespace sage
@@ -13,7 +15,7 @@ namespace sage
 class Serializer
 {
     
-    void SerializeToFile(const std::vector<std::string>& serializeData) const;
+    static void SerializeToFile(const std::vector<std::pair<std::string, std::unordered_map<std::string, std::string>>>& serializeData) ;
 
 };
 

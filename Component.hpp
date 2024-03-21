@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include "string"
+#include <string>
+#include <utility>
+#include <unordered_map>
 
 typedef int EntityID;
 
@@ -16,7 +18,7 @@ namespace sage
         const EntityID entityId;
         explicit Component(EntityID _entityId) : entityId(_entityId) {}
 
-        std::string Serialize()
+        std::unordered_map<std::string, std::string> Serialize()
         {
             return static_cast<ComponentName*>(this)->SerializeImpl();
         }
