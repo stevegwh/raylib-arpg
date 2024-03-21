@@ -20,6 +20,7 @@ class CollisionSystem : public BaseSystem<Collideable>
 {
     bool checkCollisionMatrix(const CollisionLayer& layer1, const CollisionLayer& layer2);
 public:
+    CollisionSystem() : BaseSystem<Collideable>("Collideable") {}
     void UpdateWorldBoundingBox(EntityID entityId, Vector3 pos);
     [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray) const;
     void BoundingBoxDraw(EntityID entityId, Color color = LIME) const;

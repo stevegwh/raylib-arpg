@@ -23,7 +23,10 @@ namespace sage
         
         [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
         {
-            return {{"Position", TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)}};
+            return {
+                {"EntityId", TextFormat("%i", entityId)},
+                {"Position", TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)}
+            };
         }
 
         explicit Transform(EntityID _entityId) : Component(_entityId) {}

@@ -26,5 +26,6 @@ public:
     void PathfindToLocation(EntityID entityId, const std::vector<Vector3>& path);
     void MoveToLocation(EntityID entityId, Vector3 location);
     void Update();
+    TransformSystem() : BaseSystem<Transform>("Transform") {}
 };
 }

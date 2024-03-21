@@ -18,8 +18,12 @@ namespace sage
     template <typename ComponentName>
     class BaseSystem
     {
+    private:
+        const std::string componentName;
     protected:
         std::unordered_map<EntityID, std::unique_ptr<ComponentName>> components;
+        
+        BaseSystem<ComponentName>(std::string _componentName) : componentName(_componentName) {}
         
         void m_addComponent(std::unique_ptr<ComponentName> component)
         {
@@ -62,7 +66,7 @@ namespace sage
         std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>> SerializeComponents()
         {
             std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>> toReturn;
-            toReturn.first = "Transform";
+            toReturn.first = componentName;
             for (const auto& c: components) 
             {
                 toReturn.second.push_back(c.second->Serialize());

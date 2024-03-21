@@ -25,7 +25,7 @@ public:
     const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
 
     NavigationGridSystem(int _slices, float _spacing)
-    : slices(_slices), spacing(_spacing)
+    : BaseSystem<NavigationGridSquare>("NavigationGridSquare"), slices(_slices), spacing(_spacing)
     {
         init();
     }

@@ -15,6 +15,7 @@ class RenderSystem : public BaseSystem<Renderable>
 public:
     ~RenderSystem();
     void Draw() const;
+    RenderSystem() : BaseSystem<Renderable>("Renderable") {}
 };
 }
 

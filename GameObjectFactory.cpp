@@ -19,13 +19,13 @@ namespace sage
     EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name) 
     {
         EntityID id = Registry::GetInstance().CreateEntity();
-        sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png") };
+        sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
     
         auto transform = std::make_unique<Transform>(id);
         transform->position = position;
         transform->scale = 1.0f;
     
-        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat);
+        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat, std::string("resources/models/obj/cube_steve.obj"));
         renderable->name = name;
         
         auto collideable = std::make_unique<Collideable>(id, renderable->meshBoundingBox);
@@ -45,9 +45,9 @@ namespace sage
     void GameObjectFactory::createTower(Vector3 position, const char* name) 
     {
         EntityID newTowerId = Registry::GetInstance().CreateEntity();
-        sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png") };
+        sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
     
-        auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, LoadModel("resources/models/obj/turret.obj"), mat);
+        auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, LoadModel("resources/models/obj/turret.obj"), mat, "resources/models/obj/turret.obj");
         towerRenderable1->name = name;
     
         auto towerTransform1 = std::make_unique<Transform>(newTowerId);

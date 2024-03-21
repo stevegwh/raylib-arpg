@@ -14,8 +14,8 @@ namespace sage
 
 class Serializer
 {
-    
-    static void SerializeToFile(const std::vector<std::pair<std::string, std::unordered_map<std::string, std::string>>>& serializeData) ;
+public:
+    static void SerializeToFile(const std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>>& serializeData) ;
 
 };
 
