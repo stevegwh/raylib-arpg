@@ -35,6 +35,16 @@ namespace sage
         explicit Collideable(EntityID _entityId, BoundingBox _boundingBox) :
             Component(_entityId), localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
             {}
+
+        [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
+        {
+            return {
+                {"EntityId", TextFormat("%i", entityId)},
+                {"localBoundingBox", TextFormat("%02.02f, %02.02f", localBoundingBox.min, localBoundingBox.max)},
+                {"worldBoundingBox", TextFormat("%02.02f, %02.02f", worldBoundingBox.min, worldBoundingBox.max)},
+                {"collisionLayer", TextFormat("%i", collisionLayer)}
+            };
+        }
     };
 
     struct CollisionInfo

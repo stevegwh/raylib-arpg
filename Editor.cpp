@@ -60,8 +60,10 @@ namespace sage
         std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>> serializeData;
         auto transforms = Game::GetInstance().transformSystem->SerializeComponents();
         auto renderables = Game::GetInstance().renderSystem->SerializeComponents();
+        auto collideables = Game::GetInstance().collisionSystem->SerializeComponents();
         serializeData.push_back(transforms);
         serializeData.push_back(renderables);
+        serializeData.push_back(collideables);
         Serializer::SerializeToFile(serializeData);
     }
 
