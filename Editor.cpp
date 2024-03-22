@@ -62,8 +62,8 @@ namespace sage
         auto renderables = Game::GetInstance().renderSystem->SerializeComponents();
         auto collideables = Game::GetInstance().collisionSystem->SerializeComponents();
         serializeData.push_back(transforms);
-        serializeData.push_back(renderables);
-        serializeData.push_back(collideables);
+        //serializeData.push_back(renderables);
+        //serializeData.push_back(collideables);
         Serializer::SerializeToFile(serializeData);
     }
 

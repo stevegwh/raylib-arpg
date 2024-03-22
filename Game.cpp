@@ -4,6 +4,8 @@
 
 #include "Game.hpp"
 
+#include "Serializer.hpp"
+
 #include <utility>
 
 
@@ -40,6 +42,8 @@ namespace sage
         worldSystem->AddComponent(std::move(floorWorldObject));
 
         navigationGridSystem->PopulateGrid();
+        
+        Serializer::DeserializeFile();
     }
     
     void Game::removeTower(EntityID entityId)

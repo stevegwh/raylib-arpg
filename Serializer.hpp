@@ -11,12 +11,12 @@
 
 namespace sage
 {
-
+typedef std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>> SerializationData;
 class Serializer
 {
 public:
-    static void SerializeToFile(const std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>>& serializeData) ;
-
+    static void SerializeToFile(const SerializationData& serializeData);
+    static SerializationData DeserializeFile();
 };
 
 } // sage
