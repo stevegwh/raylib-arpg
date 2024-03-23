@@ -28,6 +28,7 @@ public:
     [[nodiscard]] std::vector<CollisionInfo> GetCollisions(EntityID entity);
     //std::pair<bool, CollisionInfo> GetFirstCollision(EntityID entity);
     bool GetFirstCollision(EntityID entity);
+    void DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data);
     
     const std::vector<std::vector<CollisionLayer>> collisionMatrix = 
         {

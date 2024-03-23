@@ -40,8 +40,10 @@ namespace sage
         {
             return {
                 {"EntityId", TextFormat("%i", entityId)},
-                {"localBoundingBox", TextFormat("%02.02f, %02.02f", localBoundingBox.min, localBoundingBox.max)},
-                {"worldBoundingBox", TextFormat("%02.02f, %02.02f", worldBoundingBox.min, worldBoundingBox.max)},
+                {"localBoundingBoxMin", TextFormat("%02.02f, %02.02f, %02.02f", localBoundingBox.min.x, localBoundingBox.min.y, localBoundingBox.min.z)},
+                {"localBoundingBoxMax", TextFormat("%02.02f, %02.02f, %02.02f", localBoundingBox.max.x, localBoundingBox.max.y, localBoundingBox.max.z)},
+                {"worldBoundingBoxMin", TextFormat("%02.02f, %02.02f, %02.02f", worldBoundingBox.min.x, worldBoundingBox.min.y, worldBoundingBox.min.z)},
+                {"worldBoundingBoxMax", TextFormat("%02.02f, %02.02f, %02.02f", worldBoundingBox.max.x, worldBoundingBox.max.y, worldBoundingBox.max.z)},
                 {"collisionLayer", TextFormat("%i", collisionLayer)}
             };
         }

@@ -5,8 +5,7 @@
 #include "TransformSystem.hpp"
 
 #include "Game.hpp"
-
-
+#include "Serializer.hpp"
 
 namespace sage
 {
@@ -38,6 +37,19 @@ namespace sage
         for (auto n : path) transform->targets.emplace(n);
         transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
         moveTowardsTransforms.push_back(transform);
+    }
+
+    void TransformSystem::DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data)
+    {
+        for (const auto& c: data) 
+        {
+            int id = std::stoi(c.at("EntityId"));
+            auto transform = std::make_unique<Transform>(id);
+            auto position = c.at("Position");
+            transform->position = Serializer::ConvertStringToVector3(position);
+            //AddComponent(std::move(transform));
+            components.emplace(id, std::move(transform));
+        }            
     }
     
     void TransformSystem::Update()

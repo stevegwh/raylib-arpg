@@ -6,6 +6,8 @@
 
 #include "CollisionSystem.hpp"
 
+#include "Serializer.hpp"
+
 bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
 {
     return a.rayCollision.distance < b.rayCollision.distance;
@@ -128,6 +130,56 @@ namespace sage
         }
 
         return collisions;
+    }
+    
+    CollisionLayer intToCollisionLayer(int i)
+    {
+//        DEFAULT,
+//        FLOOR,
+//        BUILDING,
+//        NAVIGATION,
+//        PLAYER
+        switch (i) 
+        {
+        case 0:
+            return CollisionLayer::DEFAULT;
+        case 1:
+            return CollisionLayer::FLOOR;
+        case 2:
+            return CollisionLayer::BUILDING;
+        case 3:
+            return CollisionLayer::NAVIGATION;
+        case 4:
+            return CollisionLayer::PLAYER;
+        }
+        return CollisionLayer::DEFAULT;
+    }
+
+    void CollisionSystem::DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data)
+    {
+        for (const auto& c: data)
+        {
+            auto localBoundingBoxMin = c.at("localBoundingBoxMin");
+            auto localBoundingBoxMax = c.at("localBoundingBoxMax");
+            auto worldBoundingBoxMin = c.at("worldBoundingBoxMin");
+            auto worldBoundingBoxMax = c.at("worldBoundingBoxMax");
+            
+            BoundingBox localBoundingBox;
+            localBoundingBox.min = Serializer::ConvertStringToVector3(localBoundingBoxMin);
+            localBoundingBox.max = Serializer::ConvertStringToVector3(localBoundingBoxMax);
+            
+            BoundingBox worldBoundingBox;
+            worldBoundingBox.min = Serializer::ConvertStringToVector3(worldBoundingBoxMin);
+            worldBoundingBox.max = Serializer::ConvertStringToVector3(worldBoundingBoxMax);
+            
+            auto collisionLayer = std::stoi(c.at("collisionLayer"));
+            int id = std::stoi(c.at("EntityId"));
+            auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
+            collideable->worldBoundingBox = worldBoundingBox;
+            collideable->collisionLayer = intToCollisionLayer(collisionLayer);
+            //AddComponent(std::move(collideable));
+            components.emplace(id, std::move(collideable));
+        }
     }
     
 

@@ -46,8 +46,9 @@ namespace sage
     {
         EntityID newTowerId = Registry::GetInstance().CreateEntity();
         sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
-    
-        auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, LoadModel("resources/models/obj/turret.obj"), mat, "resources/models/obj/turret.obj");
+        Model model = LoadModel("resources/models/obj/turret.obj");
+        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
+        auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, model, mat, "resources/models/obj/turret.obj");
         towerRenderable1->name = name;
     
         auto towerTransform1 = std::make_unique<Transform>(newTowerId);

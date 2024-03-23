@@ -7,6 +7,7 @@
 #include "Serializer.hpp"
 
 #include <utility>
+#include <unordered_map>
 
 
 namespace sage
@@ -23,9 +24,9 @@ namespace sage
         auto playerId = GameObjectFactory::createPlayer({20.0f, 0, 20.0f}, "Player");
         actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(userInput.get(), playerId);
 
-        GameObjectFactory::createTower({0.0f, 0.0f, 0.0f}, "Tower");
-        GameObjectFactory::createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
-
+//        GameObjectFactory::createTower({0.0f, 0.0f, 0.0f}, "Tower");
+//        GameObjectFactory::createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
+//
         // Ground quad
         EntityID floor = Registry::GetInstance().CreateEntity();
         Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
@@ -38,12 +39,29 @@ namespace sage
         floorCollidable->collisionLayer = FLOOR;
         collisionSystem->AddComponent(std::move(floorCollidable));
 
-        auto floorWorldObject = std::make_unique<WorldObject>(floor);
-        worldSystem->AddComponent(std::move(floorWorldObject));
+//        auto floorWorldObject = std::make_unique<WorldObject>(floor);
+//        worldSystem->AddComponent(std::move(floorWorldObject));
+
+        
+        
+        auto data = Serializer::DeserializeFile();
+        for (const auto& component: data) 
+        {
+            if (component.first == "Transform")
+            {
+                transformSystem->DeserializeComponents(component.second);
+            }
+            else if (component.first == "Renderable")
+            {
+                renderSystem->DeserializeComponents(component.second);
+            }
+            else if (component.first == "Collideable")
+            {
+                collisionSystem->DeserializeComponents(component.second);
+            }
+        }
 
         navigationGridSystem->PopulateGrid();
-        
-        Serializer::DeserializeFile();
     }
     
     void Game::removeTower(EntityID entityId)
@@ -69,6 +87,7 @@ namespace sage
             //----------------------------------------------------------------------------------
             draw();
             Registry::GetInstance().RunMaintainance();
+            
         }
     }
 

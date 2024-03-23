@@ -5,6 +5,7 @@
 #include "Serializer.hpp"
 
 #include <fstream>
+#include <sstream>
 #include <nlohmann/json.hpp>
 #include <iostream>
 
@@ -12,6 +13,34 @@ using json = nlohmann::json;
 
 namespace sage
 {
+
+Vector3 Serializer::ConvertStringToVector3(const std::string& str) 
+{
+    Vector3 vec;
+
+    // Create a stringstream to tokenize the input string
+    std::stringstream ss(str);
+    std::string token;
+
+    // Tokenize the string by commas and extract floating-point numbers
+    std::vector<float> values;
+    while (std::getline(ss, token, ',')) {
+        values.push_back(std::stof(token));
+    }
+
+    // Extract the values into the Vector3 struct
+    if (values.size() == 3) {
+        vec.x = values[0];
+        vec.y = values[1];
+        vec.z = values[2];
+    } else {
+        // Handle incorrect input format
+        std::cerr << "Error: Invalid input format. Expected format: 'x,y,z'" << std::endl;
+        // Set default values or throw an exception as needed
+    }
+
+    return vec;
+}
 
 void Serializer::SerializeToFile(const SerializationData& serializeData)
 {
@@ -85,12 +114,8 @@ SerializationData Serializer::DeserializeFile()
                 }
             }
         }
-        return deserializeData;
     }
-
-    // Now deserializeData contains the deserialized data in the same structure as it was serialized
-    // You can further process this data as needed
-    
+    return deserializeData;
 }
 
 } // sage

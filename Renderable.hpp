@@ -6,6 +6,7 @@
 #include "raylib.h"
 #include <string>
 #include <iostream>
+#include <utility>
 
 #include "Material.hpp"
 #include "Component.hpp"
@@ -22,13 +23,13 @@ namespace sage
         std::string name = "Default";
         
         Renderable(EntityID entityId, Model _model, sage::Material _material, std::string _modelPath)
-        : Component(entityId), model(_model), material(_material), modelPath(_modelPath),meshBoundingBox(GetMeshBoundingBox(model.meshes[0]))
+        : Component(entityId), model(std::move(_model)), material(std::move(_material)), modelPath(_modelPath), meshBoundingBox(GetMeshBoundingBox(model.meshes[0]))
         {
-            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = material.diffuse;
         }
         
         ~Renderable()
         {
+            std::cout<< "DESTRUCTOR CALLED \n";
             UnloadModel(model);
             UnloadTexture(material.diffuse);
         }

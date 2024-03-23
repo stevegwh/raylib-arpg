@@ -18,7 +18,7 @@ namespace sage
         Vector3 position{};
         std::queue<Vector3> targets{};
         Vector3 direction{};
-        float scale{};
+        float scale = 1.0f;
         Vector3 rotation{};
         
         [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
