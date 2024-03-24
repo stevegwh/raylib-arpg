@@ -39,17 +39,14 @@ namespace sage
         moveTowardsTransforms.push_back(transform);
     }
 
-    void TransformSystem::DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data)
+    void TransformSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
     {
-        for (const auto& c: data) 
-        {
-            int id = std::stoi(c.at("EntityId"));
-            auto transform = std::make_unique<Transform>(id);
-            auto position = c.at("Position");
-            transform->position = Serializer::ConvertStringToVector3(position);
-            //AddComponent(std::move(transform));
-            components.emplace(id, std::move(transform));
-        }            
+        int id = std::stoi(entityId);
+        auto transform = std::make_unique<Transform>(id);
+        auto position = data.at("Position");
+        transform->position = Serializer::ConvertStringToVector3(position);
+        components.emplace(id, std::move(transform));
+        //AddComponent(std::move(transform));
     }
     
     void TransformSystem::Update()

@@ -13,7 +13,7 @@
 
 namespace sage
 {
-typedef std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>> SerializationData;
+typedef std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>> SerializationData;
 class Serializer
 {
 public:

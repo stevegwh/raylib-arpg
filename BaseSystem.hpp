@@ -63,21 +63,15 @@ namespace sage
             components.erase(entityId);
         }
 
-        std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>> SerializeComponents()
+//        {
+//            EntityID  -> { ComponentName -> { Field -> Value} }
+//        }
+        void SerializeComponents(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>>& serializeData) const
         {
-            std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>> toReturn;
-            toReturn.first = componentName;
-            for (const auto& c: components) 
+            for (const auto& c : components)
             {
-                toReturn.second.push_back(c.second->Serialize());
+                serializeData[std::to_string(c.first)][componentName] = c.second->Serialize();
             }
-
-            return toReturn;
-        }
-        
-        void DeserializeComponents()
-        {
-            
         }
     };
 }

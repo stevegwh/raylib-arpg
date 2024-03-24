@@ -46,26 +46,42 @@ void Serializer::SerializeToFile(const SerializationData& serializeData)
 {
     json j;
 
-    for (const auto& type : serializeData)
+    for (const auto& entityEntry : serializeData)
     {
-        std::string typeName = type.first;
+        const std::string& entityId = entityEntry.first;
+        const auto& componentMap = entityEntry.second;
 
-        for (const auto& components : type.second)
+        // Create or access the JSON object for the entity ID
+        if (!j.contains(entityId)) {
+            j[entityId] = json::object();
+        }
+
+        for (const auto& componentNameEntry : componentMap)
         {
-            json componentJson;
+            const std::string& componentName = componentNameEntry.first;
+            const auto& fieldMap = componentNameEntry.second;
 
-            for (const auto& field : components)
-            {
-                componentJson[field.first] = field.second;
+            // Create or access the JSON object for the component name
+            if (!j[entityId].contains(componentName)) {
+                j[entityId][componentName] = json::object();
             }
-            
-            j[typeName].push_back(componentJson);
+
+            for (const auto& fieldEntry : fieldMap)
+            {
+                const std::string& fieldName = fieldEntry.first;
+                const std::string& fieldValue = fieldEntry.second;
+
+                // Set the field value in the component object
+                j[entityId][componentName][fieldName] = fieldValue;
+            }
         }
     }
 
     std::ofstream o("pretty.json");
     o << std::setw(4) << j << std::endl;
 }
+
+
 
 // std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>> SerializationData;
 // { "TypeName": [ { "FieldName": "10004", "FieldName": "10.00, 0.00, 20.00" } ] }
@@ -78,43 +94,42 @@ SerializationData Serializer::DeserializeFile()
 
     SerializationData deserializeData;
 
-    // Iterate over each type in the JSON object
-    for (const auto& type : j.items())
+    // Iterate over each entity in the JSON object
+    for (const auto& entityEntry : j.items())
     {
-        std::string typeName = type.key();
-        std::vector<std::unordered_map<std::string, std::string>> components;
+        const std::string& entityId = entityEntry.key();
+        const auto& componentObjects = entityEntry.value();
 
-        // Iterate over each component in the type
-        for (const auto& component : type.value())
+        // Map to store components for the current entity
+        std::unordered_map<std::string, std::unordered_map<std::string, std::string>> componentMap;
+
+        // Iterate over each component in the entity
+        for (const auto& componentNameEntry : componentObjects.items())
         {
-            std::unordered_map<std::string, std::string> componentMap;
+            const std::string& componentName = componentNameEntry.key();
+            const auto& fieldMap = componentNameEntry.value();
 
-            // Deserialize each field in the component
-            for (const auto& field : component.items())
+            // Map to store fields for the current component
+            std::unordered_map<std::string, std::string> fieldMapForComponent;
+
+            // Iterate over each field in the component
+            for (const auto& fieldEntry : fieldMap.items())
             {
-                componentMap[field.key()] = field.value();
+                const std::string& fieldName = fieldEntry.key();
+                const std::string& fieldValue = fieldEntry.value();
+
+                // Add the field to the field map for the component
+                fieldMapForComponent[fieldName] = fieldValue;
             }
 
-            // Add the deserialized component to the components vector
-            components.push_back(componentMap);
+            // Add the field map for the current component to the component map for the entity
+            componentMap[componentName] = fieldMapForComponent;
         }
 
-        // Add the deserialized type and its components to the deserializeData vector
-        deserializeData.emplace_back(typeName, components);
-
-        for (const auto& t : deserializeData)
-        {
-            std::cout << "Type: " << t.first << std::endl;
-            for (const auto& component : t.second)
-            {
-                std::cout << "\tComponent:" << std::endl;
-                for (const auto& field : component)
-                {
-                    std::cout << "\t\t" << field.first << ": " << field.second << std::endl;
-                }
-            }
-        }
+        // Add the component map for the current entity to the deserialized data
+        deserializeData[entityId] = componentMap;
     }
+
     return deserializeData;
 }
 

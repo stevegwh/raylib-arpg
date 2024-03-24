@@ -29,7 +29,6 @@ namespace sage
         
         ~Renderable()
         {
-            std::cout<< "DESTRUCTOR CALLED \n";
             UnloadModel(model);
             UnloadTexture(material.diffuse);
         }

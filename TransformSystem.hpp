@@ -25,7 +25,7 @@ public:
     void SetComponent(EntityID entityId, const Transform& newTransform);
     void PathfindToLocation(EntityID entityId, const std::vector<Vector3>& path);
     void MoveToLocation(EntityID entityId, Vector3 location);
-    void DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data);
+    void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
     void Update();
     TransformSystem() : BaseSystem<Transform>("Transform") {}
 };

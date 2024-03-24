@@ -57,13 +57,11 @@ namespace sage
     
     void Editor::OnSerializeButton()
     {
-        std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>> serializeData;
-        auto transforms = Game::GetInstance().transformSystem->SerializeComponents();
-        auto renderables = Game::GetInstance().renderSystem->SerializeComponents();
-        auto collideables = Game::GetInstance().collisionSystem->SerializeComponents();
-        serializeData.push_back(transforms);
-        serializeData.push_back(renderables);
-        serializeData.push_back(collideables);
+        std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>> serializeData;
+        Game::GetInstance().transformSystem->SerializeComponents(serializeData);
+        Game::GetInstance().renderSystem->SerializeComponents(serializeData);
+        Game::GetInstance().collisionSystem->SerializeComponents(serializeData);
+        
         Serializer::SerializeToFile(serializeData);
     }
 

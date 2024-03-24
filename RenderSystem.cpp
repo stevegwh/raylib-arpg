@@ -19,23 +19,25 @@ namespace sage
         for (const auto& renderable : components)
         {
             const Transform* transform = sage::Game::GetInstance().transformSystem->GetComponent(renderable.second->entityId);
-            DrawModel(renderable.second->model, transform->position, 1.0f, WHITE);
+            DrawModel(renderable.second->model, transform->position, transform->scale, WHITE);
         }
     }
-    
-    void RenderSystem::DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data)
+
+    void RenderSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
     {
-        for (const auto& c: data)
-        {
-            sage::Material mat = { .diffuse = LoadTexture(c.at("Material").c_str()), .path = c.at("Material") };
-            std::string modelPath = c.at("Model");
-            int id = std::stoi(c.at("EntityId"));
-            Model model = LoadModel(modelPath.c_str());
-            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-            auto renderable = std::make_unique<Renderable>(id, model, mat, modelPath);
-            //AddComponent(std::move(renderable));
-            components.emplace(id, std::move(renderable));
-        }
+        int id = std::stoi(entityId);
+    
+        // Load material
+        sage::Material mat = { .diffuse = LoadTexture(data.at("Material").c_str()), .path = data.at("Material") };
+    
+        // Load model
+        std::string modelPath = data.at("Model");
+        Model model = LoadModel(modelPath.c_str());
+        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
+    
+        // Create Renderable component and add to system
+        auto renderable = std::make_unique<Renderable>(id, model, mat, modelPath);
+        components.emplace(id, std::move(renderable));
     }
 }
 

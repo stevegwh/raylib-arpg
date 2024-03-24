@@ -15,7 +15,7 @@ class RenderSystem : public BaseSystem<Renderable>
 public:
     ~RenderSystem();
     void Draw() const;
-    void DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data);
+    void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
     RenderSystem() : BaseSystem<Renderable>("Renderable") {}
 };
 }

@@ -41,23 +41,32 @@ namespace sage
 
 //        auto floorWorldObject = std::make_unique<WorldObject>(floor);
 //        worldSystem->AddComponent(std::move(floorWorldObject));
-
-        
         
         auto data = Serializer::DeserializeFile();
-        for (const auto& component: data) 
+        for (const auto& entityIdEntry : data)
         {
-            if (component.first == "Transform")
+            const std::string& entityId = entityIdEntry.first;
+            const auto& componentMap = entityIdEntry.second;
+
+            // Check if the entity has a Transform component
+            if (componentMap.find("Transform") != componentMap.end())
             {
-                transformSystem->DeserializeComponents(component.second);
+                const auto& transformComponent = componentMap.at("Transform");
+                transformSystem->DeserializeComponents(entityId, transformComponent);
             }
-            else if (component.first == "Renderable")
+
+            // Check if the entity has a Renderable component
+            if (componentMap.find("Renderable") != componentMap.end())
             {
-                renderSystem->DeserializeComponents(component.second);
+                const auto& renderableComponent = componentMap.at("Renderable");
+                renderSystem->DeserializeComponents(entityId, renderableComponent);
             }
-            else if (component.first == "Collideable")
+
+            // Check if the entity has a Collideable component
+            if (componentMap.find("Collideable") != componentMap.end())
             {
-                collisionSystem->DeserializeComponents(component.second);
+                const auto& collideableComponent = componentMap.at("Collideable");
+                collisionSystem->DeserializeComponents(entityId, collideableComponent);
             }
         }
 

@@ -155,32 +155,32 @@ namespace sage
         return CollisionLayer::DEFAULT;
     }
 
-    void CollisionSystem::DeserializeComponents(const std::vector<std::unordered_map<std::string, std::string>>& data)
+    void CollisionSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
     {
-        for (const auto& c: data)
-        {
-            auto localBoundingBoxMin = c.at("localBoundingBoxMin");
-            auto localBoundingBoxMax = c.at("localBoundingBoxMax");
-            auto worldBoundingBoxMin = c.at("worldBoundingBoxMin");
-            auto worldBoundingBoxMax = c.at("worldBoundingBoxMax");
-            
-            BoundingBox localBoundingBox;
-            localBoundingBox.min = Serializer::ConvertStringToVector3(localBoundingBoxMin);
-            localBoundingBox.max = Serializer::ConvertStringToVector3(localBoundingBoxMax);
-            
-            BoundingBox worldBoundingBox;
-            worldBoundingBox.min = Serializer::ConvertStringToVector3(worldBoundingBoxMin);
-            worldBoundingBox.max = Serializer::ConvertStringToVector3(worldBoundingBoxMax);
-            
-            auto collisionLayer = std::stoi(c.at("collisionLayer"));
-            int id = std::stoi(c.at("EntityId"));
-            auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
-            collideable->worldBoundingBox = worldBoundingBox;
-            collideable->collisionLayer = intToCollisionLayer(collisionLayer);
-            //AddComponent(std::move(collideable));
-            components.emplace(id, std::move(collideable));
-        }
-    }
+        int id = std::stoi(entityId);
     
+        auto localBoundingBoxMin = data.at("localBoundingBoxMin");
+        auto localBoundingBoxMax = data.at("localBoundingBoxMax");
+        auto worldBoundingBoxMin = data.at("worldBoundingBoxMin");
+        auto worldBoundingBoxMax = data.at("worldBoundingBoxMax");
+    
+        BoundingBox localBoundingBox;
+        localBoundingBox.min = Serializer::ConvertStringToVector3(localBoundingBoxMin);
+        localBoundingBox.max = Serializer::ConvertStringToVector3(localBoundingBoxMax);
+    
+        BoundingBox worldBoundingBox;
+        worldBoundingBox.min = Serializer::ConvertStringToVector3(worldBoundingBoxMin);
+        worldBoundingBox.max = Serializer::ConvertStringToVector3(worldBoundingBoxMax);
+    
+        auto collisionLayer = std::stoi(data.at("collisionLayer"));
+    
+        // Create Collideable component and add to system
+        auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
+        collideable->worldBoundingBox = worldBoundingBox;
+        collideable->collisionLayer = intToCollisionLayer(collisionLayer);
+        components.emplace(id, std::move(collideable));
+    }
+
+
 
 }
