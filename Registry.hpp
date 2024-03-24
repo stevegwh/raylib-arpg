@@ -28,9 +28,9 @@ namespace sage
         Registry(Registry const&) = delete;
         void operator=(Registry const&)  = delete;
 
-        EntityID CreateEntity()
+        EntityID CreateEntity(bool serializable = true)
         {
-            auto entity = std::make_unique<Entity>();
+            auto entity = std::make_unique<Entity>(serializable);
             EntityID id = entity->entityId;
             entities.emplace(id, std::move(entity));
             return id;

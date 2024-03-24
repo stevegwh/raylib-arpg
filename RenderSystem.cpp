@@ -37,7 +37,8 @@ namespace sage
     
         // Create Renderable component and add to system
         auto renderable = std::make_unique<Renderable>(id, model, mat, modelPath);
-        components.emplace(id, std::move(renderable));
+        //components.emplace(id, std::move(renderable));
+        AddComponent(std::move(renderable));
     }
 }
 

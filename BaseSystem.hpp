@@ -70,6 +70,7 @@ namespace sage
         {
             for (const auto& c : components)
             {
+                if (!Registry::GetInstance().GetEntity(c.first)->serializable) continue;
                 serializeData[std::to_string(c.first)][componentName] = c.second->Serialize();
             }
         }

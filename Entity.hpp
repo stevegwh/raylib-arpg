@@ -17,10 +17,11 @@ namespace sage
     private:
         static EntityID entityIdCounter;
     public:
+        bool serializable;
         std::unique_ptr<Event> OnDelete;
         const EntityID entityId;
-        explicit Entity()
-        : entityId(++entityIdCounter), OnDelete(std::make_unique<Event>())
+        explicit Entity(bool _serializable)
+        : entityId(++entityIdCounter), OnDelete(std::make_unique<Event>()), serializable(_serializable)
         {}
         ~Entity()
         {

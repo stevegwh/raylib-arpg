@@ -178,7 +178,8 @@ namespace sage
         auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
         collideable->worldBoundingBox = worldBoundingBox;
         collideable->collisionLayer = intToCollisionLayer(collisionLayer);
-        components.emplace(id, std::move(collideable));
+        //components.emplace(id, std::move(collideable));
+        AddComponent(std::move(collideable));
     }
 
 

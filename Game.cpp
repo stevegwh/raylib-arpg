@@ -46,27 +46,28 @@ namespace sage
         for (const auto& entityIdEntry : data)
         {
             const std::string& entityId = entityIdEntry.first;
+            auto newId = std::to_string(Registry::GetInstance().CreateEntity());
             const auto& componentMap = entityIdEntry.second;
 
             // Check if the entity has a Transform component
             if (componentMap.find("Transform") != componentMap.end())
             {
                 const auto& transformComponent = componentMap.at("Transform");
-                transformSystem->DeserializeComponents(entityId, transformComponent);
+                transformSystem->DeserializeComponents(newId, transformComponent);
             }
 
             // Check if the entity has a Renderable component
             if (componentMap.find("Renderable") != componentMap.end())
             {
                 const auto& renderableComponent = componentMap.at("Renderable");
-                renderSystem->DeserializeComponents(entityId, renderableComponent);
+                renderSystem->DeserializeComponents(newId, renderableComponent);
             }
 
             // Check if the entity has a Collideable component
             if (componentMap.find("Collideable") != componentMap.end())
             {
                 const auto& collideableComponent = componentMap.at("Collideable");
-                collisionSystem->DeserializeComponents(entityId, collideableComponent);
+                collisionSystem->DeserializeComponents(newId, collideableComponent);
             }
         }
 

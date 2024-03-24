@@ -18,7 +18,7 @@ namespace sage
 {
     EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name) 
     {
-        EntityID id = Registry::GetInstance().CreateEntity();
+        EntityID id = Registry::GetInstance().CreateEntity(false);
         sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
     
         auto transform = std::make_unique<Transform>(id);

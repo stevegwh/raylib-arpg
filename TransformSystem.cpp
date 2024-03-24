@@ -45,8 +45,8 @@ namespace sage
         auto transform = std::make_unique<Transform>(id);
         auto position = data.at("Position");
         transform->position = Serializer::ConvertStringToVector3(position);
-        components.emplace(id, std::move(transform));
-        //AddComponent(std::move(transform));
+        //components.emplace(id, std::move(transform));
+        AddComponent(std::move(transform));
     }
     
     void TransformSystem::Update()
