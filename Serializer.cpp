@@ -17,26 +17,23 @@ namespace sage
 Vector3 Serializer::ConvertStringToVector3(const std::string& str) 
 {
     Vector3 vec;
-
-    // Create a stringstream to tokenize the input string
     std::stringstream ss(str);
     std::string token;
 
-    // Tokenize the string by commas and extract floating-point numbers
     std::vector<float> values;
     while (std::getline(ss, token, ',')) {
         values.push_back(std::stof(token));
     }
 
-    // Extract the values into the Vector3 struct
-    if (values.size() == 3) {
+    if (values.size() == 3)
+    {
         vec.x = values[0];
         vec.y = values[1];
         vec.z = values[2];
-    } else {
-        // Handle incorrect input format
+    }
+    else
+    {
         std::cerr << "Error: Invalid input format. Expected format: 'x,y,z'" << std::endl;
-        // Set default values or throw an exception as needed
     }
 
     return vec;
@@ -51,8 +48,8 @@ void Serializer::SerializeToFile(const SerializationData& serializeData)
         const std::string& entityId = entityEntry.first;
         const auto& componentMap = entityEntry.second;
 
-        // Create or access the JSON object for the entity ID
-        if (!j.contains(entityId)) {
+        if (!j.contains(entityId))
+        {
             j[entityId] = json::object();
         }
 
@@ -62,7 +59,8 @@ void Serializer::SerializeToFile(const SerializationData& serializeData)
             const auto& fieldMap = componentNameEntry.second;
 
             // Create or access the JSON object for the component name
-            if (!j[entityId].contains(componentName)) {
+            if (!j[entityId].contains(componentName))
+            {
                 j[entityId][componentName] = json::object();
             }
 
@@ -71,7 +69,6 @@ void Serializer::SerializeToFile(const SerializationData& serializeData)
                 const std::string& fieldName = fieldEntry.first;
                 const std::string& fieldValue = fieldEntry.second;
 
-                // Set the field value in the component object
                 j[entityId][componentName][fieldName] = fieldValue;
             }
         }
@@ -81,11 +78,8 @@ void Serializer::SerializeToFile(const SerializationData& serializeData)
     o << std::setw(4) << j << std::endl;
 }
 
-
-
-// std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>> SerializationData;
-// { "TypeName": [ { "FieldName": "10004", "FieldName": "10.00, 0.00, 20.00" } ] }
-// { "Transform": [ { "EntityId": "10004", "Position": "10.00, 0.00, 20.00" } ] }
+// { "EntityId" { "TypeName": { "FieldName": "Value" } } }
+// { "EntityId": { "Transform" { "Position": "10.00, 0.00, 20.00" } ] }
 std::optional<SerializationData> Serializer::DeserializeFile()
 {
     std::optional<SerializationData> data;

@@ -131,29 +131,6 @@ namespace sage
 
         return collisions;
     }
-    
-    CollisionLayer intToCollisionLayer(int i)
-    {
-//        DEFAULT,
-//        FLOOR,
-//        BUILDING,
-//        NAVIGATION,
-//        PLAYER
-        switch (i) 
-        {
-        case 0:
-            return CollisionLayer::DEFAULT;
-        case 1:
-            return CollisionLayer::FLOOR;
-        case 2:
-            return CollisionLayer::BUILDING;
-        case 3:
-            return CollisionLayer::NAVIGATION;
-        case 4:
-            return CollisionLayer::PLAYER;
-        }
-        return CollisionLayer::DEFAULT;
-    }
 
     void CollisionSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
     {
@@ -171,14 +148,10 @@ namespace sage
         BoundingBox worldBoundingBox;
         worldBoundingBox.min = Serializer::ConvertStringToVector3(worldBoundingBoxMin);
         worldBoundingBox.max = Serializer::ConvertStringToVector3(worldBoundingBoxMax);
-    
-        auto collisionLayer = std::stoi(data.at("collisionLayer"));
-    
-        // Create Collideable component and add to system
+
         auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
         collideable->worldBoundingBox = worldBoundingBox;
-        collideable->collisionLayer = intToCollisionLayer(collisionLayer);
-        //components.emplace(id, std::move(collideable));
+        collideable->collisionLayer = static_cast<CollisionLayer>(std::stoi(data.at("collisionLayer")));
         AddComponent(std::move(collideable));
     }
 
