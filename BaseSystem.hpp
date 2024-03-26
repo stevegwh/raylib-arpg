@@ -8,6 +8,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <string>
 
@@ -23,7 +24,7 @@ namespace sage
     protected:
         std::unordered_map<EntityID, std::unique_ptr<ComponentName>> components;
         
-        BaseSystem<ComponentName>(std::string _componentName) : componentName(_componentName) {}
+        explicit BaseSystem<ComponentName>(std::string _componentName) : componentName(std::move(_componentName)) {}
         
         void m_addComponent(std::unique_ptr<ComponentName> component)
         {

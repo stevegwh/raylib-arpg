@@ -3,10 +3,15 @@
 //
 
 #pragma once
-#include <map>
 
 #include "Renderable.hpp"
 #include "BaseSystem.hpp"
+
+#include <unordered_map>
+#include <string>
+
+
+
 
 namespace sage
 {
@@ -16,7 +21,7 @@ public:
     ~RenderSystem();
     void Draw() const;
     void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
-    RenderSystem() : BaseSystem<Renderable>("Renderable") {}
+    RenderSystem() : BaseSystem<Renderable>(std::string("Renderable")) {}
 };
 }
 

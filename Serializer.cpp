@@ -86,9 +86,12 @@ void Serializer::SerializeToFile(const SerializationData& serializeData)
 // std::vector<std::pair<std::string, std::vector<std::unordered_map<std::string, std::string>>>> SerializationData;
 // { "TypeName": [ { "FieldName": "10004", "FieldName": "10.00, 0.00, 20.00" } ] }
 // { "Transform": [ { "EntityId": "10004", "Position": "10.00, 0.00, 20.00" } ] }
-SerializationData Serializer::DeserializeFile()
+std::optional<SerializationData> Serializer::DeserializeFile()
 {
+    std::optional<SerializationData> data;
     std::ifstream i("pretty.json");
+
+    if (!i.is_open() || i.fail()) return data;
     json j = json::parse(i);
     i.close();
 
@@ -129,8 +132,8 @@ SerializationData Serializer::DeserializeFile()
         // Add the component map for the current entity to the deserialized data
         deserializeData[entityId] = componentMap;
     }
-
-    return deserializeData;
+    data = deserializeData;
+    return data;
 }
 
 } // sage

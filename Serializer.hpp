@@ -8,6 +8,7 @@
 #include <utility>
 #include <unordered_map>
 #include <string>
+#include <optional>
 
 #include "raylib.h"
 
@@ -19,7 +20,7 @@ class Serializer
 public:
     static Vector3 ConvertStringToVector3(const std::string& str);
     static void SerializeToFile(const SerializationData& serializeData);
-    static SerializationData DeserializeFile(); // TODO: Currently does not register entities with register
+    static std::optional<SerializationData> DeserializeFile();
 };
 
 } // sage
