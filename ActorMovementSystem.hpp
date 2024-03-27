@@ -22,7 +22,7 @@ class ActorMovementSystem : public BaseSystem<Actor>
     void onCursorClick();
 public:
 
-    explicit ActorMovementSystem(UserInput* _cursor, EntityID _playerId) : BaseSystem<Actor>("Actor"), cursor(_cursor), playerId(_playerId)
+    explicit ActorMovementSystem(UserInput* _cursor, EntityID _playerId) : cursor(_cursor), playerId(_playerId)
     {
         const std::function<void()> f1 = [p = this] { p->onCursorClick(); };
         cursor->OnClickEvent->Subscribe(std::make_shared<EventCallback>(f1));

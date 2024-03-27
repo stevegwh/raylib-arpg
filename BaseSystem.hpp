@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <typeinfo>
 
 #include "Registry.hpp"
 
@@ -24,8 +25,6 @@ namespace sage
     protected:
         std::unordered_map<EntityID, std::unique_ptr<ComponentName>> components;
         
-        explicit BaseSystem<ComponentName>(std::string _componentName) : componentName(std::move(_componentName)) {}
-        
         void m_addComponent(std::unique_ptr<ComponentName> component)
         {
             // Subscribe to parent entity's "OnDelete" event
@@ -36,6 +35,11 @@ namespace sage
         }
         
     public:
+
+        const char* getComponentName() const
+        {
+            return typeid(ComponentName).name();
+        }
         
         [[nodiscard]] bool FindEntity(EntityID entityId) const
         {
@@ -69,10 +73,11 @@ namespace sage
 //        }
         void SerializeComponents(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>>& serializeData) const
         {
+            
             for (const auto& c : components)
             {
                 if (!Registry::GetInstance().GetEntity(c.first)->serializable) continue;
-                serializeData[std::to_string(c.first)][componentName] = c.second->Serialize();
+                serializeData[std::to_string(c.first)][getComponentName()] = c.second->Serialize();
             }
         }
     };

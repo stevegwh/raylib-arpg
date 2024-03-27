@@ -64,21 +64,21 @@ namespace sage
                 auto newId = std::to_string(Registry::GetInstance().CreateEntity());
                 const auto& componentMap = entityIdEntry.second;
     
-                if (componentMap.find("Transform") != componentMap.end())
+                if (componentMap.find(transformSystem->getComponentName()) != componentMap.end())
                 {
-                    const auto& transformComponent = componentMap.at("Transform");
+                    const auto& transformComponent = componentMap.at(transformSystem->getComponentName());
                     transformSystem->DeserializeComponents(newId, transformComponent);
                 }
     
-                if (componentMap.find("Renderable") != componentMap.end())
+                if (componentMap.find(renderSystem->getComponentName()) != componentMap.end())
                 {
-                    const auto& renderableComponent = componentMap.at("Renderable");
+                    const auto& renderableComponent = componentMap.at(renderSystem->getComponentName());
                     renderSystem->DeserializeComponents(newId, renderableComponent);
                 }
     
-                if (componentMap.find("Collideable") != componentMap.end())
+                if (componentMap.find(collisionSystem->getComponentName()) != componentMap.end())
                 {
-                    const auto& collideableComponent = componentMap.at("Collideable");
+                    const auto& collideableComponent = componentMap.at(collisionSystem->getComponentName());
                     collisionSystem->DeserializeComponents(newId, collideableComponent);
                 }
             }

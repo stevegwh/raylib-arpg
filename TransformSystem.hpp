@@ -27,6 +27,5 @@ public:
     void MoveToLocation(EntityID entityId, Vector3 location);
     void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
     void Update();
-    TransformSystem() : BaseSystem<Transform>("Transform") {}
 };
 }
