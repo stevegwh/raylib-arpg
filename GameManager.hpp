@@ -41,7 +41,7 @@ class GameManager
 
     std::unique_ptr<sage::UserInput> userInput;
     std::vector<Vector3> grid;
-    std::stack<std::unique_ptr<State>> states;
+    std::stack<std::unique_ptr<sage::State>> states;
 
     void init();
     static void cleanup();

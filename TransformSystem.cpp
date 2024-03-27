@@ -70,12 +70,7 @@ namespace sage
             transform->position.x = transform->position.x + transform->direction.x * 0.5f;
             //transform->position.x = dy * 0.5f;
             transform->position.z = transform->position.z + transform->direction.z * 0.5f;
-
-            // TODO: This is not a scalable solution. (Need to figure out how to update components that depend on this one)
-            if (GM.collisionSystem->FindEntity(transform->entityId))
-            {
-                GM.collisionSystem->UpdateWorldBoundingBox(transform->entityId, transform->position);
-            }
+            transform->OnPositionUpdate->InvokeAllCallbacks();
             ++it;
         }
 

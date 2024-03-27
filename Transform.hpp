@@ -11,6 +11,8 @@
 
 #include "Component.hpp"
 
+#include "Event.hpp"
+
 namespace sage
 {
     struct Transform : public Component<Transform>
@@ -28,8 +30,9 @@ namespace sage
                 {"Position", TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)}
             };
         }
+        std::unique_ptr<Event> OnPositionUpdate;
 
-        explicit Transform(EntityID _entityId) : Component(_entityId) {}
+        explicit Transform(EntityID _entityId) : OnPositionUpdate(std::make_unique<Event>()), Component(_entityId) {}
     };
 }
 

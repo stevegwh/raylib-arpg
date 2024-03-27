@@ -129,7 +129,7 @@ namespace sage
     void Editor::OnDeleteModeKeyPressed()
     {
         if (currentEditorMode != SELECT) return;
-        Registry::DeleteEntity(selectedObject);
+        Registry::GetInstance().DeleteEntity(selectedObject);
         selectedObject = 0;
         currentEditorMode = IDLE;
     }

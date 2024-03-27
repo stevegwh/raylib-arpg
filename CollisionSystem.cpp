@@ -7,6 +7,7 @@
 #include "CollisionSystem.hpp"
 
 #include "Serializer.hpp"
+#include "GameManager.hpp"
 
 bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
 {
@@ -61,6 +62,12 @@ namespace sage
         bb.max = Vector3Add(comp->localBoundingBox.max, pos);
         components.at(entityId)->worldBoundingBox = bb;
     }
+
+    void CollisionSystem::onTransformUpdate(EntityID entityId)
+    {
+        Vector3 pos = GM.transformSystem->GetComponent(entityId)->position;
+        UpdateWorldBoundingBox(entityId, pos);
+    }    
     
     bool CollisionSystem::CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2) 
     {
@@ -155,6 +162,15 @@ namespace sage
         AddComponent(std::move(collideable));
     }
 
+    void CollisionSystem::AddComponent(std::unique_ptr<Collideable> component)
+    {
+        if (GM.transformSystem->FindEntity(component->entityId))
+        {
+            const std::function<void()> f1 = [p = this, id = component->entityId] { p->onTransformUpdate(id); };
+            GM.transformSystem->GetComponent(component->entityId)->OnPositionUpdate->Subscribe(std::make_shared<EventCallback>(f1));
+        }
 
+        m_addComponent(std::move(component));
+    }
 
 }
