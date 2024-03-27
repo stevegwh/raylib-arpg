@@ -44,11 +44,9 @@ namespace sage
     {
 
         std::unique_ptr<sage::UserInput> userInput;
-        
 #ifdef EDITOR_MODE
         std::unique_ptr<sage::Editor> gameEditor;
 #endif
-        
         std::vector<Vector3> grid;
 
         void init();
@@ -99,9 +97,10 @@ namespace sage
         void operator=(Game const&)  = delete;
         
         void Update();
+        void DeserializeMap();
+        void SerializeMap() const;
         
         friend class Editor;
-        friend class Serializer;
     };
 }
 

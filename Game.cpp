@@ -12,6 +12,7 @@
 
 namespace sage
 {
+    
     void Game::init()
     {
         // Initialization
@@ -42,37 +43,7 @@ namespace sage
 //        auto floorWorldObject = std::make_unique<WorldObject>(floor);
 //        worldSystem->AddComponent(std::move(floorWorldObject));
         
-        auto data = Serializer::DeserializeFile();
-        if (data.has_value())
-        {
-            for (const auto& entityIdEntry : data.value())
-            {
-                const std::string& entityId = entityIdEntry.first;
-                auto newId = std::to_string(Registry::GetInstance().CreateEntity());
-                const auto& componentMap = entityIdEntry.second;
-
-                // Check if the entity has a Transform component
-                if (componentMap.find("Transform") != componentMap.end())
-                {
-                    const auto& transformComponent = componentMap.at("Transform");
-                    transformSystem->DeserializeComponents(newId, transformComponent);
-                }
-
-                // Check if the entity has a Renderable component
-                if (componentMap.find("Renderable") != componentMap.end())
-                {
-                    const auto& renderableComponent = componentMap.at("Renderable");
-                    renderSystem->DeserializeComponents(newId, renderableComponent);
-                }
-
-                // Check if the entity has a Collideable component
-                if (componentMap.find("Collideable") != componentMap.end())
-                {
-                    const auto& collideableComponent = componentMap.at("Collideable");
-                    collisionSystem->DeserializeComponents(newId, collideableComponent);
-                }
-            }
-        }
+        DeserializeMap();
 
         navigationGridSystem->PopulateGrid();
     }
@@ -80,6 +51,48 @@ namespace sage
     void Game::removeTower(EntityID entityId)
     {
         Registry::GetInstance().DeleteEntity(entityId);
+    }
+
+    void Game::DeserializeMap()
+    {
+        auto data = Serializer::DeserializeFile();
+        if (data.has_value())
+        {
+            for (const auto& entityIdEntry : data.value())
+            {
+                //const std::string& entityId = entityIdEntry.first;
+                auto newId = std::to_string(Registry::GetInstance().CreateEntity());
+                const auto& componentMap = entityIdEntry.second;
+    
+                if (componentMap.find("Transform") != componentMap.end())
+                {
+                    const auto& transformComponent = componentMap.at("Transform");
+                    transformSystem->DeserializeComponents(newId, transformComponent);
+                }
+    
+                if (componentMap.find("Renderable") != componentMap.end())
+                {
+                    const auto& renderableComponent = componentMap.at("Renderable");
+                    renderSystem->DeserializeComponents(newId, renderableComponent);
+                }
+    
+                if (componentMap.find("Collideable") != componentMap.end())
+                {
+                    const auto& collideableComponent = componentMap.at("Collideable");
+                    collisionSystem->DeserializeComponents(newId, collideableComponent);
+                }
+            }
+        }
+    }
+    
+    void Game::SerializeMap() const
+    {
+        SerializationData serializeData;
+        transformSystem->SerializeComponents(serializeData);
+        renderSystem->SerializeComponents(serializeData);
+        collisionSystem->SerializeComponents(serializeData);
+    
+        Serializer::SerializeToFile(serializeData);
     }
     
     void Game::Update()

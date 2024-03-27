@@ -57,12 +57,7 @@ namespace sage
     
     void Editor::OnSerializeButton()
     {
-        std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>> serializeData;
-        Game::GetInstance().transformSystem->SerializeComponents(serializeData);
-        Game::GetInstance().renderSystem->SerializeComponents(serializeData);
-        Game::GetInstance().collisionSystem->SerializeComponents(serializeData);
-        
-        Serializer::SerializeToFile(serializeData);
+        Game::GetInstance().SerializeMap();
     }
 
     void Editor::OnDeleteModeKeyPressed()
