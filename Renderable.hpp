@@ -16,6 +16,9 @@ namespace sage
 {
     struct Renderable : public Component<Renderable>
     {
+        Vector3 position;
+        float scale;
+        
         sage::Material material;
         const std::string modelPath;
         const Model model;

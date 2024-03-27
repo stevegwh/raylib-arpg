@@ -64,8 +64,6 @@ namespace sage
         
     }
     
-    
-    
     /**
      * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
      * @return A vector of "nodes" to travel to in sequential order
@@ -148,9 +146,8 @@ void NavigationGridSystem::PopulateGrid()
                 gridSquare->occupied = false;
             }
         }
-    
-        CollisionSystem& collisionSystem = *GM.collisionSystem;
-        const auto& collisionComponents = collisionSystem.GetComponents();
+        
+        const auto& collisionComponents = GM.collisionSystem->GetComponents();
         for (const auto& bb : collisionComponents)
         {
             if (bb.second->collisionLayer != BUILDING) continue;
