@@ -7,16 +7,16 @@
 
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
-#include "Game.hpp"
+#include "GameManager.hpp"
 
 namespace sage
 {
 
     void UserInput::GetMouseRayCollision()
     {
-        auto collisionSystem = Game::GetInstance().collisionSystem.get();
-        auto renderSystem = Game::GetInstance().renderSystem.get();
-        auto sCamera = Game::GetInstance().sCamera.get();
+        auto collisionSystem = GM.collisionSystem.get();
+        auto renderSystem = GM.renderSystem.get();
+        auto sCamera = GM.sCamera.get();
         // Display information about closest hit
         collision = {};
         hitObjectName = "None";
@@ -95,7 +95,7 @@ namespace sage
         // Draw the mesh bbox if we hit it
         if (rayCollisionResultInfo.rayCollision.hit)
         {
-            auto collisionSystem = Game::GetInstance().collisionSystem.get();
+            auto collisionSystem = GM.collisionSystem.get();
             auto col = collisionSystem->GetComponent(rayCollisionResultInfo.collidedEntityId);
             if (col->collisionLayer == FLOOR)
             {

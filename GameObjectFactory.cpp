@@ -6,7 +6,7 @@
 
 #include "raymath.h"
 
-#include "Game.hpp"
+#include "GameManager.hpp"
 #include "Registry.hpp"
 
 #include "Transform.hpp"
@@ -35,10 +35,10 @@ namespace sage
     
         auto towerWorldObject1 = std::make_unique<WorldObject>(id);
 
-        Game::GetInstance().renderSystem->AddComponent(std::move(renderable));
-        Game::GetInstance().transformSystem->AddComponent(std::move(transform));
-        Game::GetInstance().collisionSystem->AddComponent(std::move(collideable));
-        Game::GetInstance().worldSystem->AddComponent(std::move(towerWorldObject1));
+        GM.renderSystem->AddComponent(std::move(renderable));
+        GM.transformSystem->AddComponent(std::move(transform));
+        GM.collisionSystem->AddComponent(std::move(collideable));
+        GM.worldSystem->AddComponent(std::move(towerWorldObject1));
         return id;
     }
 
@@ -62,9 +62,9 @@ namespace sage
     
         auto towerWorldObject1 = std::make_unique<WorldObject>(newTowerId);
 
-        Game::GetInstance().renderSystem->AddComponent(std::move(towerRenderable1));
-        Game::GetInstance().transformSystem->AddComponent(std::move(towerTransform1));
-        Game::GetInstance().collisionSystem->AddComponent(std::move(towerCollidable1));
-        Game::GetInstance().worldSystem->AddComponent(std::move(towerWorldObject1));
+        GM.renderSystem->AddComponent(std::move(towerRenderable1));
+        GM.transformSystem->AddComponent(std::move(towerTransform1));
+        GM.collisionSystem->AddComponent(std::move(towerCollidable1));
+        GM.worldSystem->AddComponent(std::move(towerWorldObject1));
     }
 } // sage

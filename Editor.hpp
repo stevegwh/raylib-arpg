@@ -17,7 +17,7 @@ enum EditorMode
     CREATE
 };
 
-// NB: "Game" is friend
+// NB: "GameManager" is friend
 class Editor
 {
     EditorMode currentEditorMode;

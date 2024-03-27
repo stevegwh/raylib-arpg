@@ -8,7 +8,7 @@
 #include "NavigationGridSystem.hpp"
 #include "Collideable.hpp"
 #include "CollisionSystem.hpp"
-#include "Game.hpp"
+#include "GameManager.hpp"
 
 
 namespace sage
@@ -146,7 +146,7 @@ void NavigationGridSystem::PopulateGrid()
             }
         }
     
-        CollisionSystem& collisionSystem = *Game::GetInstance().collisionSystem;
+        CollisionSystem& collisionSystem = *GM.collisionSystem;
         const auto& collisionComponents = collisionSystem.GetComponents();
         for (const auto& bb : collisionComponents)
         {

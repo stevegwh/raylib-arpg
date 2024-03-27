@@ -30,8 +30,8 @@ FetchContent_MakeAvailable(json)
 
 add_executable(BG_Raylib
         main.cpp
-        Game.cpp
-        Game.hpp
+        GameManager.cpp
+        GameManager.hpp
         Camera.cpp
         Camera.hpp
         Renderable.hpp
@@ -70,6 +70,12 @@ add_executable(BG_Raylib
         GameObjectFactory.hpp
         Serializer.cpp
         Serializer.hpp
+        SceneSystem.cpp
+        SceneSystem.hpp
+        Scene.hpp
+        State.hpp
+        Game.cpp
+        Game.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json)

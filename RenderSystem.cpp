@@ -4,7 +4,7 @@
 
 #include "RenderSystem.hpp"
 #include "raylib.h"
-#include "Game.hpp"
+#include "GameManager.hpp"
 
 namespace sage
 {
@@ -18,7 +18,7 @@ namespace sage
     {
         for (const auto& renderable : components)
         {
-            const Transform* transform = sage::Game::GetInstance().transformSystem->GetComponent(renderable.second->entityId);
+            const Transform* transform = GM.transformSystem->GetComponent(renderable.second->entityId);
             DrawModel(renderable.second->model, transform->position, transform->scale, WHITE);
         }
     }

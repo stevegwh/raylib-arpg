@@ -1,8 +1,8 @@
-#include "Game.hpp"
+#include "GameManager.hpp"
 
 
 int main()
 {
-    sage::Game::GetInstance().Update();
+    sage::GM.Update();
     return 0;
 }

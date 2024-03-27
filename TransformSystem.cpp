@@ -4,7 +4,7 @@
 
 #include "TransformSystem.hpp"
 
-#include "Game.hpp"
+#include "GameManager.hpp"
 #include "Serializer.hpp"
 
 namespace sage
@@ -72,9 +72,9 @@ namespace sage
             transform->position.z = transform->position.z + transform->direction.z * 0.5f;
 
             // TODO: This is not a scalable solution. (Need to figure out how to update components that depend on this one)
-            if (Game::GetInstance().collisionSystem->FindEntity(transform->entityId))
+            if (GM.collisionSystem->FindEntity(transform->entityId))
             {
-                Game::GetInstance().collisionSystem->UpdateWorldBoundingBox(transform->entityId, transform->position);
+                GM.collisionSystem->UpdateWorldBoundingBox(transform->entityId, transform->position);
             }
             ++it;
         }

@@ -4,8 +4,8 @@
 
 #include "Editor.hpp"
 
-// NB: "Game" is friend
-#include "Game.hpp"
+// NB: "GameManager" is friend
+#include "GameManager.hpp"
 
 #include <iostream>
 
@@ -16,10 +16,10 @@ namespace sage
         Transform newTransform(selectedObject);
         newTransform.position = cursor->collision.point;
 
-        const Renderable* renderable = Game::GetInstance().renderSystem->GetComponent(selectedObject);
+        const Renderable* renderable = GM.renderSystem->GetComponent(selectedObject);
 
-        Game::GetInstance().transformSystem->SetComponent(selectedObject, newTransform);
-        Game::GetInstance().collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
+        GM.transformSystem->SetComponent(selectedObject, newTransform);
+        GM.collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
         
     }
     
@@ -27,7 +27,7 @@ namespace sage
     {
         if (cursor->collision.hit)
         {
-            switch (Game::GetInstance().collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
+            switch (GM.collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
             {
             case DEFAULT:
                 break;
@@ -57,13 +57,13 @@ namespace sage
     
     void Editor::OnSerializeButton()
     {
-        Game::GetInstance().SerializeMap();
+        GM.SerializeMap();
     }
 
     void Editor::OnDeleteModeKeyPressed()
     {
         if (currentEditorMode != SELECT) return;
-        Game::GetInstance().removeTower(selectedObject);
+        GM.removeTower(selectedObject);
         selectedObject = 0;
         currentEditorMode = IDLE;
     }
@@ -76,7 +76,7 @@ namespace sage
     
     void Editor::OnGenGridKeyPressed()
     {
-        Game::GetInstance().navigationGridSystem->PopulateGrid();
+        GM.navigationGridSystem->PopulateGrid();
     }
 
     void Editor::OnCollisionHit()
@@ -98,7 +98,7 @@ namespace sage
     {
         if (currentEditorMode == SELECT)
         {
-            Game::GetInstance().collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
+            GM.collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
         }
     }
 
