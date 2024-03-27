@@ -51,11 +51,6 @@ void GameManager::init()
 
 }
 
-void GameManager::removeTower(EntityID entityId)
-{
-    Registry::GetInstance().DeleteEntity(entityId);
-}
-
 void GameManager::DeserializeMap()
 {
     auto data = Serializer::DeserializeFile();

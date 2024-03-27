@@ -70,9 +70,6 @@ add_executable(BG_Raylib
         GameObjectFactory.hpp
         Serializer.cpp
         Serializer.hpp
-        SceneSystem.cpp
-        SceneSystem.hpp
-        Scene.hpp
         State.hpp
         Game.cpp
         Game.hpp

@@ -129,7 +129,7 @@ namespace sage
     void Editor::OnDeleteModeKeyPressed()
     {
         if (currentEditorMode != SELECT) return;
-        GM.removeTower(selectedObject);
+        Registry::DeleteEntity(selectedObject);
         selectedObject = 0;
         currentEditorMode = IDLE;
     }

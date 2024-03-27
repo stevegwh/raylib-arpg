@@ -46,7 +46,6 @@ class GameManager
     void init();
     static void cleanup();
     void draw();
-    void removeTower(EntityID entityId);
 
     GameManager();
     ~GameManager();
