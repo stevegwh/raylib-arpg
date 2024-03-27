@@ -67,13 +67,14 @@ class GameManager
     renderSystem(std::make_unique<RenderSystem>()),
     collisionSystem(std::make_unique<sage::CollisionSystem>()),
     transformSystem(std::make_unique<sage::TransformSystem>()),
-    userInput(std::make_unique<sage::UserInput>())
+    userInput(std::make_unique<sage::UserInput>()),
+    navigationGridSystem(std::make_unique<sage::NavigationGridSystem>())
     {
         EntityID rootNodeId = Registry::GetInstance().CreateEntity();
         auto rootNodeObject = std::make_unique<WorldObject>(rootNodeId);
         worldSystem = std::make_unique<sage::WorldSystem>(rootNodeId);
         worldSystem->AddComponent(std::move(rootNodeObject));
-        navigationGridSystem = std::make_unique<sage::NavigationGridSystem>(100, 1.0f);
+        actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(userInput.get());
         
 #ifdef EDITOR_MODE
         gameEditor = std::make_unique<sage::Editor>(userInput.get());

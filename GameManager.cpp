@@ -23,7 +23,7 @@ namespace sage
         InitWindow(screenWidth, screenHeight, "raylib [models] example - mesh picking");
 
         auto playerId = GameObjectFactory::createPlayer({20.0f, 0, 20.0f}, "Player");
-        actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(userInput.get(), playerId);
+        actorMovementSystem->SetControlledActor(playerId);
 
 //        GameObjectFactory::createTower({0.0f, 0.0f, 0.0f}, "Tower");
 //        GameObjectFactory::createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
@@ -44,7 +44,8 @@ namespace sage
 //        worldSystem->AddComponent(std::move(floorWorldObject));
         
         DeserializeMap();
-
+        
+        navigationGridSystem->Init(100, 1.0f);
         navigationGridSystem->PopulateGrid();
     }
     

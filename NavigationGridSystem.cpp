@@ -26,13 +26,16 @@ namespace sage
         
         return {static_cast<float>(x), static_cast<float>(y)};
     }
-
-    // Modify init function to use a 2D array
-    inline void NavigationGridSystem::init()
+    
+    void NavigationGridSystem::Init(int _slices, float _spacing)
     {
+        slices = _slices;
+        spacing = _spacing;
+        
         int halfSlices = slices / 2;
     
         // Resize gridSquares to the appropriate size
+        gridSquares.clear();
         gridSquares.resize(slices);
         for (int i = 0; i < slices; ++i) {
             gridSquares[i].resize(slices);

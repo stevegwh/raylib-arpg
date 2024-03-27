@@ -17,18 +17,21 @@ namespace sage
 class ActorMovementSystem : public BaseSystem<Actor>
 {
     UserInput* cursor;
-    EntityID playerId; // Temporary for now.
+    EntityID actorId; // Temporary for now.
     
     void onCursorClick();
 public:
-
-    explicit ActorMovementSystem(UserInput* _cursor, EntityID _playerId) : cursor(_cursor), playerId(_playerId)
+    
+    void SetControlledActor(EntityID id)
     {
+        actorId = id;
+        // Unsubscribe needed?
         const std::function<void()> f1 = [p = this] { p->onCursorClick(); };
         cursor->OnClickEvent->Subscribe(std::make_shared<EventCallback>(f1));
     }
 
-
+    explicit ActorMovementSystem(UserInput* _cursor) : cursor(_cursor) {}
+    
 };
 
 } // sage
