@@ -54,15 +54,15 @@ namespace sage
         };
         auto floorCollidable = std::make_unique<Collideable>(floor, bb);
         floorCollidable->collisionLayer = FLOOR;
-        GM.collisionSystem->AddComponent(std::move(floorCollidable));
+        ECS->collisionSystem->AddComponent(std::move(floorCollidable));
 
 //        auto floorWorldObject = std::make_unique<WorldObject>(floor);
 //        worldSystem->AddComponent(std::move(floorWorldObject));
 
-        GM.DeserializeMap(); // TODO: Should specify path to saved map of scene
+        ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
         // This should also be based on scene parameters
-        GM.navigationGridSystem->Init(100, 1.0f);
-        GM.navigationGridSystem->PopulateGrid();
+        ECS->navigationGridSystem->Init(100, 1.0f);
+        ECS->navigationGridSystem->PopulateGrid();
     }
     
     Editor::~Editor()
@@ -82,10 +82,10 @@ namespace sage
         Transform newTransform(selectedObject);
         newTransform.position = cursor->collision.point;
 
-        const Renderable* renderable = GM.renderSystem->GetComponent(selectedObject);
+        const Renderable* renderable = ECS->renderSystem->GetComponent(selectedObject);
 
-        GM.transformSystem->SetComponent(selectedObject, newTransform);
-        GM.collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
+        ECS->transformSystem->SetComponent(selectedObject, newTransform);
+        ECS->collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
         
     }
     
@@ -93,7 +93,7 @@ namespace sage
     {
         if (cursor->collision.hit)
         {
-            switch (GM.collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
+            switch (ECS->collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
             {
             case DEFAULT:
                 break;
@@ -123,7 +123,7 @@ namespace sage
     
     void Editor::OnSerializeButton()
     {
-        GM.SerializeMap();
+        ECS->SerializeMap();
     }
 
     void Editor::OnDeleteModeKeyPressed()
@@ -142,7 +142,7 @@ namespace sage
     
     void Editor::OnGenGridKeyPressed()
     {
-        GM.navigationGridSystem->PopulateGrid();
+        ECS->navigationGridSystem->PopulateGrid();
     }
 
     void Editor::OnCollisionHit()
@@ -169,14 +169,14 @@ namespace sage
     {
         if (currentEditorMode == SELECT)
         {
-            GM.collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
+            ECS->collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
         }
 
-        GM.renderSystem->Draw();
+        ECS->renderSystem->Draw();
 
         DrawGrid(100, 1.0f);
 
-        for (const auto& gridSquareRow : GM.navigationGridSystem->GetGridSquares())
+        for (const auto& gridSquareRow : ECS->navigationGridSystem->GetGridSquares())
         {
             for (const auto& gridSquare : gridSquareRow)
             {

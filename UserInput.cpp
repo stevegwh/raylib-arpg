@@ -14,8 +14,8 @@ namespace sage
 
     void UserInput::GetMouseRayCollision()
     {
-        auto collisionSystem = GM.collisionSystem.get();
-        auto renderSystem = GM.renderSystem.get();
+        auto collisionSystem = ECS->collisionSystem.get();
+        auto renderSystem = ECS->renderSystem.get();
         auto sCamera = GM.sCamera.get();
         // Display information about closest hit
         collision = {};
@@ -95,7 +95,7 @@ namespace sage
         // Draw the mesh bbox if we hit it
         if (rayCollisionResultInfo.rayCollision.hit)
         {
-            auto collisionSystem = GM.collisionSystem.get();
+            auto collisionSystem = ECS->collisionSystem.get();
             auto col = collisionSystem->GetComponent(rayCollisionResultInfo.collidedEntityId);
             if (col->collisionLayer == FLOOR)
             {

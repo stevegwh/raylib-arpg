@@ -12,17 +12,17 @@ namespace sage
     {
         if (cursor->collision.hit)
         {
-            switch (GM.collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
+            switch (ECS->collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
             {
             case FLOOR:
                 //GM.transformSystem->MoveToLocation(actorId, cursor->collision.point);
-                Vector2 idx = GM.navigationGridSystem->WorldToGridSpace(cursor->collision.point);
+                Vector2 idx = ECS->navigationGridSystem->WorldToGridSpace(cursor->collision.point);
                 std::cout << "x: " << idx.x << " y: " << idx.y << std::endl;
-                auto playerPos = GM.transformSystem->GetComponent(actorId);
-                auto path = GM.navigationGridSystem->Pathfind(playerPos->position, cursor->collision.point);
+                auto playerPos = ECS->transformSystem->GetComponent(actorId);
+                auto path = ECS->navigationGridSystem->Pathfind(playerPos->position, cursor->collision.point);
                 
                 //std::vector<Vector3> path = { {42, 0, 4}, {10, 0, 44}, { -50, 0, -50} };
-                GM.transformSystem->PathfindToLocation(actorId, path);
+                ECS->transformSystem->PathfindToLocation(actorId, path);
             }
         }
     }

@@ -65,7 +65,7 @@ namespace sage
 
     void CollisionSystem::onTransformUpdate(EntityID entityId)
     {
-        Vector3 pos = GM.transformSystem->GetComponent(entityId)->position;
+        Vector3 pos = ECS->transformSystem->GetComponent(entityId)->position;
         UpdateWorldBoundingBox(entityId, pos);
     }    
     
@@ -164,10 +164,10 @@ namespace sage
 
     void CollisionSystem::AddComponent(std::unique_ptr<Collideable> component)
     {
-        if (GM.transformSystem->FindEntity(component->entityId))
+        if (ECS->transformSystem->FindEntity(component->entityId))
         {
             const std::function<void()> f1 = [p = this, id = component->entityId] { p->onTransformUpdate(id); };
-            GM.transformSystem->GetComponent(component->entityId)->OnPositionUpdate->Subscribe(std::make_shared<EventCallback>(f1));
+            ECS->transformSystem->GetComponent(component->entityId)->OnPositionUpdate->Subscribe(std::make_shared<EventCallback>(f1));
         }
 
         m_addComponent(std::move(component));

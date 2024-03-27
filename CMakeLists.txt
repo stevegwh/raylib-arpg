@@ -73,6 +73,8 @@ add_executable(BG_Raylib
         State.hpp
         Game.cpp
         Game.hpp
+        ECSManager.cpp
+        ECSManager.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json)

@@ -35,10 +35,10 @@ namespace sage
     
         auto towerWorldObject1 = std::make_unique<WorldObject>(id);
         Transform* const transform_ptr = transform.get();
-        GM.transformSystem->AddComponent(std::move(transform));
-        GM.renderSystem->AddComponent(std::move(renderable), transform_ptr);
-        GM.collisionSystem->AddComponent(std::move(collideable));
-        GM.worldSystem->AddComponent(std::move(towerWorldObject1));
+        ECS->transformSystem->AddComponent(std::move(transform));
+        ECS->renderSystem->AddComponent(std::move(renderable), transform_ptr);
+        ECS->collisionSystem->AddComponent(std::move(collideable));
+        ECS->worldSystem->AddComponent(std::move(towerWorldObject1));
         return id;
     }
 
@@ -63,9 +63,9 @@ namespace sage
     
         auto towerWorldObject1 = std::make_unique<WorldObject>(newTowerId);
         Transform* const transform_ptr = towerTransform1.get();
-        GM.transformSystem->AddComponent(std::move(towerTransform1));
-        GM.renderSystem->AddComponent(std::move(towerRenderable1), transform_ptr);
-        GM.collisionSystem->AddComponent(std::move(towerCollidable1));
-        GM.worldSystem->AddComponent(std::move(towerWorldObject1));
+        ECS->transformSystem->AddComponent(std::move(towerTransform1));
+        ECS->renderSystem->AddComponent(std::move(towerRenderable1), transform_ptr);
+        ECS->collisionSystem->AddComponent(std::move(towerCollidable1));
+        ECS->worldSystem->AddComponent(std::move(towerWorldObject1));
     }
 } // sage

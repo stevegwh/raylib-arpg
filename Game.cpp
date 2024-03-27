@@ -20,7 +20,7 @@ namespace sage
 Game::Game()
 {
     auto playerId = GameObjectFactory::createPlayer({20.0f, 0, 20.0f}, "Player");
-    GM.actorMovementSystem->SetControlledActor(playerId);
+    ECS->actorMovementSystem->SetControlledActor(playerId);
 
 //        GameObjectFactory::createTower({0.0f, 0.0f, 0.0f}, "Tower");
 //        GameObjectFactory::createTower({10.0f, 0.0f, 20.0f}, "Tower 2");
@@ -35,15 +35,15 @@ Game::Game()
     };
     auto floorCollidable = std::make_unique<Collideable>(floor, bb);
     floorCollidable->collisionLayer = FLOOR;
-    GM.collisionSystem->AddComponent(std::move(floorCollidable));
+    ECS->collisionSystem->AddComponent(std::move(floorCollidable));
 
 //        auto floorWorldObject = std::make_unique<WorldObject>(floor);
 //        worldSystem->AddComponent(std::move(floorWorldObject));
 
-    GM.DeserializeMap(); // TODO: Should specify path to saved map of scene
+    ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
     // This should also be based on scene parameters
-    GM.navigationGridSystem->Init(100, 1.0f);
-    GM.navigationGridSystem->PopulateGrid();
+    ECS->navigationGridSystem->Init(100, 1.0f);
+    ECS->navigationGridSystem->PopulateGrid();
 
 }
 Game::~Game()
@@ -52,15 +52,15 @@ Game::~Game()
 }
 void Game::Update()
 {
-    GM.transformSystem->Update();
+    ECS->transformSystem->Update();
 }
 void Game::Draw3D()
 {
-    GM.renderSystem->Draw();
+    ECS->renderSystem->Draw();
 
     DrawGrid(100, 1.0f);
 
-    for (const auto& gridSquareRow : GM.navigationGridSystem->GetGridSquares())
+    for (const auto& gridSquareRow : ECS->navigationGridSystem->GetGridSquares())
     {
         for (const auto& gridSquare : gridSquareRow)
         {

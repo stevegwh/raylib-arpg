@@ -33,13 +33,13 @@ namespace sage
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
         
         auto renderable = std::make_unique<Renderable>(id, model, mat, modelPath);
-        auto t = GM.transformSystem->GetComponent(id);
+        auto t = ECS->transformSystem->GetComponent(id);
         AddComponent(std::move(renderable), t);
     }
     
     void RenderSystem::onTransformUpdate(EntityID id)
     {
-        auto t = GM.transformSystem->GetComponent(id);
+        auto t = ECS->transformSystem->GetComponent(id);
         auto r = components.at(id).get();
         r->position = t->position;
         r->scale = t->scale;

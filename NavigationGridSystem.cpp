@@ -147,7 +147,7 @@ void NavigationGridSystem::PopulateGrid()
             }
         }
         
-        const auto& collisionComponents = GM.collisionSystem->GetComponents();
+        const auto& collisionComponents = ECS->collisionSystem->GetComponents();
         for (const auto& bb : collisionComponents)
         {
             if (bb.second->collisionLayer != BUILDING) continue;
