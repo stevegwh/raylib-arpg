@@ -3,8 +3,13 @@
 //
 
 #pragma once
+
 #include "UserInput.hpp"
 #include "EventCallback.hpp"
+#include "GameManager.hpp"
+#include "State.hpp"
+
+#include <unordered_map>
 
 namespace sage
 {
@@ -18,36 +23,24 @@ enum EditorMode
 };
 
 // NB: "GameManager" is friend
-class Editor
+class Editor : public State
 {
-    EditorMode currentEditorMode;
+    EditorMode currentEditorMode = IDLE;
     UserInput* cursor;
     void OnCursorClick();
     void OnCollisionHit();
     void OnSerializeButton();
-    EntityID selectedObject;
+    EntityID selectedObject{};
     void moveSelectedObjectToCursorHit();
     
+    std::unordered_map<std::string, std::shared_ptr<EventCallback>> eventCallbacks;
+    
 public:
-    Editor(UserInput* _cursor)
-    : cursor(_cursor)
-    {
-        const std::function<void()> f1 = [p = this] { p->OnCursorClick(); };
-        cursor->OnClickEvent->Subscribe(std::make_shared<EventCallback>(f1));
-        const std::function<void()> f2 = [p = this] { p->OnCollisionHit(); };
-        cursor->OnCollisionHitEvent->Subscribe(std::make_shared<EventCallback>(f2));
-        const std::function<void()> f3 = [p = this] { p->OnDeleteModeKeyPressed(); };
-        cursor->OnDeleteKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f3));
-        const std::function<void()> f4 = [p = this] { p->OnCreateModeKeyPressed(); };
-        cursor->OnCreateKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f4));
-        const std::function<void()> f5 = [p = this] { p->OnGenGridKeyPressed(); };
-        cursor->OnGenGridKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f5));
-        const std::function<void()> f6 = [p = this] { p->OnSerializeButton(); };
-        cursor->OnSerializeKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f6));
-    }
-
-    void Draw();
-    void DrawDebugText();
+    explicit Editor(UserInput* _cursor);
+    ~Editor() override;
+    void Update() override;
+    void Draw3D() override;
+    void Draw2D() override;
     // OnClickEvent()
     // OnCursorHit(CollisionInfo collision
     //

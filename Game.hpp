@@ -4,18 +4,20 @@
 
 #pragma once
 
+
 #include "State.hpp"
 
 namespace sage
 {
 
-class Game : State
+class Game : public State
 {
 public:
     Game();
     ~Game() override;
     void Update() override;
-    void Draw() override;
+    void Draw3D() override;
+    void Draw2D() override;
 };
 
 } // sage

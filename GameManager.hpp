@@ -4,25 +4,15 @@
 
 #pragma once
 
-#define EDITOR_MODE
+//#define EDITOR_MODE
 
 #include "raylib.h"
-#include "raymath.h"
 
-#include <memory>
-#include <string>
 #include <stack>
-
-// Entities
-#include "Registry.hpp"
-#include "Entity.hpp"
-
-// Components
-#include "Collideable.hpp"
-#include "WorldObject.hpp"
+#include <memory>
+#include <unordered_map>
 
 // Misc
-#include "GameObjectFactory.hpp"
 #include "State.hpp"
 #include "Camera.hpp"
 #include "UserInput.hpp"
@@ -35,11 +25,9 @@
 #include "NavigationGridSystem.hpp"
 #include "ActorMovementSystem.hpp"
 
-// Friends
-#ifdef EDITOR_MODE
-#include "Editor.hpp"
-#endif
-
+// States
+#include "Game.hpp"
+#include "Editor.hpp" // Friend
 
 #define GM GameManager::GetInstance()
 
@@ -52,41 +40,16 @@ class GameManager
 {
 
     std::unique_ptr<sage::UserInput> userInput;
-#ifdef EDITOR_MODE
-    std::unique_ptr<sage::Editor> gameEditor;
-#endif
     std::vector<Vector3> grid;
+    std::stack<std::unique_ptr<State>> states;
 
     void init();
     static void cleanup();
     void draw();
     void removeTower(EntityID entityId);
 
-    GameManager() :
-    sCamera(std::make_unique<sage::Camera>()),
-    renderSystem(std::make_unique<RenderSystem>()),
-    collisionSystem(std::make_unique<sage::CollisionSystem>()),
-    transformSystem(std::make_unique<sage::TransformSystem>()),
-    userInput(std::make_unique<sage::UserInput>()),
-    navigationGridSystem(std::make_unique<sage::NavigationGridSystem>())
-    {
-        EntityID rootNodeId = Registry::GetInstance().CreateEntity();
-        auto rootNodeObject = std::make_unique<WorldObject>(rootNodeId);
-        worldSystem = std::make_unique<sage::WorldSystem>(rootNodeId);
-        worldSystem->AddComponent(std::move(rootNodeObject));
-        actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(userInput.get());
-        
-#ifdef EDITOR_MODE
-        gameEditor = std::make_unique<sage::Editor>(userInput.get());
-#endif
-    }
-
-    ~GameManager()
-    {
-        cleanup();
-    }
-    
-    std::stack<State> states;
+    GameManager();
+    ~GameManager();
 public:
 
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
