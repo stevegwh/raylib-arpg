@@ -8,8 +8,10 @@
 
 #include "raylib.h"
 #include "raymath.h"
+
 #include "BaseSystem.hpp"
 #include "UserInput.hpp"
+#include "EventCaller.hpp"
 
 namespace sage
 {
@@ -22,16 +24,7 @@ class ActorMovementSystem : public BaseSystem<Actor>
     void onCursorClick();
 public:
     
-    void SetControlledActor(EntityID id)
-    {
-        actorId = id;
-        // Unsubscribe needed?
-        const std::function<void()> f1 = [p = this] { p->onCursorClick(); };
-        auto e1 = std::make_shared<EventCallback>(f1);
-        eventCallbacks.push_back(e1);
-        cursor->OnClickEvent->Subscribe(e1);
-    }
-
+    void SetControlledActor(EntityID id);
     explicit ActorMovementSystem(UserInput* _cursor) : cursor(_cursor) {}
     
 };

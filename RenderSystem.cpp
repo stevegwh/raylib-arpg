@@ -47,11 +47,9 @@ namespace sage
 
     void RenderSystem::AddComponent(std::unique_ptr<Renderable> component, const sage::Transform* const transform)
     {
-    
-        const std::function<void()> f1 = [p = this, id = component->entityId] { p->onTransformUpdate(id); };
-        auto e1 = std::make_shared<EventCallback>(f1);
-        eventCallbacks.push_back(e1);
-        transform->OnPositionUpdate->Subscribe(e1);
+        eventCaller->Subscribe([p = this, id = component->entityId]
+                               { p->onTransformUpdate(id); }, *transform->OnPositionUpdate);
+        
         component->position = transform->position;
         component->scale = transform->scale;
     

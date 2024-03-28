@@ -13,9 +13,7 @@ namespace sage
         EntityID root;
         
     public:
-
         void AddComponent(std::unique_ptr<WorldObject> component);
-        
         explicit WorldSystem(EntityID rootNodeId) : root(rootNodeId) {}
     };
 }
