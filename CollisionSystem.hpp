@@ -13,6 +13,7 @@
 
 #include "Collideable.hpp"
 #include "BaseSystem.hpp"
+
 namespace sage
 {
 class CollisionSystem : public BaseSystem<Collideable>

@@ -13,42 +13,16 @@
 
 namespace sage
 {
-    Editor::Editor(UserInput* _cursor) : cursor(_cursor)
+    Editor::Editor(UserInput* _cursor) : cursor(_cursor), eventManager(std::make_unique<EventManager>())
     {
-        const std::function<void()> f1 = [p = this] { p->OnCursorClick(); };
-        auto e1 = std::make_shared<EventCallback>(f1);
-        eventCallbacks.push_back(e1);
-        cursor->OnClickEvent->Subscribe(e1);
-
-        const std::function<void()> f2 = [p = this] { p->OnCollisionHit(); };
-        auto e2 = std::make_shared<EventCallback>(f2);
-        eventCallbacks.push_back(e2);
-        cursor->OnCollisionHitEvent->Subscribe(e2);
-
-        const std::function<void()> f3 = [p = this] { p->OnDeleteModeKeyPressed(); };
-        auto e3 = std::make_shared<EventCallback>(f3);
-        eventCallbacks.push_back(e3);
-        cursor->OnDeleteKeyPressedEvent->Subscribe(e3);
-
-        const std::function<void()> f4 = [p = this] { p->OnCreateModeKeyPressed(); };
-        auto e4 = std::make_shared<EventCallback>(f4);
-        eventCallbacks.push_back(e4);
-        cursor->OnCreateKeyPressedEvent->Subscribe(e4);
-
-        const std::function<void()> f5 = [p = this] { p->OnGenGridKeyPressed(); };
-        auto e5 = std::make_shared<EventCallback>(f5);
-        eventCallbacks.push_back(e5);
-        cursor->OnGenGridKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f5));
-
-        const std::function<void()> f6 = [p = this] { p->OnSerializeButton(); };
-        auto e6 = std::make_shared<EventCallback>(f6);
-        eventCallbacks.push_back(e6);
-        cursor->OnSerializeKeyPressedEvent->Subscribe(e6);
-
-        const std::function<void()> f7 = [p = this] { p->OnRunModePressed(); };
-        auto e7 = std::make_shared<EventCallback>(f7);
-        eventCallbacks.push_back(e7);
-        cursor->OnRunModePressedEvent->Subscribe(e7);
+        
+        eventManager->Subscribe([p = this] { p->OnCursorClick(); }, *cursor->OnClickEvent);
+        eventManager->Subscribe([p = this] { p->OnCollisionHit(); }, *cursor->OnCollisionHitEvent);
+        eventManager->Subscribe([p = this] { p->OnDeleteModeKeyPressed(); }, *cursor->OnDeleteKeyPressedEvent);
+        eventManager->Subscribe([p = this] { p->OnCreateModeKeyPressed(); }, *cursor->OnCreateKeyPressedEvent);
+        eventManager->Subscribe([p = this] { p->OnGenGridKeyPressed(); }, *cursor->OnGenGridKeyPressedEvent);
+        eventManager->Subscribe([p = this] { p->OnSerializeButton(); }, *cursor->OnSerializeKeyPressedEvent);
+        eventManager->Subscribe([p = this] { p->OnRunModePressed(); }, *cursor->OnRunModePressedEvent);
 
         EntityID floor = Registry::GetInstance().CreateEntity();
         Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };

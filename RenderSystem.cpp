@@ -47,7 +47,7 @@ namespace sage
 
     void RenderSystem::AddComponent(std::unique_ptr<Renderable> component, const sage::Transform* const transform)
     {
-        eventCaller->Subscribe([p = this, id = component->entityId]
+        eventManager->Subscribe([p = this, id = component->entityId]
                                { p->onTransformUpdate(id); }, *transform->OnPositionUpdate);
         
         component->position = transform->position;

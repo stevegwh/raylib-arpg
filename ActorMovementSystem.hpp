@@ -11,7 +11,7 @@
 
 #include "BaseSystem.hpp"
 #include "UserInput.hpp"
-#include "EventCaller.hpp"
+#include "EventManager.hpp"
 
 namespace sage
 {

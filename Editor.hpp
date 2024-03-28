@@ -5,11 +5,12 @@
 #pragma once
 
 #include "UserInput.hpp"
-#include "EventCallback.hpp"
+#include "EventManager.hpp"
 #include "GameManager.hpp"
 #include "State.hpp"
 
 #include <vector>
+#include <memory>
 
 namespace sage
 {
@@ -22,7 +23,6 @@ enum EditorMode
     CREATE
 };
 
-// NB: "GameManager" is friend
 class Editor : public State
 {
     EditorMode currentEditorMode = IDLE;
@@ -40,7 +40,7 @@ class Editor : public State
     EntityID selectedObject{};
     void moveSelectedObjectToCursorHit();
     
-    std::vector<std::shared_ptr<EventCallback>> eventCallbacks;
+    std::unique_ptr<EventManager> eventManager;
     
 public:
     explicit Editor(UserInput* _cursor);

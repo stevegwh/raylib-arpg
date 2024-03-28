@@ -43,7 +43,6 @@ add_executable(BG_Raylib
         Collideable.hpp
         Event.cpp
         Event.hpp
-        EventCallback.hpp
         raygui.h
         Entity.hpp
         Transform.hpp
@@ -75,8 +74,9 @@ add_executable(BG_Raylib
         Game.hpp
         ECSManager.cpp
         ECSManager.hpp
-        EventCaller.hpp
-        EventCaller.cpp
+        EventManager.hpp
+        EventManager.cpp
+        EventCallback.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json)

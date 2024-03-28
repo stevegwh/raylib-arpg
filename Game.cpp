@@ -17,7 +17,7 @@
 
 namespace sage
 {
-Game::Game(UserInput* _cursor) : cursor(_cursor)
+Game::Game(UserInput* _cursor) : cursor(_cursor), eventManager(std::make_unique<EventManager>())
 {
     auto playerId = GameObjectFactory::createPlayer({20.0f, 0, 20.0f}, "Player");
     ECS->actorMovementSystem->SetControlledActor(playerId);
@@ -45,10 +45,7 @@ Game::Game(UserInput* _cursor) : cursor(_cursor)
     ECS->navigationGridSystem->Init(100, 1.0f);
     ECS->navigationGridSystem->PopulateGrid();
     
-    const std::function<void()> f1 = [p = this] { p->onEditorModePressed(); };
-    auto e1 = std::make_shared<EventCallback>(f1);
-    eventCallbacks.push_back(e1);
-    cursor->OnRunModePressedEvent->Subscribe(e1);
+    eventManager->Subscribe( [p = this] { p->onEditorModePressed(); }, *cursor->OnRunModePressedEvent);
 }
 
 Game::~Game()

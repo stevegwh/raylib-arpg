@@ -29,6 +29,6 @@ namespace sage
 void ActorMovementSystem::SetControlledActor(EntityID id)
 {
     actorId = id;
-    eventCaller->Subscribe([p = this] { p->onCursorClick(); }, *cursor->OnClickEvent);
+    eventManager->Subscribe([p = this] { p->onCursorClick(); }, *cursor->OnClickEvent);
 }
 } // sage

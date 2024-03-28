@@ -7,8 +7,10 @@
 
 #include "State.hpp"
 #include "UserInput.hpp"
+#include "EventManager.hpp"
 
 #include <vector>
+#include <memory>
 
 namespace sage
 {
@@ -17,7 +19,7 @@ class Game : public State
 {
     UserInput* cursor;
     void onEditorModePressed();
-    std::vector<std::shared_ptr<EventCallback>> eventCallbacks;
+    std::unique_ptr<EventManager> eventManager;
 public:
     
     explicit Game(sage::UserInput* _cursor);

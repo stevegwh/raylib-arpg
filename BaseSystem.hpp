@@ -14,7 +14,7 @@
 #include <typeinfo>
 
 #include "Registry.hpp"
-#include "EventCaller.hpp"
+#include "EventManager.hpp"
 
 namespace sage
 {
@@ -25,19 +25,19 @@ namespace sage
         const std::string componentName;
         
     protected:
-        std::unique_ptr<EventCaller> eventCaller;
+        std::unique_ptr<EventManager> eventManager;
         std::unordered_map<EntityID, std::unique_ptr<ComponentName>> components;
         void m_addComponent(std::unique_ptr<ComponentName> component)
         {
-            eventCaller->Subscribe([p = this, id = component->entityId]
+            eventManager->Subscribe([p = this, id = component->entityId]
                                    { p->RemoveComponent(id); },
-                                   *Registry::GetInstance().GetEntity(component->entityId)->OnDelete);
+                                    *Registry::GetInstance().GetEntity(component->entityId)->OnDelete);
             components.emplace(component->entityId, std::move(component));
         }
         
     public:
 
-        BaseSystem() : eventCaller(std::make_unique<EventCaller>()) {}
+        BaseSystem() : eventManager(std::make_unique<EventManager>()) {}
 
         const char* getComponentName() const
         {

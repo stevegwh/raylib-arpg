@@ -166,8 +166,8 @@ namespace sage
     {
         if (ECS->transformSystem->FindEntity(component->entityId))
         {
-            eventCaller->Subscribe([p = this, id = component->entityId] { p->onTransformUpdate(id); }, 
-                             *ECS->transformSystem->GetComponent(component->entityId)->OnPositionUpdate);
+            eventManager->Subscribe([p = this, id = component->entityId] { p->onTransformUpdate(id); },
+                                    *ECS->transformSystem->GetComponent(component->entityId)->OnPositionUpdate);
         }
 
         m_addComponent(std::move(component));

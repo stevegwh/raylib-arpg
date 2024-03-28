@@ -7,17 +7,19 @@
 #include <functional>
 #include <vector>
 #include <memory>
+#include <utility>
 
 #include "Event.hpp"
 #include "EventCallback.hpp"
 
 namespace sage
 {
-class EventCaller
+
+class EventManager
 {
 public:
-    std::vector<std::shared_ptr<EventCallback>> eventCallbacks;
-    void Subscribe(std::function<void()> func, Event& event);
+    std::vector<std::shared_ptr<EventCallback>> callbacks;
+    void Subscribe(std::function<void()> func, sage::Event& event);
 };
 
 } // sage
