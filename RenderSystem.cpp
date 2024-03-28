@@ -49,7 +49,9 @@ namespace sage
     {
     
         const std::function<void()> f1 = [p = this, id = component->entityId] { p->onTransformUpdate(id); };
-        transform->OnPositionUpdate->Subscribe(std::make_shared<EventCallback>(f1));
+        auto e1 = std::make_shared<EventCallback>(f1);
+        eventCallbacks.push_back(e1);
+        transform->OnPositionUpdate->Subscribe(e1);
         component->position = transform->position;
         component->scale = transform->scale;
     

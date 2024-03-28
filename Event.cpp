@@ -7,29 +7,31 @@
 namespace sage
 {
 
-void Event::InvokeAllCallbacks() const
+void Event::InvokeAllCallbacks()  
 {
-    for (const std::shared_ptr<EventCallback>& ob : callbacks)
+    for (auto it = callbacks.begin(); it != callbacks.end();) 
     {
-        ob->callback();
+        auto callback = it->second.lock();
+        if (!callback) 
+        {
+            it = callbacks.erase(it);
+        } 
+        else 
+        {
+            callback->callback();
+            ++it;
+        }
     }
+}
+
+void Event::Unsubscribe(const std::string& signature)
+{
+    callbacks.erase(signature);
 }
 
 void Event::Subscribe(const std::shared_ptr<EventCallback>& callback)
 {
-    callbacks.push_back(callback);
-}
-
-void Event::Unsubscribe(const std::shared_ptr<EventCallback>& callback)
-{
-    for (auto it = callbacks.begin(); it != callbacks.end(); ++it)
-    {
-        if (*it == callback)
-        {
-            callbacks.erase(it);
-            break;
-        }
-    }
+    callbacks[callback->signature] = callback;
 }
 
 }

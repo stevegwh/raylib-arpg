@@ -27,7 +27,9 @@ public:
         actorId = id;
         // Unsubscribe needed?
         const std::function<void()> f1 = [p = this] { p->onCursorClick(); };
-        cursor->OnClickEvent->Subscribe(std::make_shared<EventCallback>(f1));
+        auto e1 = std::make_shared<EventCallback>(f1);
+        eventCallbacks.push_back(e1);
+        cursor->OnClickEvent->Subscribe(e1);
     }
 
     explicit ActorMovementSystem(UserInput* _cursor) : cursor(_cursor) {}

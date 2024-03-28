@@ -24,12 +24,15 @@ namespace sage
         const std::string componentName;
     protected:
         std::unordered_map<EntityID, std::unique_ptr<ComponentName>> components;
+        std::vector<std::shared_ptr<EventCallback>> eventCallbacks;
         
         void m_addComponent(std::unique_ptr<ComponentName> component)
         {
             // Subscribe to parent entity's "OnDelete" event
             const std::function<void()> f1 = [p = this, id = component->entityId] { p->RemoveComponent(id); };
-            Registry::GetInstance().GetEntity(component->entityId)->OnDelete->Subscribe(std::make_shared<EventCallback>(f1));
+            auto e1 = std::make_shared<EventCallback>(f1);
+            eventCallbacks.push_back(e1);
+            Registry::GetInstance().GetEntity(component->entityId)->OnDelete->Subscribe(e1);
 
             components.emplace(component->entityId, std::move(component));
         }

@@ -9,7 +9,7 @@
 #include "GameManager.hpp"
 #include "State.hpp"
 
-#include <unordered_map>
+#include <vector>
 
 namespace sage
 {
@@ -40,7 +40,7 @@ class Editor : public State
     EntityID selectedObject{};
     void moveSelectedObjectToCursorHit();
     
-    std::unordered_map<std::string, std::shared_ptr<EventCallback>> eventCallbacks;
+    std::vector<std::shared_ptr<EventCallback>> eventCallbacks;
     
 public:
     explicit Editor(UserInput* _cursor);

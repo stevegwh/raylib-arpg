@@ -47,19 +47,19 @@ Game::Game(UserInput* _cursor) : cursor(_cursor)
     
     const std::function<void()> f1 = [p = this] { p->onEditorModePressed(); };
     auto e1 = std::make_shared<EventCallback>(f1);
+    eventCallbacks.push_back(e1);
     cursor->OnRunModePressedEvent->Subscribe(e1);
-    eventCallbacks["onEditorModePressed"] = e1;
 }
 
 Game::~Game()
 {
-    cursor->OnSerializeKeyPressedEvent->Unsubscribe(eventCallbacks.at("onEditorModePressed"));
 }
 
 void Game::Update()
 {
     ECS->transformSystem->Update();
 }
+
 void Game::Draw3D()
 {
     ECS->renderSystem->Draw();
@@ -79,6 +79,7 @@ void Game::Draw3D()
         }
     }
 }
+
 void Game::Draw2D()
 {
     

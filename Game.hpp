@@ -8,6 +8,8 @@
 #include "State.hpp"
 #include "UserInput.hpp"
 
+#include <vector>
+
 namespace sage
 {
 
@@ -15,10 +17,10 @@ class Game : public State
 {
     UserInput* cursor;
     void onEditorModePressed();
-    std::unordered_map<std::string, std::shared_ptr<EventCallback>> eventCallbacks;
+    std::vector<std::shared_ptr<EventCallback>> eventCallbacks;
 public:
     
-    Game(sage::UserInput* _cursor);
+    explicit Game(sage::UserInput* _cursor);
     ~Game() override;
     void Update() override;
     void Draw3D() override;

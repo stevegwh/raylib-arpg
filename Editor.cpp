@@ -17,38 +17,38 @@ namespace sage
     {
         const std::function<void()> f1 = [p = this] { p->OnCursorClick(); };
         auto e1 = std::make_shared<EventCallback>(f1);
+        eventCallbacks.push_back(e1);
         cursor->OnClickEvent->Subscribe(e1);
-        eventCallbacks["OnCursorClick"] = e1;
 
         const std::function<void()> f2 = [p = this] { p->OnCollisionHit(); };
         auto e2 = std::make_shared<EventCallback>(f2);
+        eventCallbacks.push_back(e2);
         cursor->OnCollisionHitEvent->Subscribe(e2);
-        eventCallbacks["OnCollisionHit"] = e2;
 
         const std::function<void()> f3 = [p = this] { p->OnDeleteModeKeyPressed(); };
         auto e3 = std::make_shared<EventCallback>(f3);
+        eventCallbacks.push_back(e3);
         cursor->OnDeleteKeyPressedEvent->Subscribe(e3);
-        eventCallbacks["OnDeleteModeKeyPressed"] = e3;
 
         const std::function<void()> f4 = [p = this] { p->OnCreateModeKeyPressed(); };
         auto e4 = std::make_shared<EventCallback>(f4);
+        eventCallbacks.push_back(e4);
         cursor->OnCreateKeyPressedEvent->Subscribe(e4);
-        eventCallbacks["OnCreateModeKeyPressed"] = e4;
 
         const std::function<void()> f5 = [p = this] { p->OnGenGridKeyPressed(); };
         auto e5 = std::make_shared<EventCallback>(f5);
+        eventCallbacks.push_back(e5);
         cursor->OnGenGridKeyPressedEvent->Subscribe(std::make_shared<EventCallback>(f5));
-        eventCallbacks["OnGenGridKeyPressed"] = e5;
 
         const std::function<void()> f6 = [p = this] { p->OnSerializeButton(); };
         auto e6 = std::make_shared<EventCallback>(f6);
+        eventCallbacks.push_back(e6);
         cursor->OnSerializeKeyPressedEvent->Subscribe(e6);
-        eventCallbacks["OnSerializeButton"] = e6;
 
         const std::function<void()> f7 = [p = this] { p->OnRunModePressed(); };
         auto e7 = std::make_shared<EventCallback>(f7);
+        eventCallbacks.push_back(e7);
         cursor->OnRunModePressedEvent->Subscribe(e7);
-        eventCallbacks["OnRunModePressed"] = e7;
 
         EntityID floor = Registry::GetInstance().CreateEntity();
         Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
@@ -72,16 +72,8 @@ namespace sage
     
     Editor::~Editor()
     {
-        // Unsubscribe from all events
-        cursor->OnClickEvent->Unsubscribe(eventCallbacks.at("OnCursorClick"));
-        cursor->OnCollisionHitEvent->Unsubscribe(eventCallbacks.at("OnCollisionHit"));
-        cursor->OnDeleteKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnDeleteModeKeyPressed"));
-        cursor->OnCreateKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnCreateModeKeyPressed"));
-        cursor->OnGenGridKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnGenGridKeyPressed"));
-        cursor->OnSerializeKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnSerializeButton"));
-        cursor->OnSerializeKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnRunModePressed"));
+        
     }
-    
     
     void Editor::moveSelectedObjectToCursorHit()
     {
