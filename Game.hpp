@@ -6,14 +6,19 @@
 
 
 #include "State.hpp"
+#include "UserInput.hpp"
 
 namespace sage
 {
 
 class Game : public State
 {
+    UserInput* cursor;
+    void onEditorModePressed();
+    std::unordered_map<std::string, std::shared_ptr<EventCallback>> eventCallbacks;
 public:
-    Game();
+    
+    Game(sage::UserInput* _cursor);
     ~Game() override;
     void Update() override;
     void Draw3D() override;

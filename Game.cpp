@@ -17,7 +17,7 @@
 
 namespace sage
 {
-Game::Game()
+Game::Game(UserInput* _cursor) : cursor(_cursor)
 {
     auto playerId = GameObjectFactory::createPlayer({20.0f, 0, 20.0f}, "Player");
     ECS->actorMovementSystem->SetControlledActor(playerId);
@@ -44,12 +44,18 @@ Game::Game()
     // This should also be based on scene parameters
     ECS->navigationGridSystem->Init(100, 1.0f);
     ECS->navigationGridSystem->PopulateGrid();
-
+    
+    const std::function<void()> f1 = [p = this] { p->onEditorModePressed(); };
+    auto e1 = std::make_shared<EventCallback>(f1);
+    cursor->OnRunModePressedEvent->Subscribe(e1);
+    eventCallbacks["onEditorModePressed"] = e1;
 }
+
 Game::~Game()
 {
-
+    cursor->OnSerializeKeyPressedEvent->Unsubscribe(eventCallbacks.at("onEditorModePressed"));
 }
+
 void Game::Update()
 {
     ECS->transformSystem->Update();
@@ -77,4 +83,10 @@ void Game::Draw2D()
 {
     
 }
+
+void Game::onEditorModePressed()
+{
+    GM.SetStateEditor();
+}
+
 } // sage

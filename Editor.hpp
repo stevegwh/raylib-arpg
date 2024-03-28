@@ -27,9 +27,16 @@ class Editor : public State
 {
     EditorMode currentEditorMode = IDLE;
     UserInput* cursor;
+    
+    // Event responses
     void OnCursorClick();
     void OnCollisionHit();
     void OnSerializeButton();
+    void OnDeleteModeKeyPressed();
+    void OnCreateModeKeyPressed();
+    void OnGenGridKeyPressed();
+    void OnRunModePressed();
+    
     EntityID selectedObject{};
     void moveSelectedObjectToCursorHit();
     
@@ -41,19 +48,6 @@ public:
     void Update() override;
     void Draw3D() override;
     void Draw2D() override;
-    // OnClickEvent()
-    // OnCursorHit(CollisionInfo collision
-    //
-    // PlaceModel()
-    // SelectModel()
-    // DeleteModel()
-    // PollInput()
-
-    // Store the majority of functionality in "cursor" in this class, as it will be used for editing the map.
-
-    void OnDeleteModeKeyPressed();
-    void OnCreateModeKeyPressed();
-    void OnGenGridKeyPressed();
 };
 
 }

@@ -45,6 +45,11 @@ namespace sage
         cursor->OnSerializeKeyPressedEvent->Subscribe(e6);
         eventCallbacks["OnSerializeButton"] = e6;
 
+        const std::function<void()> f7 = [p = this] { p->OnRunModePressed(); };
+        auto e7 = std::make_shared<EventCallback>(f7);
+        cursor->OnRunModePressedEvent->Subscribe(e7);
+        eventCallbacks["OnRunModePressed"] = e7;
+
         EntityID floor = Registry::GetInstance().CreateEntity();
         Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
         Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
@@ -68,12 +73,13 @@ namespace sage
     Editor::~Editor()
     {
         // Unsubscribe from all events
-        cursor->OnClickEvent->Unsubscribe(eventCallbacks.at("OnClick"));
+        cursor->OnClickEvent->Unsubscribe(eventCallbacks.at("OnCursorClick"));
         cursor->OnCollisionHitEvent->Unsubscribe(eventCallbacks.at("OnCollisionHit"));
         cursor->OnDeleteKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnDeleteModeKeyPressed"));
         cursor->OnCreateKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnCreateModeKeyPressed"));
         cursor->OnGenGridKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnGenGridKeyPressed"));
         cursor->OnSerializeKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnSerializeButton"));
+        cursor->OnSerializeKeyPressedEvent->Unsubscribe(eventCallbacks.at("OnRunModePressed"));
     }
     
     
@@ -85,7 +91,7 @@ namespace sage
         const Renderable* renderable = ECS->renderSystem->GetComponent(selectedObject);
 
         ECS->transformSystem->SetComponent(selectedObject, newTransform);
-        ECS->collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
+        //ECS->collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
         
     }
     
@@ -143,6 +149,11 @@ namespace sage
     void Editor::OnGenGridKeyPressed()
     {
         ECS->navigationGridSystem->PopulateGrid();
+    }
+
+    void Editor::OnRunModePressed()
+    {
+        GM.SetStateRun();
     }
 
     void Editor::OnCollisionHit()

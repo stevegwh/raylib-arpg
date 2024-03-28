@@ -35,9 +35,9 @@ void GameManager::init()
     // Should each state have its own set of systems?
     // Or, should the destructor just make sure to delete all its entities from the systems?
 #ifdef EDITOR_MODE
-    states.push(std::make_unique<sage::Editor>(userInput.get()));
+    state = std::make_unique<Editor>(userInput.get());
 #else
-    states.push(std::make_unique<sage::Game>());
+    state = std::make_unique<Game>(userInput.get());
 #endif
 
 }
@@ -56,12 +56,26 @@ void GameManager::Update()
         sCamera->Update();
         userInput->ListenForInput();
 
-        states.top()->Update();
+        state->Update();
 
         //----------------------------------------------------------------------------------
         draw();
         Registry::GetInstance().RunMaintainance();
-        
+        // temporary
+        if (stateChange > 0)
+        {
+            if (stateChange == 1)
+            {
+                ecs = std::make_unique<ECSManager>(userInput.get());
+                state = std::make_unique<Game>(userInput.get());
+            }
+            else if (stateChange == 2)
+            {
+                ecs = std::make_unique<ECSManager>(userInput.get());
+                state = std::make_unique<Editor>(userInput.get());
+            }
+            stateChange = 0;
+        }
     }
 }
 
@@ -78,13 +92,13 @@ void GameManager::draw()
     // If we hit something, draw the cursor at the hit point
     userInput->Draw();
     
-    states.top()->Draw3D();
+    state->Draw3D();
 
     EndMode3D();
 
     userInput->DrawDebugText();
     
-    states.top()->Draw2D();
+    state->Draw2D();
 
     DrawFPS(10, 10);
 
@@ -97,6 +111,18 @@ void GameManager::cleanup()
 {
     CloseWindow();
 }
+
+void GameManager::SetStateEditor()
+{
+    stateChange = 2;
+
+}
+
+void GameManager::SetStateRun()
+{
+    stateChange = 1;
+}
+
 }
 
 

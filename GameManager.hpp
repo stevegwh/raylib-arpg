@@ -4,7 +4,7 @@
 
 #pragma once
 
-//#define EDITOR_MODE
+#define EDITOR_MODE
 
 #include "raylib.h"
 
@@ -34,7 +34,8 @@ class GameManager
 {
     std::unique_ptr<sage::UserInput> userInput;
     std::vector<Vector3> grid;
-    std::stack<std::unique_ptr<sage::State>> states;
+    std::unique_ptr<sage::State> state;
+    int stateChange = 0;
 
     void init();
     static void cleanup();
@@ -55,6 +56,9 @@ public:
     std::unique_ptr<sage::ECSManager> ecs;
     std::unique_ptr<sage::Camera> sCamera;
     void Update();
+    
+    void SetStateRun();
+    void SetStateEditor();
     
     friend class Editor;
 };

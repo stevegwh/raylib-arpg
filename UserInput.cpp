@@ -163,6 +163,10 @@ namespace sage
         {
             OnSerializeKeyPressed();
         }
+        else if (IsKeyPressed(KEY_R))
+        {
+            OnRunModePressedEvent->InvokeAllCallbacks();
+        }
 
     }
 

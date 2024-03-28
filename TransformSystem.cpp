@@ -11,7 +11,9 @@ namespace sage
 {
     void TransformSystem::SetComponent(EntityID entityId, const Transform& newTransform)
     {
-        components.at(entityId)->position = newTransform.position;
+        auto t = components.at(entityId).get();
+        t->position = newTransform.position;
+        t->OnPositionUpdate->InvokeAllCallbacks();
     }
     
     void TransformSystem::PathfindToLocation(EntityID entityId, const std::vector<Vector3>& path)
