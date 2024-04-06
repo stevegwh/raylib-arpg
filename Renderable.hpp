@@ -15,6 +15,7 @@
 #include "Component.hpp"
 #include "RenderSystem.hpp"
 #include "Transform.hpp"
+#include "AnimationController.hpp"
 
 
 namespace sage
@@ -22,6 +23,7 @@ namespace sage
     struct Renderable : public Component<Renderable>
     {
         const sage::Transform* const transform; // Hard dependency
+        //std::unique_ptr<AnimationController> animationController;
         
         const Matrix initialTransform;
         sage::Material material;
@@ -52,8 +54,7 @@ namespace sage
         transform(_transform)
         {
         }
-
-        // TODO: Currently defaults to having animations if no material is passed
+        
         Renderable(
             EntityID entityId, 
             Model _model, 
@@ -67,9 +68,12 @@ namespace sage
             initialTransform(_localTransform),
             transform(_transform)
         {
-            animsCount = 0;
-            animation = LoadModelAnimations(_modelPath.c_str(), &animsCount);
-            model.transform = initialTransform;
+            if (IsFileExtension(_modelPath.c_str(), ".gltf") || IsFileExtension(_modelPath.c_str(), ".glb"))
+            {
+                animsCount = 0;
+                animation = LoadModelAnimations(_modelPath.c_str(), &animsCount);
+                model.transform = initialTransform;
+            }
         }
         
         ~Renderable()
