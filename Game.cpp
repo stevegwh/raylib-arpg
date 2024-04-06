@@ -55,6 +55,7 @@ Game::~Game()
 void Game::Update()
 {
     ECS->transformSystem->Update();
+    ECS->animationSystem->Update();
     ECS->renderSystem->Update();
 }
 

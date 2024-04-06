@@ -14,6 +14,7 @@
 #include "WorldSystem.hpp"
 #include "NavigationGridSystem.hpp"
 #include "ActorMovementSystem.hpp"
+#include "AnimationSystem.hpp"
 
 namespace sage
 {
@@ -28,6 +29,7 @@ public:
     std::unique_ptr<sage::WorldSystem> worldSystem;
     std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
     std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
+    std::unique_ptr<sage::AnimationSystem> animationSystem;
 
     void DeserializeMap();
     void SerializeMap() const;

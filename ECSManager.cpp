@@ -12,7 +12,8 @@ ECSManager::ECSManager(UserInput* userInput) :
     renderSystem(std::make_unique<RenderSystem>()),
     collisionSystem(std::make_unique<sage::CollisionSystem>()),
     transformSystem(std::make_unique<sage::TransformSystem>()),
-    navigationGridSystem(std::make_unique<NavigationGridSystem>())
+    navigationGridSystem(std::make_unique<NavigationGridSystem>()),
+    animationSystem(std::make_unique<AnimationSystem>())
 {
     EntityID rootNodeId = Registry::GetInstance().CreateEntity();
     auto rootNodeObject = std::make_unique<WorldObject>(rootNodeId);

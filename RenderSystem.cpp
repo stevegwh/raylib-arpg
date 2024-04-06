@@ -10,22 +10,10 @@ namespace sage
 {
 RenderSystem::~RenderSystem()
 {
-    
-
 }
 
 void RenderSystem::Update()
 {
-    for (const auto& renderable : components)
-    {
-        if (renderable.second->anim)
-        {
-            renderable.second->animationController->Update();
-//            ModelAnimation anim = renderable.second->animation[renderable.second->animIndex];
-//            renderable.second->animCurrentFrame = (renderable.second->animCurrentFrame + 1) % anim.frameCount;
-//            UpdateModelAnimation(renderable.second->model, anim, renderable.second->animCurrentFrame);
-        }
-    }
 }
 //float rotationAngle = 0;
 void RenderSystem::Draw() const

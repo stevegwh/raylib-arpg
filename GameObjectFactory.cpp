@@ -13,7 +13,7 @@
 #include "Renderable.hpp"
 #include "Collideable.hpp"
 #include "WorldObject.hpp"
-#include "PlayerAnimations.hpp"
+#include "Animation.hpp"
 
 namespace sage
 {
@@ -50,18 +50,21 @@ EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name)
     Transform* const transform_ptr = transform.get();
     ECS->transformSystem->AddComponent(std::move(transform));
     auto model = LoadModel(modelPath);
-    // Set animations
-    auto animations = std::make_unique<PlayerAnimations>(id, modelPath, &model, transform_ptr);
+    
+    // Set animation hooks
+    auto animation = std::make_unique<Animation>(id, modelPath, &model);
+    animation->eventManager->Subscribe( [p = animation.get()] { p->ChangeAnimation(3); }, *transform_ptr->OnStartMovement);
+    animation->eventManager->Subscribe( [p = animation.get()] { p->ChangeAnimation(0); }, *transform_ptr->OnFinishMovement);
+    
+    ECS->animationSystem->AddComponent(std::move(animation));
     
     Matrix modelTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
     auto renderable = std::make_unique<Renderable>(id, 
                                                    model,
                                                    std::string(modelPath),
                                                    modelTransform,
-                                                   transform_ptr,
-                                                   std::move(animations));
+                                                   transform_ptr);
     renderable->name = name;
-    renderable->anim = true;    
     
     
     ECS->renderSystem->AddComponent(std::move(renderable));

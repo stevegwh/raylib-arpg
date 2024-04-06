@@ -77,10 +77,9 @@ add_executable(BG_Raylib
         EventManager.hpp
         EventManager.cpp
         EventCallback.hpp
-        PlayerAnimations.cpp
-        PlayerAnimations.hpp
-        AnimationController.cpp
-        AnimationController.hpp
+        AnimationSystem.cpp
+        AnimationSystem.hpp
+        Animation.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json)

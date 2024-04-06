@@ -15,37 +15,18 @@
 #include "Component.hpp"
 #include "RenderSystem.hpp"
 #include "Transform.hpp"
-#include "AnimationController.hpp"
 
 namespace sage
 {
-struct Animation
-{
-    ModelAnimation* animation;
-    unsigned int animIndex = 0;
-    unsigned int animCurrentFrame = 0;
-    int animsCount;
-};
 struct Renderable : public Component<Renderable>
 {
     const sage::Transform* const transform; // Hard dependency
-    std::unordered_map<std::string, Animation> animations;
     const Matrix initialTransform;
     sage::Material material;
     const std::string modelPath;
     Model model; // was const
-    
-    std::unique_ptr<AnimationController> animationController;
 
     std::string name = "Default";
-    
-    
-
-    bool anim = false;
-//    ModelAnimation* animation;
-//    unsigned int animIndex = 0;
-//    unsigned int animCurrentFrame = 0;
-//    int animsCount;
     
     Renderable(
         EntityID entityId, 
@@ -69,15 +50,13 @@ struct Renderable : public Component<Renderable>
         Model _model, 
         std::string _modelPath,
         Matrix _localTransform,
-        const Transform* const _transform,
-        std::unique_ptr<AnimationController> _animationController)
+        const Transform* const _transform)
         : 
         Component(entityId), 
         model(std::move(_model)), 
         modelPath(_modelPath), 
         initialTransform(_localTransform),
-        transform(_transform),
-        animationController(std::move(_animationController))
+        transform(_transform)
     {
         model.transform = initialTransform;
     }
