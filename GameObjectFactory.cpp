@@ -56,23 +56,21 @@ namespace sage
         auto towerTransform1 = std::make_unique<Transform>(newTowerId);
         towerTransform1->position = position;
         towerTransform1->scale = 1.0f;
+        Transform* const transform_ptr = towerTransform1.get();
+        ECS->transformSystem->AddComponent(std::move(towerTransform1));
         
         sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
         Model model = LoadModel("resources/models/obj/turret.obj");
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
         auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, model, mat, "resources/models/obj/turret.obj");
         towerRenderable1->name = name;
-    
-        auto towerCollidable1 = std::make_unique<Collideable>(newTowerId, towerRenderable1->meshBoundingBox);
-        towerCollidable1->worldBoundingBox.min = Vector3Add(towerCollidable1->worldBoundingBox.min, towerTransform1->position);
-        towerCollidable1->worldBoundingBox.max = Vector3Add(towerCollidable1->worldBoundingBox.max, towerTransform1->position);
+        ECS->renderSystem->AddComponent(std::move(towerRenderable1), transform_ptr);
+        auto towerCollidable1 = std::make_unique<Collideable>(newTowerId, ECS->renderSystem->GetModelBoundingBox(newTowerId));
         towerCollidable1->collisionLayer = BUILDING;
+        ECS->collisionSystem->AddComponent(std::move(towerCollidable1));
+        ECS->collisionSystem->UpdateWorldBoundingBox(newTowerId, ECS->transformSystem->GetMatrix(newTowerId));
     
         auto towerWorldObject1 = std::make_unique<WorldObject>(newTowerId);
-        Transform* const transform_ptr = towerTransform1.get();
-        ECS->transformSystem->AddComponent(std::move(towerTransform1));
-        ECS->renderSystem->AddComponent(std::move(towerRenderable1), transform_ptr);
-        ECS->collisionSystem->AddComponent(std::move(towerCollidable1));
         ECS->worldSystem->AddComponent(std::move(towerWorldObject1));
     }
 } // sage

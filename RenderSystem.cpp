@@ -115,11 +115,11 @@ void RenderSystem::onTransformUpdate(EntityID id)
     r->rotation = t->rotation;
     
     // TODO: Apply rotation to model, also
-    r->meshBoundingBox = GetModelBoundingBox(id);
-    r->meshBoundingBox.min = Vector3Transform(r->meshBoundingBox.min, MatrixMultiply(
-        MatrixTranslate(r->position.x, r->position.y, r->position.z), r->initialTransform));
-    r->meshBoundingBox.max = Vector3Transform(r->meshBoundingBox.max, MatrixMultiply(
-        MatrixTranslate(r->position.x, r->position.y, r->position.z), r->initialTransform));
+//    r->meshBoundingBox = GetModelBoundingBox(id);
+//    r->meshBoundingBox.min = Vector3Transform(r->meshBoundingBox.min, MatrixMultiply(
+//        MatrixTranslate(r->position.x, r->position.y, r->position.z), r->initialTransform));
+//    r->meshBoundingBox.max = Vector3Transform(r->meshBoundingBox.max, MatrixMultiply(
+//        MatrixTranslate(r->position.x, r->position.y, r->position.z), r->initialTransform));
 }
 
 void RenderSystem::AddComponent(std::unique_ptr<Renderable> component, const sage::Transform* const transform)

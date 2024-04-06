@@ -27,7 +27,7 @@ namespace sage
         sage::Material material;
         const std::string modelPath;
         Model model; // was const
-        BoundingBox meshBoundingBox; // was const
+        //BoundingBox meshBoundingBox; // was const
 
         std::string name = "Default";
 
@@ -38,14 +38,13 @@ namespace sage
         int animsCount;
         
         Renderable(EntityID entityId, Model _model, sage::Material _material, std::string _modelPath)
-        : Component(entityId), model(std::move(_model)), material(std::move(_material)), modelPath(_modelPath), meshBoundingBox(
-            GetModelBoundingBox(model))
+        : Component(entityId), model(std::move(_model)), material(std::move(_material)), modelPath(_modelPath)
         {
         }
 
         // TODO: Currently defaults to having animations if no material is passed
         Renderable(EntityID entityId, Model _model, std::string _modelPath)
-            : Component(entityId), model(std::move(_model)), modelPath(_modelPath), meshBoundingBox(GetModelBoundingBox(model))
+            : Component(entityId), model(std::move(_model)), modelPath(_modelPath)
         {
             animsCount = 0;
             animation = LoadModelAnimations(_modelPath.c_str(), &animsCount);
