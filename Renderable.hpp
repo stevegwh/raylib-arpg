@@ -19,15 +19,16 @@ namespace sage
 {
     struct Renderable : public Component<Renderable>
     {
+        // Copies of transform
         Vector3 position;
         float scale;
         Vector3 rotation;
-        Matrix initialTransform; // Make const
+        
+        const Matrix initialTransform; // Make const
         
         sage::Material material;
         const std::string modelPath;
         Model model; // was const
-        //BoundingBox meshBoundingBox; // was const
 
         std::string name = "Default";
 
@@ -37,18 +38,17 @@ namespace sage
         unsigned int animCurrentFrame = 0;
         int animsCount;
         
-        Renderable(EntityID entityId, Model _model, sage::Material _material, std::string _modelPath)
-        : Component(entityId), model(std::move(_model)), material(std::move(_material)), modelPath(_modelPath)
+        Renderable(EntityID entityId, Model _model, sage::Material _material, std::string _modelPath, Matrix _localTransform)
+        : Component(entityId), model(std::move(_model)), material(std::move(_material)), modelPath(_modelPath), initialTransform(_localTransform)
         {
         }
 
         // TODO: Currently defaults to having animations if no material is passed
-        Renderable(EntityID entityId, Model _model, std::string _modelPath)
-            : Component(entityId), model(std::move(_model)), modelPath(_modelPath)
+        Renderable(EntityID entityId, Model _model, std::string _modelPath, Matrix _localTransform)
+            : Component(entityId), model(std::move(_model)), modelPath(_modelPath), initialTransform(_localTransform)
         {
             animsCount = 0;
             animation = LoadModelAnimations(_modelPath.c_str(), &animsCount);
-            initialTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
             model.transform = initialTransform;
         }
         

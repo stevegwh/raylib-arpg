@@ -30,7 +30,11 @@ namespace sage
 
     
         //auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat, std::string("resources/models/obj/cube_steve.obj"));
-        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/gltf/girl.glb"), std::string("resources/models/gltf/girl.glb"));
+        Matrix modelTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
+        auto renderable = std::make_unique<Renderable>(id, 
+                                                       LoadModel("resources/models/gltf/girl.glb"), 
+                                                       std::string("resources/models/gltf/girl.glb"),
+                                                       modelTransform);
         renderable->name = name;
         renderable->anim = true;
         renderable->position = transform_ptr->position;
@@ -62,7 +66,7 @@ namespace sage
         sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
         Model model = LoadModel("resources/models/obj/turret.obj");
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-        auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, model, mat, "resources/models/obj/turret.obj");
+        auto towerRenderable1 = std::make_unique<Renderable>(newTowerId, model, mat, "resources/models/obj/turret.obj", MatrixIdentity());
         towerRenderable1->name = name;
         ECS->renderSystem->AddComponent(std::move(towerRenderable1), transform_ptr);
         auto towerCollidable1 = std::make_unique<Collideable>(newTowerId, ECS->renderSystem->GetModelBoundingBox(newTowerId));
