@@ -49,24 +49,10 @@ namespace sage
         DrawBoundingBox(bb, color);
     }
 
-//    /**
-//     * Takes the local bounding box and moves it to the provided position
-//     * @param entityId The id of the entity
-//     * @param pos The world position of the desired centre of the bounding box
-//     */
-//    void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Vector3 pos)
-//    {
-//        const auto comp = components.at(entityId).get();
-//        BoundingBox bb;
-//        bb.min = Vector3Add(comp->localBoundingBox.min, pos);
-//        bb.max = Vector3Add(comp->localBoundingBox.max, pos);
-//        components.at(entityId)->worldBoundingBox = bb;
-//    }
-
 /**
-     * Takes the local bounding box and moves it to the provided position
+     * Calculates worldBoundingBox by multiplying localBoundingBox with the passed transform matrix
      * @param entityId The id of the entity
-     * @param pos The world position of the desired centre of the bounding box
+     * @param mat The transform matrix for the local bounding box
      */
     void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Matrix mat)
     {
@@ -92,27 +78,6 @@ namespace sage
         const auto& layerMatrix = collisionMatrix.at(layer1);
         return std::find(layerMatrix.begin(), layerMatrix.end(), layer2) != layerMatrix.end();
     }
-
-//    std::pair<bool, CollisionInfo> CollisionSystem::GetFirstCollision(EntityID entity)
-//    {
-//        const Collideable& targetCol = *components.at(entity);
-//        for (const auto& c : components)
-//        {
-//            if (c.second->entityId == entity) continue;
-//            if (!checkCollisionMatrix(targetCol.collisionLayer, c.second->collisionLayer)) continue;
-//            bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.second->worldBoundingBox);
-//            if (colHit)
-//            {
-//                CollisionInfo info = {
-//                    .collidedEntityId = c.second->entityId,
-//                    .collidedBB = c.second->worldBoundingBox
-//                };
-//
-//                return {true, info};
-//            }
-//        }
-//        return {false, {}};
-//    }
 
     bool CollisionSystem::GetFirstCollision(EntityID entity)
     {

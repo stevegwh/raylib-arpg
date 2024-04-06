@@ -22,7 +22,6 @@ class CollisionSystem : public BaseSystem<Collideable>
     void onTransformUpdate(EntityID entityId);
 public:
     void AddComponent(std::unique_ptr<Collideable> component);
-    //void UpdateWorldBoundingBox(EntityID entityId, Vector3 pos);
     void UpdateWorldBoundingBox(EntityID entityId, Matrix mat);
     [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray) const;
     void BoundingBoxDraw(EntityID entityId, Color color = LIME) const;
