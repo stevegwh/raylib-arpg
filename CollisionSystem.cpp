@@ -70,8 +70,7 @@ namespace sage
      */
     void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Matrix mat)
     {
-        // TODO: currently this re-calculates the transform from scratch based on the model's bounds, rather than just updating the current bounds.
-        auto bb = ECS->renderSystem->GetModelBoundingBox(entityId);
+        auto bb = GetComponent(entityId)->localBoundingBox;
         bb.min = Vector3Transform(bb.min, mat);
         bb.max = Vector3Transform(bb.max, mat);
         components.at(entityId)->worldBoundingBox = bb;
