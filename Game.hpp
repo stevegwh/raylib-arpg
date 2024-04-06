@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "State.hpp"
+#include "Scene.hpp"
 #include "UserInput.hpp"
 #include "EventManager.hpp"
 
@@ -15,7 +15,7 @@
 namespace sage
 {
 
-class Game : public State
+class Game : public Scene
 {
     UserInput* cursor;
     void onEditorModePressed();

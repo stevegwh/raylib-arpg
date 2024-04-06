@@ -13,13 +13,14 @@
 #include <unordered_map>
 
 // Misc
-#include "State.hpp"
+#include "Scene.hpp"
 #include "Camera.hpp"
 #include "UserInput.hpp"
 
-// States
+// Scenes
 #include "Game.hpp"
-#include "Editor.hpp" // Friend
+#include "Editor.hpp"
+
 #include "ECSManager.hpp"
 
 
@@ -33,8 +34,7 @@ static constexpr int SCREEN_HEIGHT = 720;
 class GameManager
 {
     std::unique_ptr<sage::UserInput> userInput;
-    std::vector<Vector3> grid;
-    std::unique_ptr<sage::State> state;
+    std::unique_ptr<sage::Scene> scene;
     int stateChange = 0;
 
     void init();
@@ -59,8 +59,6 @@ public:
     
     void SetStateRun();
     void SetStateEditor();
-    
-    friend class Editor;
 };
 }
 

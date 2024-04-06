@@ -69,7 +69,7 @@ add_executable(BG_Raylib
         GameObjectFactory.hpp
         Serializer.cpp
         Serializer.hpp
-        State.hpp
+        Scene.hpp
         Game.cpp
         Game.hpp
         ECSManager.cpp

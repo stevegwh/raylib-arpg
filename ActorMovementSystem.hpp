@@ -19,14 +19,15 @@ namespace sage
 class ActorMovementSystem : public BaseSystem<Actor>
 {
     UserInput* cursor;
-    EntityID actorId; // Temporary for now.
-    
+    EntityID controlledActorId; // Temporary for now.
     void onCursorClick();
 public:
-    
+    void MoveToLocation(EntityID id);
+    void PathfindToLocation(EntityID id);
     void SetControlledActor(EntityID id);
     explicit ActorMovementSystem(UserInput* _cursor) : cursor(_cursor) {}
-    
+
+    void PatrolLocations(EntityID id, const std::vector<Vector3> &patrol);
 };
 
 } // sage

@@ -7,7 +7,7 @@
 #include "UserInput.hpp"
 #include "EventManager.hpp"
 #include "GameManager.hpp"
-#include "State.hpp"
+#include "Scene.hpp"
 
 #include <vector>
 #include <memory>
@@ -23,7 +23,7 @@ enum EditorMode
     CREATE
 };
 
-class Editor : public State
+class Editor : public Scene
 {
     EditorMode currentEditorMode = IDLE;
     UserInput* cursor;

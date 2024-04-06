@@ -13,11 +13,36 @@ namespace sage
         
     
     }
+
+void RenderSystem::Update()
+{
+    for (const auto& renderable : components)
+    {
+        if (renderable.second->anim && GetFrameTime() > 1)
+        {
+            renderable.second->animIndex = (renderable.second->animIndex + 1)%renderable.second->animsCount;
+            // Update model animation
+            ModelAnimation anim = renderable.second->animation[renderable.second->animIndex];
+            renderable.second->animCurrentFrame = (renderable.second->animCurrentFrame + 1) % anim.frameCount;
+            UpdateModelAnimation(renderable.second->model, anim, renderable.second->animCurrentFrame);
+        }
+    }
+}
     
     void RenderSystem::Draw() const
     {
         for (const auto& renderable : components)
         {
+            if (renderable.second->anim)
+            {
+                // Update model animation
+                ModelAnimation anim = renderable.second->animation[renderable.second->animIndex];
+                renderable.second->animCurrentFrame = (renderable.second->animCurrentFrame + 1) % anim.frameCount;
+                UpdateModelAnimation(renderable.second->model, anim, renderable.second->animCurrentFrame);
+
+                renderable.second->model.transform = renderable.second->initialTransform;
+            }
+            
             DrawModel(renderable.second->model, renderable.second->position, renderable.second->scale, WHITE);
         }
     }
@@ -43,6 +68,13 @@ namespace sage
         auto r = components.at(id).get();
         r->position = t->position;
         r->scale = t->scale;
+        
+        // I think this works but the box draw function doesnt work right.
+        r->meshBoundingBox = GetMeshBoundingBox(r->model.meshes[0]);
+        r->meshBoundingBox.min = Vector3Transform(r->meshBoundingBox.min, MatrixMultiply(
+            MatrixTranslate(r->position.x, r->position.y, r->position.z), r->initialTransform));
+        r->meshBoundingBox.max = Vector3Transform(r->meshBoundingBox.max, MatrixMultiply(
+            MatrixTranslate(r->position.x, r->position.y, r->position.z), r->initialTransform));
     }
 
     void RenderSystem::AddComponent(std::unique_ptr<Renderable> component, const sage::Transform* const transform)

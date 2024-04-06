@@ -24,20 +24,28 @@ namespace sage
         auto transform = std::make_unique<Transform>(id);
         transform->position = position;
         transform->scale = 1.0f;
-    
-        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat, std::string("resources/models/obj/cube_steve.obj"));
-        renderable->name = name;
-        
-        auto collideable = std::make_unique<Collideable>(id, renderable->meshBoundingBox);
-        collideable->worldBoundingBox.min = Vector3Add(collideable->worldBoundingBox.min, transform->position);
-        collideable->worldBoundingBox.max = Vector3Add(collideable->worldBoundingBox.max, transform->position);
-        collideable->collisionLayer = PLAYER;
-    
-        auto towerWorldObject1 = std::make_unique<WorldObject>(id);
+        transform->rotation = { 0, 0, 0 };
         Transform* const transform_ptr = transform.get();
         ECS->transformSystem->AddComponent(std::move(transform));
+
+    
+        //auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat, std::string("resources/models/obj/cube_steve.obj"));
+        auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/gltf/girl.glb"), std::string("resources/models/gltf/girl.glb"));
+        renderable->name = name;
+        renderable->anim = true;
+        renderable->position = transform_ptr->position;
+        renderable->scale = transform_ptr->scale;
+        //renderable->rotation = transform_ptr->rotation;
+        Matrix matrix = ECS->transformSystem->GetMatrix(id);
+        renderable->model.transform = matrix;
+        
+        auto collideable = std::make_unique<Collideable>(id, renderable->meshBoundingBox);
+        collideable->collisionLayer = PLAYER;
+
+        auto towerWorldObject1 = std::make_unique<WorldObject>(id);
         ECS->renderSystem->AddComponent(std::move(renderable), transform_ptr);
         ECS->collisionSystem->AddComponent(std::move(collideable));
+        ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
         ECS->worldSystem->AddComponent(std::move(towerWorldObject1));
         return id;
     }

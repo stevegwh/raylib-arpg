@@ -6,7 +6,6 @@
 
 #include "Registry.hpp"
 #include "WorldObject.hpp"
-#include "GameObjectFactory.hpp"
 #include "Serializer.hpp"
 
 
@@ -30,14 +29,12 @@ void GameManager::init()
     const int screenWidth = SCREEN_WIDTH;
     const int screenHeight = SCREEN_HEIGHT;
 
-    InitWindow(screenWidth, screenHeight, "raylib [models] example - mesh picking");
+    InitWindow(screenWidth, screenHeight, "Baldur's Raylib");
     
-    // Should each state have its own set of systems?
-    // Or, should the destructor just make sure to delete all its entities from the systems?
 #ifdef EDITOR_MODE
-    state = std::make_unique<Editor>(userInput.get());
+    scene = std::make_unique<Editor>(userInput.get());
 #else
-    state = std::make_unique<Game>(userInput.get());
+    scene = std::make_unique<Game>(userInput.get());
 #endif
 
 }
@@ -56,7 +53,7 @@ void GameManager::Update()
         sCamera->Update();
         userInput->ListenForInput();
 
-        state->Update();
+        scene->Update();
 
         //----------------------------------------------------------------------------------
         draw();
@@ -67,12 +64,12 @@ void GameManager::Update()
             if (stateChange == 1)
             {
                 ecs = std::make_unique<ECSManager>(userInput.get());
-                state = std::make_unique<Game>(userInput.get());
+                scene = std::make_unique<Game>(userInput.get());
             }
             else if (stateChange == 2)
             {
                 ecs = std::make_unique<ECSManager>(userInput.get());
-                state = std::make_unique<Editor>(userInput.get());
+                scene = std::make_unique<Editor>(userInput.get());
             }
             stateChange = 0;
         }
@@ -91,14 +88,14 @@ void GameManager::draw()
 
     // If we hit something, draw the cursor at the hit point
     userInput->Draw();
-    
-    state->Draw3D();
+
+    scene->Draw3D();
 
     EndMode3D();
 
     userInput->DrawDebugText();
-    
-    state->Draw2D();
+
+    scene->Draw2D();
 
     DrawFPS(10, 10);
 

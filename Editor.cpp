@@ -6,7 +6,6 @@
 
 #include "GameObjectFactory.hpp"
 
-// NB: "GameManager" is friend
 #include "GameManager.hpp"
 
 #include <iostream>
@@ -39,7 +38,7 @@ namespace sage
 //        worldSystem->AddComponent(std::move(floorWorldObject));
 
         ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
-        // This should also be based on scene parameters
+        // TODO: This should also be based on scene parameters, and grid needs to be adapted to work.
         ECS->navigationGridSystem->Init(100, 1.0f);
         ECS->navigationGridSystem->PopulateGrid();
     }

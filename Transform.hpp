@@ -10,6 +10,7 @@
 #include "raylib.h"
 
 #include "Component.hpp"
+#include "TransformSystem.hpp"
 
 #include "Event.hpp"
 
@@ -22,6 +23,8 @@ namespace sage
         Vector3 direction{};
         float scale = 1.0f;
         Vector3 rotation{};
+
+        friend class TransformSystem;
         
         [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
         {
@@ -33,6 +36,13 @@ namespace sage
         std::unique_ptr<Event> OnPositionUpdate;
 
         explicit Transform(EntityID _entityId) : OnPositionUpdate(std::make_unique<Event>()), Component(_entityId) {}
+        
+        void positionSet(const Vector3& pos)
+        {
+            position = pos;
+            OnPositionUpdate->InvokeAllCallbacks();
+        }
+
     };
 }
 

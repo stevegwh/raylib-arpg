@@ -49,24 +49,39 @@ namespace sage
         DrawBoundingBox(bb, color);
     }
 
-    /**
+//    /**
+//     * Takes the local bounding box and moves it to the provided position
+//     * @param entityId The id of the entity
+//     * @param pos The world position of the desired centre of the bounding box
+//     */
+//    void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Vector3 pos)
+//    {
+//        const auto comp = components.at(entityId).get();
+//        BoundingBox bb;
+//        bb.min = Vector3Add(comp->localBoundingBox.min, pos);
+//        bb.max = Vector3Add(comp->localBoundingBox.max, pos);
+//        components.at(entityId)->worldBoundingBox = bb;
+//    }
+
+/**
      * Takes the local bounding box and moves it to the provided position
      * @param entityId The id of the entity
      * @param pos The world position of the desired centre of the bounding box
      */
-    void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Vector3 pos)
+    void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Matrix mat)
     {
         const auto comp = components.at(entityId).get();
+        auto renderable = ECS->renderSystem->GetComponent(entityId);
         BoundingBox bb;
-        bb.min = Vector3Add(comp->localBoundingBox.min, pos);
-        bb.max = Vector3Add(comp->localBoundingBox.max, pos);
+        bb.min = Vector3Transform(renderable->meshBoundingBox.min, mat);
+        bb.max = Vector3Transform(renderable->meshBoundingBox.max, mat);
         components.at(entityId)->worldBoundingBox = bb;
     }
 
     void CollisionSystem::onTransformUpdate(EntityID entityId)
     {
-        Vector3 pos = ECS->transformSystem->GetComponent(entityId)->position;
-        UpdateWorldBoundingBox(entityId, pos);
+        Matrix mat = ECS->transformSystem->GetMatrix(entityId);
+        UpdateWorldBoundingBox(entityId, mat);
     }    
     
     bool CollisionSystem::CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2) 
