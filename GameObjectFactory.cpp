@@ -35,12 +35,11 @@ namespace sage
         renderable->anim = true;
         renderable->position = transform_ptr->position;
         renderable->scale = transform_ptr->scale;
-        //renderable->rotation = transform_ptr->rotation;
-        Matrix matrix = ECS->transformSystem->GetMatrix(id);
-        renderable->model.transform = matrix;
+        renderable->rotation = transform_ptr->rotation;
         
         auto collideable = std::make_unique<Collideable>(id, renderable->meshBoundingBox);
         collideable->collisionLayer = PLAYER;
+        collideable->worldBoundingBox = renderable->meshBoundingBox;
 
         auto towerWorldObject1 = std::make_unique<WorldObject>(id);
         ECS->renderSystem->AddComponent(std::move(renderable), transform_ptr);

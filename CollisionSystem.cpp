@@ -45,7 +45,7 @@ namespace sage
 
     void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color) const
     {
-        auto bb = GetComponent(entityId)->worldBoundingBox;
+        auto bb = components.at(entityId)->worldBoundingBox;
         DrawBoundingBox(bb, color);
     }
 
@@ -70,11 +70,10 @@ namespace sage
      */
     void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Matrix mat)
     {
-        const auto comp = components.at(entityId).get();
-        auto renderable = ECS->renderSystem->GetComponent(entityId);
-        BoundingBox bb;
-        bb.min = Vector3Transform(renderable->meshBoundingBox.min, mat);
-        bb.max = Vector3Transform(renderable->meshBoundingBox.max, mat);
+        // TODO: currently this re-calculates the transform from scratch based on the model's bounds, rather than just updating the current bounds.
+        auto bb = ECS->renderSystem->GetModelBoundingBox(entityId);
+        bb.min = Vector3Transform(bb.min, mat);
+        bb.max = Vector3Transform(bb.max, mat);
         components.at(entityId)->worldBoundingBox = bb;
     }
 

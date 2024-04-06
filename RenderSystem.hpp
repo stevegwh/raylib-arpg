@@ -23,6 +23,7 @@ public:
     void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
     void AddComponent(std::unique_ptr<Renderable> component, const sage::Transform* const transform);
     void AddComponent(std::unique_ptr<Renderable> component) = delete;
+    BoundingBox GetModelBoundingBox(EntityID id);
 };
 }
 
