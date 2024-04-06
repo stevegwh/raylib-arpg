@@ -28,9 +28,11 @@ void RenderSystem::Update()
         }
     }
 }
-
+float rotationAngle = 0;
 void RenderSystem::Draw() const
 {
+    rotationAngle += 10.0f * GetFrameTime();
+    std::fmod(rotationAngle, 360);
     for (const auto& renderable : components)
     {
         if (renderable.second->anim)
@@ -42,8 +44,10 @@ void RenderSystem::Draw() const
 
             renderable.second->model.transform = renderable.second->initialTransform;
         }
-        
-        DrawModel(renderable.second->model, renderable.second->transform->position, renderable.second->transform->scale, WHITE);
+        auto t = renderable.second->transform;
+        Vector3 rotationAxis = { 0.0f, 1.0f, 0.0f };
+        DrawModelEx(renderable.second->model, t->position, rotationAxis, rotationAngle, {t->scale, t->scale, t->scale}, WHITE);
+        //DrawModel(renderable.second->model, renderable.second->transform->position, renderable.second->transform->scale, WHITE);
     }
 }
 
