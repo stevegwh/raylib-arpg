@@ -14,16 +14,14 @@
 #include "Material.hpp"
 #include "Component.hpp"
 #include "RenderSystem.hpp"
+#include "Transform.hpp"
 
 
 namespace sage
 {
     struct Renderable : public Component<Renderable>
     {
-        // Copies of transform
-        Vector3 position;
-        float scale;
-        Vector3 rotation;
+        const sage::Transform* const transform; // Hard dependency
         
         const Matrix initialTransform;
         sage::Material material;
@@ -38,14 +36,36 @@ namespace sage
         unsigned int animCurrentFrame = 0;
         int animsCount;
         
-        Renderable(EntityID entityId, Model _model, sage::Material _material, std::string _modelPath, Matrix _localTransform)
-        : Component(entityId), model(std::move(_model)), material(std::move(_material)), modelPath(_modelPath), initialTransform(_localTransform)
+        Renderable(
+            EntityID entityId, 
+            Model _model, 
+            sage::Material _material, 
+            std::string _modelPath, 
+            Matrix _localTransform,
+            const Transform* const _transform)
+        : 
+        Component(entityId),
+        model(std::move(_model)), 
+        material(std::move(_material)), 
+        modelPath(_modelPath), 
+        initialTransform(_localTransform),
+        transform(_transform)
         {
         }
 
         // TODO: Currently defaults to having animations if no material is passed
-        Renderable(EntityID entityId, Model _model, std::string _modelPath, Matrix _localTransform)
-            : Component(entityId), model(std::move(_model)), modelPath(_modelPath), initialTransform(_localTransform)
+        Renderable(
+            EntityID entityId, 
+            Model _model, 
+            std::string _modelPath,
+            Matrix _localTransform,
+            const Transform* const _transform)
+            : 
+            Component(entityId), 
+            model(std::move(_model)), 
+            modelPath(_modelPath), 
+            initialTransform(_localTransform),
+            transform(_transform)
         {
             animsCount = 0;
             animation = LoadModelAnimations(_modelPath.c_str(), &animsCount);
@@ -68,7 +88,7 @@ namespace sage
             };
         }
 
-        BoundingBox CalculateModelBoundingBox() const
+        [[nodiscard]] BoundingBox CalculateModelBoundingBox() const
         {
             Mesh mesh = model.meshes[0];
             std::vector<float> vertices(mesh.vertexCount * 3);
@@ -107,7 +127,7 @@ namespace sage
                 bb.max.y = std::max(bb.max.y, v.y);
                 bb.max.z = std::max(bb.max.z, v.z);
             }
-
+            
             return bb;
         }
 

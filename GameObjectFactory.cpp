@@ -27,20 +27,16 @@ namespace sage
         transform->rotation = { 0, 0, 0 };
         Transform* const transform_ptr = transform.get();
         ECS->transformSystem->AddComponent(std::move(transform));
-
-    
-        //auto renderable = std::make_unique<Renderable>(id, LoadModel("resources/models/obj/cube_steve.obj"), mat, std::string("resources/models/obj/cube_steve.obj"));
+        
         Matrix modelTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
         auto renderable = std::make_unique<Renderable>(id, 
                                                        LoadModel("resources/models/gltf/girl.glb"), 
                                                        std::string("resources/models/gltf/girl.glb"),
-                                                       modelTransform);
+                                                       modelTransform,
+                                                       transform_ptr);
         renderable->name = name;
         renderable->anim = true;
-        renderable->position = transform_ptr->position;
-        renderable->scale = transform_ptr->scale;
-        renderable->rotation = transform_ptr->rotation;
-        ECS->renderSystem->AddComponent(std::move(renderable), transform_ptr);
+        ECS->renderSystem->AddComponent(std::move(renderable));
         
         auto collideable = std::make_unique<Collideable>(id, ECS->renderSystem->GetComponent(id)->CalculateModelBoundingBox());
         collideable->collisionLayer = PLAYER;
@@ -66,9 +62,9 @@ namespace sage
         sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
         Model model = LoadModel("resources/models/obj/turret.obj");
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-        auto renderable = std::make_unique<Renderable>(id, model, mat, "resources/models/obj/turret.obj", MatrixIdentity());
+        auto renderable = std::make_unique<Renderable>(id, model, mat, "resources/models/obj/turret.obj", MatrixIdentity(), transform_ptr);
         renderable->name = name;
-        ECS->renderSystem->AddComponent(std::move(renderable), transform_ptr);
+        ECS->renderSystem->AddComponent(std::move(renderable));
         auto collideable = std::make_unique<Collideable>(id, ECS->renderSystem->GetComponent(id)->CalculateModelBoundingBox());
         collideable->collisionLayer = BUILDING;
         ECS->collisionSystem->AddComponent(std::move(collideable));

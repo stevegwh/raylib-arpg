@@ -8,9 +8,10 @@
 
 #include "raylib.h"
 
-
-
 #include <unordered_map>
+#include <optional>
+
+#include "Transform.hpp"
 
 
 namespace sage
@@ -26,15 +27,14 @@ namespace sage
 
     struct Collideable : public Component<Collideable>
     {
-    private:
-
     public:
         const BoundingBox localBoundingBox; // BoundingBox in local space
         BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb pos + world pos)
         CollisionLayer collisionLayer = DEFAULT;
+
         explicit Collideable(EntityID _entityId, BoundingBox _boundingBox) :
             Component(_entityId), localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
-            {}
+        {}
 
         [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
         {

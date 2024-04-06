@@ -15,15 +15,11 @@ namespace sage
 {
 class RenderSystem : public BaseSystem<Renderable>
 {
-    void onTransformUpdate(EntityID id);
 public:
     ~RenderSystem();
     void Update();
     void Draw() const;
     void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
-    void AddComponent(std::unique_ptr<Renderable> component, const sage::Transform* const transform);
-    void AddComponent(std::unique_ptr<Renderable> component) = delete;
-    //BoundingBox CalculateModelBoundingBox(EntityID id);
 };
 }
 
