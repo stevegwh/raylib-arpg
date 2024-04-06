@@ -2,25 +2,39 @@
 // Created by Steve Wheeler on 06/04/2024.
 //
 
-#include <memory>
-#include <vector>
-
-#include "AnimationState.hpp"
-
 #pragma once
+
+#include "raylib.h"
+
+#include "Entity.hpp"
 
 namespace sage
 {
-class AnimationController 
+
+class AnimationController
 {
-private:
-    std::vector<std::unique_ptr<AnimationState>> states;
+    EntityID entityID;
+    const Transform* transform;
+    ModelAnimation* animation;
+    Model* model;
+    unsigned int animIndex = 0;
+    unsigned int animCurrentFrame = 0;
+    int animsCount;
+protected:
+    void changeAnimation(int index);
 public:
-    AnimationState* head;
+    ~AnimationController();
     void Update();
     void Draw();
-    void SetHead(AnimationState* state);
-    void Add(std::unique_ptr<AnimationState> state);
-    void Pop();
+    
+    AnimationController(EntityID _entityId , const char* _modelPath, Model* _model, const Transform* _transform) : 
+    entityID(_entityId), model(_model), transform(_transform)
+    {
+        animsCount = 0;
+        animation = LoadModelAnimations(_modelPath, &animsCount);
+        animIndex = 0;
+    }
+
 };
+
 } // sage

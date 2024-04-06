@@ -20,9 +20,10 @@ void RenderSystem::Update()
     {
         if (renderable.second->anim)
         {
-            ModelAnimation anim = renderable.second->animation[renderable.second->animIndex];
-            renderable.second->animCurrentFrame = (renderable.second->animCurrentFrame + 1) % anim.frameCount;
-            UpdateModelAnimation(renderable.second->model, anim, renderable.second->animCurrentFrame);
+            renderable.second->animationController->Update();
+//            ModelAnimation anim = renderable.second->animation[renderable.second->animIndex];
+//            renderable.second->animCurrentFrame = (renderable.second->animCurrentFrame + 1) % anim.frameCount;
+//            UpdateModelAnimation(renderable.second->model, anim, renderable.second->animCurrentFrame);
         }
     }
 }

@@ -33,9 +33,16 @@ namespace sage
                 {"Position", TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)}
             };
         }
+        
         std::unique_ptr<Event> OnPositionUpdate;
-
-        explicit Transform(EntityID _entityId) : OnPositionUpdate(std::make_unique<Event>()), Component(_entityId) {}
+        std::unique_ptr<Event> OnStartMovement;
+        std::unique_ptr<Event> OnFinishMovement;
+        
+        explicit Transform(EntityID _entityId) : 
+        OnPositionUpdate(std::make_unique<Event>()), 
+        OnStartMovement(std::make_unique<Event>()),
+        OnFinishMovement(std::make_unique<Event>()),
+        Component(_entityId) {}
         
         void positionSet(const Vector3& pos)
         {

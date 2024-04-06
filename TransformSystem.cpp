@@ -38,6 +38,7 @@ void TransformSystem::PathfindToLocation(EntityID entityId, const std::vector<Ve
     for (auto n : path) transform->targets.emplace(n);
     transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
     moveTowardsTransforms.push_back(transform);
+    transform->OnStartMovement->InvokeAllCallbacks();
 }
 
 void TransformSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
@@ -62,6 +63,7 @@ void TransformSystem::Update()
             if (transform->targets.empty())
             {
                 it = moveTowardsTransforms.erase(it);
+                transform->OnFinishMovement->InvokeAllCallbacks();
                 continue;
             }
             transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));

@@ -3,44 +3,30 @@
 //
 
 #include "AnimationController.hpp"
+#include "GameManager.hpp"
 
 namespace sage
 {
 
-void AnimationController::SetHead(AnimationState* state)
+void AnimationController::changeAnimation(int index)
 {
-    if (head != nullptr)
-    {
-        state->next = head;
-    }
-    head = state;
-
-}
-
-void AnimationController::Pop()
-{
-    if (head == nullptr || head->next == nullptr) return; // NOTE: Always leaves 1 state in stack.
-    head = head->next;
-    //free(tmp);
+    animIndex = index;
 }
 
 void AnimationController::Update()
 {
-    if (!head->CheckCondition())
-    {
-        Pop();
-        return;
-    }
-    head->Update();
+    ModelAnimation anim = animation[animIndex];
+    animCurrentFrame = (animCurrentFrame + 1) % anim.frameCount;
+    UpdateModelAnimation(ECS->renderSystem->GetComponent(entityID)->model, anim, animCurrentFrame);
 }
 
 void AnimationController::Draw()
 {
-    head->Draw();
+
 }
 
-void AnimationController::Add(std::unique_ptr<AnimationState> state)
+AnimationController::~AnimationController()
 {
-    states.push_back(std::move(state));
+    UnloadModelAnimations(animation, animsCount);
 }
 } // sage

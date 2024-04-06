@@ -13,6 +13,7 @@
 #include "Renderable.hpp"
 #include "Collideable.hpp"
 #include "WorldObject.hpp"
+#include "PlayerAnimations.hpp"
 
 namespace sage
 {
@@ -39,7 +40,8 @@ BoundingBox createRectangularBoundingBox(float length, float height)
 EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name) 
 {
     EntityID id = Registry::GetInstance().CreateEntity(false);
-    sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
+    const char* modelPath = "resources/models/gltf/hero.glb";
+    //sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
     auto transform = std::make_unique<Transform>(id);
     transform->position = position;
@@ -47,15 +49,21 @@ EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name)
     transform->rotation = { 0, 0, 0 };
     Transform* const transform_ptr = transform.get();
     ECS->transformSystem->AddComponent(std::move(transform));
+    auto model = LoadModel(modelPath);
+    // Set animations
+    auto animations = std::make_unique<PlayerAnimations>(id, modelPath, &model, transform_ptr);
     
     Matrix modelTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
     auto renderable = std::make_unique<Renderable>(id, 
-                                                   LoadModel("resources/models/gltf/girl.glb"), 
-                                                   std::string("resources/models/gltf/girl.glb"),
+                                                   model,
+                                                   std::string(modelPath),
                                                    modelTransform,
-                                                   transform_ptr);
+                                                   transform_ptr,
+                                                   std::move(animations));
     renderable->name = name;
-    renderable->anim = true;
+    renderable->anim = true;    
+    
+    
     ECS->renderSystem->AddComponent(std::move(renderable));
     BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
     auto collideable = std::make_unique<Collideable>(id, bb);
