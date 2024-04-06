@@ -67,13 +67,16 @@ void TransformSystem::Update()
             transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
         }
 
-        transform->position.x = transform->position.x + transform->direction.x * 0.5f;
+        // Calculate rotation angle based on direction
+        float angle = atan2f(transform->direction.x, transform->direction.z) * RAD2DEG;
+        transform->rotation.y = angle;
+
+        transform->position.x = transform->position.x + transform->direction.x * 0.35f;
         //transform->position.x = dy * 0.5f;
-        transform->position.z = transform->position.z + transform->direction.z * 0.5f;
+        transform->position.z = transform->position.z + transform->direction.z * 0.35f;
         transform->OnPositionUpdate->InvokeAllCallbacks();
         ++it;
     }
-
 }
 
 Matrix TransformSystem::GetMatrix(EntityID id)
@@ -83,6 +86,15 @@ Matrix TransformSystem::GetMatrix(EntityID id)
     Matrix scale = MatrixScale(transform->scale, transform->scale, transform->scale);
     Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y, DEG2RAD*transform->rotation.z});
     return MatrixMultiply(scale, MatrixMultiply(rot, trans));
+}
+
+Matrix TransformSystem::GetMatrixNoRot(EntityID id)
+{
+    auto transform = GetComponent(id);
+    Matrix trans = MatrixTranslate(transform->position.x, transform->position.y, transform->position.z);
+    Matrix scale = MatrixScale(transform->scale, transform->scale, transform->scale);
+    //Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y, DEG2RAD*transform->rotation.z});
+    return MatrixMultiply(scale, trans);
 }
 
 }

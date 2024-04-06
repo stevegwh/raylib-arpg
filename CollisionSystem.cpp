@@ -64,7 +64,7 @@ namespace sage
 
     void CollisionSystem::onTransformUpdate(EntityID entityId)
     {
-        Matrix mat = ECS->transformSystem->GetMatrix(entityId);
+        Matrix mat = ECS->transformSystem->GetMatrixNoRot(entityId);
         UpdateWorldBoundingBox(entityId, mat);
     }    
     

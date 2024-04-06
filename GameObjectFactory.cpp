@@ -16,61 +16,81 @@
 
 namespace sage
 {
-    EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name) 
-    {
-        EntityID id = Registry::GetInstance().CreateEntity(false);
-        sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
+BoundingBox createRectangularBoundingBox(float length, float height) 
+{
+    BoundingBox bb;
+    // Calculate half dimensions
+    float halfLength = length / 2.0f;
+    float halfHeight = height / 2.0f;
+
+    // Set minimum bounds
+    bb.min.x = -halfLength;
+    bb.min.y = 0.0f;
+    bb.min.z = -halfLength;
+
+    // Set maximum bounds
+    bb.max.x = halfLength;
+    bb.max.y = height;
+    bb.max.z = halfLength;
+
+    return bb;
+}
+
+EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name) 
+{
+    EntityID id = Registry::GetInstance().CreateEntity(false);
+    sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
+
+    auto transform = std::make_unique<Transform>(id);
+    transform->position = position;
+    transform->scale = 1.0f;
+    transform->rotation = { 0, 0, 0 };
+    Transform* const transform_ptr = transform.get();
+    ECS->transformSystem->AddComponent(std::move(transform));
     
-        auto transform = std::make_unique<Transform>(id);
-        transform->position = position;
-        transform->scale = 1.0f;
-        transform->rotation = { 0, 0, 0 };
-        Transform* const transform_ptr = transform.get();
-        ECS->transformSystem->AddComponent(std::move(transform));
-        
-        Matrix modelTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
-        auto renderable = std::make_unique<Renderable>(id, 
-                                                       LoadModel("resources/models/gltf/girl.glb"), 
-                                                       std::string("resources/models/gltf/girl.glb"),
-                                                       modelTransform,
-                                                       transform_ptr);
-        renderable->name = name;
-        renderable->anim = true;
-        ECS->renderSystem->AddComponent(std::move(renderable));
-        
-        auto collideable = std::make_unique<Collideable>(id, ECS->renderSystem->GetComponent(id)->CalculateModelBoundingBox());
-        collideable->collisionLayer = PLAYER;
+    Matrix modelTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
+    auto renderable = std::make_unique<Renderable>(id, 
+                                                   LoadModel("resources/models/gltf/girl.glb"), 
+                                                   std::string("resources/models/gltf/girl.glb"),
+                                                   modelTransform,
+                                                   transform_ptr);
+    renderable->name = name;
+    renderable->anim = true;
+    ECS->renderSystem->AddComponent(std::move(renderable));
+    BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
+    auto collideable = std::make_unique<Collideable>(id, bb);
+    collideable->collisionLayer = PLAYER;
 
-        auto towerWorldObject1 = std::make_unique<WorldObject>(id);
+    auto worldObject = std::make_unique<WorldObject>(id);
 
-        ECS->collisionSystem->AddComponent(std::move(collideable));
-        ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
-        ECS->worldSystem->AddComponent(std::move(towerWorldObject1));
-        return id;
-    }
+    ECS->collisionSystem->AddComponent(std::move(collideable));
+    ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
+    ECS->worldSystem->AddComponent(std::move(worldObject));
+    return id;
+}
 
-    void GameObjectFactory::createTower(Vector3 position, const char* name) 
-    {
-        EntityID id = Registry::GetInstance().CreateEntity();
-        
-        auto transform = std::make_unique<Transform>(id);
-        transform->position = position;
-        transform->scale = 1.0f;
-        Transform* const transform_ptr = transform.get();
-        ECS->transformSystem->AddComponent(std::move(transform));
-        
-        sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
-        Model model = LoadModel("resources/models/obj/turret.obj");
-        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-        auto renderable = std::make_unique<Renderable>(id, model, mat, "resources/models/obj/turret.obj", MatrixIdentity(), transform_ptr);
-        renderable->name = name;
-        ECS->renderSystem->AddComponent(std::move(renderable));
-        auto collideable = std::make_unique<Collideable>(id, ECS->renderSystem->GetComponent(id)->CalculateModelBoundingBox());
-        collideable->collisionLayer = BUILDING;
-        ECS->collisionSystem->AddComponent(std::move(collideable));
-        ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
+void GameObjectFactory::createTower(Vector3 position, const char* name) 
+{
+    EntityID id = Registry::GetInstance().CreateEntity();
     
-        auto worldObject = std::make_unique<WorldObject>(id);
-        ECS->worldSystem->AddComponent(std::move(worldObject));
-    }
+    auto transform = std::make_unique<Transform>(id);
+    transform->position = position;
+    transform->scale = 1.0f;
+    Transform* const transform_ptr = transform.get();
+    ECS->transformSystem->AddComponent(std::move(transform));
+    
+    sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
+    Model model = LoadModel("resources/models/obj/turret.obj");
+    model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
+    auto renderable = std::make_unique<Renderable>(id, model, mat, "resources/models/obj/turret.obj", MatrixIdentity(), transform_ptr);
+    renderable->name = name;
+    ECS->renderSystem->AddComponent(std::move(renderable));
+    auto collideable = std::make_unique<Collideable>(id, ECS->renderSystem->GetComponent(id)->CalculateModelBoundingBox());
+    collideable->collisionLayer = BUILDING;
+    ECS->collisionSystem->AddComponent(std::move(collideable));
+    ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
+
+    auto worldObject = std::make_unique<WorldObject>(id);
+    ECS->worldSystem->AddComponent(std::move(worldObject));
+}
 } // sage

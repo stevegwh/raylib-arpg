@@ -18,36 +18,24 @@ void RenderSystem::Update()
 {
     for (const auto& renderable : components)
     {
-        if (renderable.second->anim && GetFrameTime() > 1)
+        if (renderable.second->anim)
         {
-            renderable.second->animIndex = (renderable.second->animIndex + 1)%renderable.second->animsCount;
-            // Update model animation
             ModelAnimation anim = renderable.second->animation[renderable.second->animIndex];
             renderable.second->animCurrentFrame = (renderable.second->animCurrentFrame + 1) % anim.frameCount;
             UpdateModelAnimation(renderable.second->model, anim, renderable.second->animCurrentFrame);
         }
     }
 }
-float rotationAngle = 0;
+//float rotationAngle = 0;
 void RenderSystem::Draw() const
 {
-    rotationAngle += 10.0f * GetFrameTime();
-    std::fmod(rotationAngle, 360);
+    //rotationAngle += 10.0f * GetFrameTime();
+    //std::fmod(rotationAngle, 360);
     for (const auto& renderable : components)
     {
-        if (renderable.second->anim)
-        {
-            // Update model animation
-            ModelAnimation anim = renderable.second->animation[renderable.second->animIndex];
-            renderable.second->animCurrentFrame = (renderable.second->animCurrentFrame + 1) % anim.frameCount;
-            UpdateModelAnimation(renderable.second->model, anim, renderable.second->animCurrentFrame);
-
-            renderable.second->model.transform = renderable.second->initialTransform;
-        }
         auto t = renderable.second->transform;
         Vector3 rotationAxis = { 0.0f, 1.0f, 0.0f };
-        DrawModelEx(renderable.second->model, t->position, rotationAxis, rotationAngle, {t->scale, t->scale, t->scale}, WHITE);
-        //DrawModel(renderable.second->model, renderable.second->transform->position, renderable.second->transform->scale, WHITE);
+        DrawModelEx(renderable.second->model, t->position, rotationAxis, t->rotation.y, {t->scale, t->scale, t->scale}, WHITE);
     }
 }
 

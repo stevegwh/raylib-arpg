@@ -30,5 +30,6 @@ public:
     void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
     void Update();
     Matrix GetMatrix(EntityID id);
+    Matrix GetMatrixNoRot(EntityID id);
 };
 }
