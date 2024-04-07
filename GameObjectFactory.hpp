@@ -15,9 +15,9 @@ namespace sage
 
 struct GameObjectFactory
 {
-    static void createTower(Vector3 position, const char* name) ;
-    static EntityID createPlayer(Vector3 position, const char* name) ;
-
+    static void createTower(Vector3 position, const char* name);
+    static EntityID createPlayer(Vector3 position, const char* name);
+    static void loadBlenderLevel();
 };
 
 } // sage

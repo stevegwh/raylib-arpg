@@ -40,7 +40,9 @@ Game::Game(UserInput* _cursor) : cursor(_cursor), eventManager(std::make_unique<
 //        auto floorWorldObject = std::make_unique<WorldObject>(floor);
 //        worldSystem->AddComponent(std::move(floorWorldObject));
 
-    ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
+    //ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
+    GameObjectFactory::loadBlenderLevel();
+    
     // This should also be based on scene parameters
     ECS->navigationGridSystem->Init(100, 1.0f);
     ECS->navigationGridSystem->PopulateGrid();

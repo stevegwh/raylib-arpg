@@ -43,6 +43,7 @@ struct Renderable : public Component<Renderable>
     initialTransform(_localTransform),
     transform(_transform)
     {
+        model.transform = initialTransform;
     }
     
     Renderable(

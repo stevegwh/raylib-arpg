@@ -12,9 +12,9 @@
 namespace sage
 {
 GameManager::GameManager() :
-sCamera(std::make_unique<sage::Camera>()),
-userInput(std::make_unique<sage::UserInput>()),
-ecs(std::make_unique<sage::ECSManager>(userInput.get()))
+    sCamera(std::make_unique<sage::Camera>()),
+    userInput(std::make_unique<sage::UserInput>()),
+    ecs(std::make_unique<sage::ECSManager>(userInput.get()))
 {}
 
 GameManager::~GameManager()

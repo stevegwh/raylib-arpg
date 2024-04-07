@@ -4,7 +4,7 @@
 
 #pragma once
 
-#define EDITOR_MODE
+//#define EDITOR_MODE
 
 #include "raylib.h"
 
@@ -33,7 +33,6 @@ static constexpr int SCREEN_HEIGHT = 720;
 
 class GameManager
 {
-    std::unique_ptr<sage::UserInput> userInput;
     std::unique_ptr<sage::Scene> scene;
     int stateChange = 0;
 
@@ -44,6 +43,7 @@ class GameManager
     GameManager();
     ~GameManager();
 public:
+    std::unique_ptr<sage::UserInput> userInput;
     static GameManager& GetInstance()
     {
         static GameManager instance; // Guaranteed to be destroyed.
