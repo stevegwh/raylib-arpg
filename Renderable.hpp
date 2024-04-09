@@ -10,6 +10,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <optional>
 
 #include "Material.hpp"
 #include "Component.hpp"
@@ -25,6 +26,7 @@ struct Renderable : public Component<Renderable>
     sage::Material material;
     const std::string modelPath;
     Model model; // was const
+    std::optional<Shader> shader;
 
     std::string name = "Default";
     
@@ -64,6 +66,10 @@ struct Renderable : public Component<Renderable>
     
     ~Renderable()
     {
+        if (shader.has_value())
+        {
+            UnloadShader(shader.value());
+        }
         UnloadModel(model);
         UnloadTexture(material.diffuse);
     }

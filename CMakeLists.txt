@@ -17,7 +17,7 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
         set(FETCHCONTENT_QUIET NO)
         FetchContent_Populate(raylib)
-        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
+        set(BUILD_EXAMPLES ON CACHE BOOL "" FORCE) # don't build the supplied examples
         add_subdirectory(${raylib_SOURCE_DIR} ${raylib_BINARY_DIR})
     endif()
 endif()
@@ -81,6 +81,8 @@ add_executable(BG_Raylib
         AnimationSystem.cpp
         AnimationSystem.hpp
         Animation.hpp
+        LightSubSystem.cpp
+        LightSubSystem.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json)

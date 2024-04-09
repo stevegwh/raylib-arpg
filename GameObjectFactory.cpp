@@ -9,6 +9,7 @@
 #include "GameManager.hpp"
 #include "Registry.hpp"
 
+#include "Scene.hpp"
 #include "Transform.hpp"
 #include "Renderable.hpp"
 #include "Collideable.hpp"
@@ -68,7 +69,7 @@ EntityID GameObjectFactory::createPlayer(Vector3 position, const char* name)
     
     ECS->animationSystem->AddComponent(std::move(animation));
     
-    Matrix modelTransform = MatrixMultiply(MatrixScale(0.035f, 0.035f, 0.035f) , MatrixRotateX(DEG2RAD*90));
+    Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
     auto renderable = std::make_unique<Renderable>(id, 
                                                    model,
                                                    std::string(modelPath),
@@ -114,12 +115,15 @@ void GameObjectFactory::createTower(Vector3 position, const char* name)
     auto worldObject = std::make_unique<WorldObject>(id);
     ECS->worldSystem->AddComponent(std::move(worldObject));
 }
-void GameObjectFactory::loadBlenderLevel()
+
+void GameObjectFactory::loadBlenderLevel(Scene* scene)
 {
     EntityID id = Registry::GetInstance().CreateEntity();
-    
-    const char* modelPath = "resources/models/m3d/seagull.m3d";
+//    sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
+//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
+    const char* modelPath = "resources/models/gltf/tavern.glb";
     Model model = LoadModel(modelPath);
+    //model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
     
     auto transform = std::make_unique<Transform>(id);
     transform->position = {0, 0, 0};
@@ -127,16 +131,32 @@ void GameObjectFactory::loadBlenderLevel()
     Transform* const transform_ptr = transform.get();
     ECS->transformSystem->AddComponent(std::move(transform));
 
-    Matrix modelTransform = MatrixIdentity();
+    Matrix modelTransform = MatrixMultiply(MatrixScale(7.0f, 7.0f, 7.0f), MatrixTranslate(0, 6.3f, 0));
+    //Matrix modelTransform = MatrixScale(0.1f, 0.1f, 0.1f);
     auto renderable = std::make_unique<Renderable>(id,
                                                    model,
+                                                   //mat,
                                                    std::string(modelPath),
                                                    modelTransform,
                                                    transform_ptr);
     renderable->name = "Level";
-
-
+    scene->lightSubSystem->LinkRenderableToLight(renderable.get());
+    
+    auto renderable_ptr = renderable.get();
     ECS->renderSystem->AddComponent(std::move(renderable));
+    
+    // Create floor
+    EntityID floor = Registry::GetInstance().CreateEntity();
+    BoundingBox modelBB = GetModelBoundingBox(renderable_ptr->model);
+    Vector3 g0 = (Vector3){ modelBB.min.x, 0.1f, modelBB.min.z };
+    Vector3 g2 = (Vector3){  modelBB.max.x, 0.1f,  modelBB.max.z };
+    BoundingBox bb = {
+        .min = g0,
+        .max = g2
+    };
+    auto floorCollidable = std::make_unique<Collideable>(floor, bb);
+    floorCollidable->collisionLayer = FLOOR;
+    ECS->collisionSystem->AddComponent(std::move(floorCollidable));
 
 }
 } // sage

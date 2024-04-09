@@ -6,8 +6,10 @@
 
 #include "Registry.hpp"
 #include "WorldObject.hpp"
-#include "Serializer.hpp"
 
+
+#define RLIGHTS_IMPLEMENTATION
+#include "rlights.h"
 
 namespace sage
 {
@@ -39,6 +41,9 @@ void GameManager::init()
 
 }
 
+//Model model;
+//Light lights[MAX_LIGHTS] = { 0 };
+
 void GameManager::Update()
 {
     init();
@@ -47,6 +52,7 @@ void GameManager::Update()
     // Main game loop
     while (!WindowShouldClose())        // Detect window close button or ESC key
     {
+
         // Update
         //----------------------------------------------------------------------------------
         sCamera->HandleInput(); // TODO: Should merge this with userInput
@@ -90,6 +96,8 @@ void GameManager::draw()
     userInput->Draw();
 
     scene->Draw3D();
+    
+    scene->lightSubSystem->DrawDebugLights();
 
     EndMode3D();
 

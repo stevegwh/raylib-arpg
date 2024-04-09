@@ -12,12 +12,12 @@
 
 namespace sage
 {
-
+typedef struct Scene Scene;
 struct GameObjectFactory
 {
     static void createTower(Vector3 position, const char* name);
     static EntityID createPlayer(Vector3 position, const char* name);
-    static void loadBlenderLevel();
+    static void loadBlenderLevel(Scene* scene);
 };
 
 } // sage
