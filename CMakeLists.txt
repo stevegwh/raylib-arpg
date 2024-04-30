@@ -4,10 +4,10 @@ project(BG_Raylib)
 set(CMAKE_CXX_STANDARD 20)
 
 # Dependencies
+include(FetchContent)
 set(RAYLIB_VERSION 5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
-if (NOT raylib_FOUND) # If there's none, fetch and build raylib
-    include(FetchContent)
+if (NOT raylib_FOUND) # If there's none, fetch and build raylib 
     FetchContent_Declare(
             raylib
             DOWNLOAD_EXTRACT_TIMESTAMP OFF
@@ -22,12 +22,15 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     endif()
 endif()
 
+FetchContent_Declare(
+        entt
+        GIT_REPOSITORY "https://github.com/skypjack/entt.git"
+        GIT_TAG "v3.13.2"
+)
+FetchContent_MakeAvailable(entt)
 # Json
-include(FetchContent)
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
-
-include_directories(../r3d-test/includes)
 
 add_executable(BG_Raylib
         main.cpp
@@ -85,7 +88,7 @@ add_executable(BG_Raylib
         LightSubSystem.hpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json EnTT::EnTT)
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
