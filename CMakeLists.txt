@@ -28,72 +28,22 @@ FetchContent_Declare(
         GIT_TAG "v3.13.2"
 )
 FetchContent_MakeAvailable(entt)
-# Json
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
-add_executable(BG_Raylib
-        main.cpp
-        GameManager.cpp
-        GameManager.hpp
-        Camera.cpp
-        Camera.hpp
-        Renderable.hpp
-        Material.hpp
-        UserInput.cpp
-        UserInput.hpp
-        CollisionSystem.cpp
-        CollisionSystem.hpp
-        Collideable.hpp
-        Event.cpp
-        Event.hpp
-        raygui.h
-        Entity.hpp
-        Transform.hpp
-        RenderSystem.cpp
-        RenderSystem.hpp
-        Component.hpp
-        TransformSystem.cpp
-        TransformSystem.hpp
-        Entity.cpp
-        BaseSystem.hpp
-        Registry.hpp
-        Editor.cpp
-        Editor.hpp
-        WorldObject.hpp
-        WorldSystem.cpp
-        WorldSystem.hpp
-        NavigationGridSystem.cpp
-        NavigationGridSystem.hpp
-        NavigationGridSquare.hpp
-        ActorMovementSystem.cpp
-        ActorMovementSystem.hpp
-        Actor.hpp
-        GameObjectFactory.cpp
-        GameObjectFactory.hpp
-        Serializer.cpp
-        Serializer.hpp
-        Scene.hpp
-        Game.cpp
-        Game.hpp
-        ECSManager.cpp
-        ECSManager.hpp
-        EventManager.hpp
-        EventManager.cpp
-        EventCallback.hpp
-        AnimationSystem.cpp
-        AnimationSystem.hpp
-        Animation.hpp
-        LightSubSystem.cpp
-        LightSubSystem.hpp
-)
+
+file(GLOB PROJECT_HEADERS src/*.hpp)
+file(GLOB PROJECT_SOURCES src/*.cpp)
+
+add_executable(${PROJECT_NAME}  ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json EnTT::EnTT)
-
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
 endif()
+
 
 # Checks if OSX and links appropriate frameworks (Only required on MacOS)
 #if (APPLE)
