@@ -18,7 +18,7 @@ bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::Coll
 namespace sage
 {
 
-    void CollisionSystem::TransformUpdateSubscribe(entt::entity entity)
+    void CollisionSystem::TransformUpdateSubscribe(entt::entity entity) // TODO: I don't like this solution
     {
         eventManager->Subscribe([this, entity] { onTransformUpdate(entity); },
                                 *registry->get<Transform>(entity).OnPositionUpdate);
@@ -63,7 +63,7 @@ namespace sage
      * @param entityId The id of the entity
      * @param mat The transform matrix for the local bounding box
      */
-    void CollisionSystem::UpdateWorldBoundingBox(entt::entity entityId, Matrix mat)
+    void CollisionSystem::UpdateWorldBoundingBox(entt::entity entityId, Matrix mat) // TODO: I don't like the name
     {
         registry->patch<Collideable>(entityId, [mat](auto& col) {
             auto bb = col.localBoundingBox;

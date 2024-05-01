@@ -1,4 +1,6 @@
 ## To Do
 
-- Every call to ECS->system should be replaced with a pointer to that system passed into the object.
-  - This should enforce a strict order of initialisation and make dependencies clearer.
+- Make editor work again
+- Add GUI to editor
+- Put editor in own folder with a CMakeLists
+- Make serialisation work again (maybe don't use json?)
