@@ -7,8 +7,6 @@
 #include <utility>
 #include "NavigationGridSystem.hpp"
 #include "Collideable.hpp"
-#include "CollisionSystem.hpp"
-#include "GameManager.hpp"
 
 
 namespace sage
@@ -48,17 +46,17 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
             Vector3 v1 = {(float)i * spacing, 0, (float)j * spacing};
             Vector3 v3 = {(float)(i + 1) * spacing, 1.0f, (float)(j + 1) * spacing};
 
-            EntityID id = Registry::GetInstance().CreateEntity();
+            //EntityID id = Registry::GetInstance().CreateEntity();
+            entt::entity id = registry->create();
 
-            auto gridSquare = std::make_unique<NavigationGridSquare>(id,
-                                                                     (Vector2){ .x = static_cast<float>(i + halfSlices), 
-                                                                                .y = static_cast<float>(j + halfSlices)},
-                                                                     v1,
-                                                                     v3,
-                                                                     Vector3Subtract(v1, v3));
+            
             // Store grid square in the 2D array
-            gridSquares[j + halfSlices][i + halfSlices] = gridSquare.get();
-            AddComponent(std::move(gridSquare));
+            auto& gridSquare = registry->emplace<NavigationGridSquare>(id, (Vector2){ .x = static_cast<float>(i + halfSlices),
+                                                                                     .y = static_cast<float>(j + halfSlices)},
+                                                                                 v1,
+                                                                                 v3,
+                                                                                 Vector3Subtract(v1, v3));
+            gridSquares[j + halfSlices][i + halfSlices] = &gridSquare;
         }
     }
     
@@ -147,14 +145,15 @@ void NavigationGridSystem::PopulateGrid()
         }
     }
     
-    const auto& collisionComponents = ECS->collisionSystem->GetComponents();
-    for (const auto& bb : collisionComponents)
+    const auto& view = registry->view<Collideable>();
+    for (const auto& ent : view)
     {
-        if (bb.second->collisionLayer != BUILDING) continue;
+        const auto& bb = view.get<Collideable>(ent);
+        if (bb.collisionLayer != BUILDING) continue;
 
         // Get the grid indices for the bounding box
-        Vector2 topLeftIndex = WorldToGridSpace(bb.second->worldBoundingBox.min);
-        Vector2 bottomRightIndex = WorldToGridSpace(bb.second->worldBoundingBox.max);
+        Vector2 topLeftIndex = WorldToGridSpace(bb.worldBoundingBox.min);
+        Vector2 bottomRightIndex = WorldToGridSpace(bb.worldBoundingBox.max);
 
         int min_col = std::min((int)topLeftIndex.x, (int)bottomRightIndex.x);
         int max_col = std::max((int)topLeftIndex.x, (int)bottomRightIndex.x);
@@ -177,6 +176,11 @@ void NavigationGridSystem::PopulateGrid()
 const std::vector<std::vector<NavigationGridSquare*>>& NavigationGridSystem::GetGridSquares()
 {
     return gridSquares;
+}
+
+NavigationGridSystem::NavigationGridSystem(entt::registry* _registry) :
+    BaseSystem<NavigationGridSquare>(_registry)
+{
 }
 
 } // sage

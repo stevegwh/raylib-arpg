@@ -21,32 +21,35 @@ namespace sage
     std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray) const
     {
         std::vector<CollisionInfo> collisions;
+        
+        auto view = registry->view<Collideable>();
 
-        for (const auto& c : components)
+        view.each([&collisions, ray](auto entity, const auto& c)
         {
-            if (c.second->collisionLayer == NAVIGATION) continue; // TODO: Need to define a collision matrix
-            auto col = GetRayCollisionBox(ray, c.second->worldBoundingBox);
-            if (col.hit) 
+            if (c.collisionLayer != NAVIGATION) // TODO: Need to define a collision matrix
             {
+                auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
+                if (col.hit)
+                {
 
-                CollisionInfo info = {
-                    .collidedEntityId= c.second->entityId,
-                    .collidedBB = c.second->worldBoundingBox,
-                    .rayCollision = col
-                };
-                collisions.push_back(info);
+                    CollisionInfo info = {
+                        .collidedEntityId = entity,
+                        .collidedBB = c.worldBoundingBox,
+                        .rayCollision = col
+                    };
+                    collisions.push_back(info);
+                }
             }
-        }
+        });
 
         std::sort(collisions.begin(), collisions.end(), compareRayCollisionDistances);
 
         return collisions;
     }
 
-    void CollisionSystem::BoundingBoxDraw(EntityID entityId, Color color) const
+    void CollisionSystem::BoundingBoxDraw(entt::entity entityId, Color color) const
     {
-        auto bb = components.at(entityId)->worldBoundingBox;
-        DrawBoundingBox(bb, color);
+        DrawBoundingBox(registry->get<Collideable>(entityId).worldBoundingBox, color);
     }
 
 /**
@@ -54,15 +57,17 @@ namespace sage
      * @param entityId The id of the entity
      * @param mat The transform matrix for the local bounding box
      */
-    void CollisionSystem::UpdateWorldBoundingBox(EntityID entityId, Matrix mat)
+    void CollisionSystem::UpdateWorldBoundingBox(entt::entity entityId, Matrix mat)
     {
-        auto bb = GetComponent(entityId)->localBoundingBox;
-        bb.min = Vector3Transform(bb.min, mat);
-        bb.max = Vector3Transform(bb.max, mat);
-        components.at(entityId)->worldBoundingBox = bb;
+        registry->patch<Collideable>(entityId, [mat](auto& col) {
+            auto bb = col.localBoundingBox;
+            bb.min = Vector3Transform(bb.min, mat);
+            bb.max = Vector3Transform(bb.max, mat);
+            col.worldBoundingBox = bb;
+        });
     }
 
-    void CollisionSystem::onTransformUpdate(EntityID entityId)
+    void CollisionSystem::onTransformUpdate(entt::entity entityId)
     {
         Matrix mat = ECS->transformSystem->GetMatrixNoRot(entityId);
         UpdateWorldBoundingBox(entityId, mat);
@@ -79,35 +84,41 @@ namespace sage
         return std::find(layerMatrix.begin(), layerMatrix.end(), layer2) != layerMatrix.end();
     }
 
-    bool CollisionSystem::GetFirstCollision(EntityID entity)
+    bool CollisionSystem::GetFirstCollision(entt::entity entity)
     {
-        const Collideable& targetCol = *components.at(entity);
-        for (const auto& c : components)
+        const auto& targetCol = registry->get<Collideable>(entity);
+
+        auto view = registry->view<Collideable>();
+
+        for (const auto& ent: view) 
         {
-            if (c.second->collisionLayer != BUILDING) continue; // TODO: Wanted to query the collision matrix but is far too slow
-            bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.second->worldBoundingBox);
+            const auto& c = view.get<Collideable>(ent);
+            if (c.collisionLayer != BUILDING) continue; // TODO: Wanted to query the collision matrix but is far too slow
+            bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
             if (colHit) return true;
         }
         return false;
     }
 
-    std::vector<CollisionInfo> CollisionSystem::GetCollisions(EntityID entity)
+    std::vector<CollisionInfo> CollisionSystem::GetCollisions(entt::entity entity)
     {
         std::vector<CollisionInfo> collisions;
         
-        const Collideable& targetCol = *components.at(entity);
+        const Collideable& targetCol = registry->get<Collideable>(entity);
+        auto view = registry->view<Collideable>();
 
-        for (const auto& c : components)
+        for (const auto& ent: view)
         {
-            if (c.second->entityId == entity) continue;
-            if (!checkCollisionMatrix(targetCol.collisionLayer, c.second->collisionLayer)) continue;
+            const auto& c = view.get<Collideable>(ent);
+            if (ent == entity) continue;
+            if (!checkCollisionMatrix(targetCol.collisionLayer, c.collisionLayer)) continue;
             
-            bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.second->worldBoundingBox);
+            bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
             if (colHit)
             {
                 CollisionInfo info = {
-                    .collidedEntityId = c.second->entityId,
-                    .collidedBB = c.second->worldBoundingBox
+                    .collidedEntityId = ent,
+                    .collidedBB = c.worldBoundingBox
                 };
                 
                 collisions.push_back(info);
@@ -134,21 +145,14 @@ namespace sage
         worldBoundingBox.min = Serializer::ConvertStringToVector3(worldBoundingBoxMin);
         worldBoundingBox.max = Serializer::ConvertStringToVector3(worldBoundingBoxMax);
 
-        auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
-        collideable->worldBoundingBox = worldBoundingBox;
-        collideable->collisionLayer = static_cast<CollisionLayer>(std::stoi(data.at("collisionLayer")));
-        AddComponent(std::move(collideable));
+//        auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
+//        collideable->worldBoundingBox = worldBoundingBox;
+//        collideable->collisionLayer = static_cast<CollisionLayer>(std::stoi(data.at("collisionLayer")));
+        //AddComponent(std::move(collideable));
     }
-
-    void CollisionSystem::AddComponent(std::unique_ptr<Collideable> component)
-    {
-        if (ECS->transformSystem->FindEntity(component->entityId))
-        {
-            eventManager->Subscribe([p = this, id = component->entityId] { p->onTransformUpdate(id); },
-                                    *ECS->transformSystem->GetComponent(component->entityId)->OnPositionUpdate);
-        }
-
-        m_addComponent(std::move(component));
-    }
+    
+    CollisionSystem::CollisionSystem(entt::registry *_registry) :
+        BaseSystem<Collideable>(_registry)
+    {}
 
 }

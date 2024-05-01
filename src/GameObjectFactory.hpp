@@ -5,19 +5,16 @@
 #pragma once
 
 #include "raylib.h"
-
-#include "Entity.hpp"
-
-
+#include <entt/entt.hpp>
 
 namespace sage
 {
 typedef struct Scene Scene;
 struct GameObjectFactory
 {
-    static void createTower(Vector3 position, const char* name);
-    static EntityID createPlayer(Vector3 position, const char* name);
-    static void loadBlenderLevel(Scene* scene);
+    static entt::entity createPlayer(entt::registry* registry, Vector3 position, const char* name);
+    static void createTower(entt::registry* registry, Vector3 position, const char* name);
+    static void loadBlenderLevel(entt::registry* registry, Scene* scene);
 };
 
 } // sage

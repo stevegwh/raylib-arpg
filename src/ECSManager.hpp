@@ -4,9 +4,6 @@
 
 #pragma once
 
-
-#include <memory>
-
 // Systems
 #include "RenderSystem.hpp"
 #include "CollisionSystem.hpp"
@@ -16,12 +13,17 @@
 #include "ActorMovementSystem.hpp"
 #include "AnimationSystem.hpp"
 
+#include <entt/entt.hpp>
+
+#include <memory>
+
 namespace sage
 {
 class ECSManager
 {
+    entt::registry* registry;
 public:
-    ECSManager(UserInput* userInput);
+    ECSManager(entt::registry* _registry, UserInput* userInput);
     
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
     std::unique_ptr<sage::RenderSystem> renderSystem;

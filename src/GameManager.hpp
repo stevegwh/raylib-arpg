@@ -8,6 +8,7 @@
 
 
 #include "raylib.h"
+#include <entt/entt.hpp>
 
 #include <stack>
 #include <memory>
@@ -34,6 +35,7 @@ static constexpr int SCREEN_HEIGHT = 720;
 
 class GameManager
 {
+    entt::registry* registry;
     std::unique_ptr<sage::Scene> scene;
     int stateChange = 0;
 

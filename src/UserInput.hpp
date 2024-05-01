@@ -4,13 +4,14 @@
 
 #pragma once
 
-#include "raylib.h"
-
 #include "Camera.hpp"
 #include "Collideable.hpp"
 #include "CollisionSystem.hpp"
 #include "RenderSystem.hpp"
 #include "Event.hpp"
+
+#include "raylib.h"
+#include <entt/entt.hpp>
 
 #include <string>
 
@@ -19,6 +20,7 @@ namespace sage
     class UserInput
     {
         Ray ray {0};
+        entt::registry* registry;
 
         std::string hitObjectName{};
         Color defaultColor = WHITE;
@@ -45,8 +47,9 @@ namespace sage
         void DrawDebugText() const;
         void ListenForInput();
 
-        UserInput()
+        explicit UserInput(entt::registry* _registry)
         :
+        registry(_registry),
         OnClickEvent(std::make_unique<Event>()), OnCollisionHitEvent(std::make_unique<Event>()),
         OnDeleteKeyPressedEvent(std::make_unique<Event>()), OnCreateKeyPressedEvent(std::make_unique<Event>()),
         OnGenGridKeyPressedEvent(std::make_unique<Event>()), OnSerializeKeyPressedEvent(std::make_unique<Event>()),

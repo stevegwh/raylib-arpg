@@ -27,19 +27,17 @@ namespace sage
         ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
 
         auto collisions = collisionSystem->GetCollisionsWithRay(ray);
-        rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){0, {}} : collisionSystem
+        rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){{}, {}} : collisionSystem
             ->GetCollisionsWithRay(ray).at(0);
 
 
         if ((rayCollisionResultInfo.rayCollision.hit) && (rayCollisionResultInfo.rayCollision.distance < collision.distance))
         {
             collision = rayCollisionResultInfo.rayCollision;
-
-            if (renderSystem->FindEntity(rayCollisionResultInfo.collidedEntityId))
+            if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
             {
-                hitObjectName = renderSystem->GetComponent(rayCollisionResultInfo.collidedEntityId)->name;
+                hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
             }
-
             OnCollisionHitEvent->InvokeAllCallbacks();
         }
     }
@@ -96,8 +94,8 @@ namespace sage
         if (rayCollisionResultInfo.rayCollision.hit)
         {
             auto collisionSystem = ECS->collisionSystem.get();
-            auto col = collisionSystem->GetComponent(rayCollisionResultInfo.collidedEntityId);
-            if (col->collisionLayer == FLOOR)
+            const auto& col = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId);
+            if (col.collisionLayer == FLOOR)
             {
                 collisionSystem->BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId, ORANGE);
             }

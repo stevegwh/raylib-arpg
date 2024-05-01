@@ -14,13 +14,15 @@
 namespace sage
 {
 GameManager::GameManager() :
+    registry(new entt::registry()),
     sCamera(std::make_unique<sage::Camera>()),
-    userInput(std::make_unique<sage::UserInput>()),
-    ecs(std::make_unique<sage::ECSManager>(userInput.get()))
+    userInput(std::make_unique<sage::UserInput>(registry)),
+    ecs(std::make_unique<sage::ECSManager>(registry, userInput.get()))
 {}
 
 GameManager::~GameManager()
 {
+    delete registry;
     cleanup();
 }
 
@@ -36,7 +38,7 @@ void GameManager::init()
 #ifdef EDITOR_MODE
     scene = std::make_unique<Editor>(userInput.get());
 #else
-    scene = std::make_unique<Game>(userInput.get());
+    scene = std::make_unique<Game>(registry, userInput.get());
 #endif
 
 }
@@ -69,13 +71,17 @@ void GameManager::Update()
         {
             if (stateChange == 1)
             {
-                ecs = std::make_unique<ECSManager>(userInput.get());
-                scene = std::make_unique<Game>(userInput.get());
+                delete registry; // TODO: will completely break everything
+                registry = new entt::registry();
+                ecs = std::make_unique<ECSManager>(registry, userInput.get());
+                scene = std::make_unique<Game>(registry, userInput.get());
             }
             else if (stateChange == 2)
             {
-                ecs = std::make_unique<ECSManager>(userInput.get());
-                scene = std::make_unique<Editor>(userInput.get());
+                delete registry;
+                registry = new entt::registry();
+                ecs = std::make_unique<ECSManager>(registry, userInput.get());
+                scene = std::make_unique<Editor>(registry, userInput.get());
             }
             stateChange = 0;
         }

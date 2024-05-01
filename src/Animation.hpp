@@ -12,7 +12,7 @@
 
 namespace sage
 {
-struct Animation : public Component<Animation>
+struct Animation
 {
     std::unique_ptr<EventManager> eventManager;
     ModelAnimation* animations;
@@ -21,8 +21,8 @@ struct Animation : public Component<Animation>
     unsigned int animCurrentFrame = 0;
     int animsCount;
     
-    Animation(EntityID _entityId, const char* _modelPath, Model* _model) :
-    Component(_entityId), model(_model), eventManager(std::make_unique<EventManager>())
+    Animation(const char* _modelPath, Model* _model) :
+    model(_model), eventManager(std::make_unique<EventManager>())
     {
         animsCount = 0;
         animations = LoadModelAnimations(_modelPath, &animsCount);

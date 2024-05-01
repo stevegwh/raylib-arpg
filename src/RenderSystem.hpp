@@ -8,6 +8,8 @@
 #include "Transform.hpp"
 #include "BaseSystem.hpp"
 
+#include <entt/entt.hpp>
+
 #include <unordered_map>
 #include <string>
 
@@ -16,6 +18,7 @@ namespace sage
 class RenderSystem : public BaseSystem<Renderable>
 {
 public:
+    explicit RenderSystem(entt::registry* _registry);
     ~RenderSystem();
     void Update();
     void Draw() const;

@@ -3,16 +3,15 @@
 //
 
 #pragma once
-#include <vector>
-#include "Component.hpp"
+
+#include <entt/entt.hpp>
 
 namespace sage
 {
-    struct WorldObject : public Component<WorldObject>
+    struct WorldObject
     {
-        EntityID parent{};
-        std::vector<EntityID> children;
-        explicit WorldObject(EntityID _entityId) : Component(_entityId) {}
+        entt::entity parent{};
+        std::vector<entt::entity> children;
     };
 }
 

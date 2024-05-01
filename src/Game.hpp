@@ -9,6 +9,8 @@
 #include "UserInput.hpp"
 #include "EventManager.hpp"
 
+#include <entt/entt.hpp>
+
 #include <vector>
 #include <memory>
 
@@ -17,12 +19,13 @@ namespace sage
 
 class Game : public Scene
 {
+    entt::registry* registry;
     UserInput* cursor;
     void onEditorModePressed();
     std::unique_ptr<EventManager> eventManager;
 public:
     
-    explicit Game(sage::UserInput* _cursor);
+    explicit Game(entt::registry* _registry, sage::UserInput* _cursor);
     ~Game() override;
     void Update() override;
     void Draw3D() override;

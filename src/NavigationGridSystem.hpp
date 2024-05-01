@@ -8,6 +8,7 @@
 #include "NavigationGridSquare.hpp"
 #include "CollisionSystem.hpp"
 
+#include <entt/entt.hpp>
 
 namespace sage
 {
@@ -15,9 +16,10 @@ namespace sage
 class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
 {
     std::vector<std::vector<NavigationGridSquare*>> gridSquares;
-    float spacing;
-    int slices;
+    float spacing{};
+    int slices{};
 public:
+    NavigationGridSystem(entt::registry* _registry);
     void Init(int _slices, float _spacing);
     void PopulateGrid();
     Vector2 WorldToGridSpace(Vector3 worldPos);

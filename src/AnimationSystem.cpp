@@ -10,15 +10,20 @@ namespace sage
 
 void AnimationSystem::Update()
 {
-    for (const auto& c: components) 
-    {
-        ModelAnimation anim = c.second->animations[c.second->animIndex];
-        c.second->animCurrentFrame = (c.second->animCurrentFrame + 1) % anim.frameCount;
-        UpdateModelAnimation(ECS->renderSystem->GetComponent(c.second->entityId)->model, anim, c.second->animCurrentFrame);
-    }
+    const auto& view = registry->view<Animation, Renderable>();
+    view.each([](auto& a, auto& r) {
+        ModelAnimation anim = a.animations[a.animIndex];
+        a.animCurrentFrame = (a.animCurrentFrame + 1) % anim.frameCount;
+        UpdateModelAnimation(r.model, anim, a.animCurrentFrame);
+    });
 }
 
 void AnimationSystem::Draw()
+{
+
+}
+AnimationSystem::AnimationSystem(entt::registry *_registry)
+    : BaseSystem<Animation>(_registry)
 {
 
 }

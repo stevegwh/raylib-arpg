@@ -16,7 +16,7 @@
 
 namespace sage
 {
-    struct Transform : public Component<Transform>
+    struct Transform
     {
         Vector3 position{};
         std::queue<Vector3> targets{};
@@ -28,21 +28,22 @@ namespace sage
         
         [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
         {
-            return {
-                {"EntityId", TextFormat("%i", entityId)},
-                {"Position", TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)}
-            };
+//            return {
+//                {"EntityId", TextFormat("%i", entityId)},
+//                {"Position", TextFormat("%02.02f, %02.02f, %02.02f", position.x, position.y, position.z)}
+//            };
+            return {};
         }
         
         std::unique_ptr<Event> OnPositionUpdate;
         std::unique_ptr<Event> OnStartMovement;
         std::unique_ptr<Event> OnFinishMovement;
         
-        explicit Transform(EntityID _entityId) : 
+        explicit Transform() : 
         OnPositionUpdate(std::make_unique<Event>()), 
         OnStartMovement(std::make_unique<Event>()),
-        OnFinishMovement(std::make_unique<Event>()),
-        Component(_entityId) {}
+        OnFinishMovement(std::make_unique<Event>())
+        {}
         
         void positionSet(const Vector3& pos)
         {

@@ -19,9 +19,8 @@
 
 namespace sage
 {
-struct Renderable : public Component<Renderable>
+struct Renderable
 {
-    const sage::Transform* const transform; // Hard dependency
     const Matrix initialTransform;
     sage::Material material;
     const std::string modelPath;
@@ -31,35 +30,27 @@ struct Renderable : public Component<Renderable>
     std::string name = "Default";
     
     Renderable(
-        EntityID entityId, 
         Model _model, 
         sage::Material _material, 
         std::string _modelPath, 
-        Matrix _localTransform,
-        const Transform* const _transform)
-    : 
-    Component(entityId),
-    model(std::move(_model)), 
+        Matrix _localTransform)
+    :
+    model(_model), 
     material(std::move(_material)), 
-    modelPath(_modelPath), 
-    initialTransform(_localTransform),
-    transform(_transform)
+    modelPath(std::move(_modelPath)), 
+    initialTransform(_localTransform)
     {
         model.transform = initialTransform;
     }
-    
+
     Renderable(
-        EntityID entityId, 
-        Model _model, 
+        Model _model,
         std::string _modelPath,
-        Matrix _localTransform,
-        const Transform* const _transform)
-        : 
-        Component(entityId), 
-        model(std::move(_model)), 
-        modelPath(_modelPath), 
-        initialTransform(_localTransform),
-        transform(_transform)
+        Matrix _localTransform)
+        :
+        model(std::move(_model)),
+        modelPath(_modelPath),
+        initialTransform(_localTransform)
     {
         model.transform = initialTransform;
     }
@@ -76,11 +67,12 @@ struct Renderable : public Component<Renderable>
 
     [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
     {
-        return {
-            {"EntityId", TextFormat("%i", entityId)},
-            {"Material", TextFormat("%s", material.path.c_str())},
-            {"Model", TextFormat("%s", modelPath.c_str())},
-        };
+//        return {
+//            {"EntityId", TextFormat("%i", entityId)},
+//            {"Material", TextFormat("%s", material.path.c_str())},
+//            {"Model", TextFormat("%s", modelPath.c_str())},
+//        };
+        return {};
     }
 
     [[nodiscard]] BoundingBox CalculateModelBoundingBox() const

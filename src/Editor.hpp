@@ -9,6 +9,8 @@
 #include "GameManager.hpp"
 #include "Scene.hpp"
 
+#include <entt/entt.hpp>
+
 #include <vector>
 #include <memory>
 
@@ -26,6 +28,7 @@ enum EditorMode
 class Editor : public Scene
 {
     EditorMode currentEditorMode = IDLE;
+    entt::registry* registry;
     UserInput* cursor;
     
     // Event responses
@@ -37,13 +40,13 @@ class Editor : public Scene
     void OnGenGridKeyPressed();
     void OnRunModePressed();
     
-    EntityID selectedObject{};
+    entt::entity selectedObject{};
     void moveSelectedObjectToCursorHit();
     
     std::unique_ptr<EventManager> eventManager;
     
 public:
-    explicit Editor(UserInput* _cursor);
+    Editor(entt::registry* _registry, UserInput* _cursor);
     ~Editor() override;
     void Update() override;
     void Draw3D() override;

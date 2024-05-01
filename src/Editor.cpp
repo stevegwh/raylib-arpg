@@ -12,71 +12,34 @@
 
 namespace sage
 {
-    Editor::Editor(UserInput* _cursor) : cursor(_cursor), eventManager(std::make_unique<EventManager>())
-    {
-        
-        eventManager->Subscribe([p = this] { p->OnCursorClick(); }, *cursor->OnClickEvent);
-        eventManager->Subscribe([p = this] { p->OnCollisionHit(); }, *cursor->OnCollisionHitEvent);
-        eventManager->Subscribe([p = this] { p->OnDeleteModeKeyPressed(); }, *cursor->OnDeleteKeyPressedEvent);
-        eventManager->Subscribe([p = this] { p->OnCreateModeKeyPressed(); }, *cursor->OnCreateKeyPressedEvent);
-        eventManager->Subscribe([p = this] { p->OnGenGridKeyPressed(); }, *cursor->OnGenGridKeyPressedEvent);
-        eventManager->Subscribe([p = this] { p->OnSerializeButton(); }, *cursor->OnSerializeKeyPressedEvent);
-        eventManager->Subscribe([p = this] { p->OnRunModePressed(); }, *cursor->OnRunModePressedEvent);
-
-        EntityID floor = Registry::GetInstance().CreateEntity();
-        Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
-        Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
-        BoundingBox bb = {
-            .min = g0,
-            .max = g2
-        };
-        auto floorCollidable = std::make_unique<Collideable>(floor, bb);
-        floorCollidable->collisionLayer = FLOOR;
-        ECS->collisionSystem->AddComponent(std::move(floorCollidable));
-
-//        auto floorWorldObject = std::make_unique<WorldObject>(floor);
-//        worldSystem->AddComponent(std::move(floorWorldObject));
-
-        ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
-        // TODO: This should also be based on scene parameters, and grid needs to be adapted to work.
-        ECS->navigationGridSystem->Init(100, 1.0f);
-        ECS->navigationGridSystem->PopulateGrid();
-    }
-    
-    Editor::~Editor()
-    {
-        
-    }
-    
     void Editor::moveSelectedObjectToCursorHit()
     {
-        Transform newTransform(selectedObject);
+        Transform newTransform;
         newTransform.position = cursor->collision.point;
-
-        const Renderable* renderable = ECS->renderSystem->GetComponent(selectedObject);
-
-        ECS->transformSystem->SetComponent(selectedObject, newTransform);
-        //ECS->collisionSystem->UpdateWorldBoundingBox(selectedObject, newTransform.position);
-        
+        const auto& renderable = registry->get<Renderable>(selectedObject);
+        registry->patch<Transform>(selectedObject, [&newTransform] (auto& t) {
+            t.position = newTransform.position;
+        });
     }
     
     void Editor::OnCursorClick()
     {
         if (cursor->collision.hit)
         {
-            switch (ECS->collisionSystem->GetComponent(cursor->rayCollisionResultInfo.collidedEntityId)->collisionLayer)
+            
+            switch (registry->get<Collideable>(cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
             {
             case DEFAULT:
                 break;
             case FLOOR:
                 if (currentEditorMode == CREATE)
                 {
-                    GameObjectFactory::createTower(cursor->collision.point, "Tower Instance");
+                    GameObjectFactory::createTower(registry, cursor->collision.point, "Tower Instance");
                 }
                 else if (currentEditorMode == SELECT)
                 {
                     moveSelectedObjectToCursorHit();
-                    selectedObject = 0;
+                    selectedObject = {};
                     currentEditorMode = IDLE;
                 }
                 break;
@@ -88,7 +51,7 @@ namespace sage
         }
         else
         {
-            selectedObject = 0;
+            selectedObject = {};
         }
     }
     
@@ -100,8 +63,8 @@ namespace sage
     void Editor::OnDeleteModeKeyPressed()
     {
         if (currentEditorMode != SELECT) return;
-        Registry::GetInstance().DeleteEntity(selectedObject);
-        selectedObject = 0;
+        registry->destroy(selectedObject);
+        selectedObject = {};
         currentEditorMode = IDLE;
     }
 
@@ -177,4 +140,41 @@ namespace sage
 
         DrawText(TextFormat("Editor Mode: %s", mode.c_str()), SCREEN_WIDTH - 150, 50, 10, BLACK);
     }
+
+Editor::Editor(entt::registry* _registry, UserInput* _cursor) : 
+registry(_registry), cursor(_cursor), eventManager(std::make_unique<EventManager>())
+{
+
+    eventManager->Subscribe([p = this] { p->OnCursorClick(); }, *cursor->OnClickEvent);
+    eventManager->Subscribe([p = this] { p->OnCollisionHit(); }, *cursor->OnCollisionHitEvent);
+    eventManager->Subscribe([p = this] { p->OnDeleteModeKeyPressed(); }, *cursor->OnDeleteKeyPressedEvent);
+    eventManager->Subscribe([p = this] { p->OnCreateModeKeyPressed(); }, *cursor->OnCreateKeyPressedEvent);
+    eventManager->Subscribe([p = this] { p->OnGenGridKeyPressed(); }, *cursor->OnGenGridKeyPressedEvent);
+    eventManager->Subscribe([p = this] { p->OnSerializeButton(); }, *cursor->OnSerializeKeyPressedEvent);
+    eventManager->Subscribe([p = this] { p->OnRunModePressed(); }, *cursor->OnRunModePressedEvent);
+
+    entt::entity floor = registry->create();
+    Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
+    Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
+    BoundingBox bb = {
+        .min = g0,
+        .max = g2
+    };
+    
+    auto& floorCollideable = registry->emplace<Collideable>(floor, bb);
+    floorCollideable.collisionLayer = FLOOR;
+
+//        auto floorWorldObject = std::make_unique<WorldObject>(floor);
+//        worldSystem->AddComponent(std::move(floorWorldObject));
+
+    ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
+    // TODO: This should also be based on scene parameters, and grid needs to be adapted to work.
+    ECS->navigationGridSystem->Init(100, 1.0f);
+    ECS->navigationGridSystem->PopulateGrid();
+}
+
+Editor::~Editor()
+{
+
+}
 }

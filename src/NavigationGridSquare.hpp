@@ -14,7 +14,7 @@
 
 namespace sage
 {
-    struct NavigationGridSquare : public Component<NavigationGridSquare>
+    struct NavigationGridSquare
     {
         const Vector3 worldPosMin; // Top Left
         const Vector3  worldPosMax; // Bottom Right
@@ -23,9 +23,9 @@ namespace sage
         bool occupied = false;
         Vector2 gridSquareIndex;
         
-        explicit NavigationGridSquare(EntityID id, Vector2 _gridSquareIndex, Vector3 _worldPosMin, Vector3 _worldPosMax, Vector3 _worldPosCentre) 
-        : gridSquareIndex(_gridSquareIndex), worldPosMin(_worldPosMin), worldPosMax(_worldPosMax), worldPosCentre(_worldPosCentre),
-        Component(id) {}
+        explicit NavigationGridSquare(Vector2 _gridSquareIndex, Vector3 _worldPosMin, Vector3 _worldPosMax, Vector3 _worldPosCentre) 
+        : gridSquareIndex(_gridSquareIndex), worldPosMin(_worldPosMin), worldPosMax(_worldPosMax), worldPosCentre(_worldPosCentre)
+        {}
         
     };
 }

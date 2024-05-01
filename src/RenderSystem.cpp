@@ -18,14 +18,11 @@ void RenderSystem::Update()
 //float rotationAngle = 0;
 void RenderSystem::Draw() const
 {
-    //rotationAngle += 10.0f * GetFrameTime();
-    //std::fmod(rotationAngle, 360);
-    for (const auto& renderable : components)
-    {
-        auto t = renderable.second->transform;
+    const auto& view = registry->view<Renderable, Transform>();
+    view.each([](const auto& r, const auto& t) {
         Vector3 rotationAxis = { 0.0f, 1.0f, 0.0f };
-        DrawModelEx(renderable.second->model, t->position, rotationAxis, t->rotation.y, {t->scale, t->scale, t->scale}, WHITE);
-    }
+        DrawModelEx(r.model, t.position, rotationAxis, t.rotation.y, {t.scale, t.scale, t.scale}, WHITE);
+    });
 }
 
 void RenderSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, 
@@ -39,10 +36,12 @@ void RenderSystem::DeserializeComponents(const std::string& entityId, const std:
     Model model = LoadModel(modelPath.c_str());
     model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
     
-    auto renderable = std::make_unique<Renderable>(id, model, mat, modelPath, MatrixIdentity(), ECS->transformSystem->GetComponent(id));
-    auto t = ECS->transformSystem->GetComponent(id);
-    AddComponent(std::move(renderable));
+    auto renderable = std::make_unique<Renderable>(model, mat, modelPath, MatrixIdentity());
+    //auto t = ECS->transformSystem->GetComponent(id);
+    //AddComponent(std::move(renderable));
 }
+
+RenderSystem::RenderSystem(entt::registry* _registry) : BaseSystem<Renderable>(_registry) {}
 
 }
 

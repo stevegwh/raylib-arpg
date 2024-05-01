@@ -3,18 +3,20 @@
 //
 
 #pragma once
+
 #include "WorldObject.hpp"
 #include "BaseSystem.hpp"
+
+#include <entt/entt.hpp>
 
 namespace sage
 {
     class WorldSystem : public BaseSystem<WorldObject>
     {
-        EntityID root;
+        entt::entity root;
         
     public:
-        void AddComponent(std::unique_ptr<WorldObject> component);
-        explicit WorldSystem(EntityID rootNodeId) : root(rootNodeId) {}
+        WorldSystem(entt::registry* _registry, entt::entity rootNodeId);
     };
 }
 

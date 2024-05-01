@@ -5,6 +5,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <entt/entt.hpp>
 
 #include "Entity.hpp"
 #include "BaseSystem.hpp"
@@ -18,6 +19,7 @@ class AnimationSystem : public BaseSystem<Animation>
 public:
     void Update();
     void Draw();
+    explicit AnimationSystem(entt::registry* _registry);
 };
 
 } // sage
