@@ -47,14 +47,6 @@ namespace sage
         void DrawDebugText() const;
         void ListenForInput();
 
-        explicit UserInput(entt::registry* _registry)
-        :
-        registry(_registry),
-        OnClickEvent(std::make_unique<Event>()), OnCollisionHitEvent(std::make_unique<Event>()),
-        OnDeleteKeyPressedEvent(std::make_unique<Event>()), OnCreateKeyPressedEvent(std::make_unique<Event>()),
-        OnGenGridKeyPressedEvent(std::make_unique<Event>()), OnSerializeKeyPressedEvent(std::make_unique<Event>()),
-        OnRunModePressedEvent(std::make_unique<Event>())
-        {
-        }
+        explicit UserInput(entt::registry* _registry);
     };
 }

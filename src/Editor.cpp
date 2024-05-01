@@ -3,9 +3,7 @@
 //
 
 #include "Editor.hpp"
-
 #include "GameObjectFactory.hpp"
-
 #include "GameManager.hpp"
 
 #include <iostream>
@@ -20,6 +18,8 @@ namespace sage
         registry->patch<Transform>(selectedObject, [&newTransform] (auto& t) {
             t.position = newTransform.position;
         });
+        Matrix mat = ECS->transformSystem->GetMatrixNoRot(selectedObject);
+        ECS->collisionSystem->UpdateWorldBoundingBox(selectedObject, mat); // TODO: Would prefer to have this as an event
     }
     
     void Editor::OnCursorClick()
@@ -77,11 +77,6 @@ namespace sage
     void Editor::OnGenGridKeyPressed()
     {
         ECS->navigationGridSystem->PopulateGrid();
-    }
-
-    void Editor::OnRunModePressed()
-    {
-        GM.SetStateRun();
     }
 
     void Editor::OnCollisionHit()
@@ -151,7 +146,7 @@ registry(_registry), cursor(_cursor), eventManager(std::make_unique<EventManager
     eventManager->Subscribe([p = this] { p->OnCreateModeKeyPressed(); }, *cursor->OnCreateKeyPressedEvent);
     eventManager->Subscribe([p = this] { p->OnGenGridKeyPressed(); }, *cursor->OnGenGridKeyPressedEvent);
     eventManager->Subscribe([p = this] { p->OnSerializeButton(); }, *cursor->OnSerializeKeyPressedEvent);
-    eventManager->Subscribe([p = this] { p->OnRunModePressed(); }, *cursor->OnRunModePressedEvent);
+    eventManager->Subscribe([] { GM.SetState(1); }, *cursor->OnRunModePressedEvent);
 
     entt::entity floor = registry->create();
     Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };

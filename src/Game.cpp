@@ -17,22 +17,6 @@
 
 namespace sage
 {
-Game::Game(entt::registry* _registry, UserInput* _cursor) : registry(_registry), cursor(_cursor), eventManager(std::make_unique<EventManager>())
-{
-    lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
-    auto playerId = GameObjectFactory::createPlayer(registry, {20.0f, 0, 20.0f}, "Player");
-    ECS->actorMovementSystem->SetControlledActor(playerId);
-    
-    //ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
-    GameObjectFactory::loadBlenderLevel(registry, this);
-    
-    // This should also be based on scene parameters
-    ECS->navigationGridSystem->Init(100, 1.0f);
-    ECS->navigationGridSystem->PopulateGrid();
-    
-    eventManager->Subscribe( [p = this] { p->onEditorModePressed(); }, *cursor->OnRunModePressedEvent);
-}
-
 void Game::Update()
 {
     ECS->transformSystem->Update();
@@ -65,14 +49,26 @@ void Game::Draw2D()
     
 }
 
-void Game::onEditorModePressed()
-{
-    GM.SetStateEditor();
-}
-
 Game::~Game()
 {
     
+}
+
+Game::Game(entt::registry* _registry, UserInput* _cursor) : 
+registry(_registry), cursor(_cursor), eventManager(std::make_unique<EventManager>())
+{
+    lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
+    auto playerId = GameObjectFactory::createPlayer(registry, {20.0f, 0, 20.0f}, "Player");
+    ECS->actorMovementSystem->SetControlledActor(playerId);
+
+    //ECS->DeserializeMap(); // TODO: Should specify path to saved map of scene
+    GameObjectFactory::loadBlenderLevel(registry, this);
+
+    // This should also be based on scene parameters
+    ECS->navigationGridSystem->Init(100, 1.0f);
+    ECS->navigationGridSystem->PopulateGrid();
+
+    eventManager->Subscribe( [] { GM.SetState(2); }, *cursor->OnRunModePressedEvent);
 }
 
 } // sage

@@ -4,7 +4,16 @@
 
 #pragma once
 
-//#define EDITOR_MODE
+#define EDITOR_MODE
+
+// Misc
+#include "Scene.hpp"
+#include "Camera.hpp"
+#include "UserInput.hpp"
+// Scenes
+#include "Game.hpp"
+#include "Editor.hpp"
+#include "ECSManager.hpp"
 
 
 #include "raylib.h"
@@ -13,18 +22,6 @@
 #include <stack>
 #include <memory>
 #include <unordered_map>
-
-// Misc
-#include "Scene.hpp"
-#include "Camera.hpp"
-#include "UserInput.hpp"
-
-// Scenes
-#include "Game.hpp"
-#include "Editor.hpp"
-
-#include "ECSManager.hpp"
-
 
 #define GM GameManager::GetInstance()
 #define ECS GameManager::GetInstance().ecs
@@ -60,6 +57,7 @@ public:
     std::unique_ptr<sage::Camera> sCamera;
     void Update();
     
+    void SetState(int stateId);
     void SetStateRun();
     void SetStateEditor();
 };

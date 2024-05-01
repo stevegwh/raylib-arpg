@@ -36,7 +36,7 @@ void GameManager::init()
     InitWindow(screenWidth, screenHeight, "Baldur's Raylib");
     
 #ifdef EDITOR_MODE
-    scene = std::make_unique<Editor>(userInput.get());
+    scene = std::make_unique<Editor>(registry, userInput.get());
 #else
     scene = std::make_unique<Game>(registry, userInput.get());
 #endif
@@ -65,23 +65,20 @@ void GameManager::Update()
 
         //----------------------------------------------------------------------------------
         draw();
-        Registry::GetInstance().RunMaintainance();
-        // temporary
+        // TODO: replace with SceneManager
         if (stateChange > 0)
         {
-            if (stateChange == 1)
-            {
-                delete registry; // TODO: will completely break everything
-                registry = new entt::registry();
-                ecs = std::make_unique<ECSManager>(registry, userInput.get());
+            delete registry;
+            registry = new entt::registry();
+            userInput = std::make_unique<UserInput>(registry);            
+            ecs = std::make_unique<ECSManager>(registry, userInput.get());
+            switch (stateChange) {
+            case 1:
                 scene = std::make_unique<Game>(registry, userInput.get());
-            }
-            else if (stateChange == 2)
-            {
-                delete registry;
-                registry = new entt::registry();
-                ecs = std::make_unique<ECSManager>(registry, userInput.get());
+                break;
+            case 2:
                 scene = std::make_unique<Editor>(registry, userInput.get());
+                break;
             }
             stateChange = 0;
         }
@@ -123,15 +120,9 @@ void GameManager::cleanup()
     CloseWindow();
 }
 
-void GameManager::SetStateEditor()
+void GameManager::SetState(int stateId)
 {
-    stateChange = 2;
-
-}
-
-void GameManager::SetStateRun()
-{
-    stateChange = 1;
+    stateChange = stateId;
 }
 
 }

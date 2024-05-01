@@ -92,6 +92,7 @@ void GameObjectFactory::createTower(entt::registry* registry, Vector3 position, 
     auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
     collideable.collisionLayer = BUILDING;
     ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
+    ECS->collisionSystem->TransformUpdateSubscribe(id);
     registry->emplace<WorldObject>(id);
 }
 
