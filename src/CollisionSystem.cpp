@@ -18,6 +18,12 @@ bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::Coll
 namespace sage
 {
 
+    void CollisionSystem::TransformUpdateSubscribe(entt::entity entity)
+    {
+        eventManager->Subscribe([this, entity] { onTransformUpdate(entity); },
+                                *registry->get<Transform>(entity).OnPositionUpdate);
+    }
+
     std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray) const
     {
         std::vector<CollisionInfo> collisions;

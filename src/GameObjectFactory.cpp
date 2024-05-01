@@ -45,7 +45,6 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Vector3 p
     transform.position = position;
     transform.scale = 1.0f;
     transform.rotation = { 0, 0, 0 };
-
     
     auto model = LoadModel(modelPath);
     
@@ -69,9 +68,10 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Vector3 p
     renderable.name = name;
     
     BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
-    auto& collideable = registry->emplace<Collideable>(id,bb);
+    auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = PLAYER;
     ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
+    ECS->collisionSystem->TransformUpdateSubscribe(id);
 
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;
