@@ -5,7 +5,6 @@
 #pragma once
 
 #include "UserInput.hpp"
-#include "EventManager.hpp"
 #include "GameManager.hpp"
 #include "Scene.hpp"
 
@@ -38,12 +37,9 @@ class Editor : public Scene
     void OnDeleteModeKeyPressed();
     void OnCreateModeKeyPressed();
     void OnGenGridKeyPressed();
-    void OnRunModePressed();
     
     entt::entity selectedObject{};
     void moveSelectedObjectToCursorHit();
-    
-    std::unique_ptr<EventManager> eventManager;
     
 public:
     Editor(entt::registry* _registry, UserInput* _cursor);

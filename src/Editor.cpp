@@ -137,16 +137,17 @@ namespace sage
     }
 
 Editor::Editor(entt::registry* _registry, UserInput* _cursor) : 
-registry(_registry), cursor(_cursor), eventManager(std::make_unique<EventManager>())
+registry(_registry), cursor(_cursor)
 {
-
-    eventManager->Subscribe([p = this] { p->OnCursorClick(); }, *cursor->OnClickEvent);
-    eventManager->Subscribe([p = this] { p->OnCollisionHit(); }, *cursor->OnCollisionHitEvent);
-    eventManager->Subscribe([p = this] { p->OnDeleteModeKeyPressed(); }, *cursor->OnDeleteKeyPressedEvent);
-    eventManager->Subscribe([p = this] { p->OnCreateModeKeyPressed(); }, *cursor->OnCreateKeyPressedEvent);
-    eventManager->Subscribe([p = this] { p->OnGenGridKeyPressed(); }, *cursor->OnGenGridKeyPressedEvent);
-    eventManager->Subscribe([p = this] { p->OnSerializeButton(); }, *cursor->OnSerializeKeyPressedEvent);
-    eventManager->Subscribe([] { GM.SetState(1); }, *cursor->OnRunModePressedEvent);
+    cursor->dOnClickEvent.connect<&Editor::OnCursorClick>(this);
+    cursor->dOnCollisionHitEvent.connect<&Editor::OnCollisionHit>(this);
+    cursor->dOnDeleteKeyPressedEvent.connect<&Editor::OnDeleteModeKeyPressed>(this);
+    cursor->dOnCreateKeyPressedEvent.connect<&Editor::OnCreateModeKeyPressed>(this);
+    cursor->dOnGenGridKeyPressedEvent.connect<&Editor::OnGenGridKeyPressed>(this);
+    cursor->dOnSerializeKeyPressedEvent.connect<&Editor::OnSerializeButton>(this);
+    cursor->dOnRunModePressedEvent.connect<[]() {
+        GM.SetState(1);
+    }>();
 
     entt::entity floor = registry->create();
     Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };

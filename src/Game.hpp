@@ -7,7 +7,6 @@
 
 #include "Scene.hpp"
 #include "UserInput.hpp"
-#include "EventManager.hpp"
 
 #include <entt/entt.hpp>
 
@@ -22,7 +21,6 @@ class Game : public Scene
     entt::registry* registry;
     UserInput* cursor;
     void onEditorModePressed();
-    std::unique_ptr<EventManager> eventManager;
 public:
     
     explicit Game(entt::registry* _registry, sage::UserInput* _cursor);

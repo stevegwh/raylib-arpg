@@ -7,7 +7,6 @@
 #include "raylib.h"
 #include <entt/entt.hpp>
 
-#include "Entity.hpp"
 #include "BaseSystem.hpp"
 #include "Animation.hpp"
 

@@ -8,7 +8,6 @@
 #include "Collideable.hpp"
 #include "CollisionSystem.hpp"
 #include "RenderSystem.hpp"
-#include "Event.hpp"
 
 #include "raylib.h"
 #include <entt/entt.hpp>
@@ -31,14 +30,6 @@ namespace sage
         void OnGenGridKeyPressed() const;
         void OnSerializeKeyPressed() const;
     public:
-        std::unique_ptr<Event> OnClickEvent;
-        std::unique_ptr<Event> OnCollisionHitEvent;
-        std::unique_ptr<Event> OnDeleteKeyPressedEvent;
-        std::unique_ptr<Event> OnCreateKeyPressedEvent;
-        std::unique_ptr<Event> OnGenGridKeyPressedEvent;
-        std::unique_ptr<Event> OnSerializeKeyPressedEvent;
-        std::unique_ptr<Event> OnRunModePressedEvent;
-        
         entt::delegate<void()> dOnClickEvent{};
         entt::delegate<void()> dOnCollisionHitEvent{};
         entt::delegate<void()> dOnDeleteKeyPressedEvent{};

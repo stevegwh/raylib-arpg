@@ -11,7 +11,6 @@
 #include <string>
 
 #include <entt/entt.hpp>
-#include "EventManager.hpp"
 
 namespace sage
 {
@@ -22,12 +21,14 @@ namespace sage
         const std::string componentName;
         
     protected:
-        std::unique_ptr<EventManager> eventManager;
+        //std::unique_ptr<EventManager> eventManager;
         entt::registry* registry;
         
     public:
 
-        BaseSystem(entt::registry* _registry) : registry(_registry), eventManager(std::make_unique<EventManager>()) {}
+        BaseSystem(entt::registry* _registry) : registry(_registry)
+        //, eventManager(std::make_unique<EventManager>()) 
+        {}
 
         [[nodiscard]] const char* getComponentName() const
         {

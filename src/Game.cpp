@@ -55,7 +55,7 @@ Game::~Game()
 }
 
 Game::Game(entt::registry* _registry, UserInput* _cursor) : 
-registry(_registry), cursor(_cursor), eventManager(std::make_unique<EventManager>())
+registry(_registry), cursor(_cursor)
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
     auto playerId = GameObjectFactory::createPlayer(registry, {20.0f, 0, 20.0f}, "Player");
@@ -67,8 +67,11 @@ registry(_registry), cursor(_cursor), eventManager(std::make_unique<EventManager
     // This should also be based on scene parameters
     ECS->navigationGridSystem->Init(100, 1.0f);
     ECS->navigationGridSystem->PopulateGrid();
-
-    eventManager->Subscribe( [] { GM.SetState(2); }, *cursor->OnRunModePressedEvent);
+    
+    cursor->dOnRunModePressedEvent.connect<[]() {
+        GM.SetState(2);
+    }>();
+    
 }
 
 } // sage

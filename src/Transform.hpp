@@ -12,7 +12,6 @@
 
 #include "Component.hpp"
 #include "TransformSystem.hpp"
-#include "Event.hpp"
 
 namespace sage
 {

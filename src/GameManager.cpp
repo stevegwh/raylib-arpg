@@ -3,8 +3,6 @@
 //
 
 #include "GameManager.hpp"
-
-#include "Registry.hpp"
 #include "WorldObject.hpp"
 
 

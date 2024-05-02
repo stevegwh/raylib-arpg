@@ -8,13 +8,10 @@
 
 #include <memory>
 
-#include "EventManager.hpp"
-
 namespace sage
 {
 struct Animation
 {
-    std::unique_ptr<EventManager> eventManager;
     ModelAnimation* animations;
     Model* model;
     unsigned int animIndex = 0;
@@ -22,7 +19,7 @@ struct Animation
     int animsCount;
     
     Animation(const char* _modelPath, Model* _model) :
-    model(_model), eventManager(std::make_unique<EventManager>())
+    model(_model)
     {
         animsCount = 0;
         animations = LoadModelAnimations(_modelPath, &animsCount);

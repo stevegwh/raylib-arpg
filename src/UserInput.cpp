@@ -15,7 +15,6 @@ namespace sage
 void UserInput::GetMouseRayCollision()
 {
     auto collisionSystem = ECS->collisionSystem.get();
-    auto renderSystem = ECS->renderSystem.get();
     auto sCamera = GM.sCamera.get();
     // Display information about closest hit
     collision = {};
@@ -41,39 +40,33 @@ void UserInput::GetMouseRayCollision()
                 hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
             }
         }
-        OnCollisionHitEvent->InvokeAllCallbacks();
         if (dOnCollisionHitEvent) dOnCollisionHitEvent();
     }
 }
 
 void UserInput::OnClick() const
 {
-    OnClickEvent->InvokeAllCallbacks();
     if (dOnClickEvent) dOnClickEvent();
     //std::cout << "Hit object position: " << collision.point.x << ", " << collision.point.y << ", " << collision.point.z << "\n";
 }
 
 void UserInput::OnDeleteKeyPressed() const
 {
-    OnDeleteKeyPressedEvent->InvokeAllCallbacks();
     if (dOnDeleteKeyPressedEvent) dOnDeleteKeyPressedEvent();
 }
 
 void UserInput::OnCreateKeyPressed() const
 {
-    OnCreateKeyPressedEvent->InvokeAllCallbacks();
     if(dOnCreateKeyPressedEvent) dOnCreateKeyPressedEvent();
 }
 
 void UserInput::OnGenGridKeyPressed() const
 {
-    OnGenGridKeyPressedEvent->InvokeAllCallbacks();
     if (dOnGenGridKeyPressedEvent) dOnGenGridKeyPressedEvent();
 }
 
 void UserInput::OnSerializeKeyPressed() const
 {
-    OnSerializeKeyPressedEvent->InvokeAllCallbacks();
     if (dOnSerializeKeyPressedEvent) dOnSerializeKeyPressedEvent();
 }
 
@@ -172,19 +165,12 @@ void UserInput::ListenForInput()
     }
     else if (IsKeyPressed(KEY_R))
     {
-        OnRunModePressedEvent->InvokeAllCallbacks();
         if (dOnRunModePressedEvent) dOnRunModePressedEvent();
     }
 }
     
-UserInput::UserInput(entt::registry *_registry)
-    :
-    registry(_registry),
-    OnClickEvent(std::make_unique<Event>()), OnCollisionHitEvent(std::make_unique<Event>()),
-    OnDeleteKeyPressedEvent(std::make_unique<Event>()), OnCreateKeyPressedEvent(std::make_unique<Event>()),
-    OnGenGridKeyPressedEvent(std::make_unique<Event>()), OnSerializeKeyPressedEvent(std::make_unique<Event>()),
-    OnRunModePressedEvent(std::make_unique<Event>())
-{
-}
+UserInput::UserInput(entt::registry *_registry) :
+    registry(_registry)
+{}
 
 }
