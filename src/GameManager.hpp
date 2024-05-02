@@ -56,10 +56,7 @@ public:
     std::unique_ptr<sage::ECSManager> ecs;
     std::unique_ptr<sage::Camera> sCamera;
     void Update();
-    
     void SetState(int stateId);
-    void SetStateRun();
-    void SetStateEditor();
 };
 }
 

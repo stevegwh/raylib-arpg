@@ -22,7 +22,7 @@ struct Transform; // Forward declaration
 class TransformSystem : public BaseSystem<Transform>
 {
     friend class Transform;
-    std::vector<Transform*> moveTowardsTransforms;
+    std::vector<std::pair<entt::entity, Transform*>> moveTowardsTransforms;
 public:
     TransformSystem(entt::registry* _registry);
     // TODO: Overload this so you can just update one field at a time if needed

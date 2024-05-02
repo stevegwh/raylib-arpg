@@ -31,7 +31,6 @@ public:
     //std::pair<bool, CollisionInfo> GetFirstCollision(EntityID entity);
     bool GetFirstCollision(entt::entity entity);
     void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
-    void TransformUpdateSubscribe(entt::entity entity);
     
     const std::vector<std::vector<CollisionLayer>> collisionMatrix = 
         {

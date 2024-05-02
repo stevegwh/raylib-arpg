@@ -38,6 +38,14 @@ namespace sage
         std::unique_ptr<Event> OnGenGridKeyPressedEvent;
         std::unique_ptr<Event> OnSerializeKeyPressedEvent;
         std::unique_ptr<Event> OnRunModePressedEvent;
+        
+        entt::delegate<void()> dOnClickEvent{};
+        entt::delegate<void()> dOnCollisionHitEvent{};
+        entt::delegate<void()> dOnDeleteKeyPressedEvent{};
+        entt::delegate<void()> dOnCreateKeyPressedEvent{};
+        entt::delegate<void()> dOnGenGridKeyPressedEvent{};
+        entt::delegate<void()> dOnSerializeKeyPressedEvent{};
+        entt::delegate<void()> dOnRunModePressedEvent{};
 
         RayCollision collision {0};
         CollisionInfo rayCollisionResultInfo;

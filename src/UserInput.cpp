@@ -42,33 +42,39 @@ void UserInput::GetMouseRayCollision()
             }
         }
         OnCollisionHitEvent->InvokeAllCallbacks();
+        if (dOnCollisionHitEvent) dOnCollisionHitEvent();
     }
 }
 
 void UserInput::OnClick() const
 {
     OnClickEvent->InvokeAllCallbacks();
+    if (dOnClickEvent) dOnClickEvent();
     //std::cout << "Hit object position: " << collision.point.x << ", " << collision.point.y << ", " << collision.point.z << "\n";
 }
 
 void UserInput::OnDeleteKeyPressed() const
 {
     OnDeleteKeyPressedEvent->InvokeAllCallbacks();
+    if (dOnDeleteKeyPressedEvent) dOnDeleteKeyPressedEvent();
 }
 
 void UserInput::OnCreateKeyPressed() const
 {
     OnCreateKeyPressedEvent->InvokeAllCallbacks();
+    if(dOnCreateKeyPressedEvent) dOnCreateKeyPressedEvent();
 }
 
 void UserInput::OnGenGridKeyPressed() const
 {
     OnGenGridKeyPressedEvent->InvokeAllCallbacks();
+    if (dOnGenGridKeyPressedEvent) dOnGenGridKeyPressedEvent();
 }
 
 void UserInput::OnSerializeKeyPressed() const
 {
     OnSerializeKeyPressedEvent->InvokeAllCallbacks();
+    if (dOnSerializeKeyPressedEvent) dOnSerializeKeyPressedEvent();
 }
 
 void UserInput::Draw()
@@ -167,6 +173,7 @@ void UserInput::ListenForInput()
     else if (IsKeyPressed(KEY_R))
     {
         OnRunModePressedEvent->InvokeAllCallbacks();
+        if (dOnRunModePressedEvent) dOnRunModePressedEvent();
     }
 }
     

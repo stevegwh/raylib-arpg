@@ -22,7 +22,7 @@ void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std
     // TODO: improve
     for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
     {
-        if (*it == &transform)
+        if (it->second == &transform)
         {
             moveTowardsTransforms.erase(it);
             continue;
@@ -36,8 +36,8 @@ void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std
 
     for (auto n : path) transform.targets.emplace(n);
     transform.direction = Vector3Normalize(Vector3Subtract(transform.targets.front(), transform.position));
-    moveTowardsTransforms.push_back(&transform);
-    transform.OnStartMovement->InvokeAllCallbacks();
+    moveTowardsTransforms.emplace_back(entityId, &transform);
+    transform.dOnStartMovement(entityId);
 }
 
 void TransformSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
@@ -53,7 +53,7 @@ void TransformSystem::Update()
 {
     for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();) 
     {
-        const auto& transform = *it;
+        const auto& transform = it->second;
 
         if (Vector3Distance(transform->targets.front(), transform->position) < 0.5f)
         {
@@ -61,7 +61,7 @@ void TransformSystem::Update()
             if (transform->targets.empty())
             {
                 it = moveTowardsTransforms.erase(it);
-                transform->OnFinishMovement->InvokeAllCallbacks();
+                transform->dOnFinishMovement(it->first);
                 continue;
             }
             transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
@@ -74,7 +74,7 @@ void TransformSystem::Update()
         transform->position.x = transform->position.x + transform->direction.x * 0.35f;
         //transform->position.x = dy * 0.5f;
         transform->position.z = transform->position.z + transform->direction.z * 0.35f;
-        transform->OnPositionUpdate->InvokeAllCallbacks();
+        transform->dOnPositionUpdate(it->first);
         ++it;
     }
 }

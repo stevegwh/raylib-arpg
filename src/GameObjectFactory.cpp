@@ -50,18 +50,22 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Vector3 p
     
     // Set animation hooks
     auto& animation = registry->emplace<Animation>(id, modelPath, &model);
-    animation.eventManager->Subscribe( [&p = animation] { p.ChangeAnimation(3); }, *transform.OnStartMovement);
-    animation.eventManager->Subscribe( [&p = animation] { p.ChangeAnimation(0); }, *transform.OnFinishMovement);
-    animation.eventManager->Subscribe( [&p = animation] {
-        if (p.animIndex == 1)
+    transform.dOnFinishMovement.connect<[](Animation& animation, entt::entity entity) {
+        animation.ChangeAnimation(0);
+    }>(animation);
+    transform.dOnStartMovement.connect<[](Animation& animation, entt::entity entity) {
+        animation.ChangeAnimation(3);
+    }>(animation);
+    GM.userInput->dOnCreateKeyPressedEvent.connect<[](Animation& animation) {
+        if (animation.animIndex == 1)
         {
-            p.ChangeAnimation(0);
+            animation.ChangeAnimation(0);
         }
-        else if (p.animIndex == 0)
+        else if (animation.animIndex == 0)
         {
-            p.ChangeAnimation(1);
+            animation.ChangeAnimation(1);
         }
-    }, *GM.userInput->OnCreateKeyPressedEvent);
+    }>(animation);
     
     Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
@@ -71,7 +75,13 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Vector3 p
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = PLAYER;
     ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
-    ECS->collisionSystem->TransformUpdateSubscribe(id);
+
+    transform.dOnPositionUpdate.connect<[](Collideable& collideable, entt::entity entity) {
+        collideable.onTransformUpdate(entity);
+    }>(collideable);
+    
+    
+    //ECS->collisionSystem->TransformUpdateSubscribe(id);
 
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;
@@ -92,7 +102,6 @@ void GameObjectFactory::createTower(entt::registry* registry, Vector3 position, 
     auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
     collideable.collisionLayer = BUILDING;
     ECS->collisionSystem->UpdateWorldBoundingBox(id, ECS->transformSystem->GetMatrix(id));
-    ECS->collisionSystem->TransformUpdateSubscribe(id);
     registry->emplace<WorldObject>(id);
 }
 

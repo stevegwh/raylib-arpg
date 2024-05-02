@@ -18,11 +18,11 @@ bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::Coll
 namespace sage
 {
 
-    void CollisionSystem::TransformUpdateSubscribe(entt::entity entity) // TODO: I don't like this solution
-    {
-        eventManager->Subscribe([this, entity] { onTransformUpdate(entity); },
-                                *registry->get<Transform>(entity).OnPositionUpdate);
-    }
+//    void CollisionSystem::TransformUpdateSubscribe(entt::entity entity) // TODO: I don't like this solution
+//    {
+//        eventManager->Subscribe([this, entity] { onTransformUpdate(entity); },
+//                                *registry->get<Transform>(entity).OnPositionUpdate);
+//    }
 
     std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray) const
     {
@@ -73,11 +73,11 @@ namespace sage
         });
     }
 
-    void CollisionSystem::onTransformUpdate(entt::entity entityId)
-    {
-        Matrix mat = ECS->transformSystem->GetMatrixNoRot(entityId);
-        UpdateWorldBoundingBox(entityId, mat);
-    }    
+//    void CollisionSystem::onTransformUpdate(entt::entity entityId)
+//    {
+//        Matrix mat = ECS->transformSystem->GetMatrixNoRot(entityId);
+//        UpdateWorldBoundingBox(entityId, mat);
+//    }    
     
     bool CollisionSystem::CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2) 
     {

@@ -15,28 +15,35 @@
 
 namespace sage
 {
-    enum CollisionLayer
+
+enum CollisionLayer
+{
+    DEFAULT,
+    FLOOR,
+    BUILDING,
+    NAVIGATION,
+    PLAYER
+};
+
+struct CollisionInfo
+{
+    entt::entity collidedEntityId{};
+    BoundingBox collidedBB{};
+    RayCollision rayCollision{};
+};
+
+struct Collideable
+{
+public:
+    const BoundingBox localBoundingBox; // BoundingBox in local space
+    BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb pos + world pos)
+    CollisionLayer collisionLayer = DEFAULT;
+
+    explicit Collideable(BoundingBox _boundingBox);
+    void onTransformUpdate(entt::entity entity);
+
+    [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
     {
-        DEFAULT,
-        FLOOR,
-        BUILDING,
-        NAVIGATION,
-        PLAYER
-    };
-
-    struct Collideable
-    {
-    public:
-        const BoundingBox localBoundingBox; // BoundingBox in local space
-        BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb pos + world pos)
-        CollisionLayer collisionLayer = DEFAULT;
-
-        explicit Collideable(BoundingBox _boundingBox) :
-           localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
-        {}
-
-        [[nodiscard]] std::unordered_map<std::string, std::string> SerializeImpl() const
-        {
 //            return {
 //                {"EntityId", TextFormat("%i", entityId)},
 //                {"localBoundingBoxMin", TextFormat("%02.02f, %02.02f, %02.02f", localBoundingBox.min.x, localBoundingBox.min.y, localBoundingBox.min.z)},
@@ -45,15 +52,10 @@ namespace sage
 //                {"worldBoundingBoxMax", TextFormat("%02.02f, %02.02f, %02.02f", worldBoundingBox.max.x, worldBoundingBox.max.y, worldBoundingBox.max.z)},
 //                {"collisionLayer", TextFormat("%i", collisionLayer)}
 //            };
-            return {};
-        }
-    };
+        return {};
+    }
+};
 
-    struct CollisionInfo
-    {
-        entt::entity collidedEntityId{};
-        BoundingBox collidedBB{};
-        RayCollision rayCollision{};
-    };
+
 }
 

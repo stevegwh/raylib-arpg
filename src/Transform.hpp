@@ -4,14 +4,14 @@
 
 #pragma once
 
+#include "raylib.h"
+#include <entt/entt.hpp>
+
 #include <memory>
 #include <queue>
 
-#include "raylib.h"
-
 #include "Component.hpp"
 #include "TransformSystem.hpp"
-
 #include "Event.hpp"
 
 namespace sage
@@ -34,22 +34,10 @@ namespace sage
 //            };
             return {};
         }
-        
-        std::unique_ptr<Event> OnPositionUpdate;
-        std::unique_ptr<Event> OnStartMovement;
-        std::unique_ptr<Event> OnFinishMovement;
-        
-        explicit Transform() : 
-        OnPositionUpdate(std::make_unique<Event>()), 
-        OnStartMovement(std::make_unique<Event>()),
-        OnFinishMovement(std::make_unique<Event>())
-        {}
-        
-        void positionSet(const Vector3& pos)
-        {
-            position = pos;
-            OnPositionUpdate->InvokeAllCallbacks();
-        }
+
+        entt::delegate<void(entt::entity)> dOnPositionUpdate{};
+        entt::delegate<void(entt::entity)> dOnStartMovement{};
+        entt::delegate<void(entt::entity)> dOnFinishMovement{};
 
     };
 }
