@@ -10,7 +10,7 @@
 namespace sage
 {
 
-void Camera::HandleInput()
+void Camera::handleInput()
 {
     if (IsKeyDown(KEY_S))
     {
@@ -78,6 +78,7 @@ void Camera::HandleInput()
 
 void Camera::Update()
 {
+    handleInput();
     UpdateCameraPro(&rlCamera, {0, 0, 0}, { 0, 0, 0 }, 0);
 }
 

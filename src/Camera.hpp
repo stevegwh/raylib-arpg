@@ -15,7 +15,7 @@ class Camera
     Vector3 target {};
     Vector3 rotation {};
     int zoom = 10;
-    
+    void handleInput();
 public:
     Camera3D* getCamera();
     Camera()
@@ -29,8 +29,6 @@ public:
     }
     
     void Update();
-
-    void HandleInput();
 };
 
 } // sage

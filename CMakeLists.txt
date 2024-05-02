@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 # Dependencies
 include(FetchContent)
+
 set(RAYLIB_VERSION 5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
 if (NOT raylib_FOUND) # If there's none, fetch and build raylib 
@@ -28,17 +29,22 @@ FetchContent_Declare(
         GIT_TAG "v3.13.2"
 )
 FetchContent_MakeAvailable(entt)
+
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
+include_directories(vendor)
 
 file(GLOB PROJECT_HEADERS src/*.hpp)
 file(GLOB PROJECT_SOURCES src/*.cpp)
-
 add_executable(${PROJECT_NAME}  ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
-
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib nlohmann_json::nlohmann_json EnTT::EnTT)
+target_link_libraries(${PROJECT_NAME} 
+        PRIVATE 
+        raylib 
+        nlohmann_json::nlohmann_json 
+        EnTT::EnTT
+)
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)

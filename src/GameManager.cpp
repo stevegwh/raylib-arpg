@@ -2,9 +2,8 @@
 // Created by steve on 18/02/2024.
 //
 
-#include "GameManager.hpp"
+#include "GameManager.hpp" 
 #include "WorldObject.hpp"
-
 
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
@@ -41,9 +40,6 @@ void GameManager::init()
 
 }
 
-//Model model;
-//Light lights[MAX_LIGHTS] = { 0 };
-
 void GameManager::Update()
 {
     init();
@@ -55,7 +51,6 @@ void GameManager::Update()
 
         // Update
         //----------------------------------------------------------------------------------
-        sCamera->HandleInput(); // TODO: Should merge this with userInput
         sCamera->Update();
         userInput->ListenForInput();
 
