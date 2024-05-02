@@ -13,8 +13,9 @@ LightSubSystem::LightSubSystem()
     shader = LoadShader(TextFormat("resources/shaders/glsl%i/lighting.vs", 330),
                         TextFormat("resources/shaders/glsl%i/lighting.fs", 330));
     // Ambient light level (some basic lighting)
+    float ambientValue[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
     int ambientLoc = GetShaderLocation(shader, "ambient");
-    SetShaderValue(shader, ambientLoc, (float[4]){ 0.1f, 0.1f, 0.1f, 1.0f }, SHADER_UNIFORM_VEC4);
+    SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
 }
 
 void LightSubSystem::LinkRenderableToLight(sage::Renderable* renderable)
