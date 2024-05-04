@@ -69,24 +69,6 @@ void TransformSystem::Update()
     }
 }
 
-Matrix TransformSystem::GetMatrix(const entt::entity& id)
-{
-    const auto& transform = registry->get<Transform>(id);
-    Matrix trans = MatrixTranslate(transform.position.x, transform.position.y, transform.position.z);
-    Matrix scale = MatrixScale(transform.scale, transform.scale, transform.scale);
-    Matrix rot = MatrixRotateXYZ({DEG2RAD*transform.rotation.x, DEG2RAD*transform.rotation.y, DEG2RAD*transform.rotation.z});
-    return MatrixMultiply(scale, MatrixMultiply(rot, trans));
-}
-
-Matrix TransformSystem::GetMatrixNoRot(const entt::entity& id)
-{
-    const auto& transform = registry->get<Transform>(id);
-    Matrix trans = MatrixTranslate(transform.position.x, transform.position.y, transform.position.z);
-    Matrix scale = MatrixScale(transform.scale, transform.scale, transform.scale);
-    //Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y, DEG2RAD*transform->rotation.z});
-    return MatrixMultiply(scale, trans);
-}
-
 TransformSystem::TransformSystem(entt::registry* _registry) :
     BaseSystem<Transform>(_registry)
 {

@@ -3,6 +3,7 @@
 
 int main()
 {
-    sage::GameManager::GetInstance().Update();
+    sage::GameManager gm;
+    gm.Update();
     return 0;
 }

@@ -149,7 +149,7 @@ void EditorScene::moveSelectedObjectToCursorHit()
     registry->patch<Transform>(selectedObject, [&newTransform] (auto& t) {
         t.position = newTransform.position;
     });
-    Matrix mat = ecs->transformSystem->GetMatrixNoRot(selectedObject);
+    Matrix mat = registry->get<Transform>(selectedObject).GetMatrixNoRot();
     ecs->collisionSystem->UpdateWorldBoundingBox(selectedObject, mat); // TODO: Would prefer to have this as an event
 }
 

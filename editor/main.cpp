@@ -3,7 +3,7 @@
 
 int main()
 {
-    std::cout << "Editor main!" << std::endl;
-    sage::Editor::GetInstance().Update();
+    sage::Editor editor;
+    editor.Update();
     return 0;
 }

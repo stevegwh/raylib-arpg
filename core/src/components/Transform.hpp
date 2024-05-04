@@ -52,6 +52,9 @@ struct Transform
     entt::delegate<void(entt::entity)> dOnPositionUpdate{};
     entt::delegate<void(entt::entity)> dOnStartMovement{};
     entt::delegate<void(entt::entity)> dOnFinishMovement{};
+
+    [[nodiscard]] Matrix GetMatrixNoRot() const;
+    [[nodiscard]] Matrix GetMatrix() const;
 };
 }
 

@@ -36,16 +36,10 @@ protected:
     virtual void init();
     static void cleanup();
     void draw();
-
+    
+public:
     GameManager();
     ~GameManager();
-public:
-    static GameManager& GetInstance()
-    {
-        static GameManager instance; // Guaranteed to be destroyed.
-        // Instantiated on first use.
-        return instance;
-    }
     GameManager(GameManager const&) = delete;
     void operator=(GameManager const&)  = delete;
     

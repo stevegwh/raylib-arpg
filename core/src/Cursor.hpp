@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "systems/CollisionSystem.hpp"
 #include "Camera.hpp"
+#include "systems/CollisionSystem.hpp"
 #include <entt/entt.hpp>
 
 namespace sage
@@ -17,7 +17,7 @@ class Cursor
     std::string hitObjectName{};
     Color defaultColor = WHITE;
     Color hoverColor = LIME;
-    CollisionSystem* collisionSystem;
+    sage::CollisionSystem* collisionSystem;
     sage::Camera* sCamera;
 public:
     RayCollision collision {0};
@@ -27,7 +27,7 @@ public:
     void Draw();
     void DrawDebugText() const;
     Cursor(entt::registry* registry,
-           CollisionSystem* _collisionSystem, 
+           sage::CollisionSystem* _collisionSystem, 
            sage::Camera* _sCamera);
 };
 }

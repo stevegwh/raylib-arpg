@@ -28,7 +28,5 @@ public:
     void MoveToLocation(const entt::entity& entityId, Vector3 location);
     void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
     void Update();
-    Matrix GetMatrix(const entt::entity& id);
-    Matrix GetMatrixNoRot(const entt::entity& id);
 };
 }

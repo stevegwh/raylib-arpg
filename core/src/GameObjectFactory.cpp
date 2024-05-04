@@ -74,11 +74,11 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, ECSManage
     BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = PLAYER;
-    ecs->collisionSystem->UpdateWorldBoundingBox(id, ecs->transformSystem->GetMatrix(id));
+    ecs->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 
-    transform.dOnPositionUpdate.connect<[](Collideable& collideable, entt::entity entity) {
-        collideable.onTransformUpdate(entity);
-    }>(collideable);
+    transform.dOnPositionUpdate.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
+        collisionSystem.OnTransformUpdate(entity);
+    }>(*ecs->collisionSystem);
     
     
     //ECS->collisionSystem->TransformUpdateSubscribe(id);
@@ -101,7 +101,7 @@ void GameObjectFactory::createTower(entt::registry* registry, ECSManager* ecs, V
     renderable.name = name;
     auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
     collideable.collisionLayer = BUILDING;
-    ecs->collisionSystem->UpdateWorldBoundingBox(id, ecs->transformSystem->GetMatrix(id));
+    ecs->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
     registry->emplace<WorldObject>(id);
 }
 

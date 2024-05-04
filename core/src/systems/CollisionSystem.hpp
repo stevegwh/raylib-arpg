@@ -8,12 +8,7 @@
 #include "BaseSystem.hpp"
 
 #include "raylib.h"
-#include "raymath.h"
 #include "entt/entt.hpp"
-
-#include <map>
-#include <vector>
-#include <utility>
 
 namespace sage
 {
@@ -21,6 +16,7 @@ class CollisionSystem : public BaseSystem<Collideable>
 {
     bool checkCollisionMatrix(const CollisionLayer& layer1, const CollisionLayer& layer2);
 public:
+    void OnTransformUpdate(entt::entity entity);
     explicit CollisionSystem(entt::registry* _registry);
     void UpdateWorldBoundingBox(entt::entity entityId, Matrix mat);
     [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray) const;
