@@ -5,10 +5,10 @@
 #pragma once
 
 #include "BaseSystem.hpp"
-#include "NavigationGridSquare.hpp"
+#include "../components/NavigationGridSquare.hpp"
 #include "CollisionSystem.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

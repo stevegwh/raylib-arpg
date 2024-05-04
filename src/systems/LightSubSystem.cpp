@@ -3,7 +3,7 @@
 //
 
 #include "LightSubSystem.hpp"
-#include "Renderable.hpp"
+#include "../components/Renderable.hpp"
 
 namespace sage
 {

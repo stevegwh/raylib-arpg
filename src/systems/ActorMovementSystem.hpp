@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "Actor.hpp"
+#include "../components/Actor.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include "BaseSystem.hpp"
-#include "UserInput.hpp"
+#include "../UserInput.hpp"
 
 namespace sage
 {

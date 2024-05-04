@@ -5,9 +5,9 @@
 #pragma once
 
 #include "Camera.hpp"
-#include "Collideable.hpp"
-#include "CollisionSystem.hpp"
-#include "RenderSystem.hpp"
+#include "components/Collideable.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/RenderSystem.hpp"
 
 #include "raylib.h"
 #include <entt/entt.hpp>

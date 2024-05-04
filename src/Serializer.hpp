@@ -4,23 +4,13 @@
 
 #pragma once
 
-#include <vector>
-#include <utility>
-#include <unordered_map>
-#include <string>
-#include <optional>
+#include <entt/entity/registry.hpp>
 
-#include "raylib.h"
-
-namespace sage
+namespace sage::serializer
 {
-typedef std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>> SerializationData;
-class Serializer
-{
-public:
-    static Vector3 ConvertStringToVector3(const std::string& str);
-    static void SerializeToFile(const SerializationData& serializeData);
-    static std::optional<SerializationData> DeserializeFile();
-};
+void Save(const entt::registry& registry);
+void Load(entt::registry* registry);
+}
 
-} // sage
+
+

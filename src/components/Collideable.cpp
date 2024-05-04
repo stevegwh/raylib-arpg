@@ -3,7 +3,7 @@
 //
 
 #include "Collideable.hpp"
-#include "GameManager.hpp"
+#include "../GameManager.hpp"
 
 namespace sage
 {

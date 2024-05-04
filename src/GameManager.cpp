@@ -3,7 +3,7 @@
 //
 
 #include "GameManager.hpp" 
-#include "WorldObject.hpp"
+#include "components/WorldObject.hpp"
 
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
@@ -33,6 +33,7 @@ void GameManager::init()
     InitWindow(screenWidth, screenHeight, "Baldur's Raylib");
     
 #ifdef EDITOR_MODE
+    //ECS->Load();
     scene = std::make_unique<Editor>(registry, userInput.get());
 #else
     scene = std::make_unique<Game>(registry, userInput.get());

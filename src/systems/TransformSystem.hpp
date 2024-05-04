@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Transform.hpp"
+#include "../components/Transform.hpp"
 #include "BaseSystem.hpp"
 
 #include "raymath.h"
@@ -18,10 +18,8 @@
 
 namespace sage
 {
-struct Transform; // Forward declaration
 class TransformSystem : public BaseSystem<Transform>
 {
-    friend class Transform;
     std::vector<std::pair<entt::entity, Transform*>> moveTowardsTransforms;
 public:
     TransformSystem(entt::registry* _registry);

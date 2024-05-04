@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <utility>
 #include "NavigationGridSystem.hpp"
-#include "Collideable.hpp"
+#include "../components/Collideable.hpp"
 
 
 namespace sage

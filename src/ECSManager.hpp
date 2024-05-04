@@ -5,13 +5,13 @@
 #pragma once
 
 // Systems
-#include "RenderSystem.hpp"
-#include "CollisionSystem.hpp"
-#include "TransformSystem.hpp"
-#include "WorldSystem.hpp"
-#include "NavigationGridSystem.hpp"
-#include "ActorMovementSystem.hpp"
-#include "AnimationSystem.hpp"
+#include "systems/RenderSystem.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/TransformSystem.hpp"
+#include "systems/WorldSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
+#include "systems/ActorMovementSystem.hpp"
+#include "systems/AnimationSystem.hpp"
 
 #include <entt/entt.hpp>
 
@@ -33,8 +33,8 @@ public:
     std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
     std::unique_ptr<sage::AnimationSystem> animationSystem;
 
-    void DeserializeMap();
-    void SerializeMap() const;
+    void Load();
+    void Save() const;
 
 };
 

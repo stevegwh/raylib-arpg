@@ -6,8 +6,8 @@
 
 #include "CollisionSystem.hpp"
 
-#include "Serializer.hpp"
-#include "GameManager.hpp"
+#include "../Serializer.hpp"
+#include "../GameManager.hpp"
 
 bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
 {
@@ -136,25 +136,7 @@ namespace sage
 
     void CollisionSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
     {
-        int id = std::stoi(entityId);
-    
-        auto localBoundingBoxMin = data.at("localBoundingBoxMin");
-        auto localBoundingBoxMax = data.at("localBoundingBoxMax");
-        auto worldBoundingBoxMin = data.at("worldBoundingBoxMin");
-        auto worldBoundingBoxMax = data.at("worldBoundingBoxMax");
-    
-        BoundingBox localBoundingBox;
-        localBoundingBox.min = Serializer::ConvertStringToVector3(localBoundingBoxMin);
-        localBoundingBox.max = Serializer::ConvertStringToVector3(localBoundingBoxMax);
-    
-        BoundingBox worldBoundingBox;
-        worldBoundingBox.min = Serializer::ConvertStringToVector3(worldBoundingBoxMin);
-        worldBoundingBox.max = Serializer::ConvertStringToVector3(worldBoundingBoxMax);
-
-//        auto collideable = std::make_unique<Collideable>(id, localBoundingBox);
-//        collideable->worldBoundingBox = worldBoundingBox;
-//        collideable->collisionLayer = static_cast<CollisionLayer>(std::stoi(data.at("collisionLayer")));
-        //AddComponent(std::move(collideable));
+        
     }
     
     CollisionSystem::CollisionSystem(entt::registry *_registry) :

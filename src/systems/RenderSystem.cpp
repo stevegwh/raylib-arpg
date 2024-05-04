@@ -4,7 +4,7 @@
 
 #include "RenderSystem.hpp"
 #include "raylib.h"
-#include "GameManager.hpp"
+#include "../GameManager.hpp"
 
 namespace sage
 {

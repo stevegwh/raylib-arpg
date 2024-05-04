@@ -9,11 +9,11 @@
 #include <memory>
 
 // Components
-#include "Collideable.hpp"
+#include "../components/Collideable.hpp"
 
 // Misc
-#include "GameManager.hpp"
-#include "GameObjectFactory.hpp"
+#include "../GameManager.hpp"
+#include "../GameObjectFactory.hpp"
 
 namespace sage
 {

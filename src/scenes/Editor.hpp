@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "UserInput.hpp"
-#include "GameManager.hpp"
-#include "Scene.hpp"
+#include "../UserInput.hpp"
+#include "../GameManager.hpp"
+#include "../Scene.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <vector>
 #include <memory>

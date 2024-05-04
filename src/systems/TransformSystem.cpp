@@ -4,8 +4,8 @@
 
 #include "TransformSystem.hpp"
 
-#include "GameManager.hpp"
-#include "Serializer.hpp"
+#include "../GameManager.hpp"
+#include "../Serializer.hpp"
 
 namespace sage
 {
@@ -42,11 +42,6 @@ void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std
 
 void TransformSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
 {
-    int id = std::stoi(entityId);
-    auto transform = std::make_unique<Transform>();
-    auto position = data.at("Position");
-    transform->position = Serializer::ConvertStringToVector3(position);
-    //AddComponent(std::move(transform));
 }
 
 void TransformSystem::Update()

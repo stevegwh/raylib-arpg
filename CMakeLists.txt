@@ -35,14 +35,13 @@ FetchContent_MakeAvailable(json)
 
 include_directories(vendor)
 
-file(GLOB PROJECT_HEADERS src/*.hpp)
-file(GLOB PROJECT_SOURCES src/*.cpp)
+file(GLOB PROJECT_HEADERS src/*.hpp src/components/*.hpp src/systems/*.hpp src/scenes/*.hpp)
+file(GLOB PROJECT_SOURCES src/*.cpp src/components/*.cpp src/systems/*.cpp src/scenes/*.cpp)
 add_executable(${PROJECT_NAME}  ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 target_link_libraries(${PROJECT_NAME} 
         PRIVATE 
-        raylib 
-        nlohmann_json::nlohmann_json 
+        raylib
         EnTT::EnTT
 )
 find_package(OpenMP)

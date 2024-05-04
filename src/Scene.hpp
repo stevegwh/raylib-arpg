@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "LightSubSystem.hpp"
+#include "systems/LightSubSystem.hpp"
 
 #include <memory>
 

@@ -5,10 +5,10 @@
 #pragma once
 
 
-#include "Scene.hpp"
-#include "UserInput.hpp"
+#include "../Scene.hpp"
+#include "../UserInput.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <vector>
 #include <memory>

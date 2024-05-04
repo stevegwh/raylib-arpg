@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "Component.hpp"
+#include "../components/Component.hpp"
 
 #include <memory>
 #include <vector>
 #include <string>
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

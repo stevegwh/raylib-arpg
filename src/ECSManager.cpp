@@ -22,45 +22,13 @@ ECSManager::ECSManager(entt::registry* _registry, UserInput* userInput) :
     actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(_registry, userInput);
 }
 
-void ECSManager::DeserializeMap()
+void ECSManager::Load()
 {
-//    auto data = Serializer::DeserializeFile();
-//    if (data.has_value())
-//    {
-//        for (const auto& entityIdEntry : data.value())
-//        {
-//            //const std::string& entityId = entityIdEntry.first;
-//            auto newId = std::to_string(registry->create());
-//            const auto& componentMap = entityIdEntry.second;
-//
-//            if (componentMap.find(transformSystem->getComponentName()) != componentMap.end())
-//            {
-//                const auto& transformComponent = componentMap.at(transformSystem->getComponentName());
-//                transformSystem->DeserializeComponents(newId, transformComponent);
-//            }
-//
-//            if (componentMap.find(renderSystem->getComponentName()) != componentMap.end())
-//            {
-//                const auto& renderableComponent = componentMap.at(renderSystem->getComponentName());
-//                renderSystem->DeserializeComponents(newId, renderableComponent);
-//            }
-//
-//            if (componentMap.find(collisionSystem->getComponentName()) != componentMap.end())
-//            {
-//                const auto& collideableComponent = componentMap.at(collisionSystem->getComponentName());
-//                collisionSystem->DeserializeComponents(newId, collideableComponent);
-//            }
-//        }
-//    }
+    serializer::Load(registry);
 }
 
-void ECSManager::SerializeMap() const
+void ECSManager::Save() const
 {
-    SerializationData serializeData;
-    transformSystem->SerializeComponents(serializeData);
-    renderSystem->SerializeComponents(serializeData);
-    collisionSystem->SerializeComponents(serializeData);
-
-    Serializer::SerializeToFile(serializeData);
+    serializer::Save(*registry);
 }
 }

@@ -12,8 +12,8 @@
 #include "UserInput.hpp"
 #include "ECSManager.hpp"
 // Scenes
-#include "Game.hpp"
-#include "Editor.hpp"
+#include "scenes/Game.hpp"
+#include "scenes/Editor.hpp"
 
 #include "raylib.h"
 #include <entt/entt.hpp>

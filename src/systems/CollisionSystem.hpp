@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include "Collideable.hpp"
+#include "../components/Collideable.hpp"
 #include "BaseSystem.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <map>
 #include <vector>

@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "WorldObject.hpp"
+#include "../components/WorldObject.hpp"
 #include "BaseSystem.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

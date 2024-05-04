@@ -5,11 +5,11 @@
 #include "GameObjectFactory.hpp"
 #include "GameManager.hpp"
 #include "Scene.hpp"
-#include "Transform.hpp"
-#include "Renderable.hpp"
-#include "Collideable.hpp"
-#include "WorldObject.hpp"
-#include "Animation.hpp"
+#include "components/Transform.hpp"
+#include "components/Renderable.hpp"
+#include "components/Collideable.hpp"
+#include "components/WorldObject.hpp"
+#include "components/Animation.hpp"
 
 #include "raymath.h"
 

@@ -5,129 +5,120 @@
 #include "Serializer.hpp"
 
 #include <fstream>
-#include <sstream>
-#include <nlohmann/json.hpp>
-#include <iostream>
+#include <type_traits>
+#include <vector>
+#include <cereal/cereal.hpp>
+//#include <cereal/archives/json.hpp>
+#include <cereal/archives/xml.hpp>
+#include <entt/core/hashed_string.hpp>
+#include <entt/core/type_traits.hpp>
+#include <entt/entity/snapshot.hpp>
 
-using json = nlohmann::json;
+#include "components/Transform.hpp"
+#include "components/Renderable.hpp"
+#include "components/Collideable.hpp"
 
-namespace sage
+
+
+namespace sage::serializer
 {
 
-Vector3 Serializer::ConvertStringToVector3(const std::string& str) 
+struct entity
 {
-    Vector3 vec;
-    std::stringstream ss(str);
-    std::string token;
+    unsigned int id;
+};
 
-    std::vector<float> values;
-    while (std::getline(ss, token, ',')) {
-        values.push_back(std::stof(token));
-    }
-
-    if (values.size() == 3)
-    {
-        vec.x = values[0];
-        vec.y = values[1];
-        vec.z = values[2];
-    }
-    else
-    {
-        std::cerr << "Error: Invalid input format. Expected format: 'x,y,z'" << std::endl;
-    }
-
-    return vec;
+template<typename Archive>
+void serialize(Archive &archive, entity &entity)
+{
+    archive(entity.id);
 }
 
-void Serializer::SerializeToFile(const SerializationData& serializeData)
+void Save(const entt::registry& source)
 {
-    json j;
+    using namespace entt::literals;
+    //std::stringstream storage;
 
-    for (const auto& entityEntry : serializeData)
+    std::ofstream storage("output.xml");
+    if (!storage.is_open()) {
+        // Handle file opening error
+        return;
+    }
+
     {
-        const std::string& entityId = entityEntry.first;
-        const auto& componentMap = entityEntry.second;
-
-        if (!j.contains(entityId))
+        // output finishes flushing its contents when it goes out of scope
+        cereal::XMLOutputArchive output{storage};
+        const auto view = source.view<sage::Transform, sage::Renderable, sage::Collideable>();
+        for (const auto& ent: view) 
         {
-            j[entityId] = json::object();
+            const auto& trans = view.get<sage::Transform>(ent);
+            const auto& rend = view.get<sage::Renderable>(ent);
+            const auto& col = view.get<sage::Collideable>(ent);
+            entity entity{};
+            entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
+            output.setNextName("entity");
+            output(entity);
+            output.setNextName("transform");
+            output(trans);
+            output.setNextName("collideable");
+            output(col);
+            output.setNextName("renderable");
+            output(rend);
         }
+    }
+    storage.close();
 
-        for (const auto& componentNameEntry : componentMap)
+}
+
+void Load(entt::registry* destination)
+{
+    using namespace entt::literals;
+    std::ifstream storage("output.xml");
+    if (!storage.is_open()) 
+    {
+        // Handle file opening error
+        return;
+    }
+
+    {
+        //cereal::JSONInputArchive input{storage};
+        cereal::XMLInputArchive input{storage};
+
+
+        entt::entity currentEntity{};
+        while (input.getNodeName() != nullptr)
         {
-            const std::string& componentName = componentNameEntry.first;
-            const auto& fieldMap = componentNameEntry.second;
 
-            // Create or access the JSON object for the component name
-            if (!j[entityId].contains(componentName))
+            std::string componentName = input.getNodeName();
+
+            //input.startNode();
+
+            if (componentName == "entity")
             {
-                j[entityId][componentName] = json::object();
+                // TODO: this is currently pointless, but I don't know how to
+                // advance cereal's parser without calling input with an object.
+                entity id;
+                input(id);
+                currentEntity = destination->create(); 
             }
-
-            for (const auto& fieldEntry : fieldMap)
+            else if (componentName == "transform") 
             {
-                const std::string& fieldName = fieldEntry.first;
-                const std::string& fieldValue = fieldEntry.second;
-
-                j[entityId][componentName][fieldName] = fieldValue;
+                auto& transform = destination->emplace<Transform>(currentEntity);
+                input(transform);
+                
+            }
+            else if (componentName == "collideable")
+            {
+                auto& col = destination->emplace<Collideable>(currentEntity);
+                input(col);
+            }
+            else if (componentName == "renderable")
+            {
+                auto& rend = destination->emplace<Renderable>(currentEntity);
+                input(rend);
             }
         }
     }
-
-    std::ofstream o("pretty.json");
-    o << std::setw(4) << j << std::endl;
+    storage.close();
 }
-
-// { "EntityId" { "TypeName": { "FieldName": "Value" } } }
-// { "EntityId": { "Transform" { "Position": "10.00, 0.00, 20.00" } ] }
-std::optional<SerializationData> Serializer::DeserializeFile()
-{
-    std::optional<SerializationData> data;
-    std::ifstream i("pretty.json");
-
-    if (!i.is_open() || i.fail()) return data;
-    json j = json::parse(i);
-    i.close();
-
-    SerializationData deserializeData;
-
-    // Iterate over each entity in the JSON object
-    for (const auto& entityEntry : j.items())
-    {
-        const std::string& entityId = entityEntry.key();
-        const auto& componentObjects = entityEntry.value();
-
-        // Map to store components for the current entity
-        std::unordered_map<std::string, std::unordered_map<std::string, std::string>> componentMap;
-
-        // Iterate over each component in the entity
-        for (const auto& componentNameEntry : componentObjects.items())
-        {
-            const std::string& componentName = componentNameEntry.key();
-            const auto& fieldMap = componentNameEntry.value();
-
-            // Map to store fields for the current component
-            std::unordered_map<std::string, std::string> fieldMapForComponent;
-
-            // Iterate over each field in the component
-            for (const auto& fieldEntry : fieldMap.items())
-            {
-                const std::string& fieldName = fieldEntry.key();
-                const std::string& fieldValue = fieldEntry.value();
-
-                // Add the field to the field map for the component
-                fieldMapForComponent[fieldName] = fieldValue;
-            }
-
-            // Add the field map for the current component to the component map for the entity
-            componentMap[componentName] = fieldMapForComponent;
-        }
-
-        // Add the component map for the current entity to the deserialized data
-        deserializeData[entityId] = componentMap;
-    }
-    data = deserializeData;
-    return data;
 }
-
-} // sage
