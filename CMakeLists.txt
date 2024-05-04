@@ -35,33 +35,27 @@ FetchContent_MakeAvailable(json)
 
 include_directories(vendor)
 
-file(GLOB PROJECT_HEADERS src/*.hpp src/components/*.hpp src/systems/*.hpp src/scenes/*.hpp)
-file(GLOB PROJECT_SOURCES src/*.cpp src/components/*.cpp src/systems/*.cpp src/scenes/*.cpp)
-add_executable(${PROJECT_NAME}  ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+# Option to enable/disable building the editor
+option(BUILD_EDITOR "Build the editor" ON)
 
-target_link_libraries(${PROJECT_NAME} 
-        PRIVATE 
-        raylib
-        EnTT::EnTT
-)
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
+# Add the core subdirectory
+add_subdirectory(core)
+
+# Conditionally add the editor subdirectory
+if(BUILD_EDITOR)
+    add_subdirectory(editor)
 endif()
 
+# TODO: Remove dependency on Editor from the game files, then reenable this
+# Add the game executable target
+add_executable(game core/src/main.cpp)
+target_link_libraries(game PRIVATE core)
 
-# Checks if OSX and links appropriate frameworks (Only required on MacOS)
-#if (APPLE)
-#    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
-#    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
-#    target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
-#endif()
-
-
+# Symbolic link for resources folder (game executable)
 set(source "${CMAKE_SOURCE_DIR}/resources")
 set(destination "${CMAKE_CURRENT_BINARY_DIR}/resources")
 add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
+        TARGET game POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
         DEPENDS ${destination}
         COMMENT "symbolic link resources folder from ${source} => ${destination}"
