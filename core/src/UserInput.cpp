@@ -3,38 +3,9 @@
 //
 
 #include "UserInput.hpp"
-#include <iostream>
-
-#include "GameManager.hpp"
 
 namespace sage
 {
-
-void UserInput::OnClick() const
-{
-    if (dOnClickEvent) dOnClickEvent();
-    //std::cout << "Hit object position: " << collision.point.x << ", " << collision.point.y << ", " << collision.point.z << "\n";
-}
-
-void UserInput::OnDeleteKeyPressed() const
-{
-    if (dOnDeleteKeyPressedEvent) dOnDeleteKeyPressedEvent();
-}
-
-void UserInput::OnCreateKeyPressed() const
-{
-    if(dOnCreateKeyPressedEvent) dOnCreateKeyPressedEvent();
-}
-
-void UserInput::OnGenGridKeyPressed() const
-{
-    if (dOnGenGridKeyPressedEvent) dOnGenGridKeyPressedEvent();
-}
-
-void UserInput::OnSerializeKeyPressed() const
-{
-    if (dOnSerializeKeyPressedEvent) dOnSerializeKeyPressedEvent();
-}
 
 void UserInput::ListenForInput()
 {
@@ -45,24 +16,24 @@ void UserInput::ListenForInput()
     
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        OnClick();
+        if (dOnClickEvent) dOnClickEvent();
     }
 
     if (IsKeyPressed(KEY_DELETE))
     {
-        OnDeleteKeyPressed();
+        if (dOnDeleteKeyPressedEvent) dOnDeleteKeyPressedEvent();
     }
     else if (IsKeyPressed(KEY_P))
     {
-        OnCreateKeyPressed();
+        if(dOnCreateKeyPressedEvent) dOnCreateKeyPressedEvent();
     } 
     else if (IsKeyPressed(KEY_G))
     {
-        OnGenGridKeyPressed();
+        if (dOnGenGridKeyPressedEvent) dOnGenGridKeyPressedEvent();
     }
     else if (IsKeyPressed(KEY_Z))
     {
-        OnSerializeKeyPressed();
+        if (dOnSerializeKeyPressedEvent) dOnSerializeKeyPressedEvent();
     }
     else if (IsKeyPressed(KEY_R))
     {

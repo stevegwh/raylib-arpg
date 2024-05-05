@@ -100,9 +100,7 @@ void Cursor::DrawDebugText() const
 
         DrawText(TextFormat("Entity ID: %d", rayCollisionResultInfo.collidedEntityId), 10,
                  ypos + 45, 10, BLACK);
-
-
-
+        
     }
 }
 Cursor::Cursor(entt::registry* _registry,

@@ -6,12 +6,8 @@
 
 #include "raylib.h"
 #include "entt/entt.hpp"
-#include <sstream>
 #include "cereal/cereal.hpp"
-//#include <cereal/archives/json.hpp>
-#include "cereal/archives/xml.hpp"
 
-#include <memory>
 #include <queue>
 
 namespace sage

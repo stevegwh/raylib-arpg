@@ -19,8 +19,6 @@
 #include <memory>
 #include <unordered_map>
 
-//#define GM GameManager::GetInstance()
-//#define ECS GameManager::GetInstance().ecs
 namespace sage
 {
 static constexpr int SCREEN_WIDTH = 1280;
@@ -32,21 +30,17 @@ protected:
     entt::registry* registry;
     std::unique_ptr<sage::Scene> scene;
     int stateChange = 0;
-
     virtual void init();
     static void cleanup();
-    void draw();
-    
+    virtual void draw();
 public:
     GameManager();
     ~GameManager();
     GameManager(GameManager const&) = delete;
     void operator=(GameManager const&)  = delete;
-    
     std::unique_ptr<sage::ECSManager> ecs;
     std::unique_ptr<sage::Camera> sCamera;
     virtual void Update();
-    void SetState(int stateId);
 };
 }
 

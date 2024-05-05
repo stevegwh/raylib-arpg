@@ -6,20 +6,13 @@
 
 
 #include "Cursor.hpp"
-#include "entt/entt.hpp"
 
 namespace sage
 {
     class UserInput
     {
-        entt::registry* registry;
         Cursor* cursor;
         
-        void OnClick() const;
-        void OnDeleteKeyPressed() const;
-        void OnCreateKeyPressed() const;
-        void OnGenGridKeyPressed() const;
-        void OnSerializeKeyPressed() const;
     public:
         entt::delegate<void()> dOnClickEvent{};
         entt::delegate<void()> dOnCollisionHitEvent{};

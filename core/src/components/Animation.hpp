@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <memory>
-
 namespace sage
 {
 struct Animation

@@ -16,6 +16,7 @@ struct GameObjectFactory
     static entt::entity createPlayer(entt::registry* registry, ECSManager* ecs, Vector3 position, const char* name);
     static void createTower(entt::registry* registry, ECSManager* ecs, Vector3 position, const char* name);
     static void loadBlenderLevel(entt::registry* registry, Scene* scene);
+    static void createFloor(entt::registry* registry, Scene* scene, BoundingBox bb);
 };
 
 } // sage

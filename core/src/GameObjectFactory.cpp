@@ -125,7 +125,6 @@ void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene)
     scene->lightSubSystem->LinkRenderableToLight(&renderable);
     
     // Create floor
-    entt::entity floor = registry->create();
     BoundingBox modelBB = GetModelBoundingBox(renderable.model);
     Vector3 g0 = (Vector3){ modelBB.min.x, 0.1f, modelBB.min.z };
     Vector3 g2 = (Vector3){  modelBB.max.x, 0.1f,  modelBB.max.z };
@@ -133,8 +132,14 @@ void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene)
         .min = g0,
         .max = g2
     };
+    createFloor(registry, scene, bb);
+    
+}
+
+void GameObjectFactory::createFloor(entt::registry *registry, sage::Scene *scene, BoundingBox bb)
+{
+    entt::entity floor = registry->create();
     auto& floorCollidable = registry->emplace<Collideable>(floor, bb);
     floorCollidable.collisionLayer = FLOOR;
-    
 }
 } // sage

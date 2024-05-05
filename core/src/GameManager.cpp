@@ -2,8 +2,7 @@
 // Created by steve on 18/02/2024.
 //
 
-#include "GameManager.hpp" 
-#include "components/WorldObject.hpp"
+#include "GameManager.hpp"
 
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
@@ -31,7 +30,6 @@ void GameManager::init()
     const int screenHeight = SCREEN_HEIGHT;
 
     InitWindow(screenWidth, screenHeight, "Baldur's Raylib");
-    // scene = std::make_unique<Editor>(registry, userInput.get());
     scene = std::make_unique<Game>(registry, ecs.get());
 }
 
@@ -43,32 +41,14 @@ void GameManager::Update()
     // Main game loop
     while (!WindowShouldClose())        // Detect window close button or ESC key
     {
-
         // Update
         //----------------------------------------------------------------------------------
         sCamera->Update();
         ecs->userInput->ListenForInput();
 
         scene->Update();
-
         //----------------------------------------------------------------------------------
         draw();
-        // TODO: replace with SceneManager
-        if (stateChange > 0)
-        {
-            delete registry;
-            registry = new entt::registry();
-            ecs = std::make_unique<ECSManager>(registry, sCamera.get());
-            switch (stateChange) {
-            case 1:
-                scene = std::make_unique<Game>(registry, ecs.get());
-                break;
-            case 2:
-//                scene = std::make_unique<Editor>(registry, ecs.get(), userInput.get());
-//                break;
-            }
-            stateChange = 0;
-        }
     }
 }
 
@@ -86,16 +66,10 @@ void GameManager::draw()
     ecs->cursor->Draw();
 
     scene->Draw3D();
-    
-    scene->lightSubSystem->DrawDebugLights();
 
     EndMode3D();
 
-    ecs->cursor->DrawDebugText();
-
     scene->Draw2D();
-
-    DrawFPS(10, 10);
 
     EndDrawing();
     //----------------------------------------------------------------------------------
@@ -105,11 +79,6 @@ void GameManager::draw()
 void GameManager::cleanup()
 {
     CloseWindow();
-}
-
-void GameManager::SetState(int stateId)
-{
-    stateChange = stateId;
 }
 
 }

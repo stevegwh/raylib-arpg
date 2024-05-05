@@ -19,7 +19,6 @@ namespace sage
 
 class Game : public Scene
 {
-    void onEditorModePressed();
 public:
     
     explicit Game(entt::registry* _registry, ECSManager* _ecs);

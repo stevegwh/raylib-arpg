@@ -239,21 +239,6 @@ void EditorScene::Draw3D()
     }
 
     ecs->renderSystem->Draw();
-
-    DrawGrid(100, 1.0f);
-
-    for (const auto& gridSquareRow : ecs->navigationGridSystem->GetGridSquares())
-    {
-        for (const auto& gridSquare : gridSquareRow)
-        {
-            BoundingBox bb;
-            bb.min = gridSquare->worldPosMin;
-            bb.max = gridSquare->worldPosMax;
-            bb.max.y = 0.1f;
-            Color color = gridSquare->occupied ? RED : GREEN;
-            DrawBoundingBox(bb, color);
-        }
-    }
 }
 
 
@@ -284,22 +269,13 @@ Scene(_registry, _ecs)
         //GM.SetState(1);
     }>();
 
-    entt::entity floor = registry->create();
-    Vector3 g0 = (Vector3){ -50.0f, 0.1f, -50.0f };
-    Vector3 g2 = (Vector3){  50.0f, 0.1f,  50.0f };
     BoundingBox bb = {
-        .min = g0,
-        .max = g2
+        .min = (Vector3){ -50.0f, 0.1f, -50.0f },
+        .max = (Vector3){  50.0f, 0.1f,  50.0f }
     };
-    
-    auto& floorCollideable = registry->emplace<Collideable>(floor, bb);
-    floorCollideable.collisionLayer = FLOOR;
+    GameObjectFactory::createFloor(registry, this, bb);
 
-//        auto floorWorldObject = std::make_unique<WorldObject>(floor);
-//        worldSystem->AddComponent(std::move(floorWorldObject));
-
-    //ECS->Load(); // TODO: Should specify path to saved map of scene
-    // TODO: This should also be based on scene parameters, and grid needs to be adapted to work.
+    ecs->Load();
     ecs->navigationGridSystem->Init(100, 1.0f);
     ecs->navigationGridSystem->PopulateGrid();
 }

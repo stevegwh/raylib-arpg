@@ -6,15 +6,10 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "cereal/cereal.hpp"
-//#include <cereal/archives/json.hpp>
-#include "cereal/archives/xml.hpp"
 
 #include "../Material.hpp"
 
 #include <string>
-#include <iostream>
-#include <utility>
-#include <vector>
 #include <optional>
 
 namespace sage

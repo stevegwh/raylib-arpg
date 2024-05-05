@@ -1,6 +1,6 @@
 ## To Do
 
 - [x] Make editor work again
-- Add GUI to editor
-- Put editor in own folder with a CMakeLists
-- Make serialisation work again (maybe don't use json?)
+- [x] Add GUI to editor
+- [x] Put editor in own folder with a CMakeLists
+- [x] Make serialisation work again (maybe don't use json?)
