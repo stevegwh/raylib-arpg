@@ -46,7 +46,6 @@ if(BUILD_EDITOR)
     add_subdirectory(editor)
 endif()
 
-# TODO: Remove dependency on Editor from the game files, then reenable this
 # Add the game executable target
 add_executable(game core/src/main.cpp)
 target_link_libraries(game PRIVATE core)

@@ -4,10 +4,10 @@
 
 #include "EditorScene.hpp"
 #include "../core/src/GameObjectFactory.hpp"
-#include "../core/src/raygui.h"
+#include "raygui.h"
 
 #define RAYGUI_IMPLEMENTATION
-#include "../core/src/raygui.h"
+#include "raygui.h"
 
 static Vector2 window_position = { 10, 10 };
 static Vector2 window_size = { 200, 400 };

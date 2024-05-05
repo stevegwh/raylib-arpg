@@ -5,7 +5,7 @@
 #include "TransformSystem.hpp"
 
 #include "../GameManager.hpp"
-#include "../Serializer.hpp"
+#include "../../utils/Serializer.hpp"
 
 namespace sage
 {
