@@ -23,10 +23,8 @@ void Editor::init()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = SCREEN_WIDTH;
-    const int screenHeight = SCREEN_HEIGHT;
 
-    InitWindow(screenWidth, screenHeight, "Baldur's Raylib");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
     scene = std::make_unique<EditorScene>(registry, ecs.get());
 
     ecs->userInput->dOnRunModePressedEvent.connect<&Editor::enablePlayMode>(this);
@@ -69,6 +67,7 @@ void Editor::Update()
         //----------------------------------------------------------------------------------
         sCamera->Update();
         ecs->userInput->ListenForInput();
+        toggleFullScreen(); // checks for full screen TODO: tmp
 
         scene->Update();
 

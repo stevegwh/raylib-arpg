@@ -33,6 +33,7 @@ protected:
     virtual void init();
     static void cleanup();
     virtual void draw();
+    static void toggleFullScreen() ;
 public:
     GameManager();
     ~GameManager();

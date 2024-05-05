@@ -22,14 +22,21 @@ GameManager::~GameManager()
     cleanup();
 }
 
+void GameManager::toggleFullScreen() 
+{
+    // check for alt + enter
+    if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
+    {
+        // toggle the state
+        ToggleFullscreen();
+    }
+}
+
 void GameManager::init()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = SCREEN_WIDTH;
-    const int screenHeight = SCREEN_HEIGHT;
-
-    InitWindow(screenWidth, screenHeight, "Baldur's Raylib");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
     scene = std::make_unique<Game>(registry, ecs.get());
 }
 
