@@ -44,7 +44,7 @@ void Editor::manageScenes()
         switch (stateChange)
         {
         case 1:
-            scene = std::make_unique<Game>(registry, ecs.get());
+            scene = std::make_unique<GameScene>(registry, ecs.get());
             ecs->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
             break;
         case 2:

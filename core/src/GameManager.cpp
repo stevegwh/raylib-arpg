@@ -46,7 +46,7 @@ void GameManager::init()
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<Game>(registry, ecs.get());
+    scene = std::make_unique<GameScene>(registry, ecs.get());
 }
 
 void GameManager::Update()
@@ -60,8 +60,8 @@ void GameManager::Update()
         // Update
         //----------------------------------------------------------------------------------
         
-        // TODO: rename ecs to "game", rename "Game" to "GameScene"
-        // TODO: make an "update" loop for "ECSManager" (now called Game)
+        // TODO: rename ecs to "game", rename "GameScene" to "GameScene"
+        // TODO: make an "update" loop for "ECSManager" (now called GameScene)
         ecs->camera->Update();
         ecs->userInput->ListenForInput();
         ecs->cursor->Update();

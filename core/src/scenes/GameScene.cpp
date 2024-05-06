@@ -2,7 +2,7 @@
 // Created by Steve Wheeler on 27/03/2024.
 //
 
-#include "Game.hpp"
+#include "GameScene.hpp"
 
 #include "raylib.h"
 
@@ -15,29 +15,29 @@
 
 namespace sage
 {
-void Game::Update()
+void GameScene::Update()
 {
     ecs->transformSystem->Update();
     ecs->animationSystem->Update();
     ecs->renderSystem->Update();
 }
 
-void Game::Draw3D()
+void GameScene::Draw3D()
 {
     ecs->renderSystem->Draw();
 }
 
-void Game::Draw2D()
+void GameScene::Draw2D()
 {
     
 }
 
-Game::~Game()
+GameScene::~GameScene()
 {
     
 }
 
-Game::Game(entt::registry* _registry, ECSManager* _ecs) : 
+GameScene::GameScene(entt::registry* _registry, ECSManager* _ecs) : 
 Scene(_registry, _ecs)
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);

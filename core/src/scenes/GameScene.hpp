@@ -17,12 +17,12 @@
 namespace sage
 {
 
-class Game : public Scene
+class GameScene : public Scene
 {
 public:
     
-    explicit Game(entt::registry* _registry, ECSManager* _ecs);
-    ~Game() override;
+    explicit GameScene(entt::registry* _registry, ECSManager* _ecs);
+    ~GameScene() override;
     void Update() override;
     void Draw3D() override;
     void Draw2D() override;

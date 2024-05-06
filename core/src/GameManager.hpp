@@ -11,7 +11,7 @@
 #include "UserInput.hpp"
 #include "ECSManager.hpp"
 // Scenes
-#include "scenes/Game.hpp"
+#include "scenes/GameScene.hpp"
 
 #include "raylib.h"
 #include "entt/entt.hpp"
