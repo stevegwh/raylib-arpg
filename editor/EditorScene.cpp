@@ -265,14 +265,11 @@ Scene(_registry, _ecs)
 {
     userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     userInput->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
-    userInput->dOnDeleteKeyPressedEvent.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
-    userInput->dOnCreateKeyPressedEvent.connect<&EditorScene::OnCreateModeKeyPressed>(this);
-    userInput->dOnGenGridKeyPressedEvent.connect<&EditorScene::OnGenGridKeyPressed>(this);
-    userInput->dOnSerializeSaveKeyPressedEvent.connect<&EditorScene::OnSerializeSave>(this);
-    userInput->dOnSerializeLoadKeyPressedEvent.connect<&EditorScene::OnSerializeLoad>(this);
-    userInput->dOnRunModePressedEvent.connect<[]() {
-        //GM.SetState(1);
-    }>();
+    userInput->dKeyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
+    userInput->dKeyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
+    userInput->dKeyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
+    userInput->dKeyMPressed.connect<&EditorScene::OnSerializeSave>(this);
+    userInput->dKeyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
 
     BoundingBox bb = {
         .min = (Vector3){ -50.0f, 0.1f, -50.0f },

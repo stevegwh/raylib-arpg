@@ -56,7 +56,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, ECSManage
     transform.dOnStartMovement.connect<[](Animation& animation, entt::entity entity) {
         animation.ChangeAnimation(3);
     }>(animation);
-    ecs->userInput->dOnCreateKeyPressedEvent.connect<[](Animation& animation) {
+    ecs->userInput->dKeyIPressed.connect<[](Animation& animation) { // TODO: Just to test animations on demand
         if (animation.animIndex == 1)
         {
             animation.ChangeAnimation(0);

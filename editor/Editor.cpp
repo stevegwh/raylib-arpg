@@ -30,7 +30,7 @@ void Editor::init()
 
     //serializer::DeserializeKeyMapping(keyMapping, "resources/editorKeymapping.xml");
 
-    ecs->userInput->dOnRunModePressedEvent.connect<&Editor::enablePlayMode>(this);
+    ecs->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
 }
 
 void Editor::manageScenes()
@@ -45,11 +45,11 @@ void Editor::manageScenes()
         {
         case 1:
             scene = std::make_unique<Game>(registry, ecs.get());
-            ecs->userInput->dOnRunModePressedEvent.connect<&Editor::enableEditMode>(this);
+            ecs->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
             break;
         case 2:
             scene = std::make_unique<EditorScene>(registry, ecs.get());
-            ecs->userInput->dOnRunModePressedEvent.connect<&Editor::enablePlayMode>(this);
+            ecs->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
             break;
         }
         stateChange = 0;
