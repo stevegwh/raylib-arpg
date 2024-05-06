@@ -7,13 +7,8 @@
 namespace sage
 {
 
-void UserInput::ListenForInput()
+void UserInput::ListenForInput() const
 {
-    if (cursor->GetMouseRayCollision())
-    {
-        if (dOnCollisionHitEvent) dOnCollisionHitEvent(); 
-    }
-    
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (dOnClickEvent) dOnClickEvent();
@@ -23,124 +18,237 @@ void UserInput::ListenForInput()
     {
         if (dKeyAPressed) dKeyAPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyB))
+    if (IsKeyUp(keyMapping.keyA))
+    {
+        if (dKeyAUp) dKeyAUp();
+    }
+    if (IsKeyPressed(keyMapping.keyB))
     {
         if (dKeyBPressed) dKeyBPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyC))
+    if (IsKeyUp(keyMapping.keyB))
+    {
+        if (dKeyBUp) dKeyBUp();
+    }
+    if (IsKeyPressed(keyMapping.keyC))
     {
         if (dKeyCPressed) dKeyCPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyD))
+    if (IsKeyUp(keyMapping.keyC))
+    {
+        if (dKeyCUp) dKeyCUp();
+    }
+    if (IsKeyPressed(keyMapping.keyD))
     {
         if (dKeyDPressed) dKeyDPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyE))
+    if (IsKeyUp(keyMapping.keyD))
+    {
+        if (dKeyDUp) dKeyDUp();
+    }
+    if (IsKeyPressed(keyMapping.keyE))
     {
         if (dKeyEPressed) dKeyEPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyF))
+    if (IsKeyUp(keyMapping.keyE))
+    {
+        if (dKeyEUp) dKeyEUp();
+    }
+    if (IsKeyPressed(keyMapping.keyF))
     {
         if (dKeyFPressed) dKeyFPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyG))
+    if (IsKeyUp(keyMapping.keyF))
+    {
+        if (dKeyFUp) dKeyFUp();
+    }
+    if (IsKeyPressed(keyMapping.keyG))
     {
         if (dKeyGPressed) dKeyGPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyH))
+    if (IsKeyUp(keyMapping.keyG))
+    {
+        if (dKeyGUp) dKeyGUp();
+    }
+    if (IsKeyPressed(keyMapping.keyH))
     {
         if (dKeyHPressed) dKeyHPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyI))
+    if (IsKeyUp(keyMapping.keyH))
+    {
+        if (dKeyHUp) dKeyHUp();
+    }
+    if (IsKeyPressed(keyMapping.keyI))
     {
         if (dKeyIPressed) dKeyIPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyJ))
+    if (IsKeyUp(keyMapping.keyI))
+    {
+        if (dKeyIUp) dKeyIUp();
+    }
+    if (IsKeyPressed(keyMapping.keyJ))
     {
         if (dKeyJPressed) dKeyJPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyK))
+    if (IsKeyUp(keyMapping.keyJ))
+    {
+        if (dKeyJUp) dKeyJUp();
+    }
+    if (IsKeyPressed(keyMapping.keyK))
     {
         if (dKeyKPressed) dKeyKPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyL))
+    if (IsKeyUp(keyMapping.keyK))
+    {
+        if (dKeyKUp) dKeyKUp();
+    }
+    if (IsKeyPressed(keyMapping.keyL))
     {
         if (dKeyLPressed) dKeyLPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyM))
+    if (IsKeyUp(keyMapping.keyL))
+    {
+        if (dKeyLUp) dKeyLUp();
+    }
+    if (IsKeyPressed(keyMapping.keyM))
     {
         if (dKeyMPressed) dKeyMPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyN))
+    if (IsKeyUp(keyMapping.keyM))
+    {
+        if (dKeyMUp) dKeyMUp();
+    }
+    if (IsKeyPressed(keyMapping.keyN))
     {
         if (dKeyNPressed) dKeyNPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyO))
+    if (IsKeyUp(keyMapping.keyN))
+    {
+        if (dKeyNUp) dKeyNUp();
+    }
+    if (IsKeyPressed(keyMapping.keyO))
     {
         if (dKeyOPressed) dKeyOPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyP))
+    if (IsKeyUp(keyMapping.keyO))
+    {
+        if (dKeyOUp) dKeyOUp();
+    }
+    if (IsKeyPressed(keyMapping.keyP))
     {
         if (dKeyPPressed) dKeyPPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyQ))
+    if (IsKeyUp(keyMapping.keyP))
+    {
+        if (dKeyPUp) dKeyPUp();
+    }
+    if (IsKeyPressed(keyMapping.keyQ))
     {
         if (dKeyQPressed) dKeyQPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyR))
+    if (IsKeyUp(keyMapping.keyQ))
+    {
+        if (dKeyQUp) dKeyQUp();
+    }
+    if (IsKeyPressed(keyMapping.keyR))
     {
         if (dKeyRPressed) dKeyRPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyS))
+    if (IsKeyUp(keyMapping.keyR))
+    {
+        if (dKeyRUp) dKeyRUp();
+    }
+    if (IsKeyPressed(keyMapping.keyS))
     {
         if (dKeySPressed) dKeySPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyT))
+    if (IsKeyUp(keyMapping.keyS))
+    {
+        if (dKeySUp) dKeySUp();
+    }
+    if (IsKeyPressed(keyMapping.keyT))
     {
         if (dKeyTPressed) dKeyTPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyU))
+    if (IsKeyUp(keyMapping.keyT))
+    {
+        if (dKeyTUp) dKeyTUp();
+    }
+    if (IsKeyPressed(keyMapping.keyU))
     {
         if (dKeyUPressed) dKeyUPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyV))
+    if (IsKeyUp(keyMapping.keyU))
+    {
+        if (dKeyUUp) dKeyUUp();
+    }
+    if (IsKeyPressed(keyMapping.keyV))
     {
         if (dKeyVPressed) dKeyVPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyW))
+    if (IsKeyUp(keyMapping.keyV))
+    {
+        if (dKeyVUp) dKeyVUp();
+    }
+    if (IsKeyPressed(keyMapping.keyW))
     {
         if (dKeyWPressed) dKeyWPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyX))
+    if (IsKeyUp(keyMapping.keyW))
+    {
+        if (dKeyWUp) dKeyWUp();
+    }
+    if (IsKeyPressed(keyMapping.keyX))
     {
         if (dKeyXPressed) dKeyXPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyY))
+    if (IsKeyUp(keyMapping.keyX))
+    {
+        if (dKeyXUp) dKeyXUp();
+    }
+    if (IsKeyPressed(keyMapping.keyY))
     {
         if (dKeyYPressed) dKeyYPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyZ))
+    if (IsKeyUp(keyMapping.keyY))
+    {
+        if (dKeyYUp) dKeyYUp();
+    }
+    if (IsKeyPressed(keyMapping.keyZ))
     {
         if (dKeyZPressed) dKeyZPressed();
     }
-    else if (IsKeyPressed(keyMapping.keyEscape))
+    if (IsKeyUp(keyMapping.keyZ))
+    {
+        if (dKeyZUp) dKeyZUp();
+    }
+    if (IsKeyPressed(keyMapping.keyEscape))
     {
         if (dKeyEscapePressed) dKeyEscapePressed();
     }
-    else if (IsKeyPressed(keyMapping.keySpace))
+    if (IsKeyUp(keyMapping.keyEscape))
+    {
+        if (dKeyEscapeUp) dKeyEscapeUp();
+    }
+    if (IsKeyPressed(keyMapping.keySpace))
     {
         if (dKeySpacePressed) dKeySpacePressed();
     }
-    else if (IsKeyPressed(keyMapping.keyDelete))
+    if (IsKeyUp(keyMapping.keySpace))
+    {
+        if (dKeySpaceUp) dKeySpaceUp();
+    }
+    if (IsKeyPressed(keyMapping.keyDelete))
     {
         if (dKeyDeletePressed) dKeyDeletePressed();
+    }
+    if (IsKeyUp(keyMapping.keyDelete))
+    {
+        if (dKeyDeleteUp) dKeyDeleteUp();
     }
 
 }
     
-UserInput::UserInput(Cursor* _cursor, KeyMapping _keyMapping) : cursor(_cursor), keyMapping(_keyMapping)
-{
-    
-}
+UserInput::UserInput(KeyMapping _keyMapping) : keyMapping(_keyMapping) {}
 
 }

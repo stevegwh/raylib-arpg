@@ -8,7 +8,7 @@
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 namespace sage
 {
-bool Cursor::GetMouseRayCollision()
+void Cursor::getMouseRayCollision()
 {
     // Display information about closest hit
     collision = {};
@@ -17,7 +17,7 @@ bool Cursor::GetMouseRayCollision()
     collision.hit = false;
 
     // Get ray and test against objects
-    ray = GetMouseRay(GetMousePosition(), *sCamera->getCamera());
+    ray = GetMouseRay(GetMousePosition(), *sCamera->getRaylibCam());
 
     auto collisions = collisionSystem->GetCollisionsWithRay(ray);
     rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){{}, {}} : collisionSystem
@@ -34,9 +34,13 @@ bool Cursor::GetMouseRayCollision()
                 hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
             }
         }
-        return true;
+        if (dOnCollisionHitEvent) dOnCollisionHitEvent();
     }
-    return false;
+}
+
+void Cursor::Update()
+{
+    getMouseRayCollision();
 }
 
 void Cursor::Draw()

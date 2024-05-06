@@ -18,12 +18,14 @@ class Cursor
     Color hoverColor = LIME;
     sage::CollisionSystem* collisionSystem;
     sage::Camera* sCamera;
+    void getMouseRayCollision();
 public:
     std::string hitObjectName{};
     RayCollision collision {0};
     CollisionInfo rayCollisionResultInfo;
-
-    bool GetMouseRayCollision();
+    entt::delegate<void()> dOnCollisionHitEvent{};
+    
+    void Update();
     void Draw();
     void DrawDebugText() const;
     Cursor(entt::registry* registry,

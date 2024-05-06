@@ -42,7 +42,6 @@ public:
     GameManager(GameManager const&) = delete;
     void operator=(GameManager const&)  = delete;
     std::unique_ptr<sage::ECSManager> ecs;
-    std::unique_ptr<sage::Camera> sCamera;
     virtual void Update();
 };
 }

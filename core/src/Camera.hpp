@@ -7,7 +7,7 @@
 
 namespace sage
 {
-
+struct UserInput;
 class Camera
 {
     Camera3D rlCamera;
@@ -16,19 +16,33 @@ class Camera
     Vector3 rotation {};
     int zoom = 10;
     void handleInput();
+    
+    bool forwardKeyDown;
+    bool backKeyDown;
+    bool leftKeyDown;
+    bool rightKeyDown;
+    bool rotateLeftKeyDown;
+    bool rotateRightKeyDown;
+    
 public:
-    Camera3D* getCamera();
-    Camera()
-    : rlCamera({0})
-    {
-        rlCamera.position = { 20.0f, 40.0f, 20.0f };
-        rlCamera.target = { 0.0f, 8.0f, 0.0f };
-        rlCamera.up = { 0.0f, 1.0f, 0.0f };
-        rlCamera.fovy = 45.0f;
-        rlCamera.projection = CAMERA_PERSPECTIVE;
-    }
+    Camera3D* getRaylibCam();
+    explicit Camera(UserInput* userInput);
     
     void Update();
+
+    void OnForwardKeyPressed();
+    void OnLeftKeyPressed();
+    void OnRightKeyPressed();
+    void OnBackKeyPressed();
+    void OnRotateLeftKeyPressed();
+    void OnRotateRightKeyPressed();
+    
+    void OnForwardKeyUp();
+    void OnLeftKeyUp();
+    void OnRightKeyUp();
+    void OnBackKeyUp();
+    void OnRotateLeftKeyUp();
+    void OnRotateRightKeyUp();
 };
 
 } // sage

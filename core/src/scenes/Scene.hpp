@@ -17,12 +17,10 @@ class Scene
 protected:
     entt::registry* registry;
     ECSManager* ecs;
-    UserInput* userInput;
 public:
     std::unique_ptr<LightSubSystem> lightSubSystem;
     explicit Scene(entt::registry* _registry, ECSManager* _ecs) :
-    registry(_registry), 
-    userInput(_ecs->userInput.get()),
+    registry(_registry),
     ecs(_ecs),
     lightSubSystem(std::make_unique<LightSubSystem>()) {};
     virtual ~Scene() = default;

@@ -10,10 +10,9 @@
 namespace sage
 {
 GameManager::GameManager() :
-    registry(new entt::registry()),
-    sCamera(std::make_unique<sage::Camera>())
+    registry(new entt::registry())
 {
-    ecs = std::make_unique<sage::ECSManager>(registry, sCamera.get(), keyMapping);
+    ecs = std::make_unique<sage::ECSManager>(registry, keyMapping);
 }
 
 GameManager::~GameManager()
@@ -60,8 +59,12 @@ void GameManager::Update()
     {
         // Update
         //----------------------------------------------------------------------------------
-        sCamera->Update();
+        
+        // TODO: rename ecs to "game", rename "Game" to "GameScene"
+        // TODO: make an "update" loop for "ECSManager" (now called Game)
+        ecs->camera->Update();
         ecs->userInput->ListenForInput();
+        ecs->cursor->Update();
 
         scene->Update();
         //----------------------------------------------------------------------------------
@@ -77,7 +80,7 @@ void GameManager::draw()
 
     ClearBackground(RAYWHITE);
 
-    BeginMode3D(*sCamera->getCamera());
+    BeginMode3D(*ecs->camera->getRaylibCam());
 
     // If we hit something, draw the cursor at the hit point
     ecs->cursor->Draw();

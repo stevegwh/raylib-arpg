@@ -263,13 +263,13 @@ void EditorScene::Draw2D()
 EditorScene::EditorScene(entt::registry* _registry, ECSManager* _ecs) : 
 Scene(_registry, _ecs)
 {
-    userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
-    userInput->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
-    userInput->dKeyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
-    userInput->dKeyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
-    userInput->dKeyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
-    userInput->dKeyMPressed.connect<&EditorScene::OnSerializeSave>(this);
-    userInput->dKeyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
+    ecs->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
+    ecs->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
+    ecs->userInput->dKeyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
+    ecs->userInput->dKeyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
+    ecs->userInput->dKeyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
+    ecs->userInput->dKeyMPressed.connect<&EditorScene::OnSerializeSave>(this);
+    ecs->userInput->dKeyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
 
     BoundingBox bb = {
         .min = (Vector3){ -50.0f, 0.1f, -50.0f },
