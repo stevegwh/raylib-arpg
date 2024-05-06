@@ -9,6 +9,7 @@
 #include "scenes/Scene.hpp"
 
 #include "entt/entt.hpp"
+#include "windows/FloatingWindow.hpp"
 
 #include <vector>
 #include <memory>
@@ -27,6 +28,9 @@ enum EditorMode
 class EditorScene : public Scene
 {
     EditorMode currentEditorMode = IDLE;
+    
+    editor::FloatingWindow guiWindow1;
+    editor::FloatingWindow guiWindow2;
     
     // Event responses
     void OnCursorClick();

@@ -17,14 +17,14 @@ namespace sage
 {
 void GameScene::Update()
 {
-    ecs->transformSystem->Update();
-    ecs->animationSystem->Update();
-    ecs->renderSystem->Update();
+    game->transformSystem->Update();
+    game->animationSystem->Update();
+    game->renderSystem->Update();
 }
 
 void GameScene::Draw3D()
 {
-    ecs->renderSystem->Draw();
+    game->renderSystem->Draw();
 }
 
 void GameScene::Draw2D()
@@ -42,9 +42,9 @@ Scene(_registry, _ecs)
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
     auto playerId = GameObjectFactory::createPlayer(registry, _ecs, {20.0f, 0, 20.0f}, "Player");
-    ecs->actorMovementSystem->SetControlledActor(playerId);
+    game->actorMovementSystem->SetControlledActor(playerId);
     
-    ecs->Load();
+    game->Load();
     BoundingBox bb = {
         .min = (Vector3){ -50.0f, 0.1f, -50.0f },
         .max = (Vector3){  50.0f, 0.1f,  50.0f }
@@ -53,8 +53,8 @@ Scene(_registry, _ecs)
     //GameObjectFactory::loadBlenderLevel(registry, this);
 
     // This should also be based on scene parameters
-    ecs->navigationGridSystem->Init(100, 1.0f);
-    ecs->navigationGridSystem->PopulateGrid();
+    game->navigationGridSystem->Init(100, 1.0f);
+    game->navigationGridSystem->PopulateGrid();
     
 }
 

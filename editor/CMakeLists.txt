@@ -1,7 +1,7 @@
 # editor/CMakeLists.txt
 
-file(GLOB EDITOR_HEADERS *.hpp)
-file(GLOB EDITOR_SOURCES *.cpp)
+file(GLOB EDITOR_HEADERS *.hpp windows/*.hpp)
+file(GLOB EDITOR_SOURCES *.cpp windows/*.cpp)
 
 add_executable(editor main.cpp ${EDITOR_SOURCES} ${EDITOR_HEADERS})
 
