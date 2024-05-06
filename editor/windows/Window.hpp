@@ -12,8 +12,11 @@
 namespace sage::editor
 {
 
-struct Window
+class Window
 {
+protected:
+    virtual void DrawContent() = 0;
+public:
     std::string title;
     Vector2 content_size{};
     Vector2 position = { 10, 10 };
@@ -23,7 +26,7 @@ struct Window
     bool resizing = false;
     Vector2 scroll{};
     
-    virtual void DrawContent() = 0;
+    virtual void Update() = 0;
     
     Window(Vector2 _position, Vector2 _size, Vector2 _content_size, std::string _title);
 

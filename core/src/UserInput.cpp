@@ -7,8 +7,29 @@
 namespace sage
 {
 
+void UserInput::toggleFullScreen() const
+{
+    if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
+    {
+        if (!IsWindowFullscreen())
+        {
+            const int current_screen = GetCurrentMonitor();
+            SetWindowSize(
+                GetMonitorWidth(current_screen),
+                GetMonitorHeight(current_screen));
+            ToggleFullscreen();
+        }
+        else if (IsWindowFullscreen())
+        {
+            ToggleFullscreen();
+            SetWindowSize(1280, 720); // TODO: do not hardcode values
+        };
+    }
+}
+
 void UserInput::ListenForInput() const
 {
+    toggleFullScreen();
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (dOnClickEvent) dOnClickEvent();

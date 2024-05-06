@@ -143,14 +143,11 @@ void EditorScene::Draw2D()
 
     DrawText(TextFormat("Editor Mode: %s", mode.c_str()), SCREEN_WIDTH - 150, 50, 10, BLACK);
     
-    guiWindow1.Update();
-    guiWindow2.Update();
+    gui->Draw();
 }
 
-EditorScene::EditorScene(entt::registry* _registry, Game* _ecs) :
-    guiWindow1({ 10, 10 }, { 200, 400 }, { 140, 320 }, "Window 1"),
-    guiWindow2({ 250, 10 }, { 200, 400 }, { 140, 320 }, "Window 1"),
-    Scene(_registry, _ecs)
+EditorScene::EditorScene(entt::registry* _registry, Game* _game) :
+    Scene(_registry, _game), gui(std::make_unique<editor::GUI>())
 {
     game->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     game->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
@@ -159,6 +156,9 @@ EditorScene::EditorScene(entt::registry* _registry, Game* _ecs) :
     game->userInput->dKeyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
     game->userInput->dKeyMPressed.connect<&EditorScene::OnSerializeSave>(this);
     game->userInput->dKeyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
+
+    gui->saveButtonPressed.connect<&EditorScene::OnSerializeSave>(this);
+    gui->loadButtonPressed.connect<&EditorScene::OnSerializeLoad>(this);
 
     BoundingBox bb = {
         .min = (Vector3){ -50.0f, 0.1f, -50.0f },

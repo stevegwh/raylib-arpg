@@ -7,6 +7,7 @@
 #include "../core/src/UserInput.hpp"
 #include "../core/src/GameManager.hpp"
 #include "scenes/Scene.hpp"
+#include "Gui.hpp"
 
 #include "entt/entt.hpp"
 #include "windows/FloatingWindow.hpp"
@@ -29,8 +30,9 @@ class EditorScene : public Scene
 {
     EditorMode currentEditorMode = IDLE;
     
-    editor::FloatingWindow guiWindow1;
-    editor::FloatingWindow guiWindow2;
+//    editor::FloatingWindow guiWindow1;
+//    editor::FloatingWindow guiWindow2;
+    std::unique_ptr<editor::GUI> gui;
     
     // Event responses
     void OnCursorClick();

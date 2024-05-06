@@ -6,6 +6,7 @@
 
 #include "KeyMapping.hpp"
 #include "GameManager.hpp"
+#include "Gui.hpp"
 
 namespace sage
 {

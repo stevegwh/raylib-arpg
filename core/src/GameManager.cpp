@@ -24,26 +24,6 @@ GameManager::~GameManager()
     cleanup();
 }
 
-void GameManager::toggleFullScreen() 
-{
-    if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
-    {
-        if (!IsWindowFullscreen())
-        {
-            const int current_screen = GetCurrentMonitor();
-            SetWindowSize(
-                GetMonitorWidth(current_screen),
-                GetMonitorHeight(current_screen));
-            ToggleFullscreen();
-        }
-        else if (IsWindowFullscreen())
-        {
-            ToggleFullscreen();
-            SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-        };
-    }
-}
-
 void GameManager::init()
 {
     // Initialization

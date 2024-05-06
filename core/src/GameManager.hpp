@@ -35,7 +35,6 @@ protected:
     virtual void init();
     static void cleanup();
     virtual void draw();
-    void toggleFullScreen();
 public:
     GameManager();
     ~GameManager();

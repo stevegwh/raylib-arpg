@@ -71,7 +71,6 @@ void Editor::Update()
         game->camera->Update();
         game->userInput->ListenForInput();
         game->cursor->Update();
-        toggleFullScreen(); // checks for full screen TODO: tmp
 
         scene->Update();
 

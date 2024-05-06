@@ -13,7 +13,7 @@ namespace sage
     class UserInput
     {
         KeyMapping keyMapping;
-        
+        void toggleFullScreen() const;
     public:
         entt::delegate<void()> dOnClickEvent{};
 
