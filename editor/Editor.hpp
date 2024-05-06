@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "KeyMapping.hpp"
 #include "GameManager.hpp"
 
 namespace sage

@@ -10,8 +10,12 @@
 namespace sage
 {
 
+// TODO: this should all be registered to events to the UserInput (but... this gets deleted every time because its part of the ECS :)))
 void Camera::handleInput()
 {
+    if (IsKeyDown(KEY_LEFT_CONTROL)|| IsKeyDown(KEY_RIGHT_CONTROL) || IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))
+        return;
+
     if (IsKeyDown(KEY_S))
     {
         auto right = GetCameraRight(&rlCamera);

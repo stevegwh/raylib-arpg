@@ -6,12 +6,14 @@
 
 
 #include "Cursor.hpp"
+#include "KeyMapping.hpp"
 
 namespace sage
 {
     class UserInput
     {
         Cursor* cursor;
+        KeyMapping keyMapping;
         
     public:
         entt::delegate<void()> dOnClickEvent{};
@@ -19,11 +21,12 @@ namespace sage
         entt::delegate<void()> dOnDeleteKeyPressedEvent{};
         entt::delegate<void()> dOnCreateKeyPressedEvent{};
         entt::delegate<void()> dOnGenGridKeyPressedEvent{};
-        entt::delegate<void()> dOnSerializeKeyPressedEvent{};
+        entt::delegate<void()> dOnSerializeSaveKeyPressedEvent{};
+        entt::delegate<void()> dOnSerializeLoadKeyPressedEvent{};
         entt::delegate<void()> dOnRunModePressedEvent{};
         
         void ListenForInput();
 
-        explicit UserInput(Cursor* _cursor);
+        explicit UserInput(Cursor* _cursor, KeyMapping _keyMapping);
     };
 }

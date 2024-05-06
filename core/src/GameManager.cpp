@@ -13,7 +13,7 @@ GameManager::GameManager() :
     registry(new entt::registry()),
     sCamera(std::make_unique<sage::Camera>())
 {
-    ecs = std::make_unique<sage::ECSManager>(registry, sCamera.get());
+    ecs = std::make_unique<sage::ECSManager>(registry, sCamera.get(), keyMapping);
 }
 
 GameManager::~GameManager()
@@ -24,11 +24,21 @@ GameManager::~GameManager()
 
 void GameManager::toggleFullScreen() 
 {
-    // check for alt + enter
     if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
     {
-        // toggle the state
-        ToggleFullscreen();
+        if (!IsWindowFullscreen())
+        {
+            const int current_screen = GetCurrentMonitor();
+            SetWindowSize(
+                GetMonitorWidth(current_screen),
+                GetMonitorHeight(current_screen));
+            ToggleFullscreen();
+        }
+        else if (IsWindowFullscreen())
+        {
+            ToggleFullscreen();
+            SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        };
     }
 }
 

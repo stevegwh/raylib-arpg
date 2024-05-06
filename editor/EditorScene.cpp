@@ -186,9 +186,13 @@ void EditorScene::OnCursorClick()
     }
 }
 
-void EditorScene::OnSerializeButton()
+void EditorScene::OnSerializeSave()
 {
-    //ECS->Save();
+    ecs->Save();
+}
+
+void EditorScene::OnSerializeLoad()
+{
     ecs->Load();
 }
 
@@ -264,7 +268,8 @@ Scene(_registry, _ecs)
     userInput->dOnDeleteKeyPressedEvent.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
     userInput->dOnCreateKeyPressedEvent.connect<&EditorScene::OnCreateModeKeyPressed>(this);
     userInput->dOnGenGridKeyPressedEvent.connect<&EditorScene::OnGenGridKeyPressed>(this);
-    userInput->dOnSerializeKeyPressedEvent.connect<&EditorScene::OnSerializeButton>(this);
+    userInput->dOnSerializeSaveKeyPressedEvent.connect<&EditorScene::OnSerializeSave>(this);
+    userInput->dOnSerializeLoadKeyPressedEvent.connect<&EditorScene::OnSerializeLoad>(this);
     userInput->dOnRunModePressedEvent.connect<[]() {
         //GM.SetState(1);
     }>();

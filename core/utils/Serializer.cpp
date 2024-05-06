@@ -36,10 +36,11 @@ void serialize(Archive &archive, entity &entity)
 
 void Save(const entt::registry& source)
 {
+    std::cout << "Save called" << std::endl;
     using namespace entt::literals;
     //std::stringstream storage;
 
-    std::ofstream storage("output.xml");
+    std::ofstream storage("resources/output.xml");
     if (!storage.is_open()) {
         // Handle file opening error
         return;
@@ -74,7 +75,7 @@ void Load(entt::registry* destination)
 {
     std::cout << "Load called" << std::endl;
     using namespace entt::literals;
-    std::ifstream storage("../output.xml");
+    std::ifstream storage("resources/output.xml");
     if (!storage.is_open()) 
     {
         // Handle file opening error

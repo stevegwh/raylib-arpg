@@ -19,29 +19,40 @@ void UserInput::ListenForInput()
         if (dOnClickEvent) dOnClickEvent();
     }
 
-    if (IsKeyPressed(KEY_DELETE))
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
     {
-        if (dOnDeleteKeyPressedEvent) dOnDeleteKeyPressedEvent();
+        if (IsKeyPressed(keyMapping.keyS))
+        {
+            if (dOnSerializeSaveKeyPressedEvent) dOnSerializeSaveKeyPressedEvent();
+        }
+        else if (IsKeyPressed(keyMapping.keyL))
+        {
+            if (dOnSerializeLoadKeyPressedEvent) dOnSerializeLoadKeyPressedEvent();
+        }
     }
-    else if (IsKeyPressed(KEY_P))
+    else
     {
-        if(dOnCreateKeyPressedEvent) dOnCreateKeyPressedEvent();
-    } 
-    else if (IsKeyPressed(KEY_G))
-    {
-        if (dOnGenGridKeyPressedEvent) dOnGenGridKeyPressedEvent();
+        if (IsKeyPressed(keyMapping.keyDelete))
+        {
+            if (dOnDeleteKeyPressedEvent) dOnDeleteKeyPressedEvent();
+        }
+        else if (IsKeyPressed(keyMapping.keyP))
+        {
+            if(dOnCreateKeyPressedEvent) dOnCreateKeyPressedEvent();
+        }
+        else if (IsKeyPressed(keyMapping.keyG))
+        {
+            if (dOnGenGridKeyPressedEvent) dOnGenGridKeyPressedEvent();
+        }
+        else if (IsKeyPressed(keyMapping.keyR))
+        {
+            if (dOnRunModePressedEvent) dOnRunModePressedEvent();
+        }
     }
-    else if (IsKeyPressed(KEY_Z))
-    {
-        if (dOnSerializeKeyPressedEvent) dOnSerializeKeyPressedEvent();
-    }
-    else if (IsKeyPressed(KEY_R))
-    {
-        if (dOnRunModePressedEvent) dOnRunModePressedEvent();
-    }
+
 }
     
-UserInput::UserInput(Cursor* _cursor) : cursor(_cursor)
+UserInput::UserInput(Cursor* _cursor, KeyMapping _keyMapping) : cursor(_cursor), keyMapping(_keyMapping)
 {
     
 }

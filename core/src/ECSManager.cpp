@@ -7,7 +7,7 @@
 
 namespace sage
 {
-ECSManager::ECSManager(entt::registry* _registry, sage::Camera* sCamera) :
+ECSManager::ECSManager(entt::registry* _registry, sage::Camera* sCamera, KeyMapping _keyMapping) :
     registry(_registry),
     renderSystem(std::make_unique<RenderSystem>(_registry)),
     collisionSystem(std::make_unique<sage::CollisionSystem>(_registry)),
@@ -16,7 +16,7 @@ ECSManager::ECSManager(entt::registry* _registry, sage::Camera* sCamera) :
     animationSystem(std::make_unique<AnimationSystem>(_registry))
 {
     cursor = std::make_unique<Cursor>(registry, collisionSystem.get(), sCamera);
-    userInput = std::make_unique<UserInput>(cursor.get());
+    userInput = std::make_unique<UserInput>(cursor.get(), _keyMapping);
     
     actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(_registry,
                                                                       cursor.get(),

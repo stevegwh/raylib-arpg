@@ -23,7 +23,7 @@ class ECSManager
 {
     entt::registry* registry;
 public:
-    ECSManager(entt::registry* _registry, sage::Camera* sCamera);
+    ECSManager(entt::registry* _registry, sage::Camera* sCamera, KeyMapping _keyMapping);
     
     std::unique_ptr<UserInput> userInput;
     std::unique_ptr<Cursor> cursor;

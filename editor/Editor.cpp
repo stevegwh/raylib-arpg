@@ -4,6 +4,7 @@
 
 #include "Editor.hpp"
 #include "EditorScene.hpp"
+#include "Serializer.hpp"
 #include <memory>
 
 namespace sage
@@ -27,6 +28,8 @@ void Editor::init()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
     scene = std::make_unique<EditorScene>(registry, ecs.get());
 
+    //serializer::DeserializeKeyMapping(keyMapping, "resources/editorKeymapping.xml");
+
     ecs->userInput->dOnRunModePressedEvent.connect<&Editor::enablePlayMode>(this);
 }
 
@@ -36,7 +39,7 @@ void Editor::manageScenes()
     {
         delete registry;
         registry = new entt::registry();
-        ecs = std::make_unique<ECSManager>(registry, sCamera.get());
+        ecs = std::make_unique<ECSManager>(registry, sCamera.get(), keyMapping);
 
         switch (stateChange)
         {

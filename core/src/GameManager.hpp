@@ -5,6 +5,7 @@
 #pragma once
 
 // Misc
+#include "KeyMapping.hpp"
 #include "scenes/Scene.hpp"
 #include "Camera.hpp"
 #include "UserInput.hpp"
@@ -27,13 +28,14 @@ static constexpr int SCREEN_HEIGHT = 720;
 class GameManager
 {
 protected:
+    KeyMapping keyMapping;
     entt::registry* registry;
     std::unique_ptr<sage::Scene> scene;
     int stateChange = 0;
     virtual void init();
     static void cleanup();
     virtual void draw();
-    static void toggleFullScreen() ;
+    void toggleFullScreen();
 public:
     GameManager();
     ~GameManager();

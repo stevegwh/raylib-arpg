@@ -31,7 +31,8 @@ class EditorScene : public Scene
     // Event responses
     void OnCursorClick();
     void OnCollisionHit();
-    void OnSerializeButton();
+    void OnSerializeSave();
+    void OnSerializeLoad();
     void OnDeleteModeKeyPressed();
     void OnCreateModeKeyPressed();
     void OnGenGridKeyPressed();
