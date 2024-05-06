@@ -6,15 +6,15 @@
 
 #include "raylib.h"
 #include "entt/entt.hpp"
-#include "ECSManager.hpp"
+#include "Game.hpp"
 
 namespace sage
 {
 typedef struct Scene Scene;
 struct GameObjectFactory
 {
-    static entt::entity createPlayer(entt::registry* registry, ECSManager* ecs, Vector3 position, const char* name);
-    static void createTower(entt::registry* registry, ECSManager* ecs, Vector3 position, const char* name);
+    static entt::entity createPlayer(entt::registry* registry, Game* ecs, Vector3 position, const char* name);
+    static void createTower(entt::registry* registry, Game* ecs, Vector3 position, const char* name);
     static void loadBlenderLevel(entt::registry* registry, Scene* scene);
     static void createFloor(entt::registry* registry, Scene* scene, BoundingBox bb);
 };

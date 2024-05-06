@@ -19,11 +19,11 @@
 
 namespace sage
 {
-class ECSManager
+class Game
 {
     entt::registry* registry;
 public:
-    ECSManager(entt::registry* _registry, KeyMapping _keyMapping);
+    Game(entt::registry* _registry, KeyMapping _keyMapping);
     
     std::unique_ptr<UserInput> userInput;
     std::unique_ptr<Cursor> cursor;

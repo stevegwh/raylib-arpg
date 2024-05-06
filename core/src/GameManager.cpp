@@ -12,7 +12,7 @@ namespace sage
 GameManager::GameManager() :
     registry(new entt::registry())
 {
-    ecs = std::make_unique<sage::ECSManager>(registry, keyMapping);
+    game = std::make_unique<sage::Game>(registry, keyMapping);
 }
 
 GameManager::~GameManager()
@@ -46,7 +46,7 @@ void GameManager::init()
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<GameScene>(registry, ecs.get());
+    scene = std::make_unique<GameScene>(registry, game.get());
 }
 
 void GameManager::Update()
@@ -60,11 +60,11 @@ void GameManager::Update()
         // Update
         //----------------------------------------------------------------------------------
         
-        // TODO: rename ecs to "game", rename "GameScene" to "GameScene"
-        // TODO: make an "update" loop for "ECSManager" (now called GameScene)
-        ecs->camera->Update();
-        ecs->userInput->ListenForInput();
-        ecs->cursor->Update();
+        // TODO: rename game to "game", rename "GameScene" to "GameScene"
+        // TODO: make an "update" loop for "Game" (now called GameScene)
+        game->camera->Update();
+        game->userInput->ListenForInput();
+        game->cursor->Update();
 
         scene->Update();
         //----------------------------------------------------------------------------------
@@ -80,10 +80,10 @@ void GameManager::draw()
 
     ClearBackground(RAYWHITE);
 
-    BeginMode3D(*ecs->camera->getRaylibCam());
+    BeginMode3D(*game->camera->getRaylibCam());
 
     // If we hit something, draw the cursor at the hit point
-    ecs->cursor->Draw();
+    game->cursor->Draw();
 
     scene->Draw3D();
 

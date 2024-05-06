@@ -260,7 +260,7 @@ void EditorScene::Draw2D()
     GuiWindowFloating(&window2_position, &window2_size, &minimized2, &moving2, &resizing2, &DrawContent, (Vector2) { 140, 320 }, &scroll2, "Another window");
 }
 
-EditorScene::EditorScene(entt::registry* _registry, ECSManager* _ecs) : 
+EditorScene::EditorScene(entt::registry* _registry, Game* _ecs) : 
 Scene(_registry, _ecs)
 {
     ecs->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);

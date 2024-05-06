@@ -26,11 +26,11 @@ void Editor::init()
     //--------------------------------------------------------------------------------------
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<EditorScene>(registry, ecs.get());
+    scene = std::make_unique<EditorScene>(registry, game.get());
 
     //serializer::DeserializeKeyMapping(keyMapping, "resources/editorKeymapping.xml");
 
-    ecs->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
+    game->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
 }
 
 void Editor::manageScenes()
@@ -39,17 +39,17 @@ void Editor::manageScenes()
     {
         delete registry;
         registry = new entt::registry();
-        ecs = std::make_unique<ECSManager>(registry, keyMapping);
+        game = std::make_unique<Game>(registry, keyMapping);
 
         switch (stateChange)
         {
         case 1:
-            scene = std::make_unique<GameScene>(registry, ecs.get());
-            ecs->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
+            scene = std::make_unique<GameScene>(registry, game.get());
+            game->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
             break;
         case 2:
-            scene = std::make_unique<EditorScene>(registry, ecs.get());
-            ecs->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
+            scene = std::make_unique<EditorScene>(registry, game.get());
+            game->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
             break;
         }
         stateChange = 0;
@@ -68,9 +68,9 @@ void Editor::Update()
 
         // Update
         //----------------------------------------------------------------------------------
-        ecs->camera->Update();
-        ecs->userInput->ListenForInput();
-        ecs->cursor->Update();
+        game->camera->Update();
+        game->userInput->ListenForInput();
+        game->cursor->Update();
         toggleFullScreen(); // checks for full screen TODO: tmp
 
         scene->Update();
@@ -84,7 +84,7 @@ void Editor::Update()
 void Editor::drawGrid()
 {
     DrawGrid(100, 1.0f);
-    for (const auto& gridSquareRow : ecs->navigationGridSystem->GetGridSquares())
+    for (const auto& gridSquareRow : game->navigationGridSystem->GetGridSquares())
     {
         for (const auto& gridSquare : gridSquareRow)
         {
@@ -106,10 +106,10 @@ void Editor::draw()
 
     ClearBackground(RAYWHITE);
 
-    BeginMode3D(*ecs->camera->getRaylibCam());
+    BeginMode3D(*game->camera->getRaylibCam());
 
     // If we hit something, draw the cursor at the hit point
-    ecs->cursor->Draw();
+    game->cursor->Draw();
 
     scene->Draw3D();
 
@@ -119,7 +119,7 @@ void Editor::draw()
 
     EndMode3D();
 
-    ecs->cursor->DrawDebugText();
+    game->cursor->DrawDebugText();
 
     scene->Draw2D();
 

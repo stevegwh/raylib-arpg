@@ -9,7 +9,7 @@
 #include "../UserInput.hpp"
 
 #include "entt/entt.hpp"
-#include "ECSManager.hpp"
+#include "Game.hpp"
 
 #include <vector>
 #include <memory>
@@ -21,7 +21,7 @@ class GameScene : public Scene
 {
 public:
     
-    explicit GameScene(entt::registry* _registry, ECSManager* _ecs);
+    explicit GameScene(entt::registry* _registry, Game* _ecs);
     ~GameScene() override;
     void Update() override;
     void Draw3D() override;

@@ -35,7 +35,7 @@ BoundingBox createRectangularBoundingBox(float length, float height)
     return bb;
 }
 
-entt::entity GameObjectFactory::createPlayer(entt::registry* registry, ECSManager* ecs, Vector3 position, const char* name) 
+entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Game* ecs, Vector3 position, const char* name) 
 {
     entt::entity id = registry->create();
     const char* modelPath = "resources/models/gltf/hero.glb";
@@ -87,7 +87,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, ECSManage
     return id;
 }
 
-void GameObjectFactory::createTower(entt::registry* registry, ECSManager* ecs, Vector3 position, const char* name) 
+void GameObjectFactory::createTower(entt::registry* registry, Game* ecs, Vector3 position, const char* name) 
 {
     auto id = registry->create();
     auto& transform = registry->emplace<Transform>(id);

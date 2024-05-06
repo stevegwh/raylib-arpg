@@ -9,7 +9,7 @@
 #include "scenes/Scene.hpp"
 #include "Camera.hpp"
 #include "UserInput.hpp"
-#include "ECSManager.hpp"
+#include "Game.hpp"
 // Scenes
 #include "scenes/GameScene.hpp"
 
@@ -41,7 +41,7 @@ public:
     ~GameManager();
     GameManager(GameManager const&) = delete;
     void operator=(GameManager const&)  = delete;
-    std::unique_ptr<sage::ECSManager> ecs;
+    std::unique_ptr<sage::Game> game;
     virtual void Update();
 };
 }

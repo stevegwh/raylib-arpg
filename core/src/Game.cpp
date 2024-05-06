@@ -2,12 +2,12 @@
 // Created by Steve Wheeler on 27/03/2024.
 //
 
-#include "ECSManager.hpp"
+#include "Game.hpp"
 #include "../utils/Serializer.hpp"
 
 namespace sage
 {
-ECSManager::ECSManager(entt::registry* _registry, KeyMapping _keyMapping) :
+Game::Game(entt::registry* _registry, KeyMapping _keyMapping) :
     registry(_registry),
     renderSystem(std::make_unique<RenderSystem>(_registry)),
     collisionSystem(std::make_unique<sage::CollisionSystem>(_registry)),
@@ -26,12 +26,12 @@ ECSManager::ECSManager(entt::registry* _registry, KeyMapping _keyMapping) :
                                                                       transformSystem.get());
 }
 
-void ECSManager::Load()
+void Game::Load()
 {
     serializer::Load(registry);
 }
 
-void ECSManager::Save() const
+void Game::Save() const
 {
     serializer::Save(*registry);
 }

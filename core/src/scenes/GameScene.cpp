@@ -37,7 +37,7 @@ GameScene::~GameScene()
     
 }
 
-GameScene::GameScene(entt::registry* _registry, ECSManager* _ecs) : 
+GameScene::GameScene(entt::registry* _registry, Game* _ecs) : 
 Scene(_registry, _ecs)
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
