@@ -123,4 +123,58 @@ void Load(entt::registry* destination)
     }
     storage.close();
 }
+
+void SerializeKeyMapping(KeyMapping& keymapping, const char* path)
+{
+    std::cout << "Save called" << std::endl;
+    using namespace entt::literals;
+    //std::stringstream storage;
+
+    std::ofstream storage(path);
+    if (!storage.is_open()) {
+        // Handle file opening error
+        return;
+    }
+
+    {
+        // output finishes flushing its contents when it goes out of scope
+        cereal::XMLOutputArchive output{storage};
+        output(keymapping);
+    }
+    storage.close();
+    
+}
+
+void DeserializeKeyMapping(KeyMapping& keymapping, const char* path)
+{
+    std::cout << "Load called" << std::endl;
+    using namespace entt::literals;
+
+    std::ifstream storage(path);
+    if (storage.is_open())
+    {
+        cereal::XMLInputArchive input{storage};
+        input(keymapping);
+        storage.close();
+    }
+    else
+    {
+        // File doesn't exist, create a new file with the default key mapping
+        std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
+
+        // Create a new file and serialize the default key mapping
+        std::ofstream newStorage(path);
+        if (newStorage.is_open())
+        {
+            cereal::XMLOutputArchive output{newStorage};
+            output(keymapping);
+            newStorage.close();
+            std::cout << "Default key mapping saved to: " << path << std::endl;
+        }
+        else
+        {
+            std::cerr << "Failed to create key mapping file: " << path << std::endl;
+        }
+    }
+}
 }

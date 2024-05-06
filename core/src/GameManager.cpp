@@ -3,6 +3,7 @@
 //
 
 #include "GameManager.hpp"
+#include "Serializer.hpp"
 
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
@@ -12,6 +13,8 @@ namespace sage
 GameManager::GameManager() :
     registry(new entt::registry())
 {
+    //serializer::SerializeKeyMapping(keyMapping, "resources/keybinding.xml");
+    serializer::DeserializeKeyMapping(keyMapping, "resources/keybinding.xml");
     game = std::make_unique<sage::Game>(registry, keyMapping);
 }
 
