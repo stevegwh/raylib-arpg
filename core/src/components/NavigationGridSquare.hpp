@@ -15,6 +15,7 @@ namespace sage
 {
     struct NavigationGridSquare
     {
+        bool debugColor = false;
         const Vector3 worldPosMin; // Top Left
         const Vector3 worldPosMax; // Bottom Right
         const Vector3 worldPosCentre;

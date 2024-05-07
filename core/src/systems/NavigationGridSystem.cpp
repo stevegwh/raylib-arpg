@@ -2,11 +2,12 @@
 // Created by Steve Wheeler on 25/02/2024.
 //
 
+#include "NavigationGridSystem.hpp"
+
 #include <queue>
 #include <unordered_map>
 #include <utility>
-#include "NavigationGridSystem.hpp"
-
+#include <iostream>
 
 Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 {
@@ -22,21 +23,66 @@ Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 namespace sage
 {
 
+bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange)
+{
+    auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
+    Vector3 center = { (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f };
+
+    // Calculate the top-left and bottom-right corners of the square grid
+    Vector3 topLeft = { center.x - bounds * spacing, center.y, center.z - bounds * spacing };
+    Vector3 bottomRight = { center.x + bounds * spacing, center.y, center.z + bounds * spacing };
+
+    // Get the grid indices for the top-left and bottom-right corners
+    Vector2 topLeftIndex;
+    Vector2 bottomRightIndex;
+
+    bool topLeftValid = WorldToGridSpace(topLeft, topLeftIndex);
+    bool bottomRightValid = WorldToGridSpace(bottomRight, bottomRightIndex);
+
+    // Clip the top-left and bottom-right indices to the grid boundaries
+    topLeftIndex.x = std::max(topLeftIndex.x, 0.0f);
+    topLeftIndex.y = std::max(topLeftIndex.y, 0.0f);
+    bottomRightIndex.x = std::min(bottomRightIndex.x, static_cast<float>(gridSquares.at(0).size() - 1));
+    bottomRightIndex.y = std::min(bottomRightIndex.y, static_cast<float>(gridSquares.size() - 1));
+
+    minRange = { static_cast<float>(topLeftIndex.x), static_cast<float>(topLeftIndex.y) };
+    maxRange = { static_cast<float>(bottomRightIndex.x), static_cast<float>(bottomRightIndex.y) };
+
+    return true;
+}
+
+
 /**
  * Translates a world position to a corresponding index on a grid.
+ * Checks if the passed position is valid based on the entire grid.
  * @param worldPos The position in world space
  * @out (Out param) The resulting index of the corresponding grid square.
  * @return Whether the move is valid
  */
 bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out)
 {
+    return WorldToGridSpace(worldPos, 
+                            out, 
+                            {0,0}, 
+                            {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())});
+}
+
+/**
+ * Translates a world position to a corresponding index on a grid.
+ * Checks if the passed position is valid based on a grid range
+ * @param worldPos The position in world space
+ * @out (Out param) The resulting index of the corresponding grid square.
+ * @return Whether the move is valid
+ */
+bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out, const Vector2& minRange, const Vector2& maxRange)
+{
     // Calculate the grid indices for the given world position
     int x = std::floor(worldPos.x / spacing) + (slices / 2);
     int y = std::floor(worldPos.z / spacing) + (slices / 2);
     out = {static_cast<float>(x), static_cast<float>(y)};
 
-    return out.y < gridSquares.size() && out.x < gridSquares.at(0).size() 
-    && out.x >= 0 && out.y >= 0;
+    return out.y < maxRange.y && out.x < maxRange.x
+    && out.x >= minRange.x && out.y >= minRange.y;
 }
 
 void NavigationGridSystem::Init(int _slices, float _spacing)
@@ -49,7 +95,8 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
     // Resize gridSquares to the appropriate size
     gridSquares.clear();
     gridSquares.resize(slices);
-    for (int i = 0; i < slices; ++i) {
+    for (int i = 0; i < slices; ++i) 
+    {
         gridSquares[i].resize(slices);
     }
 
@@ -78,9 +125,23 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
 
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+ * Checks entire grid.
  * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
  */
 std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos)
+{
+    return Pathfind(startPos, finishPos, {0,0},
+                    {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())});
+}
+
+/**
+ * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+ * Checks path within a range.
+ * @minRange The minimum grid index in the pathfinding range.
+ * @maxRange The maximum grid index in the pathfinding range.
+ * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
+ */
+std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange)
 {
     Vector2 startGridSquare = {0};
     Vector2 finishGridSquare = {0};
@@ -91,12 +152,10 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
     int finishrow = finishGridSquare.y;
     int finishcol = finishGridSquare.x;
 
-    int W = gridSquares.at(0).size();
-    int H = gridSquares.size();
-    auto inside = [&](int row, int col) { return 0 <= row && row < H && 0 <= col && col < W; };
+    auto inside = [&](int row, int col) { return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x; };
 
-    std::vector<std::vector<bool>> visited(H, std::vector<bool>(W, false));
-    std::vector<std::vector<std::pair<int, int>>> came_from(H, std::vector<std::pair<int, int>>(W, std::pair<int, int>(-1, -1)));
+    std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
+    std::vector<std::vector<std::pair<int, int>>> came_from(maxRange.y, std::vector<std::pair<int, int>>(maxRange.x, std::pair<int, int>(-1, -1)));
 
     std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1} };
     std::queue<std::pair<int,int>> frontier;
@@ -111,7 +170,8 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
         auto current = frontier.front();
         frontier.pop();
 
-        if (current.first == finishrow && current.second == finishcol) {
+        if (current.first == finishrow && current.second == finishcol) 
+        {
             pathFound = true;
             break;
         }
@@ -121,7 +181,9 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
             int next_row = current.first + dir.first;
             int next_col = current.second + dir.second;
 
-            if (inside(next_row, next_col) && !visited[next_row][next_col] && !gridSquares[next_row][next_col]->occupied)
+            if (inside(next_row, next_col) && 
+            !visited[next_row][next_col] && 
+            !gridSquares[next_row][next_col]->occupied)
             {
                 frontier.emplace(next_row, next_col);
                 visited[next_row][next_col] = true;

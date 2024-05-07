@@ -15,10 +15,35 @@ void ActorMovementSystem::PathfindToLocation(entt::entity id)
         Vector2 tmp;
         if (!navigationGridSystem->WorldToGridSpace(cursor->collision.point, tmp)) return;
     }
-    const auto& playerPos = registry->get<Transform>(id);
-    auto path = navigationGridSystem->Pathfind(playerPos.position, cursor->collision.point);
+
+    for (int i = 0; i  < navigationGridSystem->gridSquares.size(); i++)
+    {
+        for (int j = 0; j < navigationGridSystem->gridSquares.at(0).size(); j++)
+        {
+            navigationGridSystem->gridSquares[i][j]->debugColor = false;
+        }
+    }
     
-    transformSystem->PathfindToLocation(id, path);
+    Vector2 minRange;
+    Vector2 maxRange;
+    
+    navigationGridSystem->GetPathfindRange(id, 25, minRange, maxRange);
+    
+//    navigationGridSystem->WorldToGridSpace({-25,0,-25}, minRange);
+//    navigationGridSystem->WorldToGridSpace({25,0,25}, maxRange);
+
+    for (int i = minRange.y; i  < maxRange.y; i++) 
+    {
+        for (int j = minRange.x; j < maxRange.x; j++)
+        {
+            navigationGridSystem->gridSquares[i][j]->debugColor = true;
+        }
+    }
+//    navigationGridSystem->GetPathfindRange(id, 25, minRange, maxRange);
+
+    const auto& playerPos = registry->get<Transform>(id);
+    auto path = navigationGridSystem->Pathfind(playerPos.position, cursor->collision.point, minRange, maxRange);
+    if (!path.empty()) transformSystem->PathfindToLocation(id, path);
 }
 
 void ActorMovementSystem::MoveToLocation(entt::entity id)
