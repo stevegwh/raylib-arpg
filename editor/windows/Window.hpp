@@ -29,6 +29,7 @@ public:
     virtual void Update() = 0;
     
     Window(Vector2 _position, Vector2 _size, Vector2 _content_size, std::string _title);
+    virtual ~Window() = default;
 
 };
 

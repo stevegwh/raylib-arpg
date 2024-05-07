@@ -37,11 +37,11 @@ GameScene::~GameScene()
     
 }
 
-GameScene::GameScene(entt::registry* _registry, Game* _ecs) : 
-Scene(_registry, _ecs)
+GameScene::GameScene(entt::registry* _registry, Game* _game, Settings _settings) :
+Scene(_registry, _game, _settings)
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
-    auto playerId = GameObjectFactory::createPlayer(registry, _ecs, {20.0f, 0, 20.0f}, "Player");
+    auto playerId = GameObjectFactory::createPlayer(registry, _game, {20.0f, 0, 20.0f}, "Player");
     game->actorMovementSystem->SetControlledActor(playerId);
     
     game->Load();

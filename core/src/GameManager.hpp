@@ -15,6 +15,7 @@
 
 #include "raylib.h"
 #include "entt/entt.hpp"
+#include "Settings.hpp"
 
 #include <stack>
 #include <memory>
@@ -22,12 +23,11 @@
 
 namespace sage
 {
-static constexpr int SCREEN_WIDTH = 1280;
-static constexpr int SCREEN_HEIGHT = 720;
 
 class GameManager
 {
 protected:
+    Settings settings;
     KeyMapping keyMapping;
     entt::registry* registry;
     std::unique_ptr<sage::Scene> scene;

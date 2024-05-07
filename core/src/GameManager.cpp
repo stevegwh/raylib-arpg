@@ -4,6 +4,7 @@
 
 #include "GameManager.hpp"
 #include "Serializer.hpp"
+#include "Settings.hpp"
 
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
@@ -13,7 +14,7 @@ namespace sage
 GameManager::GameManager() :
     registry(new entt::registry())
 {
-    //serializer::SerializeKeyMapping(keyMapping, "resources/keybinding.xml");
+    serializer::DeserializeSettings(settings, "resources/settings.xml");
     serializer::DeserializeKeyMapping(keyMapping, "resources/keybinding.xml");
     game = std::make_unique<sage::Game>(registry, keyMapping);
 }
@@ -28,8 +29,8 @@ void GameManager::init()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<GameScene>(registry, game.get());
+    InitWindow(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "Baldur's Raylib");
+    scene = std::make_unique<GameScene>(registry, game.get(), settings);
 }
 
 void GameManager::Update()

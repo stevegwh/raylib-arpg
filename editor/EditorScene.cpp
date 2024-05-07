@@ -9,20 +9,6 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-//static Vector2 window_position = { 10, 10 };
-//static Vector2 window_size = { 200, 400 };
-//static bool minimized = false;
-//static bool moving = false;
-//static bool resizing = false;
-//static Vector2 scroll;
-//
-//static Vector2 window2_position = { 250, 10 };
-//static Vector2 window2_size = { 200, 400 };
-//static bool minimized2 = false;
-//static bool moving2 = false;
-//static bool resizing2 = false;
-//static Vector2 scroll2;
-
 #include <iostream>
 
 namespace sage
@@ -141,13 +127,13 @@ void EditorScene::Draw2D()
     else if (currentEditorMode == MOVE) mode = "MOVE";
     else if (currentEditorMode == CREATE) mode = "CREATE";
 
-    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), SCREEN_WIDTH - 150, 50, 10, BLACK);
+    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), settings.SCREEN_WIDTH - 150, 50, 10, BLACK);
     
     gui->Draw();
 }
 
-EditorScene::EditorScene(entt::registry* _registry, Game* _game) :
-    Scene(_registry, _game), gui(std::make_unique<editor::GUI>())
+EditorScene::EditorScene(entt::registry* _registry, Game* _game, Settings _settings) :
+    Scene(_registry, _game, _settings), gui(std::make_unique<editor::GUI>())
 {
     game->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     game->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);

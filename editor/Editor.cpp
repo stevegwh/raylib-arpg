@@ -5,6 +5,7 @@
 #include "Editor.hpp"
 #include "EditorScene.hpp"
 #include "Serializer.hpp"
+#include "Settings.hpp"
 #include <memory>
 
 namespace sage
@@ -24,9 +25,8 @@ void Editor::init()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<EditorScene>(registry, game.get());
+    InitWindow(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "Baldur's Raylib");
+    scene = std::make_unique<EditorScene>(registry, game.get(), settings);
 
     //serializer::DeserializeKeyMapping(keyMapping, "resources/editorKeymapping.xml");
 
@@ -44,11 +44,11 @@ void Editor::manageScenes()
         switch (stateChange)
         {
         case 1:
-            scene = std::make_unique<GameScene>(registry, game.get());
+            scene = std::make_unique<GameScene>(registry, game.get(), settings);
             game->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
             break;
         case 2:
-            scene = std::make_unique<EditorScene>(registry, game.get());
+            scene = std::make_unique<EditorScene>(registry, game.get(), settings);
             game->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
             break;
         }

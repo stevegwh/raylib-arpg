@@ -8,6 +8,7 @@
 #include "../core/src/GameManager.hpp"
 #include "scenes/Scene.hpp"
 #include "Gui.hpp"
+#include "Settings.hpp"
 
 #include "entt/entt.hpp"
 #include "windows/FloatingWindow.hpp"
@@ -47,7 +48,7 @@ class EditorScene : public Scene
     void moveSelectedObjectToCursorHit();
     
 public:
-    EditorScene(entt::registry* _registry, Game* _ecs);
+    EditorScene(entt::registry* _registry, Game* _game, Settings _settings);
     ~EditorScene() override;
     void Update() override;
     void Draw3D() override;

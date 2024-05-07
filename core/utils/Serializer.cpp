@@ -34,7 +34,7 @@ void serialize(Archive &archive, entity &entity)
     archive(entity.id);
 }
 
-void Save(const entt::registry& source)
+void Save(const entt::registry &source)
 {
     std::cout << "Save called" << std::endl;
     using namespace entt::literals;
@@ -50,11 +50,10 @@ void Save(const entt::registry& source)
         // output finishes flushing its contents when it goes out of scope
         cereal::XMLOutputArchive output{storage};
         const auto view = source.view<sage::Transform, sage::Renderable, sage::Collideable>();
-        for (const auto& ent: view) 
-        {
-            const auto& trans = view.get<sage::Transform>(ent);
-            const auto& rend = view.get<sage::Renderable>(ent);
-            const auto& col = view.get<sage::Collideable>(ent);
+        for (const auto &ent : view) {
+            const auto &trans = view.get<sage::Transform>(ent);
+            const auto &rend = view.get<sage::Renderable>(ent);
+            const auto &col = view.get<sage::Collideable>(ent);
             entity entity{};
             entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
             output.setNextName("entity");
@@ -71,13 +70,12 @@ void Save(const entt::registry& source)
 
 }
 
-void Load(entt::registry* destination)
+void Load(entt::registry *destination)
 {
     std::cout << "Load called" << std::endl;
     using namespace entt::literals;
     std::ifstream storage("resources/output.xml");
-    if (!storage.is_open()) 
-    {
+    if (!storage.is_open()) {
         // Handle file opening error
         return;
     }
@@ -86,37 +84,31 @@ void Load(entt::registry* destination)
         //cereal::JSONInputArchive input{storage};
         cereal::XMLInputArchive input{storage};
 
-
         entt::entity currentEntity{};
-        while (input.getNodeName() != nullptr)
-        {
+        while (input.getNodeName() != nullptr) {
 
             std::string componentName = input.getNodeName();
 
             //input.startNode();
 
-            if (componentName == "entity")
-            {
+            if (componentName == "entity") {
                 // TODO: this is currently pointless, but I don't know how to
                 // advance cereal's parser without calling input with an object.
                 entity id;
                 input(id);
-                currentEntity = destination->create(); 
+                currentEntity = destination->create();
             }
-            else if (componentName == "transform") 
-            {
-                auto& transform = destination->emplace<Transform>(currentEntity);
+            else if (componentName == "transform") {
+                auto &transform = destination->emplace<Transform>(currentEntity);
                 input(transform);
-                
+
             }
-            else if (componentName == "collideable")
-            {
-                auto& col = destination->emplace<Collideable>(currentEntity);
+            else if (componentName == "collideable") {
+                auto &col = destination->emplace<Collideable>(currentEntity);
                 input(col);
             }
-            else if (componentName == "renderable")
-            {
-                auto& rend = destination->emplace<Renderable>(currentEntity);
+            else if (componentName == "renderable") {
+                auto &rend = destination->emplace<Renderable>(currentEntity);
                 input(rend);
             }
         }
@@ -124,7 +116,7 @@ void Load(entt::registry* destination)
     storage.close();
 }
 
-void SerializeKeyMapping(KeyMapping& keymapping, const char* path)
+void SerializeKeyMapping(KeyMapping &keymapping, const char *path)
 {
     std::cout << "Save called" << std::endl;
     using namespace entt::literals;
@@ -142,39 +134,63 @@ void SerializeKeyMapping(KeyMapping& keymapping, const char* path)
         output(keymapping);
     }
     storage.close();
-    
+
 }
 
-void DeserializeKeyMapping(KeyMapping& keymapping, const char* path)
+void DeserializeKeyMapping(KeyMapping &keymapping, const char *path)
 {
     std::cout << "Load called" << std::endl;
     using namespace entt::literals;
 
     std::ifstream storage(path);
-    if (storage.is_open())
-    {
+    if (storage.is_open()) {
         cereal::XMLInputArchive input{storage};
         input(keymapping);
         storage.close();
     }
-    else
-    {
+    else {
         // File doesn't exist, create a new file with the default key mapping
         std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
-
-        // Create a new file and serialize the default key mapping
-        std::ofstream newStorage(path);
-        if (newStorage.is_open())
-        {
-            cereal::XMLOutputArchive output{newStorage};
-            output(keymapping);
-            newStorage.close();
-            std::cout << "Default key mapping saved to: " << path << std::endl;
-        }
-        else
-        {
-            std::cerr << "Failed to create key mapping file: " << path << std::endl;
-        }
+        SerializeKeyMapping(keymapping, path);
     }
+}
+
+void SerializeSettings(Settings& settings, const char* path)
+{
+    std::cout << "Save called" << std::endl;
+    using namespace entt::literals;
+    //std::stringstream storage;
+
+    std::ofstream storage(path);
+    if (!storage.is_open()) {
+        // Handle file opening error
+        return;
+    }
+
+    {
+        // output finishes flushing its contents when it goes out of scope
+        cereal::XMLOutputArchive output{storage};
+        output(settings);
+    }
+    storage.close();
+}
+
+void DeserializeSettings(Settings& settings, const char* path)
+{
+    std::cout << "Load called" << std::endl;
+    using namespace entt::literals;
+
+    std::ifstream storage(path);
+    if (storage.is_open()) {
+        cereal::XMLInputArchive input{storage};
+        input(settings);
+        storage.close();
+    }
+    else {
+        // File doesn't exist, create a new file with the default key mapping
+        std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
+        SerializeSettings(settings, path);
+    }
+    
 }
 }
