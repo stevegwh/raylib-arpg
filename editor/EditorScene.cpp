@@ -127,13 +127,13 @@ void EditorScene::Draw2D()
     else if (currentEditorMode == MOVE) mode = "MOVE";
     else if (currentEditorMode == CREATE) mode = "CREATE";
 
-    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), settings.SCREEN_WIDTH - 150, 50, 10, BLACK);
+    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), game->settings.SCREEN_WIDTH - 150, 50, 10, BLACK);
     
     gui->Draw();
 }
 
-EditorScene::EditorScene(entt::registry* _registry, Game* _game, Settings _settings) :
-    Scene(_registry, _game, _settings), gui(std::make_unique<editor::GUI>())
+EditorScene::EditorScene(entt::registry* _registry, Game* _game) :
+    Scene(_registry, _game), gui(std::make_unique<editor::GUI>())
 {
     game->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     game->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);

@@ -16,7 +16,7 @@ GameManager::GameManager() :
 {
     serializer::DeserializeSettings(settings, "resources/settings.xml");
     serializer::DeserializeKeyMapping(keyMapping, "resources/keybinding.xml");
-    game = std::make_unique<sage::Game>(registry, keyMapping);
+    game = std::make_unique<sage::Game>(registry, keyMapping, settings);
 }
 
 GameManager::~GameManager()
@@ -30,7 +30,7 @@ void GameManager::init()
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<GameScene>(registry, game.get(), settings);
+    scene = std::make_unique<GameScene>(registry, game.get());
 }
 
 void GameManager::Update()

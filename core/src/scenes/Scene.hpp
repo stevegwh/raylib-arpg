@@ -7,7 +7,6 @@
 #include "systems/LightSubSystem.hpp"
 #include "entt/entt.hpp"
 #include "Game.hpp"
-#include "Settings.hpp"
 
 #include <memory>
 
@@ -18,13 +17,11 @@ class Scene
 protected:
     entt::registry* registry;
     Game* game;
-    Settings settings;
 public:
     std::unique_ptr<LightSubSystem> lightSubSystem;
-    explicit Scene(entt::registry* _registry, Game* _game, Settings _settings) :
+    explicit Scene(entt::registry* _registry, Game* _game) :
         registry(_registry),
         game(_game),
-        settings(_settings),
         lightSubSystem(std::make_unique<LightSubSystem>()) {};
     virtual ~Scene() = default;
     virtual void Update() = 0;

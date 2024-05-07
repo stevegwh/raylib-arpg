@@ -7,12 +7,14 @@
 
 #include "Cursor.hpp"
 #include "KeyMapping.hpp"
+#include "Settings.hpp"
 
 namespace sage
 {
     class UserInput
     {
         KeyMapping keyMapping;
+        Settings settings;
         void toggleFullScreen() const;
     public:
         entt::delegate<void()> dOnClickEvent{};
@@ -78,6 +80,6 @@ namespace sage
         
         void ListenForInput() const;
 
-        explicit UserInput(KeyMapping _keyMapping);
+        UserInput(KeyMapping _keyMapping, Settings _settings);
     };
 }

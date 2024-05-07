@@ -26,7 +26,7 @@ void Editor::init()
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<EditorScene>(registry, game.get(), settings);
+    scene = std::make_unique<EditorScene>(registry, game.get());
 
     //serializer::DeserializeKeyMapping(keyMapping, "resources/editorKeymapping.xml");
 
@@ -39,16 +39,16 @@ void Editor::manageScenes()
     {
         delete registry;
         registry = new entt::registry();
-        game = std::make_unique<Game>(registry, keyMapping);
+        game = std::make_unique<Game>(registry, keyMapping, settings);
 
         switch (stateChange)
         {
         case 1:
-            scene = std::make_unique<GameScene>(registry, game.get(), settings);
+            scene = std::make_unique<GameScene>(registry, game.get());
             game->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
             break;
         case 2:
-            scene = std::make_unique<EditorScene>(registry, game.get(), settings);
+            scene = std::make_unique<EditorScene>(registry, game.get());
             game->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
             break;
         }

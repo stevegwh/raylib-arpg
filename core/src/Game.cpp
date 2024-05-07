@@ -7,15 +7,16 @@
 
 namespace sage
 {
-Game::Game(entt::registry* _registry, KeyMapping _keyMapping) :
+Game::Game(entt::registry* _registry, KeyMapping _keyMapping, Settings _settings) :
     registry(_registry),
+    settings(_settings),
     renderSystem(std::make_unique<RenderSystem>(_registry)),
     collisionSystem(std::make_unique<sage::CollisionSystem>(_registry)),
     transformSystem(std::make_unique<sage::TransformSystem>(_registry)),
     navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry)),
     animationSystem(std::make_unique<AnimationSystem>(_registry))
 {
-    userInput = std::make_unique<UserInput>(_keyMapping);
+    userInput = std::make_unique<UserInput>(_keyMapping, settings);
     camera = std::make_unique<sage::Camera>(userInput.get());
     cursor = std::make_unique<Cursor>(registry, collisionSystem.get(), navigationGridSystem.get(), camera.get());
     

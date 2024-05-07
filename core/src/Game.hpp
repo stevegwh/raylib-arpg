@@ -12,6 +12,7 @@
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
+#include "Settings.hpp"
 
 #include "entt/entt.hpp"
 
@@ -23,11 +24,12 @@ class Game
 {
     entt::registry* registry;
 public:
-    Game(entt::registry* _registry, KeyMapping _keyMapping);
+    Game(entt::registry* _registry, KeyMapping _keyMapping, Settings _settings);
     
     std::unique_ptr<UserInput> userInput;
     std::unique_ptr<Cursor> cursor;
     std::unique_ptr<Camera> camera;
+    Settings settings;
     
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
     std::unique_ptr<sage::RenderSystem> renderSystem;

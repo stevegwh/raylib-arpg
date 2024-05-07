@@ -20,7 +20,7 @@ class GameScene : public Scene
 {
 public:
     
-    GameScene(entt::registry* _registry, Game* _game, Settings _settings);
+    GameScene(entt::registry* _registry, Game* _game);
     ~GameScene() override;
     void Update() override;
     void Draw3D() override;

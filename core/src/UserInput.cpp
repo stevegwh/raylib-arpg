@@ -22,7 +22,7 @@ void UserInput::toggleFullScreen() const
         else if (IsWindowFullscreen())
         {
             ToggleFullscreen();
-            SetWindowSize(1280, 720); // TODO: do not hardcode values
+            SetWindowSize(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT);
         };
     }
 }
@@ -270,6 +270,6 @@ void UserInput::ListenForInput() const
 
 }
     
-UserInput::UserInput(KeyMapping _keyMapping) : keyMapping(_keyMapping) {}
+UserInput::UserInput(KeyMapping _keyMapping, Settings _settings) : keyMapping(_keyMapping), settings(_settings) {}
 
 }
