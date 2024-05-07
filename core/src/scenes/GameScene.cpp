@@ -3,15 +3,9 @@
 //
 
 #include "GameScene.hpp"
+#include "../GameObjectFactory.hpp"
 
 #include "raylib.h"
-
-#include <memory>
-
-// Components
-
-// Misc
-#include "../GameObjectFactory.hpp"
 
 namespace sage
 {
@@ -47,13 +41,13 @@ Scene(_registry, _game, _settings)
     game->Load();
     
     BoundingBox bb = {
-        .min = (Vector3){ -100.0f, 0.1f, -100.0f },
-        .max = (Vector3){  100.0f, 0.1f,  100.0f }
+        .min = (Vector3){ -1000.0f, 0.1f, -1000.0f },
+        .max = (Vector3){  1000.0f, 0.1f,  1000.0f }
     };
     GameObjectFactory::createFloor(registry, this, bb);
     //GameObjectFactory::loadBlenderLevel(registry, this);
     
-    game->navigationGridSystem->Init(100, 1.0f);
+    game->navigationGridSystem->Init(1000, 1.0f);
     game->navigationGridSystem->PopulateGrid();
 }
 

@@ -4,7 +4,6 @@
 
 #pragma once
 
-
 #include "Scene.hpp"
 #include "../UserInput.hpp"
 
@@ -27,5 +26,4 @@ public:
     void Draw3D() override;
     void Draw2D() override;
 };
-
 } // sage

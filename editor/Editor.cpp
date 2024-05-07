@@ -83,22 +83,22 @@ void Editor::drawGrid(bool drawDebug)
 {
     DrawGrid(game->navigationGridSystem->slices, game->navigationGridSystem->spacing);
 
-    for (int i = 0; i  < game->navigationGridSystem->gridSquares.size(); i++)
-    {
-        for (int j = 0; j < game->navigationGridSystem->gridSquares.at(0).size(); j++)
-        {
-            if (game->navigationGridSystem->gridSquares[i][j]->debugColor)
-            {
-                auto color = YELLOW;
-
-                DrawCubeWires(game->navigationGridSystem->gridSquares[i][j]->worldPosCentre,
-                              game->navigationGridSystem->gridSquares[i][j]->debugBox.x,
-                              game->navigationGridSystem->gridSquares[i][j]->debugBox.y,
-                              game->navigationGridSystem->gridSquares[i][j]->debugBox.z,
-                              color);
-            }
-        }
-    }
+//    for (int i = 0; i  < game->navigationGridSystem->gridSquares.size(); i++)
+//    {
+//        for (int j = 0; j < game->navigationGridSystem->gridSquares.at(0).size(); j++)
+//        {
+//            if (game->navigationGridSystem->gridSquares[i][j]->debugColor)
+//            {
+//                auto color = YELLOW;
+//
+//                DrawCubeWires(game->navigationGridSystem->gridSquares[i][j]->worldPosCentre,
+//                              game->navigationGridSystem->gridSquares[i][j]->debugBox.x,
+//                              game->navigationGridSystem->gridSquares[i][j]->debugBox.y,
+//                              game->navigationGridSystem->gridSquares[i][j]->debugBox.z,
+//                              color);
+//            }
+//        }
+//    }
 
     if (!drawDebug) return;
     for (const auto& gridSquareRow : game->navigationGridSystem->GetGridSquares())

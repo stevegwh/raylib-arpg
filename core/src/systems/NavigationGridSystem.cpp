@@ -23,6 +23,25 @@ Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 namespace sage
 {
 
+void NavigationGridSystem::DrawDebugPathfinding(const Vector2& minRange, const Vector2& maxRange)
+{
+
+    for (int i = 0; i  < gridSquares.size(); i++)
+    {
+        for (int j = 0; j < gridSquares.at(0).size(); j++)
+        {
+            gridSquares[i][j]->debugColor = false;
+        }
+    }
+    for (int i = minRange.y; i  < maxRange.y; i++)
+    {
+        for (int j = minRange.x; j < maxRange.x; j++)
+        {
+            gridSquares[i][j]->debugColor = true;
+        }
+    }
+}
+
 bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange)
 {
     auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
