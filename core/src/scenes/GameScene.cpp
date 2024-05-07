@@ -36,6 +36,8 @@ Scene(_registry, _game, _settings)
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
     auto playerId = GameObjectFactory::createPlayer(registry, _game, {20.0f, 0, 20.0f}, "Player");
+    auto& actor = registry->emplace<Actor>(playerId);
+    actor.pathfindingBounds = 50;
     game->actorMovementSystem->SetControlledActor(playerId);
     
     game->Load();

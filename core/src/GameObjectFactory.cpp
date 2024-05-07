@@ -35,7 +35,7 @@ BoundingBox createRectangularBoundingBox(float length, float height)
     return bb;
 }
 
-entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Game* ecs, Vector3 position, const char* name) 
+entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Game* game, Vector3 position, const char* name) 
 {
     entt::entity id = registry->create();
     const char* modelPath = "resources/models/gltf/hero.glb";
@@ -56,7 +56,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Game* ecs
     transform.dOnStartMovement.connect<[](Animation& animation, entt::entity entity) {
         animation.ChangeAnimation(3);
     }>(animation);
-    ecs->userInput->dKeyIPressed.connect<[](Animation& animation) { // TODO: Just to test animations on demand
+    game->userInput->dKeyIPressed.connect<[](Animation& animation) { // TODO: Just to test animations on demand
         if (animation.animIndex == 1)
         {
             animation.ChangeAnimation(0);
@@ -74,14 +74,11 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Game* ecs
     BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = PLAYER;
-    ecs->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
+    game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 
     transform.dOnPositionUpdate.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
         collisionSystem.OnTransformUpdate(entity);
-    }>(*ecs->collisionSystem);
-    
-    
-    //ECS->collisionSystem->TransformUpdateSubscribe(id);
+    }>(*game->collisionSystem);
 
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;

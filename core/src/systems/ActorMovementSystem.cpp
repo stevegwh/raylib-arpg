@@ -11,12 +11,14 @@ namespace sage
 void ActorMovementSystem::PathfindToLocation(entt::entity id)
 {
     {
+        // If mouse clicks outside of bounds, then return
         Vector2 tmp;
         if (!navigationGridSystem->WorldToGridSpace(cursor->collision.point, tmp)) return;
     }
+    const auto& actor = registry->get<Actor>(id);
     Vector2 minRange;
     Vector2 maxRange;
-    navigationGridSystem->GetPathfindRange(id, 100, minRange, maxRange);
+    navigationGridSystem->GetPathfindRange(id, actor.pathfindingBounds, minRange, maxRange);
     navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
     const auto& playerPos = registry->get<Transform>(id);
