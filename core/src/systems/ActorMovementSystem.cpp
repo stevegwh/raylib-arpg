@@ -11,12 +11,13 @@ namespace sage
 
 void ActorMovementSystem::PathfindToLocation(entt::entity id)
 {
-
-    Vector2 idx = navigationGridSystem->WorldToGridSpace(cursor->collision.point);
+    {
+        Vector2 tmp;
+        if (!navigationGridSystem->WorldToGridSpace(cursor->collision.point, tmp)) return;
+    }
     const auto& playerPos = registry->get<Transform>(id);
     auto path = navigationGridSystem->Pathfind(playerPos.position, cursor->collision.point);
-
-    //std::vector<Vector3> path = { {42, 0, 4}, {10, 0, 44}, { -50, 0, -50} };
+    
     transformSystem->PathfindToLocation(id, path);
 }
 

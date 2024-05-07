@@ -6,23 +6,37 @@
 #include <unordered_map>
 #include <utility>
 #include "NavigationGridSystem.hpp"
-#include "../components/Collideable.hpp"
 
+
+Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
+{
+    Vector3 size = { 0 };
+
+    size.x = fabsf(max.x - min.x);
+    size.y = fabsf(max.y - min.y);
+    size.z = fabsf(max.z - min.z);
+
+    return { min.x + size.x/2.0f, min.y + size.y/2.0f, min.z + size.z/2.0f };
+}
 
 namespace sage
 {
+
 /**
  * Translates a world position to a corresponding index on a grid.
  * @param worldPos The position in world space
- * @return The index of the corresponding grid square. -1 if not valid.
+ * @out (Out param) The resulting index of the corresponding grid square.
+ * @return Whether the move is valid
  */
-Vector2 NavigationGridSystem::WorldToGridSpace(Vector3 worldPos)
+bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out)
 {
     // Calculate the grid indices for the given world position
     int x = std::floor(worldPos.x / spacing) + (slices / 2);
     int y = std::floor(worldPos.z / spacing) + (slices / 2);
-    
-    return {static_cast<float>(x), static_cast<float>(y)};
+    out = {static_cast<float>(x), static_cast<float>(y)};
+
+    return out.y < gridSquares.size() && out.x < gridSquares.at(0).size() 
+    && out.x >= 0 && out.y >= 0;
 }
 
 void NavigationGridSystem::Init(int _slices, float _spacing)
@@ -51,26 +65,26 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
 
             
             // Store grid square in the 2D array
-            auto& gridSquare = registry->emplace<NavigationGridSquare>(id, (Vector2){ .x = static_cast<float>(i + halfSlices),
-                                                                                     .y = static_cast<float>(j + halfSlices)},
-                                                                                 v1,
-                                                                                 v3,
-                                                                                 Vector3Subtract(v1, v3));
+            auto& gridSquare = registry->emplace<NavigationGridSquare>(id, 
+                                                                       (Vector2){ .x = static_cast<float>(i + halfSlices),
+                                                                                  .y = static_cast<float>(j + halfSlices)},
+                                                                        v1,
+                                                                        v3,
+                                                                        calculateGridsquareCentre(v1, v3));
             gridSquares[j + halfSlices][i + halfSlices] = &gridSquare;
         }
     }
-    
 }
 
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
- * @return A vector of "nodes" to travel to in sequential order
+ * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
  */
 std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos)
 {
-    auto startGridSquare = WorldToGridSpace(startPos);
-    auto finishGridSquare = WorldToGridSpace(finishPos);
-
+    Vector2 startGridSquare = {0};
+    Vector2 finishGridSquare = {0};
+    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
     int startrow = startGridSquare.y;
     int startcol = startGridSquare.x;
 
@@ -152,8 +166,13 @@ void NavigationGridSystem::PopulateGrid()
         if (bb.collisionLayer != BUILDING) continue;
 
         // Get the grid indices for the bounding box
-        Vector2 topLeftIndex = WorldToGridSpace(bb.worldBoundingBox.min);
-        Vector2 bottomRightIndex = WorldToGridSpace(bb.worldBoundingBox.max);
+        Vector2 topLeftIndex;
+        Vector2 bottomRightIndex;
+        if (!WorldToGridSpace(bb.worldBoundingBox.min, topLeftIndex) ||
+        !WorldToGridSpace(bb.worldBoundingBox.max, bottomRightIndex))
+        {
+            continue;
+        }
 
         int min_col = std::min((int)topLeftIndex.x, (int)bottomRightIndex.x);
         int max_col = std::max((int)topLeftIndex.x, (int)bottomRightIndex.x);

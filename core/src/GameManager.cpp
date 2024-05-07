@@ -44,8 +44,6 @@ void GameManager::Update()
         // Update
         //----------------------------------------------------------------------------------
         
-        // TODO: rename game to "game", rename "GameScene" to "GameScene"
-        // TODO: make an "update" loop for "Game" (now called GameScene)
         game->camera->Update();
         game->userInput->ListenForInput();
         game->cursor->Update();

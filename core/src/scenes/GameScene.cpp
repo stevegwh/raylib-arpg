@@ -45,17 +45,16 @@ Scene(_registry, _game, _settings)
     game->actorMovementSystem->SetControlledActor(playerId);
     
     game->Load();
+    
     BoundingBox bb = {
-        .min = (Vector3){ -50.0f, 0.1f, -50.0f },
-        .max = (Vector3){  50.0f, 0.1f,  50.0f }
+        .min = (Vector3){ -100.0f, 0.1f, -100.0f },
+        .max = (Vector3){  100.0f, 0.1f,  100.0f }
     };
     GameObjectFactory::createFloor(registry, this, bb);
     //GameObjectFactory::loadBlenderLevel(registry, this);
-
-    // This should also be based on scene parameters
+    
     game->navigationGridSystem->Init(100, 1.0f);
     game->navigationGridSystem->PopulateGrid();
-    
 }
 
 } // sage

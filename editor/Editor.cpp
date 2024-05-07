@@ -71,7 +71,6 @@ void Editor::Update()
         game->camera->Update();
         game->userInput->ListenForInput();
         game->cursor->Update();
-
         scene->Update();
 
         //----------------------------------------------------------------------------------
@@ -80,19 +79,22 @@ void Editor::Update()
     }
 }
 
-void Editor::drawGrid()
+void Editor::drawGrid(bool drawDebug)
 {
-    DrawGrid(100, 1.0f);
+    DrawGrid(game->navigationGridSystem->slices, game->navigationGridSystem->spacing);
+
+    if (!drawDebug) return;
     for (const auto& gridSquareRow : game->navigationGridSystem->GetGridSquares())
     {
         for (const auto& gridSquare : gridSquareRow)
         {
-            BoundingBox bb;
-            bb.min = gridSquare->worldPosMin;
-            bb.max = gridSquare->worldPosMax;
-            bb.max.y = 0.1f;
-            Color color = gridSquare->occupied ? RED : GREEN;
-            DrawBoundingBox(bb, color);
+            auto color = gridSquare->occupied ? RED : GREEN;
+
+            DrawCubeWires(gridSquare->worldPosCentre, 
+                          gridSquare->debugBox.x, 
+                          gridSquare->debugBox.y, 
+                          gridSquare->debugBox.z, 
+                          color);
         }
     }
 }
@@ -114,7 +116,7 @@ void Editor::draw()
 
     scene->lightSubSystem->DrawDebugLights();
     
-    drawGrid();
+    drawGrid(false);
 
     EndMode3D();
 

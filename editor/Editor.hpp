@@ -15,7 +15,7 @@ class Editor : public GameManager
 {
     void init() override;
     void draw() override;
-    void drawGrid();
+    void drawGrid(bool drawDebug);
     void enablePlayMode();
     void enableEditMode();
     void manageScenes();

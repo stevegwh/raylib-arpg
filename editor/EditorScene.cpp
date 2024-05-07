@@ -146,9 +146,14 @@ EditorScene::EditorScene(entt::registry* _registry, Game* _game, Settings _setti
     gui->saveButtonPressed.connect<&EditorScene::OnSerializeSave>(this);
     gui->loadButtonPressed.connect<&EditorScene::OnSerializeLoad>(this);
 
+//    BoundingBox bb = {
+//        .min = (Vector3){ -50.0f, 0.1f, -50.0f },
+//        .max = (Vector3){  50.0f, 0.1f,  50.0f }
+//    };
+
     BoundingBox bb = {
-        .min = (Vector3){ -50.0f, 0.1f, -50.0f },
-        .max = (Vector3){  50.0f, 0.1f,  50.0f }
+        .min = (Vector3){ -100.0f, 0.1f, -100.0f },
+        .max = (Vector3){  100.0f, 0.1f,  100.0f }
     };
     GameObjectFactory::createFloor(registry, this, bb);
 

@@ -17,7 +17,7 @@ Game::Game(entt::registry* _registry, KeyMapping _keyMapping) :
 {
     userInput = std::make_unique<UserInput>(_keyMapping);
     camera = std::make_unique<sage::Camera>(userInput.get());
-    cursor = std::make_unique<Cursor>(registry, collisionSystem.get(), camera.get());
+    cursor = std::make_unique<Cursor>(registry, collisionSystem.get(), navigationGridSystem.get(), camera.get());
     
     actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(_registry,
                                                                       cursor.get(),

@@ -35,6 +35,7 @@ void Cursor::getMouseRayCollision()
             }
         }
         if (dOnCollisionHitEvent) dOnCollisionHitEvent();
+        
     }
 }
 
@@ -48,7 +49,11 @@ void Cursor::Draw()
 
     if (collision.hit)
     {
-        DrawCube(collision.point, 0.3f, 0.3f, 0.3f, hoverColor);
+        {
+            Vector2 tmp;
+            currentColor = navigationGridSystem->WorldToGridSpace(collision.point, tmp) ? hoverColor : invalidColor;
+        }
+        DrawCube(collision.point, 0.3f, 0.3f, 0.3f, currentColor);
         DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
 
         Vector3 normalEnd;
@@ -108,10 +113,12 @@ void Cursor::DrawDebugText() const
     }
 }
 Cursor::Cursor(entt::registry* _registry,
-               sage::CollisionSystem *_collisionSystem, 
+               sage::CollisionSystem *_collisionSystem,
+               sage::NavigationGridSystem* _navigationGridSystem,
                sage::Camera *_sCamera) :
                 registry(_registry),
-                collisionSystem(_collisionSystem), 
+                collisionSystem(_collisionSystem),
+                navigationGridSystem(_navigationGridSystem),
                 sCamera(_sCamera)
 {}
 }
