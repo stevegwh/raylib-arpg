@@ -1,9 +1,9 @@
-#include "GameManager.hpp"
+#include "Application.hpp"
 
 
 int main()
 {
-    sage::GameManager gm;
+    sage::Application gm;
     gm.Update();
     return 0;
 }

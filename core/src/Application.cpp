@@ -2,7 +2,7 @@
 // Created by steve on 18/02/2024.
 //
 
-#include "GameManager.hpp"
+#include "Application.hpp"
 #include "Serializer.hpp"
 #include "Settings.hpp"
 
@@ -11,29 +11,34 @@
 
 namespace sage
 {
-GameManager::GameManager() :
-    registry(new entt::registry())
+Application::Application() :
+    registry(std::make_unique<entt::registry>())
 {
-    serializer::DeserializeSettings(settings, "resources/settings.xml");
-    serializer::DeserializeKeyMapping(keyMapping, "resources/keybinding.xml");
-    game = std::make_unique<sage::Game>(registry, keyMapping, settings);
+    Settings _settings;
+    serializer::DeserializeSettings(_settings, "resources/settings.xml");
+    settings = std::make_unique<Settings>(_settings);
+    
+    KeyMapping _keyMapping;
+    serializer::DeserializeKeyMapping(_keyMapping, "resources/keybinding.xml");
+    keyMapping = std::make_unique<KeyMapping>(_keyMapping);
+
+    data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
 }
 
-GameManager::~GameManager()
+Application::~Application()
 {
-    delete registry;
     cleanup();
 }
 
-void GameManager::init()
+void Application::init()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<GameScene>(registry, game.get());
+    InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
+    scene = std::make_unique<ExampleScene>(registry.get(), data.get());
 }
 
-void GameManager::Update()
+void Application::Update()
 {
     init();
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
@@ -43,10 +48,10 @@ void GameManager::Update()
     {
         // Update
         //----------------------------------------------------------------------------------
-        
-        game->camera->Update();
-        game->userInput->ListenForInput();
-        game->cursor->Update();
+
+        data->camera->Update();
+        data->userInput->ListenForInput();
+        data->cursor->Update();
 
         scene->Update();
         //----------------------------------------------------------------------------------
@@ -54,7 +59,7 @@ void GameManager::Update()
     }
 }
 
-void GameManager::draw()
+void Application::draw()
 {
     // Draw
     //----------------------------------------------------------------------------------
@@ -62,10 +67,10 @@ void GameManager::draw()
 
     ClearBackground(RAYWHITE);
 
-    BeginMode3D(*game->camera->getRaylibCam());
+    BeginMode3D(*data->camera->getRaylibCam());
 
     // If we hit something, draw the cursor at the hit point
-    game->cursor->Draw();
+    data->cursor->Draw();
 
     scene->Draw3D();
 
@@ -78,7 +83,7 @@ void GameManager::draw()
     
 };
 
-void GameManager::cleanup()
+void Application::cleanup()
 {
     CloseWindow();
 }

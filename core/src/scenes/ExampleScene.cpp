@@ -2,36 +2,36 @@
 // Created by Steve Wheeler on 27/03/2024.
 //
 
-#include "GameScene.hpp"
+#include "ExampleScene.hpp"
 #include "../GameObjectFactory.hpp"
 
 #include "raylib.h"
 
 namespace sage
 {
-void GameScene::Update()
+void ExampleScene::Update()
 {
     game->transformSystem->Update();
     game->animationSystem->Update();
     game->renderSystem->Update();
 }
 
-void GameScene::Draw3D()
+void ExampleScene::Draw3D()
 {
     game->renderSystem->Draw();
 }
 
-void GameScene::Draw2D()
+void ExampleScene::Draw2D()
 {
     
 }
 
-GameScene::~GameScene()
+ExampleScene::~ExampleScene()
 {
     
 }
 
-GameScene::GameScene(entt::registry* _registry, Game* _game) :
+ExampleScene::ExampleScene(entt::registry* _registry, GameData* _game) :
 Scene(_registry, _game)
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);

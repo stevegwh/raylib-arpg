@@ -2,12 +2,12 @@
 // Created by Steve Wheeler on 27/03/2024.
 //
 
-#include "Game.hpp"
+#include "GameData.hpp"
 #include "../utils/Serializer.hpp"
 
 namespace sage
 {
-Game::Game(entt::registry* _registry, KeyMapping _keyMapping, Settings _settings) :
+GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings) :
     registry(_registry),
     settings(_settings),
     renderSystem(std::make_unique<RenderSystem>(_registry)),
@@ -27,12 +27,12 @@ Game::Game(entt::registry* _registry, KeyMapping _keyMapping, Settings _settings
                                                                       transformSystem.get());
 }
 
-void Game::Load()
+void GameData::Load()
 {
     serializer::Load(registry);
 }
 
-void Game::Save() const
+void GameData::Save() const
 {
     serializer::Save(*registry);
 }

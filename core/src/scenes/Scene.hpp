@@ -6,7 +6,7 @@
 
 #include "systems/LightSubSystem.hpp"
 #include "entt/entt.hpp"
-#include "Game.hpp"
+#include "GameData.hpp"
 
 #include <memory>
 
@@ -16,10 +16,10 @@ class Scene
 {
 protected:
     entt::registry* registry;
-    Game* game;
+    GameData* game;
 public:
     std::unique_ptr<LightSubSystem> lightSubSystem;
-    explicit Scene(entt::registry* _registry, Game* _game) :
+    explicit Scene(entt::registry* _registry, GameData* _game) :
         registry(_registry),
         game(_game),
         lightSubSystem(std::make_unique<LightSubSystem>()) {};

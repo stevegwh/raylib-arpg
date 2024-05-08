@@ -9,9 +9,9 @@
 #include "scenes/Scene.hpp"
 #include "Camera.hpp"
 #include "UserInput.hpp"
-#include "Game.hpp"
+#include "GameData.hpp"
 // Scenes
-#include "scenes/GameScene.hpp"
+#include "scenes/ExampleScene.hpp"
 
 #include "raylib.h"
 #include "entt/entt.hpp"
@@ -24,23 +24,23 @@
 namespace sage
 {
 
-class GameManager
+class Application
 {
 protected:
-    Settings settings;
-    KeyMapping keyMapping;
-    entt::registry* registry;
+    std::unique_ptr<Settings> settings;
+    std::unique_ptr<KeyMapping> keyMapping;
+    std::unique_ptr<entt::registry> registry;
     std::unique_ptr<sage::Scene> scene;
     int stateChange = 0;
     virtual void init();
     static void cleanup();
     virtual void draw();
 public:
-    GameManager();
-    ~GameManager();
-    GameManager(GameManager const&) = delete;
-    void operator=(GameManager const&)  = delete;
-    std::unique_ptr<sage::Game> game;
+    Application();
+    ~Application();
+    Application(Application const&) = delete;
+    void operator=(Application const&)  = delete;
+    std::unique_ptr<sage::GameData> data;
     virtual void Update();
 };
 }

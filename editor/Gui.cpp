@@ -28,11 +28,12 @@ void GUI::Draw()
     }
 }
 
-GUI::GUI()
+GUI::GUI(Settings* _settings) :
+    settings(_settings)
 {
-    windows.push_back(std::make_unique<FloatingWindow>(FloatingWindow({ 1280 - 10, 10 }, { 200, 400 },
+    windows.push_back(std::make_unique<FloatingWindow>(FloatingWindow({ static_cast<float>(settings->SCREEN_WIDTH - 10), 10 }, { 200, 400 },
                                                                       { 140, 320 }, "Window 1")));
-    windows.push_back(std::make_unique<FloatingWindow>(FloatingWindow({ 1280 - 250, 10 }, { 200, 400 },
+    windows.push_back(std::make_unique<FloatingWindow>(FloatingWindow({ static_cast<float>(settings->SCREEN_WIDTH - 250), 10 }, { 200, 400 },
                                                                       { 140, 320 }, "Window 1")));
 }
 } // sage

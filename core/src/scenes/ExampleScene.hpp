@@ -8,7 +8,7 @@
 #include "../UserInput.hpp"
 
 #include "entt/entt.hpp"
-#include "Game.hpp"
+#include "GameData.hpp"
 
 #include <vector>
 #include <memory>
@@ -16,12 +16,12 @@
 namespace sage
 {
 
-class GameScene : public Scene
+class ExampleScene : public Scene
 {
 public:
     
-    GameScene(entt::registry* _registry, Game* _game);
-    ~GameScene() override;
+    ExampleScene(entt::registry* _registry, GameData* _game);
+    ~ExampleScene() override;
     void Update() override;
     void Draw3D() override;
     void Draw2D() override;

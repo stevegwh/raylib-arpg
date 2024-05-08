@@ -7,7 +7,7 @@
 #include "CollisionSystem.hpp"
 
 #include "../../utils/Serializer.hpp"
-#include "../GameManager.hpp"
+#include "../Application.hpp"
 
 bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
 {

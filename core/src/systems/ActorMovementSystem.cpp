@@ -3,7 +3,7 @@
 //
 
 #include "ActorMovementSystem.hpp"
-#include "../GameManager.hpp"
+#include "../Application.hpp"
 
 namespace sage
 {

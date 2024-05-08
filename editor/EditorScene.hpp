@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../core/src/UserInput.hpp"
-#include "../core/src/GameManager.hpp"
+#include "../core/src/Application.hpp"
 #include "scenes/Scene.hpp"
 #include "Gui.hpp"
 #include "Settings.hpp"
@@ -48,7 +48,7 @@ class EditorScene : public Scene
     void moveSelectedObjectToCursorHit();
     
 public:
-    EditorScene(entt::registry* _registry, Game* _game);
+    EditorScene(entt::registry* _registry, GameData* _game);
     ~EditorScene() override;
     void Update() override;
     void Draw3D() override;

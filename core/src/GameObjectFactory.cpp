@@ -3,7 +3,7 @@
 //
 
 #include "GameObjectFactory.hpp"
-#include "GameManager.hpp"
+#include "Application.hpp"
 #include "scenes/Scene.hpp"
 #include "components/Transform.hpp"
 #include "components/Renderable.hpp"
@@ -35,7 +35,7 @@ BoundingBox createRectangularBoundingBox(float length, float height)
     return bb;
 }
 
-entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Game* game, Vector3 position, const char* name) 
+entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData* game, Vector3 position, const char* name) 
 {
     entt::entity id = registry->create();
     const char* modelPath = "resources/models/gltf/hero.glb";
@@ -84,21 +84,21 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, Game* gam
     return id;
 }
 
-void GameObjectFactory::createTower(entt::registry* registry, Game* ecs, Vector3 position, const char* name) 
+void GameObjectFactory::createBuilding(entt::registry* registry, GameData* data, Vector3 position, const char* name,
+                                       const char* modelPath, const char* texturePath) 
 {
     auto id = registry->create();
     auto& transform = registry->emplace<Transform>(id);
     transform.position = position;
     transform.scale = 1.0f;
-    
-    sage::Material mat = { LoadTexture("resources/models/obj/turret_diffuse.png"), "resources/models/obj/turret_diffuse.png" };
-    Model model = LoadModel("resources/models/obj/turret.obj");
+    sage::Material mat = { LoadTexture(texturePath), texturePath };
+    Model model = LoadModel(modelPath);
     model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-    auto& renderable = registry->emplace<Renderable>(id, model, mat, "resources/models/obj/turret.obj", MatrixIdentity());
+    auto& renderable = registry->emplace<Renderable>(id, model, mat, modelPath, MatrixIdentity());
     renderable.name = name;
     auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
     collideable.collisionLayer = BUILDING;
-    ecs->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
+    data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
     registry->emplace<WorldObject>(id);
 }
 

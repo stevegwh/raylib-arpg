@@ -25,31 +25,27 @@ void Editor::init()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    InitWindow(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<EditorScene>(registry, game.get());
-
-    //serializer::DeserializeKeyMapping(keyMapping, "resources/editorKeymapping.xml");
-
-    game->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
+    InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
+    scene = std::make_unique<EditorScene>(registry.get(), data.get());
+    data->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
 }
 
 void Editor::manageScenes()
 {
     if (stateChange > 0)
     {
-        delete registry;
-        registry = new entt::registry();
-        game = std::make_unique<Game>(registry, keyMapping, settings);
+        registry = std::make_unique<entt::registry>();
+        data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
 
         switch (stateChange)
         {
         case 1:
-            scene = std::make_unique<GameScene>(registry, game.get());
-            game->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
+            scene = std::make_unique<ExampleScene>(registry.get(), data.get());
+            data->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
             break;
         case 2:
-            scene = std::make_unique<EditorScene>(registry, game.get());
-            game->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
+            scene = std::make_unique<EditorScene>(registry.get(), data.get());
+            data->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
             break;
         }
         stateChange = 0;
@@ -68,9 +64,9 @@ void Editor::Update()
 
         // Update
         //----------------------------------------------------------------------------------
-        game->camera->Update();
-        game->userInput->ListenForInput();
-        game->cursor->Update();
+        data->camera->Update();
+        data->userInput->ListenForInput();
+        data->cursor->Update();
         scene->Update();
 
         //----------------------------------------------------------------------------------
@@ -81,7 +77,7 @@ void Editor::Update()
 
 void Editor::drawGrid(bool drawDebug)
 {
-    DrawGrid(game->navigationGridSystem->slices, game->navigationGridSystem->spacing);
+    DrawGrid(data->navigationGridSystem->slices, data->navigationGridSystem->spacing);
 
 //    for (int i = 0; i  < game->navigationGridSystem->gridSquares.size(); i++)
 //    {
@@ -101,7 +97,7 @@ void Editor::drawGrid(bool drawDebug)
 //    }
 
     if (!drawDebug) return;
-    for (const auto& gridSquareRow : game->navigationGridSystem->GetGridSquares())
+    for (const auto& gridSquareRow : data->navigationGridSystem->GetGridSquares())
     {
         for (const auto& gridSquare : gridSquareRow)
         {
@@ -124,10 +120,10 @@ void Editor::draw()
 
     ClearBackground(RAYWHITE);
 
-    BeginMode3D(*game->camera->getRaylibCam());
+    BeginMode3D(*data->camera->getRaylibCam());
 
     // If we hit something, draw the cursor at the hit point
-    game->cursor->Draw();
+    data->cursor->Draw();
 
     scene->Draw3D();
 
@@ -137,7 +133,7 @@ void Editor::draw()
 
     EndMode3D();
 
-    game->cursor->DrawDebugText();
+    data->cursor->DrawDebugText();
 
     scene->Draw2D();
 

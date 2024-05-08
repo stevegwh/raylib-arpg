@@ -5,13 +5,13 @@
 #pragma once
 
 #include "KeyMapping.hpp"
-#include "GameManager.hpp"
+#include "Application.hpp"
 #include "Gui.hpp"
 
 namespace sage
 {
 
-class Editor : public GameManager
+class Editor : public Application
 {
     void init() override;
     void draw() override;

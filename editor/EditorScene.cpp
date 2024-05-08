@@ -38,7 +38,10 @@ void EditorScene::OnCursorClick()
         case FLOOR:
             if (currentEditorMode == CREATE)
             {
-                GameObjectFactory::createTower(registry, game, game->cursor->collision.point, "Tower Instance");
+                GameObjectFactory::createBuilding(registry, game, game->cursor->collision.point, 
+                                                  "Tower Instance",
+                                                  "resources/models/obj/castle.obj",
+                                                  "resources/models/obj/castle_diffuse.png");
             }
             else if (currentEditorMode == SELECT)
             {
@@ -127,13 +130,13 @@ void EditorScene::Draw2D()
     else if (currentEditorMode == MOVE) mode = "MOVE";
     else if (currentEditorMode == CREATE) mode = "CREATE";
 
-    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), game->settings.SCREEN_WIDTH - 150, 50, 10, BLACK);
+    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), game->settings->SCREEN_WIDTH - 150, 50, 10, BLACK);
     
     gui->Draw();
 }
 
-EditorScene::EditorScene(entt::registry* _registry, Game* _game) :
-    Scene(_registry, _game), gui(std::make_unique<editor::GUI>())
+EditorScene::EditorScene(entt::registry* _registry, GameData* _game) :
+    Scene(_registry, _game), gui(std::make_unique<editor::GUI>(game->settings))
 {
     game->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     game->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);

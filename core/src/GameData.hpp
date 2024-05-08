@@ -20,16 +20,16 @@
 
 namespace sage
 {
-class Game
+class GameData
 {
     entt::registry* registry;
 public:
-    Game(entt::registry* _registry, KeyMapping _keyMapping, Settings _settings);
+    GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     
     std::unique_ptr<UserInput> userInput;
     std::unique_ptr<Cursor> cursor;
     std::unique_ptr<Camera> camera;
-    Settings settings;
+    Settings* settings;
     
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
     std::unique_ptr<sage::RenderSystem> renderSystem;
