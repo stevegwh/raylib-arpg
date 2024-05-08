@@ -12,7 +12,7 @@
 namespace sage::editor
 {
 
-void GUI::Draw()
+void GUI::Draw(std::string mode, Cursor* cursor)
 {
     float modifier = 100;
     GuiGroupBox((Rectangle){ 0 + modifier, 8, 184, 40 }, NULL);
@@ -29,10 +29,42 @@ void GUI::Draw()
     {
         window->Update();
     }
+    
+    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), screenSize.x - 150, 50, 10, BLACK);
+    drawDebugCollisionText(cursor);
+    
+}
+
+void GUI::drawDebugCollisionText(Cursor* cursor)
+{
+    // Draw some debug GUI text
+    DrawText(TextFormat("Hit Object: %s", cursor->hitObjectName.c_str()), 10, 50, 10, BLACK);
+
+    if (cursor->collision.hit)
+    {
+        int ypos = 70;
+
+        DrawText(TextFormat("Distance: %3.2f", cursor->collision.distance), 10, ypos, 10, BLACK);
+
+        DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
+                            cursor->collision.point.x,
+                            cursor->collision.point.y,
+                            cursor->collision.point.z), 10, ypos + 15, 10, BLACK);
+
+        DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
+                            cursor->collision.normal.x,
+                            cursor->collision.normal.y,
+                            cursor->collision.normal.z), 10, ypos + 30, 10, BLACK);
+
+        DrawText(TextFormat("Entity ID: %d", cursor->rayCollisionResultInfo.collidedEntityId), 10,
+                 ypos + 45, 10, BLACK);
+
+    }
 }
 
 void GUI::onWindowResize(Vector2 newScreenSize)
 {
+    screenSize = newScreenSize;
     toolbox->position = { 10, 135 };
     toolbox->size = { 200, 400 };
     toolbox->content_size = { 140, 320 };
@@ -49,6 +81,8 @@ void GUI::onWindowResize(Vector2 newScreenSize)
 GUI::GUI(Settings* _settings, UserInput* _userInput) :
     settings(_settings)
 {
+    screenSize = { static_cast<float>(settings->SCREEN_WIDTH), 
+                   static_cast<float>(settings->SCREEN_HEIGHT) };
     _userInput->dOnWindowUpdate.connect<&GUI::onWindowResize>(this);
     toolbox = std::make_unique<FloatingWindow>(FloatingWindow({ 10, 135 },
                                                               { 200, 400 },

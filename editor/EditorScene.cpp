@@ -17,28 +17,28 @@ namespace sage
 void EditorScene::moveSelectedObjectToCursorHit()
 {
     Transform newTransform;
-    newTransform.position = game->cursor->collision.point;
+    newTransform.position = data->cursor->collision.point;
     const auto& renderable = registry->get<Renderable>(selectedObject);
     registry->patch<Transform>(selectedObject, [&newTransform] (auto& t) {
         t.position = newTransform.position;
     });
     Matrix mat = registry->get<Transform>(selectedObject).GetMatrixNoRot();
-    game->collisionSystem->UpdateWorldBoundingBox(selectedObject, mat); // TODO: Would prefer to have this as an event
+    data->collisionSystem->UpdateWorldBoundingBox(selectedObject, mat); // TODO: Would prefer to have this as an event
 }
 
 void EditorScene::OnCursorClick()
 {
-    if (game->cursor->collision.hit)
+    if (data->cursor->collision.hit)
     {
         
-        switch (registry->get<Collideable>(game->cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
+        switch (registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
         {
         case DEFAULT:
             break;
         case FLOOR:
             if (currentEditorMode == CREATE)
             {
-                GameObjectFactory::createBuilding(registry, game, game->cursor->collision.point, 
+                GameObjectFactory::createBuilding(registry, data, data->cursor->collision.point, 
                                                   "Tower Instance",
                                                   "resources/models/obj/castle.obj",
                                                   "resources/models/obj/castle_diffuse.png");
@@ -52,7 +52,7 @@ void EditorScene::OnCursorClick()
             break;
         case BUILDING:
             currentEditorMode = SELECT;
-            selectedObject = game->cursor->rayCollisionResultInfo.collidedEntityId;
+            selectedObject = data->cursor->rayCollisionResultInfo.collidedEntityId;
             break;
         }
     }
@@ -64,12 +64,12 @@ void EditorScene::OnCursorClick()
 
 void EditorScene::OnSerializeSave()
 {
-    game->Save();
+    data->Save();
 }
 
 void EditorScene::OnSerializeLoad()
 {
-    game->Load();
+    data->Load();
 }
 
 void EditorScene::OnDeleteModeKeyPressed()
@@ -88,7 +88,7 @@ void EditorScene::OnCreateModeKeyPressed()
 
 void EditorScene::OnGenGridKeyPressed()
 {
-    game->navigationGridSystem->PopulateGrid();
+    data->navigationGridSystem->PopulateGrid();
 }
 
 void EditorScene::OnCollisionHit()
@@ -115,10 +115,10 @@ void EditorScene::Draw3D()
 {
     if (currentEditorMode == SELECT)
     {
-        game->collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
+        data->collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
     }
 
-    game->renderSystem->Draw();
+    data->renderSystem->Draw();
 }
 
 
@@ -129,22 +129,20 @@ void EditorScene::Draw2D()
     else if (currentEditorMode == SELECT) mode = "SELECT";
     else if (currentEditorMode == MOVE) mode = "MOVE";
     else if (currentEditorMode == CREATE) mode = "CREATE";
-
-    DrawText(TextFormat("Editor Mode: %s", mode.c_str()), game->settings->SCREEN_WIDTH - 150, 50, 10, BLACK);
     
-    gui->Draw();
+    gui->Draw(mode, data->cursor.get());
 }
 
-EditorScene::EditorScene(entt::registry* _registry, GameData* _game) :
-    Scene(_registry, _game), gui(std::make_unique<editor::GUI>(game->settings, game->userInput.get()))
+EditorScene::EditorScene(entt::registry* _registry, GameData* _data) :
+    Scene(_registry, _data), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get()))
 {
-    game->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
-    game->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
-    game->userInput->dKeyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
-    game->userInput->dKeyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
-    game->userInput->dKeyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
-    game->userInput->dKeyMPressed.connect<&EditorScene::OnSerializeSave>(this);
-    game->userInput->dKeyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
+    data->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
+    data->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
+    data->userInput->dKeyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
+    data->userInput->dKeyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
+    data->userInput->dKeyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
+    data->userInput->dKeyMPressed.connect<&EditorScene::OnSerializeSave>(this);
+    data->userInput->dKeyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
 
     gui->saveButtonPressed.connect<&EditorScene::OnSerializeSave>(this);
     gui->loadButtonPressed.connect<&EditorScene::OnSerializeLoad>(this);
@@ -155,9 +153,9 @@ EditorScene::EditorScene(entt::registry* _registry, GameData* _game) :
     };
     GameObjectFactory::createFloor(registry, this, bb);
 
-    game->Load();
-    game->navigationGridSystem->Init(100, 1.0f);
-    game->navigationGridSystem->PopulateGrid();
+    data->Load();
+    data->navigationGridSystem->Init(100, 1.0f);
+    data->navigationGridSystem->PopulateGrid();
 }
 
 EditorScene::~EditorScene()

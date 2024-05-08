@@ -16,12 +16,12 @@ class Scene
 {
 protected:
     entt::registry* registry;
-    GameData* game;
+    GameData* data;
 public:
     std::unique_ptr<LightSubSystem> lightSubSystem;
-    explicit Scene(entt::registry* _registry, GameData* _game) :
+    explicit Scene(entt::registry* _registry, GameData* _data) :
         registry(_registry),
-        game(_game),
+        data(_data),
         lightSubSystem(std::make_unique<LightSubSystem>()) {};
     virtual ~Scene() = default;
     virtual void Update() = 0;

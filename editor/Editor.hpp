@@ -20,7 +20,6 @@ class Editor : public Application
     void enablePlayMode();
     void enableEditMode();
     void manageScenes();
-    void drawDebugCollisionText();
 public:
     void Update() override;
 };
