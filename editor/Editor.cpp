@@ -5,7 +5,6 @@
 #include "Editor.hpp"
 #include "EditorScene.hpp"
 #include "Serializer.hpp"
-#include "Settings.hpp"
 #include <memory>
 
 namespace sage
@@ -51,6 +50,33 @@ void Editor::manageScenes()
         stateChange = 0;
     }
     
+}
+
+void Editor::drawDebugCollisionText()
+{
+    // Draw some debug GUI text
+    DrawText(TextFormat("Hit Object: %s", data->cursor->hitObjectName.c_str()), 10, 50, 10, BLACK);
+
+    if (data->cursor->collision.hit)
+    {
+        int ypos = 70;
+
+        DrawText(TextFormat("Distance: %3.2f", data->cursor->collision.distance), 10, ypos, 10, BLACK);
+
+        DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
+                            data->cursor->collision.point.x,
+                            data->cursor->collision.point.y,
+                            data->cursor->collision.point.z), 10, ypos + 15, 10, BLACK);
+
+        DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
+                            data->cursor->collision.normal.x,
+                            data->cursor->collision.normal.y,
+                            data->cursor->collision.normal.z), 10, ypos + 30, 10, BLACK);
+
+        DrawText(TextFormat("Entity ID: %d", data->cursor->rayCollisionResultInfo.collidedEntityId), 10,
+                 ypos + 45, 10, BLACK);
+
+    }
 }
 
 void Editor::Update()
@@ -128,12 +154,12 @@ void Editor::draw()
     scene->Draw3D();
 
     scene->lightSubSystem->DrawDebugLights();
-    
+
     drawGrid(false);
 
     EndMode3D();
 
-    data->cursor->DrawDebugText();
+    drawDebugCollisionText();
 
     scene->Draw2D();
 

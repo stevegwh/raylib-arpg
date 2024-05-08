@@ -86,32 +86,6 @@ void Cursor::Draw()
     }
 }
 
-void Cursor::DrawDebugText() const
-{
-    // Draw some debug GUI text
-    DrawText(TextFormat("Hit Object: %s", hitObjectName.c_str()), 10, 50, 10, BLACK);
-
-    if (collision.hit)
-    {
-        int ypos = 70;
-
-        DrawText(TextFormat("Distance: %3.2f", collision.distance), 10, ypos, 10, BLACK);
-
-        DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
-                            collision.point.x,
-                            collision.point.y,
-                            collision.point.z), 10, ypos + 15, 10, BLACK);
-
-        DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
-                            collision.normal.x,
-                            collision.normal.y,
-                            collision.normal.z), 10, ypos + 30, 10, BLACK);
-
-        DrawText(TextFormat("Entity ID: %d", rayCollisionResultInfo.collidedEntityId), 10,
-                 ypos + 45, 10, BLACK);
-        
-    }
-}
 Cursor::Cursor(entt::registry* _registry,
                sage::CollisionSystem *_collisionSystem,
                sage::NavigationGridSystem* _navigationGridSystem,

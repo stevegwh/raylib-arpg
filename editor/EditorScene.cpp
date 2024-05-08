@@ -136,7 +136,7 @@ void EditorScene::Draw2D()
 }
 
 EditorScene::EditorScene(entt::registry* _registry, GameData* _game) :
-    Scene(_registry, _game), gui(std::make_unique<editor::GUI>(game->settings))
+    Scene(_registry, _game), gui(std::make_unique<editor::GUI>(game->settings, game->userInput.get()))
 {
     game->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     game->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
@@ -148,11 +148,6 @@ EditorScene::EditorScene(entt::registry* _registry, GameData* _game) :
 
     gui->saveButtonPressed.connect<&EditorScene::OnSerializeSave>(this);
     gui->loadButtonPressed.connect<&EditorScene::OnSerializeLoad>(this);
-
-//    BoundingBox bb = {
-//        .min = (Vector3){ -50.0f, 0.1f, -50.0f },
-//        .max = (Vector3){  50.0f, 0.1f,  50.0f }
-//    };
 
     BoundingBox bb = {
         .min = (Vector3){ -100.0f, 0.1f, -100.0f },

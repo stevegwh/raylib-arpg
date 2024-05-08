@@ -31,8 +31,6 @@ class EditorScene : public Scene
 {
     EditorMode currentEditorMode = IDLE;
     
-//    editor::FloatingWindow guiWindow1;
-//    editor::FloatingWindow guiWindow2;
     std::unique_ptr<editor::GUI> gui;
     
     // Event responses

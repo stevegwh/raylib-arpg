@@ -4,10 +4,11 @@
 
 #pragma once
 
-
 #include "Cursor.hpp"
 #include "KeyMapping.hpp"
 #include "Settings.hpp"
+
+#include "raylib.h"
 
 namespace sage
 {
@@ -17,6 +18,8 @@ namespace sage
         Settings* settings;
         void toggleFullScreen() const;
     public:
+        
+        entt::delegate<void(Vector2)> dOnWindowUpdate{};
         entt::delegate<void()> dOnClickEvent{};
 
         entt::delegate<void()> dKeyAPressed{};

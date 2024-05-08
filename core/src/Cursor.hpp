@@ -34,7 +34,6 @@ public:
     
     void Update();
     void Draw();
-    void DrawDebugText() const;
     Cursor(entt::registry* registry,
            sage::CollisionSystem* _collisionSystem,
            sage::NavigationGridSystem* _navigationGridSystem,

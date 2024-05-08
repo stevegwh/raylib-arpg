@@ -11,6 +11,7 @@ void UserInput::toggleFullScreen() const
 {
     if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
     {
+
         if (!IsWindowFullscreen())
         {
             const int current_screen = GetCurrentMonitor();
@@ -18,11 +19,15 @@ void UserInput::toggleFullScreen() const
                 GetMonitorWidth(current_screen),
                 GetMonitorHeight(current_screen));
             ToggleFullscreen();
+            if (dOnWindowUpdate) dOnWindowUpdate((Vector2){ static_cast<float>(GetMonitorWidth(current_screen)), 
+                                                            static_cast<float>(GetMonitorHeight(current_screen)) });
         }
         else if (IsWindowFullscreen())
         {
             ToggleFullscreen();
             SetWindowSize(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT);
+            if (dOnWindowUpdate) dOnWindowUpdate((Vector2){ static_cast<float>(settings->SCREEN_WIDTH), 
+                                                            static_cast<float>(settings->SCREEN_HEIGHT) });
         };
     }
 }

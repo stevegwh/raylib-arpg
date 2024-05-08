@@ -13,12 +13,14 @@ namespace sage
 
 class Editor : public Application
 {
+    bool debugMode = false;
     void init() override;
     void draw() override;
     void drawGrid(bool drawDebug);
     void enablePlayMode();
     void enableEditMode();
     void manageScenes();
+    void drawDebugCollisionText();
 public:
     void Update() override;
 };
