@@ -4,7 +4,7 @@
 
 #include "Application.hpp"
 #include "Serializer.hpp"
-#include "Settings.hpp"
+#include "scenes/ExampleScene.hpp"
 
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
@@ -21,8 +21,6 @@ Application::Application() :
     KeyMapping _keyMapping;
     serializer::DeserializeKeyMapping(_keyMapping, "resources/keybinding.xml");
     keyMapping = std::make_unique<KeyMapping>(_keyMapping);
-
-    data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
 }
 
 Application::~Application()
@@ -35,7 +33,7 @@ void Application::init()
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
-    scene = std::make_unique<ExampleScene>(registry.get(), data.get());
+    scene = std::make_unique<ExampleScene>(registry.get(), std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get()));
 }
 
 void Application::Update()
@@ -48,11 +46,6 @@ void Application::Update()
     {
         // Update
         //----------------------------------------------------------------------------------
-
-        data->camera->Update();
-        data->userInput->ListenForInput();
-        data->cursor->Update();
-
         scene->Update();
         //----------------------------------------------------------------------------------
         draw();
@@ -67,11 +60,9 @@ void Application::draw()
 
     ClearBackground(RAYWHITE);
 
-    BeginMode3D(*data->camera->getRaylibCam());
+    BeginMode3D(*scene->data->camera->getRaylibCam());
 
     // If we hit something, draw the cursor at the hit point
-    data->cursor->Draw();
-
     scene->Draw3D();
 
     EndMode3D();

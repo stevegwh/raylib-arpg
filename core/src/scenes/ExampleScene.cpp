@@ -11,6 +11,7 @@ namespace sage
 {
 void ExampleScene::Update()
 {
+    Scene::Update();
     data->transformSystem->Update();
     data->animationSystem->Update();
     data->renderSystem->Update();
@@ -19,6 +20,7 @@ void ExampleScene::Update()
 void ExampleScene::Draw3D()
 {
     data->renderSystem->Draw();
+    Scene::Draw3D();
 }
 
 void ExampleScene::Draw2D()
@@ -31,17 +33,17 @@ ExampleScene::~ExampleScene()
     
 }
 
-ExampleScene::ExampleScene(entt::registry* _registry, GameData* _data) :
-Scene(_registry, _data)
+ExampleScene::ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
+Scene(_registry, std::move(_data))
 {
     lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
-    auto playerId = GameObjectFactory::createPlayer(registry, _data, {20.0f, 0, 20.0f}, "Player");
+    auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {20.0f, 0, 20.0f}, "Player");
     auto& actor = registry->emplace<Actor>(playerId);
     actor.pathfindingBounds = 50;
     data->actorMovementSystem->SetControlledActor(playerId);
     
     
-    auto knight = GameObjectFactory::createKnight(registry, _data, {0.0f, 0, 20.0f}, "Knight");
+    auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
 
     data->Load();
     

@@ -38,7 +38,7 @@ void EditorScene::OnCursorClick()
         case FLOOR:
             if (currentEditorMode == CREATE)
             {
-                GameObjectFactory::createBuilding(registry, data, data->cursor->collision.point, 
+                GameObjectFactory::createBuilding(registry, data.get(), data->cursor->collision.point,
                                                   "Tower Instance",
                                                   "resources/models/obj/castle.obj",
                                                   "resources/models/obj/castle_diffuse.png");
@@ -108,7 +108,7 @@ void EditorScene::OnCollisionHit()
 
 void EditorScene::Update()
 {
-    
+    Scene::Update();
 } 
 
 void EditorScene::Draw3D()
@@ -119,6 +119,8 @@ void EditorScene::Draw3D()
     }
 
     data->renderSystem->Draw();
+
+    Scene::Draw3D();
 }
 
 
@@ -133,8 +135,8 @@ void EditorScene::Draw2D()
     gui->Draw(mode, data->cursor.get());
 }
 
-EditorScene::EditorScene(entt::registry* _registry, GameData* _data) :
-    Scene(_registry, _data), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get()))
+EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
+    Scene(_registry, std::move(_data)), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get()))
 {
     data->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     data->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);

@@ -20,7 +20,7 @@ class ExampleScene : public Scene
 {
 public:
     
-    ExampleScene(entt::registry* _registry, GameData* _data);
+    ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
     ~ExampleScene() override;
     void Update() override;
     void Draw3D() override;

@@ -16,16 +16,26 @@ class Scene
 {
 protected:
     entt::registry* registry;
-    GameData* data;
 public:
+    std::unique_ptr<sage::GameData> data;
     std::unique_ptr<LightSubSystem> lightSubSystem;
-    explicit Scene(entt::registry* _registry, GameData* _data) :
+    explicit Scene(entt::registry* _registry, std::unique_ptr<sage::GameData> _data) :
         registry(_registry),
-        data(_data),
+        data(std::move(_data)),
         lightSubSystem(std::make_unique<LightSubSystem>()) {};
     virtual ~Scene() = default;
-    virtual void Update() = 0;
-    virtual void Draw3D() = 0;
+    virtual void Update()
+    {
+        data->camera->Update();
+        data->userInput->ListenForInput();
+        data->cursor->Update();
+    }
+    virtual void Draw3D()
+    {
+        // If we hit something, draw the cursor at the hit point
+        data->cursor->Draw();
+        lightSubSystem->DrawDebugLights();
+    };
     virtual void Draw2D() = 0;
 };
 

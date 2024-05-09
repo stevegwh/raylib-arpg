@@ -7,11 +7,7 @@
 // Misc
 #include "KeyMapping.hpp"
 #include "scenes/Scene.hpp"
-#include "Camera.hpp"
-#include "UserInput.hpp"
-#include "GameData.hpp"
-// Scenes
-#include "scenes/ExampleScene.hpp"
+#include "Settings.hpp"
 
 #include "raylib.h"
 #include "entt/entt.hpp"
@@ -40,7 +36,6 @@ public:
     ~Application();
     Application(Application const&) = delete;
     void operator=(Application const&)  = delete;
-    std::unique_ptr<sage::GameData> data;
     virtual void Update();
 };
 }

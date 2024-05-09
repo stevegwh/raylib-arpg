@@ -46,7 +46,7 @@ class EditorScene : public Scene
     void moveSelectedObjectToCursorHit();
     
 public:
-    EditorScene(entt::registry* _registry, GameData* _data);
+    EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
     ~EditorScene() override;
     void Update() override;
     void Draw3D() override;
