@@ -12,7 +12,7 @@
 namespace sage::editor
 {
 
-void GUI::Draw(std::string mode, Cursor* cursor)
+void GUI::Draw(const std::string& mode, Cursor* cursor)
 {
     float modifier = 100;
     GuiGroupBox((Rectangle){ 0 + modifier, 8, 184, 40 }, NULL);
@@ -81,6 +81,10 @@ void GUI::onWindowResize(Vector2 newScreenSize)
 GUI::GUI(Settings* _settings, UserInput* _userInput) :
     settings(_settings)
 {
+    // TODO: No hardcoded values
+    // TODO: Resolution aware fonts
+    // TODO: Toolbox (create mode) and toolbox properties
+    // TODO: Create tool: rotate, move, scale
     screenSize = { static_cast<float>(settings->SCREEN_WIDTH), 
                    static_cast<float>(settings->SCREEN_HEIGHT) };
     _userInput->dOnWindowUpdate.connect<&GUI::onWindowResize>(this);

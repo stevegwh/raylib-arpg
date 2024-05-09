@@ -33,7 +33,7 @@ public:
     entt::delegate<void()> saveButtonPressed{};
     entt::delegate<void()> loadButtonPressed{};
     void Update();
-    void Draw(std::string mode, Cursor* cursor);
+    void Draw(const std::string& mode, Cursor* cursor);
     GUI(Settings* _settings, UserInput* _userInput);
 };
 

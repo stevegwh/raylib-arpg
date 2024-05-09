@@ -39,6 +39,9 @@ Scene(_registry, _data)
     auto& actor = registry->emplace<Actor>(playerId);
     actor.pathfindingBounds = 50;
     data->actorMovementSystem->SetControlledActor(playerId);
+    
+    
+    auto knight = GameObjectFactory::createKnight(registry, _data, {0.0f, 0, 20.0f}, "Knight");
 
     data->Load();
     
