@@ -1,0 +1,14 @@
+# Target labels
+ json-populate
+# Source files and their labels
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/CMakeFiles/json-populate
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/CMakeFiles/json-populate.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/CMakeFiles/json-populate-complete.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-build.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-configure.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-download.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-install.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-mkdir.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-patch.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-test.rule
+/Users/steve/CLionProjects/BG_Raylib/vendor/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-update.rule

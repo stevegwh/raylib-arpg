@@ -38,7 +38,7 @@ BoundingBox createRectangularBoundingBox(float length, float height)
 entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData* game, Vector3 position, const char* name)
 {
     entt::entity id = registry->create();
-    const char* modelPath = "resources/models/obj/knight.obj";
+    const char* modelPath = "resources/models/gltf/arissa.glb";
     //sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
     auto& transform = registry->emplace<Transform>(id);
@@ -47,8 +47,10 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
     transform.rotation = { 0, 0, 0 };
 
     auto model = LoadModel(modelPath);
-    
-    Matrix modelTransform = MatrixScale(4.0f, 4.0f, 4.0f);
+    auto& animation = registry->emplace<Animation>(id, modelPath, &model);
+    animation.ChangeAnimation(1);
+
+    Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
 
@@ -84,16 +86,16 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
         animation.ChangeAnimation(0);
     }>(animation);
     transform.dOnStartMovement.connect<[](Animation& animation, entt::entity entity) {
-        animation.ChangeAnimation(3);
+        animation.ChangeAnimation(1);
     }>(animation);
     game->userInput->dKeyIPressed.connect<[](Animation& animation) { // TODO: Just to test animations on demand
-        if (animation.animIndex == 1)
+        if (animation.animIndex == 0)
+        {
+            animation.ChangeAnimation(2);
+        }
+        else if (animation.animIndex == 2)
         {
             animation.ChangeAnimation(0);
-        }
-        else if (animation.animIndex == 0)
-        {
-            animation.ChangeAnimation(1);
         }
     }>(animation);
     
