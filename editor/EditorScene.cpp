@@ -28,9 +28,9 @@ void EditorScene::moveSelectedObjectToCursorHit()
 
 void EditorScene::OnCursorClick()
 {
+    if (gui->active) return;
     if (data->cursor->collision.hit)
     {
-        
         switch (registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
         {
         case DEFAULT:

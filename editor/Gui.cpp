@@ -12,6 +12,16 @@
 namespace sage::editor
 {
 
+void GUI::MarkGUIActive()
+{
+    active = true;
+}
+
+void GUI::MarkGUIInactive()
+{
+    active = false;
+}
+
 void GUI::Draw(const std::string& mode, Cursor* cursor)
 {
     float modifier = 100;
@@ -110,5 +120,12 @@ GUI::GUI(Settings* _settings, UserInput* _userInput, Camera* _camera) :
     objectprops->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
     toolprops->dOnWindowHover.connect<&Camera::ScrollDisable>(camera);
     toolprops->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
+
+    toolbox->dOnWindowHover.connect<&GUI::MarkGUIActive>(this);
+    toolbox->dOnWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+    objectprops->dOnWindowHover.connect<&GUI::MarkGUIActive>(this);
+    objectprops->dOnWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+    toolprops->dOnWindowHover.connect<&GUI::MarkGUIActive>(this);
+    toolprops->dOnWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
 }
 } // sage

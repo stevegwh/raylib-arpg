@@ -31,11 +31,14 @@ class GUI
     void onWindowResize(Vector2 newScreenSize);
     static void drawDebugCollisionText(Cursor* cursor);
 public:
+    bool active = false;
     entt::delegate<void()> saveButtonPressed{};
     entt::delegate<void()> loadButtonPressed{};
     void Update();
     void Draw(const std::string& mode, Cursor* cursor);
     GUI(Settings* _settings, UserInput* _userInput, Camera* camera);
+    void MarkGUIActive();
+    void MarkGUIInactive();
 };
 
 } // sage
