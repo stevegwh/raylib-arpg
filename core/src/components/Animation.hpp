@@ -34,15 +34,5 @@ struct Animation
     {
         animIndex = index;
     }
-    
-    // temp
-    void SetAnimation3(entt::entity t)
-    {
-        animIndex = 3;
-    }
-    void SetAnimation0(entt::entity t)
-    {
-        animIndex = 0;
-    }
 };
 }

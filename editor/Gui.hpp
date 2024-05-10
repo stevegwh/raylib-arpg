@@ -21,6 +21,7 @@ namespace sage::editor
 {
 class GUI
 {
+    Camera* camera;
     std::unique_ptr<FloatingWindow> objectprops;
     std::unique_ptr<FloatingWindow> toolprops;
     std::unique_ptr<FloatingWindow> toolbox;
@@ -34,7 +35,7 @@ public:
     entt::delegate<void()> loadButtonPressed{};
     void Update();
     void Draw(const std::string& mode, Cursor* cursor);
-    GUI(Settings* _settings, UserInput* _userInput);
+    GUI(Settings* _settings, UserInput* _userInput, Camera* camera);
 };
 
 } // sage

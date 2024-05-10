@@ -78,8 +78,8 @@ void GUI::onWindowResize(Vector2 newScreenSize)
     toolprops->content_size = { 140, 320 };
 }
 
-GUI::GUI(Settings* _settings, UserInput* _userInput) :
-    settings(_settings)
+GUI::GUI(Settings* _settings, UserInput* _userInput, Camera* _camera) :
+    settings(_settings), camera(_camera)
 {
     // TODO: No hardcoded values
     // TODO: Resolution aware fonts
@@ -103,5 +103,12 @@ GUI::GUI(Settings* _settings, UserInput* _userInput) :
     windows.push_back(toolbox.get());
     windows.push_back(objectprops.get());
     windows.push_back(toolprops.get());
+    
+    toolbox->dOnWindowHover.connect<&Camera::ScrollDisable>(camera);
+    toolbox->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
+    objectprops->dOnWindowHover.connect<&Camera::ScrollDisable>(camera);
+    objectprops->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
+    toolprops->dOnWindowHover.connect<&Camera::ScrollDisable>(camera);
+    toolprops->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
 }
 } // sage

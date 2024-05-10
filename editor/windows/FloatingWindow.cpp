@@ -107,6 +107,20 @@ void FloatingWindow::Update()
                            &scroll,
                            &scissor);
 
+            Vector2 mousePosition = GetMousePosition();
+            if (CheckCollisionPointRec(mousePosition, (Rectangle) { position.x, position.y + RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT, size.x, size.y - RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT }) && GuiGetState() != STATE_DISABLED)
+            {
+
+                hovering = true;
+                if (dOnWindowHover) dOnWindowHover();
+            }
+            else if (hovering)
+            {
+                std::cout << "Stopped hovering \n";
+                hovering = false;
+                if (dOnWindowHoverStop) dOnWindowHoverStop();
+            }
+
             bool require_scissor = size.x < content_size.x || size.y < content_size.y;
 
             if(require_scissor) 

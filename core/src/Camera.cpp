@@ -113,29 +113,31 @@ void Camera::handleInput()
         rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
     }
 
-    auto mouseScroll= GetMouseWheelMoveV();
-    if (mouseScroll.y > 0)
+    if (scrollEnabled)
     {
-        if (rlCamera.position.y > rlCamera.target.y)
+        auto mouseScroll= GetMouseWheelMoveV();
+        if (mouseScroll.y > 0)
+        {
+            if (rlCamera.position.y > rlCamera.target.y)
+            {
+                Vector3 up = GetCameraUp(&rlCamera);
+                up.x *= 2.0f;
+                up.y *= 2.0f;
+                up.z *= 2.0f;
+                rlCamera.position = Vector3Subtract(rlCamera.position, up);
+                rlCamera.position = Vector3Add(GetCameraForward(&rlCamera), rlCamera.position);
+            }
+        }
+        if (mouseScroll.y < 0)
         {
             Vector3 up = GetCameraUp(&rlCamera);
             up.x *= 2.0f;
             up.y *= 2.0f;
             up.z *= 2.0f;
-            rlCamera.position = Vector3Subtract(rlCamera.position, up);
-            rlCamera.position = Vector3Add(GetCameraForward(&rlCamera), rlCamera.position);
-        }        
+            rlCamera.position = Vector3Add(up, rlCamera.position);
+            rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
+        }
     }
-    if (mouseScroll.y < 0)
-    {
-        Vector3 up = GetCameraUp(&rlCamera);
-        up.x *= 2.0f;
-        up.y *= 2.0f;
-        up.z *= 2.0f;
-        rlCamera.position = Vector3Add(up, rlCamera.position);
-        rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
-    }
-
 }
 
 void Camera::Update()
@@ -170,6 +172,16 @@ Camera::Camera(UserInput* userInput)
     userInput->dKeyDUp.connect<&Camera::OnRightKeyUp>(this);
     userInput->dKeyEUp.connect<&Camera::OnRotateLeftKeyUp>(this);
     userInput->dKeyQUp.connect<&Camera::OnRotateRightKeyUp>(this);
+}
+
+void Camera::ScrollEnable()
+{
+    scrollEnabled = true;
+}
+
+void Camera::ScrollDisable()
+{
+    scrollEnabled = false;
 }
 
 } // sage

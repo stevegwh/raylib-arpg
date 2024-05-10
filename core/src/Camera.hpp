@@ -23,12 +23,15 @@ class Camera
     bool rightKeyDown;
     bool rotateLeftKeyDown;
     bool rotateRightKeyDown;
-    
+    bool scrollEnabled = true;
 public:
     Camera3D* getRaylibCam();
     explicit Camera(UserInput* userInput);
     
     void Update();
+    
+    void ScrollEnable();
+    void ScrollDisable();
 
     void OnForwardKeyPressed();
     void OnLeftKeyPressed();

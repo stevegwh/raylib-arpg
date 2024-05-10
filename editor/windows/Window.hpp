@@ -5,6 +5,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <entt/entt.hpp>
 
 #include <string>
 
@@ -24,7 +25,11 @@ public:
     bool minimized = false;
     bool moving = false;
     bool resizing = false;
+    bool hovering = false;
     Vector2 scroll{};
+
+    entt::delegate<void()> dOnWindowHover{};
+    entt::delegate<void()> dOnWindowHoverStop{};
     
     virtual void Update() = 0;
     

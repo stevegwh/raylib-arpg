@@ -141,7 +141,7 @@ void EditorScene::Draw2D()
 }
 
 EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
-    Scene(_registry, std::move(_data)), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get()))
+    Scene(_registry, std::move(_data)), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))
 {
     data->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
     data->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
