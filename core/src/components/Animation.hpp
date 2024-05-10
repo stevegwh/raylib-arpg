@@ -21,6 +21,9 @@ struct Animation
         animations = LoadModelAnimations(_modelPath, &animsCount);
         animIndex = 0;
     }
+
+    Animation(const Animation&) = delete;
+    Animation& operator=(const Animation&) = delete;
     
     ~Animation()
     {

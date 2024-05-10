@@ -16,7 +16,6 @@ namespace sage
 {
 struct Renderable
 {
-    int _id;
     Matrix initialTransform{};
     sage::Material material;
     std::string modelPath;

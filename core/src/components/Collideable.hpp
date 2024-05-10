@@ -29,7 +29,7 @@ struct CollisionInfo
 
 struct Collideable
 {
-    BoundingBox localBoundingBox; // BoundingBox in local space
+    BoundingBox localBoundingBox{}; // BoundingBox in local space
     BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb pos + world pos)
     CollisionLayer collisionLayer = DEFAULT;
 
@@ -37,8 +37,6 @@ struct Collideable
     Collideable() = default;
     Collideable(const Collideable&) = delete;
     Collideable& operator=(const Collideable&) = delete;
-    
-    void onTransformUpdate(entt::entity entity);
 
     template<class Archive>
     void save(Archive & archive) const
