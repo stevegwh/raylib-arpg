@@ -68,22 +68,6 @@ void Cursor::Draw()
         DrawCube(collision.point, 0.3f, 0.3f, 0.3f, defaultColor);
         DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
     }
-
-
-    // Draw the mesh bbox if we hit it
-    if (rayCollisionResultInfo.rayCollision.hit && registry->valid(rayCollisionResultInfo.collidedEntityId))
-    {
-        const auto& col = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId);
-        if (col.collisionLayer == FLOOR)
-        {
-            collisionSystem->BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId, ORANGE);
-        }
-        else
-        {
-            collisionSystem->BoundingBoxDraw(rayCollisionResultInfo.collidedEntityId);
-        }
-
-    }
 }
 
 Cursor::Cursor(entt::registry* _registry,

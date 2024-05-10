@@ -35,6 +35,8 @@ struct Collideable
 
     explicit Collideable(BoundingBox _boundingBox);
     Collideable() = default;
+    Collideable(const Collideable&) = delete;
+    Collideable& operator=(const Collideable&) = delete;
     
     void onTransformUpdate(entt::entity entity);
 

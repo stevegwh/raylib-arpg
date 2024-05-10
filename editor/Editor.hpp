@@ -20,8 +20,10 @@ class Editor : public Application
     void enablePlayMode();
     void enableEditMode();
     void manageScenes();
+    void initEditorScene();
 public:
     void Update() override;
+    void initGameScene();
 };
 
 } // sage

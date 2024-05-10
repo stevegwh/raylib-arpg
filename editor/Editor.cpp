@@ -21,14 +21,26 @@ void Editor::enablePlayMode()
     stateChange = 1;
 }
 
+void Editor::initEditorScene()
+{
+    auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
+    scene = std::make_unique<EditorScene>(registry.get(), std::move(data));
+    scene->data->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
+}
+
+void Editor::initGameScene()
+{
+    auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
+    data->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
+    scene = std::make_unique<ExampleScene>(registry.get(), std::move(data));
+}
+
 void Editor::init()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
     InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
-    auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
-    scene = std::make_unique<EditorScene>(registry.get(), std::move(data));
-    scene->data->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
+    initEditorScene();
 }
 
 void Editor::manageScenes()
@@ -36,22 +48,17 @@ void Editor::manageScenes()
     if (stateChange > 0)
     {
         registry = std::make_unique<entt::registry>();
-        auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
-
         switch (stateChange)
         {
         case 1:
-            data->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
-            scene = std::make_unique<ExampleScene>(registry.get(), std::move(data));
+            initGameScene();
             break;
         case 2:
-            data->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
-            scene = std::make_unique<EditorScene>(registry.get(), std::move(data));
+            initEditorScene();
             break;
         }
         stateChange = 0;
     }
-    
 }
 
 void Editor::Update()

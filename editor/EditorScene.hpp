@@ -31,6 +31,10 @@ class EditorScene : public Scene
 {
     EditorMode currentEditorMode = IDLE;
     
+    entt::entity boundingBoxHighlight;
+    
+    bool destroySelected = false;
+    
     std::unique_ptr<editor::GUI> gui;
     
     // Event responses

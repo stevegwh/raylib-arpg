@@ -40,8 +40,8 @@ void EditorScene::OnCursorClick()
             {
                 GameObjectFactory::createBuilding(registry, data.get(), data->cursor->collision.point,
                                                   "Tower Instance",
-                                                  "resources/models/obj/castle.obj",
-                                                  "resources/models/obj/castle_diffuse.png");
+                                                  "resources/models/obj/turret.obj",
+                                                  "resources/models/obj/turret_diffuse.png");
             }
             else if (currentEditorMode == SELECT)
             {
@@ -75,9 +75,10 @@ void EditorScene::OnSerializeLoad()
 void EditorScene::OnDeleteModeKeyPressed()
 {
     if (currentEditorMode != SELECT) return;
+    std::cout << "Delete pressed" << std::endl;
+    currentEditorMode = IDLE;
     registry->destroy(selectedObject);
     selectedObject = {};
-    currentEditorMode = IDLE;
 }
 
 void EditorScene::OnCreateModeKeyPressed()
@@ -93,17 +94,12 @@ void EditorScene::OnGenGridKeyPressed()
 
 void EditorScene::OnCollisionHit()
 {
-    //std::cout << "Collision detected. \n";
-    //    if (colSystem.GetComponent(rayCollisionResultInfo.collidedEntityId).collisionLayer == FLOOR)
-    //    {
-    //        // Place model
-    //    }
-    //    else
-    //    {
-    //        // Select model
-    //        // Store entityID of selected model
-    //        // Change bounding box colour
-    //    }
+    // Draw the mesh bbox if we hit it
+    if (data->cursor->rayCollisionResultInfo.rayCollision.hit && registry->valid(data->cursor->rayCollisionResultInfo.collidedEntityId))
+    {
+        const auto& col = registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId);
+        boundingBoxHighlight = data->cursor->rayCollisionResultInfo.collidedEntityId;
+    }
 }
 
 void EditorScene::Update()
@@ -118,6 +114,15 @@ void EditorScene::Draw3D()
         data->collisionSystem->BoundingBoxDraw(selectedObject, ORANGE);
     }
 
+    if (currentEditorMode == IDLE)
+    {
+        if (boundingBoxHighlight != entt::null)
+        {
+            data->collisionSystem->BoundingBoxDraw(boundingBoxHighlight);
+            boundingBoxHighlight = entt::null;
+        }
+    }
+    
     data->renderSystem->Draw();
 
     Scene::Draw3D();

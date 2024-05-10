@@ -62,7 +62,6 @@ void Application::draw()
 
     BeginMode3D(*scene->data->camera->getRaylibCam());
 
-    // If we hit something, draw the cursor at the hit point
     scene->Draw3D();
 
     EndMode3D();

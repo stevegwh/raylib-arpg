@@ -4,8 +4,12 @@
 
 #include "Renderable.hpp"
 
+#include <utility>
+
 namespace sage
 {
+
+static int id = 1;
  
 BoundingBox Renderable::CalculateModelBoundingBox() const
 {
@@ -52,6 +56,8 @@ BoundingBox Renderable::CalculateModelBoundingBox() const
 
 Renderable::~Renderable()
 {
+    std::cout << "MODEL " << _id << " FREED \n";
+    --id;
     if (shader.has_value())
     {
         UnloadShader(shader.value());
@@ -69,14 +75,17 @@ Renderable::Renderable(
 model(_model),
 material(std::move(_material)),
 modelPath(std::move(_modelPath)),
-initialTransform(_localTransform)
+initialTransform(_localTransform),
+_id(++id)
 {
+    std::cout << "MODEL " << _id << " CREATED \n";
     model.transform = initialTransform;
 }
 
 Renderable::Renderable( Model _model, std::string _modelPath, Matrix _localTransform) :
-    model(std::move(_model)), modelPath(_modelPath), initialTransform(_localTransform)
+    model(_model), modelPath(std::move(_modelPath)), initialTransform(_localTransform), _id(++id)
 {
+    std::cout << "MODEL " << _id << " CREATED \n";
     model.transform = initialTransform;
 }
 }

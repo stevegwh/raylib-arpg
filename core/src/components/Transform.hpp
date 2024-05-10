@@ -20,6 +20,10 @@ struct Transform
     Vector3 rotation{};
     float scale = 1.0f;
 
+    Transform() = default;
+    Transform(const Transform&) = delete;
+    Transform& operator=(const Transform&) = delete;
+
     template<class Archive>
     void save(Archive & archive) const
     {

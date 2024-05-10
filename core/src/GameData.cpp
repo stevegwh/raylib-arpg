@@ -22,7 +22,7 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
     
     actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(_registry,
                                                                       cursor.get(),
-                                                                      userInput.get(), 
+                                                                      userInput.get(),
                                                                       navigationGridSystem.get(), 
                                                                       transformSystem.get());
 }

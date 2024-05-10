@@ -16,12 +16,20 @@ namespace sage
 {
 struct Renderable
 {
+    int _id;
     Matrix initialTransform{};
     sage::Material material;
     std::string modelPath;
     Model model{}; // was const
     std::optional<Shader> shader;
     std::string name = "Default";
+
+    Renderable() = default;
+    Renderable(const Renderable&) = delete;
+    Renderable& operator=(const Renderable&) = delete;
+    Renderable(Model _model, sage::Material _material, std::string _modelPath, Matrix _localTransform);
+    Renderable(Model _model, std::string _modelPath, Matrix _localTransform);
+    ~Renderable();
 
     template<class Archive>
     void save(Archive & archive) const
@@ -80,11 +88,6 @@ struct Renderable
         }
 
     }
-    
-    Renderable() = default;
-    Renderable(Model _model, sage::Material _material, std::string _modelPath, Matrix _localTransform);
-    Renderable(Model _model, std::string _modelPath, Matrix _localTransform);
-    ~Renderable();
     
     [[nodiscard]] BoundingBox CalculateModelBoundingBox() const;
 };
