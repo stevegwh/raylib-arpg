@@ -30,8 +30,6 @@ Application::~Application()
 
 void Application::init()
 {
-    // Initialization
-    //--------------------------------------------------------------------------------------
     InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
     scene = std::make_unique<ExampleScene>(registry.get(), std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get()));
     HideCursor();
@@ -40,38 +38,23 @@ void Application::init()
 void Application::Update()
 {
     init();
-    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
-    // Main game loop
+    SetTargetFPS(60);
     while (!WindowShouldClose())        // Detect window close button or ESC key
     {
-        // Update
-        //----------------------------------------------------------------------------------
         scene->Update();
-        //----------------------------------------------------------------------------------
         draw();
     }
 }
 
 void Application::draw()
 {
-    // Draw
-    //----------------------------------------------------------------------------------
     BeginDrawing();
-
     ClearBackground(RAYWHITE);
-
     BeginMode3D(*scene->data->camera->getRaylibCam());
-
     scene->Draw3D();
-
     EndMode3D();
-
     scene->Draw2D();
-
     EndDrawing();
-    //----------------------------------------------------------------------------------
-    
 };
 
 void Application::cleanup()
