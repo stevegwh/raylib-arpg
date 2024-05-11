@@ -23,7 +23,5 @@ public:
     ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
     ~ExampleScene() override;
     void Update() override;
-    void Draw3D() override;
-    void Draw2D() override;
 };
 } // sage

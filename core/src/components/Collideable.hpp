@@ -17,20 +17,21 @@ enum CollisionLayer
     FLOOR,
     BUILDING,
     NAVIGATION,
-    PLAYER
+    PLAYER,
+    NPC
 };
 
 struct CollisionInfo
 {
     entt::entity collidedEntityId{};
     BoundingBox collidedBB{};
-    RayCollision rayCollision{};
+    RayCollision rlCollision{};
 };
 
 struct Collideable
 {
     BoundingBox localBoundingBox{}; // BoundingBox in local space
-    BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb pos + world pos)
+    BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb * world mat)
     CollisionLayer collisionLayer = DEFAULT;
 
     explicit Collideable(BoundingBox _boundingBox);

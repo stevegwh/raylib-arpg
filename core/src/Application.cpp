@@ -34,6 +34,7 @@ void Application::init()
     //--------------------------------------------------------------------------------------
     InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
     scene = std::make_unique<ExampleScene>(registry.get(), std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get()));
+    HideCursor();
 }
 
 void Application::Update()

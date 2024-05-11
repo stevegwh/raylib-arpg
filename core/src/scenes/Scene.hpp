@@ -26,17 +26,22 @@ public:
     virtual ~Scene() = default;
     virtual void Update()
     {
+        data->renderSystem->Update();
         data->camera->Update();
         data->userInput->ListenForInput();
         data->cursor->Update();
     }
     virtual void Draw3D()
     {
+        data->renderSystem->Draw();
         // If we hit something, draw the cursor at the hit point
-        data->cursor->Draw();
+        data->cursor->Draw3D();
         lightSubSystem->DrawDebugLights();
     };
-    virtual void Draw2D() = 0;
+    virtual void Draw2D()
+    {
+        data->cursor->Draw2D();
+    }
 };
 
 } // sage

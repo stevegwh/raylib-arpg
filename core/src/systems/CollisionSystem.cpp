@@ -11,7 +11,7 @@
 
 bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
 {
-    return a.rayCollision.distance < b.rayCollision.distance;
+    return a.rlCollision.distance < b.rlCollision.distance;
 }
 
 
@@ -31,11 +31,10 @@ std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray)
             auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
             if (col.hit)
             {
-
                 CollisionInfo info = {
                     .collidedEntityId = entity,
                     .collidedBB = c.worldBoundingBox,
-                    .rayCollision = col
+                    .rlCollision = col,
                 };
                 collisions.push_back(info);
             }
@@ -102,7 +101,7 @@ bool CollisionSystem::GetFirstCollision(entt::entity entity)
     for (const auto& ent: view) 
     {
         const auto& c = view.get<Collideable>(ent);
-        if (c.collisionLayer != BUILDING) continue; // TODO: Wanted to query the collision matrix but is far too slow
+        if (c.collisionLayer != BUILDING) continue; // TODO: Wanted to query a collision matrix but is far too slow
         bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
         if (colHit) return true;
     }

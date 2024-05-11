@@ -95,17 +95,12 @@ void EditorScene::OnGenGridKeyPressed()
 void EditorScene::OnCollisionHit()
 {
     // Draw the mesh bbox if we hit it
-    if (data->cursor->rayCollisionResultInfo.rayCollision.hit && registry->valid(data->cursor->rayCollisionResultInfo.collidedEntityId))
+    if (data->cursor->rayCollisionResultInfo.rlCollision.hit && registry->valid(data->cursor->rayCollisionResultInfo.collidedEntityId))
     {
         const auto& col = registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId);
         boundingBoxHighlight = data->cursor->rayCollisionResultInfo.collidedEntityId;
     }
 }
-
-void EditorScene::Update()
-{
-    Scene::Update();
-} 
 
 void EditorScene::Draw3D()
 {
@@ -122,8 +117,6 @@ void EditorScene::Draw3D()
             boundingBoxHighlight = entt::null;
         }
     }
-    
-    data->renderSystem->Draw();
 
     Scene::Draw3D();
 }
@@ -138,6 +131,7 @@ void EditorScene::Draw2D()
     else if (currentEditorMode == CREATE) mode = "CREATE";
     
     gui->Draw(mode, data->cursor.get());
+    // Do not draw2D the game cursor
 }
 
 EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :

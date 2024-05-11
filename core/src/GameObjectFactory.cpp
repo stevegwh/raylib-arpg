@@ -56,7 +56,7 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
 
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
-    collideable.collisionLayer = PLAYER;
+    collideable.collisionLayer = NPC;
     game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
     {
         entt::sink sink{transform.onPositionUpdate};
@@ -122,6 +122,11 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
         sink.connect<&CollisionSystem::OnTransformUpdate>(*game->collisionSystem);
     }
     auto& worldObject = registry->emplace<WorldObject>(id);
+
+    auto& actor = registry->emplace<Actor>(id);
+    actor.pathfindingBounds = 50;
+    game->actorMovementSystem->SetControlledActor(id);
+    
     return id;
 }
 
@@ -131,7 +136,7 @@ void GameObjectFactory::createBuilding(entt::registry* registry, GameData* data,
     auto id = registry->create();
     auto& transform = registry->emplace<Transform>(id);
     transform.position = position;
-    transform.scale = 1.0f;
+    transform.scale = 2.0f;
     sage::Material mat = { LoadTexture(texturePath), texturePath };
     Model model = LoadModel(modelPath);
     model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;

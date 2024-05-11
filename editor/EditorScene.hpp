@@ -52,7 +52,6 @@ class EditorScene : public Scene
 public:
     EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
     ~EditorScene() override;
-    void Update() override;
     void Draw3D() override;
     void Draw2D() override;
 };

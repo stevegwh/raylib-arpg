@@ -14,12 +14,21 @@ namespace sage
 {
 class Cursor
 {
+    Texture2D* currentTex;
+    Texture2D regulartex;
+    Texture2D talktex;
+    Texture2D movetex;
+    Texture2D invalidmovetex;
+    
+    Vector2 position;
     entt::registry* registry;
     Ray ray {0};
     Color defaultColor = WHITE;
     Color hoverColor = LIME;
     Color invalidColor = RED;
     Color currentColor = WHITE;
+
+    entt::entity controlledActor;
     
     sage::CollisionSystem* collisionSystem;
     sage::NavigationGridSystem* navigationGridSystem;
@@ -31,13 +40,16 @@ public:
     RayCollision collision {0};
     CollisionInfo rayCollisionResultInfo;
     entt::sigh<void()> onCollisionHitEvent{};
-    
-    void Update();
-    void Draw();
+
     Cursor(entt::registry* registry,
            sage::CollisionSystem* _collisionSystem,
            sage::NavigationGridSystem* _navigationGridSystem,
            sage::Camera* _sCamera);
+    
+    void Update();
+    void Draw3D();
+    void Draw2D();
+    void OnControlledActorChange(entt::entity entity);
 };
 }
 

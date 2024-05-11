@@ -51,11 +51,17 @@ void ActorMovementSystem::onCursorClick()
     
 void ActorMovementSystem::SetControlledActor(entt::entity id)
 {
+    onControlledActorChange.publish(id);
     controlledActorId = id;
     {
         entt::sink onClick{userInput->onClickEvent};
         onClick.connect<&ActorMovementSystem::onCursorClick>(this);
     }
+}
+
+entt::entity ActorMovementSystem::GetControlledActor()
+{
+    return controlledActorId;
 }
 
 ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, 

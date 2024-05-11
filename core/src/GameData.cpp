@@ -25,6 +25,10 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
                                                                       userInput.get(),
                                                                       navigationGridSystem.get(), 
                                                                       transformSystem.get());
+    {
+        entt::sink sink{actorMovementSystem->onControlledActorChange};
+        sink.connect<&Cursor::OnControlledActorChange>(*cursor);
+    }
 }
 
 void GameData::Load()
