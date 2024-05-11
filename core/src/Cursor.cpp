@@ -132,7 +132,7 @@ void Cursor::Draw3D()
 
 void Cursor::Draw2D()
 {
-    DrawTextureEx(*currentTex, position, 0.0, 0.75f, WHITE);
+    DrawTextureEx(*currentTex, position, 0.0, 1.0f, WHITE);
 }
 
 void Cursor::OnControlledActorChange(entt::entity entity)
@@ -149,10 +149,10 @@ Cursor::Cursor(entt::registry* _registry,
                 navigationGridSystem(_navigationGridSystem),
                 sCamera(_sCamera)
 {
-    regulartex = LoadTexture("resources/textures/cursor/regular.png");
-    talktex = LoadTexture("resources/textures/cursor/talk.png");
-    movetex = LoadTexture("resources/textures/cursor/move.png");
-    invalidmovetex = LoadTexture("resources/textures/cursor/deniedred.png");
+    regulartex = LoadTexture("resources/textures/cursor/32/regular.png");
+    talktex = LoadTexture("resources/textures/cursor/32/talk.png");
+    movetex = LoadTexture("resources/textures/cursor/32/move.png");
+    invalidmovetex = LoadTexture("resources/textures/cursor/32/deniedred.png");
     currentTex = &regulartex;
 }
 }
