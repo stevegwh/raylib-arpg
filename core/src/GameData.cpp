@@ -18,13 +18,18 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
 {
     userInput = std::make_unique<UserInput>(_keyMapping, settings);
     camera = std::make_unique<sage::Camera>(userInput.get());
-    cursor = std::make_unique<Cursor>(registry, collisionSystem.get(), navigationGridSystem.get(), camera.get());
+    cursor = std::make_unique<Cursor>(registry,
+                                      collisionSystem.get(),
+                                      navigationGridSystem.get(),
+                                      camera.get(),
+                                      userInput.get());
     
     actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(_registry,
                                                                       cursor.get(),
                                                                       userInput.get(),
                                                                       navigationGridSystem.get(), 
                                                                       transformSystem.get());
+    dialogueSystem = std::make_unique<sage::DialogueSystem>(_registry, cursor.get());
     {
         entt::sink sink{actorMovementSystem->onControlledActorChange};
         sink.connect<&Cursor::OnControlledActorChange>(*cursor);

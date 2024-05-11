@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "Camera.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+#include "Camera.hpp"
 
 #include <entt/entt.hpp>
 
@@ -40,6 +40,7 @@ class Cursor
     sage::Camera* sCamera;
     
     void getMouseRayCollision();
+    void onMouseClick();
 public:
     std::string hitObjectName{};
     RayCollision collision {};
@@ -47,11 +48,11 @@ public:
     entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
     entt::sigh<void(entt::entity)> onNPCClick{};
 
-
     Cursor(entt::registry* registry,
            sage::CollisionSystem* _collisionSystem,
            sage::NavigationGridSystem* _navigationGridSystem,
-           sage::Camera* _sCamera);
+           sage::Camera* _sCamera,
+           sage::UserInput* _userInput);
     
     void Update();
     void Draw3D();

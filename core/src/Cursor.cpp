@@ -3,6 +3,7 @@
 //
 
 #include "Cursor.hpp"
+#include "UserInput.hpp"
 #include "components/Renderable.hpp"
 #include "components/Actor.hpp"
 
@@ -12,6 +13,17 @@
 
 namespace sage
 {
+
+void Cursor::onMouseClick()
+{
+
+    const auto& layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
+    if (layer == CollisionLayer::NPC)
+    {
+
+        onNPCClick.publish(rayCollisionResultInfo.collidedEntityId);
+    }
+}
 
 void Cursor::getMouseRayCollision()
 {
@@ -78,7 +90,6 @@ void Cursor::getMouseRayCollision()
     {
         currentTex = &talktex;
         currentColor = invalidColor;
-        onNPCClick.publish(rayCollisionResultInfo.collidedEntityId);
     }
 }
 
@@ -113,7 +124,8 @@ void Cursor::OnControlledActorChange(entt::entity entity)
 Cursor::Cursor(entt::registry* _registry,
                sage::CollisionSystem *_collisionSystem,
                sage::NavigationGridSystem* _navigationGridSystem,
-               sage::Camera *_sCamera) :
+               sage::Camera *_sCamera,
+               sage::UserInput* _userInput) :
                 registry(_registry),
                 collisionSystem(_collisionSystem),
                 navigationGridSystem(_navigationGridSystem),
@@ -124,6 +136,10 @@ Cursor::Cursor(entt::registry* _registry,
     movetex = LoadTexture("resources/textures/cursor/32/move.png");
     invalidmovetex = LoadTexture("resources/textures/cursor/32/denied.png");
     currentTex = &regulartex;
+    {
+        entt::sink sink{_userInput->onClickEvent};
+        sink.connect<&Cursor::onMouseClick>(this);
+    }
 }
 }
 

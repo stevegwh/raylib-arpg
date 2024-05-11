@@ -15,6 +15,7 @@
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
+#include "systems/DialogueSystem.hpp"
 
 #include <memory>
 
@@ -38,6 +39,7 @@ public:
     std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
     std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
     std::unique_ptr<sage::AnimationSystem> animationSystem;
+    std::unique_ptr<sage::DialogueSystem> dialogueSystem;
 
     void Load();
     void Save() const;

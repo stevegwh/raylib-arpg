@@ -6,7 +6,6 @@
 
 #include "BaseSystem.hpp"
 #include "Cursor.hpp"
-#include "UserInput.hpp"
 #include "../components/Dialogue.hpp"
 
 #include <entt/entt.hpp>
@@ -17,9 +16,9 @@ namespace sage
 class DialogueSystem : public BaseSystem<Dialogue>
 {
     entt::entity hoveredEntity{};
-    void onNPCClicked(entt::entity entity);
+    void onNPCClicked(entt::entity clickedNPC);
 public:
-    explicit DialogueSystem(entt::registry* registry, Cursor* _cursor, UserInput* _userInput);
+    explicit DialogueSystem(entt::registry* registry, Cursor* _cursor);
 };
 
 } // sage

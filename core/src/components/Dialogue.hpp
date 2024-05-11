@@ -7,6 +7,6 @@ namespace sage
 {
 struct Dialogue
 {
-
+    std::string sentence; // tmp
 };
 }

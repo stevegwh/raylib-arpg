@@ -48,7 +48,7 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
 
     auto model = LoadModel(modelPath);
     auto& animation = registry->emplace<Animation>(id, modelPath, &model);
-    animation.ChangeAnimation(1);
+    animation.ChangeAnimation(0);
 
     Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
@@ -64,6 +64,9 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
             collisionSystem.OnTransformUpdate(entity);
         }>(*game->collisionSystem);
     }
+
+    auto& dialogue = registry->emplace<Dialogue>(id);
+    dialogue.sentence = "Hello, this is a test sentence.";
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;
 }
