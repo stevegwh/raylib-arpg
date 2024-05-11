@@ -16,6 +16,7 @@ void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std
     // Prune existing move commands
     for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
     {
+        // TODO: Make event on transform such as "OnMoveCancelled" and call it here
         if (it->second == &transform)
         {
             it = moveTowardsTransforms.erase(it);
@@ -32,10 +33,6 @@ void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std
     transform.direction = Vector3Normalize(Vector3Subtract(transform.targets.front(), transform.position));
     moveTowardsTransforms.emplace_back(entityId, &transform);
     transform.onStartMovement.publish(entityId);
-}
-
-void TransformSystem::DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data)
-{
 }
 
 void TransformSystem::Update()

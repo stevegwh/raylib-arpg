@@ -34,7 +34,7 @@ public:
                         NavigationGridSystem* _navigationGridSystem,
                         TransformSystem* _transformSystem);
     void MoveToLocation(entt::entity id);
-    void PathfindToLocation(entt::entity id);
+    void PathfindToLocation(entt::entity id, Vector3 location);
     void SetControlledActor(entt::entity id);
     entt::entity GetControlledActor();
 

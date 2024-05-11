@@ -8,12 +8,12 @@
 namespace sage
 {
 
-void ActorMovementSystem::PathfindToLocation(entt::entity id)
+void ActorMovementSystem::PathfindToLocation(entt::entity id, Vector3 location)
 {
     {
         // If mouse clicks outside of bounds, then return
         Vector2 tmp;
-        if (!navigationGridSystem->WorldToGridSpace(cursor->collision.point, tmp)) return;
+        if (!navigationGridSystem->WorldToGridSpace(location, tmp)) return;
     }
     const auto& actor = registry->get<Actor>(id);
     Vector2 minRange;
@@ -22,7 +22,7 @@ void ActorMovementSystem::PathfindToLocation(entt::entity id)
     navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
     const auto& playerPos = registry->get<Transform>(id);
-    auto path = navigationGridSystem->Pathfind(playerPos.position, cursor->collision.point, minRange, maxRange);
+    auto path = navigationGridSystem->Pathfind(playerPos.position, location, minRange, maxRange);
     if (!path.empty()) transformSystem->PathfindToLocation(id, path);
 }
 
@@ -43,7 +43,7 @@ void ActorMovementSystem::onCursorClick()
         switch (registry->get<Collideable>(cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
         {
         case CollisionLayer::FLOOR:
-            PathfindToLocation(controlledActorId);
+            PathfindToLocation(controlledActorId, cursor->collision.point);
             //MoveToLocation(controlledActorId);
         }
     }

@@ -4,6 +4,7 @@
 
 #pragma once
 #include "raylib.h"
+#include "components/Transform.hpp"
 
 namespace sage
 {
@@ -16,7 +17,7 @@ class Camera
     Vector3 rotation {};
     int zoom = 10;
     void handleInput();
-    
+
     bool forwardKeyDown;
     bool backKeyDown;
     bool leftKeyDown;
@@ -24,6 +25,7 @@ class Camera
     bool rotateLeftKeyDown;
     bool rotateRightKeyDown;
     bool scrollEnabled = true;
+    bool lockInput = false;
 public:
     Camera3D* getRaylibCam();
     explicit Camera(UserInput* userInput);
@@ -32,6 +34,8 @@ public:
     
     void ScrollEnable();
     void ScrollDisable();
+    void LockInput();
+    void UnlockInput();
 
     void OnForwardKeyPressed();
     void OnLeftKeyPressed();
@@ -46,6 +50,7 @@ public:
     void OnBackKeyUp();
     void OnRotateLeftKeyUp();
     void OnRotateRightKeyUp();
+    void CutscenePose(const sage::Transform& location);
 };
 
 } // sage

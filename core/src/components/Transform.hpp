@@ -57,6 +57,7 @@ struct Transform
 
     [[nodiscard]] Matrix GetMatrixNoRot() const;
     [[nodiscard]] Matrix GetMatrix() const;
+    [[nodiscard]] Vector3 forward() const;
 };
 }
 

@@ -26,7 +26,6 @@ public:
     // TODO: Overload this so you can just update one field at a time if needed
     void PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path);
     void MoveToLocation(const entt::entity& entityId, Vector3 location);
-    void DeserializeComponents(const std::string& entityId, const std::unordered_map<std::string, std::string>& data);
     void Update();
 };
 }

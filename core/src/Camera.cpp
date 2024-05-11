@@ -70,9 +70,39 @@ void Camera::OnRotateRightKeyUp()
     rotateRightKeyDown = false;
 }
 
+void Camera::LockInput()
+{
+    lockInput = true;
+}
+
+void Camera::UnlockInput()
+{
+    lockInput = false;
+}
+
+void Camera::CutscenePose(const sage::Transform& actorShoulder)
+{
+    rlCamera.position.y = rlCamera.target.y;
+
+    // Calculate the camera's position behind the actor's shoulder
+    Vector3 cameraOffset = {0, 200*DEG2RAD, 0 }; // Adjust these values as needed
+    Quaternion actorRotation = QuaternionFromEuler(actorShoulder.rotation.x*DEG2RAD,
+                                                   actorShoulder.rotation.y*DEG2RAD,
+                                                   actorShoulder.rotation.z*DEG2RAD);
+    Vector3 cameraPosition = Vector3Add(actorShoulder.position, Vector3RotateByQuaternion(cameraOffset, actorRotation));
+
+    // Calculate the camera's target position slightly above the actor's position
+    Vector3 cameraTarget = Vector3Add(actorShoulder.position, {0.0f, 1.0f, 0.0f});
+
+    // Set the camera's position and target
+    position = cameraPosition;
+    target = cameraTarget;
+}
+
 void Camera::handleInput()
 {
-    if (IsKeyDown(KEY_LEFT_CONTROL)|| IsKeyDown(KEY_RIGHT_CONTROL) || IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))
+    if (IsKeyDown(KEY_LEFT_CONTROL)|| IsKeyDown(KEY_RIGHT_CONTROL) || IsKeyDown(KEY_LEFT_ALT)
+    || IsKeyDown(KEY_RIGHT_ALT) || lockInput)
         return;
 
     if (backKeyDown)

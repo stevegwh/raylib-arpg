@@ -3,10 +3,14 @@
 //
 
 #pragma once
+
+#include "raylib.h"
+
 namespace sage
 {
 struct Dialogue
 {
+    Vector3 conversationPos; // Where the other person stands
     std::string sentence; // tmp
 };
 }

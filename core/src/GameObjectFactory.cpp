@@ -67,6 +67,7 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
 
     auto& dialogue = registry->emplace<Dialogue>(id);
     dialogue.sentence = "Hello, this is a test sentence.";
+    dialogue.conversationPos = Vector3Add(transform.position, Vector3Multiply(transform.forward(), { 10.0f, 1, 10.0f}));
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;
 }

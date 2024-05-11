@@ -23,4 +23,11 @@ Matrix Transform::GetMatrix() const
     Matrix rot = MatrixRotateXYZ({DEG2RAD*rotation.x, DEG2RAD*rotation.y, DEG2RAD*rotation.z});
     return MatrixMultiply(_scale, MatrixMultiply(rot, trans));
 }
+
+Vector3 Transform::forward() const
+{
+    Matrix matrix = GetMatrix();
+    Vector3 forward = {matrix.m8, matrix.m9, matrix.m10};
+    return Vector3Normalize(forward);
+}
 }

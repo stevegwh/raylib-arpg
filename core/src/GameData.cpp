@@ -29,7 +29,7 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
                                                                       userInput.get(),
                                                                       navigationGridSystem.get(), 
                                                                       transformSystem.get());
-    dialogueSystem = std::make_unique<sage::DialogueSystem>(_registry, cursor.get());
+    dialogueSystem = std::make_unique<sage::DialogueSystem>(_registry, cursor.get(), camera.get(), actorMovementSystem.get());
     {
         entt::sink sink{actorMovementSystem->onControlledActorChange};
         sink.connect<&Cursor::OnControlledActorChange>(*cursor);
