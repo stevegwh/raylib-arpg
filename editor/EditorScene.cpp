@@ -28,7 +28,7 @@ void EditorScene::moveSelectedObjectToCursorHit()
 
 void EditorScene::OnCursorClick()
 {
-    if (gui->active) return;
+    if (gui->focused) return;
     if (data->cursor->collision.hit)
     {
         switch (registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
@@ -94,6 +94,7 @@ void EditorScene::OnGenGridKeyPressed()
 
 void EditorScene::OnCollisionHit()
 {
+    if (gui->focused) return;
     // Draw the mesh bbox if we hit it
     if (data->cursor->rayCollisionResultInfo.rlCollision.hit && registry->valid(data->cursor->rayCollisionResultInfo.collidedEntityId))
     {

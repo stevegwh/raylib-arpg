@@ -31,7 +31,7 @@ class GUI
     void onWindowResize(Vector2 newScreenSize);
     static void drawDebugCollisionText(Cursor* cursor);
 public:
-    bool active = false;
+    bool focused = false;
     entt::sigh<void()> saveButtonPressed;
     entt::sigh<void()> loadButtonPressed;
     void Update();

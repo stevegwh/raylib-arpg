@@ -14,12 +14,12 @@ namespace sage::editor
 
 void GUI::MarkGUIActive()
 {
-    active = true;
+    focused = true;
 }
 
 void GUI::MarkGUIInactive()
 {
-    active = false;
+    focused = false;
 }
 
 void GUI::Draw(const std::string& mode, Cursor* cursor)
