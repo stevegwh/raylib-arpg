@@ -158,20 +158,55 @@ Camera::Camera(UserInput* userInput)
     rlCamera.up = { 0.0f, 1.0f, 0.0f };
     rlCamera.fovy = 45.0f;
     rlCamera.projection = CAMERA_PERSPECTIVE;
-    
-    userInput->dKeyWPressed.connect<&Camera::OnForwardKeyPressed>(this);
-    userInput->dKeySPressed.connect<&Camera::OnBackKeyPressed>(this);
-    userInput->dKeyAPressed.connect<&Camera::OnLeftKeyPressed>(this);
-    userInput->dKeyDPressed.connect<&Camera::OnRightKeyPressed>(this);
-    userInput->dKeyEPressed.connect<&Camera::OnRotateLeftKeyPressed>(this);
-    userInput->dKeyQPressed.connect<&Camera::OnRotateRightKeyPressed>(this);
 
-    userInput->dKeyWUp.connect<&Camera::OnForwardKeyUp>(this);
-    userInput->dKeySUp.connect<&Camera::OnBackKeyUp>(this);
-    userInput->dKeyAUp.connect<&Camera::OnLeftKeyUp>(this);
-    userInput->dKeyDUp.connect<&Camera::OnRightKeyUp>(this);
-    userInput->dKeyEUp.connect<&Camera::OnRotateLeftKeyUp>(this);
-    userInput->dKeyQUp.connect<&Camera::OnRotateRightKeyUp>(this);
+    {
+        entt::sink keyWPressed{userInput->keyWPressed};
+        keyWPressed.connect<&Camera::OnForwardKeyPressed>(this);
+    }
+    {
+        entt::sink keySPressed{userInput->keySPressed};
+        keySPressed.connect<&Camera::OnBackKeyPressed>(this);
+    }
+    {
+        entt::sink keyAPressed{userInput->keyAPressed};
+        keyAPressed.connect<&Camera::OnLeftKeyPressed>(this);
+    }
+    {
+        entt::sink keyDPressed{userInput->keyDPressed};
+        keyDPressed.connect<&Camera::OnRightKeyPressed>(this);
+    }
+    {
+        entt::sink keyEPressed{userInput->keyEPressed};
+        keyEPressed.connect<&Camera::OnRotateLeftKeyPressed>(this);
+    }
+    {
+        entt::sink keyQPressed{userInput->keyQPressed};
+        keyQPressed.connect<&Camera::OnRotateRightKeyPressed>(this);
+    }
+    {
+        entt::sink keyWUp{userInput->keyWUp};
+        keyWUp.connect<&Camera::OnForwardKeyUp>(this);
+    }
+    {
+        entt::sink keySUp{userInput->keySUp};
+        keySUp.connect<&Camera::OnBackKeyUp>(this);
+    }
+    {
+        entt::sink keyAUp{userInput->keyAUp};
+        keyAUp.connect<&Camera::OnLeftKeyUp>(this);
+    }
+    {
+        entt::sink keyDUp{userInput->keyDUp};
+        keyDUp.connect<&Camera::OnRightKeyUp>(this);
+    }
+    {
+        entt::sink keyEUp{userInput->keyEUp};
+        keyEUp.connect<&Camera::OnRotateLeftKeyUp>(this);
+    }
+    {
+        entt::sink keyQUp{userInput->keyQUp};
+        keyQUp.connect<&Camera::OnRotateRightKeyUp>(this);
+    }
 }
 
 void Camera::ScrollEnable()

@@ -30,7 +30,7 @@ public:
     std::string hitObjectName{};
     RayCollision collision {0};
     CollisionInfo rayCollisionResultInfo;
-    entt::delegate<void()> dOnCollisionHitEvent{};
+    entt::sigh<void()> onCollisionHitEvent{};
     
     void Update();
     void Draw();

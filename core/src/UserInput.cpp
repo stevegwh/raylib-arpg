@@ -19,14 +19,14 @@ void UserInput::toggleFullScreen() const
                 GetMonitorWidth(current_screen),
                 GetMonitorHeight(current_screen));
             ToggleFullscreen();
-            if (dOnWindowUpdate) dOnWindowUpdate((Vector2){ static_cast<float>(GetMonitorWidth(current_screen)), 
+            onWindowUpdate.publish((Vector2){ static_cast<float>(GetMonitorWidth(current_screen)), 
                                                             static_cast<float>(GetMonitorHeight(current_screen)) });
         }
         else if (IsWindowFullscreen())
         {
             ToggleFullscreen();
             SetWindowSize(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT);
-            if (dOnWindowUpdate) dOnWindowUpdate((Vector2){ static_cast<float>(settings->SCREEN_WIDTH), 
+            onWindowUpdate.publish((Vector2){ static_cast<float>(settings->SCREEN_WIDTH), 
                                                             static_cast<float>(settings->SCREEN_HEIGHT) });
         };
     }
@@ -37,242 +37,241 @@ void UserInput::ListenForInput() const
     toggleFullScreen();
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        if (dOnClickEvent) dOnClickEvent();
+        onClickEvent.publish();
     }
 
     if (IsKeyPressed(keyMapping->keyA))
     {
-        if (dKeyAPressed) dKeyAPressed();
+        keyAPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyA))
     {
-        if (dKeyAUp) dKeyAUp();
+        keyAUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyB))
     {
-        if (dKeyBPressed) dKeyBPressed();
+        keyBPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyB))
     {
-        if (dKeyBUp) dKeyBUp();
+        keyBUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyC))
     {
-        if (dKeyCPressed) dKeyCPressed();
+        keyCPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyC))
     {
-        if (dKeyCUp) dKeyCUp();
+        keyCUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyD))
     {
-        if (dKeyDPressed) dKeyDPressed();
+        keyDPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyD))
     {
-        if (dKeyDUp) dKeyDUp();
+        keyDUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyE))
     {
-        if (dKeyEPressed) dKeyEPressed();
+        keyEPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyE))
     {
-        if (dKeyEUp) dKeyEUp();
+        keyEUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyF))
     {
-        if (dKeyFPressed) dKeyFPressed();
+        keyFPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyF))
     {
-        if (dKeyFUp) dKeyFUp();
+        keyFUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyG))
     {
-        if (dKeyGPressed) dKeyGPressed();
+        keyGPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyG))
     {
-        if (dKeyGUp) dKeyGUp();
+        keyGUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyH))
     {
-        if (dKeyHPressed) dKeyHPressed();
+        keyHPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyH))
     {
-        if (dKeyHUp) dKeyHUp();
+        keyHUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyI))
     {
-        if (dKeyIPressed) dKeyIPressed();
+        keyIPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyI))
     {
-        if (dKeyIUp) dKeyIUp();
+        keyIUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyJ))
     {
-        if (dKeyJPressed) dKeyJPressed();
+        keyJPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyJ))
     {
-        if (dKeyJUp) dKeyJUp();
+        keyJUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyK))
     {
-        if (dKeyKPressed) dKeyKPressed();
+        keyKPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyK))
     {
-        if (dKeyKUp) dKeyKUp();
+        keyKUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyL))
     {
-        if (dKeyLPressed) dKeyLPressed();
+        keyLPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyL))
     {
-        if (dKeyLUp) dKeyLUp();
+        keyLUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyM))
     {
-        if (dKeyMPressed) dKeyMPressed();
+        keyMPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyM))
     {
-        if (dKeyMUp) dKeyMUp();
+        keyMUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyN))
     {
-        if (dKeyNPressed) dKeyNPressed();
+        keyNPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyN))
     {
-        if (dKeyNUp) dKeyNUp();
+        keyNUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyO))
     {
-        if (dKeyOPressed) dKeyOPressed();
+        keyOPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyO))
     {
-        if (dKeyOUp) dKeyOUp();
+        keyOUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyP))
     {
-        if (dKeyPPressed) dKeyPPressed();
+        keyPPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyP))
     {
-        if (dKeyPUp) dKeyPUp();
+        keyPUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyQ))
     {
-        if (dKeyQPressed) dKeyQPressed();
+        keyQPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyQ))
     {
-        if (dKeyQUp) dKeyQUp();
+        keyQUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyR))
     {
-        if (dKeyRPressed) dKeyRPressed();
+        keyRPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyR))
     {
-        if (dKeyRUp) dKeyRUp();
+        keyRUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyS))
     {
-        if (dKeySPressed) dKeySPressed();
+        keySPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyS))
     {
-        if (dKeySUp) dKeySUp();
+        keySUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyT))
     {
-        if (dKeyTPressed) dKeyTPressed();
+        keyTPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyT))
     {
-        if (dKeyTUp) dKeyTUp();
+        keyTUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyU))
     {
-        if (dKeyUPressed) dKeyUPressed();
+        keyUPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyU))
     {
-        if (dKeyUUp) dKeyUUp();
+        keyUUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyV))
     {
-        if (dKeyVPressed) dKeyVPressed();
+        keyVPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyV))
     {
-        if (dKeyVUp) dKeyVUp();
+        keyVUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyW))
     {
-        if (dKeyWPressed) dKeyWPressed();
+        keyWPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyW))
     {
-        if (dKeyWUp) dKeyWUp();
+        keyWUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyX))
     {
-        if (dKeyXPressed) dKeyXPressed();
+        keyXPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyX))
     {
-        if (dKeyXUp) dKeyXUp();
+        keyXUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyY))
     {
-        if (dKeyYPressed) dKeyYPressed();
+        keyYPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyY))
     {
-        if (dKeyYUp) dKeyYUp();
+        keyYUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyZ))
     {
-        if (dKeyZPressed) dKeyZPressed();
+        keyZPressed.publish();
     }
     if (IsKeyUp(keyMapping->keyZ))
     {
-        if (dKeyZUp) dKeyZUp();
+        keyZUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyEscape))
     {
-        if (dKeyEscapePressed) dKeyEscapePressed();
+        keyEscapePressed.publish();
     }
     if (IsKeyUp(keyMapping->keyEscape))
     {
-        if (dKeyEscapeUp) dKeyEscapeUp();
+        keyEscapeUp.publish();
     }
     if (IsKeyPressed(keyMapping->keySpace))
     {
-        if (dKeySpacePressed) dKeySpacePressed();
+        keySpacePressed.publish();
     }
     if (IsKeyUp(keyMapping->keySpace))
     {
-        if (dKeySpaceUp) dKeySpaceUp();
+        keySpaceUp.publish();
     }
     if (IsKeyPressed(keyMapping->keyDelete))
     {
-        if (dKeyDeletePressed) dKeyDeletePressed();
+        keyDeletePressed.publish();
     }
     if (IsKeyUp(keyMapping->keyDelete))
     {
-        if (dKeyDeleteUp) dKeyDeleteUp();
+        keyDeleteUp.publish();
     }
-
 }
     
 UserInput::UserInput(KeyMapping* _keyMapping, Settings* _settings) : 

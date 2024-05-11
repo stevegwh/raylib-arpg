@@ -28,8 +28,8 @@ public:
     bool hovering = false;
     Vector2 scroll{};
 
-    entt::delegate<void()> dOnWindowHover{};
-    entt::delegate<void()> dOnWindowHoverStop{};
+    entt::sigh<void()> onWindowHover{};
+    entt::sigh<void()> onWindowHoverStop{};
     
     virtual void Update() = 0;
     

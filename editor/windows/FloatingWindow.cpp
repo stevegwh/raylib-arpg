@@ -112,13 +112,13 @@ void FloatingWindow::Update()
             {
 
                 hovering = true;
-                if (dOnWindowHover) dOnWindowHover();
+                onWindowHover.publish();
             }
             else if (hovering)
             {
                 std::cout << "Stopped hovering \n";
                 hovering = false;
-                if (dOnWindowHoverStop) dOnWindowHoverStop();
+                onWindowHoverStop.publish();
             }
 
             bool require_scissor = size.x < content_size.x || size.y < content_size.y;

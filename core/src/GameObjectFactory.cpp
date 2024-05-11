@@ -88,16 +88,18 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     transform.dOnStartMovement.connect<[](Animation& animation, entt::entity entity) {
         animation.ChangeAnimation(1);
     }>(animation);
-    game->userInput->dKeyIPressed.connect<[](Animation& animation) { // TODO: Just to test animations on demand
-        if (animation.animIndex == 0)
-        {
-            animation.ChangeAnimation(2);
-        }
-        else if (animation.animIndex == 2)
-        {
-            animation.ChangeAnimation(0);
-        }
-    }>(animation);
+    
+    // TODO
+//    game->userInput->dKeyIPressed.connect<[](Animation& animation) { // TODO: Just to test animations on demand
+//        if (animation.animIndex == 0)
+//        {
+//            animation.ChangeAnimation(2);
+//        }
+//        else if (animation.animIndex == 2)
+//        {
+//            animation.ChangeAnimation(0);
+//        }
+//    }>(animation);
     
     Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);

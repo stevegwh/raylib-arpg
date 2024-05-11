@@ -34,8 +34,7 @@ void Cursor::getMouseRayCollision()
                 hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
             }
         }
-        if (dOnCollisionHitEvent) dOnCollisionHitEvent();
-        
+        onCollisionHitEvent.publish();
     }
 }
 

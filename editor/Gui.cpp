@@ -28,11 +28,11 @@ void GUI::Draw(const std::string& mode, Cursor* cursor)
     GuiGroupBox((Rectangle){ 0 + modifier, 8, 184, 40 }, NULL);
     if(GuiButton((Rectangle){ 8 + modifier, 8, 24, 24 }, "#002#"))
     {
-        if (saveButtonPressed) saveButtonPressed();
+        saveButtonPressed.publish();
     }
     if (GuiButton((Rectangle){ 40 + modifier, 8, 24, 24 }, "#001#"))
     {
-        if (loadButtonPressed) loadButtonPressed();
+        loadButtonPressed.publish();
     }
 
     for (auto& window : windows)
@@ -97,7 +97,10 @@ GUI::GUI(Settings* _settings, UserInput* _userInput, Camera* _camera) :
     // TODO: Create tool: rotate, move, scale
     screenSize = { static_cast<float>(settings->SCREEN_WIDTH), 
                    static_cast<float>(settings->SCREEN_HEIGHT) };
-    _userInput->dOnWindowUpdate.connect<&GUI::onWindowResize>(this);
+    {
+        entt::sink windowUpdate{_userInput->onWindowUpdate};
+        windowUpdate.connect<&GUI::onWindowResize>(this);
+    }
     toolbox = std::make_unique<FloatingWindow>(FloatingWindow({ 10, 135 },
                                                               { 200, 400 },
                                                               { 140, 320 },
@@ -113,19 +116,29 @@ GUI::GUI(Settings* _settings, UserInput* _userInput, Camera* _camera) :
     windows.push_back(toolbox.get());
     windows.push_back(objectprops.get());
     windows.push_back(toolprops.get());
-    
-    toolbox->dOnWindowHover.connect<&Camera::ScrollDisable>(camera);
-    toolbox->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
-    objectprops->dOnWindowHover.connect<&Camera::ScrollDisable>(camera);
-    objectprops->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
-    toolprops->dOnWindowHover.connect<&Camera::ScrollDisable>(camera);
-    toolprops->dOnWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
-
-    toolbox->dOnWindowHover.connect<&GUI::MarkGUIActive>(this);
-    toolbox->dOnWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
-    objectprops->dOnWindowHover.connect<&GUI::MarkGUIActive>(this);
-    objectprops->dOnWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
-    toolprops->dOnWindowHover.connect<&GUI::MarkGUIActive>(this);
-    toolprops->dOnWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+    {
+        entt::sink onWindowHover{toolbox->onWindowHover};
+        entt::sink onWindowHoverStop{toolbox->onWindowHoverStop};
+        onWindowHover.connect<&GUI::MarkGUIActive>(this);
+        onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+        onWindowHover.connect<&Camera::ScrollDisable>(camera);
+        onWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
+    }
+    {
+        entt::sink onWindowHover{objectprops->onWindowHover};
+        entt::sink onWindowHoverStop{objectprops->onWindowHoverStop};
+        onWindowHover.connect<&GUI::MarkGUIActive>(this);
+        onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+        onWindowHover.connect<&Camera::ScrollDisable>(camera);
+        onWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
+    }
+    {
+        entt::sink onWindowHover{toolprops->onWindowHover};
+        entt::sink onWindowHoverStop{toolprops->onWindowHoverStop};
+        onWindowHover.connect<&GUI::MarkGUIActive>(this);
+        onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+        onWindowHover.connect<&Camera::ScrollDisable>(camera);
+        onWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
+    }
 }
 } // sage

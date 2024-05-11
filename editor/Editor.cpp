@@ -25,13 +25,19 @@ void Editor::initEditorScene()
 {
     auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
     scene = std::make_unique<EditorScene>(registry.get(), std::move(data));
-    scene->data->userInput->dKeyRPressed.connect<&Editor::enablePlayMode>(this);
+    {
+        entt::sink keyRPressed{scene->data->userInput->keyRPressed};
+        keyRPressed.connect<&Editor::enablePlayMode>(this);
+    }
 }
 
 void Editor::initGameScene()
 {
     auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
-    data->userInput->dKeyRPressed.connect<&Editor::enableEditMode>(this);
+    {
+        entt::sink keyRPressed{scene->data->userInput->keyRPressed};
+        keyRPressed.connect<&Editor::enableEditMode>(this);
+    }
     scene = std::make_unique<ExampleScene>(registry.get(), std::move(data));
 }
 

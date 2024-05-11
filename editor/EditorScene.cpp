@@ -143,16 +143,42 @@ void EditorScene::Draw2D()
 EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
     Scene(_registry, std::move(_data)), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))
 {
-    data->userInput->dOnClickEvent.connect<&EditorScene::OnCursorClick>(this);
-    data->cursor->dOnCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
-    data->userInput->dKeyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
-    data->userInput->dKeyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
-    data->userInput->dKeyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
-    data->userInput->dKeyMPressed.connect<&EditorScene::OnSerializeSave>(this);
-    data->userInput->dKeyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
-
-    gui->saveButtonPressed.connect<&EditorScene::OnSerializeSave>(this);
-    gui->loadButtonPressed.connect<&EditorScene::OnSerializeLoad>(this);
+    {
+        entt::sink onClickEvent{data->userInput->onClickEvent};
+        onClickEvent.connect<&EditorScene::OnCursorClick>(this);
+    }
+    {
+        entt::sink onCollisionHitEvent{data->cursor->onCollisionHitEvent};
+        onCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
+    }
+    {
+        entt::sink keyDeletePressed{data->userInput->keyDeletePressed};
+        keyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
+    }
+    {
+        entt::sink keyPPressed{data->userInput->keyPPressed};
+        keyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
+    }
+    {
+        entt::sink keyGPressed{data->userInput->keyGPressed};
+        keyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
+    }
+    {
+        entt::sink keyMPressed{data->userInput->keyMPressed};
+        keyMPressed.connect<&EditorScene::OnSerializeSave>(this);
+    }
+    {
+        entt::sink keyNPressed{data->userInput->keyNPressed};
+        keyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
+    }
+    {
+        entt::sink saveButton{gui->saveButtonPressed};
+        saveButton.connect<&EditorScene::OnSerializeSave>(this);
+    }
+    {
+        entt::sink loadButton{gui->loadButtonPressed};
+        loadButton.connect<&EditorScene::OnSerializeLoad>(this);
+    }
 
     BoundingBox bb = {
         .min = (Vector3){ -100.0f, 0.1f, -100.0f },

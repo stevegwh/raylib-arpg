@@ -32,8 +32,8 @@ class GUI
     static void drawDebugCollisionText(Cursor* cursor);
 public:
     bool active = false;
-    entt::delegate<void()> saveButtonPressed{};
-    entt::delegate<void()> loadButtonPressed{};
+    entt::sigh<void()> saveButtonPressed;
+    entt::sigh<void()> loadButtonPressed;
     void Update();
     void Draw(const std::string& mode, Cursor* cursor);
     GUI(Settings* _settings, UserInput* _userInput, Camera* camera);
