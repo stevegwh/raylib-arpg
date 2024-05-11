@@ -20,6 +20,7 @@ namespace sage
 
 std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray) const
 {
+    // TODO: You can define component groups with entt. Do this for collisions based on their layers.
     std::vector<CollisionInfo> collisions;
     
     auto view = registry->view<Collideable>();

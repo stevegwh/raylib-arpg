@@ -32,15 +32,5 @@ namespace sage
         {
             return typeid(ComponentName).name();
         }
-        
-        void SerializeComponents(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>>& serializeData) const
-        {
-            
-//            for (const auto& c : components)
-//            {
-//                if (!Registry::GetInstance().GetEntity(c.first)->serializable) continue;
-//                serializeData[std::to_string(c.first)][getComponentName()] = c.second->Serialize();
-//            }
-        }
     };
 }

@@ -39,7 +39,7 @@ public:
     std::string hitObjectName{};
     RayCollision collision {0};
     CollisionInfo rayCollisionResultInfo;
-    entt::sigh<void()> onCollisionHitEvent{};
+    entt::sigh<void(entt::entity)> onCollisionHitEvent{}; // Returns the hit entity
 
     Cursor(entt::registry* registry,
            sage::CollisionSystem* _collisionSystem,

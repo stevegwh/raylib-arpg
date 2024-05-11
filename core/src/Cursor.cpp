@@ -12,6 +12,7 @@
 
 namespace sage
 {
+
 void Cursor::getMouseRayCollision()
 {
     // Display information about closest hit
@@ -26,58 +27,57 @@ void Cursor::getMouseRayCollision()
     auto collisions = collisionSystem->GetCollisionsWithRay(ray);
     if (collisions.empty())
     {
-        CollisionInfo tmp;
-        rayCollisionResultInfo = tmp;
-    }
-    else
-    {
-        rayCollisionResultInfo = collisionSystem->GetCollisionsWithRay(ray).at(0);
+        CollisionInfo empty{};
+        rayCollisionResultInfo = empty;
+        return;
     }
 
-    if (rayCollisionResultInfo.rlCollision.hit)
-    {
-        auto layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
-        if (layer == FLOOR) // TODO: I was expecting this to be "NAVIGATION" not "FLOOR"
-        {
-            currentTex = &movetex;
-            if ((rayCollisionResultInfo.rlCollision.distance < collision.distance))
-            {
-                collision = rayCollisionResultInfo.rlCollision;
-                if (registry->valid(rayCollisionResultInfo.collidedEntityId))
-                {
-                    if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
-                    {
-                        hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
-                    }
-                }
-                onCollisionHitEvent.publish(); // TODO: rename the event to something descriptive (onNavigationLayerHit?)
-            }
-        }
-        else if (layer == BUILDING)
-        {
-            currentTex = &invalidmovetex;
-            if ((rayCollisionResultInfo.rlCollision.distance < collision.distance))
-            {
-                collision = rayCollisionResultInfo.rlCollision;
-                if (registry->valid(rayCollisionResultInfo.collidedEntityId))
-                {
-                    if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
-                    {
-                        hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
-                    }
-                }
-                onCollisionHitEvent.publish(); // TODO: rename the event to something descriptive (onNavigationLayerHit?)
-            }
-        }
-        else if (layer == NPC)
-        {
-            currentTex = &talktex;
-        }
-        else
-        {
-            currentTex = &regulartex;
-        }
+    // Collision hit
+    rayCollisionResultInfo = collisions.at(0); // Closest collision
+    collision = rayCollisionResultInfo.rlCollision;
+    onCollisionHitEvent.publish(rayCollisionResultInfo.collidedEntityId);
+    currentTex = &regulartex;
+    currentColor = defaultColor;
 
+    auto layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
+    if (layer == FLOOR) // TODO: I was expecting this to be "NAVIGATION" not "FLOOR"
+    {
+        currentColor = hoverColor;
+        currentTex = &movetex;
+        Vector2 tmp;
+        if (navigationGridSystem->WorldToGridSpace(collision.point,
+                                                   tmp)) // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as bounds.)
+        {
+            if (registry->any_of<Actor>(controlledActor))
+            {
+                const auto &actor = registry->get<Actor>(controlledActor);
+                Vector2 minRange;
+                Vector2 maxRange;
+                navigationGridSystem->GetPathfindRange(controlledActor,
+                                                       actor.pathfindingBounds,
+                                                       minRange,
+                                                       maxRange);
+                if (!navigationGridSystem->WorldToGridSpace(collision.point, tmp, minRange, maxRange)) // Out of player's movement range
+                {
+                    currentColor = invalidColor;
+                    currentTex = &invalidmovetex;
+                }
+            }
+        }
+    }
+    else if (layer == BUILDING)
+    {
+        currentTex = &invalidmovetex;
+        currentColor = invalidColor;
+        if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
+        {
+            hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
+        }
+    }
+    else if (layer == NPC)
+    {
+        currentTex = &talktex;
+        currentColor = invalidColor;
     }
 }
 
@@ -89,53 +89,25 @@ void Cursor::Update()
 
 void Cursor::Draw3D()
 {
-    auto layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
-    if (collision.hit && layer == FLOOR) // TODO: States would be much cleaner
+    if (!collision.hit)
     {
-        {
-            Vector2 tmp;
-            if (navigationGridSystem->WorldToGridSpace(collision.point, tmp)) // Out of map bounds
-            {
-                currentColor = hoverColor;
-                currentTex = &movetex;
-                if (registry->any_of<Actor>(controlledActor)) // Out of player bounds
-                {
-                    const auto& actor = registry->get<Actor>(controlledActor);
-                    Vector2 minRange;
-                    Vector2 maxRange;
-                    navigationGridSystem->GetPathfindRange(controlledActor, actor.pathfindingBounds, minRange, maxRange);
-                    Vector2 tmp;
-                    if (!navigationGridSystem->WorldToGridSpace(collision.point, tmp, minRange, maxRange))
-                    {
-                        currentColor = RED;
-                        currentTex = &invalidmovetex;
-                    }
-                }
-            }
-            else 
-            {
-                currentColor = RED;
-                currentTex = &invalidmovetex;
-            }
-        }
-        DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
-        //DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
-//        Vector3 normalEnd;
-//        normalEnd.x = collision.point.x + collision.normal.x;
-//        normalEnd.y = collision.point.y + collision.normal.y;
-//        normalEnd.z = collision.point.z + collision.normal.z;
-        //DrawLine3D(collision.point, normalEnd, RED);
+        currentTex = &regulartex;
+        currentColor = defaultColor;
+        return;
     }
-    else
-    {
-        DrawCube(collision.point, 0.3f, 0.3f, 0.3f, defaultColor);
-        DrawCubeWires(collision.point, 0.3f, 0.3f, 0.3f, RED);
-    }
+
+    DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
 }
 
 void Cursor::Draw2D()
 {
-    DrawTextureEx(*currentTex, position, 0.0, 1.0f, WHITE);
+    Vector2 pos = position;
+    if (currentTex != &regulartex)
+    {
+        pos = Vector2Subtract(position,
+                              {static_cast<float>(currentTex->width/2),static_cast<float>(currentTex->height/2)});
+    }
+    DrawTextureEx(*currentTex, pos, 0.0,1.0f,WHITE);
 }
 
 void Cursor::OnControlledActorChange(entt::entity entity)

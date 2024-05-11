@@ -39,7 +39,7 @@ class EditorScene : public Scene
     
     // Event responses
     void OnCursorClick();
-    void OnCollisionHit();
+    void OnCollisionHit(entt::entity entity);
     void OnSerializeSave();
     void OnSerializeLoad();
     void OnDeleteModeKeyPressed();

@@ -92,15 +92,11 @@ void EditorScene::OnGenGridKeyPressed()
     data->navigationGridSystem->PopulateGrid();
 }
 
-void EditorScene::OnCollisionHit()
+void EditorScene::OnCollisionHit(entt::entity entity)
 {
     if (gui->focused) return;
     // Draw the mesh bbox if we hit it
-    if (data->cursor->rayCollisionResultInfo.rlCollision.hit && registry->valid(data->cursor->rayCollisionResultInfo.collidedEntityId))
-    {
-        const auto& col = registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId);
-        boundingBoxHighlight = data->cursor->rayCollisionResultInfo.collidedEntityId;
-    }
+    boundingBoxHighlight = entity;
 }
 
 void EditorScene::Draw3D()
