@@ -15,11 +15,13 @@ namespace sage
 
 void Cursor::getMouseRayCollision()
 {
-    // Display information about closest hit
+    // Display information about the closest hit
     collision = {};
     hitObjectName = "None";
     collision.distance = FLT_MAX;
     collision.hit = false;
+    currentTex = &regulartex;
+    currentColor = defaultColor;
 
     // Get ray and test against objects
     ray = GetMouseRay(GetMousePosition(), *sCamera->getRaylibCam());
@@ -35,12 +37,10 @@ void Cursor::getMouseRayCollision()
     // Collision hit
     rayCollisionResultInfo = collisions.at(0); // Closest collision
     collision = rayCollisionResultInfo.rlCollision;
-    onCollisionHitEvent.publish(rayCollisionResultInfo.collidedEntityId);
-    currentTex = &regulartex;
-    currentColor = defaultColor;
+    onCollisionHit.publish(rayCollisionResultInfo.collidedEntityId);
 
     auto layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
-    if (layer == FLOOR) // TODO: I was expecting this to be "NAVIGATION" not "FLOOR"
+    if (layer == CollisionLayer::FLOOR) // TODO: I was expecting this to be "NAVIGATION" not "FLOOR"
     {
         currentColor = hoverColor;
         currentTex = &movetex;
@@ -65,7 +65,7 @@ void Cursor::getMouseRayCollision()
             }
         }
     }
-    else if (layer == BUILDING)
+    else if (layer == CollisionLayer::BUILDING)
     {
         currentTex = &invalidmovetex;
         currentColor = invalidColor;
@@ -74,10 +74,11 @@ void Cursor::getMouseRayCollision()
             hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
         }
     }
-    else if (layer == NPC)
+    else if (layer == CollisionLayer::NPC)
     {
         currentTex = &talktex;
         currentColor = invalidColor;
+        onNPCClick.publish(rayCollisionResultInfo.collidedEntityId);
     }
 }
 
@@ -89,13 +90,7 @@ void Cursor::Update()
 
 void Cursor::Draw3D()
 {
-    if (!collision.hit)
-    {
-        currentTex = &regulartex;
-        currentColor = defaultColor;
-        return;
-    }
-
+    if (!collision.hit) return;
     DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
 }
 

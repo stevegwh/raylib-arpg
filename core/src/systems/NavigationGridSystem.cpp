@@ -245,7 +245,7 @@ void NavigationGridSystem::PopulateGrid()
     for (const auto& ent : view)
     {
         const auto& bb = view.get<Collideable>(ent);
-        if (bb.collisionLayer != BUILDING) continue;
+        if (bb.collisionLayer != CollisionLayer::BUILDING) continue;
 
         // Get the grid indices for the bounding box
         Vector2 topLeftIndex;

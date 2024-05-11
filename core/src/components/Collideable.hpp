@@ -11,7 +11,7 @@
 namespace sage
 {
 
-enum CollisionLayer
+enum class CollisionLayer
 {
     DEFAULT,
     FLOOR,
@@ -32,7 +32,7 @@ struct Collideable
 {
     BoundingBox localBoundingBox{}; // BoundingBox in local space
     BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb * world mat)
-    CollisionLayer collisionLayer = DEFAULT;
+    CollisionLayer collisionLayer = CollisionLayer::DEFAULT;
 
     explicit Collideable(BoundingBox _boundingBox);
     Collideable() = default;

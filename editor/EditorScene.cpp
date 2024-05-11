@@ -33,9 +33,9 @@ void EditorScene::OnCursorClick()
     {
         switch (registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
         {
-        case DEFAULT:
+            case CollisionLayer::DEFAULT:
             break;
-        case FLOOR:
+        case CollisionLayer::FLOOR:
             if (currentEditorMode == CREATE)
             {
                 GameObjectFactory::createBuilding(registry, data.get(), data->cursor->collision.point,
@@ -50,7 +50,7 @@ void EditorScene::OnCursorClick()
                 currentEditorMode = IDLE;
             }
             break;
-        case BUILDING:
+        case CollisionLayer::BUILDING:
             currentEditorMode = SELECT;
             selectedObject = data->cursor->rayCollisionResultInfo.collidedEntityId;
             break;
@@ -139,7 +139,7 @@ EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _d
         onClickEvent.connect<&EditorScene::OnCursorClick>(this);
     }
     {
-        entt::sink onCollisionHitEvent{data->cursor->onCollisionHitEvent};
+        entt::sink onCollisionHitEvent{data->cursor->onCollisionHit};
         onCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
     }
     {

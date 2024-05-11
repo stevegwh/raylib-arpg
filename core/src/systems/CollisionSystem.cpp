@@ -27,7 +27,7 @@ std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray)
 
     view.each([&collisions, ray](auto entity, const auto& c)
     {
-        if (c.collisionLayer != NAVIGATION) // TODO: Need to define a collision matrix
+        if (c.collisionLayer != CollisionLayer::NAVIGATION) // TODO: Need to define a collision matrix
         {
             auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
             if (col.hit)
@@ -87,54 +87,20 @@ bool CollisionSystem::CheckBoxCollision(const BoundingBox& col1, const BoundingB
     return CheckCollisionBoxes(col1, col2);
 }
 
-bool CollisionSystem::checkCollisionMatrix(const CollisionLayer& layer1, const CollisionLayer& layer2)
-{
-    const auto& layerMatrix = collisionMatrix.at(layer1);
-    return std::find(layerMatrix.begin(), layerMatrix.end(), layer2) != layerMatrix.end();
-}
-
 bool CollisionSystem::GetFirstCollision(entt::entity entity)
 {
     const auto& targetCol = registry->get<Collideable>(entity);
 
     auto view = registry->view<Collideable>();
 
-    for (const auto& ent: view) 
+    for (const auto& ent: view)
     {
         const auto& c = view.get<Collideable>(ent);
-        if (c.collisionLayer != BUILDING) continue; // TODO: Wanted to query a collision matrix but is far too slow
+        if (c.collisionLayer != CollisionLayer::BUILDING) continue; // TODO: Wanted to query a collision matrix but is far too slow
         bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
         if (colHit) return true;
     }
     return false;
-}
-
-std::vector<CollisionInfo> CollisionSystem::GetCollisions(entt::entity entity)
-{
-    std::vector<CollisionInfo> collisions;
-    
-    const Collideable& targetCol = registry->get<Collideable>(entity);
-    auto view = registry->view<Collideable>();
-
-    for (const auto& ent: view)
-    {
-        const auto& c = view.get<Collideable>(ent);
-        if (ent == entity) continue;
-        if (!checkCollisionMatrix(targetCol.collisionLayer, c.collisionLayer)) continue;
-        
-        bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
-        if (colHit)
-        {
-            CollisionInfo info = {
-                .collidedEntityId = ent,
-                .collidedBB = c.worldBoundingBox
-            };
-            
-            collisions.push_back(info);
-        }
-    }
-
-    return collisions;
 }
 
 CollisionSystem::CollisionSystem(entt::registry *_registry) :

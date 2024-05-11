@@ -12,6 +12,11 @@
 
 namespace sage
 {
+enum class CursorState {
+    DEFAULT,
+    NPC_HOVER,
+    BUILDING_HOVER
+};
 class Cursor
 {
     Texture2D* currentTex;
@@ -37,9 +42,11 @@ class Cursor
     void getMouseRayCollision();
 public:
     std::string hitObjectName{};
-    RayCollision collision {0};
+    RayCollision collision {};
     CollisionInfo rayCollisionResultInfo;
-    entt::sigh<void(entt::entity)> onCollisionHitEvent{}; // Returns the hit entity
+    entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
+    entt::sigh<void(entt::entity)> onNPCClick{};
+
 
     Cursor(entt::registry* registry,
            sage::CollisionSystem* _collisionSystem,

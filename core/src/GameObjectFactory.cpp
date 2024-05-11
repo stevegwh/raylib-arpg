@@ -56,7 +56,7 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
 
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
-    collideable.collisionLayer = NPC;
+    collideable.collisionLayer = CollisionLayer::NPC;
     game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
     {
         entt::sink sink{transform.onPositionUpdate};
@@ -115,7 +115,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     
     BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
     auto& collideable = registry->emplace<Collideable>(id, bb);
-    collideable.collisionLayer = PLAYER;
+    collideable.collisionLayer = CollisionLayer::PLAYER;
     game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
     {
         entt::sink sink{transform.onPositionUpdate};
@@ -143,7 +143,7 @@ void GameObjectFactory::createBuilding(entt::registry* registry, GameData* data,
     auto& renderable = registry->emplace<Renderable>(id, model, mat, modelPath, MatrixIdentity());
     renderable.name = name;
     auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
-    collideable.collisionLayer = BUILDING;
+    collideable.collisionLayer = CollisionLayer::BUILDING;
     data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
     registry->emplace<WorldObject>(id);
 }
@@ -183,6 +183,6 @@ void GameObjectFactory::createFloor(entt::registry *registry, sage::Scene *scene
 {
     entt::entity floor = registry->create();
     auto& floorCollidable = registry->emplace<Collideable>(floor, bb);
-    floorCollidable.collisionLayer = FLOOR;
+    floorCollidable.collisionLayer = CollisionLayer::FLOOR;
 }
 } // sage

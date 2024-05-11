@@ -42,7 +42,7 @@ void ActorMovementSystem::onCursorClick()
     {
         switch (registry->get<Collideable>(cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
         {
-        case FLOOR:
+        case CollisionLayer::FLOOR:
             PathfindToLocation(controlledActorId);
             //MoveToLocation(controlledActorId);
         }
