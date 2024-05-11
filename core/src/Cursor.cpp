@@ -6,7 +6,10 @@
 #include "components/Renderable.hpp"
 #include "components/Actor.hpp"
 
-//#define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
+#ifndef WIN32
+#define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
+#endif
+
 namespace sage
 {
 void Cursor::getMouseRayCollision()
@@ -152,7 +155,7 @@ Cursor::Cursor(entt::registry* _registry,
     regulartex = LoadTexture("resources/textures/cursor/32/regular.png");
     talktex = LoadTexture("resources/textures/cursor/32/talk.png");
     movetex = LoadTexture("resources/textures/cursor/32/move.png");
-    invalidmovetex = LoadTexture("resources/textures/cursor/32/deniedred.png");
+    invalidmovetex = LoadTexture("resources/textures/cursor/32/denied.png");
     currentTex = &regulartex;
 }
 }

@@ -14,12 +14,11 @@ void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std
 {
     auto& transform = registry->get<Transform>(entityId);
     // Prune existing move commands
-    // TODO: improve
     for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
     {
         if (it->second == &transform)
         {
-            moveTowardsTransforms.erase(it);
+            it = moveTowardsTransforms.erase(it);
             continue;
         }
         ++it;
@@ -50,8 +49,8 @@ void TransformSystem::Update()
             transform->targets.pop();
             if (transform->targets.empty())
             {
-                it = moveTowardsTransforms.erase(it);
                 transform->onFinishMovement.publish(it->first);
+                it = moveTowardsTransforms.erase(it);
                 continue;
             }
             transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
