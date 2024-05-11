@@ -30,8 +30,9 @@ void DialogueSystem::startConversation(entt::entity actor)
     float angle = atan2f(direction.x, direction.z);
     actorTrans.rotation.y = RAD2DEG * angle;
 
-    camera->CutscenePose(actorTrans);
+    camera->CutscenePose(npcTrans);
     camera->LockInput();
+    cursor->LockContext();
 
 
     {
@@ -56,7 +57,7 @@ void DialogueSystem::onNPCClicked(entt::entity _clickedNPC)
 }
 
 DialogueSystem::DialogueSystem(entt::registry *registry, Cursor* _cursor, Camera* _camera, ActorMovementSystem* _actorMovementSystem) :
-BaseSystem(registry), camera(_camera), actorMovementSystem(_actorMovementSystem)
+BaseSystem(registry), cursor(_cursor), camera(_camera), actorMovementSystem(_actorMovementSystem)
 {
     {
         entt::sink sink{_actorMovementSystem->onControlledActorChange};

@@ -21,6 +21,7 @@ class DialogueSystem : public BaseSystem<Dialogue>
     entt::entity clickedNPC;
     ActorMovementSystem* actorMovementSystem;
     TransformSystem* transformSystem;
+    Cursor* cursor;
     Camera* camera;
     void onNPCClicked(entt::entity clickedNPC);
     void onControlledActorChange(entt::entity entity);

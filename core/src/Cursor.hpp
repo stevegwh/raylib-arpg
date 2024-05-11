@@ -33,6 +33,8 @@ class Cursor
     Color invalidColor = RED;
     Color currentColor = WHITE;
 
+    bool lockContext = false;
+
     entt::entity controlledActor;
     
     sage::CollisionSystem* collisionSystem;
@@ -58,6 +60,8 @@ public:
     void Draw3D();
     void Draw2D();
     void OnControlledActorChange(entt::entity entity);
+    void LockContext();
+    void UnlockContext();
 };
 }
 

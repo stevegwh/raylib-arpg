@@ -25,6 +25,16 @@ void Cursor::onMouseClick()
     }
 }
 
+void Cursor::LockContext()
+{
+    lockContext = true;
+}
+
+void Cursor::UnlockContext()
+{
+    lockContext = false;
+}
+
 void Cursor::getMouseRayCollision()
 {
     // Display information about the closest hit
@@ -102,7 +112,10 @@ void Cursor::Update()
 void Cursor::Draw3D()
 {
     if (!collision.hit) return;
-    DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
+    if (!lockContext)
+    {
+        DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
+    }
 }
 
 void Cursor::Draw2D()
