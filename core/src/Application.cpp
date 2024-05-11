@@ -31,6 +31,7 @@ Application::~Application()
 void Application::init()
 {
     InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     scene = std::make_unique<ExampleScene>(registry.get(), std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get()));
     HideCursor();
 }

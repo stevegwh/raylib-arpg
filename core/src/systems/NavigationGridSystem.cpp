@@ -131,9 +131,10 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
 
             
             // Store grid square in the 2D array
-            auto& gridSquare = registry->emplace<NavigationGridSquare>(id, 
-                                                                       (Vector2){ .x = static_cast<float>(i + halfSlices),
-                                                                                  .y = static_cast<float>(j + halfSlices)},
+
+            auto& gridSquare = registry->emplace<NavigationGridSquare>(id,
+                                                                       Vector2{ .x = static_cast<float>(i + halfSlices),
+                                                                         .y = static_cast<float>(j + halfSlices)},
                                                                         v1,
                                                                         v3,
                                                                         calculateGridsquareCentre(v1, v3));

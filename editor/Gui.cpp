@@ -25,12 +25,12 @@ void GUI::MarkGUIInactive()
 void GUI::Draw(const std::string& mode, Cursor* cursor)
 {
     float modifier = 100;
-    GuiGroupBox((Rectangle){ 0 + modifier, 8, 184, 40 }, NULL);
-    if(GuiButton((Rectangle){ 8 + modifier, 8, 24, 24 }, "#002#"))
+    GuiGroupBox({ 0 + modifier, 8, 184, 40 }, NULL);
+    if(GuiButton({ 8 + modifier, 8, 24, 24 }, "#002#"))
     {
         saveButtonPressed.publish();
     }
-    if (GuiButton((Rectangle){ 40 + modifier, 8, 24, 24 }, "#001#"))
+    if (GuiButton({ 40 + modifier, 8, 24, 24 }, "#001#"))
     {
         loadButtonPressed.publish();
     }

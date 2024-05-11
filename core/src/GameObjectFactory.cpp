@@ -169,8 +169,8 @@ void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene)
     
     // Create floor
     BoundingBox modelBB = GetModelBoundingBox(renderable.model);
-    Vector3 g0 = (Vector3){ modelBB.min.x, 0.1f, modelBB.min.z };
-    Vector3 g2 = (Vector3){  modelBB.max.x, 0.1f,  modelBB.max.z };
+    Vector3 g0 = { modelBB.min.x, 0.1f, modelBB.min.z };
+    Vector3 g2 = { modelBB.max.x, 0.1f,  modelBB.max.z };
     BoundingBox bb = {
         .min = g0,
         .max = g2

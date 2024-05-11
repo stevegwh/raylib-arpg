@@ -6,7 +6,7 @@
 #include "components/Renderable.hpp"
 #include "components/Actor.hpp"
 
-#define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
+//#define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 namespace sage
 {
 void Cursor::getMouseRayCollision()
@@ -21,8 +21,15 @@ void Cursor::getMouseRayCollision()
     ray = GetMouseRay(GetMousePosition(), *sCamera->getRaylibCam());
 
     auto collisions = collisionSystem->GetCollisionsWithRay(ray);
-    rayCollisionResultInfo = collisions.empty() ? (CollisionInfo){{}, {}} : collisionSystem
-        ->GetCollisionsWithRay(ray).at(0);
+    if (collisions.empty())
+    {
+        CollisionInfo tmp;
+        rayCollisionResultInfo = tmp;
+    }
+    else
+    {
+        rayCollisionResultInfo = collisionSystem->GetCollisionsWithRay(ray).at(0);
+    }
 
     if (rayCollisionResultInfo.rlCollision.hit)
     {
@@ -45,6 +52,7 @@ void Cursor::getMouseRayCollision()
         }
         else if (layer == BUILDING)
         {
+            currentTex = &invalidmovetex;
             if ((rayCollisionResultInfo.rlCollision.distance < collision.distance))
             {
                 collision = rayCollisionResultInfo.rlCollision;
@@ -72,7 +80,7 @@ void Cursor::getMouseRayCollision()
 
 void Cursor::Update()
 {
-    position = (Vector2){ .x = GetMousePosition().x, .y = GetMousePosition().y };
+    position = { .x = GetMousePosition().x, .y = GetMousePosition().y };
     getMouseRayCollision();
 }
 
@@ -124,7 +132,7 @@ void Cursor::Draw3D()
 
 void Cursor::Draw2D()
 {
-    DrawTextureEx(*currentTex, position, 0.0, 0.6f, WHITE);
+    DrawTextureEx(*currentTex, position, 0.0, 0.75f, WHITE);
 }
 
 void Cursor::OnControlledActorChange(entt::entity entity)

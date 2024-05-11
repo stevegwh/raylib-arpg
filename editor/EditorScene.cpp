@@ -176,8 +176,8 @@ EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _d
     }
 
     BoundingBox bb = {
-        .min = (Vector3){ -100.0f, 0.1f, -100.0f },
-        .max = (Vector3){  100.0f, 0.1f,  100.0f }
+        .min = { -100.0f, 0.1f, -100.0f },
+        .max = {  100.0f, 0.1f,  100.0f }
     };
     GameObjectFactory::createFloor(registry, this, bb);
 

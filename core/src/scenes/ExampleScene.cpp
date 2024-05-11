@@ -24,7 +24,7 @@ ExampleScene::~ExampleScene()
 ExampleScene::ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
 Scene(_registry, std::move(_data))
 {
-    lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
+    lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, { 0, 25, 0 }, Vector3Zero(), WHITE, lightSubSystem->shader);
     auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {20.0f, 0, 20.0f}, "Player");
     
     auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
@@ -32,8 +32,8 @@ Scene(_registry, std::move(_data))
     data->Load();
     
     BoundingBox bb = {
-        .min = (Vector3){ -1000.0f, 0.1f, -1000.0f },
-        .max = (Vector3){  1000.0f, 0.1f,  1000.0f }
+        .min = { -1000.0f, 0.1f, -1000.0f },
+        .max = {  1000.0f, 0.1f,  1000.0f }
     };
     GameObjectFactory::createFloor(registry, this, bb);
     //GameObjectFactory::loadBlenderLevel(registry, this);
