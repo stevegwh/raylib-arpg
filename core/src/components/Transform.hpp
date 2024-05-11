@@ -12,6 +12,7 @@
 
 namespace sage
 {
+
 struct Transform
 {
     Vector3 position{};
@@ -49,9 +50,10 @@ struct Transform
                 scale);
     }
 
-    entt::delegate<void(entt::entity)> dOnPositionUpdate{};
-    entt::delegate<void(entt::entity)> dOnStartMovement{};
-    entt::delegate<void(entt::entity)> dOnFinishMovement{};
+    entt::sigh<void(entt::entity)> onPositionUpdate{};
+    entt::sigh<void(entt::entity)> onStartMovement{};
+    entt::sigh<void(entt::entity)> onFinishMovement{};
+    
 
     [[nodiscard]] Matrix GetMatrixNoRot() const;
     [[nodiscard]] Matrix GetMatrix() const;

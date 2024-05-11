@@ -58,11 +58,12 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = PLAYER;
     game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
-
-    transform.dOnPositionUpdate.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
-        collisionSystem.OnTransformUpdate(entity);
-    }>(*game->collisionSystem);
-
+    {
+        entt::sink sink{transform.onPositionUpdate};
+        sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
+            collisionSystem.OnTransformUpdate(entity);
+        }>(*game->collisionSystem);
+    }
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;
 }
@@ -82,24 +83,31 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     
     // Set animation hooks
     auto& animation = registry->emplace<Animation>(id, modelPath, &model);
-    transform.dOnFinishMovement.connect<[](Animation& animation, entt::entity entity) {
-        animation.ChangeAnimation(0);
-    }>(animation);
-    transform.dOnStartMovement.connect<[](Animation& animation, entt::entity entity) {
-        animation.ChangeAnimation(1);
-    }>(animation);
-    
-    // TODO
-//    game->userInput->dKeyIPressed.connect<[](Animation& animation) { // TODO: Just to test animations on demand
-//        if (animation.animIndex == 0)
-//        {
-//            animation.ChangeAnimation(2);
-//        }
-//        else if (animation.animIndex == 2)
-//        {
-//            animation.ChangeAnimation(0);
-//        }
-//    }>(animation);
+    {
+        entt::sink sink{transform.onFinishMovement};
+        sink.connect<[](Animation& animation, entt::entity entity) {
+            animation.ChangeAnimation(0);
+        }>(animation);
+    }
+    {
+        entt::sink sink{transform.onStartMovement};
+        sink.connect<[](Animation& animation, entt::entity entity) {
+            animation.ChangeAnimation(1);
+        }>(animation);
+    }
+    {
+        entt::sink sink{game->userInput->keyIPressed};
+        sink.connect<[](Animation& animation) { // TODO: Just to test animations on demand
+            if (animation.animIndex == 0)
+            {
+                animation.ChangeAnimation(2);
+            }
+            else if (animation.animIndex == 2)
+            {
+                animation.ChangeAnimation(0);
+            }
+        }>(animation);
+    }
     
     Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
@@ -109,11 +117,10 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = PLAYER;
     game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
-
-    transform.dOnPositionUpdate.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
-        collisionSystem.OnTransformUpdate(entity);
-    }>(*game->collisionSystem);
-
+    {
+        entt::sink sink{transform.onPositionUpdate};
+        sink.connect<&CollisionSystem::OnTransformUpdate>(*game->collisionSystem);
+    }
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;
 }
