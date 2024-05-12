@@ -34,11 +34,11 @@ void DialogueSystem::startConversation(entt::entity entity)
     camera->CutscenePose(npcTrans);
     camera->LockInput();
     cursor->LockContext();
-
+    active = true;
     stopConversation(entity);
 }
 
-void DialogueSystem::stopConversation(entt::entity entity)
+void DialogueSystem::stopConversation(entt::entity entity) // Not the best name (isn't on stopping a conversation)
 {
     {
         auto& actorTrans = registry->get<Transform>(entity);
@@ -67,15 +67,29 @@ void DialogueSystem::onNPCClicked(entt::entity _clickedNPC)
     }
 }
 
+void DialogueSystem::Update()
+{
+    if (!active) return;
+
+}
+
+void DialogueSystem::Draw2D()
+{
+    if (!active) return;
+    window->Draw();
+}
+
 DialogueSystem::DialogueSystem(entt::registry *registry, 
                                Cursor* _cursor, 
-                               Camera* _camera, 
+                               Camera* _camera,
+                               Settings* _settings,
                                ActorMovementSystem* _actorMovementSystem) :
     BaseSystem(registry), 
     cursor(_cursor), 
     camera(_camera), 
     actorMovementSystem(_actorMovementSystem), 
-    clickedNPC(entt::null)
+    clickedNPC(entt::null),
+    window(std::make_unique<DialogueWindow>(_settings))
 {
     {
         entt::sink sink{_actorMovementSystem->onControlledActorChange};

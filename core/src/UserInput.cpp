@@ -21,10 +21,15 @@ void UserInput::toggleFullScreen() const
             ToggleFullscreen();
             onWindowUpdate.publish({ static_cast<float>(GetMonitorWidth(current_screen)),
                                      static_cast<float>(GetMonitorHeight(current_screen)) });
+            settings->SCREEN_WIDTH = static_cast<float>(GetMonitorWidth(current_screen));
+            settings->SCREEN_HEIGHT = static_cast<float>(GetMonitorHeight(current_screen));
+            // TODO: It would make more sense to change WIDTH/HEIGHT directly and store its original w/h elsewhere
         }
         else if (IsWindowFullscreen())
         {
             ToggleFullscreen();
+            settings->SCREEN_WIDTH = 1280; // tmp
+            settings->SCREEN_HEIGHT = 720; // tmp
             SetWindowSize(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT);
             onWindowUpdate.publish({ static_cast<float>(settings->SCREEN_WIDTH),
                                      static_cast<float>(settings->SCREEN_HEIGHT) });

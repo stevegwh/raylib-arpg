@@ -15,7 +15,7 @@
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
-#include "systems/DialogueSystem.hpp"
+#include "systems/dialogue/DialogueSystem.hpp"
 
 #include <memory>
 

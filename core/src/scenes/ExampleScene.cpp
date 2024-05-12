@@ -14,6 +14,13 @@ void ExampleScene::Update()
     Scene::Update();
     data->transformSystem->Update();
     data->animationSystem->Update();
+    data->dialogueSystem->Update();
+}
+
+void ExampleScene::Draw2D()
+{
+    Scene::Draw2D();
+    data->dialogueSystem->Draw2D();
 }
 
 ExampleScene::~ExampleScene()
