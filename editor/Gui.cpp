@@ -8,7 +8,6 @@
 
 #include "raygui.h"
 
-
 namespace sage::editor
 {
 
@@ -95,8 +94,8 @@ GUI::GUI(Settings* _settings, UserInput* _userInput, Camera* _camera) :
     // TODO: Resolution aware fonts
     // TODO: Toolbox (create mode) and toolbox properties
     // TODO: Create tool: rotate, move, scale
-    screenSize = { static_cast<float>(settings->SCREEN_WIDTH), 
-                   static_cast<float>(settings->SCREEN_HEIGHT) };
+    screenSize = { static_cast<float>(settings->screenWidth),
+                   static_cast<float>(settings->screenHeight) };
     {
         entt::sink windowUpdate{_userInput->onWindowUpdate};
         windowUpdate.connect<&GUI::onWindowResize>(this);
@@ -105,12 +104,12 @@ GUI::GUI(Settings* _settings, UserInput* _userInput, Camera* _camera) :
                                                               { 200, 400 },
                                                               { 140, 320 },
                                                               "Toolbox"));
-    objectprops = std::make_unique<FloatingWindow>(FloatingWindow({ static_cast<float>(settings->SCREEN_WIDTH - 200 - 10), 100 },
-                                                                  { 200,  static_cast<float>(settings->SCREEN_HEIGHT)/2 - 100 },
+    objectprops = std::make_unique<FloatingWindow>(FloatingWindow({ static_cast<float>(settings->screenWidth - 200 - 10), 100 },
+                                                                  { 200,  static_cast<float>(settings->screenHeight)/2 - 100 },
                                                                   { 140, 320 },
                                                                   "Object Properties"));
-    toolprops = std::make_unique<FloatingWindow>(FloatingWindow({ static_cast<float>(settings->SCREEN_WIDTH - 200 - 10), 100 +  static_cast<float>(settings->SCREEN_HEIGHT)/2 - 100},
-                                                              { 200,  static_cast<float>(settings->SCREEN_HEIGHT)/2 - 100 },
+    toolprops = std::make_unique<FloatingWindow>(FloatingWindow({ static_cast<float>(settings->screenWidth - 200 - 10), 100 +  static_cast<float>(settings->screenHeight)/2 - 100},
+                                                              { 200,  static_cast<float>(settings->screenHeight)/2 - 100 },
                                                               { 140, 320 },
                                                               "Tool Properties"));
     windows.push_back(toolbox.get());

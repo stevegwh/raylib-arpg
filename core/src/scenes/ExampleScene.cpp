@@ -19,8 +19,8 @@ void ExampleScene::Update()
 
 void ExampleScene::Draw2D()
 {
-    Scene::Draw2D();
     data->dialogueSystem->Draw2D();
+    Scene::Draw2D();
 }
 
 ExampleScene::~ExampleScene()

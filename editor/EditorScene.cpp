@@ -6,9 +6,6 @@
 #include "../core/src/GameObjectFactory.hpp"
 #include "raygui.h"
 
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-
 #include <iostream>
 
 namespace sage

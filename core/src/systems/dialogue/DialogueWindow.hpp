@@ -14,7 +14,7 @@ namespace sage
 class DialogueWindow
 {
     Settings* settings;
-    Vector2 windowPosition;
+    Vector2 windowPosition{};
     Vector2 contentSize;
 public:
     void Update();

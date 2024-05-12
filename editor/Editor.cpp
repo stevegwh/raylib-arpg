@@ -45,7 +45,7 @@ void Editor::initGameScene()
 
 void Editor::init()
 {
-    InitWindow(settings->SCREEN_WIDTH, settings->SCREEN_HEIGHT, "Baldur's Raylib");
+    InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     initEditorScene();
 }

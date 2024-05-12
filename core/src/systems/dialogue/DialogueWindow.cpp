@@ -3,6 +3,11 @@
 //
 
 #include "DialogueWindow.hpp"
+
+#ifndef RAYGUI_IMPLEMENTATION
+#define RAYGUI_IMPLEMENTATION
+#endif
+
 #include "raygui.h"
 
 namespace sage
@@ -13,8 +18,8 @@ void DialogueWindow::Update()
 }
 void DialogueWindow::Draw()
 {
-    GuiWindowBox({ static_cast<float>(settings->SCREEN_WIDTH) - contentSize.x,
-                   static_cast<float>(settings->SCREEN_HEIGHT) - contentSize.y, 
+    GuiWindowBox({ static_cast<float>(settings->screenWidth) - contentSize.x,
+                   static_cast<float>(settings->screenHeight) - contentSize.y,
                    contentSize.x, contentSize.y }, "#198# PORTABLE WINDOW");
 }
 
