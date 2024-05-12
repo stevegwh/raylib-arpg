@@ -25,6 +25,7 @@ class DialogueSystem : public BaseSystem<Dialogue>
     Camera* camera;
     void onNPCClicked(entt::entity clickedNPC);
     void onControlledActorChange(entt::entity entity);
+    void stopConversation(entt::entity entity);
     void startConversation(entt::entity actor);
 public:
     explicit DialogueSystem(entt::registry* registry, Cursor* _cursor, Camera* camera, ActorMovementSystem* _actorMovementSystem);

@@ -13,10 +13,11 @@ namespace sage
 void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path)
 {
     auto& transform = registry->get<Transform>(entityId);
+    
     // Prune existing move commands
+    transform.onMovementCancel.publish(entityId);
     for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
     {
-        // TODO: Make event on transform such as "OnMoveCancelled" and call it here
         if (it->second == &transform)
         {
             it = moveTowardsTransforms.erase(it);

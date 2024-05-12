@@ -16,11 +16,9 @@ namespace sage
 
 void Cursor::onMouseClick()
 {
-
     const auto& layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
     if (layer == CollisionLayer::NPC)
     {
-
         onNPCClick.publish(rayCollisionResultInfo.collidedEntityId);
     }
 }
