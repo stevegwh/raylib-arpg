@@ -43,6 +43,7 @@ class Cursor
     
     void getMouseRayCollision();
     void onMouseClick();
+    void changeCursors(CollisionLayer collisionLayer);
 public:
     std::string hitObjectName{};
     RayCollision collision {};
@@ -62,6 +63,7 @@ public:
     void OnControlledActorChange(entt::entity entity);
     void LockContext();
     void UnlockContext();
+    bool isValidMove();
 };
 }
 

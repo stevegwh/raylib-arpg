@@ -33,6 +33,70 @@ void Cursor::UnlockContext()
     lockContext = false;
 }
 
+bool Cursor::isValidMove()
+{
+    Vector2 tmp;
+    if (navigationGridSystem->WorldToGridSpace(collision.point,
+                                               tmp)) // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as bounds.)
+    {
+        if (registry->any_of<Actor>(controlledActor))
+        {
+            const auto &actor = registry->get<Actor>(controlledActor);
+            Vector2 minRange;
+            Vector2 maxRange;
+            navigationGridSystem->GetPathfindRange(controlledActor,
+                                                   actor.pathfindingBounds,
+                                                   minRange,
+                                                   maxRange);
+            if (!navigationGridSystem->WorldToGridSpace(collision.point, tmp, minRange, maxRange)) // Out of player's movement range
+            {
+                return false;
+            }
+        }
+    } 
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
+void Cursor::changeCursors(CollisionLayer layer)
+{
+    if (lockContext) return;
+
+    if (layer == CollisionLayer::FLOOR || layer == CollisionLayer::NAVIGATION)
+    {
+        if (isValidMove())
+        {
+            currentTex = &movetex;
+            currentColor = GREEN;
+        }
+        else
+        {
+            currentTex = &invalidmovetex;
+            currentColor = invalidColor;
+        }
+    }
+    else if (layer == CollisionLayer::BUILDING)
+    {
+        currentTex = &regulartex;
+        currentColor = invalidColor;
+        if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
+        {
+            hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
+        }
+    }
+    else if (layer == CollisionLayer::PLAYER)
+    {
+        currentTex = &regulartex;
+    }
+    else if (layer == CollisionLayer::NPC)
+    {
+        currentTex = &talktex;
+    }
+}
+
 void Cursor::getMouseRayCollision()
 {
     // Display information about the closest hit
@@ -60,45 +124,7 @@ void Cursor::getMouseRayCollision()
     onCollisionHit.publish(rayCollisionResultInfo.collidedEntityId);
 
     auto layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
-    if (layer == CollisionLayer::FLOOR) // TODO: I was expecting this to be "NAVIGATION" not "FLOOR"
-    {
-        currentColor = hoverColor;
-        currentTex = &movetex;
-        Vector2 tmp;
-        if (navigationGridSystem->WorldToGridSpace(collision.point,
-                                                   tmp)) // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as bounds.)
-        {
-            if (registry->any_of<Actor>(controlledActor))
-            {
-                const auto &actor = registry->get<Actor>(controlledActor);
-                Vector2 minRange;
-                Vector2 maxRange;
-                navigationGridSystem->GetPathfindRange(controlledActor,
-                                                       actor.pathfindingBounds,
-                                                       minRange,
-                                                       maxRange);
-                if (!navigationGridSystem->WorldToGridSpace(collision.point, tmp, minRange, maxRange)) // Out of player's movement range
-                {
-                    currentColor = invalidColor;
-                    currentTex = &invalidmovetex;
-                }
-            }
-        }
-    }
-    else if (layer == CollisionLayer::BUILDING)
-    {
-        currentTex = &invalidmovetex;
-        currentColor = invalidColor;
-        if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
-        {
-            hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
-        }
-    }
-    else if (layer == CollisionLayer::NPC)
-    {
-        currentTex = &talktex;
-        currentColor = invalidColor;
-    }
+    changeCursors(layer);
 }
 
 void Cursor::Update()
@@ -110,10 +136,8 @@ void Cursor::Update()
 void Cursor::Draw3D()
 {
     if (!collision.hit) return;
-    if (!lockContext)
-    {
-        DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
-    }
+    if (lockContext) return;
+    DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
 }
 
 void Cursor::Draw2D()
