@@ -21,14 +21,19 @@ void Cursor::onMouseClick()
     {
         onNPCClick.publish(rayCollisionResultInfo.collidedEntityId);
     }
+    else if (layer == CollisionLayer::FLOOR)
+    {
+        onFloorClick.publish(rayCollisionResultInfo.collidedEntityId);
+    }
+    onAnyClick.publish(rayCollisionResultInfo.collidedEntityId);
 }
 
-void Cursor::LockContext()
+void Cursor::LockCursor() // Lock mouse context? Like changing depending on collision.
 {
     lockContext = true;
 }
 
-void Cursor::UnlockContext()
+void Cursor::UnlockCursor()
 {
     lockContext = false;
 }
@@ -131,6 +136,10 @@ void Cursor::Update()
 {
     position = { .x = GetMousePosition().x, .y = GetMousePosition().y };
     getMouseRayCollision();
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        onMouseClick();
+    }
 }
 
 void Cursor::Draw3D()
@@ -164,17 +173,15 @@ Cursor::Cursor(entt::registry* _registry,
                 registry(_registry),
                 collisionSystem(_collisionSystem),
                 navigationGridSystem(_navigationGridSystem),
-                sCamera(_sCamera)
+                sCamera(_sCamera),
+                userInput(_userInput)
 {
     regulartex = LoadTexture("resources/textures/cursor/32/regular.png");
     talktex = LoadTexture("resources/textures/cursor/32/talk.png");
     movetex = LoadTexture("resources/textures/cursor/32/move.png");
     invalidmovetex = LoadTexture("resources/textures/cursor/32/denied.png");
     currentTex = &regulartex;
-    {
-        entt::sink sink{_userInput->onClickEvent};
-        sink.connect<&Cursor::onMouseClick>(this);
-    }
+    UnlockCursor();
 }
 }
 

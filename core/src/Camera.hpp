@@ -12,9 +12,6 @@ struct UserInput;
 class Camera
 {
     Camera3D rlCamera;
-    Vector3 position {};
-    Vector3 target {};
-    Vector3 rotation {};
     int zoom = 10;
     void handleInput();
 
@@ -32,6 +29,7 @@ public:
     
     void Update();
     
+    void SetCamera(Vector3 _pos, Vector3 _target);
     void ScrollEnable();
     void ScrollDisable();
     void LockInput();

@@ -10,7 +10,7 @@
 
 namespace sage
 {
-void DialogueSystem::onControlledActorChange(entt::entity entity)
+void DialogueSystem::changeControlledActor(entt::entity entity)
 {
     controlledActor = entity;
 }
@@ -31,26 +31,62 @@ void DialogueSystem::startConversation(entt::entity entity)
     float angle = atan2f(direction.x, direction.z);
     actorTrans.rotation.y = RAD2DEG * angle;
 
+    {
+        entt::sink sink { cursor->onAnyClick };
+        sink.connect<&DialogueSystem::endConversation>(this);
+    }
+    
+    oldCamPos = camera->getRaylibCam()->position;
+    oldCamTarget = camera->getRaylibCam()->target;
+    
     camera->CutscenePose(npcTrans);
     camera->LockInput();
-    cursor->LockContext();
+    
+    cursor->LockCursor();
+    actorMovementSystem->DisableMovement();
     active = true;
-    stopConversation(entity);
+    
+    {
+        entt::sink sink {actorTrans.onFinishMovement};
+        sink.disconnect<&DialogueSystem::startConversation>(this);
+        entt::sink sink2 {actorTrans.onMovementCancel};
+        sink2.disconnect<&DialogueSystem::cancelConversation>(this);
+    }
 }
 
-void DialogueSystem::stopConversation(entt::entity entity) // Not the best name (isn't on stopping a conversation)
+void DialogueSystem::endConversation(entt::entity actor)
+{
+    onConversationEnd.publish();
+    {
+        entt::sink sink3 { cursor->onAnyClick };
+        sink3.disconnect<&DialogueSystem::endConversation>(this);
+    }
+    
+    camera->UnlockInput();
+    cursor->UnlockCursor();
+    actorMovementSystem->EnableMovement();
+    active = false;
+    registry->get<Animation>(clickedNPC).ChangeAnimation(0); // TODO: Change to an enum
+    clickedNPC = entt::null;
+    
+    camera->SetCamera(oldCamPos, oldCamTarget);
+    oldCamPos = {};
+    oldCamTarget = {};
+}
+
+void DialogueSystem::cancelConversation(entt::entity entity) // Not the best name (isn't on stopping a conversation)
 {
     {
         auto& actorTrans = registry->get<Transform>(entity);
         entt::sink sink {actorTrans.onFinishMovement};
         sink.disconnect<&DialogueSystem::startConversation>(this);
         entt::sink sink2 {actorTrans.onMovementCancel};
-        sink2.disconnect<&DialogueSystem::stopConversation>(this);
-        clickedNPC = entt::null;
+        sink2.disconnect<&DialogueSystem::cancelConversation>(this);
     }
+    clickedNPC = entt::null;
 }
 
-void DialogueSystem::onNPCClicked(entt::entity _clickedNPC)
+void DialogueSystem::NPCClicked(entt::entity _clickedNPC)
 {
     if (clickedNPC != entt::null) return;
     clickedNPC = _clickedNPC;
@@ -60,10 +96,10 @@ void DialogueSystem::onNPCClicked(entt::entity _clickedNPC)
     actorMovementSystem->PathfindToLocation(controlledActor, npc.conversationPos);
     auto& actorTrans = registry->get<Transform>(controlledActor);
     {
-        entt::sink sink {actorTrans.onFinishMovement};
+        entt::sink sink { actorTrans.onFinishMovement };
         sink.connect<&DialogueSystem::startConversation>(this);
-        entt::sink sink2 {actorTrans.onMovementCancel};
-        sink2.connect<&DialogueSystem::stopConversation>(this);
+        entt::sink sink2 { actorTrans.onMovementCancel };
+        sink2.connect<&DialogueSystem::cancelConversation>(this);
     }
 }
 
@@ -93,12 +129,12 @@ DialogueSystem::DialogueSystem(entt::registry *registry,
 {
     {
         entt::sink sink{_actorMovementSystem->onControlledActorChange};
-        sink.connect<&DialogueSystem::onControlledActorChange>(this);
+        sink.connect<&DialogueSystem::changeControlledActor>(this);
         controlledActor = _actorMovementSystem->GetControlledActor();
     }
     {
         entt::sink sink{_cursor->onNPCClick};
-        sink.connect<&DialogueSystem::onNPCClicked>(this);
+        sink.connect<&DialogueSystem::NPCClicked>(this);
     }
 }
 } // sage

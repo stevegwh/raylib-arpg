@@ -25,12 +25,15 @@ class DialogueSystem : public BaseSystem<Dialogue>
     ActorMovementSystem* actorMovementSystem;
     Cursor* cursor;
     Camera* camera;
+    Vector3 oldCamPos;
+    Vector3 oldCamTarget;
     std::unique_ptr<DialogueWindow> window;
     
-    void onNPCClicked(entt::entity clickedNPC);
-    void onControlledActorChange(entt::entity entity);
-    void stopConversation(entt::entity entity);
+    void NPCClicked(entt::entity _clickedNPC);
+    void changeControlledActor(entt::entity entity);
+    void cancelConversation(entt::entity entity);
     void startConversation(entt::entity actor);
+    void endConversation(entt::entity actor);
 public:
     explicit DialogueSystem(entt::registry* registry, 
                             Cursor* _cursor, 

@@ -38,25 +38,25 @@ void ActorMovementSystem::PatrolLocations(entt::entity id, const std::vector<Vec
 
 void ActorMovementSystem::onCursorClick()
 {
-    if (cursor->collision.hit)
-    {
-        switch (registry->get<Collideable>(cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
-        {
-        case CollisionLayer::FLOOR:
-            PathfindToLocation(controlledActorId, cursor->collision.point);
-            //MoveToLocation(controlledActorId);
-        }
-    }
+    PathfindToLocation(controlledActorId, cursor->collision.point);
+}
+
+void ActorMovementSystem::EnableMovement()
+{
+    entt::sink onClick{cursor->onFloorClick};
+    onClick.connect<&ActorMovementSystem::onCursorClick>(this);
+}
+
+void ActorMovementSystem::DisableMovement()
+{
+    entt::sink onClick{cursor->onFloorClick};
+    onClick.disconnect<&ActorMovementSystem::onCursorClick>(this);
 }
     
 void ActorMovementSystem::SetControlledActor(entt::entity id)
 {
     onControlledActorChange.publish(id);
     controlledActorId = id;
-    {
-        entt::sink onClick{userInput->onClickEvent};
-        onClick.connect<&ActorMovementSystem::onCursorClick>(this);
-    }
 }
 
 entt::entity ActorMovementSystem::GetControlledActor()
@@ -72,7 +72,7 @@ ActorMovementSystem::ActorMovementSystem(entt::registry* _registry,
     BaseSystem<Actor>(_registry), cursor(_cursor), userInput(_userInput),
     navigationGridSystem(_navigationGridSystem), transformSystem(_transformSystem)
 {
-
+    EnableMovement();
 }
 
 } // sage

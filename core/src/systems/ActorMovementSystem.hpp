@@ -41,6 +41,8 @@ public:
     void PatrolLocations(entt::entity id, const std::vector<Vector3> &patrol);
     
     entt::sigh<void(entt::entity)> onControlledActorChange;
+    void EnableMovement();
+    void DisableMovement();
 };
 
 } // sage

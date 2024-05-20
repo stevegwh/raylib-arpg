@@ -132,7 +132,7 @@ EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _d
     Scene(_registry, std::move(_data)), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))
 {
     {
-        entt::sink onClickEvent{data->userInput->onClickEvent};
+        entt::sink onClickEvent{data->cursor->onAnyClick};
         onClickEvent.connect<&EditorScene::OnCursorClick>(this);
     }
     {

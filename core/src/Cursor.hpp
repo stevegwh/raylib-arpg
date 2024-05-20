@@ -40,6 +40,7 @@ class Cursor
     sage::CollisionSystem* collisionSystem;
     sage::NavigationGridSystem* navigationGridSystem;
     sage::Camera* sCamera;
+    sage::UserInput* userInput;
     
     void getMouseRayCollision();
     void onMouseClick();
@@ -50,6 +51,8 @@ public:
     CollisionInfo rayCollisionResultInfo;
     entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
     entt::sigh<void(entt::entity)> onNPCClick{};
+    entt::sigh<void(entt::entity)> onFloorClick{};
+    entt::sigh<void(entt::entity)> onAnyClick{};
 
     Cursor(entt::registry* registry,
            sage::CollisionSystem* _collisionSystem,
@@ -61,8 +64,8 @@ public:
     void Draw3D();
     void Draw2D();
     void OnControlledActorChange(entt::entity entity);
-    void LockContext();
-    void UnlockContext();
+    void LockCursor();
+    void UnlockCursor();
     bool isValidMove();
 };
 }

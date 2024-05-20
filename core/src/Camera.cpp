@@ -247,4 +247,10 @@ void Camera::ScrollDisable()
     scrollEnabled = false;
 }
 
+void Camera::SetCamera(Vector3 _pos, Vector3 _target)
+{
+    rlCamera.position = _pos;
+    rlCamera.target = _target;
+}
+
 } // sage

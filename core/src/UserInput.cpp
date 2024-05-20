@@ -38,10 +38,6 @@ void UserInput::toggleFullScreen() const
 void UserInput::ListenForInput() const
 {
     toggleFullScreen();
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
-        onClickEvent.publish();
-    }
 
     if (IsKeyPressed(keyMapping->keyA))
     {
