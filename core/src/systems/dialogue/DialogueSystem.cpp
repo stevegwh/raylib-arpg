@@ -43,7 +43,7 @@ void DialogueSystem::startConversation(entt::entity entity)
     camera->LockInput();
     
     cursor->LockCursor();
-    actorMovementSystem->DisableMovement();
+    actorMovementSystem->Disable();
     active = true;
     
     {
@@ -64,7 +64,7 @@ void DialogueSystem::endConversation(entt::entity actor)
     
     camera->UnlockInput();
     cursor->UnlockCursor();
-    actorMovementSystem->EnableMovement();
+    actorMovementSystem->Enable();
     active = false;
     registry->get<Animation>(clickedNPC).ChangeAnimation(0); // TODO: Change to an enum
     clickedNPC = entt::null;

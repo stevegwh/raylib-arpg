@@ -19,11 +19,10 @@ namespace sage
         const std::string componentName;
         
     protected:
-        //std::unique_ptr<EventManager> eventManager;
+        bool enabled = true;
         entt::registry* registry;
         
     public:
-
         BaseSystem(entt::registry* _registry) : registry(_registry)
         //, eventManager(std::make_unique<EventManager>()) 
         {}

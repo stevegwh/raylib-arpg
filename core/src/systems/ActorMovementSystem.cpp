@@ -40,18 +40,6 @@ void ActorMovementSystem::onCursorClick()
 {
     PathfindToLocation(controlledActorId, cursor->collision.point);
 }
-
-void ActorMovementSystem::EnableMovement()
-{
-    entt::sink onClick{cursor->onFloorClick};
-    onClick.connect<&ActorMovementSystem::onCursorClick>(this);
-}
-
-void ActorMovementSystem::DisableMovement()
-{
-    entt::sink onClick{cursor->onFloorClick};
-    onClick.disconnect<&ActorMovementSystem::onCursorClick>(this);
-}
     
 void ActorMovementSystem::SetControlledActor(entt::entity id)
 {
@@ -64,6 +52,17 @@ entt::entity ActorMovementSystem::GetControlledActor()
     return controlledActorId;
 }
 
+void ActorMovementSystem::Enable()
+{
+    entt::sink onClick{cursor->onFloorClick};
+    onClick.connect<&ActorMovementSystem::onCursorClick>(this);
+}
+void ActorMovementSystem::Disable()
+{
+    entt::sink onClick{cursor->onFloorClick};
+    onClick.disconnect<&ActorMovementSystem::onCursorClick>(this);
+}
+
 ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, 
                                          Cursor* _cursor,
                                          UserInput* _userInput,
@@ -71,8 +70,6 @@ ActorMovementSystem::ActorMovementSystem(entt::registry* _registry,
                                          TransformSystem* _transformSystem) :
     BaseSystem<Actor>(_registry), cursor(_cursor), userInput(_userInput),
     navigationGridSystem(_navigationGridSystem), transformSystem(_transformSystem)
-{
-    EnableMovement();
-}
+{}
 
 } // sage

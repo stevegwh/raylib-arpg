@@ -175,8 +175,9 @@ EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _d
     GameObjectFactory::createFloor(registry, this, bb);
 
     data->Load();
-    data->navigationGridSystem->Init(100, 1.0f);
+    data->navigationGridSystem->Init(200, 1.0f);
     data->navigationGridSystem->PopulateGrid();
+    data->actorMovementSystem->Disable();
 }
 
 EditorScene::~EditorScene()
