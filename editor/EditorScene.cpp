@@ -55,7 +55,10 @@ void EditorScene::OnCursorClick()
     }
     else
     {
-        selectedObject = {};
+        if (currentEditorMode != SELECT)
+        {
+            selectedObject = {};
+        }
     }
 }
 
