@@ -12,10 +12,12 @@
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
+#include "systems/dialogue/DialogueSystem.hpp"
+#include "systems/CombatSystem.hpp"
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
-#include "systems/dialogue/DialogueSystem.hpp"
+
 
 #include <memory>
 
@@ -40,6 +42,7 @@ public:
     std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
     std::unique_ptr<sage::AnimationSystem> animationSystem;
     std::unique_ptr<sage::DialogueSystem> dialogueSystem;
+    std::unique_ptr<sage::CombatSystem> combatSystem;
 
     void Load();
     void Save() const;

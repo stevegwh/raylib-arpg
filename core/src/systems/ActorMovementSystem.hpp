@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../components/Actor.hpp"
+#include "../components/PathfindingActor.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -19,7 +19,7 @@
 namespace sage
 {
 
-class ActorMovementSystem : public BaseSystem<Actor>
+class ActorMovementSystem : public BaseSystem<PathfindingActor>
 {
     Cursor* cursor;
     UserInput* userInput;

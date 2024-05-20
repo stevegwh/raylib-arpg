@@ -24,5 +24,6 @@ public:
     ~ExampleScene() override;
     void Update() override;
     void Draw2D() override;
+    void Draw3D() override;
 };
 } // sage

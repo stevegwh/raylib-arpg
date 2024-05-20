@@ -75,7 +75,6 @@ void EditorScene::OnSerializeLoad()
 void EditorScene::OnDeleteModeKeyPressed()
 {
     if (currentEditorMode != SELECT) return;
-    std::cout << "Delete pressed" << std::endl;
     currentEditorMode = IDLE;
     registry->destroy(selectedObject);
     selectedObject = {};

@@ -10,6 +10,7 @@
 #include "components/Collideable.hpp"
 #include "components/WorldObject.hpp"
 #include "components/Animation.hpp"
+#include "components/Combat.hpp"
 
 #include "raymath.h"
 
@@ -53,6 +54,8 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
     Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
+
+    //auto& combat = registry->emplace<sage::Combat>(id);
 
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
@@ -127,7 +130,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     }
     auto& worldObject = registry->emplace<WorldObject>(id);
 
-    auto& actor = registry->emplace<Actor>(id);
+    auto& actor = registry->emplace<PathfindingActor>(id);
     actor.pathfindingBounds = 50;
     game->actorMovementSystem->SetControlledActor(id);
     

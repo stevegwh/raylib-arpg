@@ -15,8 +15,8 @@ namespace sage
 class CollisionSystem : public BaseSystem<Collideable>
 {
 public:
-    void OnTransformUpdate(entt::entity entity);
     explicit CollisionSystem(entt::registry* _registry);
+    void OnTransformUpdate(entt::entity entity);
     void UpdateWorldBoundingBox(entt::entity entityId, Matrix mat);
     [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray) const;
     void BoundingBoxDraw(entt::entity entityId, Color color = LIME) const;

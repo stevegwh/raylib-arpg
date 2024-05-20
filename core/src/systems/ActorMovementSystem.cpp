@@ -15,7 +15,7 @@ void ActorMovementSystem::PathfindToLocation(entt::entity id, Vector3 location)
         Vector2 tmp;
         if (!navigationGridSystem->WorldToGridSpace(location, tmp)) return;
     }
-    const auto& actor = registry->get<Actor>(id);
+    const auto& actor = registry->get<PathfindingActor>(id);
     Vector2 minRange;
     Vector2 maxRange;
     navigationGridSystem->GetPathfindRange(id, actor.pathfindingBounds, minRange, maxRange);
@@ -68,7 +68,7 @@ ActorMovementSystem::ActorMovementSystem(entt::registry* _registry,
                                          UserInput* _userInput,
                                          NavigationGridSystem* _navigationGridSystem, 
                                          TransformSystem* _transformSystem) :
-    BaseSystem<Actor>(_registry), cursor(_cursor), userInput(_userInput),
+    BaseSystem<PathfindingActor>(_registry), cursor(_cursor), userInput(_userInput),
     navigationGridSystem(_navigationGridSystem), transformSystem(_transformSystem)
 {}
 

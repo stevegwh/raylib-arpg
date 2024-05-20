@@ -14,7 +14,8 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
     collisionSystem(std::make_unique<sage::CollisionSystem>(_registry)),
     transformSystem(std::make_unique<sage::TransformSystem>(_registry)),
     navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry)),
-    animationSystem(std::make_unique<AnimationSystem>(_registry))
+    animationSystem(std::make_unique<AnimationSystem>(_registry)),
+    combatSystem(std::make_unique<CombatSystem>(_registry))
 {
     userInput = std::make_unique<UserInput>(_keyMapping, settings);
     camera = std::make_unique<sage::Camera>(userInput.get());
