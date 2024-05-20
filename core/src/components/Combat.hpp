@@ -7,5 +7,7 @@
 namespace sage
 {
 struct Combat
-{};
+{
+    int hp = 100;
+};
 }

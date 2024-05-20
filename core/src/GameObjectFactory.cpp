@@ -54,8 +54,8 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
     Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
-
-    //auto& combat = registry->emplace<sage::Combat>(id);
+    
+    auto& combat = registry->emplace<Combat>(id);
 
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
