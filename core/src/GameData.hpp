@@ -13,7 +13,7 @@
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
-#include "systems/CombatSystem.hpp"
+#include "systems/HealthBarSystem.hpp"
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
@@ -42,7 +42,7 @@ public:
     std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
     std::unique_ptr<sage::AnimationSystem> animationSystem;
     std::unique_ptr<sage::DialogueSystem> dialogueSystem;
-    std::unique_ptr<sage::CombatSystem> combatSystem;
+    std::unique_ptr<sage::HealthBarSystem> combatSystem;
 
     void Load();
     void Save() const;

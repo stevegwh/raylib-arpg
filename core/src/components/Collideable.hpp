@@ -18,7 +18,8 @@ enum class CollisionLayer
     BUILDING,
     NAVIGATION,
     PLAYER,
-    NPC
+    NPC,
+    ENEMY
 };
 
 struct CollisionInfo

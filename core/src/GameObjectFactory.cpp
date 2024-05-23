@@ -10,7 +10,7 @@
 #include "components/Collideable.hpp"
 #include "components/WorldObject.hpp"
 #include "components/Animation.hpp"
-#include "components/Combat.hpp"
+#include "components/HealthBar.hpp"
 
 #include "raymath.h"
 
@@ -55,7 +55,7 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
     
-    auto& combat = registry->emplace<Combat>(id);
+    auto& combat = registry->emplace<HealthBar>(id);
 
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);

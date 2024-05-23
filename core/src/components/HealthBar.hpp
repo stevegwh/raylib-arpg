@@ -6,7 +6,7 @@
 
 namespace sage
 {
-struct Combat
+struct HealthBar
 {
     int hp = 100;
 };

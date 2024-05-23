@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../components/Combat.hpp"
+#include "../components/HealthBar.hpp"
 #include "Camera.hpp"
 #include "BaseSystem.hpp"
 
@@ -12,7 +12,7 @@
 
 namespace sage
 {
-class CombatSystem : public BaseSystem<Combat>
+class HealthBarSystem : public BaseSystem<HealthBar>
 {
     sage::Camera* camera;
 
@@ -25,11 +25,13 @@ class CombatSystem : public BaseSystem<Combat>
 
     void updateHealthBarTexture();
 public:
-    CombatSystem(entt::registry* _registry, sage::Camera* _camera);
-    ~CombatSystem();
+    HealthBarSystem(entt::registry* _registry, sage::Camera* _camera);
+    ~HealthBarSystem();
     void Draw2D();
     void Draw3D();
     void Update();
+    void Decrement(entt::entity entity, int value);
+    void Increment(entt::entity entity, int value);
 };
 
 } // sage

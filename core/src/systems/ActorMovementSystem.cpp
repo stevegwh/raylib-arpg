@@ -57,6 +57,7 @@ void ActorMovementSystem::Enable()
     entt::sink onClick{cursor->onFloorClick};
     onClick.connect<&ActorMovementSystem::onCursorClick>(this);
 }
+
 void ActorMovementSystem::Disable()
 {
     entt::sink onClick{cursor->onFloorClick};
@@ -70,6 +71,8 @@ ActorMovementSystem::ActorMovementSystem(entt::registry* _registry,
                                          TransformSystem* _transformSystem) :
     BaseSystem<PathfindingActor>(_registry), cursor(_cursor), userInput(_userInput),
     navigationGridSystem(_navigationGridSystem), transformSystem(_transformSystem)
-{}
+{
+    Enable();
+}
 
 } // sage
