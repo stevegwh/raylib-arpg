@@ -61,16 +61,6 @@ void HealthBarSystem::Update()
     updateHealthBarTexture();
 }
 
-void Decrement(entt::entity entity, int value)
-{
-    
-}
-
-void Increment(entt::entity entity, int value)
-{
-    
-}
-
 HealthBarSystem::~HealthBarSystem()
 {
     UnloadRenderTexture(healthBarTexture);

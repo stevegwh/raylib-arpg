@@ -24,6 +24,7 @@ class Cursor
     Texture2D talktex;
     Texture2D movetex;
     Texture2D invalidmovetex;
+    Texture2D combattex;
     
     Vector2 position;
     entt::registry* registry;
@@ -53,7 +54,8 @@ public:
     entt::sigh<void(entt::entity)> onNPCClick{};
     entt::sigh<void(entt::entity)> onFloorClick{};
     entt::sigh<void(entt::entity)> onAnyClick{};
-
+    entt::sigh<void(entt::entity)> onEnemyClick{};
+    
     Cursor(entt::registry* registry,
            sage::CollisionSystem* _collisionSystem,
            sage::NavigationGridSystem* _navigationGridSystem,

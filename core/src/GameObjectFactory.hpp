@@ -13,6 +13,7 @@ namespace sage
 typedef struct Scene Scene;
 struct GameObjectFactory
 {
+    static entt::entity createEnemy(entt::registry* registry, GameData* data, Vector3 position, const char* name);
     static entt::entity createKnight(entt::registry* registry, GameData* data, Vector3 position, const char* name);
     static entt::entity createPlayer(entt::registry* registry, GameData* data, Vector3 position, const char* name);
     static void createBuilding(entt::registry* registry, GameData* data, Vector3 position, const char* name,

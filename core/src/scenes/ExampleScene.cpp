@@ -15,7 +15,7 @@ void ExampleScene::Update()
     data->transformSystem->Update();
     data->animationSystem->Update();
     data->dialogueSystem->Update();
-    data->combatSystem->Update();
+    data->healthBarSystem->Update();
 }
 
 void ExampleScene::Draw2D()
@@ -26,7 +26,7 @@ void ExampleScene::Draw2D()
 
 void ExampleScene::Draw3D()
 {
-    data->combatSystem->Draw3D();
+    data->healthBarSystem->Draw3D();
     Scene::Draw3D();
 }
 
@@ -42,6 +42,7 @@ Scene(_registry, std::move(_data))
     auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {20.0f, 0, 20.0f}, "Player");
     
     auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
+    auto enemy = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 30.0f}, "Enemy");
 
     data->Load();
     

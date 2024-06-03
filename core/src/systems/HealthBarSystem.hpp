@@ -30,8 +30,6 @@ public:
     void Draw2D();
     void Draw3D();
     void Update();
-    void Decrement(entt::entity entity, int value);
-    void Increment(entt::entity entity, int value);
 };
 
 } // sage

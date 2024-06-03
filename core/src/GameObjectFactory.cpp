@@ -36,6 +36,42 @@ BoundingBox createRectangularBoundingBox(float length, float height)
     return bb;
 }
 
+entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* game, Vector3 position, const char* name)
+{
+    entt::entity id = registry->create();
+    const char* modelPath = "resources/models/gltf/goblin.glb";
+    //sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
+
+    auto& transform = registry->emplace<Transform>(id);
+    transform.position = position;
+    transform.scale = 1.0f;
+    transform.rotation = { 0, 0, 0 };
+
+    auto model = LoadModel(modelPath);
+    auto& animation = registry->emplace<Animation>(id, modelPath, &model);
+    animation.ChangeAnimation(3);
+
+    Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+    auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
+    renderable.name = name;
+
+    auto& healthbar = registry->emplace<HealthBar>(id); // TODO: "HealthBar" should be something like CombatData
+
+    BoundingBox bb = renderable.CalculateModelBoundingBox();
+    auto& collideable = registry->emplace<Collideable>(id, bb);
+    collideable.collisionLayer = CollisionLayer::ENEMY;
+    game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
+    {
+        entt::sink sink{transform.onPositionUpdate};
+        sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
+            collisionSystem.OnTransformUpdate(entity);
+        }>(*game->collisionSystem);
+    }
+    
+    auto& worldObject = registry->emplace<WorldObject>(id);
+    return id;
+}
+
 entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData* game, Vector3 position, const char* name)
 {
     entt::entity id = registry->create();
@@ -55,7 +91,7 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
     
-    auto& combat = registry->emplace<HealthBar>(id);
+    //auto& combat = registry->emplace<HealthBar>(id);
 
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);

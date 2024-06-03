@@ -25,6 +25,10 @@ void Cursor::onMouseClick()
     {
         onFloorClick.publish(rayCollisionResultInfo.collidedEntityId);
     }
+    else if (layer == CollisionLayer::ENEMY)
+    {
+        onEnemyClick.publish(rayCollisionResultInfo.collidedEntityId);
+    }
     onAnyClick.publish(rayCollisionResultInfo.collidedEntityId);
 }
 
@@ -99,6 +103,10 @@ void Cursor::changeCursors(CollisionLayer layer)
     else if (layer == CollisionLayer::NPC)
     {
         currentTex = &talktex;
+    }
+    else if (layer == CollisionLayer::ENEMY)
+    {
+        currentTex = &combattex;
     }
 }
 
@@ -180,6 +188,7 @@ Cursor::Cursor(entt::registry* _registry,
     talktex = LoadTexture("resources/textures/cursor/32/talk.png");
     movetex = LoadTexture("resources/textures/cursor/32/move.png");
     invalidmovetex = LoadTexture("resources/textures/cursor/32/denied.png");
+    combattex = LoadTexture("resources/textures/cursor/32/attack.png");
     currentTex = &regulartex;
     UnlockCursor();
 }

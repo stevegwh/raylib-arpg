@@ -13,6 +13,7 @@ struct Animation
     unsigned int animIndex = 0;
     unsigned int animCurrentFrame = 0;
     int animsCount;
+    bool oneShot = false;
     
     Animation(const char* _modelPath, Model* _model) :
     model(_model)
@@ -30,9 +31,14 @@ struct Animation
         UnloadModelAnimations(animations, animsCount);
     }
 
-    void ChangeAnimation(int index)
+    void ChangeAnimation(int index, bool _oneShot = false)
     {
         animIndex = index;
+        if (_oneShot)
+        {
+            oneShot = true;
+            animCurrentFrame = 0;
+        }
     }
 };
 }
