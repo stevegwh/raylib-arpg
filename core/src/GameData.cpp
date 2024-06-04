@@ -44,7 +44,7 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
 
 void GameData::Load()
 {
-    serializer::Load(registry);
+    serializer::Load(registry);  
 }
 
 void GameData::Save() const

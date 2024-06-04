@@ -17,7 +17,7 @@ class LightSubSystem
     std::vector<Renderable*> renderables;
 public:
     Shader shader;
-    Light lights[MAX_LIGHTS] = { 0 };
+    Light lights[MAX_LIGHTS] {};
     explicit LightSubSystem();
     void LinkRenderableToLight(Renderable* renderable);
     void DrawDebugLights();

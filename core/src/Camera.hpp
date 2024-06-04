@@ -8,7 +8,7 @@
 
 namespace sage
 {
-struct UserInput;
+class UserInput;
 class Camera
 {
     Camera3D rlCamera;

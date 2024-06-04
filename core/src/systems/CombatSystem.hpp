@@ -8,19 +8,17 @@
 
 #include "Cursor.hpp"
 #include "ActorMovementSystem.hpp"
+#include "components/Combatable.hpp"
 
 namespace sage
 {
 
-class CombatSystem // SubSystem?
+class CombatSystem : public BaseSystem<Combatable>
 {
     // Subscribe to collision with cursor on Enemy layer
     // React to click by updating HealthBar and animation
-    entt::registry* registry;
     Cursor* cursor;
     ActorMovementSystem* actorMovementSystem;
-    
-    entt::entity targetEnemy;
 
     void startCombat(entt::entity entity);
     void onEnemyClick(entt::entity entity);
@@ -28,6 +26,7 @@ class CombatSystem // SubSystem?
     void destroyEnemy(entt::entity entity);
 public:
     CombatSystem(entt::registry* _registry, Cursor* _cursor, ActorMovementSystem* _actorMovementSystem);
+    void Update();
 };
 
 } // sage

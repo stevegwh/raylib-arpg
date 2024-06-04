@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/CMakeFiles/entt-populate"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/CMakeFiles/entt-populate.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/CMakeFiles/entt-populate-complete.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-build.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-configure.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-download.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-install.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-mkdir.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-patch.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-test.rule"
+		},
+		{
+			"file" : "/Users/steve/CLionProjects/BG_Raylib/build/_deps/entt-subbuild/entt-populate-prefix/src/entt-populate-stamp/entt-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"entt-populate"
+		],
+		"name" : "entt-populate"
+	}
+}

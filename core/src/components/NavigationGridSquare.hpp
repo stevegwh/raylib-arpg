@@ -16,13 +16,13 @@ namespace sage
     struct NavigationGridSquare
     {
         bool debugColor = false;
+        Vector2 gridSquareIndex;
         const Vector3 worldPosMin; // Top Left
         const Vector3 worldPosMax; // Bottom Right
         const Vector3 worldPosCentre;
         const Vector3 debugBox;
         std::vector<CollisionInfo> collisionsWithSquare;
         bool occupied = false;
-        Vector2 gridSquareIndex;
         
         explicit NavigationGridSquare(Vector2 _gridSquareIndex, 
                                       Vector3 _worldPosMin, 

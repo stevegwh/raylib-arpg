@@ -11,6 +11,7 @@
 #include "components/WorldObject.hpp"
 #include "components/Animation.hpp"
 #include "components/HealthBar.hpp"
+#include "components/Combatable.hpp"
 
 #include "raymath.h"
 
@@ -21,7 +22,7 @@ BoundingBox createRectangularBoundingBox(float length, float height)
     BoundingBox bb;
     // Calculate half dimensions
     float halfLength = length / 2.0f;
-    float halfHeight = height / 2.0f;
+    //float halfHeight = height / 2.0f;
 
     // Set minimum bounds
     bb.min.x = -halfLength;
@@ -56,7 +57,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     renderable.name = name;
 
     auto& healthbar = registry->emplace<HealthBar>(id); // TODO: "HealthBar" should be something like CombatData
-
+    auto& combatable = registry->emplace<Combatable>(id);
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = CollisionLayer::ENEMY;
@@ -151,6 +152,8 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
             }
         }>(animation);
     }
+
+    auto& combatable = registry->emplace<Combatable>(id);
     
     Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);

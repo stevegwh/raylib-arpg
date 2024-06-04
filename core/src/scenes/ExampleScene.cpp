@@ -16,6 +16,7 @@ void ExampleScene::Update()
     data->animationSystem->Update();
     data->dialogueSystem->Update();
     data->healthBarSystem->Update();
+    data->combatSystem->Update();
 }
 
 void ExampleScene::Draw2D()

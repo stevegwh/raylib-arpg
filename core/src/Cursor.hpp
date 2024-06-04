@@ -28,7 +28,7 @@ class Cursor
     
     Vector2 position;
     entt::registry* registry;
-    Ray ray {0};
+    Ray ray {};
     Color defaultColor = WHITE;
     Color hoverColor = LIME;
     Color invalidColor = RED;
