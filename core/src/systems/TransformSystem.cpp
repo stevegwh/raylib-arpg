@@ -59,7 +59,7 @@ void TransformSystem::Update()
         transform->rotation.y = angle;
 
         transform->position.x = transform->position.x + transform->direction.x * 0.35f;
-        //transform->position.x = dy * 0.5f;
+        //transform->position.y = dy * 0.5f;
         transform->position.z = transform->position.z + transform->direction.z * 0.35f;
         transform->onPositionUpdate.publish(it->first);
         ++it;
