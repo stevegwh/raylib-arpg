@@ -9,11 +9,28 @@
 namespace sage
 {
 
+void CombatSystem::destroyEnemy(entt::entity entity)
+{
+    {
+        auto& animation = registry->get<Animation>(entity);
+        entt::sink sink { animation.onAnimationEnd };
+        sink.disconnect<&CombatSystem::destroyEnemy>(this);
+    }
+    registry->destroy(entity);
+}
 
 void CombatSystem::onEnemyDead(entt::entity entity)
 {
     auto& animation = registry->get<Animation>(entity);
     animation.ChangeAnimation(0, true); // TODO: Magic number for changing animations
+    {
+        entt::sink sink { animation.onAnimationEnd };
+        sink.connect<&CombatSystem::destroyEnemy>(this);
+    }
+    {
+        entt::sink sink{ cursor->onEnemyClick };
+        sink.disconnect<&CombatSystem::onEnemyClick>(this);
+    }
 }
 
 void CombatSystem::startCombat(entt::entity entity)
@@ -52,7 +69,7 @@ CombatSystem::CombatSystem(entt::registry *_registry, Cursor *_cursor, ActorMove
 registry(_registry), cursor(_cursor), actorMovementSystem(_actorMovementSystem)
 {
     {
-        entt::sink sink{cursor->onEnemyClick};
+        entt::sink sink{ cursor->onEnemyClick };
         sink.connect<&CombatSystem::onEnemyClick>(this);  
     }
 }

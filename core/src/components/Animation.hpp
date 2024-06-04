@@ -14,6 +14,8 @@ struct Animation
     unsigned int animCurrentFrame = 0;
     int animsCount;
     bool oneShot = false;
+    entt::sigh<void(entt::entity)> onAnimationEnd{};
+    entt::sigh<void(entt::entity)> onAnimationStart{};
     
     Animation(const char* _modelPath, Model* _model) :
     model(_model)
@@ -34,11 +36,8 @@ struct Animation
     void ChangeAnimation(int index, bool _oneShot = false)
     {
         animIndex = index;
-        if (_oneShot)
-        {
-            oneShot = true;
-            animCurrentFrame = 0;
-        }
+        oneShot = _oneShot;
+        if (oneShot) animCurrentFrame = 0;
     }
 };
 }

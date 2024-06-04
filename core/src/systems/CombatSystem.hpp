@@ -25,6 +25,7 @@ class CombatSystem // SubSystem?
     void startCombat(entt::entity entity);
     void onEnemyClick(entt::entity entity);
     void onEnemyDead(entt::entity entity);
+    void destroyEnemy(entt::entity entity);
 public:
     CombatSystem(entt::registry* _registry, Cursor* _cursor, ActorMovementSystem* _actorMovementSystem);
 };

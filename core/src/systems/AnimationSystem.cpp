@@ -3,7 +3,7 @@
 //
 
 #include "AnimationSystem.hpp"
-#include "../Application.hpp"
+#include "../components/Renderable.hpp"
 
 namespace sage
 {
@@ -11,12 +11,26 @@ namespace sage
 void AnimationSystem::Update()
 {
     const auto& view = registry->view<Animation, Renderable>();
-    view.each([](auto& a, auto& r) {
+    for (auto& entity : view)
+    {
+        auto& a = registry->get<Animation>(entity);
+        auto& r = registry->get<Renderable>(entity);
         ModelAnimation anim = a.animations[a.animIndex];
-        if (a.oneShot && a.animCurrentFrame + 1 >= anim.frameCount) return;
+        
+        if (a.animCurrentFrame == 0)
+        {
+            a.onAnimationStart.publish(entity);
+        }
+        
+        if (a.animCurrentFrame + 1 >= anim.frameCount)
+        {
+            a.onAnimationEnd.publish(entity);
+            if (a.oneShot) return;
+        }
+        
         a.animCurrentFrame = (a.animCurrentFrame + 1) % anim.frameCount;
         UpdateModelAnimation(r.model, anim, a.animCurrentFrame);
-    });
+    };
 }
 
 void AnimationSystem::Draw()
