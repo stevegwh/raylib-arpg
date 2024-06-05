@@ -29,7 +29,7 @@ void HealthBarSystem::updateHealthBarTexture()
                   DrawRectangleLines(0, 0, 200, 20, healthBarBorderColor);
                   
                   Vector2 textSize = MeasureTextEx(GetFontDefault(), TextFormat("HP: %03i", c.hp), 20, 1);
-                  DrawTextEx(GetFontDefault(), TextFormat("HP: %03i", c.hp), (Vector2){ 10, healthBarTexture.texture.height - 30 - textSize.y }, 20, 1, GREEN);
+                  DrawTextEx(GetFontDefault(), TextFormat("HP: %03i", c.hp), { 10, healthBarTexture.texture.height - 30 - textSize.y }, 20, 1, GREEN);
 
                   EndTextureMode();
               });

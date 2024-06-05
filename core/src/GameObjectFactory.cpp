@@ -135,10 +135,10 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     // Set animation hooks
     auto& animation = registry->emplace<Animation>(id, modelPath, &model);
 
-    animation.animationMap[AnimationEnum::IDLE] = 0;
-    animation.animationMap[AnimationEnum::MOVE] = 1;
-    animation.animationMap[AnimationEnum::TALK] = 2;
-    animation.animationMap[AnimationEnum::AUTOATTACK] = 2;
+    animation.animationMap[AnimationEnum::IDLE] = 2;
+    animation.animationMap[AnimationEnum::MOVE] = 5;
+    animation.animationMap[AnimationEnum::TALK] = 3;
+    animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
     animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
     {
