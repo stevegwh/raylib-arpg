@@ -8,11 +8,16 @@
 
 namespace sage
 {
-
-struct Combatable
+enum class CombatableActorType
 {
+	PLAYER,
+	WAVEMOB
+};
+struct CombatableActor
+{
+	CombatableActorType actorType = CombatableActorType::WAVEMOB;
     bool inCombat = false;
-    entt::entity target;
+    entt::entity target{};
     float autoAttackTick = 0;
     float autoAttackTickThreshold = 1;
 };

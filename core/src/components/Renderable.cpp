@@ -5,6 +5,7 @@
 #include "Renderable.hpp"
 
 #include <utility>
+#include <cstring>
 
 namespace sage
 {
