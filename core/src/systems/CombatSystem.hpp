@@ -24,6 +24,8 @@ class CombatSystem : public BaseSystem<Combatable>
     void onEnemyClick(entt::entity entity);
     void onEnemyDead(entt::entity entity);
     void destroyEnemy(entt::entity entity);
+    void onAutoAttackEnd(entt::entity entity);
+    void CheckInCombat(entt::entity entity);
 public:
     CombatSystem(entt::registry* _registry, Cursor* _cursor, ControllableActorMovementSystem* _actorMovementSystem);
     void Update();

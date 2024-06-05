@@ -4,10 +4,21 @@
 
 #pragma once
 
+#include <unordered_map>
+
 namespace sage
 {
+enum class AnimationEnum
+{
+    IDLE,
+    DEATH,
+    AUTOATTACK,
+    MOVE,
+    TALK
+};
 struct Animation
 {
+    std::unordered_map<AnimationEnum, int> animationMap;
     ModelAnimation* animations;
     Model* model;
     unsigned int animIndex = 0;
@@ -31,6 +42,13 @@ struct Animation
     ~Animation()
     {
         UnloadModelAnimations(animations, animsCount);
+    }
+
+    bool ChangeAnimationByEnum(AnimationEnum animEnum, bool _oneShot = false)
+    {
+        if (animationMap.find(animEnum) == animationMap.end()) return false;
+        ChangeAnimation(animationMap.at(animEnum), _oneShot);
+        return true;
     }
 
     void ChangeAnimation(int index, bool _oneShot = false)

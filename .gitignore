@@ -1,2 +1,6 @@
 cmake-build-debug
+build
+.DS_Store
+.idea
+.vscode
 resources/models/gltf/level.glb

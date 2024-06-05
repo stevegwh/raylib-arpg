@@ -49,8 +49,13 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     transform.rotation = { 0, 0, 0 };
 
     auto model = LoadModel(modelPath);
+
     auto& animation = registry->emplace<Animation>(id, modelPath, &model);
-    animation.ChangeAnimation(3);
+    animation.animationMap[AnimationEnum::IDLE] = 0;
+    animation.animationMap[AnimationEnum::DEATH] = 0;
+    animation.animationMap[AnimationEnum::MOVE] = 3;
+    animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
+    animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
     Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
@@ -129,16 +134,23 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     
     // Set animation hooks
     auto& animation = registry->emplace<Animation>(id, modelPath, &model);
+
+    animation.animationMap[AnimationEnum::IDLE] = 0;
+    animation.animationMap[AnimationEnum::MOVE] = 1;
+    animation.animationMap[AnimationEnum::TALK] = 2;
+    animation.animationMap[AnimationEnum::AUTOATTACK] = 2;
+    animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+
     {
         entt::sink sink{transform.onFinishMovement};
         sink.connect<[](Animation& animation, entt::entity entity) {
-            animation.ChangeAnimation(0);
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }>(animation);
     }
     {
         entt::sink sink{transform.onStartMovement};
         sink.connect<[](Animation& animation, entt::entity entity) {
-            animation.ChangeAnimation(1);
+            animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
         }>(animation);
     }
     {
@@ -146,11 +158,11 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
         sink.connect<[](Animation& animation) { // TODO: Just to test animations on demand
             if (animation.animIndex == 0)
             {
-                animation.ChangeAnimation(2);
+                animation.ChangeAnimationByEnum(AnimationEnum::TALK);
             }
             else if (animation.animIndex == 2)
             {
-                animation.ChangeAnimation(0);
+                animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
             }
         }>(animation);
     }
