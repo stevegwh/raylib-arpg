@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../components/PathfindingActor.hpp"
+#include "../components/ControllableActor.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -19,7 +19,7 @@
 namespace sage
 {
 
-class ActorMovementSystem : public BaseSystem<PathfindingActor>
+class ControllableActorMovementSystem : public BaseSystem<ControllableActor>
 {
     Cursor* cursor;
     UserInput* userInput;
@@ -28,11 +28,11 @@ class ActorMovementSystem : public BaseSystem<PathfindingActor>
     TransformSystem* transformSystem{};
     void onCursorClick();
 public:
-    ActorMovementSystem(entt::registry* _registry,
-                        Cursor* _cursor,
-                        UserInput* _userInput,
-                        NavigationGridSystem* _navigationGridSystem,
-                        TransformSystem* _transformSystem);
+    ControllableActorMovementSystem(entt::registry* _registry,
+                                    Cursor* _cursor,
+                                    UserInput* _userInput,
+                                    NavigationGridSystem* _navigationGridSystem,
+                                    TransformSystem* _transformSystem);
     void MoveToLocation(entt::entity id);
     void PathfindToLocation(entt::entity id, Vector3 location);
     void SetControlledActor(entt::entity id);

@@ -56,8 +56,10 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
 
-    auto& healthbar = registry->emplace<HealthBar>(id); // TODO: "HealthBar" should be something like CombatData
+    auto& healthbar = registry->emplace<HealthBar>(id); // TODO: "HealthBar" should be separate from something like CombatData
+    
     auto& combatable = registry->emplace<Combatable>(id);
+    
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = CollisionLayer::ENEMY;
@@ -169,7 +171,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     }
     auto& worldObject = registry->emplace<WorldObject>(id);
 
-    auto& actor = registry->emplace<PathfindingActor>(id);
+    auto& actor = registry->emplace<ControllableActor>(id);
     actor.pathfindingBounds = 50;
     game->actorMovementSystem->SetControlledActor(id);
     

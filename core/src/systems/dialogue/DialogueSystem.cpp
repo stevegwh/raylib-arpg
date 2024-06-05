@@ -115,11 +115,11 @@ void DialogueSystem::Draw2D()
     window->Draw();
 }
 
-DialogueSystem::DialogueSystem(entt::registry *registry, 
-                               Cursor* _cursor, 
+DialogueSystem::DialogueSystem(entt::registry *registry,
+                               Cursor* _cursor,
                                Camera* _camera,
                                Settings* _settings,
-                               ActorMovementSystem* _actorMovementSystem) :
+                               ControllableActorMovementSystem* _actorMovementSystem) :
     BaseSystem(registry), 
     cursor(_cursor), 
     camera(_camera), 

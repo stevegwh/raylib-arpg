@@ -5,7 +5,7 @@
 #include "Cursor.hpp"
 #include "UserInput.hpp"
 #include "components/Renderable.hpp"
-#include "components/PathfindingActor.hpp"
+#include "components/ControllableActor.hpp"
 
 #ifndef WIN32
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
@@ -48,9 +48,9 @@ bool Cursor::isValidMove()
     if (navigationGridSystem->WorldToGridSpace(collision.point,
                                                tmp)) // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as bounds.)
     {
-        if (registry->any_of<PathfindingActor>(controlledActor))
+        if (registry->any_of<ControllableActor>(controlledActor))
         {
-            const auto &actor = registry->get<PathfindingActor>(controlledActor);
+            const auto &actor = registry->get<ControllableActor>(controlledActor);
             Vector2 minRange;
             Vector2 maxRange;
             navigationGridSystem->GetPathfindRange(controlledActor,

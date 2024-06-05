@@ -9,7 +9,7 @@
 #include "Camera.hpp"
 #include "components/Dialogue.hpp"
 #include "DialogueWindow.hpp"
-#include "systems/ActorMovementSystem.hpp"
+#include "systems/ControllableActorMovementSystem.hpp"
 
 #include "entt/entt.hpp"
 
@@ -22,7 +22,7 @@ class DialogueSystem : public BaseSystem<Dialogue>
     entt::entity controlledActor;
     entt::entity clickedNPC;
     
-    ActorMovementSystem* actorMovementSystem;
+    ControllableActorMovementSystem* actorMovementSystem;
     Cursor* cursor;
     Camera* camera;
     Vector3 oldCamPos;
@@ -35,11 +35,11 @@ class DialogueSystem : public BaseSystem<Dialogue>
     void startConversation(entt::entity actor);
     void endConversation(entt::entity actor);
 public:
-    explicit DialogueSystem(entt::registry* registry, 
-                            Cursor* _cursor, 
-                            Camera* camera, 
+    explicit DialogueSystem(entt::registry* registry,
+                            Cursor* _cursor,
+                            Camera* camera,
                             Settings* _settings,
-                            ActorMovementSystem* _actorMovementSystem);
+                            ControllableActorMovementSystem* _actorMovementSystem);
     entt::sigh<void()> onConversationStart;
     entt::sigh<void()> onConversationEnd;
     

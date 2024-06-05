@@ -24,11 +24,11 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
                                       camera.get(),
                                       userInput.get());
     
-    actorMovementSystem = std::make_unique<sage::ActorMovementSystem>(_registry,
-                                                                      cursor.get(),
-                                                                      userInput.get(),
-                                                                      navigationGridSystem.get(), 
-                                                                      transformSystem.get());
+    actorMovementSystem = std::make_unique<sage::ControllableActorMovementSystem>(_registry,
+                                                                                  cursor.get(),
+                                                                                  userInput.get(),
+                                                                                  navigationGridSystem.get(),
+                                                                                  transformSystem.get());
     dialogueSystem = std::make_unique<sage::DialogueSystem>(_registry, 
                                                             cursor.get(), 
                                                             camera.get(),

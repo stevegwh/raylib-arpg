@@ -7,7 +7,7 @@
 
 namespace sage
 {
-    struct PathfindingActor
+    struct ControllableActor
     {
         int pathfindingBounds = 25; // The max range the actor can pathfind at one time.
     };

@@ -11,9 +11,10 @@ namespace sage
 
 struct Combatable
 {
+    bool inCombat = false;
     entt::entity target;
-    float currentTick;
-    float maxTick;
+    float autoAttackTick = 0;
+    float autoAttackTickThreshold = 1;
 };
 
 } // sage

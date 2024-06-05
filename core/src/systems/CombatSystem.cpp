@@ -37,22 +37,25 @@ void CombatSystem::onEnemyDead(entt::entity entity)
     c.target = entt::null;
 }
 
-void CombatSystem::startCombat(entt::entity entity)
+void CombatSystem::startCombat(entt::entity entity) // All this should do is set target, idle animation and combat flag
 {
-    auto& player = registry->get<Transform>(actorMovementSystem->GetControlledActor());
     {
+        auto& player = registry->get<Transform>(actorMovementSystem->GetControlledActor());
         entt::sink sink { player.onFinishMovement };
         sink.disconnect<&CombatSystem::startCombat>(this);
     }
-    auto& combatable = registry->get<Combatable>(actorMovementSystem->GetControlledActor());
-    auto& animation = registry->get<Animation>(combatable.target);
+    auto& playerCombatable = registry->get<Combatable>(actorMovementSystem->GetControlledActor());
+    playerCombatable.inCombat = true;
+    
+    // TODO: Below should be part of autoattack
+    auto& animation = registry->get<Animation>(playerCombatable.target);
     animation.ChangeAnimation(1); // TODO: Magic number for changing animations
-    auto& healthbar = registry->get<HealthBar>(combatable.target);
-    healthbar.Decrement(combatable.target, 10); // TODO: tmp
+    auto& healthbar = registry->get<HealthBar>(playerCombatable.target);
+    healthbar.Decrement(playerCombatable.target, 10); // TODO: tmp
 
     if (healthbar.hp <= 0)
     {
-        onEnemyDead(combatable.target);
+        onEnemyDead(playerCombatable.target);
     }
 }
 
@@ -75,20 +78,31 @@ void CombatSystem::Update()
     for (auto& entity : view) 
     {
         auto& c = registry->get<Combatable>(entity);
-        if (c.target == entt::null) continue;
+        if (c.target == entt::null || !c.inCombat) continue;
         auto& t = registry->get<Transform>(entity);
-        // Turn to look at target
+        // Move to target
         // Progress tick
+        // Turn to look at target
         // Autoattack
-        // Calculate rotation angle based on direction
-        auto& enemyPos = registry->get<Transform>(c.target).position;
-        Vector3 direction = Vector3Subtract(enemyPos, t.position);
-        float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-        t.rotation.y = angle;
+        
+        // Player is out of combat if no enemy is targetting them?
+        if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
+        {
+            auto& enemyPos = registry->get<Transform>(c.target).position;
+            Vector3 direction = Vector3Subtract(enemyPos, t.position);
+            float angle = atan2f(direction.x, direction.z) * RAD2DEG;
+            t.rotation.y = angle;
+        }
+        else
+        {
+            c.autoAttackTick += GetFrameTime();
+            
+        }
+
     }
 }
 
-CombatSystem::CombatSystem(entt::registry *_registry, Cursor *_cursor, ActorMovementSystem* _actorMovementSystem) :
+CombatSystem::CombatSystem(entt::registry *_registry, Cursor *_cursor, ControllableActorMovementSystem* _actorMovementSystem) :
     BaseSystem<Combatable>(_registry), cursor(_cursor), actorMovementSystem(_actorMovementSystem)
 {
     {
