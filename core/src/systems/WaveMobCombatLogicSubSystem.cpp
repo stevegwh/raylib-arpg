@@ -102,18 +102,17 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker) const
 {
+    
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);
-    if (!c.inCombat)
-    {
-        c.target = attacker;
-        c.inCombat = true;
-    }
+    c.target = attacker;
+    c.inCombat = true;
 }
 
 WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry) :
 	registry(_registry)
 {
+    // TODO: This method does not work because the GameObjectFactory is run after this constructor
     auto view = registry->view<CombatableActor>();
     for (auto& entity: view) 
     {

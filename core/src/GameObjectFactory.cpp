@@ -64,6 +64,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     auto& healthbar = registry->emplace<HealthBar>(id); // TODO: "HealthBar" should be separate from something like CombatData
     
     auto& combatable = registry->emplace<CombatableActor>(id);
+    combatable.actorType = CombatableActorType::WAVEMOB;
     
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
@@ -168,6 +169,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     }
 
     auto& combatable = registry->emplace<CombatableActor>(id);
+    combatable.actorType = CombatableActorType::PLAYER;
     
     Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
