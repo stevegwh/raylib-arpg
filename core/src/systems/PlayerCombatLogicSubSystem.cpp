@@ -88,7 +88,26 @@ void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
     combatable.target = entity;
     auto& playerTrans = registry->get<Transform>(actorMovementSystem->GetControlledActor());
     const auto& enemyTrans = registry->get<Transform>(entity);
-    actorMovementSystem->PathfindToLocation(actorMovementSystem->GetControlledActor(), enemyTrans.position); // TODO: cannot be enemy position
+	
+	// TODO: We don't want "enemyTrans.position", we want enemy collider + our unit's weapon range 
+	
+	const auto& enemyCollideable = registry->get<Collideable>(combatable.target);
+	Vector3 enemyPos = enemyTrans.position;
+
+	// Calculate the direction vector from player to enemy
+	Vector3 direction = Vector3Subtract(enemyPos, playerTrans.position);
+
+	// Normalize the direction vector
+	float length = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	direction.x = (direction.x / length) * combatable.attackRange;
+	direction.y = (direction.y / length) * combatable.attackRange;
+	direction.z = (direction.z / length) * combatable.attackRange;
+
+	// Calculate the target position by subtracting the normalized direction vector
+	// multiplied by the attack range from the enemy position
+	Vector3 targetPos = Vector3Subtract(enemyPos, direction);
+	
+    actorMovementSystem->PathfindToLocation(actorMovementSystem->GetControlledActor(), targetPos);
     {
         entt::sink sink { playerTrans.onFinishMovement };
         sink.connect<&PlayerCombatLogicSubSystem::StartCombat>(this);
@@ -97,6 +116,7 @@ void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
 
 void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 {
+	// TODO: Check if unit is still within our attack range?
     auto& c = registry->get<CombatableActor>(entity);
 	auto& t = registry->get<Transform>(entity);
 	auto& enemyPos = registry->get<Transform>(c.target).position;

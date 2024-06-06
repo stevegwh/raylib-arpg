@@ -57,7 +57,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
     animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
-    Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+    Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
 
