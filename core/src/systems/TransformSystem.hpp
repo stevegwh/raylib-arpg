@@ -23,6 +23,7 @@ class TransformSystem : public BaseSystem<Transform>
     std::vector<std::pair<entt::entity, Transform*>> moveTowardsTransforms;
 public:
     TransformSystem(entt::registry* _registry);
+    void PruneMoveCommands(const entt::entity& entity);
     // TODO: Overload this so you can just update one field at a time if needed
     void PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path);
     void MoveToLocation(const entt::entity& entityId, Vector3 location);

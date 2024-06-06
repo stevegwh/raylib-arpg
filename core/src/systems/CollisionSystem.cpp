@@ -36,6 +36,7 @@ std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray)
                     .collidedEntityId = entity,
                     .collidedBB = c.worldBoundingBox,
                     .rlCollision = col,
+                    .collisionLayer = c.collisionLayer
                 };
                 collisions.push_back(info);
             }
@@ -87,7 +88,7 @@ bool CollisionSystem::CheckBoxCollision(const BoundingBox& col1, const BoundingB
     return CheckCollisionBoxes(col1, col2);
 }
 
-bool CollisionSystem::GetFirstCollision(entt::entity entity)
+bool CollisionSystem::GetFirstCollision(entt::entity entity) // TODO: Terrible name. Should be "CheckAnyBoxCollision"
 {
     const auto& targetCol = registry->get<Collideable>(entity);
 

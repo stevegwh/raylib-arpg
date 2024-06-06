@@ -79,42 +79,49 @@ void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
 
 void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 {
-	auto& c = registry->get<CombatableActor>(entity);
-	auto& t = registry->get<Transform>(entity);
+    auto& c = registry->get<CombatableActor>(entity);
+    auto& t = registry->get<Transform>(entity);
     auto& animation = registry->get<Animation>(entity);
-	auto& enemyPos = registry->get<Transform>(c.target).position;
-    
-    if (Vector3Distance(t.position, enemyPos) > c.attackRange)
+    auto& enemyPos = registry->get<Transform>(c.target).position;
+
+    Vector3 direction = Vector3Subtract(enemyPos, t.position);
+    float distance = Vector3Length(direction);
+    Vector3 normDirection = Vector3Normalize(direction);
+
+    if (distance > c.attackRange)
     {
         animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-        if (t.movementTick >= t.movementTickThreshold)
+        Ray ray;
+        ray.position = t.position;
+        ray.direction = Vector3Scale(normDirection, distance);
+        auto collisions = collisionSystem->GetCollisionsWithRay(ray);
+    
+        bool hasObstruction = false;
+        for (const auto& col : collisions)
         {
-            Vector2 minRage;
-            Vector2 maxRange;
-            navigationGridSystem->GetPathfindRange(entity, 25.0f, minRage, maxRange); // TODO: 25.0f is temporary
-            auto path = navigationGridSystem->Pathfind(t.position, enemyPos, minRage, maxRange);
-            if (path.empty())
+            if (col.collisionLayer == CollisionLayer::BUILDING)
             {
-                // Go out of combat
-                transformSystem->PathfindToLocation(entity, {t.position});
-                c.target = entt::null;
-                return;
+                hasObstruction = true;
+                break;
             }
-            transformSystem->PathfindToLocation(entity, path);
-            t.movementTick = 0;
         }
-        else
+    
+        if (hasObstruction)
         {
-            t.movementTick += GetFrameTime();
+            // Out of combat
+            transformSystem->PruneMoveCommands(entity);
+            c.target = entt::null;
+            return;
         }
+    
+        transformSystem->PathfindToLocation(entity, {enemyPos});
         return;
     }
-    
-	Vector3 direction = Vector3Subtract(enemyPos, t.position);
-	float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-	t.rotation.y = angle;
-	c.autoAttackTick = 0;
-	animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
+
+    float angle = atan2f(direction.x, direction.z) * RAD2DEG;
+    t.rotation.y = angle;
+    c.autoAttackTick = 0;
+    animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 }
 
 void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
@@ -141,9 +148,9 @@ void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attack
 
 WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry,
                                                          TransformSystem* _transformSystem,
-                                                         NavigationGridSystem* _navigationGridSystem) :
+                                                         CollisionSystem* _collisionSystem) :
                                                          registry(_registry),
                                                          transformSystem(_transformSystem),
-                                                         navigationGridSystem(_navigationGridSystem)
+                                                         collisionSystem(_collisionSystem)
 {}
 } // sage

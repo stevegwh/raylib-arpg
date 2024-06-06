@@ -27,6 +27,7 @@ struct CollisionInfo
     entt::entity collidedEntityId{};
     BoundingBox collidedBB{};
     RayCollision rlCollision{};
+    CollisionLayer collisionLayer{};
 };
 
 struct Collideable

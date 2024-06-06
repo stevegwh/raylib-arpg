@@ -5,7 +5,7 @@
 #pragma once
 
 #include "TransformSystem.hpp"
-#include "NavigationGridSystem.hpp"
+#include "CollisionSystem.hpp"
 
 #include <entt/entt.hpp>
 
@@ -16,7 +16,7 @@ struct WaveMobCombatLogicSubSystem
 {
 	entt::registry* registry;
     TransformSystem* transformSystem;
-    NavigationGridSystem* navigationGridSystem;
+    CollisionSystem* collisionSystem;
 
 	void Update(entt::entity entity) const;
 	void StartCombat(entt::entity entity);
@@ -25,7 +25,7 @@ struct WaveMobCombatLogicSubSystem
 	void AutoAttack(entt::entity entity) const;
 	void OnHit(entt::entity entity, entt::entity attacker, float damage);
     void destroyEnemy(entt::entity entity);
-	WaveMobCombatLogicSubSystem(entt::registry* _registry, TransformSystem* _transformSystem, NavigationGridSystem* _navigationGridSystem);
+	WaveMobCombatLogicSubSystem(entt::registry* _registry, TransformSystem* _transformSystem, CollisionSystem* _collisionSystem);
 };
 
 } // sage

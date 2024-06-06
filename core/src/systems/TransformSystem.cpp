@@ -10,12 +10,12 @@
 namespace sage
 {
 
-void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
+void TransformSystem::PruneMoveCommands(const entt::entity& entity)
 {
-    auto& transform = registry->get<Transform>(entityId);
-    
+    auto& transform = registry->get<Transform>(entity);
+
     // Prune existing move commands
-    transform.onMovementCancel.publish(entityId);
+    transform.onMovementCancel.publish(entity);
     for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
     {
         if (it->second == &transform)
@@ -25,11 +25,16 @@ void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std
         }
         ++it;
     }
-    
+
     // Clear queue of previous commands
     std::queue<Vector3> empty;
     std::swap(transform.targets, empty);
+}
 
+void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
+{
+    PruneMoveCommands(entityId);
+    auto& transform = registry->get<Transform>(entityId);
     for (auto n : path) transform.targets.emplace(n);
     transform.direction = Vector3Normalize(Vector3Subtract(transform.targets.front(), transform.position));
     moveTowardsTransforms.emplace_back(entityId, &transform);

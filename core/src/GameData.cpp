@@ -43,7 +43,7 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
                                                   cursor.get(),
                                                   actorMovementSystem.get(),
                                                   transformSystem.get(),
-                                                  navigationGridSystem.get());
+                                                  collisionSystem.get());
 }
 
 void GameData::Load()

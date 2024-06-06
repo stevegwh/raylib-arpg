@@ -15,7 +15,7 @@
 namespace sage
 {
 class TransformSystem; // forward dec
-class NavigationGridSystem; // forward dec
+class CollisionSystem; // forward dec
 class CombatSystem : public BaseSystem<CombatableActor>
 {
     Cursor* cursor;
@@ -27,7 +27,7 @@ public:
                Cursor *_cursor,
                ControllableActorMovementSystem* _actorMovementSystem,
                TransformSystem* _transformSystem,
-               NavigationGridSystem* _navigationGridSystem);
+               CollisionSystem* _collisionSystem);
     void Update();
 };
 
