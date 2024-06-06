@@ -39,7 +39,11 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
         entt::sink sink{actorMovementSystem->onControlledActorChange};
         sink.connect<&Cursor::OnControlledActorChange>(*cursor);
     }
-    combatSystem = std::make_unique<CombatSystem>(_registry, cursor.get(), actorMovementSystem.get());
+    combatSystem = std::make_unique<CombatSystem>(_registry,
+                                                  cursor.get(),
+                                                  actorMovementSystem.get(),
+                                                  transformSystem.get(),
+                                                  navigationGridSystem.get());
 }
 
 void GameData::Load()

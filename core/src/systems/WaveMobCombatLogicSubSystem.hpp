@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "TransformSystem.hpp"
+#include "NavigationGridSystem.hpp"
+
 #include <entt/entt.hpp>
 
 namespace sage
@@ -12,6 +15,9 @@ namespace sage
 struct WaveMobCombatLogicSubSystem
 {
 	entt::registry* registry;
+    TransformSystem* transformSystem;
+    NavigationGridSystem* navigationGridSystem;
+
 	void Update(entt::entity entity) const;
 	void StartCombat(entt::entity entity);
 	void CheckInCombat(entt::entity entity) const;
@@ -19,7 +25,7 @@ struct WaveMobCombatLogicSubSystem
 	void AutoAttack(entt::entity entity) const;
 	void OnHit(entt::entity entity, entt::entity attacker, float damage);
     void destroyEnemy(entt::entity entity);
-	explicit WaveMobCombatLogicSubSystem(entt::registry* _registry);
+	WaveMobCombatLogicSubSystem(entt::registry* _registry, TransformSystem* _transformSystem, NavigationGridSystem* _navigationGridSystem);
 };
 
 } // sage

@@ -14,7 +14,8 @@
 
 namespace sage
 {
-
+class TransformSystem; // forward dec
+class NavigationGridSystem; // forward dec
 class CombatSystem : public BaseSystem<CombatableActor>
 {
     Cursor* cursor;
@@ -22,7 +23,11 @@ class CombatSystem : public BaseSystem<CombatableActor>
 public:
 	std::unique_ptr<PlayerCombatLogicSubSystem> playerCombatLogicSubSystem;
 	std::unique_ptr<WaveMobCombatLogicSubSystem> waveMobCombatLogicSubSystem;
-    CombatSystem(entt::registry* _registry, Cursor* _cursor, ControllableActorMovementSystem* _actorMovementSystem);
+    CombatSystem(entt::registry *_registry,
+               Cursor *_cursor,
+               ControllableActorMovementSystem* _actorMovementSystem,
+               TransformSystem* _transformSystem,
+               NavigationGridSystem* _navigationGridSystem);
     void Update();
 };
 

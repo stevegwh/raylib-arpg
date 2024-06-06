@@ -10,7 +10,7 @@
 namespace sage
 {
 
-void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path)
+void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
 {
     auto& transform = registry->get<Transform>(entityId);
     

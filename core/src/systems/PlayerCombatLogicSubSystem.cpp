@@ -18,10 +18,6 @@ void PlayerCombatLogicSubSystem::Update(entt::entity entity) const
 	auto& c = registry->get<CombatableActor>(entity);
 	if (c.inCombat) CheckInCombat(entity);
 	if (c.target == entt::null || !c.inCombat) return;
-	// Move to target
-	// Progress tick
-	// Turn to look at target
-	// Autoattack
 
 	// Player is out of combat if no enemy is targetting them?
 	if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
@@ -43,7 +39,10 @@ void PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	{
 		combatable.inCombat = false;
 		auto& animation = registry->get<Animation>(entity);
-		animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+        if (animation.animIndex == animation.animationMap[AnimationEnum::AUTOATTACK])
+        {
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+        }
 	}
 }
 
@@ -52,15 +51,26 @@ void PlayerCombatLogicSubSystem::OnDeath(entt::entity entity)
 
 }
 
-void PlayerCombatLogicSubSystem::OnTargetInvalid(entt::entity entity)
+void PlayerCombatLogicSubSystem::OnTargetDeath(entt::entity entity)
 {
 	auto& enemyCombatable = registry->get<CombatableActor>(entity);
 	{
 		entt::sink sink{ enemyCombatable.onDeath };
-		sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetInvalid>(this);
+		sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
 	}
 	auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
 	playerCombatable.target = entt::null;
+}
+
+void PlayerCombatLogicSubSystem::OnAttackCancel(entt::entity entity)
+{
+    auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
+    playerCombatable.target = entt::null;
+    auto& playerTrans = registry->get<Transform>(actorMovementSystem->GetControlledActor());
+    {
+        entt::sink sink { playerTrans.onFinishMovement };
+        sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
+    }
 }
 
 void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
@@ -78,7 +88,7 @@ void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
 	auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 	{
 		entt::sink sink{ enemyCombatable.onDeath };
-		sink.connect<&PlayerCombatLogicSubSystem::OnTargetInvalid>(this);
+		sink.connect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
 	}
 }
 
@@ -88,9 +98,7 @@ void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
     combatable.target = entity;
     auto& playerTrans = registry->get<Transform>(actorMovementSystem->GetControlledActor());
     const auto& enemyTrans = registry->get<Transform>(entity);
-	
-	// TODO: We don't want "enemyTrans.position", we want enemy collider + our unit's weapon range 
-	
+
 	const auto& enemyCollideable = registry->get<Collideable>(combatable.target);
 	Vector3 enemyPos = enemyTrans.position;
 
@@ -144,6 +152,10 @@ PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry
     {
         entt::sink sink{ cursor->onEnemyClick };
         sink.connect<&PlayerCombatLogicSubSystem::onEnemyClick>(this);
+    }
+    {
+        entt::sink sink{ cursor->onFloorClick };
+        sink.connect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
     }
 }
 } // sage

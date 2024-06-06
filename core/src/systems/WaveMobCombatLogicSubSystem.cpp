@@ -82,6 +82,14 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 	auto& c = registry->get<CombatableActor>(entity);
 	auto& t = registry->get<Transform>(entity);
 	auto& enemyPos = registry->get<Transform>(c.target).position;
+
+    if (Vector3Distance(t.position, enemyPos) > c.attackRange)
+    {
+        auto path = navigationGridSystem->Pathfind(t.position, enemyPos);
+        transformSystem->PathfindToLocation(entity, path);
+        return;
+    }
+
 	Vector3 direction = Vector3Subtract(enemyPos, t.position);
 	float angle = atan2f(direction.x, direction.z) * RAD2DEG;
 	t.rotation.y = angle;
@@ -113,7 +121,11 @@ void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attack
 	}
 }
 
-WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry) :
-	registry(_registry)
+WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry,
+                                                         TransformSystem* _transformSystem,
+                                                         NavigationGridSystem* _navigationGridSystem) :
+                                                         registry(_registry),
+                                                         transformSystem(_transformSystem),
+                                                         navigationGridSystem(_navigationGridSystem)
 {}
 } // sage

@@ -31,10 +31,16 @@ void CombatSystem::Update()
     }
 }
 
-CombatSystem::CombatSystem(entt::registry *_registry, Cursor *_cursor, ControllableActorMovementSystem* _actorMovementSystem) :
-	BaseSystem<CombatableActor>(_registry), cursor(_cursor), actorMovementSystem(_actorMovementSystem),
-    playerCombatLogicSubSystem(std::make_unique<PlayerCombatLogicSubSystem>(_registry, _actorMovementSystem, _cursor)),
-    waveMobCombatLogicSubSystem(std::make_unique<WaveMobCombatLogicSubSystem>(_registry))
+CombatSystem::CombatSystem(entt::registry *_registry,
+                           Cursor *_cursor,
+                           ControllableActorMovementSystem* _actorMovementSystem,
+                           TransformSystem* _transformSystem,
+                           NavigationGridSystem* _navigationGridSystem) :
+                           BaseSystem<CombatableActor>(_registry),
+                               cursor(_cursor),
+                               actorMovementSystem(_actorMovementSystem),
+                               playerCombatLogicSubSystem(std::make_unique<PlayerCombatLogicSubSystem>(_registry, _actorMovementSystem, _cursor)),
+                               waveMobCombatLogicSubSystem(std::make_unique<WaveMobCombatLogicSubSystem>(_registry, _transformSystem, _navigationGridSystem))
 {
 }
 } // sage
