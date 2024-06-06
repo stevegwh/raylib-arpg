@@ -4,19 +4,31 @@
 
 #pragma once
 
-#include "systems/CombatLogicSubSystem.hpp"
+#include "ControllableActorMovementSystem.hpp"
+#include "Cursor.hpp"
+
+#include <entt/entt.hpp>
 
 namespace sage
 {
 
-struct PlayerCombatLogicSubSystem : public CombatLogicSubSystem
+struct PlayerCombatLogicSubSystem
 {
-	void Update(entt::entity entity) override;
-	void StartCombat(entt::entity entity) override;
-	void CheckInCombat(entt::entity entity) override;
-	void OnDeath(entt::entity entity) override;
-	void AutoAttack(entt::entity entity) override;
-	void OnHit(entt::entity entity, entt::entity attacker) override;
+	entt::registry* registry;
+    Cursor* cursor;
+	ControllableActorMovementSystem* actorMovementSystem;
+    
+	void onEnemyClick(entt::entity entity);
+
+	void Update(entt::entity entity);
+	void StartCombat(entt::entity entity);
+	void CheckInCombat(entt::entity entity) const;
+	void OnDeath(entt::entity entity);
+    void AutoAttack(entt::entity entity);
+    void OnHit(entt::entity entity, entt::entity attacker);
+
+	PlayerCombatLogicSubSystem(entt::registry* _registry, ControllableActorMovementSystem* _actorMovementSystem,
+                               Cursor* _cursor);
 };
 
 } // sage

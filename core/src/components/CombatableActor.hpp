@@ -20,6 +20,8 @@ struct CombatableActor
     entt::entity target{};
     float autoAttackTick = 0;
     float autoAttackTickThreshold = 1;
+    entt::sigh<void(entt::entity, entt::entity)> onHit{};
+    entt::sigh<void(entt::entity)> onDeath{};
 };
 
 } // sage

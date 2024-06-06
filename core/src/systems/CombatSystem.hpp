@@ -24,13 +24,6 @@ class CombatSystem : public BaseSystem<CombatableActor>
 	
 	std::unique_ptr<PlayerCombatLogicSubSystem> playerCombatLogicSubSystem;
 	std::unique_ptr<WaveMobCombatLogicSubSystem> waveMobCombatLogicSubSystem;
-
-    void startCombat(entt::entity entity);
-    void onEnemyClick(entt::entity entity);
-    void onEnemyDead(entt::entity entity);
-    void destroyEnemy(entt::entity entity);
-    void onAutoAttackEnd(entt::entity entity);
-    void checkInCombat(entt::entity entity);
 public:
     CombatSystem(entt::registry* _registry, Cursor* _cursor, ControllableActorMovementSystem* _actorMovementSystem);
     void Update();
