@@ -18,6 +18,7 @@ struct WaveMobCombatLogicSubSystem
     TransformSystem* transformSystem;
     CollisionSystem* collisionSystem;
 
+    void Draw3D(entt::entity entity) const;
 	void Update(entt::entity entity) const;
 	void StartCombat(entt::entity entity);
 	void CheckInCombat(entt::entity entity) const;

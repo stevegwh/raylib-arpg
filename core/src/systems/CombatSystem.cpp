@@ -13,6 +13,19 @@
 namespace sage
 {
 
+void CombatSystem::Draw3D()
+{
+    auto view = registry->view<CombatableActor>();
+    for (auto& entity : view)
+    {
+        auto& c = registry->get<CombatableActor>(entity);
+        if (c.actorType == CombatableActorType::WAVEMOB)
+        {
+            waveMobCombatLogicSubSystem->Draw3D(entity);
+        }
+    }
+}
+
 
 void CombatSystem::Update()
 {

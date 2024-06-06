@@ -21,8 +21,8 @@ struct Transform
     Vector3 rotation{};
     float scale = 1.0f;
     float movementSpeed = 0.35f;
-    float movementTick = 0;
-    float movementTickThreshold = 0.5f;
+    
+    Ray movementDirectionDebugLine{};
 
     Transform() = default;
     Transform(const Transform&) = delete;

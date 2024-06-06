@@ -19,7 +19,8 @@ enum class CollisionLayer
     NAVIGATION,
     PLAYER,
     NPC,
-    ENEMY
+    ENEMY,
+    COUNT // Must always be last
 };
 
 struct CollisionInfo

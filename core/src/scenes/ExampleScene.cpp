@@ -28,6 +28,7 @@ void ExampleScene::Draw2D()
 void ExampleScene::Draw3D()
 {
     data->healthBarSystem->Draw3D();
+    data->combatSystem->Draw3D();
     Scene::Draw3D();
 }
 

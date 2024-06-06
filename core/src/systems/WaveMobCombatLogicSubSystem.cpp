@@ -11,6 +11,8 @@
 #include "../components/Transform.hpp"
 #include "../components/HealthBar.hpp"
 
+#define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
+
 namespace sage
 {
 void WaveMobCombatLogicSubSystem::Update(entt::entity entity) const
@@ -81,6 +83,7 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 {
     auto& c = registry->get<CombatableActor>(entity);
     auto& t = registry->get<Transform>(entity);
+    auto& collideable = registry->get<Collideable>(entity);
     auto& animation = registry->get<Animation>(entity);
     auto& enemyPos = registry->get<Transform>(c.target).position;
 
@@ -94,26 +97,21 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
         Ray ray;
         ray.position = t.position;
         ray.direction = Vector3Scale(normDirection, distance);
-        auto collisions = collisionSystem->GetCollisionsWithRay(ray);
-    
-        bool hasObstruction = false;
-        for (const auto& col : collisions)
+        ray.position.y = 0.5f;
+        ray.direction.y = 0.5f;
+        t.movementDirectionDebugLine = ray;
+        auto collisions = collisionSystem->GetCollisionsWithRay(ray, collideable.collisionLayer);
+        
+        if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
         {
-            if (col.collisionLayer == CollisionLayer::BUILDING)
-            {
-                hasObstruction = true;
-                break;
-            }
-        }
-    
-        if (hasObstruction)
-        {
+            
             // Out of combat
             transformSystem->PruneMoveCommands(entity);
             c.target = entt::null;
+            t.movementDirectionDebugLine = {};
             return;
         }
-    
+
         transformSystem->PathfindToLocation(entity, {enemyPos});
         return;
     }
@@ -122,6 +120,12 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
     t.rotation.y = angle;
     c.autoAttackTick = 0;
     animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
+}
+
+void WaveMobCombatLogicSubSystem::Draw3D(entt::entity entity) const
+{
+    auto& t = registry->get<Transform>(entity);
+    //DrawLine3D(t.movementDirectionDebugLine.position, t.movementDirectionDebugLine.direction, RED);
 }
 
 void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)

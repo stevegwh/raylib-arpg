@@ -29,6 +29,7 @@ public:
                TransformSystem* _transformSystem,
                CollisionSystem* _collisionSystem);
     void Update();
+    void Draw3D();
 };
 
 } // sage

@@ -14,34 +14,32 @@ bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::Coll
     return a.rlCollision.distance < b.rlCollision.distance;
 }
 
-
 namespace sage
 {
 
-std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray) const
+std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray, CollisionLayer layer)
 {
-    // TODO: You can define component groups with entt. Do this for collisions based on their layers.
     std::vector<CollisionInfo> collisions;
-    
+
     auto view = registry->view<Collideable>();
 
-    view.each([&collisions, ray](auto entity, const auto& c)
-    {
-        if (c.collisionLayer != CollisionLayer::NAVIGATION) // TODO: Need to define a collision matrix
-        {
-            auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
-            if (col.hit)
-            {
-                CollisionInfo info = {
-                    .collidedEntityId = entity,
-                    .collidedBB = c.worldBoundingBox,
-                    .rlCollision = col,
-                    .collisionLayer = c.collisionLayer
-                };
-                collisions.push_back(info);
-            }
-        }
-    });
+    view.each([&](auto entity, const auto& c)
+              {
+                  if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
+                  {
+                      auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
+                      if (col.hit)
+                      {
+                          CollisionInfo info = {
+                              .collidedEntityId = entity,
+                              .collidedBB = c.worldBoundingBox,
+                              .rlCollision = col,
+                              .collisionLayer = c.collisionLayer
+                          };
+                          collisions.push_back(info);
+                      }
+                  }
+              });
 
     std::sort(collisions.begin(), collisions.end(), compareRayCollisionDistances);
 
@@ -104,9 +102,30 @@ bool CollisionSystem::GetFirstCollision(entt::entity entity) // TODO: Terrible n
     return false;
 }
 
+CollisionMatrix CollisionSystem::CreateCollisionMatrix() const
+{
+    int numLayers = static_cast<int>(CollisionLayer::COUNT);
+    std::vector<std::vector<bool>> matrix(numLayers, std::vector<bool>(numLayers, false));
+
+    matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::PLAYER)] = true;
+    matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::ENEMY)] = true;
+    matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::NPC)] = true;
+    //matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::NAVIGATION)] = true;
+    matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::BUILDING)] = true;
+    matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::FLOOR)] = true;
+    
+    matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::ENEMY)] = true;
+    matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::BUILDING)] = true;
+    matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::PLAYER)] = true;
+    matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::BUILDING)] = true;
+
+    return matrix;
+}
+
 CollisionSystem::CollisionSystem(entt::registry *_registry) :
     BaseSystem<Collideable>(_registry)
 {
+    collisionMatrix = CreateCollisionMatrix();
 }
 
 }

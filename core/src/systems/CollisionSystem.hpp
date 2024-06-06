@@ -12,17 +12,20 @@
 
 namespace sage
 {
+using CollisionMatrix = std::vector<std::vector<bool>>;
 class CollisionSystem : public BaseSystem<Collideable>
 {
+    [[nodiscard]] CollisionMatrix CreateCollisionMatrix() const;
 public:
+    CollisionMatrix collisionMatrix;
+    
     explicit CollisionSystem(entt::registry* _registry);
     void OnTransformUpdate(entt::entity entity);
     void UpdateWorldBoundingBox(entt::entity entityId, Matrix mat);
-    [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray) const;
+    [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray, CollisionLayer layer = CollisionLayer::DEFAULT);
     void BoundingBoxDraw(entt::entity entityId, Color color = LIME) const;
     static bool CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2);
     bool GetFirstCollision(entt::entity entity);
-
 };
 }
 
