@@ -13,7 +13,7 @@
 
 namespace sage
 {
-void WaveMobCombatLogicSubSystem::Update(entt::entity entity)
+void WaveMobCombatLogicSubSystem::Update(entt::entity entity) const
 {
 	CheckInCombat(entity);
 	auto& c = registry->get<CombatableActor>(entity);
@@ -61,6 +61,9 @@ void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
 void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
 {
     auto& combatable = registry->get<CombatableActor>(entity);
+	combatable.inCombat = false;
+	combatable.target = entt::null;
+	
     {
         entt::sink sink { combatable.onHit };
         sink.disconnect<&WaveMobCombatLogicSubSystem::OnHit>(this);
@@ -69,16 +72,13 @@ void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
         entt::sink sink { combatable.onDeath };
         sink.disconnect<&WaveMobCombatLogicSubSystem::OnDeath>(this);
     }
-    
-    combatable.inCombat = false;
+	
     auto& animation = registry->get<Animation>(entity);
     animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
     {
         entt::sink sink { animation.onAnimationEnd };
         sink.connect<&WaveMobCombatLogicSubSystem::destroyEnemy>(this);
     }
-    auto& c = registry->get<CombatableActor>(entity);
-    c.target = entt::null;
 }
 
 void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
@@ -102,7 +102,6 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker) const
 {
-    
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);
     c.target = attacker;
@@ -111,26 +110,5 @@ void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attack
 
 WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry) :
 	registry(_registry)
-{
-    // TODO: This method does not work because the GameObjectFactory is run after this constructor
-    auto view = registry->view<CombatableActor>();
-    for (auto& entity: view) 
-    {
-        auto& combatable = registry->get<CombatableActor>(entity);
-        if (combatable.actorType != CombatableActorType::WAVEMOB) 
-        {
-            continue;
-        }
-        
-        {
-            entt::sink sink { combatable.onHit };
-            sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(this);
-        }
-        {
-            entt::sink sink { combatable.onDeath };
-            sink.connect<&WaveMobCombatLogicSubSystem::OnDeath>(this);
-        }
-    }
-
-}
+{}
 } // sage

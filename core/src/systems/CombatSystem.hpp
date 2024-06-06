@@ -17,14 +17,11 @@ namespace sage
 
 class CombatSystem : public BaseSystem<CombatableActor>
 {
-    // Subscribe to collision with cursor on Enemy layer
-    // React to click by updating HealthBar and animation
     Cursor* cursor;
     ControllableActorMovementSystem* actorMovementSystem;
-	
+public:
 	std::unique_ptr<PlayerCombatLogicSubSystem> playerCombatLogicSubSystem;
 	std::unique_ptr<WaveMobCombatLogicSubSystem> waveMobCombatLogicSubSystem;
-public:
     CombatSystem(entt::registry* _registry, Cursor* _cursor, ControllableActorMovementSystem* _actorMovementSystem);
     void Update();
 };

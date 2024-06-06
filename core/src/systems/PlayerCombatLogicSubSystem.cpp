@@ -15,8 +15,8 @@ namespace sage
 {
 void PlayerCombatLogicSubSystem::Update(entt::entity entity)
 {
-	CheckInCombat(entity);
 	auto& c = registry->get<CombatableActor>(entity);
+	if (c.inCombat) CheckInCombat(entity);
 	if (c.target == entt::null || !c.inCombat) return;
 	// Move to target
 	// Progress tick
@@ -76,7 +76,7 @@ void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
     }
 }
 
-void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity)
+void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 {
     auto& c = registry->get<CombatableActor>(entity);
 	auto& t = registry->get<Transform>(entity);
@@ -91,14 +91,15 @@ void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity)
 
     auto& enemyCombatable = registry->get<CombatableActor>(c.target);
     enemyCombatable.onHit.publish(c.target, actorMovementSystem->GetControlledActor());
-
+	
+	// TODO: Below should be handled by the target that gets hit. Just pass the damage number and the attacker to the enemy via OnHit()
 	if (registry->all_of<HealthBar>(c.target))
 	{
 		auto& healthbar = registry->get<HealthBar>(c.target);
 		healthbar.Decrement(c.target, 10); // TODO: tmp
 		if (healthbar.hp <= 0)
 		{
-			OnDeath(c.target);
+			enemyCombatable.onDeath.publish(c.target);
 			c.target = entt::null;
 		}
 	}

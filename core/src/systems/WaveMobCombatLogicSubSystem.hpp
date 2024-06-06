@@ -12,7 +12,7 @@ namespace sage
 struct WaveMobCombatLogicSubSystem
 {
 	entt::registry* registry;
-	void Update(entt::entity entity);
+	void Update(entt::entity entity) const;
 	void StartCombat(entt::entity entity);
 	void CheckInCombat(entt::entity entity) const;
 	void OnDeath(entt::entity entity);
