@@ -13,7 +13,7 @@
 
 namespace sage
 {
-void PlayerCombatLogicSubSystem::Update(entt::entity entity)
+void PlayerCombatLogicSubSystem::Update(entt::entity entity) const
 {
 	auto& c = registry->get<CombatableActor>(entity);
 	if (c.inCombat) CheckInCombat(entity);
@@ -46,12 +46,24 @@ void PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 		animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 	}
 }
+
 void PlayerCombatLogicSubSystem::OnDeath(entt::entity entity)
 {
 
 }
 
-void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity) // All this should do is set target, idle animation and combat flag
+void PlayerCombatLogicSubSystem::OnTargetInvalid(entt::entity entity)
+{
+	auto& enemyCombatable = registry->get<CombatableActor>(entity);
+	{
+		entt::sink sink{ enemyCombatable.onDeath };
+		sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetInvalid>(this);
+	}
+	auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
+	playerCombatable.target = entt::null;
+}
+
+void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
 {
     // TODO: What is "entity"?
     {
@@ -59,8 +71,15 @@ void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity) // All this sh
         entt::sink sink { playerTrans.onFinishMovement };
         sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
     }
+
     auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
     playerCombatable.inCombat = true;
+
+	auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
+	{
+		entt::sink sink{ enemyCombatable.onDeath };
+		sink.connect<&PlayerCombatLogicSubSystem::OnTargetInvalid>(this);
+	}
 }
 
 void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
@@ -90,19 +109,7 @@ void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 	animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
     auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-    enemyCombatable.onHit.publish(c.target, actorMovementSystem->GetControlledActor());
-	
-	// TODO: Below should be handled by the target that gets hit. Just pass the damage number and the attacker to the enemy via OnHit()
-	if (registry->all_of<HealthBar>(c.target))
-	{
-		auto& healthbar = registry->get<HealthBar>(c.target);
-		healthbar.Decrement(c.target, 10); // TODO: tmp
-		if (healthbar.hp <= 0)
-		{
-			enemyCombatable.onDeath.publish(c.target);
-			c.target = entt::null;
-		}
-	}
+    enemyCombatable.onHit.publish(c.target, actorMovementSystem->GetControlledActor(), 10); // TODO: tmp dmg
 }
 
 void PlayerCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker)

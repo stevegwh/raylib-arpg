@@ -68,10 +68,6 @@ void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
         entt::sink sink { combatable.onHit };
         sink.disconnect<&WaveMobCombatLogicSubSystem::OnHit>(this);
     }
-    {
-        entt::sink sink { combatable.onDeath };
-        sink.disconnect<&WaveMobCombatLogicSubSystem::OnDeath>(this);
-    }
 	
     auto& animation = registry->get<Animation>(entity);
     animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
@@ -100,12 +96,21 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 }
 
-void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker) const
+void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 {
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);
     c.target = attacker;
     c.inCombat = true;
+	
+	auto& healthbar = registry->get<HealthBar>(entity);
+	healthbar.Decrement(entity, damage);
+	if (healthbar.hp <= 0)
+	{
+		c.onDeath.publish(entity);
+		c.target = entt::null;
+		OnDeath(entity);
+	}
 }
 
 WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry) :

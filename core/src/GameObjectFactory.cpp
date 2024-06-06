@@ -69,10 +69,6 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
 		entt::sink sink { combatable.onHit };
 		sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatSystem->waveMobCombatLogicSubSystem);
 	}
-	{
-		entt::sink sink { combatable.onDeath };
-		sink.connect<&WaveMobCombatLogicSubSystem::OnDeath>(game->combatSystem->waveMobCombatLogicSubSystem);
-	}
     
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);

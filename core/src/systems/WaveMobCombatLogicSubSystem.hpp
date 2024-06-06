@@ -17,7 +17,7 @@ struct WaveMobCombatLogicSubSystem
 	void CheckInCombat(entt::entity entity) const;
 	void OnDeath(entt::entity entity);
 	void AutoAttack(entt::entity entity) const;
-	void OnHit(entt::entity entity, entt::entity attacker) const;
+	void OnHit(entt::entity entity, entt::entity attacker, float damage);
     void destroyEnemy(entt::entity entity);
 	explicit WaveMobCombatLogicSubSystem(entt::registry* _registry);
 };
