@@ -57,6 +57,8 @@ bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bou
 
     bool topLeftValid = WorldToGridSpace(topLeft, topLeftIndex);
     bool bottomRightValid = WorldToGridSpace(bottomRight, bottomRightIndex);
+    
+    if (!topLeftValid || !bottomRightValid) return false;
 
     // Clip the top-left and bottom-right indices to the grid boundaries
     topLeftIndex.x = std::max(topLeftIndex.x, 0.0f);

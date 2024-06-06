@@ -44,7 +44,7 @@ void WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	{
 		combatable.inCombat = false;
 		auto& animation = registry->get<Animation>(entity);
-		animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 	}
 }
 
@@ -81,21 +81,39 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 {
 	auto& c = registry->get<CombatableActor>(entity);
 	auto& t = registry->get<Transform>(entity);
+    auto& animation = registry->get<Animation>(entity);
 	auto& enemyPos = registry->get<Transform>(c.target).position;
-
+    
     if (Vector3Distance(t.position, enemyPos) > c.attackRange)
     {
-        auto path = navigationGridSystem->Pathfind(t.position, enemyPos);
-        transformSystem->PathfindToLocation(entity, path);
+        animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+        if (t.movementTick >= t.movementTickThreshold)
+        {
+            Vector2 minRage;
+            Vector2 maxRange;
+            navigationGridSystem->GetPathfindRange(entity, 25.0f, minRage, maxRange); // TODO: 25.0f is temporary
+            auto path = navigationGridSystem->Pathfind(t.position, enemyPos, minRage, maxRange);
+            if (path.empty())
+            {
+                // Go out of combat
+                transformSystem->PathfindToLocation(entity, {t.position});
+                c.target = entt::null;
+                return;
+            }
+            transformSystem->PathfindToLocation(entity, path);
+            t.movementTick = 0;
+        }
+        else
+        {
+            t.movementTick += GetFrameTime();
+        }
         return;
     }
-
+    
 	Vector3 direction = Vector3Subtract(enemyPos, t.position);
 	float angle = atan2f(direction.x, direction.z) * RAD2DEG;
 	t.rotation.y = angle;
 	c.autoAttackTick = 0;
-
-	auto& animation = registry->get<Animation>(entity);
 	animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 }
 

@@ -47,6 +47,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     transform.position = position;
     transform.scale = 1.0f;
     transform.rotation = { 0, 0, 0 };
+    transform.movementSpeed = 0.15f;
 
     auto model = LoadModel(modelPath);
 
