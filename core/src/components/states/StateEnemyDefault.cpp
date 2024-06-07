@@ -2,12 +2,8 @@
 // Created by Steve Wheeler on 07/06/2024.
 //
 
-#pragma once
+#include "StateEnemyDefault.hpp"
 
 namespace sage
 {
-struct StateMachineComponent
-{
-    
-};
-}
+} // sage

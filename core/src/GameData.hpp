@@ -5,6 +5,7 @@
 #pragma once
 
 // Systems
+#include "systems/StateMachineSystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/TransformSystem.hpp"
@@ -35,6 +36,7 @@ public:
     std::unique_ptr<Camera> camera;
     Settings* settings;
     
+    std::unique_ptr<sage::StateMachineSystem> stateMachineSystem;
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
     std::unique_ptr<sage::RenderSystem> renderSystem;
     std::unique_ptr<sage::TransformSystem> transformSystem;

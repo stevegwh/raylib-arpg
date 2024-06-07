@@ -2,6 +2,9 @@
 // Created by Steve on 05/06/24.
 //
 
+
+#include "components/states/StatePlayerCombat.hpp"
+#include "components/states/StatePlayerDefault.hpp"
 #include "PlayerCombatLogicSubSystem.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
@@ -13,21 +16,26 @@
 
 namespace sage
 {
-void PlayerCombatLogicSubSystem::Update(entt::entity entity) const
+void PlayerCombatLogicSubSystem::Update() const
 {
-	auto& c = registry->get<CombatableActor>(entity);
-	if (c.inCombat) CheckInCombat(entity);
-	if (c.target == entt::null || !c.inCombat) return;
+	auto view = registry->view<CombatableActor, StatePlayerCombat>();
 
-	// Player is out of combat if no enemy is targetting them?
-	if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
-	{
-		AutoAttack(entity);
-	}
-	else
-	{
-		c.autoAttackTick += GetFrameTime();
-	}
+    for (const auto& entity: view) 
+    {
+        auto& c = registry->get<CombatableActor>(entity);
+        if (c.inCombat) CheckInCombat(entity);
+        if (c.target == entt::null || !c.inCombat) return;
+
+        // Player is out of combat if no enemy is targetting them?
+        if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
+        {
+            AutoAttack(entity);
+        }
+        else
+        {
+            c.autoAttackTick += GetFrameTime();
+        }
+    }
 }
 void PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 {
@@ -38,6 +46,7 @@ void PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	if (combatable.target == entt::null)
 	{
 		combatable.inCombat = false;
+        stateMachineSystem->ChangeState<StatePlayerDefault>(entity);
 		auto& animation = registry->get<Animation>(entity);
         if (animation.animIndex == animation.animationMap[AnimationEnum::AUTOATTACK])
         {
@@ -84,6 +93,7 @@ void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
 
     auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
     playerCombatable.inCombat = true;
+    stateMachineSystem->ChangeState<StatePlayerCombat>(actorMovementSystem->GetControlledActor());
 
 	auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 	{
@@ -144,10 +154,14 @@ void PlayerCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacke
 {
 }
 
-PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry, 
+PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry,
+                                                       StateMachineSystem* _stateMachineSystem,
                                                        ControllableActorMovementSystem* _actorMovementSystem, 
                                                        Cursor* _cursor) :
-   registry(_registry), actorMovementSystem(_actorMovementSystem), cursor(_cursor)
+   registry(_registry),
+   stateMachineSystem(_stateMachineSystem),
+   actorMovementSystem(_actorMovementSystem), 
+   cursor(_cursor)
 {
     {
         entt::sink sink{ cursor->onEnemyClick };

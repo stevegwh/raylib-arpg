@@ -10,6 +10,7 @@ namespace sage
 GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings) :
     registry(_registry),
     settings(_settings),
+    stateMachineSystem(std::make_unique<StateMachineSystem>(_registry)),
     renderSystem(std::make_unique<RenderSystem>(_registry)),
     collisionSystem(std::make_unique<sage::CollisionSystem>(_registry)),
     transformSystem(std::make_unique<sage::TransformSystem>(_registry)),
@@ -41,6 +42,7 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
     }
     combatSystem = std::make_unique<CombatSystem>(_registry,
                                                   cursor.get(),
+                                                  stateMachineSystem.get(),
                                                   actorMovementSystem.get(),
                                                   transformSystem.get(),
                                                   collisionSystem.get());
