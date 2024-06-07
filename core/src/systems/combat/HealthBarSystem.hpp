@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "../components/HealthBar.hpp"
+#include "components/HealthBar.hpp"
 #include "Camera.hpp"
-#include "BaseSystem.hpp"
+#include "systems/BaseSystem.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

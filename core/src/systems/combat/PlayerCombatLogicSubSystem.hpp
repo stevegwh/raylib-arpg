@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "ControllableActorMovementSystem.hpp"
+#include "systems/ControllableActorMovementSystem.hpp"
 #include "Cursor.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

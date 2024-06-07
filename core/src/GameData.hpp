@@ -13,11 +13,11 @@
 #include "systems/ControllableActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
-#include "systems/HealthBarSystem.hpp"
+#include "systems/combat/HealthBarSystem.hpp"
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
-#include "systems/CombatSystem.hpp"
+#include "systems/combat/CombatSystem.hpp"
 
 
 #include <memory>

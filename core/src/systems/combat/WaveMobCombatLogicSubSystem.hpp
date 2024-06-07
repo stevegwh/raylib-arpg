@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "TransformSystem.hpp"
-#include "CollisionSystem.hpp"
+#include "systems/TransformSystem.hpp"
+#include "systems/CollisionSystem.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

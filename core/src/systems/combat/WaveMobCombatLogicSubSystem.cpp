@@ -6,10 +6,10 @@
 #include "raymath.h"
 
 #include "WaveMobCombatLogicSubSystem.hpp"
-#include "../components/CombatableActor.hpp"
-#include "../components/Animation.hpp"
-#include "../components/Transform.hpp"
-#include "../components/HealthBar.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/Animation.hpp"
+#include "components/Transform.hpp"
+#include "components/HealthBar.hpp"
 
 #define FLT_MAX     340282346638528859811704183484516925440.0f     // Maximum value of a float, from bit pattern 01111111011111111111111111111111
 
@@ -19,7 +19,7 @@ void WaveMobCombatLogicSubSystem::Update(entt::entity entity) const
 {
 	CheckInCombat(entity);
 	auto& c = registry->get<CombatableActor>(entity);
-	if (c.target == entt::null || !c.inCombat) return;
+	if (c.target == entt::null || !c.inCombat) return; // Set a state flag?
 	// Move to target
 	// Progress tick
 	// Turn to look at target

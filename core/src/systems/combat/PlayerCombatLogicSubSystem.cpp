@@ -3,10 +3,10 @@
 //
 
 #include "PlayerCombatLogicSubSystem.hpp"
-#include "../components/CombatableActor.hpp"
-#include "../components/Animation.hpp"
-#include "../components/Transform.hpp"
-#include "../components/HealthBar.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/Animation.hpp"
+#include "components/Transform.hpp"
+#include "components/HealthBar.hpp"
 
 #include "raylib.h"
 #include "raymath.h"

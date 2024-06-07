@@ -32,6 +32,7 @@ void CombatSystem::Update()
     auto view = registry->view<CombatableActor>();
     for (auto& entity : view) 
     {
+        // I could use polymorphism here (with the CombatLogicSubSystem class). Not sure what is preferable.
         auto& c = registry->get<CombatableActor>(entity);
 		if (c.actorType == CombatableActorType::PLAYER)
 		{
