@@ -22,8 +22,7 @@ void WaveMobCombatLogicSubSystem::Update() const
     for (const auto& entity: view)
     {
         auto& c = registry->get<CombatableActor>(entity);
-        if (c.inCombat) CheckInCombat(entity);
-        if (c.target == entt::null || !c.inCombat) return;
+        if (!CheckInCombat(entity)) continue;
 
         // Player is out of combat if no enemy is targetting them?
         if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
@@ -37,7 +36,7 @@ void WaveMobCombatLogicSubSystem::Update() const
     }
 }
 
-void WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
+bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 {
     // If the entity is not the target of any other combatable.
 	// If no current target
@@ -46,10 +45,12 @@ void WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	if (combatable.target == entt::null)
 	{
         stateMachineSystem->ChangeState<StateEnemyDefault>(entity);
-		combatable.inCombat = false;
+		//combatable.inCombat = false;
 		auto& animation = registry->get<Animation>(entity);
 		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+        return false;
 	}
+    return true;
 }
 
 void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
@@ -65,7 +66,7 @@ void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
 void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
 {
     auto& combatable = registry->get<CombatableActor>(entity);
-	combatable.inCombat = false;
+	//combatable.inCombat = false;
 	combatable.target = entt::null;
 	
     {
@@ -141,7 +142,7 @@ void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attack
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);
     c.target = attacker;
-    c.inCombat = true;
+    //c.inCombat = true;
 	
 	auto& healthbar = registry->get<HealthBar>(entity);
 	healthbar.Decrement(entity, damage);

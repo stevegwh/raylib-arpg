@@ -21,10 +21,9 @@ void PlayerCombatLogicSubSystem::Update() const
 	auto view = registry->view<CombatableActor, StatePlayerCombat>();
 
     for (const auto& entity: view) 
-    {
+    {g
         auto& c = registry->get<CombatableActor>(entity);
-        if (c.inCombat) CheckInCombat(entity);
-        if (c.target == entt::null || !c.inCombat) return;
+        if (!CheckInCombat(entity)) continue;
 
         // Player is out of combat if no enemy is targetting them?
         if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
@@ -37,7 +36,7 @@ void PlayerCombatLogicSubSystem::Update() const
         }
     }
 }
-void PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
+bool PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 {
     // If the entity is not the target of any other combatable.
 	// If no current target
@@ -45,14 +44,15 @@ void PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	auto& combatable = registry->get<CombatableActor>(entity);
 	if (combatable.target == entt::null)
 	{
-		combatable.inCombat = false;
         stateMachineSystem->ChangeState<StatePlayerDefault>(entity);
 		auto& animation = registry->get<Animation>(entity);
         if (animation.animIndex == animation.animationMap[AnimationEnum::AUTOATTACK])
         {
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
+        return false;
 	}
+    return true;
 }
 
 void PlayerCombatLogicSubSystem::OnDeath(entt::entity entity)

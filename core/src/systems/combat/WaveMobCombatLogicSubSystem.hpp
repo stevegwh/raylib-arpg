@@ -23,7 +23,7 @@ struct WaveMobCombatLogicSubSystem
     void Draw3D(entt::entity entity) const;
 	void Update() const;
 	void StartCombat(entt::entity entity);
-	void CheckInCombat(entt::entity entity) const;
+	[[nodiscard]] bool CheckInCombat(entt::entity entity) const;
 	void OnDeath(entt::entity entity);
 	void AutoAttack(entt::entity entity) const;
 	void OnHit(entt::entity entity, entt::entity attacker, float damage);
