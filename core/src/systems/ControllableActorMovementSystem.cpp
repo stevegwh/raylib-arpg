@@ -8,6 +8,28 @@
 namespace sage
 {
 
+void ControllableActorMovementSystem::Update()
+{
+    auto view = registry->view<ControllableActor>();
+    for (auto& entity : view)
+    {
+        auto& actor = registry->get<ControllableActor>(entity);
+        if (actor.checkTargetPosTimer > actor.checkTargetPosThreshold)
+        {
+            actor.checkTargetPosTimer = 0;
+            auto& targetCurrentPos = registry->get<Transform>(actor.target);
+            if (actor.targetPos.x != targetCurrentPos.position.x && actor.targetPos.z != targetCurrentPos.position.z)
+            {
+                PathfindToLocation(entity, targetCurrentPos.position);
+            }
+        }
+        else
+        {
+            actor.checkTargetPosTimer += GetFrameTime();
+        }
+    }
+}
+
 void ControllableActorMovementSystem::PathfindToLocation(entt::entity id, Vector3 location)
 {
     {

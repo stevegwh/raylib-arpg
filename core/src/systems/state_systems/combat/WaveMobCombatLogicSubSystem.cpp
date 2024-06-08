@@ -12,13 +12,12 @@
 #include "components/Animation.hpp"
 #include "components/Transform.hpp"
 #include "components/HealthBar.hpp"
-
-#include <iostream>
+#include "../EnemyStateComponents.hpp"
 
 namespace sage
 {
 
-using StateComponents = std::tuple<StateEnemyDefault, StateEnemyCombat>;
+
 
 void WaveMobCombatLogicSubSystem::Update() const
 {
@@ -48,7 +47,7 @@ bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	// If no current target
 	// Have a timer for aggro and if the player is not within that range for a certain amount of time they resume their regular task (tasks TBC)
 	auto& combatable = registry->get<CombatableActor>(entity);
-	if (combatable.target == entt::null)
+	if (combatable.target == entt::null && !combatable.dying)
 	{
         stateMachineSystem->ChangeState<StateEnemyDefault, StateComponents>(entity);
         return false;
@@ -69,7 +68,7 @@ void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
 void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
 {
     auto& combatable = registry->get<CombatableActor>(entity);
-	//combatable.inCombat = false;
+    combatable.onDeath.publish(entity);
 	combatable.target = entt::null;
     combatable.dying = true;
 	
@@ -146,13 +145,11 @@ void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attack
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);
     c.target = attacker;
-    //c.inCombat = true;
 	
 	auto& healthbar = registry->get<HealthBar>(entity);
 	healthbar.Decrement(entity, damage);
 	if (healthbar.hp <= 0)
 	{
-		c.onDeath.publish(entity);
 		c.target = entt::null;
 		OnDeath(entity);
 	}

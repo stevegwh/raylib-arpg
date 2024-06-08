@@ -3,9 +3,9 @@
 //
 
 
-#include "components/states/StatePlayerCombat.hpp"
-#include "components/states/StatePlayerDefault.hpp"
+
 #include "PlayerCombatLogicSubSystem.hpp"
+#include "../PlayerStateComponents.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
 #include "components/Transform.hpp"
@@ -17,7 +17,7 @@
 namespace sage
 {
 
-using StateComponents = std::tuple<StatePlayerDefault, StatePlayerCombat>;
+
 
 void PlayerCombatLogicSubSystem::Update() const
 {

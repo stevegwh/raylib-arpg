@@ -13,6 +13,7 @@ void ExampleScene::Update()
 {
     Scene::Update();
     data->transformSystem->Update();
+    data->actorMovementSystem->Update();
     data->animationSystem->Update();
     data->dialogueSystem->Update();
     data->healthBarSystem->Update();

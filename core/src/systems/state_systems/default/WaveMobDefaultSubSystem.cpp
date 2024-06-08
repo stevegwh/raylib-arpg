@@ -20,7 +20,7 @@ void WaveMobDefaultSubSystem::Update()
         auto& t = registry->get<Transform>(entity);
         auto& animation = registry->get<Animation>(entity);
         animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-        transformSystem->PathfindToLocation(entity, {{0,0,0}}); // Temporary. Just move to location
+        transformSystem->PathfindToLocation(entity, {{0,0,-50}}); // Temporary. Just move to location
         // Set animation to walking
         // Move towards nexus
         // If within range of nexus, set animation to attack

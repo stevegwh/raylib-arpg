@@ -24,7 +24,7 @@ struct PlayerCombatLogicSubSystem
 
 	void Update() const;
 	void StartCombat(entt::entity entity);
-	bool CheckInCombat(entt::entity entity) const;
+	[[nodiscard]] bool CheckInCombat(entt::entity entity) const;
 	void OnDeath(entt::entity entity);
 	void OnTargetDeath(entt::entity entity);
     void OnAttackCancel(entt::entity entity);
