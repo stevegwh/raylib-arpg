@@ -75,8 +75,8 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
 		entt::sink sink { combatable.onHit };
 		sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatStateSystem->waveMobCombatLogicSubSystem);
 	}
-    
-    game->stateMachineSystem->ChangeState<StateEnemyDefault>(id);
+
+    registry->emplace<StateEnemyDefault>(id);
     // ---
     
     // Collision

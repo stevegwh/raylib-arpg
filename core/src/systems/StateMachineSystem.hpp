@@ -6,6 +6,10 @@
 
 #include "BaseSystem.hpp"
 #include "components/states/StateMachineComponent.hpp"
+#include "components/states/StateEnemyCombat.hpp"
+#include "components/states/StateEnemyDefault.hpp"
+#include "components/states/StatePlayerDefault.hpp"
+#include "components/states/StatePlayerCombat.hpp"
 
 #include <entt/entt.hpp>
 
@@ -14,26 +18,43 @@ namespace sage
 
 class StateMachineSystem : BaseSystem<StateMachineComponent>
 {
+    template<typename Tuple, size_t... Indices>
+    void RemoveStateComponents(entt::entity entity, std::index_sequence<Indices...>)
+    {
+        (RemoveStateComponent<std::tuple_element_t<Indices, Tuple>>(entity), ...);
+    }
+
+    template<typename Tuple>
+    void RemoveStateComponents(entt::entity entity)
+    {
+        RemoveStateComponents<Tuple>(entity, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    }
+
+    template<typename StateComponent>
+    void RemoveStateComponent(entt::entity entity)
+    {
+        if (registry->any_of<StateComponent>(entity))
+        {
+            registry->get<StateComponent>(entity).Disable(entity);
+            registry->remove<StateComponent>(entity);
+        }
+    }
+
 public:
-    template<typename NewStateComponent>
+    template<typename NewStateComponent, typename StateComponentsTuple>
     void ChangeState(entt::entity entity)
     {
+        // Check if the entity already has the NewStateComponent
         if (registry->any_of<NewStateComponent>(entity)) return;
-        auto view = registry->view<StateMachineComponent>();
-        if (view.contains(entity))
-        {
-            view.each([&](auto e, auto& component)
-                      {
-                          if (e == entity)
-                          {
-                              registry->remove<std::decay_t<decltype(component)>>(entity);
-                              component.Disable(entity);
-                          }
-                      });
-        }
+
+        // Remove any existing state components
+        RemoveStateComponents<StateComponentsTuple>(entity);
+
+        // Emplace the new component
         auto& newComponent = registry->emplace<NewStateComponent>(entity);
         newComponent.Enable(entity);
     }
+
     explicit StateMachineSystem(entt::registry* _registry);
 };
 

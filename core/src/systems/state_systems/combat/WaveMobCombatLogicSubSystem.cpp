@@ -17,6 +17,9 @@
 
 namespace sage
 {
+
+using StateComponents = std::tuple<StateEnemyDefault, StateEnemyCombat>;
+
 void WaveMobCombatLogicSubSystem::Update() const
 {
     auto view = registry->view<CombatableActor, StateEnemyCombat>();
@@ -47,7 +50,7 @@ bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	auto& combatable = registry->get<CombatableActor>(entity);
 	if (combatable.target == entt::null)
 	{
-        stateMachineSystem->ChangeState<StateEnemyDefault>(entity);
+        stateMachineSystem->ChangeState<StateEnemyDefault, StateComponents>(entity);
         return false;
 	}
     return true;
@@ -89,16 +92,14 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
     auto& t = registry->get<Transform>(entity);
     auto& collideable = registry->get<Collideable>(entity);
     auto& animation = registry->get<Animation>(entity);
-    auto& enemyPos = registry->get<Transform>(c.target).position;
 
+    auto& enemyPos = registry->get<Transform>(c.target).position;
     Vector3 direction = Vector3Subtract(enemyPos, t.position);
     float distance = Vector3Length(direction);
     Vector3 normDirection = Vector3Normalize(direction);
-    
-    std::cout << (distance > c.attackRange) << std::endl;
-    if (distance > c.attackRange)
+
+    if (distance >= c.attackRange)
     {
-        
         animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
         Ray ray;
         ray.position = t.position;
@@ -110,7 +111,7 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
         
         if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
         {
-            
+
             // Lost line of sight, out of combat
             transformSystem->PruneMoveCommands(entity);
             c.target = entt::null;
@@ -141,7 +142,7 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 {
-    stateMachineSystem->ChangeState<StateEnemyCombat>(entity);
+    stateMachineSystem->ChangeState<StateEnemyCombat, StateComponents>(entity);
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);
     c.target = attacker;

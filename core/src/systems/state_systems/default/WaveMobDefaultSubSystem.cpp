@@ -7,6 +7,8 @@
 #include "components/Transform.hpp"
 #include "components/Animation.hpp"
 
+#include <iostream>
+
 namespace sage
 {
 

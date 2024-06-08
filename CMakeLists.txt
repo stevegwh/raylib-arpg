@@ -3,10 +3,10 @@ project(BG_Raylib)
 
 set(CMAKE_CXX_STANDARD 20)
 
-#if(WIN32)
-#    set(MSVC_COMPILE_FLAGS "/MP")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MSVC_COMPILE_FLAGS}" )
-#endif()
+if(MSVC)
+    set(MSVC_COMPILE_FLAGS "/MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MSVC_COMPILE_FLAGS}" )
+endif()
 
 # Dependencies
 include(FetchContent)

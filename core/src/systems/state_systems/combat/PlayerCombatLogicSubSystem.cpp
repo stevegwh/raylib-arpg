@@ -16,6 +16,9 @@
 
 namespace sage
 {
+
+using StateComponents = std::tuple<StatePlayerDefault, StatePlayerCombat>;
+
 void PlayerCombatLogicSubSystem::Update() const
 {
 	auto view = registry->view<CombatableActor, StatePlayerCombat>();
@@ -44,7 +47,7 @@ bool PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	auto& combatable = registry->get<CombatableActor>(entity);
 	if (combatable.target == entt::null)
 	{
-        stateMachineSystem->ChangeState<StatePlayerDefault>(entity);
+        stateMachineSystem->ChangeState<StatePlayerDefault, StateComponents>(entity);
         // TODO: below should be handled by state
 		auto& animation = registry->get<Animation>(entity);
         if (animation.animIndex == animation.animationMap[AnimationEnum::AUTOATTACK])
@@ -93,7 +96,7 @@ void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
     }
 
     auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
-    stateMachineSystem->ChangeState<StatePlayerCombat>(actorMovementSystem->GetControlledActor());
+    stateMachineSystem->ChangeState<StatePlayerCombat, StateComponents>(actorMovementSystem->GetControlledActor());
 
 	auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 	{
