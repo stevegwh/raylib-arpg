@@ -14,6 +14,7 @@
 #include "components/CombatableActor.hpp"
 
 #include "raymath.h"
+#include "components/states/StateEnemyDefault.hpp"
 
 namespace sage
 {
@@ -40,6 +41,8 @@ BoundingBox createRectangularBoundingBox(float length, float height)
 entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* game, Vector3 position, const char* name)
 {
     entt::entity id = registry->create();
+    
+    // Model/Rendering
     const char* modelPath = "resources/models/gltf/goblin.glb";
     //sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
@@ -48,7 +51,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     transform.scale = 1.0f;
     transform.rotation = { 0, 0, 0 };
     transform.movementSpeed = 0.15f;
-
+    
     auto model = LoadModel(modelPath);
 
     auto& animation = registry->emplace<Animation>(id, modelPath, &model);
@@ -61,16 +64,22 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
     auto& renderable = registry->emplace<Renderable>(id, model,std::string(modelPath), modelTransform);
     renderable.name = name;
+    // ---
 
+    // Combat
     auto& healthbar = registry->emplace<HealthBar>(id); // TODO: "HealthBar" should be separate from something like CombatData
     
     auto& combatable = registry->emplace<CombatableActor>(id);
     combatable.actorType = CombatableActorType::WAVEMOB;
 	{
 		entt::sink sink { combatable.onHit };
-		sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatSystem->waveMobCombatLogicSubSystem);
+		sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatStateSystem->waveMobCombatLogicSubSystem);
 	}
     
+    game->stateMachineSystem->ChangeState<StateEnemyDefault>(id);
+    // ---
+    
+    // Collision
     BoundingBox bb = renderable.CalculateModelBoundingBox();
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = CollisionLayer::ENEMY;
@@ -81,6 +90,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
             collisionSystem.OnTransformUpdate(entity);
         }>(*game->collisionSystem);
     }
+    // ---
     
     auto& worldObject = registry->emplace<WorldObject>(id);
     return id;

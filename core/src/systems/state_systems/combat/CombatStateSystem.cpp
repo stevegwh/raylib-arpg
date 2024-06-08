@@ -2,7 +2,7 @@
 // Created by Steve Wheeler on 03/06/2024.
 //
 
-#include "CombatSystem.hpp"
+#include "CombatStateSystem.hpp"
 #include "components/Animation.hpp"
 #include "components/HealthBar.hpp"
 
@@ -13,7 +13,7 @@
 namespace sage
 {
 
-void CombatSystem::Draw3D()
+void CombatStateSystem::Draw3D()
 {
     auto view = registry->view<CombatableActor>();
     for (auto& entity : view)
@@ -27,18 +27,18 @@ void CombatSystem::Draw3D()
 }
 
 
-void CombatSystem::Update()
+void CombatStateSystem::Update()
 {
     playerCombatLogicSubSystem->Update();
     waveMobCombatLogicSubSystem->Update();
 }
 
-CombatSystem::CombatSystem(entt::registry *_registry,
-                           Cursor *_cursor,
-                           StateMachineSystem* _stateMachineSystem,
-                           ControllableActorMovementSystem* _actorMovementSystem,
-                           TransformSystem* _transformSystem,
-                           CollisionSystem* _collisionSystem) :
+CombatStateSystem::CombatStateSystem(entt::registry *_registry,
+                                     Cursor *_cursor,
+                                     StateMachineSystem* _stateMachineSystem,
+                                     ControllableActorMovementSystem* _actorMovementSystem,
+                                     TransformSystem* _transformSystem,
+                                     CollisionSystem* _collisionSystem) :
                            BaseSystem<CombatableActor>(_registry),
                                cursor(_cursor),
                                stateMachineSystem(_stateMachineSystem),

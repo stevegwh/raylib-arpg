@@ -16,7 +16,7 @@ enum class CombatableActorType
 struct CombatableActor
 {
 	CombatableActorType actorType = CombatableActorType::WAVEMOB;
-    bool inCombat = false;
+    bool dying = false;
     entt::entity target{};
 	int attackRange = 5;
     float autoAttackTick = 0;

@@ -21,7 +21,7 @@ void PlayerCombatLogicSubSystem::Update() const
 	auto view = registry->view<CombatableActor, StatePlayerCombat>();
 
     for (const auto& entity: view) 
-    {g
+    {
         auto& c = registry->get<CombatableActor>(entity);
         if (!CheckInCombat(entity)) continue;
 
@@ -45,6 +45,7 @@ bool PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	if (combatable.target == entt::null)
 	{
         stateMachineSystem->ChangeState<StatePlayerDefault>(entity);
+        // TODO: below should be handled by state
 		auto& animation = registry->get<Animation>(entity);
         if (animation.animIndex == animation.animationMap[AnimationEnum::AUTOATTACK])
         {
@@ -92,7 +93,6 @@ void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
     }
 
     auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
-    playerCombatable.inCombat = true;
     stateMachineSystem->ChangeState<StatePlayerCombat>(actorMovementSystem->GetControlledActor());
 
 	auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);

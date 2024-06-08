@@ -13,6 +13,8 @@
 #include "components/Transform.hpp"
 #include "components/HealthBar.hpp"
 
+#include <iostream>
+
 namespace sage
 {
 void WaveMobCombatLogicSubSystem::Update() const
@@ -23,6 +25,7 @@ void WaveMobCombatLogicSubSystem::Update() const
     {
         auto& c = registry->get<CombatableActor>(entity);
         if (!CheckInCombat(entity)) continue;
+        if (c.dying) continue;
 
         // Player is out of combat if no enemy is targetting them?
         if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
@@ -45,9 +48,6 @@ bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	if (combatable.target == entt::null)
 	{
         stateMachineSystem->ChangeState<StateEnemyDefault>(entity);
-		//combatable.inCombat = false;
-		auto& animation = registry->get<Animation>(entity);
-		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
         return false;
 	}
     return true;
@@ -68,6 +68,7 @@ void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
     auto& combatable = registry->get<CombatableActor>(entity);
 	//combatable.inCombat = false;
 	combatable.target = entt::null;
+    combatable.dying = true;
 	
     {
         entt::sink sink { combatable.onHit };
@@ -93,9 +94,11 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
     Vector3 direction = Vector3Subtract(enemyPos, t.position);
     float distance = Vector3Length(direction);
     Vector3 normDirection = Vector3Normalize(direction);
-
+    
+    std::cout << (distance > c.attackRange) << std::endl;
     if (distance > c.attackRange)
     {
+        
         animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
         Ray ray;
         ray.position = t.position;
@@ -108,7 +111,7 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
         if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
         {
             
-            // Out of combat
+            // Lost line of sight, out of combat
             transformSystem->PruneMoveCommands(entity);
             c.target = entt::null;
             t.movementDirectionDebugLine = {};

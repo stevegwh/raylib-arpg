@@ -14,12 +14,12 @@
 #include "systems/ControllableActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
-#include "systems/combat/HealthBarSystem.hpp"
+#include "systems/HealthBarSystem.hpp"
+#include "systems/state_systems/combat/CombatStateSystem.hpp"
+#include "systems/state_systems/default/DefaultStateSystem.hpp"
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
-#include "systems/combat/CombatSystem.hpp"
-
 
 #include <memory>
 
@@ -46,7 +46,8 @@ public:
     std::unique_ptr<sage::AnimationSystem> animationSystem;
     std::unique_ptr<sage::DialogueSystem> dialogueSystem;
     std::unique_ptr<sage::HealthBarSystem> healthBarSystem;
-    std::unique_ptr<sage::CombatSystem> combatSystem;
+    std::unique_ptr<sage::CombatStateSystem> combatStateSystem;
+    std::unique_ptr<sage::DefaultStateSystem> defaultStateSystem;
 
     void Load();
     void Save() const;

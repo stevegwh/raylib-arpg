@@ -17,7 +17,7 @@ namespace sage
 {
 class TransformSystem; // forward dec
 class CollisionSystem; // forward dec
-class CombatSystem : public BaseSystem<CombatableActor>
+class CombatStateSystem : public BaseSystem<CombatableActor>
 {
     StateMachineSystem* stateMachineSystem;
     Cursor* cursor;
@@ -25,12 +25,12 @@ class CombatSystem : public BaseSystem<CombatableActor>
 public:
 	std::unique_ptr<PlayerCombatLogicSubSystem> playerCombatLogicSubSystem;
 	std::unique_ptr<WaveMobCombatLogicSubSystem> waveMobCombatLogicSubSystem;
-    CombatSystem(entt::registry *_registry,
-               Cursor *_cursor,
-               StateMachineSystem* _stateMachineSystem,
-               ControllableActorMovementSystem* _actorMovementSystem,
-               TransformSystem* _transformSystem,
-               CollisionSystem* _collisionSystem);
+    CombatStateSystem(entt::registry *_registry,
+                      Cursor *_cursor,
+                      StateMachineSystem* _stateMachineSystem,
+                      ControllableActorMovementSystem* _actorMovementSystem,
+                      TransformSystem* _transformSystem,
+                      CollisionSystem* _collisionSystem);
     void Update();
     void Draw3D();
 };

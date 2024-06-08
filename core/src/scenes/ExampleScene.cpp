@@ -16,7 +16,9 @@ void ExampleScene::Update()
     data->animationSystem->Update();
     data->dialogueSystem->Update();
     data->healthBarSystem->Update();
-    data->combatSystem->Update();
+    // State systems
+    data->defaultStateSystem->Update();
+    data->combatStateSystem->Update();
 }
 
 void ExampleScene::Draw2D()
@@ -28,7 +30,7 @@ void ExampleScene::Draw2D()
 void ExampleScene::Draw3D()
 {
     data->healthBarSystem->Draw3D();
-    data->combatSystem->Draw3D();
+    data->combatStateSystem->Draw3D();
     Scene::Draw3D();
 }
 

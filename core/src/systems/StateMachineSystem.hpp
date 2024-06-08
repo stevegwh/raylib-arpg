@@ -27,10 +27,12 @@ public:
                           if (e == entity)
                           {
                               registry->remove<std::decay_t<decltype(component)>>(entity);
+                              component.Disable(entity);
                           }
                       });
         }
-        registry->emplace<NewStateComponent>(entity);
+        auto& newComponent = registry->emplace<NewStateComponent>(entity);
+        newComponent.Enable(entity);
     }
     explicit StateMachineSystem(entt::registry* _registry);
 };
