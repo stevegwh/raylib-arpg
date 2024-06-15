@@ -82,10 +82,6 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         ray.position = transform->position;
         ray.position.y = 0.5f;
         float avoidanceDistance = 1; //
-        if (avoidanceDistance >= distance)
-        {
-            avoidanceDistance = distance;
-        }
         ray.direction = Vector3Multiply(transform->direction, { avoidanceDistance, 1, avoidanceDistance });
         ray.direction.y = 0.5f;
         auto col = collisionSystem->GetCollisionsWithRay(ray, CollisionLayer::BOYD);

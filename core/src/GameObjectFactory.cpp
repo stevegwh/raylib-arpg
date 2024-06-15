@@ -117,7 +117,7 @@ entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData*
     
     //auto& combat = registry->emplace<HealthBar>(id);
 
-    BoundingBox bb = renderable.CalculateModelBoundingBox();
+    BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
     auto& collideable = registry->emplace<Collideable>(id, bb);
     collideable.collisionLayer = CollisionLayer::NPC;
     game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
