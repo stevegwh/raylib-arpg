@@ -144,7 +144,7 @@ void Cursor::Update()
 {
     position = { .x = GetMousePosition().x, .y = GetMousePosition().y };
     getMouseRayCollision();
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
     {
         onMouseClick();
     }

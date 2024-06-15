@@ -52,8 +52,8 @@ public:
     CollisionInfo rayCollisionResultInfo;
     entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
     entt::sigh<void(entt::entity)> onNPCClick{};
-    entt::sigh<void(entt::entity)> onFloorClick{};
-    entt::sigh<void(entt::entity)> onAnyClick{};
+    entt::sigh<void(entt::entity entity)> onFloorClick{};
+    entt::sigh<void(entt::entity entity)> onAnyClick{};
     entt::sigh<void(entt::entity)> onEnemyClick{};
     
     Cursor(entt::registry* registry,

@@ -157,14 +157,7 @@ void PlayerCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacke
 {
 }
 
-PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry,
-                                                       StateMachineSystem* _stateMachineSystem,
-                                                       ControllableActorMovementSystem* _actorMovementSystem, 
-                                                       Cursor* _cursor) :
-   registry(_registry),
-   stateMachineSystem(_stateMachineSystem),
-   actorMovementSystem(_actorMovementSystem), 
-   cursor(_cursor)
+void PlayerCombatLogicSubSystem::Enable()
 {
     {
         entt::sink sink{ cursor->onEnemyClick };
@@ -174,5 +167,29 @@ PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry
         entt::sink sink{ cursor->onFloorClick };
         sink.connect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
     }
+}
+
+void PlayerCombatLogicSubSystem::Disable()
+{
+    {
+        entt::sink sink{ cursor->onEnemyClick };
+        sink.disconnect<&PlayerCombatLogicSubSystem::onEnemyClick>(this);
+    }
+    {
+        entt::sink sink{ cursor->onFloorClick };
+        sink.disconnect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
+    }
+}
+
+PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry,
+                                                       StateMachineSystem* _stateMachineSystem,
+                                                       ControllableActorMovementSystem* _actorMovementSystem, 
+                                                       Cursor* _cursor) :
+   registry(_registry),
+   stateMachineSystem(_stateMachineSystem),
+   actorMovementSystem(_actorMovementSystem), 
+   cursor(_cursor)
+{
+
 }
 } // sage

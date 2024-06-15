@@ -14,19 +14,36 @@ void ControllableActorMovementSystem::Update()
     for (auto& entity : view)
     {
         auto& actor = registry->get<ControllableActor>(entity);
-        if (actor.checkTargetPosTimer > actor.checkTargetPosThreshold)
-        {
-            actor.checkTargetPosTimer = 0;
-            auto& targetCurrentPos = registry->get<Transform>(actor.target);
-            if (actor.targetPos.x != targetCurrentPos.position.x && actor.targetPos.z != targetCurrentPos.position.z)
-            {
-                PathfindToLocation(entity, targetCurrentPos.position);
-            }
-        }
-        else
-        {
-            actor.checkTargetPosTimer += GetFrameTime();
-        }
+        actor.checkTargetPosTimer += GetFrameTime();
+    }
+}
+
+void ControllableActorMovementSystem::onTargetUpdate(entt::entity target)
+{
+    auto& actor = registry->get<ControllableActor>(controlledActorId);
+    if (actor.checkTargetPosTimer > actor.checkTargetPosThreshold)
+    {
+        actor.checkTargetPosTimer = 0;
+        auto& targetTrans = registry->get<Transform>(target);
+        PathfindToLocation(controlledActorId, targetTrans.position);
+    }
+}
+
+void ControllableActorMovementSystem::cancelMovement(entt::entity entity)
+{
+    auto& actor = registry->get<ControllableActor>(entity);
+    auto& target = registry->get<Transform>(actor.targetActor);
+    {
+        entt::sink sink { target.onPositionUpdate };
+        sink.disconnect<&ControllableActorMovementSystem::onTargetUpdate>(this);
+    }
+    {
+        entt::sink sink { target.onMovementCancel };
+        sink.disconnect<&ControllableActorMovementSystem::cancelMovement>(this);
+    }
+    {
+        entt::sink sink { target.onFinishMovement };
+        sink.disconnect<&ControllableActorMovementSystem::cancelMovement>(this);
     }
 }
 
@@ -50,7 +67,7 @@ void ControllableActorMovementSystem::PathfindToLocation(entt::entity id, Vector
 
 void ControllableActorMovementSystem::MoveToLocation(entt::entity id)
 {
-    transformSystem->PathfindToLocation(id, {cursor->collision.point});
+    transformSystem->PathfindToLocation(id, { cursor->collision.point });
 }
 
 void ControllableActorMovementSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
@@ -58,8 +75,31 @@ void ControllableActorMovementSystem::PatrolLocations(entt::entity id, const std
     transformSystem->PathfindToLocation(id, patrol);
 }
 
-void ControllableActorMovementSystem::onCursorClick()
+void ControllableActorMovementSystem::onFloorClick(entt::entity entity)
 {
+    transformSystem->CancelMovement(controlledActorId); // Flush any previous commands
+    PathfindToLocation(controlledActorId, cursor->collision.point);
+}
+
+void ControllableActorMovementSystem::onEnemyClick(entt::entity entity)
+{
+    auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
+    transformSystem->CancelMovement(controlledActorId); // Flush any previous commands
+    auto& target = registry->get<Transform>(entity);
+    controlledActor.targetActor = entity;
+    controlledActor.targetActorPos = target.position;
+    {
+        entt::sink sink { target.onPositionUpdate };
+        sink.connect<&ControllableActorMovementSystem::onTargetUpdate>(this);
+    }
+    {
+        entt::sink sink { target.onMovementCancel };
+        sink.connect<&ControllableActorMovementSystem::cancelMovement>(this);
+    }
+    {
+        entt::sink sink { target.onFinishMovement };
+        sink.connect<&ControllableActorMovementSystem::cancelMovement>(this);
+    }
     PathfindToLocation(controlledActorId, cursor->collision.point);
 }
     
@@ -76,14 +116,28 @@ entt::entity ControllableActorMovementSystem::GetControlledActor()
 
 void ControllableActorMovementSystem::Enable()
 {
-    entt::sink onClick{cursor->onFloorClick};
-    onClick.connect<&ControllableActorMovementSystem::onCursorClick>(this);
+    {
+        entt::sink onClick{ cursor->onFloorClick };
+        onClick.connect<&ControllableActorMovementSystem::onFloorClick>(this);
+    }
+
+    {
+        entt::sink onClick{ cursor->onEnemyClick };
+        onClick.connect<&ControllableActorMovementSystem::onEnemyClick>(this);
+    }
 }
 
 void ControllableActorMovementSystem::Disable()
 {
-    entt::sink onClick{cursor->onFloorClick};
-    onClick.disconnect<&ControllableActorMovementSystem::onCursorClick>(this);
+    {
+        entt::sink onClick{ cursor->onFloorClick };
+        onClick.disconnect<&ControllableActorMovementSystem::onFloorClick>(this);
+    }
+
+    {
+        entt::sink onClick{ cursor->onEnemyClick };
+        onClick.disconnect<&ControllableActorMovementSystem::onEnemyClick>(this);
+    }
 }
 
 ControllableActorMovementSystem::ControllableActorMovementSystem(entt::registry* _registry,

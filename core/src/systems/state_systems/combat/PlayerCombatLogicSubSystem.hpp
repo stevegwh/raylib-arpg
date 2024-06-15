@@ -30,6 +30,8 @@ struct PlayerCombatLogicSubSystem
     void OnAttackCancel(entt::entity entity);
     void AutoAttack(entt::entity entity) const;
     void OnHit(entt::entity entity, entt::entity attacker);
+    void Enable();
+    void Disable();
 
 	PlayerCombatLogicSubSystem(entt::registry* _registry,
                                StateMachineSystem* _stateMachineSystem,

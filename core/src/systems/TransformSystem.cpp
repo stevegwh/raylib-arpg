@@ -7,18 +7,20 @@
 #include "../Application.hpp"
 #include "../../utils/Serializer.hpp"
 
+
+#include <iostream>
 namespace sage
 {
 
 void TransformSystem::PruneMoveCommands(const entt::entity& entity)
 {
+    
     auto& transform = registry->get<Transform>(entity);
 
     // Prune existing move commands
-    transform.onMovementCancel.publish(entity);
     for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
     {
-        if (it->second == &transform)
+        if (it->second == &transform) // TODO: Surely this just needs to be done once?
         {
             it = moveTowardsTransforms.erase(it);
             continue;
@@ -31,14 +33,22 @@ void TransformSystem::PruneMoveCommands(const entt::entity& entity)
     std::swap(transform.targets, empty);
 }
 
-void TransformSystem::PathfindToLocation(const entt::entity& entityId, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
+void TransformSystem::CancelMovement(const entt::entity& entity)
 {
-    PruneMoveCommands(entityId);
-    auto& transform = registry->get<Transform>(entityId);
+    PruneMoveCommands(entity);
+    auto& transform = registry->get<Transform>(entity);
+    transform.onMovementCancel.publish(entity);
+}
+
+
+void TransformSystem::PathfindToLocation(const entt::entity& entity, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
+{
+    PruneMoveCommands(entity);
+    auto& transform = registry->get<Transform>(entity);
     for (auto n : path) transform.targets.emplace(n);
     transform.direction = Vector3Normalize(Vector3Subtract(transform.targets.front(), transform.position));
-    moveTowardsTransforms.emplace_back(entityId, &transform);
-    transform.onStartMovement.publish(entityId);
+    moveTowardsTransforms.emplace_back(entity, &transform);
+    transform.onStartMovement.publish(entity);
 }
 
 void TransformSystem::Update()

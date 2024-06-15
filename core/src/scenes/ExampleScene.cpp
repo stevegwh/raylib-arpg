@@ -60,6 +60,8 @@ Scene(_registry, std::move(_data))
 
     data->navigationGridSystem->Init(1000, 1.0f);
     data->navigationGridSystem->PopulateGrid();
+    
+    data->combatStateSystem->playerCombatLogicSubSystem->Enable();
 }
 
 } // sage

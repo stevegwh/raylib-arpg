@@ -26,7 +26,10 @@ class ControllableActorMovementSystem : public BaseSystem<ControllableActor>
     entt::entity controlledActorId{}; // TODO: Right now this system just controls one unit at a time. What if we wanted more?
     NavigationGridSystem* navigationGridSystem{};
     TransformSystem* transformSystem{};
-    void onCursorClick();
+    void onFloorClick(entt::entity entity);
+    void onEnemyClick(entt::entity entity);
+    void onTargetUpdate(entt::entity target);
+    void cancelMovement(entt::entity entity);
 public:
     ControllableActorMovementSystem(entt::registry* _registry,
                                     Cursor* _cursor,

@@ -112,12 +112,12 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
         {
 
             // Lost line of sight, out of combat
-            transformSystem->PruneMoveCommands(entity);
+            transformSystem->CancelMovement(entity);
             c.target = entt::null;
             t.movementDirectionDebugLine = {};
             return;
         }
-
+        // TODO: PathfindToLocation also calls PruneMoveCommands which triggers onMovementCancel
         transformSystem->PathfindToLocation(entity, {enemyPos});
         return;
     }
@@ -141,6 +141,10 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 {
+    // TODO: Would prefer this to be handled in a changing state event like OnExit OnEnter
+    transformSystem->CancelMovement(attacker); 
+    transformSystem->PruneMoveCommands(entity);
+    // -----
     stateMachineSystem->ChangeState<StateEnemyCombat, StateComponents>(entity);
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);

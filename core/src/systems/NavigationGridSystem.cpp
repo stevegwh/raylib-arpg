@@ -221,13 +221,53 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
     // Trace path back from finish to start
     std::vector<Vector3> path;
     std::pair<int, int> current = {finishrow, finishcol};
+    std::pair<int, int> previous;
+    std::pair<int, int> currentDir = {0,0};
+    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+    
     while (current.first != startrow || current.second != startcol)
     {
-        auto node = gridSquares[current.first][current.second];
-        path.push_back(node->worldPosMin);
+        previous = current;
         current = came_from[current.first][current.second];
+        for (const auto& dir : directions)
+        {
+            int row = previous.first + dir.first;
+            int col = previous.second + dir.second;
+            if (row == current.first && col == current.second) // Found the direction
+            {
+                auto current_node = gridSquares[current.first][current.second];
+                if (currentDir.first == 0 && currentDir.second == 0)
+                {
+                    currentDir = dir;
+                    break;
+                }
+                if (dir != currentDir)
+                {
+                    currentDir = dir;
+                    path.push_back(gridSquares[previous.first][previous.second]->worldPosMin);
+                    path.push_back(current_node->worldPosMin);
+                }
+                break;
+            }
+        }
     }
+    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
     std::reverse(path.begin(), path.end());
+
+//    while (current.first != startrow || current.second != startcol)
+//    {
+//        previous = current;
+//        current = came_from[current.first][current.second];
+//        path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+//    }
+//    std::reverse(path.begin(), path.end());
+
+
+//    for (const auto& node : path) 
+//    {
+//        std::cout << node.x << ", " << node.y << ", " << node.z << std::endl;
+//    }
+    
 
     return path;
 }
