@@ -2,13 +2,13 @@
 // Created by Steve Wheeler on 29/02/2024.
 //
 
-#include "ControllableActorMovementSystem.hpp"
+#include "ControllableActorSystem.hpp"
 #include "../Application.hpp"
 
 namespace sage
 {
 
-void ControllableActorMovementSystem::Update()
+void ControllableActorSystem::Update()
 {
     auto view = registry->view<ControllableActor>();
     for (auto& entity : view)
@@ -18,7 +18,7 @@ void ControllableActorMovementSystem::Update()
     }
 }
 
-void ControllableActorMovementSystem::onTargetUpdate(entt::entity target)
+void ControllableActorSystem::onTargetUpdate(entt::entity target)
 {
     auto& actor = registry->get<ControllableActor>(controlledActorId);
     if (actor.checkTargetPosTimer > actor.checkTargetPosThreshold)
@@ -29,25 +29,25 @@ void ControllableActorMovementSystem::onTargetUpdate(entt::entity target)
     }
 }
 
-void ControllableActorMovementSystem::cancelMovement(entt::entity entity)
+void ControllableActorSystem::cancelMovement(entt::entity entity)
 {
     auto& actor = registry->get<ControllableActor>(entity);
     auto& target = registry->get<Transform>(actor.targetActor);
     {
         entt::sink sink { target.onPositionUpdate };
-        sink.disconnect<&ControllableActorMovementSystem::onTargetUpdate>(this);
+        sink.disconnect<&ControllableActorSystem::onTargetUpdate>(this);
     }
     {
         entt::sink sink { target.onMovementCancel };
-        sink.disconnect<&ControllableActorMovementSystem::cancelMovement>(this);
+        sink.disconnect<&ControllableActorSystem::cancelMovement>(this);
     }
     {
         entt::sink sink { target.onFinishMovement };
-        sink.disconnect<&ControllableActorMovementSystem::cancelMovement>(this);
+        sink.disconnect<&ControllableActorSystem::cancelMovement>(this);
     }
 }
 
-void ControllableActorMovementSystem::PathfindToLocation(entt::entity id, Vector3 location)
+void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location)
 {
     {
         // If location outside of bounds, then return
@@ -65,23 +65,23 @@ void ControllableActorMovementSystem::PathfindToLocation(entt::entity id, Vector
     if (!path.empty()) transformSystem->PathfindToLocation(id, path);
 }
 
-void ControllableActorMovementSystem::MoveToLocation(entt::entity id)
+void ControllableActorSystem::MoveToLocation(entt::entity id)
 {
     transformSystem->PathfindToLocation(id, { cursor->collision.point });
 }
 
-void ControllableActorMovementSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
+void ControllableActorSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
 {
     transformSystem->PathfindToLocation(id, patrol);
 }
 
-void ControllableActorMovementSystem::onFloorClick(entt::entity entity)
+void ControllableActorSystem::onFloorClick(entt::entity entity)
 {
     transformSystem->CancelMovement(controlledActorId); // Flush any previous commands
     PathfindToLocation(controlledActorId, cursor->collision.point);
 }
 
-void ControllableActorMovementSystem::onEnemyClick(entt::entity entity)
+void ControllableActorSystem::onEnemyClick(entt::entity entity)
 {
     auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
     transformSystem->CancelMovement(controlledActorId); // Flush any previous commands
@@ -90,61 +90,61 @@ void ControllableActorMovementSystem::onEnemyClick(entt::entity entity)
     controlledActor.targetActorPos = target.position;
     {
         entt::sink sink { target.onPositionUpdate };
-        sink.connect<&ControllableActorMovementSystem::onTargetUpdate>(this);
+        sink.connect<&ControllableActorSystem::onTargetUpdate>(this);
     }
     {
         entt::sink sink { target.onMovementCancel };
-        sink.connect<&ControllableActorMovementSystem::cancelMovement>(this);
+        sink.connect<&ControllableActorSystem::cancelMovement>(this);
     }
     {
         entt::sink sink { target.onFinishMovement };
-        sink.connect<&ControllableActorMovementSystem::cancelMovement>(this);
+        sink.connect<&ControllableActorSystem::cancelMovement>(this);
     }
     PathfindToLocation(controlledActorId, cursor->collision.point);
 }
     
-void ControllableActorMovementSystem::SetControlledActor(entt::entity id)
+void ControllableActorSystem::SetControlledActor(entt::entity id)
 {
     onControlledActorChange.publish(id);
     controlledActorId = id;
 }
 
-entt::entity ControllableActorMovementSystem::GetControlledActor()
+entt::entity ControllableActorSystem::GetControlledActor()
 {
     return controlledActorId;
 }
 
-void ControllableActorMovementSystem::Enable()
+void ControllableActorSystem::Enable()
 {
     {
         entt::sink onClick{ cursor->onFloorClick };
-        onClick.connect<&ControllableActorMovementSystem::onFloorClick>(this);
+        onClick.connect<&ControllableActorSystem::onFloorClick>(this);
     }
 
     {
         entt::sink onClick{ cursor->onEnemyClick };
-        onClick.connect<&ControllableActorMovementSystem::onEnemyClick>(this);
+        onClick.connect<&ControllableActorSystem::onEnemyClick>(this);
     }
 }
 
-void ControllableActorMovementSystem::Disable()
+void ControllableActorSystem::Disable()
 {
     {
         entt::sink onClick{ cursor->onFloorClick };
-        onClick.disconnect<&ControllableActorMovementSystem::onFloorClick>(this);
+        onClick.disconnect<&ControllableActorSystem::onFloorClick>(this);
     }
 
     {
         entt::sink onClick{ cursor->onEnemyClick };
-        onClick.disconnect<&ControllableActorMovementSystem::onEnemyClick>(this);
+        onClick.disconnect<&ControllableActorSystem::onEnemyClick>(this);
     }
 }
 
-ControllableActorMovementSystem::ControllableActorMovementSystem(entt::registry* _registry,
+ControllableActorSystem::ControllableActorSystem(entt::registry* _registry,
                                                                  Cursor* _cursor,
                                                                  UserInput* _userInput,
                                                                  NavigationGridSystem* _navigationGridSystem,
-                                                                 TransformSystem* _transformSystem) :
+                                                                 ActorMovementSystem* _transformSystem) :
     BaseSystem<ControllableActor>(_registry), cursor(_cursor), userInput(_userInput),
     navigationGridSystem(_navigationGridSystem), transformSystem(_transformSystem)
 {

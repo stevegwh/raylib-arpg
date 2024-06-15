@@ -5,7 +5,7 @@
 #pragma once
 
 #include "systems/StateMachineSystem.hpp"
-#include "systems/TransformSystem.hpp"
+#include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 
 #include "entt/entt.hpp"
@@ -16,7 +16,7 @@ namespace sage
 class WaveMobCombatLogicSubSystem
 {
 	entt::registry* registry;
-    TransformSystem* transformSystem;
+    ActorMovementSystem* transformSystem;
     CollisionSystem* collisionSystem;
     StateMachineSystem* stateMachineSystem;
 
@@ -29,7 +29,7 @@ public:
     void OnHit(entt::entity entity, entt::entity attacker, float damage);
     void Draw3D(entt::entity entity) const;
 	void Update() const;
-	WaveMobCombatLogicSubSystem(entt::registry* _registry, StateMachineSystem* _stateMachineSystem, TransformSystem* _transformSystem, CollisionSystem* _collisionSystem);
+	WaveMobCombatLogicSubSystem(entt::registry* _registry, StateMachineSystem* _stateMachineSystem, ActorMovementSystem* _transformSystem, CollisionSystem* _collisionSystem);
 };
 
 } // sage

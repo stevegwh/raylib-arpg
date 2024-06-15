@@ -183,7 +183,7 @@ void PlayerCombatLogicSubSystem::Disable()
 
 PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry,
                                                        StateMachineSystem* _stateMachineSystem,
-                                                       ControllableActorMovementSystem* _actorMovementSystem, 
+                                                       ControllableActorSystem* _actorMovementSystem, 
                                                        Cursor* _cursor) :
    registry(_registry),
    stateMachineSystem(_stateMachineSystem),

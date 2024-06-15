@@ -102,7 +102,7 @@ bool CollisionSystem::GetFirstCollision(entt::entity entity) // TODO: Terrible n
     return false;
 }
 
-CollisionMatrix CollisionSystem::CreateCollisionMatrix() const
+CollisionMatrix CollisionSystem::CreateCollisionMatrix()
 {
     int numLayers = static_cast<int>(CollisionLayer::COUNT);
     std::vector<std::vector<bool>> matrix(numLayers, std::vector<bool>(numLayers, false));
@@ -116,8 +116,13 @@ CollisionMatrix CollisionSystem::CreateCollisionMatrix() const
     
     matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::ENEMY)] = true;
     matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::BUILDING)] = true;
+
     matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::PLAYER)] = true;
     matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::BUILDING)] = true;
+
+    matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::PLAYER)] = true;
+    matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::NPC)] = true;
+    matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::ENEMY)] = true;
 
     return matrix;
 }

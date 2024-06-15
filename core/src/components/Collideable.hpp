@@ -20,6 +20,7 @@ enum class CollisionLayer
     PLAYER,
     NPC,
     ENEMY,
+    BOYD,
     COUNT // Must always be last
 };
 

@@ -13,12 +13,12 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
     stateMachineSystem(std::make_unique<StateMachineSystem>(_registry)),
     renderSystem(std::make_unique<RenderSystem>(_registry)),
     collisionSystem(std::make_unique<sage::CollisionSystem>(_registry)),
-    transformSystem(std::make_unique<sage::TransformSystem>(_registry)),
+    actorMovementSystem(std::make_unique<sage::ActorMovementSystem>(_registry, collisionSystem.get())),
     navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry)),
     animationSystem(std::make_unique<AnimationSystem>(_registry)),
     defaultStateSystem(std::make_unique<DefaultStateSystem>(_registry, 
                                                             stateMachineSystem.get(),
-                                                            transformSystem.get()))
+                                                            actorMovementSystem.get()))
 {
     userInput = std::make_unique<UserInput>(_keyMapping, settings);
     camera = std::make_unique<sage::Camera>(userInput.get());
@@ -28,26 +28,26 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
                                       camera.get(),
                                       userInput.get());
     
-    actorMovementSystem = std::make_unique<sage::ControllableActorMovementSystem>(_registry,
-                                                                                  cursor.get(),
-                                                                                  userInput.get(),
-                                                                                  navigationGridSystem.get(),
-                                                                                  transformSystem.get());
+    controllableActorSystem = std::make_unique<sage::ControllableActorSystem>(_registry,
+                                                                              cursor.get(),
+                                                                              userInput.get(),
+                                                                              navigationGridSystem.get(),
+                                                                              actorMovementSystem.get());
     {
-        entt::sink sink{ actorMovementSystem->onControlledActorChange };
+        entt::sink sink{ controllableActorSystem->onControlledActorChange };
         sink.connect<&Cursor::OnControlledActorChange>(*cursor);
     }
     dialogueSystem = std::make_unique<sage::DialogueSystem>(_registry, 
                                                             cursor.get(), 
                                                             camera.get(),
                                                             settings,
-                                                            actorMovementSystem.get());
+                                                            controllableActorSystem.get());
     healthBarSystem = std::make_unique<sage::HealthBarSystem>(_registry, camera.get());
     combatStateSystem = std::make_unique<CombatStateSystem>(_registry,
                                                        cursor.get(),
                                                        stateMachineSystem.get(),
+                                                       controllableActorSystem.get(),
                                                        actorMovementSystem.get(),
-                                                       transformSystem.get(),
                                                        collisionSystem.get());
 }
 

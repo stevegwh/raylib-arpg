@@ -161,7 +161,7 @@ void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attack
 
 WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry,
                                                          StateMachineSystem* _stateMachineSystem,
-                                                         TransformSystem* _transformSystem,
+                                                         ActorMovementSystem* _transformSystem,
                                                          CollisionSystem* _collisionSystem) :
                                                          registry(_registry),
                                                          stateMachineSystem(_stateMachineSystem),

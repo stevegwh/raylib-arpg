@@ -28,9 +28,9 @@ void WaveMobDefaultSubSystem::Update()
     }
 }
 
-WaveMobDefaultSubSystem::WaveMobDefaultSubSystem(entt::registry* _registry, 
+WaveMobDefaultSubSystem::WaveMobDefaultSubSystem(entt::registry* _registry,
                                                  StateMachineSystem* _stateMachineSystem,
-                                                 TransformSystem* _transformSystem) :
+                                                 ActorMovementSystem* _transformSystem) :
     registry(_registry), 
     stateMachineSystem(_stateMachineSystem),
     transformSystem(_transformSystem)

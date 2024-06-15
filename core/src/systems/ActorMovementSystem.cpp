@@ -2,17 +2,16 @@
 // Created by Steve Wheeler on 21/02/2024.
 //
 
-#include "TransformSystem.hpp"
+#include "ActorMovementSystem.hpp"
 
-#include "../Application.hpp"
 #include "../../utils/Serializer.hpp"
 
-
 #include <iostream>
+
 namespace sage
 {
 
-void TransformSystem::PruneMoveCommands(const entt::entity& entity)
+void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity)
 {
     
     auto& transform = registry->get<Transform>(entity);
@@ -33,7 +32,7 @@ void TransformSystem::PruneMoveCommands(const entt::entity& entity)
     std::swap(transform.targets, empty);
 }
 
-void TransformSystem::CancelMovement(const entt::entity& entity)
+void ActorMovementSystem::CancelMovement(const entt::entity& entity)
 {
     PruneMoveCommands(entity);
     auto& transform = registry->get<Transform>(entity);
@@ -41,7 +40,7 @@ void TransformSystem::CancelMovement(const entt::entity& entity)
 }
 
 
-void TransformSystem::PathfindToLocation(const entt::entity& entity, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
+void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
 {
     PruneMoveCommands(entity);
     auto& transform = registry->get<Transform>(entity);
@@ -51,13 +50,14 @@ void TransformSystem::PathfindToLocation(const entt::entity& entity, const std::
     transform.onStartMovement.publish(entity);
 }
 
-void TransformSystem::Update()
+void ActorMovementSystem::updateMoveTowardsTransforms()
 {
-    for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();) 
+    for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
     {
         const auto& transform = it->second;
+        auto distance = Vector3Distance(transform->targets.front(), transform->position);
 
-        if (Vector3Distance(transform->targets.front(), transform->position) < 0.5f)
+        if (distance < 0.5f)
         {
             transform->targets.pop();
             if (transform->targets.empty())
@@ -73,16 +73,49 @@ void TransformSystem::Update()
         float angle = atan2f(transform->direction.x, transform->direction.z) * RAD2DEG;
         transform->rotation.y = angle;
 
+        // TODO: Temporary. Working on boyd avoidance.
+        // Move
+        // Raycast in direction.
+        // Check collision
+        // Avoid or not
+        Ray ray; // This raycast is way too thin. Use a box raycast or something
+        ray.position = transform->position;
+        ray.position.y = 0.5f;
+        float avoidanceDistance = 1; //
+        if (avoidanceDistance >= distance)
+        {
+            avoidanceDistance = distance;
+        }
+        ray.direction = Vector3Multiply(transform->direction, { avoidanceDistance, 1, avoidanceDistance });
+        ray.direction.y = 0.5f;
+        auto col = collisionSystem->GetCollisionsWithRay(ray, CollisionLayer::BOYD);
+
+        if (col.size() > 1)
+        {
+            auto& hitTransform = registry->get<Transform>(col.at(1).collidedEntityId);
+            if (Vector3Distance(hitTransform.position, transform->position) < distance)
+            {
+                std::cout << "We have hit something! Avoid! \n";
+            }
+        }
+        // ---
         transform->position.x = transform->position.x + transform->direction.x * transform->movementSpeed;
         //transform->position.y = dy * 0.5f;
         transform->position.z = transform->position.z + transform->direction.z * transform->movementSpeed;
         transform->onPositionUpdate.publish(it->first);
+
         ++it;
     }
 }
 
-TransformSystem::TransformSystem(entt::registry* _registry) :
-    BaseSystem<Transform>(_registry)
+
+void ActorMovementSystem::Update()
+{
+    updateMoveTowardsTransforms();
+}
+
+ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, CollisionSystem* _collisionSystem) :
+    BaseSystem<Transform>(_registry), collisionSystem(_collisionSystem)
 {
 }
 

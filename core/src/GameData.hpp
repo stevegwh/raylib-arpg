@@ -8,10 +8,10 @@
 #include "systems/StateMachineSystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/CollisionSystem.hpp"
-#include "systems/TransformSystem.hpp"
+#include "systems/ActorMovementSystem.hpp"
 #include "systems/WorldSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
-#include "systems/ControllableActorMovementSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
@@ -39,10 +39,10 @@ public:
     std::unique_ptr<sage::StateMachineSystem> stateMachineSystem;
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
     std::unique_ptr<sage::RenderSystem> renderSystem;
-    std::unique_ptr<sage::TransformSystem> transformSystem;
+    std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
     std::unique_ptr<sage::WorldSystem> worldSystem;
     std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
-    std::unique_ptr<sage::ControllableActorMovementSystem> actorMovementSystem;
+    std::unique_ptr<sage::ControllableActorSystem> controllableActorSystem;
     std::unique_ptr<sage::AnimationSystem> animationSystem;
     std::unique_ptr<sage::DialogueSystem> dialogueSystem;
     std::unique_ptr<sage::HealthBarSystem> healthBarSystem;

@@ -119,7 +119,7 @@ DialogueSystem::DialogueSystem(entt::registry *registry,
                                Cursor* _cursor,
                                Camera* _camera,
                                Settings* _settings,
-                               ControllableActorMovementSystem* _actorMovementSystem) :
+                               ControllableActorSystem* _actorMovementSystem) :
     BaseSystem(registry), 
     cursor(_cursor), 
     camera(_camera), 

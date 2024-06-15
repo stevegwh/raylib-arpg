@@ -7,7 +7,7 @@
 #include "entt/entt.hpp"
 
 #include "systems/StateMachineSystem.hpp"
-#include "systems/TransformSystem.hpp"
+#include "systems/ActorMovementSystem.hpp"
 
 namespace sage
 {
@@ -16,12 +16,12 @@ class WaveMobDefaultSubSystem
 {
     entt::registry* registry;
     StateMachineSystem* stateMachineSystem;
-    TransformSystem* transformSystem;
+    ActorMovementSystem* transformSystem;
 public:
     void Update();
-    WaveMobDefaultSubSystem(entt::registry* _registry, 
+    WaveMobDefaultSubSystem(entt::registry* _registry,
                             StateMachineSystem* _stateMachineSystem,
-                            TransformSystem* _transformSystem);
+                            ActorMovementSystem* _transformSystem);
 };
 
 } // sage

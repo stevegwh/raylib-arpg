@@ -6,6 +6,7 @@
 
 #include "../components/Transform.hpp"
 #include "BaseSystem.hpp"
+#include "CollisionSystem.hpp"
 
 #include "raymath.h"
 #include "entt/entt.hpp"
@@ -18,11 +19,13 @@
 
 namespace sage
 {
-class TransformSystem : public BaseSystem<Transform>
+class ActorMovementSystem : public BaseSystem<Transform>
 {
+    CollisionSystem* collisionSystem;
     std::vector<std::pair<entt::entity, Transform*>> moveTowardsTransforms;
+    void updateMoveTowardsTransforms();
 public:
-    TransformSystem(entt::registry* _registry);
+    ActorMovementSystem(entt::registry* _registry, CollisionSystem* _collisionSystem);
     void PruneMoveCommands(const entt::entity& entity);
     // TODO: Overload this so you can just update one field at a time if needed
     void PathfindToLocation(const entt::entity& entity, const std::vector<Vector3>& path);

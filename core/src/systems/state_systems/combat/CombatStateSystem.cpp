@@ -36,8 +36,8 @@ void CombatStateSystem::Update()
 CombatStateSystem::CombatStateSystem(entt::registry *_registry,
                                      Cursor *_cursor,
                                      StateMachineSystem* _stateMachineSystem,
-                                     ControllableActorMovementSystem* _actorMovementSystem,
-                                     TransformSystem* _transformSystem,
+                                     ControllableActorSystem* _actorMovementSystem,
+                                     ActorMovementSystem* _transformSystem,
                                      CollisionSystem* _collisionSystem) :
                            BaseSystem<CombatableActor>(_registry),
                                cursor(_cursor),

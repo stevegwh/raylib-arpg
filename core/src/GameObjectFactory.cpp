@@ -202,7 +202,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
 
     auto& actor = registry->emplace<ControllableActor>(id);
     actor.pathfindingBounds = 50;
-    game->actorMovementSystem->SetControlledActor(id);
+    game->controllableActorSystem->SetControlledActor(id);
     
     return id;
 }

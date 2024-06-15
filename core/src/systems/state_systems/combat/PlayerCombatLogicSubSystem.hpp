@@ -5,7 +5,7 @@
 #pragma once
 
 #include "systems/StateMachineSystem.hpp"
-#include "systems/ControllableActorMovementSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "Cursor.hpp"
 
 #include "entt/entt.hpp"
@@ -18,7 +18,7 @@ struct PlayerCombatLogicSubSystem
 	entt::registry* registry;
     Cursor* cursor;
     StateMachineSystem* stateMachineSystem;
-	ControllableActorMovementSystem* actorMovementSystem;
+	ControllableActorSystem* actorMovementSystem;
     
 	void onEnemyClick(entt::entity entity);
 
@@ -35,7 +35,7 @@ struct PlayerCombatLogicSubSystem
 
 	PlayerCombatLogicSubSystem(entt::registry* _registry,
                                StateMachineSystem* _stateMachineSystem,
-                               ControllableActorMovementSystem* _actorMovementSystem,
+                               ControllableActorSystem* _actorMovementSystem,
                                Cursor* _cursor);
 };
 

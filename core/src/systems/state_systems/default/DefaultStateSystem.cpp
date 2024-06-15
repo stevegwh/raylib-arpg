@@ -11,9 +11,9 @@ void DefaultStateSystem::Update()
     waveMobDefaultSubSystem->Update();
 }
 
-DefaultStateSystem::DefaultStateSystem(entt::registry* _registry, 
+DefaultStateSystem::DefaultStateSystem(entt::registry* _registry,
                                        StateMachineSystem* _stateMachineSystem,
-                                       TransformSystem* _transformSystem):
+                                       ActorMovementSystem* _transformSystem):
                                        BaseSystem<StateMachineComponent>(_registry),
                                        stateMachineSystem(_stateMachineSystem),
                                        waveMobDefaultSubSystem(std::make_unique<WaveMobDefaultSubSystem>(_registry, 
