@@ -17,6 +17,34 @@ bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::Coll
 namespace sage
 {
 
+std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithBoundingBox(const BoundingBox& bb, CollisionLayer layer)
+{
+    std::vector<CollisionInfo> collisions;
+
+    auto view = registry->view<Collideable>();
+
+    view.each([&](auto entity, const auto& c)
+              {
+                  if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
+                  {
+                      if (CheckCollisionBoxes(bb, c.worldBoundingBox))
+                      {
+                          CollisionInfo info = {
+                              .collidedEntityId = entity,
+                              .collidedBB = c.worldBoundingBox,
+                              .rlCollision = {},
+                              .collisionLayer = c.collisionLayer
+                          };
+                          collisions.push_back(info);
+                      }
+                  }
+              });
+
+    std::sort(collisions.begin(), collisions.end(), compareRayCollisionDistances);
+
+    return collisions;
+}
+
 std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray, CollisionLayer layer)
 {
     std::vector<CollisionInfo> collisions;
