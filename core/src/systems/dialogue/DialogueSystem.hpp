@@ -22,7 +22,7 @@ class DialogueSystem : public BaseSystem<Dialogue>
     entt::entity controlledActor;
     entt::entity clickedNPC;
     
-    ControllableActorSystem* actorMovementSystem;
+    ControllableActorSystem* controllableActorSystem;
     Cursor* cursor;
     Camera* camera;
     Vector3 oldCamPos;

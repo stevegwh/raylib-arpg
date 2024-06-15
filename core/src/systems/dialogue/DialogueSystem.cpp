@@ -43,7 +43,7 @@ void DialogueSystem::startConversation(entt::entity entity)
     camera->LockInput();
     
     cursor->LockCursor();
-    actorMovementSystem->Disable();
+    controllableActorSystem->Disable();
     active = true;
     
     {
@@ -64,7 +64,7 @@ void DialogueSystem::endConversation(entt::entity actor)
     
     camera->UnlockInput();
     cursor->UnlockCursor();
-    actorMovementSystem->Enable();
+    controllableActorSystem->Enable();
     active = false;
     registry->get<Animation>(clickedNPC).ChangeAnimation(0); // TODO: Change to an enum
     clickedNPC = entt::null;
@@ -93,7 +93,7 @@ void DialogueSystem::NPCClicked(entt::entity _clickedNPC)
     const auto& npc = registry->get<Dialogue>(_clickedNPC);
     const auto& actorCol = registry->get<Collideable>(controlledActor);
     const auto& npcCol = registry->get<Collideable>(_clickedNPC);
-    actorMovementSystem->PathfindToLocation(controlledActor, npc.conversationPos);
+    controllableActorSystem->PathfindToLocation(controlledActor, npc.conversationPos);
     auto& actorTrans = registry->get<Transform>(controlledActor);
     {
         entt::sink sink { actorTrans.onFinishMovement };
@@ -119,18 +119,18 @@ DialogueSystem::DialogueSystem(entt::registry *registry,
                                Cursor* _cursor,
                                Camera* _camera,
                                Settings* _settings,
-                               ControllableActorSystem* _actorMovementSystem) :
+                               ControllableActorSystem* _controllableActorSystem) :
     BaseSystem(registry), 
     cursor(_cursor), 
-    camera(_camera), 
-    actorMovementSystem(_actorMovementSystem), 
+    camera(_camera),
+    controllableActorSystem(_controllableActorSystem),
     clickedNPC(entt::null),
     window(std::make_unique<DialogueWindow>(_settings))
 {
     {
-        entt::sink sink{_actorMovementSystem->onControlledActorChange};
+        entt::sink sink{_controllableActorSystem->onControlledActorChange};
         sink.connect<&DialogueSystem::changeControlledActor>(this);
-        controlledActor = _actorMovementSystem->GetControlledActor();
+        controlledActor = _controllableActorSystem->GetControlledActor();
     }
     {
         entt::sink sink{_cursor->onNPCClick};
