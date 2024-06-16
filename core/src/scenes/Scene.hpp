@@ -38,9 +38,15 @@ public:
         data->cursor->Draw3D();
         lightSubSystem->DrawDebugLights();
     };
+    
     virtual void Draw2D()
     {
         data->cursor->Draw2D();
+    }
+    
+    virtual void DrawDebug()
+    {
+        
     }
 };
 

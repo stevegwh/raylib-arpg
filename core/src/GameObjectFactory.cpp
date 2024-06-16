@@ -6,6 +6,7 @@
 #include "Application.hpp"
 #include "scenes/Scene.hpp"
 #include "components/Transform.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/Renderable.hpp"
 #include "components/Collideable.hpp"
 #include "components/WorldObject.hpp"
@@ -51,6 +52,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     transform.scale = 1.0f;
     transform.rotation = { 0, 0, 0 };
     transform.movementSpeed = 0.05f;
+    registry->emplace<MoveableActor>(id);
     
     auto model = LoadModel(modelPath);
 
@@ -145,6 +147,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     transform.position = position;
     transform.scale = 1.0f;
     transform.rotation = { 0, 0, 0 };
+    registry->emplace<MoveableActor>(id);
     
     auto model = LoadModel(modelPath);
     

@@ -80,41 +80,9 @@ void Editor::Update()
     }
 }
 
-void Editor::drawGrid(bool drawDebug)
+void Editor::drawGrid()
 {
     DrawGrid(scene->data->navigationGridSystem->slices, scene->data->navigationGridSystem->spacing);
-
-//    for (int i = 0; i  < game->navigationGridSystem->gridSquares.size(); i++)
-//    {
-//        for (int j = 0; j < game->navigationGridSystem->gridSquares.at(0).size(); j++)
-//        {
-//            if (game->navigationGridSystem->gridSquares[i][j]->debugColor)
-//            {
-//                auto color = YELLOW;
-//
-//                DrawCubeWires(game->navigationGridSystem->gridSquares[i][j]->worldPosCentre,
-//                              game->navigationGridSystem->gridSquares[i][j]->debugBox.x,
-//                              game->navigationGridSystem->gridSquares[i][j]->debugBox.y,
-//                              game->navigationGridSystem->gridSquares[i][j]->debugBox.z,
-//                              color);
-//            }
-//        }
-//    }
-
-    if (!drawDebug) return;
-    for (const auto& gridSquareRow : scene->data->navigationGridSystem->GetGridSquares())
-    {
-        for (const auto& gridSquare : gridSquareRow)
-        {
-            auto color = gridSquare->occupied ? RED : GREEN;
-
-            DrawCubeWires(gridSquare->worldPosCentre, 
-                          gridSquare->debugBox.x, 
-                          gridSquare->debugBox.y, 
-                          gridSquare->debugBox.z, 
-                          color);
-        }
-    }
 }
 
 void Editor::draw()
@@ -123,7 +91,8 @@ void Editor::draw()
     ClearBackground(RAYWHITE);
     BeginMode3D(*scene->data->camera->getRaylibCam());
     scene->Draw3D();
-    drawGrid(false);
+    scene->DrawDebug();
+    drawGrid();
     EndMode3D();
     scene->Draw2D();
     DrawFPS(10, 10);

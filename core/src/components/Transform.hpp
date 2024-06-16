@@ -8,15 +8,12 @@
 #include "entt/entt.hpp"
 #include "cereal/cereal.hpp"
 
-#include <deque>
-
 namespace sage
 {
 
 struct Transform
 {
     Vector3 position{};
-    std::deque<Vector3> targets{};
     Vector3 direction{};
     Vector3 rotation{};
     float scale = 1.0f;

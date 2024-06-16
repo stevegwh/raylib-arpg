@@ -146,6 +146,23 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
     }
 }
 
+void NavigationGridSystem::DrawDebug() const
+{
+    for (const auto& gridSquareRow : gridSquares)
+    {
+        for (const auto& gridSquare : gridSquareRow)
+        {
+            if (!gridSquare->occupied) continue;
+            auto color = RED;
+            DrawCubeWires(gridSquare->worldPosCentre,
+                          gridSquare->debugBox.x,
+                          gridSquare->debugBox.y,
+                          gridSquare->debugBox.z,
+                          color);
+        }
+    }
+}
+
 std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos)
 {
     // Add obstacle to grid
@@ -170,12 +187,13 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         {
             // Access grid square from the 2D array
             gridSquares[row][col]->occupied = true;
+            gridSquares[row][col]->debugColor = true;
         }
     }
     
     Vector2 minRange;
     Vector2 maxRange;
-    int bounds = 25;
+    int bounds = 50;
     if (registry->any_of<ControllableActor>(actor))
     {
         auto& controllableActor = registry->get<ControllableActor>(actor);
@@ -187,7 +205,7 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         return {};
     }
     
-    auto path = Pathfind(startPos, finishPos, minRange, maxRange);
+    auto path = Pathfind(startPos, finishPos);
     
     
     for (int row = min_row; row <= max_row; ++row)
@@ -270,7 +288,9 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
         }
     }
     
-    if (!pathFound) {
+    if (!pathFound) 
+    {
+        
         return {}; 
     }
 

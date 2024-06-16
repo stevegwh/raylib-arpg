@@ -37,6 +37,7 @@ struct Collideable
     BoundingBox localBoundingBox{}; // BoundingBox in local space
     BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb * world mat)
     CollisionLayer collisionLayer = CollisionLayer::DEFAULT;
+    bool debugDraw = false;
 
     explicit Collideable(BoundingBox _boundingBox);
     Collideable() = default;

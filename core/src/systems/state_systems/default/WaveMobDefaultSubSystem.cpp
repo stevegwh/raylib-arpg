@@ -14,11 +14,11 @@ namespace sage
 
 void WaveMobDefaultSubSystem::Update()
 {
-    auto view = registry->view<StateEnemyDefault, Transform>();
+    auto view = registry->view<StateEnemyDefault, MoveableActor>();
     for (auto& entity: view) 
     {
-        auto& t = registry->get<Transform>(entity);
-        if (t.targets.empty())
+        auto& a = registry->get<MoveableActor>(entity);
+        if (a.globalPath.empty())
         {
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);

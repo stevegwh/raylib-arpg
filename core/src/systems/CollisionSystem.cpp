@@ -89,6 +89,19 @@ void CollisionSystem::OnTransformUpdate(entt::entity entity)
     col.worldBoundingBox = bb;
 }
 
+void CollisionSystem::DrawDebug()
+{
+    auto view = registry->view<Collideable>();
+    for (auto entity: view) 
+    {
+        auto& c = registry->get<Collideable>(entity);
+        if (c.debugDraw)
+        {
+            DrawBoundingBox(c.worldBoundingBox, YELLOW);
+        }
+    }
+}
+
 void CollisionSystem::BoundingBoxDraw(entt::entity entityId, Color color) const
 {
     DrawBoundingBox(registry->get<Collideable>(entityId).worldBoundingBox, color);

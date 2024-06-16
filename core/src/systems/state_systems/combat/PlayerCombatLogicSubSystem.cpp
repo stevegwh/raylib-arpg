@@ -5,7 +5,7 @@
 
 
 #include "PlayerCombatLogicSubSystem.hpp"
-#include "../PlayerStateComponents.hpp"
+#include "components/states/PlayerStateComponents.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
 #include "components/Transform.hpp"

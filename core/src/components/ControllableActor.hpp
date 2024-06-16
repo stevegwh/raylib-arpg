@@ -9,12 +9,12 @@
 
 namespace sage
 {
-    struct ControllableActor
-    {
-        int pathfindingBounds = 25; // The max range the actor can pathfind at one time.
-        float checkTargetPosTimer;
-        float checkTargetPosThreshold = 0.5f;
-        entt::entity targetActor; // An actor that is the target for pathfinding etc.
-        Vector3 targetActorPos{};
-    };
+struct ControllableActor
+{
+    int pathfindingBounds = 25; // The max range the actor can pathfind at one time.
+    float checkTargetPosTimer;
+    float checkTargetPosThreshold = 0.5f;
+    entt::entity targetActor; // An actor that is the target for pathfinding etc.
+    Vector3 targetActorPos{};
+};
 }

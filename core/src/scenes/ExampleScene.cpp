@@ -35,6 +35,14 @@ void ExampleScene::Draw3D()
     Scene::Draw3D();
 }
 
+
+void ExampleScene::DrawDebug()
+{
+    data->collisionSystem->DrawDebug();
+    data->navigationGridSystem->DrawDebug();
+    data->actorMovementSystem->DebugDraw();
+}
+
 ExampleScene::~ExampleScene()
 {
     

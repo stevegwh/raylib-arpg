@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include "components/states/StatePlayerCombat.hpp"
-#include "components/states/StatePlayerDefault.hpp"
+#include "StatePlayerCombat.hpp"
+#include "StatePlayerDefault.hpp"
 #include <tuple>
 
 namespace sage

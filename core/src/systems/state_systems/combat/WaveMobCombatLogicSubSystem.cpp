@@ -12,7 +12,7 @@
 #include "components/Animation.hpp"
 #include "components/Transform.hpp"
 #include "components/HealthBar.hpp"
-#include "../EnemyStateComponents.hpp"
+#include "components/states/EnemyStateComponents.hpp"
 
 namespace sage
 {

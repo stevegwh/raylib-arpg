@@ -16,7 +16,7 @@ class Editor : public Application
     bool debugMode = false;
     void init() override;
     void draw() override;
-    void drawGrid(bool drawDebug);
+    void drawGrid();
     void enablePlayMode();
     void enableEditMode();
     void manageScenes();

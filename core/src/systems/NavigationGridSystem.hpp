@@ -30,6 +30,7 @@ public:
     [[nodiscard]] std::vector<Vector3> Pathfind(const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange);
     const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
     void DrawDebugPathfinding(const Vector2 &minRange, const Vector2 &maxRange);
+    void DrawDebug() const;
 };
 
 } // sage

@@ -28,9 +28,17 @@ void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity)
         ++it;
     }
 
+    auto& actor = registry->get<MoveableActor>(entity);
     // Clear queue of previous commands
-    std::deque<Vector3> empty;
-    std::swap(transform.targets, empty);
+    {
+        std::deque<Vector3> empty;
+        std::swap(actor.localPath, empty);
+    }
+    {
+        std::deque<Vector3> empty;
+        std::swap(actor.globalPath, empty);
+    }
+
 }
 
 void ActorMovementSystem::CancelMovement(const entt::entity& entity)
@@ -45,78 +53,124 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const s
 {
     PruneMoveCommands(entity);
     auto& transform = registry->get<Transform>(entity);
-    for (auto n : path) transform.targets.emplace_back(n);
-    transform.direction = Vector3Normalize(Vector3Subtract(transform.targets.front(), transform.position));
-    moveTowardsTransforms.emplace_back(entity, &transform);
+    auto& actor = registry->get<MoveableActor>(entity);
+    for (auto n : path) actor.globalPath.emplace_back(n);
+    transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
+    //moveTowardsTransforms.emplace_back(entity, &transform);
     transform.onStartMovement.publish(entity);
 }
 
 void ActorMovementSystem::updateMoveTowardsTransforms()
 {
-    for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
+    auto view = registry->view<MoveableActor, Transform>();
+    for (auto& entity: view)
     {
-        const auto& transform = it->second;
-        auto distance = Vector3Distance(transform->targets.front(), transform->position);
-
-        if (distance < 0.5f)
+        auto& actor = registry->get<MoveableActor>(entity);
+        if (actor.globalPath.empty()) continue;
+        auto& transform = registry->get<Transform>(entity);
+        
+        if (!actor.localPath.empty())
         {
-            transform->targets.pop_front();
-            if (transform->targets.empty())
+            
+            auto distance = Vector3Distance(actor.localPath.front(), transform.position);
+            if (distance < 0.5f)
             {
-                transform->onFinishMovement.publish(it->first);
-                it = moveTowardsTransforms.erase(it);
-                continue;
+                actor.localPath.pop_front();
+                if (actor.localPath.empty()) continue;
+                transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
             }
-            transform->direction = Vector3Normalize(Vector3Subtract(transform->targets.front(), transform->position));
         }
-
-        // Calculate rotation angle based on direction
-        float angle = atan2f(transform->direction.x, transform->direction.z) * RAD2DEG;
-        transform->rotation.y = angle;
-
-        // TODO: Temporary. Working on boyd avoidance.
-        // Move
-        // Raycast in direction.
-        // Check collision
-        // Avoid or not
-        Ray ray;
-        ray.position = transform->position;
-        ray.position.y = 0.5f;
-        float avoidanceDistance = 0.5;
-        ray.direction = Vector3Multiply(transform->direction, { avoidanceDistance, 1, avoidanceDistance });
-        ray.direction.y = 0.5f;
-        auto col = collisionSystem->GetCollisionsWithRay(ray, CollisionLayer::BOYD);
-
-        if (col.size() > 1) // First collision will be this unit
+        else
         {
-            auto& hitTransform = registry->get<Transform>(col.at(1).collidedEntityId);
-            if (Vector3Distance(hitTransform.position, transform->position) < distance)
+            auto distance = Vector3Distance(actor.globalPath.front(), transform.position);
+            if (distance < 0.5f)
             {
-                std::cout << "We have hit something! Avoid! \n";
-                BoundingBox hitBB = col.at(1).collidedBB;
-                auto path = navigationGridSystem->PathfindAvoidLocalObstacle(it->first, hitBB, transform->position, transform->targets.front());
-                
-                for (auto & it2 : std::ranges::reverse_view(path))
+                actor.globalPath.pop_front();
+                if (actor.globalPath.empty())
                 {
-                    transform->targets.push_front(it2);
+                    transform.onFinishMovement.publish(entity);
+                    continue;
                 }
-                ++it;
-                continue;
+                transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
             }
-            // TODO
-            // Take the collideable's bounding box and mark the grid squares that it occupies as "occupied" (temporarily, somehow)
-            // Use dijkstra's algo, favouring grid squares that are not in the direction the collided object is moving in (move towards their rear)
-            // Merge the local avoidance path with the global path somehow
-        }
-        // ---
-        transform->position.x = transform->position.x + transform->direction.x * transform->movementSpeed;
-        //transform->position.y = dy * 0.5f;
-        transform->position.z = transform->position.z + transform->direction.z * transform->movementSpeed;
-        transform->onPositionUpdate.publish(it->first);
 
-        ++it;
+            // Calculate rotation angle based on direction
+            float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
+            transform.rotation.y = angle;
+
+            // TODO: Temporary. Working on boyd avoidance.
+            // Move
+            // Raycast in direction.
+            // Check collision
+            // Avoid or not
+            Ray ray;
+            ray.position = transform.position;
+            ray.position.y = 0.5f;
+            float avoidanceDistance = 1;
+            ray.direction = Vector3Multiply(transform.direction, { avoidanceDistance, 1, avoidanceDistance });
+            ray.direction.y = 0.5f;
+            auto col = collisionSystem->GetCollisionsWithRay(ray, CollisionLayer::BOYD);
+
+            if (col.size() > 1) // First collision will be this unit
+            {
+                auto& hitTransform = registry->get<Transform>(col.at(1).collidedEntityId);
+                if (Vector3Distance(hitTransform.position, transform.position) < distance)
+                {
+                    std::cout << "We have hit something! Avoid! \n";
+                    BoundingBox hitBB = col.at(1).collidedBB;
+                    auto& c = registry->get<Collideable>(col.at(1).collidedEntityId);
+                    c.debugDraw = true;
+                    auto path = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
+
+                    for (auto & it : std::ranges::reverse_view(path))
+                    {
+                        actor.localPath.push_front(it);
+                    }
+                    continue;
+                }
+                // TODO
+                // Take the collideable's bounding box and mark the grid squares that it occupies as "occupied" (temporarily, somehow)
+                // Use dijkstra's algo, favouring grid squares that are not in the direction the collided object is moving in (move towards their rear)
+                // Merge the local avoidance path with the global path somehow
+            }
+        }
+        
+        
+        // ---
+        transform.position.x = transform.position.x + transform.direction.x * transform.movementSpeed;
+        //transform->position.y = dy * 0.5f;
+        transform.position.z = transform.position.z + transform.direction.z * transform.movementSpeed;
+        transform.onPositionUpdate.publish(entity);
     }
 }
+
+void ActorMovementSystem::DebugDraw() const
+{
+    auto view = registry->view<MoveableActor, Transform>();
+    for (auto& entity: view) 
+    {
+        auto &actor = registry->get<MoveableActor>(entity);
+        if (actor.globalPath.empty()) continue;
+        auto &transform = registry->get<Transform>(entity);
+        if (!actor.localPath.empty())
+        {
+            for (auto p : actor.localPath) 
+            {
+                DrawCube(p, 1, 1, 1, RED);
+            }
+        }
+        if (!actor.globalPath.empty())
+        {
+            for (auto p : actor.globalPath)
+            {
+                DrawCube(p, 1, 1, 1, GREEN);
+            }
+        }
+    }
+    
+    
+}
+
 
 
 void ActorMovementSystem::Update()
@@ -125,7 +179,7 @@ void ActorMovementSystem::Update()
 }
 
 ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, CollisionSystem* _collisionSystem, NavigationGridSystem* _navigationGridSystem) :
-    BaseSystem<Transform>(_registry), collisionSystem(_collisionSystem), navigationGridSystem(_navigationGridSystem)
+    BaseSystem<MoveableActor>(_registry), collisionSystem(_collisionSystem), navigationGridSystem(_navigationGridSystem)
 {
 }
 

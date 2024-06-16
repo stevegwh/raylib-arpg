@@ -20,6 +20,7 @@ public:
     CollisionMatrix collisionMatrix;
     
     explicit CollisionSystem(entt::registry* _registry);
+    void DrawDebug();
     void OnTransformUpdate(entt::entity entity);
     void UpdateWorldBoundingBox(entt::entity entityId, Matrix mat);
     [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray, CollisionLayer layer = CollisionLayer::DEFAULT);

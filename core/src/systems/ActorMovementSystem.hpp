@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../components/Transform.hpp"
+#include "../components/MoveableActor.hpp"
 #include "BaseSystem.hpp"
 #include "CollisionSystem.hpp"
 #include "NavigationGridSystem.hpp"
@@ -20,7 +21,7 @@
 
 namespace sage
 {
-class ActorMovementSystem : public BaseSystem<Transform>
+class ActorMovementSystem : public BaseSystem<MoveableActor>
 {
     CollisionSystem* collisionSystem;
     NavigationGridSystem* navigationGridSystem;
@@ -34,5 +35,6 @@ public:
     void MoveToLocation(const entt::entity& entity, Vector3 location);
     void CancelMovement(const entt::entity& entity);
     void Update();
+    void DebugDraw() const;
 };
 }
