@@ -3,6 +3,7 @@
 //
 
 #include "NavigationGridSystem.hpp"
+#include "components/ControllableActor.hpp"
 
 #include <queue>
 #include <unordered_map>
@@ -95,7 +96,7 @@ bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out)
  * @out (Out param) The resulting index of the corresponding grid square.
  * @return Whether the move is valid
  */
-bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out, const Vector2& minRange, const Vector2& maxRange)
+bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out, const Vector2& minRange, const Vector2& maxRange) const
 {
     // Calculate the grid indices for the given world position
     int x = std::floor(worldPos.x / spacing) + (slices / 2);
@@ -145,6 +146,61 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
     }
 }
 
+std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos)
+{
+    // Add obstacle to grid
+    
+    // Get the grid indices for the bounding box
+    Vector2 topLeftIndex;
+    Vector2 bottomRightIndex;
+    if (!WorldToGridSpace(obstacle.min, topLeftIndex) ||
+        !WorldToGridSpace(obstacle.max, bottomRightIndex))
+    {
+        return {};
+    }
+
+    int min_col = std::min((int)topLeftIndex.x, (int)bottomRightIndex.x);
+    int max_col = std::max((int)topLeftIndex.x, (int)bottomRightIndex.x);
+    int min_row = std::min((int)topLeftIndex.y, (int)bottomRightIndex.y);
+    int max_row = std::max((int)topLeftIndex.y, (int)bottomRightIndex.y);
+    
+    for (int row = min_row; row <= max_row; ++row)
+    {
+        for (int col = min_col; col <= max_col; ++col)
+        {
+            // Access grid square from the 2D array
+            gridSquares[row][col]->occupied = true;
+        }
+    }
+    
+    Vector2 minRange;
+    Vector2 maxRange;
+    int bounds = 25;
+    if (registry->any_of<ControllableActor>(actor))
+    {
+        auto& controllableActor = registry->get<ControllableActor>(actor);
+        bounds = controllableActor.pathfindingBounds;
+    }
+
+    if (!GetPathfindRange(actor, bounds, minRange, maxRange))
+    {
+        return {};
+    }
+    
+    auto path = Pathfind(startPos, finishPos, minRange, maxRange);
+    
+    
+    for (int row = min_row; row <= max_row; ++row)
+    {
+        for (int col = min_col; col <= max_col; ++col)
+        {
+            // Access grid square from the 2D array
+            gridSquares[row][col]->occupied = false;
+        }
+    }
+    return path;
+}
+
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
  * Checks entire grid.
@@ -158,7 +214,7 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
 
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
- * Checks path within a range.
+ * Checks path within a range. Use "GetPathfindRange" to calculate minRange/maxRange if needed.
  * @minRange The minimum grid index in the pathfinding range.
  * @maxRange The maximum grid index in the pathfinding range.
  * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
@@ -218,7 +274,7 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
         return {}; 
     }
 
-    // Trace path back from finish to start
+    // Trace path back from finish to start, skip nodes if they are the same direction as the previous
     std::vector<Vector3> path;
     std::pair<int, int> current = {finishrow, finishcol};
     std::pair<int, int> previous;
@@ -253,22 +309,7 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
     }
     path.push_back(gridSquares[current.first][current.second]->worldPosMin);
     std::reverse(path.begin(), path.end());
-
-//    while (current.first != startrow || current.second != startcol)
-//    {
-//        previous = current;
-//        current = came_from[current.first][current.second];
-//        path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-//    }
-//    std::reverse(path.begin(), path.end());
-
-
-//    for (const auto& node : path) 
-//    {
-//        std::cout << node.x << ", " << node.y << ", " << node.z << std::endl;
-//    }
     
-
     return path;
 }
 

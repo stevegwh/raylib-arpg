@@ -39,9 +39,9 @@ public:
     std::unique_ptr<sage::StateMachineSystem> stateMachineSystem;
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
     std::unique_ptr<sage::RenderSystem> renderSystem;
+    std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
     std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
     std::unique_ptr<sage::WorldSystem> worldSystem;
-    std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
     std::unique_ptr<sage::ControllableActorSystem> controllableActorSystem;
     std::unique_ptr<sage::AnimationSystem> animationSystem;
     std::unique_ptr<sage::DialogueSystem> dialogueSystem;
