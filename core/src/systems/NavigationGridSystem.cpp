@@ -165,8 +165,6 @@ void NavigationGridSystem::DrawDebug() const
 
 std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos)
 {
-    // Add obstacle to grid
-    
     // Get the grid indices for the bounding box
     Vector2 topLeftIndex;
     Vector2 bottomRightIndex;
@@ -205,7 +203,7 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         return {};
     }
     
-    auto path = Pathfind(startPos, finishPos);
+    auto path = Pathfind(startPos, finishPos, minRange, maxRange);
     
     
     for (int row = min_row; row <= max_row; ++row)

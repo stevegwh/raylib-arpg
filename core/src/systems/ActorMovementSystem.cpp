@@ -77,7 +77,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
             {
                 actor.localPath.pop_front();
                 if (actor.localPath.empty()) continue;
-                transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
+                transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
             }
         }
         else
@@ -93,16 +93,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
                 }
                 transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
             }
-
-            // Calculate rotation angle based on direction
-            float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
-            transform.rotation.y = angle;
-
-            // TODO: Temporary. Working on boyd avoidance.
-            // Move
-            // Raycast in direction.
-            // Check collision
-            // Avoid or not
+            
             Ray ray;
             ray.position = transform.position;
             ray.position.y = 0.5f;
@@ -116,7 +107,6 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
                 auto& hitTransform = registry->get<Transform>(col.at(1).collidedEntityId);
                 if (Vector3Distance(hitTransform.position, transform.position) < distance)
                 {
-                    std::cout << "We have hit something! Avoid! \n";
                     BoundingBox hitBB = col.at(1).collidedBB;
                     auto& c = registry->get<Collideable>(col.at(1).collidedEntityId);
                     c.debugDraw = true;
@@ -128,15 +118,13 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
                     }
                     continue;
                 }
-                // TODO
-                // Take the collideable's bounding box and mark the grid squares that it occupies as "occupied" (temporarily, somehow)
-                // Use dijkstra's algo, favouring grid squares that are not in the direction the collided object is moving in (move towards their rear)
-                // Merge the local avoidance path with the global path somehow
             }
         }
         
         
-        // ---
+        // Calculate rotation angle based on direction
+        float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
+        transform.rotation.y = angle;
         transform.position.x = transform.position.x + transform.direction.x * transform.movementSpeed;
         //transform->position.y = dy * 0.5f;
         transform.position.z = transform.position.z + transform.direction.z * transform.movementSpeed;
