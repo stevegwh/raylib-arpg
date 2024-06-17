@@ -47,17 +47,24 @@ std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithBoundingBox(const B
 
 std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray, CollisionLayer layer)
 {
+    return GetCollisionsWithRay(entt::null, ray, layer);
+}
+
+std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const entt::entity& caster, const Ray& ray, CollisionLayer layer)
+{
     std::vector<CollisionInfo> collisions;
 
     auto view = registry->view<Collideable>();
 
     view.each([&](auto entity, const auto& c)
               {
+                  if (entity == caster) return;
                   if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
                   {
                       auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
                       if (col.hit)
                       {
+
                           CollisionInfo info = {
                               .collidedEntityId = entity,
                               .collidedBB = c.worldBoundingBox,

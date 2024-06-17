@@ -106,7 +106,7 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
         ray.position.y = 0.5f;
         ray.direction.y = 0.5f;
         t.movementDirectionDebugLine = ray;
-        auto collisions = collisionSystem->GetCollisionsWithRay(ray, collideable.collisionLayer);
+        auto collisions = collisionSystem->GetCollisionsWithRay(entity, ray, collideable.collisionLayer);
         
         if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
         {

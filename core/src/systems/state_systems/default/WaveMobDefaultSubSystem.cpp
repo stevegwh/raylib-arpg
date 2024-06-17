@@ -14,7 +14,6 @@ namespace sage
 
 void WaveMobDefaultSubSystem::Update()
 {
-    return;
     auto view = registry->view<StateEnemyDefault, MoveableActor>();
     for (auto& entity: view) 
     {

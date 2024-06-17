@@ -13,7 +13,6 @@ namespace sage
 
 struct MoveableActor
 {
-    std::deque<Vector3> localPath{};
     std::deque<Vector3> globalPath{};
 };
 

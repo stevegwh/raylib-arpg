@@ -29,11 +29,6 @@ void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity)
     }
 
     auto& actor = registry->get<MoveableActor>(entity);
-    // Clear queue of previous commands
-    {
-        std::deque<Vector3> empty;
-        std::swap(actor.localPath, empty);
-    }
     {
         std::deque<Vector3> empty;
         std::swap(actor.globalPath, empty);
@@ -69,56 +64,44 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         if (actor.globalPath.empty()) continue;
         auto& transform = registry->get<Transform>(entity);
         
-        if (!actor.localPath.empty())
+        auto distance = Vector3Distance(actor.globalPath.front(), transform.position);
+        if (distance < 0.5f)
         {
-            std::cout << "Current (local) target: " << actor.localPath.front().x << ", " << actor.localPath.front().z << std::endl;
-            auto distance = Vector3Distance(actor.localPath.front(), transform.position);
-            if (distance < 0.5f)
+            actor.globalPath.pop_front();
+            if (actor.globalPath.empty())
             {
-                actor.localPath.pop_front();
-                if (actor.localPath.empty()) continue;
-                transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
+                transform.onFinishMovement.publish(entity);
+                continue;
             }
+            transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
         }
-        else
+        
+        Ray ray;
+        float avoidanceDistance = 1;
+        ray.direction = Vector3Multiply(transform.direction, { avoidanceDistance, 1, avoidanceDistance });
+        ray.direction.y = 0.5f;
+        ray.position = transform.position;
+        ray.position.y = 0.5f;
+        auto col = collisionSystem->GetCollisionsWithRay(entity, ray, CollisionLayer::BOYD);
+
+        if (!col.empty())
         {
-            std::cout << "Current (global) target: " << actor.globalPath.front().x << ", " << actor.globalPath.front().z << std::endl;
-            auto distance = Vector3Distance(actor.globalPath.front(), transform.position);
-            if (distance < 0.5f)
+            auto& hitTransform = registry->get<Transform>(col.at(0).collidedEntityId);
+            if (Vector3Distance(hitTransform.position, transform.position) < distance)
             {
-                actor.globalPath.pop_front();
-                if (actor.globalPath.empty())
+                
+                BoundingBox hitBB = col.at(0).collidedBB;
+                auto casterLocalBB = registry->get<Collideable>(entity).localBoundingBox;
+                auto& c = registry->get<Collideable>(col.at(0).collidedEntityId);
+                c.debugDraw = true;
+                auto path = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
+                
+                for (auto & it : std::ranges::reverse_view(path))
                 {
-                    transform.onFinishMovement.publish(entity);
-                    continue;
+                    actor.globalPath.push_front(it);
                 }
                 transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
-            }
-            
-            Ray ray;
-            ray.position = transform.position;
-            ray.position.y = 0.5f;
-            float avoidanceDistance = 1;
-            ray.direction = Vector3Multiply(transform.direction, { avoidanceDistance, 1, avoidanceDistance });
-            ray.direction.y = 0.5f;
-            auto col = collisionSystem->GetCollisionsWithRay(ray, CollisionLayer::BOYD);
-
-            if (col.size() > 1) // First collision will be this unit
-            {
-                auto& hitTransform = registry->get<Transform>(col.at(1).collidedEntityId);
-                if (Vector3Distance(hitTransform.position, transform.position) < distance)
-                {
-                    BoundingBox hitBB = col.at(1).collidedBB;
-                    auto& c = registry->get<Collideable>(col.at(1).collidedEntityId);
-                    c.debugDraw = true;
-                    auto path = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
-
-                    for (auto & it : std::ranges::reverse_view(path))
-                    {
-                        actor.localPath.push_front(it);
-                    }
-                    continue;
-                }
+                continue;
             }
         }
         
@@ -142,13 +125,6 @@ void ActorMovementSystem::DebugDraw() const
         auto &actor = registry->get<MoveableActor>(entity);
         if (actor.globalPath.empty()) continue;
         auto &transform = registry->get<Transform>(entity);
-        if (!actor.localPath.empty())
-        {
-            for (auto p : actor.localPath) 
-            {
-                DrawCube(p, 1, 1, 1, RED);
-            }
-        }
         if (!actor.globalPath.empty())
         {
             for (auto p : actor.globalPath)
