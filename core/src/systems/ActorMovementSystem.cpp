@@ -71,7 +71,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         
         if (!actor.localPath.empty())
         {
-            
+            std::cout << "Current (local) target: " << actor.localPath.front().x << ", " << actor.localPath.front().z << std::endl;
             auto distance = Vector3Distance(actor.localPath.front(), transform.position);
             if (distance < 0.5f)
             {
@@ -82,6 +82,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         }
         else
         {
+            std::cout << "Current (global) target: " << actor.globalPath.front().x << ", " << actor.globalPath.front().z << std::endl;
             auto distance = Vector3Distance(actor.globalPath.front(), transform.position);
             if (distance < 0.5f)
             {
@@ -129,6 +130,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         //transform->position.y = dy * 0.5f;
         transform.position.z = transform.position.z + transform.direction.z * transform.movementSpeed;
         transform.onPositionUpdate.publish(entity);
+        
     }
 }
 
