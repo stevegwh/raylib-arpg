@@ -61,7 +61,7 @@ void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 locati
     navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
     const auto& actorPos = registry->get<Transform>(id);
-    auto path = navigationGridSystem->Pathfind(actorPos.position, location, minRange, maxRange);
+    auto path = navigationGridSystem->AStarPathfind(actorPos.position, location, minRange, maxRange);
     if (!path.empty()) transformSystem->PathfindToLocation(id, path);
 }
 

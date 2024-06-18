@@ -13,29 +13,31 @@
 
 namespace sage
 {
-    struct NavigationGridSquare
-    {
-        bool debugColor = false;
-        Vector2 gridSquareIndex;
-        const Vector3 worldPosMin; // Top Left
-        const Vector3 worldPosMax; // Bottom Right
-        const Vector3 worldPosCentre;
-        const Vector3 debugBox;
-        std::vector<CollisionInfo> collisionsWithSquare;
-        bool occupied = false;
-        
-        explicit NavigationGridSquare(Vector2 _gridSquareIndex, 
-                                      Vector3 _worldPosMin, 
-                                      Vector3 _worldPosMax, 
-                                      Vector3 _worldPosCentre) : 
-        gridSquareIndex(_gridSquareIndex), 
-        worldPosMin(_worldPosMin), 
-        worldPosMax(_worldPosMax), 
-        worldPosCentre(_worldPosCentre),
-        debugBox({ fabsf(worldPosMax.x - worldPosMin.x), 
-                   0.1f, 
-                   fabsf(worldPosMax.z - worldPosMin.z) })
-        {}
-        
-    };
+
+struct NavigationGridSquare
+{
+    int pathfindingCost = 1;
+    bool debugColor = false;
+    Vector2 gridSquareIndex;
+    const Vector3 worldPosMin; // Top Left
+    const Vector3 worldPosMax; // Bottom Right
+    const Vector3 worldPosCentre;
+    const Vector3 debugBox;
+    std::vector<CollisionInfo> collisionsWithSquare; // TODO: unimplemented
+    bool occupied = false;
+    
+    explicit NavigationGridSquare(Vector2 _gridSquareIndex, 
+                                  Vector3 _worldPosMin, 
+                                  Vector3 _worldPosMax, 
+                                  Vector3 _worldPosCentre) : 
+    gridSquareIndex(_gridSquareIndex), 
+    worldPosMin(_worldPosMin), 
+    worldPosMax(_worldPosMax), 
+    worldPosCentre(_worldPosCentre),
+    debugBox({ fabsf(worldPosMax.x - worldPosMin.x), 
+               0.1f, 
+               fabsf(worldPosMax.z - worldPosMin.z) })
+    {}
+    
+};
 }

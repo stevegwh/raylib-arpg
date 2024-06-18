@@ -5,10 +5,12 @@
 #include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/Transform.hpp"
+#include "../utils/PriorityQueue.hpp"
 
 #include <queue>
 #include <unordered_map>
 #include <utility>
+#include <tuple>
 #include <iostream>
 
 Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
@@ -236,6 +238,15 @@ std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity act
     return { gridSquares[rightGridIndex.y][rightGridIndex.x]->worldPosMin, gridSquares[forwardGridIndex.y][forwardGridIndex.x]->worldPosMin };
 }
 
+/**
+ * Resolves local collisions by putting the obstacle into the grid system and using the pathfinding algorithm
+ * for resolution.
+ * @param actor 
+ * @param obstacle 
+ * @param startPos 
+ * @param finishPos 
+ * @return 
+ */
 std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos)
 {
     // Get the grid indices for the bounding box
@@ -276,7 +287,7 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         return {};
     }
     
-    auto path = Pathfind(startPos, finishPos, minRange, maxRange);
+    auto path = BFSPathfind(startPos, finishPos, minRange, maxRange);
     
     
     for (int row = min_row; row <= max_row; ++row)
@@ -295,9 +306,136 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
  * Checks entire grid.
  * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
  */
-std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos)
+std::vector<Vector3> NavigationGridSystem::AStarPathfind(const Vector3 &startPos, const Vector3 &finishPos)
 {
-    return Pathfind(startPos, finishPos, {0,0},
+    return AStarPathfind(startPos, finishPos, {0,0},
+                       {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())});
+}
+
+inline double heuristic(std::pair<int, int> a, std::pair<int, int> b) 
+{
+    return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+}
+
+/**
+ * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+ * Checks path within a range. Use "GetPathfindRange" to calculate minRange/maxRange if needed.
+ * @minRange The minimum grid index in the pathfinding range.
+ * @maxRange The maximum grid index in the pathfinding range.
+ * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
+ */
+std::vector<Vector3> NavigationGridSystem::AStarPathfind(const Vector3 &startPos,
+                                                         const Vector3 &finishPos,
+                                                         const Vector2 &minRange,
+                                                         const Vector2 &maxRange)
+{
+    Vector2 startGridSquare = {0};
+    Vector2 finishGridSquare = {0};
+    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
+    int startrow = startGridSquare.y;
+    int startcol = startGridSquare.x;
+
+    int finishrow = finishGridSquare.y;
+    int finishcol = finishGridSquare.x;
+
+    auto inside = [&](int row, int col) { return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x; };
+
+    std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
+    std::vector<std::vector<std::pair<int, int>>> came_from(maxRange.y, std::vector<std::pair<int, int>>(maxRange.x, std::pair<int, int>(-1, -1)));
+    std::vector<std::vector<double>> cost_so_far(maxRange.y, std::vector<double>(maxRange.x, 0.0));
+    
+    std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1} };
+    PriorityQueue<std::pair<int,int>, double> frontier;
+
+    frontier.put({startrow, startcol}, 0);
+    visited[startrow][startcol] = true;
+
+    bool pathFound = false;
+
+    while (!frontier.empty())
+    {
+        auto current = frontier.get();
+
+        if (current.first == finishrow && current.second == finishcol)
+        {
+            pathFound = true;
+            break;
+        }
+
+        for (const auto& dir : directions)
+        {
+            int next_row = current.first + dir.first;
+            int next_col = current.second + dir.second;
+            
+            auto current_cost = gridSquares[current.first][current.second]->pathfindingCost;
+            auto next_cost = gridSquares[next_row][next_col]->pathfindingCost;
+            double new_cost = current_cost + next_cost;
+            
+            if (inside(next_row, next_col) &&
+                !visited[next_row][next_col] &&
+                !gridSquares[next_row][next_col]->occupied || 
+                new_cost < cost_so_far[next_row][next_col])
+            {
+                cost_so_far[next_row][next_col] = new_cost;
+                double priority = new_cost + heuristic({next_row, next_col}, {finishrow, finishcol});
+                frontier.put({next_row, next_col}, priority);
+                came_from[next_row][next_col] = current;
+                visited[next_row][next_col] = true;
+            }
+        }
+    }
+
+    if (!pathFound)
+    {
+        return {};
+    }
+
+    // Trace path back from finish to start, skip nodes if they are the same direction as the previous
+    std::vector<Vector3> path;
+    std::pair<int, int> current = {finishrow, finishcol};
+    std::pair<int, int> previous;
+    std::pair<int, int> currentDir = {0,0};
+
+    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+    while (current.first != startrow || current.second != startcol)
+    {
+        previous = current;
+        current = came_from[current.first][current.second];
+        for (const auto& dir : directions)
+        {
+            int row = previous.first + dir.first;
+            int col = previous.second + dir.second;
+            if (row == current.first && col == current.second) // Found the direction
+            {
+                if (currentDir.first == 0 && currentDir.second == 0)
+                {
+                    currentDir = dir;
+                    break;
+                }
+                if (dir != currentDir)
+                {
+                    currentDir = dir;
+                    path.push_back(gridSquares[previous.first][previous.second]->worldPosMin);
+                    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+                }
+                break;
+            }
+        }
+    }
+    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+    std::reverse(path.begin(), path.end());
+
+    return path;
+}
+
+/**
+ * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+ * Checks entire grid.
+ * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
+ */
+std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos)
+{
+    return BFSPathfind(startPos, finishPos, {0,0},
                     {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())});
 }
 
@@ -308,7 +446,7 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
  * @maxRange The maximum grid index in the pathfinding range.
  * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
  */
-std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange)
+std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange)
 {
     Vector2 startGridSquare = {0};
     Vector2 finishGridSquare = {0};
@@ -361,7 +499,6 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
     
     if (!pathFound) 
     {
-        
         return {}; 
     }
 
