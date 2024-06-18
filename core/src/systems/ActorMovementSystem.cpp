@@ -14,7 +14,6 @@ namespace sage
 
 void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity)
 {
-    
     auto& transform = registry->get<Transform>(entity);
 
     // Prune existing move commands
@@ -57,6 +56,7 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const s
 
 void ActorMovementSystem::updateMoveTowardsTransforms()
 {
+    debugRays.erase(debugRays.begin(), debugRays.end());
     auto view = registry->view<MoveableActor, Transform>();
     for (auto& entity: view)
     {
@@ -77,11 +77,12 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         }
         
         Ray ray;
-        float avoidanceDistance = 1;
+        float avoidanceDistance = 1.5;
         ray.direction = Vector3Multiply(transform.direction, { avoidanceDistance, 1, avoidanceDistance });
-        ray.direction.y = 0.5f;
+        ray.direction.y = 1.0f;
         ray.position = transform.position;
-        ray.position.y = 0.5f;
+        ray.position.y = 1.0f;
+        debugRays.push_back(ray);
         auto col = collisionSystem->GetCollisionsWithRay(entity, ray, CollisionLayer::BOYD);
 
         if (!col.empty())
@@ -89,12 +90,15 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
             auto& hitTransform = registry->get<Transform>(col.at(0).collidedEntityId);
             if (Vector3Distance(hitTransform.position, transform.position) < distance)
             {
-                
+                // TODO: This bounding box has to take into account the bounding box sizes or the units will end up inside each other's boxes
                 BoundingBox hitBB = col.at(0).collidedBB;
                 auto casterLocalBB = registry->get<Collideable>(entity).localBoundingBox;
+
                 auto& c = registry->get<Collideable>(col.at(0).collidedEntityId);
                 c.debugDraw = true;
-                auto path = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
+
+                auto path = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
+                //auto path = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
                 
                 for (auto & it : std::ranges::reverse_view(path))
                 {
@@ -104,7 +108,6 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
                 continue;
             }
         }
-        
         
         // Calculate rotation angle based on direction
         float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
@@ -117,7 +120,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
     }
 }
 
-void ActorMovementSystem::DebugDraw() const
+void ActorMovementSystem::DrawDebug() const
 {
     auto view = registry->view<MoveableActor, Transform>();
     for (auto& entity: view) 
@@ -133,7 +136,11 @@ void ActorMovementSystem::DebugDraw() const
             }
         }
     }
-    
+
+    for (auto& ray: debugRays) 
+    {
+        DrawLine3D(ray.position, Vector3Add(ray.position, Vector3Multiply(ray.direction, {5, 1, 5})), RED);
+    }
     
 }
 

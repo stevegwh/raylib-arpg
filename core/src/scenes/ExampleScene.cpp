@@ -14,7 +14,7 @@ void ExampleScene::Update()
     Scene::Update();
     data->actorMovementSystem->Update();
     data->controllableActorSystem->Update();
-    data->animationSystem->Update();
+    //data->animationSystem->Update();
     data->dialogueSystem->Update();
     data->healthBarSystem->Update();
     // State systems
@@ -35,12 +35,11 @@ void ExampleScene::Draw3D()
     Scene::Draw3D();
 }
 
-
 void ExampleScene::DrawDebug()
 {
     data->collisionSystem->DrawDebug();
     data->navigationGridSystem->DrawDebug();
-    data->actorMovementSystem->DebugDraw();
+    data->actorMovementSystem->DrawDebug();
 }
 
 ExampleScene::~ExampleScene()
@@ -55,7 +54,10 @@ Scene(_registry, std::move(_data))
     auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {20.0f, 0, 20.0f}, "Player");
     
     auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
-    auto enemy = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 40.0f}, "Enemy");
+    auto enemy = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 0.0f}, "Enemy");
+    auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 0.0f}, "Enemy");
+    auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 10.0f}, "Enemy");
+    auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 10.0f}, "Enemy");
 
     data->Load();
     

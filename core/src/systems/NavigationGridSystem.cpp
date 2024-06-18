@@ -4,6 +4,7 @@
 
 #include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
+#include "components/Transform.hpp"
 
 #include <queue>
 #include <unordered_map>
@@ -163,6 +164,78 @@ void NavigationGridSystem::DrawDebug() const
     }
 }
 
+/**
+ * If actor encounters a non-static obstacle this function resolves it by turning the conflicting actors to the right
+ * past the other's bounding box.
+ * @param actor 
+ * @param obstacle 
+ * @param currentDir 
+ * @return 
+ */
+std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir)
+{
+    Vector2 actorMinIndex, actorMaxIndex, obstacleMinIndex, obstacleMaxIndex;
+    auto& actorCollideable = registry->get<Collideable>(actor);
+    if (!WorldToGridSpace(actorCollideable.worldBoundingBox.min, actorMinIndex) ||
+        !WorldToGridSpace(actorCollideable.worldBoundingBox.max, actorMaxIndex) ||
+        !WorldToGridSpace(obstacle.min, obstacleMinIndex) ||
+        !WorldToGridSpace(obstacle.max, obstacleMaxIndex))
+    {
+        return { gridSquares[actorMinIndex.y][actorMinIndex.x]->worldPosMin };
+    }
+    
+    Vector2 rightGridIndex, forwardGridIndex;
+    int currentX = std::round(currentDir.x);
+    int currentZ = std::round(currentDir.z);
+    
+    if (currentZ > 0)
+    {
+        
+        if (actorMaxIndex.x <= obstacleMinIndex.x)
+            rightGridIndex = { obstacleMinIndex.x - 1, obstacleMaxIndex.y + 1 };
+        else
+            rightGridIndex = { obstacleMaxIndex.x + 1, obstacleMinIndex.y };
+        forwardGridIndex = Vector2Add(rightGridIndex, {0, obstacleMaxIndex.y - obstacleMinIndex.y + 1});
+    }
+    else if (currentZ < 0)
+    {
+        if (actorMinIndex.x >= obstacleMaxIndex.x)
+            rightGridIndex = { obstacleMaxIndex.x + 1, obstacleMinIndex.y - 1 };
+        else
+            rightGridIndex = { obstacleMinIndex.x - 1, obstacleMaxIndex.y };
+        forwardGridIndex = Vector2Add(rightGridIndex, {0, obstacleMinIndex.y - obstacleMaxIndex.y - 1});
+    }
+
+    if (currentX > 0)
+    {
+        if (actorMaxIndex.y <= obstacleMinIndex.y)
+            rightGridIndex = { obstacleMaxIndex.x + 1, obstacleMinIndex.y - 1 };
+        else
+            rightGridIndex = { obstacleMinIndex.x, obstacleMaxIndex.y + 1 };
+        forwardGridIndex = Vector2Add(rightGridIndex, {obstacleMaxIndex.x - obstacleMinIndex.x + 1, 0});
+    }
+    else if (currentX < 0)
+    {
+        if (actorMinIndex.y >= obstacleMaxIndex.y)
+            rightGridIndex = { obstacleMinIndex.x - 1, obstacleMaxIndex.y + 1 };
+        else
+            rightGridIndex = { obstacleMaxIndex.x + 1, obstacleMinIndex.y - 1 };
+        forwardGridIndex = Vector2Add(rightGridIndex, {obstacleMinIndex.x - obstacleMaxIndex.x - 1, 0});
+    }
+    
+    if (rightGridIndex.x < 0 || rightGridIndex.x >= gridSquares.at(0).size() ||
+        rightGridIndex.y < 0 || rightGridIndex.y >= gridSquares.size() ||
+        gridSquares[rightGridIndex.y][rightGridIndex.x]->occupied ||
+        forwardGridIndex.x < 0 || forwardGridIndex.x >= gridSquares.at(0).size() ||
+        forwardGridIndex.y < 0 || forwardGridIndex.y >= gridSquares.size() ||
+        gridSquares[forwardGridIndex.y][forwardGridIndex.x]->occupied)
+    {
+        return { gridSquares[actorMinIndex.y][actorMinIndex.x]->worldPosMin };
+    }
+    
+    return { gridSquares[rightGridIndex.y][rightGridIndex.x]->worldPosMin, gridSquares[forwardGridIndex.y][forwardGridIndex.x]->worldPosMin };
+}
+
 std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos)
 {
     // Get the grid indices for the bounding box
@@ -297,8 +370,8 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
     std::pair<int, int> current = {finishrow, finishcol};
     std::pair<int, int> previous;
     std::pair<int, int> currentDir = {0,0};
-    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
     
+    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
     while (current.first != startrow || current.second != startcol)
     {
         previous = current;
@@ -309,7 +382,6 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
             int col = previous.second + dir.second;
             if (row == current.first && col == current.second) // Found the direction
             {
-                auto current_node = gridSquares[current.first][current.second];
                 if (currentDir.first == 0 && currentDir.second == 0)
                 {
                     currentDir = dir;
@@ -319,7 +391,7 @@ std::vector<Vector3> NavigationGridSystem::Pathfind(const Vector3& startPos, con
                 {
                     currentDir = dir;
                     path.push_back(gridSquares[previous.first][previous.second]->worldPosMin);
-                    path.push_back(current_node->worldPosMin);
+                    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
                 }
                 break;
             }

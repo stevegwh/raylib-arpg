@@ -23,6 +23,7 @@ namespace sage
 {
 class ActorMovementSystem : public BaseSystem<MoveableActor>
 {
+    std::vector<Ray> debugRays;
     CollisionSystem* collisionSystem;
     NavigationGridSystem* navigationGridSystem;
     std::vector<std::pair<entt::entity, Transform*>> moveTowardsTransforms;
@@ -35,6 +36,6 @@ public:
     void MoveToLocation(const entt::entity& entity, Vector3 location);
     void CancelMovement(const entt::entity& entity);
     void Update();
-    void DebugDraw() const;
+    void DrawDebug() const;
 };
 }
