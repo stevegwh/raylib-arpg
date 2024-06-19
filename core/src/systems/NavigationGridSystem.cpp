@@ -10,7 +10,6 @@
 #include <queue>
 #include <unordered_map>
 #include <utility>
-#include <tuple>
 #include <iostream>
 
 Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
@@ -27,9 +26,54 @@ Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 namespace sage
 {
 
+inline double heuristic(std::pair<int, int> a, std::pair<int, int> b)
+{
+    return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+}
+
+inline double heuristic_favourRight(std::pair<int, int> a, std::pair<int, int> b, const Vector3& currentDir)
+{
+    double dx = std::abs(a.first - b.first);
+    double dy = std::abs(a.second - b.second);
+    double diagonal_distance = dx + dy;
+
+    // Check if the node is to the local left of the current direction
+    int currentX = std::round(currentDir.x);
+    int currentZ = std::round(currentDir.z);
+
+    if (currentZ > 0)
+    {
+        if (a.second < b.second)
+        {
+            diagonal_distance += 10.0; // Increase cost for nodes to the local left
+        }
+    } else if (currentZ < 0)
+    {
+        if (a.second > b.second)
+        {
+            diagonal_distance += 10.0; // Increase cost for nodes to the local left
+        }
+    } else if (currentX > 0)
+    {
+        if (a.first > b.first)
+        {
+            diagonal_distance += 10.0; // Increase cost for nodes to the local left
+        }
+    } else if (currentX < 0)
+    {
+        if (a.first < b.first)
+        {
+            diagonal_distance += 10.0; // Increase cost for nodes to the local left
+        }
+    }
+
+    return diagonal_distance;
+}
+
+
+
 void NavigationGridSystem::DrawDebugPathfinding(const Vector2& minRange, const Vector2& maxRange)
 {
-
     for (int i = 0; i  < gridSquares.size(); i++)
     {
         for (int j = 0; j < gridSquares.at(0).size(); j++)
@@ -249,6 +293,7 @@ std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity act
  */
 std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos)
 {
+    auto& actorTrans = registry->get<Transform>(actor);
     // Get the grid indices for the bounding box
     Vector2 topLeftIndex;
     Vector2 bottomRightIndex;
@@ -258,10 +303,56 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         return {};
     }
 
-    int min_col = std::min((int)topLeftIndex.x, (int)bottomRightIndex.x);
-    int max_col = std::max((int)topLeftIndex.x, (int)bottomRightIndex.x);
-    int min_row = std::min((int)topLeftIndex.y, (int)bottomRightIndex.y);
-    int max_row = std::max((int)topLeftIndex.y, (int)bottomRightIndex.y);
+    Vector2 actorGridPosition;
+    {
+        Vector3 actorExtents = Vector3Subtract(registry->get<Collideable>(actor).localBoundingBox.max, registry->get<Collideable>(actor).localBoundingBox.min);
+
+        Vector3 actorPos = Vector3Add(actorTrans.position, Vector3Multiply(actorTrans.direction, {actorExtents.x,1,actorExtents.z}));
+        WorldToGridSpace(actorPos, actorGridPosition);
+//        actorGridPosition.x += actorTrans.direction.x;
+//        actorGridPosition.y += actorTrans.direction.z;
+//        Vector3 actorPos = Vector3Add(actorTrans.position, Vector3Multiply(actorTrans.direction, {4,1,4}));
+//        WorldToGridSpace(actorPos, actorGridPosition);
+        
+    }
+    
+    Vector2 obstacleTopLeftIndex;
+    Vector2 obstacleBottomRightIndex;
+    if (!WorldToGridSpace(obstacle.min, obstacleTopLeftIndex) ||
+        !WorldToGridSpace(obstacle.max, obstacleBottomRightIndex))
+    {
+        return {};
+    }
+
+    int min_col, max_col, min_row, max_row;
+    if (actorTrans.direction.x > 0) // Moving right
+    {
+        min_col = static_cast<int>(actorGridPosition.x);
+        max_col = static_cast<int>(obstacleBottomRightIndex.x);
+        min_row = std::min(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
+        max_row = std::max(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
+    }
+    else if (actorTrans.direction.x < 0) // Moving left
+    {
+        max_col = static_cast<int>(actorGridPosition.x);
+        min_col = static_cast<int>(obstacleTopLeftIndex.x);
+        min_row = std::min(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
+        max_row = std::max(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
+    }
+    else if (actorTrans.direction.z > 0) // Moving forward
+    {
+        min_row = static_cast<int>(actorGridPosition.y);
+        max_row = static_cast<int>(obstacleBottomRightIndex.y);
+        min_col = std::min(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
+        max_col = std::max(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
+    }
+    else // Moving backward
+    {
+        max_row = static_cast<int>(actorGridPosition.y);
+        min_row = static_cast<int>(obstacleTopLeftIndex.y);
+        min_col = std::min(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
+        max_col = std::max(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
+    }
     
     for (int row = min_row; row <= max_row; ++row)
     {
@@ -276,19 +367,16 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
     Vector2 minRange;
     Vector2 maxRange;
     int bounds = 50;
-    if (registry->any_of<ControllableActor>(actor))
-    {
-        auto& controllableActor = registry->get<ControllableActor>(actor);
-        bounds = controllableActor.pathfindingBounds;
-    }
 
     if (!GetPathfindRange(actor, bounds, minRange, maxRange))
     {
         return {};
     }
+
     
-    auto path = BFSPathfind(startPos, finishPos, minRange, maxRange);
-    
+    auto path = AStarPathfind(actor, startPos, finishPos, minRange, maxRange, AStarHeuristic::FAVOUR_RIGHT);
+    path.erase(path.end()-1); // Avoid overlapping local/global paths
+    path.erase(path.begin()); // Avoid overlapping local/global paths
     
     for (int row = min_row; row <= max_row; ++row)
     {
@@ -301,20 +389,61 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
     return path;
 }
 
+std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::vector<std::pair<int, int>>>& came_from,
+                                                         const std::pair<int,int>& start,
+                                                         const std::pair<int,int>& finish,
+                                                         const std::vector<std::pair<int, int>>& directions)
+{
+    // Trace path back from finish to start, skip nodes if they are the same direction as the previous
+    std::vector<Vector3> path;
+    std::pair<int, int> current = {finish.first, finish.second};
+    std::pair<int, int> previous;
+    std::pair<int, int> currentDir = {0,0};
+
+    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+    while (current.first != start.first || current.second != start.second)
+    {
+        previous = current;
+        current = came_from[current.first][current.second];
+        for (const auto& dir : directions)
+        {
+            int row = previous.first + dir.first;
+            int col = previous.second + dir.second;
+            if (row == current.first && col == current.second) // Found the direction
+            {
+                if (currentDir.first == 0 && currentDir.second == 0)
+                {
+                    currentDir = dir;
+                    break;
+                }
+                if (dir != currentDir)
+                {
+                    currentDir = dir;
+                    path.push_back(gridSquares[previous.first][previous.second]->worldPosMin);
+                    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+                }
+                break;
+            }
+        }
+    }
+    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+    std::reverse(path.begin(), path.end());
+    return path;
+}
+
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
  * Checks entire grid.
  * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
  */
-std::vector<Vector3> NavigationGridSystem::AStarPathfind(const Vector3 &startPos, const Vector3 &finishPos)
+std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& entity, const Vector3 &startPos, const Vector3 &finishPos, AStarHeuristic heuristicType)
 {
-    return AStarPathfind(startPos, finishPos, {0,0},
-                       {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())});
-}
-
-inline double heuristic(std::pair<int, int> a, std::pair<int, int> b) 
-{
-    return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+    return AStarPathfind(entity,
+                         startPos, 
+                         finishPos, 
+                         {0,0},
+                         {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())},
+                         heuristicType);
 }
 
 /**
@@ -324,10 +453,12 @@ inline double heuristic(std::pair<int, int> a, std::pair<int, int> b)
  * @maxRange The maximum grid index in the pathfinding range.
  * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
  */
-std::vector<Vector3> NavigationGridSystem::AStarPathfind(const Vector3 &startPos,
-                                                         const Vector3 &finishPos,
-                                                         const Vector2 &minRange,
-                                                         const Vector2 &maxRange)
+std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& entity,
+                                                         const Vector3& startPos,
+                                                         const Vector3& finishPos,
+                                                         const Vector2& minRange,
+                                                         const Vector2& maxRange,
+                                                         AStarHeuristic heuristicType)
 {
     Vector2 startGridSquare = {0};
     Vector2 finishGridSquare = {0};
@@ -377,7 +508,17 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const Vector3 &startPos
                 new_cost < cost_so_far[next_row][next_col])
             {
                 cost_so_far[next_row][next_col] = new_cost;
-                double priority = new_cost + heuristic({next_row, next_col}, {finishrow, finishcol});
+                double heuristic_cost = 0;
+                if (heuristicType == AStarHeuristic::DEFAULT)
+                {
+                    heuristic_cost = heuristic({next_row, next_col}, {finishrow, finishcol});
+                }
+                else if (heuristicType == AStarHeuristic::FAVOUR_RIGHT)
+                {
+                    auto& currentDir = registry->get<Transform>(entity).direction;
+                    heuristic_cost = heuristic_favourRight({next_row, next_col}, {finishrow, finishcol}, currentDir);
+                }
+                double priority = new_cost + heuristic_cost;
                 frontier.put({next_row, next_col}, priority);
                 came_from[next_row][next_col] = current;
                 visited[next_row][next_col] = true;
@@ -389,43 +530,8 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const Vector3 &startPos
     {
         return {};
     }
-
-    // Trace path back from finish to start, skip nodes if they are the same direction as the previous
-    std::vector<Vector3> path;
-    std::pair<int, int> current = {finishrow, finishcol};
-    std::pair<int, int> previous;
-    std::pair<int, int> currentDir = {0,0};
-
-    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-    while (current.first != startrow || current.second != startcol)
-    {
-        previous = current;
-        current = came_from[current.first][current.second];
-        for (const auto& dir : directions)
-        {
-            int row = previous.first + dir.first;
-            int col = previous.second + dir.second;
-            if (row == current.first && col == current.second) // Found the direction
-            {
-                if (currentDir.first == 0 && currentDir.second == 0)
-                {
-                    currentDir = dir;
-                    break;
-                }
-                if (dir != currentDir)
-                {
-                    currentDir = dir;
-                    path.push_back(gridSquares[previous.first][previous.second]->worldPosMin);
-                    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-                }
-                break;
-            }
-        }
-    }
-    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-    std::reverse(path.begin(), path.end());
-
-    return path;
+    
+    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol}, directions);
 }
 
 /**
@@ -501,43 +607,8 @@ std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, 
     {
         return {}; 
     }
-
-    // Trace path back from finish to start, skip nodes if they are the same direction as the previous
-    std::vector<Vector3> path;
-    std::pair<int, int> current = {finishrow, finishcol};
-    std::pair<int, int> previous;
-    std::pair<int, int> currentDir = {0,0};
     
-    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-    while (current.first != startrow || current.second != startcol)
-    {
-        previous = current;
-        current = came_from[current.first][current.second];
-        for (const auto& dir : directions)
-        {
-            int row = previous.first + dir.first;
-            int col = previous.second + dir.second;
-            if (row == current.first && col == current.second) // Found the direction
-            {
-                if (currentDir.first == 0 && currentDir.second == 0)
-                {
-                    currentDir = dir;
-                    break;
-                }
-                if (dir != currentDir)
-                {
-                    currentDir = dir;
-                    path.push_back(gridSquares[previous.first][previous.second]->worldPosMin);
-                    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-                }
-                break;
-            }
-        }
-    }
-    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-    std::reverse(path.begin(), path.end());
-    
-    return path;
+    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol} , directions);
 }
 
 

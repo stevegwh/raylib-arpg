@@ -30,6 +30,10 @@ void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity)
     auto& actor = registry->get<MoveableActor>(entity);
     {
         std::deque<Vector3> empty;
+        std::swap(actor.localPath, empty);
+    }
+    {
+        std::deque<Vector3> empty;
         std::swap(actor.globalPath, empty);
     }
 
@@ -64,17 +68,19 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         if (actor.globalPath.empty()) continue;
         auto& transform = registry->get<Transform>(entity);
         
-        auto distance = Vector3Distance(actor.globalPath.front(), transform.position);
+        auto& path = actor.localPath.empty() ? actor.globalPath : actor.localPath;
+        transform.direction = Vector3Normalize(Vector3Subtract(path.front(), transform.position));
+        auto distance = Vector3Distance(path.front(), transform.position);
         if (distance < 0.5f)
         {
-            actor.globalPath.pop_front();
+            path.pop_front();
             if (actor.globalPath.empty())
             {
                 transform.onFinishMovement.publish(entity);
                 continue;
             }
-            transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
         }
+        
         
         Ray ray;
         float avoidanceDistance = 1.5;
@@ -97,14 +103,19 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
                 auto& c = registry->get<Collideable>(col.at(0).collidedEntityId);
                 c.debugDraw = true;
 
-                auto path = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
-                //auto path = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
+                //auto path = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
                 
-                for (auto & it : std::ranges::reverse_view(path))
+                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
                 {
-                    actor.globalPath.push_front(it);
+                    std::deque<Vector3> empty;
+                    std::swap(actor.localPath, empty);
                 }
-                transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
+                for (auto & it : std::ranges::reverse_view(localPath))
+                {
+                    actor.localPath.push_front(it);
+                }
+                
+                //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
                 continue;
             }
         }
@@ -116,7 +127,6 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         //transform->position.y = dy * 0.5f;
         transform.position.z = transform.position.z + transform.direction.z * transform.movementSpeed;
         transform.onPositionUpdate.publish(entity);
-        
     }
 }
 
@@ -133,6 +143,13 @@ void ActorMovementSystem::DrawDebug() const
             for (auto p : actor.globalPath)
             {
                 DrawCube(p, 1, 1, 1, GREEN);
+            }
+        }
+        if (!actor.localPath.empty())
+        {
+            for (auto p : actor.localPath)
+            {
+                DrawCube(p, 0.8, 1.2, 0.8, RED);
             }
         }
     }

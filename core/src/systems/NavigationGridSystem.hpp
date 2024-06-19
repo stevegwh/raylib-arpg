@@ -13,9 +13,19 @@
 namespace sage
 {
 
+enum class AStarHeuristic
+{
+    DEFAULT,
+    FAVOUR_RIGHT
+};
+
 class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
 {
     std::vector<std::vector<NavigationGridSquare*>> gridSquares;
+    std::vector<Vector3> tracebackPath(const std::vector<std::vector<std::pair<int, int>>>& currentPath,
+                                       const std::pair<int,int>& start,
+                                       const std::pair<int,int>& finish,
+                                       const std::vector<std::pair<int, int>>& directions);
 public:
     float spacing{};
     int slices{};
@@ -25,8 +35,8 @@ public:
     bool GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange);
     bool WorldToGridSpace(Vector3 worldPos, Vector2& out);
     bool WorldToGridSpace(Vector3 worldPos, Vector2& out, const Vector2& _minRange, const Vector2& _maxRange) const;
-    [[nodiscard]] std::vector<Vector3> AStarPathfind(const Vector3& startPos, const Vector3& finishPos);
-    [[nodiscard]] std::vector<Vector3> AStarPathfind(const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange);
+    [[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
+    [[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange, AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
     [[nodiscard]] std::vector<Vector3> ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir);
     [[nodiscard]] std::vector<Vector3> PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos);
     [[nodiscard]] std::vector<Vector3> BFSPathfind(const Vector3& startPos, const Vector3& finishPos);

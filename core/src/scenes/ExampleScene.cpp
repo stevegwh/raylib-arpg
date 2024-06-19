@@ -56,8 +56,8 @@ Scene(_registry, std::move(_data))
     auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
     auto enemy = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 0.0f}, "Enemy");
     auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 0.0f}, "Enemy");
-    auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 10.0f}, "Enemy");
-    auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 10.0f}, "Enemy");
+//    auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 10.0f}, "Enemy");
+//    auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 10.0f}, "Enemy");
 
     data->Load();
     
