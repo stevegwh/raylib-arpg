@@ -21,6 +21,7 @@ enum class AStarHeuristic
 
 class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
 {
+    std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1} };
     std::vector<std::vector<NavigationGridSquare*>> gridSquares;
     std::vector<Vector3> tracebackPath(const std::vector<std::vector<std::pair<int, int>>>& currentPath,
                                        const std::pair<int,int>& start,

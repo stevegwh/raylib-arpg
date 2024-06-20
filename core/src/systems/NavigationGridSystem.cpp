@@ -363,7 +363,6 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
             gridSquares[row][col]->debugColor = true;
         }
     }
-    
     Vector2 minRange;
     Vector2 maxRange;
     int bounds = 50;
@@ -462,20 +461,83 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
 {
     Vector2 startGridSquare = {0};
     Vector2 finishGridSquare = {0};
+    Vector2 extents;
+    {
+        Vector2 bb_min;
+        auto& bb = registry->get<Collideable>(entity).localBoundingBox;
+        WorldToGridSpace(bb.min, bb_min);
+        WorldToGridSpace(bb.max, extents);
+        extents.y -= bb_min.y;
+        extents.x -= bb_min.x;
+    }
+    
     if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
+
+    auto inside = [&](int row, int col) { return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x; };
+    
+    auto check_extents = [&](std::pair<int,int> idx)
+    {
+        Vector2 min = Vector2Subtract({ static_cast<float>(idx.second), static_cast<float>(idx.first) }, extents);
+        Vector2 max = Vector2Add({ static_cast<float>(idx.second), static_cast<float>(idx.first) }, extents);
+
+        return inside(min.y, min.x) && inside(max.y, max.x) && !gridSquares[min.y][min.x]->occupied &&
+            !gridSquares[min.y][max.x]->occupied && !gridSquares[max.y][min.x]->occupied &&
+            !gridSquares[max.y][max.x]->occupied;
+    };
+
+    std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1} };
+
+    
+    if (!check_extents({ finishGridSquare.y, finishGridSquare.x }))
+    {
+        std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
+        std::queue<std::pair<int,int>> frontier;
+        frontier.emplace(finishGridSquare.y, finishGridSquare.x);
+
+        // Valid click but model would overlap with occupied squares
+        // Find next available square where model would fit
+        bool foundValidSquare = false;
+        while (!frontier.empty())
+        {
+            auto current = frontier.front();
+            frontier.pop();
+            for (const auto& dir : directions)
+            {
+                // next
+                int next_row = current.first + dir.first;
+                int next_col = current.second + dir.second;
+                if (!check_extents({ next_row, next_col }))
+                {
+                    if (!visited[next_row][next_col])
+                    {
+                        frontier.emplace(next_row, next_col);
+                        visited[next_row][next_col] = true;
+                    }
+                }
+                else
+                {
+                    
+                    finishGridSquare.x = next_col;
+                    finishGridSquare.y = next_row;
+                    foundValidSquare = true;
+                    break;
+                }
+            }
+            if (foundValidSquare)
+                break;
+        }
+    }
+    
     int startrow = startGridSquare.y;
     int startcol = startGridSquare.x;
 
     int finishrow = finishGridSquare.y;
     int finishcol = finishGridSquare.x;
-
-    auto inside = [&](int row, int col) { return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x; };
-
+    
     std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
     std::vector<std::vector<std::pair<int, int>>> came_from(maxRange.y, std::vector<std::pair<int, int>>(maxRange.x, std::pair<int, int>(-1, -1)));
     std::vector<std::vector<double>> cost_so_far(maxRange.y, std::vector<double>(maxRange.x, 0.0));
     
-    std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1} };
     PriorityQueue<std::pair<int,int>, double> frontier;
 
     frontier.put({startrow, startcol}, 0);
@@ -501,8 +563,9 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
             auto current_cost = gridSquares[current.first][current.second]->pathfindingCost;
             auto next_cost = gridSquares[next_row][next_col]->pathfindingCost;
             double new_cost = current_cost + next_cost;
-            
+
             if (inside(next_row, next_col) &&
+                check_extents({ next_row, next_col }) &&
                 !visited[next_row][next_col] &&
                 !gridSquares[next_row][next_col]->occupied || 
                 new_cost < cost_so_far[next_row][next_col])

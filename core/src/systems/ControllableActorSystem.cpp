@@ -58,6 +58,11 @@ void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 locati
     Vector2 minRange;
     Vector2 maxRange;
     navigationGridSystem->GetPathfindRange(id, actor.pathfindingBounds, minRange, maxRange);
+    {
+        // If location outside of actor's movement range, then return
+        Vector2 tmp;
+        if (!navigationGridSystem->WorldToGridSpace(location, tmp, minRange, maxRange)) return;
+    }
     navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
     const auto& actorPos = registry->get<Transform>(id);
