@@ -1,3 +1,4 @@
+#include "NavigationGridSystem.hpp"
 //
 // Created by Steve Wheeler on 25/02/2024.
 //
@@ -70,90 +71,6 @@ inline double heuristic_favourRight(std::pair<int, int> a, std::pair<int, int> b
     return diagonal_distance;
 }
 
-
-
-void NavigationGridSystem::DrawDebugPathfinding(const Vector2& minRange, const Vector2& maxRange)
-{
-    for (int i = 0; i  < gridSquares.size(); i++)
-    {
-        for (int j = 0; j < gridSquares.at(0).size(); j++)
-        {
-            gridSquares[i][j]->debugColor = false;
-        }
-    }
-    for (int i = minRange.y; i  < maxRange.y; i++)
-    {
-        for (int j = minRange.x; j < maxRange.x; j++)
-        {
-            gridSquares[i][j]->debugColor = true;
-        }
-    }
-}
-
-bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange)
-{
-    auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
-    Vector3 center = { (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f };
-
-    // Calculate the top-left and bottom-right corners of the square grid
-    Vector3 topLeft = { center.x - bounds * spacing, center.y, center.z - bounds * spacing };
-    Vector3 bottomRight = { center.x + bounds * spacing, center.y, center.z + bounds * spacing };
-
-    // Get the grid indices for the top-left and bottom-right corners
-    Vector2 topLeftIndex;
-    Vector2 bottomRightIndex;
-
-    bool topLeftValid = WorldToGridSpace(topLeft, topLeftIndex);
-    bool bottomRightValid = WorldToGridSpace(bottomRight, bottomRightIndex);
-    
-    if (!topLeftValid || !bottomRightValid) return false;
-
-    // Clip the top-left and bottom-right indices to the grid boundaries
-    topLeftIndex.x = std::max(topLeftIndex.x, 0.0f);
-    topLeftIndex.y = std::max(topLeftIndex.y, 0.0f);
-    bottomRightIndex.x = std::min(bottomRightIndex.x, static_cast<float>(gridSquares.at(0).size() - 1));
-    bottomRightIndex.y = std::min(bottomRightIndex.y, static_cast<float>(gridSquares.size() - 1));
-
-    minRange = { static_cast<float>(topLeftIndex.x), static_cast<float>(topLeftIndex.y) };
-    maxRange = { static_cast<float>(bottomRightIndex.x), static_cast<float>(bottomRightIndex.y) };
-
-    return true;
-}
-
-
-/**
- * Translates a world position to a corresponding index on a grid.
- * Checks if the passed position is valid based on the entire grid.
- * @param worldPos The position in world space
- * @out (Out param) The resulting index of the corresponding grid square.
- * @return Whether the move is valid
- */
-bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out)
-{
-    return WorldToGridSpace(worldPos, 
-                            out, 
-                            {0,0}, 
-                            {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())});
-}
-
-/**
- * Translates a world position to a corresponding index on a grid.
- * Checks if the passed position is valid based on a grid range
- * @param worldPos The position in world space
- * @out (Out param) The resulting index of the corresponding grid square.
- * @return Whether the move is valid
- */
-bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out, const Vector2& minRange, const Vector2& maxRange) const
-{
-    // Calculate the grid indices for the given world position
-    int x = std::floor(worldPos.x / spacing) + (slices / 2);
-    int y = std::floor(worldPos.z / spacing) + (slices / 2);
-    out = {static_cast<float>(x), static_cast<float>(y)};
-
-    return out.y < maxRange.y && out.x < maxRange.x
-    && out.x >= minRange.x && out.y >= minRange.y;
-}
-
 void NavigationGridSystem::Init(int _slices, float _spacing)
 {
     slices = _slices;
@@ -193,6 +110,115 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
     }
 }
 
+void NavigationGridSystem::DrawDebugPathfinding(const Vector2& minRange, const Vector2& maxRange) const
+{
+    for (int i = 0; i  < gridSquares.size(); i++)
+    {
+        for (int j = 0; j < gridSquares.at(0).size(); j++)
+        {
+            gridSquares[i][j]->debugColor = false;
+        }
+    }
+    for (int i = minRange.y; i  < maxRange.y; i++)
+    {
+        for (int j = minRange.x; j < maxRange.x; j++)
+        {
+            gridSquares[i][j]->debugColor = true;
+        }
+    }
+}
+
+void NavigationGridSystem::MarkSquareOccupied(const BoundingBox& occupant, bool occupied) const
+{
+	// Get the grid indices for the bounding box
+    Vector2 topLeftIndex;
+    Vector2 bottomRightIndex;
+    if (!WorldToGridSpace(occupant.min, topLeftIndex) ||
+        !WorldToGridSpace(occupant.max, bottomRightIndex))
+    {
+        return;
+    }
+
+    int min_col = std::min((int)topLeftIndex.x, (int)bottomRightIndex.x);
+    int max_col = std::max((int)topLeftIndex.x, (int)bottomRightIndex.x);
+    int min_row = std::min((int)topLeftIndex.y, (int)bottomRightIndex.y);
+    int max_row = std::max((int)topLeftIndex.y, (int)bottomRightIndex.y);
+
+
+    for (int row = min_row; row <= max_row; ++row)
+    {
+        for (int col = min_col; col <= max_col; ++col)
+        {
+            // Access grid square from the 2D array
+            gridSquares[row][col]->occupied = occupied;
+        }
+    }
+
+}
+
+bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange) const
+{
+    auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
+    Vector3 center = { (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f };
+
+    // Calculate the top-left and bottom-right corners of the square grid
+    Vector3 topLeft = { center.x - bounds * spacing, center.y, center.z - bounds * spacing };
+    Vector3 bottomRight = { center.x + bounds * spacing, center.y, center.z + bounds * spacing };
+
+    // Get the grid indices for the top-left and bottom-right corners
+    Vector2 topLeftIndex;
+    Vector2 bottomRightIndex;
+
+    bool topLeftValid = WorldToGridSpace(topLeft, topLeftIndex);
+    bool bottomRightValid = WorldToGridSpace(bottomRight, bottomRightIndex);
+    
+    if (!topLeftValid || !bottomRightValid) return false;
+
+    // Clip the top-left and bottom-right indices to the grid boundaries
+    topLeftIndex.x = std::max(topLeftIndex.x, 0.0f);
+    topLeftIndex.y = std::max(topLeftIndex.y, 0.0f);
+    bottomRightIndex.x = std::min(bottomRightIndex.x, static_cast<float>(gridSquares.at(0).size() - 1));
+    bottomRightIndex.y = std::min(bottomRightIndex.y, static_cast<float>(gridSquares.size() - 1));
+
+    minRange = { static_cast<float>(topLeftIndex.x), static_cast<float>(topLeftIndex.y) };
+    maxRange = { static_cast<float>(bottomRightIndex.x), static_cast<float>(bottomRightIndex.y) };
+
+    return true;
+}
+
+/**
+ * Translates a world position to a corresponding index on a grid.
+ * Checks if the passed position is valid based on the entire grid.
+ * @param worldPos The position in world space
+ * @out (Out param) The resulting index of the corresponding grid square.
+ * @return Whether the move is valid
+ */
+bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out) const
+{
+    return WorldToGridSpace(worldPos, 
+                            out, 
+                            {0,0}, 
+                            {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())});
+}
+
+/**
+ * Translates a world position to a corresponding index on a grid.
+ * Checks if the passed position is valid based on a grid range
+ * @param worldPos The position in world space
+ * @out (Out param) The resulting index of the corresponding grid square.
+ * @return Whether the move is valid
+ */
+bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, Vector2& out, const Vector2& minRange, const Vector2& maxRange) const
+{
+    // Calculate the grid indices for the given world position
+    int x = std::floor(worldPos.x / spacing) + (slices / 2);
+    int y = std::floor(worldPos.z / spacing) + (slices / 2);
+    out = {static_cast<float>(x), static_cast<float>(y)};
+
+    return out.y < maxRange.y && out.x < maxRange.x
+    && out.x >= minRange.x && out.y >= minRange.y;
+}
+
 void NavigationGridSystem::DrawDebug() const
 {
     for (const auto& gridSquareRow : gridSquares)
@@ -218,7 +244,7 @@ void NavigationGridSystem::DrawDebug() const
  * @param currentDir 
  * @return 
  */
-std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir)
+std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir) const
 {
     Vector2 actorMinIndex, actorMaxIndex, obstacleMinIndex, obstacleMaxIndex;
     auto& actorCollideable = registry->get<Collideable>(actor);
@@ -291,7 +317,7 @@ std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity act
  * @param finishPos 
  * @return 
  */
-std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos)
+std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, const BoundingBox& obstacle, const Vector3& startPos, const Vector3& finishPos)
 {
     auto& actorTrans = registry->get<Transform>(actor);
     // Get the grid indices for the bounding box
@@ -390,8 +416,7 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
 
 std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::vector<std::pair<int, int>>>& came_from,
                                                          const std::pair<int,int>& start,
-                                                         const std::pair<int,int>& finish,
-                                                         const std::vector<std::pair<int, int>>& directions)
+                                                         const std::pair<int,int>& finish) const
 {
     // Trace path back from finish to start, skip nodes if they are the same direction as the previous
     std::vector<Vector3> path;
@@ -445,6 +470,97 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
                          heuristicType);
 }
 
+bool NavigationGridSystem::checkInside(int row, int col, Vector2 minRange, Vector2 maxRange)
+{
+	return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x;
+}
+
+bool NavigationGridSystem::checkExtents(std::pair<int, int> idx, Vector2 minRange, Vector2 maxRange, Vector2 extents) const
+{
+
+  Vector2 min = Vector2Subtract(
+      {static_cast<float>(idx.second), static_cast<float>(idx.first)},
+      extents);
+  Vector2 max = Vector2Add(
+      {static_cast<float>(idx.second), static_cast<float>(idx.first)},
+      extents);
+
+  return checkInside(min.y, min.x, minRange, maxRange) && 
+      checkInside(max.y, max.x, minRange, maxRange) &&
+      !gridSquares[min.y][min.x]->occupied &&
+      !gridSquares[min.y][max.x]->occupied &&
+      !gridSquares[max.y][min.x]->occupied &&
+      !gridSquares[max.y][max.x]->occupied;
+}
+
+Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 finishGridSquare) const
+{
+    Vector2 minRange, maxRange, extents;
+    {
+        Vector2 bb_min;
+        auto& bb = registry->get<Collideable>(entity).localBoundingBox;
+        WorldToGridSpace(bb.min, bb_min);
+        WorldToGridSpace(bb.max, extents);
+        extents.y -= bb_min.y;
+        extents.x -= bb_min.x;
+    }
+
+    int bounds = 50;
+    if (!GetPathfindRange(entity, bounds, minRange, maxRange))
+    {
+        return {};
+    }
+
+    return FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
+}
+
+/**
+ * Finds next best available square from "finishGridSquare"
+ * @param finishGridSquare 
+ * @param minRange 
+ * @param maxRange 
+ * @param extents 
+ * @return 
+ */
+Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vector2 minRange, Vector2 maxRange, Vector2 extents) const
+{
+	std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
+    std::queue<std::pair<int,int>> frontier;
+    frontier.emplace(finishGridSquare.y, finishGridSquare.x);
+
+    bool foundValidSquare = false;
+    while (!frontier.empty())
+    {
+        auto current = frontier.front();
+        frontier.pop();
+        for (const auto& dir : directions)
+        {
+            // next
+            int next_row = current.first + dir.first;
+            int next_col = current.second + dir.second;
+            if (!checkExtents({ next_row, next_col }, minRange, maxRange, extents))
+            {
+                if (!visited[next_row][next_col])
+                {
+                    frontier.emplace(next_row, next_col);
+                    visited[next_row][next_col] = true;
+                }
+            }
+            else
+            {
+                
+                finishGridSquare.x = next_col;
+                finishGridSquare.y = next_row;
+                foundValidSquare = true;
+                break;
+            }
+        }
+        if (foundValidSquare)
+            break;
+    }
+    return finishGridSquare;
+}
+
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
  * Checks path within a range. Use "GetPathfindRange" to calculate minRange/maxRange if needed.
@@ -459,8 +575,8 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
                                                          const Vector2& maxRange,
                                                          AStarHeuristic heuristicType)
 {
-    Vector2 startGridSquare = {0};
-    Vector2 finishGridSquare = {0};
+    Vector2 startGridSquare{};
+    Vector2 finishGridSquare{};
     Vector2 extents;
     {
         Vector2 bb_min;
@@ -472,60 +588,10 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     }
     
     if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
-
-    auto inside = [&](int row, int col) { return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x; };
     
-    auto check_extents = [&](std::pair<int,int> idx)
+    if (!checkExtents({ finishGridSquare.y, finishGridSquare.x }, minRange, maxRange, extents))
     {
-        Vector2 min = Vector2Subtract({ static_cast<float>(idx.second), static_cast<float>(idx.first) }, extents);
-        Vector2 max = Vector2Add({ static_cast<float>(idx.second), static_cast<float>(idx.first) }, extents);
-
-        return inside(min.y, min.x) && inside(max.y, max.x) && !gridSquares[min.y][min.x]->occupied &&
-            !gridSquares[min.y][max.x]->occupied && !gridSquares[max.y][min.x]->occupied &&
-            !gridSquares[max.y][max.x]->occupied;
-    };
-
-    std::vector<std::pair<int, int>> directions = { {1,0}, {0,1}, {-1,0}, {0,-1}, {1,1}, {-1,1}, {-1,-1}, {1,-1} };
-
-    
-    if (!check_extents({ finishGridSquare.y, finishGridSquare.x }))
-    {
-        std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
-        std::queue<std::pair<int,int>> frontier;
-        frontier.emplace(finishGridSquare.y, finishGridSquare.x);
-
-        // Valid click but model would overlap with occupied squares
-        // Find next available square where model would fit
-        bool foundValidSquare = false;
-        while (!frontier.empty())
-        {
-            auto current = frontier.front();
-            frontier.pop();
-            for (const auto& dir : directions)
-            {
-                // next
-                int next_row = current.first + dir.first;
-                int next_col = current.second + dir.second;
-                if (!check_extents({ next_row, next_col }))
-                {
-                    if (!visited[next_row][next_col])
-                    {
-                        frontier.emplace(next_row, next_col);
-                        visited[next_row][next_col] = true;
-                    }
-                }
-                else
-                {
-                    
-                    finishGridSquare.x = next_col;
-                    finishGridSquare.y = next_row;
-                    foundValidSquare = true;
-                    break;
-                }
-            }
-            if (foundValidSquare)
-                break;
-        }
+        finishGridSquare = FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
     }
     
     int startrow = startGridSquare.y;
@@ -564,8 +630,8 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
             auto next_cost = gridSquares[next_row][next_col]->pathfindingCost;
             double new_cost = current_cost + next_cost;
 
-            if (inside(next_row, next_col) &&
-                check_extents({ next_row, next_col }) &&
+            if (checkInside(next_row, next_col, minRange, maxRange) &&
+                checkExtents({ next_row, next_col }, minRange, maxRange, extents) &&
                 !visited[next_row][next_col] &&
                 !gridSquares[next_row][next_col]->occupied || 
                 new_cost < cost_so_far[next_row][next_col])
@@ -594,7 +660,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
         return {};
     }
     
-    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol}, directions);
+    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol});
 }
 
 // TODO: For BFS just call A* with an "BFS" heuristic (which just returns 1, or something).
@@ -672,11 +738,11 @@ std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, 
         return {}; 
     }
     
-    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol} , directions);
+    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol});
 }
 
 
-void NavigationGridSystem::PopulateGrid()
+void NavigationGridSystem::PopulateGrid() const
 {
     for (auto& row : gridSquares)
     {

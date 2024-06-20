@@ -70,6 +70,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         
         auto& path = actor.localPath.empty() ? actor.globalPath : actor.localPath;
         transform.direction = Vector3Normalize(Vector3Subtract(path.front(), transform.position));
+
         auto distance = Vector3Distance(path.front(), transform.position);
         if (distance < 0.5f)
         {
@@ -91,25 +92,55 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         debugRays.push_back(ray);
         auto col = collisionSystem->GetCollisionsWithRay(entity, ray, CollisionLayer::BOYD);
 
+        // If targets.size() == 1 && object hit and the distance == a.extents + b.extents then assume destination is taken
+
         if (!col.empty())
         {
             auto& hitTransform = registry->get<Transform>(col.at(0).collidedEntityId);
+
+
             if (Vector3Distance(hitTransform.position, transform.position) < distance)
             {
-                // TODO: This bounding box has to take into account the bounding box sizes or the units will end up inside each other's boxes
                 BoundingBox hitBB = col.at(0).collidedBB;
-                auto casterLocalBB = registry->get<Collideable>(entity).localBoundingBox;
+                // TODO: Make sure collision boxes do not overlap
+            	if (actor.globalPath.size() == 1)
+				{
+	                int collisionDist = static_cast<int>(std::round(Vector3Distance(transform.position, hitTransform.position)));
+	                int targetDist = static_cast<int>(std::round(distance));
+
+			        if (collisionDist == targetDist)
+			        {
+                        // Destination occupied
+                        navigationGridSystem->MarkSquareOccupied(hitBB);
+                        if (!actor.localPath.empty())
+                        {
+                        	std::deque<Vector3> empty;
+                        	std::swap(actor.localPath, empty);
+                        }
+
+                        auto frontCopy = actor.globalPath.front();
+
+                        auto newDestination = navigationGridSystem->FindNextBestLocation(entity, { frontCopy.x, frontCopy.y });
+
+                        actor.globalPath.pop_front();
+
+                        actor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
+
+                        navigationGridSystem->MarkSquareOccupied(hitBB, false);
+
+			        }
+				}
 
                 auto& c = registry->get<Collideable>(col.at(0).collidedEntityId);
                 c.debugDraw = true;
 
-                //auto path = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
+                auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
                 
-                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
-                {
-                    std::deque<Vector3> empty;
-                    std::swap(actor.localPath, empty);
-                }
+                //auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
+//                {
+//                    std::deque<Vector3> empty;
+//                    std::swap(actor.localPath, empty);
+//                }
                 for (auto & it : std::ranges::reverse_view(localPath))
                 {
                     actor.localPath.push_front(it);

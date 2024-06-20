@@ -25,25 +25,32 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     std::vector<std::vector<NavigationGridSquare*>> gridSquares;
     std::vector<Vector3> tracebackPath(const std::vector<std::vector<std::pair<int, int>>>& currentPath,
                                        const std::pair<int,int>& start,
-                                       const std::pair<int,int>& finish,
-                                       const std::vector<std::pair<int, int>>& directions);
-public:
+                                       const std::pair<int,int>& finish) const;
+    static bool checkInside(int row, int col, Vector2 minRange, Vector2 maxRange);
+	bool checkExtents(std::pair<int,int> idx, Vector2 minRange, Vector2 maxRange, Vector2 extents) const;
+  public:
     float spacing{};
     int slices{};
     explicit NavigationGridSystem(entt::registry* _registry);
     void Init(int _slices, float _spacing);
-    void PopulateGrid();
-    bool GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange);
-    bool WorldToGridSpace(Vector3 worldPos, Vector2& out);
+    void PopulateGrid() const;
+    bool GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange) const;
+    bool WorldToGridSpace(Vector3 worldPos, Vector2& out) const;
     bool WorldToGridSpace(Vector3 worldPos, Vector2& out, const Vector2& _minRange, const Vector2& _maxRange) const;
-    [[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
+    [[nodiscard]] std::vector<Vector3>
+    AStarPathfind(const entt::entity &entity, const Vector3 &startPos,
+                  const Vector3 &finishPos,
+                  AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
+    [[nodiscard]] Vector2 FindNextBestLocation(entt::entity entity, Vector2 finishGridSquare) const;
+	[[nodiscard]] Vector2 FindNextBestLocation(Vector2 finishGridSquare, Vector2 minRange, Vector2 maxRange, Vector2 extents) const;
     [[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange, AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
-    [[nodiscard]] std::vector<Vector3> ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir);
-    [[nodiscard]] std::vector<Vector3> PathfindAvoidLocalObstacle(entt::entity actor, BoundingBox obstacle, const Vector3& startPos, const Vector3& finishPos);
+    [[nodiscard]] std::vector<Vector3> ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir) const;
+    [[nodiscard]] std::vector<Vector3> PathfindAvoidLocalObstacle(entt::entity actor, const BoundingBox& obstacle, const Vector3& startPos, const Vector3& finishPos);
     [[nodiscard]] std::vector<Vector3> BFSPathfind(const Vector3& startPos, const Vector3& finishPos);
     [[nodiscard]] std::vector<Vector3> BFSPathfind(const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange);
     const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
-    void DrawDebugPathfinding(const Vector2 &minRange, const Vector2 &maxRange);
+    void DrawDebugPathfinding(const Vector2 &minRange, const Vector2 &maxRange) const;
+    void MarkSquareOccupied(const BoundingBox&, bool occupied = true) const;
     void DrawDebug() const;
 };
 

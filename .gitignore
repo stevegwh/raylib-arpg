@@ -4,3 +4,5 @@ build
 .idea
 .vscode
 resources/models/gltf/level.glb
+out
+.vs

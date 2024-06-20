@@ -14,8 +14,8 @@ void AnimationSystem::Update()
     for (auto& entity : view)
     {
         auto& a = registry->get<Animation>(entity);
-        auto& r = registry->get<Renderable>(entity);
-        ModelAnimation anim = a.animations[a.animIndex];
+        const auto& r = registry->get<Renderable>(entity);
+        const ModelAnimation& anim = a.animations[a.animIndex];
         
         if (a.animCurrentFrame == 0)
         {
@@ -24,14 +24,13 @@ void AnimationSystem::Update()
         
         if (a.animCurrentFrame + 1 >= anim.frameCount)
         {
-			// TODO: Below is called which signals the deletion of this entity but then UpdateModelAnimation is called causing a segfault
             a.onAnimationEnd.publish(entity);
             if (a.oneShot) return;
         }
 		if (!registry->valid(entity)) continue;
         a.animCurrentFrame = (a.animCurrentFrame + 1) % anim.frameCount;
         UpdateModelAnimation(r.model, anim, a.animCurrentFrame);
-    };
+    }
 }
 
 void AnimationSystem::Draw()
