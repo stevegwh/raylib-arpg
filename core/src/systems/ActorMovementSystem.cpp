@@ -82,7 +82,6 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
             }
         }
         
-        
         Ray ray;
         float avoidanceDistance = 1.5;
         ray.direction = Vector3Multiply(transform.direction, { avoidanceDistance, 1, avoidanceDistance });
@@ -92,51 +91,21 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         debugRays.push_back(ray);
         auto col = collisionSystem->GetCollisionsWithRay(entity, ray, CollisionLayer::BOYD);
 
-        // If targets.size() == 1 && object hit and the distance == a.extents + b.extents then assume destination is taken
-
         if (!col.empty())
         {
             auto& hitTransform = registry->get<Transform>(col.at(0).collidedEntityId);
+            BoundingBox hitBB = col.at(0).collidedBB;
 
-
+            // TODO: Make sure collision boxes do not overlap
+            
             if (Vector3Distance(hitTransform.position, transform.position) < distance)
             {
-                BoundingBox hitBB = col.at(0).collidedBB;
-                // TODO: Make sure collision boxes do not overlap
-            	if (actor.globalPath.size() == 1)
-				{
-	                int collisionDist = static_cast<int>(std::round(Vector3Distance(transform.position, hitTransform.position)));
-	                int targetDist = static_cast<int>(std::round(distance));
-
-			        if (collisionDist == targetDist)
-			        {
-                        // Destination occupied
-                        navigationGridSystem->MarkSquareOccupied(hitBB);
-                        if (!actor.localPath.empty())
-                        {
-                        	std::deque<Vector3> empty;
-                        	std::swap(actor.localPath, empty);
-                        }
-
-                        auto frontCopy = actor.globalPath.front();
-
-                        auto newDestination = navigationGridSystem->FindNextBestLocation(entity, { frontCopy.x, frontCopy.y });
-
-                        actor.globalPath.pop_front();
-
-                        actor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
-
-                        navigationGridSystem->MarkSquareOccupied(hitBB, false);
-
-			        }
-				}
-
-                auto& c = registry->get<Collideable>(col.at(0).collidedEntityId);
-                c.debugDraw = true;
+                auto& hitCollidable = registry->get<Collideable>(col.at(0).collidedEntityId);
+                hitCollidable.debugDraw = true;
 
                 auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
                 
-                //auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
+//                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
 //                {
 //                    std::deque<Vector3> empty;
 //                    std::swap(actor.localPath, empty);
@@ -148,6 +117,25 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
                 
                 //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
                 continue;
+            }
+
+            if (actor.globalPath.size() == 1 && CheckCollisionBoxSphere(hitBB, actor.globalPath.front(), 0.1f))
+            {
+                
+                // Destination occupied
+                navigationGridSystem->MarkSquareOccupied(hitBB);
+                if (!actor.localPath.empty())
+                {
+                    std::deque<Vector3> empty;
+                    std::swap(actor.localPath, empty);
+                }
+
+                auto frontCopy = actor.globalPath.front();
+                auto newDestination = navigationGridSystem->FindNextBestLocation(entity, { col.at(0).rlCollision.point.x, col.at(0).rlCollision.point.y });
+                actor.globalPath.pop_front();
+                actor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
+
+                navigationGridSystem->MarkSquareOccupied(hitBB, false);
             }
         }
         

@@ -151,6 +151,7 @@ void NavigationGridSystem::MarkSquareOccupied(const BoundingBox& occupant, bool 
         {
             // Access grid square from the 2D array
             gridSquares[row][col]->occupied = occupied;
+            gridSquares[row][col]->debugColor = occupied;
         }
     }
 
@@ -400,8 +401,10 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
 
     
     auto path = AStarPathfind(actor, startPos, finishPos, minRange, maxRange, AStarHeuristic::FAVOUR_RIGHT);
-    path.erase(path.end()-1); // Avoid overlapping local/global paths
-    path.erase(path.begin()); // Avoid overlapping local/global paths
+    if (!path.empty())
+    {
+        path.erase(path.end()-1); // Avoid overlapping local/global paths
+    }
     
     for (int row = min_row; row <= max_row; ++row)
     {
@@ -510,7 +513,8 @@ Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 
     {
         return {};
     }
-
+    // TODO: Your way of translating between world/grid gets buggy around the 0,0 mark (leads to bad access and weird behaviour)
+    // maybe needs to wrap?
     return FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
 }
 
@@ -524,10 +528,12 @@ Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 
  */
 Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vector2 minRange, Vector2 maxRange, Vector2 extents) const
 {
+    // TODO: Instead of starting from the centre of the bounding box, start from its edge. Otherwise it won't find the nearest square.
+    // use "hit" instead of the transfomr pos?
 	std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
     std::queue<std::pair<int,int>> frontier;
     frontier.emplace(finishGridSquare.y, finishGridSquare.x);
-
+    
     bool foundValidSquare = false;
     while (!frontier.empty())
     {
@@ -535,9 +541,11 @@ Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vec
         frontier.pop();
         for (const auto& dir : directions)
         {
-            // next
             int next_row = current.first + dir.first;
             int next_col = current.second + dir.second;
+            
+            if (!checkInside(next_row, next_col, minRange, maxRange)) continue;
+            
             if (!checkExtents({ next_row, next_col }, minRange, maxRange, extents))
             {
                 if (!visited[next_row][next_col])
@@ -548,7 +556,6 @@ Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vec
             }
             else
             {
-                
                 finishGridSquare.x = next_col;
                 finishGridSquare.y = next_row;
                 foundValidSquare = true;
@@ -558,6 +565,7 @@ Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vec
         if (foundValidSquare)
             break;
     }
+    
     return finishGridSquare;
 }
 

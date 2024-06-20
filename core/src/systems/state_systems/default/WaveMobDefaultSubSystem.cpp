@@ -14,24 +14,20 @@ namespace sage
 
 void WaveMobDefaultSubSystem::Update()
 {
+    return;
     int i = 1;
     auto view = registry->view<StateEnemyDefault, MoveableActor>();
     for (auto& entity: view) 
     {
-        Vector3 target = { 0, 0, 0 };
+        Vector3 target = { -5.0, 0, 0 };
         if (i % 2 == 0)
         {
+            return;
             target = { 40, 0, 0 };
         }
         auto& a = registry->get<MoveableActor>(entity);
         auto& t = registry->get<Transform>(entity);
-        if (a.globalPath.empty())
-        {
-            
-            auto& animation = registry->get<Animation>(entity);
-            animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-            transformSystem->PathfindToLocation(entity, {target}); // Temporary. Just move to location
-        }
+
         // Set animation to walking
         // Move towards nexus
         // If within range of nexus, set animation to attack
@@ -47,6 +43,6 @@ WaveMobDefaultSubSystem::WaveMobDefaultSubSystem(entt::registry* _registry,
     stateMachineSystem(_stateMachineSystem),
     transformSystem(_transformSystem)
 {
-    
+
 }
 } // sage
