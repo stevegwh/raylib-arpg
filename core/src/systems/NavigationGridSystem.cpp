@@ -597,6 +597,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol}, directions);
 }
 
+// TODO: For BFS just call A* with an "BFS" heuristic (which just returns 1, or something).
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
  * Checks entire grid.
