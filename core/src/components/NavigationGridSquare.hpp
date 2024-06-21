@@ -6,16 +6,17 @@
 
 #include "Collideable.hpp"
 
+#include <entt/entt.hpp>
 #include "raylib.h"
 #include "raymath.h"
 
-#include <vector>
 
 namespace sage
 {
 
 struct NavigationGridSquare
 {
+
     int pathfindingCost = 1;
     bool debugColor = false;
     Vector2 gridSquareIndex;
@@ -23,7 +24,7 @@ struct NavigationGridSquare
     const Vector3 worldPosMax; // Bottom Right
     const Vector3 worldPosCentre;
     const Vector3 debugBox;
-    std::vector<CollisionInfo> collisionsWithSquare; // TODO: unimplemented
+	entt::entity occupant = entt::null;
     bool occupied = false;
     
     explicit NavigationGridSquare(Vector2 _gridSquareIndex, 
@@ -38,6 +39,6 @@ struct NavigationGridSquare
                0.1f, 
                fabsf(worldPosMax.z - worldPosMin.z) })
     {}
-    
+
 };
 }

@@ -10,13 +10,9 @@
 #include "CollisionSystem.hpp"
 #include "NavigationGridSystem.hpp"
 
-#include "raymath.h"
+
 #include "entt/entt.hpp"
 
-#include <map>
-#include <memory>
-#include <utility>
-#include <deque>
 #include <vector>
 
 namespace sage

@@ -45,94 +45,183 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const s
     transform.onStartMovement.publish(entity);
 }
 
+//void ActorMovementSystem::updateMoveTowardsTransforms()
+//{
+//    debugRays.erase(debugRays.begin(), debugRays.end());
+//    auto view = registry->view<MoveableActor, Transform>();
+//    for (auto& entity: view)
+//    {
+//        auto& moveableActor = registry->get<MoveableActor>(entity);
+//        if (moveableActor.globalPath.empty()) continue;
+//
+//        const auto& actorCollideable = registry->get<Collideable>(entity);
+//        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
+//
+//        auto& path = moveableActor.localPath.empty() ? moveableActor.globalPath : moveableActor.localPath;
+//
+//        auto& actorTrans = registry->get<Transform>(entity);
+//        actorTrans.direction = Vector3Normalize(Vector3Subtract(path.front(), actorTrans.position));
+//
+//        auto distance = Vector3Distance(path.front(), actorTrans.position);
+//        if (distance < 0.5f)
+//        {
+//            path.pop_front();
+//            if (moveableActor.globalPath.empty())
+//            {
+//                actorTrans.onFinishMovement.publish(entity);
+//                continue;
+//            }
+//        }
+//        
+//        Ray ray;
+//        float avoidanceDistance = 1.5;
+//        ray.direction = Vector3Multiply(actorTrans.direction, { avoidanceDistance, 1, avoidanceDistance });
+//        ray.direction.y = 1.0f;
+//        ray.position = actorTrans.position;
+//        ray.position.y = 1.0f;
+//        debugRays.push_back(ray);
+//
+//        auto col = collisionSystem->GetCollisionsWithRay(entity, ray, CollisionLayer::BOYD);
+//
+//        if (!col.empty())
+//        {
+//            auto& hitTransform = registry->get<Transform>(col.at(0).collidedEntityId);
+//            BoundingBox hitBB = col.at(0).collidedBB;
+//
+//            // TODO: Make sure collision boxes do not overlap
+//            
+//            if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
+//            {
+//                auto& hitCollidable = registry->get<Collideable>(col.at(0).collidedEntityId);
+//                hitCollidable.debugDraw = true;
+//
+//                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
+//                
+//                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
+//                {
+//                    std::deque<Vector3> empty;
+//                    std::swap(moveableActor.localPath, empty);
+//                }
+//                for (auto & it : std::ranges::reverse_view(localPath))
+//                {
+//                    moveableActor.localPath.push_front(it);
+//                }
+//                
+//                //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
+//                continue;
+//            }
+//
+//            if (moveableActor.globalPath.size() == 1 && CheckCollisionBoxSphere(hitBB, moveableActor.globalPath.front(), 0.1f))
+//            {
+//                
+//                // Destination occupied
+//                if (!moveableActor.localPath.empty())
+//                {
+//                    std::deque<Vector3> empty;
+//                    std::swap(moveableActor.localPath, empty);
+//                }
+//
+//                auto frontCopy = moveableActor.globalPath.front();
+//                auto newDestination = navigationGridSystem->FindNextBestLocation(entity, { col.at(0).rlCollision.point.x, col.at(0).rlCollision.point.y });
+//                moveableActor.globalPath.pop_front();
+//                moveableActor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
+//
+//            }
+//        }
+//        
+//        // Calculate rotation angle based on direction
+//        float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
+//        actorTrans.rotation.y = angle;
+//        actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
+//        actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
+//        actorTrans.onPositionUpdate.publish(entity);
+//        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true);
+//    }
+//}
+
 void ActorMovementSystem::updateMoveTowardsTransforms()
 {
     debugRays.erase(debugRays.begin(), debugRays.end());
     auto view = registry->view<MoveableActor, Transform>();
     for (auto& entity: view)
     {
-        auto& actor = registry->get<MoveableActor>(entity);
-        if (actor.globalPath.empty()) continue;
-        auto& transform = registry->get<Transform>(entity);
-        
-        auto& path = actor.localPath.empty() ? actor.globalPath : actor.localPath;
-        transform.direction = Vector3Normalize(Vector3Subtract(path.front(), transform.position));
+        auto& moveableActor = registry->get<MoveableActor>(entity);
+        if (moveableActor.globalPath.empty()) continue;
 
-        auto distance = Vector3Distance(path.front(), transform.position);
+        const auto& actorCollideable = registry->get<Collideable>(entity);
+        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
+
+        auto& path = moveableActor.localPath.empty() ? moveableActor.globalPath : moveableActor.localPath;
+
+        auto& actorTrans = registry->get<Transform>(entity);
+        actorTrans.direction = Vector3Normalize(Vector3Subtract(path.front(), actorTrans.position));
+
+        auto distance = Vector3Distance(path.front(), actorTrans.position);
         if (distance < 0.5f)
         {
             path.pop_front();
-            if (actor.globalPath.empty())
+            if (moveableActor.globalPath.empty())
             {
-                transform.onFinishMovement.publish(entity);
+                actorTrans.onFinishMovement.publish(entity);
+            	navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true);
                 continue;
             }
         }
-        
-        Ray ray;
+
         float avoidanceDistance = 1.5;
-        ray.direction = Vector3Multiply(transform.direction, { avoidanceDistance, 1, avoidanceDistance });
-        ray.direction.y = 1.0f;
-        ray.position = transform.position;
-        ray.position.y = 1.0f;
-        debugRays.push_back(ray);
-        auto col = collisionSystem->GetCollisionsWithRay(entity, ray, CollisionLayer::BOYD);
 
-        if (!col.empty())
+        Vector2 actorIndex;
+        navigationGridSystem->WorldToGridSpace(actorTrans.position, actorIndex);
+        auto col = navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance);
+
+        if (col != entt::null)
         {
-            auto& hitTransform = registry->get<Transform>(col.at(0).collidedEntityId);
-            BoundingBox hitBB = col.at(0).collidedBB;
+            auto& hitTransform = registry->get<Transform>(col);
+            auto& hitCol = registry->get<Collideable>(col);
+            BoundingBox hitBB = hitCol.worldBoundingBox;
 
-            // TODO: Make sure collision boxes do not overlap
-            
-            if (Vector3Distance(hitTransform.position, transform.position) < distance)
+            if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
             {
-                auto& hitCollidable = registry->get<Collideable>(col.at(0).collidedEntityId);
-                hitCollidable.debugDraw = true;
+                hitCol.debugDraw = true;
 
-                auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
+                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
                 
-//                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, transform.position, actor.globalPath.front());
-//                {
-//                    std::deque<Vector3> empty;
-//                    std::swap(actor.localPath, empty);
-//                }
+                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
+                {
+                    std::deque<Vector3> empty;
+                    std::swap(moveableActor.localPath, empty);
+                }
                 for (auto & it : std::ranges::reverse_view(localPath))
                 {
-                    actor.localPath.push_front(it);
+                    moveableActor.localPath.push_front(it);
                 }
                 
                 //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
                 continue;
             }
+        }
 
-            if (actor.globalPath.size() == 1 && CheckCollisionBoxSphere(hitBB, actor.globalPath.front(), 0.1f))
+        if (moveableActor.globalPath.size() == 1)
+        {
+            Vector2 destinationIndex;
+			navigationGridSystem->WorldToGridSpace(moveableActor.globalPath.front(), destinationIndex);
+            if (navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupied)
             {
-                
-                // Destination occupied
-                navigationGridSystem->MarkSquareOccupied(hitBB);
-                if (!actor.localPath.empty())
-                {
-                    std::deque<Vector3> empty;
-                    std::swap(actor.localPath, empty);
-                }
-
-                auto frontCopy = actor.globalPath.front();
-                auto newDestination = navigationGridSystem->FindNextBestLocation(entity, { col.at(0).rlCollision.point.x, col.at(0).rlCollision.point.y });
-                actor.globalPath.pop_front();
-                actor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
-
-                navigationGridSystem->MarkSquareOccupied(hitBB, false);
+                auto& occupantBB = registry->get<Collideable>(navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupant).worldBoundingBox;
+                auto frontCopy = moveableActor.globalPath.front();
+                auto newDestination = navigationGridSystem->FindNextBestLocation(entity, {occupantBB.max.x, occupantBB.max.z}); // TODO: tmp. Would prefer getting the "hit" index
+                moveableActor.globalPath.pop_front();
+                moveableActor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
             }
         }
         
         // Calculate rotation angle based on direction
-        float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
-        transform.rotation.y = angle;
-        transform.position.x = transform.position.x + transform.direction.x * transform.movementSpeed;
-        //transform->position.y = dy * 0.5f;
-        transform.position.z = transform.position.z + transform.direction.z * transform.movementSpeed;
-        transform.onPositionUpdate.publish(entity);
+        float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
+        actorTrans.rotation.y = angle;
+        actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
+        actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
+        actorTrans.onPositionUpdate.publish(entity);
+        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true);
     }
 }
 

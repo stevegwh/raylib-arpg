@@ -8,7 +8,7 @@
 namespace sage
 {
 
-void ControllableActorSystem::Update()
+void ControllableActorSystem::Update() const
 {
     auto view = registry->view<ControllableActor>();
     for (auto& entity : view)
@@ -55,6 +55,8 @@ void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 locati
         if (!navigationGridSystem->WorldToGridSpace(location, tmp)) return;
     }
     const auto& actor = registry->get<ControllableActor>(id);
+    const auto& actorCollideable = registry->get<Collideable>(id);
+    navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
     Vector2 minRange;
     Vector2 maxRange;
     navigationGridSystem->GetPathfindRange(id, actor.pathfindingBounds, minRange, maxRange);
@@ -67,29 +69,29 @@ void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 locati
 
     const auto& actorPos = registry->get<Transform>(id);
     auto path = navigationGridSystem->AStarPathfind(id, actorPos.position, location, minRange, maxRange);
-    if (!path.empty()) transformSystem->PathfindToLocation(id, path);
+    if (!path.empty()) actorMovementSystem->PathfindToLocation(id, path);
 }
 
 void ControllableActorSystem::MoveToLocation(entt::entity id)
 {
-    transformSystem->PathfindToLocation(id, { cursor->collision.point });
+    actorMovementSystem->PathfindToLocation(id, { cursor->collision.point });
 }
 
 void ControllableActorSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
 {
-    transformSystem->PathfindToLocation(id, patrol);
+    actorMovementSystem->PathfindToLocation(id, patrol);
 }
 
 void ControllableActorSystem::onFloorClick(entt::entity entity)
 {
-    transformSystem->CancelMovement(controlledActorId); // Flush any previous commands
+    actorMovementSystem->CancelMovement(controlledActorId); // Flush any previous commands
     PathfindToLocation(controlledActorId, cursor->collision.point);
 }
 
 void ControllableActorSystem::onEnemyClick(entt::entity entity)
 {
     auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
-    transformSystem->CancelMovement(controlledActorId); // Flush any previous commands
+    actorMovementSystem->CancelMovement(controlledActorId); // Flush any previous commands
     auto& target = registry->get<Transform>(entity);
     controlledActor.targetActor = entity;
     controlledActor.targetActorPos = target.position;
@@ -151,7 +153,7 @@ ControllableActorSystem::ControllableActorSystem(entt::registry* _registry,
                                                                  NavigationGridSystem* _navigationGridSystem,
                                                                  ActorMovementSystem* _transformSystem) :
     BaseSystem<ControllableActor>(_registry), cursor(_cursor), userInput(_userInput),
-    navigationGridSystem(_navigationGridSystem), transformSystem(_transformSystem)
+    navigationGridSystem(_navigationGridSystem), actorMovementSystem(_transformSystem)
 {
     Enable();
 }

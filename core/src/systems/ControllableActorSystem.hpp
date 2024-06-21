@@ -25,7 +25,7 @@ class ControllableActorSystem : public BaseSystem<ControllableActor>
     UserInput* userInput;
     entt::entity controlledActorId{}; // TODO: Right now this system just controls one unit at a time. What if we wanted more?
     NavigationGridSystem* navigationGridSystem{};
-    ActorMovementSystem* transformSystem{};
+    ActorMovementSystem* actorMovementSystem{};
     void onFloorClick(entt::entity entity);
     void onEnemyClick(entt::entity entity);
     void onTargetUpdate(entt::entity target);
@@ -36,7 +36,7 @@ public:
                                     UserInput* _userInput,
                                     NavigationGridSystem* _navigationGridSystem,
                                     ActorMovementSystem* _transformSystem);
-    void Update();
+    void Update() const;
     void MoveToLocation(entt::entity id);
     void PathfindToLocation(entt::entity id, Vector3 location);
     void SetControlledActor(entt::entity id);

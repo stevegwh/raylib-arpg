@@ -1,4 +1,5 @@
 #include "NavigationGridSystem.hpp"
+#include "NavigationGridSystem.hpp"
 //
 // Created by Steve Wheeler on 25/02/2024.
 //
@@ -128,7 +129,8 @@ void NavigationGridSystem::DrawDebugPathfinding(const Vector2& minRange, const V
     }
 }
 
-void NavigationGridSystem::MarkSquareOccupied(const BoundingBox& occupant, bool occupied) const
+
+void NavigationGridSystem::MarkSquareOccupied(const BoundingBox& occupant, bool occupied, entt::entity occupantEntity) const
 {
 	// Get the grid indices for the bounding box
     Vector2 topLeftIndex;
@@ -152,9 +154,17 @@ void NavigationGridSystem::MarkSquareOccupied(const BoundingBox& occupant, bool 
             // Access grid square from the 2D array
             gridSquares[row][col]->occupied = occupied;
             gridSquares[row][col]->debugColor = occupied;
+            if (occupied)
+            {
+	            gridSquares[row][col]->occupant = occupantEntity;
+            }
+            else
+            {
+	            gridSquares[row][col]->occupant = entt::null;
+            }
+            
         }
     }
-
 }
 
 bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange) const
@@ -496,8 +506,43 @@ bool NavigationGridSystem::checkExtents(std::pair<int, int> idx, Vector2 minRang
       !gridSquares[max.y][max.x]->occupied;
 }
 
+/**
+ * Casts a "ray" in the grid. Returns true if the ray encounters an occupied square.
+ * @param currentGridPos 
+ * @param direction 
+ * @param distance 
+ * @return 
+ */
+entt::entity NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direction, int distance) const
+{
+	direction = Vector2Normalize(direction);
+    int dirRow =  std::round(direction.y);
+    int dirCol = std::round(direction.x);
+
+
+    for (int i = 0; i < distance; ++i)
+    {
+        int newRow = currentRow + (dirRow * i);
+        int newCol = currentCol + (dirCol * i);
+        if (!checkInside(newRow, newCol, {0.0f,0.0f}, 
+            {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())}))
+	    {
+		    continue;
+	    }
+        auto& cell = gridSquares[newRow][newCol];
+        cell->debugColor = true;
+
+	    if (cell->occupied)
+	    {
+		    return cell->occupant; // TODO: Care. It could be occupied but still return entt::null, conceivably.
+	    }
+    }
+    return entt::null;
+}
+
 Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 finishGridSquare) const
 {
+
     Vector2 minRange, maxRange, extents;
     {
         Vector2 bb_min;
@@ -513,8 +558,13 @@ Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 
     {
         return {};
     }
-    // TODO: Your way of translating between world/grid gets buggy around the 0,0 mark (leads to bad access and weird behaviour)
-    // maybe needs to wrap?
+    auto& destination = gridSquares[finishGridSquare.y][finishGridSquare.x];
+    if (destination->occupied)
+    {
+        const auto& occupant = registry->get<Collideable>(destination->occupant);
+        finishGridSquare = { occupant.worldBoundingBox.max.x, occupant.worldBoundingBox.max.z  };
+    }
+
     return FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
 }
 
@@ -528,12 +578,11 @@ Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 
  */
 Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vector2 minRange, Vector2 maxRange, Vector2 extents) const
 {
-    // TODO: Instead of starting from the centre of the bounding box, start from its edge. Otherwise it won't find the nearest square.
-    // use "hit" instead of the transfomr pos?
 	std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
     std::queue<std::pair<int,int>> frontier;
     frontier.emplace(finishGridSquare.y, finishGridSquare.x);
-    
+
+    Vector2 out{};
     bool foundValidSquare = false;
     while (!frontier.empty())
     {
@@ -556,8 +605,8 @@ Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vec
             }
             else
             {
-                finishGridSquare.x = next_col;
-                finishGridSquare.y = next_row;
+                out.x = next_col;
+                out.y = next_row;
                 foundValidSquare = true;
                 break;
             }
@@ -566,7 +615,7 @@ Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 finishGridSquare, Vec
             break;
     }
     
-    return finishGridSquare;
+    return out;
 }
 
 /**
@@ -761,35 +810,11 @@ void NavigationGridSystem::PopulateGrid() const
     }
     
     const auto& view = registry->view<Collideable>();
-    for (const auto& ent : view)
+    for (const auto& entity : view)
     {
-        const auto& bb = view.get<Collideable>(ent);
-        if (bb.collisionLayer != CollisionLayer::BUILDING) continue;
-
-        // Get the grid indices for the bounding box
-        Vector2 topLeftIndex;
-        Vector2 bottomRightIndex;
-        if (!WorldToGridSpace(bb.worldBoundingBox.min, topLeftIndex) ||
-        !WorldToGridSpace(bb.worldBoundingBox.max, bottomRightIndex))
-        {
-            continue;
-        }
-
-        int min_col = std::min((int)topLeftIndex.x, (int)bottomRightIndex.x);
-        int max_col = std::max((int)topLeftIndex.x, (int)bottomRightIndex.x);
-        int min_row = std::min((int)topLeftIndex.y, (int)bottomRightIndex.y);
-        int max_row = std::max((int)topLeftIndex.y, (int)bottomRightIndex.y);
-
-
-        for (int row = min_row; row <= max_row; ++row)
-        {
-            for (int col = min_col; col <= max_col; ++col)
-            {
-                // Access grid square from the 2D array
-                gridSquares[row][col]->occupied = true;
-            }
-        }
-
+        const auto& bb = view.get<Collideable>(entity);
+        if (bb.collisionLayer != CollisionLayer::BUILDING) continue; // TODO: All static objects, not just buildings
+        MarkSquareOccupied(bb.worldBoundingBox, true, entity);
     }
 }
 
