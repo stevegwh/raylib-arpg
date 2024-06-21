@@ -163,7 +163,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
             if (moveableActor.globalPath.empty())
             {
                 actorTrans.onFinishMovement.publish(entity);
-            	navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true);
+            	navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
                 continue;
             }
         }
@@ -221,7 +221,7 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
         actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
         actorTrans.onPositionUpdate.publish(entity);
-        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true);
+        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
     }
 }
 
