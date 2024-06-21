@@ -26,7 +26,6 @@ class ActorMovementSystem : public BaseSystem<MoveableActor>
     std::vector<Ray> debugRays;
     CollisionSystem* collisionSystem;
     NavigationGridSystem* navigationGridSystem;
-    std::vector<std::pair<entt::entity, Transform*>> moveTowardsTransforms;
     void updateMoveTowardsTransforms();
 public:
     ActorMovementSystem(entt::registry* _registry, CollisionSystem* _collisionSystem, NavigationGridSystem* _navigationGridSystem);

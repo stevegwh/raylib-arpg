@@ -14,19 +14,6 @@ namespace sage
 
 void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity)
 {
-    auto& transform = registry->get<Transform>(entity);
-
-    // Prune existing move commands
-    for (auto it = moveTowardsTransforms.begin(); it != moveTowardsTransforms.end();)
-    {
-        if (it->second == &transform) // TODO: Surely this just needs to be done once?
-        {
-            it = moveTowardsTransforms.erase(it);
-            continue;
-        }
-        ++it;
-    }
-
     auto& actor = registry->get<MoveableActor>(entity);
     {
         std::deque<Vector3> empty;
