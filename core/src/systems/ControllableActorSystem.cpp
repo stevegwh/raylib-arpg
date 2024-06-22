@@ -14,7 +14,10 @@ void ControllableActorSystem::Update() const
     for (auto& entity : view)
     {
         auto& actor = registry->get<ControllableActor>(entity);
-        actor.checkTargetPosTimer += GetFrameTime();
+        if (actor.targetActor != entt::null)
+        {
+	        actor.checkTargetPosTimer += GetFrameTime();
+        }
     }
 }
 
@@ -47,13 +50,14 @@ void ControllableActorSystem::cancelMovement(entt::entity entity)
     }
 }
 
-void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 target)
+void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location)
 {
     {
         // If location outside of bounds, then return
         Vector2 tmp;
-        if (!navigationGridSystem->WorldToGridSpace(target, tmp)) return;
+        if (!navigationGridSystem->WorldToGridSpace(location, tmp)) return;
     }
+
     const auto& actor = registry->get<ControllableActor>(id);
     const auto& actorCollideable = registry->get<Collideable>(id);
     navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
@@ -63,12 +67,13 @@ void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 target
     {
         // If location outside of actor's movement range, then return
         Vector2 tmp;
-        if (!navigationGridSystem->WorldToGridSpace(target, tmp, minRange, maxRange)) return;
+        if (!navigationGridSystem->WorldToGridSpace(location, tmp, minRange, maxRange)) return;
     }
     navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
+
     const auto& actorPos = registry->get<Transform>(id);
-    auto path = navigationGridSystem->AStarPathfind(id, actorPos.position, target, minRange, maxRange);
+    auto path = navigationGridSystem->AStarPathfind(id, actorPos.position, location, minRange, maxRange);
     if (!path.empty()) actorMovementSystem->PathfindToLocation(id, path);
 }
 
@@ -107,6 +112,7 @@ void ControllableActorSystem::onEnemyClick(entt::entity entity)
         entt::sink sink { target.onFinishMovement };
         sink.connect<&ControllableActorSystem::cancelMovement>(this);
     }
+
     PathfindToLocation(controlledActorId, cursor->collision.point);
 }
     

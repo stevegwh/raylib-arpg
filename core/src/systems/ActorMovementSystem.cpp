@@ -43,6 +43,7 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const s
     transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
     //moveTowardsTransforms.emplace_back(entity, &transform);
     transform.onStartMovement.publish(entity);
+
 }
 
 //void ActorMovementSystem::updateMoveTowardsTransforms()
@@ -169,51 +170,51 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         }
 
         float avoidanceDistance = 1.5;
-
         Vector2 actorIndex;
         navigationGridSystem->WorldToGridSpace(actorTrans.position, actorIndex);
-        //auto col = navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance);
+        auto col = navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance);
 
-        //if (col != entt::null)
-        //{
-        //    auto& hitTransform = registry->get<Transform>(col);
-        //    auto& hitCol = registry->get<Collideable>(col);
-        //    BoundingBox hitBB = hitCol.worldBoundingBox;
-
-        //    if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
-        //    {
-        //        hitCol.debugDraw = true;
-
-        //        //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
-        //        
-        //        auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
-        //        {
-        //            std::deque<Vector3> empty;
-        //            std::swap(moveableActor.localPath, empty);
-        //        }
-        //        for (auto & it : std::ranges::reverse_view(localPath))
-        //        {
-        //            moveableActor.localPath.push_front(it);
-        //        }
-        //        
-        //        //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
-        //        continue;
-        //    }
-        //}
-
-        if (moveableActor.globalPath.size() == 1)
+        if (col != entt::null)
         {
-            Vector2 destinationIndex;
-			navigationGridSystem->WorldToGridSpace(moveableActor.globalPath.front(), destinationIndex);
-            if (navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupied)
+            auto& hitTransform = registry->get<Transform>(col);
+            auto& hitCol = registry->get<Collideable>(col);
+            BoundingBox hitBB = hitCol.worldBoundingBox;
+
+            if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
             {
-                auto& occupantBB = registry->get<Collideable>(navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupant).worldBoundingBox;
-                auto frontCopy = moveableActor.globalPath.front();
-                auto newDestination = navigationGridSystem->FindNextBestLocation(entity, {occupantBB.max.x, occupantBB.max.z}); // TODO: tmp. Would prefer getting the "hit" index
-                moveableActor.globalPath.pop_front();
-                moveableActor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
+                hitCol.debugDraw = true;
+
+                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
+                
+                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
+                {
+                    std::deque<Vector3> empty;
+                    std::swap(moveableActor.localPath, empty);
+                }
+                for (auto & it : std::ranges::reverse_view(localPath))
+                {
+                    moveableActor.localPath.push_front(it);
+                }
+                
+                //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
+                continue;
             }
         }
+
+        // Below won't be necessary if you cast ahead to avoid collisions
+   //     if (moveableActor.globalPath.size() == 1)
+   //     {
+   //         Vector2 destinationIndex;
+			//navigationGridSystem->WorldToGridSpace(moveableActor.globalPath.front(), destinationIndex);
+   //         if (navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupied)
+   //         {
+   //             auto& occupantBB = registry->get<Collideable>(navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupant).worldBoundingBox;
+   //             auto frontCopy = moveableActor.globalPath.front();
+   //             auto newDestination = navigationGridSystem->FindNextBestLocation(entity, {occupantBB.max.x, occupantBB.max.z}); // TODO: tmp. Would prefer getting the "hit" index
+   //             moveableActor.globalPath.pop_front();
+   //             moveableActor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
+   //         }
+   //     }
         
         // Calculate rotation angle based on direction
         float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;

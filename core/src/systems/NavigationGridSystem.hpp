@@ -64,6 +64,7 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     entt::entity CheckSquareAreaOccupant(int row, int col, const BoundingBox& bb) const;
     bool CompareSquareAreaOccupant(entt::entity entity, const BoundingBox& bb) const;
     bool CompareSingleSquareOccupant(entt::entity entity, const BoundingBox& bb) const;
+    bool GetExtents(entt::entity entity, Vector2 extents) const;
 
     void DrawDebug() const;
 };

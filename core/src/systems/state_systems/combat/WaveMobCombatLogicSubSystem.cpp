@@ -97,30 +97,30 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
     float distance = Vector3Length(direction);
     Vector3 normDirection = Vector3Normalize(direction);
 
-    if (distance >= c.attackRange)
-    {
-        animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-        Ray ray;
-        ray.position = t.position;
-        ray.direction = Vector3Scale(normDirection, distance);
-        ray.position.y = 0.5f;
-        ray.direction.y = 0.5f;
-        t.movementDirectionDebugLine = ray;
-        auto collisions = collisionSystem->GetCollisionsWithRay(entity, ray, collideable.collisionLayer);
-        
-        if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
-        {
+    //if (distance >= c.attackRange)
+    //{
+    //    animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+    //    Ray ray;
+    //    ray.position = t.position;
+    //    ray.direction = Vector3Scale(normDirection, distance);
+    //    ray.position.y = 0.5f;
+    //    ray.direction.y = 0.5f;
+    //    t.movementDirectionDebugLine = ray;
+    //    auto collisions = collisionSystem->GetCollisionsWithRay(entity, ray, collideable.collisionLayer);
+    //    
+    //    if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
+    //    {
 
-            // Lost line of sight, out of combat
-            transformSystem->CancelMovement(entity);
-            c.target = entt::null;
-            t.movementDirectionDebugLine = {};
-            return;
-        }
-        // TODO: PathfindToLocation also calls PruneMoveCommands which triggers onMovementCancel
-        transformSystem->PathfindToLocation(entity, {enemyPos});
-        return;
-    }
+    //        // Lost line of sight, out of combat
+    //        transformSystem->CancelMovement(entity);
+    //        c.target = entt::null;
+    //        t.movementDirectionDebugLine = {};
+    //        return;
+    //    }
+    //    // TODO: PathfindToLocation also calls PruneMoveCommands which triggers onMovementCancel
+    //    transformSystem->PathfindToLocation(entity, {enemyPos});
+    //    return;
+    //}
 
     float angle = atan2f(direction.x, direction.z) * RAD2DEG;
     t.rotation.y = angle;

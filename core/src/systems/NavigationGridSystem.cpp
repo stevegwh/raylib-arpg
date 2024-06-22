@@ -286,6 +286,28 @@ bool NavigationGridSystem::CompareSingleSquareOccupant(entt::entity entity, cons
     return false;
 }
 
+bool NavigationGridSystem::GetExtents(entt::entity entity, Vector2 extents) const
+{
+    {
+        Vector2 bb_min;
+        auto& bb = registry->get<Collideable>(entity).localBoundingBox;
+        if (!WorldToGridSpace(bb.min, bb_min) || !WorldToGridSpace(bb.max, extents))
+        {
+	        return false;
+        }
+        extents.y -= bb_min.y;
+        extents.x -= bb_min.x;
+
+        if (!checkInside(extents.y, extents.x, { 0,0 }, 
+            {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())}))
+        {
+	        return false;
+        }
+    }
+    return true;
+}
+
+
 bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, Vector2& minRange, Vector2& maxRange) const
 {
     auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
@@ -607,13 +629,13 @@ bool NavigationGridSystem::checkInside(int row, int col, Vector2 minRange, Vecto
 	return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x;
 }
 
-bool NavigationGridSystem::checkExtents(int col, int row, Vector2 extents) const
+bool NavigationGridSystem::checkExtents(int row, int col, Vector2 extents) const
 {
 	Vector2 min = Vector2Subtract(
-	  {static_cast<float>(row), static_cast<float>(col)},
+	  {static_cast<float>(col), static_cast<float>(row)},
 	  extents);
 	Vector2 max = Vector2Add(
-	  {static_cast<float>(row), static_cast<float>(col)},
+	  {static_cast<float>(col), static_cast<float>(row)},
 	  extents);
 
 	Vector2 minRange = {0,0};
@@ -670,16 +692,12 @@ entt::entity NavigationGridSystem::CastRay(int currentRow, int currentCol, Vecto
 Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 target) const
 {
 
-    Vector2 minRange, maxRange, extents;
+    Vector2 extents{};
+    if (!GetExtents(entity, extents))
     {
-        Vector2 bb_min;
-        auto& bb = registry->get<Collideable>(entity).localBoundingBox;
-        WorldToGridSpace(bb.min, bb_min);
-        WorldToGridSpace(bb.max, extents);
-        extents.y -= bb_min.y;
-        extents.x -= bb_min.x;
+        return {};
     }
-
+    Vector2 minRange, maxRange;
     int bounds = 50;
     if (!GetPathfindRange(entity, bounds, minRange, maxRange))
     {
@@ -705,6 +723,7 @@ Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 
  */
 Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 target, Vector2 minRange, Vector2 maxRange, Vector2 extents) const
 {
+
 	std::vector<std::vector<bool>> visited(maxRange.y, std::vector<bool>(maxRange.x, false));
     std::queue<std::pair<int,int>> frontier;
     frontier.emplace(target.y, target.x);
@@ -761,21 +780,14 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
 {
     Vector2 startGridSquare{};
     Vector2 finishGridSquare{};
-    Vector2 extents;
-    {
-        Vector2 bb_min;
-        auto& bb = registry->get<Collideable>(entity).localBoundingBox;
-        WorldToGridSpace(bb.min, bb_min);
-        WorldToGridSpace(bb.max, extents);
-        extents.y -= bb_min.y;
-        extents.x -= bb_min.x;
-    }
+    Vector2 extents{};
     
-    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
+    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare) || !GetExtents(entity, extents)) return {};
     
     if (!checkExtents(finishGridSquare.y, finishGridSquare.x, extents))
     {
         finishGridSquare = FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
+
     }
     
     int startrow = startGridSquare.y;
@@ -817,7 +829,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
             if (checkInside(next_row, next_col, minRange, maxRange) &&
                 checkExtents(next_row, next_col, extents) &&
                 !visited[next_row][next_col] &&
-                !gridSquares[next_row][next_col]->occupied || 
+                !gridSquares.at(next_row).at(next_col)->occupied || 
                 new_cost < cost_so_far[next_row][next_col])
             {
                 cost_so_far[next_row][next_col] = new_cost;
