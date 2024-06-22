@@ -607,19 +607,24 @@ bool NavigationGridSystem::checkInside(int row, int col, Vector2 minRange, Vecto
 	return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x;
 }
 
-bool NavigationGridSystem::checkExtents(int row, int col, Vector2 extents) const
+bool NavigationGridSystem::checkExtents(int col, int row, Vector2 extents) const
 {
-	Vector2 currentPos = {static_cast<float>(row), static_cast<float>(col)};
-	Vector2 min = Vector2Subtract(currentPos, extents);
-	Vector2 max = Vector2Add(currentPos, extents);
-	Vector2 maxRange = { gridSquares.size(), gridSquares.at(0).size() };
+	Vector2 min = Vector2Subtract(
+	  {static_cast<float>(row), static_cast<float>(col)},
+	  extents);
+	Vector2 max = Vector2Add(
+	  {static_cast<float>(row), static_cast<float>(col)},
+	  extents);
 
-	return checkInside(min.y, min.x, { 0, 0 }, maxRange) && 
-      checkInside(max.y, max.x, { 0, 0 }, maxRange) &&
-      !gridSquares[min.y][min.x]->occupied &&
-      !gridSquares[min.y][max.x]->occupied &&
-      !gridSquares[max.y][min.x]->occupied &&
-      !gridSquares[max.y][max.x]->occupied;
+	Vector2 minRange = {0,0};
+	Vector2 maxRange = {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())};
+
+	return checkInside(min.y, min.x, minRange, maxRange) && 
+	  checkInside(max.y, max.x, minRange, maxRange) &&
+	  !gridSquares[min.y][min.x]->occupied &&
+	  !gridSquares[min.y][max.x]->occupied &&
+	  !gridSquares[max.y][min.x]->occupied &&
+	  !gridSquares[max.y][max.x]->occupied;
 }
 
 /**
