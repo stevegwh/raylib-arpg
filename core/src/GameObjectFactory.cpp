@@ -84,7 +84,7 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     // Collision
     BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
     auto& collideable = registry->emplace<Collideable>(id, bb);
-    collideable.debugDraw = true;
+    //collideable.debugDraw = true;
     collideable.collisionLayer = CollisionLayer::ENEMY;
     game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
     {

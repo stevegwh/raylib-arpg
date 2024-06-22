@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "Collideable.hpp"
-
 #include <entt/entt.hpp>
 #include "raylib.h"
 #include "raymath.h"
@@ -20,14 +18,14 @@ struct NavigationGridSquare
     int pathfindingCost = 1;
     bool debugColor = false;
     Vector2 gridSquareIndex;
-    const Vector3 worldPosMin; // Top Left
-    const Vector3 worldPosMax; // Bottom Right
-    const Vector3 worldPosCentre;
-    const Vector3 debugBox;
+    Vector3 worldPosMin; // Top Left
+    Vector3 worldPosMax; // Bottom Right
+    Vector3 worldPosCentre;
+    Vector3 debugBox;
 	entt::entity occupant = entt::null;
     bool occupied = false;
     
-    explicit NavigationGridSquare(Vector2 _gridSquareIndex, 
+    NavigationGridSquare(Vector2 _gridSquareIndex, 
                                   Vector3 _worldPosMin, 
                                   Vector3 _worldPosMax, 
                                   Vector3 _worldPosCentre) : 

@@ -4,6 +4,8 @@
 
 #include "ActorMovementSystem.hpp"
 
+#include "../components/NavigationGridSquare.hpp"
+
 #include "../../utils/Serializer.hpp"
 
 #include <iostream>
@@ -156,9 +158,12 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
 
         auto& actorTrans = registry->get<Transform>(entity);
         actorTrans.direction = Vector3Normalize(Vector3Subtract(path.front(), actorTrans.position));
+    	// Calculate rotation angle based on direction
+    	float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
+    	actorTrans.rotation.y = angle;
 
-        auto distance = Vector3Distance(path.front(), actorTrans.position);
-        if (distance < 0.5f)
+    	auto distance = Vector3Distance(path.front(), actorTrans.position);
+    	if (distance < 0.5f)
         {
             path.pop_front();
             if (moveableActor.globalPath.empty())
@@ -169,60 +174,37 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
             }
         }
 
-        float avoidanceDistance = 1.5;
+        float avoidanceDistance = 10;
         Vector2 actorIndex;
         navigationGridSystem->WorldToGridSpace(actorTrans.position, actorIndex);
-        auto col = navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance);
-
-        if (col != entt::null)
+        NavigationGridSquare* hitCell{};
+        
+        if (navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance, hitCell))
         {
-            auto& hitTransform = registry->get<Transform>(col);
-            auto& hitCol = registry->get<Collideable>(col);
+            auto& hitTransform = registry->get<Transform>(hitCell->occupant);
+            auto& hitCol = registry->get<Collideable>(hitCell->occupant);
             BoundingBox hitBB = hitCol.worldBoundingBox;
 
             if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
             {
-                hitCol.debugDraw = true;
-
-                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
-                
-                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
-                {
+	            {
                     std::deque<Vector3> empty;
                     std::swap(moveableActor.localPath, empty);
                 }
-                for (auto & it : std::ranges::reverse_view(localPath))
-                {
-                    moveableActor.localPath.push_front(it);
-                }
-                
-                //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
-                continue;
+                hitCol.debugDraw = true;
+            	Vector3 newLocation;
+                auto nextBest = navigationGridSystem->FindNextBestLocation(entity, { hitCell->worldPosMin.x, hitCell->worldPosMin.z });
+            	navigationGridSystem->GridToWorldSpace(nextBest, newLocation);
+                moveableActor.localPath.push_back(newLocation);
             }
         }
-
-        // Below won't be necessary if you cast ahead to avoid collisions
-   //     if (moveableActor.globalPath.size() == 1)
-   //     {
-   //         Vector2 destinationIndex;
-			//navigationGridSystem->WorldToGridSpace(moveableActor.globalPath.front(), destinationIndex);
-   //         if (navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupied)
-   //         {
-   //             auto& occupantBB = registry->get<Collideable>(navigationGridSystem->GetGridSquares()[destinationIndex.y][destinationIndex.x]->occupant).worldBoundingBox;
-   //             auto frontCopy = moveableActor.globalPath.front();
-   //             auto newDestination = navigationGridSystem->FindNextBestLocation(entity, {occupantBB.max.x, occupantBB.max.z}); // TODO: tmp. Would prefer getting the "hit" index
-   //             moveableActor.globalPath.pop_front();
-   //             moveableActor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
-   //         }
-   //     }
-        
-        // Calculate rotation angle based on direction
-        float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
-        actorTrans.rotation.y = angle;
-        actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
-        actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
-        actorTrans.onPositionUpdate.publish(entity);
-        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
+        else
+        {
+		    actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
+		    actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
+		    actorTrans.onPositionUpdate.publish(entity);
+		    navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
+        }
     }
 }
 

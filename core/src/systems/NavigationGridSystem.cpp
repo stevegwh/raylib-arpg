@@ -113,6 +113,7 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
 
 void NavigationGridSystem::DrawDebugPathfinding(const Vector2& minRange, const Vector2& maxRange) const
 {
+    return;
     for (int i = 0; i  < gridSquares.size(); i++)
     {
         for (int j = 0; j < gridSquares.at(0).size(); j++)
@@ -214,10 +215,10 @@ bool NavigationGridSystem::CheckSquareAreaOccupied(int row, int col, const Bound
     return checkExtents(row, col, extents);
 }
 
-entt::entity NavigationGridSystem::CheckSingleSquareOccupant(Vector3 position) const
+entt::entity NavigationGridSystem::CheckSingleSquareOccupant(Vector3 worldPos) const
 {
 	Vector2 squareIndex;
-    if (!WorldToGridSpace(position, squareIndex))
+    if (!WorldToGridSpace(worldPos, squareIndex))
     {
 	    return entt::null; // TODO: Should return true? False?
     }
@@ -286,7 +287,7 @@ bool NavigationGridSystem::CompareSingleSquareOccupant(entt::entity entity, cons
     return false;
 }
 
-bool NavigationGridSystem::GetExtents(entt::entity entity, Vector2 extents) const
+bool NavigationGridSystem::getExtents(entt::entity entity, Vector2 extents) const
 {
     {
         Vector2 bb_min;
@@ -339,6 +340,19 @@ bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bou
 }
 
 /**
+ * Translates a grid position to a corresponding world position.
+ * @param gridPos The position in world space
+ * @out (Out param) The resulting worldPos.
+ * @return Whether the move is valid
+ */
+bool NavigationGridSystem::GridToWorldSpace(Vector2 gridPos, Vector3& out) const
+{
+    Vector2 maxRange = { static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size()) };
+    out = gridSquares[gridPos.y][gridPos.x]->worldPosMin;
+    return checkInside(gridPos.y, gridPos.x, {0,0}, maxRange);
+}
+
+/**
  * Translates a world position to a corresponding index on a grid.
  * Checks if the passed position is valid based on the entire grid.
  * @param worldPos The position in world space
@@ -377,7 +391,7 @@ void NavigationGridSystem::DrawDebug() const
     {
         for (const auto& gridSquare : gridSquareRow)
         {
-            if (!gridSquare->occupied) continue;
+            if (!gridSquare->debugColor) continue;
             auto color = RED;
             DrawCubeWires(gridSquare->worldPosCentre,
                           gridSquare->debugBox.x,
@@ -408,7 +422,7 @@ std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity act
         return { gridSquares[actorMinIndex.y][actorMinIndex.x]->worldPosMin };
     }
     
-    Vector2 rightGridIndex, forwardGridIndex;
+    Vector2 rightGridIndex{}, forwardGridIndex{};
     int currentX = std::round(currentDir.x);
     int currentZ = std::round(currentDir.z);
     
@@ -532,15 +546,6 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         max_col = std::max(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
     }
     
-    for (int row = min_row; row <= max_row; ++row)
-    {
-        for (int col = min_col; col <= max_col; ++col)
-        {
-            // Access grid square from the 2D array
-            gridSquares[row][col]->occupied = true;
-            gridSquares[row][col]->debugColor = true;
-        }
-    }
     Vector2 minRange;
     Vector2 maxRange;
     int bounds = 50;
@@ -556,15 +561,7 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
     {
         path.erase(path.end()-1); // Avoid overlapping local/global paths
     }
-    
-    for (int row = min_row; row <= max_row; ++row)
-    {
-        for (int col = min_col; col <= max_col; ++col)
-        {
-            // Access grid square from the 2D array
-            gridSquares[row][col]->occupied = false;
-        }
-    }
+
     return path;
 }
 
@@ -649,24 +646,27 @@ bool NavigationGridSystem::checkExtents(int row, int col, Vector2 extents) const
 	  !gridSquares[max.y][max.x]->occupied;
 }
 
-/**
- * Casts a "ray" in the grid. Returns true if the ray encounters an occupied square.
- * @param currentGridPos 
- * @param direction 
- * @param distance 
- * @return 
- */
-entt::entity NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direction, int distance) const
+///**
+// * Casts a "ray" in the grid. Returns true if the ray encounters an occupied square.
+// * @param currentRow
+// * @param currentCol 
+// * @param direction 
+// * @param distance 
+// * @return 
+// */
+bool NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direction, float distance, const NavigationGridSquare* out) const
 {
+    int dist = std::round(distance);
 	direction = Vector2Normalize(direction);
     int dirRow =  std::round(direction.y);
     int dirCol = std::round(direction.x);
 
 
-    for (int i = 0; i < distance; ++i)
+    for (int i = 0; i < dist; ++i)
     {
         int newRow = currentRow + (dirRow * i);
         int newCol = currentCol + (dirCol * i);
+
         if (!checkInside(newRow, newCol, {0.0f,0.0f}, 
             {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())}))
 	    {
@@ -677,10 +677,11 @@ entt::entity NavigationGridSystem::CastRay(int currentRow, int currentCol, Vecto
 
 	    if (cell->occupied)
 	    {
-		    return cell->occupant; // TODO: Care. It could be occupied but still return entt::null, conceivably.
+		    out = cell;
+            return true;
 	    }
     }
-    return entt::null;
+    return false;
 }
 
 /**
@@ -693,7 +694,7 @@ Vector2 NavigationGridSystem::FindNextBestLocation(entt::entity entity, Vector2 
 {
 
     Vector2 extents{};
-    if (!GetExtents(entity, extents))
+    if (!getExtents(entity, extents))
     {
         return {};
     }
@@ -782,7 +783,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     Vector2 finishGridSquare{};
     Vector2 extents{};
     
-    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare) || !GetExtents(entity, extents)) return {};
+    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare) || !getExtents(entity, extents)) return {};
     
     if (!checkExtents(finishGridSquare.y, finishGridSquare.x, extents))
     {
