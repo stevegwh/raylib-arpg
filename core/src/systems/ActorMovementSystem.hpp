@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../components/Transform.hpp"
-#include "../components/MoveableActor.hpp"
+#include "../components/MovableActor.hpp"
 #include "BaseSystem.hpp"
 #include "CollisionSystem.hpp"
 #include "NavigationGridSystem.hpp"

@@ -172,34 +172,34 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
 
         Vector2 actorIndex;
         navigationGridSystem->WorldToGridSpace(actorTrans.position, actorIndex);
-        auto col = navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance);
+        //auto col = navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance);
 
-        if (col != entt::null)
-        {
-            auto& hitTransform = registry->get<Transform>(col);
-            auto& hitCol = registry->get<Collideable>(col);
-            BoundingBox hitBB = hitCol.worldBoundingBox;
+        //if (col != entt::null)
+        //{
+        //    auto& hitTransform = registry->get<Transform>(col);
+        //    auto& hitCol = registry->get<Collideable>(col);
+        //    BoundingBox hitBB = hitCol.worldBoundingBox;
 
-            if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
-            {
-                hitCol.debugDraw = true;
+        //    if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
+        //    {
+        //        hitCol.debugDraw = true;
 
-                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
-                
-                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
-                {
-                    std::deque<Vector3> empty;
-                    std::swap(moveableActor.localPath, empty);
-                }
-                for (auto & it : std::ranges::reverse_view(localPath))
-                {
-                    moveableActor.localPath.push_front(it);
-                }
-                
-                //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
-                continue;
-            }
-        }
+        //        //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
+        //        
+        //        auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
+        //        {
+        //            std::deque<Vector3> empty;
+        //            std::swap(moveableActor.localPath, empty);
+        //        }
+        //        for (auto & it : std::ranges::reverse_view(localPath))
+        //        {
+        //            moveableActor.localPath.push_front(it);
+        //        }
+        //        
+        //        //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
+        //        continue;
+        //    }
+        //}
 
         if (moveableActor.globalPath.size() == 1)
         {

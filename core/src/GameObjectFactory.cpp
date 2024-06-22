@@ -6,7 +6,7 @@
 #include "Application.hpp"
 #include "scenes/Scene.hpp"
 #include "components/Transform.hpp"
-#include "components/MoveableActor.hpp"
+#include "components/MovableActor.hpp"
 #include "components/Renderable.hpp"
 #include "components/Collideable.hpp"
 #include "components/WorldObject.hpp"

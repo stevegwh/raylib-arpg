@@ -38,7 +38,7 @@ public:
                                     ActorMovementSystem* _transformSystem);
     void Update() const;
     void MoveToLocation(entt::entity id);
-    void PathfindToLocation(entt::entity id, Vector3 location);
+    void PathfindToLocation(entt::entity id, Vector3 target);
     void SetControlledActor(entt::entity id);
     entt::entity GetControlledActor();
 
