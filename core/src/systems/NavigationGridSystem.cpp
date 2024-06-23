@@ -596,10 +596,11 @@ bool NavigationGridSystem::checkExtents(int row, int col, Vector2 extents) const
 
 	return checkInside(min.y, min.x, minRange, maxRange) && 
 	  checkInside(max.y, max.x, minRange, maxRange) &&
-	  !gridSquares[min.y][min.x]->occupied &&
-	  !gridSquares[min.y][max.x]->occupied &&
-	  !gridSquares[max.y][min.x]->occupied &&
-	  !gridSquares[max.y][max.x]->occupied;
+        !gridSquares[row][col]->occupied &&
+        !gridSquares[min.y][min.x]->occupied &&
+        !gridSquares[min.y][max.x]->occupied &&
+        !gridSquares[max.y][min.x]->occupied &&
+        !gridSquares[max.y][max.x]->occupied;
 }
 
 ///**
