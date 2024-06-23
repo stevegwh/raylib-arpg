@@ -158,12 +158,13 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
 
         auto& actorTrans = registry->get<Transform>(entity);
         actorTrans.direction = Vector3Normalize(Vector3Subtract(path.front(), actorTrans.position));
+
     	// Calculate rotation angle based on direction
     	float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
     	actorTrans.rotation.y = angle;
 
-    	auto distance = Vector3Distance(path.front(), actorTrans.position);
-    	if (distance < 0.5f)
+    	auto nextPointDist = Vector3Distance(path.front(), actorTrans.position);
+    	if (nextPointDist < 0.5f)
         {
             path.pop_front();
             if (moveableActor.globalPath.empty())
@@ -185,12 +186,19 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
             auto& hitCol = registry->get<Collideable>(hitCell->occupant);
             BoundingBox hitBB = hitCol.worldBoundingBox;
 
-            if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
+            if (Vector3Distance(hitTransform.position, actorTrans.position) < nextPointDist)
             {
 	            {
                     std::deque<Vector3> empty;
                     std::swap(moveableActor.localPath, empty);
                 }
+
+                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, actorTrans.direction);
+                //for (auto& node : localPath)
+                //{
+	               // moveableActor.localPath.push_back(node);
+                //}
+
                 hitCol.debugDraw = true;
             	Vector3 newLocation;
                 auto nextBest = navigationGridSystem->FindNextBestLocation(entity, { hitCell->worldPosMin.x, hitCell->worldPosMin.z });
@@ -203,8 +211,8 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
 		    actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
 		    actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
 		    actorTrans.onPositionUpdate.publish(entity);
-		    navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
         }
+        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
     }
 }
 
