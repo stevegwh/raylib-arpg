@@ -287,7 +287,7 @@ bool NavigationGridSystem::CompareSingleSquareOccupant(entt::entity entity, cons
     return false;
 }
 
-bool NavigationGridSystem::getExtents(entt::entity entity, Vector2 extents) const
+bool NavigationGridSystem::getExtents(entt::entity entity, Vector2& extents) const
 {
     {
         Vector2 bb_min;
@@ -495,16 +495,16 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         return {};
     }
 
+    Vector2 extents;
     Vector2 actorGridPosition;
     {
+
+        getExtents(actor, extents);
         Vector3 actorExtents = Vector3Subtract(registry->get<Collideable>(actor).localBoundingBox.max, registry->get<Collideable>(actor).localBoundingBox.min);
 
         Vector3 actorPos = Vector3Add(actorTrans.position, Vector3Multiply(actorTrans.direction, {actorExtents.x,1,actorExtents.z}));
         WorldToGridSpace(actorPos, actorGridPosition);
-//        actorGridPosition.x += actorTrans.direction.x;
-//        actorGridPosition.y += actorTrans.direction.z;
-//        Vector3 actorPos = Vector3Add(actorTrans.position, Vector3Multiply(actorTrans.direction, {4,1,4}));
-//        WorldToGridSpace(actorPos, actorGridPosition);
+
         
     }
     
@@ -516,35 +516,6 @@ std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::enti
         return {};
     }
 
-    int min_col, max_col, min_row, max_row;
-    if (actorTrans.direction.x > 0) // Moving right
-    {
-        min_col = static_cast<int>(actorGridPosition.x);
-        max_col = static_cast<int>(obstacleBottomRightIndex.x);
-        min_row = std::min(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
-        max_row = std::max(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
-    }
-    else if (actorTrans.direction.x < 0) // Moving left
-    {
-        max_col = static_cast<int>(actorGridPosition.x);
-        min_col = static_cast<int>(obstacleTopLeftIndex.x);
-        min_row = std::min(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
-        max_row = std::max(static_cast<int>(obstacleTopLeftIndex.y), static_cast<int>(obstacleBottomRightIndex.y));
-    }
-    else if (actorTrans.direction.z > 0) // Moving forward
-    {
-        min_row = static_cast<int>(actorGridPosition.y);
-        max_row = static_cast<int>(obstacleBottomRightIndex.y);
-        min_col = std::min(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
-        max_col = std::max(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
-    }
-    else // Moving backward
-    {
-        max_row = static_cast<int>(actorGridPosition.y);
-        min_row = static_cast<int>(obstacleTopLeftIndex.y);
-        min_col = std::min(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
-        max_col = std::max(static_cast<int>(obstacleTopLeftIndex.x), static_cast<int>(obstacleBottomRightIndex.x));
-    }
     
     Vector2 minRange;
     Vector2 maxRange;
@@ -606,21 +577,6 @@ std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::
     return path;
 }
 
-/**
- * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
- * Checks entire grid.
- * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
- */
-std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& entity, const Vector3 &startPos, const Vector3 &finishPos, AStarHeuristic heuristicType)
-{
-    return AStarPathfind(entity,
-                         startPos, 
-                         finishPos, 
-                         {0,0},
-                         {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())},
-                         heuristicType);
-}
-
 bool NavigationGridSystem::checkInside(int row, int col, Vector2 minRange, Vector2 maxRange)
 {
 	return minRange.y <= row && row < maxRange.y && minRange.x <= col && col < maxRange.x;
@@ -654,7 +610,7 @@ bool NavigationGridSystem::checkExtents(int row, int col, Vector2 extents) const
 // * @param distance 
 // * @return 
 // */
-bool NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direction, float distance, const NavigationGridSquare* out) const
+NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direction, float distance) const
 {
     int dist = std::round(distance);
 	direction = Vector2Normalize(direction);
@@ -672,16 +628,15 @@ bool NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direc
 	    {
 		    continue;
 	    }
-        auto& cell = gridSquares[newRow][newCol];
+        const auto cell = gridSquares[newRow][newCol];
         cell->debugColor = true;
 
-	    if (cell->occupied)
+	    if (cell->occupant != entt::null)
 	    {
-		    out = cell;
-            return true;
+            return cell;
 	    }
     }
-    return false;
+    return nullptr;
 }
 
 /**
@@ -763,6 +718,21 @@ Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 target, Vector2 minRa
     }
     
     return out;
+}
+
+/**
+ * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+ * Checks entire grid.
+ * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
+ */
+std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& entity, const Vector3 &startPos, const Vector3 &finishPos, AStarHeuristic heuristicType)
+{
+    return AStarPathfind(entity,
+                         startPos, 
+                         finishPos, 
+                         {0,0},
+                         {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())},
+                         heuristicType);
 }
 
 /**

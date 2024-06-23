@@ -154,14 +154,10 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         const auto& actorCollideable = registry->get<Collideable>(entity);
         navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
 
-        auto& path = moveableActor.localPath.empty() ? moveableActor.globalPath : moveableActor.localPath;
+        auto& path = moveableActor.globalPath;
 
         auto& actorTrans = registry->get<Transform>(entity);
-        actorTrans.direction = Vector3Normalize(Vector3Subtract(path.front(), actorTrans.position));
 
-    	// Calculate rotation angle based on direction
-    	float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
-    	actorTrans.rotation.y = angle;
 
     	auto nextPointDist = Vector3Distance(path.front(), actorTrans.position);
     	if (nextPointDist < 0.5f)
@@ -178,40 +174,43 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         float avoidanceDistance = 10;
         Vector2 actorIndex;
         navigationGridSystem->WorldToGridSpace(actorTrans.position, actorIndex);
-        NavigationGridSquare* hitCell{};
+        NavigationGridSquare* hitCell = navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance);
         
-        if (navigationGridSystem->CastRay(actorIndex.y, actorIndex.x, { actorTrans.direction.x, actorTrans.direction.z }, avoidanceDistance, hitCell))
+        if (hitCell != nullptr)
         {
             auto& hitTransform = registry->get<Transform>(hitCell->occupant);
             auto& hitCol = registry->get<Collideable>(hitCell->occupant);
             BoundingBox hitBB = hitCol.worldBoundingBox;
 
+            // if next destination is within the bounds of the occupant, find next best square. If not, re-do pathfinding to destination.
             if (Vector3Distance(hitTransform.position, actorTrans.position) < nextPointDist)
             {
-	            {
-                    std::deque<Vector3> empty;
-                    std::swap(moveableActor.localPath, empty);
+
+                // TODO: This will get called despite colliding with the same entity again and again
+                // Could just store a "lastHitActor" variable and see if (hitCell->occupant = lastHitActor && hitTransform.position != lastHitActorPos) and see if the occupant has moved
+                auto newPath = navigationGridSystem->AStarPathfind(entity, actorTrans.position, moveableActor.globalPath.back());                
+                std::deque<Vector3> empty;
+                std::swap(moveableActor.globalPath, empty);
+                for (auto& node : newPath)
+                {
+	                moveableActor.globalPath.push_back(node);
                 }
 
-                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, actorTrans.direction);
-                //for (auto& node : localPath)
-                //{
-	               // moveableActor.localPath.push_back(node);
-                //}
-
                 hitCol.debugDraw = true;
-            	Vector3 newLocation;
-                auto nextBest = navigationGridSystem->FindNextBestLocation(entity, { hitCell->worldPosMin.x, hitCell->worldPosMin.z });
-            	navigationGridSystem->GridToWorldSpace(nextBest, newLocation);
-                moveableActor.localPath.push_back(newLocation);
+            	//Vector3 newLocation;
+             //   auto nextBest = navigationGridSystem->FindNextBestLocation(entity, { hitCell->worldPosMin.x, hitCell->worldPosMin.z });
+            	//navigationGridSystem->GridToWorldSpace(nextBest, newLocation);
+             //   moveableActor.localPath.push_back(newLocation);
             }
         }
-        else
-        {
-		    actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
-		    actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
-		    actorTrans.onPositionUpdate.publish(entity);
-        }
+
+        actorTrans.direction = Vector3Normalize(Vector3Subtract(path.front(), actorTrans.position));
+    	// Calculate rotation angle based on direction
+    	float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
+    	actorTrans.rotation.y = angle;
+	    actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
+	    actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
+	    actorTrans.onPositionUpdate.publish(entity);
         navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
     }
 }

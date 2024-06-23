@@ -27,7 +27,7 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
                                        const std::pair<int,int>& start,
                                        const std::pair<int,int>& finish) const;
     static bool checkInside(int row, int col, Vector2 minRange, Vector2 maxRange);
-	bool getExtents(entt::entity entity, Vector2 extents) const;
+	bool getExtents(entt::entity entity, Vector2& extents) const;
 	bool checkExtents(int row, int col, Vector2 extents) const;
   public:
     float spacing{};
@@ -45,7 +45,7 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
                   const Vector3 &finishPos,
                   AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
     [[nodiscard]] Vector2 FindNextBestLocation(entt::entity entity, Vector2 target) const;
-    [[nodiscard]] bool CastRay(int currentRow, int currentCol, Vector2 direction, float distance, const NavigationGridSquare* out) const;
+    [[nodiscard]] NavigationGridSquare* CastRay(int currentRow, int currentCol, Vector2 direction, float distance) const;
     [[nodiscard]] Vector2 FindNextBestLocation(Vector2 target, Vector2 minRange, Vector2 maxRange, Vector2 extents) const;
     [[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange, AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
     [[nodiscard]] std::vector<Vector3> ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir) const;
