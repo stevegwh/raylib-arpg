@@ -8,7 +8,7 @@
 
 #include "../../utils/Serializer.hpp"
 
-#include <iostream>
+#include <tuple>
 #include <ranges>
 
 namespace sage
@@ -17,10 +17,6 @@ namespace sage
 void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity)
 {
     auto& actor = registry->get<MoveableActor>(entity);
-    {
-        std::deque<Vector3> empty;
-        std::swap(actor.localPath, empty);
-    }
     {
         std::deque<Vector3> empty;
         std::swap(actor.globalPath, empty);
@@ -48,99 +44,12 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const s
 
 }
 
-//void ActorMovementSystem::updateMoveTowardsTransforms()
-//{
-//    debugRays.erase(debugRays.begin(), debugRays.end());
-//    auto view = registry->view<MoveableActor, Transform>();
-//    for (auto& entity: view)
-//    {
-//        auto& moveableActor = registry->get<MoveableActor>(entity);
-//        if (moveableActor.globalPath.empty()) continue;
-//
-//        const auto& actorCollideable = registry->get<Collideable>(entity);
-//        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
-//
-//        auto& path = moveableActor.localPath.empty() ? moveableActor.globalPath : moveableActor.localPath;
-//
-//        auto& actorTrans = registry->get<Transform>(entity);
-//        actorTrans.direction = Vector3Normalize(Vector3Subtract(path.front(), actorTrans.position));
-//
-//        auto distance = Vector3Distance(path.front(), actorTrans.position);
-//        if (distance < 0.5f)
-//        {
-//            path.pop_front();
-//            if (moveableActor.globalPath.empty())
-//            {
-//                actorTrans.onFinishMovement.publish(entity);
-//                continue;
-//            }
-//        }
-//        
-//        Ray ray;
-//        float avoidanceDistance = 1.5;
-//        ray.direction = Vector3Multiply(actorTrans.direction, { avoidanceDistance, 1, avoidanceDistance });
-//        ray.direction.y = 1.0f;
-//        ray.position = actorTrans.position;
-//        ray.position.y = 1.0f;
-//        debugRays.push_back(ray);
-//
-//        auto col = collisionSystem->GetCollisionsWithRay(entity, ray, CollisionLayer::BOYD);
-//
-//        if (!col.empty())
-//        {
-//            auto& hitTransform = registry->get<Transform>(col.at(0).collidedEntityId);
-//            BoundingBox hitBB = col.at(0).collidedBB;
-//
-//            // TODO: Make sure collision boxes do not overlap
-//            
-//            if (Vector3Distance(hitTransform.position, actorTrans.position) < distance)
-//            {
-//                auto& hitCollidable = registry->get<Collideable>(col.at(0).collidedEntityId);
-//                hitCollidable.debugDraw = true;
-//
-//                //auto localPath = navigationGridSystem->ResolveLocalObstacle(entity, hitBB, transform.direction);
-//                
-//                auto localPath = navigationGridSystem->PathfindAvoidLocalObstacle(entity, hitBB, actorTrans.position, moveableActor.globalPath.front());
-//                {
-//                    std::deque<Vector3> empty;
-//                    std::swap(moveableActor.localPath, empty);
-//                }
-//                for (auto & it : std::ranges::reverse_view(localPath))
-//                {
-//                    moveableActor.localPath.push_front(it);
-//                }
-//                
-//                //transform.direction = Vector3Normalize(Vector3Subtract(actor.localPath.front(), transform.position));
-//                continue;
-//            }
-//
-//            if (moveableActor.globalPath.size() == 1 && CheckCollisionBoxSphere(hitBB, moveableActor.globalPath.front(), 0.1f))
-//            {
-//                
-//                // Destination occupied
-//                if (!moveableActor.localPath.empty())
-//                {
-//                    std::deque<Vector3> empty;
-//                    std::swap(moveableActor.localPath, empty);
-//                }
-//
-//                auto frontCopy = moveableActor.globalPath.front();
-//                auto newDestination = navigationGridSystem->FindNextBestLocation(entity, { col.at(0).rlCollision.point.x, col.at(0).rlCollision.point.y });
-//                moveableActor.globalPath.pop_front();
-//                moveableActor.globalPath.push_front({ newDestination.x, frontCopy.y, newDestination.y });
-//
-//            }
-//        }
-//        
-//        // Calculate rotation angle based on direction
-//        float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
-//        actorTrans.rotation.y = angle;
-//        actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
-//        actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
-//        actorTrans.onPositionUpdate.publish(entity);
-//        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true);
-//    }
-//}
+bool AlmostEquals(Vector3 a, Vector3 b)
+{
+	std::tuple<int, int, int> a1 = { std::round(a.x), std::round(a.y), std::round(a.z) };
+	std::tuple<int, int, int> b1 = { std::round(b.x), std::round(b.y), std::round(b.z) };
+    return a1 == b1;
+}
 
 void ActorMovementSystem::updateMoveTowardsTransforms()
 {
@@ -162,13 +71,28 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
     	auto nextPointDist = Vector3Distance(path.front(), actorTrans.position);
     	if (nextPointDist < 0.5f)
         {
-            path.pop_front();
-            if (moveableActor.globalPath.empty())
+	        if (!navigationGridSystem->CheckSingleSquareOccupied(path.front()))
+	        {
+		        path.pop_front();
+	            if (moveableActor.globalPath.empty())
+	            {
+	                actorTrans.onFinishMovement.publish(entity);
+            		navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
+	                continue;
+	            }
+	        }
+            else
             {
-                actorTrans.onFinishMovement.publish(entity);
-            	navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
+            	auto newPath = navigationGridSystem->AStarPathfind(entity, actorTrans.position, moveableActor.globalPath.back());                
+                std::deque<Vector3> empty;
+                std::swap(moveableActor.globalPath, empty);
+                for (auto& node : newPath)
+                {
+	                moveableActor.globalPath.push_back(node);
+                }
                 continue;
             }
+
         }
 
         float avoidanceDistance = 10;
@@ -179,10 +103,14 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
         if (hitCell != nullptr)
         {
             auto& hitTransform = registry->get<Transform>(hitCell->occupant);
-            auto& hitCol = registry->get<Collideable>(hitCell->occupant);
-            BoundingBox hitBB = hitCol.worldBoundingBox;
+	        if (AlmostEquals(hitTransform.position, moveableActor.hitActorLastPos)) // TODO: this will be true if 0,0
+	        {
+                continue;
+	        }
+            moveableActor.hitActorLastPos = hitTransform.position;
 
-            // if next destination is within the bounds of the occupant, find next best square. If not, re-do pathfinding to destination.
+            auto& hitCol = registry->get<Collideable>(hitCell->occupant);
+
             if (Vector3Distance(hitTransform.position, actorTrans.position) < nextPointDist)
             {
 
@@ -197,10 +125,6 @@ void ActorMovementSystem::updateMoveTowardsTransforms()
                 }
 
                 hitCol.debugDraw = true;
-            	//Vector3 newLocation;
-             //   auto nextBest = navigationGridSystem->FindNextBestLocation(entity, { hitCell->worldPosMin.x, hitCell->worldPosMin.z });
-            	//navigationGridSystem->GridToWorldSpace(nextBest, newLocation);
-             //   moveableActor.localPath.push_back(newLocation);
             }
         }
 
@@ -228,13 +152,6 @@ void ActorMovementSystem::DrawDebug() const
             for (auto p : actor.globalPath)
             {
                 DrawCube(p, 1, 1, 1, GREEN);
-            }
-        }
-        if (!actor.localPath.empty())
-        {
-            for (auto p : actor.localPath)
-            {
-                DrawCube(p, 0.8, 1.2, 0.8, RED);
             }
         }
     }

@@ -474,68 +474,6 @@ std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity act
     return { gridSquares[rightGridIndex.y][rightGridIndex.x]->worldPosMin, gridSquares[forwardGridIndex.y][forwardGridIndex.x]->worldPosMin };
 }
 
-/**
- * Resolves local collisions by putting the obstacle into the grid system and using the pathfinding algorithm
- * for resolution.
- * @param actor 
- * @param obstacle 
- * @param startPos 
- * @param finishPos 
- * @return 
- */
-std::vector<Vector3> NavigationGridSystem::PathfindAvoidLocalObstacle(entt::entity actor, const BoundingBox& obstacle, const Vector3& startPos, const Vector3& finishPos)
-{
-    auto& actorTrans = registry->get<Transform>(actor);
-    // Get the grid indices for the bounding box
-    Vector2 topLeftIndex;
-    Vector2 bottomRightIndex;
-    if (!WorldToGridSpace(obstacle.min, topLeftIndex) ||
-        !WorldToGridSpace(obstacle.max, bottomRightIndex))
-    {
-        return {};
-    }
-
-    Vector2 extents;
-    Vector2 actorGridPosition;
-    {
-
-        getExtents(actor, extents);
-        Vector3 actorExtents = Vector3Subtract(registry->get<Collideable>(actor).localBoundingBox.max, registry->get<Collideable>(actor).localBoundingBox.min);
-
-        Vector3 actorPos = Vector3Add(actorTrans.position, Vector3Multiply(actorTrans.direction, {actorExtents.x,1,actorExtents.z}));
-        WorldToGridSpace(actorPos, actorGridPosition);
-
-        
-    }
-    
-    Vector2 obstacleTopLeftIndex;
-    Vector2 obstacleBottomRightIndex;
-    if (!WorldToGridSpace(obstacle.min, obstacleTopLeftIndex) ||
-        !WorldToGridSpace(obstacle.max, obstacleBottomRightIndex))
-    {
-        return {};
-    }
-
-    
-    Vector2 minRange;
-    Vector2 maxRange;
-    int bounds = 50;
-
-    if (!GetPathfindRange(actor, bounds, minRange, maxRange))
-    {
-        return {};
-    }
-
-    
-    auto path = AStarPathfind(actor, startPos, finishPos, minRange, maxRange, AStarHeuristic::FAVOUR_RIGHT);
-    if (!path.empty())
-    {
-        path.erase(path.end()-1); // Avoid overlapping local/global paths
-    }
-
-    return path;
-}
-
 std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::vector<std::pair<int, int>>>& came_from,
                                                          const std::pair<int,int>& start,
                                                          const std::pair<int,int>& finish) const
@@ -584,6 +522,7 @@ bool NavigationGridSystem::checkInside(int row, int col, Vector2 minRange, Vecto
 
 bool NavigationGridSystem::checkExtents(int row, int col, Vector2 extents) const
 {
+    // TODO: Is below correct? Care x/y -> col/row
 	Vector2 min = Vector2Subtract(
 	  {static_cast<float>(col), static_cast<float>(row)},
 	  extents);
@@ -595,7 +534,7 @@ bool NavigationGridSystem::checkExtents(int row, int col, Vector2 extents) const
 	Vector2 maxRange = {static_cast<float>(gridSquares.at(0).size()), static_cast<float>(gridSquares.size())};
 
 	return checkInside(min.y, min.x, minRange, maxRange) && 
-	  checkInside(max.y, max.x, minRange, maxRange) &&
+        checkInside(max.y, max.x, minRange, maxRange) &&
         !gridSquares[row][col]->occupied &&
         !gridSquares[min.y][min.x]->occupied &&
         !gridSquares[min.y][max.x]->occupied &&

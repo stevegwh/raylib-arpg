@@ -5,6 +5,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <entt/entt.hpp>
 
 #include <deque>
 
@@ -13,7 +14,8 @@ namespace sage
 
 struct MoveableActor
 {
-    std::deque<Vector3> localPath{};
+    entt::entity lastHitActor = entt::null;
+    Vector3 hitActorLastPos{};
     std::deque<Vector3> globalPath{};
 };
 

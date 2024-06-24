@@ -49,7 +49,6 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     [[nodiscard]] Vector2 FindNextBestLocation(Vector2 target, Vector2 minRange, Vector2 maxRange, Vector2 extents) const;
     [[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange, AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
     [[nodiscard]] std::vector<Vector3> ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir) const;
-    [[nodiscard]] std::vector<Vector3> PathfindAvoidLocalObstacle(entt::entity actor, const BoundingBox& obstacle, const Vector3& startPos, const Vector3& finishPos);
     [[nodiscard]] std::vector<Vector3> BFSPathfind(const Vector3& startPos, const Vector3& finishPos);
     [[nodiscard]] std::vector<Vector3> BFSPathfind(const Vector3& startPos, const Vector3& finishPos, const Vector2& minRange, const Vector2& maxRange);
     const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
