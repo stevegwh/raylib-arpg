@@ -42,17 +42,17 @@ void Cursor::UnlockCursor()
     lockContext = false;
 }
 
-bool Cursor::isValidMove()
+bool Cursor::isValidMove() const
 {
-    Vector2 tmp;
+    GridSquare tmp;
     if (navigationGridSystem->WorldToGridSpace(collision.point,
                                                tmp)) // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as bounds.)
     {
         if (registry->any_of<ControllableActor>(controlledActor))
         {
             const auto &actor = registry->get<ControllableActor>(controlledActor);
-            Vector2 minRange;
-            Vector2 maxRange;
+            GridSquare minRange;
+            GridSquare maxRange;
             navigationGridSystem->GetPathfindRange(controlledActor,
                                                    actor.pathfindingBounds,
                                                    minRange,

@@ -122,11 +122,11 @@ void ActorMovementSystem::Update()
         }
 
         float avoidanceDistance = 10;
-        Vector2 actorIndex;
+        GridSquare actorIndex;
         navigationGridSystem->WorldToGridSpace(actorTrans.position, actorIndex);
         NavigationGridSquare* hitCell = navigationGridSystem->CastRay(
-            actorIndex.y, 
-            actorIndex.x, 
+            actorIndex.row, 
+            actorIndex.col, 
             { actorTrans.direction.x, actorTrans.direction.z }, 
             avoidanceDistance);
         

@@ -68,7 +68,7 @@ public:
     void OnControlledActorChange(entt::entity entity);
     void LockCursor();
     void UnlockCursor();
-    bool isValidMove();
+    bool isValidMove() const;
 };
 }
 

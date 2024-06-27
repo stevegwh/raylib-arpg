@@ -54,19 +54,19 @@ void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 locati
 {
     {
         // If location outside of bounds, then return
-        Vector2 tmp;
+        GridSquare tmp;
         if (!navigationGridSystem->WorldToGridSpace(location, tmp)) return;
     }
 
     const auto& actor = registry->get<ControllableActor>(id);
     const auto& actorCollideable = registry->get<Collideable>(id);
     navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
-    Vector2 minRange;
-    Vector2 maxRange;
+    GridSquare minRange;
+    GridSquare maxRange;
     navigationGridSystem->GetPathfindRange(id, actor.pathfindingBounds, minRange, maxRange);
     {
         // If location outside of actor's movement range, then return
-        Vector2 tmp;
+        GridSquare tmp;
         if (!navigationGridSystem->WorldToGridSpace(location, tmp, minRange, maxRange)) return;
     }
     navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);

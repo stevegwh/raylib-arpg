@@ -12,12 +12,18 @@
 namespace sage
 {
 
+struct GridSquare
+{
+    int row;
+    int col;
+};
+
 struct NavigationGridSquare
 {
 
     int pathfindingCost = 1;
     bool debugColor = false;
-    Vector2 gridSquareIndex;
+    GridSquare gridSquareIndex;
     Vector3 worldPosMin; // Top Left
     Vector3 worldPosMax; // Bottom Right
     Vector3 worldPosCentre;
@@ -25,11 +31,11 @@ struct NavigationGridSquare
 	entt::entity occupant = entt::null;
     bool occupied = false;
     
-    NavigationGridSquare(Vector2 _gridSquareIndex, 
-                                  Vector3 _worldPosMin, 
-                                  Vector3 _worldPosMax, 
-                                  Vector3 _worldPosCentre) : 
-    gridSquareIndex(_gridSquareIndex), 
+    NavigationGridSquare(GridSquare _gridSquareIndex, 
+                          Vector3 _worldPosMin, 
+                          Vector3 _worldPosMax, 
+                          Vector3 _worldPosCentre) :
+	gridSquareIndex(_gridSquareIndex), 
     worldPosMin(_worldPosMin), 
     worldPosMax(_worldPosMax), 
     worldPosCentre(_worldPosCentre),
