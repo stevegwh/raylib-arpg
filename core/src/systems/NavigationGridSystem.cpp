@@ -393,7 +393,7 @@ std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::
         }
     }
     path.push_back(gridSquares[current.row][current.col]->worldPosMin);
-    std::reverse(path.begin(), path.end());
+    std::ranges::reverse(path);
     return path;
 }
 
@@ -476,8 +476,8 @@ GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare target, GridSqu
 {
 
 	std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
-    std::queue<std::pair<int,int>> frontier;
-    frontier.emplace(target.row, target.col);
+    std::queue<GridSquare> frontier;
+    frontier.emplace(target);
 
     GridSquare out{};
     bool foundValidSquare = false;
@@ -487,23 +487,21 @@ GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare target, GridSqu
         frontier.pop();
         for (const auto& dir : directions)
         {
-            int next_row = current.first + dir.first;
-            int next_col = current.second + dir.second;
+			GridSquare next = { current.row + dir.first, current.col + dir.second };
             
-            if (!checkInside(next_row, next_col, minRange, maxRange)) continue;
+            if (!checkInside(next, minRange, maxRange)) continue;
             
-            if (!checkExtents(next_row, next_col, extents))
+            if (!checkExtents(next, extents))
             {
-                if (!visited[next_row][next_col])
+                if (!visited[next.row][next.col])
                 {
-                    frontier.emplace(next_row, next_col);
-                    visited[next_row][next_col] = true;
+                    frontier.emplace(next);
+                    visited[next.row][next.col] = true;
                 }
             }
             else
             {
-                out.col = next_col;
-                out.row = next_row;
+                out = next;
                 foundValidSquare = true;
                 break;
             }
@@ -538,11 +536,11 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     
     if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare) || !getExtents(entity, extents)) return {};
     
-    //if (!checkExtents(finishGridSquare.row, finishGridSquare.col, extents))
-    //{
-    //    finishGridSquare = FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
+    if (!checkExtents(finishGridSquare, extents))
+    {
+        finishGridSquare = FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
 
-    //}
+    }
 
     std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
     std::vector<std::vector<GridSquare>> came_from(maxRange.row, std::vector<GridSquare>(maxRange.col, { -1, -1 }));
@@ -550,7 +548,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     
     PriorityQueue<GridSquare, double> frontier;
 
-    frontier.put({startGridSquare.row, startGridSquare.col}, 0);
+    frontier.put(startGridSquare, 0);
     visited[startGridSquare.row][startGridSquare.col] = true;
 
     bool pathFound = false;
@@ -573,8 +571,8 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
             auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
             double new_cost = current_cost + next_cost;
 
-            if (checkInside(next.row, next.col, minRange, maxRange) &&
-                checkExtents(next.row, next.col, extents) &&
+            if (checkInside(next, minRange, maxRange) &&
+                checkExtents(next, extents) &&
                 !visited[next.row][next.col] &&
                 !gridSquares.at(next.row).at(next.col)->occupied || 
                 new_cost < cost_so_far[next.row][next.col])
@@ -591,7 +589,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
                     heuristic_cost = heuristic_favourRight(next, finishGridSquare, currentDir);
                 }
                 double priority = new_cost + heuristic_cost;
-                frontier.put({next.row, next.col}, priority);
+                frontier.put(next, priority);
                 came_from[next.row][next.col] = current;
                 visited[next.row][next.col] = true;
             }
