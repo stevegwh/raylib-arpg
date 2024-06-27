@@ -1,7 +1,4 @@
 #include "NavigationGridSystem.hpp"
-#include "NavigationGridSystem.hpp"
-
-#include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/Transform.hpp"
 #include "../utils/PriorityQueue.hpp"
@@ -182,10 +179,10 @@ bool NavigationGridSystem::CheckSquareAreaOccupied(Vector3 worldPos, const Bound
         extents.col -= bb_min.col;
     }
 
-    return checkExtents(gridPos.row, gridPos.col, extents);
+    return checkExtents(gridPos, extents);
 }
 
-bool NavigationGridSystem::CheckSquareAreaOccupied(int row, int col, const BoundingBox& bb) const
+bool NavigationGridSystem::CheckSquareAreaOccupied(GridSquare square, const BoundingBox& bb) const
 {
 	GridSquare extents;
     {
@@ -195,7 +192,7 @@ bool NavigationGridSystem::CheckSquareAreaOccupied(int row, int col, const Bound
         extents.row -= bb_min.row;
         extents.col -= bb_min.col;
     }
-    return checkExtents(row, col, extents);
+    return checkExtents(square, extents);
 }
 
 entt::entity NavigationGridSystem::CheckSingleSquareOccupant(Vector3 worldPos) const
@@ -222,10 +219,10 @@ entt::entity NavigationGridSystem::CheckSquareAreaOccupant(Vector3 worldPos, con
 		    return entt::null;
 	    }
     }
-    return CheckSquareAreaOccupant(gridPos.row, gridPos.col, bb);
+    return CheckSquareAreaOccupant(gridPos, bb);
 }
 
-entt::entity NavigationGridSystem::CheckSquareAreaOccupant(int row, int col, const BoundingBox& bb) const
+entt::entity NavigationGridSystem::CheckSquareAreaOccupant(GridSquare square, const BoundingBox& bb) const
 {
 	GridSquare extents;
     {
@@ -236,26 +233,26 @@ entt::entity NavigationGridSystem::CheckSquareAreaOccupant(int row, int col, con
         extents.col -= bb_min.col;
     }
 
-	if (!checkExtents(row, col, extents))
+	if (!checkExtents(square, extents))
 	{
 		return entt::null;
 	}
 
-	if (gridSquares[row - extents.row][col - extents.col]->occupied)
+	if (gridSquares[square.row - extents.row][square.col - extents.col]->occupied)
 	{
-		return gridSquares[row - extents.row][col - extents.col]->occupant;
+		return gridSquares[square.row - extents.row][square.col - extents.col]->occupant;
 	}
-	if (gridSquares[row + extents.row][col + extents.col]->occupied)
+	if (gridSquares[square.row + extents.row][square.col + extents.col]->occupied)
 	{
-		return gridSquares[row + extents.row][col + extents.col]->occupant;
+		return gridSquares[square.row + extents.row][square.col + extents.col]->occupant;
 	}
-    if (gridSquares[row - extents.row][col + extents.col]->occupied)
+    if (gridSquares[square.row - extents.row][square.col + extents.col]->occupied)
 	{
-		return gridSquares[row - extents.row][col + extents.col]->occupant;
+		return gridSquares[square.row - extents.row][square.col + extents.col]->occupant;
 	}
-    if (gridSquares[row + extents.row][col - extents.col]->occupied)
+    if (gridSquares[square.row + extents.row][square.col - extents.col]->occupied)
 	{
-		return gridSquares[row + extents.row][col - extents.col]->occupant;
+		return gridSquares[square.row + extents.row][square.col - extents.col]->occupant;
 	}
     return entt::null;
 }
@@ -282,7 +279,7 @@ bool NavigationGridSystem::getExtents(entt::entity entity, GridSquare& extents) 
         extents.row -= bb_min.row;
         extents.col -= bb_min.col;
 
-        if (!checkInside(extents.row, extents.col, { 0,0 }, 
+        if (!checkInside(extents, { 0,0 }, 
             {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
         {
 	        return false;
@@ -322,7 +319,7 @@ bool NavigationGridSystem::GridToWorldSpace(GridSquare gridPos, Vector3& out) co
 {
     GridSquare maxRange = { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) };
     out = gridSquares[gridPos.row][gridPos.col]->worldPosMin;
-    return checkInside(gridPos.row, gridPos.col, {0,0}, maxRange);
+    return checkInside(gridPos, {0,0}, maxRange);
 }
 
 bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, GridSquare& out) const
@@ -400,22 +397,22 @@ std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::
     return path;
 }
 
-bool NavigationGridSystem::checkInside(int row, int col, GridSquare minRange, GridSquare maxRange)
+bool NavigationGridSystem::checkInside(GridSquare square, GridSquare minRange, GridSquare maxRange)
 {
-	return minRange.row <= row && row < maxRange.row && minRange.col <= col && col < maxRange.col;
+	return minRange.row <= square.row && square.row < maxRange.row && minRange.col <= square.col && square.col < maxRange.col;
 }
 
-bool NavigationGridSystem::checkExtents(int row, int col, GridSquare extents) const
+bool NavigationGridSystem::checkExtents(GridSquare square, GridSquare extents) const
 {
-	GridSquare min = {row - extents.row, col - extents.col};
-	GridSquare max = {row + extents.row, col + extents.col};
+	GridSquare min = {square.row - extents.row, square.col - extents.col};
+	GridSquare max = {square.row + extents.row, square.col + extents.col};
 
 	GridSquare minRange = {0, 0};
 	GridSquare maxRange = {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())};
 
-	return checkInside(min.row, min.col, minRange, maxRange) && 
-        checkInside(max.row, max.col, minRange, maxRange) &&
-        !gridSquares[row][col]->occupied &&
+	return checkInside(min, minRange, maxRange) && 
+        checkInside(max, minRange, maxRange) &&
+        !gridSquares[square.row][square.col]->occupied &&
         !gridSquares[min.row][min.col]->occupied &&
         !gridSquares[min.row][max.col]->occupied &&
         !gridSquares[max.row][min.col]->occupied &&
@@ -431,16 +428,15 @@ NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentC
 
     for (int i = 0; i < dist; ++i)
     {
-        int newRow = currentRow + (dirRow * i);
-        int newCol = currentCol + (dirCol * i);
+		GridSquare square = { currentRow + (dirRow * i), currentCol + (dirCol * i) };
 
-        if (!checkInside(newRow, newCol, {0,0}, 
+        if (!checkInside(square, {0,0}, 
             {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
 	    {
 		    continue;
 	    }
 
-        const auto cell = gridSquares[newRow][newCol];
+        const auto cell = gridSquares[square.row][square.col];
         cell->debugColor = true;
 
 	    if (cell->occupant != entt::null)

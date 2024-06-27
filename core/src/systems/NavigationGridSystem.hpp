@@ -22,9 +22,9 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
 	std::vector<Vector3> tracebackPath(const std::vector<std::vector<GridSquare>>& came_from,
 	                                                         const GridSquare& start,
 	                                                         const GridSquare& finish) const;
-    static bool checkInside(int row, int col, GridSquare minRange, GridSquare maxRange);
+    static bool checkInside(GridSquare square, GridSquare minRange, GridSquare maxRange);
 	bool getExtents(entt::entity entity, GridSquare& extents) const;
-	bool checkExtents(int row, int col, GridSquare extents) const;
+	bool checkExtents(GridSquare square, GridSquare extents) const;
   public:
     float spacing{};
     int slices{};
@@ -52,11 +52,11 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     bool CheckSingleSquareOccupied(Vector3 worldPos) const;
     bool CheckSingleSquareOccupied(GridSquare position) const;
     bool CheckSquareAreaOccupied(Vector3 worldPos, const BoundingBox& bb) const;
-    bool CheckSquareAreaOccupied(int row, int col, const BoundingBox& bb) const;
+    bool CheckSquareAreaOccupied(GridSquare square, const BoundingBox& bb) const;
 	entt::entity CheckSingleSquareOccupant(Vector3 worldPos) const;
 	entt::entity CheckSingleSquareOccupant(GridSquare position) const;
     entt::entity CheckSquareAreaOccupant(Vector3 worldPos, const BoundingBox& bb) const;
-    entt::entity CheckSquareAreaOccupant(int row, int col, const BoundingBox& bb) const;
+    entt::entity CheckSquareAreaOccupant(GridSquare square, const BoundingBox& bb) const;
     bool CompareSquareAreaOccupant(entt::entity entity, const BoundingBox& bb) const;
     bool CompareSingleSquareOccupant(entt::entity entity, const BoundingBox& bb) const;
 
