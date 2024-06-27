@@ -16,6 +16,21 @@ struct GridSquare
 {
     int row;
     int col;
+    bool operator>(const GridSquare& other) const {
+        return std::tie(row, col) > std::tie(other.row, other.col);
+    }
+
+    bool operator<(const GridSquare& other) const {
+        return std::tie(row, col) < std::tie(other.row, other.col);
+    }
+
+    bool operator==(const GridSquare& other) const {
+        return std::tie(row, col) == std::tie(other.row, other.col);
+    }
+
+    bool operator!=(const GridSquare& other) const {
+        return !(*this == other);
+    }
 };
 
 struct NavigationGridSquare

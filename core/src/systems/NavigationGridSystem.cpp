@@ -7,7 +7,6 @@
 #include "../utils/PriorityQueue.hpp"
 
 #include <queue>
-#include <unordered_map>
 #include <utility>
 #include <iostream>
 
@@ -25,15 +24,15 @@ Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 namespace sage
 {
 
-inline double heuristic(std::pair<int, int> a, std::pair<int, int> b)
+inline double heuristic(GridSquare a, GridSquare b)
 {
-    return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+    return std::abs(a.row - b.row) + std::abs(a.col - b.col);
 }
 
-inline double heuristic_favourRight(std::pair<int, int> a, std::pair<int, int> b, const Vector3& currentDir)
+inline double heuristic_favourRight(GridSquare a, GridSquare b, const Vector3& currentDir)
 {
-    double dx = std::abs(a.first - b.first);
-    double dy = std::abs(a.second - b.second);
+    double dx = std::abs(a.row - b.row);
+    double dy = std::abs(a.col - b.col);
     double diagonal_distance = dx + dy;
 
     int currentX = std::round(currentDir.x);
@@ -41,25 +40,25 @@ inline double heuristic_favourRight(std::pair<int, int> a, std::pair<int, int> b
 
     if (currentZ > 0)
     {
-        if (a.second < b.second)
+        if (a.col < b.col)
         {
             diagonal_distance += 10.0;
         }
     } else if (currentZ < 0)
     {
-        if (a.second > b.second)
+        if (a.col > b.col)
         {
             diagonal_distance += 10.0;
         }
     } else if (currentX > 0)
     {
-        if (a.first > b.first)
+        if (a.row > b.row)
         {
             diagonal_distance += 10.0;
         }
     } else if (currentX < 0)
     {
-        if (a.first < b.first)
+        if (a.row < b.row)
         {
             diagonal_distance += 10.0;
         }
@@ -361,88 +360,25 @@ void NavigationGridSystem::DrawDebug() const
     }
 }
 
-std::vector<Vector3> NavigationGridSystem::ResolveLocalObstacle(entt::entity actor, BoundingBox obstacle, Vector3 currentDir) const
-{
-    GridSquare actorMinIndex, actorMaxIndex, obstacleMinIndex, obstacleMaxIndex;
-    auto& actorCollideable = registry->get<Collideable>(actor);
-    if (!WorldToGridSpace(actorCollideable.worldBoundingBox.min, actorMinIndex) ||
-        !WorldToGridSpace(actorCollideable.worldBoundingBox.max, actorMaxIndex) ||
-        !WorldToGridSpace(obstacle.min, obstacleMinIndex) ||
-        !WorldToGridSpace(obstacle.max, obstacleMaxIndex))
-    {
-        return { gridSquares[actorMinIndex.row][actorMinIndex.col]->worldPosMin };
-    }
-    
-    GridSquare rightGridIndex{}, forwardGridIndex{};
-    int currentX = std::round(currentDir.x);
-    int currentZ = std::round(currentDir.z);
-    
-    if (currentZ > 0)
-    {
-        if (actorMaxIndex.col <= obstacleMinIndex.col)
-            rightGridIndex = { obstacleMaxIndex.row, obstacleMinIndex.col - 1 };
-        else
-            rightGridIndex = { obstacleMinIndex.row, obstacleMaxIndex.col + 1 };
-        forwardGridIndex = { rightGridIndex.row + 1, rightGridIndex.col };
-    }
-    else if (currentZ < 0)
-    {
-        if (actorMinIndex.col >= obstacleMaxIndex.col)
-            rightGridIndex = { obstacleMinIndex.row - 1, obstacleMaxIndex.col + 1 };
-        else
-            rightGridIndex = { obstacleMaxIndex.row, obstacleMinIndex.col - 1 };
-        forwardGridIndex = { rightGridIndex.row - 1, rightGridIndex.col };
-    }
-
-    if (currentX > 0)
-    {
-        if (actorMaxIndex.row <= obstacleMinIndex.row)
-            rightGridIndex = { obstacleMinIndex.row - 1, obstacleMaxIndex.col + 1 };
-        else
-            rightGridIndex = { obstacleMaxIndex.row + 1, obstacleMinIndex.col };
-        forwardGridIndex = { rightGridIndex.row, rightGridIndex.col + 1 };
-    }
-    else if (currentX < 0)
-    {
-        if (actorMinIndex.row >= obstacleMaxIndex.row)
-            rightGridIndex = { obstacleMaxIndex.row + 1, obstacleMinIndex.col - 1 };
-        else
-            rightGridIndex = { obstacleMinIndex.row - 1, obstacleMaxIndex.col };
-        forwardGridIndex = { rightGridIndex.row, rightGridIndex.col - 1 };
-    }
-    
-    if (rightGridIndex.col < 0 || rightGridIndex.col >= gridSquares.at(0).size() ||
-        rightGridIndex.row < 0 || rightGridIndex.row >= gridSquares.size() ||
-        gridSquares[rightGridIndex.row][rightGridIndex.col]->occupied ||
-        forwardGridIndex.col < 0 || forwardGridIndex.col >= gridSquares.at(0).size() ||
-        forwardGridIndex.row < 0 || forwardGridIndex.row >= gridSquares.size() ||
-        gridSquares[forwardGridIndex.row][forwardGridIndex.col]->occupied)
-    {
-        return { gridSquares[actorMinIndex.row][actorMinIndex.col]->worldPosMin };
-    }
-    
-    return { gridSquares[rightGridIndex.row][rightGridIndex.col]->worldPosMin, gridSquares[forwardGridIndex.row][forwardGridIndex.col]->worldPosMin };
-}
-
-std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::vector<std::pair<int, int>>>& came_from,
-                                                         const std::pair<int,int>& start,
-                                                         const std::pair<int,int>& finish) const
+std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::vector<GridSquare>>& came_from,
+                                                         const GridSquare& start,
+                                                         const GridSquare& finish) const
 {
     std::vector<Vector3> path;
-    std::pair<int, int> current = {finish.first, finish.second};
-    std::pair<int, int> previous;
+    GridSquare current = {finish.row, finish.col};
+    GridSquare previous;
     std::pair<int, int> currentDir = {0,0};
 
-    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
-    while (current.first != start.first || current.second != start.second)
+    path.push_back(gridSquares[current.row][current.col]->worldPosMin);
+    while (current.row != start.row || current.col != start.col)
     {
         previous = current;
-        current = came_from[current.first][current.second];
+        current = came_from[current.row][current.col];
         for (const auto& dir : directions)
         {
-            int row = previous.first + dir.first;
-            int col = previous.second + dir.second;
-            if (row == current.first && col == current.second)
+            int row = previous.row + dir.first;
+            int col = previous.col + dir.second;
+            if (row == current.row && col == current.col)
             {
                 if (currentDir.first == 0 && currentDir.second == 0)
                 {
@@ -452,14 +388,14 @@ std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::
                 if (dir != currentDir)
                 {
                     currentDir = dir;
-                    path.push_back(gridSquares[previous.first][previous.second]->worldPosMin);
-                    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+                    path.push_back(gridSquares[previous.row][previous.col]->worldPosMin);
+                    path.push_back(gridSquares[current.row][current.col]->worldPosMin);
                 }
                 break;
             }
         }
     }
-    path.push_back(gridSquares[current.first][current.second]->worldPosMin);
+    path.push_back(gridSquares[current.row][current.col]->worldPosMin);
     std::reverse(path.begin(), path.end());
     return path;
 }
@@ -606,26 +542,20 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     
     if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare) || !getExtents(entity, extents)) return {};
     
-    if (!checkExtents(finishGridSquare.row, finishGridSquare.col, extents))
-    {
-        finishGridSquare = FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
+    //if (!checkExtents(finishGridSquare.row, finishGridSquare.col, extents))
+    //{
+    //    finishGridSquare = FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
 
-    }
-    
-    int startrow = startGridSquare.row;
-    int startcol = startGridSquare.col;
+    //}
 
-    int finishrow = finishGridSquare.row;
-    int finishcol = finishGridSquare.col;
-    
     std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
-    std::vector<std::vector<std::pair<int, int>>> came_from(maxRange.row, std::vector<std::pair<int, int>>(maxRange.col, std::pair<int, int>(-1, -1)));
+    std::vector<std::vector<GridSquare>> came_from(maxRange.row, std::vector<GridSquare>(maxRange.col, { -1, -1 }));
     std::vector<std::vector<double>> cost_so_far(maxRange.row, std::vector<double>(maxRange.col, 0.0));
     
-    PriorityQueue<std::pair<int,int>, double> frontier;
+    PriorityQueue<GridSquare, double> frontier;
 
-    frontier.put({startrow, startcol}, 0);
-    visited[startrow][startcol] = true;
+    frontier.put({startGridSquare.row, startGridSquare.col}, 0);
+    visited[startGridSquare.row][startGridSquare.col] = true;
 
     bool pathFound = false;
 
@@ -633,7 +563,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     {
         auto current = frontier.get();
 
-        if (current.first == finishrow && current.second == finishcol)
+        if (current.row == finishGridSquare.row && current.col == finishGridSquare.col)
         {
             pathFound = true;
             break;
@@ -641,34 +571,33 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
 
         for (const auto& dir : directions)
         {
-            int next_row = current.first + dir.first;
-            int next_col = current.second + dir.second;
+            GridSquare next = { current.row + dir.first, current.col + dir.second };
             
-            auto current_cost = gridSquares[current.first][current.second]->pathfindingCost;
-            auto next_cost = gridSquares[next_row][next_col]->pathfindingCost;
+            auto current_cost = gridSquares[current.row][current.col]->pathfindingCost;
+            auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
             double new_cost = current_cost + next_cost;
 
-            if (checkInside(next_row, next_col, minRange, maxRange) &&
-                checkExtents(next_row, next_col, extents) &&
-                !visited[next_row][next_col] &&
-                !gridSquares.at(next_row).at(next_col)->occupied || 
-                new_cost < cost_so_far[next_row][next_col])
+            if (checkInside(next.row, next.col, minRange, maxRange) &&
+                checkExtents(next.row, next.col, extents) &&
+                !visited[next.row][next.col] &&
+                !gridSquares.at(next.row).at(next.col)->occupied || 
+                new_cost < cost_so_far[next.row][next.col])
             {
-                cost_so_far[next_row][next_col] = new_cost;
+                cost_so_far[next.row][next.col] = new_cost;
                 double heuristic_cost = 0;
                 if (heuristicType == AStarHeuristic::DEFAULT)
                 {
-                    heuristic_cost = heuristic({next_row, next_col}, {finishrow, finishcol});
+                    heuristic_cost = heuristic(next, finishGridSquare);
                 }
                 else if (heuristicType == AStarHeuristic::FAVOUR_RIGHT)
                 {
                     auto& currentDir = registry->get<Transform>(entity).direction;
-                    heuristic_cost = heuristic_favourRight({next_row, next_col}, {finishrow, finishcol}, currentDir);
+                    heuristic_cost = heuristic_favourRight(next, finishGridSquare, currentDir);
                 }
                 double priority = new_cost + heuristic_cost;
-                frontier.put({next_row, next_col}, priority);
-                came_from[next_row][next_col] = current;
-                visited[next_row][next_col] = true;
+                frontier.put({next.row, next.col}, priority);
+                came_from[next.row][next.col] = current;
+                visited[next.row][next.col] = true;
             }
         }
     }
@@ -678,72 +607,72 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
         return {};
     }
     
-    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol});
+    return tracebackPath(came_from, startGridSquare, finishGridSquare);
 }
 
-std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos)
-{
-    return BFSPathfind(startPos, finishPos, {0,0},
-                    {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())});
-}
-
-std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos, const GridSquare& minRange, const GridSquare& maxRange)
-{
-    GridSquare startGridSquare = {0};
-    GridSquare finishGridSquare = {0};
-    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
-    int startrow = startGridSquare.row;
-    int startcol = startGridSquare.col;
-
-    int finishrow = finishGridSquare.row;
-    int finishcol = finishGridSquare.col;
-
-    auto inside = [&](int row, int col) { return minRange.row <= row && row < maxRange.row && minRange.col <= col && col < maxRange.col; };
-
-    std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
-    std::vector<std::vector<std::pair<int, int>>> came_from(maxRange.row, std::vector<std::pair<int, int>>(maxRange.col, std::pair<int, int>(-1, -1)));
-
-    std::queue<std::pair<int,int>> frontier;
-
-    frontier.emplace(startrow, startcol);
-    visited[startrow][startcol] = true;
-
-    bool pathFound = false;
-
-    while (!frontier.empty())
-    {
-        auto current = frontier.front();
-        frontier.pop();
-
-        if (current.first == finishrow && current.second == finishcol) 
-        {
-            pathFound = true;
-            break;
-        }
-
-        for (const auto& dir : directions)
-        {
-            int next_row = current.first + dir.first;
-            int next_col = current.second + dir.second;
-
-            if (inside(next_row, next_col) && 
-            !visited[next_row][next_col] && 
-            !gridSquares[next_row][next_col]->occupied)
-            {
-                frontier.emplace(next_row, next_col);
-                visited[next_row][next_col] = true;
-                came_from[next_row][next_col] = current;
-            }
-        }
-    }
-    
-    if (!pathFound) 
-    {
-        return {}; 
-    }
-    
-    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol});
-}
+//std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos)
+//{
+//    return BFSPathfind(startPos, finishPos, {0,0},
+//                    {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())});
+//}
+//
+//std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos, const GridSquare& minRange, const GridSquare& maxRange)
+//{
+//    GridSquare startGridSquare = {0};
+//    GridSquare finishGridSquare = {0};
+//    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
+//    int startrow = startGridSquare.row;
+//    int startcol = startGridSquare.col;
+//
+//    int finishrow = finishGridSquare.row;
+//    int finishcol = finishGridSquare.col;
+//
+//    auto inside = [&](int row, int col) { return minRange.row <= row && row < maxRange.row && minRange.col <= col && col < maxRange.col; };
+//
+//    std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
+//    std::vector<std::vector<std::pair<int, int>>> came_from(maxRange.row, std::vector<std::pair<int, int>>(maxRange.col, std::pair<int, int>(-1, -1)));
+//
+//    std::queue<std::pair<int,int>> frontier;
+//
+//    frontier.emplace(startrow, startcol);
+//    visited[startrow][startcol] = true;
+//
+//    bool pathFound = false;
+//
+//    while (!frontier.empty())
+//    {
+//        auto current = frontier.front();
+//        frontier.pop();
+//
+//        if (current.first == finishrow && current.second == finishcol) 
+//        {
+//            pathFound = true;
+//            break;
+//        }
+//
+//        for (const auto& dir : directions)
+//        {
+//            int next_row = current.first + dir.first;
+//            int next_col = current.second + dir.second;
+//
+//            if (inside(next_row, next_col) && 
+//            !visited[next_row][next_col] && 
+//            !gridSquares[next_row][next_col]->occupied)
+//            {
+//                frontier.emplace(next_row, next_col);
+//                visited[next_row][next_col] = true;
+//                came_from[next_row][next_col] = current;
+//            }
+//        }
+//    }
+//    
+//    if (!pathFound) 
+//    {
+//        return {}; 
+//    }
+//    
+//    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol});
+//}
 
 void NavigationGridSystem::PopulateGrid() const
 {
