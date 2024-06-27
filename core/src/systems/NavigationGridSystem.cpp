@@ -659,7 +659,7 @@ Vector2 NavigationGridSystem::FindNextBestLocation(Vector2 target, Vector2 minRa
     
     return out;
 }
-
+    
 /**
  * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
  * Checks entire grid.
