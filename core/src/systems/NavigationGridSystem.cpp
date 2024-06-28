@@ -489,6 +489,7 @@ NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentC
 
 GridSquare NavigationGridSystem::FindNextBestLocation(entt::entity entity, GridSquare target) const
 {
+
     GridSquare extents{};
     if (!getExtents(entity, extents))
     {
@@ -540,8 +541,7 @@ GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare currentPos, Gri
             {
                 if (!visited[next.row][next.col])
                 {
-                    int manhattanDistance = std::abs(next.row - currentPos.row) + std::abs(next.col - currentPos.col);
-                    frontier.emplace(manhattanDistance, next);
+                    frontier.emplace(heuristic(currentPos, next), next);
                     visited[next.row][next.col] = true;
                 }
             }
@@ -649,6 +649,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     
     return tracebackPath(came_from, startGridSquare, finishGridSquare);
 }
+
 
 void NavigationGridSystem::PopulateGrid() const
 {
