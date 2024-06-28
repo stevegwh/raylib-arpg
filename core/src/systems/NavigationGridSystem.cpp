@@ -102,14 +102,14 @@ void NavigationGridSystem::DrawDebugPathfinding(const GridSquare& minRange, cons
     {
         for (int j = 0; j < gridSquares.at(0).size(); j++)
         {
-            gridSquares[i][j]->debugColor = false;
+            gridSquares[i][j]->drawDebug = false;
         }
     }
     for (int i = minRange.row; i  < maxRange.row; i++)
     {
         for (int j = minRange.col; j < maxRange.col; j++)
         {
-            gridSquares[i][j]->debugColor = true;
+            gridSquares[i][j]->drawDebug = true;
         }
     }
 }
@@ -135,7 +135,7 @@ void NavigationGridSystem::MarkSquareOccupied(const BoundingBox& occupant, bool 
         for (int col = min_col; col <= max_col; ++col)
         {
             gridSquares[row][col]->occupied = occupied;
-            gridSquares[row][col]->debugColor = occupied;
+            gridSquares[row][col]->drawDebug = occupied;
             if (occupied)
             {
 	            gridSquares[row][col]->occupant = occupantEntity;
@@ -163,34 +163,35 @@ bool NavigationGridSystem::CheckSingleSquareOccupied(GridSquare position) const
     return gridSquares[position.row][position.col]->occupied;
 }
 
-bool NavigationGridSystem::CheckSquareAreaOccupied(Vector3 worldPos, const BoundingBox& bb) const
+/**
+ * Checks whether the bounding box fits at the given world position.
+ * @param worldPos 
+ * @param bb 
+ * @return 
+ */
+bool NavigationGridSystem::CheckBoundingBoxAreaUnoccupied(Vector3 worldPos, const BoundingBox& bb) const
 {
-	GridSquare extents, gridPos;
+	GridSquare gridPos;
+    if (!WorldToGridSpace(worldPos, gridPos))
     {
-        GridSquare bb_min;
-
-        if (!WorldToGridSpace(bb.min, bb_min) ||
-        !WorldToGridSpace(bb.max, extents) ||
-        !WorldToGridSpace(worldPos, gridPos))
-        {
-			return false;	        
-        }
-        extents.row -= bb_min.row;
-        extents.col -= bb_min.col;
+		return false;	        
     }
 
-    return checkExtents(gridPos, extents);
+    return CheckBoundingBoxAreaUnoccupied(gridPos, bb);
 }
 
-bool NavigationGridSystem::CheckSquareAreaOccupied(GridSquare square, const BoundingBox& bb) const
+bool NavigationGridSystem::CheckBoundingBoxAreaUnoccupied(GridSquare square, const BoundingBox& bb) const
 {
 	GridSquare extents;
     {
         GridSquare bb_min;
-        WorldToGridSpace(bb.min, bb_min);
-        WorldToGridSpace(bb.max, extents);
-        extents.row -= bb_min.row;
-        extents.col -= bb_min.col;
+        if (!WorldToGridSpace(bb.min, bb_min) ||
+            !WorldToGridSpace(bb.max, extents))
+        {
+	        return false;
+        }
+
+        extents -= bb_min;
     }
     return checkExtents(square, extents);
 }
@@ -229,8 +230,7 @@ entt::entity NavigationGridSystem::CheckSquareAreaOccupant(GridSquare square, co
         GridSquare bb_min;
         WorldToGridSpace(bb.min, bb_min);
         WorldToGridSpace(bb.max, extents);
-        extents.row -= bb_min.row;
-        extents.col -= bb_min.col;
+        extents -= bb_min;
     }
 
 	if (!checkExtents(square, extents))
@@ -267,6 +267,39 @@ bool NavigationGridSystem::CompareSingleSquareOccupant(entt::entity entity, cons
     return false;
 }
 
+/**
+ * Checks a position in the world for an occupant. If an occupant is found, the extents of the occupant are returned.
+ * @param worldPos The position in the world to check for an occupant.
+ * @param extents The extents of the occupant.
+ * @return Whether an occupant was found
+ */
+bool NavigationGridSystem::getExtents(Vector3 worldPos, GridSquare& extents) const
+{
+	GridSquare gridPos;
+	if (!WorldToGridSpace(worldPos, gridPos))
+	{
+		return false;
+	}
+	auto entity = CheckSingleSquareOccupant(worldPos);
+	if (entity == entt::null)
+	{
+		return false;
+	}
+
+	if (!getExtents(entity, extents))
+	{
+		return false;
+	}
+
+    return true;
+}
+
+/**
+ * Takes an entity and returns the extents of the entity in grid space.
+ * @param entity The entity to get the extents of.
+ * @param extents The extents of the entity.
+ * @return Whether the extents were successfully retrieved.
+ */
 bool NavigationGridSystem::getExtents(entt::entity entity, GridSquare& extents) const
 {
     {
@@ -278,6 +311,7 @@ bool NavigationGridSystem::getExtents(entt::entity entity, GridSquare& extents) 
         }
 
         extents -= bb_min;
+
 
         if (!checkInside(extents, { 0,0 }, 
             {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
@@ -346,13 +380,12 @@ void NavigationGridSystem::DrawDebug() const
     {
         for (const auto& gridSquare : gridSquareRow)
         {
-            if (!gridSquare->debugColor) continue;
-            auto color = RED;
+            if (!gridSquare->drawDebug) continue;
             DrawCubeWires(gridSquare->worldPosCentre,
                           gridSquare->debugBox.x,
                           gridSquare->debugBox.y,
                           gridSquare->debugBox.z,
-                          color);
+                          gridSquare->debugColor);
         }
     }
 }
@@ -407,16 +440,23 @@ bool NavigationGridSystem::checkExtents(GridSquare square, GridSquare extents) c
 	auto min = square - extents;
 	auto max = square + extents;
 
+
 	GridSquare minRange = {0, 0};
 	GridSquare maxRange = {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())};
 
+    for (int row = min.row; row < max.row; ++row)
+    {
+        for (int col = min.col; col < max.col; ++col)
+        {
+	        if (gridSquares[row][col]->occupied)
+	        {
+		        return false;
+	        }
+        }
+    }
+
 	return checkInside(min, minRange, maxRange) && 
-        checkInside(max, minRange, maxRange) &&
-        !gridSquares[square.row][square.col]->occupied &&
-        !gridSquares[min.row][min.col]->occupied &&
-        !gridSquares[min.row][max.col]->occupied &&
-        !gridSquares[max.row][min.col]->occupied &&
-        !gridSquares[max.row][max.col]->occupied;
+        checkInside(max, minRange, maxRange);
 }
 
 NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direction, float distance) const
@@ -437,7 +477,8 @@ NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentC
 	    }
 
         const auto cell = gridSquares[square.row][square.col];
-        cell->debugColor = true;
+        cell->drawDebug = true;
+		cell->debugColor = PURPLE;
 
 	    if (cell->occupant != entt::null)
 	    {
@@ -480,7 +521,7 @@ GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare target, GridSqu
         frontier.pop();
         for (const auto& dir : directions)
         {
-			GridSquare next = { current.row + dir.first, current.col + dir.second };
+			GridSquare next = { current.row + dir.second, current.col + dir.first };
             
             if (!checkInside(next, minRange, maxRange)) continue;
             
@@ -494,6 +535,7 @@ GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare target, GridSqu
             }
             else
             {
+
                 out = next;
                 foundValidSquare = true;
                 break;

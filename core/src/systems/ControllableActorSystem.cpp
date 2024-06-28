@@ -52,29 +52,7 @@ void ControllableActorSystem::cancelMovement(entt::entity entity)
 
 void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location)
 {
-    {
-        // If location outside of bounds, then return
-        GridSquare tmp;
-        if (!navigationGridSystem->WorldToGridSpace(location, tmp)) return;
-    }
-
-    const auto& actor = registry->get<ControllableActor>(id);
-    const auto& actorCollideable = registry->get<Collideable>(id);
-    navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
-    GridSquare minRange;
-    GridSquare maxRange;
-    navigationGridSystem->GetPathfindRange(id, actor.pathfindingBounds, minRange, maxRange);
-    {
-        // If location outside of actor's movement range, then return
-        GridSquare tmp;
-        if (!navigationGridSystem->WorldToGridSpace(location, tmp, minRange, maxRange)) return;
-    }
-    navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
-
-
-    const auto& actorPos = registry->get<Transform>(id);
-    auto path = navigationGridSystem->AStarPathfind(id, actorPos.position, location, minRange, maxRange);
-    if (!path.empty()) actorMovementSystem->PathfindToLocation(id, path);
+    actorMovementSystem->PathfindToLocation(id, location);
 }
 
 void ControllableActorSystem::MoveToLocation(entt::entity id)
@@ -84,7 +62,7 @@ void ControllableActorSystem::MoveToLocation(entt::entity id)
 
 void ControllableActorSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
 {
-    actorMovementSystem->PathfindToLocation(id, patrol);
+    //actorMovementSystem->PathfindToLocation(id, patrol);
 }
 
 void ControllableActorSystem::onFloorClick(entt::entity entity)

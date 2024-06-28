@@ -25,6 +25,7 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     static bool checkInside(GridSquare square, GridSquare minRange, GridSquare maxRange);
 	bool getExtents(entt::entity entity, GridSquare& extents) const;
 	bool checkExtents(GridSquare square, GridSquare extents) const;
+	bool getExtents(Vector3 worldPos, GridSquare& extents) const;
   public:
     float spacing{};
     int slices{};
@@ -51,8 +52,8 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     void MarkSquareOccupied(const BoundingBox& occupant, bool occupied, entt::entity occupantEntity = entt::null) const;
     bool CheckSingleSquareOccupied(Vector3 worldPos) const;
     bool CheckSingleSquareOccupied(GridSquare position) const;
-    bool CheckSquareAreaOccupied(Vector3 worldPos, const BoundingBox& bb) const;
-    bool CheckSquareAreaOccupied(GridSquare square, const BoundingBox& bb) const;
+    bool CheckBoundingBoxAreaUnoccupied(Vector3 worldPos, const BoundingBox& bb) const;
+    bool CheckBoundingBoxAreaUnoccupied(GridSquare square, const BoundingBox& bb) const;
 	entt::entity CheckSingleSquareOccupant(Vector3 worldPos) const;
 	entt::entity CheckSingleSquareOccupant(GridSquare position) const;
     entt::entity CheckSquareAreaOccupant(Vector3 worldPos, const BoundingBox& bb) const;

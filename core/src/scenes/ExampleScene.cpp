@@ -66,14 +66,7 @@ Scene(_registry, std::move(_data))
     data->Load();
 
 
-    // Temporary
-    Vector3 target = { -5.0, 0, 0 };
-    //auto& animation = registry->get<Animation>(enemy2);
-    //animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-    //data->actorMovementSystem->PathfindToLocation(enemy2, {target});
-    //data->actorMovementSystem->PathfindToLocation(enemy3, {target});
-    //data->actorMovementSystem->PathfindToLocation(enemy4, {target});
-    data->actorMovementSystem->PathfindToLocation(enemy5, {target});
+
     
     BoundingBox bb = {
         .min = { -1000.0f, 0.1f, -1000.0f },
@@ -90,6 +83,16 @@ Scene(_registry, std::move(_data))
     data->navigationGridSystem->MarkSquareOccupied(col.worldBoundingBox, true, knight);
     
     data->combatStateSystem->playerCombatLogicSubSystem->Enable();
+
+
+    // Temporary
+    Vector3 target = { -5.0, 0, 0 };
+    //auto& animation = registry->get<Animation>(enemy2);
+    //animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+    //data->actorMovementSystem->PathfindToLocation(enemy2, {target});
+    //data->actorMovementSystem->PathfindToLocation(enemy3, {target});
+    //data->actorMovementSystem->PathfindToLocation(enemy4, {target});
+    data->actorMovementSystem->PathfindToLocation(enemy5, target);
 }
 
 } // sage

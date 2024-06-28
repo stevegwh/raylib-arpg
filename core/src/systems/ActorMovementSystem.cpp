@@ -11,8 +11,11 @@
 #include <tuple>
 #include <ranges>
 
+#include "components/ControllableActor.hpp"
+
 namespace sage
 {
+
 
 void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity) const
 {
@@ -32,16 +35,48 @@ void ActorMovementSystem::CancelMovement(const entt::entity& entity) const
 }
 
 
-void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const std::vector<Vector3>& path) // TODO: Pathfinding/movement needs some sense of movement speed.
+void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination, bool initialMove) // TODO: Pathfinding/movement needs some sense of movement speed.
 {
+
+	{
+        // If location outside of bounds, then return
+        GridSquare tmp;
+        if (!navigationGridSystem->WorldToGridSpace(destination, tmp)) return;
+    }
+
+    int bounds = 50;
+	if (registry->any_of<ControllableActor>(entity)) // TODO: Why is this only for controllable actors? Shouldn't all actors have pathfinding bounds?
+	{
+		const auto& controllableActor = registry->get<ControllableActor>(entity);
+		bounds = controllableActor.pathfindingBounds;
+	}
+
+    const auto& actorCollideable = registry->get<Collideable>(entity);
+    navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
+    GridSquare minRange;
+    GridSquare maxRange;
+    navigationGridSystem->GetPathfindRange(entity, bounds, minRange, maxRange);
+    {
+        // If location outside of actor's movement range, then return
+        GridSquare tmp;
+        if (!navigationGridSystem->WorldToGridSpace(destination, tmp, minRange, maxRange)) return;
+    }
+    navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
+
+
+    const auto& actorTrans = registry->get<Transform>(entity);
+    auto path = navigationGridSystem->AStarPathfind(entity, actorTrans.position, destination, minRange, maxRange);
+
     PruneMoveCommands(entity);
     auto& transform = registry->get<Transform>(entity);
-    auto& actor = registry->get<MoveableActor>(entity);
-    for (auto n : path) actor.globalPath.emplace_back(n);
-    transform.direction = Vector3Normalize(Vector3Subtract(actor.globalPath.front(), transform.position));
-    //moveTowardsTransforms.emplace_back(entity, &transform);
-    transform.onStartMovement.publish(entity);
+    auto& movableActor = registry->get<MoveableActor>(entity);
+    for (auto n : path) movableActor.globalPath.emplace_back(n);
+    transform.direction = Vector3Normalize(Vector3Subtract(movableActor.globalPath.front(), transform.position));
 
+    if (initialMove)
+    {
+    	transform.onStartMovement.publish(entity);
+    }
 }
 
 bool AlmostEquals(Vector3 a, Vector3 b)
@@ -74,19 +109,6 @@ void ActorMovementSystem::DrawDebug() const
     }
 }
 
-void ActorMovementSystem::generateNewPath(entt::entity actor) const
-{
-    auto& actorTrans = registry->get<Transform>(actor);
-    auto& moveableActor = registry->get<MoveableActor>(actor);
-	auto newPath = navigationGridSystem->AStarPathfind(actor, actorTrans.position, moveableActor.globalPath.back());                
-    std::deque<Vector3> empty;
-    std::swap(moveableActor.globalPath, empty);
-    for (auto& node : newPath)
-    {
-        moveableActor.globalPath.push_back(node);
-    }
-}
-
 void ActorMovementSystem::Update()
 {
 	debugRays.erase(debugRays.begin(), debugRays.end());
@@ -103,11 +125,13 @@ void ActorMovementSystem::Update()
     	auto nextPointDist = Vector3Distance(moveableActor.globalPath.front(), actorTrans.position);
 
 
-        // Every turn should first check if the destination is occupied. Wouldn't need to cast a ray or anything.
-        if (!navigationGridSystem->CheckSquareAreaOccupied(moveableActor.globalPath.front(), actorCollideable.worldBoundingBox))
+		// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
+		// The idea is to check whether the next square is occupied, and if it is, then recalculate the path.
+        if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.globalPath.back(), actorCollideable.worldBoundingBox))
         {
-	        generateNewPath(entity);
-            continue;
+			PathfindToLocation(entity, moveableActor.globalPath.back(), false);
+            navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
+			continue;
         }
 
     	if (nextPointDist < 0.5f) // Destination reached
@@ -142,7 +166,7 @@ void ActorMovementSystem::Update()
 
 	            if (Vector3Distance(hitTransform.position, actorTrans.position) < Vector3Distance(moveableActor.globalPath.back(), actorTrans.position))
 	            {
-					generateNewPath(entity);
+					PathfindToLocation(entity, moveableActor.globalPath.back(), false);
 	                hitCol.debugDraw = true;
 	            }
 	        }

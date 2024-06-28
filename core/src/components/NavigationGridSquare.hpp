@@ -63,7 +63,8 @@ struct NavigationGridSquare
 {
 
     int pathfindingCost = 1;
-    bool debugColor = false;
+    bool drawDebug = false;
+	Color debugColor = RED;
     GridSquare gridSquareIndex;
     Vector3 worldPosMin; // Top Left
     Vector3 worldPosMax; // Bottom Right
