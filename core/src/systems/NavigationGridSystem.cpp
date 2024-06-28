@@ -276,8 +276,8 @@ bool NavigationGridSystem::getExtents(entt::entity entity, GridSquare& extents) 
         {
 	        return false;
         }
-        extents.row -= bb_min.row;
-        extents.col -= bb_min.col;
+
+        extents -= bb_min;
 
         if (!checkInside(extents, { 0,0 }, 
             {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
@@ -404,8 +404,8 @@ bool NavigationGridSystem::checkInside(GridSquare square, GridSquare minRange, G
 
 bool NavigationGridSystem::checkExtents(GridSquare square, GridSquare extents) const
 {
-	GridSquare min = {square.row - extents.row, square.col - extents.col};
-	GridSquare max = {square.row + extents.row, square.col + extents.col};
+	auto min = square - extents;
+	auto max = square + extents;
 
 	GridSquare minRange = {0, 0};
 	GridSquare maxRange = {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())};
@@ -447,7 +447,6 @@ NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentC
     return nullptr;
 }
 
-
 GridSquare NavigationGridSystem::FindNextBestLocation(entt::entity entity, GridSquare target) const
 {
 
@@ -461,12 +460,6 @@ GridSquare NavigationGridSystem::FindNextBestLocation(entt::entity entity, GridS
     if (!GetPathfindRange(entity, bounds, minRange, maxRange))
     {
         return {};
-    }
-    auto& destination = gridSquares[target.row][target.col];
-    if (destination->occupied)
-    {
-        const auto& occupant = registry->get<Collideable>(destination->occupant);
-        WorldToGridSpace(occupant.worldBoundingBox.max, target); // TODO: Fail?
     }
 
     return FindNextBestLocation(target, minRange, maxRange, extents);

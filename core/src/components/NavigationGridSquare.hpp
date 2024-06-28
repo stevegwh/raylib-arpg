@@ -16,21 +16,47 @@ struct GridSquare
 {
     int row;
     int col;
+
     bool operator>(const GridSquare& other) const {
         return std::tie(row, col) > std::tie(other.row, other.col);
     }
 
-    bool operator<(const GridSquare& other) const {
+    bool operator<(const GridSquare& other) const
+	{
         return std::tie(row, col) < std::tie(other.row, other.col);
     }
 
-    bool operator==(const GridSquare& other) const {
+    bool operator==(const GridSquare& other) const
+	{
         return std::tie(row, col) == std::tie(other.row, other.col);
     }
 
-    bool operator!=(const GridSquare& other) const {
+    bool operator!=(const GridSquare& other) const
+	{
         return !(*this == other);
     }
+
+    GridSquare operator-(const GridSquare& other) const
+	{
+        return { row - other.row, col - other.col };
+    }
+
+	void operator-=(const GridSquare& other)
+	{
+		row -= other.row;
+        col -= other.col;
+    }
+
+	GridSquare operator+(const GridSquare& other) const
+    {
+		return { row + other.row, col + other.col };
+    }
+
+	void operator+=(const GridSquare& other)
+	{
+		row += other.row;
+		col += other.col;
+	}
 };
 
 struct NavigationGridSquare
