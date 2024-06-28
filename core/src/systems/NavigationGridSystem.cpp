@@ -1,7 +1,6 @@
 #include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/Transform.hpp"
-#include "../utils/PriorityQueue.hpp"
 
 #include <queue>
 #include <utility>
@@ -490,7 +489,6 @@ NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentC
 
 GridSquare NavigationGridSystem::FindNextBestLocation(entt::entity entity, GridSquare target) const
 {
-
     GridSquare extents{};
     if (!getExtents(entity, extents))
     {
@@ -502,40 +500,53 @@ GridSquare NavigationGridSystem::FindNextBestLocation(entt::entity entity, GridS
     {
         return {};
     }
+    GridSquare currentPos;
+	auto& trans = registry->get<Transform>(entity);
+	if (!WorldToGridSpace(trans.position, currentPos))
+	{
+		return {};
+	}
 
-    return FindNextBestLocation(target, minRange, maxRange, extents);
+    return FindNextBestLocation(currentPos, target, minRange, maxRange, extents);
 }
 
-GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare target, GridSquare minRange, GridSquare maxRange, GridSquare extents) const
+GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare currentPos, GridSquare target, GridSquare minRange, GridSquare maxRange, GridSquare extents) const
 {
-
-	std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
-    std::queue<GridSquare> frontier;
-    frontier.emplace(target);
+    struct Compare {
+    bool operator()(const std::pair<int, GridSquare>& a, const std::pair<int, GridSquare>& b) {
+        return a.first > b.first; // Min-heap based on distance
+    }
+};
+    std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
+    std::priority_queue<std::pair<int, GridSquare>, std::vector<std::pair<int, GridSquare>>, Compare> frontier;
+    frontier.emplace(0, target);
 
     GridSquare out{};
     bool foundValidSquare = false;
+
     while (!frontier.empty())
     {
-        auto current = frontier.front();
+        auto currentPair = frontier.top();
         frontier.pop();
+        auto current = currentPair.second;
+
         for (const auto& dir : directions)
         {
-			GridSquare next = { current.row + dir.second, current.col + dir.first };
-            
+            GridSquare next = { current.row + dir.second, current.col + dir.first };
+
             if (!checkInside(next, minRange, maxRange)) continue;
-            
+
             if (!checkExtents(next, extents))
             {
                 if (!visited[next.row][next.col])
                 {
-                    frontier.emplace(next);
+                    int manhattanDistance = std::abs(next.row - currentPos.row) + std::abs(next.col - currentPos.col);
+                    frontier.emplace(manhattanDistance, next);
                     visited[next.row][next.col] = true;
                 }
             }
             else
             {
-
                 out = next;
                 foundValidSquare = true;
                 break;
@@ -544,7 +555,7 @@ GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare target, GridSqu
         if (foundValidSquare)
             break;
     }
-    
+
     return out;
 }
 
@@ -573,7 +584,7 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     
     if (!checkExtents(finishGridSquare, extents))
     {
-        finishGridSquare = FindNextBestLocation(finishGridSquare, minRange, maxRange, extents);
+        finishGridSquare = FindNextBestLocation(startGridSquare, finishGridSquare, minRange, maxRange, extents);
 
     }
 
@@ -638,70 +649,6 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     
     return tracebackPath(came_from, startGridSquare, finishGridSquare);
 }
-
-//std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos)
-//{
-//    return BFSPathfind(startPos, finishPos, {0,0},
-//                    {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())});
-//}
-//
-//std::vector<Vector3> NavigationGridSystem::BFSPathfind(const Vector3& startPos, const Vector3& finishPos, const GridSquare& minRange, const GridSquare& maxRange)
-//{
-//    GridSquare startGridSquare = {0};
-//    GridSquare finishGridSquare = {0};
-//    if (!WorldToGridSpace(startPos, startGridSquare) || !WorldToGridSpace(finishPos, finishGridSquare)) return {};
-//    int startrow = startGridSquare.row;
-//    int startcol = startGridSquare.col;
-//
-//    int finishrow = finishGridSquare.row;
-//    int finishcol = finishGridSquare.col;
-//
-//    auto inside = [&](int row, int col) { return minRange.row <= row && row < maxRange.row && minRange.col <= col && col < maxRange.col; };
-//
-//    std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
-//    std::vector<std::vector<std::pair<int, int>>> came_from(maxRange.row, std::vector<std::pair<int, int>>(maxRange.col, std::pair<int, int>(-1, -1)));
-//
-//    std::queue<std::pair<int,int>> frontier;
-//
-//    frontier.emplace(startrow, startcol);
-//    visited[startrow][startcol] = true;
-//
-//    bool pathFound = false;
-//
-//    while (!frontier.empty())
-//    {
-//        auto current = frontier.front();
-//        frontier.pop();
-//
-//        if (current.first == finishrow && current.second == finishcol) 
-//        {
-//            pathFound = true;
-//            break;
-//        }
-//
-//        for (const auto& dir : directions)
-//        {
-//            int next_row = current.first + dir.first;
-//            int next_col = current.second + dir.second;
-//
-//            if (inside(next_row, next_col) && 
-//            !visited[next_row][next_col] && 
-//            !gridSquares[next_row][next_col]->occupied)
-//            {
-//                frontier.emplace(next_row, next_col);
-//                visited[next_row][next_col] = true;
-//                came_from[next_row][next_col] = current;
-//            }
-//        }
-//    }
-//    
-//    if (!pathFound) 
-//    {
-//        return {}; 
-//    }
-//    
-//    return tracebackPath(came_from, {startrow, startcol}, {finishrow, finishcol});
-//}
 
 void NavigationGridSystem::PopulateGrid() const
 {

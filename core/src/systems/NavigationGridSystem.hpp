@@ -3,6 +3,7 @@
 #include "BaseSystem.hpp"
 #include "../components/NavigationGridSquare.hpp"
 #include "CollisionSystem.hpp"
+#include "../utils/PriorityQueue.hpp"
 
 #include "entt/entt.hpp"
 
@@ -38,14 +39,12 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     bool WorldToGridSpace(Vector3 worldPos, GridSquare& out) const;
     bool WorldToGridSpace(Vector3 worldPos, GridSquare& out, const GridSquare& _minRange, const GridSquare& _maxRange) const;
     [[nodiscard]] GridSquare FindNextBestLocation(entt::entity entity, GridSquare target) const;
-    [[nodiscard]] GridSquare FindNextBestLocation(GridSquare target, GridSquare minRange, GridSquare maxRange, GridSquare extents) const;
+    [[nodiscard]] GridSquare FindNextBestLocation(GridSquare currentPos, GridSquare target, GridSquare minRange, GridSquare maxRange, GridSquare extents) const;
     [[nodiscard]] NavigationGridSquare* CastRay(int currentRow, int currentCol, Vector2 direction, float distance) const;
 	[[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity &entity, const Vector3 &startPos,
                   const Vector3 &finishPos,
                   AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
     [[nodiscard]] std::vector<Vector3> AStarPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, const GridSquare& minRange, const GridSquare& maxRange, AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
-    //[[nodiscard]] std::vector<Vector3> BFSPathfind(const Vector3& startPos, const Vector3& finishPos);
-    //[[nodiscard]] std::vector<Vector3> BFSPathfind(const Vector3& startPos, const Vector3& finishPos, const GridSquare& minRange, const GridSquare& maxRange);
     const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
     void DrawDebugPathfinding(const GridSquare &minRange, const GridSquare &maxRange) const;
 
@@ -62,6 +61,54 @@ class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
     bool CompareSingleSquareOccupant(entt::entity entity, const BoundingBox& bb) const;
 
     void DrawDebug() const;
+
+    template<typename Heuristic>
+	std::vector<Vector3> AStarPathfindHelper(const entt::entity& entity, const GridSquare& startGridSquare, const GridSquare& finishGridSquare, const GridSquare& minRange, const GridSquare& maxRange, const GridSquare& extents, Heuristic heuristic) {
+	    std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
+	    std::vector<std::vector<GridSquare>> came_from(maxRange.row, std::vector<GridSquare>(maxRange.col, { -1, -1 }));
+	    std::vector<std::vector<double>> cost_so_far(maxRange.row, std::vector<double>(maxRange.col, 0.0));
+
+	    PriorityQueue<GridSquare, double> frontier;
+	    frontier.put(startGridSquare, 0);
+	    visited[startGridSquare.row][startGridSquare.col] = true;
+
+	    bool pathFound = false;
+
+	    while (!frontier.empty()) {
+	        auto current = frontier.get();
+
+	        if (current.row == finishGridSquare.row && current.col == finishGridSquare.col) {
+	            pathFound = true;
+	            break;
+	        }
+
+	        for (const auto& dir : directions) {
+	            GridSquare next = { current.row + dir.first, current.col + dir.second };
+
+	            auto current_cost = gridSquares[current.row][current.col]->pathfindingCost;
+	            auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
+	            double new_cost = current_cost + next_cost;
+
+	            if (checkInside(next, minRange, maxRange) &&
+	                checkExtents(next, extents) &&
+	                !visited[next.row][next.col] &&
+	                !gridSquares.at(next.row).at(next.col)->occupied || 
+	                new_cost < cost_so_far[next.row][next.col]) {
+	                cost_so_far[next.row][next.col] = new_cost;
+	                double priority = new_cost + heuristic(next, finishGridSquare);
+	                frontier.put(next, priority);
+	                came_from[next.row][next.col] = current;
+	                visited[next.row][next.col] = true;
+	            }
+	        }
+	    }
+
+	    if (!pathFound) {
+	        return {};
+	    }
+
+	    return tracebackPath(came_from, startGridSquare, finishGridSquare);
+	}
 };
 
 } // sage
