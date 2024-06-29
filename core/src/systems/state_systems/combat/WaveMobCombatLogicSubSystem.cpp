@@ -93,35 +93,35 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
     auto& animation = registry->get<Animation>(entity);
 
     auto& enemyPos = registry->get<Transform>(c.target).position;
-    Vector3 direction = Vector3Subtract(enemyPos, t.position);
+
+	Vector3 direction = Vector3Subtract(enemyPos, t.position);
     float distance = Vector3Length(direction);
     Vector3 normDirection = Vector3Normalize(direction);
 
-    // TODO: replace with cast grid ray
-    //if (distance >= c.attackRange)
-    //{
-    //    animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-    //    Ray ray;
-    //    ray.position = t.position;
-    //    ray.direction = Vector3Scale(normDirection, distance);
-    //    ray.position.y = 0.5f;
-    //    ray.direction.y = 0.5f;
-    //    t.movementDirectionDebugLine = ray;
-    //    auto collisions = collisionSystem->GetCollisionsWithRay(entity, ray, collideable.collisionLayer);
-    //    
-    //    if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
-    //    {
+    if (distance >= c.attackRange)
+    {
+        animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+        Ray ray;
+        ray.position = t.position;
+        ray.direction = Vector3Scale(normDirection, distance);
+        ray.position.y = 0.5f;
+        ray.direction.y = 0.5f;
+        t.movementDirectionDebugLine = ray;
+        auto collisions = collisionSystem->GetCollisionsWithRay(entity, ray, collideable.collisionLayer);
+        
+        if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
+        {
 
-    //        // Lost line of sight, out of combat
-    //        transformSystem->CancelMovement(entity);
-    //        c.target = entt::null;
-    //        t.movementDirectionDebugLine = {};
-    //        return;
-    //    }
-    //    // TODO: PathfindToLocation also calls PruneMoveCommands which triggers onMovementCancel
-    //    transformSystem->PathfindToLocation(entity, {enemyPos});
-    //    return;
-    //}
+            // Lost line of sight, out of combat
+            actorMovementSystem->CancelMovement(entity);
+            c.target = entt::null;
+            t.movementDirectionDebugLine = {};
+            return;
+        }
+        // TODO: PathfindToLocation also calls PruneMoveCommands which triggers onMovementCancel
+        actorMovementSystem->PathfindToLocation(entity, {enemyPos});
+        return;
+    }
 
     float angle = atan2f(direction.x, direction.z) * RAD2DEG;
     t.rotation.y = angle;
@@ -143,8 +143,8 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 {
     // TODO: Would prefer this to be handled in a changing state event like OnExit OnEnter
-    //transformSystem->CancelMovement(attacker); 
-    transformSystem->PruneMoveCommands(entity);
+    actorMovementSystem->CancelMovement(attacker); 
+    actorMovementSystem->CancelMovement(entity);
     // -----
     stateMachineSystem->ChangeState<StateEnemyCombat, StateComponents>(entity);
     // Aggro when player hits
@@ -161,12 +161,14 @@ void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attack
 }
 
 WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_registry,
-                                                         StateMachineSystem* _stateMachineSystem,
-                                                         ActorMovementSystem* _transformSystem,
-                                                         CollisionSystem* _collisionSystem) :
-                                                         registry(_registry),
-                                                         stateMachineSystem(_stateMachineSystem),
-                                                         transformSystem(_transformSystem),
-                                                         collisionSystem(_collisionSystem)
+    StateMachineSystem* _stateMachineSystem,
+    ActorMovementSystem* _actorMovementSystem,
+    CollisionSystem* _collisionSystem,
+    NavigationGridSystem* _navigationGridSystem) :
+	registry(_registry),
+	navigationGridSystem(_navigationGridSystem),
+	actorMovementSystem(_actorMovementSystem),
+	collisionSystem(_collisionSystem),
+	stateMachineSystem(_stateMachineSystem)
 {}
 } // sage

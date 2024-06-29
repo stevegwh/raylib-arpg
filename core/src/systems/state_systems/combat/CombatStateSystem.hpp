@@ -26,11 +26,12 @@ public:
 	std::unique_ptr<PlayerCombatLogicSubSystem> playerCombatLogicSubSystem;
 	std::unique_ptr<WaveMobCombatLogicSubSystem> waveMobCombatLogicSubSystem;
     CombatStateSystem(entt::registry *_registry,
-                      Cursor *_cursor,
-                      StateMachineSystem* _stateMachineSystem,
-                      ControllableActorSystem* _actorMovementSystem,
-                      ActorMovementSystem* _transformSystem,
-                      CollisionSystem* _collisionSystem);
+			Cursor *_cursor,
+			StateMachineSystem* _stateMachineSystem,
+			ControllableActorSystem* _actorMovementSystem,
+			ActorMovementSystem* _transformSystem,
+			CollisionSystem* _collisionSystem,
+            NavigationGridSystem* _navigationGridSystem);
     void Update();
     void Draw3D();
 };

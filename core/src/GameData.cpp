@@ -46,11 +46,12 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
                                                             controllableActorSystem.get());
     healthBarSystem = std::make_unique<sage::HealthBarSystem>(_registry, camera.get());
     combatStateSystem = std::make_unique<CombatStateSystem>(_registry,
-                                                       cursor.get(),
-                                                       stateMachineSystem.get(),
-                                                       controllableActorSystem.get(),
-                                                       actorMovementSystem.get(),
-                                                       collisionSystem.get());
+		cursor.get(),
+		stateMachineSystem.get(),
+		controllableActorSystem.get(),
+		actorMovementSystem.get(),
+		collisionSystem.get(),
+        navigationGridSystem.get());
 }
 
 void GameData::Load()

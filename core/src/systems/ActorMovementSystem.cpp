@@ -118,6 +118,8 @@ void ActorMovementSystem::DrawDebug() const
 
 void ActorMovementSystem::Update()
 {
+    // TODO: Instead of always calling this no matter what... maybe choose to call it (or not) based on the state. So, you can pass in the entity to Update and iterate over a collectioon
+    // from another system
 	debugRays.erase(debugRays.begin(), debugRays.end());
     auto view = registry->view<MoveableActor, Transform>();
     for (auto& entity: view)
@@ -153,7 +155,8 @@ void ActorMovementSystem::Update()
 
 		// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
 		// The idea is to check whether the next square is occupied, and if it is, then recalculate the path.
-        if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.path.back(), actorCollideable.worldBoundingBox))
+        if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.path.front(), actorCollideable.worldBoundingBox)
+            || !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.path.back(), actorCollideable.worldBoundingBox))
         {
 			PathfindToLocation(entity, moveableActor.path.back(), false);
             navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);

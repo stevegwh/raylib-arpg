@@ -139,6 +139,7 @@ void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 {
 	// TODO: Check if unit is still within our attack range?
     auto& c = registry->get<CombatableActor>(entity);
+
 	auto& t = registry->get<Transform>(entity);
 	auto& enemyPos = registry->get<Transform>(c.target).position;
 	Vector3 direction = Vector3Subtract(enemyPos, t.position);
@@ -148,9 +149,11 @@ void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 
 	auto& animation = registry->get<Animation>(entity);
 	animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
-
-    auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-    enemyCombatable.onHit.publish(c.target, actorMovementSystem->GetControlledActor(), 10); // TODO: tmp dmg
+	if (registry->any_of<CombatableActor>(c.target))
+	{
+		auto& enemyCombatable = registry->get<CombatableActor>(c.target);
+		enemyCombatable.onHit.publish(c.target, actorMovementSystem->GetControlledActor(), 10); // TODO: tmp dmg
+	}
 }
 
 void PlayerCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker)
