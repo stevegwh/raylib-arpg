@@ -38,25 +38,25 @@ inline double heuristic_favourRight(GridSquare a, GridSquare b, const Vector3& c
     {
         if (a.col < b.col)
         {
-            diagonal_distance += 10.0;
+            diagonal_distance += 1.0;
         }
     } else if (currentZ < 0)
     {
         if (a.col > b.col)
         {
-            diagonal_distance += 10.0;
+            diagonal_distance += 1.0;
         }
     } else if (currentX > 0)
     {
         if (a.row > b.row)
         {
-            diagonal_distance += 10.0;
+            diagonal_distance += 1.0;
         }
     } else if (currentX < 0)
     {
         if (a.row < b.row)
         {
-            diagonal_distance += 10.0;
+            diagonal_distance += 1.0;
         }
     }
 

@@ -74,7 +74,7 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const V
 
 
     const auto& actorTrans = registry->get<Transform>(entity);
-    auto path = navigationGridSystem->AStarPathfind(entity, actorTrans.position, destination, minRange, maxRange);
+    auto path = navigationGridSystem->AStarPathfind(entity, actorTrans.position, destination, minRange, maxRange, AStarHeuristic::FAVOUR_RIGHT);
 
     PruneMoveCommands(entity);
     auto& transform = registry->get<Transform>(entity);
