@@ -34,6 +34,7 @@ void ControllableActorSystem::onTargetUpdate(entt::entity target)
 
 void ControllableActorSystem::cancelMovement(entt::entity entity)
 {
+    if (!registry->any_of<ControllableActor>(entity)) return;
     auto& actor = registry->get<ControllableActor>(entity);
     auto& target = registry->get<Transform>(actor.targetActor);
     {
