@@ -32,13 +32,14 @@ void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity) const
         std::deque<Vector3> empty;
         std::swap(actor.path, empty);
     }
-
 }
 
 void ActorMovementSystem::CancelMovement(const entt::entity& entity) const
 {
     PruneMoveCommands(entity);
     auto& transform = registry->get<Transform>(entity);
+    auto& moveableActor = registry->get<MoveableActor>(entity);
+    moveableActor.destination.reset();
     transform.onMovementCancel.publish(entity);
 }
 
