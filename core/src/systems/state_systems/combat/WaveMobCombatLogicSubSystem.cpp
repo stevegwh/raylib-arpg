@@ -97,6 +97,7 @@ void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
     float distance = Vector3Length(direction);
     Vector3 normDirection = Vector3Normalize(direction);
 
+    // TODO: replace with cast grid ray
     //if (distance >= c.attackRange)
     //{
     //    animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
@@ -142,7 +143,7 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 {
     // TODO: Would prefer this to be handled in a changing state event like OnExit OnEnter
-    transformSystem->CancelMovement(attacker); 
+    //transformSystem->CancelMovement(attacker); 
     transformSystem->PruneMoveCommands(entity);
     // -----
     stateMachineSystem->ChangeState<StateEnemyCombat, StateComponents>(entity);

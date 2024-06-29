@@ -55,9 +55,9 @@ Scene(_registry, std::move(_data))
     
     auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
 //    auto enemy = GameObjectFactory::createEnemy(registry, data.get(), {-5.0f, 0, 0.0f}, "Enemy");
-    //auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {10.0f, 0, 0.0f}, "Enemy");
-    //auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {20.0f, 0, 0.0f}, "Enemy");
-    //auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {30.0f, 0, 0.0f}, "Enemy");
+    auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {10.0f, 0, 0.0f}, "Enemy");
+    auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {20.0f, 0, 0.0f}, "Enemy");
+    auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {30.0f, 0, 0.0f}, "Enemy");
     auto enemy5 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 0.0f}, "Enemy");
 //    auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {0.0f, 0, 10.0f}, "Enemy");
 //    auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 10.0f}, "Enemy");
@@ -89,9 +89,9 @@ Scene(_registry, std::move(_data))
     Vector3 target = { -5.0, 0, 0 };
     //auto& animation = registry->get<Animation>(enemy2);
     //animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-    //data->actorMovementSystem->PathfindToLocation(enemy2, {target});
-    //data->actorMovementSystem->PathfindToLocation(enemy3, {target});
-    //data->actorMovementSystem->PathfindToLocation(enemy4, {target});
+    data->actorMovementSystem->PathfindToLocation(enemy2, {target});
+    data->actorMovementSystem->PathfindToLocation(enemy3, {target});
+    data->actorMovementSystem->PathfindToLocation(enemy4, {target});
     data->actorMovementSystem->PathfindToLocation(enemy5, target);
 }
 

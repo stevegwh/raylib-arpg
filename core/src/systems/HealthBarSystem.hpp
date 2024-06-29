@@ -14,19 +14,11 @@ namespace sage
 {
 class HealthBarSystem : public BaseSystem<HealthBar>
 {
-    sage::Camera* camera;
+    Camera* camera;
 
-    RenderTexture2D healthBarTexture;
-    const int healthBarWidth = 200;
-    const int healthBarHeight = 20;
-    const Color healthBarColor = RED;
-    const Color healthBarBgColor = BLACK;
-    const Color healthBarBorderColor = MAROON;
-
-    void updateHealthBarTexture();
+    void updateHealthBarTextures();
 public:
     HealthBarSystem(entt::registry* _registry, sage::Camera* _camera);
-    ~HealthBarSystem();
     void Draw2D();
     void Draw3D();
     void Update();

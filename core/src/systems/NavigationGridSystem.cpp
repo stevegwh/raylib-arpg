@@ -584,8 +584,8 @@ std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& ent
     
     if (!checkExtents(finishGridSquare, extents))
     {
+        // TODO: Should actually try to find next best location to original destination
         finishGridSquare = FindNextBestLocation(startGridSquare, finishGridSquare, minRange, maxRange, extents);
-
     }
 
     std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
