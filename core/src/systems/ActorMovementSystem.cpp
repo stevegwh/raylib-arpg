@@ -22,7 +22,7 @@ void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity) const
     auto& actor = registry->get<MoveableActor>(entity);
     {
         std::deque<Vector3> empty;
-        std::swap(actor.globalPath, empty);
+        std::swap(actor.path, empty);
     }
 
 }
@@ -70,11 +70,12 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const V
     PruneMoveCommands(entity);
     auto& transform = registry->get<Transform>(entity);
     auto& movableActor = registry->get<MoveableActor>(entity);
-    for (auto n : path) movableActor.globalPath.emplace_back(n);
-    transform.direction = Vector3Normalize(Vector3Subtract(movableActor.globalPath.front(), transform.position));
+    for (auto n : path) movableActor.path.emplace_back(n);
+    transform.direction = Vector3Normalize(Vector3Subtract(movableActor.path.front(), transform.position));
 
-    if (initialMove)
+	if (initialMove) // TODO: Store the initial target location in the actor component. This way, if the actor has to find "next best position", it can keep track of whether its original position is open and go to that instead
     {
+		movableActor.destination = destination;
     	transform.onStartMovement.publish(entity);
     }
 }
@@ -92,11 +93,11 @@ void ActorMovementSystem::DrawDebug() const
     for (auto& entity: view) 
     {
         auto &actor = registry->get<MoveableActor>(entity);
-        if (actor.globalPath.empty()) continue;
+        if (actor.path.empty()) continue;
         auto &transform = registry->get<Transform>(entity);
-        if (!actor.globalPath.empty())
+        if (!actor.path.empty())
         {
-            for (auto p : actor.globalPath)
+            for (auto p : actor.path)
             {
                 DrawCube(p, 1, 1, 1, GREEN);
             }
@@ -116,28 +117,45 @@ void ActorMovementSystem::Update()
     for (auto& entity: view)
     {
         auto& moveableActor = registry->get<MoveableActor>(entity);
-        if (moveableActor.globalPath.empty()) continue;
-
         const auto& actorCollideable = registry->get<Collideable>(entity);
-        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
 
+        if (moveableActor.path.empty())
+        {
+            if (moveableActor.destination.has_value())
+            {
+		        if (navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.destination.value(), actorCollideable.worldBoundingBox))
+		        {
+                    // TODO: Not sure how much I like having to mark squares as occupied etc.
+                    navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
+					PathfindToLocation(entity, moveableActor.destination.value(), false);
+		            navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
+		        }
+            }
+            continue;
+        }
+
+        navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
         auto& actorTrans = registry->get<Transform>(entity);
-    	auto nextPointDist = Vector3Distance(moveableActor.globalPath.front(), actorTrans.position);
+    	auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position);
 
 
 		// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
 		// The idea is to check whether the next square is occupied, and if it is, then recalculate the path.
-        if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.globalPath.back(), actorCollideable.worldBoundingBox))
+        if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.path.back(), actorCollideable.worldBoundingBox))
         {
-			PathfindToLocation(entity, moveableActor.globalPath.back(), false);
+			PathfindToLocation(entity, moveableActor.path.back(), false);
             navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
 			continue;
         }
 
     	if (nextPointDist < 0.5f) // Destination reached
         {
-	        moveableActor.globalPath.pop_front();
-            if (moveableActor.globalPath.empty())
+            if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(moveableActor.destination.value(), moveableActor.path.front()))
+            {
+                moveableActor.destination.reset();
+            }
+	        moveableActor.path.pop_front();
+            if (moveableActor.path.empty())
             {
                 actorTrans.onFinishMovement.publish(entity);
             	navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
@@ -164,15 +182,15 @@ void ActorMovementSystem::Update()
 
 	            auto& hitCol = registry->get<Collideable>(hitCell->occupant);
 
-	            if (Vector3Distance(hitTransform.position, actorTrans.position) < Vector3Distance(moveableActor.globalPath.back(), actorTrans.position))
+	            if (Vector3Distance(hitTransform.position, actorTrans.position) < Vector3Distance(moveableActor.path.back(), actorTrans.position))
 	            {
-					PathfindToLocation(entity, moveableActor.globalPath.back(), false);
+					PathfindToLocation(entity, moveableActor.path.back(), false);
 	                hitCol.debugDraw = true;
 	            }
 	        }
         }
 
-        actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.globalPath.front(), actorTrans.position));
+        actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position));
     	// Calculate rotation angle based on direction
     	float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
     	actorTrans.rotation.y = angle;

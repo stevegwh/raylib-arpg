@@ -8,6 +8,7 @@
 #include <entt/entt.hpp>
 
 #include <deque>
+#include <optional>
 
 namespace sage
 {
@@ -16,7 +17,8 @@ struct MoveableActor
 {
     entt::entity lastHitActor = entt::null;
     Vector3 hitActorLastPos{};
-    std::deque<Vector3> globalPath{};
+    std::deque<Vector3> path{};
+	std::optional<Vector3> destination{};
 };
 
 } // sage
