@@ -32,7 +32,7 @@ void ControllableActorSystem::onTargetUpdate(entt::entity target)
     }
 }
 
-void ControllableActorSystem::cancelMovement(entt::entity entity)
+void ControllableActorSystem::CancelMovement(entt::entity entity)
 {
     if (!registry->any_of<ControllableActor>(entity)) return;
     auto& actor = registry->get<ControllableActor>(entity);
@@ -43,12 +43,13 @@ void ControllableActorSystem::cancelMovement(entt::entity entity)
     }
     {
         entt::sink sink { target.onMovementCancel };
-        sink.disconnect<&ControllableActorSystem::cancelMovement>(this);
+        sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
     }
     {
         entt::sink sink { target.onFinishMovement };
-        sink.disconnect<&ControllableActorSystem::cancelMovement>(this);
+        sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
     }
+    actorMovementSystem->CancelMovement(entity);
 }
 
 void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location)
@@ -85,11 +86,11 @@ void ControllableActorSystem::onEnemyClick(entt::entity entity)
     }
     {
         entt::sink sink { target.onMovementCancel };
-        sink.connect<&ControllableActorSystem::cancelMovement>(this);
+        sink.connect<&ControllableActorSystem::CancelMovement>(this);
     }
     {
         entt::sink sink { target.onFinishMovement };
-        sink.connect<&ControllableActorSystem::cancelMovement>(this);
+        sink.connect<&ControllableActorSystem::CancelMovement>(this);
     }
 
     PathfindToLocation(controlledActorId, cursor->collision.point);

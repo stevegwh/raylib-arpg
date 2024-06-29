@@ -18,7 +18,7 @@ struct PlayerCombatLogicSubSystem
 	entt::registry* registry;
     Cursor* cursor;
     StateMachineSystem* stateMachineSystem;
-	ControllableActorSystem* actorMovementSystem;
+	ControllableActorSystem* controllableActorSystem;
     
 	void onEnemyClick(entt::entity entity);
 
@@ -35,7 +35,7 @@ struct PlayerCombatLogicSubSystem
 
 	PlayerCombatLogicSubSystem(entt::registry* _registry,
                                StateMachineSystem* _stateMachineSystem,
-                               ControllableActorSystem* _actorMovementSystem,
+                               ControllableActorSystem* _controllableActorSystem,
                                Cursor* _cursor);
 };
 

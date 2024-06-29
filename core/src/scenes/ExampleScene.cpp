@@ -14,7 +14,7 @@ void ExampleScene::Update()
     Scene::Update();
     data->actorMovementSystem->Update();
     data->controllableActorSystem->Update();
-    //data->animationSystem->Update();
+    data->animationSystem->Update();
     data->dialogueSystem->Update();
     data->healthBarSystem->Update();
     // State systems

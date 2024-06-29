@@ -71,32 +71,34 @@ void PlayerCombatLogicSubSystem::OnTargetDeath(entt::entity entity)
 		entt::sink sink{ enemyCombatable.onDeath };
 		sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
 	}
-	auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
+	auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
 	playerCombatable.target = entt::null;
 }
 
 void PlayerCombatLogicSubSystem::OnAttackCancel(entt::entity entity)
 {
-    auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
+    // TODO: What is entity?
+    auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
     playerCombatable.target = entt::null;
-    auto& playerTrans = registry->get<Transform>(actorMovementSystem->GetControlledActor());
+    auto& playerTrans = registry->get<Transform>(controllableActorSystem->GetControlledActor());
     {
         entt::sink sink { playerTrans.onFinishMovement };
         sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
     }
+    controllableActorSystem->CancelMovement(controllableActorSystem->GetControlledActor());
 }
 
 void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
 {
     // TODO: What is "entity"?
     {
-        auto& playerTrans = registry->get<Transform>(actorMovementSystem->GetControlledActor());
+        auto& playerTrans = registry->get<Transform>(controllableActorSystem->GetControlledActor());
         entt::sink sink { playerTrans.onFinishMovement };
         sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
     }
 
-    auto& playerCombatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
-    stateMachineSystem->ChangeState<StatePlayerCombat, StateComponents>(actorMovementSystem->GetControlledActor());
+    auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
+    stateMachineSystem->ChangeState<StatePlayerCombat, StateComponents>(controllableActorSystem->GetControlledActor());
 
 	auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 	{
@@ -107,9 +109,9 @@ void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
 {
-    auto& combatable = registry->get<CombatableActor>(actorMovementSystem->GetControlledActor());
+    auto& combatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
     combatable.target = entity;
-    auto& playerTrans = registry->get<Transform>(actorMovementSystem->GetControlledActor());
+    auto& playerTrans = registry->get<Transform>(controllableActorSystem->GetControlledActor());
     const auto& enemyTrans = registry->get<Transform>(entity);
 
 	const auto& enemyCollideable = registry->get<Collideable>(combatable.target);
@@ -127,8 +129,8 @@ void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
 	// Calculate the target position by subtracting the normalized direction vector
 	// multiplied by the attack range from the enemy position
 	Vector3 targetPos = Vector3Subtract(enemyPos, direction);
-	
-    actorMovementSystem->PathfindToLocation(actorMovementSystem->GetControlledActor(), targetPos);
+
+    controllableActorSystem->PathfindToLocation(controllableActorSystem->GetControlledActor(), targetPos);
     {
         entt::sink sink { playerTrans.onFinishMovement };
         sink.connect<&PlayerCombatLogicSubSystem::StartCombat>(this);
@@ -152,7 +154,7 @@ void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 	if (registry->any_of<CombatableActor>(c.target))
 	{
 		auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-		enemyCombatable.onHit.publish(c.target, actorMovementSystem->GetControlledActor(), 10); // TODO: tmp dmg
+		enemyCombatable.onHit.publish(c.target, controllableActorSystem->GetControlledActor(), 10); // TODO: tmp dmg
 	}
 }
 
@@ -186,11 +188,11 @@ void PlayerCombatLogicSubSystem::Disable()
 
 PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry,
                                                        StateMachineSystem* _stateMachineSystem,
-                                                       ControllableActorSystem* _actorMovementSystem, 
+                                                       ControllableActorSystem* _controllableActorSystem, 
                                                        Cursor* _cursor) :
    registry(_registry),
    stateMachineSystem(_stateMachineSystem),
-   actorMovementSystem(_actorMovementSystem), 
+   controllableActorSystem(_controllableActorSystem), 
    cursor(_cursor)
 {
 

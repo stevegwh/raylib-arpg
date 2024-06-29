@@ -57,6 +57,8 @@ bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 
 void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
 {
+    
+    navigationGridSystem->MarkSquareOccupied(registry->get<Collideable>(entity).worldBoundingBox, false);
     {
         auto& animation = registry->get<Animation>(entity);
         entt::sink sink { animation.onAnimationEnd };
@@ -87,45 +89,48 @@ void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
 
 void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 {
-    auto& c = registry->get<CombatableActor>(entity);
-    auto& t = registry->get<Transform>(entity);
+    auto& combatableActor = registry->get<CombatableActor>(entity);
+    auto& actorTrans = registry->get<Transform>(entity);
     auto& collideable = registry->get<Collideable>(entity);
     auto& animation = registry->get<Animation>(entity);
 
-    auto& enemyPos = registry->get<Transform>(c.target).position;
+    auto& target = registry->get<Transform>(combatableActor.target).position;
 
-	Vector3 direction = Vector3Subtract(enemyPos, t.position);
-    float distance = Vector3Length(direction);
+	Vector3 direction = Vector3Subtract(target, actorTrans.position);
+    float distance = Vector3Distance(actorTrans.position, target);
     Vector3 normDirection = Vector3Normalize(direction);
 
-    if (distance >= c.attackRange)
+    if (distance >= 15)
     {
         animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
         Ray ray;
-        ray.position = t.position;
+        ray.position = actorTrans.position;
         ray.direction = Vector3Scale(normDirection, distance);
         ray.position.y = 0.5f;
         ray.direction.y = 0.5f;
-        t.movementDirectionDebugLine = ray;
+        actorTrans.movementDirectionDebugLine = ray;
         auto collisions = collisionSystem->GetCollisionsWithRay(entity, ray, collideable.collisionLayer);
-        
+
         if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
         {
 
             // Lost line of sight, out of combat
             actorMovementSystem->CancelMovement(entity);
-            c.target = entt::null;
-            t.movementDirectionDebugLine = {};
+            combatableActor.target = entt::null;
+            actorTrans.movementDirectionDebugLine = {};
             return;
         }
-        // TODO: PathfindToLocation also calls PruneMoveCommands which triggers onMovementCancel
-        actorMovementSystem->PathfindToLocation(entity, {enemyPos});
+        const auto& moveableActor = registry->get<MoveableActor>(entity);
+        if (!moveableActor.destination.has_value())
+        {
+            actorMovementSystem->PathfindToLocation(entity, target, true);
+        }
         return;
     }
 
     float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-    t.rotation.y = angle;
-    c.autoAttackTick = 0;
+    actorTrans.rotation.y = angle;
+    combatableActor.autoAttackTick = 0;
     animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 }
 

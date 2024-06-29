@@ -29,7 +29,6 @@ class ControllableActorSystem : public BaseSystem<ControllableActor>
     void onFloorClick(entt::entity entity);
     void onEnemyClick(entt::entity entity);
     void onTargetUpdate(entt::entity target);
-    void cancelMovement(entt::entity entity);
 public:
     ControllableActorSystem(entt::registry* _registry,
                                     Cursor* _cursor,
@@ -39,6 +38,7 @@ public:
     void Update() const;
     void MoveToLocation(entt::entity id);
     void PathfindToLocation(entt::entity id, Vector3 location);
+    void CancelMovement(entt::entity entity);
     void SetControlledActor(entt::entity id);
     entt::entity GetControlledActor();
 
