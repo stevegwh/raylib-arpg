@@ -13,6 +13,14 @@
 
 #include "components/ControllableActor.hpp"
 
+
+bool AlmostEquals(Vector3 a, Vector3 b)
+{
+	std::tuple<int, int> aInt = { static_cast<int>(a.x), static_cast<int>(a.z) };
+	std::tuple<int, int> bInt = { static_cast<int>(b.x), static_cast<int>(b.z) };
+    return aInt == bInt;
+}
+
 namespace sage
 {
 
@@ -71,20 +79,17 @@ void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const V
     auto& transform = registry->get<Transform>(entity);
     auto& movableActor = registry->get<MoveableActor>(entity);
     for (auto n : path) movableActor.path.emplace_back(n);
-    transform.direction = Vector3Normalize(Vector3Subtract(movableActor.path.front(), transform.position));
-
-	if (initialMove) // TODO: Store the initial target location in the actor component. This way, if the actor has to find "next best position", it can keep track of whether its original position is open and go to that instead
+    if (!path.empty())
     {
-		movableActor.destination = destination;
-    	transform.onStartMovement.publish(entity);
-    }
-}
+		transform.direction = Vector3Normalize(Vector3Subtract(movableActor.path.front(), transform.position));
 
-bool AlmostEquals(Vector3 a, Vector3 b)
-{
-	std::tuple<int, int, int> a1 = { std::round(a.x), std::round(a.y), std::round(a.z) };
-	std::tuple<int, int, int> b1 = { std::round(b.x), std::round(b.y), std::round(b.z) };
-    return a1 == b1;
+		if (initialMove) // TODO: Store the initial target location in the actor component. This way, if the actor has to find "next best position", it can keep track of whether its original position is open and go to that instead
+	    {
+			movableActor.destination = path.back(); // path.back instead of destination to account for the requested destination being occupied
+    		transform.onStartMovement.publish(entity);
+	    }
+    }
+	// Else? Error. Destination is unreachable.
 }
 
 void ActorMovementSystem::DrawDebug() const
@@ -119,18 +124,24 @@ void ActorMovementSystem::Update()
         auto& moveableActor = registry->get<MoveableActor>(entity);
         const auto& actorCollideable = registry->get<Collideable>(entity);
 
-        if (moveableActor.path.empty())
+    	if (moveableActor.destination.has_value())
         {
-            if (moveableActor.destination.has_value())
-            {
-		        if (navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.destination.value(), actorCollideable.worldBoundingBox))
+	        if (moveableActor.path.empty() 
+                || !AlmostEquals(moveableActor.path.back(), moveableActor.destination.value()))
+	        {
+
+			    if (navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.destination.value(), actorCollideable.worldBoundingBox))
 		        {
-                    // TODO: Not sure how much I like having to mark squares as occupied etc.
-                    navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
+	                // TODO: Not sure how much I like having to mark squares as occupied etc.
+	                navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, false);
 					PathfindToLocation(entity, moveableActor.destination.value(), false);
 		            navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
 		        }
-            }
+	        }
+        }
+
+        if (moveableActor.path.empty())
+        {
             continue;
         }
 
@@ -150,7 +161,7 @@ void ActorMovementSystem::Update()
 
     	if (nextPointDist < 0.5f) // Destination reached
         {
-            if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(moveableActor.destination.value(), moveableActor.path.front()))
+            if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(moveableActor.destination.value(), moveableActor.path.back()))
             {
                 moveableActor.destination.reset();
             }
