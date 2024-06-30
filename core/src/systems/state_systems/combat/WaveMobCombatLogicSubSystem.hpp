@@ -26,6 +26,7 @@ class WaveMobCombatLogicSubSystem
     void OnDeath(entt::entity entity);
     void AutoAttack(entt::entity entity) const;
     void destroyEnemy(entt::entity entity);
+    void onTargetOutOfRange(entt::entity entity, Vector3& normDirection, float distance) const;
 public:
 	void OnComponentEnabled(entt::entity entity) const;
 	void OnComponentDisabled(entt::entity entity) const;
