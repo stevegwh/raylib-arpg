@@ -36,7 +36,7 @@ void ControllableActorSystem::CancelMovement(entt::entity entity)
 {
     if (!registry->any_of<ControllableActor>(entity)) return;
     auto& actor = registry->get<ControllableActor>(entity);
-    if (actor.targetActor != entt::null) // TODO: Unsure if this properly unsubscribes
+    if (actor.targetActor != entt::null && registry->valid(actor.targetActor))
     {
 	    auto& target = registry->get<Transform>(actor.targetActor);
 	    {

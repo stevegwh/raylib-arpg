@@ -65,7 +65,10 @@ void PlayerCombatLogicSubSystem::OnTargetDeath(entt::entity entity)
 		entt::sink sink{ enemyCombatable.onDeath };
 		sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
 	}
-    // TODO: disconnect OnAttackCancel
+    {
+        entt::sink sink{ cursor->onFloorClick };
+        sink.disconnect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
+    }
 	auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
 	playerCombatable.target = entt::null;
 }
@@ -104,6 +107,10 @@ void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity entity)
 {
+    {
+        entt::sink sink{ cursor->onFloorClick };
+        sink.connect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
+    }
     auto& combatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
     combatable.target = entity;
     auto& playerTrans = registry->get<Transform>(controllableActorSystem->GetControlledActor());
@@ -163,10 +170,6 @@ void PlayerCombatLogicSubSystem::Enable()
         entt::sink sink{ cursor->onEnemyClick };
         sink.connect<&PlayerCombatLogicSubSystem::onEnemyClick>(this);
     }
-    {
-        entt::sink sink{ cursor->onFloorClick };
-        sink.connect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
-    }
 }
 
 void PlayerCombatLogicSubSystem::Disable()
@@ -183,17 +186,13 @@ void PlayerCombatLogicSubSystem::Disable()
 
 void PlayerCombatLogicSubSystem::OnComponentEnabled(entt::entity entity) const
 {
-	//auto& c = registry->get<StatePlayerCombat>(entity);
 	auto& animation = registry->get<Animation>(entity);
 	animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
-    controllableActorSystem->CancelMovement(entity);
 }
 
-void PlayerCombatLogicSubSystem::OnComponentDisabled(entt::entity entity)
+void PlayerCombatLogicSubSystem::OnComponentDisabled(entt::entity entity) const
 {
-    auto& c = registry->get<StatePlayerCombat>(entity);
-    c.Disable(entity);
-    std::cout << "PlayerCombatLogicSubSystem removed \n";
+    controllableActorSystem->CancelMovement(entity);
 }
 
 PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry,

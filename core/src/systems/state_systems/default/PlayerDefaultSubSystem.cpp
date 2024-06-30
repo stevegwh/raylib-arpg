@@ -18,7 +18,7 @@ void PlayerDefaultSubSystem::OnComponentEnabled(entt::entity entity) const
 
 void PlayerDefaultSubSystem::OnComponentDisabled(entt::entity entity) const
 {
-	//actorMovementSystem->CancelMovement(entity);
+	actorMovementSystem->CancelMovement(entity);
 }
 
 PlayerDefaultSubSystem::PlayerDefaultSubSystem(entt::registry* _registry, StateMachineSystem* _stateMachineSystem, ActorMovementSystem* _actorMovementSystem) :

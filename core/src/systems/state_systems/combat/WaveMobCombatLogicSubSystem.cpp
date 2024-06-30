@@ -27,7 +27,6 @@ void WaveMobCombatLogicSubSystem::Update() const
     {
         auto& c = registry->get<CombatableActor>(entity);
         if (!CheckInCombat(entity)) continue;
-        if (c.dying) continue;
 
         // Player is out of combat if no enemy is targetting them?
         if (c.autoAttackTick >= c.autoAttackTickThreshold) // Maybe can count time since last autoattack to time out combat?
@@ -47,7 +46,8 @@ bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	// If no current target
 	// Have a timer for aggro and if the player is not within that range for a certain amount of time they resume their regular task (tasks TBC)
 	auto& combatable = registry->get<CombatableActor>(entity);
-	if (combatable.target == entt::null && !combatable.dying)
+    if (combatable.dying) return false;
+	if (combatable.target == entt::null)
 	{
         stateMachineSystem->ChangeState<StateEnemyDefault, StateComponents>(entity);
         return false;
@@ -57,7 +57,6 @@ bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 
 void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
 {
-    
     navigationGridSystem->MarkSquareOccupied(registry->get<Collideable>(entity).worldBoundingBox, false);
     {
         auto& animation = registry->get<Animation>(entity);
@@ -74,6 +73,7 @@ void WaveMobCombatLogicSubSystem::OnComponentEnabled(entt::entity entity) const
 
 void WaveMobCombatLogicSubSystem::OnComponentDisabled(entt::entity entity) const
 {
+    
 }
 
 void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
