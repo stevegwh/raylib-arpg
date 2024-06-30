@@ -16,6 +16,7 @@
 
 #include "raymath.h"
 #include "components/states/StateEnemyDefault.hpp"
+#include "components/states/StatePlayerDefault.hpp"
 
 namespace sage
 {
@@ -78,7 +79,6 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
 		sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatStateSystem->waveMobCombatLogicSubSystem);
 	}
 
-    auto& stateEnemyDefault = registry->emplace<StateEnemyDefault>(id);
     // ---
     
     // Collision
@@ -96,6 +96,8 @@ entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* 
     // ---
     
     auto& worldObject = registry->emplace<WorldObject>(id);
+
+	registry->emplace<StateEnemyDefault>(id); // Always set state last to ensure everything is initialised properly before.
     return id;
 }
 
@@ -207,7 +209,7 @@ entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData*
     auto& actor = registry->emplace<ControllableActor>(id);
     actor.pathfindingBounds = 50;
     game->controllableActorSystem->SetControlledActor(id);
-    
+    registry->emplace<StatePlayerDefault>(id); // Always set state last to ensure everything is initialised properly before.
     return id;
 }
 

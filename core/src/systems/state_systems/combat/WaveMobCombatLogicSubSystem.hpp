@@ -27,6 +27,8 @@ class WaveMobCombatLogicSubSystem
     void AutoAttack(entt::entity entity) const;
     void destroyEnemy(entt::entity entity);
 public:
+	void OnComponentEnabled(entt::entity entity) const;
+	void OnComponentDisabled(entt::entity entity) const;
     void OnHit(entt::entity entity, entt::entity attacker, float damage);
     void Draw3D(entt::entity entity) const;
 	void Update() const;

@@ -181,11 +181,12 @@ void PlayerCombatLogicSubSystem::Disable()
     }
 }
 
-void PlayerCombatLogicSubSystem::OnComponentEnabled(entt::entity entity)
+void PlayerCombatLogicSubSystem::OnComponentEnabled(entt::entity entity) const
 {
 	//auto& c = registry->get<StatePlayerCombat>(entity);
 	auto& animation = registry->get<Animation>(entity);
 	animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
+    controllableActorSystem->CancelMovement(entity);
 }
 
 void PlayerCombatLogicSubSystem::OnComponentDisabled(entt::entity entity)

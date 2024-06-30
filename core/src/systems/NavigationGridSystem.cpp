@@ -81,8 +81,8 @@ void NavigationGridSystem::Init(int _slices, float _spacing)
     {
         for (int i = -halfSlices; i < halfSlices; i++)
         {
-            Vector3 v1 = {(float)i * spacing, 0, (float)j * spacing};
-            Vector3 v3 = {(float)(i + 1) * spacing, 1.0f, (float)(j + 1) * spacing};
+            Vector3 v1 = {static_cast<float>(i) * spacing, 0, static_cast<float>(j) * spacing};
+            Vector3 v3 = {static_cast<float>(i + 1) * spacing, 1.0f, static_cast<float>(j + 1) * spacing};
 
             entt::entity id = registry->create();
 

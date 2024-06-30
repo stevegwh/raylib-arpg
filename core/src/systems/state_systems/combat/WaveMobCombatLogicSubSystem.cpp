@@ -67,6 +67,15 @@ void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
     registry->destroy(entity);
 }
 
+void WaveMobCombatLogicSubSystem::OnComponentEnabled(entt::entity entity) const
+{
+    actorMovementSystem->CancelMovement(entity);
+}
+
+void WaveMobCombatLogicSubSystem::OnComponentDisabled(entt::entity entity) const
+{
+}
+
 void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
 {
     auto& combatable = registry->get<CombatableActor>(entity);
@@ -147,10 +156,6 @@ void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
 
 void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 {
-    // TODO: Would prefer this to be handled in a changing state event like OnExit OnEnter
-    actorMovementSystem->CancelMovement(attacker); 
-    actorMovementSystem->CancelMovement(entity);
-    // -----
     stateMachineSystem->ChangeState<StateEnemyCombat, StateComponents>(entity);
     // Aggro when player hits
     auto& c = registry->get<CombatableActor>(entity);
@@ -175,5 +180,8 @@ WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry *_regist
 	actorMovementSystem(_actorMovementSystem),
 	collisionSystem(_collisionSystem),
 	stateMachineSystem(_stateMachineSystem)
-{}
+{
+	registry->on_construct<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnComponentEnabled>(this);
+    registry->on_destroy<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnComponentDisabled>(this);
+}
 } // sage

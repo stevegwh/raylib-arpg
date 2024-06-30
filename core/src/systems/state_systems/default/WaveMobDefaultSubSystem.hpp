@@ -16,12 +16,14 @@ class WaveMobDefaultSubSystem
 {
     entt::registry* registry;
     StateMachineSystem* stateMachineSystem;
-    ActorMovementSystem* transformSystem;
+    ActorMovementSystem* actorMovementSystem;
 public:
+	void OnComponentEnabled(entt::entity entity) const;
+	void OnComponentDisabled(entt::entity entity) const;
     void Update();
     WaveMobDefaultSubSystem(entt::registry* _registry,
                             StateMachineSystem* _stateMachineSystem,
-                            ActorMovementSystem* _transformSystem);
+                            ActorMovementSystem* _actorMovementSystem);
 };
 
 } // sage

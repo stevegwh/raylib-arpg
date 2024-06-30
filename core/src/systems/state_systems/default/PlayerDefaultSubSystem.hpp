@@ -17,8 +17,8 @@ class PlayerDefaultSubSystem
     ActorMovementSystem* actorMovementSystem;
 public:
     void Update();
-    void OnComponentEnabled(entt::entity entity);
-    void OnComponentDisabled(entt::entity entity);
+    void OnComponentEnabled(entt::entity entity) const;
+    void OnComponentDisabled(entt::entity entity) const;
     PlayerDefaultSubSystem(entt::registry* _registry,
                             StateMachineSystem* _stateMachineSystem,
                             ActorMovementSystem* _actorMovementSystem);

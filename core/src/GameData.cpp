@@ -35,7 +35,8 @@ GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings*
                                                                               userInput.get(),
                                                                               navigationGridSystem.get(),
                                                                               actorMovementSystem.get());
-    {
+    // TODO: Don't like this here. (Put it in cursor constructor)
+	{
         entt::sink sink{ controllableActorSystem->onControlledActorChange };
         sink.connect<&Cursor::OnControlledActorChange>(*cursor);
     }

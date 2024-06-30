@@ -37,8 +37,8 @@ public:
     Settings* settings;
     
     std::unique_ptr<sage::StateMachineSystem> stateMachineSystem;
+	std::unique_ptr<sage::RenderSystem> renderSystem;
     std::unique_ptr<sage::CollisionSystem> collisionSystem;
-    std::unique_ptr<sage::RenderSystem> renderSystem;
     std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
     std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
     std::unique_ptr<sage::WorldSystem> worldSystem;

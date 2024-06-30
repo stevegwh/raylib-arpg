@@ -32,7 +32,7 @@ struct PlayerCombatLogicSubSystem
     void OnHit(entt::entity entity, entt::entity attacker);
     void Enable();
     void Disable();
-	void OnComponentEnabled(entt::entity entity);
+	void OnComponentEnabled(entt::entity entity) const;
     void OnComponentDisabled(entt::entity entity);
 
 	PlayerCombatLogicSubSystem(entt::registry* _registry,
