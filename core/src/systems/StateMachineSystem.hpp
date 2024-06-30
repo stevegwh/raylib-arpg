@@ -6,10 +6,6 @@
 
 #include "BaseSystem.hpp"
 #include "components/states/StateMachineComponent.hpp"
-#include "components/states/StateEnemyCombat.hpp"
-#include "components/states/StateEnemyDefault.hpp"
-#include "components/states/StatePlayerDefault.hpp"
-#include "components/states/StatePlayerCombat.hpp"
 
 #include <entt/entt.hpp>
 
@@ -46,6 +42,8 @@ public:
     {
         // Check if the entity already has the NewStateComponent
         if (registry->any_of<NewStateComponent>(entity)) return;
+
+
 
         // Remove any existing state components
         RemoveStateComponents<StateComponentsTuple>(entity);

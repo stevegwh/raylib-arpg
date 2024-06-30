@@ -17,7 +17,7 @@ struct StateMachineComponent
     virtual void Enable(entt::entity entity)
     {
         onEnable.publish(entity);
-    };
+    }
     
     virtual void Disable(entt::entity entity)
     {

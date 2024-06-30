@@ -13,7 +13,6 @@ class StateEnemyDefault : public StateMachineComponent
 {
 public:
     // TODO: Add OnExit/OnEnter which subscribes to transform events (currently handled in the state systems)
-    StateEnemyDefault() = default;
     ~StateEnemyDefault() override = default;
 };
 

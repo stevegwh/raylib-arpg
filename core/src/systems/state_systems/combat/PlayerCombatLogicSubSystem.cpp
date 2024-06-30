@@ -48,12 +48,6 @@ bool PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
 	if (combatable.target == entt::null)
 	{
         stateMachineSystem->ChangeState<StatePlayerDefault, StateComponents>(entity);
-        // TODO: below should be handled by state
-		auto& animation = registry->get<Animation>(entity);
-        if (animation.animIndex == animation.animationMap[AnimationEnum::AUTOATTACK])
-        {
-            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-        }
         return false;
 	}
     return true;
@@ -71,6 +65,7 @@ void PlayerCombatLogicSubSystem::OnTargetDeath(entt::entity entity)
 		entt::sink sink{ enemyCombatable.onDeath };
 		sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
 	}
+    // TODO: disconnect OnAttackCancel
 	auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
 	playerCombatable.target = entt::null;
 }
@@ -186,15 +181,30 @@ void PlayerCombatLogicSubSystem::Disable()
     }
 }
 
+void PlayerCombatLogicSubSystem::OnComponentEnabled(entt::entity entity)
+{
+	//auto& c = registry->get<StatePlayerCombat>(entity);
+	auto& animation = registry->get<Animation>(entity);
+	animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
+}
+
+void PlayerCombatLogicSubSystem::OnComponentDisabled(entt::entity entity)
+{
+    auto& c = registry->get<StatePlayerCombat>(entity);
+    c.Disable(entity);
+    std::cout << "PlayerCombatLogicSubSystem removed \n";
+}
+
 PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(entt::registry *_registry,
                                                        StateMachineSystem* _stateMachineSystem,
                                                        ControllableActorSystem* _controllableActorSystem, 
                                                        Cursor* _cursor) :
    registry(_registry),
-   stateMachineSystem(_stateMachineSystem),
-   controllableActorSystem(_controllableActorSystem), 
-   cursor(_cursor)
+   cursor(_cursor),
+   stateMachineSystem(_stateMachineSystem), 
+   controllableActorSystem(_controllableActorSystem)
 {
-
+    registry->on_construct<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnComponentEnabled>(this);
+    registry->on_destroy<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnComponentDisabled>(this);
 }
 } // sage

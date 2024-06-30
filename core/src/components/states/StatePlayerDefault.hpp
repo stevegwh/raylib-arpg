@@ -12,7 +12,6 @@ namespace sage
 class StatePlayerDefault : public StateMachineComponent
 {
 public:
-    StatePlayerDefault() = default;
     ~StatePlayerDefault() override = default;
 };
 

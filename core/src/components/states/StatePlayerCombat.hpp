@@ -11,7 +11,6 @@ namespace sage
 class StatePlayerCombat : public StateMachineComponent
 {
 public:
-    StatePlayerCombat() = default;
     ~StatePlayerCombat() override = default;
 };
 

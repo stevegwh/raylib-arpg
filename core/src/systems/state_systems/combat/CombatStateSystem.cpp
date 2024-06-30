@@ -3,12 +3,11 @@
 //
 
 #include "CombatStateSystem.hpp"
-#include "components/Animation.hpp"
 #include "components/HealthBar.hpp"
 
-#include <iostream>
+#include "components/states/StatePlayerCombat.hpp"
 
-#include "raymath.h"
+#include <iostream>
 
 namespace sage
 {

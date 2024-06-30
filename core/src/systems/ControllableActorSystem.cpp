@@ -36,19 +36,23 @@ void ControllableActorSystem::CancelMovement(entt::entity entity)
 {
     if (!registry->any_of<ControllableActor>(entity)) return;
     auto& actor = registry->get<ControllableActor>(entity);
-    auto& target = registry->get<Transform>(actor.targetActor);
+    if (actor.targetActor != entt::null) // TODO: Unsure if this properly unsubscribes
     {
-        entt::sink sink { target.onPositionUpdate };
-        sink.disconnect<&ControllableActorSystem::onTargetUpdate>(this);
+	    auto& target = registry->get<Transform>(actor.targetActor);
+	    {
+	        entt::sink sink { target.onPositionUpdate };
+	        sink.disconnect<&ControllableActorSystem::onTargetUpdate>(this);
+	    }
+	    {
+	        entt::sink sink { target.onMovementCancel };
+	        sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
+	    }
+	    {
+	        entt::sink sink { target.onFinishMovement };
+	        sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
+	    }
     }
-    {
-        entt::sink sink { target.onMovementCancel };
-        sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
-    }
-    {
-        entt::sink sink { target.onFinishMovement };
-        sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
-    }
+
     actorMovementSystem->CancelMovement(entity);
 }
 
