@@ -8,6 +8,5 @@
 
 namespace sage
 {
-using StateComponents = std::tuple<StateEnemyDefault, StateEnemyCombat>;
+	using StateComponents = std::tuple<StateEnemyDefault, StateEnemyCombat>;
 }
-

@@ -7,27 +7,26 @@
 
 namespace sage
 {
+	Matrix Transform::GetMatrixNoRot() const
+	{
+		Matrix trans = MatrixTranslate(position.x, position.y, position.z);
+		Matrix _scale = MatrixScale(scale, scale, scale);
+		//Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y, DEG2RAD*transform->rotation.z});
+		return MatrixMultiply(_scale, trans);
+	}
 
-Matrix Transform::GetMatrixNoRot() const
-{
-    Matrix trans = MatrixTranslate(position.x, position.y, position.z);
-    Matrix _scale = MatrixScale(scale, scale, scale);
-    //Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y, DEG2RAD*transform->rotation.z});
-    return MatrixMultiply(_scale, trans);
-}
+	Matrix Transform::GetMatrix() const
+	{
+		Matrix trans = MatrixTranslate(position.x, position.y, position.z);
+		Matrix _scale = MatrixScale(scale, scale, scale);
+		Matrix rot = MatrixRotateXYZ({DEG2RAD * rotation.x, DEG2RAD * rotation.y, DEG2RAD * rotation.z});
+		return MatrixMultiply(_scale, MatrixMultiply(rot, trans));
+	}
 
-Matrix Transform::GetMatrix() const
-{
-    Matrix trans = MatrixTranslate(position.x, position.y, position.z);
-    Matrix _scale = MatrixScale(scale, scale, scale);
-    Matrix rot = MatrixRotateXYZ({DEG2RAD*rotation.x, DEG2RAD*rotation.y, DEG2RAD*rotation.z});
-    return MatrixMultiply(_scale, MatrixMultiply(rot, trans));
-}
-
-Vector3 Transform::forward() const
-{
-    Matrix matrix = GetMatrix();
-    Vector3 forward = {matrix.m8, matrix.m9, matrix.m10};
-    return Vector3Normalize(forward);
-}
+	Vector3 Transform::forward() const
+	{
+		Matrix matrix = GetMatrix();
+		Vector3 forward = {matrix.m8, matrix.m9, matrix.m10};
+		return Vector3Normalize(forward);
+	}
 }

@@ -11,9 +11,9 @@
 
 namespace sage
 {
-    struct Material
-    {
-        Texture2D diffuse{};
-        std::string path;
-    };
+	struct Material
+	{
+		Texture2D diffuse{};
+		std::string path;
+	};
 }

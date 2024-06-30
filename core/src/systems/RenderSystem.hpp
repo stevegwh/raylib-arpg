@@ -11,13 +11,12 @@
 
 namespace sage
 {
-class RenderSystem : public BaseSystem<Renderable>
-{
-public:
-    explicit RenderSystem(entt::registry* _registry);
-    ~RenderSystem();
-    void Update();
-    void Draw() const;
-};
+	class RenderSystem : public BaseSystem<Renderable>
+	{
+	public:
+		explicit RenderSystem(entt::registry* _registry);
+		~RenderSystem();
+		void Update();
+		void Draw() const;
+	};
 }
-

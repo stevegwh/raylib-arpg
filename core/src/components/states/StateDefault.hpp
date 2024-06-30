@@ -7,8 +7,8 @@
 
 namespace sage
 {
-struct StateDefault : public StateMachineComponent
-{
-    
-};
+	struct StateDefault : public StateMachineComponent
+	{
+
+	};
 }

@@ -10,92 +10,91 @@
 
 namespace sage
 {
+	void Editor::enableEditMode()
+	{
+		stateChange = 2;
+	}
 
-void Editor::enableEditMode()
-{
-    stateChange = 2;
-}
+	void Editor::enablePlayMode()
+	{
+		stateChange = 1;
+	}
 
-void Editor::enablePlayMode()
-{
-    stateChange = 1;
-}
+	void Editor::initEditorScene()
+	{
+		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
+		scene = std::make_unique<EditorScene>(registry.get(), std::move(data));
+		{
+			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
+			keyRPressed.connect<&Editor::enablePlayMode>(this);
+		}
+		EnableCursor();
+	}
 
-void Editor::initEditorScene()
-{
-    auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
-    scene = std::make_unique<EditorScene>(registry.get(), std::move(data));
-    {
-        entt::sink keyRPressed{scene->data->userInput->keyRPressed};
-        keyRPressed.connect<&Editor::enablePlayMode>(this);
-    }
-    EnableCursor();
-}
+	void Editor::initGameScene()
+	{
+		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
+		scene = std::make_unique<ExampleScene>(registry.get(), std::move(data));
+		{
+			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
+			keyRPressed.connect<&Editor::enableEditMode>(this);
+		}
+		HideCursor();
+	}
 
-void Editor::initGameScene()
-{
-    auto data = std::make_unique<sage::GameData>(registry.get(), keyMapping.get(), settings.get());
-    scene = std::make_unique<ExampleScene>(registry.get(), std::move(data));
-    {
-        entt::sink keyRPressed{scene->data->userInput->keyRPressed};
-        keyRPressed.connect<&Editor::enableEditMode>(this);
-    }
-    HideCursor();
-}
+	void Editor::init()
+	{
+		InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
+		SetConfigFlags(FLAG_MSAA_4X_HINT);
+		initEditorScene();
+	}
 
-void Editor::init()
-{
-    InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
-    initEditorScene();
-}
+	void Editor::manageScenes()
+	{
+		if (stateChange > 0)
+		{
+			registry = std::make_unique<entt::registry>();
+			switch (stateChange)
+			{
+			case 1:
+				initGameScene();
+				break;
+			case 2:
+				initEditorScene();
+				break;
+			}
+			stateChange = 0;
+		}
+	}
 
-void Editor::manageScenes()
-{
-    if (stateChange > 0)
-    {
-        registry = std::make_unique<entt::registry>();
-        switch (stateChange)
-        {
-        case 1:
-            initGameScene();
-            break;
-        case 2:
-            initEditorScene();
-            break;
-        }
-        stateChange = 0;
-    }
-}
+	void Editor::Update()
+	{
+		init();
+		SetTargetFPS(60);
+		while (!WindowShouldClose()) // Detect window close button or ESC key
+		{
+			scene->Update();
+			draw();
+			manageScenes();
+		}
+	}
 
-void Editor::Update()
-{
-    init();
-    SetTargetFPS(60);
-    while (!WindowShouldClose())        // Detect window close button or ESC key
-    {
-        scene->Update();
-        draw();
-        manageScenes();
-    }
-}
+	void Editor::drawGrid()
+	{
+		DrawGrid(scene->data->navigationGridSystem->slices, scene->data->navigationGridSystem->spacing);
+	}
 
-void Editor::drawGrid()
-{
-    DrawGrid(scene->data->navigationGridSystem->slices, scene->data->navigationGridSystem->spacing);
-}
-
-void Editor::draw()
-{
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
-    BeginMode3D(*scene->data->camera->getRaylibCam());
-    scene->Draw3D();
-    scene->DrawDebug();
-    drawGrid();
-    EndMode3D();
-    scene->Draw2D();
-    DrawFPS(10, 10);
-    EndDrawing();
-}
+	void Editor::draw()
+	{
+		BeginDrawing();
+		ClearBackground(RAYWHITE);
+		BeginMode3D(*scene->data->camera->getRaylibCam());
+		scene->Draw3D();
+		scene->DrawDebug();
+		drawGrid();
+		EndMode3D();
+		scene->Draw2D();
+		DrawFPS(10, 10);
+		EndDrawing();
+	}
 } // sage

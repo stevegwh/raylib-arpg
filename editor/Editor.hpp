@@ -10,20 +10,19 @@
 
 namespace sage
 {
+	class Editor : public Application
+	{
+		bool debugMode = false;
+		void init() override;
+		void draw() override;
+		void drawGrid();
+		void enablePlayMode();
+		void enableEditMode();
+		void manageScenes();
+		void initEditorScene();
 
-class Editor : public Application
-{
-    bool debugMode = false;
-    void init() override;
-    void draw() override;
-    void drawGrid();
-    void enablePlayMode();
-    void enableEditMode();
-    void manageScenes();
-    void initEditorScene();
-public:
-    void Update() override;
-    void initGameScene();
-};
-
+	public:
+		void Update() override;
+		void initGameScene();
+	};
 } // sage

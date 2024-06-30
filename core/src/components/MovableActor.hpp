@@ -12,13 +12,11 @@
 
 namespace sage
 {
-
-struct MoveableActor
-{
-    entt::entity lastHitActor = entt::null;
-    Vector3 hitActorLastPos{};
-    std::deque<Vector3> path{};
-	std::optional<Vector3> destination{};
-};
-
+	struct MoveableActor
+	{
+		entt::entity lastHitActor = entt::null;
+		Vector3 hitActorLastPos{};
+		std::deque<Vector3> path{};
+		std::optional<Vector3> destination{};
+	};
 } // sage

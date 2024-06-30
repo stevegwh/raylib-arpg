@@ -11,13 +11,11 @@
 
 namespace sage
 {
-    class WorldSystem : public BaseSystem<WorldObject>
-    {
-        entt::entity root;
-        
-    public:
-        WorldSystem(entt::registry* _registry, entt::entity rootNodeId);
-    };
+	class WorldSystem : public BaseSystem<WorldObject>
+	{
+		entt::entity root;
+
+	public:
+		WorldSystem(entt::registry* _registry, entt::entity rootNodeId);
+	};
 }
-
-

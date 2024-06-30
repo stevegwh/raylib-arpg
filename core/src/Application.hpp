@@ -19,24 +19,23 @@
 
 namespace sage
 {
+	class Application
+	{
+	protected:
+		std::unique_ptr<Settings> settings;
+		std::unique_ptr<KeyMapping> keyMapping;
+		std::unique_ptr<entt::registry> registry;
+		std::unique_ptr<Scene> scene;
+		int stateChange = 0;
+		virtual void init();
+		static void cleanup();
+		virtual void draw();
 
-class Application
-{
-protected:
-    std::unique_ptr<Settings> settings;
-    std::unique_ptr<KeyMapping> keyMapping;
-    std::unique_ptr<entt::registry> registry;
-    std::unique_ptr<sage::Scene> scene;
-    int stateChange = 0;
-    virtual void init();
-    static void cleanup();
-    virtual void draw();
-public:
-    Application();
-    ~Application();
-    Application(Application const&) = delete;
-    void operator=(Application const&)  = delete;
-    virtual void Update();
-};
+	public:
+		Application();
+		~Application();
+		Application(const Application&) = delete;
+		void operator=(const Application&) = delete;
+		virtual void Update();
+	};
 }
-

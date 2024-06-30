@@ -7,9 +7,8 @@
 
 namespace sage
 {
-    WorldSystem::WorldSystem(entt::registry* _registry, entt::entity rootNodeId) : 
-    BaseSystem(_registry), root(rootNodeId)
-    {
-        
-    }
+	WorldSystem::WorldSystem(entt::registry* _registry, entt::entity rootNodeId) :
+		BaseSystem(_registry), root(rootNodeId)
+	{
+	}
 }

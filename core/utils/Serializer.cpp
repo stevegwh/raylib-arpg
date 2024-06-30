@@ -19,178 +19,185 @@
 #include "components/Collideable.hpp"
 
 
-
 namespace sage::serializer
 {
+	struct entity
+	{
+		unsigned int id;
+	};
 
-struct entity
-{
-    unsigned int id;
-};
+	template <typename Archive>
+	void serialize(Archive& archive, entity& entity)
+	{
+		archive(entity.id);
+	}
 
-template<typename Archive>
-void serialize(Archive &archive, entity &entity)
-{
-    archive(entity.id);
-}
+	void Save(const entt::registry& source)
+	{
+		std::cout << "Save called" << std::endl;
+		using namespace entt::literals;
+		//std::stringstream storage;
 
-void Save(const entt::registry &source)
-{
-    std::cout << "Save called" << std::endl;
-    using namespace entt::literals;
-    //std::stringstream storage;
+		std::ofstream storage("resources/output.xml");
+		if (!storage.is_open())
+		{
+			// Handle file opening error
+			return;
+		}
 
-    std::ofstream storage("resources/output.xml");
-    if (!storage.is_open()) {
-        // Handle file opening error
-        return;
-    }
+		{
+			// output finishes flushing its contents when it goes out of scope
+			cereal::XMLOutputArchive output{storage};
+			const auto view = source.view<Transform, Renderable, Collideable>();
+			for (const auto& ent : view)
+			{
+				const auto& trans = view.get<Transform>(ent);
+				const auto& rend = view.get<Renderable>(ent);
+				const auto& col = view.get<Collideable>(ent);
+				entity entity{};
+				entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
+				output.setNextName("entity");
+				output(entity);
+				output.setNextName("transform");
+				output(trans);
+				output.setNextName("collideable");
+				output(col);
+				output.setNextName("renderable");
+				output(rend);
+			}
+		}
+		storage.close();
+	}
 
-    {
-        // output finishes flushing its contents when it goes out of scope
-        cereal::XMLOutputArchive output{storage};
-        const auto view = source.view<sage::Transform, sage::Renderable, sage::Collideable>();
-        for (const auto &ent : view) {
-            const auto &trans = view.get<sage::Transform>(ent);
-            const auto &rend = view.get<sage::Renderable>(ent);
-            const auto &col = view.get<sage::Collideable>(ent);
-            entity entity{};
-            entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
-            output.setNextName("entity");
-            output(entity);
-            output.setNextName("transform");
-            output(trans);
-            output.setNextName("collideable");
-            output(col);
-            output.setNextName("renderable");
-            output(rend);
-        }
-    }
-    storage.close();
+	void Load(entt::registry* destination)
+	{
+		std::cout << "Load called" << std::endl;
+		using namespace entt::literals;
+		std::ifstream storage("resources/output.xml");
+		if (!storage.is_open())
+		{
+			// Handle file opening error
+			return;
+		}
 
-}
+		{
+			//cereal::JSONInputArchive input{storage};
+			cereal::XMLInputArchive input{storage};
 
-void Load(entt::registry *destination)
-{
-    std::cout << "Load called" << std::endl;
-    using namespace entt::literals;
-    std::ifstream storage("resources/output.xml");
-    if (!storage.is_open()) {
-        // Handle file opening error
-        return;
-    }
+			entt::entity currentEntity{};
+			while (input.getNodeName() != nullptr)
+			{
+				std::string componentName = input.getNodeName();
 
-    {
-        //cereal::JSONInputArchive input{storage};
-        cereal::XMLInputArchive input{storage};
+				//input.startNode();
 
-        entt::entity currentEntity{};
-        while (input.getNodeName() != nullptr) {
+				if (componentName == "entity")
+				{
+					// TODO: this is currently pointless, but I don't know how to
+					// advance cereal's parser without calling input with an object.
+					entity id;
+					input(id);
+					currentEntity = destination->create();
+				}
+				else if (componentName == "transform")
+				{
+					auto& transform = destination->emplace<Transform>(currentEntity);
+					input(transform);
+				}
+				else if (componentName == "collideable")
+				{
+					auto& col = destination->emplace<Collideable>(currentEntity);
+					input(col);
+				}
+				else if (componentName == "renderable")
+				{
+					auto& rend = destination->emplace<Renderable>(currentEntity);
+					input(rend);
+				}
+			}
+		}
+		storage.close();
+	}
 
-            std::string componentName = input.getNodeName();
+	void SerializeKeyMapping(KeyMapping& keymapping, const char* path)
+	{
+		std::cout << "Save called" << std::endl;
+		using namespace entt::literals;
+		//std::stringstream storage;
 
-            //input.startNode();
+		std::ofstream storage(path);
+		if (!storage.is_open())
+		{
+			// Handle file opening error
+			return;
+		}
 
-            if (componentName == "entity") {
-                // TODO: this is currently pointless, but I don't know how to
-                // advance cereal's parser without calling input with an object.
-                entity id;
-                input(id);
-                currentEntity = destination->create();
-            }
-            else if (componentName == "transform") {
-                auto &transform = destination->emplace<Transform>(currentEntity);
-                input(transform);
+		{
+			// output finishes flushing its contents when it goes out of scope
+			cereal::XMLOutputArchive output{storage};
+			output(keymapping);
+		}
+		storage.close();
+	}
 
-            }
-            else if (componentName == "collideable") {
-                auto &col = destination->emplace<Collideable>(currentEntity);
-                input(col);
-            }
-            else if (componentName == "renderable") {
-                auto &rend = destination->emplace<Renderable>(currentEntity);
-                input(rend);
-            }
-        }
-    }
-    storage.close();
-}
+	void DeserializeKeyMapping(KeyMapping& keymapping, const char* path)
+	{
+		std::cout << "Load called" << std::endl;
+		using namespace entt::literals;
 
-void SerializeKeyMapping(KeyMapping &keymapping, const char *path)
-{
-    std::cout << "Save called" << std::endl;
-    using namespace entt::literals;
-    //std::stringstream storage;
+		std::ifstream storage(path);
+		if (storage.is_open())
+		{
+			cereal::XMLInputArchive input{storage};
+			input(keymapping);
+			storage.close();
+		}
+		else
+		{
+			// File doesn't exist, create a new file with the default key mapping
+			std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
+			SerializeKeyMapping(keymapping, path);
+		}
+	}
 
-    std::ofstream storage(path);
-    if (!storage.is_open()) {
-        // Handle file opening error
-        return;
-    }
+	void SerializeSettings(Settings& settings, const char* path)
+	{
+		std::cout << "Save called" << std::endl;
+		using namespace entt::literals;
+		//std::stringstream storage;
 
-    {
-        // output finishes flushing its contents when it goes out of scope
-        cereal::XMLOutputArchive output{storage};
-        output(keymapping);
-    }
-    storage.close();
+		std::ofstream storage(path);
+		if (!storage.is_open())
+		{
+			// Handle file opening error
+			return;
+		}
 
-}
+		{
+			// output finishes flushing its contents when it goes out of scope
+			cereal::XMLOutputArchive output{storage};
+			output(settings);
+		}
+		storage.close();
+	}
 
-void DeserializeKeyMapping(KeyMapping &keymapping, const char *path)
-{
-    std::cout << "Load called" << std::endl;
-    using namespace entt::literals;
+	void DeserializeSettings(Settings& settings, const char* path)
+	{
+		std::cout << "Load called" << std::endl;
+		using namespace entt::literals;
 
-    std::ifstream storage(path);
-    if (storage.is_open()) {
-        cereal::XMLInputArchive input{storage};
-        input(keymapping);
-        storage.close();
-    }
-    else {
-        // File doesn't exist, create a new file with the default key mapping
-        std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
-        SerializeKeyMapping(keymapping, path);
-    }
-}
-
-void SerializeSettings(Settings& settings, const char* path)
-{
-    std::cout << "Save called" << std::endl;
-    using namespace entt::literals;
-    //std::stringstream storage;
-
-    std::ofstream storage(path);
-    if (!storage.is_open()) {
-        // Handle file opening error
-        return;
-    }
-
-    {
-        // output finishes flushing its contents when it goes out of scope
-        cereal::XMLOutputArchive output{storage};
-        output(settings);
-    }
-    storage.close();
-}
-
-void DeserializeSettings(Settings& settings, const char* path)
-{
-    std::cout << "Load called" << std::endl;
-    using namespace entt::literals;
-
-    std::ifstream storage(path);
-    if (storage.is_open()) {
-        cereal::XMLInputArchive input{storage};
-        input(settings);
-        storage.close();
-    }
-    else {
-        // File doesn't exist, create a new file with the default key mapping
-        std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
-        SerializeSettings(settings, path);
-    }
-    
-}
+		std::ifstream storage(path);
+		if (storage.is_open())
+		{
+			cereal::XMLInputArchive input{storage};
+			input(settings);
+			storage.close();
+		}
+		else
+		{
+			// File doesn't exist, create a new file with the default key mapping
+			std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
+			SerializeSettings(settings, path);
+		}
+	}
 }

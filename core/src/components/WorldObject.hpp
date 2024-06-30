@@ -8,10 +8,9 @@
 
 namespace sage
 {
-    struct WorldObject
-    {
-        entt::entity parent{};
-        std::vector<entt::entity> children;
-    };
+	struct WorldObject
+	{
+		entt::entity parent{};
+		std::vector<entt::entity> children;
+	};
 }
-

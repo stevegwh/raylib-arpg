@@ -10,16 +10,15 @@
 
 namespace sage
 {
+	class DialogueWindow
+	{
+		Settings* settings;
+		Vector2 windowPosition{};
+		Vector2 contentSize;
 
-class DialogueWindow
-{
-    Settings* settings;
-    Vector2 windowPosition{};
-    Vector2 contentSize;
-public:
-    void Update();
-    void Draw();
-    DialogueWindow(Settings* _settings);
-};
-
+	public:
+		void Update();
+		void Draw();
+		DialogueWindow(Settings* _settings);
+	};
 } // sage

@@ -12,24 +12,24 @@
 
 namespace sage
 {
-    template <typename ComponentName>
-    class BaseSystem
-    {
-    private:
-        const std::string componentName;
-        
-    protected:
-        bool enabled = true;
-        entt::registry* registry;
-        
-    public:
-        BaseSystem(entt::registry* _registry) : registry(_registry)
-        //, eventManager(std::make_unique<EventManager>()) 
-        {}
+	template <typename ComponentName>
+	class BaseSystem
+	{
+		const std::string componentName;
 
-        [[nodiscard]] const char* getComponentName() const
-        {
-            return typeid(ComponentName).name();
-        }
-    };
+	protected:
+		bool enabled = true;
+		entt::registry* registry;
+
+	public:
+		BaseSystem(entt::registry* _registry) : registry(_registry)
+		//, eventManager(std::make_unique<EventManager>()) 
+		{
+		}
+
+		[[nodiscard]] const char* getComponentName() const
+		{
+			return typeid(ComponentName).name();
+		}
+	};
 }

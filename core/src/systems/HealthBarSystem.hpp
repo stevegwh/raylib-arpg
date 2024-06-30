@@ -12,16 +12,16 @@
 
 namespace sage
 {
-class HealthBarSystem : public BaseSystem<HealthBar>
-{
-    Camera* camera;
+	class HealthBarSystem : public BaseSystem<HealthBar>
+	{
+		Camera* camera;
 
-    void updateHealthBarTextures();
-public:
-    HealthBarSystem(entt::registry* _registry, sage::Camera* _camera);
-    void Draw2D();
-    void Draw3D();
-    void Update();
-};
+		void updateHealthBarTextures();
 
+	public:
+		HealthBarSystem(entt::registry* _registry, Camera* _camera);
+		void Draw2D();
+		void Draw3D();
+		void Update();
+	};
 } // sage

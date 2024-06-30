@@ -8,7 +8,7 @@
 namespace sage
 {
 
-void AnimationSystem::Update()
+void AnimationSystem::Update() const
 {
     const auto& view = registry->view<Animation, Renderable>();
     for (auto& entity : view)

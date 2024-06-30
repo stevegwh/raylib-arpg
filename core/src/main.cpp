@@ -3,7 +3,7 @@
 
 int main()
 {
-    sage::Application gm;
-    gm.Update();
-    return 0;
+	sage::Application gm;
+	gm.Update();
+	return 0;
 }

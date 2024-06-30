@@ -3,7 +3,7 @@
 
 int main()
 {
-    sage::Editor editor;
-    editor.Update();
-    return 0;
+	sage::Editor editor;
+	editor.Update();
+	return 0;
 }

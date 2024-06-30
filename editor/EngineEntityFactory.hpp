@@ -6,10 +6,7 @@
 
 namespace sage::editor
 {
-
-class EngineEntityFactory
-{
-
-};
-
+	class EngineEntityFactory
+	{
+	};
 } // sage

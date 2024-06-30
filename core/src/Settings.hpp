@@ -9,31 +9,32 @@
 
 struct Settings
 {
+	int screenWidth = 1280;
+	int screenHeight = 720;
 
-    int screenWidth = 1280;
-    int screenHeight = 720;
+	void ResetScreenSize()
+	{
+		screenWidth = SCREEN_WIDTH;
+		screenHeight = SCREEN_HEIGHT;
+	}
 
-    void ResetScreenSize()
-    {
-        screenWidth = SCREEN_WIDTH;
-        screenHeight = SCREEN_HEIGHT;
-    }
+	template <class Archive>
+	void save(Archive& archive) const
+	{
+		archive(CEREAL_NVP(SCREEN_WIDTH),
+		        CEREAL_NVP(SCREEN_HEIGHT));
+	}
 
-    template<class Archive>
-    void save(Archive & archive) const
-    {
-        archive(CEREAL_NVP(SCREEN_WIDTH),
-                CEREAL_NVP(SCREEN_HEIGHT));
-    }
-    template<class Archive>
-    void load(Archive & archive)
-    {
-        archive(CEREAL_NVP(SCREEN_WIDTH),
-                CEREAL_NVP(SCREEN_HEIGHT));
-        screenWidth = SCREEN_WIDTH;
-        screenHeight = SCREEN_HEIGHT;
-    }
+	template <class Archive>
+	void load(Archive& archive)
+	{
+		archive(CEREAL_NVP(SCREEN_WIDTH),
+		        CEREAL_NVP(SCREEN_HEIGHT));
+		screenWidth = SCREEN_WIDTH;
+		screenHeight = SCREEN_HEIGHT;
+	}
+
 private:
-    int SCREEN_WIDTH = 1280;
-    int SCREEN_HEIGHT = 720;
+	int SCREEN_WIDTH = 1280;
+	int SCREEN_HEIGHT = 720;
 };

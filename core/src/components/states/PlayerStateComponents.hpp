@@ -9,5 +9,5 @@
 
 namespace sage
 {
-using StateComponents = std::tuple<StatePlayerDefault, StatePlayerCombat>;
+	using StateComponents = std::tuple<StatePlayerDefault, StatePlayerCombat>;
 }

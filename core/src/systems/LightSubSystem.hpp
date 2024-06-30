@@ -11,15 +11,16 @@
 
 namespace sage
 {
-typedef struct Renderable Renderable; //forward dec
-class LightSubSystem
-{
-    std::vector<Renderable*> renderables;
-public:
-    Shader shader;
-    Light lights[MAX_LIGHTS] {};
-    explicit LightSubSystem();
-    void LinkRenderableToLight(Renderable* renderable);
-    void DrawDebugLights();
-};
+	using Renderable = struct Renderable; //forward dec
+	class LightSubSystem
+	{
+		std::vector<Renderable*> renderables;
+
+	public:
+		Shader shader;
+		Light lights[MAX_LIGHTS]{};
+		explicit LightSubSystem();
+		void LinkRenderableToLight(Renderable* renderable);
+		void DrawDebugLights();
+	};
 }

@@ -8,9 +8,9 @@
 
 namespace sage
 {
-struct Dialogue
-{
-    Vector3 conversationPos; // Where the other person stands
-    std::string sentence; // tmp
-};
+	struct Dialogue
+	{
+		Vector3 conversationPos; // Where the other person stands
+		std::string sentence; // tmp
+	};
 }

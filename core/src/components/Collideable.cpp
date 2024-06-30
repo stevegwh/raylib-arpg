@@ -7,9 +7,8 @@
 
 namespace sage
 {
-
-Collideable::Collideable(BoundingBox _boundingBox) :
-    localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
-{}
-
+	Collideable::Collideable(BoundingBox _boundingBox) :
+		localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
+	{
+	}
 }

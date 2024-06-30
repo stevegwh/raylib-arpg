@@ -10,80 +10,75 @@
 
 namespace sage
 {
+	enum class CollisionLayer
+	{
+		DEFAULT,
+		FLOOR,
+		BUILDING,
+		NAVIGATION,
+		PLAYER,
+		NPC,
+		ENEMY,
+		BOYD,
+		COUNT // Must always be last
+	};
 
-enum class CollisionLayer
-{
-    DEFAULT,
-    FLOOR,
-    BUILDING,
-    NAVIGATION,
-    PLAYER,
-    NPC,
-    ENEMY,
-    BOYD,
-    COUNT // Must always be last
-};
+	struct CollisionInfo
+	{
+		entt::entity collidedEntityId{};
+		BoundingBox collidedBB{};
+		RayCollision rlCollision{};
+		CollisionLayer collisionLayer{};
+	};
 
-struct CollisionInfo
-{
-    entt::entity collidedEntityId{};
-    BoundingBox collidedBB{};
-    RayCollision rlCollision{};
-    CollisionLayer collisionLayer{};
-};
+	struct Collideable
+	{
+		BoundingBox localBoundingBox{}; // BoundingBox in local space
+		BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb * world mat)
+		CollisionLayer collisionLayer = CollisionLayer::DEFAULT;
+		bool debugDraw = false;
 
-struct Collideable
-{
-    BoundingBox localBoundingBox{}; // BoundingBox in local space
-    BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb * world mat)
-    CollisionLayer collisionLayer = CollisionLayer::DEFAULT;
-    bool debugDraw = false;
+		explicit Collideable(BoundingBox _boundingBox);
+		Collideable() = default;
+		Collideable(const Collideable&) = delete;
+		Collideable& operator=(const Collideable&) = delete;
 
-    explicit Collideable(BoundingBox _boundingBox);
-    Collideable() = default;
-    Collideable(const Collideable&) = delete;
-    Collideable& operator=(const Collideable&) = delete;
+		template <class Archive>
+		void save(Archive& archive) const
+		{
+			archive(
+				CEREAL_NVP(localBoundingBox.min.x),
+				CEREAL_NVP(localBoundingBox.min.y),
+				CEREAL_NVP(localBoundingBox.min.z),
+				CEREAL_NVP(localBoundingBox.max.x),
+				CEREAL_NVP(localBoundingBox.max.y),
+				CEREAL_NVP(localBoundingBox.max.z),
+				CEREAL_NVP(worldBoundingBox.min.x),
+				CEREAL_NVP(worldBoundingBox.min.y),
+				CEREAL_NVP(worldBoundingBox.min.z),
+				CEREAL_NVP(worldBoundingBox.max.x),
+				CEREAL_NVP(worldBoundingBox.max.y),
+				CEREAL_NVP(worldBoundingBox.max.z),
+				CEREAL_NVP(collisionLayer));
+		}
 
-    template<class Archive>
-    void save(Archive & archive) const
-    {
-        archive(
-                CEREAL_NVP(localBoundingBox.min.x),
-                CEREAL_NVP(localBoundingBox.min.y),
-                CEREAL_NVP(localBoundingBox.min.z),
-                CEREAL_NVP(localBoundingBox.max.x),
-                CEREAL_NVP(localBoundingBox.max.y),
-                CEREAL_NVP(localBoundingBox.max.z),
-                CEREAL_NVP(worldBoundingBox.min.x),
-                CEREAL_NVP(worldBoundingBox.min.y),
-                CEREAL_NVP(worldBoundingBox.min.z),
-                CEREAL_NVP(worldBoundingBox.max.x),
-                CEREAL_NVP(worldBoundingBox.max.y),
-                CEREAL_NVP(worldBoundingBox.max.z),
-                CEREAL_NVP(collisionLayer));
-    }
-
-    template<class Archive>
-    void load(Archive & archive)
-    {
-        archive(
-                CEREAL_NVP(localBoundingBox.min.x),
-                CEREAL_NVP(localBoundingBox.min.y),
-                CEREAL_NVP(localBoundingBox.min.z),
-                CEREAL_NVP(localBoundingBox.max.x),
-                CEREAL_NVP(localBoundingBox.max.y),
-                CEREAL_NVP(localBoundingBox.max.z),
-                CEREAL_NVP(worldBoundingBox.min.x),
-                CEREAL_NVP(worldBoundingBox.min.y),
-                CEREAL_NVP(worldBoundingBox.min.z),
-                CEREAL_NVP(worldBoundingBox.max.x),
-                CEREAL_NVP(worldBoundingBox.max.y),
-                CEREAL_NVP(worldBoundingBox.max.z),
-                CEREAL_NVP(collisionLayer));
-    }
-
-};
-
-
+		template <class Archive>
+		void load(Archive& archive)
+		{
+			archive(
+				CEREAL_NVP(localBoundingBox.min.x),
+				CEREAL_NVP(localBoundingBox.min.y),
+				CEREAL_NVP(localBoundingBox.min.z),
+				CEREAL_NVP(localBoundingBox.max.x),
+				CEREAL_NVP(localBoundingBox.max.y),
+				CEREAL_NVP(localBoundingBox.max.z),
+				CEREAL_NVP(worldBoundingBox.min.x),
+				CEREAL_NVP(worldBoundingBox.min.y),
+				CEREAL_NVP(worldBoundingBox.min.z),
+				CEREAL_NVP(worldBoundingBox.max.x),
+				CEREAL_NVP(worldBoundingBox.max.y),
+				CEREAL_NVP(worldBoundingBox.max.z),
+				CEREAL_NVP(collisionLayer));
+		}
+	};
 }
-

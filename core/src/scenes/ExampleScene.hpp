@@ -15,16 +15,14 @@
 
 namespace sage
 {
-
-class ExampleScene : public Scene
-{
-public:
-    
-    ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
-    ~ExampleScene() override;
-    void Update() override;
-    void Draw2D() override;
-    void Draw3D() override;
-    void DrawDebug() override;
-};
+	class ExampleScene : public Scene
+	{
+	public:
+		ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
+		~ExampleScene() override;
+		void Update() override;
+		void Draw2D() override;
+		void Draw3D() override;
+		void DrawDebug() override;
+	};
 } // sage
