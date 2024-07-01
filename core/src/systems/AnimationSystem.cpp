@@ -24,13 +24,13 @@ namespace sage
     
     #pragma omp parallel
             {
-    #pragma omp single
-                printf("Number of threads: %d\n", omp_get_num_threads());
+    //#pragma omp single
+    //            printf("Number of threads: %d\n", omp_get_num_threads());
     
     #pragma omp for
                 for (int m = 0; m < model.meshCount; m++)
                 {
-                    printf("Processing mesh %d on thread %d\n", m, omp_get_thread_num());
+                    //printf("Processing mesh %d on thread %d\n", m, omp_get_thread_num());
     
                     Mesh* mesh = &model.meshes[m];
     
@@ -86,7 +86,7 @@ namespace sage
                             outRotation = anim.framePoses[frame][boneId].rotation;
                             outScale = anim.framePoses[frame][boneId].scale;
     
-                            animVertex = (Vector3){ mesh->vertices[vCounter], mesh->vertices[vCounter + 1], mesh->vertices[vCounter + 2] };
+                            animVertex = { mesh->vertices[vCounter], mesh->vertices[vCounter + 1], mesh->vertices[vCounter + 2] };
                             animVertex = Vector3Subtract(animVertex, inTranslation);
                             animVertex = Vector3Multiply(animVertex, outScale);
                             animVertex = Vector3RotateByQuaternion(animVertex, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
@@ -98,7 +98,7 @@ namespace sage
     
                             if (mesh->normals != NULL)
                             {
-                                animNormal = (Vector3){ mesh->normals[vCounter], mesh->normals[vCounter + 1], mesh->normals[vCounter + 2] };
+                                animNormal = { mesh->normals[vCounter], mesh->normals[vCounter + 1], mesh->normals[vCounter + 2] };
                                 animNormal = Vector3RotateByQuaternion(animNormal, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
                                 mesh->animNormals[vCounter] += animNormal.x*boneWeight;
                                 mesh->animNormals[vCounter + 1] += animNormal.y*boneWeight;
