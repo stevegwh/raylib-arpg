@@ -55,7 +55,7 @@ namespace sage
 
 	void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
 	{
-		navigationGridSystem->MarkSquareOccupied(registry->get<Collideable>(entity).worldBoundingBox, false);
+		navigationGridSystem->MarkSquareAreaOccupied(registry->get<Collideable>(entity).worldBoundingBox, false);
 		{
 			auto& animation = registry->get<Animation>(entity);
 			entt::sink sink{animation.onAnimationEnd};

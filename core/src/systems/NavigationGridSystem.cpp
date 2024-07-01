@@ -8,13 +8,13 @@
 
 Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 {
-	Vector3 size = {0};
+	Vector3 size = { 0 };
 
 	size.x = fabsf(max.x - min.x);
 	size.y = fabsf(max.y - min.y);
 	size.z = fabsf(max.z - min.z);
 
-	return {min.x + size.x / 2.0f, min.y + size.y / 2.0f, min.z + size.z / 2.0f};
+	return { min.x + size.x / 2.0f, min.y + size.y / 2.0f, min.z + size.z / 2.0f };
 }
 
 namespace sage
@@ -83,12 +83,12 @@ namespace sage
 		{
 			for (int i = -halfSlices; i < halfSlices; i++)
 			{
-				Vector3 v1 = {static_cast<float>(i) * spacing, 0, static_cast<float>(j) * spacing};
-				Vector3 v3 = {static_cast<float>(i + 1) * spacing, 1.0f, static_cast<float>(j + 1) * spacing};
+				Vector3 v1 = { static_cast<float>(i) * spacing, 0, static_cast<float>(j) * spacing };
+				Vector3 v3 = { static_cast<float>(i + 1) * spacing, 1.0f, static_cast<float>(j + 1) * spacing };
 
 				entt::entity id = registry->create();
 
-				GridSquare gridSquareIndex = {i + halfSlices, j + halfSlices};
+				GridSquare gridSquareIndex = { i + halfSlices, j + halfSlices };
 				auto& gridSquare = registry->emplace<NavigationGridSquare>(
 					id, gridSquareIndex, v1, v3, calculateGridsquareCentre(v1, v3));
 				gridSquares[j + halfSlices][i + halfSlices] = &gridSquare;
@@ -116,8 +116,8 @@ namespace sage
 	}
 
 
-	void NavigationGridSystem::MarkSquareOccupied(const BoundingBox& occupant, bool occupied,
-	                                              entt::entity occupantEntity) const
+	void NavigationGridSystem::MarkSquareAreaOccupied(const BoundingBox& occupant, bool occupied,
+		entt::entity occupantEntity) const
 	{
 		GridSquare topLeftIndex;
 		GridSquare bottomRightIndex;
@@ -150,6 +150,27 @@ namespace sage
 		}
 	}
 
+	void NavigationGridSystem::MarkSquaresOccupied(const std::vector<GridSquare>& squares, bool occupied) const
+	{
+		for (const auto& square : squares)
+		{
+			gridSquares[square.row][square.col]->occupied = occupied;
+		}
+	}
+
+	void NavigationGridSystem::MarkSquaresDebug(const std::vector<GridSquare>& squares, Color color, bool occupied) const
+	{
+		for (const auto& square : squares)
+		{
+			gridSquares[square.row][square.col]->drawDebug = occupied;
+			if (occupied)
+			{
+				gridSquares[square.row][square.col]->debugColor = color;
+			}
+
+		}
+	}
+
 	bool NavigationGridSystem::CheckSingleSquareOccupied(Vector3 worldPos) const
 	{
 		GridSquare squareIndex;
@@ -167,9 +188,9 @@ namespace sage
 
 	/**
 	 * Checks whether the bounding box fits at the given world position.
-	 * @param worldPos 
-	 * @param bb 
-	 * @return 
+	 * @param worldPos
+	 * @param bb
+	 * @return
 	 */
 	bool NavigationGridSystem::CheckBoundingBoxAreaUnoccupied(Vector3 worldPos, const BoundingBox& bb) const
 	{
@@ -315,8 +336,8 @@ namespace sage
 			extents -= bb_min;
 
 
-			if (!checkInside(extents, {0, 0},
-			                 {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
+			if (!checkInside(extents, { 0, 0 },
+				{ static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) }))
 			{
 				return false;
 			}
@@ -325,13 +346,13 @@ namespace sage
 	}
 
 	bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, GridSquare& minRange,
-	                                            GridSquare& maxRange) const
+		GridSquare& maxRange) const
 	{
 		auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
-		Vector3 center = {(bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f};
+		Vector3 center = { (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f };
 
-		Vector3 topLeft = {center.x - bounds * spacing, center.y, center.z - bounds * spacing};
-		Vector3 bottomRight = {center.x + bounds * spacing, center.y, center.z + bounds * spacing};
+		Vector3 topLeft = { center.x - bounds * spacing, center.y, center.z - bounds * spacing };
+		Vector3 bottomRight = { center.x + bounds * spacing, center.y, center.z + bounds * spacing };
 
 		GridSquare topLeftIndex;
 		GridSquare bottomRightIndex;
@@ -346,33 +367,33 @@ namespace sage
 		bottomRightIndex.col = std::min(bottomRightIndex.col, static_cast<int>(gridSquares.at(0).size() - 1));
 		bottomRightIndex.row = std::min(bottomRightIndex.row, static_cast<int>(gridSquares.size() - 1));
 
-		minRange = {topLeftIndex.row, topLeftIndex.col};
-		maxRange = {bottomRightIndex.row, bottomRightIndex.col};
+		minRange = { topLeftIndex.row, topLeftIndex.col };
+		maxRange = { bottomRightIndex.row, bottomRightIndex.col };
 
 		return true;
 	}
 
 	bool NavigationGridSystem::GridToWorldSpace(GridSquare gridPos, Vector3& out) const
 	{
-		GridSquare maxRange = {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())};
+		GridSquare maxRange = { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) };
 		out = gridSquares[gridPos.row][gridPos.col]->worldPosMin;
-		return checkInside(gridPos, {0, 0}, maxRange);
+		return checkInside(gridPos, { 0, 0 }, maxRange);
 	}
 
 	bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, GridSquare& out) const
 	{
 		return WorldToGridSpace(worldPos,
-		                        out,
-		                        {0, 0},
-		                        {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())});
+			out,
+			{ 0, 0 },
+			{ static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) });
 	}
 
 	bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, GridSquare& out, const GridSquare& minRange,
-	                                            const GridSquare& maxRange) const
+		const GridSquare& maxRange) const
 	{
 		int x = std::floor(worldPos.x / spacing) + (slices / 2);
 		int y = std::floor(worldPos.z / spacing) + (slices / 2);
-		out = {y, x};
+		out = { y, x };
 
 		return out.row < maxRange.row && out.col < maxRange.col
 			&& out.col >= minRange.col && out.row >= minRange.row;
@@ -386,22 +407,22 @@ namespace sage
 			{
 				if (!gridSquare->drawDebug) continue;
 				DrawCubeWires(gridSquare->worldPosCentre,
-				              gridSquare->debugBox.x,
-				              gridSquare->debugBox.y,
-				              gridSquare->debugBox.z,
-				              gridSquare->debugColor);
+					gridSquare->debugBox.x,
+					gridSquare->debugBox.y,
+					gridSquare->debugBox.z,
+					gridSquare->debugColor);
 			}
 		}
 	}
 
 	std::vector<Vector3> NavigationGridSystem::tracebackPath(const std::vector<std::vector<GridSquare>>& came_from,
-	                                                         const GridSquare& start,
-	                                                         const GridSquare& finish) const
+		const GridSquare& start,
+		const GridSquare& finish) const
 	{
 		std::vector<Vector3> path;
-		GridSquare current = {finish.row, finish.col};
+		GridSquare current = { finish.row, finish.col };
 		GridSquare previous;
-		std::pair<int, int> currentDir = {0, 0};
+		std::pair<int, int> currentDir = { 0, 0 };
 
 		path.push_back(gridSquares[current.row][current.col]->worldPosMin);
 		while (current.row != start.row || current.col != start.col)
@@ -446,8 +467,8 @@ namespace sage
 		auto max = square + extents;
 
 
-		GridSquare minRange = {0, 0};
-		GridSquare maxRange = {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())};
+		GridSquare minRange = { 0, 0 };
+		GridSquare maxRange = { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) };
 
 		for (int row = min.row; row < max.row; ++row)
 		{
@@ -465,7 +486,7 @@ namespace sage
 	}
 
 	NavigationGridSquare* NavigationGridSystem::CastRay(int currentRow, int currentCol, Vector2 direction,
-	                                                    float distance) const
+		float distance, std::vector<GridSquare>& debugLines) const
 	{
 		int dist = std::round(distance);
 		direction = Vector2Normalize(direction);
@@ -474,10 +495,11 @@ namespace sage
 
 		for (int i = 0; i < dist; ++i)
 		{
-			GridSquare square = {currentRow + (dirRow * i), currentCol + (dirCol * i)};
+			GridSquare square = { currentRow + (dirRow * i), currentCol + (dirCol * i) };
+			debugLines.push_back(square);
 
-			if (!checkInside(square, {0, 0},
-			                 {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
+			if (!checkInside(square, { 0, 0 },
+				{ static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) }))
 			{
 				continue;
 			}
@@ -518,7 +540,7 @@ namespace sage
 	}
 
 	GridSquare NavigationGridSystem::FindNextBestLocation(GridSquare currentPos, GridSquare target, GridSquare minRange,
-	                                                      GridSquare maxRange, GridSquare extents) const
+		GridSquare maxRange, GridSquare extents) const
 	{
 		struct Compare
 		{
@@ -542,7 +564,7 @@ namespace sage
 
 			for (const auto& dir : directions)
 			{
-				GridSquare next = {current.row + dir.second, current.col + dir.first};
+				GridSquare next = { current.row + dir.second, current.col + dir.first };
 
 				if (!checkInside(next, minRange, maxRange)) continue;
 
@@ -569,22 +591,22 @@ namespace sage
 	}
 
 	std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& entity, const Vector3& startPos,
-	                                                         const Vector3& finishPos, AStarHeuristic heuristicType)
+		const Vector3& finishPos, AStarHeuristic heuristicType)
 	{
 		return AStarPathfind(entity,
-		                     startPos,
-		                     finishPos,
-		                     {0, 0},
-		                     {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())},
-		                     heuristicType);
+			startPos,
+			finishPos,
+			{ 0, 0 },
+			{ static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) },
+			heuristicType);
 	}
 
 	std::vector<Vector3> NavigationGridSystem::AStarPathfind(const entt::entity& entity,
-	                                                         const Vector3& startPos,
-	                                                         const Vector3& finishPos,
-	                                                         const GridSquare& minRange,
-	                                                         const GridSquare& maxRange,
-	                                                         AStarHeuristic heuristicType)
+		const Vector3& startPos,
+		const Vector3& finishPos,
+		const GridSquare& minRange,
+		const GridSquare& maxRange,
+		AStarHeuristic heuristicType)
 	{
 		GridSquare startGridSquare{};
 		GridSquare finishGridSquare{};
@@ -600,7 +622,7 @@ namespace sage
 		}
 
 		std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
-		std::vector<std::vector<GridSquare>> came_from(maxRange.row, std::vector<GridSquare>(maxRange.col, {-1, -1}));
+		std::vector<std::vector<GridSquare>> came_from(maxRange.row, std::vector<GridSquare>(maxRange.col, { -1, -1 }));
 		std::vector<std::vector<double>> cost_so_far(maxRange.row, std::vector<double>(maxRange.col, 0.0));
 
 		PriorityQueue<GridSquare, double> frontier;
@@ -622,7 +644,7 @@ namespace sage
 
 			for (const auto& dir : directions)
 			{
-				GridSquare next = {current.row + dir.first, current.col + dir.second};
+				GridSquare next = { current.row + dir.first, current.col + dir.second };
 
 				auto current_cost = gridSquares[current.row][current.col]->pathfindingCost;
 				auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
@@ -677,7 +699,7 @@ namespace sage
 		{
 			const auto& bb = view.get<Collideable>(entity);
 			if (bb.collisionLayer != CollisionLayer::BUILDING) continue;
-			MarkSquareOccupied(bb.worldBoundingBox, true, entity);
+			MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
 		}
 	}
 

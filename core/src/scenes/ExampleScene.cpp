@@ -74,7 +74,7 @@ namespace sage
 
 		// TODO: tmp
 		const auto& col = registry->get<Collideable>(knight);
-		data->navigationGridSystem->MarkSquareOccupied(col.worldBoundingBox, true, knight);
+		data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
 		// TODO: Not sure if I like this
 		data->combatStateSystem->playerCombatLogicSubSystem->Enable();

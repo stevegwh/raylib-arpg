@@ -2,12 +2,10 @@
 // Created by Steve Wheeler on 08/06/2024.
 //
 
-#include "WaveMobDefaultSubSystem.hpp"
+#include "components/Animation.hpp"
 #include "components/states/StateEnemyDefault.hpp"
 #include "components/Transform.hpp"
-#include "components/Animation.hpp"
-
-#include <iostream>
+#include "WaveMobDefaultSubSystem.hpp"
 
 namespace sage
 {
