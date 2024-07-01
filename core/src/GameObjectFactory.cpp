@@ -56,7 +56,7 @@ namespace sage
 		transform.movementSpeed = 0.05f;
 		registry->emplace<MoveableActor>(id);
 
-		auto model = ModelManager::ModelLoad(modelPath);
+		auto model = LoadModel(modelPath);
 
 		auto& animation = registry->emplace<Animation>(id, modelPath, &model);
 		animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -117,7 +117,7 @@ namespace sage
 		transform.scale = 1.0f;
 		transform.rotation = {0, 0, 0};
 
-		auto model = ModelManager::ModelLoad(modelPath);
+		auto model = LoadModel(modelPath);
 		auto& animation = registry->emplace<Animation>(id, modelPath, &model);
 		animation.ChangeAnimation(0);
 
@@ -160,7 +160,7 @@ namespace sage
 		transform.rotation = {0, 0, 0};
 		registry->emplace<MoveableActor>(id);
 
-		auto model = ModelManager::ModelLoad(modelPath);
+		auto model = LoadModel(modelPath);
 
 		// Set animation hooks
 		auto& animation = registry->emplace<Animation>(id, modelPath, &model);
@@ -234,7 +234,7 @@ namespace sage
 		transform.position = position;
 		transform.scale = 2.0f;
 		Material mat = {LoadTexture(texturePath), texturePath};
-		auto model = ModelManager::ModelLoad(modelPath);
+		auto model = LoadModel(modelPath);
 		model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
 		auto& renderable = registry->emplace<Renderable>(id, model, mat, modelPath, MatrixIdentity());
 		renderable.name = name;
