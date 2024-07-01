@@ -86,12 +86,10 @@ namespace sage
 			transform.direction = Vector3Normalize(Vector3Subtract(movableActor.path.front(), transform.position));
 
 			if (initialMove)
-			// TODO: Store the initial target location in the actor component. This way, if the actor has to find "next best position", it can keep track of whether its original position is open and go to that instead
 			{
-				movableActor.destination = path.back();
-				// path.back instead of destination to account for the requested destination being occupied
-				transform.onStartMovement.publish(entity);
+				movableActor.destination = path.back(); // path.back instead of destination to account for the requested destination being occupied
 			}
+            transform.onStartMovement.publish(entity);
 		}
 		// Else? Error. Destination is unreachable.
 	}
@@ -173,12 +171,13 @@ namespace sage
 				if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(
 					moveableActor.destination.value(), moveableActor.path.back()))
 				{
+                    actorTrans.onDestinationReached.publish(entity);
 					moveableActor.destination.reset();
 				}
 				moveableActor.path.pop_front();
 				if (moveableActor.path.empty())
 				{
-					actorTrans.onFinishMovement.publish(entity);
+					actorTrans.onFinishMovement.publish(entity); // Should this be published when it reaches its true destination or just a movement? Maybe have two events for it
 					navigationGridSystem->MarkSquareOccupied(actorCollideable.worldBoundingBox, true, entity);
 					continue;
 				}

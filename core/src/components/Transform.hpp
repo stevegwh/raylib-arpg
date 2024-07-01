@@ -52,6 +52,7 @@ namespace sage
 		entt::sigh<void(entt::entity)> onPositionUpdate{};
 		entt::sigh<void(entt::entity)> onStartMovement{};
 		entt::sigh<void(entt::entity)> onFinishMovement{};
+        entt::sigh<void(entt::entity)> onDestinationReached{};
 		entt::sigh<void(entt::entity)> onMovementCancel{};
 
 
