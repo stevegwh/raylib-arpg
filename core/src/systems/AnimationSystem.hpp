@@ -12,14 +12,13 @@
 
 namespace sage
 {
+	class AnimationSystem : public BaseSystem<Animation>
+	{
+		float animationTimer = 0;
 
-class AnimationSystem : public BaseSystem<Animation>
-{
-    float animationTimer = 0;
-public:
-    void Update();
-    void Draw();
-    explicit AnimationSystem(entt::registry* _registry);
-};
-
+	public:
+		void Update() const;
+		void Draw();
+		explicit AnimationSystem(entt::registry* _registry);
+	};
 } // sage

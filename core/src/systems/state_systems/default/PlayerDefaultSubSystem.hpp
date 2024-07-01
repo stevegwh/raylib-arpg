@@ -9,19 +9,18 @@
 
 namespace sage
 {
+	class PlayerDefaultSubSystem
+	{
+		entt::registry* registry;
+		StateMachineSystem* stateMachineSystem;
+		ActorMovementSystem* actorMovementSystem;
 
-class PlayerDefaultSubSystem
-{
-    entt::registry* registry;
-    StateMachineSystem* stateMachineSystem;
-    ActorMovementSystem* actorMovementSystem;
-public:
-    void Update();
-    void OnComponentEnabled(entt::entity entity) const;
-    void OnComponentDisabled(entt::entity entity) const;
-    PlayerDefaultSubSystem(entt::registry* _registry,
-                            StateMachineSystem* _stateMachineSystem,
-                            ActorMovementSystem* _actorMovementSystem);
-};
-
+	public:
+		void Update();
+		void OnComponentEnabled(entt::entity entity) const;
+		void OnComponentDisabled(entt::entity entity) const;
+		PlayerDefaultSubSystem(entt::registry* _registry,
+		                       StateMachineSystem* _stateMachineSystem,
+		                       ActorMovementSystem* _actorMovementSystem);
+	};
 } // sage

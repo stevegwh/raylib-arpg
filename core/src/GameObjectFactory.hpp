@@ -7,6 +7,7 @@
 #include "raylib.h"
 #include "entt/entt.hpp"
 #include "GameData.hpp"
+#include "ModelManager.hpp"
 
 namespace sage
 {

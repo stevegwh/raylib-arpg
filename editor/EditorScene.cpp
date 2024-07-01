@@ -7,17 +7,18 @@
 
 namespace sage
 {
-
 	void EditorScene::moveSelectedObjectToCursorHit() const
 	{
 		Transform newTransform;
 		newTransform.position = data->cursor->collision.point;
 		const auto& renderable = registry->get<Renderable>(selectedObject);
-		registry->patch<Transform>(selectedObject, [&newTransform](auto& t) {
+		registry->patch<Transform>(selectedObject, [&newTransform](auto& t)
+		{
 			t.position = newTransform.position;
-			});
+		});
 		Matrix mat = registry->get<Transform>(selectedObject).GetMatrixNoRot();
-		data->collisionSystem->UpdateWorldBoundingBox(selectedObject, mat); // TODO: Would prefer to have this as an event
+		data->collisionSystem->UpdateWorldBoundingBox(selectedObject, mat);
+		// TODO: Would prefer to have this as an event
 	}
 
 	void EditorScene::OnCursorClick()
@@ -33,9 +34,9 @@ namespace sage
 				if (currentEditorMode == CREATE)
 				{
 					GameObjectFactory::createBuilding(registry, data.get(), data->cursor->collision.point,
-						"Tower Instance",
-						"resources/models/obj/turret.obj",
-						"resources/models/obj/turret_diffuse.png");
+					                                  "Tower Instance",
+					                                  "resources/models/obj/turret.obj",
+					                                  "resources/models/obj/turret_diffuse.png");
 				}
 				else if (currentEditorMode == SELECT)
 				{
@@ -128,48 +129,49 @@ namespace sage
 	}
 
 	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
-		Scene(_registry, std::move(_data)), gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))
+		Scene(_registry, std::move(_data)),
+		gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))
 	{
 		{
-			entt::sink onClickEvent{ data->cursor->onAnyClick };
+			entt::sink onClickEvent{data->cursor->onAnyClick};
 			onClickEvent.connect<&EditorScene::OnCursorClick>(this);
 		}
 		{
-			entt::sink onCollisionHitEvent{ data->cursor->onCollisionHit };
+			entt::sink onCollisionHitEvent{data->cursor->onCollisionHit};
 			onCollisionHitEvent.connect<&EditorScene::OnCollisionHit>(this);
 		}
 		{
-			entt::sink keyDeletePressed{ data->userInput->keyDeletePressed };
+			entt::sink keyDeletePressed{data->userInput->keyDeletePressed};
 			keyDeletePressed.connect<&EditorScene::OnDeleteModeKeyPressed>(this);
 		}
 		{
-			entt::sink keyPPressed{ data->userInput->keyPPressed };
+			entt::sink keyPPressed{data->userInput->keyPPressed};
 			keyPPressed.connect<&EditorScene::OnCreateModeKeyPressed>(this);
 		}
 		{
-			entt::sink keyGPressed{ data->userInput->keyGPressed };
+			entt::sink keyGPressed{data->userInput->keyGPressed};
 			keyGPressed.connect<&EditorScene::OnGenGridKeyPressed>(this);
 		}
 		{
-			entt::sink keyMPressed{ data->userInput->keyMPressed };
+			entt::sink keyMPressed{data->userInput->keyMPressed};
 			keyMPressed.connect<&EditorScene::OnSerializeSave>(this);
 		}
 		{
-			entt::sink keyNPressed{ data->userInput->keyNPressed };
+			entt::sink keyNPressed{data->userInput->keyNPressed};
 			keyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
 		}
 		{
-			entt::sink saveButton{ gui->saveButtonPressed };
+			entt::sink saveButton{gui->saveButtonPressed};
 			saveButton.connect<&EditorScene::OnSerializeSave>(this);
 		}
 		{
-			entt::sink loadButton{ gui->loadButtonPressed };
+			entt::sink loadButton{gui->loadButtonPressed};
 			loadButton.connect<&EditorScene::OnSerializeLoad>(this);
 		}
 
 		BoundingBox bb = {
-			.min = { -100.0f, 0.1f, -100.0f },
-			.max = {  100.0f, 0.1f,  100.0f }
+			.min = {-100.0f, 0.1f, -100.0f},
+			.max = {100.0f, 0.1f, 100.0f}
 		};
 		GameObjectFactory::createFloor(registry, this, bb);
 
@@ -181,6 +183,5 @@ namespace sage
 
 	EditorScene::~EditorScene()
 	{
-
 	}
 }

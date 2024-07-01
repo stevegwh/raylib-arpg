@@ -25,34 +25,32 @@
 
 namespace sage
 {
-class GameData
-{
-    entt::registry* registry;
-public:
-    GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
-    
-    std::unique_ptr<UserInput> userInput;
-    std::unique_ptr<Cursor> cursor;
-    std::unique_ptr<Camera> camera;
-    Settings* settings;
-    
-    std::unique_ptr<sage::StateMachineSystem> stateMachineSystem;
-	std::unique_ptr<sage::RenderSystem> renderSystem;
-    std::unique_ptr<sage::CollisionSystem> collisionSystem;
-    std::unique_ptr<sage::NavigationGridSystem> navigationGridSystem;
-    std::unique_ptr<sage::ActorMovementSystem> actorMovementSystem;
-    std::unique_ptr<sage::WorldSystem> worldSystem;
-    std::unique_ptr<sage::ControllableActorSystem> controllableActorSystem;
-    std::unique_ptr<sage::AnimationSystem> animationSystem;
-    std::unique_ptr<sage::DialogueSystem> dialogueSystem;
-    std::unique_ptr<sage::HealthBarSystem> healthBarSystem;
-    std::unique_ptr<sage::CombatStateSystem> combatStateSystem;
-    std::unique_ptr<sage::DefaultStateSystem> defaultStateSystem;
+	class GameData
+	{
+		entt::registry* registry;
 
-    void Load();
-    void Save() const;
+	public:
+		GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
 
-};
+		std::unique_ptr<UserInput> userInput;
+		std::unique_ptr<Cursor> cursor;
+		std::unique_ptr<Camera> camera;
+		Settings* settings;
 
+		std::unique_ptr<StateMachineSystem> stateMachineSystem;
+		std::unique_ptr<RenderSystem> renderSystem;
+		std::unique_ptr<CollisionSystem> collisionSystem;
+		std::unique_ptr<NavigationGridSystem> navigationGridSystem;
+		std::unique_ptr<ActorMovementSystem> actorMovementSystem;
+		std::unique_ptr<WorldSystem> worldSystem;
+		std::unique_ptr<ControllableActorSystem> controllableActorSystem;
+		std::unique_ptr<AnimationSystem> animationSystem;
+		std::unique_ptr<DialogueSystem> dialogueSystem;
+		std::unique_ptr<HealthBarSystem> healthBarSystem;
+		std::unique_ptr<CombatStateSystem> combatStateSystem;
+		std::unique_ptr<DefaultStateSystem> defaultStateSystem;
+
+		void Load();
+		void Save() const;
+	};
 }
-

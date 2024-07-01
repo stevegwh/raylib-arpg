@@ -7,11 +7,9 @@
 
 namespace sage
 {
-
-class StatePlayerCombat : public StateMachineComponent
-{
-public:
-    ~StatePlayerCombat() override = default;
-};
-
+	class StatePlayerCombat : public StateMachineComponent
+	{
+	public:
+		~StatePlayerCombat() override = default;
+	};
 } // sage

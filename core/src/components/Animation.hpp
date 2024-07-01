@@ -6,6 +6,10 @@
 
 #include <unordered_map>
 
+#include <entt/entt.hpp>
+
+#include "raylib.h"
+
 namespace sage
 {
 	enum class AnimationEnum

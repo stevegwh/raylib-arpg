@@ -8,11 +8,9 @@
 
 namespace sage
 {
-
-class StateEnemyDefault : public StateMachineComponent
-{
-public:
-    ~StateEnemyDefault() override = default;
-};
-
+	class StateEnemyDefault : public StateMachineComponent
+	{
+	public:
+		~StateEnemyDefault() override = default;
+	};
 } // sage

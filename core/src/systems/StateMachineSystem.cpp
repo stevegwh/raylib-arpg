@@ -6,10 +6,8 @@
 
 namespace sage
 {
-
-StateMachineSystem::StateMachineSystem(entt::registry *_registry)
-    : BaseSystem<StateMachineComponent>(_registry)
-{
-
-}
+	StateMachineSystem::StateMachineSystem(entt::registry* _registry)
+		: BaseSystem<StateMachineComponent>(_registry)
+	{
+	}
 } // sage

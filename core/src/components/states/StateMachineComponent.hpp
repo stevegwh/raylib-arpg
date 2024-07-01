@@ -8,22 +8,21 @@
 
 namespace sage
 {
+	struct StateMachineComponent
+	{
+		entt::sigh<void(entt::entity)> onEnable;
+		entt::sigh<void(entt::entity)> onDisable;
 
-struct StateMachineComponent
-{
-    entt::sigh<void(entt::entity)> onEnable;
-    entt::sigh<void(entt::entity)> onDisable;
-    
-    virtual void Enable(entt::entity entity)
-    {
-        onEnable.publish(entity);
-    }
-    
-    virtual void Disable(entt::entity entity)
-    {
-        onDisable.publish(entity);
-    }
-    
-    virtual ~StateMachineComponent() = default;
-};
+		virtual void Enable(entt::entity entity)
+		{
+			onEnable.publish(entity);
+		}
+
+		virtual void Disable(entt::entity entity)
+		{
+			onDisable.publish(entity);
+		}
+
+		virtual ~StateMachineComponent() = default;
+	};
 }
