@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 if(MSVC)
     set(MSVC_COMPILE_FLAGS "/MP")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MSVC_COMPILE_FLAGS}" )
+else ()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++20 -O3")
 endif()
 
 # Dependencies
