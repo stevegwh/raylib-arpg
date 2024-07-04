@@ -250,16 +250,17 @@ namespace sage
 		entt::entity id = registry->create();
 		//    sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
 		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
-		auto modelPath = "resources/models/gltf/tavern.glb";
+		auto modelPath = "resources/models/obj/level.obj";
 		Model model = LoadModel(modelPath);
+
 		//model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
 
 		auto& transform = registry->emplace<Transform>(id);
 		transform.position = {0, 0, 0};
 		transform.scale = 1.0f;
 
-		Matrix modelTransform = MatrixMultiply(MatrixScale(7.0f, 7.0f, 7.0f), MatrixTranslate(0, 6.3f, 0));
-		//Matrix modelTransform = MatrixScale(0.1f, 0.1f, 0.1f);
+		//Matrix modelTransform = MatrixMultiply(MatrixScale(7.0f, 7.0f, 7.0f), MatrixTranslate(0, 6.3f, 0));
+		Matrix modelTransform = MatrixScale(1,1,1);
 		auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
 		renderable.name = "Level";
 		scene->lightSubSystem->LinkRenderableToLight(&renderable);

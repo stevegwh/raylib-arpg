@@ -51,6 +51,8 @@ namespace sage
 	{
 		data->navigationGridSystem->Init(1000, 1.0f);
 		lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
+		data->Load();
+
 		auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {20.0f, 0, 20.0f}, "Player");
 
 		auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
@@ -59,8 +61,7 @@ namespace sage
 		auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {30.0f, 0, 0.0f}, "Enemy");
 		auto enemy5 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 0.0f}, "Enemy");
 
-
-		data->Load();
+		
 
 		BoundingBox bb = {
 			.min = {-1000.0f, 0.1f, -1000.0f},
@@ -68,8 +69,6 @@ namespace sage
 		};
 		GameObjectFactory::createFloor(registry, this, bb);
 		//GameObjectFactory::loadBlenderLevel(registry, this);
-
-
 		data->navigationGridSystem->PopulateGrid();
 
 		// TODO: tmp
