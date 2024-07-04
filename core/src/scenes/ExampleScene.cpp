@@ -68,7 +68,7 @@ namespace sage
 			.max = {1000.0f, 0.1f, 1000.0f}
 		};
 		GameObjectFactory::createFloor(registry, this, bb);
-		//GameObjectFactory::loadBlenderLevel(registry, this);
+		GameObjectFactory::loadBlenderLevel(registry, this);
 		data->navigationGridSystem->PopulateGrid();
 
 		// TODO: tmp

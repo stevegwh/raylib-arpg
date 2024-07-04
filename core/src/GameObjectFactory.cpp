@@ -247,33 +247,41 @@ namespace sage
 
 	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene)
 	{
-		entt::entity id = registry->create();
+		
 		//    sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
 		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
-		auto modelPath = "resources/models/obj/level.obj";
-		Model model = LoadModel(modelPath);
+		auto modelPath = "resources/models/obj/level2.obj";
+		Model parent = LoadModel(modelPath);
+
+		for (int i = 0; i < parent.meshCount; ++i)
+		{
+			entt::entity id = registry->create();
+			auto& transform = registry->emplace<Transform>(id);
+			transform.position = {0, 0, 0};
+			transform.scale = 1.0f;
+
+			Matrix modelTransform = MatrixMultiply(MatrixScale(5.0f, 5.0f, 5.0f), MatrixTranslate(0, 0, 0));
+			Model model = LoadModelFromMesh(parent.meshes[i]);
+			//Matrix modelTransform = MatrixScale(1,1,1);
+			auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
+			renderable.name = "Level";
+			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
+			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/models/obj/POLYGON_Knights_Texture_01.png");
+		}
 
 		//model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
 
-		auto& transform = registry->emplace<Transform>(id);
-		transform.position = {0, 0, 0};
-		transform.scale = 1.0f;
 
-		//Matrix modelTransform = MatrixMultiply(MatrixScale(7.0f, 7.0f, 7.0f), MatrixTranslate(0, 6.3f, 0));
-		Matrix modelTransform = MatrixScale(1,1,1);
-		auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
-		renderable.name = "Level";
-		scene->lightSubSystem->LinkRenderableToLight(&renderable);
 
 		// Create floor
-		BoundingBox modelBB = GetModelBoundingBox(renderable.model);
-		Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
-		Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
-		BoundingBox bb = {
-			.min = g0,
-			.max = g2
-		};
-		createFloor(registry, scene, bb);
+		//BoundingBox modelBB = GetModelBoundingBox(renderable.model);
+		//Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
+		//Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
+		//BoundingBox bb = {
+		//	.min = g0,
+		//	.max = g2
+		//};
+		//createFloor(registry, scene, bb);
 	}
 
 	void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)

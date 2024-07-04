@@ -4,5 +4,7 @@ build
 .idea
 .vscode
 resources/models/gltf/level.glb
+resources/models/obj/level.obj
+resources/models/obj/level2.obj
 out
 .vs
