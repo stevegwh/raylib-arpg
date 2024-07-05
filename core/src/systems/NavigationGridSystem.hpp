@@ -60,6 +60,7 @@ namespace sage
 		                                                 const GridSquare& maxRange,
 		                                                 AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
 		const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
+        const NavigationGridSquare* GetGridSquare(int row, int col);
 		void DrawDebugPathfinding(const GridSquare& minRange, const GridSquare& maxRange) const;
 
 		void MarkSquareAreaOccupied(const BoundingBox& occupant, bool occupied,

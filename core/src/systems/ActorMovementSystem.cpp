@@ -149,7 +149,7 @@ namespace sage
 
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
 			auto& actorTrans = registry->get<Transform>(entity);
-			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position);
+			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position); // TODO: Should be 2D?
 
 
 			// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
@@ -219,8 +219,8 @@ namespace sage
 			float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
 			actorTrans.rotation.y = angle;
 			actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
-
-			actorTrans.position.y = navigationGridSystem->GetGridSquares().at(actorIndex.row).at(actorIndex.col)->terrainHeight;
+			auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
+            actorTrans.position.y = gridSquare->terrainHeight;
 			actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
 			actorTrans.onPositionUpdate.publish(entity);
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);

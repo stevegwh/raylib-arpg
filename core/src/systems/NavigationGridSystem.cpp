@@ -321,39 +321,27 @@ namespace sage
 
 	void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area)
 	{
-
+        auto bb = registry->get<Collideable>(entity).worldBoundingBox;
 		GridSquare topLeftIndex;
 		GridSquare bottomRightIndex;
-		if (!WorldToGridSpace(area.min, topLeftIndex) ||
-			!WorldToGridSpace(area.max, bottomRightIndex))
+		if (!WorldToGridSpace(bb.min, topLeftIndex) ||
+			!WorldToGridSpace(bb.max, bottomRightIndex))
 		{
 			return;
 		}
-
+        //auto& rend = registry->get<Renderable>(entity);
 		int min_col = std::min(topLeftIndex.col, bottomRightIndex.col);
 		int max_col = std::max(topLeftIndex.col, bottomRightIndex.col);
 		int min_row = std::min(topLeftIndex.row, bottomRightIndex.row);
 		int max_row = std::max(topLeftIndex.row, bottomRightIndex.row);
-		auto& trans = registry->get<Transform>(entity);
-		auto& rend = registry->get<Renderable>(entity);
 
 		for (int row = min_row; row <= max_row; ++row)
 		{
 			for (int col = min_col; col <= max_col; ++col)
 			{
-				Vector3 worldPos = gridSquares[row][col]->worldPosMin; // TODO: Not sure if worldPosCentre works or not. Using min for now.
-				Ray ray;
-				ray.position = worldPos;
-				ray.position.y = -10.0f;
-				ray.direction = { 0, -100, 0 };
-
-				auto info = GetRayCollisionMesh(ray, *rend.model.meshes, trans.GetMatrix());
-				
-				if (info.hit)
-				{
-					gridSquares[row][col]->terrainHeight = info.point.y;
-					gridSquares[row][col]->terrainNormal = info.normal;
-				}
+                gridSquares[row][col]->terrainHeight = bb.max.y;
+                
+                //gridSquares[row][col]->terrainNormal = info.rlCollision.normal;
 			
 			}
 		}
@@ -730,36 +718,56 @@ namespace sage
 	/*
 	* This function finds the collisions between buildings in the world and the grid squares and marks them as occupied.
 	 */
-	void NavigationGridSystem::PopulateGrid()
-	{
-		for (auto& row : gridSquares)
-		{
-			for (auto& gridSquare : row)
-			{
-				gridSquare->occupied = false;
-			}
-		}
+    void NavigationGridSystem::PopulateGrid()
+    {
+        for (auto& row : gridSquares)
+        {
+            for (auto& gridSquare : row)
+            {
+                gridSquare->occupied = false;
+            }
+        }
 
-		const auto& view = registry->view<Collideable>();
-		for (const auto& entity : view)
-		{
-			const auto& bb = view.get<Collideable>(entity);
-			if (bb.collisionLayer == CollisionLayer::BUILDING)
-			{
-				MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
-			}
-			else if (bb.collisionLayer == CollisionLayer::FLOOR)
-			{
-				calculateTerrainHeightAndNormals(entity, bb.worldBoundingBox);
-			}
-			
-		}
-	}
+        const auto& view = registry->view<Collideable>();
+
+        // Create a vector of pairs: (entity, worldBoundingBox.max.y)
+        std::vector<std::pair<entt::entity, float>> sortedEntities;
+
+        for (const auto& entity : view)
+        {
+            const auto& bb = view.get<Collideable>(entity);
+            sortedEntities.emplace_back(entity, bb.worldBoundingBox.max.y);
+        }
+
+        // Sort the vector based on worldBoundingBox.max.y
+        std::sort(sortedEntities.begin(), sortedEntities.end(),
+                  [](const auto& a, const auto& b) { return a.second < b.second; });
+
+        // Process the sorted entities
+        for (const auto& [entity, height] : sortedEntities)
+        {
+            const auto& bb = view.get<Collideable>(entity);
+
+            if (bb.collisionLayer == CollisionLayer::BUILDING)
+            {
+                MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
+            }
+            else if (bb.collisionLayer == CollisionLayer::FLOOR)
+            {
+                calculateTerrainHeightAndNormals(entity, bb.worldBoundingBox);
+            }
+        }
+    }
 
 	const std::vector<std::vector<NavigationGridSquare*>>& NavigationGridSystem::GetGridSquares()
 	{
 		return gridSquares;
 	}
+
+    const NavigationGridSquare* NavigationGridSystem::GetGridSquare(int row, int col)
+    {
+        return gridSquares[row][col];
+    }
 
 	NavigationGridSystem::NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem) :
 		BaseSystem<NavigationGridSquare>(_registry), collisionSystem(_collisionSystem)
