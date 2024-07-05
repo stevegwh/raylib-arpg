@@ -53,5 +53,6 @@ namespace sage
 		~EditorScene() override;
 		void Draw3D() override;
 		void Draw2D() override;
+        void DrawDebug() override;
 	};
 }

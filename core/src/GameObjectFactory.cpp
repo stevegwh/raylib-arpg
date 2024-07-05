@@ -273,7 +273,19 @@ namespace sage
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
 			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/models/obj/POLYGON_Knights_Texture_01.png");
             auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
-            collideable.collisionLayer = CollisionLayer::BUILDING;
+            
+            if (renderable.name.find("SM_Bld") != std::string::npos) 
+            {
+                collideable.collisionLayer = CollisionLayer::BUILDING;
+            } 
+            else if (renderable.name.find("SM_Env") != std::string::npos) 
+            {
+                collideable.collisionLayer = CollisionLayer::FLOOR;
+            } 
+            else 
+            {
+                collideable.collisionLayer = CollisionLayer::DEFAULT;
+            }
             scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
         }
 

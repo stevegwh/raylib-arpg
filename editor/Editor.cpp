@@ -79,11 +79,6 @@ namespace sage
 		}
 	}
 
-	void Editor::drawGrid()
-	{
-		DrawGrid(scene->data->navigationGridSystem->slices, scene->data->navigationGridSystem->spacing);
-	}
-
 	void Editor::draw()
 	{
 		BeginDrawing();
@@ -91,7 +86,6 @@ namespace sage
 		BeginMode3D(*scene->data->camera->getRaylibCam());
 		scene->Draw3D();
 		scene->DrawDebug();
-		drawGrid();
 		EndMode3D();
 		scene->Draw2D();
 		DrawFPS(10, 10);

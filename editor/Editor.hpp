@@ -15,7 +15,6 @@ namespace sage
 		bool debugMode = false;
 		void init() override;
 		void draw() override;
-		void drawGrid();
 		void enablePlayMode();
 		void enableEditMode();
 		void manageScenes();
