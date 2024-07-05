@@ -72,6 +72,9 @@ namespace sage
 		entt::entity occupant = entt::null;
 		bool occupied = false;
 
+		Vector3 terrainNormal = {0, 1, 0};
+		float terrainHeight = 0.0f;
+
 		NavigationGridSquare(GridSquare _gridSquareIndex,
 		                     Vector3 _worldPosMin,
 		                     Vector3 _worldPosMax,

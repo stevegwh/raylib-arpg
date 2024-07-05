@@ -20,7 +20,10 @@ namespace sage
 		std::vector<std::pair<int, int>> directions = {
 			{1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, 1}, {-1, -1}, {1, -1}
 		};
+		CollisionSystem* collisionSystem;
 		std::vector<std::vector<NavigationGridSquare*>> gridSquares;
+
+
 		std::vector<Vector3> tracebackPath(const std::vector<std::vector<GridSquare>>& came_from,
 		                                   const GridSquare& start,
 		                                   const GridSquare& finish) const;
@@ -29,13 +32,15 @@ namespace sage
 		bool checkExtents(GridSquare square, GridSquare extents) const;
 		bool getExtents(Vector3 worldPos, GridSquare& extents) const;
 
+		void calculateTerrainHeightAndNormals(const BoundingBox& area);
+
 	public:
 		float spacing{};
 		int slices{};
 
-		explicit NavigationGridSystem(entt::registry* _registry);
+		explicit NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem);
 		void Init(int _slices, float _spacing);
-		void PopulateGrid() const;
+		void PopulateGrid();
 		bool GetPathfindRange(const entt::entity& actorId, int bounds, GridSquare& minRange,
 		                      GridSquare& maxRange) const;
 		bool GridToWorldSpace(GridSquare gridPos, Vector3& out) const;

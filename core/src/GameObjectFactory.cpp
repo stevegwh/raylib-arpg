@@ -247,7 +247,7 @@ namespace sage
 		registry->emplace<WorldObject>(id);
 	}
 
-	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene)
+	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene, bool shouldCreateFloor)
 	{
 		
 		//    sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
@@ -289,19 +289,18 @@ namespace sage
             scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
         }
 
-		//model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-
-
-
-		// Create floor
-		//BoundingBox modelBB = GetModelBoundingBox(renderable.model);
-		//Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
-		//Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
-		//BoundingBox bb = {
-		//	.min = g0,
-		//	.max = g2
-		//};
-		//createFloor(registry, scene, bb);
+		if (shouldCreateFloor)
+		{
+			// Create floor
+			BoundingBox modelBB = GetModelBoundingBox(parent);
+			Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
+			Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
+			BoundingBox bb = {
+				.min = g0,
+				.max = g2
+			};
+			createFloor(registry, scene, bb);
+		}
 	}
 
 	void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)

@@ -1,4 +1,5 @@
 #include "NavigationGridSystem.hpp"
+#include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/Transform.hpp"
 
@@ -317,6 +318,43 @@ namespace sage
 		return true;
 	}
 
+	void NavigationGridSystem::calculateTerrainHeightAndNormals(const BoundingBox& area)
+	{
+		GridSquare topLeftIndex;
+		GridSquare bottomRightIndex;
+		if (!WorldToGridSpace(area.min, topLeftIndex) ||
+			!WorldToGridSpace(area.max, bottomRightIndex))
+		{
+			return;
+		}
+
+		int min_col = std::min(topLeftIndex.col, bottomRightIndex.col);
+		int max_col = std::max(topLeftIndex.col, bottomRightIndex.col);
+		int min_row = std::min(topLeftIndex.row, bottomRightIndex.row);
+		int max_row = std::max(topLeftIndex.row, bottomRightIndex.row);
+
+		for (int row = min_row; row <= max_row; ++row)
+		{
+			for (int col = min_col; col <= max_col; ++col)
+			{
+				Vector3 worldPos = gridSquares[row][col]->worldPosMin; // TODO: Not sure if worldPosCentre works or not. Using min for now.
+				Ray ray;
+				ray.position = worldPos;
+				ray.direction = { 0, -100, 0 };
+
+				auto collision = collisionSystem->GetCollisionsWithRay(ray, CollisionLayer::FLOOR);
+
+				if (!collision.empty())
+				{
+					gridSquares[row][col]->terrainHeight = collision.at(0).rlCollision.point.y;
+					gridSquares[row][col]->terrainNormal = collision.at(0).rlCollision.normal;
+				}
+
+			}
+		}
+		
+	}
+
 	/**
 	 * Takes an entity and returns the extents of the entity in grid space.
 	 * @param entity The entity to get the extents of.
@@ -376,7 +414,7 @@ namespace sage
 	bool NavigationGridSystem::GridToWorldSpace(GridSquare gridPos, Vector3& out) const
 	{
 		GridSquare maxRange = { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) };
-		out = gridSquares[gridPos.row][gridPos.col]->worldPosMin;
+		out = gridSquares[gridPos.row][gridPos.col]->worldPosMin; // Not centre?
 		return checkInside(gridPos, { 0, 0 }, maxRange);
 	}
 
@@ -684,8 +722,10 @@ namespace sage
 		return tracebackPath(came_from, startGridSquare, finishGridSquare);
 	}
 
-
-	void NavigationGridSystem::PopulateGrid() const
+	/*
+	* This function finds the collisions between buildings in the world and the grid squares and marks them as occupied.
+	 */
+	void NavigationGridSystem::PopulateGrid()
 	{
 		for (auto& row : gridSquares)
 		{
@@ -699,8 +739,15 @@ namespace sage
 		for (const auto& entity : view)
 		{
 			const auto& bb = view.get<Collideable>(entity);
-			if (bb.collisionLayer != CollisionLayer::BUILDING) continue;
-			MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
+			if (bb.collisionLayer == CollisionLayer::BUILDING)
+			{
+				MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
+			}
+			else if (bb.collisionLayer == CollisionLayer::FLOOR)
+			{
+				calculateTerrainHeightAndNormals(bb.worldBoundingBox);
+			}
+			
 		}
 	}
 
@@ -709,8 +756,8 @@ namespace sage
 		return gridSquares;
 	}
 
-	NavigationGridSystem::NavigationGridSystem(entt::registry* _registry) :
-		BaseSystem<NavigationGridSquare>(_registry)
+	NavigationGridSystem::NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem) :
+		BaseSystem<NavigationGridSquare>(_registry), collisionSystem(_collisionSystem)
 	{
 	}
 } // sage
