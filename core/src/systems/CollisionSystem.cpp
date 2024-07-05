@@ -1,3 +1,4 @@
+#include "CollisionSystem.hpp"
 //
 // Created by Steve Wheeler on 18/02/2024.
 //
@@ -48,6 +49,31 @@ namespace sage
 	std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray, CollisionLayer layer)
 	{
 		return GetCollisionsWithRay(entt::null, ray, layer);
+	}
+
+	bool CollisionSystem::GetFirstCollisionWithRay(const Ray& ray, CollisionInfo& info, CollisionLayer layer)
+	{
+		auto view = registry->view<Collideable>();
+
+		view.each([&](auto entity, const auto& c)
+		{
+			if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
+			{
+				auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
+				if (col.hit)
+				{
+					CollisionInfo _info = {
+						.collidedEntityId = entity,
+						.collidedBB = c.worldBoundingBox,
+						.rlCollision = col,
+						.collisionLayer = c.collisionLayer
+					};
+					info = _info;
+				}
+			}
+		});
+
+		return false;
 	}
 
 	std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const entt::entity& caster, const Ray& ray,
@@ -174,6 +200,8 @@ namespace sage
 		matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::PLAYER)] = true;
 		matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::NPC)] = true;
 		matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::ENEMY)] = true;
+
+		matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::FLOOR)] = true;
 
 		return matrix;
 	}

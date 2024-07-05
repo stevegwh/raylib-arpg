@@ -29,6 +29,7 @@ namespace sage
 		                                                              CollisionLayer layer = CollisionLayer::DEFAULT);
 		[[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(const Ray& ray,
 		                                                              CollisionLayer layer = CollisionLayer::DEFAULT);
+		[[nodiscard]] bool GetFirstCollisionWithRay(const Ray& ray, CollisionInfo& info, CollisionLayer layer = CollisionLayer::DEFAULT);
 		[[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithBoundingBox(
 			const BoundingBox& bb, CollisionLayer layer = CollisionLayer::DEFAULT);
 		void BoundingBoxDraw(entt::entity entityId, Color color = LIME) const;

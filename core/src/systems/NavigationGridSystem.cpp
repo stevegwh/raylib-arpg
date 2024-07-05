@@ -2,6 +2,7 @@
 #include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/Transform.hpp"
+#include "components/Renderable.hpp"
 
 #include <queue>
 #include <utility>
@@ -318,8 +319,9 @@ namespace sage
 		return true;
 	}
 
-	void NavigationGridSystem::calculateTerrainHeightAndNormals(const BoundingBox& area)
+	void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area)
 	{
+
 		GridSquare topLeftIndex;
 		GridSquare bottomRightIndex;
 		if (!WorldToGridSpace(area.min, topLeftIndex) ||
@@ -332,6 +334,8 @@ namespace sage
 		int max_col = std::max(topLeftIndex.col, bottomRightIndex.col);
 		int min_row = std::min(topLeftIndex.row, bottomRightIndex.row);
 		int max_row = std::max(topLeftIndex.row, bottomRightIndex.row);
+		auto& trans = registry->get<Transform>(entity);
+		auto& rend = registry->get<Renderable>(entity);
 
 		for (int row = min_row; row <= max_row; ++row)
 		{
@@ -340,16 +344,17 @@ namespace sage
 				Vector3 worldPos = gridSquares[row][col]->worldPosMin; // TODO: Not sure if worldPosCentre works or not. Using min for now.
 				Ray ray;
 				ray.position = worldPos;
+				ray.position.y = -10.0f;
 				ray.direction = { 0, -100, 0 };
 
-				auto collision = collisionSystem->GetCollisionsWithRay(ray, CollisionLayer::FLOOR);
-
-				if (!collision.empty())
+				auto info = GetRayCollisionMesh(ray, *rend.model.meshes, trans.GetMatrix());
+				
+				if (info.hit)
 				{
-					gridSquares[row][col]->terrainHeight = collision.at(0).rlCollision.point.y;
-					gridSquares[row][col]->terrainNormal = collision.at(0).rlCollision.normal;
+					gridSquares[row][col]->terrainHeight = info.point.y;
+					gridSquares[row][col]->terrainNormal = info.normal;
 				}
-
+			
 			}
 		}
 		
@@ -745,7 +750,7 @@ namespace sage
 			}
 			else if (bb.collisionLayer == CollisionLayer::FLOOR)
 			{
-				calculateTerrainHeightAndNormals(bb.worldBoundingBox);
+				calculateTerrainHeightAndNormals(entity, bb.worldBoundingBox);
 			}
 			
 		}
