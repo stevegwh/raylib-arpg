@@ -13,7 +13,7 @@ namespace sage
 		stateMachineSystem(std::make_unique<StateMachineSystem>(_registry)),
 		renderSystem(std::make_unique<RenderSystem>(_registry)),
 		collisionSystem(std::make_unique<CollisionSystem>(_registry)),
-		navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry)),
+		navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
 		actorMovementSystem(std::make_unique<ActorMovementSystem>(_registry,
 		                                                          collisionSystem.get(),
 		                                                          navigationGridSystem.get())),

@@ -219,6 +219,7 @@ namespace sage
 			float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
 			actorTrans.rotation.y = angle;
 			actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
+			actorTrans.position.y = navigationGridSystem->GetGridSquares().at(actorIndex.row).at(actorIndex.col)->terrainHeight;
 			actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
 			actorTrans.onPositionUpdate.publish(entity);
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);

@@ -175,7 +175,7 @@ namespace sage
         lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
         
 		data->Load();
-        GameObjectFactory::loadBlenderLevel(registry, this);
+        GameObjectFactory::loadBlenderLevel(registry, this, false);
         BoundingBox bb = {
             .min = {-100.0f, 0.1f, -100.0f},
             .max = {100.0f, 0.1f, 100.0f}
