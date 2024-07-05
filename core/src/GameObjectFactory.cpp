@@ -250,9 +250,9 @@ namespace sage
 	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene, bool shouldCreateFloor)
 	{
 		
-		//    sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
+		    sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
 		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
-		auto modelPath = "resources/models/obj/level2.obj";
+		auto modelPath = "resources/models/obj/level-min.obj";
 		Model parent = LoadModel(modelPath);
         
         // TODO: Copy LoadOBJ and alter it so that it spits out meshes as models with their names parsed as a layer etc
@@ -264,16 +264,15 @@ namespace sage
 			transform.position = {0, 0, 0};
 			transform.scale = 1.0f;
 
-			Matrix modelTransform = MatrixMultiply(MatrixScale(5.0f, 5.0f, 5.0f), MatrixTranslate(0, 0, 0));
+			Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
 			Model model = LoadModelFromMesh(parent.meshes[i]);
 			//Matrix modelTransform = MatrixScale(1,1,1);
 			auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
 			renderable.name = parent.meshes[i].name;
             
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
-			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/models/obj/POLYGON_Knights_Texture_01.png");
+			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
             auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
-            
             if (renderable.name.find("SM_Bld") != std::string::npos) 
             {
                 collideable.collisionLayer = CollisionLayer::BUILDING;

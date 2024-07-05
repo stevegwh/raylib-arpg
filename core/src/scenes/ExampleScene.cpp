@@ -49,7 +49,7 @@ namespace sage
 	ExampleScene::ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
 		Scene(_registry, std::move(_data))
 	{
-		data->navigationGridSystem->Init(100, 1.0f); // TODO: The number of grid slices should be based on the level size
+		data->navigationGridSystem->Init(1000, 1.0f); // TODO: The number of grid slices should be based on the level size
 		lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
 		data->Load();
 
