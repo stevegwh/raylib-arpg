@@ -3,8 +3,9 @@
 //
 
 #include "GameObjectFactory.hpp"
-#include "Application.hpp"
 #include "scenes/Scene.hpp"
+
+
 #include "components/Transform.hpp"
 #include "components/MovableActor.hpp"
 #include "components/Renderable.hpp"
@@ -13,10 +14,11 @@
 #include "components/Animation.hpp"
 #include "components/HealthBar.hpp"
 #include "components/CombatableActor.hpp"
-
-#include "raymath.h"
 #include "components/states/StateEnemyDefault.hpp"
 #include "components/states/StatePlayerDefault.hpp"
+
+#include "raymath.h"
+
 
 namespace sage
 {
@@ -252,6 +254,8 @@ namespace sage
 		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
 		auto modelPath = "resources/models/obj/level2.obj";
 		Model parent = LoadModel(modelPath);
+        
+        // TODO: Copy LoadOBJ and alter it so that it spits out meshes as models with their names parsed as a layer etc
 
 		for (int i = 0; i < parent.meshCount; ++i)
 		{
@@ -264,10 +268,14 @@ namespace sage
 			Model model = LoadModelFromMesh(parent.meshes[i]);
 			//Matrix modelTransform = MatrixScale(1,1,1);
 			auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
-			renderable.name = "Level";
+			renderable.name = parent.meshes[i].name;
+            
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
 			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/models/obj/POLYGON_Knights_Texture_01.png");
-		}
+            auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
+            collideable.collisionLayer = CollisionLayer::BUILDING;
+            scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
+        }
 
 		//model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
 

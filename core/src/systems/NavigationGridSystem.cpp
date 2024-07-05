@@ -401,6 +401,7 @@ namespace sage
 
 	void NavigationGridSystem::DrawDebug() const
 	{
+        return;
 		for (const auto& gridSquareRow : gridSquares)
 		{
 			for (const auto& gridSquare : gridSquareRow)
