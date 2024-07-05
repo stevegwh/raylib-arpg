@@ -115,7 +115,6 @@ namespace sage
 		Scene::Draw3D();
 	}
 
-
 	void EditorScene::Draw2D()
 	{
 		std::string mode = "NONE";
@@ -127,6 +126,11 @@ namespace sage
 		gui->Draw(mode, data->cursor.get());
 		// Do not draw2D the game cursor
 	}
+    
+    void EditorScene::DrawDebug()
+    {
+        DrawGrid(data->navigationGridSystem->slices, data->navigationGridSystem->spacing);
+    }
 
 	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
 		Scene(_registry, std::move(_data)),
