@@ -140,14 +140,14 @@ namespace sage
 				if (moveableActor.path.empty()
 					|| !AlmostEquals(moveableActor.path.back(), moveableActor.destination.value()))
 				{
+					navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
 					if (navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
 						moveableActor.destination.value(), actorCollideable.worldBoundingBox))
 					{
 						// TODO: Not sure how much I like having to mark squares as occupied etc.
-						navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
 						PathfindToLocation(entity, moveableActor.destination.value(), false);
-						navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
 					}
+					navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
 				}
 			}
 
@@ -157,8 +157,6 @@ namespace sage
 			}
 
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
-//            Vector2 frontV2 = Vec3ToVec2(moveableActor.path.front());
-//            Vector2 posV2 = Vec3ToVec2(actorTrans.position);
 			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position());
             
 			// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
