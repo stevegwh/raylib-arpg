@@ -10,12 +10,13 @@
 
 namespace sage
 {
-	struct Transform
+	class Transform
 	{
-		Vector3 position{};
-		Vector3 direction{};
-		Vector3 rotation{};
-		float scale = 1.0f;
+		Vector3 m_position{};
+		Vector3 m_direction{};
+		Vector3 m_rotation{};
+		float m_scale = 1.0f;
+    public:
 		float movementSpeed = 0.35f;
 
 		Ray movementDirectionDebugLine{};
@@ -54,7 +55,6 @@ namespace sage
 		entt::sigh<void(entt::entity)> onFinishMovement{};
         entt::sigh<void(entt::entity)> onDestinationReached{};
 		entt::sigh<void(entt::entity)> onMovementCancel{};
-
 
 		[[nodiscard]] Matrix GetMatrixNoRot() const;
 		[[nodiscard]] Matrix GetMatrix() const;
