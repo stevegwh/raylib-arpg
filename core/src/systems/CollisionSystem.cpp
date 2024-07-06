@@ -8,6 +8,7 @@
 #include "CollisionSystem.hpp"
 
 #include "../../utils/Serializer.hpp"
+#include "../components/Renderable.hpp"
 #include "../Application.hpp"
 
 bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
@@ -75,6 +76,42 @@ namespace sage
 
 		return false;
 	}
+
+    std::vector<CollisionInfo> CollisionSystem::GetMeshCollisionsWithRay(const entt::entity& caster, const Ray& ray,
+        CollisionLayer layer)
+    {
+        std::vector<CollisionInfo> collisions;
+
+        auto view = registry->view<Collideable>();
+
+        view.each([&](auto entity, const auto& c)
+                  {
+                      if (entity == caster) return;
+                      if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)]) 
+                      {
+                          if (registry->any_of<Renderable>(entity))
+                          {
+                              auto& r = registry->get<Renderable>(entity);
+                              auto mesh = *r.model.meshes;
+                              auto col = GetRayCollisionMesh(ray, mesh, r.model.transform);
+                              if (col.hit) 
+                              {
+                                  CollisionInfo info = {
+                                      .collidedEntityId = entity,
+                                      .collidedBB = c.worldBoundingBox,
+                                      .rlCollision = col,
+                                      .collisionLayer = c.collisionLayer
+                                  };
+                                  collisions.push_back(info);
+                              }
+                          }
+                      }
+                  });
+
+        std::sort(collisions.begin(), collisions.end(), compareRayCollisionDistances);
+
+        return collisions;
+    }
 
 	std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const entt::entity& caster, const Ray& ray,
 	                                                                 CollisionLayer layer)

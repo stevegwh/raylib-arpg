@@ -319,34 +319,109 @@ namespace sage
 		return true;
 	}
 
-	void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area)
-	{
-        auto bb = registry->get<Collideable>(entity).worldBoundingBox;
-		GridSquare topLeftIndex;
-		GridSquare bottomRightIndex;
-		if (!WorldToGridSpace(bb.min, topLeftIndex) ||
-			!WorldToGridSpace(bb.max, bottomRightIndex))
-		{
-			return;
-		}
-        //auto& rend = registry->get<Renderable>(entity);
-		int min_col = std::min(topLeftIndex.col, bottomRightIndex.col);
-		int max_col = std::max(topLeftIndex.col, bottomRightIndex.col);
-		int min_row = std::min(topLeftIndex.row, bottomRightIndex.row);
-		int max_row = std::max(topLeftIndex.row, bottomRightIndex.row);
+bool PointInTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
+{
+    // Compute vectors
+    Vector3 v0 = Vector3Subtract(c, a);
+    Vector3 v1 = Vector3Subtract(b, a);
+    Vector3 v2 = Vector3Subtract(p, a);
 
-		for (int row = min_row; row <= max_row; ++row)
-		{
-			for (int col = min_col; col <= max_col; ++col)
-			{
-                gridSquares[row][col]->terrainHeight = bb.max.y;
-                
-                //gridSquares[row][col]->terrainNormal = info.rlCollision.normal;
-			
-			}
-		}
-		
-	}
+    // Compute dot products
+    float dot00 = Vector3DotProduct(v0, v0);
+    float dot01 = Vector3DotProduct(v0, v1);
+    float dot02 = Vector3DotProduct(v0, v2);
+    float dot11 = Vector3DotProduct(v1, v1);
+    float dot12 = Vector3DotProduct(v1, v2);
+
+    // Compute barycentric coordinates
+    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    // Check if point is in triangle
+    return (u >= 0) && (v >= 0) && (u + v < 1);
+}
+
+Vector3 FindTriangleContainingPoint(const Vector3& point, const Mesh& mesh, const Matrix& transform)
+{
+    Vector3* vertices = (Vector3*)mesh.vertices;
+    unsigned short* indices = (unsigned short*)mesh.indices;
+
+    for (int i = 0; i < mesh.triangleCount; i++)
+    {
+        Vector3 a = Vector3Transform(vertices[indices[i*3]], transform);
+        Vector3 b = Vector3Transform(vertices[indices[i*3 + 1]], transform);
+        Vector3 c = Vector3Transform(vertices[indices[i*3 + 2]], transform);
+
+        // Ignore Y component for terrain
+        Vector3 flattened_point = {point.x, 0, point.z};
+        Vector3 flattened_a = {a.x, 0, a.z};
+        Vector3 flattened_b = {b.x, 0, b.z};
+        Vector3 flattened_c = {c.x, 0, c.z};
+
+        if (PointInTriangle(flattened_point, flattened_a, flattened_b, flattened_c))
+        {
+            // Calculate the height using barycentric coordinates
+            Vector3 barycentric = Vector3Barycenter(flattened_point, flattened_a, flattened_b, flattened_c);
+            float height = a.y * barycentric.x + b.y * barycentric.y + c.y * barycentric.z;
+
+            return (Vector3){ point.x, height, point.z };
+        }
+    }
+
+    // If no triangle is found, return a point with a very low Y value
+    return (Vector3){ point.x, -1000000.0f, point.z };
+}
+
+void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area)
+{
+    GridSquare topLeftIndex, bottomRightIndex;
+    if (!WorldToGridSpace(area.min, topLeftIndex) || !WorldToGridSpace(area.max, bottomRightIndex))
+    {
+        return;
+    }
+
+    auto& renderable = registry->get<Renderable>(entity);
+    auto& transform = registry->get<Transform>(entity);
+    Mesh mesh = *renderable.model.meshes;
+    Matrix matrix = transform.GetMatrix();
+
+
+    int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
+    int max_col = std::min(static_cast<int>(gridSquares[0].size()) - 1, std::max(topLeftIndex.col, bottomRightIndex.col));
+    int min_row = std::max(0, std::min(topLeftIndex.row, bottomRightIndex.row));
+    int max_row = std::min(static_cast<int>(gridSquares.size()) - 1, std::max(topLeftIndex.row, bottomRightIndex.row));
+
+    for (int row = min_row; row <= max_row; ++row)
+    {
+        for (int col = min_col; col <= max_col; ++col)
+        {
+            Vector3 gridCenter = {
+                (gridSquares[row][col]->worldPosMin.x + gridSquares[row][col]->worldPosMax.x) * 0.5f,
+                area.max.y + 1.0f,  // Start slightly above the terrain
+                (gridSquares[row][col]->worldPosMin.z + gridSquares[row][col]->worldPosMax.z) * 0.5f
+            };
+
+            Ray ray = { gridCenter, { 0, -1, 0 } };  // Cast ray down
+
+            RayCollision collision = GetRayCollisionMesh(ray, mesh, matrix);
+            
+
+            if (collision.hit)
+            {
+                gridSquares[row][col]->terrainHeight = collision.point.y;
+                gridSquares[row][col]->terrainNormal = collision.normal;
+            }
+            else
+            {
+                // If no hit, use the lowest point of the terrain as a fallback
+                gridSquares[row][col]->terrainHeight = area.max.y;
+                gridSquares[row][col]->terrainNormal = { 0, 1, 0 };  // Assume flat ground as fallback
+                //std::cout << "Warning: No terrain intersection at grid (" << row << ", " << col << ")\n";
+            }
+        }
+    }
+}
 
 	/**
 	 * Takes an entity and returns the extents of the entity in grid space.
