@@ -101,11 +101,11 @@ namespace sage
 		auto& animation = registry->get<Animation>(entity);
 		auto& actorTrans = registry->get<Transform>(entity);
 		auto& collideable = registry->get<Collideable>(entity);
-		auto& target = registry->get<Transform>(combatableActor.target).position;
+		auto& target = registry->get<Transform>(combatableActor.target).position();
 
 		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 		Ray ray;
-		ray.position = actorTrans.position;
+		ray.position = actorTrans.position();
 		ray.direction = Vector3Scale(normDirection, distance);
 		ray.position.y = 0.5f;
 		ray.direction.y = 0.5f;
@@ -133,10 +133,10 @@ namespace sage
 		auto& actorTrans = registry->get<Transform>(entity);
 		auto& animation = registry->get<Animation>(entity);
 
-		auto& target = registry->get<Transform>(combatableActor.target).position;
+		auto target = registry->get<Transform>(combatableActor.target).position();
 
-		Vector3 direction = Vector3Subtract(target, actorTrans.position);
-		float distance = Vector3Distance(actorTrans.position, target);
+		Vector3 direction = Vector3Subtract(target, actorTrans.position());
+		float distance = Vector3Distance(actorTrans.position(), target);
 		Vector3 normDirection = Vector3Normalize(direction);
 
 		if (distance >= 15)
@@ -146,7 +146,7 @@ namespace sage
 		}
 
 		float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-		actorTrans.rotation.y = angle;
+		actorTrans.SetRotation({0, angle, 0}, entity);
 		combatableActor.autoAttackTick = 0;
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 	}

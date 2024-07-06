@@ -643,7 +643,7 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
 		}
 		GridSquare currentPos;
 		auto& trans = registry->get<Transform>(entity);
-		if (!WorldToGridSpace(trans.position, currentPos))
+		if (!WorldToGridSpace(trans.position(), currentPos))
 		{
 			return {};
 		}

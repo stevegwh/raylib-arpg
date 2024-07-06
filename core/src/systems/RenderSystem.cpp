@@ -24,7 +24,7 @@ namespace sage
 		view.each([](const auto& r, const auto& t)
 		{
 			Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
-			DrawModelEx(r.model, t.position, rotationAxis, t.rotation.y, {t.scale, t.scale, t.scale}, WHITE);
+			DrawModelEx(r.model, t.position(), rotationAxis, t.rotation().y, {t.scale(), t.scale(), t.scale()}, WHITE);
 		});
 	}
 

@@ -73,7 +73,7 @@ namespace sage
 		navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
 		const auto& actorTrans = registry->get<Transform>(entity);
-		auto path = navigationGridSystem->AStarPathfind(entity, actorTrans.position, destination, minRange, maxRange,
+		auto path = navigationGridSystem->AStarPathfind(entity, actorTrans.position(), destination, minRange, maxRange,
 			AStarHeuristic::FAVOUR_RIGHT);
 
 		PruneMoveCommands(entity);
@@ -82,7 +82,7 @@ namespace sage
 		for (auto n : path) movableActor.path.emplace_back(n);
 		if (!path.empty())
 		{
-			transform.direction = Vector3Normalize(Vector3Subtract(movableActor.path.front(), transform.position));
+			transform.direction = Vector3Normalize(Vector3Subtract(movableActor.path.front(), transform.position()));
 
 			if (initialMove)
 			{
@@ -159,7 +159,7 @@ namespace sage
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
 //            Vector2 frontV2 = Vec3ToVec2(moveableActor.path.front());
 //            Vector2 posV2 = Vec3ToVec2(actorTrans.position);
-			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position);
+			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position());
             
 			// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
 			// The idea is to check whether the next square is occupied, and if it is, then recalculate the path.
@@ -194,7 +194,7 @@ namespace sage
 
 			float avoidanceDistance = 10;
 			GridSquare actorIndex;
-			navigationGridSystem->WorldToGridSpace(actorTrans.position, actorIndex);
+			navigationGridSystem->WorldToGridSpace(actorTrans.position(), actorIndex);
 
 
 			navigationGridSystem->MarkSquaresDebug(moveableActor.debugRay, PURPLE, false);
@@ -208,15 +208,15 @@ namespace sage
 			{
 				auto& hitTransform = registry->get<Transform>(hitCell->occupant);
 				if (moveableActor.lastHitActor != entity || !AlmostEquals(
-					hitTransform.position, moveableActor.hitActorLastPos))
+					hitTransform.position(), moveableActor.hitActorLastPos))
 				{
 					moveableActor.lastHitActor = entity;
-					moveableActor.hitActorLastPos = hitTransform.position;
+					moveableActor.hitActorLastPos = hitTransform.position();
 
 					auto& hitCol = registry->get<Collideable>(hitCell->occupant);
 
-					if (Vector3Distance(hitTransform.position, actorTrans.position) < 
-                    Vector3Distance(moveableActor.path.back(), actorTrans.position))
+					if (Vector3Distance(hitTransform.position(), actorTrans.position()) < 
+                    Vector3Distance(moveableActor.path.back(), actorTrans.position()))
 					{
 						PathfindToLocation(entity, moveableActor.path.back(), false);
 						hitCol.debugDraw = true;
@@ -255,15 +255,19 @@ namespace sage
 //                std::cout << "No collision with terrain detected \n";
 //            }
 
-			actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position));
+			actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position()));
 			// Calculate rotation angle based on direction
 			float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
-			actorTrans.rotation.y = angle;
-			actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
+			actorTrans.SetRotation({ actorTrans.rotation().x, angle, actorTrans.rotation().z  }, entity);
+
 			auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
-            actorTrans.position.y = gridSquare->terrainHeight;
-			actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
-			actorTrans.onPositionUpdate.publish(entity);
+			Vector3 newPos = { actorTrans.position().x + actorTrans.direction.x * actorTrans.movementSpeed,
+								gridSquare->terrainHeight,
+				actorTrans.position().z + actorTrans.direction.z * actorTrans.movementSpeed
+			};
+
+			actorTrans.SetPosition(newPos, entity);
+
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
 		}
 	}

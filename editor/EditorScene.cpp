@@ -9,16 +9,10 @@ namespace sage
 {
 	void EditorScene::moveSelectedObjectToCursorHit() const
 	{
-		Transform newTransform;
-		newTransform.position = data->cursor->collision.point;
-		const auto& renderable = registry->get<Renderable>(selectedObject);
-		registry->patch<Transform>(selectedObject, [&newTransform](auto& t)
-		{
-			t.position = newTransform.position;
-		});
-		Matrix mat = registry->get<Transform>(selectedObject).GetMatrixNoRot();
-		data->collisionSystem->UpdateWorldBoundingBox(selectedObject, mat);
-		// TODO: Would prefer to have this as an event
+		// TODO: Confirm this works
+		// (It does not. Set event to update the bb of the selected object)
+		auto& selectedObjectTrans = registry->get<Transform>(selectedObject);
+		selectedObjectTrans.SetPosition(data->cursor->collision.point, selectedObject);
 	}
 
 	void EditorScene::OnCursorClick()

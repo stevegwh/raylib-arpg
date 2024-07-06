@@ -115,10 +115,10 @@ namespace sage
 		const auto& enemyTrans = registry->get<Transform>(entity);
 
 		const auto& enemyCollideable = registry->get<Collideable>(combatable.target);
-		Vector3 enemyPos = enemyTrans.position;
+		Vector3 enemyPos = enemyTrans.position();
 
 		// Calculate the direction vector from player to enemy
-		Vector3 direction = Vector3Subtract(enemyPos, playerTrans.position);
+		Vector3 direction = Vector3Subtract(enemyPos, playerTrans.position());
 
 		// Normalize the direction vector
 		float length = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
@@ -143,10 +143,10 @@ namespace sage
 		auto& c = registry->get<CombatableActor>(entity);
 
 		auto& t = registry->get<Transform>(entity);
-		auto& enemyPos = registry->get<Transform>(c.target).position;
-		Vector3 direction = Vector3Subtract(enemyPos, t.position);
+		auto& enemyPos = registry->get<Transform>(c.target).position();
+		Vector3 direction = Vector3Subtract(enemyPos, t.position());
 		float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-		t.rotation.y = angle;
+		t.SetRotation({0, angle, 0}, entity);
 		c.autoAttackTick = 0;
 
 		auto& animation = registry->get<Animation>(entity);

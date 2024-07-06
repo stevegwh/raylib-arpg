@@ -52,9 +52,9 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<Transform>(id);
-		transform.position = position;
-		transform.scale = 1.0f;
-		transform.rotation = {0, 0, 0};
+		transform.SetPosition(position, id);
+		transform.SetScale(1.0f, id);
+		transform.SetRotation({0, 0, 0}, id);
 		transform.movementSpeed = 0.05f;
 		registry->emplace<MoveableActor>(id);
 
@@ -115,9 +115,9 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<Transform>(id);
-		transform.position = position;
-		transform.scale = 1.0f;
-		transform.rotation = {0, 0, 0};
+		transform.SetPosition(position, id);
+		transform.SetScale(1.0f, id);
+		transform.SetRotation({0, 0, 0}, id);
 
 		auto model = LoadModel(modelPath);
 		auto& animation = registry->emplace<Animation>(id, modelPath, &model);
@@ -143,7 +143,7 @@ namespace sage
 
 		auto& dialogue = registry->emplace<Dialogue>(id);
 		dialogue.sentence = "Hello, this is a test sentence.";
-		dialogue.conversationPos = Vector3Add(transform.position,
+		dialogue.conversationPos = Vector3Add(transform.position(),
 		                                      Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 		auto& worldObject = registry->emplace<WorldObject>(id);
 		return id;
@@ -157,9 +157,9 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<Transform>(id);
-		transform.position = position;
-		transform.scale = 1.0f;
-		transform.rotation = {0, 0, 0};
+		transform.SetPosition(position, id);
+		transform.SetScale(1.0f, id);
+		transform.SetRotation({0, 0, 0}, id);
 		registry->emplace<MoveableActor>(id);
 
 		auto model = LoadModel(modelPath);
@@ -233,8 +233,9 @@ namespace sage
 	{
 		auto id = registry->create();
 		auto& transform = registry->emplace<Transform>(id);
-		transform.position = position;
-		transform.scale = 2.0f;
+		transform.SetPosition(position, id);
+		transform.SetScale(2.0f, id);
+		transform.SetRotation({0, 0, 0}, id);
 		Material mat = {LoadTexture(texturePath), texturePath};
 		auto model = LoadModel(modelPath);
 		model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
@@ -244,6 +245,13 @@ namespace sage
 			id, registry->get<Renderable>(id).CalculateModelBoundingBox());
 		collideable.collisionLayer = CollisionLayer::BUILDING;
 		data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
+		{
+			entt::sink sink{transform.onPositionUpdate};
+			sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity)
+			{
+				collisionSystem.OnTransformUpdate(entity);
+			}>(*data->collisionSystem);
+		}
 		registry->emplace<WorldObject>(id);
 	}
 
@@ -261,8 +269,10 @@ namespace sage
 		{
 			entt::entity id = registry->create();
 			auto& transform = registry->emplace<Transform>(id);
-			transform.position = {0, 0, 0};
-			transform.scale = 1.0f;
+			transform.SetPosition({ 0, 0, 0 }, id);
+			transform.SetScale(1.0f, id);
+			transform.SetRotation({0, 0, 0}, id);
+
 
 			Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
 			Model model = LoadModelFromMesh(parent.meshes[i]);

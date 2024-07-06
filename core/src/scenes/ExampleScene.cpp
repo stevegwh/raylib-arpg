@@ -56,10 +56,10 @@ namespace sage
 		auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {20.0f, 0, 20.0f}, "Player");
 
 		auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
-//		auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {10.0f, 0, 0.0f}, "Enemy");
-//		auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {20.0f, 0, 0.0f}, "Enemy");
-//		auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {30.0f, 0, 0.0f}, "Enemy");
-//		auto enemy5 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 0.0f}, "Enemy");
+		auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {10.0f, 0, 0.0f}, "Enemy");
+		auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {20.0f, 0, 0.0f}, "Enemy");
+		auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {30.0f, 0, 0.0f}, "Enemy");
+		auto enemy5 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 0.0f}, "Enemy");
         
 		BoundingBox bb = {
 			.min = {-1000.0f, 0.1f, -1000.0f},
