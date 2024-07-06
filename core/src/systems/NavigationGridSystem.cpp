@@ -525,12 +525,17 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
 		const GridSquare& start,
 		const GridSquare& finish) const
 	{
+        auto combineWorldPosTerrainHeight = [this] (auto gridPos) {
+            Vector3 worldPos = gridSquares[gridPos.row][gridPos.col]->worldPosMin;
+            worldPos.y = gridSquares[gridPos.row][gridPos.col]->terrainHeight;
+            return worldPos;
+        };
 		std::vector<Vector3> path;
 		GridSquare current = { finish.row, finish.col };
 		GridSquare previous;
 		std::pair<int, int> currentDir = { 0, 0 };
 
-		path.push_back(gridSquares[current.row][current.col]->worldPosMin);
+		path.push_back(combineWorldPosTerrainHeight(current));
 		while (current.row != start.row || current.col != start.col)
 		{
 			previous = current;
@@ -549,14 +554,15 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
 					if (dir != currentDir)
 					{
 						currentDir = dir;
-						path.push_back(gridSquares[previous.row][previous.col]->worldPosMin);
-						path.push_back(gridSquares[current.row][current.col]->worldPosMin);
+
+						path.push_back(combineWorldPosTerrainHeight(previous));
+						path.push_back(combineWorldPosTerrainHeight(current));
 					}
 					break;
 				}
 			}
 		}
-		path.push_back(gridSquares[current.row][current.col]->worldPosMin);
+		path.push_back(combineWorldPosTerrainHeight(current));
 		std::ranges::reverse(path);
 		return path;
 	}
@@ -812,7 +818,8 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
             const auto& bb = view.get<Collideable>(entity);
             sortedEntities.emplace_back(entity, bb.worldBoundingBox.max.y);
         }
-
+        
+        // TODO: Better way of doing this?
         // Sort the vector based on worldBoundingBox.max.y
         std::sort(sortedEntities.begin(), sortedEntities.end(),
                   [](const auto& a, const auto& b) { return a.second < b.second; });
