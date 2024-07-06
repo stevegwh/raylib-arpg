@@ -86,10 +86,10 @@ namespace sage
 		// Calculate the camera's position behind the actor's shoulder
 		Vector3 cameraOffset = {5.0f, 10.0f, 18.0f}; // TODO: Shouldn't be hardcoded
 
-		Vector3 cameraPosition = Vector3Add(npcTrans.position, cameraOffset);
+		Vector3 cameraPosition = Vector3Add(npcTrans.position(), cameraOffset);
 
 		// Calculate the camera's target position slightly above the actor's position
-		Vector3 cameraTarget = Vector3Add(npcTrans.position, {0.0f, 1.0f, 0.0f});
+		Vector3 cameraTarget = Vector3Add(npcTrans.position(), {0.0f, 1.0f, 0.0f});
 
 		// Set the camera's position and target
 		rlCamera.position = cameraPosition;
