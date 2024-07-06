@@ -130,6 +130,7 @@ namespace sage
 		auto view = registry->view<MoveableActor, Transform>();
 		for (auto& entity : view)
 		{
+            auto& actorTrans = registry->get<Transform>(entity);
 			auto& moveableActor = registry->get<MoveableActor>(entity);
 			const auto& actorCollideable = registry->get<Collideable>(entity);
 
@@ -155,8 +156,9 @@ namespace sage
 			}
 
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
-			auto& actorTrans = registry->get<Transform>(entity);
-			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position); // TODO: Should be 2D?
+            Vector2 frontV2 = { moveableActor.path.front().x, moveableActor.path.front().z };
+            Vector2 posV2 = { actorTrans.position.x, actorTrans.position.z };
+			auto nextPointDist = Vector2Distance(frontV2, posV2);
 
 
 			// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
@@ -170,13 +172,13 @@ namespace sage
 				navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
 				continue;
 			}
-
-            // TODO: Likely below doesn't work with height taken into consideration
+            
 			if (nextPointDist < 0.5f) // Destination reached
 			{
 				if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(
 					moveableActor.destination.value(), moveableActor.path.back()))
 				{
+                    //actorTrans.position.y = cachedY;
 					actorTrans.onDestinationReached.publish(entity);
 					moveableActor.destination.reset();
 				}
@@ -213,8 +215,8 @@ namespace sage
 
 					auto& hitCol = registry->get<Collideable>(hitCell->occupant);
 
-					if (Vector3Distance(hitTransform.position, actorTrans.position) < Vector3Distance(
-						moveableActor.path.back(), actorTrans.position))
+					if (Vector2Distance({hitTransform.position.x, hitTransform.position.z}, posV2) < Vector2Distance(
+                        {moveableActor.path.back().x, moveableActor.path.back().z}, posV2))
 					{
 						PathfindToLocation(entity, moveableActor.path.back(), false);
 						hitCol.debugDraw = true;
@@ -222,36 +224,36 @@ namespace sage
 				}
 			}
 
-            Ray ray;
-            ray.position = actorTrans.position;
-            ray.position.y = actorCollideable.worldBoundingBox.max.y;
-            ray.direction = { 0, -1, 0 };
-            debugRays.push_back(ray);
-            auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray, CollisionLayer::NAVIGATION);
-            if (!collisions.empty())
-            {
-                auto hitentt = collisions.at(0).collidedEntityId;
-                if (registry->any_of<Renderable>(hitentt))
-                {
-                    auto& name = registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
-                    std::cout << "Hit with object: " << name << std::endl;
-                }
-                else
-                {
-                    auto text = TextFormat("Likely hit floor, with entity ID: %d", collisions.at(0).collidedEntityId);
-                    std::cout << text << std::endl;
-                }
-                
-                
-                //auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max, collisions.at(0).rlCollision.point);
-                actorTrans.position.y = collisions.at(0).rlCollision.point.y;
-                debugCollisions.push_back(collisions.at(0).rlCollision);
-                
-            }
-            else
-            {
-                std::cout << "No collision with terrain detected \n";
-            }
+//            Ray ray;
+//            ray.position = actorTrans.position;
+//            ray.position.y = actorCollideable.worldBoundingBox.max.y;
+//            ray.direction = { 0, -1, 0 };
+//            debugRays.push_back(ray);
+//            auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray, CollisionLayer::NAVIGATION);
+//            if (!collisions.empty())
+//            {
+//                auto hitentt = collisions.at(0).collidedEntityId;
+//                if (registry->any_of<Renderable>(hitentt))
+//                {
+//                    auto& name = registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
+//                    std::cout << "Hit with object: " << name << std::endl;
+//                }
+//                else
+//                {
+//                    auto text = TextFormat("Likely hit floor, with entity ID: %d", collisions.at(0).collidedEntityId);
+//                    std::cout << text << std::endl;
+//                }
+//                
+//                
+//                //auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max, collisions.at(0).rlCollision.point);
+//                actorTrans.position.y = collisions.at(0).rlCollision.point.y;
+//                //debugCollisions.push_back(collisions.at(0).rlCollision);
+//                
+//            }
+//            else
+//            {
+//                std::cout << "No collision with terrain detected \n";
+//            }
 
 			actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position));
 			// Calculate rotation angle based on direction
@@ -259,7 +261,7 @@ namespace sage
 			actorTrans.rotation.y = angle;
 			actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
 			auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
-            
+            actorTrans.position.y = gridSquare->terrainHeight;
 			actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
 			actorTrans.onPositionUpdate.publish(entity);
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);

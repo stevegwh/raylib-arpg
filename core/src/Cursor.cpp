@@ -142,6 +142,18 @@ namespace sage
 
 		// Collision hit
 		rayCollisionResultInfo = collisions.at(0); // Closest collision
+
+        // If collided entity has a mesh, use this position as opposed to its bounding box
+        if (registry->any_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
+        {
+            auto& renderable = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId);
+            auto meshCollision = GetRayCollisionMesh(ray, *renderable.model.meshes, renderable.model.transform);
+            if (meshCollision.hit)
+            {
+                rayCollisionResultInfo.rlCollision = meshCollision;
+            }
+        }
+        
 		collision = rayCollisionResultInfo.rlCollision;
 		onCollisionHit.publish(rayCollisionResultInfo.collidedEntityId);
 
@@ -164,6 +176,12 @@ namespace sage
 		if (!collision.hit) return;
 		if (lockContext) return;
 		DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
+        Vector3 normalEnd;
+        normalEnd.x = collision.point.x + collision.normal.x;
+        normalEnd.y = collision.point.y + collision.normal.y;
+        normalEnd.z = collision.point.z + collision.normal.z;
+
+        DrawLine3D(collision.point, normalEnd, RED);
 	}
 
 	void Cursor::Draw2D()
