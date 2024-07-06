@@ -384,7 +384,6 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
     auto& renderable = registry->get<Renderable>(entity);
     auto& transform = registry->get<Transform>(entity);
     Mesh mesh = *renderable.model.meshes;
-    Matrix matrix = transform.GetMatrix();
 
 
     int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
@@ -404,7 +403,7 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
 
             Ray ray = { gridCenter, { 0, -1, 0 } };  // Cast ray down
 
-            RayCollision collision = GetRayCollisionMesh(ray, mesh, matrix);
+            RayCollision collision = GetRayCollisionMesh(ray, mesh, renderable.model.transform);
             
 
             if (collision.hit)
@@ -415,9 +414,9 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
             else
             {
                 // If no hit, use the lowest point of the terrain as a fallback
-                gridSquares[row][col]->terrainHeight = area.max.y;
+                gridSquares[row][col]->terrainHeight = area.min.y;
                 gridSquares[row][col]->terrainNormal = { 0, 1, 0 };  // Assume flat ground as fallback
-                //std::cout << "Warning: No terrain intersection at grid (" << row << ", " << col << ")\n";
+                std::cout << "Warning: No terrain intersection at grid (" << row << ", " << col << ")\n";
             }
         }
     }
