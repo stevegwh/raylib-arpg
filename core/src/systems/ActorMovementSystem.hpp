@@ -17,6 +17,7 @@ namespace sage
 	class ActorMovementSystem : public BaseSystem<MoveableActor>
 	{
 		std::vector<Ray> debugRays;
+        std::vector<RayCollision> debugCollisions;
 		CollisionSystem* collisionSystem;
 		NavigationGridSystem* navigationGridSystem;
 

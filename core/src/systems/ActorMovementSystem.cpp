@@ -12,6 +12,7 @@
 #include <ranges>
 
 #include "components/ControllableActor.hpp"
+#include "components/Renderable.hpp"
 
 bool AlmostEquals(Vector3 a, Vector3 b)
 {
@@ -113,6 +114,11 @@ namespace sage
 		{
 			DrawLine3D(ray.position, Vector3Add(ray.position, Vector3Multiply(ray.direction, { 5, 1, 5 })), RED);
 		}
+
+        for (auto& col: debugCollisions) 
+        {
+            DrawSphere(col.point, 1.5, GREEN);
+        }
 	}
 
 	void ActorMovementSystem::Update()
@@ -120,6 +126,7 @@ namespace sage
 		// TODO: Instead of always calling this no matter what... maybe choose to call it (or not) based on the state. So, you can pass in the entity to Update and iterate over a collectioon
 		// from another system
 		debugRays.erase(debugRays.begin(), debugRays.end());
+        debugCollisions.erase(debugCollisions.begin(), debugCollisions.end());
 		auto view = registry->view<MoveableActor, Transform>();
 		for (auto& entity : view)
 		{
@@ -164,6 +171,7 @@ namespace sage
 				continue;
 			}
 
+            // TODO: Likely below doesn't work with height taken into consideration
 			if (nextPointDist < 0.5f) // Destination reached
 			{
 				if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(
@@ -214,13 +222,44 @@ namespace sage
 				}
 			}
 
+            Ray ray;
+            ray.position = actorTrans.position;
+            ray.position.y = actorCollideable.worldBoundingBox.max.y;
+            ray.direction = { 0, -1, 0 };
+            debugRays.push_back(ray);
+            auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray, CollisionLayer::NAVIGATION);
+            if (!collisions.empty())
+            {
+                auto hitentt = collisions.at(0).collidedEntityId;
+                if (registry->any_of<Renderable>(hitentt))
+                {
+                    auto& name = registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
+                    std::cout << "Hit with object: " << name << std::endl;
+                }
+                else
+                {
+                    auto text = TextFormat("Likely hit floor, with entity ID: %d", collisions.at(0).collidedEntityId);
+                    std::cout << text << std::endl;
+                }
+                
+                
+                //auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max, collisions.at(0).rlCollision.point);
+                actorTrans.position.y = collisions.at(0).rlCollision.point.y;
+                debugCollisions.push_back(collisions.at(0).rlCollision);
+                
+            }
+            else
+            {
+                std::cout << "No collision with terrain detected \n";
+            }
+
 			actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position));
 			// Calculate rotation angle based on direction
 			float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
 			actorTrans.rotation.y = angle;
 			actorTrans.position.x = actorTrans.position.x + actorTrans.direction.x * actorTrans.movementSpeed;
 			auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
-            actorTrans.position.y = gridSquare->terrainHeight;
+            
 			actorTrans.position.z = actorTrans.position.z + actorTrans.direction.z * actorTrans.movementSpeed;
 			actorTrans.onPositionUpdate.publish(entity);
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);

@@ -88,6 +88,10 @@ namespace sage
 				currentTex = &invalidmovetex;
 				currentColor = invalidColor;
 			}
+            if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
+            {
+                hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
+            }
 		}
 		else if (layer == CollisionLayer::BUILDING)
 		{
@@ -101,14 +105,17 @@ namespace sage
 		else if (layer == CollisionLayer::PLAYER)
 		{
 			currentTex = &regulartex;
+            hitObjectName = "Player";
 		}
 		else if (layer == CollisionLayer::NPC)
 		{
 			currentTex = &talktex;
+            hitObjectName = "NPC";
 		}
 		else if (layer == CollisionLayer::ENEMY)
 		{
 			currentTex = &combattex;
+            hitObjectName = "NPC";
 		}
 	}
 

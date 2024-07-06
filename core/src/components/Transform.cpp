@@ -12,16 +12,16 @@ namespace sage
 		Matrix trans = MatrixTranslate(position.x, position.y, position.z);
 		Matrix _scale = MatrixScale(scale, scale, scale);
 		//Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y, DEG2RAD*transform->rotation.z});
-		return MatrixMultiply(_scale, trans);
+		return MatrixMultiply(trans, _scale);
 	}
 
-	Matrix Transform::GetMatrix() const
-	{
-		Matrix trans = MatrixTranslate(position.x, position.y, position.z);
-		Matrix _scale = MatrixScale(scale, scale, scale);
-		Matrix rot = MatrixRotateXYZ({DEG2RAD * rotation.x, DEG2RAD * rotation.y, DEG2RAD * rotation.z});
-		return MatrixMultiply(_scale, MatrixMultiply(rot, trans));
-	}
+    Matrix Transform::GetMatrix() const
+    {
+        Matrix trans = MatrixTranslate(position.x, position.y, position.z);
+        Matrix _scale = MatrixScale(scale, scale, scale);
+        Matrix rot = MatrixRotateXYZ({DEG2RAD * rotation.x, DEG2RAD * rotation.y, DEG2RAD * rotation.z});
+        return MatrixMultiply(MatrixMultiply(trans, rot), _scale);
+    }
 
 	Vector3 Transform::forward() const
 	{
