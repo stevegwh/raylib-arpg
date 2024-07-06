@@ -5,14 +5,15 @@
 #include "ActorMovementSystem.hpp"
 
 #include "../components/NavigationGridSquare.hpp"
-
-#include "../../utils/Serializer.hpp"
+#include "components/ControllableActor.hpp"
+#include "components/Renderable.hpp"
+#include <Serializer.hpp>
+#include <slib.hpp>
 
 #include <tuple>
 #include <ranges>
 
-#include "components/ControllableActor.hpp"
-#include "components/Renderable.hpp"
+
 
 bool AlmostEquals(Vector3 a, Vector3 b)
 {
@@ -105,7 +106,7 @@ namespace sage
 			{
 				for (auto p : actor.path)
 				{
-					DrawCube(p, 1, 1, 1, GREEN);
+					DrawCube({p.x, p.y + 1, p.z}, 1, 1, 1, GREEN);
 				}
 			}
 		}
@@ -156,11 +157,10 @@ namespace sage
 			}
 
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
-            Vector2 frontV2 = { moveableActor.path.front().x, moveableActor.path.front().z };
-            Vector2 posV2 = { actorTrans.position.x, actorTrans.position.z };
-			auto nextPointDist = Vector2Distance(frontV2, posV2);
-
-
+//            Vector2 frontV2 = Vec3ToVec2(moveableActor.path.front());
+//            Vector2 posV2 = Vec3ToVec2(actorTrans.position);
+			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position);
+            
 			// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
 			// The idea is to check whether the next square is occupied, and if it is, then recalculate the path.
 			if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.path.front(),
@@ -215,8 +215,8 @@ namespace sage
 
 					auto& hitCol = registry->get<Collideable>(hitCell->occupant);
 
-					if (Vector2Distance({hitTransform.position.x, hitTransform.position.z}, posV2) < Vector2Distance(
-                        {moveableActor.path.back().x, moveableActor.path.back().z}, posV2))
+					if (Vector3Distance(hitTransform.position, actorTrans.position) < 
+                    Vector3Distance(moveableActor.path.back(), actorTrans.position))
 					{
 						PathfindToLocation(entity, moveableActor.path.back(), false);
 						hitCol.debugDraw = true;
