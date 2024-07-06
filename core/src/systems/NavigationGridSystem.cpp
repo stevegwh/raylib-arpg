@@ -770,15 +770,16 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
 				{
 					cost_so_far[next.row][next.col] = new_cost;
 					double heuristic_cost = 0;
-					if (heuristicType == AStarHeuristic::DEFAULT)
-					{
-						heuristic_cost = heuristic(next, finishGridSquare);
-					}
-					else if (heuristicType == AStarHeuristic::FAVOUR_RIGHT)
-					{
-						auto& currentDir = registry->get<Transform>(entity).direction;
-						heuristic_cost = heuristic_favourRight(next, finishGridSquare, currentDir);
-					}
+					heuristic_cost = heuristic(next, finishGridSquare);
+					//if (heuristicType == AStarHeuristic::DEFAULT)
+					//{
+					//	heuristic_cost = heuristic(next, finishGridSquare);
+					//}
+					//else if (heuristicType == AStarHeuristic::FAVOUR_RIGHT)
+					//{
+					//	auto& currentDir = registry->get<Transform>(entity).direction;
+					//	heuristic_cost = heuristic_favourRight(next, finishGridSquare, currentDir);
+					//}
 					double priority = new_cost + heuristic_cost;
 					frontier.put(next, priority);
 					came_from[next.row][next.col] = current;
