@@ -1,5 +1,6 @@
 #include "NavigationGridSystem.hpp"
 #include "NavigationGridSystem.hpp"
+#include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/Transform.hpp"
 #include "components/Renderable.hpp"
@@ -292,6 +293,83 @@ namespace sage
 		return false;
 	}
 
+	// TODO: Below does not work
+	// Need to take the logic of calculateTerrainHeightAndNormals but use it for a single square.
+	// Also should return early.
+	// Might be time to move on from brute forcing mesh collision comparisons.
+	float NavigationGridSystem::getTerrainHeight(GridSquare square) const
+	{
+		auto navSquare = gridSquares[square.row][square.col];
+
+
+		Vector3 gridCenter = {
+			(navSquare->worldPosMin.x + navSquare->worldPosMax.x) * 0.5f,
+			navSquare->worldPosMax.y + 1.0f,  // Start slightly above the terrain
+			(navSquare->worldPosMin.z + navSquare->worldPosMax.z) * 0.5f
+		};
+
+		Ray ray = { gridCenter, { 0, -1, 0 } };  // Cast ray down
+		auto collisions = collisionSystem->GetMeshCollisionsWithRay(entt::null, ray, CollisionLayer::NAVIGATION);
+
+		if (collisions.size() > 0)
+		{
+			return collisions.at(0).rlCollision.point.y;
+		}
+		else
+		{
+			// If no hit, use the lowest point of the terrain as a fallback
+			return navSquare->worldPosMin.y;
+		}
+	}
+
+
+	void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area)
+	{
+		GridSquare topLeftIndex, bottomRightIndex;
+		if (!WorldToGridSpace(area.min, topLeftIndex) || !WorldToGridSpace(area.max, bottomRightIndex))
+		{
+			return;
+		}
+
+		auto& renderable = registry->get<Renderable>(entity);
+		auto& transform = registry->get<Transform>(entity);
+		Mesh mesh = *renderable.model.meshes;
+
+
+		int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
+		int max_col = std::min(static_cast<int>(gridSquares[0].size()) - 1, std::max(topLeftIndex.col, bottomRightIndex.col));
+		int min_row = std::max(0, std::min(topLeftIndex.row, bottomRightIndex.row));
+		int max_row = std::min(static_cast<int>(gridSquares.size()) - 1, std::max(topLeftIndex.row, bottomRightIndex.row));
+
+		for (int row = min_row; row <= max_row; ++row)
+		{
+			for (int col = min_col; col <= max_col; ++col)
+			{
+				Vector3 gridCenter = {
+					(gridSquares[row][col]->worldPosMin.x + gridSquares[row][col]->worldPosMax.x) * 0.5f,
+					area.max.y + 1.0f,  // Start slightly above the terrain
+					(gridSquares[row][col]->worldPosMin.z + gridSquares[row][col]->worldPosMax.z) * 0.5f
+				};
+
+				Ray ray = { gridCenter, { 0, -1, 0 } };  // Cast ray down
+
+				RayCollision collision = GetRayCollisionMesh(ray, mesh, renderable.model.transform);
+            
+
+				if (collision.hit)
+				{
+					gridSquares[row][col]->terrainHeight = collision.point.y;
+					gridSquares[row][col]->terrainNormal = collision.normal;
+				}
+				else
+				{
+					// If no hit, use the lowest point of the terrain as a fallback
+					gridSquares[row][col]->terrainHeight = area.min.y;
+				}
+			}
+		}
+	}
+
 	/**
 	 * Checks a position in the world for an occupant. If an occupant is found, the extents of the occupant are returned.
 	 * @param worldPos The position in the world to check for an occupant.
@@ -318,109 +396,6 @@ namespace sage
 
 		return true;
 	}
-
-bool PointInTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
-{
-    // Compute vectors
-    Vector3 v0 = Vector3Subtract(c, a);
-    Vector3 v1 = Vector3Subtract(b, a);
-    Vector3 v2 = Vector3Subtract(p, a);
-
-    // Compute dot products
-    float dot00 = Vector3DotProduct(v0, v0);
-    float dot01 = Vector3DotProduct(v0, v1);
-    float dot02 = Vector3DotProduct(v0, v2);
-    float dot11 = Vector3DotProduct(v1, v1);
-    float dot12 = Vector3DotProduct(v1, v2);
-
-    // Compute barycentric coordinates
-    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-    // Check if point is in triangle
-    return (u >= 0) && (v >= 0) && (u + v < 1);
-}
-
-Vector3 FindTriangleContainingPoint(const Vector3& point, const Mesh& mesh, const Matrix& transform)
-{
-    Vector3* vertices = (Vector3*)mesh.vertices;
-    unsigned short* indices = (unsigned short*)mesh.indices;
-
-    for (int i = 0; i < mesh.triangleCount; i++)
-    {
-        Vector3 a = Vector3Transform(vertices[indices[i*3]], transform);
-        Vector3 b = Vector3Transform(vertices[indices[i*3 + 1]], transform);
-        Vector3 c = Vector3Transform(vertices[indices[i*3 + 2]], transform);
-
-        // Ignore Y component for terrain
-        Vector3 flattened_point = {point.x, 0, point.z};
-        Vector3 flattened_a = {a.x, 0, a.z};
-        Vector3 flattened_b = {b.x, 0, b.z};
-        Vector3 flattened_c = {c.x, 0, c.z};
-
-        if (PointInTriangle(flattened_point, flattened_a, flattened_b, flattened_c))
-        {
-            // Calculate the height using barycentric coordinates
-            Vector3 barycentric = Vector3Barycenter(flattened_point, flattened_a, flattened_b, flattened_c);
-            float height = a.y * barycentric.x + b.y * barycentric.y + c.y * barycentric.z;
-
-            return (Vector3){ point.x, height, point.z };
-        }
-    }
-
-    // If no triangle is found, return a point with a very low Y value
-    return (Vector3){ point.x, -1000000.0f, point.z };
-}
-
-void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area)
-{
-    GridSquare topLeftIndex, bottomRightIndex;
-    if (!WorldToGridSpace(area.min, topLeftIndex) || !WorldToGridSpace(area.max, bottomRightIndex))
-    {
-        return;
-    }
-
-    auto& renderable = registry->get<Renderable>(entity);
-    auto& transform = registry->get<Transform>(entity);
-    Mesh mesh = *renderable.model.meshes;
-
-
-    int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
-    int max_col = std::min(static_cast<int>(gridSquares[0].size()) - 1, std::max(topLeftIndex.col, bottomRightIndex.col));
-    int min_row = std::max(0, std::min(topLeftIndex.row, bottomRightIndex.row));
-    int max_row = std::min(static_cast<int>(gridSquares.size()) - 1, std::max(topLeftIndex.row, bottomRightIndex.row));
-
-    for (int row = min_row; row <= max_row; ++row)
-    {
-        for (int col = min_col; col <= max_col; ++col)
-        {
-            Vector3 gridCenter = {
-                (gridSquares[row][col]->worldPosMin.x + gridSquares[row][col]->worldPosMax.x) * 0.5f,
-                area.max.y + 1.0f,  // Start slightly above the terrain
-                (gridSquares[row][col]->worldPosMin.z + gridSquares[row][col]->worldPosMax.z) * 0.5f
-            };
-
-            Ray ray = { gridCenter, { 0, -1, 0 } };  // Cast ray down
-
-            RayCollision collision = GetRayCollisionMesh(ray, mesh, renderable.model.transform);
-            
-
-            if (collision.hit)
-            {
-                gridSquares[row][col]->terrainHeight = collision.point.y;
-                gridSquares[row][col]->terrainNormal = collision.normal;
-            }
-            else
-            {
-                // If no hit, use the lowest point of the terrain as a fallback
-                gridSquares[row][col]->terrainHeight = area.min.y;
-                gridSquares[row][col]->terrainNormal = { 0, 1, 0 };  // Assume flat ground as fallback
-                std::cout << "Warning: No terrain intersection at grid (" << row << ", " << col << ")\n";
-            }
-        }
-    }
-}
 
 	/**
 	 * Takes an entity and returns the extents of the entity in grid space.
@@ -527,7 +502,7 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
 	{
         auto combineWorldPosTerrainHeight = [this] (auto gridPos) {
             Vector3 worldPos = gridSquares[gridPos.row][gridPos.col]->worldPosMin;
-            worldPos.y = gridSquares[gridPos.row][gridPos.col]->terrainHeight;
+            worldPos.y = getTerrainHeight(gridPos);
             return worldPos;
         };
 		std::vector<Vector3> path;
@@ -554,7 +529,6 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
 					if (dir != currentDir)
 					{
 						currentDir = dir;
-
 						path.push_back(combineWorldPosTerrainHeight(previous));
 						path.push_back(combineWorldPosTerrainHeight(current));
 					}
@@ -824,7 +798,7 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
         // Sort the vector based on worldBoundingBox.max.y
         std::sort(sortedEntities.begin(), sortedEntities.end(),
                   [](const auto& a, const auto& b) { return a.second < b.second; });
-
+		std::cout << "Populating grid... \n";
         // Process the sorted entities
         for (const auto& [entity, height] : sortedEntities)
         {
@@ -834,11 +808,12 @@ void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& 
             {
                 MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
             }
-            else if (bb.collisionLayer == CollisionLayer::FLOOR)
-            {
-                calculateTerrainHeightAndNormals(entity, bb.worldBoundingBox);
-            }
+            //else if (bb.collisionLayer == CollisionLayer::FLOOR)
+            //{
+            //    calculateTerrainHeightAndNormals(entity, bb.worldBoundingBox);
+            //}
         }
+		std::cout << "Populating grid finished. \n";
     }
 
 	const std::vector<std::vector<NavigationGridSquare*>>& NavigationGridSystem::GetGridSquares()

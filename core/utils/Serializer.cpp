@@ -51,8 +51,10 @@ namespace sage::serializer
 			const auto view = source.view<Transform, Renderable, Collideable>();
 			for (const auto& ent : view)
 			{
-				const auto& trans = view.get<Transform>(ent);
 				const auto& rend = view.get<Renderable>(ent);
+				if (!rend.serializable) continue;
+				const auto& trans = view.get<Transform>(ent);
+
 				const auto& col = view.get<Collideable>(ent);
 				entity entity{};
 				entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
@@ -67,6 +69,7 @@ namespace sage::serializer
 			}
 		}
 		storage.close();
+		std::cout << "Save finished" << std::endl;
 	}
 
 	void Load(entt::registry* destination)
@@ -117,6 +120,7 @@ namespace sage::serializer
 			}
 		}
 		storage.close();
+		std::cout << "Load finished" << std::endl;
 	}
 
 	void SerializeKeyMapping(KeyMapping& keymapping, const char* path)
@@ -138,6 +142,7 @@ namespace sage::serializer
 			output(keymapping);
 		}
 		storage.close();
+		std::cout << "Save finished" << std::endl;
 	}
 
 	void DeserializeKeyMapping(KeyMapping& keymapping, const char* path)
@@ -158,6 +163,7 @@ namespace sage::serializer
 			std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
 			SerializeKeyMapping(keymapping, path);
 		}
+		std::cout << "Load finished" << std::endl;
 	}
 
 	void SerializeSettings(Settings& settings, const char* path)
@@ -179,6 +185,7 @@ namespace sage::serializer
 			output(settings);
 		}
 		storage.close();
+		std::cout << "Save finished" << std::endl;
 	}
 
 	void DeserializeSettings(Settings& settings, const char* path)
@@ -199,5 +206,6 @@ namespace sage::serializer
 			std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
 			SerializeSettings(settings, path);
 		}
+		std::cout << "Load finished" << std::endl;
 	}
 }
