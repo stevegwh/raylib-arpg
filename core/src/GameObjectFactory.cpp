@@ -258,9 +258,9 @@ namespace sage
 	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene, bool shouldCreateFloor)
 	{
 		
-		    sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
+		sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
 		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
-		auto modelPath = "resources/models/obj/level-min.obj";
+		auto modelPath = "resources/models/obj/level2.obj";
 		Model parent = LoadModel(modelPath);
         
         // TODO: Copy LoadOBJ and alter it so that it spits out meshes as models with their names parsed as a layer etc
@@ -279,6 +279,7 @@ namespace sage
 			//Matrix modelTransform = MatrixScale(1,1,1);
 			auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
 			renderable.name = parent.meshes[i].name;
+			renderable.serializable = false;
             
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
 			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;

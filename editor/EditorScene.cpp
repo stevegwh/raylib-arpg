@@ -167,16 +167,16 @@ namespace sage
 			loadButton.connect<&EditorScene::OnSerializeLoad>(this);
 		}
         lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
-        
+        float slices = 1000;
 		data->Load();
         GameObjectFactory::loadBlenderLevel(registry, this, false);
         BoundingBox bb = {
-            .min = {-100.0f, 0.1f, -100.0f},
-            .max = {100.0f, 0.1f, 100.0f}
+            .min = {-slices, 0.1f, -slices},
+            .max = {slices, 0.1f, slices}
         };
         GameObjectFactory::createFloor(registry, this, bb);
         
-		data->navigationGridSystem->Init(200, 1.0f);
+		data->navigationGridSystem->Init(slices, 1.0f);
 		data->navigationGridSystem->PopulateGrid();
 		data->controllableActorSystem->Disable();
 	}

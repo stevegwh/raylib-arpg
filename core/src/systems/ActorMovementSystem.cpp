@@ -44,7 +44,7 @@ namespace sage
 
 	void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination,
 		bool initialMove)
-	// TODO: Pathfinding/movement needs some sense of movement speed.
+		// TODO: Pathfinding/movement needs some sense of movement speed.
 	{
 		{
 			// If location outside of bounds, then return
@@ -106,7 +106,7 @@ namespace sage
 			{
 				for (auto p : actor.path)
 				{
-					DrawCube({p.x, p.y + 1, p.z}, 1, 1, 1, GREEN);
+					DrawCube({ p.x, p.y + 1, p.z }, 1, 1, 1, GREEN);
 				}
 			}
 		}
@@ -116,10 +116,10 @@ namespace sage
 			DrawLine3D(ray.position, Vector3Add(ray.position, Vector3Multiply(ray.direction, { 5, 1, 5 })), RED);
 		}
 
-        for (auto& col: debugCollisions) 
-        {
-            DrawSphere(col.point, 1.5, GREEN);
-        }
+		for (auto& col : debugCollisions)
+		{
+			DrawSphere(col.point, 1.5, GREEN);
+		}
 	}
 
 	void ActorMovementSystem::Update()
@@ -127,11 +127,11 @@ namespace sage
 		// TODO: Instead of always calling this no matter what... maybe choose to call it (or not) based on the state. So, you can pass in the entity to Update and iterate over a collectioon
 		// from another system
 		debugRays.erase(debugRays.begin(), debugRays.end());
-        debugCollisions.erase(debugCollisions.begin(), debugCollisions.end());
+		debugCollisions.erase(debugCollisions.begin(), debugCollisions.end());
 		auto view = registry->view<MoveableActor, Transform>();
 		for (auto& entity : view)
 		{
-            auto& actorTrans = registry->get<Transform>(entity);
+			auto& actorTrans = registry->get<Transform>(entity);
 			auto& moveableActor = registry->get<MoveableActor>(entity);
 			const auto& actorCollideable = registry->get<Collideable>(entity);
 
@@ -158,7 +158,7 @@ namespace sage
 
 			navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
 			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position());
-            
+
 			// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
 			// The idea is to check whether the next square is occupied, and if it is, then recalculate the path.
 			if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.path.front(),
@@ -170,13 +170,13 @@ namespace sage
 				navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
 				continue;
 			}
-            
+
 			if (nextPointDist < 0.5f) // Destination reached
 			{
 				if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(
 					moveableActor.destination.value(), moveableActor.path.back()))
 				{
-                    //actorTrans.position.y = cachedY;
+					//actorTrans.position.y = cachedY;
 					actorTrans.onDestinationReached.publish(entity);
 					moveableActor.destination.reset();
 				}
@@ -213,8 +213,8 @@ namespace sage
 
 					auto& hitCol = registry->get<Collideable>(hitCell->occupant);
 
-					if (Vector3Distance(hitTransform.position(), actorTrans.position()) < 
-                    Vector3Distance(moveableActor.path.back(), actorTrans.position()))
+					if (Vector3Distance(hitTransform.position(), actorTrans.position()) <
+						Vector3Distance(moveableActor.path.back(), actorTrans.position()))
 					{
 						PathfindToLocation(entity, moveableActor.path.back(), false);
 						hitCol.debugDraw = true;
@@ -222,45 +222,46 @@ namespace sage
 				}
 			}
 
-//            Ray ray;
-//            ray.position = actorTrans.position;
-//            ray.position.y = actorCollideable.worldBoundingBox.max.y;
-//            ray.direction = { 0, -1, 0 };
-//            debugRays.push_back(ray);
-//            auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray, CollisionLayer::NAVIGATION);
-//            if (!collisions.empty())
-//            {
-//                auto hitentt = collisions.at(0).collidedEntityId;
-//                if (registry->any_of<Renderable>(hitentt))
-//                {
-//                    auto& name = registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
-//                    std::cout << "Hit with object: " << name << std::endl;
-//                }
-//                else
-//                {
-//                    auto text = TextFormat("Likely hit floor, with entity ID: %d", collisions.at(0).collidedEntityId);
-//                    std::cout << text << std::endl;
-//                }
-//                
-//                
-//                //auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max, collisions.at(0).rlCollision.point);
-//                actorTrans.position.y = collisions.at(0).rlCollision.point.y;
-//                //debugCollisions.push_back(collisions.at(0).rlCollision);
-//                
-//            }
-//            else
-//            {
-//                std::cout << "No collision with terrain detected \n";
-//            }
+			float newY = 0;
+			Ray ray;
+			ray.position = actorTrans.position();
+			ray.position.y = actorCollideable.worldBoundingBox.max.y;
+			ray.direction = { 0, -1, 0 };
+			debugRays.push_back(ray);
+			auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray, CollisionLayer::NAVIGATION);
+			if (!collisions.empty())
+			{
+				//auto hitentt = collisions.at(0).collidedEntityId;
+				//if (registry->any_of<Renderable>(hitentt))
+				//{
+				//	auto& name = registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
+				//	std::cout << "Hit with object: " << name << std::endl;
+				//}
+				//else
+				//{
+				//	auto text = TextFormat("Likely hit floor, with entity ID: %d", collisions.at(0).collidedEntityId);
+				//	std::cout << text << std::endl;
+				//}
+
+
+				//auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max, collisions.at(0).rlCollision.point);
+				newY = collisions.at(0).rlCollision.point.y;
+				//debugCollisions.push_back(collisions.at(0).rlCollision);
+
+			}
+			else
+			{
+				std::cout << "No collision with terrain detected \n";
+			}
 
 			actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position()));
 			// Calculate rotation angle based on direction
 			float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
-			actorTrans.SetRotation({ actorTrans.rotation().x, angle, actorTrans.rotation().z  }, entity);
+			actorTrans.SetRotation({ actorTrans.rotation().x, angle, actorTrans.rotation().z }, entity);
 
 			auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
 			Vector3 newPos = { actorTrans.position().x + actorTrans.direction.x * actorTrans.movementSpeed,
-								gridSquare->terrainHeight,
+								newY,
 				actorTrans.position().z + actorTrans.direction.z * actorTrans.movementSpeed
 			};
 

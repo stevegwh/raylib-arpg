@@ -22,6 +22,7 @@ namespace sage
 		Model model{}; // was const
 		std::optional<Shader> shader;
 		std::string name = "Default";
+		bool serializable = true;
 
 		Renderable() = default;
 		Renderable(const Renderable&) = delete;
@@ -80,6 +81,8 @@ namespace sage
 				CEREAL_NVP(initialTransform.m15));
 
 			model = LoadModel(modelPath.c_str());
+			char* _name = new char[this->name.size() + 1];
+			model.meshes[0].name = _name;
 			if (!material.path.empty())
 			{
 				material.diffuse = LoadTexture(material.path.c_str());

@@ -49,7 +49,8 @@ namespace sage
 	ExampleScene::ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
 		Scene(_registry, std::move(_data))
 	{
-		data->navigationGridSystem->Init(1000, 1.0f); // TODO: The number of grid slices should be based on the level size
+		float slices = 1000;
+		data->navigationGridSystem->Init(slices, 1.0f); // TODO: The number of grid slices should be based on the level size
 		lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
 		data->Load();
 
@@ -62,8 +63,8 @@ namespace sage
 		auto enemy5 = GameObjectFactory::createEnemy(registry, data.get(), {40.0f, 0, 0.0f}, "Enemy");
         
 		BoundingBox bb = {
-			.min = {-1000.0f, 0.1f, -1000.0f},
-			.max = {1000.0f, 0.1f, 1000.0f}
+			.min = {-slices, 0.1f, -slices},
+			.max = {slices, 0.1f, slices}
 		};
 		GameObjectFactory::createFloor(registry, this, bb);
 		GameObjectFactory::loadBlenderLevel(registry, this, false);
