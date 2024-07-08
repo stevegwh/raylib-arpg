@@ -32,6 +32,7 @@ namespace sage
 		bool checkExtents(GridSquare square, GridSquare extents) const;
 		bool getExtents(Vector3 worldPos, GridSquare& extents) const;
 		void calculateTerrainHeightAndNormals(const entt::entity& entity);
+        void loadTerrainHeightMap(const Image& heightMap, float maxHeight);
 
 	public:
 		float spacing{};

@@ -4,7 +4,6 @@
 
 #include "EditorScene.hpp"
 #include "../core/src/GameObjectFactory.hpp"
-#include "Serializer.hpp"
 
 namespace sage
 {
@@ -171,7 +170,7 @@ namespace sage
 
 		data->Load();
 
-        float slices = 300; // TODO: Calculate this based on level size
+        float slices = 500; // TODO: Calculate this based on level size (maybe)
         GameObjectFactory::loadBlenderLevel(registry, this, slices);
 
         BoundingBox bb = {
@@ -182,7 +181,6 @@ namespace sage
         
 		data->navigationGridSystem->Init(slices, 1.0f);
 		data->navigationGridSystem->PopulateGrid();
-        serializer::GenerateHeightMap(registry, data->navigationGridSystem->GetGridSquares());
 		data->controllableActorSystem->Disable();
 	}
 
