@@ -171,7 +171,7 @@ namespace sage
 
 		data->Load();
 
-        float slices = 800; // TODO: Calculate this based on level size
+        float slices = 300; // TODO: Calculate this based on level size
         GameObjectFactory::loadBlenderLevel(registry, this, slices);
 
         BoundingBox bb = {

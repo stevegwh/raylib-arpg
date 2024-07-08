@@ -89,7 +89,5 @@ namespace sage
 				model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = material.diffuse;
 			}
 		}
-
-		[[nodiscard]] BoundingBox CalculateModelBoundingBox() const;
 	};
 }

@@ -232,7 +232,7 @@ namespace sage::serializer
 
     void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
     {
-        float maxHeight = GetMaxHeight(registry);
+        float maxHeight = 50.0f;
         int slices = gridSquares.size();
         Image heightMap = GenImageColor(slices, slices, BLACK);
         std::cout << "Generating height map..." << std::endl;

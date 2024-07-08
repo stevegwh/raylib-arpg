@@ -8,5 +8,6 @@
 
 namespace sage
 {
-Vector2 Vec3ToVec2(const Vector3& vec3);
+	Vector2 Vec3ToVec2(const Vector3& vec3);
+	BoundingBox CalculateModelBoundingBox(Model& model);
 } // sage

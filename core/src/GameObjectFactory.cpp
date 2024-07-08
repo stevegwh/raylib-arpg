@@ -18,6 +18,7 @@
 #include "components/states/StatePlayerDefault.hpp"
 
 #include "raymath.h"
+#include <slib.hpp>
 
 
 namespace sage
@@ -242,7 +243,7 @@ namespace sage
 		auto& renderable = registry->emplace<Renderable>(id, model, mat, modelPath, MatrixIdentity());
 		renderable.name = name;
 		auto& collideable = registry->emplace<Collideable>(
-			id, registry->get<Renderable>(id).CalculateModelBoundingBox());
+			id, CalculateModelBoundingBox(renderable.model));
 		collideable.collisionLayer = CollisionLayer::BUILDING;
 		data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 		{
@@ -262,7 +263,9 @@ namespace sage
 		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
 		auto modelPath = "resources/models/obj/level2.obj";
 		Model parent = LoadModel(modelPath);
-        
+  //      BoundingBox modelBB = CalculateModelBoundingBox(parent);
+		//slices = std::max(modelBB.max.x * modelBB.max.x, modelBB.max.z * modelBB.max.z);
+        if (std::fmod(slices, 2) != 0) ++slices;
         // TODO: Copy LoadOBJ and alter it so that it spits out meshes as models with their names parsed as a layer etc
 
 		for (int i = 0; i < parent.meshCount; ++i)
@@ -283,7 +286,7 @@ namespace sage
             
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
 			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-            auto& collideable = registry->emplace<Collideable>(id, registry->get<Renderable>(id).CalculateModelBoundingBox());
+            auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
             if (renderable.name.find("SM_Bld") != std::string::npos) 
             {
                 collideable.collisionLayer = CollisionLayer::BUILDING;
@@ -299,17 +302,16 @@ namespace sage
             scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
         }
 
+		//Renderable modelRenderable(parent, mat, modelPath, MatrixIdentity());
 
         // Create floor
-//        BoundingBox modelBB = GetModelBoundingBox(parent);
 //        Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
 //        Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
 //        BoundingBox bb = {
 //            .min = g0,
 //            .max = g2
 //        };
-//        slices = modelBB.max.x - modelBB.min.x;
-//        if (std::fmod(slices, 2) == 0) ++slices;
+
 //        createFloor(registry, scene, bb);
 	}
 
