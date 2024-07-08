@@ -4,6 +4,7 @@
 #include "components/ControllableActor.hpp"
 #include "components/Transform.hpp"
 #include "components/Renderable.hpp"
+#include "Serializer.hpp"
 
 #include <queue>
 #include <utility>
@@ -339,38 +340,44 @@ namespace sage
 		}
 	}
 
+    void NavigationGridSystem::loadTerrainHeightMap(const Image& heightMap, float maxHeight)
+    {
+        // Ensure the heightMap dimensions match our grid
+        if (heightMap.width != slices || heightMap.height != slices)
+        {
+            std::cerr << "Error: Height map dimensions do not match grid dimensions." << std::endl;
+            return;
+        }
     
-//    // TODO: Not necessary. All you need to do is generate a height map (and a normal map?)
-//    void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity &entity)
-//    {
-//        const auto& renderable = registry->get<Renderable>(entity);
-//        const Mesh& mesh = *renderable.model.meshes;
-//        if (mesh.indices == NULL) return;
-//        for (int i = 0; i < mesh.triangleCount; i += 3) {
-//            // Get the three vertices of this triangle
-//            Vector3 v0 = {mesh.vertices[mesh.indices[i * 3] * 3],
-//                          mesh.vertices[mesh.indices[i * 3] * 3 + 1],
-//                          mesh.vertices[mesh.indices[i * 3] * 3 + 2]};
-//
-//            Vector3 v1 = {mesh.vertices[mesh.indices[i * 3 + 1] * 3],
-//                          mesh.vertices[mesh.indices[i * 3 + 1] * 3 + 1],
-//                          mesh.vertices[mesh.indices[i * 3 + 1] * 3 + 2]};
-//
-//            Vector3 v2 = {mesh.vertices[mesh.indices[i * 3 + 2] * 3],
-//                          mesh.vertices[mesh.indices[i * 3 + 2] * 3 + 1],
-//                          mesh.vertices[mesh.indices[i * 3 + 2] * 3 + 2]};
-//
-//            // Calculate the bounding box of the triangle in grid space
-//            GridSquare minSquare, maxSquare;
-//            WorldToGridSpace(v0, minSquare);
-//            WorldToGridSpace(v1, maxSquare);
-//            WorldToGridSpace(v2, maxSquare);
-//            minSquare.row = std::min({minSquare.row, maxSquare.row});
-//            minSquare.col = std::min({minSquare.col, maxSquare.col});
-//            maxSquare.row = std::max({minSquare.row, maxSquare.row});
-//            maxSquare.col = std::max({minSquare.col, maxSquare.col});
-//        }
-//    }
+        int halfSlices = slices / 2;
+    
+        for (int j = 0; j < slices; ++j)
+        {
+            for (int i = 0; i < slices; ++i)
+            {
+                // Get the color of the pixel
+                Color color = GetImageColor(heightMap, i, j);
+    
+                // The height is stored in the red channel, normalized to 0-255
+                float normalizedHeight = static_cast<float>(color.r) / 255.0f;
+    
+                // Scale the height to the maxHeight
+                float height = normalizedHeight * maxHeight;
+    
+                // Calculate the grid index
+                int gridX = i;
+                int gridY = j;
+    
+                // Assign the height to the corresponding grid square
+                if (gridX >= 0 && gridX < slices && gridY >= 0 && gridY < slices)
+                {
+                    gridSquares[gridY][gridX]->terrainHeight = height;
+                }
+            }
+        }
+    
+        std::cout << "Terrain height map loaded and applied to grid." << std::endl;
+    }
 
 	/**
 	 * Checks a position in the world for an occupant. If an occupant is found, the extents of the occupant are returned.
@@ -790,6 +797,18 @@ namespace sage
         }
 
         const auto& view = registry->view<Collideable, Renderable>();
+        Image image = LoadImage("output.png");
+        bool heightMapExists = image.data;
+        if (heightMapExists)
+        {
+            loadTerrainHeightMap(image, serializer::GetMaxHeight(registry, slices));
+            UnloadImage(image);
+        }
+        else
+        {
+            std::cout << "Height map not loaded. Generating new one.. \n";
+        }
+
         std::cout << "Populating grid started. \n";
         for (const auto& entity: view)
         {
@@ -801,8 +820,15 @@ namespace sage
             }
             else if (bb.collisionLayer == CollisionLayer::FLOOR)
             {
-                calculateTerrainHeightAndNormals(entity);
+                if (!heightMapExists)
+                {
+                    calculateTerrainHeightAndNormals(entity);
+                }
             }
+        }
+        if (!heightMapExists)
+        {
+            serializer::GenerateHeightMap(registry, GetGridSquares());
         }
 		std::cout << "Populating grid finished. \n";
     }

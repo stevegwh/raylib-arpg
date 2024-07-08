@@ -18,6 +18,8 @@
 #include "components/Renderable.hpp"
 #include "components/Collideable.hpp"
 
+#include <algorithm>
+
 
 namespace sage::serializer
 {
@@ -209,18 +211,24 @@ namespace sage::serializer
 		std::cout << "Load finished" << std::endl;
 	}
     
-    float GetMaxHeight(entt::registry* registry)
+    float GetMaxHeight(entt::registry* registry, float slices)
     {
         float max = 0;
-        
+        BoundingBox bb = {
+            .min = {-slices, 0.1f, -slices},
+            .max = {slices, 0.1f, slices}
+        };
+        auto inside = [bb] (auto x, auto z) {
+            return x >= bb.min.x && x <= bb.max.x && z >= bb.min.z && z >= bb.max.z;
+        };
         auto view = registry->view<Collideable, Renderable>();
 
         for (const auto& entity: view) 
         {
-            const auto& r = registry->get<Renderable>(entity);
-            if (!r.serializable) continue;
             const auto& c = registry->get<Collideable>(entity);
             if (c.collisionLayer != CollisionLayer::FLOOR) continue;
+            if (!inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z) || 
+            !inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z)) continue;
             if (c.worldBoundingBox.max.y > max)
             {
                 max = c.worldBoundingBox.max.y;
@@ -232,8 +240,9 @@ namespace sage::serializer
 
     void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
     {
-        float maxHeight = 50.0f;
         int slices = gridSquares.size();
+        float maxHeight = GetMaxHeight(registry, slices); // TODO
+        
         Image heightMap = GenImageColor(slices, slices, BLACK);
         std::cout << "Generating height map..." << std::endl;
         for (int y = 0; y < slices; ++y)
@@ -241,7 +250,9 @@ namespace sage::serializer
             for (int x = 0; x < slices; ++x)
             {
                 float height = gridSquares[y][x]->terrainHeight;
-                unsigned char heightValue = static_cast<unsigned char>((height / maxHeight) * 255.0f);
+
+                unsigned char heightValue = static_cast<unsigned char>(std::min((height / maxHeight) * 255.0f, 255.0f));
+
                 Color pixelColor = { heightValue, heightValue, heightValue, 255 };
                 ImageDrawPixel(&heightMap, x, y, pixelColor);
             }
