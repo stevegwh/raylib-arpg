@@ -7,6 +7,7 @@
 #include "entt/entity/registry.hpp"
 #include "KeyMapping.hpp"
 #include "Settings.hpp"
+#include "components/NavigationGridSquare.hpp"
 
 namespace sage::serializer
 {
@@ -16,4 +17,5 @@ namespace sage::serializer
 	void DeserializeKeyMapping(KeyMapping& keymapping, const char* path);
 	void SerializeSettings(Settings& settings, const char* path);
 	void DeserializeSettings(Settings& settings, const char* path);
+    void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares);
 }
