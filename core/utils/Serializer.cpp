@@ -208,4 +208,48 @@ namespace sage::serializer
 		}
 		std::cout << "Load finished" << std::endl;
 	}
+    
+    float GetMaxHeight(entt::registry* registry)
+    {
+        float max = 0;
+        
+        auto view = registry->view<Collideable, Renderable>();
+
+        for (const auto& entity: view) 
+        {
+            const auto& r = registry->get<Renderable>(entity);
+            if (!r.serializable) continue;
+            const auto& c = registry->get<Collideable>(entity);
+            if (c.collisionLayer != CollisionLayer::FLOOR) continue;
+            if (c.worldBoundingBox.max.y > max)
+            {
+                max = c.worldBoundingBox.max.y;
+            }
+        }
+        
+        return max;
+    }
+
+    void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
+    {
+        float maxHeight = GetMaxHeight(registry);
+        int slices = gridSquares.size();
+        Image heightMap = GenImageColor(slices, slices, BLACK);
+        std::cout << "Generating height map..." << std::endl;
+        for (int y = 0; y < slices; ++y)
+        {
+            for (int x = 0; x < slices; ++x)
+            {
+                float height = gridSquares[y][x]->terrainHeight;
+                unsigned char heightValue = static_cast<unsigned char>((height / maxHeight) * 255.0f);
+                Color pixelColor = { heightValue, heightValue, heightValue, 255 };
+                ImageDrawPixel(&heightMap, x, y, pixelColor);
+            }
+        }
+    
+        ExportImage(heightMap, "output.png");
+        UnloadImage(heightMap);
+    
+        std::cout << "Height map saved as '" << "output.png" << "'" << std::endl;
+    }
 }

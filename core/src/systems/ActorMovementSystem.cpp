@@ -222,48 +222,48 @@ namespace sage
 				}
 			}
 
-			float newY = 0;
-			Ray ray;
-			ray.position = actorTrans.position();
-			ray.position.y = actorCollideable.worldBoundingBox.max.y;
-			ray.direction = { 0, -1, 0 };
-			debugRays.push_back(ray);
-			auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray, CollisionLayer::NAVIGATION);
-			if (!collisions.empty())
-			{
-				//auto hitentt = collisions.at(0).collidedEntityId;
-				//if (registry->any_of<Renderable>(hitentt))
-				//{
-				//	auto& name = registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
-				//	std::cout << "Hit with object: " << name << std::endl;
-				//}
-				//else
-				//{
-				//	auto text = TextFormat("Likely hit floor, with entity ID: %d", collisions.at(0).collidedEntityId);
-				//	std::cout << text << std::endl;
-				//}
-
-
-				//auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max, collisions.at(0).rlCollision.point);
-				newY = collisions.at(0).rlCollision.point.y;
-				//debugCollisions.push_back(collisions.at(0).rlCollision);
-
-			}
-			else
-			{
-				std::cout << "No collision with terrain detected \n";
-			}
+//			float newY = 0;
+//			Ray ray;
+//			ray.position = actorTrans.position();
+//			ray.position.y = actorCollideable.worldBoundingBox.max.y;
+//			ray.direction = { 0, -1, 0 };
+//			debugRays.push_back(ray);
+//			auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray, CollisionLayer::NAVIGATION);
+//			if (!collisions.empty())
+//			{
+//				//auto hitentt = collisions.at(0).collidedEntityId;
+//				//if (registry->any_of<Renderable>(hitentt))
+//				//{
+//				//	auto& name = registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
+//				//	std::cout << "Hit with object: " << name << std::endl;
+//				//}
+//				//else
+//				//{
+//				//	auto text = TextFormat("Likely hit floor, with entity ID: %d", collisions.at(0).collidedEntityId);
+//				//	std::cout << text << std::endl;
+//				//}
+//
+//
+//				//auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max, collisions.at(0).rlCollision.point);
+//				newY = collisions.at(0).rlCollision.point.y;
+//				//debugCollisions.push_back(collisions.at(0).rlCollision);
+//
+//			}
+//			else
+//			{
+//				std::cout << "No collision with terrain detected \n";
+//			}
 
 			actorTrans.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position()));
 			// Calculate rotation angle based on direction
 			float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
 			actorTrans.SetRotation({ actorTrans.rotation().x, angle, actorTrans.rotation().z }, entity);
 
-			auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
-			Vector3 newPos = { actorTrans.position().x + actorTrans.direction.x * actorTrans.movementSpeed,
-								newY,
-				actorTrans.position().z + actorTrans.direction.z * actorTrans.movementSpeed
-			};
+            auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
+            Vector3 newPos = {actorTrans.position().x + actorTrans.direction.x * actorTrans.movementSpeed,
+                              gridSquare->terrainHeight,
+                              actorTrans.position().z + actorTrans.direction.z * actorTrans.movementSpeed
+            };
 
 			actorTrans.SetPosition(newPos, entity);
 

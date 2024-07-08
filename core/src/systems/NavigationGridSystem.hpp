@@ -31,9 +31,7 @@ namespace sage
 		bool getExtents(entt::entity entity, GridSquare& extents) const;
 		bool checkExtents(GridSquare square, GridSquare extents) const;
 		bool getExtents(Vector3 worldPos, GridSquare& extents) const;
-
-		float getTerrainHeight(GridSquare square) const;
-		void calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area);
+		void calculateTerrainHeightAndNormals(const entt::entity& entity);
 
 	public:
 		float spacing{};

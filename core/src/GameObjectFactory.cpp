@@ -255,7 +255,7 @@ namespace sage
 		registry->emplace<WorldObject>(id);
 	}
 
-	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene, bool shouldCreateFloor)
+	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene, float& slices)
 	{
 		
 		sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
@@ -299,18 +299,18 @@ namespace sage
             scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
         }
 
-		if (shouldCreateFloor)
-		{
-			// Create floor
-			BoundingBox modelBB = GetModelBoundingBox(parent);
-			Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
-			Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
-			BoundingBox bb = {
-				.min = g0,
-				.max = g2
-			};
-			createFloor(registry, scene, bb);
-		}
+
+        // Create floor
+//        BoundingBox modelBB = GetModelBoundingBox(parent);
+//        Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
+//        Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
+//        BoundingBox bb = {
+//            .min = g0,
+//            .max = g2
+//        };
+//        slices = modelBB.max.x - modelBB.min.x;
+//        if (std::fmod(slices, 2) == 0) ++slices;
+//        createFloor(registry, scene, bb);
 	}
 
 	void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)

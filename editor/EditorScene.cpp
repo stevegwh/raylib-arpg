@@ -4,6 +4,7 @@
 
 #include "EditorScene.hpp"
 #include "../core/src/GameObjectFactory.hpp"
+#include "Serializer.hpp"
 
 namespace sage
 {
@@ -167,9 +168,12 @@ namespace sage
 			loadButton.connect<&EditorScene::OnSerializeLoad>(this);
 		}
         lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
-        float slices = 1000;
+
 		data->Load();
-        GameObjectFactory::loadBlenderLevel(registry, this, false);
+
+        float slices = 800; // TODO: Calculate this based on level size
+        GameObjectFactory::loadBlenderLevel(registry, this, slices);
+
         BoundingBox bb = {
             .min = {-slices, 0.1f, -slices},
             .max = {slices, 0.1f, slices}
@@ -178,6 +182,7 @@ namespace sage
         
 		data->navigationGridSystem->Init(slices, 1.0f);
 		data->navigationGridSystem->PopulateGrid();
+        serializer::GenerateHeightMap(registry, data->navigationGridSystem->GetGridSquares());
 		data->controllableActorSystem->Disable();
 	}
 

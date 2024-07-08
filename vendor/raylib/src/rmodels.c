@@ -3990,7 +3990,8 @@ static Model LoadOBJ(const char *fileName)
             model.meshes[i].vertices = (float *)RL_CALLOC(model.meshes[i].vertexCount*3, sizeof(float));
             model.meshes[i].texcoords = (float *)RL_CALLOC(model.meshes[i].vertexCount*2, sizeof(float));
             model.meshes[i].normals = (float *)RL_CALLOC(model.meshes[i].vertexCount*3, sizeof(float));
-
+            model.meshes[i].indices = (unsigned short *)RL_CALLOC(model.meshes[i].triangleCount*3, sizeof(unsigned short));
+            
             size_t len = strlen(meshes[i].name) + 1;  // +1 for null terminator
             model.meshes[i].name  = (char*)malloc(len);
             memcpy(model.meshes[i].name , meshes[i].name, len);
@@ -4005,6 +4006,10 @@ static Model LoadOBJ(const char *fileName)
                 tinyobj_vertex_index_t idx1 = attrib.faces[f*3 + 1];
                 tinyobj_vertex_index_t idx2 = attrib.faces[f*3 + 2];
 
+                model.meshes[i].indices[face*3 + 0] = v;
+                model.meshes[i].indices[face*3 + 1] = v + 1;
+                model.meshes[i].indices[face*3 + 2] = v + 2;
+                
                 // Fill vertices buffer (float) using vertex index of the face
                 for (int n = 0; n < 3; n++) { model.meshes[i].vertices[v*3 + n] = attrib.vertices[idx0.v_idx*3 + n]; }
                 for (int n = 0; n < 3; n++) { model.meshes[i].vertices[(v + 1)*3 + n] = attrib.vertices[idx1.v_idx*3 + n]; }

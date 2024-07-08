@@ -293,38 +293,9 @@ namespace sage
 		return false;
 	}
 
-	// TODO: Below does not work
-	// Need to take the logic of calculateTerrainHeightAndNormals but use it for a single square.
-	// Also should return early.
-	// Might be time to move on from brute forcing mesh collision comparisons.
-	float NavigationGridSystem::getTerrainHeight(GridSquare square) const
+	void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity)
 	{
-		auto navSquare = gridSquares[square.row][square.col];
-
-
-		Vector3 gridCenter = {
-			(navSquare->worldPosMin.x + navSquare->worldPosMax.x) * 0.5f,
-			navSquare->worldPosMax.y + 1.0f,  // Start slightly above the terrain
-			(navSquare->worldPosMin.z + navSquare->worldPosMax.z) * 0.5f
-		};
-
-		Ray ray = { gridCenter, { 0, -1, 0 } };  // Cast ray down
-		auto collisions = collisionSystem->GetMeshCollisionsWithRay(entt::null, ray, CollisionLayer::NAVIGATION);
-
-		if (collisions.size() > 0)
-		{
-			return collisions.at(0).rlCollision.point.y;
-		}
-		else
-		{
-			// If no hit, use the lowest point of the terrain as a fallback
-			return navSquare->worldPosMin.y;
-		}
-	}
-
-
-	void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity, const BoundingBox& area)
-	{
+        BoundingBox area = registry->get<Collideable>(entity).worldBoundingBox;
 		GridSquare topLeftIndex, bottomRightIndex;
 		if (!WorldToGridSpace(area.min, topLeftIndex) || !WorldToGridSpace(area.max, bottomRightIndex))
 		{
@@ -354,21 +325,52 @@ namespace sage
 				Ray ray = { gridCenter, { 0, -1, 0 } };  // Cast ray down
 
 				RayCollision collision = GetRayCollisionMesh(ray, mesh, renderable.model.transform);
-            
+
 
 				if (collision.hit)
 				{
-					gridSquares[row][col]->terrainHeight = collision.point.y;
-					gridSquares[row][col]->terrainNormal = collision.normal;
-				}
-				else
-				{
-					// If no hit, use the lowest point of the terrain as a fallback
-					gridSquares[row][col]->terrainHeight = area.min.y;
+                    if (gridSquares[row][col]->terrainHeight < collision.point.y)
+                    {
+                        gridSquares[row][col]->terrainHeight = collision.point.y;
+                        gridSquares[row][col]->terrainNormal = collision.normal;
+                    }
 				}
 			}
 		}
 	}
+
+    
+//    // TODO: Not necessary. All you need to do is generate a height map (and a normal map?)
+//    void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity &entity)
+//    {
+//        const auto& renderable = registry->get<Renderable>(entity);
+//        const Mesh& mesh = *renderable.model.meshes;
+//        if (mesh.indices == NULL) return;
+//        for (int i = 0; i < mesh.triangleCount; i += 3) {
+//            // Get the three vertices of this triangle
+//            Vector3 v0 = {mesh.vertices[mesh.indices[i * 3] * 3],
+//                          mesh.vertices[mesh.indices[i * 3] * 3 + 1],
+//                          mesh.vertices[mesh.indices[i * 3] * 3 + 2]};
+//
+//            Vector3 v1 = {mesh.vertices[mesh.indices[i * 3 + 1] * 3],
+//                          mesh.vertices[mesh.indices[i * 3 + 1] * 3 + 1],
+//                          mesh.vertices[mesh.indices[i * 3 + 1] * 3 + 2]};
+//
+//            Vector3 v2 = {mesh.vertices[mesh.indices[i * 3 + 2] * 3],
+//                          mesh.vertices[mesh.indices[i * 3 + 2] * 3 + 1],
+//                          mesh.vertices[mesh.indices[i * 3 + 2] * 3 + 2]};
+//
+//            // Calculate the bounding box of the triangle in grid space
+//            GridSquare minSquare, maxSquare;
+//            WorldToGridSpace(v0, minSquare);
+//            WorldToGridSpace(v1, maxSquare);
+//            WorldToGridSpace(v2, maxSquare);
+//            minSquare.row = std::min({minSquare.row, maxSquare.row});
+//            minSquare.col = std::min({minSquare.col, maxSquare.col});
+//            maxSquare.row = std::max({minSquare.row, maxSquare.row});
+//            maxSquare.col = std::max({minSquare.col, maxSquare.col});
+//        }
+//    }
 
 	/**
 	 * Checks a position in the world for an occupant. If an occupant is found, the extents of the occupant are returned.
@@ -456,8 +458,12 @@ namespace sage
 	bool NavigationGridSystem::GridToWorldSpace(GridSquare gridPos, Vector3& out) const
 	{
 		GridSquare maxRange = { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) };
+        if (!checkInside(gridPos, { 0, 0 }, maxRange))
+        {
+            return false;
+        }
 		out = gridSquares[gridPos.row][gridPos.col]->worldPosMin; // Not centre?
-		return checkInside(gridPos, { 0, 0 }, maxRange);
+		return true;
 	}
 
 	bool NavigationGridSystem::WorldToGridSpace(Vector3 worldPos, GridSquare& out) const
@@ -502,7 +508,7 @@ namespace sage
 	{
         auto combineWorldPosTerrainHeight = [this] (auto gridPos) {
             Vector3 worldPos = gridSquares[gridPos.row][gridPos.col]->worldPosMin;
-            worldPos.y = getTerrainHeight(gridPos);
+            worldPos.y = gridSquares[gridPos.row][gridPos.col]->terrainHeight;
             return worldPos;
         };
 		std::vector<Vector3> path;
@@ -783,24 +789,9 @@ namespace sage
             }
         }
 
-        const auto& view = registry->view<Collideable>();
-
-        // Create a vector of pairs: (entity, worldBoundingBox.max.y)
-        std::vector<std::pair<entt::entity, float>> sortedEntities;
-
-        for (const auto& entity : view)
-        {
-            const auto& bb = view.get<Collideable>(entity);
-            sortedEntities.emplace_back(entity, bb.worldBoundingBox.max.y);
-        }
-        
-        // TODO: Better way of doing this?
-        // Sort the vector based on worldBoundingBox.max.y
-        std::sort(sortedEntities.begin(), sortedEntities.end(),
-                  [](const auto& a, const auto& b) { return a.second < b.second; });
-		std::cout << "Populating grid... \n";
-        // Process the sorted entities
-        for (const auto& [entity, height] : sortedEntities)
+        const auto& view = registry->view<Collideable, Renderable>();
+        std::cout << "Populating grid started. \n";
+        for (const auto& entity: view)
         {
             const auto& bb = view.get<Collideable>(entity);
 
@@ -808,10 +799,10 @@ namespace sage
             {
                 MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
             }
-            //else if (bb.collisionLayer == CollisionLayer::FLOOR)
-            //{
-            //    calculateTerrainHeightAndNormals(entity, bb.worldBoundingBox);
-            //}
+            else if (bb.collisionLayer == CollisionLayer::FLOOR)
+            {
+                calculateTerrainHeightAndNormals(entity);
+            }
         }
 		std::cout << "Populating grid finished. \n";
     }
