@@ -37,9 +37,10 @@ namespace sage
 	public:
 		float spacing{};
 		int slices{};
+        std::string mapPath;
 
 		explicit NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem);
-		void Init(int _slices, float _spacing);
+		void Init(int _slices, float _spacing, const std::string& _mapPath);
 		void PopulateGrid();
 		bool GetPathfindRange(const entt::entity& actorId, int bounds, GridSquare& minRange,
 		                      GridSquare& maxRange) const;

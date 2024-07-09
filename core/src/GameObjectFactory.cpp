@@ -265,18 +265,15 @@ namespace sage
 		registry->emplace<WorldObject>(id);
 	}
 
-	void GameObjectFactory::loadBlenderLevel(entt::registry* registry, Scene* scene, float& slices)
+	void GameObjectFactory::loadMap(entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
 	{
 		
 		sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
 		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
-		auto modelPath = "resources/models/obj/level2.obj";
-		Model parent = LoadModel(modelPath);
-  //      BoundingBox modelBB = CalculateModelBoundingBox(parent);
-		//slices = std::max(modelBB.max.x * modelBB.max.x, modelBB.max.z * modelBB.max.z);
-        if (std::fmod(slices, 2) != 0) ++slices;
-        // TODO: Copy LoadOBJ and alter it so that it spits out meshes as models with their names parsed as a layer etc
-
+//		auto modelPath = "resources/models/obj/level2.obj";
+		Model parent = LoadModel(_mapPath.c_str());
+        std::vector<Collideable*> floorMeshes;
+        
 		for (int i = 0; i < parent.meshCount; ++i)
 		{
 			entt::entity id = registry->create();
@@ -285,11 +282,10 @@ namespace sage
 			transform.SetScale(1.0f, id);
 			transform.SetRotation({0, 0, 0}, id);
 
-
 			Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
 			Model model = LoadModelFromMesh(parent.meshes[i]);
 			//Matrix modelTransform = MatrixScale(1,1,1);
-			auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
+			auto& renderable = registry->emplace<Renderable>(id, model, _mapPath, modelTransform); // TODO: You're storing the entire model's path here
 			renderable.name = parent.meshes[i].name;
 			renderable.serializable = false;
             
@@ -307,6 +303,7 @@ namespace sage
             else if (renderable.name.find("SM_Env") != std::string::npos) 
             {
                 collideable.collisionLayer = CollisionLayer::FLOOR;
+                floorMeshes.push_back(&collideable);
             } 
             else 
             {
@@ -315,17 +312,23 @@ namespace sage
             scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
         }
 
-		//Renderable modelRenderable(parent, mat, modelPath, MatrixIdentity());
-
+        // Calculate grid based on walkable area
+        BoundingBox mapBB;
+        for (const auto& col: floorMeshes) 
+        {
+            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
+            {
+                mapBB.min = col->worldBoundingBox.min;
+            }
+            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
+            {
+                mapBB.max = col->worldBoundingBox.max;
+            }
+        }
+        
+        slices = mapBB.max.x - mapBB.min.x;
         // Create floor
-//        Vector3 g0 = {modelBB.min.x, 0.1f, modelBB.min.z};
-//        Vector3 g2 = {modelBB.max.x, 0.1f, modelBB.max.z};
-//        BoundingBox bb = {
-//            .min = g0,
-//            .max = g2
-//        };
-
-//        createFloor(registry, scene, bb);
+        createFloor(registry, scene, mapBB);
 	}
 
 	void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)
