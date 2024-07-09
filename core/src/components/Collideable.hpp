@@ -20,6 +20,7 @@ namespace sage
 		NPC,
 		ENEMY,
 		BOYD,
+        TERRAIN,
 		COUNT // Must always be last
 	};
 

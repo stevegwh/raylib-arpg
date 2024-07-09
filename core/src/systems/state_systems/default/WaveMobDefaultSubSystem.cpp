@@ -11,7 +11,7 @@ namespace sage
 {
 	void WaveMobDefaultSubSystem::OnComponentEnabled(entt::entity entity) const
 	{
-		Vector3 target = {-5.0, 0, 0};
+		Vector3 target = {52, 0, -10};
 		auto& a = registry->get<MoveableActor>(entity);
 		auto& t = registry->get<Transform>(entity);
 		auto& animation = registry->get<Animation>(entity);
