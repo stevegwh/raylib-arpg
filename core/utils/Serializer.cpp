@@ -210,35 +210,42 @@ namespace sage::serializer
 		}
 		std::cout << "Load finished" << std::endl;
 	}
-    
-    float GetMaxHeight(entt::registry* registry, float slices)
-    {
-        float max = 0;
-        BoundingBox bb = {
-            .min = {-slices, 0.1f, -slices},
-            .max = {slices, 0.1f, slices}
-        };
-        auto inside = [bb] (auto x, auto z) {
-            return x >= bb.min.x && x <= bb.max.x && z >= bb.min.z && z >= bb.max.z;
-        };
-        auto view = registry->view<Collideable, Renderable>();
 
-        for (const auto& entity: view) 
+float GetMaxHeight(entt::registry* registry, float slices)
+{
+    float max = 0;
+    BoundingBox bb = {
+        .min = {-slices, 0.1f, -slices},
+        .max = {slices, 0.1f, slices}
+    };
+
+    auto inside = [bb] (float x, float z) {
+        return x >= bb.min.x && x <= bb.max.x && z >= bb.min.z && z <= bb.max.z;
+    };
+
+    auto view = registry->view<Collideable, Renderable>();
+
+    for (const auto& entity : view)
+    {
+        const auto& c = registry->get<Collideable>(entity);
+        if (c.collisionLayer != CollisionLayer::FLOOR) continue;
+
+        // Check if either min or max point of the bounding box is inside the defined area
+        if (inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z) ||
+            inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z))
         {
-            const auto& c = registry->get<Collideable>(entity);
-            if (c.collisionLayer != CollisionLayer::FLOOR) continue;
-            if (!inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z) || 
-            !inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z)) continue;
             if (c.worldBoundingBox.max.y > max)
             {
                 max = c.worldBoundingBox.max.y;
             }
         }
-        
-        return max;
     }
 
-    void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
+    return max;
+}
+
+
+void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
     {
         int slices = gridSquares.size();
         float maxHeight = GetMaxHeight(registry, slices); // TODO

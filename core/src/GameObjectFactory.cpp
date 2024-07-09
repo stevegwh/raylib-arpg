@@ -53,7 +53,10 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<Transform>(id);
-		transform.SetPosition(position, id);
+        GridSquare actorIdx;
+        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        transform.SetPosition({ position.x, height, position.z }, id);
 		transform.SetScale(1.0f, id);
 		transform.SetRotation({0, 0, 0}, id);
 		transform.movementSpeed = 0.05f;
@@ -116,7 +119,10 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<Transform>(id);
-		transform.SetPosition(position, id);
+        GridSquare actorIdx;
+        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        transform.SetPosition({ position.x, height, position.z }, id);
 		transform.SetScale(1.0f, id);
 		transform.SetRotation({0, 0, 0}, id);
 
@@ -158,7 +164,10 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<Transform>(id);
-		transform.SetPosition(position, id);
+        GridSquare actorIdx;
+        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+		transform.SetPosition({ position.x, height, position.z }, id);
 		transform.SetScale(1.0f, id);
 		transform.SetRotation({0, 0, 0}, id);
 		registry->emplace<MoveableActor>(id);
@@ -290,7 +299,11 @@ namespace sage
             if (renderable.name.find("SM_Bld") != std::string::npos) 
             {
                 collideable.collisionLayer = CollisionLayer::BUILDING;
-            } 
+            }
+            else if (renderable.name.find("SM_Env_NoWalk") != std::string::npos)
+            {
+                collideable.collisionLayer = CollisionLayer::TERRAIN;
+            }
             else if (renderable.name.find("SM_Env") != std::string::npos) 
             {
                 collideable.collisionLayer = CollisionLayer::FLOOR;
