@@ -245,7 +245,7 @@ float GetMaxHeight(entt::registry* registry, float slices)
 }
 
 
-void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
+void GenerateHeightMap(entt::registry* registry, const std::string& path, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
     {
         int slices = gridSquares.size();
         float maxHeight = GetMaxHeight(registry, slices); // TODO
@@ -264,10 +264,11 @@ void GenerateHeightMap(entt::registry* registry, const std::vector<std::vector<N
                 ImageDrawPixel(&heightMap, x, y, pixelColor);
             }
         }
-    
-        ExportImage(heightMap, "output.png");
+        size_t lastindex = path.find_last_of('.');
+        std::string strippedPath = path.substr(0, lastindex);
+        ExportImage(heightMap, TextFormat("%s.png", strippedPath.c_str()));
         UnloadImage(heightMap);
     
-        std::cout << "Height map saved as '" << "output.png" << "'" << std::endl;
+        std::cout << "Height map saved as '" << strippedPath << ".png'" << std::endl;
     }
 }

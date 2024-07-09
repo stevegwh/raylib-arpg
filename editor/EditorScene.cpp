@@ -170,16 +170,10 @@ namespace sage
 
 		data->Load();
 
-        float slices = 800; // TODO: Calculate this based on level size (maybe)
-        GameObjectFactory::loadBlenderLevel(registry, this, slices);
-
-        BoundingBox bb = {
-            .min = {-slices, 0.1f, -slices},
-            .max = {slices, 0.1f, slices}
-        };
-        GameObjectFactory::createFloor(registry, this, bb);
-        
-		data->navigationGridSystem->Init(slices, 1.0f);
+        float slices = 0;
+        std::string mapPath = "resources/models/obj/level2.obj";
+        GameObjectFactory::loadMap(registry, this, slices, mapPath);
+		data->navigationGridSystem->Init(slices, 1.0f, mapPath);
 		data->navigationGridSystem->PopulateGrid();
 		data->controllableActorSystem->Disable();
 	}

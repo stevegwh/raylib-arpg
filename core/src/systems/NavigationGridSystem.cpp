@@ -69,10 +69,11 @@ namespace sage
 		return diagonal_distance;
 	}
 
-	void NavigationGridSystem::Init(int _slices, float _spacing)
+	void NavigationGridSystem::Init(int _slices, float _spacing, const std::string& _mapPath)
 	{
 		slices = _slices;
 		spacing = _spacing;
+        mapPath = _mapPath;
 
 		int halfSlices = slices / 2;
 
@@ -342,12 +343,6 @@ namespace sage
 
     void NavigationGridSystem::loadTerrainHeightMap(const Image& heightMap, float maxHeight)
     {
-        // Ensure the heightMap dimensions match our grid
-        if (heightMap.width != slices || heightMap.height != slices)
-        {
-            std::cerr << "Error: Height map dimensions do not match grid dimensions." << std::endl;
-            return;
-        }
     
         int halfSlices = slices / 2;
     
@@ -797,16 +792,18 @@ namespace sage
         }
 
         const auto& view = registry->view<Collideable, Renderable>();
-        Image image = LoadImage("output.png");
-        bool heightMapExists = image.data;
-        if (heightMapExists)
+        size_t lastindex = mapPath.find_last_of('.');
+        std::string imgPath = mapPath.substr(0, lastindex);
+        Image image = LoadImage(std::string(imgPath + ".png").c_str());
+        bool heightMapValid = image.data && image.width == slices && image.height == slices;
+        if (heightMapValid)
         {
             loadTerrainHeightMap(image, serializer::GetMaxHeight(registry, slices));
             UnloadImage(image);
         }
         else
         {
-            std::cout << "Height map not loaded. Generating new one.. \n";
+            std::cout << "Height map not loaded or size mismatch. Generating new one.. \n";
         }
 
         std::cout << "Populating grid started. \n";
@@ -820,15 +817,15 @@ namespace sage
             }
             else if (bb.collisionLayer == CollisionLayer::FLOOR)
             {
-                if (!heightMapExists)
+                if (!heightMapValid)
                 {
                     calculateTerrainHeightAndNormals(entity);
                 }
             }
         }
-        if (!heightMapExists)
+        if (!heightMapValid)
         {
-            serializer::GenerateHeightMap(registry, GetGridSquares());
+            serializer::GenerateHeightMap(registry, mapPath, GetGridSquares());
         }
 		std::cout << "Populating grid finished. \n";
     }

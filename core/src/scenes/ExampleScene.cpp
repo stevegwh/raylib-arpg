@@ -49,27 +49,23 @@ namespace sage
 	ExampleScene::ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
 		Scene(_registry, std::move(_data))
 	{
-        float slices = 800;
-		data->navigationGridSystem->Init(slices, 1.0f); // TODO: The number of grid slices should be based on the level size
-		lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
-		data->Load();
+        data->Load();
         
-		BoundingBox bb = {
-			.min = {-slices, 0.1f, -slices},
-			.max = {slices, 0.1f, slices}
-		};
-		GameObjectFactory::createFloor(registry, this, bb);
-        float tmp;
-		GameObjectFactory::loadBlenderLevel(registry, this, tmp);
-		data->navigationGridSystem->PopulateGrid();
-
+        //float slices = 800;
+        float slices = 0;
+        std::string mapPath = "resources/models/obj/level2.obj";
+        GameObjectFactory::loadMap(registry, this, slices, mapPath);
+		data->navigationGridSystem->Init(slices, 1.0f, mapPath); // TODO: The number of grid slices should be based on the level size
+        data->navigationGridSystem->PopulateGrid();
+        
+        lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
+        
         auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
         auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 10.0f}, "Enemy");
         auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 20.0f}, "Enemy");
         auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 30.0f}, "Enemy");
         auto enemy5 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 40.0f}, "Enemy");
-
 
 		// TODO: tmp
 		const auto& col = registry->get<Collideable>(knight);
