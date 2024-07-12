@@ -355,7 +355,7 @@ namespace sage
                     {
                         gridSquares[row][col]->terrainHeight = collision.point.y;
                         gridSquares[row][col]->terrainNormal = collision.normal;
-                        gridSquares[row][col]->pathfindingCost = calculateTerrainCost(collision.normal, 45.0f);
+                        //gridSquares[row][col]->pathfindingCost = calculateTerrainCost(collision.normal, 45.0f);
                     }
 				}
 			}

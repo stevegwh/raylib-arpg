@@ -325,7 +325,8 @@ namespace sage
                 mapBB.max = col->worldBoundingBox.max;
             }
         }
-        
+        mapBB.min.y = 0.1f;
+        mapBB.max.y = 0.1f;
         slices = mapBB.max.x - mapBB.min.x;
         // Create floor
         createFloor(registry, scene, mapBB);

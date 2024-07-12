@@ -172,10 +172,27 @@ namespace sage
 		}
 	}
 
-	void CollisionSystem::BoundingBoxDraw(entt::entity entityId, Color color) const
-	{
-		DrawBoundingBox(registry->get<Collideable>(entityId).worldBoundingBox, color);
-	}
+void CollisionSystem::BoundingBoxDraw(entt::entity entityId, Color color) const
+{
+        auto& col = registry->get<Collideable>(entityId);
+        Vector3 min = col.worldBoundingBox.min;
+        Vector3 max = col.worldBoundingBox.max;
+        
+        // Calculate the center of the bounding box
+        Vector3 center = {
+            (min.x + max.x) / 2,
+            (min.y + max.y) / 2,
+            (min.z + max.z) / 2
+        };
+        
+        // Calculate dimensions
+        float width = max.x - min.x;
+        float height = max.y - min.y;
+        float depth = max.z - min.z;
+        
+        // Draw the cube at the calculated center with the correct dimensions
+        DrawCube(center, width, height, depth, color);
+}
 
 	/**
 	 * Calculates worldBoundingBox by multiplying localBoundingBox with the passed transform matrix
