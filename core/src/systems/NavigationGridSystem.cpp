@@ -295,6 +295,26 @@ namespace sage
 		return false;
 	}
 
+    float calculateTerrainCost(const Vector3& normal, float maxSlopeAngle)
+    {
+        // The up vector
+        Vector3 up = { 0.0f, 1.0f, 0.0f };
+    
+        // Calculate the angle between the normal and the up vector
+        float dotProduct = normal.x * up.x + normal.y * up.y + normal.z * up.z;
+        float angle = std::acos(dotProduct) * RAD2DEG;  // Convert to degrees
+    
+        // If the angle is greater than the max slope angle, return a very high cost
+        if (angle > maxSlopeAngle)
+        {
+            return std::numeric_limits<float>::max();
+        }
+    
+        // Otherwise, calculate a cost based on the angle
+        // This will return 1.0 for flat ground, and increase as the slope increases
+        return 1.0f + (angle / maxSlopeAngle);
+    }
+
 	void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity)
 	{
         BoundingBox area = registry->get<Collideable>(entity).worldBoundingBox;
@@ -335,6 +355,7 @@ namespace sage
                     {
                         gridSquares[row][col]->terrainHeight = collision.point.y;
                         gridSquares[row][col]->terrainNormal = collision.normal;
+                        gridSquares[row][col]->pathfindingCost = calculateTerrainCost(collision.normal, 45.0f);
                     }
 				}
 			}
