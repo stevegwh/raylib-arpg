@@ -9,9 +9,11 @@
 #include "scenes/Scene.hpp"
 #include "Gui.hpp"
 #include "Settings.hpp"
+#include "EditorSettings.hpp"
 
 #include "entt/entt.hpp"
 #include "windows/FloatingWindow.hpp"
+#include "EditorSettings.hpp"
 
 #include <vector>
 #include <memory>
@@ -36,6 +38,7 @@ namespace sage
 		bool destroySelected = false;
 
 		std::unique_ptr<editor::GUI> gui;
+        EditorSettings* editorSettings;
 
 		// Event responses
 		void OnCursorClick();
@@ -43,6 +46,7 @@ namespace sage
 		void OnSerializeSave();
 		void OnOpenPressed();
 		void OnOpenClicked();
+        void OnFileOpened();
 		void OnDeleteModeKeyPressed();
 		void OnCreateModeKeyPressed();
 		void OnGenGridKeyPressed();
@@ -51,7 +55,7 @@ namespace sage
 		void moveSelectedObjectToCursorHit() const;
 
 	public:
-		EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath);
+		EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, EditorSettings* _editorSettings);
 		~EditorScene() override;
 		void Draw3D() override;
 		void Draw2D() override;

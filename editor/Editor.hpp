@@ -14,14 +14,14 @@ namespace sage
 	{
 		std::unique_ptr<EditorSettings> editorSettings;
 		bool debugMode = false;
-
+        
 		void init() override;
 		void draw() override;
 		void enablePlayMode();
 		void enableEditMode();
 		void manageScenes();
 		void initEditorScene();
-		void SerializeEditorSettings(EditorSettings& settings, const char* path);
+		void SerializeEditorSettings(EditorSettings* settings, const char* path);
 		void DeserializeEditorSettings(EditorSettings& settings, const char* path);
 	public:
 		Editor();

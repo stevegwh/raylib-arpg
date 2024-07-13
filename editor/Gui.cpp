@@ -29,12 +29,16 @@ namespace sage::editor
 
 	void GUI::Update()
 	{
-		
         if (fileDialogState->SelectFilePressed)
         {
-			std::cout << TextFormat("%s\%s", fileDialogState->dirPathText, fileDialogState->fileNameText) << std::endl;
-
+            auto previousMap = editorSettings->lastOpenedMap;
+			std::cout << TextFormat("%s", fileDialogState->dirPathText) << std::endl;
+            editorSettings->lastOpenedMap = TextFormat("%s/%s", fileDialogState->dirPathText, fileDialogState->fileNameText);
             fileDialogState->SelectFilePressed = false;
+            if (previousMap != editorSettings->lastOpenedMap)
+            {
+                onFileOpened.publish();
+            }
         }
 	}
 
@@ -113,8 +117,8 @@ namespace sage::editor
 		toolprops->content_size = {140, 320};
 	}
 
-	GUI::GUI(Settings* _settings, UserInput* _userInput, Camera* _camera) :
-		camera(_camera), settings(_settings)
+	GUI::GUI(EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* _camera) :
+		editorSettings(_editorSettings), camera(_camera), settings(_settings)
 	{
 		// TODO: No hardcoded values
 		// TODO: Resolution aware fonts
@@ -166,6 +170,6 @@ namespace sage::editor
 			onWindowHover.connect<&GUI::MarkGUIActive>(this);
 			onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
 		}
-		fileDialogState = std::make_unique<GuiWindowFileDialogState>(InitGuiWindowFileDialog(GetApplicationDirectory()));
+		fileDialogState = std::make_unique<GuiWindowFileDialogState>(InitGuiWindowFileDialog(GetWorkingDirectory()));
 	}
 } // sage

@@ -30,16 +30,21 @@ namespace sage
 
 	void Editor::initEditorScene()
 	{
+        // "resources/models/obj/level-basic.obj"
 		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
-		scene = std::make_unique<EditorScene>(registry.get(), std::move(data), "resources/models/obj/level-basic.obj");
+		scene = std::make_unique<EditorScene>(registry.get(), std::move(data), editorSettings.get());
 		{
 			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
 			keyRPressed.connect<&Editor::enablePlayMode>(this);
 		}
+        {
+            entt::sink sink{scene->data->sceneChange};
+            sink.connect<&Editor::enableEditMode>(this);
+        }
 		EnableCursor();
 	}
 
-	void Editor::SerializeEditorSettings(EditorSettings& settings, const char* path)
+	void Editor::SerializeEditorSettings(EditorSettings* settings, const char* path)
 	{
 		std::cout << "Save called" << std::endl;
 		using namespace entt::literals;
@@ -55,7 +60,7 @@ namespace sage
 		{
 			// output finishes flushing its contents when it goes out of scope
 			cereal::XMLOutputArchive output{ storage };
-			output(settings);
+			output(*settings);
 		}
 		storage.close();
 		std::cout << "Save finished" << std::endl;
@@ -78,7 +83,7 @@ namespace sage
 		{
 			// File doesn't exist, create a new file with the default key mapping
 			std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
-			SerializeEditorSettings(settings, path);
+			SerializeEditorSettings(&settings, path);
 		}
 		std::cout << "Load finished" << std::endl;
 	}
@@ -86,7 +91,7 @@ namespace sage
 	void Editor::initGameScene()
 	{
 		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
-		scene = std::make_unique<ExampleScene>(registry.get(), std::move(data), "resources/models/obj/level-basic.obj");
+		scene = std::make_unique<ExampleScene>(registry.get(), std::move(data), editorSettings->lastOpenedMap);
 		{
 			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
 			keyRPressed.connect<&Editor::enableEditMode>(this);
@@ -109,6 +114,7 @@ namespace sage
 			switch (stateChange)
 			{
 			case 1:
+                SerializeEditorSettings(editorSettings.get(), "resources/editor-settings.xml");
 				initGameScene();
 				break;
 			case 2:
@@ -146,7 +152,6 @@ namespace sage
 
 	Editor::Editor()
 	{
-		editorSettings = std::make_unique<EditorSettings>();
 		EditorSettings _settings;
 		DeserializeEditorSettings(_settings, "resources/editor-settings.xml");
 		editorSettings = std::make_unique<EditorSettings>(_settings);

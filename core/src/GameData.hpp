@@ -51,6 +51,7 @@ namespace sage
 		std::unique_ptr<CombatStateSystem> combatStateSystem;
 		std::unique_ptr<DefaultStateSystem> defaultStateSystem;
 
+        entt::sigh<void()> sceneChange;
 		void Load();
 		void Save() const;
 	};

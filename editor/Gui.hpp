@@ -12,6 +12,7 @@
 #include "Settings.hpp"
 #include "UserInput.hpp"
 #include "Cursor.hpp"
+#include "EditorSettings.hpp"
 
 #include <entt/entt.hpp>
 
@@ -29,7 +30,8 @@ namespace sage::editor
 		std::unique_ptr<FloatingWindow> toolbox;
 		std::unique_ptr<GuiWindowFileDialogState> fileDialogState;
 		std::vector<Window*> windows;
-		Vector2 screenSize;
+		Vector2 screenSize{};
+        EditorSettings* editorSettings;
 		Settings* settings;
 		void onWindowResize(Vector2 newScreenSize);
 		static void drawDebugCollisionText(Cursor* cursor);
@@ -38,10 +40,11 @@ namespace sage::editor
 		bool focused = false;
 		entt::sigh<void()> saveButtonPressed;
 		entt::sigh<void()> loadButtonPressed;
+        entt::sigh<void()> onFileOpened;
 		void OpenFileDialog();
 		void Update();
 		void Draw(const std::string& mode, Cursor* cursor);
-		GUI(Settings* _settings, UserInput* _userInput, Camera* camera);
+		GUI(EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* camera);
 		void MarkGUIActive();
 		void MarkGUIInactive();
 	};
