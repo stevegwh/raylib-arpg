@@ -37,7 +37,7 @@ if(BUILD_EDITOR)
 endif()
 
 # Add the game executable target
-add_executable(game core/src/main.cpp "vendor/implementations.c")
+add_executable(game core/src/main.cpp)
 target_link_libraries(game PRIVATE core)
 
 # Symbolic link for resources folder (game executable)
