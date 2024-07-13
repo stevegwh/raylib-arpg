@@ -799,9 +799,88 @@ namespace sage
 		return tracebackPath(came_from, startGridSquare, finishGridSquare);
 	}
 
-	/*
-	* This function finds the collisions between buildings in the world and the grid squares and marks them as occupied.
-	 */
+    /**
+    * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+    * Checks entire grid.
+    * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
+    */
+    std::vector<Vector3> NavigationGridSystem::BFSPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos)
+    {
+        return BFSPathfind(entity, startPos, finishPos, {0,0},
+                           { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) });
+    }
+    
+    /**
+     * Generates a sequence of nodes that should be the "optimal" route from point A to point B.
+     * Checks path within a range. Use "GetPathfindRange" to calculate minRange/maxRange if needed.
+     * @minRange The minimum grid index in the pathfinding range.
+     * @maxRange The maximum grid index in the pathfinding range.
+     * @return A vector of "nodes" to travel to in sequential order. Empty if path is invalid (OOB or no path available).
+     */
+    std::vector<Vector3> NavigationGridSystem::BFSPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, const GridSquare& minRange, const GridSquare& maxRange)
+    {
+        GridSquare start{};
+        GridSquare finish{};
+        GridSquare extents{};
+        if (!WorldToGridSpace(startPos, start) ||
+            !WorldToGridSpace(finishPos, finish) ||
+            !getExtents(entity, extents))
+            return {};
+
+        if (!checkExtents(finish, extents))
+        {
+            // TODO: Should actually try to find next best location to original destination
+            finish = FindNextBestLocation(start, finish, minRange, maxRange, extents);
+        }
+
+        std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
+        std::vector<std::vector<GridSquare>> came_from(maxRange.row, std::vector<GridSquare>(maxRange.col, { -1, -1 }));
+        
+        std::queue<GridSquare> frontier;
+    
+        frontier.emplace(start);
+        visited[start.row][start.col] = true;
+    
+        bool pathFound = false;
+    
+        while (!frontier.empty())
+        {
+            auto current = frontier.front();
+            frontier.pop();
+    
+            if (current.row == finish.row && current.col == finish.col)
+            {
+                pathFound = true;
+                break;
+            }
+    
+            for (const auto& dir : directions)
+            {
+                GridSquare next = { current.row + dir.first, current.col + dir.second };
+    
+                if (checkInside(next, minRange, maxRange) &&
+                    !visited[next.row][next.col] &&
+                    checkExtents(next, extents) &&
+                    !gridSquares[next.row][next.col]->occupied)
+                {
+                    frontier.emplace(next);
+                    visited[next.row][next.col] = true;
+                    came_from[next.row][next.col] = current;
+                }
+            }
+        }
+    
+        if (!pathFound)
+        {
+            return {};
+        }
+    
+        return tracebackPath(came_from, start, finish);
+    }
+
+    /*
+    * This function finds the collisions between buildings in the world and the grid squares and marks them as occupied.
+     */
     void NavigationGridSystem::PopulateGrid()
     {
         for (auto& row : gridSquares)

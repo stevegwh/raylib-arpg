@@ -304,7 +304,11 @@ namespace sage
             {
                 collideable.collisionLayer = CollisionLayer::FLOOR;
                 floorMeshes.push_back(&collideable);
-            } 
+            }
+            else if (renderable.name.find("SM_Prop") != std::string::npos)
+            {
+                collideable.collisionLayer = CollisionLayer::BUILDING;
+            }
             else 
             {
                 collideable.collisionLayer = CollisionLayer::DEFAULT;

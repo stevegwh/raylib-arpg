@@ -24,7 +24,7 @@ namespace sage
 		std::vector<std::vector<NavigationGridSquare*>> gridSquares;
 
 
-		std::vector<Vector3> tracebackPath(const std::vector<std::vector<GridSquare>>& came_from,
+		[[nodiscard]] std::vector<Vector3> tracebackPath(const std::vector<std::vector<GridSquare>>& came_from,
 		                                   const GridSquare& start,
 		                                   const GridSquare& finish) const;
 		static bool checkInside(GridSquare square, GridSquare minRange, GridSquare maxRange);
@@ -60,6 +60,8 @@ namespace sage
 		                                                 const Vector3& finishPos, const GridSquare& minRange,
 		                                                 const GridSquare& maxRange,
 		                                                 AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
+        [[nodiscard]] std::vector<Vector3> BFSPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos);
+        [[nodiscard]] std::vector<Vector3> BFSPathfind(const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos, const GridSquare& minRange, const GridSquare& maxRange);
 		const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
         const NavigationGridSquare* GetGridSquare(int row, int col);
 		void DrawDebugPathfinding(const GridSquare& minRange, const GridSquare& maxRange) const;
