@@ -6,9 +6,6 @@
 #include "Serializer.hpp"
 #include "scenes/ExampleScene.hpp"
 
-#define RLIGHTS_IMPLEMENTATION
-#include "rlights.h"
-
 namespace sage
 {
 	Application::Application() :
