@@ -39,16 +39,9 @@
 
 #include "raylib.h"
 
-#if !defined(RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT)
-#define RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT 24
-#endif
-
-#if !defined(RAYGUI_WINDOW_CLOSEBUTTON_SIZE)
-#define RAYGUI_WINDOW_CLOSEBUTTON_SIZE 18
-#endif
-
 #ifndef GUI_WINDOW_FILE_DIALOG_H
 #define GUI_WINDOW_FILE_DIALOG_H
+
 
 // Gui file dialog context data
 typedef struct {
@@ -138,6 +131,13 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state);
 #define PATH_SEPERATOR "\\"
 #else
 #define PATH_SEPERATOR "/"
+#endif
+#if !defined(RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT)
+#define RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT 24
+#endif
+
+#if !defined(RAYGUI_WINDOW_CLOSEBUTTON_SIZE)
+#define RAYGUI_WINDOW_CLOSEBUTTON_SIZE 18
 #endif
 
 //----------------------------------------------------------------------------------

@@ -4,12 +4,8 @@
 
 #include "Gui.hpp"
 
-#ifndef RAYGUI_IMPLEMENTATION
-#define RAYGUI_IMPLEMENTATION
-#endif
 #define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
 #include "windows/gui_window_file_dialog.h"
-
 
 #include "windows/FloatingWindow.hpp"
 #include "UserInput.hpp"
