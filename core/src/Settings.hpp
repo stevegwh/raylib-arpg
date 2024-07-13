@@ -25,6 +25,7 @@ struct Settings
 		        CEREAL_NVP(SCREEN_HEIGHT));
 	}
 
+	// TODO: Fairly sure below my logic is reversed (im saving and loading the default values, not the user settings)
 	template <class Archive>
 	void load(Archive& archive)
 	{
