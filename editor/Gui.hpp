@@ -8,7 +8,7 @@
 
 #include "windows/Window.hpp"
 #include "windows/FloatingWindow.hpp"
-#include "windows/gui_window_file_dialog.h"
+#include <gui_window_file_dialog.h>
 #include "Settings.hpp"
 #include "UserInput.hpp"
 #include "Cursor.hpp"
