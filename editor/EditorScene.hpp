@@ -56,5 +56,6 @@ namespace sage
 		void Draw3D() override;
 		void Draw2D() override;
         void DrawDebug() override;
+		void Update() override;
 	};
 }

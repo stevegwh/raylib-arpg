@@ -49,7 +49,7 @@ namespace sage::serializer
 
 		{
 			// output finishes flushing its contents when it goes out of scope
-			cereal::XMLOutputArchive output{storage};
+			cereal::XMLOutputArchive output{ storage };
 			const auto view = source.view<Transform, Renderable, Collideable>();
 			for (const auto& ent : view)
 			{
@@ -87,7 +87,7 @@ namespace sage::serializer
 
 		{
 			//cereal::JSONInputArchive input{storage};
-			cereal::XMLInputArchive input{storage};
+			cereal::XMLInputArchive input{ storage };
 
 			entt::entity currentEntity{};
 			while (input.getNodeName() != nullptr)
@@ -140,7 +140,7 @@ namespace sage::serializer
 
 		{
 			// output finishes flushing its contents when it goes out of scope
-			cereal::XMLOutputArchive output{storage};
+			cereal::XMLOutputArchive output{ storage };
 			output(keymapping);
 		}
 		storage.close();
@@ -155,7 +155,7 @@ namespace sage::serializer
 		std::ifstream storage(path);
 		if (storage.is_open())
 		{
-			cereal::XMLInputArchive input{storage};
+			cereal::XMLInputArchive input{ storage };
 			input(keymapping);
 			storage.close();
 		}
@@ -183,7 +183,7 @@ namespace sage::serializer
 
 		{
 			// output finishes flushing its contents when it goes out of scope
-			cereal::XMLOutputArchive output{storage};
+			cereal::XMLOutputArchive output{ storage };
 			output(settings);
 		}
 		storage.close();
@@ -198,7 +198,7 @@ namespace sage::serializer
 		std::ifstream storage(path);
 		if (storage.is_open())
 		{
-			cereal::XMLInputArchive input{storage};
+			cereal::XMLInputArchive input{ storage };
 			input(settings);
 			storage.close();
 		}
@@ -211,64 +211,64 @@ namespace sage::serializer
 		std::cout << "Load finished" << std::endl;
 	}
 
-float GetMaxHeight(entt::registry* registry, float slices)
-{
-    float max = 0;
-    BoundingBox bb = {
-        .min = {-slices, 0.1f, -slices},
-        .max = {slices, 0.1f, slices}
-    };
+	float GetMaxHeight(entt::registry* registry, float slices)
+	{
+		float max = 0;
+		BoundingBox bb = {
+			.min = {-slices, 0.1f, -slices},
+			.max = {slices, 0.1f, slices}
+		};
 
-    auto inside = [bb] (float x, float z) {
-        return x >= bb.min.x && x <= bb.max.x && z >= bb.min.z && z <= bb.max.z;
-    };
+		auto inside = [bb](float x, float z) {
+			return x >= bb.min.x && x <= bb.max.x && z >= bb.min.z && z <= bb.max.z;
+			};
 
-    auto view = registry->view<Collideable, Renderable>();
+		auto view = registry->view<Collideable, Renderable>();
 
-    for (const auto& entity : view)
-    {
-        const auto& c = registry->get<Collideable>(entity);
-        if (c.collisionLayer != CollisionLayer::FLOOR) continue;
+		for (const auto& entity : view)
+		{
+			const auto& c = registry->get<Collideable>(entity);
+			if (c.collisionLayer != CollisionLayer::FLOOR) continue;
 
-        // Check if either min or max point of the bounding box is inside the defined area
-        if (inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z) ||
-            inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z))
-        {
-            if (c.worldBoundingBox.max.y > max)
-            {
-                max = c.worldBoundingBox.max.y;
-            }
-        }
-    }
+			// Check if either min or max point of the bounding box is inside the defined area
+			if (inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z) ||
+				inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z))
+			{
+				if (c.worldBoundingBox.max.y > max)
+				{
+					max = c.worldBoundingBox.max.y;
+				}
+			}
+		}
 
-    return max;
-}
+		return max;
+	}
 
 
-void GenerateHeightMap(entt::registry* registry, const std::string& path, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
-    {
-        int slices = gridSquares.size();
-        float maxHeight = GetMaxHeight(registry, slices); // TODO
-        
-        Image heightMap = GenImageColor(slices, slices, BLACK);
-        std::cout << "Generating height map..." << std::endl;
-        for (int y = 0; y < slices; ++y)
-        {
-            for (int x = 0; x < slices; ++x)
-            {
-                float height = gridSquares[y][x]->terrainHeight;
+	void GenerateHeightMap(entt::registry* registry, const std::string& path, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
+	{
+		int slices = gridSquares.size();
+		float maxHeight = GetMaxHeight(registry, slices); // TODO
 
-                unsigned char heightValue = static_cast<unsigned char>(std::min((height / maxHeight) * 255.0f, 255.0f));
+		Image heightMap = GenImageColor(slices, slices, BLACK);
+		std::cout << "Generating height map..." << std::endl;
+		for (int y = 0; y < slices; ++y)
+		{
+			for (int x = 0; x < slices; ++x)
+			{
+				float height = gridSquares[y][x]->terrainHeight;
 
-                Color pixelColor = { heightValue, heightValue, heightValue, 255 };
-                ImageDrawPixel(&heightMap, x, y, pixelColor);
-            }
-        }
-        size_t lastindex = path.find_last_of('.');
-        std::string strippedPath = path.substr(0, lastindex);
-        ExportImage(heightMap, TextFormat("%s.png", strippedPath.c_str()));
-        UnloadImage(heightMap);
-    
-        std::cout << "Height map saved as '" << strippedPath << ".png'" << std::endl;
-    }
+				unsigned char heightValue = static_cast<unsigned char>(std::min((height / maxHeight) * 255.0f, 255.0f));
+
+				Color pixelColor = { heightValue, heightValue, heightValue, 255 };
+				ImageDrawPixel(&heightMap, x, y, pixelColor);
+			}
+		}
+		size_t lastindex = path.find_last_of('.');
+		std::string strippedPath = path.substr(0, lastindex);
+		ExportImage(heightMap, TextFormat("%s.png", strippedPath.c_str()));
+		UnloadImage(heightMap);
+
+		std::cout << "Height map saved as '" << strippedPath << ".png'" << std::endl;
+	}
 }

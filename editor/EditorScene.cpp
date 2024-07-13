@@ -135,6 +135,12 @@ namespace sage
         DrawGrid(data->navigationGridSystem->slices, data->navigationGridSystem->spacing);
     }
 
+	void EditorScene::Update()
+	{
+		Scene::Update();
+		gui->Update();
+	}
+
 	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath) :
 		Scene(_registry, std::move(_data), mapPath),
 		gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))

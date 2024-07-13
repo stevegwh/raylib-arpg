@@ -8,27 +8,47 @@
 #include "UserInput.hpp"
 
 
-
 namespace sage::editor
 {
 	void GUI::MarkGUIActive()
 	{
 		focused = true;
+		camera->ScrollDisable();
 	}
 
 	void GUI::MarkGUIInactive()
 	{
 		focused = false;
+		camera->ScrollEnable();
 	}
 
 	void GUI::OpenFileDialog()
 	{
-		GuiWindowFileDialog(fileDialogState.get());
-		std::cout << "File dialog opens" << std::endl;
+		fileDialogState->windowActive = true;
+	}
+
+	void GUI::Update()
+	{
+		
+        if (fileDialogState->SelectFilePressed)
+        {
+			std::cout << TextFormat("%s\%s", fileDialogState->dirPathText, fileDialogState->fileNameText) << std::endl;
+
+            fileDialogState->SelectFilePressed = false;
+        }
 	}
 
 	void GUI::Draw(const std::string& mode, Cursor* cursor)
 	{
+		if (fileDialogState->windowActive) 
+		{
+			GuiLock();
+			MarkGUIActive();
+		}
+		else
+		{
+			MarkGUIInactive();
+		}
 		float modifier = 100;
 		GuiGroupBox({0 + modifier, 8, 184, 40}, nullptr);
 		if (GuiButton({8 + modifier, 8, 24, 24}, "#002#"))
@@ -47,6 +67,8 @@ namespace sage::editor
 
 		DrawText(TextFormat("Editor Mode: %s", mode.c_str()), screenSize.x - 150, 50, 10, BLACK);
 		drawDebugCollisionText(cursor);
+		GuiUnlock();
+		GuiWindowFileDialog(fileDialogState.get());
 	}
 
 	void GUI::drawDebugCollisionText(Cursor* cursor)
@@ -131,25 +153,19 @@ namespace sage::editor
 			entt::sink onWindowHoverStop{toolbox->onWindowHoverStop};
 			onWindowHover.connect<&GUI::MarkGUIActive>(this);
 			onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
-			onWindowHover.connect<&Camera::ScrollDisable>(camera);
-			onWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
 		}
 		{
 			entt::sink onWindowHover{objectprops->onWindowHover};
 			entt::sink onWindowHoverStop{objectprops->onWindowHoverStop};
 			onWindowHover.connect<&GUI::MarkGUIActive>(this);
 			onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
-			onWindowHover.connect<&Camera::ScrollDisable>(camera);
-			onWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
 		}
 		{
 			entt::sink onWindowHover{toolprops->onWindowHover};
 			entt::sink onWindowHoverStop{toolprops->onWindowHoverStop};
 			onWindowHover.connect<&GUI::MarkGUIActive>(this);
 			onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
-			onWindowHover.connect<&Camera::ScrollDisable>(camera);
-			onWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
 		}
-		fileDialogState = std::make_unique<GuiWindowFileDialogState>(InitGuiWindowFileDialog("~/"));
+		fileDialogState = std::make_unique<GuiWindowFileDialogState>(InitGuiWindowFileDialog(GetApplicationDirectory()));
 	}
 } // sage
