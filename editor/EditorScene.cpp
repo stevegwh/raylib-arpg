@@ -171,7 +171,7 @@ namespace sage
 		data->Load();
 
         float slices = 0;
-        std::string mapPath = "resources/models/obj/level2.obj";
+        std::string mapPath = "resources/models/obj/level-basic.obj";
         GameObjectFactory::loadMap(registry, this, slices, mapPath);
 		data->navigationGridSystem->Init(slices, 1.0f, mapPath);
 		data->navigationGridSystem->PopulateGrid();
