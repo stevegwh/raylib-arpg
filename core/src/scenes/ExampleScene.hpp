@@ -12,13 +12,14 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 namespace sage
 {
 	class ExampleScene : public Scene
 	{
 	public:
-		ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
+		ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath);
 		~ExampleScene() override;
 		void Update() override;
 		void Draw2D() override;

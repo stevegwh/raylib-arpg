@@ -22,6 +22,7 @@
 #include "entt/entt.hpp"
 
 #include <memory>
+#include <string>
 
 namespace sage
 {

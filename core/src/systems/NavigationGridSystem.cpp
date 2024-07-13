@@ -880,6 +880,7 @@ namespace sage
      */
     void NavigationGridSystem::PopulateGrid()
     {
+		// TODO: The below crashes when trying to autogenerate the amount of slices
         for (auto& row : gridSquares)
         {
             for (auto& gridSquare : row)

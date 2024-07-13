@@ -23,7 +23,7 @@ namespace sage
 	void Editor::initEditorScene()
 	{
 		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
-		scene = std::make_unique<EditorScene>(registry.get(), std::move(data));
+		scene = std::make_unique<EditorScene>(registry.get(), std::move(data), "resources/models/obj/level-basic.obj");
 		{
 			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
 			keyRPressed.connect<&Editor::enablePlayMode>(this);
@@ -34,7 +34,7 @@ namespace sage
 	void Editor::initGameScene()
 	{
 		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
-		scene = std::make_unique<ExampleScene>(registry.get(), std::move(data));
+		scene = std::make_unique<ExampleScene>(registry.get(), std::move(data), "resources/models/obj/level-basic.obj");
 		{
 			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
 			keyRPressed.connect<&Editor::enableEditMode>(this);

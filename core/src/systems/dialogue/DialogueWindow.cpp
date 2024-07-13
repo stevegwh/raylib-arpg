@@ -4,9 +4,9 @@
 
 #include "DialogueWindow.hpp"
 
-#ifndef RAYGUI_IMPLEMENTATION
-#define RAYGUI_IMPLEMENTATION
-#endif
+//#ifndef RAYGUI_IMPLEMENTATION
+//#define RAYGUI_IMPLEMENTATION
+//#endif
 
 #include "raygui.h"
 

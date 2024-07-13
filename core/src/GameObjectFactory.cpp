@@ -161,7 +161,6 @@ namespace sage
 	{
 		entt::entity id = registry->create();
 		auto modelPath = "resources/models/gltf/hero.glb";
-		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<Transform>(id);
         GridSquare actorIdx;
@@ -231,7 +230,7 @@ namespace sage
 		auto& worldObject = registry->emplace<WorldObject>(id);
 
 		auto& actor = registry->emplace<ControllableActor>(id);
-		actor.pathfindingBounds = 50;
+		actor.pathfindingBounds = 100;
 		game->controllableActorSystem->SetControlledActor(id);
 		registry->emplace<StatePlayerDefault>(id);
 		// Always set state last to ensure everything is initialised properly before.
@@ -265,12 +264,30 @@ namespace sage
 		registry->emplace<WorldObject>(id);
 	}
 
+	BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
+	{
+		// TODO: Below doesn't seem to work always, depending on the map.
+		BoundingBox mapBB { Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
+		for (const auto& col: floorMeshes) 
+        {
+            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
+            {
+                mapBB.min = col->worldBoundingBox.min;
+            }
+            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
+            {
+                mapBB.max = col->worldBoundingBox.max;
+            }
+        }
+        mapBB.min.y = 0.1f;
+        mapBB.max.y = 0.1f;
+		return mapBB;
+	}
+
 	void GameObjectFactory::loadMap(entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
 	{
 		
 		sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
-		//    const char* modelPath = "resources/models/obj/SM_Env_Rock_010.obj";
-//		auto modelPath = "resources/models/obj/level2.obj";
 		Model parent = LoadModel(_mapPath.c_str());
         std::vector<Collideable*> floorMeshes;
         
@@ -318,20 +335,9 @@ namespace sage
 
         // Calculate grid based on walkable area
 		BoundingBox mapBB { Vector3{-500, 0, -500}, Vector3{500, 0, 500} }; // min, max
-        //for (const auto& col: floorMeshes) 
-        //{
-        //    if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
-        //    {
-        //        mapBB.min = col->worldBoundingBox.min;
-        //    }
-        //    if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
-        //    {
-        //        mapBB.max = col->worldBoundingBox.max;
-        //    }
-        //}
-        mapBB.min.y = 0.1f;
-        mapBB.max.y = 0.1f;
-        slices = mapBB.max.x - mapBB.min.x; // Should check if x or z is larger
+		//BoundingBox mapBB = calculateFloorSize(floorMeshes);
+
+        slices = mapBB.max.x - mapBB.min.x;
         // Create floor
         createFloor(registry, scene, mapBB);
 	}
