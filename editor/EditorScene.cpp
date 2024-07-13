@@ -72,6 +72,11 @@ namespace sage
 	{
 		gui->OpenFileDialog();
 	}
+    
+    void EditorScene::OnFileOpened()
+    {
+        data->sceneChange.publish();
+    }
 
 	void EditorScene::OnDeleteModeKeyPressed()
 	{
@@ -141,9 +146,10 @@ namespace sage
 		gui->Update();
 	}
 
-	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath) :
-		Scene(_registry, std::move(_data), mapPath),
-		gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))
+	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, EditorSettings* _editorSettings) :
+		Scene(_registry, std::move(_data), _editorSettings->lastOpenedMap),
+        editorSettings(_editorSettings),
+		gui(std::make_unique<editor::GUI>(_editorSettings, data->settings, data->userInput.get(), data->camera.get()))
 	{
 		{
 			entt::sink onClickEvent{data->cursor->onAnyClick};
@@ -181,6 +187,10 @@ namespace sage
 			entt::sink loadButton{gui->loadButtonPressed};
 			loadButton.connect<&EditorScene::OnOpenClicked>(this);
 		}
+        {
+            entt::sink loadButton{gui->onFileOpened};
+            loadButton.connect<&EditorScene::OnFileOpened>(this);
+        }
         lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
 		data->controllableActorSystem->Disable();
 	}
