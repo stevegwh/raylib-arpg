@@ -140,29 +140,26 @@ namespace sage
 			return;
 		}
 
-
-		// TODO: Currently, the bounding box of the environment obstructs the NPCs or other actor's bounding boxes. Currently using a bit of a hack, for this
-		// Could use a priority queue?
-		
+	
 		// Collision hit
 		rayCollisionResultInfo = collisions.at(0); // Closest collision
 
-		for (auto coll : collisions) // First NPC or Enemy collision
+		for (auto coll : collisions) // Avoids the actors in the scene being obscured by the terrain's bounding boxes
 		{
-			if (coll.collisionLayer == CollisionLayer::NPC || coll.collisionLayer == CollisionLayer::ENEMY)
+			if (coll.collisionLayer != CollisionLayer::FLOOR)
 			{
 				rayCollisionResultInfo = coll;
+				break;
 			}
 		}
 
-        // If collided entity has a mesh, use this position as opposed to its bounding box
+        // Get the floor's mesh hit point
         if (rayCollisionResultInfo.collisionLayer == CollisionLayer::FLOOR && registry->any_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
         {
             auto& renderable = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId);
             auto meshCollision = GetRayCollisionMesh(ray, *renderable.model.meshes, renderable.model.transform);
             if (meshCollision.hit)
             {
-                
                 rayCollisionResultInfo.rlCollision = meshCollision;
             }
         }
