@@ -317,21 +317,21 @@ namespace sage
         }
 
         // Calculate grid based on walkable area
-        BoundingBox mapBB;
-        for (const auto& col: floorMeshes) 
-        {
-            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
-            {
-                mapBB.min = col->worldBoundingBox.min;
-            }
-            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
-            {
-                mapBB.max = col->worldBoundingBox.max;
-            }
-        }
+		BoundingBox mapBB { Vector3{-500, 0, -500}, Vector3{500, 0, 500} }; // min, max
+        //for (const auto& col: floorMeshes) 
+        //{
+        //    if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
+        //    {
+        //        mapBB.min = col->worldBoundingBox.min;
+        //    }
+        //    if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
+        //    {
+        //        mapBB.max = col->worldBoundingBox.max;
+        //    }
+        //}
         mapBB.min.y = 0.1f;
         mapBB.max.y = 0.1f;
-        slices = mapBB.max.x - mapBB.min.x;
+        slices = mapBB.max.x - mapBB.min.x; // Should check if x or z is larger
         // Create floor
         createFloor(registry, scene, mapBB);
 	}

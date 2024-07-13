@@ -6,5 +6,6 @@ build
 resources/models/gltf/level.glb
 resources/models/obj/level.obj
 resources/models/obj/level2.obj
+resources/models/obj/level-basic.obj
 out
 .vs
