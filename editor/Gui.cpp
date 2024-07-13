@@ -5,7 +5,7 @@
 #include "Gui.hpp"
 
 #define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
-#include "windows/gui_window_file_dialog.h"
+#include <gui_window_file_dialog.h>
 
 #include "windows/FloatingWindow.hpp"
 #include "UserInput.hpp"
