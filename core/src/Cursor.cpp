@@ -136,7 +136,7 @@ namespace sage
 		if (collisions.empty())
 		{
 			CollisionInfo empty{};
-			rayCollisionResultInfo = empty;
+			rayCollisionResultInfo = {};
 			return;
 		}
 
@@ -150,6 +150,7 @@ namespace sage
             auto meshCollision = GetRayCollisionMesh(ray, *renderable.model.meshes, renderable.model.transform);
             if (meshCollision.hit)
             {
+                
                 rayCollisionResultInfo.rlCollision = meshCollision;
             }
         }
