@@ -428,27 +428,26 @@ namespace sage
 	 * @param extents The extents of the entity.
 	 * @return Whether the extents were successfully retrieved.
 	 */
-	bool NavigationGridSystem::getExtents(entt::entity entity, GridSquare& extents) const
-	{
-		{
-			GridSquare bb_min;
-			auto& bb = registry->get<Collideable>(entity).localBoundingBox;
-			if (!WorldToGridSpace(bb.min, bb_min) || !WorldToGridSpace(bb.max, extents))
-			{
-				return false;
-			}
+    bool NavigationGridSystem::getExtents(entt::entity entity, GridSquare &extents) const
+    {
+        GridSquare bb_min;
+        auto &bb = registry->get<Collideable>(entity).localBoundingBox;
+        if (!WorldToGridSpace(bb.min, bb_min) || !WorldToGridSpace(bb.max, extents)) 
+        {
+            return false;
+        }
 
-			extents -= bb_min;
-
-
-			if (!checkInside(extents, { 0, 0 },
-				{ static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) }))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+        extents -= bb_min;
+        
+        if (!checkInside(extents, {0, 0},
+                         {static_cast<int>(gridSquares.at(0).size()),
+                          static_cast<int>(gridSquares.size())})) 
+        {
+            return false;
+        }
+        
+        return true;
+    }
 
 	bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, GridSquare& minRange,
 		GridSquare& maxRange) const
@@ -581,10 +580,6 @@ namespace sage
 		auto min = square - extents;
 		auto max = square + extents;
 
-
-		GridSquare minRange = { 0, 0 };
-		GridSquare maxRange = { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) };
-
 		for (int row = min.row; row < max.row; ++row)
 		{
 			for (int col = min.col; col < max.col; ++col)
@@ -595,7 +590,9 @@ namespace sage
 				}
 			}
 		}
-
+        
+        GridSquare minRange = { 0, 0 };
+        GridSquare maxRange = { static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size()) };
 		return checkInside(min, minRange, maxRange) &&
 			checkInside(max, minRange, maxRange);
 	}
