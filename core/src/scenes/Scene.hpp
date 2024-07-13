@@ -7,6 +7,7 @@
 #include "systems/LightSubSystem.hpp"
 #include "entt/entt.hpp"
 #include "GameData.hpp"
+#include <GameObjectFactory.hpp>
 
 #include <memory>
 
@@ -21,12 +22,18 @@ namespace sage
 		std::unique_ptr<GameData> data;
 		std::unique_ptr<LightSubSystem> lightSubSystem;
 
-		explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
+		explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath) :
 			registry(_registry),
 			data(std::move(_data)),
 			lightSubSystem(std::make_unique<LightSubSystem>())
 		{
+			data->Load();
+			float slices = 0;
+			GameObjectFactory::loadMap(registry, this, slices, mapPath);
+			data->navigationGridSystem->Init(slices, 1.0f, mapPath);
+			data->navigationGridSystem->PopulateGrid();
 		};
+
 		virtual ~Scene() = default;
 
 		virtual void Update()

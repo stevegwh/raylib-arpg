@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 namespace sage
 {
@@ -40,7 +41,8 @@ namespace sage
 		void OnCursorClick();
 		void OnCollisionHit(entt::entity entity);
 		void OnSerializeSave();
-		void OnSerializeLoad();
+		void OnOpenPressed();
+		void OnOpenClicked();
 		void OnDeleteModeKeyPressed();
 		void OnCreateModeKeyPressed();
 		void OnGenGridKeyPressed();
@@ -49,7 +51,7 @@ namespace sage
 		void moveSelectedObjectToCursorHit() const;
 
 	public:
-		EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data);
+		EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath);
 		~EditorScene() override;
 		void Draw3D() override;
 		void Draw2D() override;

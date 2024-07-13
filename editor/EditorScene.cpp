@@ -59,9 +59,18 @@ namespace sage
 		data->Save();
 	}
 
-	void EditorScene::OnSerializeLoad()
+	void EditorScene::OnOpenPressed()
 	{
-		data->Load();
+		if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+		{
+			// data->Load();
+			gui->OpenFileDialog();
+		}
+	}
+
+	void EditorScene::OnOpenClicked()
+	{
+		gui->OpenFileDialog();
 	}
 
 	void EditorScene::OnDeleteModeKeyPressed()
@@ -80,7 +89,7 @@ namespace sage
 
 	void EditorScene::OnGenGridKeyPressed()
 	{
-		data->navigationGridSystem->PopulateGrid();
+		// data->navigationGridSystem->PopulateGrid();
 	}
 
 	void EditorScene::OnCollisionHit(entt::entity entity)
@@ -126,8 +135,8 @@ namespace sage
         DrawGrid(data->navigationGridSystem->slices, data->navigationGridSystem->spacing);
     }
 
-	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data) :
-		Scene(_registry, std::move(_data)),
+	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath) :
+		Scene(_registry, std::move(_data), mapPath),
 		gui(std::make_unique<editor::GUI>(data->settings, data->userInput.get(), data->camera.get()))
 	{
 		{
@@ -155,8 +164,8 @@ namespace sage
 			keyMPressed.connect<&EditorScene::OnSerializeSave>(this);
 		}
 		{
-			entt::sink keyNPressed{data->userInput->keyNPressed};
-			keyNPressed.connect<&EditorScene::OnSerializeLoad>(this);
+			entt::sink keyNPressed{data->userInput->keyOPressed};
+			keyNPressed.connect<&EditorScene::OnOpenPressed>(this);
 		}
 		{
 			entt::sink saveButton{gui->saveButtonPressed};
@@ -164,17 +173,9 @@ namespace sage
 		}
 		{
 			entt::sink loadButton{gui->loadButtonPressed};
-			loadButton.connect<&EditorScene::OnSerializeLoad>(this);
+			loadButton.connect<&EditorScene::OnOpenClicked>(this);
 		}
         lightSubSystem->lights[0] = CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
-
-		data->Load();
-
-        float slices = 0;
-        std::string mapPath = "resources/models/obj/level-basic.obj";
-        GameObjectFactory::loadMap(registry, this, slices, mapPath);
-		data->navigationGridSystem->Init(slices, 1.0f, mapPath);
-		data->navigationGridSystem->PopulateGrid();
 		data->controllableActorSystem->Disable();
 	}
 

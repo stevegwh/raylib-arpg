@@ -31,6 +31,16 @@ illum 3
 map_Kd POLYGON_Knights_Texture_01.png
 map_d Texture_01.png
 
+newmtl Mat_PolyKnights_01.003
+Ns 200.000000
+Ka 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 3
+map_Kd POLYGON_Knights_Texture_01.png
+map_d Texture_01.png
+
 newmtl Mat_Statue
 Ns 200.000000
 Ka 1.000000 1.000000 1.000000

@@ -3,10 +3,18 @@
 //
 
 #include "Gui.hpp"
+
+#ifndef RAYGUI_IMPLEMENTATION
+#define RAYGUI_IMPLEMENTATION
+#endif
+#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
+#include "windows/gui_window_file_dialog.h"
+
+
 #include "windows/FloatingWindow.hpp"
 #include "UserInput.hpp"
 
-#include "raygui.h"
+
 
 namespace sage::editor
 {
@@ -18,6 +26,12 @@ namespace sage::editor
 	void GUI::MarkGUIInactive()
 	{
 		focused = false;
+	}
+
+	void GUI::OpenFileDialog()
+	{
+		GuiWindowFileDialog(fileDialogState.get());
+		std::cout << "File dialog opens" << std::endl;
 	}
 
 	void GUI::Draw(const std::string& mode, Cursor* cursor)
@@ -143,5 +157,6 @@ namespace sage::editor
 			onWindowHover.connect<&Camera::ScrollDisable>(camera);
 			onWindowHoverStop.connect<&Camera::ScrollEnable>(camera);
 		}
+		fileDialogState = std::make_unique<GuiWindowFileDialogState>(InitGuiWindowFileDialog("~/"));
 	}
 } // sage
