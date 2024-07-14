@@ -6,11 +6,9 @@
 #include "../src/scenes/ExampleScene.hpp"
 #include "EditorScene.hpp"
 #include "Serializer.hpp"
-#include <memory>
 
+#include <memory>
 #include <fstream>
-#include <type_traits>
-#include <vector>
 
 #include "cereal/cereal.hpp"
 //#include <cereal/archives/json.hpp>
@@ -20,12 +18,12 @@ namespace sage
 {
 	void Editor::enableEditMode()
 	{
-		stateChange = 2;
+		state = EditorState::EDITOR;
 	}
 
 	void Editor::enablePlayMode()
 	{
-		stateChange = 1;
+		state = EditorState::PLAY;
 	}
 
 	void Editor::initEditorScene()
@@ -38,11 +36,22 @@ namespace sage
 			keyRPressed.connect<&Editor::enablePlayMode>(this);
 		}
         {
-            entt::sink sink{scene->data->sceneChange};
+            entt::sink sink{scene->sceneChange};
             sink.connect<&Editor::enableEditMode>(this);
         }
 		EnableCursor();
 	}
+
+    void Editor::initGameScene()
+    {
+        auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
+        scene = std::make_unique<ExampleScene>(registry.get(), std::move(data), editorSettings->lastOpenedMap);
+        {
+            entt::sink keyRPressed{scene->data->userInput->keyRPressed};
+            keyRPressed.connect<&Editor::enableEditMode>(this);
+        }
+        HideCursor();
+    }
 
 	void Editor::SerializeEditorSettings(EditorSettings* settings, const char* path)
 	{
@@ -88,17 +97,6 @@ namespace sage
 		std::cout << "Load finished" << std::endl;
 	}
 
-	void Editor::initGameScene()
-	{
-		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
-		scene = std::make_unique<ExampleScene>(registry.get(), std::move(data), editorSettings->lastOpenedMap);
-		{
-			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
-			keyRPressed.connect<&Editor::enableEditMode>(this);
-		}
-		HideCursor();
-	}
-
 	void Editor::init()
 	{
 		InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
@@ -106,22 +104,23 @@ namespace sage
 		initEditorScene();
 	}
 
-	void Editor::manageScenes()
+	void Editor::manageStates()
 	{
-		if (stateChange > 0)
+		if (state != EditorState::IDLE)
 		{
 			registry = std::make_unique<entt::registry>();
-			switch (stateChange)
+			switch (state)
 			{
-			case 1:
+			case EditorState::PLAY:
                 SerializeEditorSettings(editorSettings.get(), "resources/editor-settings.xml");
 				initGameScene();
 				break;
-			case 2:
+            case EditorState::EDITOR:
 				initEditorScene();
 				break;
-			}
-			stateChange = 0;
+            case EditorState::IDLE:break;
+            }
+			state = EditorState::IDLE;
 		}
 	}
 
@@ -133,7 +132,7 @@ namespace sage
 		{
 			scene->Update();
 			draw();
-			manageScenes();
+            manageStates();
 		}
 	}
 

@@ -12,6 +12,14 @@ namespace sage
 {
 	class Editor : public Application
 	{
+        enum class EditorState
+        {
+            IDLE,
+            EDITOR,
+            PLAY
+        };
+        
+        EditorState state = EditorState::IDLE;
 		std::unique_ptr<EditorSettings> editorSettings;
 		bool debugMode = false;
         
@@ -19,7 +27,7 @@ namespace sage
 		void draw() override;
 		void enablePlayMode();
 		void enableEditMode();
-		void manageScenes();
+		void manageStates();
 		void initEditorScene();
 		void SerializeEditorSettings(EditorSettings* settings, const char* path);
 		void DeserializeEditorSettings(EditorSettings& settings, const char* path);

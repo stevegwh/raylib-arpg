@@ -75,7 +75,7 @@ namespace sage
     
     void EditorScene::OnFileOpened()
     {
-        data->sceneChange.publish();
+        sceneChange.publish(); // TODO: Make scene files?
     }
 
 	void EditorScene::OnDeleteModeKeyPressed()
