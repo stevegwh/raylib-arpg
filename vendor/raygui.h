@@ -241,7 +241,7 @@
 *       1.9 (09-Oct-2018) REVIEWED: GuiGrid(), GuiTextBox(), GuiTextBoxMulti(), GuiValueBox()...
 *       1.8 (01-May-2018) Lot of rework and redesign to align with rGuiStyler and rGuiLayout
 *       1.5 (21-Jun-2017) Working in an improved styles system
-*       1.4 (15-Jun-2017) Rewritten all GUI functions (removed useless ones)
+*       1.4 (15-Jun-2017) Rewritten all EditorGui functions (removed useless ones)
 *       1.3 (12-Jun-2017) Complete redesign of style system
 *       1.1 (01-Jun-2017) Complete review of the library
 *       1.0 (07-Jun-2016) Converted to header-only by Ramon Santamaria.

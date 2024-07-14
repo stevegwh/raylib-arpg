@@ -2,7 +2,7 @@
 // Created by Steve Wheeler on 04/05/2024.
 //
 
-#include "Editor.hpp"
+#include "EditorApplication.hpp"
 #include "../src/scenes/ExampleScene.hpp"
 #include "EditorScene.hpp"
 #include "Serializer.hpp"
@@ -16,44 +16,44 @@
 
 namespace sage
 {
-	void Editor::enableEditMode()
+	void EditorApplication::enableEditMode()
 	{
 		state = EditorState::EDITOR;
 	}
 
-	void Editor::enablePlayMode()
+	void EditorApplication::enablePlayMode()
 	{
 		state = EditorState::PLAY;
 	}
 
-	void Editor::initEditorScene()
+	void EditorApplication::initEditorScene()
 	{
         // "resources/models/obj/level-basic.obj"
 		auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
 		scene = std::make_unique<EditorScene>(registry.get(), std::move(data), editorSettings.get());
 		{
 			entt::sink keyRPressed{scene->data->userInput->keyRPressed};
-			keyRPressed.connect<&Editor::enablePlayMode>(this);
+			keyRPressed.connect<&EditorApplication::enablePlayMode>(this);
 		}
         {
             entt::sink sink{scene->sceneChange};
-            sink.connect<&Editor::enableEditMode>(this);
+            sink.connect<&EditorApplication::enableEditMode>(this);
         }
 		EnableCursor();
 	}
 
-    void Editor::initGameScene()
+    void EditorApplication::initGameScene()
     {
         auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
         scene = std::make_unique<ExampleScene>(registry.get(), std::move(data), editorSettings->lastOpenedMap);
         {
             entt::sink keyRPressed{scene->data->userInput->keyRPressed};
-            keyRPressed.connect<&Editor::enableEditMode>(this);
+            keyRPressed.connect<&EditorApplication::enableEditMode>(this);
         }
         HideCursor();
     }
 
-	void Editor::SerializeEditorSettings(EditorSettings* settings, const char* path)
+	void EditorApplication::SerializeEditorSettings(EditorSettings* settings, const char* path)
 	{
 		std::cout << "Save called" << std::endl;
 		using namespace entt::literals;
@@ -76,7 +76,7 @@ namespace sage
 	}
 
 
-	void Editor::DeserializeEditorSettings(EditorSettings& settings, const char* path)
+	void EditorApplication::DeserializeEditorSettings(EditorSettings& settings, const char* path)
 	{
 		std::cout << "Load called" << std::endl;
 		using namespace entt::literals;
@@ -92,27 +92,26 @@ namespace sage
 		{
 			// File doesn't exist, create a new file with the default key mapping
 			std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
-			SerializeEditorSettings(&settings, path);
+            SerializeEditorSettings(&settings, path);
 		}
 		std::cout << "Load finished" << std::endl;
 	}
 
-	void Editor::init()
+	void EditorApplication::init()
 	{
 		InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
 		SetConfigFlags(FLAG_MSAA_4X_HINT);
 		initEditorScene();
 	}
 
-	void Editor::manageStates()
+	void EditorApplication::manageStates()
 	{
 		if (state != EditorState::IDLE)
 		{
 			registry = std::make_unique<entt::registry>();
 			switch (state)
 			{
-			case EditorState::PLAY:
-                SerializeEditorSettings(editorSettings.get(), "resources/editor-settings.xml");
+			case EditorState::PLAY:SerializeEditorSettings(editorSettings.get(), "resources/editor-settings.xml");
 				initGameScene();
 				break;
             case EditorState::EDITOR:
@@ -124,7 +123,7 @@ namespace sage
 		}
 	}
 
-	void Editor::Update()
+	void EditorApplication::Update()
 	{
 		init();
 		SetTargetFPS(60);
@@ -136,7 +135,7 @@ namespace sage
 		}
 	}
 
-	void Editor::draw()
+	void EditorApplication::draw()
 	{
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
@@ -149,10 +148,10 @@ namespace sage
 		EndDrawing();
 	}
 
-	Editor::Editor()
+	EditorApplication::EditorApplication()
 	{
 		EditorSettings _settings;
-		DeserializeEditorSettings(_settings, "resources/editor-settings.xml");
+        DeserializeEditorSettings(_settings, "resources/editor-settings.xml");
 		editorSettings = std::make_unique<EditorSettings>(_settings);
 	}
 } // sage

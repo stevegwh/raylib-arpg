@@ -22,7 +22,7 @@
 
 namespace sage::editor
 {
-	class GUI
+	class EditorGui
 	{
 		Camera* camera;
 		std::unique_ptr<FloatingWindow> objectprops;
@@ -39,14 +39,13 @@ namespace sage::editor
 	public:
 		bool focused = false;
 		entt::sigh<void()> saveButtonPressed;
-		entt::sigh<void()> loadButtonPressed;
         entt::sigh<void()> onFileOpened;
 		void OpenFileDialog();
 		void Update();
 		void Draw(const std::string& mode, Cursor* cursor);
-		GUI(EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* camera);
-		void MarkGUIActive();
-		void MarkGUIInactive();
+		EditorGui(EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* camera);
+		void GuiFocused();
+		void GuiNotFocused();
 	};
 } // sage
 // editor

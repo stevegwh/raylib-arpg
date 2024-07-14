@@ -58,7 +58,7 @@ On September 2015, after 1 year of raylib 1.2 release, arrives raylib 1.3. This 
 
  - New [gestures](https://github.com/raysan5/raylib/blob/master/src/rgestures.h) module simplifies gestures detection on Android and HTML5 programs.
 
- - [raygui](https://github.com/raysan5/raylib/blob/master/src/raygui.h), the new immediate-mode GUI module offers a set of functions to create simple user interfaces, primary intended for tools development. It's still in experimental state but already fully functional.
+ - [raygui](https://github.com/raysan5/raylib/blob/master/src/raygui.h), the new immediate-mode EditorGui module offers a set of functions to create simple user interfaces, primary intended for tools development. It's still in experimental state but already fully functional.
 
 Most of the examples have been completely rewritten and +10 new examples have been added to show the new raylib features.
 

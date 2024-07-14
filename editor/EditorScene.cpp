@@ -67,11 +67,6 @@ namespace sage
 			gui->OpenFileDialog();
 		}
 	}
-
-	void EditorScene::OnOpenClicked()
-	{
-		gui->OpenFileDialog();
-	}
     
     void EditorScene::OnFileOpened()
     {
@@ -149,7 +144,7 @@ namespace sage
 	EditorScene::EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, EditorSettings* _editorSettings) :
 		Scene(_registry, std::move(_data), _editorSettings->lastOpenedMap),
         editorSettings(_editorSettings),
-		gui(std::make_unique<editor::GUI>(_editorSettings, data->settings, data->userInput.get(), data->camera.get()))
+		gui(std::make_unique<editor::EditorGui>(_editorSettings, data->settings, data->userInput.get(), data->camera.get()))
 	{
 		{
 			entt::sink onClickEvent{data->cursor->onAnyClick};
@@ -176,16 +171,12 @@ namespace sage
 			keyMPressed.connect<&EditorScene::OnSerializeSave>(this);
 		}
 		{
-			entt::sink keyNPressed{data->userInput->keyOPressed};
-			keyNPressed.connect<&EditorScene::OnOpenPressed>(this);
+			entt::sink keyOPressed{data->userInput->keyOPressed};
+			keyOPressed.connect<&EditorScene::OnOpenPressed>(this);
 		}
 		{
 			entt::sink saveButton{gui->saveButtonPressed};
 			saveButton.connect<&EditorScene::OnSerializeSave>(this);
-		}
-		{
-			entt::sink loadButton{gui->loadButtonPressed};
-			loadButton.connect<&EditorScene::OnOpenClicked>(this);
 		}
         {
             entt::sink loadButton{gui->onFileOpened};

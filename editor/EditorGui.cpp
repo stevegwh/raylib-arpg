@@ -2,66 +2,75 @@
 // Created by Steve Wheeler on 06/05/2024.
 //
 
-#include "Gui.hpp"
+#include "EditorGui.hpp"
 
 #include "windows/FloatingWindow.hpp"
 #include "UserInput.hpp"
+#include "EditorApplication.hpp"
 
 
 namespace sage::editor
 {
-	void GUI::MarkGUIActive()
+	void EditorGui::GuiFocused()
 	{
 		focused = true;
 		camera->ScrollDisable();
 	}
 
-	void GUI::MarkGUIInactive()
+	void EditorGui::GuiNotFocused()
 	{
 		focused = false;
 		camera->ScrollEnable();
 	}
 
-	void GUI::OpenFileDialog()
+	void EditorGui::OpenFileDialog()
 	{
 		fileDialogState->windowActive = true;
 	}
 
-	void GUI::Update()
+	void EditorGui::Update()
 	{
+        if (fileDialogState->CancelFilePressed)
+        {
+            EditorApplication::SerializeEditorSettings(editorSettings, "resources/editor-settings.xml");
+        }
         if (fileDialogState->SelectFilePressed)
         {
             auto previousMap = editorSettings->lastOpenedMap;
 			std::cout << TextFormat("%s", fileDialogState->dirPathText) << std::endl;
             editorSettings->lastOpenedMap = TextFormat("%s/%s", fileDialogState->dirPathText, fileDialogState->fileNameText);
+            editorSettings->lastVisitedDirectory = fileDialogState->dirPathText;
             fileDialogState->SelectFilePressed = false;
             if (previousMap != editorSettings->lastOpenedMap)
             {
+                EditorApplication::SerializeEditorSettings(editorSettings, "resources/editor-settings.xml");
                 onFileOpened.publish();
             }
         }
 	}
 
-	void GUI::Draw(const std::string& mode, Cursor* cursor)
+	void EditorGui::Draw(const std::string& mode, Cursor* cursor)
 	{
 		if (fileDialogState->windowActive) 
 		{
 			GuiLock();
-			MarkGUIActive();
+            GuiFocused();
 		}
 		else
 		{
-			MarkGUIInactive();
+            GuiNotFocused();
 		}
+        drawDebugCollisionText(cursor);
 		float modifier = 100;
-		GuiGroupBox({0 + modifier, 8, 184, 40}, nullptr);
-		if (GuiButton({8 + modifier, 8, 24, 24}, "#002#"))
+		GuiGroupBox({0 + modifier, 8, 184, 30}, nullptr);
+        DrawRectangle(0 + modifier, 8, 184, 30, Fade(GRAY, 0.8f));
+		if (GuiButton({8 + modifier, 8, 24, 24}, "#002#")) // Save button
 		{
 			saveButtonPressed.publish();
 		}
-		if (GuiButton({40 + modifier, 8, 24, 24}, "#001#"))
+		if (GuiButton({40 + modifier, 8, 24, 24}, "#001#")) // Load button
 		{
-			loadButtonPressed.publish();
+            OpenFileDialog();
 		}
 
 		for (auto& window : windows)
@@ -69,15 +78,15 @@ namespace sage::editor
 			window->Update();
 		}
 
-		DrawText(TextFormat("Editor Mode: %s", mode.c_str()), screenSize.x - 150, 50, 10, BLACK);
-		drawDebugCollisionText(cursor);
+		DrawText(TextFormat("EditorApplication Mode: %s", mode.c_str()), screenSize.x - 150, 50, 10, BLACK);
+
 		GuiUnlock();
 		GuiWindowFileDialog(fileDialogState.get());
 	}
 
-	void GUI::drawDebugCollisionText(Cursor* cursor)
+	void EditorGui::drawDebugCollisionText(Cursor* cursor)
 	{
-		// Draw some debug GUI text
+		// Draw some debug EditorGui text
 		DrawText(TextFormat("Hit Object: %s", cursor->hitObjectName.c_str()), 10, 50, 10, BLACK);
 
 		if (cursor->collision.hit)
@@ -101,7 +110,7 @@ namespace sage::editor
 		}
 	}
 
-	void GUI::onWindowResize(Vector2 newScreenSize)
+	void EditorGui::onWindowResize(Vector2 newScreenSize)
 	{
 		screenSize = newScreenSize;
 		toolbox->position = {10, 135};
@@ -117,7 +126,7 @@ namespace sage::editor
 		toolprops->content_size = {140, 320};
 	}
 
-	GUI::GUI(EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* _camera) :
+	EditorGui::EditorGui(EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* _camera) :
 		editorSettings(_editorSettings), camera(_camera), settings(_settings)
 	{
 		// TODO: No hardcoded values
@@ -130,7 +139,7 @@ namespace sage::editor
 		};
 		{
 			entt::sink windowUpdate{_userInput->onWindowUpdate};
-			windowUpdate.connect<&GUI::onWindowResize>(this);
+			windowUpdate.connect<&EditorGui::onWindowResize>(this);
 		}
 		toolbox = std::make_unique<FloatingWindow>(FloatingWindow({10, 135},
 		                                                          {200, 400},
@@ -155,21 +164,21 @@ namespace sage::editor
 		{
 			entt::sink onWindowHover{toolbox->onWindowHover};
 			entt::sink onWindowHoverStop{toolbox->onWindowHoverStop};
-			onWindowHover.connect<&GUI::MarkGUIActive>(this);
-			onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+			onWindowHover.connect<&EditorGui::GuiFocused>(this);
+			onWindowHoverStop.connect<&EditorGui::GuiNotFocused>(this);
 		}
 		{
 			entt::sink onWindowHover{objectprops->onWindowHover};
 			entt::sink onWindowHoverStop{objectprops->onWindowHoverStop};
-			onWindowHover.connect<&GUI::MarkGUIActive>(this);
-			onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+			onWindowHover.connect<&EditorGui::GuiFocused>(this);
+			onWindowHoverStop.connect<&EditorGui::GuiNotFocused>(this);
 		}
 		{
 			entt::sink onWindowHover{toolprops->onWindowHover};
 			entt::sink onWindowHoverStop{toolprops->onWindowHoverStop};
-			onWindowHover.connect<&GUI::MarkGUIActive>(this);
-			onWindowHoverStop.connect<&GUI::MarkGUIInactive>(this);
+			onWindowHover.connect<&EditorGui::GuiFocused>(this);
+			onWindowHoverStop.connect<&EditorGui::GuiNotFocused>(this);
 		}
-		fileDialogState = std::make_unique<GuiWindowFileDialogState>(InitGuiWindowFileDialog(GetWorkingDirectory()));
+		fileDialogState = std::make_unique<GuiWindowFileDialogState>(InitGuiWindowFileDialog(editorSettings->lastVisitedDirectory.c_str()));
 	}
 } // sage
