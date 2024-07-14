@@ -16,14 +16,16 @@
 
 namespace sage
 {
+    std::string EditorApplication::editorSettingsPath = "resources/editor-settings.xml";
+
 	void EditorApplication::enableEditMode()
 	{
-		state = EditorState::EDITOR;
+		state = StateFlag::EDITOR;
 	}
 
 	void EditorApplication::enablePlayMode()
 	{
-		state = EditorState::PLAY;
+		state = StateFlag::PLAY;
 	}
 
 	void EditorApplication::initEditorScene()
@@ -53,13 +55,13 @@ namespace sage
         HideCursor();
     }
 
-	void EditorApplication::SerializeEditorSettings(EditorSettings* settings, const char* path)
+	void EditorApplication::SerializeEditorSettings(EditorSettings* settings)
 	{
 		std::cout << "Save called" << std::endl;
 		using namespace entt::literals;
 		//std::stringstream storage;
 
-		std::ofstream storage(path);
+		std::ofstream storage(EditorApplication::editorSettingsPath.c_str());
 		if (!storage.is_open())
 		{
 			// Handle file opening error
@@ -76,12 +78,12 @@ namespace sage
 	}
 
 
-	void EditorApplication::DeserializeEditorSettings(EditorSettings& settings, const char* path)
+	void EditorApplication::DeserializeEditorSettings(EditorSettings& settings)
 	{
 		std::cout << "Load called" << std::endl;
 		using namespace entt::literals;
 
-		std::ifstream storage(path);
+		std::ifstream storage(EditorApplication::editorSettingsPath.c_str());
 		if (storage.is_open())
 		{
 			cereal::XMLInputArchive input{ storage };
@@ -92,34 +94,28 @@ namespace sage
 		{
 			// File doesn't exist, create a new file with the default key mapping
 			std::cout << "Key mapping file not found. Creating a new file with the default key mapping." << std::endl;
-            SerializeEditorSettings(&settings, path);
+            SerializeEditorSettings(&settings);
 		}
 		std::cout << "Load finished" << std::endl;
 	}
 
-	void EditorApplication::init()
+	void EditorApplication::manageEditorState()
 	{
-		InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
-		SetConfigFlags(FLAG_MSAA_4X_HINT);
-		initEditorScene();
-	}
-
-	void EditorApplication::manageStates()
-	{
-		if (state != EditorState::IDLE)
+		if (state != StateFlag::VOID)
 		{
 			registry = std::make_unique<entt::registry>();
 			switch (state)
 			{
-			case EditorState::PLAY:SerializeEditorSettings(editorSettings.get(), "resources/editor-settings.xml");
+			case StateFlag::PLAY:
+                SerializeEditorSettings(editorSettings.get());
 				initGameScene();
 				break;
-            case EditorState::EDITOR:
+            case StateFlag::EDITOR:
 				initEditorScene();
 				break;
-            case EditorState::IDLE:break;
+            case StateFlag::VOID:break;
             }
-			state = EditorState::IDLE;
+			state = StateFlag::VOID;
 		}
 	}
 
@@ -129,9 +125,9 @@ namespace sage
 		SetTargetFPS(60);
 		while (!WindowShouldClose()) // Detect window close button or ESC key
 		{
+            manageEditorState();
 			scene->Update();
 			draw();
-            manageStates();
 		}
 	}
 
@@ -151,7 +147,7 @@ namespace sage
 	EditorApplication::EditorApplication()
 	{
 		EditorSettings _settings;
-        DeserializeEditorSettings(_settings, "resources/editor-settings.xml");
+        DeserializeEditorSettings(_settings);
 		editorSettings = std::make_unique<EditorSettings>(_settings);
 	}
 } // sage

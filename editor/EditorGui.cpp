@@ -32,7 +32,7 @@ namespace sage::editor
 	{
         if (fileDialogState->CancelFilePressed)
         {
-            EditorApplication::SerializeEditorSettings(editorSettings, "resources/editor-settings.xml");
+            EditorApplication::SerializeEditorSettings(editorSettings);
         }
         if (fileDialogState->SelectFilePressed)
         {
@@ -43,7 +43,7 @@ namespace sage::editor
             fileDialogState->SelectFilePressed = false;
             if (previousMap != editorSettings->lastOpenedMap)
             {
-                EditorApplication::SerializeEditorSettings(editorSettings, "resources/editor-settings.xml");
+                EditorApplication::SerializeEditorSettings(editorSettings);
                 onFileOpened.publish();
             }
         }
