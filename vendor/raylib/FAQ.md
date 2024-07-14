@@ -94,7 +94,7 @@ I would say "simplicity" and "enjoyment" at a really low-level of coding but act
 
 ### How does raylib compare to Unity/Unreal/Godot?
 
-Those engines are usually big and complex to use, providing lot of functionality. They require some time to learn and test, they usually abstract many parts of the game development process and they usually provide a set of tools to assist users on their creations (like a GUI editor).
+Those engines are usually big and complex to use, providing lot of functionality. They require some time to learn and test, they usually abstract many parts of the game development process and they usually provide a set of tools to assist users on their creations (like a EditorGui editor).
 
 raylib is a simple programming library, with no integrated tools or editors. It gives full control to users at a very low-level to create graphics applications in a more handmade way.
 

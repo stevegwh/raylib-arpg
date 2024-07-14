@@ -6,11 +6,11 @@
 
 #include "Application.hpp"
 #include "EditorSettings.hpp"
-#include "Gui.hpp"
+#include "EditorGui.hpp"
 
 namespace sage
 {
-	class Editor : public Application
+	class EditorApplication : public Application
 	{
         enum class EditorState
         {
@@ -29,11 +29,11 @@ namespace sage
 		void enableEditMode();
 		void manageStates();
 		void initEditorScene();
-		void SerializeEditorSettings(EditorSettings* settings, const char* path);
-		void DeserializeEditorSettings(EditorSettings& settings, const char* path);
+        void initGameScene();
 	public:
-		Editor();
+		EditorApplication();
 		void Update() override;
-		void initGameScene();
-	};
+        static void DeserializeEditorSettings(EditorSettings& settings, const char* path);
+        static void SerializeEditorSettings(EditorSettings* settings, const char* path);
+    };
 } // sage

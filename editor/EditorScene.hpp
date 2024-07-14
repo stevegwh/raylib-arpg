@@ -7,7 +7,7 @@
 #include "../core/src/UserInput.hpp"
 #include "../core/src/Application.hpp"
 #include "scenes/Scene.hpp"
-#include "Gui.hpp"
+#include "EditorGui.hpp"
 #include "Settings.hpp"
 #include "EditorSettings.hpp"
 
@@ -37,7 +37,7 @@ namespace sage
 
 		bool destroySelected = false;
 
-		std::unique_ptr<editor::GUI> gui;
+		std::unique_ptr<editor::EditorGui> gui;
         EditorSettings* editorSettings;
 
 		// Event responses
