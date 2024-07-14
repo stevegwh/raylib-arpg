@@ -26,7 +26,6 @@ namespace sage
 		std::unique_ptr<KeyMapping> keyMapping;
 		std::unique_ptr<entt::registry> registry;
 		std::unique_ptr<Scene> scene;
-		int stateChange = 0;
 		virtual void init();
 		static void cleanup();
 		virtual void draw();

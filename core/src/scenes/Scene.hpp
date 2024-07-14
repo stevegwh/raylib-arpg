@@ -21,6 +21,7 @@ namespace sage
 	public:
 		std::unique_ptr<GameData> data;
 		std::unique_ptr<LightSubSystem> lightSubSystem;
+        entt::sigh<void()> sceneChange;
 
 		explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath) :
 			registry(_registry),
