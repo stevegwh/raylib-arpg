@@ -29,15 +29,17 @@ namespace sage
 	{
 		InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
 		SetConfigFlags(FLAG_MSAA_4X_HINT);
-		scene = std::make_unique<ExampleScene>(registry.get(),
-			std::make_unique<GameData>(
-				registry.get(), keyMapping.get(), settings.get()), "resources/models/obj/level-basic.obj");
+        Image icon = LoadImage("resources/icon.png");
+        SetWindowIcon(icon);
 		HideCursor();
 	}
 
 	void Application::Update()
 	{
 		init();
+        scene = std::make_unique<ExampleScene>(registry.get(),
+                                               std::make_unique<GameData>(
+                                                   registry.get(), keyMapping.get(), settings.get()), "resources/models/obj/level-basic.obj");
 		SetTargetFPS(60);
 		while (!WindowShouldClose()) // Detect window close button or ESC key
 		{

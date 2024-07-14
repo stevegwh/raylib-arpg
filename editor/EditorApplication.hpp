@@ -12,28 +12,28 @@ namespace sage
 {
 	class EditorApplication : public Application
 	{
-        enum class EditorState
+        enum class StateFlag
         {
-            IDLE,
+            VOID,
             EDITOR,
             PLAY
         };
         
-        EditorState state = EditorState::IDLE;
+        StateFlag state = StateFlag::EDITOR;
 		std::unique_ptr<EditorSettings> editorSettings;
 		bool debugMode = false;
         
-		void init() override;
 		void draw() override;
 		void enablePlayMode();
 		void enableEditMode();
-		void manageStates();
+		void manageEditorState();
 		void initEditorScene();
         void initGameScene();
 	public:
+        static std::string editorSettingsPath;
 		EditorApplication();
 		void Update() override;
-        static void DeserializeEditorSettings(EditorSettings& settings, const char* path);
-        static void SerializeEditorSettings(EditorSettings* settings, const char* path);
+        static void DeserializeEditorSettings(EditorSettings& settings);
+        static void SerializeEditorSettings(EditorSettings* settings);
     };
 } // sage

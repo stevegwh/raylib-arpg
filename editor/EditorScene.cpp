@@ -121,7 +121,7 @@ namespace sage
 	void EditorScene::Draw2D()
 	{
 		std::string mode = "NONE";
-		if (currentEditorMode == IDLE) mode = "IDLE";
+		if (currentEditorMode == IDLE) mode = "VOID";
 		else if (currentEditorMode == SELECT) mode = "SELECT";
 		else if (currentEditorMode == MOVE) mode = "MOVE";
 		else if (currentEditorMode == CREATE) mode = "CREATE";
