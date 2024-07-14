@@ -37,7 +37,7 @@ namespace sage::editor
             fileDialogState->SelectFilePressed = false;
             if (previousMap != editorSettings->lastOpenedMap)
             {
-                onFileOpened.publish(0);
+                onFileOpened.publish();
             }
         }
 	}
