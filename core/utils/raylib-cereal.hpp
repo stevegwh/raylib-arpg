@@ -5,6 +5,7 @@
 #include "cereal/cereal.hpp"
 #include "cereal/archives/binary.hpp"
 #include "cereal/types/vector.hpp"
+#include "cereal/types/array.hpp"
 #include "cereal/types/string.hpp"
 #include "raylib.h"
 #include "raylib/src/config.h"
@@ -265,7 +266,17 @@ void save(Archive& archive, Shader const &  shader)
 template <typename Archive>
 void load(Archive& archive, Shader &  shader)
 {
-	// TODO.
+	std::vector<int> locs;
+	locs.reserve(RL_MAX_SHADER_LOCATIONS);
+	shader.locs = (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS*sizeof(int));
+	archive(
+		shader.id,
+		locs
+	);
+	for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++)
+	{
+		shader.locs[i] = locs[i];
+	}
 };
 
 template <typename Archive>
@@ -278,7 +289,6 @@ void serialize(Archive& archive, Color &  color)
 		color.a
 	);
 };
-
 
 template <typename Archive>
 void serialize(Archive& archive, Texture &  texture)
@@ -326,14 +336,19 @@ template <typename Archive>
 void save(Archive& archive, Material const &  material)
 {
 	std::vector<MaterialMap> maps;
+	std::array<float, 4> params;
 	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
 	{
 		maps.push_back(material.maps[i]);
 	}
+	for (size_t i = 0; i < 4; i++)
+	{
+		params[i] = material.params[i];
+	}
 	archive(
 		material.shader,
 		maps,
-		material.params
+		params
 	);
 };
 
@@ -342,11 +357,14 @@ void load(Archive& archive, Material &  material)
 {
 	std::vector<MaterialMap> maps;
 	maps.resize(MAX_MATERIAL_MAPS);
+	std::array<float, 4> params;
+
+	// TODO: Archive throws a bad access error here
 
 	archive(
 		material.shader,
 		maps,
-		material.params
+		params
 	);
 
 	material.maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS*sizeof(MaterialMap));
@@ -439,7 +457,6 @@ void load(Archive& archive, Model& model)
 		bindPose
 	);
 
-	// TODO: Check allocations
 	model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
 	model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
 	model.meshMaterial = (int *)RL_CALLOC(model.meshCount, sizeof(int));
