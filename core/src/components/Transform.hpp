@@ -7,6 +7,7 @@
 #include "raylib.h"
 #include "entt/entt.hpp"
 #include "cereal/cereal.hpp"
+#include "raylib-cereal.hpp"
 
 namespace sage
 {
@@ -29,24 +30,16 @@ namespace sage
 		void save(Archive& archive) const
 		{
 			archive(
-				CEREAL_NVP(m_position.x),
-				CEREAL_NVP(m_position.y),
-				CEREAL_NVP(m_position.z),
-				CEREAL_NVP(m_rotation.x),
-				CEREAL_NVP(m_rotation.y),
-				CEREAL_NVP(m_rotation.z),
-				CEREAL_NVP(m_scale));
+				m_position,
+				m_rotation,
+				m_scale);
 		}
 
 		template <class Archive>
 		void load(Archive& archive)
 		{
-			archive(m_position.x,
-			        m_position.y,
-			        m_position.z,
-			        m_rotation.x,
-			        m_rotation.y,
-			        m_rotation.z,
+			archive(m_position,
+			        m_rotation,
 			        m_scale);
 		}
 

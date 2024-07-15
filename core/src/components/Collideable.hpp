@@ -7,6 +7,7 @@
 #include "raylib.h"
 #include "entt/entt.hpp"
 #include "cereal/cereal.hpp"
+#include "raylib-cereal.hpp"
 
 namespace sage
 {
@@ -48,38 +49,18 @@ namespace sage
 		void save(Archive& archive) const
 		{
 			archive(
-				CEREAL_NVP(localBoundingBox.min.x),
-				CEREAL_NVP(localBoundingBox.min.y),
-				CEREAL_NVP(localBoundingBox.min.z),
-				CEREAL_NVP(localBoundingBox.max.x),
-				CEREAL_NVP(localBoundingBox.max.y),
-				CEREAL_NVP(localBoundingBox.max.z),
-				CEREAL_NVP(worldBoundingBox.min.x),
-				CEREAL_NVP(worldBoundingBox.min.y),
-				CEREAL_NVP(worldBoundingBox.min.z),
-				CEREAL_NVP(worldBoundingBox.max.x),
-				CEREAL_NVP(worldBoundingBox.max.y),
-				CEREAL_NVP(worldBoundingBox.max.z),
-				CEREAL_NVP(collisionLayer));
+				localBoundingBox,
+				worldBoundingBox,
+				collisionLayer);
 		}
 
 		template <class Archive>
 		void load(Archive& archive)
 		{
 			archive(
-				CEREAL_NVP(localBoundingBox.min.x),
-				CEREAL_NVP(localBoundingBox.min.y),
-				CEREAL_NVP(localBoundingBox.min.z),
-				CEREAL_NVP(localBoundingBox.max.x),
-				CEREAL_NVP(localBoundingBox.max.y),
-				CEREAL_NVP(localBoundingBox.max.z),
-				CEREAL_NVP(worldBoundingBox.min.x),
-				CEREAL_NVP(worldBoundingBox.min.y),
-				CEREAL_NVP(worldBoundingBox.min.z),
-				CEREAL_NVP(worldBoundingBox.max.x),
-				CEREAL_NVP(worldBoundingBox.max.y),
-				CEREAL_NVP(worldBoundingBox.max.z),
-				CEREAL_NVP(collisionLayer));
+				localBoundingBox,
+				worldBoundingBox,
+				collisionLayer);
 		}
 	};
 }
