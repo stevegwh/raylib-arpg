@@ -29,7 +29,7 @@ namespace sage
 			lightSubSystem(std::make_unique<LightSubSystem>())
 		{
 			data->Load();
-			float slices = 0;
+			float slices = 500;
 			GameObjectFactory::loadMap(registry, this, slices, mapPath);
 			data->navigationGridSystem->Init(slices, 1.0f, mapPath);
 			data->navigationGridSystem->PopulateGrid();

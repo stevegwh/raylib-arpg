@@ -5,7 +5,10 @@
 #pragma once
 #include "raylib.h"
 #include "raymath.h"
+
 #include "cereal/cereal.hpp"
+#include "cereal/types/string.hpp"
+#include "raylib-cereal.hpp"
 
 #include "../Material.hpp"
 
@@ -35,52 +38,26 @@ namespace sage
 		void save(Archive& archive) const
 		{
 			archive(
-				CEREAL_NVP(modelPath),
-				CEREAL_NVP(material.path),
-				CEREAL_NVP(name),
-				CEREAL_NVP(initialTransform.m0),
-				CEREAL_NVP(initialTransform.m1),
-				CEREAL_NVP(initialTransform.m2),
-				CEREAL_NVP(initialTransform.m3),
-				CEREAL_NVP(initialTransform.m4),
-				CEREAL_NVP(initialTransform.m5),
-				CEREAL_NVP(initialTransform.m6),
-				CEREAL_NVP(initialTransform.m7),
-				CEREAL_NVP(initialTransform.m8),
-				CEREAL_NVP(initialTransform.m9),
-				CEREAL_NVP(initialTransform.m10),
-				CEREAL_NVP(initialTransform.m11),
-				CEREAL_NVP(initialTransform.m12),
-				CEREAL_NVP(initialTransform.m13),
-				CEREAL_NVP(initialTransform.m14),
-				CEREAL_NVP(initialTransform.m15));
+				modelPath,
+				model,
+				material.path,
+				name,
+				initialTransform
+			);
 		}
 
 		template <class Archive>
 		void load(Archive& archive)
 		{
 			archive(
-				CEREAL_NVP(modelPath),
-				CEREAL_NVP(material.path),
-				CEREAL_NVP(name),
-				CEREAL_NVP(initialTransform.m0),
-				CEREAL_NVP(initialTransform.m1),
-				CEREAL_NVP(initialTransform.m2),
-				CEREAL_NVP(initialTransform.m3),
-				CEREAL_NVP(initialTransform.m4),
-				CEREAL_NVP(initialTransform.m5),
-				CEREAL_NVP(initialTransform.m6),
-				CEREAL_NVP(initialTransform.m7),
-				CEREAL_NVP(initialTransform.m8),
-				CEREAL_NVP(initialTransform.m9),
-				CEREAL_NVP(initialTransform.m10),
-				CEREAL_NVP(initialTransform.m11),
-				CEREAL_NVP(initialTransform.m12),
-				CEREAL_NVP(initialTransform.m13),
-				CEREAL_NVP(initialTransform.m14),
-				CEREAL_NVP(initialTransform.m15));
+				modelPath,
+				model,
+				material.path,
+				name,
+				initialTransform
+			);
 
-			model = LoadModel(modelPath.c_str());
+			
 			char* _name = new char[this->name.size() + 1];
 			model.meshes[0].name = _name;
 			if (!material.path.empty())

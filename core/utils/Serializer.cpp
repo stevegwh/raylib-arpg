@@ -8,7 +8,8 @@
 #include <type_traits>
 #include <vector>
 #include "cereal/cereal.hpp"
-//#include <cereal/archives/json.hpp>
+#include <cereal/archives/json.hpp>
+#include "cereal/archives/binary.hpp"
 #include "cereal/archives/xml.hpp"
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
@@ -40,7 +41,7 @@ namespace sage::serializer
 		using namespace entt::literals;
 		//std::stringstream storage;
 
-		std::ofstream storage("resources/output.xml");
+		std::ofstream storage("resources/output.bin", std::ios::binary);
 		if (!storage.is_open())
 		{
 			// Handle file opening error
@@ -49,25 +50,18 @@ namespace sage::serializer
 
 		{
 			// output finishes flushing its contents when it goes out of scope
-			cereal::XMLOutputArchive output{ storage };
+			cereal::BinaryOutputArchive output{ storage };
 			const auto view = source.view<Transform, Renderable, Collideable>();
 			for (const auto& ent : view)
 			{
 				const auto& rend = view.get<Renderable>(ent);
-				if (!rend.serializable) continue;
+				//if (!rend.serializable) continue;
 				const auto& trans = view.get<Transform>(ent);
 
 				const auto& col = view.get<Collideable>(ent);
 				entity entity{};
 				entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
-				output.setNextName("entity");
-				output(entity);
-				output.setNextName("transform");
-				output(trans);
-				output.setNextName("collideable");
-				output(col);
-				output.setNextName("renderable");
-				output(rend);
+				output(entity, trans, col, rend);
 			}
 		}
 		storage.close();
@@ -78,52 +72,139 @@ namespace sage::serializer
 	{
 		std::cout << "Load called" << std::endl;
 		using namespace entt::literals;
-		std::ifstream storage("resources/output.xml");
+		std::ifstream storage("resources/output.bin", std::ios::binary);
 		if (!storage.is_open())
 		{
-			// Handle file opening error
+			std::cerr << "Error: Unable to open file for reading." << std::endl;
 			return;
 		}
 
 		{
-			//cereal::JSONInputArchive input{storage};
-			cereal::XMLInputArchive input{ storage };
+			cereal::BinaryInputArchive input(storage);
 
-			entt::entity currentEntity{};
-			while (input.getNodeName() != nullptr)
+			while (storage.peek() != EOF)
 			{
-				std::string componentName = input.getNodeName();
+				entity entityId;
+				Transform transform;
+				Collideable collideable;
+				Renderable renderable;
 
-				//input.startNode();
+				try
+				{
+					input(entityId, transform, collideable, renderable);
+				}
+				catch (const cereal::Exception& e)
+				{
+					std::cerr << "Error during deserialization: " << e.what() << std::endl;
+					break;
+				}
 
-				if (componentName == "entity")
-				{
-					// TODO: this is currently pointless, but I don't know how to
-					// advance cereal's parser without calling input with an object.
-					entity id;
-					input(id);
-					currentEntity = destination->create();
-				}
-				else if (componentName == "transform")
-				{
-					auto& transform = destination->emplace<Transform>(currentEntity);
-					input(transform);
-				}
-				else if (componentName == "collideable")
-				{
-					auto& col = destination->emplace<Collideable>(currentEntity);
-					input(col);
-				}
-				else if (componentName == "renderable")
-				{
-					auto& rend = destination->emplace<Renderable>(currentEntity);
-					input(rend);
-				}
+				// Currently ignores the saved entity ID and creates a new entity
+				auto currentEntity = destination->create();
+
+				// Emplace components
+				destination->emplace<Transform>(currentEntity, transform);
+				destination->emplace<Collideable>(currentEntity, collideable);
+				destination->emplace<Renderable>(currentEntity, renderable);
 			}
 		}
+
 		storage.close();
 		std::cout << "Load finished" << std::endl;
 	}
+
+
+	// XML/JSON serialization
+	//void Save(const entt::registry& source)
+	//{
+	//	std::cout << "Save called" << std::endl;
+	//	using namespace entt::literals;
+	//	//std::stringstream storage;
+
+	//	std::ofstream storage("resources/output.xml");
+	//	if (!storage.is_open())
+	//	{
+	//		// Handle file opening error
+	//		return;
+	//	}
+
+	//	{
+	//		// output finishes flushing its contents when it goes out of scope
+	//		cereal::XMLOutputArchive output{ storage };
+	//		const auto view = source.view<Transform, Renderable, Collideable>();
+	//		for (const auto& ent : view)
+	//		{
+	//			const auto& rend = view.get<Renderable>(ent);
+	//			//if (!rend.serializable) continue;
+	//			const auto& trans = view.get<Transform>(ent);
+
+	//			const auto& col = view.get<Collideable>(ent);
+	//			entity entity{};
+	//			entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
+	//			output.setNextName("entity");
+	//			output(entity);
+	//			output.setNextName("transform");
+	//			output(trans);
+	//			output.setNextName("collideable");
+	//			output(col);
+	//			output.setNextName("renderable");
+	//			output(rend);
+	//		}
+	//	}
+	//	storage.close();
+	//	std::cout << "Save finished" << std::endl;
+	//}
+
+	//void Load(entt::registry* destination)
+	//{
+	//	std::cout << "Load called" << std::endl;
+	//	using namespace entt::literals;
+	//	std::ifstream storage("resources/output.xml");
+	//	if (!storage.is_open())
+	//	{
+	//		// Handle file opening error
+	//		return;
+	//	}
+
+	//	{
+	//		//cereal::JSONInputArchive input{storage};
+	//		cereal::XMLInputArchive input{ storage };
+
+	//		entt::entity currentEntity{};
+	//		while (input.getNodeName() != nullptr)
+	//		{
+	//			std::string componentName = input.getNodeName();
+
+	//			//input.startNode();
+
+	//			if (componentName == "entity")
+	//			{
+	//				// TODO: this is currently pointless, but I don't know how to
+	//				// advance cereal's parser without calling input with an object.
+	//				entity id;
+	//				input(id);
+	//				currentEntity = destination->create();
+	//			}
+	//			else if (componentName == "transform")
+	//			{
+	//				auto& transform = destination->emplace<Transform>(currentEntity);
+	//				input(transform);
+	//			}
+	//			else if (componentName == "collideable")
+	//			{
+	//				auto& col = destination->emplace<Collideable>(currentEntity);
+	//				input(col);
+	//			}
+	//			else if (componentName == "renderable")
+	//			{
+	//				auto& rend = destination->emplace<Renderable>(currentEntity);
+	//				input(rend);
+	//			}
+	//		}
+	//	}
+	//	storage.close();
+	//	std::cout << "Load finished" << std::endl;
+	//}
 
 	void SerializeKeyMapping(KeyMapping& keymapping, const char* path)
 	{
