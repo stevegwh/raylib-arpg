@@ -184,15 +184,67 @@ void load(Archive& archive, Mesh& mesh)
 {
     std::vector<Vector3> vertices;
     std::vector<Vector2> texcoords;
-    std::vector<Vector3> normals;
+    std::vector<Vector2> texcoords2;
+	std::vector<Vector3> normals;
+	std::vector<Vector4> tangents;
+	std::vector<Color> colors;
 
     
     Model _model;
 	archive(
+		mesh.vertexCount,
+		mesh.triangleCount,
 		vertices,
 		texcoords,
-		normals
+		texcoords2,
+        normals,
+		tangents,
+		colors
 	);
+	
+	mesh.vertices = (float*)RL_MALLOC(mesh.vertexCount*3*sizeof(float));
+	if (!texcoords.empty()) mesh.texcoords = (float*)RL_MALLOC(mesh.vertexCount*2*sizeof(float));
+	if (!texcoords2.empty()) mesh.texcoords2 = (float*)RL_MALLOC(mesh.vertexCount*2*sizeof(float));
+	if (!normals.empty()) mesh.normals = (float*)RL_MALLOC(mesh.vertexCount*3*sizeof(float));
+	if (!tangents.empty()) mesh.tangents = (float*)RL_MALLOC(mesh.vertexCount*4*sizeof(float));
+	if (!colors.empty()) mesh.colors = (unsigned char*)RL_MALLOC(mesh.vertexCount*4*sizeof(unsigned char));
+
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		mesh.vertices[i * 3] = vertices[i].x;
+		mesh.vertices[i * 3 + 1] = vertices[i].y;
+		mesh.vertices[i * 3 + 2] = vertices[i].z;
+		if (!texcoords.empty())
+		{
+			mesh.texcoords[i * 2] = texcoords[i].x;
+			mesh.texcoords[i * 2 + 1] = texcoords[i].y;
+		}
+		if (!texcoords2.empty())
+		{
+			mesh.texcoords2[i * 2] = texcoords2[i].x;
+			mesh.texcoords2[i * 2 + 1] = texcoords2[i].y;
+		}
+		if (!normals.empty())
+		{
+			mesh.normals[i * 3] = normals[i].x;
+			mesh.normals[i * 3 + 1] = normals[i].y;
+			mesh.normals[i * 3 + 2] = normals[i].z;
+		}
+		if (!tangents.empty())
+		{
+			mesh.tangents[i * 4] = tangents[i].x;
+			mesh.tangents[i * 4 + 1] = tangents[i].y;
+			mesh.tangents[i * 4 + 2] = tangents[i].z;
+			mesh.tangents[i * 4 + 3] = tangents[i].w;
+		}
+		if (!colors.empty())
+		{
+			mesh.colors[i * 4] = colors[i].r;
+			mesh.colors[i * 4 + 1] = colors[i].g;
+			mesh.colors[i * 4 + 2] = colors[i].b;
+			mesh.colors[i * 4 + 3] = colors[i].a;
+		}
+	}
 };
 
 template <typename Archive>
@@ -271,7 +323,7 @@ void serialize(Archive& archive, MaterialMap &  map)
 };
 
 template <typename Archive>
-void serialize(Archive& archive, Material &  material)
+void save(Archive& archive, Material const &  material)
 {
 	std::vector<MaterialMap> maps;
 	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
@@ -284,6 +336,27 @@ void serialize(Archive& archive, Material &  material)
 		material.params
 	);
 };
+
+template <typename Archive>
+void load(Archive& archive, Material &  material)
+{
+	std::vector<MaterialMap> maps;
+	maps.resize(MAX_MATERIAL_MAPS);
+
+	archive(
+		material.shader,
+		maps,
+		material.params
+	);
+
+	material.maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS*sizeof(MaterialMap));
+
+	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
+	{
+		material.maps[i] = maps[i];
+	}
+};
+
 
 template <typename Archive>
 void serialize(Archive& archive, BoneInfo &  boneInfo)
@@ -354,12 +427,6 @@ void load(Archive& archive, Model& model)
 	std::vector<BoneInfo> bones;
 	std::vector<Transform> bindPose;
 
-	model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
-	model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
-	model.meshMaterial = (int *)RL_CALLOC(model.meshCount, sizeof(int));
-	model.bones = (BoneInfo*)RL_MALLOC(model.boneCount*sizeof(BoneInfo));
-    model.bindPose = (Transform*)RL_MALLOC(model.boneCount*sizeof(Transform));
-    
 	archive(
 		model.transform,
 		model.meshCount,
@@ -371,6 +438,14 @@ void load(Archive& archive, Model& model)
 		bones,
 		bindPose
 	);
+
+	// TODO: Check allocations
+	model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
+	model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+	model.meshMaterial = (int *)RL_CALLOC(model.meshCount, sizeof(int));
+	model.bones = (BoneInfo*)RL_MALLOC(model.boneCount*sizeof(BoneInfo));
+    model.bindPose = (Transform*)RL_MALLOC(model.boneCount*sizeof(Transform));
+    
 	
 	for (size_t i = 0; i < model.meshCount; ++i)
 	{
