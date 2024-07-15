@@ -6,7 +6,7 @@
 #include "scenes/Scene.hpp"
 
 
-#include "components/Transform.hpp"
+#include "components/sgTransform.hpp"
 #include "components/MovableActor.hpp"
 #include "components/Renderable.hpp"
 #include "components/Collideable.hpp"
@@ -52,7 +52,7 @@ namespace sage
 		auto modelPath = "resources/models/gltf/goblin.glb";
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
-		auto& transform = registry->emplace<Transform>(id);
+		auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx;
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
@@ -118,7 +118,7 @@ namespace sage
 		auto modelPath = "resources/models/gltf/arissa.glb";
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
-		auto& transform = registry->emplace<Transform>(id);
+		auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx;
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
@@ -162,7 +162,7 @@ namespace sage
 		entt::entity id = registry->create();
 		auto modelPath = "resources/models/gltf/hero.glb";
 
-		auto& transform = registry->emplace<Transform>(id);
+		auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx;
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
@@ -241,7 +241,7 @@ namespace sage
 	                                       const char* modelPath, const char* texturePath)
 	{
 		auto id = registry->create();
-		auto& transform = registry->emplace<Transform>(id);
+		auto& transform = registry->emplace<sgTransform>(id);
 		transform.SetPosition(position, id);
 		transform.SetScale(2.0f, id);
 		transform.SetRotation({0, 0, 0}, id);
@@ -294,7 +294,7 @@ namespace sage
 		for (int i = 0; i < parent.meshCount; ++i)
 		{
 			entt::entity id = registry->create();
-			auto& transform = registry->emplace<Transform>(id);
+			auto& transform = registry->emplace<sgTransform>(id);
 			transform.SetPosition({ 0, 0, 0 }, id);
 			transform.SetScale(1.0f, id);
 			transform.SetRotation({0, 0, 0}, id);

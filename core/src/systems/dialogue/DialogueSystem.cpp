@@ -24,8 +24,8 @@ namespace sage
 		registry->get<Animation>(clickedNPC).ChangeAnimation(1); // TODO: Change to an enum
 
 		// Rotate to look at NPC
-		auto& actorTrans = registry->get<Transform>(controlledActor);
-		auto& npcTrans = registry->get<Transform>(clickedNPC);
+		auto& actorTrans = registry->get<sgTransform>(controlledActor);
+		auto& npcTrans = registry->get<sgTransform>(clickedNPC);
 		Vector3 direction = Vector3Subtract(npcTrans.position(), actorTrans.position());
 		direction = Vector3Normalize(direction);
 		float angle = atan2f(direction.x, direction.z);
@@ -77,7 +77,7 @@ namespace sage
 	void DialogueSystem::cancelConversation(entt::entity entity) // Not the best name (isn't on stopping a conversation)
 	{
 		{
-			auto& actorTrans = registry->get<Transform>(entity);
+			auto& actorTrans = registry->get<sgTransform>(entity);
 			entt::sink sink{actorTrans.onFinishMovement};
 			sink.disconnect<&DialogueSystem::startConversation>(this);
 			entt::sink sink2{actorTrans.onMovementCancel};
@@ -94,7 +94,7 @@ namespace sage
 		const auto& actorCol = registry->get<Collideable>(controlledActor);
 		const auto& npcCol = registry->get<Collideable>(_clickedNPC);
 		controllableActorSystem->PathfindToLocation(controlledActor, npc.conversationPos);
-		auto& actorTrans = registry->get<Transform>(controlledActor);
+		auto& actorTrans = registry->get<sgTransform>(controlledActor);
 		{
 			entt::sink sink{actorTrans.onFinishMovement};
 			sink.connect<&DialogueSystem::startConversation>(this);

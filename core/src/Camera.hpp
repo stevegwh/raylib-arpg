@@ -4,7 +4,7 @@
 
 #pragma once
 #include "raylib.h"
-#include "components/Transform.hpp"
+#include "components/sgTransform.hpp"
 
 namespace sage
 {
@@ -50,6 +50,6 @@ namespace sage
 		void OnBackKeyUp();
 		void OnRotateLeftKeyUp();
 		void OnRotateRightKeyUp();
-		void CutscenePose(const Transform& location);
+		void CutscenePose(const sgTransform& location);
 	};
 } // sage

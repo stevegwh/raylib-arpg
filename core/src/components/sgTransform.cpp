@@ -1,18 +1,13 @@
-#include "Transform.hpp"
-#include "Transform.hpp"
-#include "Transform.hpp"
-#include "Transform.hpp"
-#include "Transform.hpp"
 //
 // Created by Steve Wheeler on 03/05/2024.
 //
 
-#include "Transform.hpp"
+#include "sgTransform.hpp"
 #include "raymath.h"
 
 namespace sage
 {
-	Matrix Transform::GetMatrixNoRot() const
+	Matrix sgTransform::GetMatrixNoRot() const
 	{
 		Matrix trans = MatrixTranslate(m_position.x, m_position.y, m_position.z);
 		Matrix _scale = MatrixScale(m_scale, m_scale, m_scale);
@@ -20,7 +15,7 @@ namespace sage
 		return MatrixMultiply(trans, _scale);
 	}
 
-    Matrix Transform::GetMatrix() const
+    Matrix sgTransform::GetMatrix() const
     {
         Matrix trans = MatrixTranslate(m_position.x, m_position.y, m_position.z);
         Matrix _scale = MatrixScale(m_scale, m_scale, m_scale);
@@ -28,40 +23,40 @@ namespace sage
         return MatrixMultiply(MatrixMultiply(trans, rot), _scale);
     }
 
-	Vector3 Transform::forward() const
+	Vector3 sgTransform::forward() const
 	{
 		Matrix matrix = GetMatrix();
 		Vector3 forward = {matrix.m8, matrix.m9, matrix.m10};
 		return Vector3Normalize(forward);
 	}
 
-	const Vector3& Transform::position() const
+	const Vector3& sgTransform::position() const
 	{
 		return m_position;
 	}
 
-	const Vector3& Transform::rotation() const
+	const Vector3& sgTransform::rotation() const
 	{
 		return m_rotation;
 	}
 
-	float Transform::scale() const
+	float sgTransform::scale() const
 	{
 		return m_scale;
 	}
 
-	void Transform::SetPosition(const Vector3& position, const entt::entity& entity)
+	void sgTransform::SetPosition(const Vector3& position, const entt::entity& entity)
 	{
 		m_position = position;
 		onPositionUpdate.publish(entity);
 	}
 
-	void Transform::SetRotation(const Vector3& rotation, const entt::entity& entity)
+	void sgTransform::SetRotation(const Vector3& rotation, const entt::entity& entity)
 	{
 		m_rotation = rotation;;
 	}
 
-	void Transform::SetScale(float scale, const entt::entity& entity)
+	void sgTransform::SetScale(float scale, const entt::entity& entity)
 	{
 		m_scale = scale;
 	}

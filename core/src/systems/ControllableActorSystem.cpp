@@ -26,7 +26,7 @@ namespace sage
 		if (actor.checkTargetPosTimer > actor.checkTargetPosThreshold)
 		{
 			actor.checkTargetPosTimer = 0;
-			auto& targetTrans = registry->get<Transform>(target);
+			auto& targetTrans = registry->get<sgTransform>(target);
 			PathfindToLocation(controlledActorId, targetTrans.position());
 		}
 	}
@@ -37,7 +37,7 @@ namespace sage
 		auto& actor = registry->get<ControllableActor>(entity);
 		if (actor.targetActor != entt::null && registry->valid(actor.targetActor))
 		{
-			auto& target = registry->get<Transform>(actor.targetActor);
+			auto& target = registry->get<sgTransform>(actor.targetActor);
 			{
 				entt::sink sink{target.onPositionUpdate};
 				sink.disconnect<&ControllableActorSystem::onTargetUpdate>(this);
@@ -80,7 +80,7 @@ namespace sage
 	{
 		auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
 		actorMovementSystem->CancelMovement(controlledActorId); // Flush any previous commands
-		auto& target = registry->get<Transform>(entity);
+		auto& target = registry->get<sgTransform>(entity);
 		controlledActor.targetActor = entity;
 		controlledActor.targetActorPos = target.position();
 		{

@@ -7,7 +7,6 @@
 #include "raylib.h"
 #include "entt/entt.hpp"
 #include "cereal/cereal.hpp"
-#include "raylib-cereal.hpp"
 
 namespace sage
 {

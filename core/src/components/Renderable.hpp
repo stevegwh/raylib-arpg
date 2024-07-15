@@ -8,7 +8,6 @@
 
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"
-#include "raylib-cereal.hpp"
 
 #include "../Material.hpp"
 

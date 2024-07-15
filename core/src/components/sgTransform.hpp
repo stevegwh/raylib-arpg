@@ -7,11 +7,10 @@
 #include "raylib.h"
 #include "entt/entt.hpp"
 #include "cereal/cereal.hpp"
-#include "raylib-cereal.hpp"
 
 namespace sage
 {
-	class Transform
+	class sgTransform
 	{
 		Vector3 m_position{};
 		Vector3 m_rotation{};
@@ -22,9 +21,9 @@ namespace sage
 
 		Ray movementDirectionDebugLine{};
 
-		Transform() = default;
-		Transform(const Transform&) = delete;
-		Transform& operator=(const Transform&) = delete;
+		sgTransform() = default;
+		sgTransform(const sgTransform&) = delete;
+		sgTransform& operator=(const sgTransform&) = delete;
 
 		template <class Archive>
 		void save(Archive& archive) const

@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <vector>
 #include "cereal/cereal.hpp"
+#include "raylib-cereal.hpp"
 #include <cereal/archives/json.hpp>
 #include "cereal/archives/binary.hpp"
 #include "cereal/archives/xml.hpp"
@@ -15,7 +16,7 @@
 #include "entt/core/type_traits.hpp"
 #include "entt/entity/snapshot.hpp"
 
-#include "components/Transform.hpp"
+#include "components/sgTransform.hpp"
 #include "components/Renderable.hpp"
 #include "components/Collideable.hpp"
 
@@ -51,12 +52,12 @@ namespace sage::serializer
 		{
 			// output finishes flushing its contents when it goes out of scope
 			cereal::BinaryOutputArchive output{ storage };
-			const auto view = source.view<Transform, Renderable, Collideable>();
+			const auto view = source.view<sgTransform, Renderable, Collideable>();
 			for (const auto& ent : view)
 			{
 				const auto& rend = view.get<Renderable>(ent);
 				//if (!rend.serializable) continue;
-				const auto& trans = view.get<Transform>(ent);
+				const auto& trans = view.get<sgTransform>(ent);
 
 				const auto& col = view.get<Collideable>(ent);
 				entity entity{};
@@ -84,10 +85,11 @@ namespace sage::serializer
 
 			while (storage.peek() != EOF)
 			{
-				entity entityId;
-				Transform transform;
-				Collideable collideable;
-				Renderable renderable;
+				auto entt = destination->create();
+				entity entityId{};
+				auto& transform = destination->emplace<sgTransform>(entt);
+				auto& collideable = destination->emplace<Collideable>(entt);
+				auto& renderable = destination->emplace<Renderable>(entt);
 
 				try
 				{
@@ -98,14 +100,6 @@ namespace sage::serializer
 					std::cerr << "Error during deserialization: " << e.what() << std::endl;
 					break;
 				}
-
-				// Currently ignores the saved entity ID and creates a new entity
-				auto currentEntity = destination->create();
-
-				// Emplace components
-				destination->emplace<Transform>(currentEntity, transform);
-				destination->emplace<Collideable>(currentEntity, collideable);
-				destination->emplace<Renderable>(currentEntity, renderable);
 			}
 		}
 
@@ -131,12 +125,12 @@ namespace sage::serializer
 	//	{
 	//		// output finishes flushing its contents when it goes out of scope
 	//		cereal::XMLOutputArchive output{ storage };
-	//		const auto view = source.view<Transform, Renderable, Collideable>();
+	//		const auto view = source.view<sgTransform, Renderable, Collideable>();
 	//		for (const auto& ent : view)
 	//		{
 	//			const auto& rend = view.get<Renderable>(ent);
 	//			//if (!rend.serializable) continue;
-	//			const auto& trans = view.get<Transform>(ent);
+	//			const auto& trans = view.get<sgTransform>(ent);
 
 	//			const auto& col = view.get<Collideable>(ent);
 	//			entity entity{};
@@ -187,7 +181,7 @@ namespace sage::serializer
 	//			}
 	//			else if (componentName == "transform")
 	//			{
-	//				auto& transform = destination->emplace<Transform>(currentEntity);
+	//				auto& transform = destination->emplace<sgTransform>(currentEntity);
 	//				input(transform);
 	//			}
 	//			else if (componentName == "collideable")

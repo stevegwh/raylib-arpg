@@ -79,7 +79,7 @@ namespace sage
 		lockInput = false;
 	}
 
-	void Camera::CutscenePose(const Transform& npcTrans)
+	void Camera::CutscenePose(const sgTransform& npcTrans)
 	{
 		rlCamera.position.y = rlCamera.target.y;
 

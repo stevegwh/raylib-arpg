@@ -6,7 +6,7 @@
 #include "raylib.h"
 #include "../Application.hpp"
 
-#include "../components/Transform.hpp"
+#include "../components/sgTransform.hpp"
 
 namespace sage
 {
@@ -20,7 +20,7 @@ namespace sage
 
 	void RenderSystem::Draw() const
 	{
-		const auto& view = registry->view<Renderable, Transform>();
+		const auto& view = registry->view<Renderable, sgTransform>();
 		view.each([](const auto& r, const auto& t)
 		{
 			Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};

@@ -4,7 +4,7 @@
 
 #include "components/Animation.hpp"
 #include "components/states/StateEnemyDefault.hpp"
-#include "components/Transform.hpp"
+#include "components/sgTransform.hpp"
 #include "WaveMobDefaultSubSystem.hpp"
 
 namespace sage
@@ -13,7 +13,7 @@ namespace sage
 	{
 		Vector3 target = {52, 0, -10};
 		auto& a = registry->get<MoveableActor>(entity);
-		auto& t = registry->get<Transform>(entity);
+		auto& t = registry->get<sgTransform>(entity);
 		auto& animation = registry->get<Animation>(entity);
 		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 		actorMovementSystem->PathfindToLocation(entity, target);
