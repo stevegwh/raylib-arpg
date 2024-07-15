@@ -7,7 +7,7 @@
 #include "components/states/PlayerStateComponents.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
-#include "components/Transform.hpp"
+#include "components/sgTransform.hpp"
 #include "components/HealthBar.hpp"
 
 #include "raylib.h"
@@ -75,7 +75,7 @@ namespace sage
 		// TODO: What is entity?
 		auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
 		playerCombatable.target = entt::null;
-		auto& playerTrans = registry->get<Transform>(controllableActorSystem->GetControlledActor());
+		auto& playerTrans = registry->get<sgTransform>(controllableActorSystem->GetControlledActor());
 		{
 			entt::sink sink{playerTrans.onFinishMovement};
 			sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
@@ -87,7 +87,7 @@ namespace sage
 	{
 		// TODO: What is "entity"?
 		{
-			auto& playerTrans = registry->get<Transform>(controllableActorSystem->GetControlledActor());
+			auto& playerTrans = registry->get<sgTransform>(controllableActorSystem->GetControlledActor());
 			entt::sink sink{playerTrans.onFinishMovement};
 			sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
 		}
@@ -111,8 +111,8 @@ namespace sage
 		}
 		auto& combatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
 		combatable.target = entity;
-		auto& playerTrans = registry->get<Transform>(controllableActorSystem->GetControlledActor());
-		const auto& enemyTrans = registry->get<Transform>(entity);
+		auto& playerTrans = registry->get<sgTransform>(controllableActorSystem->GetControlledActor());
+		const auto& enemyTrans = registry->get<sgTransform>(entity);
 
 		const auto& enemyCollideable = registry->get<Collideable>(combatable.target);
 		Vector3 enemyPos = enemyTrans.position();
@@ -142,8 +142,8 @@ namespace sage
 		// TODO: Check if unit is still within our attack range?
 		auto& c = registry->get<CombatableActor>(entity);
 
-		auto& t = registry->get<Transform>(entity);
-		auto& enemyPos = registry->get<Transform>(c.target).position();
+		auto& t = registry->get<sgTransform>(entity);
+		auto& enemyPos = registry->get<sgTransform>(c.target).position();
 		Vector3 direction = Vector3Subtract(enemyPos, t.position());
 		float angle = atan2f(direction.x, direction.z) * RAD2DEG;
 		t.SetRotation({0, angle, 0}, entity);

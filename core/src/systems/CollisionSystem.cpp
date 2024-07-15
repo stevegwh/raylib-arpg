@@ -150,7 +150,7 @@ namespace sage
 	 **/
 	void CollisionSystem::OnTransformUpdate(entt::entity entity)
 	{
-		auto& trans = registry->get<Transform>(entity);
+		auto& trans = registry->get<sgTransform>(entity);
 		auto& col = registry->get<Collideable>(entity);
 		Matrix mat = trans.GetMatrixNoRot();
 		auto bb = col.localBoundingBox;

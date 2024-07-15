@@ -36,7 +36,7 @@ namespace sage
 	void ActorMovementSystem::CancelMovement(const entt::entity& entity) const
 	{
 		PruneMoveCommands(entity);
-		auto& transform = registry->get<Transform>(entity);
+		auto& transform = registry->get<sgTransform>(entity);
 		auto& moveableActor = registry->get<MoveableActor>(entity);
 		moveableActor.destination.reset();
 		transform.onMovementCancel.publish(entity);
@@ -72,11 +72,11 @@ namespace sage
 		}
 		navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
-		const auto& actorTrans = registry->get<Transform>(entity);
+		const auto& actorTrans = registry->get<sgTransform>(entity);
 		auto path = navigationGridSystem->BFSPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
 
 		PruneMoveCommands(entity);
-		auto& transform = registry->get<Transform>(entity);
+		auto& transform = registry->get<sgTransform>(entity);
 		auto& movableActor = registry->get<MoveableActor>(entity);
 		for (auto n : path) movableActor.path.emplace_back(n);
 		if (!path.empty())
@@ -95,12 +95,12 @@ namespace sage
 
 	void ActorMovementSystem::DrawDebug() const
 	{
-		auto view = registry->view<MoveableActor, Transform>();
+		auto view = registry->view<MoveableActor, sgTransform>();
 		for (auto& entity : view)
 		{
 			auto& actor = registry->get<MoveableActor>(entity);
 			if (actor.path.empty()) continue;
-			auto& transform = registry->get<Transform>(entity);
+			auto& transform = registry->get<sgTransform>(entity);
 			if (!actor.path.empty())
 			{
 				for (auto p : actor.path)
@@ -127,10 +127,10 @@ namespace sage
 		// from another system
 		debugRays.erase(debugRays.begin(), debugRays.end());
 		debugCollisions.erase(debugCollisions.begin(), debugCollisions.end());
-		auto view = registry->view<MoveableActor, Transform>();
+		auto view = registry->view<MoveableActor, sgTransform>();
 		for (auto& entity : view)
 		{
-			auto& actorTrans = registry->get<Transform>(entity);
+			auto& actorTrans = registry->get<sgTransform>(entity);
 			auto& moveableActor = registry->get<MoveableActor>(entity);
 			const auto& actorCollideable = registry->get<Collideable>(entity);
 
@@ -217,7 +217,7 @@ namespace sage
 
 			if (hitCell != nullptr)
 			{
-				auto& hitTransform = registry->get<Transform>(hitCell->occupant);
+				auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
 				if (moveableActor.lastHitActor != entity || !AlmostEquals(
 					hitTransform.position(), moveableActor.hitActorLastPos))
 				{

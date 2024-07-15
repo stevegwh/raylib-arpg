@@ -2,7 +2,7 @@
 #include "NavigationGridSystem.hpp"
 #include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
-#include "components/Transform.hpp"
+#include "components/sgTransform.hpp"
 #include "components/Renderable.hpp"
 #include "Serializer.hpp"
 
@@ -325,7 +325,7 @@ namespace sage
 		}
 
 		auto& renderable = registry->get<Renderable>(entity);
-		auto& transform = registry->get<Transform>(entity);
+		auto& transform = registry->get<sgTransform>(entity);
 		Mesh mesh = *renderable.model.meshes;
 
 
@@ -642,7 +642,7 @@ namespace sage
 			return {};
 		}
 		GridSquare currentPos;
-		auto& trans = registry->get<Transform>(entity);
+		auto& trans = registry->get<sgTransform>(entity);
 		if (!WorldToGridSpace(trans.position(), currentPos))
 		{
 			return {};
@@ -777,7 +777,7 @@ namespace sage
 					//}
 					//else if (heuristicType == AStarHeuristic::FAVOUR_RIGHT)
 					//{
-					//	auto& currentDir = registry->get<Transform>(entity).direction;
+					//	auto& currentDir = registry->get<sgTransform>(entity).direction;
 					//	heuristic_cost = heuristic_favourRight(next, finishGridSquare, currentDir);
 					//}
 					double priority = new_cost + heuristic_cost;

@@ -10,7 +10,7 @@
 #include "WaveMobCombatLogicSubSystem.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
-#include "components/Transform.hpp"
+#include "components/sgTransform.hpp"
 #include "components/HealthBar.hpp"
 #include "components/states/EnemyStateComponents.hpp"
 
@@ -99,9 +99,9 @@ namespace sage
 	{
 		auto& combatableActor = registry->get<CombatableActor>(entity);
 		auto& animation = registry->get<Animation>(entity);
-		auto& actorTrans = registry->get<Transform>(entity);
+		auto& actorTrans = registry->get<sgTransform>(entity);
 		auto& collideable = registry->get<Collideable>(entity);
-		auto& target = registry->get<Transform>(combatableActor.target).position();
+		auto& target = registry->get<sgTransform>(combatableActor.target).position();
 
 		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 		Ray ray;
@@ -130,10 +130,10 @@ namespace sage
 	void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
 	{
 		auto& combatableActor = registry->get<CombatableActor>(entity);
-		auto& actorTrans = registry->get<Transform>(entity);
+		auto& actorTrans = registry->get<sgTransform>(entity);
 		auto& animation = registry->get<Animation>(entity);
 
-		auto target = registry->get<Transform>(combatableActor.target).position();
+		auto target = registry->get<sgTransform>(combatableActor.target).position();
 
 		Vector3 direction = Vector3Subtract(target, actorTrans.position());
 		float distance = Vector3Distance(actorTrans.position(), target);
@@ -153,7 +153,7 @@ namespace sage
 
 	void WaveMobCombatLogicSubSystem::Draw3D(entt::entity entity) const
 	{
-		auto& t = registry->get<Transform>(entity);
+		auto& t = registry->get<sgTransform>(entity);
 		//DrawLine3D(t.movementDirectionDebugLine.position, t.movementDirectionDebugLine.direction, RED);
 	}
 

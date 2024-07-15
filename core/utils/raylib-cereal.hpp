@@ -5,7 +5,9 @@
 #include "cereal/cereal.hpp"
 #include "cereal/archives/binary.hpp"
 #include "cereal/types/vector.hpp"
+#include "cereal/types/string.hpp"
 #include "raylib.h"
+#include "raylib/src/config.h"
 
 
 template <typename Archive>
@@ -76,45 +78,104 @@ void save(Archive& archive, Mesh const & mesh)
 {
     std::vector<Vector3> vertices;
     std::vector<Vector2> texcoords;
+    std::vector<Vector2> texcoords2;
 	std::vector<Vector3> normals;
-	std::vector<Vector3> animVertices;
-	std::vector<Vector3> animNormals;
+	std::vector<Vector4> tangents;
+	std::vector<Color> colors;
+
+	// Animations not supported right now
+	//std::vector<Vector3> animVertices;
+	//std::vector<Vector3> animNormals;
+	//std::vector<std::string> boneIds; // Unsigned char*
+	//std::vector<Vector4> boneWeights; // float* (4 bones per vertex)
+	// TODO: Bone IDs and weights are missing
     
-    vertices.reserve(mesh.vertexCount);
-    texcoords.reserve(mesh.vertexCount);
-    normals.reserve(mesh.vertexCount);
+    vertices.reserve(mesh.vertexCount*3);
+    texcoords.reserve(mesh.vertexCount*2);
+	texcoords2.reserve(mesh.vertexCount*2);
+	normals.reserve(mesh.vertexCount*3);
+	tangents.reserve(mesh.vertexCount*4);
+    colors.reserve(mesh.vertexCount*4);
+	
+	//animVertices.reserve(mesh.vertexCount*3);
+	//animNormals.reserve(mesh.vertexCount*3);
     
     for (int i = 0; i < mesh.vertexCount; ++i) 
     {
-        // Convert vertices
         vertices.push_back({
             mesh.vertices[i * 3],
             mesh.vertices[i * 3 + 1],
             mesh.vertices[i * 3 + 2]
         });
-        
-        // Convert texcoords
-        texcoords.push_back({
-            mesh.texcoords[i * 2],
-            mesh.texcoords[i * 2 + 1]
-        });
-        
-        // Convert normals
-        normals.push_back({
-            mesh.normals[i * 3],
-            mesh.normals[i * 3 + 1],
-            mesh.normals[i * 3 + 2]
-        });
+		if (mesh.texcoords)
+		{
+			texcoords.push_back({
+				mesh.texcoords[i * 2],
+				mesh.texcoords[i * 2 + 1]
+			});
+		}
+
+		if (mesh.texcoords2)
+		{
+			texcoords2.push_back({
+			mesh.texcoords2[i * 2],
+			mesh.texcoords2[i * 2 + 1]
+			});
+		}
+        if (mesh.normals)
+		{
+			normals.push_back({
+				mesh.normals[i * 3],
+				mesh.normals[i * 3 + 1],
+				mesh.normals[i * 3 + 2]
+			});
+		}
+		if (mesh.tangents)
+		{
+			tangents.push_back({
+				mesh.tangents[i * 4],
+				mesh.tangents[i * 4 + 1],
+				mesh.tangents[i * 4 + 2],
+				mesh.tangents[i * 4 + 3]
+			});
+		}
+		if (mesh.colors)
+		{
+			colors.push_back({
+				mesh.colors[i * 4],
+				mesh.colors[i * 4 + 1],
+				mesh.colors[i * 4 + 2],
+				mesh.colors[i * 4 + 3]
+			});
+		}
+		//if (animVertices)
+		//{
+		//	animVertices.push_back({
+		//		mesh.animVertices[i * 3],
+		//		mesh.animVertices[i * 3 + 1],
+		//		mesh.animVertices[i * 3 + 2]
+		//	});
+		//}
+		//if (animNormals)
+		//{
+		//	animNormals.push_back({
+		//		mesh.animNormals[i * 3],
+		//		mesh.animNormals[i * 3 + 1],
+		//		mesh.animNormals[i * 3 + 2]
+		//	});
+		//}
     }
 	archive(
 		mesh.vertexCount,
 		mesh.triangleCount,
 		vertices,
 		texcoords,
+		texcoords2,
         normals,
-		// tangents
-		animVertices,
-		animNormals,
+		tangents,
+		colors
+		//animVertices,
+		//animNormals,
 		);
 };
 
@@ -138,8 +199,8 @@ template <typename Archive>
 void save(Archive& archive, Shader const &  shader)
 {
 	std::vector<int> locs;
-	locs.reserve(MAX_SHADER_LOCATIONS);
-	for (int i = 0; i < MAX_SHADER_LOCATIONS; i++)
+	locs.reserve(RL_MAX_SHADER_LOCATIONS); // TODO: MAX_SHADER_LOCATIONS is not defined
+	for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++)
 	{
 		locs.push_back(shader.locs[i]);
 	}
@@ -147,6 +208,12 @@ void save(Archive& archive, Shader const &  shader)
 		shader.id,
 		locs
 	);
+};
+
+template <typename Archive>
+void load(Archive& archive, Shader &  shader)
+{
+	// TODO.
 };
 
 template <typename Archive>
@@ -162,17 +229,6 @@ void serialize(Archive& archive, Color &  color)
 
 
 template <typename Archive>
-void serialize(Archive& archive, Texture2D &  texture)
-{
-	archive(
-		texture.width,
-		texture.height,
-		texture.mipmaps,
-		texture.format
-	);
-};
-
-template <typename Archive>
 void serialize(Archive& archive, Texture &  texture)
 {
 	archive(
@@ -185,17 +241,6 @@ void serialize(Archive& archive, Texture &  texture)
 
 template <typename Archive>
 void serialize(Archive& archive, Vector4 &  v4)
-{
-	archive(
-		v4.x,
-		v4.y,
-		v4.z,
-		v4.w
-	);
-};
-
-template <typename Archive>
-void serialize(Archive& archive, Quaternion &  v4)
 {
 	archive(
 		v4.x,
@@ -228,9 +273,14 @@ void serialize(Archive& archive, MaterialMap &  map)
 template <typename Archive>
 void serialize(Archive& archive, Material &  material)
 {
+	std::vector<MaterialMap> maps;
+	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
+	{
+		maps.push_back(material.maps[i]);
+	}
 	archive(
 		material.shader,
-		material.maps,
+		maps,
 		material.params
 	);
 };
@@ -244,16 +294,6 @@ void serialize(Archive& archive, BoneInfo &  boneInfo)
 	);
 };
 
-//Matrix transform;       // Local transform matrix
-//int meshCount;          // Number of meshes
-//int materialCount;      // Number of materials
-//Mesh *meshes;           // Meshes array
-//Material *materials;    // Materials array
-//int *meshMaterial;      // Mesh material number
-//// Animation data
-//int boneCount;          // Number of bones
-//BoneInfo *bones;        // Bones information (skeleton)
-//Transform *bindPose;    // Bones base transformation (pose)
 template <typename Archive>
 void save(Archive& archive, Model const &  model)
 {
@@ -285,13 +325,20 @@ void save(Archive& archive, Model const &  model)
 		bindPose.push_back(model.bindPose[i]);
 	}
 
+	std::vector<int> meshMaterial;
+	bindPose.reserve(model.boneCount);
+	for (size_t i = 0; i < model.meshCount; i++)
+	{
+		meshMaterial.push_back(model.meshMaterial[i]);
+	}
+
 	archive(
 		model.transform,
 		model.meshCount,
 		model.materialCount,
 		meshes,
 		materials,
-		model.meshMaterial,
+		meshMaterial,
 		model.boneCount,
 		bones,
 		bindPose
@@ -303,13 +350,15 @@ void load(Archive& archive, Model& model)
 {
     std::vector<Mesh> meshes;
 	std::vector<Material> materials;
+	std::vector<int> meshMaterial;
 	std::vector<BoneInfo> bones;
 	std::vector<Transform> bindPose;
 
 	model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
-	model.materials = (Material *)RL_CALLOC(model.materialCount, sizeof(Material));
-	model.bones = RL_MALLOC(model.boneCount*sizeof(BoneInfo));
-    model.bindPose = RL_MALLOC(model.boneCount*sizeof(Transform));
+	model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+	model.meshMaterial = (int *)RL_CALLOC(model.meshCount, sizeof(int));
+	model.bones = (BoneInfo*)RL_MALLOC(model.boneCount*sizeof(BoneInfo));
+    model.bindPose = (Transform*)RL_MALLOC(model.boneCount*sizeof(Transform));
     
 	archive(
 		model.transform,
@@ -317,7 +366,7 @@ void load(Archive& archive, Model& model)
 		model.materialCount,
 		meshes,
 		materials,
-		model.meshMaterial,
+		meshMaterial,
 		model.boneCount,
 		bones,
 		bindPose
@@ -330,6 +379,10 @@ void load(Archive& archive, Model& model)
 	for (size_t i = 0; i < model.materialCount; ++i)
 	{
 		model.materials[i] = materials[i];
+	}
+	for (size_t i = 0; i < model.meshCount; ++i)
+	{
+		model.meshMaterial[i] = meshMaterial[i];
 	}
 	for (size_t i = 0; i < model.boneCount; ++i)
 	{
