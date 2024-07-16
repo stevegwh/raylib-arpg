@@ -4,6 +4,7 @@
 
 #include "GameObjectFactory.hpp"
 #include "scenes/Scene.hpp"
+#include "ResourceManager.hpp"
 
 
 #include "components/sgTransform.hpp"
@@ -248,7 +249,7 @@ namespace sage
 		auto model = LoadModel(modelPath);
 		MaterialPaths matPaths;
 		matPaths.diffuse = texturePath;
-		model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(texturePath);
+		model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
 		auto& renderable = registry->emplace<Renderable>(id, model, matPaths, MatrixIdentity());
 		renderable.name = name;
 		auto& collideable = registry->emplace<Collideable>(
@@ -309,7 +310,7 @@ namespace sage
 			renderable.serializable = false;
             
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
-			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(matPaths.diffuse.c_str());
+			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
             auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
             if (renderable.name.find("SM_Bld") != std::string::npos) 
             {

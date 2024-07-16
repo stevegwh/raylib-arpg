@@ -13,6 +13,7 @@
 #include "cereal/cereal.hpp"
 
 #include "cereal/types/string.hpp"
+#include "ResourceManager.hpp"
 
 #include <string>
 #include <optional>
@@ -20,52 +21,58 @@
 
 namespace sage
 {
-	struct Renderable
-	{
-		Matrix initialTransform{};
-		MaterialPaths materials;
-		Model model{}; // was const
-		std::optional<Shader> shader;
-		std::string name = "Default";
-		bool serializable = true;
+struct Renderable
+{
+    Matrix initialTransform{};
+    MaterialPaths materials;
+    Model model{}; // was const
+    std::optional<Shader> shader;
+    std::string name = "Default";
+    bool serializable = true;
 
-		Renderable() = default;
-		Renderable(const Renderable&) = delete;
-		Renderable& operator=(const Renderable&) = delete;
-		Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform);
-		Renderable(Model _model, Matrix _localTransform);
-		~Renderable();
+    Renderable() = default;
+    Renderable(const Renderable &) = delete;
+    Renderable &operator=(const Renderable &) = delete;
+    Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform);
+    Renderable(Model _model, Matrix _localTransform);
+    ~Renderable();
 
-		template <class Archive>
-		void save(Archive& archive) const
-		{
-			archive(
-				model,
-				name,
-				materials,
-				initialTransform
-			);
-		}
+    template<class Archive>
+    void save(Archive &archive) const
+    {
+        archive(
+            model,
+            name,
+            materials,
+            initialTransform
+        );
+    }
 
-		template <class Archive>
-		void load(Archive& archive)
-		{
-			archive(
-				model,
-				name,
-				materials,
-				initialTransform
-			);
+    template<class Archive>
+    void load(Archive &archive)
+    {
+        archive(
+            model,
+            name,
+            materials,
+            initialTransform
+        );
 
-			char* _name = new char[this->name.size() + 1];
-			model.meshes[0].name = _name;
-			model.transform = initialTransform;
+        char *_name = new char[this->name.size() + 1];
+        model.meshes[0].name = _name;
+        model.transform = initialTransform;
 
-			// Set the textures of the model with their respective paths
-            if (FileExists(materials.diffuse.c_str())) model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(materials.diffuse.c_str());
-            if (FileExists(materials.specular.c_str())) model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture(materials.specular.c_str());
-            if (FileExists(materials.normal.c_str())) model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture(materials.normal.c_str());
+        // Set the textures of the model with their respective paths
+        if (FileExists(materials.diffuse.c_str()))
+            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
+                LoadTextureFromImage(ResourceManager::LoadTexture(materials.diffuse));
+        if (FileExists(materials.specular.c_str()))
+            model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture =
+                LoadTextureFromImage(ResourceManager::LoadTexture(materials.specular));
+        if (FileExists(materials.normal.c_str()))
+            model.materials[0].maps[MATERIAL_MAP_NORMAL].texture =
+                LoadTextureFromImage(ResourceManager::LoadTexture(materials.normal));
 
-		}
-	};
+    }
+};
 }
