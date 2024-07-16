@@ -73,8 +73,8 @@ namespace sage
 		navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
 		const auto& actorTrans = registry->get<sgTransform>(entity);
-		auto path = navigationGridSystem->BFSPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
-
+//		auto path = navigationGridSystem->BFSPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
+        auto path = navigationGridSystem->AStarPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
 		PruneMoveCommands(entity);
 		auto& transform = registry->get<sgTransform>(entity);
 		auto& movableActor = registry->get<MoveableActor>(entity);

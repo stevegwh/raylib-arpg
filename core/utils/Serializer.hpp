@@ -17,6 +17,7 @@ namespace sage::serializer
 	void DeserializeKeyMapping(KeyMapping& keymapping, const char* path);
 	void SerializeSettings(Settings& settings, const char* path);
 	void DeserializeSettings(Settings& settings, const char* path);
+    void GenerateNormalMap(entt::registry* registry, const std::string& path, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares);
     float GetMaxHeight(entt::registry* registry, float slices);
     void GenerateHeightMap(entt::registry* registry, const std::string& path, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares);
 }

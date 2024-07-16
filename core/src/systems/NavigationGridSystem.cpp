@@ -1,6 +1,4 @@
 #include "NavigationGridSystem.hpp"
-#include "NavigationGridSystem.hpp"
-#include "NavigationGridSystem.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "components/Renderable.hpp"
@@ -23,6 +21,7 @@ Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 
 namespace sage
 {
+
 	inline double heuristic(GridSquare a, GridSquare b)
 	{
 		return std::abs(a.row - b.row) + std::abs(a.col - b.col);
@@ -361,6 +360,37 @@ namespace sage
 			}
 		}
 	}
+
+    void NavigationGridSystem::loadTerrainNormalMap(const Image& normalMap)
+    {
+        for (int j = 0; j < slices; ++j)
+        {
+            for (int i = 0; i < slices; ++i)
+            {
+                // Get the color of the pixel
+                Color color = GetImageColor(normalMap, i, j);
+    
+                // Convert the color values back to the range [-1, 1]
+                float normalX = (static_cast<float>(color.r) / 127.5f) - 1.0f;
+                float normalY = (static_cast<float>(color.g) / 127.5f) - 1.0f;
+                float normalZ = (static_cast<float>(color.b) / 127.5f) - 1.0f;
+    
+                // Create a vector from these components
+                Vector3 normal = { normalX, normalY, normalZ };
+    
+                // Normalize the vector (in case of any precision loss)
+                normal = Vector3Normalize(normal);
+    
+                // Assign the normal to the corresponding grid square
+                if (i >= 0 && i < slices && j >= 0 && j < slices)
+                {
+                    gridSquares[j][i]->terrainNormal = normal;
+                }
+            }
+        }
+    
+        std::cout << "Terrain normal map loaded and applied to grid." << std::endl;
+    }
 
     void NavigationGridSystem::loadTerrainHeightMap(const Image& heightMap, float maxHeight)
     {
@@ -729,7 +759,7 @@ namespace sage
 
 		if (!checkExtents(finishGridSquare, extents))
 		{
-			// TODO: Should actually try to find next best location to original destination
+			// TODO: Should try to find next best location to "original" destination
 			finishGridSquare = FindNextBestLocation(startGridSquare, finishGridSquare, minRange, maxRange, extents);
 		}
 
@@ -770,7 +800,8 @@ namespace sage
 				{
 					cost_so_far[next.row][next.col] = new_cost;
 					double heuristic_cost = 0;
-					heuristic_cost = heuristic(next, finishGridSquare);
+					heuristic_cost = heuristic(next, finishGridSquare) + 
+                        calculateTerrainCost(gridSquares[next.row][next.col]->terrainNormal, 45.0f);
 					//if (heuristicType == AStarHeuristic::DEFAULT)
 					//{
 					//	heuristic_cost = heuristic(next, finishGridSquare);
@@ -892,16 +923,19 @@ namespace sage
         const auto& view = registry->view<Collideable, Renderable>();
         size_t lastindex = mapPath.find_last_of('.');
         std::string imgPath = mapPath.substr(0, lastindex);
-        Image image = LoadImage(std::string(imgPath + ".png").c_str());
-        bool heightMapValid = image.data && image.width == slices && image.height == slices;
-        if (heightMapValid)
+        Image heightMapImage = LoadImage(std::string(imgPath + "-height.png").c_str());
+        Image normalMapImage = LoadImage(std::string(imgPath + "-normal.png").c_str());
+        bool heightMapValid = heightMapImage.data && heightMapImage.width == slices && heightMapImage.height == slices;
+        bool normalMapValid = heightMapImage.data && heightMapImage.width == slices && heightMapImage.height == slices;
+        if (heightMapValid && normalMapValid)
         {
-            loadTerrainHeightMap(image, serializer::GetMaxHeight(registry, slices));
-            UnloadImage(image);
+            loadTerrainNormalMap(normalMapImage);
+            loadTerrainHeightMap(heightMapImage, serializer::GetMaxHeight(registry, slices));
+            UnloadImage(heightMapImage);
         }
         else
         {
-            std::cout << "Height map not loaded or size mismatch. Generating new one.. \n";
+            std::cout << "Height or Normal map not loaded or size mismatch. Generating new one.. \n";
         }
 
         std::cout << "Populating grid started. \n";
@@ -924,6 +958,7 @@ namespace sage
         if (!heightMapValid)
         {
             serializer::GenerateHeightMap(registry, mapPath, GetGridSquares());
+            serializer::GenerateNormalMap(registry, mapPath, GetGridSquares());
         }
 		std::cout << "Populating grid finished. \n";
     }

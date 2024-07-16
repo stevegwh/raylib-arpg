@@ -4,6 +4,7 @@
 
 #include "Serializer.hpp"
 
+#include "raylib.h"
 #include <fstream>
 #include <type_traits>
 #include <vector>
@@ -286,6 +287,35 @@ namespace sage::serializer
 		std::cout << "Load finished" << std::endl;
 	}
 
+    void GenerateNormalMap(entt::registry* registry, const std::string& path, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
+    {
+        int slices = gridSquares.size();
+    
+        Image normalMap = GenImageColor(slices, slices, BLACK);
+        std::cout << "Generating normal map..." << std::endl;
+        for (int y = 0; y < slices; ++y)
+        {
+            for (int x = 0; x < slices; ++x)
+            {
+                auto normal = gridSquares[y][x]->terrainNormal;
+    
+                // Map the normal components from [-1, 1] to [0, 255]
+                unsigned char r = static_cast<unsigned char>((normal.x + 1.0f) * 127.5f);
+                unsigned char g = static_cast<unsigned char>((normal.y + 1.0f) * 127.5f);
+                unsigned char b = static_cast<unsigned char>((normal.z + 1.0f) * 127.5f);
+    
+                Color pixelColor = { r, g, b, 255 };
+                ImageDrawPixel(&normalMap, x, y, pixelColor);
+            }
+        }
+        size_t lastindex = path.find_last_of('.');
+        std::string strippedPath = path.substr(0, lastindex);
+        ExportImage(normalMap, TextFormat("%s-normal.png", strippedPath.c_str()));
+        UnloadImage(normalMap);
+    
+        std::cout << "Normal map saved as '" << strippedPath << "-normal.png'" << std::endl;
+    }
+
 	float GetMaxHeight(entt::registry* registry, float slices)
 	{
 		float max = 0;
@@ -319,7 +349,6 @@ namespace sage::serializer
 		return max;
 	}
 
-
 	void GenerateHeightMap(entt::registry* registry, const std::string& path, const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
 	{
 		int slices = gridSquares.size();
@@ -341,7 +370,7 @@ namespace sage::serializer
 		}
 		size_t lastindex = path.find_last_of('.');
 		std::string strippedPath = path.substr(0, lastindex);
-		ExportImage(heightMap, TextFormat("%s.png", strippedPath.c_str()));
+		ExportImage(heightMap, TextFormat("%s-height.png", strippedPath.c_str()));
 		UnloadImage(heightMap);
 
 		std::cout << "Height map saved as '" << strippedPath << ".png'" << std::endl;

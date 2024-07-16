@@ -29,7 +29,7 @@ namespace sage
 			lightSubSystem(std::make_unique<LightSubSystem>(_registry))
 		{
 			data->Load();
-
+            // TODO: Keep getting "Failed to open file" errors when deserializing
 			float slices = 500;
 			if (!FileExists("resources/output.bin"))
 			{
@@ -37,9 +37,8 @@ namespace sage
 			}
 			else
 			{
-				lightSubSystem->LinkAllRenderablesToLight();
+                lightSubSystem->LinkAllRenderablesToLight();
 			}
-
 			data->navigationGridSystem->Init(slices, 1.0f, mapPath);
 			data->navigationGridSystem->PopulateGrid();
 		};
