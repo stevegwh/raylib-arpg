@@ -26,9 +26,11 @@ namespace sage
 		explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath) :
 			registry(_registry),
 			data(std::move(_data)),
-			lightSubSystem(std::make_unique<LightSubSystem>())
+			lightSubSystem(std::make_unique<LightSubSystem>(_registry))
 		{
 			data->Load();
+			lightSubSystem->LinkAllRenderablesToLight();
+
 			float slices = 500;
 			//GameObjectFactory::loadMap(registry, this, slices, mapPath);
 			data->navigationGridSystem->Init(slices, 1.0f, mapPath);

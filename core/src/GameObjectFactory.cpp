@@ -245,10 +245,9 @@ namespace sage
 		transform.SetPosition(position, id);
 		transform.SetScale(2.0f, id);
 		transform.SetRotation({0, 0, 0}, id);
-		Material mat = {LoadTexture(texturePath), texturePath};
 		auto model = LoadModel(modelPath);
-		model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
-		auto& renderable = registry->emplace<Renderable>(id, model, mat, modelPath, MatrixIdentity());
+		model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(texturePath);
+		auto& renderable = registry->emplace<Renderable>(id, model, texturePath, modelPath, MatrixIdentity());
 		renderable.name = name;
 		auto& collideable = registry->emplace<Collideable>(
 			id, CalculateModelBoundingBox(renderable.model));
@@ -287,7 +286,7 @@ namespace sage
 	void GameObjectFactory::loadMap(entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
 	{
 		
-		sage::Material mat = { LoadTexture("resources/models/obj/PolyAdventureTexture_01.png"), "resources/models/obj/PolyAdventureTexture_01.png" };
+		std::string mat = "resources/models/obj/PolyAdventureTexture_01.png";
 		Model parent = LoadModel(_mapPath.c_str());
         std::vector<Collideable*> floorMeshes;
         
@@ -307,7 +306,7 @@ namespace sage
 			renderable.serializable = false;
             
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
-			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = mat.diffuse;
+			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(mat.c_str());
             auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
             if (renderable.name.find("SM_Bld") != std::string::npos) 
             {

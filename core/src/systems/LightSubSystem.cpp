@@ -1,3 +1,4 @@
+#include "LightSubSystem.hpp"
 //
 // Created by Steve Wheeler on 09/04/2024.
 //
@@ -7,7 +8,8 @@
 
 namespace sage
 {
-	LightSubSystem::LightSubSystem()
+	LightSubSystem::LightSubSystem(entt::registry* _registry) :
+		registry(_registry)
 	{
 		shader = LoadShader(TextFormat("resources/shaders/glsl%i/lighting.vs", 330),
 		                    TextFormat("resources/shaders/glsl%i/lighting.fs", 330));
@@ -15,6 +17,14 @@ namespace sage
 		float ambientValue[4] = {0.1f, 0.1f, 0.1f, 1.0f};
 		int ambientLoc = GetShaderLocation(shader, "ambient");
 		SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
+	}
+
+	void LightSubSystem::LinkAllRenderablesToLight()
+	{
+		registry->view<Renderable>().each([&](auto entity, Renderable& renderable)
+		{
+			LinkRenderableToLight(&renderable);
+		});
 	}
 
 	void LightSubSystem::LinkRenderableToLight(Renderable* renderable)
