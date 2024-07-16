@@ -49,14 +49,16 @@ namespace sage
 		{
 			archive(
 				model,
-				material,
 				name,
+				material,
 				initialTransform
 			);
 
 			char* _name = new char[this->name.size() + 1];
 			model.meshes[0].name = _name;
 			model.transform = initialTransform;
+			std::cout << material << std::endl;
+
 			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/models/obj/PolyAdventureTexture_01.png");
 		}
 	};
