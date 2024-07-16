@@ -4,16 +4,13 @@
 
 #pragma once
 
-#include "raylib.h"
-
 #include <string>
-#include <utility>
 
 namespace sage
 {
-	struct Material
+	struct sgMaterial
 	{
-		Texture2D diffuse{};
-		std::string path;
+		std::string diffuse{};
+		// Specular etc here
 	};
 }

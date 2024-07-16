@@ -16,12 +16,13 @@ namespace sage
 			UnloadShader(shader.value());
 		}
 		UnloadModel(model);
-		UnloadTexture(material.diffuse);
+		// TODO: Unload textures
+		//UnloadTexture(material.diffuse);
 	}
 
 	Renderable::Renderable(
 		Model _model,
-		Material _material,
+		std::string _material,
 		std::string _modelPath,
 		Matrix _localTransform)
 		:

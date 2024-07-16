@@ -6,10 +6,10 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include "raylib-cereal.hpp"
 #include "cereal/cereal.hpp"
-#include "cereal/types/string.hpp"
 
-#include "../Material.hpp"
+#include "cereal/types/string.hpp"
 
 #include <string>
 #include <optional>
@@ -19,7 +19,7 @@ namespace sage
 	struct Renderable
 	{
 		Matrix initialTransform{};
-		Material material;
+		std::string material;
 		std::string modelPath;
 		Model model{}; // was const
 		std::optional<Shader> shader;
@@ -29,7 +29,7 @@ namespace sage
 		Renderable() = default;
 		Renderable(const Renderable&) = delete;
 		Renderable& operator=(const Renderable&) = delete;
-		Renderable(Model _model, Material _material, std::string _modelPath, Matrix _localTransform);
+		Renderable(Model _model, std::string _material, std::string _modelPath, Matrix _localTransform);
 		Renderable(Model _model, std::string _modelPath, Matrix _localTransform);
 		~Renderable();
 
@@ -37,10 +37,9 @@ namespace sage
 		void save(Archive& archive) const
 		{
 			archive(
-				modelPath,
 				model,
-				material.path,
 				name,
+				material,
 				initialTransform
 			);
 		}
@@ -49,21 +48,16 @@ namespace sage
 		void load(Archive& archive)
 		{
 			archive(
-				modelPath,
 				model,
-				material.path,
+				material,
 				name,
 				initialTransform
 			);
 
-			
 			char* _name = new char[this->name.size() + 1];
 			model.meshes[0].name = _name;
-			if (!material.path.empty())
-			{
-				material.diffuse = LoadTexture(material.path.c_str());
-				model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = material.diffuse;
-			}
+			model.transform = initialTransform;
+			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/models/obj/PolyAdventureTexture_01.png");
 		}
 	};
 }

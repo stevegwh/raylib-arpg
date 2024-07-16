@@ -10,6 +10,7 @@
 #include "raylib.h"
 #include "raylib/src/config.h"
 #include "utils.h"
+#include "../src/Material.hpp"
 
 
 template <typename Archive>
@@ -253,7 +254,7 @@ template <typename Archive>
 void save(Archive& archive, Shader const &  shader)
 {
 	std::vector<int> locs;
-	locs.reserve(RL_MAX_SHADER_LOCATIONS); // TODO: MAX_SHADER_LOCATIONS is not defined
+	locs.reserve(RL_MAX_SHADER_LOCATIONS);
 	for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++)
 	{
 		locs.push_back(shader.locs[i]);
@@ -292,7 +293,7 @@ void serialize(Archive& archive, Color &  color)
 };
 
 template <typename Archive>
-void serialize(Archive& archive, Texture &  texture)
+void save(Archive& archive, Texture const &  texture)
 {
 	archive(
 		texture.width,
@@ -301,6 +302,21 @@ void serialize(Archive& archive, Texture &  texture)
 		texture.format
 	);
 };
+
+template <typename Archive>
+void load(Archive& archive, Texture &  texture)
+{
+	archive(
+		texture.width,
+		texture.height,
+		texture.mipmaps,
+		texture.format
+	);
+	// TODO: Need to store the image data or names in "Renderable"
+	//Image image;
+	//texture.id = rlLoadTexture(image.data, image.width, image.height, image.format, image.mipmaps);
+};
+
 
 template <typename Archive>
 void serialize(Archive& archive, Vector4 &  v4)
@@ -317,9 +333,9 @@ template <typename Archive>
 void serialize(Archive& archive, Transform &  transform)
 {
 	archive(
-		transform.scale,
 		transform.translation,
-		transform.rotation
+		transform.rotation,
+		transform.scale
 	);
 };
 
@@ -327,17 +343,27 @@ template <typename Archive>
 void serialize(Archive& archive, MaterialMap &  map)
 {
 	archive(
-		map.color,
 		map.texture,
+		map.color,
 		map.value
 	);
 };
+
+
+// TODO:
+// Serialize sgMaterial
+// Call LoadTextureFromImage() after loading the image data rather than serializing the textures directly
 
 template <typename Archive>
 void save(Archive& archive, Material const &  material)
 {
 	std::vector<MaterialMap> maps;
+	maps.resize(MAX_MATERIAL_MAPS);
 	std::array<float, 4> params;
+	// TODO: Maps does not get saved correctly
+	//maps[MATERIAL_MAP_DIFFUSE] = material.maps[MATERIAL_MAP_DIFFUSE];
+	//maps[MATERIAL_MAP_SPECULAR] = material.maps[MATERIAL_MAP_SPECULAR];
+
 	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
 	{
 		maps.push_back(material.maps[i]);
@@ -360,22 +386,20 @@ void load(Archive& archive, Material &  material)
 	maps.resize(MAX_MATERIAL_MAPS);
 	std::array<float, 4> params;
 
-	// TODO: Archive throws a bad access error here
-
 	archive(
 		material.shader,
 		maps,
 		params
 	);
 
+	// TODO: Material image data is automatically uploaded to the GPU and not stored in any struct (i.e., in Model, Mesh or Texture). This makes serialization difficult,
+	// as we need the Image data to load the texture correctly.
 	material.maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS*sizeof(MaterialMap));
-
 	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
 	{
 		material.maps[i] = maps[i];
 	}
 };
-
 
 template <typename Archive>
 void serialize(Archive& archive, BoneInfo &  boneInfo)
@@ -396,12 +420,12 @@ void save(Archive& archive, Model const &  model)
 		meshes.push_back(model.meshes[i]);
 	}
 
-	std::vector<Material> materials;
-	materials.reserve(model.materialCount);
-	for (size_t i = 0; i < model.materialCount; i++)
-	{
-		materials.push_back(model.materials[i]);
-	}
+	//std::vector<Material> materials;
+	//materials.reserve(model.materialCount);
+	//for (size_t i = 0; i < model.materialCount; i++)
+	//{
+	//	materials.push_back(model.materials[i]);
+	//}
 	
 	std::vector<BoneInfo> bones;
 	bones.reserve(model.boneCount);
@@ -429,7 +453,7 @@ void save(Archive& archive, Model const &  model)
 		model.meshCount,
 		model.materialCount,
 		meshes,
-		materials,
+		//materials,
 		meshMaterial,
 		model.boneCount,
 		bones,
@@ -441,7 +465,7 @@ template <typename Archive>
 void load(Archive& archive, Model& model)
 {
     std::vector<Mesh> meshes;
-	std::vector<Material> materials;
+	//std::vector<Material> materials;
 	std::vector<int> meshMaterial;
 	std::vector<BoneInfo> bones;
 	std::vector<Transform> bindPose;
@@ -451,7 +475,7 @@ void load(Archive& archive, Model& model)
 		model.meshCount,
 		model.materialCount,
 		meshes,
-		materials,
+		//materials,
 		meshMaterial,
 		model.boneCount,
 		bones,
@@ -471,7 +495,7 @@ void load(Archive& archive, Model& model)
 	}
 	for (size_t i = 0; i < model.materialCount; ++i)
 	{
-		model.materials[i] = materials[i];
+		model.materials[i] = LoadMaterialDefault();
 	}
 	for (size_t i = 0; i < model.meshCount; ++i)
 	{
