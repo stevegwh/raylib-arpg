@@ -62,9 +62,9 @@ namespace sage
 			model.transform = initialTransform;
 
 			// Set the textures of the model with their respective paths
-			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(materials.diffuse.c_str());
-			model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture(materials.specular.c_str());
-			model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture(materials.normal.c_str());
+            if (FileExists(materials.diffuse.c_str())) model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(materials.diffuse.c_str());
+            if (FileExists(materials.specular.c_str())) model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture(materials.specular.c_str());
+            if (FileExists(materials.normal.c_str())) model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture(materials.normal.c_str());
 
 		}
 	};

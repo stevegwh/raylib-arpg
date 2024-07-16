@@ -8,7 +8,6 @@
 #include "cereal/types/array.hpp"
 #include "cereal/types/string.hpp"
 #include "raylib.h"
-#include <rlgl.h>
 #include "raylib/src/config.h"
 #include "utils.h"
 
