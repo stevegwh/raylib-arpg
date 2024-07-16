@@ -10,8 +10,6 @@
 #include "raylib.h"
 #include "raylib/src/config.h"
 #include "utils.h"
-#include "../src/Material.hpp"
-
 
 template <typename Archive>
 void serialize(Archive& archive, Vector3& v3)
@@ -511,7 +509,6 @@ void load(Archive& archive, Model& model)
 	}
 
     // Below taken from raylib's LoadModel().
-    // Make sure model transform is set to identity matrix!
     model.transform = MatrixIdentity();
     if ((model.meshCount != 0) && (model.meshes != NULL))
     {

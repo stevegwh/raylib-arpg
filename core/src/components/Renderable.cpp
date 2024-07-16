@@ -22,20 +22,18 @@ namespace sage
 
 	Renderable::Renderable(
 		Model _model,
-		std::string _material,
-		std::string _modelPath,
+		MaterialPaths _materials,
 		Matrix _localTransform)
 		:
 		initialTransform(_localTransform),
-		material(std::move(_material)),
-		modelPath(std::move(_modelPath)),
+		materials(std::move(_materials)),
 		model(_model)
 	{
 		model.transform = initialTransform;
 	}
 
-	Renderable::Renderable(Model _model, std::string _modelPath, Matrix _localTransform) :
-		initialTransform(_localTransform), modelPath(std::move(_modelPath)), model(_model)
+	Renderable::Renderable(Model _model, Matrix _localTransform) :
+		initialTransform(_localTransform), model(_model)
 	{
 		model.transform = initialTransform;
 	}

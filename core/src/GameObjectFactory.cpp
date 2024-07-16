@@ -72,7 +72,7 @@ namespace sage
 		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
 		Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
-		auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
+		auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
 		renderable.name = name;
 		// ---
 
@@ -131,7 +131,7 @@ namespace sage
 		animation.ChangeAnimation(0);
 
 		Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
-		auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
+		auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
 		renderable.name = name;
 
 		//auto& combat = registry->emplace<HealthBar>(id);
@@ -216,7 +216,7 @@ namespace sage
 		combatable.actorType = CombatableActorType::PLAYER;
 
 		Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
-		auto& renderable = registry->emplace<Renderable>(id, model, std::string(modelPath), modelTransform);
+		auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
 		renderable.name = name;
 
 		BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
@@ -246,8 +246,10 @@ namespace sage
 		transform.SetScale(2.0f, id);
 		transform.SetRotation({0, 0, 0}, id);
 		auto model = LoadModel(modelPath);
+		MaterialPaths matPaths;
+		matPaths.diffuse = texturePath;
 		model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(texturePath);
-		auto& renderable = registry->emplace<Renderable>(id, model, texturePath, modelPath, MatrixIdentity());
+		auto& renderable = registry->emplace<Renderable>(id, model, matPaths, MatrixIdentity());
 		renderable.name = name;
 		auto& collideable = registry->emplace<Collideable>(
 			id, CalculateModelBoundingBox(renderable.model));
@@ -286,7 +288,8 @@ namespace sage
 	void GameObjectFactory::loadMap(entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
 	{
 		
-		std::string mat = "resources/models/obj/PolyAdventureTexture_01.png";
+		MaterialPaths matPaths;
+		matPaths.diffuse = "resources/models/obj/PolyAdventureTexture_01.png";
 		Model parent = LoadModel(_mapPath.c_str());
         std::vector<Collideable*> floorMeshes;
         
@@ -301,12 +304,12 @@ namespace sage
 			Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
 			Model model = LoadModelFromMesh(parent.meshes[i]);
 			//Matrix modelTransform = MatrixScale(1,1,1);
-			auto& renderable = registry->emplace<Renderable>(id, model, mat, _mapPath, modelTransform); // TODO: You're storing the entire model's path here
+			auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
 			renderable.name = parent.meshes[i].name;
 			renderable.serializable = false;
             
 			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
-			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(mat.c_str());
+			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(matPaths.diffuse.c_str());
             auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
             if (renderable.name.find("SM_Bld") != std::string::npos) 
             {
