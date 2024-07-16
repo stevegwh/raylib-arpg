@@ -9,6 +9,7 @@
 #include "cereal/types/string.hpp"
 #include "raylib.h"
 #include "raylib/src/config.h"
+#include "utils.h"
 
 
 template <typename Archive>
@@ -484,4 +485,14 @@ void load(Archive& archive, Model& model)
 	{
 		model.bindPose[i] = bindPose[i];
 	}
+
+    // Below taken from raylib's LoadModel().
+    // Make sure model transform is set to identity matrix!
+    model.transform = MatrixIdentity();
+    if ((model.meshCount != 0) && (model.meshes != NULL))
+    {
+        // Upload vertex data to GPU (static meshes)
+        for (int i = 0; i < model.meshCount; i++) UploadMesh(&model.meshes[i], false);
+    }
+    else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data", "Cereal Model Import");
 };

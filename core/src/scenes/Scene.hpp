@@ -30,7 +30,7 @@ namespace sage
 		{
 			data->Load();
 			float slices = 500;
-			GameObjectFactory::loadMap(registry, this, slices, mapPath);
+			//GameObjectFactory::loadMap(registry, this, slices, mapPath);
 			data->navigationGridSystem->Init(slices, 1.0f, mapPath);
 			data->navigationGridSystem->PopulateGrid();
 		};
