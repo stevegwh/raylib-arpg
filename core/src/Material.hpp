@@ -8,9 +8,5 @@
 
 namespace sage
 {
-	struct sgMaterial
-	{
-		std::string diffuse{};
-		// Specular etc here
-	};
+
 }
