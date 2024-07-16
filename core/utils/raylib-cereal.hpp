@@ -8,6 +8,7 @@
 #include "cereal/types/array.hpp"
 #include "cereal/types/string.hpp"
 #include "raylib.h"
+#include <rlgl.h>
 #include "raylib/src/config.h"
 #include "utils.h"
 
@@ -341,16 +342,11 @@ template <typename Archive>
 void serialize(Archive& archive, MaterialMap &  map)
 {
 	archive(
-		map.texture,
+		//map.texture,
 		map.color,
 		map.value
 	);
 };
-
-
-// TODO:
-// Serialize sgMaterial
-// Call LoadTextureFromImage() after loading the image data rather than serializing the textures directly
 
 template <typename Archive>
 void save(Archive& archive, Material const &  material)
@@ -358,11 +354,8 @@ void save(Archive& archive, Material const &  material)
 	std::vector<MaterialMap> maps;
 	maps.resize(MAX_MATERIAL_MAPS);
 	std::array<float, 4> params;
-	// TODO: Maps does not get saved correctly
-	//maps[MATERIAL_MAP_DIFFUSE] = material.maps[MATERIAL_MAP_DIFFUSE];
-	//maps[MATERIAL_MAP_SPECULAR] = material.maps[MATERIAL_MAP_SPECULAR];
 
-	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
+	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
 	{
 		maps.push_back(material.maps[i]);
 	}
@@ -371,7 +364,6 @@ void save(Archive& archive, Material const &  material)
 		params[i] = material.params[i];
 	}
 	archive(
-		material.shader,
 		maps,
 		params
 	);
@@ -380,20 +372,17 @@ void save(Archive& archive, Material const &  material)
 template <typename Archive>
 void load(Archive& archive, Material &  material)
 {
+	material = LoadMaterialDefault();
 	std::vector<MaterialMap> maps;
 	maps.resize(MAX_MATERIAL_MAPS);
 	std::array<float, 4> params;
 
 	archive(
-		material.shader,
 		maps,
 		params
 	);
-
-	// TODO: Material image data is automatically uploaded to the GPU and not stored in any struct (i.e., in Model, Mesh or Texture). This makes serialization difficult,
-	// as we need the Image data to load the texture correctly.
 	material.maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS*sizeof(MaterialMap));
-	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++) // TODO: Safe?. MAX_MATERIAL_MAPS not defined
+	for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
 	{
 		material.maps[i] = maps[i];
 	}
@@ -493,7 +482,9 @@ void load(Archive& archive, Model& model)
 	}
 	for (size_t i = 0; i < model.materialCount; ++i)
 	{
-		model.materials[i] = LoadMaterialDefault();
+		model.materials[i] = LoadMaterialDefault(); // TODO: Redundant?
+		//model.materials[i] = materials[i];
+		//model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = (Texture2D){ rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 }; // Load a default texture.
 	}
 	for (size_t i = 0; i < model.meshCount; ++i)
 	{
