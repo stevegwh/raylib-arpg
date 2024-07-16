@@ -100,9 +100,10 @@ namespace sage::serializer
 					std::cerr << "Error during deserialization: " << e.what() << std::endl;
 					break;
 				}
+				std::cout << "Material path: " << renderable.material << std::endl;
 			}
 		}
-
+		
 		storage.close();
 		std::cout << "Load finished" << std::endl;
 	}

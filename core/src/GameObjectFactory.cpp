@@ -301,7 +301,7 @@ namespace sage
 			Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
 			Model model = LoadModelFromMesh(parent.meshes[i]);
 			//Matrix modelTransform = MatrixScale(1,1,1);
-			auto& renderable = registry->emplace<Renderable>(id, model, _mapPath, modelTransform); // TODO: You're storing the entire model's path here
+			auto& renderable = registry->emplace<Renderable>(id, model, mat, _mapPath, modelTransform); // TODO: You're storing the entire model's path here
 			renderable.name = parent.meshes[i].name;
 			renderable.serializable = false;
             
