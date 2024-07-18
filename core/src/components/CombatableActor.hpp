@@ -27,6 +27,7 @@ namespace sage
 		entt::sigh<void(entt::entity)> onDeath{};
 		entt::sigh<void(entt::entity, entt::entity)> onEnemyClicked{}; // Self, Clicked enemy
 		entt::sigh<void(entt::entity)> onAttackCancelled{}; // Self
+		entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
 
 		void EnemyClicked(entt::entity enemy)
 		{
@@ -37,6 +38,12 @@ namespace sage
 		void AttackCancelled()
 		{
 			onAttackCancelled.publish(self);
+		}
+
+		void TargetDeath(entt::entity _target)
+		{
+			onTargetDeath.publish(self, _target);
+			target = entt::null;
 		}
 	};
 } // sage

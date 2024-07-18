@@ -55,14 +55,14 @@ namespace sage
 	{
 	}
 
-	void PlayerCombatLogicSubSystem::OnTargetDeath(entt::entity entity)
+	void PlayerCombatLogicSubSystem::OnTargetDeath(entt::entity actor, entt::entity target)
 	{
-		auto& enemyCombatable = registry->get<CombatableActor>(entity);
-		auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
-		{
-			entt::sink sink{ enemyCombatable.onDeath };
-			sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
-		}
+		auto& enemyCombatable = registry->get<CombatableActor>(target);
+		auto& playerCombatable = registry->get<CombatableActor>(actor);
+		//{
+		//	entt::sink sink{ enemyCombatable.onDeath };
+		//	sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
+		//}
 		{
 			entt::sink sink{ playerCombatable.onAttackCancelled };
 			sink.disconnect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
@@ -155,8 +155,12 @@ namespace sage
 		auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 		{
 			entt::sink sink{ enemyCombatable.onDeath };
-			sink.connect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
+			sink.connect<&CombatableActor::TargetDeath>(playerCombatable);
 		}
+		//{
+		//	entt::sink sink{ playerCombatable.onTargetDeath };
+		//	sink.connect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
+		//}
 	}
 
 	void PlayerCombatLogicSubSystem::Enable()

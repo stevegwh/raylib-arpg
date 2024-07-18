@@ -26,7 +26,7 @@ namespace sage
 		void StartCombat(entt::entity entity);
 		[[nodiscard]] bool CheckInCombat(entt::entity entity) const;
 		void OnDeath(entt::entity entity);
-		void OnTargetDeath(entt::entity entity);
+		void OnTargetDeath(entt::entity actor, entt::entity target);
 		void OnAttackCancel(entt::entity entity);
 		void AutoAttack(entt::entity entity) const;
 		void OnHit(entt::entity entity, entt::entity attacker);
