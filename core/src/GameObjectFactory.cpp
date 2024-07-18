@@ -45,7 +45,7 @@ namespace sage
 	}
 
 	entt::entity GameObjectFactory::createEnemy(entt::registry* registry, GameData* game, Vector3 position,
-	                                            const char* name)
+		const char* name)
 	{
 		entt::entity id = registry->create();
 
@@ -54,12 +54,12 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<sgTransform>(id);
-        GridSquare actorIdx;
-        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({ position.x, height, position.z }, id);
+		GridSquare actorIdx;
+		game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+		float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+		transform.SetPosition({ position.x, height, position.z }, id);
 		transform.SetScale(1.0f, id);
-		transform.SetRotation({0, 0, 0}, id);
+		transform.SetRotation({ 0, 0, 0 }, id);
 		transform.movementSpeed = 0.05f;
 		registry->emplace<MoveableActor>(id);
 
@@ -84,7 +84,7 @@ namespace sage
 		auto& combatable = registry->emplace<CombatableActor>(id);
 		combatable.actorType = CombatableActorType::WAVEMOB;
 		{
-			entt::sink sink{combatable.onHit};
+			entt::sink sink{ combatable.onHit };
 			sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatStateSystem->waveMobCombatLogicSubSystem);
 		}
 
@@ -97,11 +97,11 @@ namespace sage
 		collideable.collisionLayer = CollisionLayer::ENEMY;
 		game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 		{
-			entt::sink sink{transform.onPositionUpdate};
-			sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity)
-			{
-				collisionSystem.OnTransformUpdate(entity);
-			}>(*game->collisionSystem);
+			entt::sink sink{ transform.onPositionUpdate };
+			sink.connect < [](CollisionSystem& collisionSystem, entt::entity entity)
+				{
+					collisionSystem.OnTransformUpdate(entity);
+				} > (*game->collisionSystem);
 		}
 		// ---
 
@@ -113,19 +113,19 @@ namespace sage
 	}
 
 	entt::entity GameObjectFactory::createKnight(entt::registry* registry, GameData* game, Vector3 position,
-	                                             const char* name)
+		const char* name)
 	{
 		entt::entity id = registry->create();
 		auto modelPath = "resources/models/gltf/arissa.glb";
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<sgTransform>(id);
-        GridSquare actorIdx;
-        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({ position.x, height, position.z }, id);
+		GridSquare actorIdx;
+		game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+		float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+		transform.SetPosition({ position.x, height, position.z }, id);
 		transform.SetScale(1.0f, id);
-		transform.SetRotation({0, 0, 0}, id);
+		transform.SetRotation({ 0, 0, 0 }, id);
 
 		auto model = LoadModel(modelPath);
 		auto& animation = registry->emplace<Animation>(id, modelPath, &model);
@@ -142,34 +142,34 @@ namespace sage
 		collideable.collisionLayer = CollisionLayer::NPC;
 		game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 		{
-			entt::sink sink{transform.onPositionUpdate};
-			sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity)
-			{
-				collisionSystem.OnTransformUpdate(entity);
-			}>(*game->collisionSystem);
+			entt::sink sink{ transform.onPositionUpdate };
+			sink.connect < [](CollisionSystem& collisionSystem, entt::entity entity)
+				{
+					collisionSystem.OnTransformUpdate(entity);
+				} > (*game->collisionSystem);
 		}
 
 		auto& dialogue = registry->emplace<Dialogue>(id);
 		dialogue.sentence = "Hello, this is a test sentence.";
 		dialogue.conversationPos = Vector3Add(transform.position(),
-		                                      Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+			Vector3Multiply(transform.forward(), { 10.0f, 1, 10.0f }));
 		auto& worldObject = registry->emplace<WorldObject>(id);
 		return id;
 	}
 
 	entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData* game, Vector3 position,
-	                                             const char* name)
+		const char* name)
 	{
 		entt::entity id = registry->create();
 		auto modelPath = "resources/models/gltf/hero.glb";
 
 		auto& transform = registry->emplace<sgTransform>(id);
-        GridSquare actorIdx;
-        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+		GridSquare actorIdx;
+		game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+		float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
 		transform.SetPosition({ position.x, height, position.z }, id);
 		transform.SetScale(1.0f, id);
-		transform.SetRotation({0, 0, 0}, id);
+		transform.SetRotation({ 0, 0, 0 }, id);
 		registry->emplace<MoveableActor>(id);
 
 		auto model = LoadModel(modelPath);
@@ -184,37 +184,49 @@ namespace sage
 		animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
 		{
-			entt::sink sink{transform.onFinishMovement};
-			sink.connect<[](Animation& animation, entt::entity entity)
-			{
-				animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-			}>(animation);
-		}
-		{
-			entt::sink sink{transform.onStartMovement};
-			sink.connect<[](Animation& animation, entt::entity entity)
-			{
-				animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
-			}>(animation);
-		}
-		{
-			entt::sink sink{game->userInput->keyIPressed};
-			sink.connect<[](Animation& animation)
-			{
-				// TODO: Just to test animations on demand
-				if (animation.animIndex == 0)
-				{
-					animation.ChangeAnimationByEnum(AnimationEnum::TALK);
-				}
-				else if (animation.animIndex == 2)
+			entt::sink sink{ transform.onFinishMovement };
+			sink.connect < [](Animation& animation, entt::entity entity)
 				{
 					animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-				}
-			}>(animation);
+				} > (animation);
+		}
+		{
+			entt::sink sink{ transform.onStartMovement };
+			sink.connect < [](Animation& animation, entt::entity entity)
+				{
+					animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+				} > (animation);
+		}
+		{
+			entt::sink sink{ game->userInput->keyIPressed };
+			sink.connect < [](Animation& animation)
+				{
+					// TODO: Just to test animations on demand
+					if (animation.animIndex == 0)
+					{
+						animation.ChangeAnimationByEnum(AnimationEnum::TALK);
+					}
+					else if (animation.animIndex == 2)
+					{
+						animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+					}
+				} > (animation);
 		}
 
+		// Combat
 		auto& combatable = registry->emplace<CombatableActor>(id);
+		combatable.self = id;
 		combatable.actorType = CombatableActorType::PLAYER;
+		// Links the cursor's events to the combatable actor which passes on the entity id to the system
+		{
+			entt::sink sink{ game->cursor->onEnemyClick };
+			sink.connect<&CombatableActor::EnemyClicked>(combatable);
+		}
+		{
+			entt::sink sink{ game->cursor->onFloorClick };
+			sink.connect<&CombatableActor::AttackCancelled>(combatable);
+		}
+		// ---
 
 		Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
 		auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
@@ -225,7 +237,7 @@ namespace sage
 		collideable.collisionLayer = CollisionLayer::PLAYER;
 		game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 		{
-			entt::sink sink{transform.onPositionUpdate};
+			entt::sink sink{ transform.onPositionUpdate };
 			sink.connect<&CollisionSystem::OnTransformUpdate>(*game->collisionSystem);
 		}
 		auto& worldObject = registry->emplace<WorldObject>(id);
@@ -239,13 +251,13 @@ namespace sage
 	}
 
 	void GameObjectFactory::createBuilding(entt::registry* registry, GameData* data, Vector3 position, const char* name,
-	                                       const char* modelPath, const char* texturePath)
+		const char* modelPath, const char* texturePath)
 	{
 		auto id = registry->create();
 		auto& transform = registry->emplace<sgTransform>(id);
 		transform.SetPosition(position, id);
 		transform.SetScale(2.0f, id);
-		transform.SetRotation({0, 0, 0}, id);
+		transform.SetRotation({ 0, 0, 0 }, id);
 		auto model = LoadModel(modelPath);
 		MaterialPaths matPaths;
 		matPaths.diffuse = texturePath;
@@ -257,11 +269,11 @@ namespace sage
 		collideable.collisionLayer = CollisionLayer::BUILDING;
 		data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 		{
-			entt::sink sink{transform.onPositionUpdate};
-			sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity)
-			{
-				collisionSystem.OnTransformUpdate(entity);
-			}>(*data->collisionSystem);
+			entt::sink sink{ transform.onPositionUpdate };
+			sink.connect < [](CollisionSystem& collisionSystem, entt::entity entity)
+				{
+					collisionSystem.OnTransformUpdate(entity);
+				} > (*data->collisionSystem);
 		}
 		registry->emplace<WorldObject>(id);
 	}
@@ -269,38 +281,38 @@ namespace sage
 	BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
 	{
 		// TODO: Below doesn't seem to work always, depending on the map.
-		BoundingBox mapBB { Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
-		for (const auto& col: floorMeshes) 
-        {
-            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
-            {
-                mapBB.min = col->worldBoundingBox.min;
-            }
-            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
-            {
-                mapBB.max = col->worldBoundingBox.max;
-            }
-        }
-        mapBB.min.y = 0.1f;
-        mapBB.max.y = 0.1f;
+		BoundingBox mapBB{ Vector3{0, 0, 0}, Vector3{0, 0, 0} }; // min, max
+		for (const auto& col : floorMeshes)
+		{
+			if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
+			{
+				mapBB.min = col->worldBoundingBox.min;
+			}
+			if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
+			{
+				mapBB.max = col->worldBoundingBox.max;
+			}
+		}
+		mapBB.min.y = 0.1f;
+		mapBB.max.y = 0.1f;
 		return mapBB;
 	}
 
 	void GameObjectFactory::loadMap(entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
 	{
-		
+
 		MaterialPaths matPaths;
 		matPaths.diffuse = "resources/models/obj/PolyAdventureTexture_01.png";
 		Model parent = LoadModel(_mapPath.c_str());
-        std::vector<Collideable*> floorMeshes;
-        
+		std::vector<Collideable*> floorMeshes;
+
 		for (int i = 0; i < parent.meshCount; ++i)
 		{
 			entt::entity id = registry->create();
 			auto& transform = registry->emplace<sgTransform>(id);
 			transform.SetPosition({ 0, 0, 0 }, id);
 			transform.SetScale(1.0f, id);
-			transform.SetRotation({0, 0, 0}, id);
+			transform.SetRotation({ 0, 0, 0 }, id);
 
 			Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
 			Model model = LoadModelFromMesh(parent.meshes[i]);
@@ -308,41 +320,41 @@ namespace sage
 			auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
 			renderable.name = parent.meshes[i].name;
 			renderable.serializable = false;
-            
-			scene->lightSubSystem->LinkRenderableToLight(&renderable);			
-			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
-            auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
-            if (renderable.name.find("SM_Bld") != std::string::npos) 
-            {
-                collideable.collisionLayer = CollisionLayer::BUILDING;
-            }
-            else if (renderable.name.find("SM_Env_NoWalk") != std::string::npos)
-            {
-                collideable.collisionLayer = CollisionLayer::TERRAIN;
-            }
-            else if (renderable.name.find("SM_Env") != std::string::npos) 
-            {
-                collideable.collisionLayer = CollisionLayer::FLOOR;
-                floorMeshes.push_back(&collideable);
-            }
-            else if (renderable.name.find("SM_Prop") != std::string::npos)
-            {
-                collideable.collisionLayer = CollisionLayer::BUILDING;
-            }
-            else 
-            {
-                collideable.collisionLayer = CollisionLayer::DEFAULT;
-            }
-            scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
-        }
 
-        // Calculate grid based on walkable area
-		BoundingBox mapBB { Vector3{-500, 0, -500}, Vector3{500, 0, 500} }; // min, max
+			scene->lightSubSystem->LinkRenderableToLight(&renderable);
+			model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
+			auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
+			if (renderable.name.find("SM_Bld") != std::string::npos)
+			{
+				collideable.collisionLayer = CollisionLayer::BUILDING;
+			}
+			else if (renderable.name.find("SM_Env_NoWalk") != std::string::npos)
+			{
+				collideable.collisionLayer = CollisionLayer::TERRAIN;
+			}
+			else if (renderable.name.find("SM_Env") != std::string::npos)
+			{
+				collideable.collisionLayer = CollisionLayer::FLOOR;
+				floorMeshes.push_back(&collideable);
+			}
+			else if (renderable.name.find("SM_Prop") != std::string::npos)
+			{
+				collideable.collisionLayer = CollisionLayer::BUILDING;
+			}
+			else
+			{
+				collideable.collisionLayer = CollisionLayer::DEFAULT;
+			}
+			scene->data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
+		}
+
+		// Calculate grid based on walkable area
+		BoundingBox mapBB{ Vector3{-500, 0, -500}, Vector3{500, 0, 500} }; // min, max
 		//BoundingBox mapBB = calculateFloorSize(floorMeshes);
 
-        slices = mapBB.max.x - mapBB.min.x;
-        // Create floor
-        createFloor(registry, scene, mapBB);
+		slices = mapBB.max.x - mapBB.min.x;
+		// Create floor
+		createFloor(registry, scene, mapBB);
 	}
 
 	void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)

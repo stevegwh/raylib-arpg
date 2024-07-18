@@ -11,6 +11,6 @@ namespace sage
 	{
 	public:
 		~StatePlayerCombat() override = default;
-		entt::sigh<void(entt::entity)> onAttackCancel{}; // entity id of this component
+		
 	};
 } // sage

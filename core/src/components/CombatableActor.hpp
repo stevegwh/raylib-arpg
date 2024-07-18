@@ -16,6 +16,7 @@ namespace sage
 
 	struct CombatableActor
 	{
+		entt::entity self;
 		CombatableActorType actorType = CombatableActorType::WAVEMOB;
 		bool dying = false;
 		entt::entity target{};
@@ -24,5 +25,17 @@ namespace sage
 		float autoAttackTickThreshold = 1;
 		entt::sigh<void(entt::entity, entt::entity, float)> onHit{};
 		entt::sigh<void(entt::entity)> onDeath{};
+		entt::sigh<void(entt::entity, entt::entity)> onEnemyClicked{}; // Self, Clicked enemy
+		entt::sigh<void(entt::entity)> onAttackCancelled{}; // Self
+
+		void EnemyClicked(entt::entity enemy)
+		{
+			onEnemyClicked.publish(self, enemy);
+		}
+
+		void AttackCancelled()
+		{
+			onAttackCancelled.publish(self);
+		}
 	};
 } // sage

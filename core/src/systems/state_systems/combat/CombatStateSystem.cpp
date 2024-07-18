@@ -43,8 +43,7 @@ namespace sage
 		cursor(_cursor),
 		actorMovementSystem(_actorMovementSystem),
 		playerCombatLogicSubSystem(
-			std::make_unique<PlayerCombatLogicSubSystem>(_registry, _stateMachineSystem, _actorMovementSystem,
-			                                             _cursor)),
+			std::make_unique<PlayerCombatLogicSubSystem>(_registry, _stateMachineSystem, _actorMovementSystem)),
 		waveMobCombatLogicSubSystem(std::make_unique<WaveMobCombatLogicSubSystem>(
 			_registry, _stateMachineSystem, _transformSystem, _collisionSystem, _navigationGridSystem))
 	{
