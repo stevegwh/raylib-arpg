@@ -6,7 +6,6 @@
 
 #include "systems/StateMachineSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "Cursor.hpp"
 
 #include "entt/entt.hpp"
 
@@ -16,13 +15,12 @@ namespace sage
 	{
 		entt::registry* registry;
 		entt::entity playerEntity;
-		Cursor* cursor;
 		StateMachineSystem* stateMachineSystem;
 		ControllableActorSystem* controllableActorSystem;
 
 		// TODO: Move all non-combat related logic to the default system (i.e., enemy clicked etc)
 
-		void onEnemyClick(entt::entity entity);
+		void onEnemyClick(entt::entity actor, entt::entity target);
 
 		void Update() const;
 		void StartCombat(entt::entity entity);
@@ -39,7 +37,6 @@ namespace sage
 
 		PlayerCombatLogicSubSystem(entt::registry* _registry,
 		                           StateMachineSystem* _stateMachineSystem,
-		                           ControllableActorSystem* _controllableActorSystem,
-		                           Cursor* _cursor);
+		                           ControllableActorSystem* _controllableActorSystem);
 	};
 } // sage
