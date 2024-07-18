@@ -72,7 +72,6 @@ namespace sage
 
 	void PlayerCombatLogicSubSystem::OnAttackCancel(entt::entity entity)
 	{
-		// TODO: What is entity?
 		auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
 		playerCombatable.target = entt::null;
 		auto& playerTrans = registry->get<sgTransform>(controllableActorSystem->GetControlledActor());
@@ -154,7 +153,7 @@ namespace sage
 		if (registry->any_of<CombatableActor>(c.target))
 		{
 			auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-			enemyCombatable.onHit.publish(c.target, controllableActorSystem->GetControlledActor(), 10); // TODO: tmp dmg
+			enemyCombatable.onHit.publish(c.target, entity, 10); // TODO: tmp dmg
 		}
 	}
 
@@ -164,6 +163,8 @@ namespace sage
 
 	void PlayerCombatLogicSubSystem::Enable()
 	{
+		// TODO: Have all StatePlayerCombat components contain the necessary events for the systems which pass through the entity ID as the first argument
+		// Have this system listen to those events and call the system's functions
 		{
 			entt::sink sink{cursor->onEnemyClick};
 			sink.connect<&PlayerCombatLogicSubSystem::onEnemyClick>(this);

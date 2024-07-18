@@ -15,6 +15,7 @@ namespace sage
 	struct PlayerCombatLogicSubSystem
 	{
 		entt::registry* registry;
+		entt::entity playerEntity;
 		Cursor* cursor;
 		StateMachineSystem* stateMachineSystem;
 		ControllableActorSystem* controllableActorSystem;
