@@ -30,6 +30,7 @@ namespace sage
 
 		void EnemyClicked(entt::entity enemy)
 		{
+			target = enemy;
 			onEnemyClicked.publish(self, enemy);
 		}
 

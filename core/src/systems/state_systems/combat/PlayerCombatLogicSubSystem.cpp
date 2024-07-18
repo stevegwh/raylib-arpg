@@ -72,14 +72,14 @@ namespace sage
 
 	void PlayerCombatLogicSubSystem::OnAttackCancel(entt::entity entity)
 	{
-		auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
+		auto& playerCombatable = registry->get<CombatableActor>(entity);
 		playerCombatable.target = entt::null;
-		auto& playerTrans = registry->get<sgTransform>(controllableActorSystem->GetControlledActor());
+		auto& playerTrans = registry->get<sgTransform>(entity);
 		{
 			entt::sink sink{ playerTrans.onFinishMovement };
 			sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
 		}
-		controllableActorSystem->CancelMovement(controllableActorSystem->GetControlledActor());
+		controllableActorSystem->CancelMovement(entity);
 	}
 
 	
@@ -110,13 +110,12 @@ namespace sage
 
 	void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity actor, entt::entity target)
 	{
-		auto& combatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
-		combatable.target = target;
+		auto& combatable = registry->get<CombatableActor>(actor);
 		{
 			entt::sink sink{ combatable.onAttackCancelled };
 			sink.connect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
 		}
-		auto& playerTrans = registry->get<sgTransform>(controllableActorSystem->GetControlledActor());
+		auto& playerTrans = registry->get<sgTransform>(actor);
 		const auto& enemyTrans = registry->get<sgTransform>(target);
 
 		const auto& enemyCollideable = registry->get<Collideable>(combatable.target);
@@ -135,7 +134,7 @@ namespace sage
 		// multiplied by the attack range from the enemy position
 		Vector3 targetPos = Vector3Subtract(enemyPos, direction);
 
-		controllableActorSystem->PathfindToLocation(controllableActorSystem->GetControlledActor(), targetPos);
+		controllableActorSystem->PathfindToLocation(actor, targetPos);
 		{
 			entt::sink sink{playerTrans.onFinishMovement};
 			sink.connect<&PlayerCombatLogicSubSystem::StartCombat>(this);
@@ -144,16 +143,14 @@ namespace sage
 
 	void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
 	{
-		// TODO: What is "entity"?
 		{
-			auto& playerTrans = registry->get<sgTransform>(controllableActorSystem->GetControlledActor());
+			auto& playerTrans = registry->get<sgTransform>(entity);
 			entt::sink sink{ playerTrans.onFinishMovement };
 			sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
 		}
 
-		auto& playerCombatable = registry->get<CombatableActor>(controllableActorSystem->GetControlledActor());
-		stateMachineSystem->ChangeState<StatePlayerCombat, StateComponents>(
-			controllableActorSystem->GetControlledActor());
+		auto& playerCombatable = registry->get<CombatableActor>(entity);
+		stateMachineSystem->ChangeState<StatePlayerCombat, StateComponents>(entity);
 
 		auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 		{
