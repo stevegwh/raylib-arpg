@@ -20,6 +20,8 @@ namespace sage
 		StateMachineSystem* stateMachineSystem;
 		ControllableActorSystem* controllableActorSystem;
 
+		// TODO: Move all non-combat related logic to the default system (i.e., enemy clicked etc)
+
 		void onEnemyClick(entt::entity entity);
 
 		void Update() const;
@@ -32,8 +34,8 @@ namespace sage
 		void OnHit(entt::entity entity, entt::entity attacker);
 		void Enable();
 		void Disable();
-		void OnComponentEnabled(entt::entity entity) const;
-		void OnComponentDisabled(entt::entity entity) const;
+		void OnStateAdded(entt::entity entity) const;
+		void OnStateRemoved(entt::entity entity) const;
 
 		PlayerCombatLogicSubSystem(entt::registry* _registry,
 		                           StateMachineSystem* _stateMachineSystem,

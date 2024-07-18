@@ -183,13 +183,13 @@ namespace sage
 		}
 	}
 
-	void PlayerCombatLogicSubSystem::OnComponentEnabled(entt::entity entity) const
+	void PlayerCombatLogicSubSystem::OnStateAdded(entt::entity entity) const
 	{
 		auto& animation = registry->get<Animation>(entity);
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
 	}
 
-	void PlayerCombatLogicSubSystem::OnComponentDisabled(entt::entity entity) const
+	void PlayerCombatLogicSubSystem::OnStateRemoved(entt::entity entity) const
 	{
 		controllableActorSystem->CancelMovement(entity);
 	}
@@ -203,7 +203,7 @@ namespace sage
 		stateMachineSystem(_stateMachineSystem),
 		controllableActorSystem(_controllableActorSystem)
 	{
-		registry->on_construct<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnComponentEnabled>(this);
-		registry->on_destroy<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnComponentDisabled>(this);
+		registry->on_construct<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnStateAdded>(this);
+		registry->on_destroy<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnStateRemoved>(this);
 	}
 } // sage
