@@ -48,7 +48,7 @@ namespace sage
 	{
 		{
 			// If location outside of bounds, then return
-			GridSquare tmp;
+			GridSquare tmp{};
 			if (!navigationGridSystem->WorldToGridSpace(destination, tmp)) return;
 		}
 
@@ -62,18 +62,18 @@ namespace sage
 
 		const auto& actorCollideable = registry->get<Collideable>(entity);
 		navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
-		GridSquare minRange;
-		GridSquare maxRange;
+		GridSquare minRange{};
+		GridSquare maxRange{};
 		navigationGridSystem->GetPathfindRange(entity, bounds, minRange, maxRange);
 		{
 			// If location outside of actor's movement range, then return
-			GridSquare tmp;
+			GridSquare tmp{};
 			if (!navigationGridSystem->WorldToGridSpace(destination, tmp, minRange, maxRange)) return;
 		}
 		navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
 		const auto& actorTrans = registry->get<sgTransform>(entity);
-//		auto path = navigationGridSystem->BFSPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
+		//auto path = navigationGridSystem->BFSPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
         auto path = navigationGridSystem->AStarPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
 		PruneMoveCommands(entity);
 		auto& transform = registry->get<sgTransform>(entity);
@@ -90,7 +90,7 @@ namespace sage
 			}
 			transform.onStartMovement.publish(entity);
 		}
-		// Else? Error. Destination is unreachable.
+		// TODO: Handle destination being unreachable. (Change animation to IDLE, for a start)
 	}
 
 	void ActorMovementSystem::DrawDebug() const
