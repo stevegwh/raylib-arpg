@@ -17,8 +17,8 @@ namespace sage
 
 	public:
 		void Update();
-		void OnComponentEnabled(entt::entity entity) const;
-		void OnComponentDisabled(entt::entity entity) const;
+		void OnStateAdded(entt::entity entity) const;
+		void OnStateRemoved(entt::entity entity) const;
 		PlayerDefaultSubSystem(entt::registry* _registry,
 		                       StateMachineSystem* _stateMachineSystem,
 		                       ActorMovementSystem* _actorMovementSystem);

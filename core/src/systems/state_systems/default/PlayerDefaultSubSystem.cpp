@@ -9,13 +9,13 @@ namespace sage
 	{
 	}
 
-	void PlayerDefaultSubSystem::OnComponentEnabled(entt::entity entity) const
+	void PlayerDefaultSubSystem::OnStateAdded(entt::entity entity) const
 	{
 		auto& animation = registry->get<Animation>(entity);
 		animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 	}
 
-	void PlayerDefaultSubSystem::OnComponentDisabled(entt::entity entity) const
+	void PlayerDefaultSubSystem::OnStateRemoved(entt::entity entity) const
 	{
 		actorMovementSystem->CancelMovement(entity);
 	}
@@ -26,7 +26,7 @@ namespace sage
 		stateMachineSystem(_stateMachineSystem),
 		actorMovementSystem(_actorMovementSystem)
 	{
-		registry->on_construct<StatePlayerDefault>().connect<&PlayerDefaultSubSystem::OnComponentEnabled>(this);
-		registry->on_destroy<StatePlayerDefault>().connect<&PlayerDefaultSubSystem::OnComponentDisabled>(this);
+		registry->on_construct<StatePlayerDefault>().connect<&PlayerDefaultSubSystem::OnStateAdded>(this);
+		registry->on_destroy<StatePlayerDefault>().connect<&PlayerDefaultSubSystem::OnStateRemoved>(this);
 	}
 }
