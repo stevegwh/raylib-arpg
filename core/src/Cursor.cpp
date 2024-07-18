@@ -44,9 +44,9 @@ namespace sage
 
 	bool Cursor::isValidMove() const
 	{
-		GridSquare tmp;
+		GridSquare clickedSquare{};
 		if (navigationGridSystem->WorldToGridSpace(collision.point,
-		                                           tmp))
+                                                   clickedSquare))
 		// Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as bounds.)
 		{
 			if (registry->any_of<ControllableActor>(controlledActor))
@@ -58,7 +58,7 @@ namespace sage
 				                                       actor.pathfindingBounds,
 				                                       minRange,
 				                                       maxRange);
-				if (!navigationGridSystem->WorldToGridSpace(collision.point, tmp, minRange, maxRange))
+				if (!navigationGridSystem->WorldToGridSpace(collision.point, clickedSquare, minRange, maxRange))
 				// Out of player's movement range
 				{
 					return false;
@@ -69,6 +69,10 @@ namespace sage
 		{
 			return false;
 		}
+        if (navigationGridSystem->GetGridSquare(clickedSquare.row, clickedSquare.col)->occupied)
+        {
+            return false;
+        }
 		return true;
 	}
 

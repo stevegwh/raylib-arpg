@@ -119,12 +119,46 @@ namespace sage
 		}
 	}
 
+    void NavigationGridSystem::MarkSquareAreaOccupiedIfSteep(const BoundingBox& occupant, bool occupied)
+    {
+        GridSquare topLeftIndex{};
+        GridSquare bottomRightIndex{};
+        if (!WorldToGridSpace(occupant.min, topLeftIndex) ||
+            !WorldToGridSpace(occupant.max, bottomRightIndex))
+        {
+            return;
+        }
+    
+        int min_col = std::min(topLeftIndex.col, bottomRightIndex.col);
+        int max_col = std::max(topLeftIndex.col, bottomRightIndex.col);
+        int min_row = std::min(topLeftIndex.row, bottomRightIndex.row);
+        int max_row = std::max(topLeftIndex.row, bottomRightIndex.row);
+        Vector3 up = { 0.0f, 1.0f, 0.0f };
+        
+        for (int row = min_row; row <= max_row; ++row)
+        {
+            for (int col = min_col; col <= max_col; ++col)
+            {
+                auto normal = gridSquares[row][col]->terrainNormal;
+                // Calculate the angle between the normal and the up vector
+                float dotProduct = normal.x * up.x + normal.y * up.y + normal.z * up.z;
+                float angle = std::acos(dotProduct) * RAD2DEG;  // Convert to degrees
 
+                // If the angle is greater than the max slope angle, return a very high cost
+                if (angle > 45.0f)
+                {
+                    gridSquares[row][col]->occupied = occupied;
+                    gridSquares[row][col]->drawDebug = occupied;
+                }
+            }
+        }
+    }
+    
 	void NavigationGridSystem::MarkSquareAreaOccupied(const BoundingBox& occupant, bool occupied,
 		entt::entity occupantEntity) const
 	{
-		GridSquare topLeftIndex;
-		GridSquare bottomRightIndex;
+		GridSquare topLeftIndex{};
+		GridSquare bottomRightIndex{};
 		if (!WorldToGridSpace(occupant.min, topLeftIndex) ||
 			!WorldToGridSpace(occupant.max, bottomRightIndex))
 		{
@@ -792,30 +826,19 @@ namespace sage
 				auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
 				double new_cost = current_cost + next_cost;
 
-				if (checkInside(next, minRange, maxRange) &&
-					checkExtents(next, extents) &&
-					!visited[next.row][next.col] &&
-					!gridSquares.at(next.row).at(next.col)->occupied ||
-					new_cost < cost_so_far[next.row][next.col])
-				{
-					cost_so_far[next.row][next.col] = new_cost;
-					double heuristic_cost = 0;
-					heuristic_cost = heuristic(next, finishGridSquare) + 
-                        calculateTerrainCost(gridSquares[next.row][next.col]->terrainNormal, 45.0f);
-					//if (heuristicType == AStarHeuristic::DEFAULT)
-					//{
-					//	heuristic_cost = heuristic(next, finishGridSquare);
-					//}
-					//else if (heuristicType == AStarHeuristic::FAVOUR_RIGHT)
-					//{
-					//	auto& currentDir = registry->get<sgTransform>(entity).direction;
-					//	heuristic_cost = heuristic_favourRight(next, finishGridSquare, currentDir);
-					//}
-					double priority = new_cost + heuristic_cost;
-					frontier.put(next, priority);
-					came_from[next.row][next.col] = current;
-					visited[next.row][next.col] = true;
-				}
+                if (checkInside(next, minRange, maxRange) &&
+                    checkExtents(next, extents) &&
+                    (!visited[next.row][next.col] ||
+                        (visited[next.row][next.col] && new_cost < cost_so_far[next.row][next.col])) &&
+                    !gridSquares.at(next.row).at(next.col)->occupied)
+                {
+                    cost_so_far[next.row][next.col] = new_cost;
+                    double heuristic_cost = heuristic(next, finishGridSquare);
+                    double priority = new_cost + heuristic_cost;
+                    frontier.put(next, priority);
+                    came_from[next.row][next.col] = current;
+                    visited[next.row][next.col] = true;
+                }
 			}
 		}
 
@@ -953,6 +976,7 @@ namespace sage
                 {
                     calculateTerrainHeightAndNormals(entity);
                 }
+                MarkSquareAreaOccupiedIfSteep(bb.worldBoundingBox, true);
             }
         }
         if (!heightMapValid)

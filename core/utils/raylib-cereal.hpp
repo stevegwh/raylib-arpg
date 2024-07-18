@@ -310,9 +310,6 @@ void load(Archive& archive, Texture &  texture)
 		texture.mipmaps,
 		texture.format
 	);
-	// TODO: Need to store the image data or names in "Renderable"
-	//Image image;
-	//texture.id = rlLoadTexture(image.data, image.width, image.height, image.format, image.mipmaps);
 };
 
 
@@ -374,7 +371,7 @@ void load(Archive& archive, Material &  material)
 	material = LoadMaterialDefault();
 	std::vector<MaterialMap> maps;
 	maps.resize(MAX_MATERIAL_MAPS);
-	std::array<float, 4> params;
+	std::array<float, 4> params{};
 
 	archive(
 		maps,

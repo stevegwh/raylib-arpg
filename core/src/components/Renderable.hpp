@@ -61,6 +61,8 @@ struct Renderable
         char *_name = new char[this->name.size() + 1];
         model.meshes[0].name = _name;
         model.transform = initialTransform;
+        
+        // TODO: Should use resource manager to load mesh data
 
         // Set the textures of the model with their respective paths
         if (FileExists(materials.diffuse.c_str()))

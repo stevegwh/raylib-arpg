@@ -66,7 +66,7 @@ namespace sage
 		const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
         const NavigationGridSquare* GetGridSquare(int row, int col);
 		void DrawDebugPathfinding(const GridSquare& minRange, const GridSquare& maxRange) const;
-
+        void MarkSquareAreaOccupiedIfSteep(const BoundingBox& occupant, bool occupied);
 		void MarkSquareAreaOccupied(const BoundingBox& occupant, bool occupied,
 		                        entt::entity occupantEntity = entt::null) const;
 		void MarkSquaresOccupied(const std::vector<GridSquare>& squares, bool occupied = true) const;
