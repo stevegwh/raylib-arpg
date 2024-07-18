@@ -948,6 +948,7 @@ namespace sage
         std::string imgPath = mapPath.substr(0, lastindex);
         Image heightMapImage = LoadImage(std::string(imgPath + "-height.png").c_str());
         Image normalMapImage = LoadImage(std::string(imgPath + "-normal.png").c_str());
+
         bool heightMapValid = heightMapImage.data && heightMapImage.width == slices && heightMapImage.height == slices;
         bool normalMapValid = heightMapImage.data && heightMapImage.width == slices && heightMapImage.height == slices;
         if (heightMapValid && normalMapValid)
