@@ -14,10 +14,10 @@ namespace sage
 		ActorMovementSystem* actorMovementSystem;
 
 	public:
-		void Update();
-		void Draw3D();
-		void OnStateEnter(entt::entity entity);
-		void OnStateExit(entt::entity entity);
+		void Update() override;
+		void Draw3D(entt::entity entity) override;
+		void OnStateEnter(entt::entity entity) override;
+		void OnStateExit(entt::entity entity) override;
 		PlayerDefaultSubSystem(entt::registry* _registry,
 			ActorMovementSystem* _actorMovementSystem);
 	};

@@ -1,3 +1,4 @@
+#include "PlayerCombatLogicSubSystem.hpp"
 //
 // Created by Steve on 05/06/24.
 //
@@ -37,6 +38,10 @@ namespace sage
 		}
 	}
 
+	void PlayerCombatLogicSubSystem::Draw3D(entt::entity entity)
+	{
+	}
+
 	bool PlayerCombatLogicSubSystem::checkInCombat(entt::entity entity)
 	{
 		// If the entity is not the target of any other combatable.
@@ -61,7 +66,7 @@ namespace sage
 		auto& playerCombatable = registry->get<CombatableActor>(actor);
         {
             entt::sink sink{ playerCombatable.onTargetDeath };
-            sink.disconnect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
+            sink.disconnect<&PlayerCombatLogicSubSystem::onTargetDeath>(this);
         }
 		{
 			entt::sink sink{ playerCombatable.onAttackCancelled };
@@ -159,7 +164,7 @@ namespace sage
 		}
 		{
 			entt::sink sink{ playerCombatable.onTargetDeath };
-			sink.connect<&PlayerCombatLogicSubSystem::OnTargetDeath>(this);
+			sink.connect<&PlayerCombatLogicSubSystem::onTargetDeath>(this);
 		}
 	}
 
@@ -205,13 +210,13 @@ namespace sage
 		}
 	}
 
-	void PlayerCombatLogicSubSystem::OnStateEnter(entt::entity entity) const
+	void PlayerCombatLogicSubSystem::OnStateEnter(entt::entity entity)
 	{
 		auto& animation = registry->get<Animation>(entity);
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
 	}
 
-	void PlayerCombatLogicSubSystem::OnStateExit(entt::entity entity) const
+	void PlayerCombatLogicSubSystem::OnStateExit(entt::entity entity)
 	{
 		controllableActorSystem->CancelMovement(entity);
 	}

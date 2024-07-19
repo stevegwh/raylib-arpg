@@ -85,7 +85,7 @@ namespace sage
 		combatable.actorType = CombatableActorType::WAVEMOB;
 		{
 			entt::sink sink{ combatable.onHit };
-			sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatStateSystem->waveMobCombatLogicSubSystem);
+			sink.connect<&WaveMobCombatLogicSubSystem::OnHit>(game->combatStateSystems->waveMobCombatLogicSubSystem);
 		}
 
 		// ---

@@ -14,8 +14,8 @@
 #include "systems/AnimationSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
-#include "systems/state_systems/combat/CombatStateSystem.hpp"
-#include "systems/state_systems/default/DefaultStateSystem.hpp"
+#include "systems/state_systems/combat/CombatStateSystems.hpp"
+#include "systems/state_systems/default/DefaultStateSystems.hpp"
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
@@ -46,8 +46,8 @@ namespace sage
 		std::unique_ptr<AnimationSystem> animationSystem;
 		std::unique_ptr<DialogueSystem> dialogueSystem;
 		std::unique_ptr<HealthBarSystem> healthBarSystem;
-		std::unique_ptr<CombatStateSystem> combatStateSystem;
-		std::unique_ptr<DefaultStateSystem> defaultStateSystem;
+		std::unique_ptr<CombatStateSystems> combatStateSystems;
+		std::unique_ptr<DefaultStateSystems> defaultStateSystems;
         
 		void Load();
 		void Save() const;

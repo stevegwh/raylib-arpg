@@ -16,8 +16,6 @@ namespace sage
 		entt::entity playerEntity;
 		ControllableActorSystem* controllableActorSystem;
 
-		// TODO: Move all non-combat related logic to the default system (i.e., enemy clicked etc)
-
 		void startCombat(entt::entity entity);
 		[[nodiscard]] bool checkInCombat(entt::entity entity);
 		void onDeath(entt::entity entity);
@@ -26,12 +24,13 @@ namespace sage
 		void autoAttack(entt::entity entity) const;
 	public:
 		void OnEnemyClick(entt::entity actor, entt::entity target);
-		void Update();
+		void Update() override;
+		void Draw3D(entt::entity entity) override;
 		void OnHit(entt::entity entity, entt::entity attacker);
 		void Enable();
 		void Disable();
-		void OnStateEnter(entt::entity entity) const;
-		void OnStateExit(entt::entity entity) const;
+		void OnStateEnter(entt::entity entity) override;
+		void OnStateExit(entt::entity entity) override;
 
 		PlayerCombatLogicSubSystem(entt::registry* _registry,
 		                           ControllableActorSystem* _controllableActorSystem);

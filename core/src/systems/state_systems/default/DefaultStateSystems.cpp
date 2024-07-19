@@ -2,16 +2,16 @@
 // Created by Steve Wheeler on 08/06/2024.
 //
 
-#include "DefaultStateSystem.hpp"
+#include "DefaultStateSystems.hpp"
 
 namespace sage
 {
-	void DefaultStateSystem::Update()
+	void DefaultStateSystems::Update()
 	{
 		waveMobDefaultSubSystem->Update();
 	}
 
-	DefaultStateSystem::DefaultStateSystem(entt::registry* _registry,
+	DefaultStateSystems::DefaultStateSystems(entt::registry* _registry,
 	                                       ActorMovementSystem* _actorMovementSystem):
 		waveMobDefaultSubSystem(std::make_unique<WaveMobDefaultSubSystem>(_registry,
 		                                                                  _actorMovementSystem)),

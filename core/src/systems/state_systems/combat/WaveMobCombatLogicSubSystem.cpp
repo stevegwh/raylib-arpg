@@ -62,12 +62,12 @@ namespace sage
 		registry->destroy(entity);
 	}
 
-	void WaveMobCombatLogicSubSystem::OnStateEnter(entt::entity entity) const
+	void WaveMobCombatLogicSubSystem::OnStateEnter(entt::entity entity)
 	{
 		actorMovementSystem->CancelMovement(entity);
 	}
 
-	void WaveMobCombatLogicSubSystem::OnStateExit(entt::entity entity) const
+	void WaveMobCombatLogicSubSystem::OnStateExit(entt::entity entity)
 	{
 	}
 
@@ -149,7 +149,7 @@ namespace sage
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 	}
 
-	void WaveMobCombatLogicSubSystem::Draw3D(entt::entity entity) const
+	void WaveMobCombatLogicSubSystem::Draw3D(entt::entity entity)
 	{
 		auto& t = registry->get<sgTransform>(entity);
 		//DrawLine3D(t.movementDirectionDebugLine.position, t.movementDirectionDebugLine.direction, RED);
