@@ -16,8 +16,7 @@ namespace sage
 		actorMovementSystem(std::make_unique<ActorMovementSystem>(_registry,
 		                                                          collisionSystem.get(),
 		                                                          navigationGridSystem.get())),
-		animationSystem(std::make_unique<AnimationSystem>(_registry)),
-		defaultStateSystems(std::make_unique<DefaultStateSystems>(_registry, actorMovementSystem.get()))
+		animationSystem(std::make_unique<AnimationSystem>(_registry))
 	{
 		userInput = std::make_unique<UserInput>(_keyMapping, settings);
 		camera = std::make_unique<Camera>(userInput.get());
@@ -43,12 +42,8 @@ namespace sage
 		                                                  settings,
 		                                                  controllableActorSystem.get());
 		healthBarSystem = std::make_unique<HealthBarSystem>(_registry, camera.get());
-		combatStateSystems = std::make_unique<CombatStateSystems>(_registry,
-		                                                        cursor.get(),
-		                                                        controllableActorSystem.get(),
-		                                                        actorMovementSystem.get(),
-		                                                        collisionSystem.get(),
-		                                                        navigationGridSystem.get());
+		stateSystems = std::make_unique<StateSystems>(_registry, cursor.get(), actorMovementSystem.get(), collisionSystem.get(),
+		                                              controllableActorSystem.get(), navigationGridSystem.get());
 	}
 
 	void GameData::Load()

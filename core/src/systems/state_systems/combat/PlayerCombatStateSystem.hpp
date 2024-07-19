@@ -4,16 +4,15 @@
 
 #pragma once
 
-#include "systems/StateMachineSystem.hpp"
+#include "systems/state_systems/StateMachineSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
 #include "entt/entt.hpp"
 
 namespace sage
 {
-	class PlayerCombatLogicSubSystem : public StateMachineSystem
+	class PlayerCombatStateSystem : public StateMachineSystem
 	{
-		entt::entity playerEntity;
 		ControllableActorSystem* controllableActorSystem;
 
 		void startCombat(entt::entity entity);
@@ -25,14 +24,14 @@ namespace sage
 	public:
 		void OnEnemyClick(entt::entity actor, entt::entity target);
 		void Update() override;
-		void Draw3D(entt::entity entity) override;
+		void Draw3D() override;
 		void OnHit(entt::entity entity, entt::entity attacker);
 		void Enable();
 		void Disable();
 		void OnStateEnter(entt::entity entity) override;
 		void OnStateExit(entt::entity entity) override;
 
-		PlayerCombatLogicSubSystem(entt::registry* _registry,
+		PlayerCombatStateSystem(entt::registry* _registry,
 		                           ControllableActorSystem* _controllableActorSystem);
 	};
 } // sage

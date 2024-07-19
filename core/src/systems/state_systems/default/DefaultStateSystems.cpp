@@ -8,15 +8,20 @@ namespace sage
 {
 	void DefaultStateSystems::Update()
 	{
-		waveMobDefaultSubSystem->Update();
+		for (auto& system : systems)
+		{
+			system->Update();
+		}
 	}
 
 	DefaultStateSystems::DefaultStateSystems(entt::registry* _registry,
 	                                       ActorMovementSystem* _actorMovementSystem):
-		waveMobDefaultSubSystem(std::make_unique<WaveMobDefaultSubSystem>(_registry,
+		waveMobDefaultSubSystem(std::make_unique<WaveMobDefaultStateSystem>(_registry,
 		                                                                  _actorMovementSystem)),
-		playerDefaultSubSystem(std::make_unique<PlayerDefaultSubSystem>(_registry,
+		playerDefaultSubSystem(std::make_unique<PlayerDefaultStateSystem>(_registry,
 		                                                                _actorMovementSystem))
 	{
+		systems.push_back(waveMobDefaultSubSystem.get());
+		systems.push_back(playerDefaultSubSystem.get());
 	}
 } // sage

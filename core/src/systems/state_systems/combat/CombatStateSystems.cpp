@@ -14,37 +14,36 @@ namespace sage
 {
 	void CombatStateSystems::Draw3D()
 	{
-		auto view = registry->view<CombatableActor>();
-		for (auto& entity : view)
+		for (auto& system : systems)
 		{
-			auto& c = registry->get<CombatableActor>(entity);
-			if (c.actorType == CombatableActorType::WAVEMOB)
-			{
-				waveMobCombatLogicSubSystem->Draw3D(entity);
-			}
+			system->Draw3D();
 		}
 	}
 
 
 	void CombatStateSystems::Update()
 	{
-		playerCombatLogicSubSystem->Update();
-		waveMobCombatLogicSubSystem->Update();
+		for (auto& system : systems)
+		{
+			system->Update();
+		}
 	}
 
 	CombatStateSystems::CombatStateSystems(entt::registry* _registry,
-	                                     Cursor* _cursor,
-	                                     ControllableActorSystem* _actorMovementSystem,
-	                                     ActorMovementSystem* _transformSystem,
-	                                     CollisionSystem* _collisionSystem,
-	                                     NavigationGridSystem* _navigationGridSystem) :
+		Cursor* _cursor,
+		ControllableActorSystem* _actorMovementSystem,
+		ActorMovementSystem* _transformSystem,
+		CollisionSystem* _collisionSystem,
+		NavigationGridSystem* _navigationGridSystem) :
 		registry(_registry),
 		cursor(_cursor),
 		actorMovementSystem(_actorMovementSystem),
 		playerCombatLogicSubSystem(
-			std::make_unique<PlayerCombatLogicSubSystem>(_registry, _actorMovementSystem)),
-		waveMobCombatLogicSubSystem(std::make_unique<WaveMobCombatLogicSubSystem>(
+			std::make_unique<PlayerCombatStateSystem>(_registry, _actorMovementSystem)),
+		waveMobCombatLogicSubSystem(std::make_unique<WaveMobCombatStateSystem>(
 			_registry, _transformSystem, _collisionSystem, _navigationGridSystem))
 	{
+		systems.push_back(playerCombatLogicSubSystem.get());
+		systems.push_back(waveMobCombatLogicSubSystem.get());
 	}
 } // sage
