@@ -8,8 +8,11 @@
 
 #include "Cursor.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "PlayerCombatLogicSubSystem.hpp"
-#include "WaveMobCombatLogicSubSystem.hpp"
+#include "PlayerCombatStateSystem.hpp"
+#include "WaveMobCombatStateSystem.hpp"
+
+
+#include <vector>
 
 namespace sage
 {
@@ -20,10 +23,11 @@ namespace sage
 		entt::registry* registry;
 		Cursor* cursor;
 		ControllableActorSystem* actorMovementSystem;
+		std::vector<StateMachineSystem*> systems;
 
 	public:
-		std::unique_ptr<PlayerCombatLogicSubSystem> playerCombatLogicSubSystem;
-		std::unique_ptr<WaveMobCombatLogicSubSystem> waveMobCombatLogicSubSystem;
+		std::unique_ptr<PlayerCombatStateSystem> playerCombatLogicSubSystem;
+		std::unique_ptr<WaveMobCombatStateSystem> waveMobCombatLogicSubSystem;
 		CombatStateSystems(entt::registry* _registry,
 		                  Cursor* _cursor,
 		                  ControllableActorSystem* _actorMovementSystem,

@@ -17,9 +17,7 @@ namespace sage
 		data->animationSystem->Update();
 		data->dialogueSystem->Update();
 		data->healthBarSystem->Update();
-		// State systems
-		data->defaultStateSystems->Update();
-		data->combatStateSystems->Update();
+		data->stateSystems->Update();
 	}
 
 	void ExampleScene::Draw2D()
@@ -31,7 +29,7 @@ namespace sage
 	void ExampleScene::Draw3D()
 	{
 		data->healthBarSystem->Draw3D();
-		data->combatStateSystems->Draw3D();
+		data->stateSystems->Draw3D();
 		Scene::Draw3D();
 	}
 
@@ -63,6 +61,6 @@ namespace sage
 		data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
 		// TODO: Not sure if I like this
-		data->combatStateSystems->playerCombatLogicSubSystem->Enable();
+		data->stateSystems->combatSystems->playerCombatLogicSubSystem->Enable();
 	}
 } // sage

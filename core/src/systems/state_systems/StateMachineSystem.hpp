@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "BaseSystem.hpp"
+#include "../BaseSystem.hpp"
 #include "components/states/StateMachineComponent.hpp"
 
 #include <entt/entt.hpp>
@@ -52,7 +52,7 @@ namespace sage
 		}
 
 		virtual void Update() = 0;
-		virtual void Draw3D(entt::entity entity) = 0;
+		virtual void Draw3D() = 0;
 		virtual void OnStateEnter(entt::entity entity) = 0;
 		virtual void OnStateExit(entt::entity entity) = 0;
 

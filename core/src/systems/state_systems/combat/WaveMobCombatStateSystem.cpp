@@ -5,7 +5,7 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#include "WaveMobCombatLogicSubSystem.hpp"
+#include "WaveMobCombatStateSystem.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
 #include "components/sgTransform.hpp"
@@ -14,7 +14,7 @@
 
 namespace sage
 {
-	void WaveMobCombatLogicSubSystem::Update()
+	void WaveMobCombatStateSystem::Update()
 	{
 		auto view = registry->view<CombatableActor, StateEnemyCombat>();
 
@@ -36,7 +36,7 @@ namespace sage
 		}
 	}
 
-	bool WaveMobCombatLogicSubSystem::checkInCombat(entt::entity entity)
+	bool WaveMobCombatStateSystem::checkInCombat(entt::entity entity)
 	{
 		// If the entity is not the target of any other combatable.
 		// If no current target
@@ -51,27 +51,27 @@ namespace sage
 		return true;
 	}
 
-	void WaveMobCombatLogicSubSystem::destroyEnemy(entt::entity entity)
+	void WaveMobCombatStateSystem::destroyEnemy(entt::entity entity)
 	{
 		navigationGridSystem->MarkSquareAreaOccupied(registry->get<Collideable>(entity).worldBoundingBox, false);
 		{
 			auto& animation = registry->get<Animation>(entity);
 			entt::sink sink{animation.onAnimationEnd};
-			sink.disconnect<&WaveMobCombatLogicSubSystem::destroyEnemy>(this);
+			sink.disconnect<&WaveMobCombatStateSystem::destroyEnemy>(this);
 		}
 		registry->destroy(entity);
 	}
 
-	void WaveMobCombatLogicSubSystem::OnStateEnter(entt::entity entity)
+	void WaveMobCombatStateSystem::OnStateEnter(entt::entity entity)
 	{
 		actorMovementSystem->CancelMovement(entity);
 	}
 
-	void WaveMobCombatLogicSubSystem::OnStateExit(entt::entity entity)
+	void WaveMobCombatStateSystem::OnStateExit(entt::entity entity)
 	{
 	}
 
-	void WaveMobCombatLogicSubSystem::onDeath(entt::entity entity)
+	void WaveMobCombatStateSystem::onDeath(entt::entity entity)
 	{
 		auto& combatable = registry->get<CombatableActor>(entity);
 		combatable.onDeath.publish(entity);
@@ -80,18 +80,18 @@ namespace sage
 
 		{
 			entt::sink sink{combatable.onHit};
-			sink.disconnect<&WaveMobCombatLogicSubSystem::OnHit>(this);
+			sink.disconnect<&WaveMobCombatStateSystem::OnHit>(this);
 		}
 
 		auto& animation = registry->get<Animation>(entity);
 		animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
 		{
 			entt::sink sink{animation.onAnimationEnd};
-			sink.connect<&WaveMobCombatLogicSubSystem::destroyEnemy>(this);
+			sink.connect<&WaveMobCombatStateSystem::destroyEnemy>(this);
 		}
 	}
 
-	inline void WaveMobCombatLogicSubSystem::onTargetOutOfRange(entt::entity entity,
+	inline void WaveMobCombatStateSystem::onTargetOutOfRange(entt::entity entity,
 	                                                            Vector3& normDirection,
 	                                                            float distance) const
 	{
@@ -125,7 +125,7 @@ namespace sage
 		}
 	}
 
-	void WaveMobCombatLogicSubSystem::autoAttack(entt::entity entity) const
+	void WaveMobCombatStateSystem::autoAttack(entt::entity entity) const
 	{
 		auto& combatableActor = registry->get<CombatableActor>(entity);
 		auto& actorTrans = registry->get<sgTransform>(entity);
@@ -149,17 +149,25 @@ namespace sage
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 	}
 
-	void WaveMobCombatLogicSubSystem::Draw3D(entt::entity entity)
+	void WaveMobCombatStateSystem::Draw3D()
 	{
-		auto& t = registry->get<sgTransform>(entity);
-		//DrawLine3D(t.movementDirectionDebugLine.position, t.movementDirectionDebugLine.direction, RED);
+		return;
+		auto view = registry->view<CombatableActor>();
+		for (auto& entity : view)
+		{
+			auto& c = registry->get<CombatableActor>(entity);
+			if (c.actorType == CombatableActorType::WAVEMOB)
+			{
+				// Draw stuff here
+			}
+		}
 	}
 
-	void WaveMobCombatLogicSubSystem::startCombat(entt::entity entity)
+	void WaveMobCombatStateSystem::startCombat(entt::entity entity)
 	{
 	}
 
-	void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
+	void WaveMobCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 	{
 		ChangeState<StateEnemyCombat, StateComponents>(entity);
 		// Aggro when player hits
@@ -175,7 +183,7 @@ namespace sage
 		}
 	}
 
-	WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry* _registry,
+	WaveMobCombatStateSystem::WaveMobCombatStateSystem(entt::registry* _registry,
 	                                                         ActorMovementSystem* _actorMovementSystem,
 	                                                         CollisionSystem* _collisionSystem,
 	                                                         NavigationGridSystem* _navigationGridSystem) :
@@ -184,7 +192,7 @@ namespace sage
 		actorMovementSystem(_actorMovementSystem),
 		collisionSystem(_collisionSystem)
 	{
-		registry->on_construct<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnStateEnter>(this);
-		registry->on_destroy<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnStateExit>(this);
+		registry->on_construct<StateEnemyCombat>().connect<&WaveMobCombatStateSystem::OnStateEnter>(this);
+		registry->on_destroy<StateEnemyCombat>().connect<&WaveMobCombatStateSystem::OnStateExit>(this);
 	}
 } // sage
