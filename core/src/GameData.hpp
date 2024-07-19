@@ -5,7 +5,6 @@
 #pragma once
 
 // Systems
-#include "systems/StateMachineSystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
@@ -38,7 +37,6 @@ namespace sage
 		std::unique_ptr<Camera> camera;
 		Settings* settings;
 
-		std::unique_ptr<StateMachineSystem> stateMachineSystem;
 		std::unique_ptr<RenderSystem> renderSystem;
 		std::unique_ptr<CollisionSystem> collisionSystem;
 		std::unique_ptr<NavigationGridSystem> navigationGridSystem;

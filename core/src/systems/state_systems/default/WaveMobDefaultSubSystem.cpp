@@ -9,9 +9,9 @@
 
 namespace sage
 {
-	void WaveMobDefaultSubSystem::OnComponentEnabled(entt::entity entity) const
+	void WaveMobDefaultSubSystem::OnStateEnter(entt::entity entity) const
 	{
-		Vector3 target = {52, 0, -10};
+		Vector3 target = { 52, 0, -10 };
 		auto& a = registry->get<MoveableActor>(entity);
 		auto& t = registry->get<sgTransform>(entity);
 		auto& animation = registry->get<Animation>(entity);
@@ -19,7 +19,7 @@ namespace sage
 		actorMovementSystem->PathfindToLocation(entity, target);
 	}
 
-	void WaveMobDefaultSubSystem::OnComponentDisabled(entt::entity entity) const
+	void WaveMobDefaultSubSystem::OnStateExit(entt::entity entity) const
 	{
 		//actorMovementSystem->CancelMovement(entity);
 	}
@@ -29,13 +29,11 @@ namespace sage
 	}
 
 	WaveMobDefaultSubSystem::WaveMobDefaultSubSystem(entt::registry* _registry,
-	                                                 StateMachineSystem* _stateMachineSystem,
-	                                                 ActorMovementSystem* _actorMovementSystem) :
-		registry(_registry),
-		stateMachineSystem(_stateMachineSystem),
+		ActorMovementSystem* _actorMovementSystem) :
+		StateMachineSystem(_registry),
 		actorMovementSystem(_actorMovementSystem)
 	{
-		registry->on_construct<StateEnemyDefault>().connect<&WaveMobDefaultSubSystem::OnComponentEnabled>(this);
-		registry->on_destroy<StateEnemyDefault>().connect<&WaveMobDefaultSubSystem::OnComponentDisabled>(this);
+		registry->on_construct<StateEnemyDefault>().connect<&WaveMobDefaultSubSystem::OnStateEnter>(this);
+		registry->on_destroy<StateEnemyDefault>().connect<&WaveMobDefaultSubSystem::OnStateExit>(this);
 	}
 } // sage

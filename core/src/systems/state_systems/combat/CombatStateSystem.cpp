@@ -3,8 +3,9 @@
 //
 
 #include "CombatStateSystem.hpp"
-#include "components/HealthBar.hpp"
 
+#include "components/HealthBar.hpp"
+#include "components/CombatableActor.hpp"
 #include "components/states/StatePlayerCombat.hpp"
 
 #include <iostream>
@@ -33,19 +34,17 @@ namespace sage
 
 	CombatStateSystem::CombatStateSystem(entt::registry* _registry,
 	                                     Cursor* _cursor,
-	                                     StateMachineSystem* _stateMachineSystem,
 	                                     ControllableActorSystem* _actorMovementSystem,
 	                                     ActorMovementSystem* _transformSystem,
 	                                     CollisionSystem* _collisionSystem,
 	                                     NavigationGridSystem* _navigationGridSystem) :
-		BaseSystem<CombatableActor>(_registry),
-		stateMachineSystem(_stateMachineSystem),
+		registry(_registry),
 		cursor(_cursor),
 		actorMovementSystem(_actorMovementSystem),
 		playerCombatLogicSubSystem(
-			std::make_unique<PlayerCombatLogicSubSystem>(_registry, _stateMachineSystem, _actorMovementSystem)),
+			std::make_unique<PlayerCombatLogicSubSystem>(_registry, _actorMovementSystem)),
 		waveMobCombatLogicSubSystem(std::make_unique<WaveMobCombatLogicSubSystem>(
-			_registry, _stateMachineSystem, _transformSystem, _collisionSystem, _navigationGridSystem))
+			_registry, _transformSystem, _collisionSystem, _navigationGridSystem))
 	{
 	}
 } // sage

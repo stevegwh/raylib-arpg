@@ -9,18 +9,16 @@
 
 namespace sage
 {
-	class PlayerDefaultSubSystem
+	class PlayerDefaultSubSystem : public StateMachineSystem
 	{
-		entt::registry* registry;
-		StateMachineSystem* stateMachineSystem;
 		ActorMovementSystem* actorMovementSystem;
 
 	public:
 		void Update();
-		void OnStateAdded(entt::entity entity) const;
-		void OnStateRemoved(entt::entity entity) const;
+		void Draw3D();
+		void OnStateEnter(entt::entity entity);
+		void OnStateExit(entt::entity entity);
 		PlayerDefaultSubSystem(entt::registry* _registry,
-		                       StateMachineSystem* _stateMachineSystem,
-		                       ActorMovementSystem* _actorMovementSystem);
+			ActorMovementSystem* _actorMovementSystem);
 	};
 } // sage
