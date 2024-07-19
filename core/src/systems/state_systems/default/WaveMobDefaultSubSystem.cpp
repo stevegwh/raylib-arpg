@@ -1,15 +1,15 @@
+
 //
 // Created by Steve Wheeler on 08/06/2024.
 //
-
+#include "WaveMobDefaultSubSystem.hpp"
 #include "components/Animation.hpp"
 #include "components/states/StateEnemyDefault.hpp"
 #include "components/sgTransform.hpp"
-#include "WaveMobDefaultSubSystem.hpp"
 
 namespace sage
 {
-	void WaveMobDefaultSubSystem::OnStateEnter(entt::entity entity) const
+	void WaveMobDefaultSubSystem::OnStateEnter(entt::entity entity)
 	{
 		Vector3 target = { 52, 0, -10 };
 		auto& a = registry->get<MoveableActor>(entity);
@@ -19,12 +19,16 @@ namespace sage
 		actorMovementSystem->PathfindToLocation(entity, target);
 	}
 
-	void WaveMobDefaultSubSystem::OnStateExit(entt::entity entity) const
+	void WaveMobDefaultSubSystem::OnStateExit(entt::entity entity)
 	{
 		//actorMovementSystem->CancelMovement(entity);
 	}
 
 	void WaveMobDefaultSubSystem::Update()
+	{
+	}
+
+	void WaveMobDefaultSubSystem::Draw3D(entt::entity entity)
 	{
 	}
 

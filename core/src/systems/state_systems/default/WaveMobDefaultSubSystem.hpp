@@ -16,9 +16,10 @@ namespace sage
 		ActorMovementSystem* actorMovementSystem;
 
 	public:
-		void OnStateEnter(entt::entity entity) const;
-		void OnStateExit(entt::entity entity) const;
-		void Update();
+		void OnStateEnter(entt::entity entity) override;
+		void OnStateExit(entt::entity entity) override;
+		void Update() override;
+		void Draw3D(entt::entity entity) override;
 		WaveMobDefaultSubSystem(entt::registry* _registry,
 		                        ActorMovementSystem* _actorMovementSystem);
 	};

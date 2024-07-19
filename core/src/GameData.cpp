@@ -17,7 +17,7 @@ namespace sage
 		                                                          collisionSystem.get(),
 		                                                          navigationGridSystem.get())),
 		animationSystem(std::make_unique<AnimationSystem>(_registry)),
-		defaultStateSystem(std::make_unique<DefaultStateSystem>(_registry, actorMovementSystem.get()))
+		defaultStateSystems(std::make_unique<DefaultStateSystems>(_registry, actorMovementSystem.get()))
 	{
 		userInput = std::make_unique<UserInput>(_keyMapping, settings);
 		camera = std::make_unique<Camera>(userInput.get());
@@ -43,7 +43,7 @@ namespace sage
 		                                                  settings,
 		                                                  controllableActorSystem.get());
 		healthBarSystem = std::make_unique<HealthBarSystem>(_registry, camera.get());
-		combatStateSystem = std::make_unique<CombatStateSystem>(_registry,
+		combatStateSystems = std::make_unique<CombatStateSystems>(_registry,
 		                                                        cursor.get(),
 		                                                        controllableActorSystem.get(),
 		                                                        actorMovementSystem.get(),

@@ -51,6 +51,11 @@ namespace sage
 			newComponent.Enable(entity);
 		}
 
+		virtual void Update() = 0;
+		virtual void Draw3D(entt::entity entity) = 0;
+		virtual void OnStateEnter(entt::entity entity) = 0;
+		virtual void OnStateExit(entt::entity entity) = 0;
+
 		explicit StateMachineSystem(entt::registry* _registry);
 	};
 } // sage

@@ -25,11 +25,11 @@ namespace sage
 		void destroyEnemy(entt::entity entity);
 		void onTargetOutOfRange(entt::entity entity, Vector3& normDirection, float distance) const;
 	public:
-		void OnStateEnter(entt::entity entity) const;
-		void OnStateExit(entt::entity entity) const;
+		void OnStateEnter(entt::entity entity) override;
+		void OnStateExit(entt::entity entity) override;
 		void OnHit(entt::entity entity, entt::entity attacker, float damage);
-		void Draw3D(entt::entity entity) const;
-		void Update();
+		void Draw3D(entt::entity entity) override;
+		void Update() override;
 		WaveMobCombatLogicSubSystem(entt::registry* _registry,
 		                            ActorMovementSystem* _actorMovementSystem,
 		                            CollisionSystem* _collisionSystem,

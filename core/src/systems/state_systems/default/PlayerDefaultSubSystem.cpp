@@ -10,7 +10,7 @@ namespace sage
 	{
 	}
 
-	void PlayerDefaultSubSystem::Draw3D()
+	void PlayerDefaultSubSystem::Draw3D(entt::entity entity)
 	{
 	}
 

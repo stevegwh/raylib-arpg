@@ -12,15 +12,14 @@
 
 namespace sage
 {
-	class DefaultStateSystem
+	class DefaultStateSystems
 	{
-		StateMachineSystem* stateMachineSystem;
 		std::unique_ptr<WaveMobDefaultSubSystem> waveMobDefaultSubSystem;
 		std::unique_ptr<PlayerDefaultSubSystem> playerDefaultSubSystem;
 
 	public:
 		void Update();
-		DefaultStateSystem(entt::registry* _registry,
+		DefaultStateSystems(entt::registry* _registry,
 		                   ActorMovementSystem* _actorMovementSystem);
 	};
 } // sage
