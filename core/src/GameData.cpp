@@ -10,7 +10,6 @@ namespace sage
 	GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings) :
 		registry(_registry),
 		settings(_settings),
-		stateMachineSystem(std::make_unique<StateMachineSystem>(_registry)),
 		renderSystem(std::make_unique<RenderSystem>(_registry)),
 		collisionSystem(std::make_unique<CollisionSystem>(_registry)),
 		navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
@@ -18,9 +17,7 @@ namespace sage
 		                                                          collisionSystem.get(),
 		                                                          navigationGridSystem.get())),
 		animationSystem(std::make_unique<AnimationSystem>(_registry)),
-		defaultStateSystem(std::make_unique<DefaultStateSystem>(_registry,
-		                                                        stateMachineSystem.get(),
-		                                                        actorMovementSystem.get()))
+		defaultStateSystem(std::make_unique<DefaultStateSystem>(_registry, actorMovementSystem.get()))
 	{
 		userInput = std::make_unique<UserInput>(_keyMapping, settings);
 		camera = std::make_unique<Camera>(userInput.get());
@@ -48,7 +45,6 @@ namespace sage
 		healthBarSystem = std::make_unique<HealthBarSystem>(_registry, camera.get());
 		combatStateSystem = std::make_unique<CombatStateSystem>(_registry,
 		                                                        cursor.get(),
-		                                                        stateMachineSystem.get(),
 		                                                        controllableActorSystem.get(),
 		                                                        actorMovementSystem.get(),
 		                                                        collisionSystem.get(),

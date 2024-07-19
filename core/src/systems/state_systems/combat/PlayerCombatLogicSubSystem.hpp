@@ -11,32 +11,29 @@
 
 namespace sage
 {
-	struct PlayerCombatLogicSubSystem
+	class PlayerCombatLogicSubSystem : public StateMachineSystem
 	{
-		entt::registry* registry;
 		entt::entity playerEntity;
-		StateMachineSystem* stateMachineSystem;
 		ControllableActorSystem* controllableActorSystem;
 
 		// TODO: Move all non-combat related logic to the default system (i.e., enemy clicked etc)
 
-		void onEnemyClick(entt::entity actor, entt::entity target);
-
-		void Update() const;
-		void StartCombat(entt::entity entity);
-		[[nodiscard]] bool CheckInCombat(entt::entity entity) const;
-		void OnDeath(entt::entity entity);
-		void OnTargetDeath(entt::entity actor, entt::entity target);
-		void OnAttackCancel(entt::entity entity);
-		void AutoAttack(entt::entity entity) const;
+		void startCombat(entt::entity entity);
+		[[nodiscard]] bool checkInCombat(entt::entity entity);
+		void onDeath(entt::entity entity);
+		void onTargetDeath(entt::entity actor, entt::entity target);
+		void onAttackCancel(entt::entity entity);
+		void autoAttack(entt::entity entity) const;
+	public:
+		void OnEnemyClick(entt::entity actor, entt::entity target);
+		void Update();
 		void OnHit(entt::entity entity, entt::entity attacker);
 		void Enable();
 		void Disable();
-		void OnStateAdded(entt::entity entity) const;
-		void OnStateRemoved(entt::entity entity) const;
+		void OnStateEnter(entt::entity entity) const;
+		void OnStateExit(entt::entity entity) const;
 
 		PlayerCombatLogicSubSystem(entt::registry* _registry,
-		                           StateMachineSystem* _stateMachineSystem,
 		                           ControllableActorSystem* _controllableActorSystem);
 	};
 } // sage

@@ -15,20 +15,20 @@
 
 namespace sage
 {
-	void PlayerCombatLogicSubSystem::Update() const
+	void PlayerCombatLogicSubSystem::Update()
 	{
 		auto view = registry->view<CombatableActor, StatePlayerCombat>();
 
 		for (const auto& entity : view)
 		{
 			auto& c = registry->get<CombatableActor>(entity);
-			if (!CheckInCombat(entity)) continue;
+			if (!checkInCombat(entity)) continue;
 
 			// Player is out of combat if no enemy is targetting them?
 			if (c.autoAttackTick >= c.autoAttackTickThreshold)
 				// Maybe can count time since last autoattack to time out combat?
 			{
-				AutoAttack(entity);
+				autoAttack(entity);
 			}
 			else
 			{
@@ -37,7 +37,7 @@ namespace sage
 		}
 	}
 
-	bool PlayerCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
+	bool PlayerCombatLogicSubSystem::checkInCombat(entt::entity entity)
 	{
 		// If the entity is not the target of any other combatable.
 		// If no current target
@@ -45,17 +45,17 @@ namespace sage
 		auto& combatable = registry->get<CombatableActor>(entity);
 		if (combatable.target == entt::null)
 		{
-			stateMachineSystem->ChangeState<StatePlayerDefault, StateComponents>(entity);
+			ChangeState<StatePlayerDefault, StateComponents>(entity);
 			return false;
 		}
 		return true;
 	}
 
-	void PlayerCombatLogicSubSystem::OnDeath(entt::entity entity)
+	void PlayerCombatLogicSubSystem::onDeath(entt::entity entity)
 	{
 	}
 
-	void PlayerCombatLogicSubSystem::OnTargetDeath(entt::entity actor, entt::entity target)
+	void PlayerCombatLogicSubSystem::onTargetDeath(entt::entity actor, entt::entity target)
 	{
 		auto& enemyCombatable = registry->get<CombatableActor>(target);
 		auto& playerCombatable = registry->get<CombatableActor>(actor);
@@ -65,25 +65,25 @@ namespace sage
 		//}
 		{
 			entt::sink sink{ playerCombatable.onAttackCancelled };
-			sink.disconnect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
+			sink.disconnect<&PlayerCombatLogicSubSystem::onAttackCancel>(this);
 		}
 		playerCombatable.target = entt::null;
 	}
 
-	void PlayerCombatLogicSubSystem::OnAttackCancel(entt::entity entity)
+	void PlayerCombatLogicSubSystem::onAttackCancel(entt::entity entity)
 	{
 		auto& playerCombatable = registry->get<CombatableActor>(entity);
 		playerCombatable.target = entt::null;
 		auto& playerTrans = registry->get<sgTransform>(entity);
 		{
 			entt::sink sink{ playerTrans.onFinishMovement };
-			sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
+			sink.disconnect<&PlayerCombatLogicSubSystem::startCombat>(this);
 		}
 		controllableActorSystem->CancelMovement(entity);
 	}
 
 	
-	void PlayerCombatLogicSubSystem::AutoAttack(entt::entity entity) const
+	void PlayerCombatLogicSubSystem::autoAttack(entt::entity entity) const
 	{
 		// TODO: Check if unit is still within our attack range?
 		auto& c = registry->get<CombatableActor>(entity);
@@ -108,12 +108,12 @@ namespace sage
 	{
 	}
 
-	void PlayerCombatLogicSubSystem::onEnemyClick(entt::entity actor, entt::entity target)
+	void PlayerCombatLogicSubSystem::OnEnemyClick(entt::entity actor, entt::entity target)
 	{
 		auto& combatable = registry->get<CombatableActor>(actor);
 		{
 			entt::sink sink{ combatable.onAttackCancelled };
-			sink.connect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
+			sink.connect<&PlayerCombatLogicSubSystem::onAttackCancel>(this);
 		}
 		auto& playerTrans = registry->get<sgTransform>(actor);
 		const auto& enemyTrans = registry->get<sgTransform>(target);
@@ -137,20 +137,20 @@ namespace sage
 		controllableActorSystem->PathfindToLocation(actor, targetPos);
 		{
 			entt::sink sink{playerTrans.onFinishMovement};
-			sink.connect<&PlayerCombatLogicSubSystem::StartCombat>(this);
+			sink.connect<&PlayerCombatLogicSubSystem::startCombat>(this);
 		}
 	}
 
-	void PlayerCombatLogicSubSystem::StartCombat(entt::entity entity)
+	void PlayerCombatLogicSubSystem::startCombat(entt::entity entity)
 	{
 		{
 			auto& playerTrans = registry->get<sgTransform>(entity);
 			entt::sink sink{ playerTrans.onFinishMovement };
-			sink.disconnect<&PlayerCombatLogicSubSystem::StartCombat>(this);
+			sink.disconnect<&PlayerCombatLogicSubSystem::startCombat>(this);
 		}
 
 		auto& playerCombatable = registry->get<CombatableActor>(entity);
-		stateMachineSystem->ChangeState<StatePlayerCombat, StateComponents>(entity);
+		ChangeState<StatePlayerCombat, StateComponents>(entity);
 
 		auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 		{
@@ -174,11 +174,11 @@ namespace sage
 			{
 				{
 					entt::sink sink{ combatable.onEnemyClicked };
-					sink.connect<&PlayerCombatLogicSubSystem::onEnemyClick>(this);
+					sink.connect<&PlayerCombatLogicSubSystem::OnEnemyClick>(this);
 				}
 				{
 					entt::sink sink{ combatable.onAttackCancelled };
-					sink.connect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
+					sink.connect<&PlayerCombatLogicSubSystem::onAttackCancel>(this);
 				}
 			}
 		}
@@ -195,36 +195,34 @@ namespace sage
 			{
 				{
 					entt::sink sink{ combatable.onEnemyClicked };
-					sink.disconnect<&PlayerCombatLogicSubSystem::onEnemyClick>(this);
+					sink.disconnect<&PlayerCombatLogicSubSystem::OnEnemyClick>(this);
 				}
 				{
 					entt::sink sink{ combatable.onAttackCancelled };
-					sink.disconnect<&PlayerCombatLogicSubSystem::OnAttackCancel>(this);
+					sink.disconnect<&PlayerCombatLogicSubSystem::onAttackCancel>(this);
 				}
 			}
 		}
 	}
 
-	void PlayerCombatLogicSubSystem::OnStateAdded(entt::entity entity) const
+	void PlayerCombatLogicSubSystem::OnStateEnter(entt::entity entity) const
 	{
 		auto& animation = registry->get<Animation>(entity);
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
 	}
 
-	void PlayerCombatLogicSubSystem::OnStateRemoved(entt::entity entity) const
+	void PlayerCombatLogicSubSystem::OnStateExit(entt::entity entity) const
 	{
 		controllableActorSystem->CancelMovement(entity);
 	}
 
 	PlayerCombatLogicSubSystem::PlayerCombatLogicSubSystem(
 		entt::registry* _registry,
-		StateMachineSystem* _stateMachineSystem,
 		ControllableActorSystem* _controllableActorSystem) :
-		registry(_registry),
-		stateMachineSystem(_stateMachineSystem),
+		StateMachineSystem(_registry),
 		controllableActorSystem(_controllableActorSystem)
 	{
-		registry->on_construct<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnStateAdded>(this);
-		registry->on_destroy<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnStateRemoved>(this);
+		registry->on_construct<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnStateEnter>(this);
+		registry->on_destroy<StatePlayerCombat>().connect<&PlayerCombatLogicSubSystem::OnStateExit>(this);
 	}
 } // sage

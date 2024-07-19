@@ -11,7 +11,7 @@
 
 namespace sage
 {
-	class StateMachineSystem : BaseSystem<StateMachineComponent>
+	class StateMachineSystem : public BaseSystem<StateMachineComponent>
 	{
 		template <typename Tuple, size_t... Indices>
 		void RemoveStateComponents(entt::entity entity, std::index_sequence<Indices...>)

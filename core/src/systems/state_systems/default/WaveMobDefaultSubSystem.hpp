@@ -11,18 +11,15 @@
 
 namespace sage
 {
-	class WaveMobDefaultSubSystem
+	class WaveMobDefaultSubSystem : public StateMachineSystem
 	{
-		entt::registry* registry;
-		StateMachineSystem* stateMachineSystem;
 		ActorMovementSystem* actorMovementSystem;
 
 	public:
-		void OnComponentEnabled(entt::entity entity) const;
-		void OnComponentDisabled(entt::entity entity) const;
+		void OnStateEnter(entt::entity entity) const;
+		void OnStateExit(entt::entity entity) const;
 		void Update();
 		WaveMobDefaultSubSystem(entt::registry* _registry,
-		                        StateMachineSystem* _stateMachineSystem,
 		                        ActorMovementSystem* _actorMovementSystem);
 	};
 } // sage

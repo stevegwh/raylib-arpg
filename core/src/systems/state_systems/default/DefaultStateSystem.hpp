@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include "systems/BaseSystem.hpp"
-#include "components/states/StateMachineComponent.hpp"
-#include "systems/StateMachineSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "WaveMobDefaultSubSystem.hpp"
 #include "PlayerDefaultSubSystem.hpp"
@@ -15,7 +12,7 @@
 
 namespace sage
 {
-	class DefaultStateSystem : public BaseSystem<StateMachineComponent>
+	class DefaultStateSystem
 	{
 		StateMachineSystem* stateMachineSystem;
 		std::unique_ptr<WaveMobDefaultSubSystem> waveMobDefaultSubSystem;
@@ -24,7 +21,6 @@ namespace sage
 	public:
 		void Update();
 		DefaultStateSystem(entt::registry* _registry,
-		                   StateMachineSystem* _stateMachineSystem,
 		                   ActorMovementSystem* _actorMovementSystem);
 	};
 } // sage

@@ -5,8 +5,6 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#include "components/states/StateEnemyCombat.hpp"
-#include "components/states/StateEnemyDefault.hpp"
 #include "WaveMobCombatLogicSubSystem.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
@@ -16,20 +14,20 @@
 
 namespace sage
 {
-	void WaveMobCombatLogicSubSystem::Update() const
+	void WaveMobCombatLogicSubSystem::Update()
 	{
 		auto view = registry->view<CombatableActor, StateEnemyCombat>();
 
 		for (const auto& entity : view)
 		{
 			auto& c = registry->get<CombatableActor>(entity);
-			if (!CheckInCombat(entity)) continue;
+			if (!checkInCombat(entity)) continue;
 
 			// Player is out of combat if no enemy is targetting them?
 			if (c.autoAttackTick >= c.autoAttackTickThreshold)
 			// Maybe can count time since last autoattack to time out combat?
 			{
-				AutoAttack(entity);
+				autoAttack(entity);
 			}
 			else
 			{
@@ -38,7 +36,7 @@ namespace sage
 		}
 	}
 
-	bool WaveMobCombatLogicSubSystem::CheckInCombat(entt::entity entity) const
+	bool WaveMobCombatLogicSubSystem::checkInCombat(entt::entity entity)
 	{
 		// If the entity is not the target of any other combatable.
 		// If no current target
@@ -47,7 +45,7 @@ namespace sage
 		if (combatable.dying) return false;
 		if (combatable.target == entt::null)
 		{
-			stateMachineSystem->ChangeState<StateEnemyDefault, StateComponents>(entity);
+			ChangeState<StateEnemyDefault, StateComponents>(entity);
 			return false;
 		}
 		return true;
@@ -64,16 +62,16 @@ namespace sage
 		registry->destroy(entity);
 	}
 
-	void WaveMobCombatLogicSubSystem::OnComponentEnabled(entt::entity entity) const
+	void WaveMobCombatLogicSubSystem::OnStateEnter(entt::entity entity) const
 	{
 		actorMovementSystem->CancelMovement(entity);
 	}
 
-	void WaveMobCombatLogicSubSystem::OnComponentDisabled(entt::entity entity) const
+	void WaveMobCombatLogicSubSystem::OnStateExit(entt::entity entity) const
 	{
 	}
 
-	void WaveMobCombatLogicSubSystem::OnDeath(entt::entity entity)
+	void WaveMobCombatLogicSubSystem::onDeath(entt::entity entity)
 	{
 		auto& combatable = registry->get<CombatableActor>(entity);
 		combatable.onDeath.publish(entity);
@@ -127,7 +125,7 @@ namespace sage
 		}
 	}
 
-	void WaveMobCombatLogicSubSystem::AutoAttack(entt::entity entity) const
+	void WaveMobCombatLogicSubSystem::autoAttack(entt::entity entity) const
 	{
 		auto& combatableActor = registry->get<CombatableActor>(entity);
 		auto& actorTrans = registry->get<sgTransform>(entity);
@@ -157,13 +155,13 @@ namespace sage
 		//DrawLine3D(t.movementDirectionDebugLine.position, t.movementDirectionDebugLine.direction, RED);
 	}
 
-	void WaveMobCombatLogicSubSystem::StartCombat(entt::entity entity)
+	void WaveMobCombatLogicSubSystem::startCombat(entt::entity entity)
 	{
 	}
 
 	void WaveMobCombatLogicSubSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 	{
-		stateMachineSystem->ChangeState<StateEnemyCombat, StateComponents>(entity);
+		ChangeState<StateEnemyCombat, StateComponents>(entity);
 		// Aggro when player hits
 		auto& c = registry->get<CombatableActor>(entity);
 		c.target = attacker;
@@ -173,22 +171,20 @@ namespace sage
 		if (healthbar.hp <= 0)
 		{
 			c.target = entt::null;
-			OnDeath(entity);
+			onDeath(entity);
 		}
 	}
 
 	WaveMobCombatLogicSubSystem::WaveMobCombatLogicSubSystem(entt::registry* _registry,
-	                                                         StateMachineSystem* _stateMachineSystem,
 	                                                         ActorMovementSystem* _actorMovementSystem,
 	                                                         CollisionSystem* _collisionSystem,
 	                                                         NavigationGridSystem* _navigationGridSystem) :
-		registry(_registry),
+		StateMachineSystem(_registry),
 		navigationGridSystem(_navigationGridSystem),
 		actorMovementSystem(_actorMovementSystem),
-		collisionSystem(_collisionSystem),
-		stateMachineSystem(_stateMachineSystem)
+		collisionSystem(_collisionSystem)
 	{
-		registry->on_construct<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnComponentEnabled>(this);
-		registry->on_destroy<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnComponentDisabled>(this);
+		registry->on_construct<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnStateEnter>(this);
+		registry->on_destroy<StateEnemyCombat>().connect<&WaveMobCombatLogicSubSystem::OnStateExit>(this);
 	}
 } // sage
