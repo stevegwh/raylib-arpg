@@ -273,6 +273,38 @@ namespace sage
 		{
 			keyDeleteUp.publish();
 		}
+		if (IsKeyPressed(keyMapping->keyOne))
+		{
+			keyOnePressed.publish();
+		}
+		if (IsKeyUp(keyMapping->keyOne))
+		{
+			keyOneUp.publish();
+		}
+		if (IsKeyPressed(keyMapping->keyTwo))
+		{
+			keyTwoPressed.publish();
+		}
+		if (IsKeyUp(keyMapping->keyTwo))
+		{
+			keyTwoUp.publish();
+		}
+		if (IsKeyPressed(keyMapping->keyThree))
+		{
+			keyThreePressed.publish();
+		}
+		if (IsKeyUp(keyMapping->keyThree))
+		{
+			keyThreeUp.publish();
+		}
+		if (IsKeyPressed(keyMapping->keyFour))
+		{
+			keyFourPressed
+		}
+		if (IsKeyUp(keyMapping->keyFour))
+		{
+			keyFourUp.publish();
+		}
 	}
 
 	UserInput::UserInput(KeyMapping* _keyMapping, Settings* _settings) :

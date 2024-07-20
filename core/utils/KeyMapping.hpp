@@ -40,6 +40,10 @@ namespace sage
 		KeyboardKey keyEscape = KEY_ESCAPE;
 		KeyboardKey keySpace = KEY_SPACE;
 		KeyboardKey keyDelete = KEY_DELETE;
+		KeyboardKey keyOne = KEY_ONE;
+		KeyboardKey keyTwo = KEY_TWO;
+		KeyboardKey keyThree = KEY_THREE;
+		KeyboardKey keyFour = KEY_FOUR;
 
 		template <class Archive>
 		void serialize(Archive& archive)
@@ -73,7 +77,11 @@ namespace sage
 				CEREAL_NVP(keyZ),
 				CEREAL_NVP(keyEscape),
 				CEREAL_NVP(keySpace),
-				CEREAL_NVP(keyDelete)
+				CEREAL_NVP(keyDelete),
+				CEREAL_NVP(keyOne),
+				CEREAL_NVP(keyTwo),
+				CEREAL_NVP(keyThree),
+				CEREAL_NVP(keyFour)
 			);
 		}
 	};
