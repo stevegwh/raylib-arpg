@@ -79,6 +79,14 @@ namespace sage
 		entt::sigh<void()> keySpaceUp{};
 		entt::sigh<void()> keyDeletePressed{};
 		entt::sigh<void()> keyDeleteUp{};
+		entt::sigh<void()> keyOnePressed{};
+		entt::sigh<void()> keyOneUp{};
+		entt::sigh<void()> keyTwoPressed{};
+		entt::sigh<void()> keyTwoUp{};
+		entt::sigh<void()> keyThreePressed{};
+		entt::sigh<void()> keyThreeUp{};
+		entt::sigh<void()> keyFourPressed{};
+		entt::sigh<void()> keyFourUp{};
 
 		void ListenForInput() const;
 
