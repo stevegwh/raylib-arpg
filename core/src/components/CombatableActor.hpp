@@ -23,27 +23,17 @@ namespace sage
 		int attackRange = 5;
 		float autoAttackTick = 0;
 		float autoAttackTickThreshold = 1;
-		entt::sigh<void(entt::entity, entt::entity, float)> onHit{};
+        
+        std::vector<entt::delegate<void()>> dots;
+        
+		entt::sigh<void(entt::entity, entt::entity, float)> onHit{}; // Self, attacker, damage
 		entt::sigh<void(entt::entity)> onDeath{};
 		entt::sigh<void(entt::entity, entt::entity)> onEnemyClicked{}; // Self, Clicked enemy
 		entt::sigh<void(entt::entity)> onAttackCancelled{}; // Self
 		entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
-
-		void EnemyClicked(entt::entity enemy)
-		{
-			target = enemy;
-			onEnemyClicked.publish(self, enemy);
-		}
-
-		void AttackCancelled()
-		{
-			onAttackCancelled.publish(self);
-		}
-
-		void TargetDeath(entt::entity _target)
-		{
-			onTargetDeath.publish(self, _target);
-			target = entt::null;
-		}
+        
+		void EnemyClicked(entt::entity enemy);
+		void AttackCancelled();
+		void TargetDeath(entt::entity _target);
 	};
 } // sage

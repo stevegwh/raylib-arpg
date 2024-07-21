@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Ability.hpp"
+
 namespace sage
 {
-	struct WhirlwindAbility
+	struct WhirlwindAbility : public Ability
 	{
-		float cooldown = 0.0f;
-		float damage = 10.0f;
+        void Update() override;
+        WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem);
 	};
 }
