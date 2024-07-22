@@ -18,7 +18,8 @@ namespace sage
 		DEATH,
 		AUTOATTACK,
 		MOVE,
-		TALK
+		TALK,
+		SPIN
 	};
 
 	struct Animation

@@ -19,6 +19,7 @@ namespace sage
 		data->healthBarSystem->Update();
 		data->stateSystems->Update();
         data->abilitySystem->Update();
+		data->timerManager->Update();
 	}
 
 	void ExampleScene::Draw2D()
