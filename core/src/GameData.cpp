@@ -14,38 +14,35 @@ namespace sage
 		collisionSystem(std::make_unique<CollisionSystem>(_registry)),
 		navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
 		actorMovementSystem(std::make_unique<ActorMovementSystem>(_registry,
-		                                                          collisionSystem.get(),
-		                                                          navigationGridSystem.get())),
-		animationSystem(std::make_unique<AnimationSystem>(_registry))
+			collisionSystem.get(),
+			navigationGridSystem.get())),
+		animationSystem(std::make_unique<AnimationSystem>(_registry)),
+		timerManager(std::make_unique<TimerManager>())
 	{
 		userInput = std::make_unique<UserInput>(_keyMapping, settings);
 		camera = std::make_unique<Camera>(userInput.get());
 		cursor = std::make_unique<Cursor>(registry,
-		                                  collisionSystem.get(),
-		                                  navigationGridSystem.get(),
-		                                  camera.get(),
-		                                  userInput.get());
+			collisionSystem.get(),
+			navigationGridSystem.get(),
+			camera.get(),
+			userInput.get());
 
 		controllableActorSystem = std::make_unique<ControllableActorSystem>(_registry,
-		                                                                    cursor.get(),
-		                                                                    userInput.get(),
-		                                                                    navigationGridSystem.get(),
-		                                                                    actorMovementSystem.get());
-		// TODO: Don't like this here. (Put it in cursor constructor)
-		{
-			entt::sink sink{controllableActorSystem->onControlledActorChange};
-			sink.connect<&Cursor::OnControlledActorChange>(*cursor);
-		}
+			cursor.get(),
+			userInput.get(),
+			navigationGridSystem.get(),
+			actorMovementSystem.get());
+
 		dialogueSystem = std::make_unique<DialogueSystem>(_registry,
-		                                                  cursor.get(),
-		                                                  camera.get(),
-		                                                  settings,
-		                                                  controllableActorSystem.get());
+			cursor.get(),
+			camera.get(),
+			settings,
+			controllableActorSystem.get());
 		healthBarSystem = std::make_unique<HealthBarSystem>(_registry, camera.get());
 		stateSystems = std::make_unique<StateSystems>(_registry, cursor.get(), actorMovementSystem.get(), collisionSystem.get(),
-		                                              controllableActorSystem.get(), navigationGridSystem.get());
-        abilitySystem = std::make_unique<AbilitySystem>(_registry, cursor.get(), userInput.get(), actorMovementSystem.get(), 
-				collisionSystem.get(), controllableActorSystem.get());
+			controllableActorSystem.get(), navigationGridSystem.get());
+		abilitySystem = std::make_unique<AbilitySystem>(_registry, cursor.get(), userInput.get(), actorMovementSystem.get(),
+			collisionSystem.get(), controllableActorSystem.get(), timerManager.get());
 	}
 
 	void GameData::Load()

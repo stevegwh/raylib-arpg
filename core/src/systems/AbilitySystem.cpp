@@ -72,7 +72,7 @@ namespace sage
 
 	AbilitySystem::AbilitySystem(entt::registry* _registry, Cursor* _cursor, UserInput* _userInput,
 			ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
-			ControllableActorSystem* _controllableActorSystem)
+			ControllableActorSystem* _controllableActorSystem, TimerManager* _timerManager)
 			:
 			registry(_registry), cursor(_cursor), userInput(_userInput),
 			actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem),
@@ -101,7 +101,7 @@ namespace sage
 		}
 
 		currentAbilities.fill(-1);
-		abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem));
+		abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem, _timerManager));
 		ChangeAbility(0, 0);
 	}
 }
