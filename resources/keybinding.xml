@@ -30,6 +30,10 @@
 		<keyEscape>256</keyEscape>
 		<keySpace>32</keySpace>
 		<keyDelete>261</keyDelete>
+		<keyOne>49</keyOne>
+		<keyTwo>50</keyTwo>
+		<keyThree>51</keyThree>
+		<keyFour>52</keyFour>
 	</value0>
 </cereal>
 

@@ -1,10 +1,12 @@
 #include "Ability.hpp"
 
+#include "raylib.h"
+
 namespace sage
 {
 	void Ability::Update()
 	{
-		cooldownTimer -= 1.0f;
+		cooldownTimer -= GetFrameTime();
 	}
 
 	void Ability::Draw3D()

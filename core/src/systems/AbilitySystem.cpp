@@ -1,60 +1,89 @@
 #include "AbilitySystem.hpp"
+#include "abilities/WhirlwindAbility.hpp"
 
 namespace sage
 {
 	void AbilitySystem::abilityOnePressed()
 	{
-		abilityMap[currentAbilities[0]();
+        std::cout << "Ability 1 pressed \n";
+        if (currentAbilities[0] == -1 || abilityMap[currentAbilities[0]]->cooldownTimer > 0.0f)
+        {
+            std::cout << "Waiting for cooldown timer: " << abilityMap[currentAbilities[0]]->cooldownTimer << "\n";
+            return;
+        }
+		abilityMap[currentAbilities[0]]->Use();
 	}
 
 	void AbilitySystem::abilityTwoPressed()
 	{
-		abilityMap[currentAbilities[1]();
+        std::cout << "Ability 2 pressed \n";
+        if (currentAbilities[1] == -1 || abilityMap[currentAbilities[1]]->cooldownTimer > 0.0f)
+        {
+            return;
+        }
+        abilityMap[currentAbilities[1]]->Use();
 	}
 
 	void AbilitySystem::abilityThreePressed()
 	{
-		abilityMap[currentAbilities[2]();
+        std::cout << "Ability 3 pressed \n";
+        if (currentAbilities[2] == -1 || abilityMap[currentAbilities[2]]->cooldownTimer > 0.0f)
+        {
+            return;
+        }
+        abilityMap[currentAbilities[2]]->Use();
 	}
 
 	void AbilitySystem::abilityFourPressed()
 	{
-		abilityMap[currentAbilities[3]();
+        std::cout << "Ability 4 pressed \n";
+        if (currentAbilities[3] == -1 || abilityMap[currentAbilities[3]]->cooldownTimer > 0.0f)
+        {
+            return;
+        }
+        abilityMap[currentAbilities[3]]->Use();
 	}
 
 	void sage::AbilitySystem::ChangeAbility(int abilitySlot, int newAbilityIndex)
 	{
+        // More than likely should subscribe to an "ability end" event which then triggers the change
 		currentAbilities[abilitySlot] = newAbilityIndex;
 	}
 
 	void AbilitySystem::Update()
 	{
-		// Grab the  ability from the map? Update each one?
+		for (auto& ability : abilityMap)
+        {
+            ability->Update();
+        }
 	}
+    
+    void AbilitySystem::Draw2D()
+    {
+        // Draw GUI here (cooldowns etc)
+    }
 
 	AbilitySystem::AbilitySystem(entt::registry* _registry, Cursor* _cursor, UserInput* _userInput, ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem) :
 		registry(_registry), cursor(_cursor), userInput(_userInput), actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem)
 	{
-		// Subscribe to user input events
-		// Need a way to change which event corresponds to which ability. Probably needs a map of some sort.
 		{
-			entt::sink sink userInput->keyOnePressed;
+			entt::sink sink { userInput->keyOnePressed };
 			sink.connect<&AbilitySystem::abilityOnePressed>(this);
 		}
 		{
-			entt::sink sink userInput->keyTwoPressed;
+			entt::sink sink { userInput->keyTwoPressed };
 			sink.connect<&AbilitySystem::abilityTwoPressed>(this);
 		}
 		{
-			entt::sink sink userInput->keyThreePressed;
+			entt::sink sink { userInput->keyThreePressed };
 			sink.connect<&AbilitySystem::abilityThreePressed>(this);
 		}
 		{
-			entt::sink sink userInput->keyFourPressed;
+			entt::sink sink { userInput->keyFourPressed };
 			sink.connect<&AbilitySystem::abilityFourPressed>(this);
 		}
-
-
-
+        currentAbilities.fill(-1);
+        abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem));
+        ChangeAbility(0, 0);
 	}
 }
