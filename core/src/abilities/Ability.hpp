@@ -14,6 +14,7 @@ namespace sage
         entt::registry* registry;
         CollisionSystem* collisionSystem;
         std::vector<entt::entity> hitUnits;
+		bool active = false;
         float cooldownLimit;
 		float cooldownTimer;
 		float windupLimit;
