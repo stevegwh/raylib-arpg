@@ -50,8 +50,8 @@ namespace sage
         cooldownTimer -= GetFrameTime();
     }
     
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem) : 
-    Ability(_registry, _collisionSystem)
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager) : 
+    Ability(_registry, _collisionSystem, _timerManager)
     {
         cooldownLimit = 3.0f;
         initialDamage = 10.0f;

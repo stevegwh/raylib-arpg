@@ -4,11 +4,13 @@
 
 #include <vector>
 #include "systems/CollisionSystem.hpp"
+#include "TimerManager.hpp"
 
 namespace sage
 {
 	struct Ability
 	{
+		TimerManager* timerManager;
         entt::registry* registry;
         CollisionSystem* collisionSystem;
         std::vector<entt::entity> hitUnits;
@@ -24,6 +26,6 @@ namespace sage
         virtual void Update(entt::entity actor);
 		virtual void Draw3D(entt::entity actor);
         virtual ~Ability() = default;
-        Ability(entt::registry* _registry, CollisionSystem* _collisionSystem);
+        Ability(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager);
 	};
 }

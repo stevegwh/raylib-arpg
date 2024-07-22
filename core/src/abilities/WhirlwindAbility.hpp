@@ -10,6 +10,6 @@ namespace sage
         void Use(entt::entity actor) override;
         void Update(entt::entity actor) override;
         ~WhirlwindAbility() override = default;
-        WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem);
+        WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager);
 	};
 }

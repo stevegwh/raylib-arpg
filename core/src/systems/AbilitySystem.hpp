@@ -37,7 +37,7 @@ namespace sage
 		void Draw2D();
 		AbilitySystem(entt::registry* _registry, Cursor* _cursor, UserInput* _userInput,
 				ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
-				ControllableActorSystem* _controllableActorSystem);
+				ControllableActorSystem* _controllableActorSystem, TimerManager* _timerManager);
 
 	};
 }

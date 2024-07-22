@@ -145,5 +145,9 @@ namespace sage
 		navigationGridSystem(_navigationGridSystem), actorMovementSystem(_transformSystem)
 	{
 		Enable();
+		{
+			entt::sink sink{ onControlledActorChange };
+			sink.connect<&Cursor::OnControlledActorChange>(*cursor);
+		}
 	}
 } // sage
