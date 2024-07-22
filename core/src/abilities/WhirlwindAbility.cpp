@@ -20,7 +20,20 @@ namespace sage
 
 		std::cout << "Whirlwind ability used \n";
 		cooldownTimer = cooldownLimit;
-		auto& actorTransform = registry->get<sgTransform>(actor);
+		active = true;
+		windupTimer = 0.0f;
+    }
+    
+    void WhirlwindAbility::Update(entt::entity actor)
+    {
+        cooldownTimer -= GetFrameTime();
+		if (windupTimer < windupLimit)
+		{
+			windupTimer += GetFrameTime();
+			return;
+		}
+		if (!active) return;
+        auto& actorTransform = registry->get<sgTransform>(actor);
 		const auto& actorCol = registry->get<Collideable>(actor);
 		auto& animation = registry->get<Animation>(actor);
 		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
@@ -43,17 +56,15 @@ namespace sage
 				std::cout << "Hit unit \n";
 			}
 		}
-    }
-    
-    void WhirlwindAbility::Update(entt::entity actor)
-    {
-        cooldownTimer -= GetFrameTime();
+		active = false;
     }
     
     WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager) : 
     Ability(_registry, _collisionSystem, _timerManager)
     {
+		windupTimer = 0.0f;
+		windupLimit = 0.75f;
         cooldownLimit = 3.0f;
-        initialDamage = 10.0f;
+        initialDamage = 25.0f;
     }
 }

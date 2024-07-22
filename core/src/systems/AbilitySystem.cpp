@@ -61,7 +61,7 @@ namespace sage
 	{
 		for (auto& ability : abilityMap)
 		{
-			ability->Update(controlledActor);
+			ability->Update(controllableActorSystem->GetControlledActor());
 		}
 	}
 
