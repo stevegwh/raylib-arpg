@@ -4,22 +4,48 @@
 
 #include "WhirlwindAbility.hpp"
 #include "raylib.h"
+#include "components/sgTransform.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/Animation.hpp"
 
 namespace sage
 {
-    void WhirlwindAbility::Use()
+    void WhirlwindAbility::Use(entt::entity actor)
     {
-        if (cooldownTimer <= 0)
+        if (cooldownTimer > 0)
         {
-            cooldownTimer = cooldownLimit;
-            // Do something
-            std::cout << "Whirlwind ability used \n";
+			std::cout << "Waiting for cooldown \n";
             return;
         }
-        std::cout << "Waiting for cooldown \n";
+
+		std::cout << "Whirlwind ability used \n";
+		cooldownTimer = cooldownLimit;
+		auto& actorTransform = registry->get<sgTransform>(actor);
+		const auto& actorCol = registry->get<Collideable>(actor);
+		auto& animation = registry->get<Animation>(actor);
+		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
+		
+		auto view = registry->view<CombatableActor>();
+		
+		for (auto& entity : view)
+		{
+			if (entity == actor) continue;
+			//if (std::find(hitUnits.begin(), hitUnits.end(), entity) != hitUnits.end()) continue;
+			
+			const auto& targetTransform = registry->get<sgTransform>(entity);
+			const auto& targetCol = registry->get<Collideable>(entity);
+			
+			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, actorTransform.position(), whirlwindRadius))
+			{
+				//hitUnits.push_back(entity);
+				const auto& combatable = registry->get<CombatableActor>(entity);
+				combatable.onHit.publish(entity, actor, initialDamage);
+				std::cout << "Hit unit \n";
+			}
+		}
     }
     
-    void WhirlwindAbility::Update()
+    void WhirlwindAbility::Update(entt::entity actor)
     {
         cooldownTimer -= GetFrameTime();
     }

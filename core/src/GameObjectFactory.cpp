@@ -161,7 +161,7 @@ namespace sage
 		const char* name)
 	{
 		entt::entity id = registry->create();
-		auto modelPath = "resources/models/gltf/hero.glb";
+		auto modelPath = "resources/models/gltf/hero2.glb";
 
 		auto& transform = registry->emplace<sgTransform>(id);
 		GridSquare actorIdx;
@@ -181,6 +181,7 @@ namespace sage
 		animation.animationMap[AnimationEnum::MOVE] = 5;
 		animation.animationMap[AnimationEnum::TALK] = 3;
 		animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
+		animation.animationMap[AnimationEnum::SPIN] = 6;
 		animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
 		{
