@@ -299,7 +299,7 @@ namespace sage
 		}
 		if (IsKeyPressed(keyMapping->keyFour))
 		{
-			keyFourPressed
+			keyFourPressed.publish();
 		}
 		if (IsKeyUp(keyMapping->keyFour))
 		{

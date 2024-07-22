@@ -15,6 +15,8 @@
 #include "systems/dialogue/DialogueSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/state_systems/StateSystems.hpp"
+#include "systems/AbilitySystem.hpp"
+
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
@@ -46,6 +48,7 @@ namespace sage
 		std::unique_ptr<DialogueSystem> dialogueSystem;
 		std::unique_ptr<HealthBarSystem> healthBarSystem;
 		std::unique_ptr<StateSystems> stateSystems;
+        std::unique_ptr<AbilitySystem> abilitySystem;
         
 		void Load();
 		void Save() const;

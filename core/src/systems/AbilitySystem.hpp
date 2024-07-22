@@ -6,8 +6,10 @@
 #include "Cursor.hpp"
 #include "ActorMovementSystem.hpp"
 #include "CollisionSystem.hpp"
-#include "Ability.hpp"
+#include "../abilities/Ability.hpp"
 
+#include <memory>
+#include <array>
 #include <vector>
 
 namespace sage
@@ -19,8 +21,8 @@ namespace sage
 		UserInput* userInput;
 		ActorMovementSystem* actorMovementSystem;
 		CollisionSystem* collisionSystem;
-		std::vector <Ability> abilityMap;
-		std::array<int> currentAbilities;
+		std::vector<std::unique_ptr<Ability>> abilityMap;
+		std::array<int, 4> currentAbilities{};
 		void abilityOnePressed();
 		void abilityTwoPressed();
 		void abilityThreePressed();
@@ -28,6 +30,7 @@ namespace sage
 	public:
 		void ChangeAbility(int abilitySlot, int newAbilityIndex);
 		void Update();
+        void Draw2D();
 		AbilitySystem(entt::registry* _registry, Cursor* _cursor, UserInput* _userInput, ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem);
 
 	};
