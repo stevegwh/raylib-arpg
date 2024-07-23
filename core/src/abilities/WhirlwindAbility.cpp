@@ -22,6 +22,8 @@ namespace sage
 		cooldownTimer = cooldownLimit;
 		active = true;
 		windupTimer = 0.0f;
+		auto& animation = registry->get<Animation>(actor);
+		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
     }
     
     void WhirlwindAbility::Update(entt::entity actor)
@@ -35,8 +37,6 @@ namespace sage
 		if (!active) return;
         auto& actorTransform = registry->get<sgTransform>(actor);
 		const auto& actorCol = registry->get<Collideable>(actor);
-		auto& animation = registry->get<Animation>(actor);
-		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
 		
 		auto view = registry->view<CombatableActor>();
 		
