@@ -3,12 +3,14 @@
 #include "Ability.hpp"
 #include "TextureTerrainOverlay.hpp"
 #include "Cursor.hpp"
+#include "systems/ControllableActorSystem.hpp"
 
 namespace sage
 {
 	struct RainOfFireAbility : public Ability
 	{
 		Cursor* cursor;
+		ControllableActorSystem* controllableActorSystem;
 		std::unique_ptr<TextureTerrainOverlay> spellCursor;
 		float whirlwindRadius = 50.0f;
 		void Use(entt::entity actor) override;
@@ -20,6 +22,7 @@ namespace sage
 				Cursor* _cursor,
 				CollisionSystem* _collisionSystem,
 				NavigationGridSystem* _navigationGridSystem,
+				ControllableActorSystem* _controllableActorSystem,
 				TimerManager* _timerManager);
 	};
 }

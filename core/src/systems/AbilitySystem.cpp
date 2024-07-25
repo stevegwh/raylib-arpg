@@ -108,7 +108,7 @@ namespace sage
 		abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem, _timerManager));
 		abilityMap.push_back(std::make_unique<ConeOfCold>(registry, collisionSystem, _timerManager));
 		abilityMap.push_back(
-				std::make_unique<RainOfFireAbility>(registry, _cursor, collisionSystem, _navigationGridSystem, _timerManager));
+				std::make_unique<RainOfFireAbility>(registry, _cursor, collisionSystem, _navigationGridSystem, controllableActorSystem, _timerManager));
 		ChangeAbility(0, 0);
 		ChangeAbility(1, 1);
 		ChangeAbility(2, 2);
