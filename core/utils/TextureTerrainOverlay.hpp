@@ -30,7 +30,6 @@ namespace sage
 		GridSquare lastHit{};
 	public:
 		~TextureTerrainOverlay();
-		// TODO: NavigationGridSystem needs to return a square portion of the grid
 		TextureTerrainOverlay(entt::registry* _registry,
 				NavigationGridSystem* _navigationGridSystem,
 				const char* texturePath

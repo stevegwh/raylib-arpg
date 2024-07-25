@@ -21,10 +21,12 @@ namespace sage
 		{
 			spellCursor->Init(cursor->collision.point); // Should not do this if already done
 			spellCursor->Enable(true);
+			controllableActorSystem->Disable();
 			return;
 		}
 		else
 		{
+			controllableActorSystem->Enable();
 			spellCursor->Enable(false); // Cancel move
 		}
 	}
@@ -38,6 +40,7 @@ namespace sage
 		auto& animation = registry->get<Animation>(actor);
 		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
 		spellCursor->Enable(false);
+		controllableActorSystem->Enable();
 	}
 
 	void RainOfFireAbility::Update(entt::entity actor)
@@ -45,11 +48,11 @@ namespace sage
 		if (spellCursor->active())
 		{
 			spellCursor->Update(cursor->collision.point);
+			if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !active)
+			{
+				Confirm(actor);
+			}
 			return;
-		}
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !active && spellCursor->active())
-		{
-			Confirm(actor);
 		}
 		cooldownTimer -= GetFrameTime();
 		if (windupTimer < windupLimit)
@@ -84,10 +87,12 @@ namespace sage
 			Cursor* _cursor,
 			CollisionSystem* _collisionSystem,
 			NavigationGridSystem* _navigationGridSystem,
+			ControllableActorSystem* _controllableActorSystem,
 			TimerManager* _timerManager)
 			:
 			Ability(_registry, _collisionSystem, _timerManager),
-			cursor(_cursor)
+			cursor(_cursor),
+			controllableActorSystem(_controllableActorSystem)
 	{
 		windupTimer = 0.0f;
 		windupLimit = 0.75f;
