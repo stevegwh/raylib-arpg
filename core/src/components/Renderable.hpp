@@ -23,6 +23,7 @@ namespace sage
 {
 struct Renderable
 {
+	bool active = true;
     Matrix initialTransform{};
     MaterialPaths materials;
     Model model{}; // was const

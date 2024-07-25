@@ -142,21 +142,42 @@ namespace sage
 		registry->emplace<Renderable>(entity);
 		registry->emplace<sgTransform>(entity);
 	}
+	
+	void TextureTerrainOverlay::Enable(bool enable)
+	{
+		m_active = enable;
+		auto& renderable = registry->get<Renderable>(entity);
+		renderable.active = enable;
+	}
 
 	void TextureTerrainOverlay::Init(Vector3 mouseRayHit)
 	{
+		if (initialised)
+		{
+			return;
+		}
+		else
+		{
+			initialised = true;
+		}
 		navigationGridSystem->WorldToGridSpace(mouseRayHit, lastHit);
 		navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
 		auto& renderable = registry->get<Renderable>(entity);
 		renderable.model = generateTerrainPolygon();
+		renderable.model.transform = MatrixIdentity();
 		auto& trans = registry->get<sgTransform>(entity);
 		auto centre = navigationGridSystem->GetGridSquare(lastHit.row, lastHit.col);
 		trans.SetPosition({ centre->worldPosMin.x, centre->terrainHeight, centre->worldPosMin.z }, entity);
-		renderable.model.transform = MatrixIdentity();
+	}
+	
+	bool TextureTerrainOverlay::active() const
+	{
+		return m_active;
 	}
 
 	void TextureTerrainOverlay::Update(Vector3 mouseRayHit)
 	{
+		if (!m_active) return;
 		GridSquare mousePosGrid{};
 		navigationGridSystem->WorldToGridSpace(mouseRayHit, mousePosGrid);
 		if (lastHit == mousePosGrid) return;

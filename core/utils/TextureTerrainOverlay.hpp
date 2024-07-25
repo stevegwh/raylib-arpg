@@ -19,6 +19,8 @@ namespace sage
 	{
 		entt::registry* registry;
 		entt::entity entity;
+		bool m_active = false;
+		bool initialised = false;
 		NavigationGridSystem* navigationGridSystem;
 		Texture2D texture{};
 		Model generateTerrainPolygon();
@@ -35,6 +37,8 @@ namespace sage
 		);
 		void Init(Vector3 mouseRayHit);
 		void Update(Vector3 mouseRayHit);
+		void Enable(bool enable);
+		bool active() const;
 	};
 
 } // sage
