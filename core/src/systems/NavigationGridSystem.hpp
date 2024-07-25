@@ -43,6 +43,8 @@ namespace sage
 		explicit NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem);
 		void Init(int _slices, float _spacing, const std::string& _mapPath);
 		void PopulateGrid();
+		bool GetGridRange(Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
+		bool GetGridRange(BoundingBox bb, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
 		bool GetPathfindRange(const entt::entity& actorId, int bounds, GridSquare& minRange,
 		                      GridSquare& maxRange) const;
 		bool GridToWorldSpace(GridSquare gridPos, Vector3& out) const;

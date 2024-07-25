@@ -513,12 +513,8 @@ namespace sage
         return true;
     }
 
-	bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, GridSquare& minRange,
-		GridSquare& maxRange) const
+	bool NavigationGridSystem::GetGridRange(Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const
 	{
-		auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
-		Vector3 center = { (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f };
-
 		Vector3 topLeft = { center.x - bounds * spacing, center.y, center.z - bounds * spacing };
 		Vector3 bottomRight = { center.x + bounds * spacing, center.y, center.z + bounds * spacing };
 
@@ -539,6 +535,19 @@ namespace sage
 		maxRange = { bottomRightIndex.row, bottomRightIndex.col };
 
 		return true;
+	}
+
+	bool NavigationGridSystem::GetGridRange(BoundingBox bb, int bounds, GridSquare& minRange, GridSquare& maxRange) const
+	{
+		Vector3 center = { (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f };
+		return GetGridRange(center, bounds, minRange, maxRange);
+	}
+
+	bool NavigationGridSystem::GetPathfindRange(const entt::entity& actorId, int bounds, GridSquare& minRange,
+		GridSquare& maxRange) const
+	{
+		auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
+		return GetGridRange(bb, bounds, minRange, maxRange);
 	}
 
 	bool NavigationGridSystem::GridToWorldSpace(GridSquare gridPos, Vector3& out) const
