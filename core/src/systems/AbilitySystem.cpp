@@ -1,5 +1,8 @@
 #include "AbilitySystem.hpp"
 #include "abilities/WhirlwindAbility.hpp"
+#include "abilities/ConeOfCold.hpp"
+#include "abilities/RainOfFireAbility.hpp"
+
 #include "ControllableActorSystem.hpp"
 
 namespace sage
@@ -72,7 +75,8 @@ namespace sage
 
 	AbilitySystem::AbilitySystem(entt::registry* _registry, Cursor* _cursor, UserInput* _userInput,
 			ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
-			ControllableActorSystem* _controllableActorSystem, TimerManager* _timerManager)
+			ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem,
+			TimerManager* _timerManager)
 			:
 			registry(_registry), cursor(_cursor), userInput(_userInput),
 			actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem),
@@ -102,6 +106,11 @@ namespace sage
 
 		currentAbilities.fill(-1);
 		abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem, _timerManager));
+		abilityMap.push_back(std::make_unique<ConeOfCold>(registry, collisionSystem, _timerManager));
+		abilityMap.push_back(
+				std::make_unique<RainOfFireAbility>(registry, _cursor, collisionSystem, _navigationGridSystem, _timerManager));
 		ChangeAbility(0, 0);
+		ChangeAbility(1, 1);
+		ChangeAbility(2, 2);
 	}
 }
