@@ -17,26 +17,39 @@ namespace sage
 			std::cout << "Waiting for cooldown \n";
 			return;
 		}
-		std::cout << "Rain of fire ability used \n";
-		if (!cursorActive)
+		if (!spellCursor->active())
 		{
-			cursorActive = true;
-			spellCursor->Init(cursor->collision.point);
+			spellCursor->Init(cursor->collision.point); // Should not do this if already done
+			spellCursor->Enable(true);
 			return;
 		}
+		else
+		{
+			spellCursor->Enable(false); // Cancel move
+		}
+	}
+	
+	void RainOfFireAbility::Confirm(entt::entity actor)
+	{
+		std::cout << "Rain of fire ability used \n";
 		cooldownTimer = cooldownLimit;
 		active = true;
 		windupTimer = 0.0f;
-//		auto& animation = registry->get<Animation>(actor);
-//		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
+		auto& animation = registry->get<Animation>(actor);
+		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
+		spellCursor->Enable(false);
 	}
 
 	void RainOfFireAbility::Update(entt::entity actor)
 	{
-		if (cursorActive)
+		if (spellCursor->active())
 		{
 			spellCursor->Update(cursor->collision.point);
 			return;
+		}
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !active && spellCursor->active())
+		{
+			Confirm(actor);
 		}
 		cooldownTimer -= GetFrameTime();
 		if (windupTimer < windupLimit)
@@ -53,12 +66,9 @@ namespace sage
 		for (auto& entity : view)
 		{
 			if (entity == actor) continue;
-			//if (std::find(hitUnits.begin(), hitUnits.end(), entity) != hitUnits.end()) continue;
-
-			const auto& targetTransform = registry->get<sgTransform>(entity);
 			const auto& targetCol = registry->get<Collideable>(entity);
 
-			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, actorTransform.position(), whirlwindRadius))
+			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, cursor->collision.point, whirlwindRadius))
 			{
 				//hitUnits.push_back(entity);
 				const auto& combatable = registry->get<CombatableActor>(entity);
