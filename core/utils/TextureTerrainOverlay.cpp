@@ -12,30 +12,49 @@ namespace sage
 
 	Model TextureTerrainOverlay::generateTerrainPolygon()
 	{
-		return LoadModelFromMesh(GenMeshPoly(5, 2.0f));
-		Mesh mesh;
+		Mesh mesh = { 0 };
+
 		auto gridSquares = navigationGridSystem->GetGridSquares();
-		mesh.vertices = (float*)RL_MALLOC(sizeof(float) * 3 * gridSquares.size());
-		mesh.normals = (float*)RL_MALLOC(sizeof(float) * 3 * gridSquares.size());
 		int maxRow = maxRange.row - minRange.row;
 		int maxCol = maxRange.col - minRange.col;
-		int i = 0;
-		for (int row = minRange.row; row < maxRow; ++row)
+		int vertexCount = maxRow * maxCol;
+		int triangleCount = (maxRow - 1) * (maxCol - 1) * 2;
+
+		mesh.vertices = (float*)RL_MALLOC(vertexCount * 3 * sizeof(float));
+		mesh.normals = (float*)RL_MALLOC(vertexCount * 3 * sizeof(float));
+		mesh.texcoords = (float*)RL_MALLOC(vertexCount * 2 * sizeof(float));
+		mesh.colors = (unsigned char*)RL_MALLOC(vertexCount * 4 * sizeof(unsigned char)); // Add colors
+		mesh.indices = (unsigned short*)RL_MALLOC(triangleCount * 3 * sizeof(unsigned short));
+		int vertexIndex = 0;
+		for (int row = minRange.row; row < maxRange.row; ++row)
 		{
-			for (int col = minRange.col; col < maxCol; ++i, ++col)
+			for (int col = minRange.col; col < maxRange.col; ++col, ++vertexIndex)
 			{
-				mesh.vertices[i * 3] = gridSquares[row][col]->worldPosMin.x;
-				mesh.vertices[i * 3 + 1] = gridSquares[row][col]->terrainHeight;
-				mesh.vertices[i * 3 + 2] = gridSquares[row][col]->worldPosMin.z;
-				mesh.normals[i * 3] = gridSquares[row][col]->terrainNormal.x;
-				mesh.normals[i * 3 + 1] = gridSquares[row][col]->terrainNormal.y;
-				mesh.normals[i * 3 + 2] = gridSquares[row][col]->terrainNormal.z;
+				mesh.vertices[vertexIndex * 3] = gridSquares[row][col]->worldPosMin.x;
+				mesh.vertices[vertexIndex * 3 + 1] = gridSquares[row][col]->terrainHeight;
+				mesh.vertices[vertexIndex * 3 + 2] = gridSquares[row][col]->worldPosMin.z;
+
+				mesh.normals[vertexIndex * 3] = gridSquares[row][col]->terrainNormal.x;
+				mesh.normals[vertexIndex * 3 + 1] = gridSquares[row][col]->terrainNormal.y;
+				mesh.normals[vertexIndex * 3 + 2] = gridSquares[row][col]->terrainNormal.z;
+
+				mesh.texcoords[vertexIndex * 2] = (float)(col - minRange.col) / (maxCol - 1);
+				mesh.texcoords[vertexIndex * 2 + 1] = (float)(row - minRange.row) / (maxRow - 1);
 			}
 		}
-		mesh.triangleCount = i;
-		mesh.vertexCount = i*3;
+
+		mesh.vertexCount = vertexCount;
+		mesh.triangleCount = triangleCount;
+		UploadMesh(&mesh, false);
 		Model _model = LoadModelFromMesh(mesh);
-		_model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+		if (_model.materials == NULL)
+		{
+			_model.materials = (Material*)RL_MALLOC(sizeof(Material));
+			_model.materials[0] = LoadMaterialDefault();
+			_model.materialCount = 1;
+		}
+		//_model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+
 		return _model;
 	}
 
@@ -65,11 +84,10 @@ namespace sage
 		navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
 		auto& renderable = registry->get<Renderable>(entity);
 		renderable.model = generateTerrainPolygon();
-		auto topLeft = navigationGridSystem->GetGridSquare(minRange.row, minRange.col);
 		auto& trans = registry->get<sgTransform>(entity);
-		trans.SetPosition({ topLeft->worldPosMin.x, topLeft->terrainHeight, topLeft->worldPosMin.z }, entity);
-//		Matrix matrix = MatrixTranslate(topLeft->worldPosMin.x, topLeft->terrainHeight, topLeft->worldPosMin.z);
-//		renderable.model.transform = matrix;
+		auto centre = navigationGridSystem->GetGridSquare(lastHit.row, lastHit.col);
+		trans.SetPosition({ centre->worldPosMin.x, centre->terrainHeight, centre->worldPosMin.z }, entity);
+		renderable.model.transform = MatrixIdentity();
 	}
 
 	void TextureTerrainOverlay::Update(Vector3 mouseRayHit)
