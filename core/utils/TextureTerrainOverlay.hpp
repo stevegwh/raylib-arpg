@@ -22,6 +22,7 @@ namespace sage
 		NavigationGridSystem* navigationGridSystem;
 		Texture2D texture{};
 		Model generateTerrainPolygon();
+		void updateTerrainPolygon();
 		GridSquare minRange{}; // Top left corner of the texture
 		GridSquare maxRange{}; // bottom right corner of the texture
 		GridSquare lastHit{};
