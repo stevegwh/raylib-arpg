@@ -36,7 +36,9 @@ namespace sage
 		Color invalidColor = RED;
 		Color currentColor = WHITE;
 
-		bool lockContext = false;
+		bool contextLocked = false;
+		bool hideCursor = false;
+		bool enabled = true;
 
 		entt::entity controlledActor;
 
@@ -69,8 +71,12 @@ namespace sage
 		void Draw3D();
 		void Draw2D();
 		void OnControlledActorChange(entt::entity entity);
-		void LockCursor();
-		void UnlockCursor();
+		void DisableContextSwitching();
+		void EnableContextSwitching();
+		void Enable();
+		void Disable();
+		void Hide();
+		void Show();
 		bool isValidMove() const;
 	};
 }

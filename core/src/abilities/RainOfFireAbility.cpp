@@ -21,12 +21,14 @@ namespace sage
 		{
 			spellCursor->Init(cursor->collision.point); // Should not do this if already done
 			spellCursor->Enable(true);
-			controllableActorSystem->Disable();
+			cursor->Disable();
+			cursor->Hide();
 			return;
 		}
 		else
 		{
-			controllableActorSystem->Enable();
+			cursor->Enable();
+			cursor->Show();
 			spellCursor->Enable(false); // Cancel move
 		}
 	}
@@ -40,7 +42,8 @@ namespace sage
 		auto& animation = registry->get<Animation>(actor);
 		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
 		spellCursor->Enable(false);
-		controllableActorSystem->Enable();
+		cursor->Enable();
+		cursor->Show();
 	}
 
 	void RainOfFireAbility::Update(entt::entity actor)
@@ -61,7 +64,7 @@ namespace sage
 			return;
 		}
 		if (!active) return;
-		auto& actorTransform = registry->get<sgTransform>(actor);
+
 		const auto& actorCol = registry->get<Collideable>(actor);
 
 		auto view = registry->view<CombatableActor>();
