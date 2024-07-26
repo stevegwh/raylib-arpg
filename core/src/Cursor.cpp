@@ -16,6 +16,8 @@ namespace sage
 {
 	void Cursor::onMouseClick()
 	{
+		if (!enabled) return;
+		
 		const auto& layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
 		if (layer == CollisionLayer::NPC)
 		{
@@ -32,14 +34,34 @@ namespace sage
 		onAnyClick.publish(rayCollisionResultInfo.collidedEntityId);
 	}
 
-	void Cursor::LockCursor() // Lock mouse context? Like changing depending on collision.
+	void Cursor::DisableContextSwitching() // Lock mouse context? Like changing depending on collision.
 	{
-		lockContext = true;
+		contextLocked = true;
 	}
 
-	void Cursor::UnlockCursor()
+	void Cursor::EnableContextSwitching()
 	{
-		lockContext = false;
+		contextLocked = false;
+	}
+
+	void Cursor::Enable()
+	{
+		enabled = true;
+	}
+	
+	void Cursor::Disable()
+	{
+		enabled = false;
+	}
+	
+	void Cursor::Hide()
+	{
+		hideCursor = true;
+	}
+	
+	void Cursor::Show()
+	{
+		hideCursor = false;
 	}
 
 	bool Cursor::isValidMove() const
@@ -78,7 +100,7 @@ namespace sage
 
 	void Cursor::changeCursors(CollisionLayer layer)
 	{
-		if (lockContext) return;
+		if (contextLocked) return;
 
 		if (layer == CollisionLayer::FLOOR || layer == CollisionLayer::NAVIGATION)
 		{
@@ -179,7 +201,7 @@ namespace sage
 	{
 		position = {.x = GetMousePosition().x, .y = GetMousePosition().y};
 		getMouseRayCollision();
-		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
 			onMouseClick();
 		}
@@ -188,7 +210,7 @@ namespace sage
 	void Cursor::Draw3D()
 	{
 		if (!collision.hit) return;
-		if (lockContext) return;
+		if (contextLocked) return;
 		DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
         Vector3 normalEnd;
         normalEnd.x = collision.point.x + collision.normal.x;
@@ -200,6 +222,7 @@ namespace sage
 
 	void Cursor::Draw2D()
 	{
+		if (hideCursor) return;
 		Vector2 pos = position;
 		if (currentTex != &regulartex)
 		{
@@ -234,6 +257,6 @@ namespace sage
 		invalidmovetex = LoadTexture("resources/textures/cursor/32/denied.png");
 		combattex = LoadTexture("resources/textures/cursor/32/attack.png");
 		currentTex = &regulartex;
-		UnlockCursor();
+		EnableContextSwitching();
 	}
 }
