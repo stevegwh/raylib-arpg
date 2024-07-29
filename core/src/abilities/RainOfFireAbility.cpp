@@ -46,8 +46,22 @@ namespace sage
 		cursor->Show();
 	}
 
+	void RainOfFireAbility::Draw3D(entt::entity actor)
+	{
+		if (vfx->active)
+		{
+			vfx->Draw3D();
+		}
+		
+		Ability::Draw3D(actor);
+	}
+
 	void RainOfFireAbility::Update(entt::entity actor)
 	{
+		if (vfx->active)
+		{
+			vfx->Update(GetFrameTime());
+		}
 		if (spellCursor->active())
 		{
 			spellCursor->Update(cursor->collision.point);
@@ -63,11 +77,14 @@ namespace sage
 			windupTimer += GetFrameTime();
 			return;
 		}
+		
 		if (!active) return;
 
 		const auto& actorCol = registry->get<Collideable>(actor);
 
 		auto view = registry->view<CombatableActor>();
+
+		vfx->InitSystem(cursor->collision.point);
 
 		for (auto& entity : view)
 		{
@@ -87,6 +104,7 @@ namespace sage
 
 	RainOfFireAbility::RainOfFireAbility(
 			entt::registry* _registry,
+			Camera* _camera,
 			Cursor* _cursor,
 			CollisionSystem* _collisionSystem,
 			NavigationGridSystem* _navigationGridSystem,
@@ -103,5 +121,6 @@ namespace sage
 		initialDamage = 25.0f;
 		spellCursor = std::make_unique<TextureTerrainOverlay>(registry, _navigationGridSystem,
 				"resources/textures/cursor/rainoffire_cursor.png");
+		vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
 	}
 }
