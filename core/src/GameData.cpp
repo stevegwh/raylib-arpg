@@ -41,7 +41,7 @@ namespace sage
 		healthBarSystem = std::make_unique<HealthBarSystem>(_registry, camera.get());
 		stateSystems = std::make_unique<StateSystems>(_registry, cursor.get(), actorMovementSystem.get(), collisionSystem.get(),
 			controllableActorSystem.get(), navigationGridSystem.get());
-		abilitySystem = std::make_unique<AbilitySystem>(_registry, cursor.get(), userInput.get(), actorMovementSystem.get(),
+		abilitySystem = std::make_unique<AbilitySystem>(_registry, camera.get(), cursor.get(), userInput.get(), actorMovementSystem.get(),
 			collisionSystem.get(), controllableActorSystem.get(), navigationGridSystem.get(), timerManager.get());
 	}
 

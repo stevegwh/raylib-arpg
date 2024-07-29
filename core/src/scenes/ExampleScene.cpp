@@ -30,6 +30,7 @@ namespace sage
 
 	void ExampleScene::Draw3D()
 	{
+		data->abilitySystem->Draw3D();
 		data->healthBarSystem->Draw3D();
 		data->stateSystems->Draw3D();
 		Scene::Draw3D();
