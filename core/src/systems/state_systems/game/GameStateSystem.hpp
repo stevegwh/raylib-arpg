@@ -18,7 +18,7 @@ namespace sage
 	class GameStateSystem
 	{
 		entt::entity gameEntity;
-		std::vector<StateMachineSystem*> systems;
+		std::vector<BaseSystem*> systems;
 		
 	public:
 		std::unique_ptr<GameDefaultSystem> defaultSystem;

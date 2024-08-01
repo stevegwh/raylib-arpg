@@ -18,7 +18,7 @@
 
 namespace sage
 {
-	class ControllableActorSystem : public BaseSystem<ControllableActor>
+	class ControllableActorSystem : public BaseSystem
 	{
 		Cursor* cursor;
 		UserInput* userInput;

@@ -14,7 +14,7 @@
 
 namespace sage
 {
-	class ActorMovementSystem : public BaseSystem<MoveableActor>
+	class ActorMovementSystem : public BaseSystem
 	{
 		std::vector<Ray> debugRays;
         std::vector<RayCollision> debugCollisions;
@@ -29,7 +29,7 @@ namespace sage
 		void PathfindToLocation(const entt::entity& entity, const Vector3& destination, bool initialMove = true);
 		void MoveToLocation(const entt::entity& entity, Vector3 location);
 		void CancelMovement(const entt::entity& entity) const;
-		void Update();
+		void Update() override;
 		void DrawDebug() const;
 	};
 }

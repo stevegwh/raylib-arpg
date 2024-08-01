@@ -15,7 +15,7 @@
 
 namespace sage
 {
-	class DialogueSystem : public BaseSystem<Dialogue>
+	class DialogueSystem : public BaseSystem
 	{
 		bool active = false;
 		entt::entity controlledActor;

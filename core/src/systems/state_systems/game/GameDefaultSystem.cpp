@@ -39,8 +39,5 @@ namespace sage
 			StateMachineSystem(_registry), gameEntity(_gameEntity), timerManager(_timerManager)
 	{
 		callback.connect<&GameDefaultSystem::OnTimerEnd>(this);
-		registry->on_construct<StateGameDefault>().connect<&GameDefaultSystem::OnStateEnter>(this);
-		registry->on_destroy<StateGameDefault>().connect<&GameDefaultSystem::OnStateExit>(this);
-		// entt::delegate<void()> _callback, float _duration
 	}
 } // sage

@@ -141,7 +141,7 @@ namespace sage
 	                                                 UserInput* _userInput,
 	                                                 NavigationGridSystem* _navigationGridSystem,
 	                                                 ActorMovementSystem* _transformSystem) :
-		BaseSystem<ControllableActor>(_registry), cursor(_cursor), userInput(_userInput),
+		BaseSystem(_registry), cursor(_cursor), userInput(_userInput),
 		navigationGridSystem(_navigationGridSystem), actorMovementSystem(_transformSystem)
 	{
 		Enable();

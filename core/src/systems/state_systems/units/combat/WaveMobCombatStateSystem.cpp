@@ -6,11 +6,11 @@
 #include "raymath.h"
 
 #include "WaveMobCombatStateSystem.hpp"
+#include "components/states/EnemyStateComponents.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
 #include "components/sgTransform.hpp"
 #include "components/HealthBar.hpp"
-#include "components/states/EnemyStateComponents.hpp"
 
 namespace sage
 {
@@ -192,7 +192,5 @@ namespace sage
 		actorMovementSystem(_actorMovementSystem),
 		collisionSystem(_collisionSystem)
 	{
-		registry->on_construct<StateEnemyCombat>().connect<&WaveMobCombatStateSystem::OnStateEnter>(this);
-		registry->on_destroy<StateEnemyCombat>().connect<&WaveMobCombatStateSystem::OnStateExit>(this);
 	}
 } // sage
