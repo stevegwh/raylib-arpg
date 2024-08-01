@@ -27,7 +27,7 @@ namespace sage
 		entt::registry* registry;
 		Cursor* cursor;
 		ControllableActorSystem* controllableActorSystem;
-		std::vector<StateMachineSystem*> systems;
+		std::vector<BaseSystem*> systems;
 
 	public:
 		std::unique_ptr<WaveMobDefaultStateSystem> waveMobDefaultSubSystem;

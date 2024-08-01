@@ -12,7 +12,7 @@
 
 namespace sage
 {
-	class AnimationSystem : public BaseSystem<Animation>
+	class AnimationSystem : public BaseSystem
 	{
 		float animationTimer = 0;
 

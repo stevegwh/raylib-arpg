@@ -11,7 +11,7 @@
 
 namespace sage
 {
-	class WorldSystem : public BaseSystem<WorldObject>
+	class WorldSystem : public BaseSystem
 	{
 		entt::entity root;
 

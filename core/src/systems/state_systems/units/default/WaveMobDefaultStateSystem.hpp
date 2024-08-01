@@ -8,10 +8,11 @@
 
 #include "systems/state_systems/StateMachineSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
+#include "components/states/StateEnemyDefault.hpp"
 
 namespace sage
 {
-	class WaveMobDefaultStateSystem : public StateMachineSystem
+	class WaveMobDefaultStateSystem : public StateMachineSystem<WaveMobDefaultStateSystem, StateEnemyDefault>
 	{
 		ActorMovementSystem* actorMovementSystem;
 
@@ -20,7 +21,7 @@ namespace sage
 		void OnStateExit(entt::entity entity) override;
 		void Update() override;
 		void Draw3D() override;
-		WaveMobDefaultStateSystem(entt::registry* _registry,
-		                        ActorMovementSystem* _actorMovementSystem);
+		
+		WaveMobDefaultStateSystem(entt::registry* _registry, ActorMovementSystem* _actorMovementSystem);
 	};
 } // sage

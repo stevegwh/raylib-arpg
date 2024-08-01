@@ -5,11 +5,11 @@
 
 
 #include "PlayerCombatStateSystem.hpp"
-#include "components/states/PlayerStateComponents.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
 #include "components/sgTransform.hpp"
 #include "components/HealthBar.hpp"
+#include "components/states/PlayerStateComponents.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -227,7 +227,5 @@ namespace sage
 		StateMachineSystem(_registry),
 		controllableActorSystem(_controllableActorSystem)
 	{
-		registry->on_construct<StatePlayerCombat>().connect<&PlayerCombatStateSystem::OnStateEnter>(this);
-		registry->on_destroy<StatePlayerCombat>().connect<&PlayerCombatStateSystem::OnStateExit>(this);
 	}
 } // sage

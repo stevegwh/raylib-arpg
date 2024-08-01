@@ -5,6 +5,7 @@
 #pragma once
 
 #include "systems/state_systems/StateMachineSystem.hpp"
+#include "components/states/StateEnemyCombat.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 
@@ -12,7 +13,7 @@
 
 namespace sage
 {
-	class WaveMobCombatStateSystem : public StateMachineSystem
+	class WaveMobCombatStateSystem : public StateMachineSystem<WaveMobCombatStateSystem, StateEnemyCombat>
 	{
 		NavigationGridSystem* navigationGridSystem;
 		ActorMovementSystem* actorMovementSystem;

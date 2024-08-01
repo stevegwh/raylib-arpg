@@ -4,32 +4,20 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-#include <string>
-
 #include "entt/entt.hpp"
 
 namespace sage
 {
-	template <typename ComponentName>
 	class BaseSystem
 	{
-		const std::string componentName;
-
 	protected:
 		bool enabled = true;
 		entt::registry* registry;
-
 	public:
-		BaseSystem(entt::registry* _registry) : registry(_registry)
-		//, eventManager(std::make_unique<EventManager>()) 
+		explicit BaseSystem(entt::registry* _registry) : registry(_registry)
 		{
 		}
-
-		[[nodiscard]] const char* getComponentName() const
-		{
-			return typeid(ComponentName).name();
-		}
+		virtual void Update(){};
+		virtual void Draw3D(){};
 	};
 }

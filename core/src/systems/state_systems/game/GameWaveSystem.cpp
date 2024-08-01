@@ -3,7 +3,6 @@
 //
 
 #include "GameWaveSystem.hpp"
-#include "components/states/StateGameWaveattack.hpp"
 #include <iostream>
 
 namespace sage
@@ -32,7 +31,5 @@ namespace sage
 	GameWaveSystem::GameWaveSystem(entt::registry* _registry, entt::entity _gameEntity, TimerManager* _timerManager) :
 			StateMachineSystem(_registry)
 	{
-		registry->on_construct<StateGameWaveattack>().connect<&GameWaveSystem::OnStateEnter>(this);
-		registry->on_destroy<StateGameWaveattack>().connect<&GameWaveSystem::OnStateExit>(this);
 	}
 } // sage

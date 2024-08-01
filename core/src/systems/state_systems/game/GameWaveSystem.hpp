@@ -7,13 +7,13 @@
 #include "entt/entt.hpp"
 #include "TimerManager.hpp"
 
-#include "components/states/StateGameDefault.hpp"
+#include "components/states/StateGameWaveattack.hpp"
 #include "systems/state_systems/StateMachineSystem.hpp"
 
 namespace sage
 {
 
-	class GameWaveSystem : public StateMachineSystem
+	class GameWaveSystem : public StateMachineSystem<GameWaveSystem, StateGameWaveattack>
 	{
 		TimerManager* timerManager;
 		void OnTimerEnd();
