@@ -6,6 +6,7 @@
 
 namespace sage
 {
+	struct GameData;
 	class StateSystems
 	{
 
@@ -17,6 +18,7 @@ namespace sage
 		void Draw3D();
 		StateSystems(
 				entt::registry* _registry,
+				GameData* _gameData,
 				Cursor* _cursor,
 				TimerManager* _timerManager,
 				ActorMovementSystem* _actorMovementSystem,
