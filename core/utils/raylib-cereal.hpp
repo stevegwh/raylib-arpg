@@ -189,9 +189,7 @@ void load(Archive& archive, Mesh& mesh)
 	std::vector<Vector3> normals;
 	std::vector<Vector4> tangents;
 	std::vector<Color> colors;
-
-    
-    Model _model;
+	
 	archive(
 		mesh.vertexCount,
 		mesh.triangleCount,

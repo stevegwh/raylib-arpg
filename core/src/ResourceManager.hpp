@@ -15,6 +15,8 @@ class ResourceManager
 {
 public:
     static Image LoadTexture(const std::string& path);
+	static Model StaticModelLoad(const std::string& path);
+	static Model DynamicModelLoad(const std::string& path);
     ~ResourceManager();
 };
 
