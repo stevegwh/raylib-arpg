@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include "StateGameDefault.hpp"
-#include "StateGameWaveattack.hpp"
+#include "GameStates.hpp"
 #include <tuple>
 
 namespace sage

@@ -7,7 +7,7 @@
 #include "entt/entt.hpp"
 #include "TimerManager.hpp"
 
-#include "components/states/StateGameDefault.hpp"
+#include "components/states/GameStates.hpp"
 #include "systems/state_systems/StateMachineSystem.hpp"
 
 namespace sage

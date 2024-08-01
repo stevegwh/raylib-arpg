@@ -3,8 +3,7 @@
 //
 
 #pragma once
-#include "StatePlayerCombat.hpp"
-#include "StatePlayerDefault.hpp"
+#include "PlayerStates.hpp"
 #include <tuple>
 
 namespace sage
