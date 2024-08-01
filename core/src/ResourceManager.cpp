@@ -3,7 +3,9 @@
 //
 
 #include "ResourceManager.hpp"
+
 #include <unordered_map>
+#include <utility>
 
 #include "raylib/src/config.h"
 #include "raymath.h"
@@ -15,6 +17,7 @@ namespace sage
 	static std::unordered_map<std::string, Image> textureImages;
 	static std::unordered_map<std::string, Model> staticModels;
 	static std::unordered_map<std::string, Model> dynamicModels;
+	static std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations;
 
 	Image ResourceManager::LoadTexture(const std::string& path)
 	{
@@ -208,11 +211,36 @@ namespace sage
 		return model;
 	}
 
+	ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
+	{
+		if (modelAnimations.find(path) == modelAnimations.end())
+		{
+			auto animations = LoadModelAnimations(path.c_str(), animsCount);
+			modelAnimations[path] = std::make_pair(animations, *animsCount);
+			return animations;
+		}
+		const auto& pair = modelAnimations[path];
+		*animsCount = pair.second;
+		return pair.first;
+	}
+
 	ResourceManager::~ResourceManager()
 	{
 		for (auto kv : textureImages)
 		{
 			UnloadImage(kv.second);
+		}
+		for (auto kv : staticModels)
+		{
+			UnloadModel(kv.second);
+		}
+		for (auto kv : dynamicModels)
+		{
+			UnloadModel(kv.second);
+		}
+		for (auto kv : modelAnimations)
+		{
+			UnloadModelAnimations(kv.second.first, kv.second.second);
 		}
 	}
 } // sage
