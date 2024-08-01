@@ -3,8 +3,10 @@
 //
 
 #include "GameDefaultSystem.hpp"
-#include "components/states/GameStateComponents.hpp"
+#include "components/states/GameStates.hpp"
 #include <iostream>
+#include <tuple>
+
 
 namespace sage
 {
@@ -12,7 +14,7 @@ namespace sage
 	void GameDefaultSystem::OnTimerEnd()
 	{
 		std::cout << "Timer ended! \n";
-		ChangeState<StateGameWaveattack, StateComponents>(gameEntity);
+		ChangeState<StateGameWaveattack, GameStates>(gameEntity);
 	}
 	
 	void GameDefaultSystem::Update()

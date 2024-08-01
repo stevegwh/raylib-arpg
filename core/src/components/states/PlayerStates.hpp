@@ -6,6 +6,8 @@
 
 #include "StateMachineComponent.hpp"
 
+#include <tuple>
+
 namespace sage
 {
 	class StatePlayerDefault : public StateMachineComponent
@@ -18,6 +20,6 @@ namespace sage
 	{
 	public:
 		~StatePlayerCombat() override = default;
-
 	};
+	using PlayerStates = std::tuple<StatePlayerDefault, StatePlayerCombat>;
 } // sage
