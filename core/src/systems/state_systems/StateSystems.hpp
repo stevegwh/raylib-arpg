@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "default/DefaultStateSystems.hpp"
-#include "combat/CombatStateSystems.hpp"
+#include "units/UnitStateSystems.hpp"
+#include "game/GameStateSystem.hpp"
 
 namespace sage
 {
@@ -11,11 +11,17 @@ namespace sage
 
 	public:
 		// Systems
-		std::unique_ptr<DefaultStateSystems> defaultSystems;
-		std::unique_ptr<CombatStateSystems> combatSystems;
+		std::unique_ptr<UnitStateSystems> unitSystems;
+		std::unique_ptr<GameStateSystem> gameSystem;
 		void Update();
 		void Draw3D();
-		StateSystems(entt::registry* _registry, Cursor* _cursor, ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
-			ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem);
+		StateSystems(
+				entt::registry* _registry,
+				Cursor* _cursor,
+				TimerManager* _timerManager,
+				ActorMovementSystem* _actorMovementSystem,
+				CollisionSystem* _collisionSystem,
+				ControllableActorSystem* _controllableActorSystem,
+				NavigationGridSystem* _navigationGridSystem);
 	};
 } // sage

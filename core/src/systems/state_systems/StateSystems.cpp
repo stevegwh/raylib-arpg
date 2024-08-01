@@ -4,26 +4,34 @@ namespace sage
 {
 	void StateSystems::Update()
 	{
-		defaultSystems->Update();
-		combatSystems->Update();
+		unitSystems->Update();
+		gameSystem->Update();
 	}
 
 	void StateSystems::Draw3D()
 	{
-		// defaultStateSystems->Draw3D();
-		combatSystems->Draw3D();
+		unitSystems->Draw3D();
+		// gameSystem->Draw3D();
 	}
 
-	StateSystems::StateSystems(entt::registry* _registry, Cursor* _cursor, ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
-			ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem) :
-		defaultSystems(std::make_unique<DefaultStateSystems>(_registry, _actorMovementSystem))
+	StateSystems::StateSystems(
+			entt::registry* _registry,
+			Cursor* _cursor,
+			TimerManager* _timerManager,
+			ActorMovementSystem* _actorMovementSystem,
+			CollisionSystem* _collisionSystem,
+			ControllableActorSystem* _controllableActorSystem,
+			NavigationGridSystem* _navigationGridSystem)
 	{
-		
-		combatSystems = std::make_unique<CombatStateSystems>(_registry,
-		                                                        _cursor,
-		                                                        _controllableActorSystem,
-		                                                        _actorMovementSystem,
-		                                                        _collisionSystem,
-		                                                        _navigationGridSystem);
+
+		unitSystems = std::make_unique<UnitStateSystems>(
+				_registry,
+				_cursor,
+				_controllableActorSystem,
+				_actorMovementSystem,
+				_collisionSystem,
+				_navigationGridSystem);
+
+		gameSystem = std::make_unique<GameStateSystem>(_registry, _timerManager);
 	}
 }//sage
