@@ -134,7 +134,7 @@ namespace sage
 	void EditorApplication::draw()
 	{
 		BeginDrawing();
-		ClearBackground(RAYWHITE);
+		ClearBackground(BLACK);
 		BeginMode3D(*scene->data->camera->getRaylibCam());
 		scene->Draw3D();
 		scene->DrawDebug();
