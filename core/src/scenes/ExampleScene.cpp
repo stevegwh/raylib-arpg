@@ -63,6 +63,6 @@ namespace sage
 		data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
 		// TODO: Not sure if I like this
-		data->stateSystems->combatSystems->playerCombatLogicSubSystem->Enable();
+		data->stateSystems->unitSystems->playerCombatLogicSubSystem->Enable();
 	}
 } // sage
