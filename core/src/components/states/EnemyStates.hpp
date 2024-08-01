@@ -3,7 +3,10 @@
 //
 
 #pragma once
+
 #include "StateMachineComponent.hpp"
+
+#include <tuple>
 
 namespace sage
 {
@@ -18,4 +21,6 @@ namespace sage
 	public:
 		~StateEnemyCombat() override = default;
 	};
+	
+	using EnemyStates = std::tuple<StateEnemyDefault, StateEnemyCombat>;
 } // sage

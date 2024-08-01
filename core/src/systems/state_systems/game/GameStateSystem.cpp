@@ -4,7 +4,6 @@
 
 #include "GameStateSystem.hpp"
 #include "GameDefaultSystem.hpp"
-#include "components/states/GameStateComponents.hpp"
 
 namespace sage
 {
@@ -23,6 +22,6 @@ namespace sage
 		systems.push_back(defaultSystem.get());
 		systems.push_back(waveSystem.get());
 		// TODO: Seems like a hacky way to do this
-		defaultSystem->ChangeState<StateGameDefault, StateComponents>(gameEntity);
+		defaultSystem->ChangeState<StateGameDefault, GameStates>(gameEntity);
 	}
 } // sage

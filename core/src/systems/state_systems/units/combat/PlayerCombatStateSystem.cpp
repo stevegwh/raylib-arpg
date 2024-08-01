@@ -9,7 +9,6 @@
 #include "components/Animation.hpp"
 #include "components/sgTransform.hpp"
 #include "components/HealthBar.hpp"
-#include "components/states/PlayerStateComponents.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -50,7 +49,7 @@ namespace sage
 		auto& combatable = registry->get<CombatableActor>(entity);
 		if (combatable.target == entt::null)
 		{
-			ChangeState<StatePlayerDefault, StateComponents>(entity);
+			ChangeState<StatePlayerDefault, PlayerStates>(entity);
 			return false;
 		}
 		return true;
@@ -155,7 +154,7 @@ namespace sage
 		}
 
 		auto& playerCombatable = registry->get<CombatableActor>(entity);
-		ChangeState<StatePlayerCombat, StateComponents>(entity);
+		ChangeState<StatePlayerCombat, PlayerStates>(entity);
 
 		auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 		{

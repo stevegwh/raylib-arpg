@@ -3,7 +3,9 @@
 //
 
 #pragma once
+
 #include "StateMachineComponent.hpp"
+#include <tuple>
 
 namespace sage
 {
@@ -18,4 +20,5 @@ namespace sage
 	public:
 		~StateGameWaveattack() override = default;
 	};
+	using GameStates = std::tuple<StateGameDefault, StateGameWaveattack>;
 } // sage
