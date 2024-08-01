@@ -10,7 +10,6 @@
 #include "components/Animation.hpp"
 #include "components/sgTransform.hpp"
 #include "components/HealthBar.hpp"
-#include "components/states/EnemyStateComponents.hpp"
 
 namespace sage
 {
@@ -45,7 +44,7 @@ namespace sage
 		if (combatable.dying) return false;
 		if (combatable.target == entt::null)
 		{
-			ChangeState<StateEnemyDefault, StateComponents>(entity);
+			ChangeState<StateEnemyDefault, EnemyStates>(entity);
 			return false;
 		}
 		return true;
@@ -169,7 +168,7 @@ namespace sage
 
 	void WaveMobCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
 	{
-		ChangeState<StateEnemyCombat, StateComponents>(entity);
+		ChangeState<StateEnemyCombat, EnemyStates>(entity);
 		// Aggro when player hits
 		auto& c = registry->get<CombatableActor>(entity);
 		c.target = attacker;
@@ -192,7 +191,5 @@ namespace sage
 		actorMovementSystem(_actorMovementSystem),
 		collisionSystem(_collisionSystem)
 	{
-		registry->on_construct<StateEnemyCombat>().connect<&WaveMobCombatStateSystem::OnStateEnter>(this);
-		registry->on_destroy<StateEnemyCombat>().connect<&WaveMobCombatStateSystem::OnStateExit>(this);
 	}
 } // sage

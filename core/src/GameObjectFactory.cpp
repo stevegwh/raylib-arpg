@@ -15,8 +15,8 @@
 #include "components/Animation.hpp"
 #include "components/HealthBar.hpp"
 #include "components/CombatableActor.hpp"
-#include "components/states/StateEnemyDefault.hpp"
-#include "components/states/StatePlayerDefault.hpp"
+#include "components/states/EnemyStates.hpp"
+#include "components/states/PlayerStates.hpp"
 
 #include "raymath.h"
 #include <slib.hpp>
@@ -63,7 +63,8 @@ namespace sage
 		transform.movementSpeed = 0.05f;
 		registry->emplace<MoveableActor>(id);
 
-		auto model = LoadModel(modelPath);
+		//auto model = LoadModel(modelPath);
+		auto model = ResourceManager::DynamicModelLoad(modelPath);
 
 		auto& animation = registry->emplace<Animation>(id, modelPath, &model);
 		animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -85,7 +86,7 @@ namespace sage
 		combatable.actorType = CombatableActorType::WAVEMOB;
 		{
 			entt::sink sink{ combatable.onHit };
-			sink.connect<&WaveMobCombatStateSystem::OnHit>(game->stateSystems->combatSystems->waveMobCombatLogicSubSystem);
+			sink.connect<&WaveMobCombatStateSystem::OnHit>(game->stateSystems->unitSystems->waveMobCombatLogicSubSystem);
 		}
 
 		// ---
@@ -160,6 +161,8 @@ namespace sage
 	entt::entity GameObjectFactory::createPlayer(entt::registry* registry, GameData* game, Vector3 position,
 		const char* name)
 	{
+		// TODO: On load, the actor's collision box doesn't seem to be correct. Causes a bug that, if I don't move 
+		//  before casting a move, the enemies don't register that the player has a collision box.
 		entt::entity id = registry->create();
 		auto modelPath = "resources/models/gltf/hero2.glb";
 
@@ -236,11 +239,11 @@ namespace sage
 		BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
 		auto& collideable = registry->emplace<Collideable>(id, bb);
 		collideable.collisionLayer = CollisionLayer::PLAYER;
-		game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
 		{
 			entt::sink sink{ transform.onPositionUpdate };
 			sink.connect<&CollisionSystem::OnTransformUpdate>(*game->collisionSystem);
 		}
+		game->collisionSystem->OnTransformUpdate(id);
 		auto& worldObject = registry->emplace<WorldObject>(id);
 
 		auto& actor = registry->emplace<ControllableActor>(id);

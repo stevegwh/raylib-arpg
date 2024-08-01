@@ -1008,7 +1008,7 @@ namespace sage
     }
 
 	NavigationGridSystem::NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem) :
-		BaseSystem<NavigationGridSquare>(_registry), collisionSystem(_collisionSystem)
+		BaseSystem(_registry), collisionSystem(_collisionSystem)
 	{
 	}
 } // sage

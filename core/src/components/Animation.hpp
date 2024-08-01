@@ -10,6 +10,8 @@
 
 #include "raylib.h"
 
+#include "ResourceManager.hpp"
+
 namespace sage
 {
 	enum class AnimationEnum
@@ -38,17 +40,12 @@ namespace sage
 			model(_model)
 		{
 			animsCount = 0;
-			animations = LoadModelAnimations(_modelPath, &animsCount);
+			animations = ResourceManager::ModelAnimationLoad(_modelPath, &animsCount);
 			animIndex = 0;
 		}
 
 		Animation(const Animation&) = delete;
 		Animation& operator=(const Animation&) = delete;
-
-		~Animation()
-		{
-			UnloadModelAnimations(animations, animsCount);
-		}
 
 		bool ChangeAnimationByEnum(AnimationEnum animEnum, bool _oneShot = false)
 		{

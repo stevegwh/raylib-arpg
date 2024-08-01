@@ -260,8 +260,7 @@ void CollisionSystem::BoundingBoxDraw(entt::entity entityId, Color color) const
 		return matrix;
 	}
 
-	CollisionSystem::CollisionSystem(entt::registry* _registry) :
-		BaseSystem<Collideable>(_registry)
+	CollisionSystem::CollisionSystem(entt::registry* _registry) : BaseSystem(_registry)
 	{
 		collisionMatrix = CreateCollisionMatrix();
 	}

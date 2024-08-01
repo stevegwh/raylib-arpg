@@ -14,7 +14,7 @@ namespace sage
 {
 	using CollisionMatrix = std::vector<std::vector<bool>>;
 
-	class CollisionSystem : public BaseSystem<Collideable>
+	class CollisionSystem : public BaseSystem
 	{
 		[[nodiscard]] static CollisionMatrix CreateCollisionMatrix();
 

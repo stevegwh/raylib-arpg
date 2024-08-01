@@ -5,7 +5,6 @@
 
 
 #include "PlayerCombatStateSystem.hpp"
-#include "components/states/PlayerStateComponents.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
 #include "components/sgTransform.hpp"
@@ -50,7 +49,7 @@ namespace sage
 		auto& combatable = registry->get<CombatableActor>(entity);
 		if (combatable.target == entt::null)
 		{
-			ChangeState<StatePlayerDefault, StateComponents>(entity);
+			ChangeState<StatePlayerDefault, PlayerStates>(entity);
 			return false;
 		}
 		return true;
@@ -155,7 +154,7 @@ namespace sage
 		}
 
 		auto& playerCombatable = registry->get<CombatableActor>(entity);
-		ChangeState<StatePlayerCombat, StateComponents>(entity);
+		ChangeState<StatePlayerCombat, PlayerStates>(entity);
 
 		auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
 		{
@@ -227,7 +226,5 @@ namespace sage
 		StateMachineSystem(_registry),
 		controllableActorSystem(_controllableActorSystem)
 	{
-		registry->on_construct<StatePlayerCombat>().connect<&PlayerCombatStateSystem::OnStateEnter>(this);
-		registry->on_destroy<StatePlayerCombat>().connect<&PlayerCombatStateSystem::OnStateExit>(this);
 	}
 } // sage

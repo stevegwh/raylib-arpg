@@ -254,7 +254,7 @@ namespace sage
 
 	ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, CollisionSystem* _collisionSystem,
 		NavigationGridSystem* _navigationGridSystem) :
-		BaseSystem<MoveableActor>(_registry), collisionSystem(_collisionSystem),
+		BaseSystem(_registry), collisionSystem(_collisionSystem),
 		navigationGridSystem(_navigationGridSystem)
 	{
 	}
