@@ -14,14 +14,16 @@ namespace sage
 			system->Update();
 		}
 	}
-	GameStateSystem::GameStateSystem(entt::registry* _registry, TimerManager* _timerManager)
+	GameStateSystem::GameStateSystem(
+			entt::registry* _registry,
+			GameData* _gameData,
+			TimerManager* _timerManager)
 	{
 		gameEntity = _registry->create();
 		defaultSystem = std::make_unique<GameDefaultSystem>(_registry, gameEntity, _timerManager);
-		waveSystem = std::make_unique<GameWaveSystem>(_registry, gameEntity, _timerManager);
+		waveSystem = std::make_unique<GameWaveSystem>(_registry, _gameData, gameEntity, _timerManager);
 		systems.push_back(defaultSystem.get());
 		systems.push_back(waveSystem.get());
-		// TODO: Seems like a hacky way to do this
-		defaultSystem->ChangeState<StateGameDefault, GameStates>(gameEntity);
+		_registry->emplace<StateGameDefault>(gameEntity);
 	}
 } // sage

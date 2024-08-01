@@ -14,6 +14,7 @@
 
 namespace sage
 {
+	struct GameData;
 	struct TimerManager;
 	class GameStateSystem
 	{
@@ -24,7 +25,10 @@ namespace sage
 		std::unique_ptr<GameDefaultSystem> defaultSystem;
 		std::unique_ptr<GameWaveSystem> waveSystem;
 		void Update();
-		GameStateSystem(entt::registry* _registry, TimerManager* _timerManager);
+		GameStateSystem(
+				entt::registry* _registry, 
+				GameData* _gameData,
+				TimerManager* _timerManager);
 	};
 
 } // sage

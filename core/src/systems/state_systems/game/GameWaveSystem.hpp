@@ -12,21 +12,23 @@
 
 namespace sage
 {
-
+	struct GameData; // forward dec
 	class GameWaveSystem : public StateMachineSystem<GameWaveSystem, StateGameWaveattack>
 	{
+		GameData* gameData;
 		TimerManager* timerManager;
+		void initWave();
 		void OnTimerEnd();
 		entt::delegate<void()> callback;
-		// Countdown to next wave
-		// Swap state when timer reached
-
 	public:
-		GameWaveSystem(entt::registry* _registry, entt::entity _gameEntity, TimerManager* _timerManager);
+		GameWaveSystem(
+				entt::registry* _registry,
+				GameData* _gameData,
+				entt::entity _gameEntity, 
+				TimerManager* _timerManager);
 		void Update() override;
 		void Draw3D() override;
 		void OnStateEnter(entt::entity entity) override;
 		void OnStateExit(entt::entity entity) override;
 	};
-
 } // sage

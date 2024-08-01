@@ -29,7 +29,7 @@ namespace sage
 	
 	void GameDefaultSystem::OnStateEnter(entt::entity entity)
 	{
-		timerId = timerManager->AddTimer(5.0f, callback);
+		timerId = timerManager->AddTimer(20.0f, callback);
 	}
 	
 	void GameDefaultSystem::OnStateExit(entt::entity entity)
