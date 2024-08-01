@@ -44,9 +44,8 @@ namespace sage
 		stateSystems = std::make_unique<StateSystems>(_registry, this, cursor.get(), timerManager.get(), actorMovementSystem.get(), collisionSystem.get(),
 			controllableActorSystem.get(), navigationGridSystem.get());
 		
-		abilitySystem = std::make_unique<AbilitySystem>(_registry, cursor.get(), userInput.get(), actorMovementSystem.get(),
+		abilitySystem = std::make_unique<AbilitySystem>(_registry, camera.get(), cursor.get(), userInput.get(), actorMovementSystem.get(),
 			collisionSystem.get(), controllableActorSystem.get(), navigationGridSystem.get(), timerManager.get());
-
 	}
 
 	void GameData::Load()
