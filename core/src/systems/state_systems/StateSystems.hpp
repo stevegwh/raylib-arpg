@@ -6,7 +6,7 @@
 
 namespace sage
 {
-	struct GameData;
+	class GameData;
 	class StateSystems
 	{
 

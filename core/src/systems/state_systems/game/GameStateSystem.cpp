@@ -3,7 +3,8 @@
 //
 
 #include "GameStateSystem.hpp"
-#include "GameDefaultSystem.hpp"
+#include "components/states/GameStates.hpp"
+
 
 namespace sage
 {

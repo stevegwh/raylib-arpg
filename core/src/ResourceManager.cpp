@@ -6,6 +6,7 @@
 
 #include <unordered_map>
 #include <utility>
+#include <string.h>
 
 #include "raylib/src/config.h"
 #include "raymath.h"
