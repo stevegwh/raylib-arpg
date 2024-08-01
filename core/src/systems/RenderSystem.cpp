@@ -29,8 +29,7 @@ namespace sage
 		});
 	}
 
-	RenderSystem::RenderSystem(entt::registry* _registry)
-			:BaseSystem<Renderable>(_registry)
+	RenderSystem::RenderSystem(entt::registry* _registry) : BaseSystem(_registry)
 	{
 	}
 }

@@ -15,7 +15,7 @@ namespace sage
 		FAVOUR_RIGHT
 	};
 
-	class NavigationGridSystem : public BaseSystem<NavigationGridSquare>
+	class NavigationGridSystem : public BaseSystem
 	{
 		std::vector<std::pair<int, int>> directions = {
 			{1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, 1}, {-1, -1}, {1, -1}
