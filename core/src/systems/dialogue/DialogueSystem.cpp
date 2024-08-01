@@ -42,7 +42,7 @@ namespace sage
 		camera->CutscenePose(npcTrans);
 		camera->LockInput();
 
-		cursor->LockCursor();
+		cursor->DisableContextSwitching();
 		controllableActorSystem->Disable();
 		active = true;
 
@@ -63,7 +63,7 @@ namespace sage
 		}
 
 		camera->UnlockInput();
-		cursor->UnlockCursor();
+		cursor->EnableContextSwitching();
 		controllableActorSystem->Enable();
 		active = false;
 		registry->get<Animation>(clickedNPC).ChangeAnimation(0); // TODO: Change to an enum

@@ -4,7 +4,6 @@
 //
 #include "WaveMobDefaultStateSystem.hpp"
 #include "components/Animation.hpp"
-#include "components/states/StateEnemyDefault.hpp"
 #include "components/sgTransform.hpp"
 
 namespace sage
@@ -32,12 +31,12 @@ namespace sage
 	{
 	}
 
-	WaveMobDefaultStateSystem::WaveMobDefaultStateSystem(entt::registry* _registry,
-		ActorMovementSystem* _actorMovementSystem) :
-		StateMachineSystem(_registry),
-		actorMovementSystem(_actorMovementSystem)
+	WaveMobDefaultStateSystem::WaveMobDefaultStateSystem(
+			entt::registry* _registry,
+			ActorMovementSystem* _actorMovementSystem)
+			:
+			StateMachineSystem(_registry),
+			actorMovementSystem(_actorMovementSystem)
 	{
-		registry->on_construct<StateEnemyDefault>().connect<&WaveMobDefaultStateSystem::OnStateEnter>(this);
-		registry->on_destroy<StateEnemyDefault>().connect<&WaveMobDefaultStateSystem::OnStateExit>(this);
 	}
 } // sage

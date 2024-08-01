@@ -6,10 +6,11 @@
 
 #include "systems/state_systems/StateMachineSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
+#include "components/states/PlayerStates.hpp"
 
 namespace sage
 {
-	class PlayerDefaultStateSystem : public StateMachineSystem
+	class PlayerDefaultStateSystem : public StateMachineSystem<PlayerDefaultStateSystem, StatePlayerDefault>
 	{
 		ActorMovementSystem* actorMovementSystem;
 

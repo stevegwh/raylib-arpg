@@ -1,7 +1,6 @@
 #include "PlayerDefaultStateSystem.hpp"
 
 #include "components/Animation.hpp"
-#include "components/states/StatePlayerDefault.hpp"
 
 namespace sage
 {
@@ -28,7 +27,5 @@ namespace sage
 		StateMachineSystem(_registry),
 		actorMovementSystem(_actorMovementSystem)
 	{
-		registry->on_construct<StatePlayerDefault>().connect<&PlayerDefaultStateSystem::OnStateEnter>(this);
-		registry->on_destroy<StatePlayerDefault>().connect<&PlayerDefaultStateSystem::OnStateExit>(this);
 	}
 }
