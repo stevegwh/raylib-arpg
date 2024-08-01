@@ -54,16 +54,12 @@ namespace sage
         // std::string mapPath = "resources/models/obj/level-basic.obj";
         auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
-        auto enemy2 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 10.0f}, "Enemy");
-        auto enemy3 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 20.0f}, "Enemy");
-        auto enemy4 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 30.0f}, "Enemy");
-        auto enemy5 = GameObjectFactory::createEnemy(registry, data.get(), {52.0f, 0, 40.0f}, "Enemy");
 
 		// TODO: tmp
 		const auto& col = registry->get<Collideable>(knight);
 		data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
 		// TODO: Not sure if I like this
-		data->stateSystems->combatSystems->playerCombatLogicSubSystem->Enable();
+		data->stateSystems->unitSystems->playerCombatLogicSubSystem->Enable();
 	}
 } // sage

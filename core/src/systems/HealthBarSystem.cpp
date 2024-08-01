@@ -55,7 +55,7 @@ namespace sage
 
 
 	HealthBarSystem::HealthBarSystem(entt::registry* _registry, Camera* _camera) :
-		BaseSystem<HealthBar>(_registry), camera(_camera)
+		BaseSystem(_registry), camera(_camera)
 	{
 	}
 } // sage

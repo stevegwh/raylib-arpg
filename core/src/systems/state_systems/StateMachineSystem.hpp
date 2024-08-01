@@ -5,13 +5,13 @@
 #pragma once
 
 #include "../BaseSystem.hpp"
-#include "components/states/StateMachineComponent.hpp"
 
 #include <entt/entt.hpp>
 
 namespace sage
 {
-	class StateMachineSystem : public BaseSystem<StateMachineComponent>
+	template<typename Derived, typename DerivedStateComponent>
+	class StateMachineSystem : public BaseSystem
 	{
 		template <typename Tuple, size_t... Indices>
 		void RemoveStateComponents(entt::entity entity, std::index_sequence<Indices...>)
@@ -51,11 +51,15 @@ namespace sage
 			newComponent.Enable(entity);
 		}
 
-		virtual void Update() = 0;
-		virtual void Draw3D() = 0;
+		void Update() override = 0;
+		void Draw3D() override = 0;
 		virtual void OnStateEnter(entt::entity entity) = 0;
 		virtual void OnStateExit(entt::entity entity) = 0;
 
-		explicit StateMachineSystem(entt::registry* _registry);
+		explicit StateMachineSystem(entt::registry* _registry) : BaseSystem(_registry)
+		{
+			registry->template on_construct<DerivedStateComponent>().template connect<&Derived::OnStateEnter>(static_cast<Derived*>(this));
+			registry->template on_destroy<DerivedStateComponent>().template connect<&Derived::OnStateExit>(static_cast<Derived*>(this));
+		}
 	};
 } // sage
