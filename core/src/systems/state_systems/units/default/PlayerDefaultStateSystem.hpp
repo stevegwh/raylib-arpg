@@ -6,7 +6,7 @@
 
 #include "systems/state_systems/StateMachineSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
-#include "components/states/StatePlayerDefault.hpp"
+#include "components/states/PlayerStates.hpp"
 
 namespace sage
 {

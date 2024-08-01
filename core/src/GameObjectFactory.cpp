@@ -15,8 +15,8 @@
 #include "components/Animation.hpp"
 #include "components/HealthBar.hpp"
 #include "components/CombatableActor.hpp"
-#include "components/states/StateEnemyDefault.hpp"
-#include "components/states/StatePlayerDefault.hpp"
+#include "components/states/EnemyStates.hpp"
+#include "components/states/PlayerStates.hpp"
 
 #include "raymath.h"
 #include <slib.hpp>

@@ -1,5 +1,5 @@
 //
-// Created by Steve Wheeler on 31/07/2024.
+// Created by Steve Wheeler on 01/08/2024.
 //
 
 #pragma once
@@ -7,6 +7,12 @@
 
 namespace sage
 {
+	class StateGameDefault : public StateMachineComponent
+	{
+	public:
+		~StateGameDefault() override = default;
+	};
+
 	class StateGameWaveattack : public StateMachineComponent
 	{
 	public:

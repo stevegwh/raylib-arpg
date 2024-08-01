@@ -5,7 +5,7 @@
 #pragma once
 
 #include "systems/state_systems/StateMachineSystem.hpp"
-#include "components/states/StatePlayerCombat.hpp"
+#include "components/states/PlayerStates.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
 #include "entt/entt.hpp"

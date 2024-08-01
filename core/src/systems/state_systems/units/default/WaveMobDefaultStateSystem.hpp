@@ -8,7 +8,7 @@
 
 #include "systems/state_systems/StateMachineSystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
-#include "components/states/StateEnemyDefault.hpp"
+#include "components/states/EnemyStates.hpp"
 
 namespace sage
 {
