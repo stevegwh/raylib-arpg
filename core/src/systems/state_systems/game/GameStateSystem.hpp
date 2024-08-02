@@ -14,8 +14,9 @@
 
 namespace sage
 {
-	struct GameData;
-	struct TimerManager;
+	class GameData;
+	class TimerManager;
+	class BaseSystem;
 	class GameStateSystem
 	{
 		entt::entity gameEntity;
