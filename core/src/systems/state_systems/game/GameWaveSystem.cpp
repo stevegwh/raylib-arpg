@@ -11,7 +11,6 @@ namespace sage
 {
 	void GameWaveSystem::initWave()
 	{
-		// TODO: This is far, far too slow. Need to buffer the enemies models or share mesh data
 		auto enemy2 = GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 10.0f}, "Enemy");
 		auto enemy3 = GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 20.0f}, "Enemy");
 		auto enemy4 = GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 30.0f}, "Enemy");
@@ -48,5 +47,7 @@ namespace sage
 			StateMachineSystem(_registry),
 			gameData(_gameData)
 	{
+		// Preload model(s)
+		ResourceManager::DynamicModelLoad("resources/models/gltf/goblin.glb");
 	}
 } // sage

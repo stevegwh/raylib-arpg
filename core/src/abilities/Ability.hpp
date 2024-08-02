@@ -3,6 +3,8 @@
 #include <entt/entt.hpp>
 
 #include <vector>
+
+#include "components/CombatableActor.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "TimerManager.hpp"
 
@@ -10,6 +12,7 @@ namespace sage
 {
 	struct Ability
 	{
+		AttackData attackData;
 		TimerManager* timerManager;
         entt::registry* registry;
         CollisionSystem* collisionSystem;

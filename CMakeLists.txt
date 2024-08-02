@@ -21,6 +21,7 @@ FetchContent_Declare(
         GIT_TAG "v3.13.2"
 )
 FetchContent_MakeAvailable(entt)
+set(GRAPHICS GRAPHICS_API_OPENGL_43)
 add_subdirectory(vendor/raylib)
 include_directories(vendor)
 

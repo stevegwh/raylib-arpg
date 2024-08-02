@@ -12,7 +12,7 @@
 
 namespace sage
 {
-	struct GameData; // forward dec
+	class GameData; // forward dec
 	class GameWaveSystem : public StateMachineSystem<GameWaveSystem, StateGameWaveattack>
 	{
 		GameData* gameData;

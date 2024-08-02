@@ -100,11 +100,15 @@ namespace sage
 		c.autoAttackTick = 0;
 
 		auto& animation = registry->get<Animation>(entity);
-		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
+		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
 		if (registry->any_of<CombatableActor>(c.target))
 		{
 			auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-			enemyCombatable.onHit.publish(c.target, entity, 10); // TODO: tmp dmg
+			// TODO: Make the player's AutoAttack an ability and use it here
+			AttackData attack;
+			attack.element = AttackElement::PHYSICAL;
+			attack.damage = 10; // TODO: tmp dmg
+			enemyCombatable.onHit.publish(c.target, entity, attack); // TODO: tmp dmg
 		}
 	}
 

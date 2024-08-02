@@ -63,7 +63,8 @@ namespace sage
 		transform.movementSpeed = 0.05f;
 		registry->emplace<MoveableActor>(id);
 
-		auto model = LoadModel(modelPath);
+		//auto model = LoadModel(modelPath);
+		auto model = ResourceManager::DynamicModelLoad(modelPath);
 
 		auto& animation = registry->emplace<Animation>(id, modelPath, &model);
 		animation.animationMap[AnimationEnum::IDLE] = 0;
