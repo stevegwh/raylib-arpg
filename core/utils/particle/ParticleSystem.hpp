@@ -130,4 +130,5 @@ public:
 	void Stop();
 	void Burst();
 	void Draw(const Shader& shader) const;
+	void Draw() const;
 };

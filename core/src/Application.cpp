@@ -28,7 +28,7 @@ namespace sage
 	void Application::init()
 	{
 		InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
-		SetConfigFlags(FLAG_MSAA_4X_HINT);
+		//SetConfigFlags(FLAG_MSAA_4X_HINT);
         Image icon = LoadImage("resources/icon.png");
         SetWindowIcon(icon);
 		HideCursor();

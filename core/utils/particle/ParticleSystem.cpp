@@ -245,6 +245,7 @@ unsigned long Emitter::Update(float dt)
 	return counter;
 }
 
+// Emitter_Draw draws all active particles.
 void Emitter::Draw(Camera3D* const camera) const
 {
 	BeginBlendMode(config.blendMode);
@@ -259,22 +260,6 @@ void Emitter::Draw(Camera3D* const camera) const
 	}
 	EndBlendMode();
 }
-
-// Emitter_Draw draws all active particles.
-//void Emitter::Draw(Camera3D* const camera) const
-//{
-//	BeginBlendMode(config.blendMode);
-//	for (size_t i = 0; i < config.capacity; i++)
-//	{
-//		auto& p = particles[i];
-//		if (p->active)
-//		{
-//			DrawBillboard(*camera, config.texture, particles[i]->position, particles[i]->size,
-//					LinearFade(config.startColor, config.endColor, p->age / p->ttl));
-//		}
-//	}
-//	EndBlendMode();
-//}
 
 // ParticleSystem constructor
 ParticleSystem::ParticleSystem(Camera* _camera)
@@ -376,6 +361,15 @@ void ParticleSystem::Burst()
 	for (auto& emitter : emitters)
 	{
 		emitter->Burst();
+	}
+}
+
+// ParticleSystem_Draw runs Emitter_Draw on all registered Emitters.
+void ParticleSystem::Draw() const
+{
+	for (auto& emitter : emitters)
+	{
+		emitter->Draw(camera);
 	}
 }
 
