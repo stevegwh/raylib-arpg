@@ -145,6 +145,7 @@ namespace sage
 		float angle = atan2f(direction.x, direction.z) * RAD2DEG;
 		actorTrans.SetRotation({0, angle, 0}, entity);
 		combatableActor.autoAttackTick = 0;
+		// onHit.publish?
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 	}
 
@@ -166,7 +167,7 @@ namespace sage
 	{
 	}
 
-	void WaveMobCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, float damage)
+	void WaveMobCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, AttackData attackData)
 	{
 		ChangeState<StateEnemyCombat, EnemyStates>(entity);
 		// Aggro when player hits
@@ -174,7 +175,7 @@ namespace sage
 		c.target = attacker;
 
 		auto& healthbar = registry->get<HealthBar>(entity);
-		healthbar.Decrement(entity, damage);
+		healthbar.Decrement(entity, attackData.damage);
 		if (healthbar.hp <= 0)
 		{
 			c.target = entt::null;
