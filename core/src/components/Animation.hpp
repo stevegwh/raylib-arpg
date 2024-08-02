@@ -31,7 +31,9 @@ namespace sage
 		Model* model;
 		unsigned int animIndex = 0;
 		unsigned int animCurrentFrame = 0;
+		unsigned int animLastFrame = 0;
 		int animsCount;
+		int animSpeed = 1;
 		bool oneShot = false;
 		entt::sigh<void(entt::entity)> onAnimationEnd{};
 		entt::sigh<void(entt::entity)> onAnimationStart{};
@@ -47,18 +49,30 @@ namespace sage
 		Animation(const Animation&) = delete;
 		Animation& operator=(const Animation&) = delete;
 
-		bool ChangeAnimationByEnum(AnimationEnum animEnum, bool _oneShot = false)
+		bool ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed, bool _oneShot = false)
 		{
 			if (!animationMap.contains(animEnum)) return false;
-			ChangeAnimation(animationMap.at(animEnum), _oneShot);
+			ChangeAnimation(animationMap.at(animEnum), _animSpeed, _oneShot);
 			return true;
 		}
 
-		void ChangeAnimation(int index, bool _oneShot = false)
+		bool ChangeAnimationByEnum(AnimationEnum animEnum, bool _oneShot = false)
 		{
+			return ChangeAnimationByEnum(animEnum, 1, _oneShot);
+		}
+
+		void ChangeAnimation(int index, int _animSpeed, bool _oneShot = false)
+		{
+			animSpeed = _animSpeed;
 			animIndex = index;
 			oneShot = _oneShot;
 			if (oneShot) animCurrentFrame = 0;
 		}
+
+		void ChangeAnimation(int index, bool _oneShot = false)
+		{
+			ChangeAnimation(index, 1, _oneShot);
+		}
+
 	};
 }
