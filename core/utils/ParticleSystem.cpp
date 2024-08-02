@@ -4,7 +4,6 @@
 
 #include "ParticleSystem.hpp"
 
-
 #include <iostream>
 
 float GetRandomFloat(float from, float to) {
@@ -23,7 +22,7 @@ namespace sage
 		rlUnloadVertexArray(particleVao);
 	}
 
-	ParticleSystem::ParticleSystem(Camera3D* _camera) : camera(_camera)
+	ParticleSystem::ParticleSystem(Camera3D* _camera) : camera(_camera), origin({ 3, 0, 0 })
 	{
 		// Compute shader for updating particles.
 		char* shaderCode = LoadFileText("resources/shaders/particle_compute.glsl");
@@ -56,9 +55,9 @@ namespace sage
 			// We only use the XYZ components of position and velocity.
 			// Use the remainder for extra effects if needed, or create more buffers.
 			positions[i] = (Vector4){
-				GetRandomFloat(-0.5, 0.5),
-				GetRandomFloat(-0.5, 0.5),
-				GetRandomFloat(-0.5, 0.5),
+				origin.x + GetRandomFloat(-0.5, 0.5),
+				origin.y + GetRandomFloat(-0.5, 0.5),
+				origin.z + GetRandomFloat(-0.5, 0.5),
 				0,
 			};
 			velocities[i] = (Vector4){ 0, 0, 0, 0 };
@@ -68,6 +67,8 @@ namespace sage
 		ssbo0 = rlLoadShaderBuffer(numParticles * sizeof(Vector4), positions, RL_DYNAMIC_COPY);
 		ssbo1 = rlLoadShaderBuffer(numParticles * sizeof(Vector4), velocities, RL_DYNAMIC_COPY);
 		ssbo2 = rlLoadShaderBuffer(numParticles * sizeof(Vector4), positions, RL_DYNAMIC_COPY);
+
+
 
 		// For instancing we need a Vertex Array Object.
 		// Raylib Mesh* is inefficient for millions of particles.
@@ -95,8 +96,44 @@ namespace sage
 
 	}
 
+	void ParticleSystem::resetParticles()
+	{
+		auto* positions = (Vector4*)RL_MALLOC(sizeof(Vector4) * numParticles);
+		auto* velocities = (Vector4*)RL_MALLOC(sizeof(Vector4) * numParticles);
+
+		for (int i = 0; i < numParticles; i++)
+		{
+			positions[i] = (Vector4){
+				origin.x + GetRandomFloat(-0.5f, 0.5f),
+				origin.y + GetRandomFloat(-0.5f, 0.5f),
+				origin.z + GetRandomFloat(-0.5f, 0.5f),
+				0,
+			};
+			velocities[i] = (Vector4){ 0, 0, 0, 0 };
+		}
+
+		rlUpdateShaderBuffer(ssbo0, positions, numParticles * sizeof(Vector4), 0);
+		rlUpdateShaderBuffer(ssbo1, velocities, numParticles * sizeof(Vector4), 0);
+		rlUpdateShaderBuffer(ssbo2, positions, numParticles * sizeof(Vector4), 0);
+
+		RL_FREE(positions);
+		RL_FREE(velocities);
+
+		time = 0.0f;
+	}
+
 	void ParticleSystem::Update()
 	{
+		if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
+		{
+			Vector2 mousePos = GetMousePosition();
+			Ray ray = GetMouseRay(mousePos, *camera);
+			Vector3 newOrigin = Vector3Add(ray.position, Vector3Scale(ray.direction, 10.0f)); // Adjust the scale factor as needed
+			SetOrigin(newOrigin);
+			//ResetTime(); // You'll need to implement this method to reset the time to 0
+			time = 0.0f;
+		}
+
 		float deltaTime = GetFrameTime();
 		numInstances = (int)(instances_x1000 / 1000 * numParticles);
 
@@ -110,6 +147,7 @@ namespace sage
 		rlSetUniform(3, &sigma, SHADER_UNIFORM_FLOAT, 1);
 		rlSetUniform(4, &rho, SHADER_UNIFORM_FLOAT, 1);
 		rlSetUniform(5, &beta, SHADER_UNIFORM_FLOAT, 1);
+		rlSetUniform(6, &origin, SHADER_UNIFORM_VEC3, 1);
 
 		rlBindShaderBuffer(ssbo0, 0);
 		rlBindShaderBuffer(ssbo1, 1);
@@ -120,17 +158,12 @@ namespace sage
 		rlDisableShader();
 		time += deltaTime;
 
-//		Vector4* positions = (Vector4*)RL_MALLOC(sizeof(Vector4) * numParticles);
-//		rlReadShaderBuffer(ssbo0, positions, sizeof(Vector4) * numParticles, 0);
-//		for (int i = 0; i < 5; i++)  // Check first 5 particles
-//		{
-//			std::cout << TextFormat("Particle %d position: (%f, %f, %f)\n", i, positions[i].x, positions[i].y, positions[i].z) << std::endl;
-//		}
-//		RL_FREE(positions);
+
 	}
 
 	void ParticleSystem::Draw()
 	{
+		if (!IsShaderReady(particleShader)) return;
 		rlEnableShader(particleShader.id);
 
 		// Because we use rlgl, we must take care of matrices ourselves.
@@ -152,6 +185,12 @@ namespace sage
 		rlDisableVertexArray();
 		rlDisableShader();
 
-		DrawCubeWires((Vector3){ 0, 0, 0 }, 1.0, 1.0, 1.0, DARKGRAY);
+		DrawCubeWires((Vector3) { 0, 0, 0 }, 1.0, 1.0, 1.0, DARKGRAY);
+	}
+
+	void ParticleSystem::SetOrigin(Vector3 _origin)
+	{
+		origin = _origin;
+		resetParticles();
 	}
 } // sage

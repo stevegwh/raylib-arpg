@@ -47,8 +47,8 @@ namespace sage
 
 		virtual void Update()
 		{
-			data->renderSystem->Update();
 			data->camera->Update();
+			data->renderSystem->Update();
 			data->userInput->ListenForInput();
 			data->cursor->Update();
 		}

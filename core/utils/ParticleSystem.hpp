@@ -16,6 +16,7 @@ namespace sage
 	class ParticleSystem
 	{
 		Camera3D* camera;
+		Vector3 origin;
 		Shader particleShader;
 		int computeShader;
 
@@ -33,11 +34,13 @@ namespace sage
 		int ssbo2;
 		int particleVao;
 		int numInstances;
+		void resetParticles();
 	public:
 		~ParticleSystem();
 		ParticleSystem(Camera3D* _camera);
 		void Update();
 		void Draw();
+		void SetOrigin(Vector3 _origin);
 	};
 
 } // sage

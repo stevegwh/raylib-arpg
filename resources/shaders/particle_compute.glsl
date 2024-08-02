@@ -32,6 +32,7 @@ layout(location=2) uniform float deltaTime;
 layout(location=3) uniform float sigma;
 layout(location=4) uniform float rho;
 layout(location=5) uniform float beta;
+layout(location=6) uniform vec3 origin;
 
 const float PI = 3.14159;
 
@@ -44,6 +45,9 @@ void main()
     if (time == 0) {
         pos = startPositions[index].xyz;
     }
+
+    // Transform the position relative to the origin
+    pos = pos - origin;
 
     // Since our particles are in the (-1, 1) space
     // we transform the position to be suitable for the Lorenz system.
@@ -58,6 +62,7 @@ void main()
     // Update and transform back to (-1, 1).
     pos += vel*deltaTime*timeScale;
     pos = (pos - vec3(0, 0, 30)) / 30;
+    pos = pos + origin;
 
     // Assign the new values to the buffers.
     positions[index].xyz = pos;

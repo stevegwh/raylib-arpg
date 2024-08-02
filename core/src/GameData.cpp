@@ -21,7 +21,6 @@ namespace sage
 	{
 		userInput = std::make_unique<UserInput>(_keyMapping, settings);
 		camera = std::make_unique<Camera>(userInput.get());
-		particleSystem = std::make_unique<ParticleSystem>(camera->getRaylibCam());
 		cursor = std::make_unique<Cursor>(registry,
 			collisionSystem.get(),
 			navigationGridSystem.get(),
@@ -47,7 +46,7 @@ namespace sage
 		
 		abilitySystem = std::make_unique<AbilitySystem>(_registry, cursor.get(), userInput.get(), actorMovementSystem.get(),
 			collisionSystem.get(), controllableActorSystem.get(), navigationGridSystem.get(), timerManager.get());
-
+		particleSystem = std::make_unique<ParticleSystem>(camera->getRaylibCam());
 	}
 
 	void GameData::Load()

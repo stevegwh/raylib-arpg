@@ -7,20 +7,29 @@
 
 #include "raylib.h"
 
+static bool particleSystemEnabled = false;
+
 namespace sage
 {
 	void ExampleScene::Update()
 	{
 		Scene::Update();
-		data->actorMovementSystem->Update();
-		data->controllableActorSystem->Update();
-		data->animationSystem->Update();
-		data->dialogueSystem->Update();
-		data->healthBarSystem->Update();
-		data->stateSystems->Update();
-        data->abilitySystem->Update();
-		data->timerManager->Update();
+		//data->actorMovementSystem->Update();
+		//data->controllableActorSystem->Update();
+		//data->animationSystem->Update();
+		//data->dialogueSystem->Update();
+		//data->healthBarSystem->Update();
+		//data->stateSystems->Update();
+  //      data->abilitySystem->Update();
+		//data->timerManager->Update();
+		if (IsKeyReleased(KEY_SPACE))
+		{
+			particleSystemEnabled = !particleSystemEnabled;
+		}
+		if (!particleSystemEnabled) return;
+
 		data->particleSystem->Update();
+
 	}
 
 	void ExampleScene::Draw2D()
@@ -34,6 +43,7 @@ namespace sage
 //		data->healthBarSystem->Draw3D();
 //		data->stateSystems->Draw3D();
 //		Scene::Draw3D();
+		if (!particleSystemEnabled) return;
 		data->particleSystem->Draw();
 	}
 
