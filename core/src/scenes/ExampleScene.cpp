@@ -34,7 +34,7 @@ namespace sage
 		data->healthBarSystem->Draw3D();
 		data->stateSystems->Draw3D();
 		Scene::Draw3D();
-		fountain->Draw();
+		fountain->Draw3D();
 		data->abilitySystem->Draw3D();
 	}
 
@@ -64,6 +64,6 @@ namespace sage
 		// TODO: Not sure if I like this
 		data->stateSystems->unitSystems->playerCombatLogicSubSystem->Enable();
 		
-		fountain = std::make_unique<FountainEffect>(data->camera->getRaylibCam());
+		fountain = std::make_unique<SpiralFountainVFX>(data->camera->getRaylibCam());
 	}
 } // sage

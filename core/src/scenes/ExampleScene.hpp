@@ -9,7 +9,7 @@
 
 #include "entt/entt.hpp"
 #include "GameData.hpp"
-#include "particle/FountainEffect.hpp"
+#include "particle/SpiralFountainVFX.hpp"
 
 #include <vector>
 #include <memory>
@@ -19,7 +19,7 @@ namespace sage
 {
 	class ExampleScene : public Scene
 	{
-		std::unique_ptr<FountainEffect> fountain;
+		std::unique_ptr<SpiralFountainVFX> fountain;
 	public:
 		
 		ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath);
