@@ -181,15 +181,15 @@ namespace sage
 	Camera::Camera(UserInput* userInput)
 		: rlCamera({0})
 	{
-//		rlCamera.position = {20.0f, 40.0f, 20.0f};
-//		rlCamera.target = {0.0f, 8.0f, 0.0f};
-//		rlCamera.up = {0.0f, 1.0f, 0.0f};
-//		rlCamera.fovy = 45.0f;
-
-		rlCamera.position = {2.0f, 2.0f, 2.0f};
-		rlCamera.target = {0.0f, 0.0f, 0.0f};
+		rlCamera.position = {20.0f, 40.0f, 20.0f};
+		rlCamera.target = {0.0f, 8.0f, 0.0f};
 		rlCamera.up = {0.0f, 1.0f, 0.0f};
-		rlCamera.fovy = 35.0f;
+		rlCamera.fovy = 45.0f;
+
+//		rlCamera.position = {2.0f, 2.0f, 2.0f};
+//		rlCamera.target = {0.0f, 0.0f, 0.0f};
+//		rlCamera.up = {0.0f, 1.0f, 0.0f};
+//		rlCamera.fovy = 35.0f;
 
 		//Camera camera = { { 2, 2, 2 }, { 0, 0, 0 }, { 0, 1, 0 }, 35.0, CAMERA_PERSPECTIVE };
 		rlCamera.projection = CAMERA_PERSPECTIVE;
