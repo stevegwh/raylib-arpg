@@ -141,18 +141,19 @@ namespace sage
 			const auto& r = registry->get<Renderable>(entity);
 			const ModelAnimation& anim = a.animations[a.animIndex];
 
-			if (a.animCurrentFrame == 0)
+			if (a.animCurrentFrame == 0 || a.animCurrentFrame < a.animLastFrame)
 			{
 				a.onAnimationStart.publish(entity);
 			}
 
-			if (a.animCurrentFrame + 1 >= anim.frameCount)
+			if (a.animCurrentFrame + a.animSpeed >= anim.frameCount)
 			{
 				a.onAnimationEnd.publish(entity);
 				if (a.oneShot) continue;
 			}
 			if (!registry->valid(entity)) continue;
-			a.animCurrentFrame = (a.animCurrentFrame + 1) % anim.frameCount;
+			a.animLastFrame = a.animCurrentFrame;
+			a.animCurrentFrame = (a.animCurrentFrame + a.animSpeed) % anim.frameCount;
 			sage::UpdateModelAnimation(r.model, anim, a.animCurrentFrame);
 		}
 	}

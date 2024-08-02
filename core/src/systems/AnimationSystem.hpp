@@ -14,8 +14,6 @@ namespace sage
 {
 	class AnimationSystem : public BaseSystem
 	{
-		float animationTimer = 0;
-
 	public:
 		void Update() const;
 		void Draw();

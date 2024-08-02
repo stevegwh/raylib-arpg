@@ -6,7 +6,7 @@ namespace sage
 {
 	struct WhirlwindAbility : public Ability
 	{
-		float whirlwindRadius = 50.0f;
+		float whirlwindRadius = 15.0f;
         void Use(entt::entity actor) override;
         void Update(entt::entity actor) override;
         ~WhirlwindAbility() override = default;
