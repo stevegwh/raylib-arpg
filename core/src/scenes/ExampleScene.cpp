@@ -20,6 +20,7 @@ namespace sage
 		data->stateSystems->Update();
         data->abilitySystem->Update();
 		data->timerManager->Update();
+		fountain->Update(GetFrameTime());
 	}
 
 	void ExampleScene::Draw2D()
@@ -30,10 +31,11 @@ namespace sage
 
 	void ExampleScene::Draw3D()
 	{
-		data->abilitySystem->Draw3D();
 		data->healthBarSystem->Draw3D();
 		data->stateSystems->Draw3D();
 		Scene::Draw3D();
+		fountain->Draw();
+		data->abilitySystem->Draw3D();
 	}
 
 	void ExampleScene::DrawDebug()
@@ -61,5 +63,7 @@ namespace sage
 
 		// TODO: Not sure if I like this
 		data->stateSystems->unitSystems->playerCombatLogicSubSystem->Enable();
+		
+		fountain = std::make_unique<FountainEffect>(data->camera->getRaylibCam());
 	}
 } // sage

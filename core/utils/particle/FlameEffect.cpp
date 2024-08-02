@@ -20,34 +20,34 @@ FlameEffect::FlameEffect(Camera3D* cam)
 	UnloadImage(imgCircle8);
 	UnloadImage(imgCircle16);
 
-	EmitterConfig ecfg;
-	ecfg.size =  1.0f;
-	ecfg.direction = Vector3{ 0, 1, 0 };
-	ecfg.velocity = FloatRange{ 0.7, 0.73 };
-	ecfg.directionAngle = FloatRange{ -6, 6 };
-	ecfg.velocityAngle = FloatRange{ 0, 0 };
-	ecfg.offset = FloatRange{ 0, 0 };
-	ecfg.originAcceleration = FloatRange{ 0, 0 };
-	ecfg.burst = IntRange{ 0, 0 };
-	ecfg.capacity = 600;
-	ecfg.emissionRate = 200;
-	ecfg.origin = Vector3{ 0, 0, 0 };
-	ecfg.externalAcceleration = Vector3{ 0, 0.85, 0 };
-	ecfg.startColor = Color{ 255, 100, 0, 255 };
-	ecfg.endColor = Color{ 255, 150, 150, 70 };
-	ecfg.age = FloatRange{ 0, 0.5 };
-	ecfg.blendMode = BLEND_ADDITIVE;
-	ecfg.texture = texCircle16;
-	ecfg.particle_Deactivator = Particle_DeactivatorAge;
+	EmitterConfig ecfg1;
+	ecfg1.size =  0.1f;
+	ecfg1.direction = Vector3{ 0, 1, 0 };
+	ecfg1.velocity = FloatRange{ 0.7, 0.73 };
+	ecfg1.directionAngle = FloatRange{ -6, 6 };
+	ecfg1.velocityAngle = FloatRange{ 0, 0 };
+	ecfg1.offset = FloatRange{ 0, 0 };
+	ecfg1.originAcceleration = FloatRange{ 0, 0 };
+	ecfg1.burst = IntRange{ 0, 0 };
+	ecfg1.capacity = 600;
+	ecfg1.emissionRate = 200;
+	ecfg1.origin = Vector3{ 0, 0, 0 };
+	ecfg1.externalAcceleration = Vector3{ 0, 0.85, 0 };
+	ecfg1.startColor = Color{ 255, 100, 0, 255 };
+	ecfg1.endColor = Color{ 255, 150, 150, 70 };
+	ecfg1.age = FloatRange{ 0, 0.5 };
+	ecfg1.blendMode = BLEND_ADDITIVE;
+	ecfg1.texture = texCircle16;
+	ecfg1.particle_Deactivator = Particle_DeactivatorAge;
 
-	auto emitter = std::make_unique<Emitter>(ecfg);
-	Register(std::move(emitter));
+	auto emitterFountain1 = std::make_unique<Emitter>(ecfg1);
+	Register(std::move(emitterFountain1));
 
-	ecfg.directionAngle = FloatRange{ -1.5, 1.5 };
-	ecfg.velocity = FloatRange{ 0.8, 0.85 };
-	ecfg.texture = texCircle8;
-	auto emitter2 = std::make_unique<Emitter>(ecfg);
-	Register(std::move(emitter2));
+	ecfg1.directionAngle = FloatRange{ -1.5, 1.5 };
+	ecfg1.velocity = FloatRange{ 0.8, 0.85 };
+	ecfg1.texture = texCircle8;
+	auto emitterFountain2 = std::make_unique<Emitter>(ecfg1);
+	Register(std::move(emitterFountain2));
 
 	Start();
 
