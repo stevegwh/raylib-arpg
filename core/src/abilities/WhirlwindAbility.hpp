@@ -2,6 +2,7 @@
 
 #include "Ability.hpp"
 
+
 namespace sage
 {
 	struct WhirlwindAbility : public Ability

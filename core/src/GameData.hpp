@@ -21,7 +21,6 @@
 
 #include "entt/entt.hpp"
 #include "TimerManager.hpp"
-#include "ParticleSystem.hpp"
 
 #include <memory>
 #include <string>
@@ -40,7 +39,6 @@ namespace sage
 		std::unique_ptr<Camera> camera;
 		std::unique_ptr<TimerManager> timerManager;
 		Settings* settings;
-		std::unique_ptr<ParticleSystem> particleSystem;
 
 		std::unique_ptr<RenderSystem> renderSystem;
 		std::unique_ptr<CollisionSystem> collisionSystem;

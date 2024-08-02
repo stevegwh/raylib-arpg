@@ -68,19 +68,27 @@ namespace sage
 		}
 	}
 
+	void AbilitySystem::Draw3D()
+	{
+		for (auto& ability : abilityMap)
+		{
+			ability->Draw3D(entt::null);
+		}
+	}
+
 	void AbilitySystem::Draw2D()
 	{
 		// Draw GUI here (cooldowns etc)
 	}
 
-	AbilitySystem::AbilitySystem(entt::registry* _registry, Cursor* _cursor, UserInput* _userInput,
-			ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
-			ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem,
-			TimerManager* _timerManager)
-			:
-			registry(_registry), cursor(_cursor), userInput(_userInput),
-			actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem),
-			controllableActorSystem(_controllableActorSystem)
+	AbilitySystem::AbilitySystem(entt::registry* _registry, Camera3D* _camera, Cursor* _cursor, UserInput* _userInput,
+		ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
+		ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem,
+		TimerManager* _timerManager)
+		:
+		registry(_registry), cursor(_cursor), userInput(_userInput),
+		actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem),
+		controllableActorSystem(_controllableActorSystem)
 	{
 		{
 			entt::sink sink{ userInput->keyOnePressed };
@@ -108,7 +116,7 @@ namespace sage
 		abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem, _timerManager));
 		abilityMap.push_back(std::make_unique<ConeOfCold>(registry, collisionSystem, _timerManager));
 		abilityMap.push_back(
-				std::make_unique<RainOfFireAbility>(registry, _cursor, collisionSystem, _navigationGridSystem, controllableActorSystem, _timerManager));
+			std::make_unique<RainOfFireAbility>(registry, _camera, _cursor, collisionSystem, _navigationGridSystem, controllableActorSystem, _timerManager));
 		ChangeAbility(0, 0);
 		ChangeAbility(1, 1);
 		ChangeAbility(2, 2);

@@ -124,15 +124,16 @@ namespace sage
 
 	void ParticleSystem::Update()
 	{
-		if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
-		{
-			Vector2 mousePos = GetMousePosition();
-			Ray ray = GetMouseRay(mousePos, *camera);
-			Vector3 newOrigin = Vector3Add(ray.position, Vector3Scale(ray.direction, 10.0f)); // Adjust the scale factor as needed
-			SetOrigin(newOrigin);
-			//ResetTime(); // You'll need to implement this method to reset the time to 0
-			time = 0.0f;
-		}
+		if (!enabled) return;
+		//if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
+		//{
+		//	Vector2 mousePos = GetMousePosition();
+		//	Ray ray = GetMouseRay(mousePos, *camera);
+		//	Vector3 newOrigin = Vector3Add(ray.position, Vector3Scale(ray.direction, 10.0f)); // Adjust the scale factor as needed
+		//	SetOrigin(newOrigin);
+		//	//ResetTime(); // You'll need to implement this method to reset the time to 0
+		//	time = 0.0f;
+		//}
 
 		float deltaTime = GetFrameTime();
 		numInstances = (int)(instances_x1000 / 1000 * numParticles);
@@ -157,13 +158,11 @@ namespace sage
 		rlComputeShaderDispatch(numParticles / 1024, 1, 1);
 		rlDisableShader();
 		time += deltaTime;
-
-
 	}
 
 	void ParticleSystem::Draw()
 	{
-		if (!IsShaderReady(particleShader)) return;
+		if (!IsShaderReady(particleShader) || !enabled) return;
 		rlEnableShader(particleShader.id);
 
 		// Because we use rlgl, we must take care of matrices ourselves.
@@ -186,6 +185,15 @@ namespace sage
 		rlDisableShader();
 
 		DrawCubeWires((Vector3) { 0, 0, 0 }, 1.0, 1.0, 1.0, DARKGRAY);
+	}
+
+	void ParticleSystem::Enable(bool enable)
+	{
+		enabled = enable;
+		//if (enabled)
+		//{
+		//	resetParticles();
+		//}
 	}
 
 	void ParticleSystem::SetOrigin(Vector3 _origin)

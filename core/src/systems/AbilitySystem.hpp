@@ -34,8 +34,9 @@ namespace sage
 	public:
 		void ChangeAbility(int abilitySlot, int newAbilityIndex);
 		void Update();
+		void Draw3D();
 		void Draw2D();
-		AbilitySystem(entt::registry* _registry, Cursor* _cursor, UserInput* _userInput,
+		AbilitySystem(entt::registry* _registry, Camera3D* _camera, Cursor* _cursor, UserInput* _userInput,
 				ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
 				ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem,
 				TimerManager* _timerManager);

@@ -32,7 +32,7 @@ namespace sage
 			spellCursor->Enable(false); // Cancel move
 		}
 	}
-	
+
 	void RainOfFireAbility::Confirm(entt::entity actor)
 	{
 		std::cout << "Rain of fire ability used \n";
@@ -44,10 +44,18 @@ namespace sage
 		spellCursor->Enable(false);
 		cursor->Enable();
 		cursor->Show();
+		vfx->Enable(true);
+		vfx->SetOrigin(cursor->collision.point);
+	}
+
+	void RainOfFireAbility::Draw3D(entt::entity actor)
+	{
+		vfx->Draw();
 	}
 
 	void RainOfFireAbility::Update(entt::entity actor)
 	{
+		vfx->Update();
 		if (spellCursor->active())
 		{
 			spellCursor->Update(cursor->collision.point);
@@ -86,17 +94,19 @@ namespace sage
 	}
 
 	RainOfFireAbility::RainOfFireAbility(
-			entt::registry* _registry,
-			Cursor* _cursor,
-			CollisionSystem* _collisionSystem,
-			NavigationGridSystem* _navigationGridSystem,
-			ControllableActorSystem* _controllableActorSystem,
-			TimerManager* _timerManager)
-			:
-			Ability(_registry, _collisionSystem, _timerManager),
-			cursor(_cursor),
-			controllableActorSystem(_controllableActorSystem)
+		entt::registry* _registry,
+		Camera3D* _camera,
+		Cursor* _cursor,
+		CollisionSystem* _collisionSystem,
+		NavigationGridSystem* _navigationGridSystem,
+		ControllableActorSystem* _controllableActorSystem,
+		TimerManager* _timerManager)
+		:
+		Ability(_registry, _collisionSystem, _timerManager),
+		cursor(_cursor),
+		controllableActorSystem(_controllableActorSystem)
 	{
+		vfx = std::make_unique<ParticleSystem>(_camera);
 		windupTimer = 0.0f;
 		windupLimit = 0.75f;
 		cooldownLimit = 3.0f;
@@ -104,6 +114,6 @@ namespace sage
 		attackData.element = AttackElement::FIRE;
 		initialDamage = 25.0f;
 		spellCursor = std::make_unique<TextureTerrainOverlay>(registry, _navigationGridSystem,
-				"resources/textures/cursor/rainoffire_cursor.png");
+			"resources/textures/cursor/rainoffire_cursor.png");
 	}
 }
