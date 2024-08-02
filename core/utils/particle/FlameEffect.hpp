@@ -5,11 +5,14 @@
 #include "raylib.h"
 #include <memory>
 
-struct FlameEffect : public ParticleSystem
+namespace sage
 {
-	Texture2D texCircle16{};
-	Texture2D texCircle8{};
+	struct FlameEffect : public ParticleSystem
+	{
+		Texture2D texCircle16{};
+		Texture2D texCircle8{};
 
-	~FlameEffect();
-	explicit FlameEffect(Camera3D* cam);
-};
+		~FlameEffect();
+		explicit FlameEffect(Camera3D* cam);
+	};	
+}
