@@ -17,9 +17,9 @@ namespace sage
 	void HealthBarSystem::updateHealthBarTextures()
 	{
 		const auto& view = registry->view<HealthBar>();
-		view.each([this](const auto& c)
+		view.each([this](auto& c)
 		{
-			c.UpdateTexture();
+			c.Update();
 		});
 	}
 
