@@ -78,7 +78,7 @@ namespace sage
 			{
 				//hitUnits.push_back(entity);
 				const auto& combatable = registry->get<CombatableActor>(entity);
-				combatable.onHit.publish(entity, actor, initialDamage);
+				combatable.onHit.publish(entity, actor, attackData);
 				std::cout << "Hit unit \n";
 			}
 		}
@@ -100,6 +100,8 @@ namespace sage
 		windupTimer = 0.0f;
 		windupLimit = 0.75f;
 		cooldownLimit = 3.0f;
+		attackData.damage = 25.0f;
+		attackData.element = AttackElement::FIRE;
 		initialDamage = 25.0f;
 		spellCursor = std::make_unique<TextureTerrainOverlay>(registry, _navigationGridSystem,
 				"resources/textures/cursor/rainoffire_cursor.png");
