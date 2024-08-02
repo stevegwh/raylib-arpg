@@ -5,10 +5,6 @@
 #pragma once
 
 #include <raylib.h>
-#include <rlgl.h>
-#include <raymath.h>
-#include <stdlib.h>
-#include <limits.h>
 
 namespace sage
 {

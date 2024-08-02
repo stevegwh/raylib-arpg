@@ -4,12 +4,18 @@
 
 #include "ParticleSystem.hpp"
 
-#include <iostream>
+#include <rlgl.h>
 
-float GetRandomFloat(float from, float to) {
+#include <cstdlib>
+
+
+float GetRandomFloat(float from, float to) 
+{
 	float random = (float)GetRandomValue(0, RAND_MAX) / (float)RAND_MAX;
 	return from + random * (to - from);
 }
+
+#ifndef __APPLE__
 namespace sage
 {
 
@@ -202,3 +208,31 @@ namespace sage
 		resetParticles();
 	}
 } // sage
+#else
+namespace sage
+{
+	ParticleSystem::~ParticleSystem()
+	{
+	}
+
+	ParticleSystem::ParticleSystem(Camera3D* _camera) : camera(_camera), origin({ 3, 0, 0 })
+	{
+	}
+
+	void ParticleSystem::Update()
+	{
+	}
+
+	void ParticleSystem::Draw()
+	{
+	}
+
+	void ParticleSystem::Enable(bool enable)
+	{
+	}
+
+	void ParticleSystem::SetOrigin(Vector3 _origin)
+	{
+	}
+} // sage
+#endif
