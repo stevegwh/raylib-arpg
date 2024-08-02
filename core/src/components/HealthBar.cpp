@@ -23,6 +23,8 @@ namespace sage
 	void HealthBar::Increment(entt::entity entity, int value)
 	{
 		hp += value;
+		if (hp > 100) hp = 100;
+		damageTaken = 0;
 		onHealthUpdate.publish(entity);
 	}
 

@@ -100,7 +100,7 @@ namespace sage
 		c.autoAttackTick = 0;
 
 		auto& animation = registry->get<Animation>(entity);
-		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
+		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
 		if (registry->any_of<CombatableActor>(c.target))
 		{
 			auto& enemyCombatable = registry->get<CombatableActor>(c.target);
