@@ -23,7 +23,7 @@ namespace sage
 		active = true;
 		windupTimer = 0.0f;
 		auto& animation = registry->get<Animation>(actor);
-		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
+		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
     }
     
     void WhirlwindAbility::Update(entt::entity actor)
@@ -63,7 +63,7 @@ namespace sage
     Ability(_registry, _collisionSystem, _timerManager)
     {
 		windupTimer = 0.0f;
-		windupLimit = 0.75f;
+		windupLimit = 0.65f;
         cooldownLimit = 3.0f;
         initialDamage = 25.0f;
     }
