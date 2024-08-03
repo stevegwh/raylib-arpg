@@ -28,7 +28,7 @@ namespace sage
 		void OnEnemyClick(entt::entity actor, entt::entity target);
 		void Update() override;
 		void Draw3D() override;
-		void OnHit(entt::entity entity, entt::entity attacker, AttackData attackData);
+		void OnHit(AttackData attackData);
 		void Enable();
 		void Disable();
 		void OnStateEnter(entt::entity entity) override;

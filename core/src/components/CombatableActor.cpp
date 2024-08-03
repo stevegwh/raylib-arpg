@@ -10,7 +10,6 @@ namespace sage
     {
         target = enemy;
         onEnemyClicked.publish(self, enemy);
-    
     }
     
     void CombatableActor::AttackCancelled()

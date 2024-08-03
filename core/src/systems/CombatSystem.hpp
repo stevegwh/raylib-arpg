@@ -19,7 +19,7 @@ namespace sage
 		void onComponentAdded(entt::entity entity);
 		void onComponentRemoved(entt::entity entity);
 	public:
-		void RegisterAttack(entt::entity attacker, entt::entity target, AttackData attackData);
+		void RegisterAttack(AttackData attackData);
 		explicit CombatSystem(entt::registry* _registry);
 	};
 

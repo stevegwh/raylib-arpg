@@ -175,11 +175,11 @@ namespace sage
 	{
 	}
 
-	void WaveMobCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, AttackData attackData)
+	void WaveMobCombatStateSystem::OnHit(AttackData attackData)
 	{
-		ChangeState<StateEnemyCombat, EnemyStates>(entity);
-		auto& c = registry->get<CombatableActor>(entity);
-		c.target = attacker;
+		ChangeState<StateEnemyCombat, EnemyStates>(attackData.hit);
+		auto& c = registry->get<CombatableActor>(attackData.hit);
+		c.target = attackData.attacker;
 	}
 
 	WaveMobCombatStateSystem::WaveMobCombatStateSystem(entt::registry* _registry,
