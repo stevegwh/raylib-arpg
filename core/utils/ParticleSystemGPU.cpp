@@ -2,10 +2,11 @@
 // Created by steve on 31/07/2024.
 //
 
-#include "ParticleSystem.hpp"
-
+#include "ParticleSystemGPU.hpp"
 
 #include <iostream>
+#include <rlgl.h>
+#include <cstdlib>
 
 float GetRandomFloat(float from, float to) {
 	float random = (float)GetRandomValue(0, RAND_MAX) / (float)RAND_MAX;
@@ -14,7 +15,7 @@ float GetRandomFloat(float from, float to) {
 namespace sage
 {
 
-	ParticleSystem::~ParticleSystem()
+	ParticleSystemGPU::~ParticleSystemGPU()
 	{
 		UnloadShader(particleShader);
 		rlUnloadShaderBuffer(ssbo0);
@@ -23,7 +24,7 @@ namespace sage
 		rlUnloadVertexArray(particleVao);
 	}
 
-	ParticleSystem::ParticleSystem(Camera3D* _camera) : camera(_camera)
+	ParticleSystemGPU::ParticleSystemGPU(Camera3D* _camera) :camera(_camera)
 	{
 		// Compute shader for updating particles.
 		char* shaderCode = LoadFileText("resources/shaders/particle_compute.glsl");
@@ -95,7 +96,7 @@ namespace sage
 
 	}
 
-	void ParticleSystem::Update()
+	void ParticleSystemGPU::Update()
 	{
 		float deltaTime = GetFrameTime();
 		numInstances = (int)(instances_x1000 / 1000 * numParticles);
@@ -129,7 +130,7 @@ namespace sage
 //		RL_FREE(positions);
 	}
 
-	void ParticleSystem::Draw()
+	void ParticleSystemGPU::Draw()
 	{
 		rlEnableShader(particleShader.id);
 

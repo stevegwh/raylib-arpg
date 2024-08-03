@@ -5,15 +5,11 @@
 #pragma once
 
 #include <raylib.h>
-#include <rlgl.h>
-#include <raymath.h>
-#include <stdlib.h>
-#include <limits.h>
 
 namespace sage
 {
 
-	class ParticleSystem
+	class ParticleSystemGPU
 	{
 		Camera3D* camera;
 		Shader particleShader;
@@ -34,8 +30,8 @@ namespace sage
 		int particleVao;
 		int numInstances;
 	public:
-		~ParticleSystem();
-		ParticleSystem(Camera3D* _camera);
+		~ParticleSystemGPU();
+		ParticleSystemGPU(Camera3D* _camera);
 		void Update();
 		void Draw();
 	};

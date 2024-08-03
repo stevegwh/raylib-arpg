@@ -103,6 +103,9 @@ namespace sage
 		void Burst();
 		unsigned long Update(float dt);
 		void Draw(Camera3D* camera) const;
+		void Draw(Camera3D* camera, const Shader& shader) const;
+		void DrawOldestFirst(Camera3D* const camera) const;
+		void DrawOldestFirst(Camera3D* const camera, const Shader& shader) const;
 	};
 
 // ParticleSystem type.
@@ -133,5 +136,7 @@ namespace sage
 		void Burst();
 		void Draw(const Shader& shader) const;
 		void Draw() const;
+		void DrawOldestFirst() const;
+		void DrawOldestFirst(const Shader& shader) const;
 	};
 }

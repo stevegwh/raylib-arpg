@@ -122,26 +122,6 @@ namespace sage
 
 		return model;
 	}
-
-	TextureTerrainOverlay::~TextureTerrainOverlay()
-	{
-		UnloadTexture(texture);
-	}
-
-	TextureTerrainOverlay::TextureTerrainOverlay(
-			entt::registry* _registry,
-			NavigationGridSystem* _navigationGridSystem,
-			const char* texturePath)
-			:
-			registry(_registry),
-			navigationGridSystem(_navigationGridSystem)
-	{
-		texture = LoadTexture(texturePath);
-		entity = registry->create();
-
-		registry->emplace<Renderable>(entity);
-		registry->emplace<sgTransform>(entity);
-	}
 	
 	void TextureTerrainOverlay::Enable(bool enable)
 	{
@@ -164,6 +144,7 @@ namespace sage
 		navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
 		auto& renderable = registry->get<Renderable>(entity);
 		renderable.model = generateTerrainPolygon();
+		renderable.model.materials[0].shader = renderable.shader.value();
 		renderable.model.transform = MatrixIdentity();
 		auto& trans = registry->get<sgTransform>(entity);
 		auto centre = navigationGridSystem->GetGridSquare(lastHit.row, lastHit.col);
@@ -201,5 +182,29 @@ namespace sage
 
 		trans.SetPosition(centerPos, entity);
 		renderable.model.transform = MatrixIdentity();
+	}
+
+	TextureTerrainOverlay::~TextureTerrainOverlay()
+	{
+		UnloadTexture(texture);
+	}
+
+	TextureTerrainOverlay::TextureTerrainOverlay(
+			entt::registry* _registry,
+			NavigationGridSystem* _navigationGridSystem,
+			const char* texturePath,
+			Color _hint,
+			const char* shaderPath)
+			:
+			registry(_registry),
+			navigationGridSystem(_navigationGridSystem)
+	{
+		texture = LoadTexture(texturePath);
+		entity = registry->create();
+
+		auto& r = registry->emplace<Renderable>(entity);
+		r.shader = std::make_optional(LoadShader(nullptr, shaderPath));
+		r.hint = _hint;
+		registry->emplace<sgTransform>(entity);
 	}
 } // sage
