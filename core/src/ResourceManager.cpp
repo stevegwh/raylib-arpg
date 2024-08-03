@@ -157,7 +157,7 @@ namespace sage
 		// Copy name if it exists
 		if (oldMesh.name) 
 		{
-			mesh.name = _strdup(oldMesh.name);
+			mesh.name = strdup(oldMesh.name);
 		}
 
 		return mesh;

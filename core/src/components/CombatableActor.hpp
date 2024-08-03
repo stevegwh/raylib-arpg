@@ -38,6 +38,7 @@ namespace sage
 
 	struct CombatableActor
 	{
+		int hp = 100;
 		entt::entity self;
 		CombatableActorType actorType = CombatableActorType::WAVEMOB;
 		bool dying = false;

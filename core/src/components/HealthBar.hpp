@@ -12,20 +12,18 @@ namespace sage
 {
 	struct HealthBar
 	{
-		int hp = 100;
+		int* hp;
 		float damageTaken = 0;
-		RenderTexture2D healthBarTexture;
+		RenderTexture2D healthBarTexture{};
 		const int healthBarWidth = 200;
 		const int healthBarHeight = 20;
 		const Color healthBarColor = RED;
 		const Color healthBarBgColor = BLACK;
 		const Color healthBarBorderColor = MAROON;
-		void Decrement(entt::entity entity, int value);
-		void Increment(entt::entity entity, int value);
+		void Decrement(int value);
+		void Increment(int value);
 		void Update();
-		entt::sigh<void(entt::entity)> onHealthUpdate{};
-		entt::sigh<void(entt::entity)> onHealthIsZero{};
-		HealthBar();
+		HealthBar(int* _hp);
 		~HealthBar();
 	};
 }

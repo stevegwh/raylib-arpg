@@ -54,7 +54,7 @@ namespace sage
 		//sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"), std::string("resources/models/obj/cube_diffuse.png") };
 
 		auto& transform = registry->emplace<sgTransform>(id);
-		GridSquare actorIdx;
+		GridSquare actorIdx{};
 		game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
 		float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
 		transform.SetPosition({ position.x, height, position.z }, id);
@@ -79,16 +79,14 @@ namespace sage
 		// ---
 
 		// Combat
-		auto& healthbar = registry->emplace<HealthBar>(id);
-		// TODO: "HealthBar" should be separate from something like CombatData
-
 		auto& combatable = registry->emplace<CombatableActor>(id);
 		combatable.actorType = CombatableActorType::WAVEMOB;
 		{
 			entt::sink sink{ combatable.onHit };
 			sink.connect<&WaveMobCombatStateSystem::OnHit>(game->stateSystems->unitSystems->waveMobCombatLogicSubSystem);
 		}
-
+		
+		auto& healthbar = registry->emplace<HealthBar>(id, &combatable.hp);
 		// ---
 
 		// Collision
