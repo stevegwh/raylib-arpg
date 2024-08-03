@@ -12,7 +12,7 @@ namespace sage
 {
 	struct HealthBar
 	{
-		int* hp;
+		int hp = 100;
 		float damageTaken = 0;
 		RenderTexture2D healthBarTexture{};
 		const int healthBarWidth = 200;

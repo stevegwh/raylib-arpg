@@ -11,6 +11,8 @@ namespace sage
 	void HealthBar::Decrement(int value)
 	{
 		damageTaken += value;
+		hp -= value;
+		if (hp < 0) hp = 0;
 	}
 
 	void HealthBar::Increment(int value)
@@ -29,21 +31,21 @@ namespace sage
 		ClearBackground(BLANK);
 
 		DrawRectangle(0, 0, 200, 20, healthBarBgColor);
-		float healthPercentage = static_cast<float>(*hp) / 100.0f;
+		float healthPercentage = static_cast<float>(hp) / 100.0f;
 		float damageTakenPercentage = static_cast<float>(damageTaken) / 100.0f;
 		int fillWidth = static_cast<int>(healthPercentage * 200);
 		DrawRectangle(0, 0, fillWidth, 20, healthBarColor);
 		DrawRectangle(fillWidth, 0, static_cast<int>(damageTakenPercentage * 200), 20, WHITE);
 		DrawRectangleLines(0, 0, 200, 20, healthBarBorderColor);
 
-		Vector2 textSize = MeasureTextEx(GetFontDefault(), TextFormat("HP: %03i", *hp), 20, 1);
-		DrawTextEx(GetFontDefault(), TextFormat("HP: %03i", *hp),
+		Vector2 textSize = MeasureTextEx(GetFontDefault(), TextFormat("HP: %03i", hp), 20, 1);
+		DrawTextEx(GetFontDefault(), TextFormat("HP: %03i", hp),
 				{10, healthBarTexture.texture.height - 30 - textSize.y}, 20, 1, GREEN);
 
 		EndTextureMode();
 	}
 
-	HealthBar::HealthBar(int* _hp) : hp(_hp)
+	HealthBar::HealthBar(int* _hp)
 	{
 		healthBarTexture = LoadRenderTexture(200, 50);
 	}
