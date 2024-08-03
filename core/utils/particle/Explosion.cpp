@@ -54,7 +54,7 @@ namespace sage
 		registry->emplace<sgTransform>(entity);
 		auto& r = registry->emplace<Renderable>(entity, sphere, MatrixIdentity());
 		r.hint = Color{255, 0, 0, 100};
-		shader = LoadShader(nullptr, "resources/shaders/glsl330/bloom.fs");
+		shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/bloom.fs");
 		r.model.materials[0].shader = shader;
 	}
 } // sage

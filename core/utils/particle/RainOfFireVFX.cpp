@@ -6,6 +6,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "ResourceManager.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -126,6 +127,6 @@ namespace sage
 	RainOfFireVFX::RainOfFireVFX(Camera3D* _camera)
 			:camera(_camera)
 	{
-		shader = LoadShader(nullptr, "resources/shaders/glsl330/billboard.fs");
+		shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
 	}
 }

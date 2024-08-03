@@ -11,7 +11,7 @@ namespace sage
 	LightSubSystem::LightSubSystem(entt::registry* _registry) :
 		registry(_registry)
 	{
-		shader = LoadShader(TextFormat("resources/shaders/glsl%i/lighting.vs", 330),
+		shader = ResourceManager::ShaderLoad(TextFormat("resources/shaders/glsl%i/lighting.vs", 330),
 		                    TextFormat("resources/shaders/glsl%i/lighting.fs", 330));
 		// Ambient light level (some basic lighting)
 		float ambientValue[4] = {0.1f, 0.1f, 0.1f, 1.0f};

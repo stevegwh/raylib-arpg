@@ -14,6 +14,7 @@ namespace sage
 class ResourceManager
 {
 public:
+	static Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
     static Image LoadTexture(const std::string& path);
 	static Model StaticModelLoad(const std::string& path);
 	static Model DynamicModelLoad(const std::string& path);
