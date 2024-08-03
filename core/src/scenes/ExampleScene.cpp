@@ -23,6 +23,12 @@ namespace sage
 		const auto& playerTransform = registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
 		fountain->SetOrigin(playerTransform.position());
 		fountain->Update(GetFrameTime());
+		if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+		{
+			explosion->Restart();
+			explosion->SetOrigin(data->cursor->terrainCollision().point);
+		}
+		explosion->Update();
 	}
 
 	void ExampleScene::Draw2D()
@@ -38,6 +44,7 @@ namespace sage
 		Scene::Draw3D();
 		fountain->Draw3D();
 		data->abilitySystem->Draw3D();
+		explosion->Draw3D();
 	}
 
 	void ExampleScene::DrawDebug()
@@ -67,5 +74,7 @@ namespace sage
 		data->stateSystems->unitSystems->playerCombatLogicSubSystem->Enable();
 		
 		fountain = std::make_unique<SpiralFountainVFX>(data->camera->getRaylibCam());
+		explosion = std::make_unique<Explosion>(registry);
+		explosion->SetOrigin({0, 3, 0});
 	}
 } // sage
