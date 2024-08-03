@@ -12,7 +12,7 @@ namespace sage
 		UnloadTexture(texCircle8);
 	}
 
-	FountainEffect::FountainEffect(Camera3D* cam) : ParticleSystem(cam)
+	FountainEffect::FountainEffect(Camera3D* cam) :ParticleSystem(cam)
 	{
 		Image imgCircle16 = GenImageGradientRadial(16, 16, 0.3f, WHITE, BLACK);
 		texCircle16 = LoadTextureFromImage(imgCircle16);
@@ -22,7 +22,7 @@ namespace sage
 		UnloadImage(imgCircle16);
 
 		EmitterConfig ecfg1;
-		ecfg1.size = 0.1f;
+		ecfg1.size = 0.2f;
 		ecfg1.direction = Vector3{ 0, 1, 0 };
 		ecfg1.velocity = FloatRange{ 0.7, 0.73 };
 		ecfg1.directionAngle = FloatRange{ -6, 6 };
@@ -32,7 +32,7 @@ namespace sage
 		ecfg1.burst = IntRange{ 0, 0 };
 		ecfg1.capacity = 600;
 		ecfg1.emissionRate = 200;
-		ecfg1.origin = Vector3{ 30.0f, 4, 20.0f };
+		ecfg1.origin = Vector3{ 0, 0, 0 };
 		ecfg1.externalAcceleration = Vector3{ 0, -0.30, 0 };
 		ecfg1.startColor = Color{ 0, 100, 150, 255 };
 		ecfg1.endColor = Color{ 0, 0, 255, 125 };

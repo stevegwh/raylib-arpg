@@ -22,7 +22,7 @@ namespace sage
 		spiralRadius += spiralGrowth * dt;
 		if (spiralRadius > maxSpiralRadius)
 		{
-			spiralRadius = 0.0f;
+			spiralRadius = minSpiralRadius;
 			spiralAngle = 0.0f;
 		}
 		Vector3 spiralPos = {
@@ -32,6 +32,11 @@ namespace sage
 		};
 		fountain->SetOrigin(Vector3Add(spiralCentre, spiralPos));
 		fountain->Update(dt);
+	}
+
+	void SpiralFountainVFX::SetOrigin(const Vector3& origin)
+	{
+		spiralCentre = origin;
 	}
 
 	void SpiralFountainVFX::InitSystem(const Vector3& _target)

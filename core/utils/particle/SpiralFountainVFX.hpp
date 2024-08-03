@@ -20,13 +20,12 @@ namespace sage
 		Camera3D* camera;
 
 		Vector3 spiralCentre{};
-		float spiralRadius = 0.0f;    // Starting radius of the spiral
+		float minSpiralRadius = 2.0f; // Minimum radius of the spiral
+		float maxSpiralRadius = 5.0f; // Maximum radius of the spiral
+		float spiralRadius = minSpiralRadius;    // Current radius of the spiral
 		float spiralSpeed = 10.0f;     // Speed of rotation (in radians per second)
 		float spiralAngle = 0.0f;     // Current angle of rotation
 		float spiralGrowth = 0.5f;    // How much the radius grows per second
-		float maxSpiralRadius = 1.0f; // Maximum radius of the spiral
-
-
 		std::unique_ptr<FountainEffect> fountain;
 	public:
 		bool active = false;
@@ -35,5 +34,6 @@ namespace sage
 		void InitSystem(const Vector3& _target);
 		void Update(float dt);
 		void Draw3D() const;
+		void SetOrigin(const Vector3& origin);
 	};
 }

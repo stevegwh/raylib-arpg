@@ -20,6 +20,8 @@ namespace sage
 		data->stateSystems->Update();
         data->abilitySystem->Update();
 		data->timerManager->Update();
+		const auto& playerTransform = registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
+		fountain->SetOrigin(playerTransform.position());
 		fountain->Update(GetFrameTime());
 	}
 

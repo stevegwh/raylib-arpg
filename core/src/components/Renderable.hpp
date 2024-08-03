@@ -23,6 +23,7 @@ namespace sage
 {
 struct Renderable
 {
+	Color hint = WHITE;
 	bool active = true;
     Matrix initialTransform{};
     MaterialPaths materials;

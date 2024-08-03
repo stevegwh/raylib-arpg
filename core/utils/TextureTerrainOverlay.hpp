@@ -32,7 +32,9 @@ namespace sage
 		~TextureTerrainOverlay();
 		TextureTerrainOverlay(entt::registry* _registry,
 				NavigationGridSystem* _navigationGridSystem,
-				const char* texturePath
+				const char* texturePath,
+				Color _hint,
+				const char* shaderPath
 		);
 		void Init(Vector3 mouseRayHit);
 		void Update(Vector3 mouseRayHit);

@@ -246,21 +246,59 @@ namespace sage
 
 		return counter;
 	}
+	
+	void Emitter::DrawOldestFirst(Camera3D* const camera) const
+	{
+		// Create a vector of pointers to active particles
+		std::vector<Particle*> activeParticles;
+		for (size_t i = 0; i < config.capacity; i++)
+		{
+			if (particles[i]->active)
+			{
+				activeParticles.push_back(particles[i].get());
+			}
+		}
+
+		// Sort particles by age, oldest first
+		std::sort(activeParticles.begin(), activeParticles.end(),
+				[](const Particle* a, const Particle* b) {
+				  return a->age < b->age;
+				});
+
+		BeginBlendMode(config.blendMode);
+		for (const auto& p : activeParticles)
+		{
+			DrawBillboard(*camera, config.texture, p->position, p->size,
+					LinearFade(config.startColor, config.endColor, p->age / p->ttl));
+		}
+		EndBlendMode();
+	}
+
+	void Emitter::DrawOldestFirst(Camera3D* const camera, const Shader& shader) const
+	{
+		BeginShaderMode(shader);
+		DrawOldestFirst(camera);
+		EndShaderMode();
+	}
 
 // Emitter_Draw draws all active particles.
 	void Emitter::Draw(Camera3D* const camera) const
 	{
 		BeginBlendMode(config.blendMode);
-		for (size_t i = 0; i < config.capacity; i++)
+		for (const auto& p : particles)
 		{
-			auto& p = particles[i];
-			if (p->active)
-			{
-				DrawBillboard(*camera, config.texture, particles[i]->position, particles[i]->size,
-						LinearFade(config.startColor, config.endColor, p->age / p->ttl));
-			}
+			DrawBillboard(*camera, config.texture, p->position, p->size,
+					LinearFade(config.startColor, config.endColor, p->age / p->ttl));
 		}
 		EndBlendMode();
+	}
+
+
+	void Emitter::Draw(Camera3D* const camera, const Shader& shader) const
+	{
+		BeginShaderMode(shader);
+		Draw(camera);
+		EndShaderMode();
 	}
 
 // ParticleSystem constructor
@@ -278,6 +316,7 @@ namespace sage
 		{
 			counter += emitters[i]->Update(dt);
 		}
+		
 		return counter;
 	}
 
@@ -377,11 +416,25 @@ namespace sage
 
 	void ParticleSystem::Draw(const Shader& shader) const
 	{
-		BeginShaderMode(shader);
 		for (auto& emitter : emitters)
 		{
-			emitter->Draw(camera);
+			emitter->Draw(camera, shader);
 		}
-		EndShaderMode();
+	}
+
+	void ParticleSystem::DrawOldestFirst() const
+	{
+		for (auto& emitter : emitters)
+		{
+			emitter->DrawOldestFirst(camera);
+		}
+	}
+
+	void ParticleSystem::DrawOldestFirst(const Shader& shader) const
+	{
+		for (auto& emitter : emitters)
+		{
+			emitter->DrawOldestFirst(camera, shader);
+		}
 	}
 }

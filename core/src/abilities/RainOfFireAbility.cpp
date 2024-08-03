@@ -121,8 +121,12 @@ namespace sage
 		attackData.damage = 25.0f;
 		attackData.element = AttackElement::FIRE;
 		initialDamage = 25.0f;
-		spellCursor = std::make_unique<TextureTerrainOverlay>(registry, _navigationGridSystem,
-				"resources/textures/cursor/rainoffire_cursor.png");
+		spellCursor = std::make_unique<TextureTerrainOverlay>(
+				registry, 
+				_navigationGridSystem,
+				"resources/textures/cursor/rainoffire_cursor.png",
+				Color{ 255, 215, 0, 255},
+				"resources/shaders/glsl330/bloom.fs");
 		vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
 	}
 }

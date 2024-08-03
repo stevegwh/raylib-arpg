@@ -14,12 +14,13 @@ namespace sage
 {
 	void RainOfFireVFX::Draw3D() const
 	{
-
+		BeginShaderMode(shader);
 		for (const auto& fireball : fireballs)
 		{
 			//DrawSphere(fireball->position, fireball->radius, RED);
-			fireball->flameEffect->Draw(shader);
+			fireball->flameEffect->DrawOldestFirst();
 		}
+		EndShaderMode();
 	}
 
 	void RainOfFireVFX::Update(float dt)
@@ -46,8 +47,8 @@ namespace sage
 	void RainOfFireVFX::generateFireball(Fireball& fireball)
 	{
 
-		// Add randomness to the spawn position within a circular area
-		float spawnAngle = ((float)rand() / RAND_MAX) * 2.0f * M_PI;
+		// Add randomness to the spawn position within a semi-circular area
+		float spawnAngle = ((float)rand() / RAND_MAX) * M_PI;
 		float spawnRadius = ((float)rand() / RAND_MAX) * spawnAreaRadius;
 
 		Vector3 spawnPoint = {
@@ -57,7 +58,7 @@ namespace sage
 		};
 
 		// Randomize angle for initial trajectory within a 360-degree spread
-		float angle = ((float)rand() / RAND_MAX) * 2.0f * M_PI;
+		float angle = 200 * DEG2RAD;
 		float radius = ((float)rand() / RAND_MAX) * impactRadius;
 
 		// Calculate the landing point within the circle at the ground level
@@ -125,6 +126,6 @@ namespace sage
 	RainOfFireVFX::RainOfFireVFX(Camera3D* _camera)
 			:camera(_camera)
 	{
-		shader = LoadShader(nullptr, "resources/shader/glsl330/billboard.fs");
+		shader = LoadShader(nullptr, "resources/shaders/glsl330/billboard.fs");
 	}
 }
