@@ -8,11 +8,11 @@ namespace sage
 {
 	Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer)
 	{
-		Color *pixels = (Color *)RL_MALLOC(width*height*sizeof(Color));
-		float radius = (width < height)? (float)width/2.0f : (float)height/2.0f;
+		Color* pixels = (Color*)RL_MALLOC(width * height * sizeof(Color));
+		float radius = (width < height) ? (float)width / 2.0f : (float)height / 2.0f;
 
-		float centerX = (float)width/2.0f;
-		float centerY = (float)height/2.0f;
+		float centerX = (float)width / 2.0f;
+		float centerY = (float)height / 2.0f;
 
 		// Set outer color's alpha to 0 (fully transparent)
 		outer.a = 0;
@@ -22,54 +22,58 @@ namespace sage
 			for (int x = 0; x < width; x++)
 			{
 				float dist = hypotf((float)x - centerX, (float)y - centerY);
-				float factor = (dist - radius*density)/(radius*(1.0f - density));
+				float factor = (dist - radius * density) / (radius * (1.0f - density));
 
 				factor = (float)fmax(factor, 0.0f);
 				factor = (float)fmin(factor, 1.f);
 
 				// Calculate alpha first
-				unsigned char alpha = (unsigned char)((float)outer.a*factor + (float)inner.a*(1.0f - factor));
+				unsigned char alpha = (unsigned char)((float)outer.a * factor + (float)inner.a * (1.0f - factor));
 
 				// Only set color if alpha is not zero
 				if (alpha > 0)
 				{
-					pixels[y*width + x].r = (unsigned char)((float)outer.r*factor + (float)inner.r*(1.0f - factor));
-					pixels[y*width + x].g = (unsigned char)((float)outer.g*factor + (float)inner.g*(1.0f - factor));
-					pixels[y*width + x].b = (unsigned char)((float)outer.b*factor + (float)inner.b*(1.0f - factor));
-					pixels[y*width + x].a = alpha;
+					pixels[y * width + x].r =
+						(unsigned char)((float)outer.r * factor + (float)inner.r * (1.0f - factor));
+					pixels[y * width + x].g =
+						(unsigned char)((float)outer.g * factor + (float)inner.g * (1.0f - factor));
+					pixels[y * width + x].b =
+						(unsigned char)((float)outer.b * factor + (float)inner.b * (1.0f - factor));
+					pixels[y * width + x].a = alpha;
 				}
 				else
 				{
-					pixels[y*width + x] = (Color){0, 0, 0, 0}; // Fully transparent
+					pixels[y * width + x] = (Color){ 0, 0, 0, 0 }; // Fully transparent
 				}
 			}
 		}
 
 		Image image = {
-				.data = pixels,
-				.width = width,
-				.height = height,
-				.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
-				.mipmaps = 1
+			.data = pixels,
+			.width = width,
+			.height = height,
+			.mipmaps = 1,
+			.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8
+
 		};
 
 		return image;
 	}
-	
+
 	FlameEffect::~FlameEffect()
 	{
 		UnloadTexture(texCircle8);
 		UnloadTexture(texCircle16);
 	}
 
-	FlameEffect::FlameEffect(Camera3D* cam) :ParticleSystem(cam)
+	FlameEffect::FlameEffect(Camera3D* cam) : ParticleSystem(cam)
 	{
 		Image imgCircle16 = GenImageGradientRadialTrans(16, 16, 0.3f, WHITE, BLACK);
 		texCircle16 = LoadTextureFromImage(imgCircle16);
 		Image imgCircle8 = GenImageGradientRadialTrans(8, 8, 0.5f, WHITE, BLACK);
 		texCircle8 = LoadTextureFromImage(imgCircle8);
 		ExportImage(imgCircle16, "resources/radialimage.png");
-		
+
 		UnloadImage(imgCircle8);
 		UnloadImage(imgCircle16);
 

@@ -64,6 +64,11 @@ namespace sage
 	void WaveMobCombatStateSystem::OnStateEnter(entt::entity entity)
 	{
 		actorMovementSystem->CancelMovement(entity);
+		auto& combatable = registry->get<CombatableActor>(entity);
+		{
+			entt::sink sink{ combatable.onDeath };
+			sink.connect<&WaveMobCombatStateSystem::onDeath>(this);
+		}
 	}
 
 	void WaveMobCombatStateSystem::OnStateExit(entt::entity entity)
@@ -73,13 +78,16 @@ namespace sage
 	void WaveMobCombatStateSystem::onDeath(entt::entity entity)
 	{
 		auto& combatable = registry->get<CombatableActor>(entity);
-		combatable.onDeath.publish(entity);
 		combatable.target = entt::null;
 		combatable.dying = true;
 
 		{
 			entt::sink sink{combatable.onHit};
 			sink.disconnect<&WaveMobCombatStateSystem::OnHit>(this);
+		}
+		{
+			entt::sink sink{ combatable.onDeath };
+			sink.disconnect<&WaveMobCombatStateSystem::onDeath>(this);
 		}
 
 		auto& animation = registry->get<Animation>(entity);
@@ -170,17 +178,8 @@ namespace sage
 	void WaveMobCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, AttackData attackData)
 	{
 		ChangeState<StateEnemyCombat, EnemyStates>(entity);
-		// Aggro when player hits
 		auto& c = registry->get<CombatableActor>(entity);
 		c.target = attacker;
-
-		auto& healthbar = registry->get<HealthBar>(entity);
-		healthbar.Decrement(entity, attackData.damage);
-		if (healthbar.hp <= 0)
-		{
-			c.target = entt::null;
-			onDeath(entity);
-		}
 	}
 
 	WaveMobCombatStateSystem::WaveMobCombatStateSystem(entt::registry* _registry,

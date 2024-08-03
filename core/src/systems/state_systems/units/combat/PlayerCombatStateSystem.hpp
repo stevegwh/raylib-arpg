@@ -7,6 +7,7 @@
 #include "systems/state_systems/StateMachineSystem.hpp"
 #include "components/states/PlayerStates.hpp"
 #include "systems/ControllableActorSystem.hpp"
+#include "components/CombatableActor.hpp"
 
 #include "entt/entt.hpp"
 
@@ -27,7 +28,7 @@ namespace sage
 		void OnEnemyClick(entt::entity actor, entt::entity target);
 		void Update() override;
 		void Draw3D() override;
-		void OnHit(entt::entity entity, entt::entity attacker);
+		void OnHit(entt::entity entity, entt::entity attacker, AttackData attackData);
 		void Enable();
 		void Disable();
 		void OnStateEnter(entt::entity entity) override;

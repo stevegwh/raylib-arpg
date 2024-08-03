@@ -49,7 +49,7 @@ namespace sage
 	{
 
 		// Add randomness to the spawn position within a semi-circular area
-		float spawnAngle = ((float)rand() / RAND_MAX) * M_PI;
+		float spawnAngle = ((float)rand() / RAND_MAX) * PI;
 		float spawnRadius = ((float)rand() / RAND_MAX) * spawnAreaRadius;
 
 		Vector3 spawnPoint = {

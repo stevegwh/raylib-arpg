@@ -23,7 +23,6 @@ namespace sage
 		float increment = 30.0f;
 	public:
 		void Update();
-		void Draw3D();
 		void Restart();
 		void SetOrigin(Vector3 origin);
 		~Explosion();

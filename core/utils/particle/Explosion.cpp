@@ -28,13 +28,6 @@ namespace sage
 		}
 	}
 	
-	void Explosion::Draw3D()
-	{
-//		if (scale >= maxScale) return;
-//		auto& transform = registry->get<sgTransform>(entity);
-//		DrawModel(sphere, transform.position(), transform.scale(), Color{255, 0, 0, 100});
-	}
-	
 	void Explosion::SetOrigin(Vector3 origin)
 	{
 		auto& transform = registry->get<sgTransform>(entity);

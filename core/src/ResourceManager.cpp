@@ -23,6 +23,14 @@ namespace sage
 	static std::unordered_map<std::string, char*> fragShaders;
 	
 	
+	/*
+	* @brief Stores the shader's text file in memory, saving on reading the file multiple times.
+	 * 
+	 * @param vShaderStr 
+	 * @param fShaderStr 
+	 * @return Shader 
+	 
+	*/
 	Shader ResourceManager::ShaderLoad(const char* vsFileName, const char* fsFileName)
 	{
 		Shader shader = { 0 };
@@ -149,14 +157,14 @@ namespace sage
 		// Copy name if it exists
 		if (oldMesh.name) 
 		{
-			mesh.name = strdup(oldMesh.name);
+			mesh.name = _strdup(oldMesh.name);
 		}
 
 		return mesh;
 	}
 
 	/**
-	 * @brief Creates a deep copy of the loaded model
+	 * @brief Creates a deep copy of the loaded model. Cuts down model loading times as it's faster copying buffers rather than reading/parsing model files.
 	 * @param path 
 	 * @return 
 	 */

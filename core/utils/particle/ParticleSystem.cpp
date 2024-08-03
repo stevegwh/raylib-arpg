@@ -1,6 +1,7 @@
 #include "ParticleSystem.hpp"
 #include "raymath.h"
 #include <utility>
+#include <algorithm>
 
 namespace sage
 {
