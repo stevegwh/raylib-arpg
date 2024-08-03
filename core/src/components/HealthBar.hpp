@@ -12,7 +12,6 @@ namespace sage
 {
 	struct HealthBar
 	{
-		int hp = 100;
 		float damageTaken = 0;
 		RenderTexture2D healthBarTexture{};
 		const int healthBarWidth = 200;
@@ -22,8 +21,7 @@ namespace sage
 		const Color healthBarBorderColor = MAROON;
 		void Decrement(int value);
 		void Increment(int value);
-		void Update();
-		HealthBar(int* _hp);
+		HealthBar();
 		~HealthBar();
 	};
 }

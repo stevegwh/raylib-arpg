@@ -86,7 +86,7 @@ namespace sage
 			sink.connect<&WaveMobCombatStateSystem::OnHit>(game->stateSystems->unitSystems->waveMobCombatLogicSubSystem);
 		}
 		
-		auto& healthbar = registry->emplace<HealthBar>(id, &combatable.hp);
+		auto& healthbar = registry->emplace<HealthBar>(id);
 		// ---
 
 		// Collision
