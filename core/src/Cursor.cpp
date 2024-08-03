@@ -18,20 +18,20 @@ namespace sage
 	{
 		if (!enabled) return;
 		
-		const auto& layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
+		const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
 		if (layer == CollisionLayer::NPC)
 		{
-			onNPCClick.publish(rayCollisionResultInfo.collidedEntityId);
+			onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
 		}
 		else if (layer == CollisionLayer::FLOOR)
 		{
-			onFloorClick.publish(rayCollisionResultInfo.collidedEntityId);
+			onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
 		}
 		else if (layer == CollisionLayer::ENEMY)
 		{
-			onEnemyClick.publish(rayCollisionResultInfo.collidedEntityId);
+			onEnemyClick.publish(m_mouseHitInfo.collidedEntityId);
 		}
-		onAnyClick.publish(rayCollisionResultInfo.collidedEntityId);
+		onAnyClick.publish(m_mouseHitInfo.collidedEntityId);
 	}
 
 	void Cursor::DisableContextSwitching() // Lock mouse context? Like changing depending on collision.
@@ -67,20 +67,20 @@ namespace sage
 	bool Cursor::isValidMove() const
 	{
 		GridSquare clickedSquare{};
-		if (navigationGridSystem->WorldToGridSpace(collision.point,
+		if (navigationGridSystem->WorldToGridSpace(m_mouseHitInfo.rlCollision.point,
                                                    clickedSquare))
 		// Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as bounds.)
 		{
 			if (registry->any_of<ControllableActor>(controlledActor))
 			{
 				const auto& actor = registry->get<ControllableActor>(controlledActor);
-				GridSquare minRange;
-				GridSquare maxRange;
+				GridSquare minRange{};
+				GridSquare maxRange{};
 				navigationGridSystem->GetPathfindRange(controlledActor,
 				                                       actor.pathfindingBounds,
 				                                       minRange,
 				                                       maxRange);
-				if (!navigationGridSystem->WorldToGridSpace(collision.point, clickedSquare, minRange, maxRange))
+				if (!navigationGridSystem->WorldToGridSpace(m_mouseHitInfo.rlCollision.point, clickedSquare, minRange, maxRange))
 				// Out of player's movement range
 				{
 					return false;
@@ -114,18 +114,18 @@ namespace sage
 				currentTex = &invalidmovetex;
 				currentColor = invalidColor;
 			}
-            if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
+            if (registry->all_of<Renderable>(m_mouseHitInfo.collidedEntityId))
             {
-                hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
+                hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
             }
 		}
 		else if (layer == CollisionLayer::BUILDING)
 		{
 			currentTex = &regulartex;
 			currentColor = invalidColor;
-			if (registry->all_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
+			if (registry->all_of<Renderable>(m_mouseHitInfo.collidedEntityId))
 			{
-				hitObjectName = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId).name;
+				hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
 			}
 		}
 		else if (layer == CollisionLayer::PLAYER)
@@ -147,54 +147,67 @@ namespace sage
 
 	void Cursor::getMouseRayCollision()
 	{
-		// Display information about the closest hit
-		collision = {};
+		// Reset hit information
+		resetHitInfo(m_mouseHitInfo);
+		resetHitInfo(m_terrainHitInfo);
 		hitObjectName = "None";
-		collision.distance = FLT_MAX;
-		collision.hit = false;
 		currentTex = &regulartex;
 		currentColor = defaultColor;
 
 		// Get ray and test against objects
 		ray = GetMouseRay(GetMousePosition(), *sCamera->getRaylibCam());
-
 		auto collisions = collisionSystem->GetCollisionsWithRay(ray);
+
 		if (collisions.empty())
 		{
-			CollisionInfo empty{};
-			rayCollisionResultInfo = {};
 			return;
 		}
 
-	
-		// Collision hit
-		rayCollisionResultInfo = collisions.at(0); // Closest collision
+		// Set initial hit info
+		m_mouseHitInfo = collisions[0];
 
-		for (auto coll : collisions) // Avoids the actors in the scene being obscured by the terrain's bounding boxes
+		// Find first non-floor collision for mouse hit
+		auto nonFloorIt = std::find_if(collisions.begin(), collisions.end(),
+				[](const CollisionInfo& coll) { return coll.collisionLayer != CollisionLayer::FLOOR; });
+
+		if (nonFloorIt != collisions.end())
 		{
-			if (coll.collisionLayer != CollisionLayer::FLOOR)
+			m_mouseHitInfo = *nonFloorIt;
+			m_terrainHitInfo = collisions[0];  // Keep the first hit (likely floor) as terrain hit
+			findMeshCollision(m_terrainHitInfo);
+		}
+		else
+		{
+			m_terrainHitInfo = m_mouseHitInfo;
+		}
+		
+		findMeshCollision(m_mouseHitInfo);
+
+		onCollisionHit.publish(m_mouseHitInfo.collidedEntityId);
+
+		auto layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+		changeCursors(layer);
+	}
+
+	void Cursor::resetHitInfo(CollisionInfo& hitInfo)
+	{
+		hitInfo.rlCollision = {};
+		hitInfo.rlCollision.distance = FLT_MAX;
+		hitInfo.rlCollision.hit = false;
+	}
+
+	// Find the terrain's mesh collision (instead of using its bounding box)
+	void Cursor::findMeshCollision(CollisionInfo& hitInfo)
+	{
+		if (hitInfo.collisionLayer == CollisionLayer::FLOOR && registry->any_of<Renderable>(hitInfo.collidedEntityId))
+		{
+			auto& renderable = registry->get<Renderable>(hitInfo.collidedEntityId);
+			auto meshCollision = GetRayCollisionMesh(ray, *renderable.model.meshes, renderable.model.transform);
+			if (meshCollision.hit)
 			{
-				rayCollisionResultInfo = coll;
-				break;
+				hitInfo.rlCollision = meshCollision;
 			}
 		}
-
-        // Get the floor's mesh hit point
-        if (rayCollisionResultInfo.collisionLayer == CollisionLayer::FLOOR && registry->any_of<Renderable>(rayCollisionResultInfo.collidedEntityId))
-        {
-            auto& renderable = registry->get<Renderable>(rayCollisionResultInfo.collidedEntityId);
-            auto meshCollision = GetRayCollisionMesh(ray, *renderable.model.meshes, renderable.model.transform);
-            if (meshCollision.hit)
-            {
-                rayCollisionResultInfo.rlCollision = meshCollision;
-            }
-        }
-        
-		collision = rayCollisionResultInfo.rlCollision;
-		onCollisionHit.publish(rayCollisionResultInfo.collidedEntityId);
-
-		auto layer = registry->get<Collideable>(rayCollisionResultInfo.collidedEntityId).collisionLayer;
-		changeCursors(layer);
 	}
 
 	void Cursor::Update()
@@ -209,15 +222,15 @@ namespace sage
 
 	void Cursor::Draw3D()
 	{
-		if (!collision.hit) return;
+		if (!m_mouseHitInfo.rlCollision.hit) return;
 		if (contextLocked) return;
-		DrawCube(collision.point, 0.5f, 0.5f, 0.5f, currentColor);
+		DrawCube(m_mouseHitInfo.rlCollision.point, 0.5f, 0.5f, 0.5f, currentColor);
         Vector3 normalEnd;
-        normalEnd.x = collision.point.x + collision.normal.x;
-        normalEnd.y = collision.point.y + collision.normal.y;
-        normalEnd.z = collision.point.z + collision.normal.z;
+        normalEnd.x = m_mouseHitInfo.rlCollision.point.x + m_mouseHitInfo.rlCollision.normal.x;
+        normalEnd.y = m_mouseHitInfo.rlCollision.point.y + m_mouseHitInfo.rlCollision.normal.y;
+        normalEnd.z = m_mouseHitInfo.rlCollision.point.z + m_mouseHitInfo.rlCollision.normal.z;
 
-        DrawLine3D(collision.point, normalEnd, RED);
+        DrawLine3D(m_mouseHitInfo.rlCollision.point, normalEnd, RED);
 	}
 
 	void Cursor::Draw2D()
@@ -238,6 +251,21 @@ namespace sage
 	void Cursor::OnControlledActorChange(entt::entity entity)
 	{
 		controlledActor = entity;
+	}
+
+	const CollisionInfo& Cursor::getMouseHitInfo() const
+	{
+		return m_mouseHitInfo;
+	}
+
+	const RayCollision& Cursor::terrainCollision() const
+	{
+		return m_terrainHitInfo.rlCollision;
+	}
+	
+	const RayCollision& Cursor::collision() const
+	{
+		return m_mouseHitInfo.rlCollision;
 	}
 
 	Cursor::Cursor(entt::registry* _registry,

@@ -62,7 +62,7 @@ namespace sage
 
 	void ControllableActorSystem::MoveToLocation(entt::entity id)
 	{
-		actorMovementSystem->PathfindToLocation(id, {cursor->collision.point});
+		actorMovementSystem->PathfindToLocation(id, {cursor->collision().point});
 	}
 
 	void ControllableActorSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
@@ -73,7 +73,7 @@ namespace sage
 	void ControllableActorSystem::onFloorClick(entt::entity entity)
 	{
 		actorMovementSystem->CancelMovement(controlledActorId); // Flush any previous commands
-		PathfindToLocation(controlledActorId, cursor->collision.point);
+		PathfindToLocation(controlledActorId, cursor->collision().point);
 	}
 
 	void ControllableActorSystem::onEnemyClick(entt::entity entity)
@@ -96,7 +96,7 @@ namespace sage
 			sink.connect<&ControllableActorSystem::CancelMovement>(this);
 		}
 
-		PathfindToLocation(controlledActorId, cursor->collision.point);
+		PathfindToLocation(controlledActorId, cursor->collision().point);
 	}
 
 	void ControllableActorSystem::SetControlledActor(entt::entity id)

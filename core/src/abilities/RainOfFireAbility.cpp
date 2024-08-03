@@ -19,7 +19,7 @@ namespace sage
 		}
 		if (!spellCursor->active())
 		{
-			spellCursor->Init(cursor->collision.point); // Should not do this if already done
+			spellCursor->Init(cursor->terrainCollision().point);
 			spellCursor->Enable(true);
 			cursor->Disable();
 			cursor->Hide();
@@ -64,7 +64,7 @@ namespace sage
 		}
 		if (spellCursor->active())
 		{
-			spellCursor->Update(cursor->collision.point);
+			spellCursor->Update(cursor->terrainCollision().point);
 			if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !active)
 			{
 				Confirm(actor);
@@ -84,14 +84,14 @@ namespace sage
 
 		auto view = registry->view<CombatableActor>();
 
-		vfx->InitSystem(cursor->collision.point);
+		vfx->InitSystem(cursor->collision().point);
 
 		for (auto& entity : view)
 		{
 			if (entity == actor) continue;
 			const auto& targetCol = registry->get<Collideable>(entity);
 
-			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, cursor->collision.point, whirlwindRadius))
+			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, cursor->collision().point, whirlwindRadius))
 			{
 				//hitUnits.push_back(entity);
 				const auto& combatable = registry->get<CombatableActor>(entity);

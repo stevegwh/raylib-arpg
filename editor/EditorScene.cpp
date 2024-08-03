@@ -12,22 +12,22 @@ namespace sage
 		// TODO: Confirm this works
 		// (It does not. Set event to update the bb of the selected object)
 		auto& selectedObjectTrans = registry->get<sgTransform>(selectedObject);
-		selectedObjectTrans.SetPosition(data->cursor->collision.point, selectedObject);
+		selectedObjectTrans.SetPosition(data->cursor->collision().point, selectedObject);
 	}
 
 	void EditorScene::OnCursorClick()
 	{
 		if (gui->focused) return;
-		if (data->cursor->collision.hit)
+		if (data->cursor->collision().hit)
 		{
-			switch (registry->get<Collideable>(data->cursor->rayCollisionResultInfo.collidedEntityId).collisionLayer)
+			switch (registry->get<Collideable>(data->cursor->getMouseHitInfo().collidedEntityId).collisionLayer)
 			{
 			case CollisionLayer::DEFAULT:
 				break;
 			case CollisionLayer::FLOOR:
 				if (currentEditorMode == CREATE)
 				{
-					GameObjectFactory::createBuilding(registry, data.get(), data->cursor->collision.point,
+					GameObjectFactory::createBuilding(registry, data.get(), data->cursor->collision().point,
 					                                  "Tower Instance",
 					                                  "resources/models/obj/turret.obj",
 					                                  "resources/models/obj/turret_diffuse.png");
@@ -41,7 +41,7 @@ namespace sage
 				break;
 			case CollisionLayer::BUILDING:
 				currentEditorMode = SELECT;
-				selectedObject = data->cursor->rayCollisionResultInfo.collidedEntityId;
+				selectedObject = data->cursor->getMouseHitInfo().collidedEntityId;
 				break;
 			}
 		}
