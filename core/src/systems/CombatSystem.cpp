@@ -21,21 +21,22 @@ namespace sage
 	{
 	}
 
-	void CombatSystem::RegisterAttack(entt::entity hit, entt::entity attacker, AttackData attackData)
+	void CombatSystem::RegisterAttack(AttackData attackData)
 	{
-		// Register the attack with the target.
-		// This could be used to apply damage, status effects, etc.
-		auto& targetCombat = registry->get<CombatableActor>(hit);
+		// DoTs could be handled in attackData with a duration and a damage value. Use a timer and callback?
+		// Can store timerId (and hit entity) in a map which the callback function can call 
+		// (I assume I can't pass these on as parameters directly without some generic programming trickery)
+		auto& targetCombat = registry->get<CombatableActor>(attackData.hit);
 		targetCombat.hp -= attackData.damage;
 		if (targetCombat.hp <= 0)
 		{
 			targetCombat.hp = 0;
 			targetCombat.target = entt::null;
-			targetCombat.onDeath.publish(hit);
+			targetCombat.onDeath.publish(attackData.hit);
 		}
-		if (registry->any_of<HealthBar>(hit))
+		if (registry->any_of<HealthBar>(attackData.hit))
 		{
-			auto& healthbar = registry->get<HealthBar>(hit);
+			auto& healthbar = registry->get<HealthBar>(attackData.hit);
 			healthbar.Decrement(attackData.damage);
 		}
 	}

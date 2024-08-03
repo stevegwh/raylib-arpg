@@ -25,6 +25,9 @@ namespace sage
 	
 	struct AttackData
 	{
+		entt::entity attacker = entt::null;
+		entt::entity hit = entt::null;
+		// TODO: Set the above variables in related functions (e.g., onHit) instead of passing entities separately
 		int damage = 0;
 		AttackElement element = AttackElement::PHYSICAL;
 	};
@@ -49,12 +52,14 @@ namespace sage
         
         std::vector<entt::delegate<void()>> dots;
         
-		entt::sigh<void(entt::entity, entt::entity, AttackData)> onHit{}; // Self, attacker, damage
+		entt::sigh<void(AttackData)> onHit{}; // Self, attacker, damage
 		entt::sigh<void(entt::entity)> onDeath{};
 		entt::sigh<void(entt::entity, entt::entity)> onEnemyClicked{}; // Self, Clicked enemy
 		entt::sigh<void(entt::entity)> onAttackCancelled{}; // Self
 		entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
         
+		// Below are "bridge" functions that hook onto mouse events (etc.) and publish the above signals but
+		// with a reference to the self (entity) so the system can use the entity to get the component data.
 		void EnemyClicked(entt::entity enemy);
 		void AttackCancelled();
 		void TargetDeath(entt::entity _target);

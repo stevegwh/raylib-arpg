@@ -52,7 +52,10 @@ namespace sage
 			{
 				//hitUnits.push_back(entity);
 				const auto& combatable = registry->get<CombatableActor>(entity);
-				combatable.onHit.publish(entity, actor, attackData);
+				AttackData _attackData = attackData;
+				_attackData.hit = entity;
+				_attackData.attacker = actor;
+				combatable.onHit.publish(_attackData);
 				std::cout << "Hit unit \n";
 			}
 		}

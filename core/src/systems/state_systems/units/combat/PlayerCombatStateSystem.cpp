@@ -108,11 +108,13 @@ namespace sage
 			AttackData attack;
 			attack.element = AttackElement::PHYSICAL;
 			attack.damage = 10; // TODO: tmp dmg
-			enemyCombatable.onHit.publish(c.target, entity, attack); // TODO: tmp dmg
+			attack.attacker = entity;
+			attack.hit = c.target;
+			enemyCombatable.onHit.publish(attack); // TODO: tmp dmg
 		}
 	}
 
-	void PlayerCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, AttackData attackData)
+	void PlayerCombatStateSystem::OnHit(AttackData attackData)
 	{
 	}
 

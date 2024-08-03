@@ -29,7 +29,7 @@ namespace sage
 	public:
 		void OnStateEnter(entt::entity entity) override;
 		void OnStateExit(entt::entity entity) override;
-		void OnHit(entt::entity entity, entt::entity attacker, AttackData attackData);
+		void OnHit(AttackData attackData);
 		void Draw3D() override;
 		void Update() override;
 		WaveMobCombatStateSystem(entt::registry* _registry,
