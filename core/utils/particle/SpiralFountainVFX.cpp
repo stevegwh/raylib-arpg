@@ -6,6 +6,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "ResourceManager.hpp"
 
 #include <cmath>
 
@@ -52,7 +53,7 @@ namespace sage
 
 	SpiralFountainVFX::SpiralFountainVFX(Camera3D* _camera) : camera(_camera)
 	{
-		shader = LoadShader(nullptr, "resources/shader/glsl330/billboard.fs");
+		shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
 		fountain = std::make_unique<FountainEffect>(camera);
 		InitSystem({ 30.0f, 4, 20.0f });
 	}

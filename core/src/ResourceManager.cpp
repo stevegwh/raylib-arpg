@@ -19,7 +19,40 @@ namespace sage
 	static std::unordered_map<std::string, Model> staticModels;
 	static std::unordered_map<std::string, Model> dynamicModels;
 	static std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations;
+	static std::unordered_map<std::string, char*> vertShaders;
+	static std::unordered_map<std::string, char*> fragShaders;
+	
+	
+	Shader ResourceManager::ShaderLoad(const char* vsFileName, const char* fsFileName)
+	{
+		Shader shader = { 0 };
 
+		char *vShaderStr = nullptr;
+		char *fShaderStr = nullptr;
+
+		if (vsFileName != nullptr)
+		{
+			if (vertShaders.find(vsFileName) == vertShaders.end())
+			{
+				vertShaders[vsFileName] = LoadFileText(vsFileName);
+			}
+			vShaderStr = vertShaders[vsFileName];
+		}
+		
+		if (fsFileName != nullptr)
+		{
+			if (fragShaders.find(fsFileName) == fragShaders.end())
+			{
+				fragShaders[fsFileName] = LoadFileText(fsFileName);
+			}
+			fShaderStr = fragShaders[fsFileName];
+		}
+
+		shader = LoadShaderFromMemory(vShaderStr, fShaderStr);
+
+		return shader;
+	}
+	
 	Image ResourceManager::LoadTexture(const std::string& path)
 	{
 		if (textureImages.find(path) == textureImages.end())
@@ -242,6 +275,15 @@ namespace sage
 		for (auto kv : modelAnimations)
 		{
 			UnloadModelAnimations(kv.second.first, kv.second.second);
+		}
+		for (auto kv : vertShaders)
+		{
+			UnloadFileText(kv.second);
+			
+		}
+		for (auto kv : fragShaders)
+		{
+			UnloadFileText(kv.second);
 		}
 	}
 } // sage
