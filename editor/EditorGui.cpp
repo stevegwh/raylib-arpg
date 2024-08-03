@@ -89,23 +89,23 @@ namespace sage::editor
 		// Draw some debug EditorGui text
 		DrawText(TextFormat("Hit Object: %s", cursor->hitObjectName.c_str()), 10, 50, 10, BLACK);
 
-		if (cursor->collision.hit)
+		if (cursor->collision().hit)
 		{
 			int ypos = 70;
 
-			DrawText(TextFormat("Distance: %3.2f", cursor->collision.distance), 10, ypos, 10, BLACK);
+			DrawText(TextFormat("Distance: %3.2f", cursor->collision().distance), 10, ypos, 10, BLACK);
 
 			DrawText(TextFormat("Hit Pos: %3.2f %3.2f %3.2f",
-			                    cursor->collision.point.x,
-			                    cursor->collision.point.y,
-			                    cursor->collision.point.z), 10, ypos + 15, 10, BLACK);
+			                    cursor->collision().point.x,
+			                    cursor->collision().point.y,
+			                    cursor->collision().point.z), 10, ypos + 15, 10, BLACK);
 
 			DrawText(TextFormat("Hit Norm: %3.2f %3.2f %3.2f",
-			                    cursor->collision.normal.x,
-			                    cursor->collision.normal.y,
-			                    cursor->collision.normal.z), 10, ypos + 30, 10, BLACK);
+			                    cursor->collision().normal.x,
+			                    cursor->collision().normal.y,
+			                    cursor->collision().normal.z), 10, ypos + 30, 10, BLACK);
 
-			DrawText(TextFormat("Entity ID: %d", cursor->rayCollisionResultInfo.collidedEntityId), 10,
+			DrawText(TextFormat("Entity ID: %d", cursor->getMouseHitInfo().collidedEntityId), 10,
 			         ypos + 45, 10, BLACK);
 		}
 	}

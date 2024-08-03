@@ -21,14 +21,17 @@ namespace sage
 
 	class Cursor
 	{
+		CollisionInfo m_mouseHitInfo{};
+		CollisionInfo m_terrainHitInfo{};
+		
 		Texture2D* currentTex;
-		Texture2D regulartex;
-		Texture2D talktex;
-		Texture2D movetex;
-		Texture2D invalidmovetex;
-		Texture2D combattex;
+		Texture2D regulartex{};
+		Texture2D talktex{};
+		Texture2D movetex{};
+		Texture2D invalidmovetex{};
+		Texture2D combattex{};
 
-		Vector2 position;
+		Vector2 position{};
 		entt::registry* registry;
 		Ray ray{};
 		Color defaultColor = WHITE;
@@ -50,11 +53,14 @@ namespace sage
 		void getMouseRayCollision();
 		void onMouseClick();
 		void changeCursors(CollisionLayer collisionLayer);
-
+		static void resetHitInfo(CollisionInfo& hitInfo);
+		void findMeshCollision(CollisionInfo& hitInfo);
 	public:
 		std::string hitObjectName{};
-		RayCollision collision{};
-		CollisionInfo rayCollisionResultInfo;
+		[[nodiscard]] const CollisionInfo& getMouseHitInfo() const;
+		[[nodiscard]] const RayCollision& terrainCollision() const;
+		[[nodiscard]] const RayCollision& collision() const;
+
 		entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
 		entt::sigh<void(entt::entity)> onNPCClick{};
 		entt::sigh<void(entt::entity entity)> onFloorClick{};
