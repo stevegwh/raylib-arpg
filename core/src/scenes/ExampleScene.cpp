@@ -44,7 +44,6 @@ namespace sage
 		Scene::Draw3D();
 		fountain->Draw3D();
 		data->abilitySystem->Draw3D();
-		explosion->Draw3D();
 	}
 
 	void ExampleScene::DrawDebug()

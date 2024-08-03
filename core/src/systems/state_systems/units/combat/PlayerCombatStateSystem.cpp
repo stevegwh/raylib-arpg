@@ -5,7 +5,6 @@
 
 
 #include "PlayerCombatStateSystem.hpp"
-#include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
 #include "components/sgTransform.hpp"
 #include "components/HealthBar.hpp"
@@ -46,6 +45,7 @@ namespace sage
 		// If the entity is not the target of any other combatable.
 		// If no current target
 		// Have a timer for aggro and if the player is not within that range for a certain amount of time they resume their regular task (tasks TBC)
+
 		auto& combatable = registry->get<CombatableActor>(entity);
 		if (combatable.target == entt::null)
 		{
@@ -112,7 +112,7 @@ namespace sage
 		}
 	}
 
-	void PlayerCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker)
+	void PlayerCombatStateSystem::OnHit(entt::entity entity, entt::entity attacker, AttackData attackData)
 	{
 	}
 

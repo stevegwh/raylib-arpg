@@ -16,6 +16,7 @@
 #include "systems/HealthBarSystem.hpp"
 #include "systems/state_systems/StateSystems.hpp"
 #include "systems/AbilitySystem.hpp"
+#include "systems/CombatSystem.hpp"
 
 #include "Settings.hpp"
 
@@ -51,6 +52,7 @@ namespace sage
 		std::unique_ptr<HealthBarSystem> healthBarSystem;
 		std::unique_ptr<StateSystems> stateSystems;
         std::unique_ptr<AbilitySystem> abilitySystem;
+		std::unique_ptr<CombatSystem> combatSystem;
         
 		void Load();
 		void Save() const;
