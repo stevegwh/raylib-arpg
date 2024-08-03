@@ -8,24 +8,14 @@
 
 namespace sage
 {
-	void HealthBar::Decrement(entt::entity entity, int value)
+	void HealthBar::Decrement(int value)
 	{
 		damageTaken += value;
-		hp -= value;
-		onHealthUpdate.publish(entity);
-		if (hp <= 0)
-		{
-			hp = 0;
-			onHealthIsZero.publish(entity);
-		}
 	}
 
-	void HealthBar::Increment(entt::entity entity, int value)
+	void HealthBar::Increment(int value)
 	{
-		hp += value;
-		if (hp > 100) hp = 100;
 		damageTaken = 0;
-		onHealthUpdate.publish(entity);
 	}
 
 	void HealthBar::Update()
@@ -39,21 +29,21 @@ namespace sage
 		ClearBackground(BLANK);
 
 		DrawRectangle(0, 0, 200, 20, healthBarBgColor);
-		float healthPercentage = static_cast<float>(hp) / 100.0f;
+		float healthPercentage = static_cast<float>(*hp) / 100.0f;
 		float damageTakenPercentage = static_cast<float>(damageTaken) / 100.0f;
 		int fillWidth = static_cast<int>(healthPercentage * 200);
 		DrawRectangle(0, 0, fillWidth, 20, healthBarColor);
 		DrawRectangle(fillWidth, 0, static_cast<int>(damageTakenPercentage * 200), 20, WHITE);
 		DrawRectangleLines(0, 0, 200, 20, healthBarBorderColor);
 
-		Vector2 textSize = MeasureTextEx(GetFontDefault(), TextFormat("HP: %03i", hp), 20, 1);
-		DrawTextEx(GetFontDefault(), TextFormat("HP: %03i", hp),
+		Vector2 textSize = MeasureTextEx(GetFontDefault(), TextFormat("HP: %03i", *hp), 20, 1);
+		DrawTextEx(GetFontDefault(), TextFormat("HP: %03i", *hp),
 				{10, healthBarTexture.texture.height - 30 - textSize.y}, 20, 1, GREEN);
 
 		EndTextureMode();
 	}
 
-	HealthBar::HealthBar()
+	HealthBar::HealthBar(int* _hp) : hp(_hp)
 	{
 		healthBarTexture = LoadRenderTexture(200, 50);
 	}

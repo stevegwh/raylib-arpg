@@ -7,6 +7,7 @@
 
 namespace sage
 {
+	
 	void CombatSystem::onComponentAdded(entt::entity entity)
 	{
 		auto& c = registry->get<CombatableActor>(entity);
@@ -25,16 +26,17 @@ namespace sage
 		// Register the attack with the target.
 		// This could be used to apply damage, status effects, etc.
 		auto& targetCombat = registry->get<CombatableActor>(hit);
-
+		targetCombat.hp -= attackData.damage;
+		if (targetCombat.hp <= 0)
+		{
+			targetCombat.hp = 0;
+			targetCombat.target = entt::null;
+			targetCombat.onDeath.publish(hit);
+		}
 		if (registry->any_of<HealthBar>(hit))
 		{
 			auto& healthbar = registry->get<HealthBar>(hit);
-			healthbar.Decrement(hit, attackData.damage);
-			if (healthbar.hp <= 0) // TODO: healthbar should not be in charge of HP
-			{
-				targetCombat.target = entt::null;
-				targetCombat.onDeath.publish(hit);
-			}
+			healthbar.Decrement(attackData.damage);
 		}
 	}
 
