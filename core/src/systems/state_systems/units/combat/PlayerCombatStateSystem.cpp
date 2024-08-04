@@ -46,6 +46,8 @@ namespace sage
 		// If no current target
 		// Have a timer for aggro and if the player is not within that range for a certain amount of time they resume their regular task (tasks TBC)
 
+		// TODO: Should only go out of combat if no enemies are targetting the player
+
 		auto& combatable = registry->get<CombatableActor>(entity);
 		if (combatable.target == entt::null)
 		{
@@ -93,6 +95,7 @@ namespace sage
 		auto& c = registry->get<CombatableActor>(entity);
 
 		auto& t = registry->get<sgTransform>(entity);
+		// TODO: Check if target is present
 		auto& enemyPos = registry->get<sgTransform>(c.target).position();
 		Vector3 direction = Vector3Subtract(enemyPos, t.position());
 		float angle = atan2f(direction.x, direction.z) * RAD2DEG;
@@ -116,6 +119,16 @@ namespace sage
 
 	void PlayerCombatStateSystem::OnHit(AttackData attackData)
 	{
+		if (!registry->any_of<StatePlayerCombat>(attackData.hit))
+		{
+			ChangeState<StatePlayerCombat, PlayerStates>(attackData.hit);
+		}
+		
+		auto& playerCombatable = registry->get<CombatableActor>(attackData.hit);
+		if (playerCombatable.target == entt::null)
+		{
+			playerCombatable.target = attackData.attacker;
+		}
 	}
 
 	void PlayerCombatStateSystem::OnEnemyClick(entt::entity actor, entt::entity target)
@@ -146,7 +159,7 @@ namespace sage
 
 		controllableActorSystem->PathfindToLocation(actor, targetPos);
 		{
-			entt::sink sink{playerTrans.onFinishMovement};
+			entt::sink sink { playerTrans.onFinishMovement };
 			sink.connect<&PlayerCombatStateSystem::startCombat>(this);
 		}
 	}
