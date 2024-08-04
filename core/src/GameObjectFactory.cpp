@@ -228,10 +228,6 @@ namespace sage
 			entt::sink sink{ game->cursor->onFloorClick };
 			sink.connect<&CombatableActor::AttackCancelled>(combatable);
 		}
-		{
-			entt::sink sink{ combatable.onHit };
-			sink.connect<&PlayerCombatStateSystem::OnHit>(game->stateSystems->unitSystems->playerCombatLogicSubSystem);
-		}
 		// ---
 
 		Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);

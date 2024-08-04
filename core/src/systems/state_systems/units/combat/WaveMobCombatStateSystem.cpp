@@ -35,36 +35,36 @@ namespace sage
 		}
 	}
 
-	bool WaveMobCombatStateSystem::checkInCombat(entt::entity entity)
+	bool WaveMobCombatStateSystem::checkInCombat(entt::entity self)
 	{
 		// If the entity is not the target of any other combatable.
 		// If no current target
 		// Have a timer for aggro and if the player is not within that range for a certain amount of time they resume their regular task (tasks TBC)
-		auto& combatable = registry->get<CombatableActor>(entity);
+		auto& combatable = registry->get<CombatableActor>(self);
 		if (combatable.dying) return false;
 		if (combatable.target == entt::null)
 		{
-			ChangeState<StateEnemyDefault, EnemyStates>(entity);
+			ChangeState<StateEnemyDefault, EnemyStates>(self);
 			return false;
 		}
 		return true;
 	}
 
-	void WaveMobCombatStateSystem::destroyEnemy(entt::entity entity)
+	void WaveMobCombatStateSystem::destroyEnemy(entt::entity self)
 	{
-		navigationGridSystem->MarkSquareAreaOccupied(registry->get<Collideable>(entity).worldBoundingBox, false);
+		navigationGridSystem->MarkSquareAreaOccupied(registry->get<Collideable>(self).worldBoundingBox, false);
 		{
-			auto& animation = registry->get<Animation>(entity);
+			auto& animation = registry->get<Animation>(self);
 			entt::sink sink{animation.onAnimationEnd};
 			sink.disconnect<&WaveMobCombatStateSystem::destroyEnemy>(this);
 		}
-		registry->destroy(entity);
+		registry->destroy(self);
 	}
 
-	void WaveMobCombatStateSystem::OnStateEnter(entt::entity entity)
+	void WaveMobCombatStateSystem::OnStateEnter(entt::entity self)
 	{
-		actorMovementSystem->CancelMovement(entity);
-		auto& combatable = registry->get<CombatableActor>(entity);
+		actorMovementSystem->CancelMovement(self);
+		auto& combatable = registry->get<CombatableActor>(self);
 		{
 			entt::sink sink{ combatable.onDeath };
 			sink.connect<&WaveMobCombatStateSystem::onDeath>(this);
@@ -75,9 +75,9 @@ namespace sage
 	{
 	}
 
-	void WaveMobCombatStateSystem::onDeath(entt::entity entity)
+	void WaveMobCombatStateSystem::onDeath(entt::entity self)
 	{
-		auto& combatable = registry->get<CombatableActor>(entity);
+		auto& combatable = registry->get<CombatableActor>(self);
 		combatable.target = entt::null;
 		combatable.dying = true;
 
@@ -90,7 +90,7 @@ namespace sage
 			sink.disconnect<&WaveMobCombatStateSystem::onDeath>(this);
 		}
 
-		auto& animation = registry->get<Animation>(entity);
+		auto& animation = registry->get<Animation>(self);
 		animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
 		{
 			entt::sink sink{animation.onAnimationEnd};
@@ -98,14 +98,14 @@ namespace sage
 		}
 	}
 
-	inline void WaveMobCombatStateSystem::onTargetOutOfRange(entt::entity entity,
+	inline void WaveMobCombatStateSystem::onTargetOutOfRange(entt::entity self,
 	                                                            Vector3& normDirection,
 	                                                            float distance) const
 	{
-		auto& combatableActor = registry->get<CombatableActor>(entity);
-		auto& animation = registry->get<Animation>(entity);
-		auto& actorTrans = registry->get<sgTransform>(entity);
-		auto& collideable = registry->get<Collideable>(entity);
+		auto& combatableActor = registry->get<CombatableActor>(self);
+		auto& animation = registry->get<Animation>(self);
+		auto& actorTrans = registry->get<sgTransform>(self);
+		auto& collideable = registry->get<Collideable>(self);
 		auto& target = registry->get<sgTransform>(combatableActor.target).position();
 
 		animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
@@ -115,28 +115,28 @@ namespace sage
 		ray.position.y = 0.5f;
 		ray.direction.y = 0.5f;
 		actorTrans.movementDirectionDebugLine = ray;
-		auto collisions = collisionSystem->GetCollisionsWithRay(entity, ray, collideable.collisionLayer);
+		auto collisions = collisionSystem->GetCollisionsWithRay(self, ray, collideable.collisionLayer);
 
 		if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
 		{
 			// Lost line of sight, out of combat
-			actorMovementSystem->CancelMovement(entity);
+			actorMovementSystem->CancelMovement(self);
 			combatableActor.target = entt::null;
 			actorTrans.movementDirectionDebugLine = {};
 			return;
 		}
-		const auto& moveableActor = registry->get<MoveableActor>(entity);
+		const auto& moveableActor = registry->get<MoveableActor>(self);
 		if (!moveableActor.destination.has_value())
 		{
-			actorMovementSystem->PathfindToLocation(entity, target, true);
+			actorMovementSystem->PathfindToLocation(self, target, true);
 		}
 	}
 
-	void WaveMobCombatStateSystem::autoAttack(entt::entity entity) const
+	void WaveMobCombatStateSystem::autoAttack(entt::entity self) const
 	{
-		auto& combatableActor = registry->get<CombatableActor>(entity);
-		auto& actorTrans = registry->get<sgTransform>(entity);
-		auto& animation = registry->get<Animation>(entity);
+		auto& combatableActor = registry->get<CombatableActor>(self);
+		auto& actorTrans = registry->get<sgTransform>(self);
+		auto& animation = registry->get<Animation>(self);
 
 		auto target = registry->get<sgTransform>(combatableActor.target).position();
 
@@ -146,19 +146,19 @@ namespace sage
 
 		if (distance >= 15)
 		{
-			onTargetOutOfRange(entity, normDirection, distance);
+			onTargetOutOfRange(self, normDirection, distance);
 			return;
 		}
 
 		float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-		actorTrans.SetRotation({0, angle, 0}, entity);
+		actorTrans.SetRotation({0, angle, 0}, self);
 		combatableActor.autoAttackTick = 0;
 
 		auto& targetCombatable = registry->get<CombatableActor>(combatableActor.target);
 
 		// TODO: Need to move all of these things to an ability class
 		AttackData attackData;
-		attackData.attacker = entity;
+		attackData.attacker = self;
 		attackData.hit = combatableActor.target;
 		attackData.damage = 0;
 		targetCombatable.onHit.publish(attackData);

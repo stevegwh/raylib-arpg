@@ -18,14 +18,15 @@ namespace sage
 	{
 		ControllableActorSystem* controllableActorSystem;
 
-		void startCombat(entt::entity entity);
-		[[nodiscard]] bool checkInCombat(entt::entity entity);
-		void onDeath(entt::entity entity);
-		void onTargetDeath(entt::entity actor, entt::entity target);
-		void onAttackCancel(entt::entity entity);
-		void autoAttack(entt::entity entity) const;
+		void setTarget(entt::entity self);
+		void startCombat(entt::entity self);
+		[[nodiscard]] bool checkInCombat(entt::entity self);
+		void onDeath(entt::entity self);
+		void onTargetDeath(entt::entity self, entt::entity target);
+		void onAttackCancel(entt::entity self);
+		void autoAttack(entt::entity self) const;
 	public:
-		void OnEnemyClick(entt::entity actor, entt::entity target);
+		void OnEnemyClick(entt::entity self, entt::entity target);
 		void Update() override;
 		void Draw3D() override;
 		void OnHit(AttackData attackData);

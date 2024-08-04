@@ -20,15 +20,15 @@ namespace sage
 		ActorMovementSystem* actorMovementSystem;
 		CollisionSystem* collisionSystem;
 
-		void startCombat(entt::entity entity);
-		[[nodiscard]] bool checkInCombat(entt::entity entity);
-		void onDeath(entt::entity entity);
-		void autoAttack(entt::entity entity) const;
-		void destroyEnemy(entt::entity entity);
+		void startCombat(entt::entity self);
+		[[nodiscard]] bool checkInCombat(entt::entity self);
+		void onDeath(entt::entity self);
+		void autoAttack(entt::entity self) const;
+		void destroyEnemy(entt::entity self);
 		void onTargetOutOfRange(entt::entity entity, Vector3& normDirection, float distance) const;
 	public:
-		void OnStateEnter(entt::entity entity) override;
-		void OnStateExit(entt::entity entity) override;
+		void OnStateEnter(entt::entity self) override;
+		void OnStateExit(entt::entity self) override;
 		void OnHit(AttackData attackData);
 		void Draw3D() override;
 		void Update() override;
