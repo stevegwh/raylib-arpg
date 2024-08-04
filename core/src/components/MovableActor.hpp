@@ -19,7 +19,10 @@ namespace sage
 		entt::entity lastHitActor = entt::null;
 		Vector3 hitActorLastPos{};
 		std::deque<Vector3> path{};
-		std::optional<Vector3> destination{};
+		bool isMoving() const
+		{
+			return !path.empty();
+		}
         std::vector<GridSquare> debugRay;
 	};
 } // sage

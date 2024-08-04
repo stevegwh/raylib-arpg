@@ -38,7 +38,6 @@ namespace sage
 		PruneMoveCommands(entity);
 		auto& transform = registry->get<sgTransform>(entity);
 		auto& moveableActor = registry->get<MoveableActor>(entity);
-		moveableActor.destination.reset();
 		transform.onMovementCancel.publish(entity);
 	}
 
@@ -82,12 +81,6 @@ namespace sage
 		if (!path.empty())
 		{
 			transform.direction = Vector3Normalize(Vector3Subtract(movableActor.path.front(), transform.position()));
-
-			if (initialMove)
-			{
-				movableActor.destination =
-					path.back(); // path.back instead of destination to account for the requested destination being occupied
-			}
 			transform.onStartMovement.publish(entity);
 		}
 		// TODO: Handle destination being unreachable. (Change animation to IDLE, for a start)
@@ -134,24 +127,6 @@ namespace sage
 			auto& moveableActor = registry->get<MoveableActor>(entity);
 			const auto& actorCollideable = registry->get<Collideable>(entity);
 
-            // Checks if actor can be moved to their original destination
-            // Accounts for whether the actor was moved to a "next best" destination previously
-			if (moveableActor.destination.has_value())
-			{
-				if (moveableActor.path.empty()
-					|| !AlmostEquals(moveableActor.path.back(), moveableActor.destination.value()))
-				{
-					navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
-					if (navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
-						moveableActor.destination.value(), actorCollideable.worldBoundingBox))
-					{
-						// TODO: Not sure how much I like having to mark squares as occupied etc.
-						PathfindToLocation(entity, moveableActor.destination.value(), false);
-					}
-					navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
-				}
-			}
-
 			if (moveableActor.path.empty())
 			{
 				continue;
@@ -161,7 +136,7 @@ namespace sage
 			auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position());
 
 //			// TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
-//			// Checks whether the next square is occupied, and if it is, then recalculate the path.
+//			// Checks whether the next destination is occupied, and if it is, then recalculate the path.
             if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(moveableActor.path.front(),
 				actorCollideable.worldBoundingBox)
 				|| !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
@@ -174,14 +149,6 @@ namespace sage
 
 			if (nextPointDist < 0.5f) // Destination reached
 			{
-                // If the actor has reached their original destination (not a "next best" one)
-				if (moveableActor.path.size() == 1 && moveableActor.destination.has_value() && AlmostEquals(
-					moveableActor.destination.value(), moveableActor.path.back()))
-				{
-					actorTrans.onDestinationReached.publish(entity);
-					moveableActor.destination.reset();
-				}
-
                 // Set continuous pos to grid/discrete pos
                 GridSquare targetGridPos{};
                 navigationGridSystem->WorldToGridSpace(moveableActor.path.front(), targetGridPos);
@@ -196,8 +163,8 @@ namespace sage
 				moveableActor.path.pop_front();
 				if (moveableActor.path.empty())
 				{
-					actorTrans.onFinishMovement
-						.publish(entity); // Should this be published when it reaches its true destination or just a movement? Maybe have two events for it
+					actorTrans.onDestinationReached.publish(entity);
+					actorTrans.onFinishMovement.publish(entity);
 					navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
 					continue;
 				}
@@ -209,6 +176,7 @@ namespace sage
 
 
 			navigationGridSystem->MarkSquaresDebug(moveableActor.debugRay, PURPLE, false);
+			// Looks ahead and checks if collision will occur
 			NavigationGridSquare* hitCell = navigationGridSystem->CastRay(
 				actorIndex.row,
 				actorIndex.col,

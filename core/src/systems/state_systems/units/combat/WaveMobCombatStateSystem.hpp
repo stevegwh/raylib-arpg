@@ -19,7 +19,7 @@ namespace sage
 		NavigationGridSystem* navigationGridSystem;
 		ActorMovementSystem* actorMovementSystem;
 		CollisionSystem* collisionSystem;
-
+		bool isTargetInLineOfSight(entt::entity self, Vector3& normDirection, float distance) const;
 		void startCombat(entt::entity self);
 		[[nodiscard]] bool checkInCombat(entt::entity self);
 		void onDeath(entt::entity self);
