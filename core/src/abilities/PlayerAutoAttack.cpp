@@ -34,27 +34,30 @@ namespace sage
         }
     }
 
-    void PlayerAutoAttack::Init()
+    void PlayerAutoAttack::Init(entt::entity self)
     {
         active = true;
+        timerManager->AddTimer(m_cooldownLimit, &PlayerAutoAttack::Execute, this, self);
     }
 
     void PlayerAutoAttack::Cancel()
     {
         active = false;
         m_cooldownTimer = 0;
+        timerManager->RemoveTimer(timerId);
+        timerId = -1;
     }
 
     void PlayerAutoAttack::Update(entt::entity self)
     {
-        if (!active)
-            return;
-        m_cooldownTimer += GetFrameTime();
-        if (m_cooldownTimer >= m_cooldownLimit)
-        {
-            m_cooldownTimer = 0;
-            Execute(self);
-        }
+        // if (!active)
+        //     return;
+        // m_cooldownTimer += GetFrameTime();
+        // if (m_cooldownTimer >= m_cooldownLimit)
+        // {
+        //     m_cooldownTimer = 0;
+        //     Execute(self);
+        // }
     }
 
     PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem,

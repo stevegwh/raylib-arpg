@@ -198,7 +198,7 @@ namespace sage
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
-        autoAttackAbility->Init();
+        autoAttackAbility->Init(self);
     }
 
     void PlayerCombatStateSystem::OnStateExit(entt::entity self)

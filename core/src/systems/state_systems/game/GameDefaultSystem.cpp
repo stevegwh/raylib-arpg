@@ -29,7 +29,7 @@ namespace sage
 	
 	void GameDefaultSystem::OnStateEnter(entt::entity entity)
 	{
-		timerId = timerManager->AddTimer(5.0f, callback);
+    	timerId = timerManager->AddTimer(5.0f, &GameDefaultSystem::OnTimerEnd, this);
 	}
 	
 	void GameDefaultSystem::OnStateExit(entt::entity entity)
@@ -40,6 +40,5 @@ namespace sage
 	GameDefaultSystem::GameDefaultSystem(entt::registry* _registry, entt::entity _gameEntity, TimerManager* _timerManager) :
 			StateMachineSystem(_registry), gameEntity(_gameEntity), timerManager(_timerManager)
 	{
-		callback.connect<&GameDefaultSystem::OnTimerEnd>(this);
 	}
 } // sage
