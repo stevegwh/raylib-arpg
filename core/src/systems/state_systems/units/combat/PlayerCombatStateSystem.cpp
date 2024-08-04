@@ -23,16 +23,7 @@ namespace sage
             if (!checkInCombat(entity))
                 continue;
 
-            // Player is out of combat if no enemy is targetting them?
-            if (c.autoAttackTick >= c.autoAttackTickThreshold)
-            // Maybe can count time since last autoattack to time out combat?
-            {
-                autoAttack(entity);
-            }
-            else
-            {
-                c.autoAttackTick += GetFrameTime();
-            }
+            autoAttackAbility->Update(entity);
         }
     }
 
@@ -87,36 +78,7 @@ namespace sage
             sink.disconnect<&PlayerCombatStateSystem::startCombat>(this);
         }
         controllableActorSystem->CancelMovement(entity);
-    }
-
-    void PlayerCombatStateSystem::autoAttack(entt::entity self) const
-    {
-        // TODO: Check if unit is still within our attack range?
-        auto& c = registry->get<CombatableActor>(self);
-        if (c.target == entt::null)
-            return;
-
-        auto& t = registry->get<sgTransform>(self);
-        // TODO: Check if target is present
-        auto& enemyPos = registry->get<sgTransform>(c.target).position();
-        Vector3 direction = Vector3Subtract(enemyPos, t.position());
-        float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-        t.SetRotation({0, angle, 0}, self);
-        c.autoAttackTick = 0;
-
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
-        if (registry->any_of<CombatableActor>(c.target))
-        {
-            auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-            // TODO: Make the player's AutoAttack an ability and use it here
-            AttackData attack;
-            attack.element = AttackElement::PHYSICAL;
-            attack.damage = 10; // TODO: tmp dmg
-            attack.attacker = self;
-            attack.hit = c.target;
-            enemyCombatable.onHit.publish(attack); // TODO: tmp dmg
-        }
+        //autoAttackAbility->Cancel();
     }
 
     void PlayerCombatStateSystem::OnHit(AttackData attackData)
@@ -236,16 +198,21 @@ namespace sage
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
+        autoAttackAbility->active = true;
     }
 
     void PlayerCombatStateSystem::OnStateExit(entt::entity self)
     {
         controllableActorSystem->CancelMovement(self);
+        autoAttackAbility->active = false;
     }
 
     PlayerCombatStateSystem::PlayerCombatStateSystem(entt::registry* _registry,
-                                                     ControllableActorSystem* _controllableActorSystem)
-        : StateMachineSystem(_registry), controllableActorSystem(_controllableActorSystem)
+                                                     ControllableActorSystem* _controllableActorSystem,
+                                                     CollisionSystem* _collisionSystem, 
+                                                     TimerManager* _timerManager)
+        : StateMachineSystem(_registry), controllableActorSystem(_controllableActorSystem),
+        autoAttackAbility(std::make_unique<PlayerAutoAttack>(registry, _collisionSystem, _timerManager))
     {
     }
 } // namespace sage

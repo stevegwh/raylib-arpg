@@ -10,7 +10,7 @@
 
 namespace sage
 {
-    void WhirlwindAbility::Use(entt::entity actor)
+    void WhirlwindAbility::Execute(entt::entity actor)
     {
         if (cooldownTimer > 0)
         {

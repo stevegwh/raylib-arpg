@@ -20,6 +20,7 @@ namespace sage
 {
 	class CollisionSystem; // forward dec
 	class NavigationGridSystem; // forward dec
+	class TimerManager; // forward dec
 
 	class UnitStateSystems
 	{
@@ -41,7 +42,8 @@ namespace sage
 				ControllableActorSystem* _controllableActorSystem,
 				ActorMovementSystem* _actorMovementSystem,
 				CollisionSystem* _collisionSystem,
-				NavigationGridSystem* _navigationGridSystem);
+				NavigationGridSystem* _navigationGridSystem,
+				TimerManager* _timerManager);
 
 		void Update();
 		void Draw3D();

@@ -17,7 +17,7 @@ namespace sage
 		ControllableActorSystem* controllableActorSystem;
 		std::unique_ptr<TextureTerrainOverlay> spellCursor;
 		float whirlwindRadius = 50.0f;
-		void Use(entt::entity actor) override;
+		void Execute(entt::entity actor) override;
 		void Draw3D(entt::entity actor) override;
 		void Update(entt::entity actor) override;
 		void Confirm(entt::entity actor);

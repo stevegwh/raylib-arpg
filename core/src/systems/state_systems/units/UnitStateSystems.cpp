@@ -29,13 +29,14 @@ namespace sage
 			ControllableActorSystem* _controllableActorSystem,
 			ActorMovementSystem* _actorMovementSystem,
 			CollisionSystem* _collisionSystem,
-			NavigationGridSystem* _navigationGridSystem) :
+			NavigationGridSystem* _navigationGridSystem,
+			TimerManager* _timerManager) :
 			registry(_registry),
 			cursor(_cursor),
 			controllableActorSystem(_controllableActorSystem),
 			waveMobDefaultSubSystem(std::make_unique<WaveMobDefaultStateSystem>(_registry, _actorMovementSystem)),
 			playerDefaultSubSystem(std::make_unique<PlayerDefaultStateSystem>(_registry, _actorMovementSystem)),
-			playerCombatLogicSubSystem(std::make_unique<PlayerCombatStateSystem>(_registry, _controllableActorSystem)),
+			playerCombatLogicSubSystem(std::make_unique<PlayerCombatStateSystem>(_registry, _controllableActorSystem, _collisionSystem, _timerManager)),
 			waveMobCombatLogicSubSystem(std::make_unique<WaveMobCombatStateSystem>(_registry, _actorMovementSystem, _collisionSystem, _navigationGridSystem))
 	{
 		systems.push_back(waveMobDefaultSubSystem.get());
