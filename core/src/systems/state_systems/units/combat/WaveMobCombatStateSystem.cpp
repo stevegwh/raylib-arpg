@@ -99,6 +99,7 @@ namespace sage
             entt::sink sink{animation.onAnimationEnd};
             sink.connect<&WaveMobCombatStateSystem::destroyEnemy>(this);
         }
+        actorMovementSystem->CancelMovement(self);
     }
 
 	bool WaveMobCombatStateSystem::isTargetInLineOfSight(entt::entity self, Vector3& normDirection,

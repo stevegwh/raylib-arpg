@@ -118,6 +118,7 @@ namespace sage
 		abilityMap.push_back(
 				std::make_unique<RainOfFireAbility>(registry, _camera, _cursor, collisionSystem, _navigationGridSystem,
 						controllableActorSystem, _timerManager));
+		// TODO: These should be set by the player or another system
 		ChangeAbility(0, 0);
 		ChangeAbility(1, 1);
 		ChangeAbility(2, 2);
