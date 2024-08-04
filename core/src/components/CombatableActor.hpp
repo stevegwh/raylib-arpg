@@ -25,7 +25,7 @@ namespace sage
 	
 	struct AttackData
 	{
-		entt::entity attacker = entt::null;
+		entt::entity attacker;
 		entt::entity hit = entt::null;
 		// TODO: Set the above variables in related functions (e.g., onHit) instead of passing entities separately
 		int damage = 0;

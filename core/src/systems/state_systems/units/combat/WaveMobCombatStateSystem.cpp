@@ -153,7 +153,16 @@ namespace sage
 		float angle = atan2f(direction.x, direction.z) * RAD2DEG;
 		actorTrans.SetRotation({0, angle, 0}, entity);
 		combatableActor.autoAttackTick = 0;
-		// onHit.publish?
+
+		auto& targetCombatable = registry->get<CombatableActor>(combatableActor.target);
+
+		// TODO: Need to move all of these things to an ability class
+		AttackData attackData;
+		attackData.attacker = entity;
+		attackData.hit = combatableActor.target;
+		attackData.damage = 0;
+		targetCombatable.onHit.publish(attackData);
+		
 		animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 	}
 

@@ -14,7 +14,6 @@ namespace sage
 	class CombatSystem
 	{
 		entt::registry* registry;
-		// Have a central combat system instead of handling damage etc in individual systems.
 		// Can have callbacks for certain types of damage being inflicted so that other systems can react and modify it (chain effects etc).
 		void onComponentAdded(entt::entity entity);
 		void onComponentRemoved(entt::entity entity);
