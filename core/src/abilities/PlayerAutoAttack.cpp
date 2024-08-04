@@ -30,23 +30,29 @@ namespace sage
             AttackData attack = attackData;
             attack.attacker = self;
             attack.hit = c.target;
-            enemyCombatable.onHit.publish(attack); // TODO: tmp dmg
+            enemyCombatable.onHit.publish(attack);
         }
+    }
+
+    void PlayerAutoAttack::Init()
+    {
+        active = true;
     }
 
     void PlayerAutoAttack::Cancel()
     {
-        cooldownTimer = 0;
+        active = false;
+        m_cooldownTimer = 0;
     }
 
     void PlayerAutoAttack::Update(entt::entity self)
     {
         if (!active)
             return;
-        cooldownTimer += GetFrameTime();
-        if (cooldownTimer >= cooldownLimit)
+        m_cooldownTimer += GetFrameTime();
+        if (m_cooldownTimer >= m_cooldownLimit)
         {
-            cooldownTimer = 0;
+            m_cooldownTimer = 0;
             Execute(self);
         }
     }
@@ -57,5 +63,6 @@ namespace sage
     {
         attackData.element = AttackElement::PHYSICAL;
         attackData.damage = 10;
+        m_cooldownLimit = 1.0f;
     }
 } // namespace sage

@@ -10,19 +10,33 @@
 
 namespace sage
 {
-	struct Ability
+	class Ability
 	{
+	protected:
 		AttackData attackData;
 		TimerManager* timerManager;
         entt::registry* registry;
         CollisionSystem* collisionSystem;
         std::vector<entt::entity> hitUnits;
 		bool active = false;
-        float cooldownLimit;
-		float cooldownTimer;
+        float m_cooldownLimit;
+		float m_cooldownTimer;
 		float windupLimit;
 		float windupTimer;
 		float duration;
+	public:
+		virtual bool IsActive() const
+		{
+			return active;
+		}
+		float cooldownTimer() const
+		{
+			return m_cooldownTimer;
+		}
+		float cooldownLimit() const
+		{
+			return m_cooldownLimit;
+		}
 		virtual void Execute(entt::entity self) = 0;
         virtual void Update(entt::entity self);
 		virtual void Draw3D(entt::entity self);

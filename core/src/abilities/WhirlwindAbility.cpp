@@ -12,14 +12,14 @@ namespace sage
 {
     void WhirlwindAbility::Execute(entt::entity actor)
     {
-        if (cooldownTimer > 0)
+        if (m_cooldownTimer > 0)
         {
 			std::cout << "Waiting for cooldown \n";
             return;
         }
 
 		std::cout << "Whirlwind ability used \n";
-		cooldownTimer = cooldownLimit;
+		m_cooldownTimer = m_cooldownLimit;
 		active = true;
 		windupTimer = 0.0f;
 		auto& animation = registry->get<Animation>(actor);
@@ -28,7 +28,7 @@ namespace sage
     
     void WhirlwindAbility::Update(entt::entity actor)
     {
-        cooldownTimer -= GetFrameTime();
+        m_cooldownTimer -= GetFrameTime();
 		if (windupTimer < windupLimit)
 		{
 			windupTimer += GetFrameTime();
@@ -67,7 +67,7 @@ namespace sage
     {
 		windupTimer = 0.0f;
 		windupLimit = 0.65f;
-        cooldownLimit = 3.0f;
+        m_cooldownLimit = 3.0f;
 		
 		attackData.damage = 25.0f;
     }

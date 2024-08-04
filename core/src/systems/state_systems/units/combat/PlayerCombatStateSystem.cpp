@@ -78,7 +78,7 @@ namespace sage
             sink.disconnect<&PlayerCombatStateSystem::startCombat>(this);
         }
         controllableActorSystem->CancelMovement(entity);
-        //autoAttackAbility->Cancel();
+        autoAttackAbility->Cancel();
     }
 
     void PlayerCombatStateSystem::OnHit(AttackData attackData)
@@ -198,13 +198,13 @@ namespace sage
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
-        autoAttackAbility->active = true;
+        autoAttackAbility->Init();
     }
 
     void PlayerCombatStateSystem::OnStateExit(entt::entity self)
     {
         controllableActorSystem->CancelMovement(self);
-        autoAttackAbility->active = false;
+        autoAttackAbility->Cancel();
     }
 
     PlayerCombatStateSystem::PlayerCombatStateSystem(entt::registry* _registry,
