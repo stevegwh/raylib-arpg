@@ -10,9 +10,9 @@
 
 namespace sage
 {
-	void RainOfFireAbility::Execute(entt::entity actor)
+	void RainOfFireAbility::Init(entt::entity self)
 	{
-		if (m_cooldownTimer > 0)
+		if (cooldownTimer() > 0)
 		{
 			std::cout << "Waiting for cooldown \n";
 			return;
@@ -32,31 +32,62 @@ namespace sage
 			spellCursor->Enable(false); // Cancel move
 		}
 	}
+
+	void RainOfFireAbility::Execute(entt::entity self)
+	{
+		const auto& actorCol = registry->get<Collideable>(self);
+
+		auto view = registry->view<CombatableActor>();
+
+		vfx->InitSystem(cursor->collision().point);
+
+		for (auto& entity : view)
+		{
+			if (entity == self) continue;
+			const auto& targetCol = registry->get<Collideable>(entity);
+
+			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, cursor->collision().point, whirlwindRadius))
+			{
+				//hitUnits.push_back(entity);
+				const auto& combatable = registry->get<CombatableActor>(entity);
+				AttackData _attackData = attackData;
+				_attackData.hit = entity;
+				_attackData.attacker = self;
+				combatable.onHit.publish(_attackData);
+				std::cout << "Hit unit \n";
+			}
+		}
+		active = false;
+		timerManager->RemoveTimer(windupTimerId);
+		windupTimerId = -1;
+	}
 	
-	void RainOfFireAbility::Confirm(entt::entity actor)
+	void RainOfFireAbility::Confirm(entt::entity self)
 	{
 		std::cout << "Rain of fire ability used \n";
-		m_cooldownTimer = m_cooldownLimit;
+
+		cooldownTimerId = timerManager->AddTimer(m_cooldownLimit, &Ability::ResetCooldown, this);
+		windupTimerId = timerManager->AddTimer(m_windupLimit, &RainOfFireAbility::Execute, this, self);
+
 		active = true;
-		windupTimer = 0.0f;
-		auto& animation = registry->get<Animation>(actor);
+		auto& animation = registry->get<Animation>(self);
 		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
 		spellCursor->Enable(false);
 		cursor->Enable();
 		cursor->Show();
 	}
 
-	void RainOfFireAbility::Draw3D(entt::entity actor)
+	void RainOfFireAbility::Draw3D(entt::entity self)
 	{
 		if (vfx->active)
 		{
 			vfx->Draw3D();
 		}
 		
-		Ability::Draw3D(actor);
+		Ability::Draw3D(self);
 	}
 
-	void RainOfFireAbility::Update(entt::entity actor)
+	void RainOfFireAbility::Update(entt::entity self)
 	{
 		if (vfx->active)
 		{
@@ -67,42 +98,10 @@ namespace sage
 			spellCursor->Update(cursor->terrainCollision().point);
 			if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !active)
 			{
-				Confirm(actor);
+				Confirm(self);
 			}
 			return;
 		}
-		m_cooldownTimer -= GetFrameTime();
-		if (windupTimer < windupLimit)
-		{
-			windupTimer += GetFrameTime();
-			return;
-		}
-		
-		if (!active) return;
-
-		const auto& actorCol = registry->get<Collideable>(actor);
-
-		auto view = registry->view<CombatableActor>();
-
-		vfx->InitSystem(cursor->collision().point);
-
-		for (auto& entity : view)
-		{
-			if (entity == actor) continue;
-			const auto& targetCol = registry->get<Collideable>(entity);
-
-			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, cursor->collision().point, whirlwindRadius))
-			{
-				//hitUnits.push_back(entity);
-				const auto& combatable = registry->get<CombatableActor>(entity);
-				AttackData _attackData = attackData;
-				_attackData.hit = entity;
-				_attackData.attacker = actor;
-				combatable.onHit.publish(_attackData);
-				std::cout << "Hit unit \n";
-			}
-		}
-		active = false;
 	}
 
 	RainOfFireAbility::RainOfFireAbility(
@@ -118,8 +117,7 @@ namespace sage
 			cursor(_cursor),
 			controllableActorSystem(_controllableActorSystem)
 	{
-		windupTimer = 0.0f;
-		windupLimit = 0.75f;
+		m_windupLimit = 0.75f;
 		m_cooldownLimit = 3.0f;
 		attackData.damage = 25.0f;
 		attackData.element = AttackElement::FIRE;

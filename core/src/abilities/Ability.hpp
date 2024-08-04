@@ -13,6 +13,8 @@ namespace sage
 	class Ability
 	{
 	protected:
+		int cooldownTimerId = -1;
+		int windupTimerId = -1;
 		AttackData attackData;
 		TimerManager* timerManager;
         entt::registry* registry;
@@ -20,18 +22,21 @@ namespace sage
         std::vector<entt::entity> hitUnits;
 		bool active = false;
         float m_cooldownLimit;
-		float m_cooldownTimer;
-		float windupLimit;
-		float windupTimer;
+		float m_windupLimit;
 		float duration;
 	public:
+		virtual void ResetCooldown()
+		{
+			timerManager->RemoveTimer(cooldownTimerId);
+			cooldownTimerId = -1;
+		}
 		virtual bool IsActive() const
 		{
 			return active;
 		}
 		float cooldownTimer() const
 		{
-			return m_cooldownTimer;
+			return timerManager->GetRemainingTime(cooldownTimerId);
 		}
 		float cooldownLimit() const
 		{
@@ -40,6 +45,7 @@ namespace sage
 		virtual void Execute(entt::entity self) = 0;
         virtual void Update(entt::entity self);
 		virtual void Draw3D(entt::entity self);
+		virtual void Init(entt::entity self);
         virtual ~Ability() = default;
         Ability(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager);
 	};

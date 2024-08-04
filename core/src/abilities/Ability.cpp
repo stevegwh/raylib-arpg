@@ -4,14 +4,18 @@
 
 namespace sage
 {
-	void Ability::Update(entt::entity actor)
+	void Ability::Update(entt::entity self)
 	{
-		m_cooldownTimer -= GetFrameTime();
 	}
 
-	void Ability::Draw3D(entt::entity actor)
+	void Ability::Draw3D(entt::entity self)
 	{
 		// Draw the ability in 3D space
+	}
+
+	void Ability::Init(entt::entity self)
+	{
+		Execute(self);
 	}
     
     Ability::Ability(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager)

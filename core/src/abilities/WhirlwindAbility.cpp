@@ -3,72 +3,69 @@
 //
 
 #include "WhirlwindAbility.hpp"
-#include "raylib.h"
-#include "components/sgTransform.hpp"
-#include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/sgTransform.hpp"
+#include "raylib.h"
 
 namespace sage
 {
-    void WhirlwindAbility::Execute(entt::entity actor)
+    void WhirlwindAbility::Init(entt::entity self)
     {
-        if (m_cooldownTimer > 0)
+        if (cooldownTimer() > 0)
         {
-			std::cout << "Waiting for cooldown \n";
+            std::cout << "Waiting for cooldown \n";
             return;
         }
 
-		std::cout << "Whirlwind ability used \n";
-		m_cooldownTimer = m_cooldownLimit;
-		active = true;
-		windupTimer = 0.0f;
-		auto& animation = registry->get<Animation>(actor);
-		animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
+        std::cout << "Whirlwind ability used \n";
+        active = true;
+        auto& animation = registry->get<Animation>(self);
+        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
+
+		cooldownTimerId = timerManager->AddTimer(m_cooldownLimit, &Ability::ResetCooldown, this);
+		windupTimerId = timerManager->AddTimer(m_windupLimit, &WhirlwindAbility::Execute, this, self);
     }
-    
-    void WhirlwindAbility::Update(entt::entity actor)
+
+    void WhirlwindAbility::Execute(entt::entity self)
     {
-        m_cooldownTimer -= GetFrameTime();
-		if (windupTimer < windupLimit)
-		{
-			windupTimer += GetFrameTime();
-			return;
-		}
-		if (!active) return;
-        auto& actorTransform = registry->get<sgTransform>(actor);
-		const auto& actorCol = registry->get<Collideable>(actor);
-		
-		auto view = registry->view<CombatableActor>();
-		
-		for (auto& entity : view)
-		{
-			if (entity == actor) continue;
-			//if (std::find(hitUnits.begin(), hitUnits.end(), entity) != hitUnits.end()) continue;
-			
-			const auto& targetTransform = registry->get<sgTransform>(entity);
-			const auto& targetCol = registry->get<Collideable>(entity);
-			
-			if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, actorTransform.position(), whirlwindRadius))
-			{
-				//hitUnits.push_back(entity);
-				const auto& combatable = registry->get<CombatableActor>(entity);
-				AttackData _attackData = attackData;
-				_attackData.hit = entity;
-				_attackData.attacker = actor;
-				combatable.onHit.publish(_attackData);
-				std::cout << "Hit unit \n";
-			}
-		}
-		active = false;
+        auto& actorTransform = registry->get<sgTransform>(self);
+        const auto& actorCol = registry->get<Collideable>(self);
+
+        auto view = registry->view<CombatableActor>();
+
+        for (auto& entity : view)
+        {
+            if (entity == self)
+                continue;
+            // if (std::find(hitUnits.begin(), hitUnits.end(), entity) != hitUnits.end()) continue;
+
+            const auto& targetTransform = registry->get<sgTransform>(entity);
+            const auto& targetCol = registry->get<Collideable>(entity);
+
+            if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, actorTransform.position(), whirlwindRadius))
+            {
+                // hitUnits.push_back(entity);
+                const auto& combatable = registry->get<CombatableActor>(entity);
+                AttackData _attackData = attackData;
+                _attackData.hit = entity;
+                _attackData.attacker = self;
+                combatable.onHit.publish(_attackData);
+                std::cout << "Hit unit \n";
+            }
+        }
+        active = false;
+		timerManager->RemoveTimer(windupTimerId);
+		windupTimerId = -1;
     }
-    
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager) : 
-    Ability(_registry, _collisionSystem, _timerManager)
+
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem,
+                                       TimerManager* _timerManager)
+        : Ability(_registry, _collisionSystem, _timerManager)
     {
-		windupTimer = 0.0f;
-		windupLimit = 0.65f;
+        m_windupLimit = 0.65f;
         m_cooldownLimit = 3.0f;
-		
-		attackData.damage = 25.0f;
+
+        attackData.damage = 25.0f;
     }
-}
+} // namespace sage
