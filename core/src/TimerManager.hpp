@@ -44,6 +44,12 @@ namespace sage
             });
         }
 
+		int AddTimer(float duration)
+        {
+            // Adding a dummy function as callback
+            return AddTimer(duration, []() {});
+        }
+
         void Update()
         {
             float dt = GetFrameTime();
@@ -64,6 +70,18 @@ namespace sage
                 }
             }
         }
+
+		float GetRemainingTime(int id)
+		{
+			for (auto& timer : timers)
+			{
+				if (timer.id == id)
+				{
+					return timer.remainingTime;
+				}
+			}
+			return -1;
+		}
 
         void RemoveTimer(int id)
         {

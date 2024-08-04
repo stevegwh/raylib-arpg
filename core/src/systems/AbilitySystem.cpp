@@ -15,7 +15,7 @@ namespace sage
 			std::cout << "Waiting for cooldown timer: " << abilityMap[currentAbilities[0]]->cooldownTimer() << "\n";
 			return;
 		}
-		abilityMap[currentAbilities[0]]->Execute(controllableActorSystem->GetControlledActor());
+		abilityMap[currentAbilities[0]]->Init(controllableActorSystem->GetControlledActor());
 	}
 
 	void AbilitySystem::abilityTwoPressed()
@@ -25,7 +25,7 @@ namespace sage
 		{
 			return;
 		}
-		abilityMap[currentAbilities[1]]->Execute(controlledActor);
+		abilityMap[currentAbilities[1]]->Init(controlledActor);
 	}
 
 	void AbilitySystem::abilityThreePressed()
@@ -35,7 +35,7 @@ namespace sage
 		{
 			return;
 		}
-		abilityMap[currentAbilities[2]]->Execute(controlledActor);
+		abilityMap[currentAbilities[2]]->Init(controlledActor);
 	}
 
 	void AbilitySystem::abilityFourPressed()
@@ -45,7 +45,7 @@ namespace sage
 		{
 			return;
 		}
-		abilityMap[currentAbilities[3]]->Execute(controlledActor);
+		abilityMap[currentAbilities[3]]->Init(controlledActor);
 	}
 
 	void AbilitySystem::onActorChanged()
