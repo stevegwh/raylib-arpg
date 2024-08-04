@@ -31,7 +31,8 @@ namespace sage
 				_controllableActorSystem,
 				_actorMovementSystem,
 				_collisionSystem,
-				_navigationGridSystem);
+				_navigationGridSystem,
+				_timerManager);
 
 		gameSystem = std::make_unique<GameStateSystem>(_registry, _gameData, _timerManager);
 	}

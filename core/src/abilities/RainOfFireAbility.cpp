@@ -10,7 +10,7 @@
 
 namespace sage
 {
-	void RainOfFireAbility::Use(entt::entity actor)
+	void RainOfFireAbility::Execute(entt::entity actor)
 	{
 		if (cooldownTimer > 0)
 		{
@@ -123,7 +123,6 @@ namespace sage
 		cooldownLimit = 3.0f;
 		attackData.damage = 25.0f;
 		attackData.element = AttackElement::FIRE;
-		initialDamage = 25.0f;
 		spellCursor = std::make_unique<TextureTerrainOverlay>(
 				registry, 
 				_navigationGridSystem,

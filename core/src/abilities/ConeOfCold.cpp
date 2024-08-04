@@ -10,7 +10,7 @@
 
 namespace sage
 {
-	void ConeOfCold::Use(entt::entity actor)
+	void ConeOfCold::Execute(entt::entity actor)
 	{
 		if (cooldownTimer > 0)
 		{
