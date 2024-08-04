@@ -10,9 +10,9 @@ namespace sage
 	void AbilitySystem::abilityOnePressed()
 	{
 		std::cout << "Ability 1 pressed \n";
-		if (currentAbilities[0] == -1 || abilityMap[currentAbilities[0]]->cooldownTimer > 0.0f)
+		if (currentAbilities[0] == -1 || abilityMap[currentAbilities[0]]->cooldownTimer() > 0.0f)
 		{
-			std::cout << "Waiting for cooldown timer: " << abilityMap[currentAbilities[0]]->cooldownTimer << "\n";
+			std::cout << "Waiting for cooldown timer: " << abilityMap[currentAbilities[0]]->cooldownTimer() << "\n";
 			return;
 		}
 		abilityMap[currentAbilities[0]]->Execute(controllableActorSystem->GetControlledActor());
@@ -21,7 +21,7 @@ namespace sage
 	void AbilitySystem::abilityTwoPressed()
 	{
 		std::cout << "Ability 2 pressed \n";
-		if (currentAbilities[1] == -1 || abilityMap[currentAbilities[1]]->cooldownTimer > 0.0f)
+		if (currentAbilities[1] == -1 || abilityMap[currentAbilities[1]]->cooldownTimer() > 0.0f)
 		{
 			return;
 		}
@@ -31,7 +31,7 @@ namespace sage
 	void AbilitySystem::abilityThreePressed()
 	{
 		std::cout << "Ability 3 pressed \n";
-		if (currentAbilities[2] == -1 || abilityMap[currentAbilities[2]]->cooldownTimer > 0.0f)
+		if (currentAbilities[2] == -1 || abilityMap[currentAbilities[2]]->cooldownTimer() > 0.0f)
 		{
 			return;
 		}
@@ -41,7 +41,7 @@ namespace sage
 	void AbilitySystem::abilityFourPressed()
 	{
 		std::cout << "Ability 4 pressed \n";
-		if (currentAbilities[3] == -1 || abilityMap[currentAbilities[3]]->cooldownTimer > 0.0f)
+		if (currentAbilities[3] == -1 || abilityMap[currentAbilities[3]]->cooldownTimer() > 0.0f)
 		{
 			return;
 		}

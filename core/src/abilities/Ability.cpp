@@ -6,7 +6,7 @@ namespace sage
 {
 	void Ability::Update(entt::entity actor)
 	{
-		cooldownTimer -= GetFrameTime();
+		m_cooldownTimer -= GetFrameTime();
 	}
 
 	void Ability::Draw3D(entt::entity actor)

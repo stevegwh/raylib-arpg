@@ -12,7 +12,7 @@ namespace sage
 {
 	void RainOfFireAbility::Execute(entt::entity actor)
 	{
-		if (cooldownTimer > 0)
+		if (m_cooldownTimer > 0)
 		{
 			std::cout << "Waiting for cooldown \n";
 			return;
@@ -36,7 +36,7 @@ namespace sage
 	void RainOfFireAbility::Confirm(entt::entity actor)
 	{
 		std::cout << "Rain of fire ability used \n";
-		cooldownTimer = cooldownLimit;
+		m_cooldownTimer = m_cooldownLimit;
 		active = true;
 		windupTimer = 0.0f;
 		auto& animation = registry->get<Animation>(actor);
@@ -71,7 +71,7 @@ namespace sage
 			}
 			return;
 		}
-		cooldownTimer -= GetFrameTime();
+		m_cooldownTimer -= GetFrameTime();
 		if (windupTimer < windupLimit)
 		{
 			windupTimer += GetFrameTime();
@@ -120,7 +120,7 @@ namespace sage
 	{
 		windupTimer = 0.0f;
 		windupLimit = 0.75f;
-		cooldownLimit = 3.0f;
+		m_cooldownLimit = 3.0f;
 		attackData.damage = 25.0f;
 		attackData.element = AttackElement::FIRE;
 		spellCursor = std::make_unique<TextureTerrainOverlay>(
