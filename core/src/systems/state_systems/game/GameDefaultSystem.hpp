@@ -19,7 +19,6 @@ namespace sage
 		int timerId = -1;
 		TimerManager* timerManager;
 		void OnTimerEnd();
-		entt::delegate<void()> callback;
 		// Countdown to next wave
 		// Swap state when timer reached
 		

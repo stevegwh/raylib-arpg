@@ -1,26 +1,76 @@
-//
-// Created by Steve Wheeler on 22/07/2024.
-//
-
 #pragma once
-
-#include "Timer.hpp"
-
-#include <entt/entt.hpp>
-
+#include <functional>
 #include <vector>
-#include <memory>
+#include "raylib.h"
 
 namespace sage
 {
+    class TimerManager
+    {
+    private:
+        struct Timer
+        {
+            std::function<void()> func;
+			float maxTime;
+            float remainingTime;
+            int id;
+        };
 
-	class TimerManager
-	{
-		std::vector<std::unique_ptr<Timer>> timers;
-	public:
-		void Update();
-		int AddTimer(float duration, entt::delegate<void()> callback);
-		void RemoveTimer(int id);
-	};
+        std::vector<Timer> timers;
+        int nextId = 0;
 
-} // sage
+    public:
+        template <typename Func, typename... Args>
+        int AddTimer(float duration, Func&& func, Args&&... args)
+        {
+            int id = nextId++;
+            timers.push_back({
+                [f = std::forward<Func>(func), ... capturedArgs = std::forward<Args>(args)]() mutable {
+                    std::invoke(f, std::forward<Args>(capturedArgs)...);
+                },
+				duration,
+                duration,
+                id
+            });
+            return id;
+        }
+
+        // Overload for member functions
+        template <typename C, typename R, typename... Args>
+        int AddTimer(float duration, R(C::*memFunc)(Args...), C* instance, Args... args)
+        {
+            return AddTimer(duration, [instance, memFunc, ... capturedArgs = std::move(args)]() mutable {
+                (instance->*memFunc)(std::move(capturedArgs)...);
+            });
+        }
+
+        void Update()
+        {
+            float dt = GetFrameTime();
+            
+            for (auto it = timers.begin(); it != timers.end(); )
+            {
+                it->remainingTime -= dt;
+                
+                if (it->remainingTime <= 0)
+                {
+                    it->func();  // Execute the function
+					it->remainingTime = it->maxTime;
+                    //it = timers.erase(it);  // Remove the timer
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+
+        void RemoveTimer(int id)
+        {
+            timers.erase(
+                std::remove_if(timers.begin(), timers.end(),
+                    [id](const Timer& timer) { return timer.id == id; }),
+                timers.end());
+        }
+    };
+}  // namespace sage
