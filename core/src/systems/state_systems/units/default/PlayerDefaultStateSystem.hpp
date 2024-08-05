@@ -17,8 +17,8 @@ namespace sage
 	public:
 		void Update() override;
 		void Draw3D() override;
-		void OnComponentAdded(entt::entity entity) override;
-		void OnComponentRemoved(entt::entity entity) override;
+		void OnStateEnter(entt::entity entity) override;
+		void OnStateExit(entt::entity entity) override;
 		PlayerDefaultStateSystem(entt::registry* _registry,
 			ActorMovementSystem* _actorMovementSystem);
 	};

@@ -26,12 +26,12 @@ namespace sage
 
 	}
 	
-	void GameDefaultSystem::OnComponentAdded(entt::entity entity)
+	void GameDefaultSystem::OnStateEnter(entt::entity entity)
 	{
     	timerId = timerManager->AddTimerOneshot(5.0f, &GameDefaultSystem::OnTimerEnd, this);
 	}
 	
-	void GameDefaultSystem::OnComponentRemoved(entt::entity entity)
+	void GameDefaultSystem::OnStateExit(entt::entity entity)
 	{
 	}
 

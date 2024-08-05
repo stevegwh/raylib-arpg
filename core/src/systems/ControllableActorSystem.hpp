@@ -44,6 +44,7 @@ namespace sage
 		entt::entity GetControlledActor();
 
 		void PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol);
+		bool ReachedDestination(entt::entity entity) const;
 
 		entt::sigh<void(entt::entity)> onControlledActorChange;
 		void Enable();

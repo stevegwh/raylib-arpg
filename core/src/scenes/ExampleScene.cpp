@@ -68,9 +68,6 @@ namespace sage
 		// TODO: tmp
 		const auto& col = registry->get<Collideable>(knight);
 		data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
-
-		// TODO: Not sure if I like this
-		data->stateSystems->playerStateMachine->inCombatState->Enable();
 		
 		fountain = std::make_unique<SpiralFountainVFX>(data->camera->getRaylibCam());
 		explosion = std::make_unique<Explosion>(registry);

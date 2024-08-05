@@ -12,13 +12,13 @@ namespace sage
     {
     }
 
-    void PlayerDefaultStateSystem::OnComponentAdded(entt::entity entity)
+    void PlayerDefaultStateSystem::OnStateEnter(entt::entity entity)
     {
         auto& animation = registry->get<Animation>(entity);
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
     }
 
-    void PlayerDefaultStateSystem::OnComponentRemoved(entt::entity entity)
+    void PlayerDefaultStateSystem::OnStateExit(entt::entity entity)
     {
         actorMovementSystem->CancelMovement(entity);
     }

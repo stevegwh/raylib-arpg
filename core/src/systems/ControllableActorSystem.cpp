@@ -20,6 +20,11 @@ namespace sage
 		}
 	}
 
+	bool ControllableActorSystem::ReachedDestination(entt::entity entity) const
+	{
+		return actorMovementSystem->ReachedDestination(entity);
+	}
+
 	void ControllableActorSystem::onTargetUpdate(entt::entity target)
 	{
 		auto& actor = registry->get<ControllableActor>(controlledActorId);

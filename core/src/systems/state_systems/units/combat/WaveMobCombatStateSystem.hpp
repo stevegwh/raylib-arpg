@@ -31,8 +31,8 @@ namespace sage
 		void destroyEnemy(entt::entity self);
 		void onTargetOutOfRange(entt::entity entity, Vector3& normDirection, float distance) const;
 	public:
-		void OnComponentAdded(entt::entity self) override;
-		void OnComponentRemoved(entt::entity self) override;
+		void OnStateEnter(entt::entity self) override;
+		void OnStateExit(entt::entity self) override;
 		void OnHit(AttackData attackData);
 		void Draw3D() override;
 		void Update() override;
