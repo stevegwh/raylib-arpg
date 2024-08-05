@@ -8,7 +8,7 @@
 #include "TimerManager.hpp"
 
 #include "components/states/GameStates.hpp"
-#include "systems/state_systems/StateMachineSystem.hpp"
+#include "systems/state_systems/StateMachine.hpp"
 
 namespace sage
 {

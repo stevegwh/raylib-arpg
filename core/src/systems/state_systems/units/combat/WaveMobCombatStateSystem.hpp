@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "systems/state_systems/StateMachineSystem.hpp"
+#include "systems/state_systems/StateMachine.hpp"
 #include "components/states/EnemyStates.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
