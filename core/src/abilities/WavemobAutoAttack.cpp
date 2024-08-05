@@ -5,7 +5,6 @@
 #include "components/sgTransform.hpp"
 
 #include "systems/CollisionSystem.hpp"
-#include "TimerManager.hpp"
 
 #include <raymath.h>
 
@@ -45,26 +44,33 @@ namespace sage
             return;
         }
         active = true;
-        cooldownTimerId = timerManager->AddTimer(m_cooldownLimit, &WavemobAutoAttack::Execute, this, self);
+        timer.Start();
     }
 
     void WavemobAutoAttack::Cancel()
     {
         active = false;
-        timerManager->RemoveTimer(cooldownTimerId);
-        cooldownTimerId = -1;
+        timer.Stop();
     }
 
     void WavemobAutoAttack::Update(entt::entity self)
     {
+        if (!active)
+            return;
+        timer.Update(GetFrameTime());
+        if (timer.HasFinished())
+        {
+            Execute(self);
+            timer.Restart();
+        }
     }
 
-    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem,
-                                       TimerManager* _timerManager)
-        : Ability(_registry, _collisionSystem, _timerManager)
+    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem)
+        : Ability(_registry, _collisionSystem)
     {
         attackData.element = AttackElement::PHYSICAL;
         attackData.damage = 10;
         m_cooldownLimit = 1.0f;
+        timer.maxTime = m_cooldownLimit;
     }
 } // namespace sage

@@ -20,8 +20,8 @@ namespace sage
 		
 	}
 
-	ConeOfCold::ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager) :
-			Ability(_registry, _collisionSystem, _timerManager)
+	ConeOfCold::ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem) :
+			Ability(_registry, _collisionSystem)
 	{
 	}
 }

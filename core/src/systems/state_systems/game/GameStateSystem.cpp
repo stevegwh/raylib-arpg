@@ -17,12 +17,11 @@ namespace sage
 	}
 	GameStateSystem::GameStateSystem(
 			entt::registry* _registry,
-			GameData* _gameData,
-			TimerManager* _timerManager)
+			GameData* _gameData)
 	{
 		gameEntity = _registry->create();
-		defaultSystem = std::make_unique<GameDefaultSystem>(_registry, gameEntity, _timerManager);
-		waveSystem = std::make_unique<GameWaveSystem>(_registry, _gameData, gameEntity, _timerManager);
+		defaultSystem = std::make_unique<GameDefaultSystem>(_registry, gameEntity);
+		waveSystem = std::make_unique<GameWaveSystem>(_registry, _gameData, gameEntity);
 		systems.push_back(defaultSystem.get());
 		systems.push_back(waveSystem.get());
 		_registry->emplace<StateGameDefault>(gameEntity);

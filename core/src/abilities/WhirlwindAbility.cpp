@@ -23,8 +23,8 @@ namespace sage
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
 
-		cooldownTimerId = timerManager->AddTimerOneshot(m_cooldownLimit, &Ability::ResetCooldown, this);
-		windupTimerId = timerManager->AddTimerOneshot(m_windupLimit, &WhirlwindAbility::Execute, this, self);
+        timer.Start();
+        windupTimer.Start();
     }
 
     void WhirlwindAbility::Execute(entt::entity self)
@@ -55,15 +55,29 @@ namespace sage
             }
         }
         active = false;
-		windupTimerId = -1;
     }
 
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem,
-                                       TimerManager* _timerManager)
-        : Ability(_registry, _collisionSystem, _timerManager)
+    void WhirlwindAbility::Update(entt::entity self)
+    {
+
+        timer.Update(GetFrameTime());
+        if (!active)
+            return;
+        windupTimer.Update(GetFrameTime());
+        if (windupTimer.HasFinished())
+        {
+            Execute(self);
+            windupTimer.Reset();
+        }
+    }
+
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem)
+        : Ability(_registry, _collisionSystem)
     {
         m_windupLimit = 0.65f;
         m_cooldownLimit = 3.0f;
+        timer.maxTime = m_cooldownLimit;
+        windupTimer.maxTime = m_windupLimit;
 
         attackData.damage = 25.0f;
     }

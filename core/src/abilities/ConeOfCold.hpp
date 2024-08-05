@@ -10,6 +10,6 @@ namespace sage
 		void Execute(entt::entity actor) override;
 		void Update(entt::entity actor) override;
 		~ConeOfCold() override = default;
-		ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager);
+		ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem);
 	};
 }

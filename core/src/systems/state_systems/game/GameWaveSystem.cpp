@@ -42,8 +42,7 @@ namespace sage
 	GameWaveSystem::GameWaveSystem(
 			entt::registry* _registry,
 			GameData* _gameData,
-			entt::entity _gameEntity, 
-			TimerManager* _timerManager) :
+			entt::entity _gameEntity) :
 			StateMachine(_registry),
 			gameData(_gameData)
 	{

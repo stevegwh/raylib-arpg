@@ -15,7 +15,6 @@
 namespace sage
 {
 	class GameData;
-	class TimerManager;
 	class BaseSystem;
 	class GameStateSystem
 	{
@@ -28,8 +27,7 @@ namespace sage
 		void Update();
 		GameStateSystem(
 				entt::registry* _registry, 
-				GameData* _gameData,
-				TimerManager* _timerManager);
+				GameData* _gameData);
 	};
 
 } // sage

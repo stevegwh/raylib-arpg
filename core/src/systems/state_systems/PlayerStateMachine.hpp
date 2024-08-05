@@ -15,7 +15,6 @@ namespace sage
     class ControllableActorSystem;
     class NavigationGridSystem;
     class CollisionSystem;
-    class TimerManager;
     struct AttackData;
 
     namespace playerstates
@@ -49,17 +48,17 @@ namespace sage
             ApproachingTargetState(entt::registry* registry, ControllableActorSystem* controllableActorSystem);
         };
 
-        class EngagedInCombatState : public StateMachine<EngagedInCombatState, StatePlayerEngagedInCombat>
+        class CombatState : public StateMachine<CombatState, StatePlayerCombat>
         {
           public:
-            virtual ~EngagedInCombatState() = default;
+            virtual ~CombatState() = default;
             void Update() override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             void onTargetDeath(entt::entity self, entt::entity target);
             void onAttackCancel(entt::entity self);
             bool checkInCombat(entt::entity entity);
-            EngagedInCombatState(entt::registry* registry);
+            CombatState(entt::registry* registry);
         };
     } // namespace playerstates
 
@@ -74,12 +73,12 @@ namespace sage
       public:
         std::unique_ptr<playerstates::DefaultState> defaultState;
         std::unique_ptr<playerstates::ApproachingTargetState> approachingTargetState;
-        std::unique_ptr<playerstates::EngagedInCombatState> engagedInCombatState;
+        std::unique_ptr<playerstates::CombatState> engagedInCombatState;
 
         PlayerStateController(entt::registry* registry, Cursor* cursor,
                               ControllableActorSystem* controllableActorSystem,
                               ActorMovementSystem* actorMovementSystem, CollisionSystem* collisionSystem,
-                              NavigationGridSystem* navigationGridSystem, TimerManager* timerManager);
+                              NavigationGridSystem* navigationGridSystem);
         void Update();
         void Draw3D();
     };

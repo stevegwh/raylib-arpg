@@ -6,6 +6,7 @@ namespace sage
 {
 	void Ability::Update(entt::entity self)
 	{
+		
 	}
 
 	void Ability::Draw3D(entt::entity self)
@@ -18,6 +19,6 @@ namespace sage
 		Execute(self);
 	}
     
-    Ability::Ability(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager)
-        : registry(_registry), collisionSystem(_collisionSystem), timerManager(_timerManager) {}
+    Ability::Ability(entt::registry* _registry, CollisionSystem* _collisionSystem)
+        : registry(_registry), collisionSystem(_collisionSystem) {}
 }

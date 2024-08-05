@@ -200,8 +200,7 @@ namespace sage
     WaveMobCombatStateSystem::WaveMobCombatStateSystem(entt::registry* _registry,
                                                        ActorMovementSystem* _actorMovementSystem,
                                                        CollisionSystem* _collisionSystem,
-                                                       NavigationGridSystem* _navigationGridSystem,
-                                                       TimerManager* _timerManager)
+                                                       NavigationGridSystem* _navigationGridSystem)
         : StateMachine(_registry), navigationGridSystem(_navigationGridSystem),
           actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem)
     {

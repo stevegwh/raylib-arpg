@@ -41,26 +41,33 @@ namespace sage
             return;
         }
         active = true;
-        cooldownTimerId = timerManager->AddTimer(m_cooldownLimit, &PlayerAutoAttack::Execute, this, self);
+        timer.Start();
     }
 
     void PlayerAutoAttack::Cancel()
     {
         active = false;
-        timerManager->RemoveTimer(cooldownTimerId);
-        cooldownTimerId = -1;
+        timer.Stop();
     }
 
     void PlayerAutoAttack::Update(entt::entity self)
     {
+        if (!active)
+            return;
+        timer.Update(GetFrameTime());
+        if (timer.HasFinished())
+        {
+            Execute(self);
+            timer.Restart();
+        }
     }
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem,
-                                       TimerManager* _timerManager)
-        : Ability(_registry, _collisionSystem, _timerManager)
+    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem)
+        : Ability(_registry, _collisionSystem)
     {
         attackData.element = AttackElement::PHYSICAL;
         attackData.damage = 10;
         m_cooldownLimit = 1.0f;
+        timer.maxTime = m_cooldownLimit;
     }
 } // namespace sage

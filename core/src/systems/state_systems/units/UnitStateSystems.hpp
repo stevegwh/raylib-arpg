@@ -20,7 +20,6 @@ namespace sage
 {
 	class CollisionSystem; // forward dec
 	class NavigationGridSystem; // forward dec
-	class TimerManager; // forward dec
 
 	class UnitStateSystems
 	{
@@ -32,8 +31,6 @@ namespace sage
 
 	public:
 		std::unique_ptr<WaveMobDefaultStateSystem> waveMobDefaultSubSystem;
-		// std::unique_ptr<PlayerDefaultStateSystem> playerDefaultSubSystem;
-		// std::unique_ptr<PlayerCombatStateSystem> playerCombatLogicSubSystem;
 		std::unique_ptr<WaveMobCombatStateSystem> waveMobCombatLogicSubSystem;
 
 		UnitStateSystems(
@@ -42,8 +39,7 @@ namespace sage
 				ControllableActorSystem* _controllableActorSystem,
 				ActorMovementSystem* _actorMovementSystem,
 				CollisionSystem* _collisionSystem,
-				NavigationGridSystem* _navigationGridSystem,
-				TimerManager* _timerManager);
+				NavigationGridSystem* _navigationGridSystem);
 
 		void Update();
 		void Draw3D();

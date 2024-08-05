@@ -4,8 +4,11 @@
 
 #include "GameDefaultSystem.hpp"
 #include "components/states/GameStates.hpp"
+
 #include <iostream>
 #include <tuple>
+
+#include "raylib.h"
 
 
 namespace sage
@@ -18,7 +21,11 @@ namespace sage
 	
 	void GameDefaultSystem::Update()
 	{
-
+		timer.Update(GetFrameTime());
+		if (timer.HasFinished())
+		{
+			OnTimerEnd();
+		}
 	}
 	
 	void GameDefaultSystem::Draw3D()
@@ -28,15 +35,18 @@ namespace sage
 	
 	void GameDefaultSystem::OnStateEnter(entt::entity entity)
 	{
-    	timerId = timerManager->AddTimerOneshot(5.0f, &GameDefaultSystem::OnTimerEnd, this);
+		
+    	timer.Start();
 	}
 	
 	void GameDefaultSystem::OnStateExit(entt::entity entity)
 	{
+		timer.Stop();
 	}
 
-	GameDefaultSystem::GameDefaultSystem(entt::registry* _registry, entt::entity _gameEntity, TimerManager* _timerManager) :
-			StateMachine(_registry), gameEntity(_gameEntity), timerManager(_timerManager)
+	GameDefaultSystem::GameDefaultSystem(entt::registry* _registry, entt::entity _gameEntity) :
+			StateMachine(_registry), gameEntity(_gameEntity)
 	{
+		timer.maxTime = 5.0f;
 	}
 } // sage

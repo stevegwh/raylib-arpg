@@ -19,17 +19,15 @@ namespace sage
         ~StatePlayerApproachingTarget() override = default;
     };
 
-    class StatePlayerEngagedInCombat : public StateMachineComponent
+    class StatePlayerCombat : public StateMachineComponent
     {
     public:
-        ~StatePlayerEngagedInCombat() override = default;
+        ~StatePlayerCombat() override = default;
     };
 
     using PlayerStates = std::tuple<
         StatePlayerDefault,
         StatePlayerApproachingTarget,
-        StatePlayerEngagedInCombat,
-        StatePlayerCombatCooldown,
-        StatePlayerRetreating
+        StatePlayerCombat
     >;
 } // sage

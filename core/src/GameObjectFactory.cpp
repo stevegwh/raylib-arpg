@@ -87,7 +87,7 @@ namespace sage
 			entt::sink sink{ combatable.onHit };
 			sink.connect<&WaveMobCombatStateSystem::OnHit>(game->stateSystems->unitSystems->waveMobCombatLogicSubSystem);
 		}
-		registry->emplace<WavemobAutoAttack>(id, registry, game->collisionSystem.get(), game->timerManager.get());
+		registry->emplace<WavemobAutoAttack>(id, registry, game->collisionSystem.get());
 		
 		auto& healthbar = registry->emplace<HealthBar>(id);
 		// ---
@@ -231,7 +231,7 @@ namespace sage
 			entt::sink sink{ game->cursor->onFloorClick };
 			sink.connect<&CombatableActor::AttackCancelled>(combatable);
 		}
-		registry->emplace<PlayerAutoAttack>(id, registry, game->collisionSystem.get(), game->timerManager.get());
+		registry->emplace<PlayerAutoAttack>(id, registry, game->collisionSystem.get());
 		// ---
 
 		Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);

@@ -16,8 +16,7 @@ namespace sage
 		actorMovementSystem(std::make_unique<ActorMovementSystem>(_registry,
 			collisionSystem.get(),
 			navigationGridSystem.get())),
-		animationSystem(std::make_unique<AnimationSystem>(_registry)),
-		timerManager(std::make_unique<TimerManager>())
+		animationSystem(std::make_unique<AnimationSystem>(_registry))
 	{
 		userInput = std::make_unique<UserInput>(_keyMapping, settings);
 		camera = std::make_unique<Camera>(userInput.get());
@@ -38,14 +37,25 @@ namespace sage
 			camera.get(),
 			settings,
 			controllableActorSystem.get());
-		
+
 		healthBarSystem = std::make_unique<HealthBarSystem>(_registry, camera.get());
-		
-		stateSystems = std::make_unique<StateSystems>(_registry, this, cursor.get(), timerManager.get(), actorMovementSystem.get(), collisionSystem.get(),
-			controllableActorSystem.get(), navigationGridSystem.get());
-		
-		abilitySystem = std::make_unique<AbilitySystem>(_registry, camera.get(), cursor.get(), userInput.get(), actorMovementSystem.get(),
-			collisionSystem.get(), controllableActorSystem.get(), navigationGridSystem.get(), timerManager.get());
+
+		stateSystems = std::make_unique<StateSystems>(_registry,
+			this,
+			cursor.get(),
+			actorMovementSystem.get(),
+			collisionSystem.get(),
+			controllableActorSystem.get(),
+			navigationGridSystem.get());
+
+		abilitySystem = std::make_unique<AbilitySystem>(_registry,
+			camera.get(),
+			cursor.get(),
+			userInput.get(),
+			actorMovementSystem.get(),
+			collisionSystem.get(),
+			controllableActorSystem.get(),
+			navigationGridSystem.get());
 		combatSystem = std::make_unique<CombatSystem>(_registry);
 	}
 
