@@ -85,6 +85,12 @@ namespace sage
 		// TODO: Handle destination being unreachable. (Change animation to IDLE, for a start)
 	}
 
+	bool ActorMovementSystem::ReachedDestination(entt::entity entity) const
+	{
+		auto& actor = registry->get<MoveableActor>(entity);
+		return actor.path.empty();
+	}
+
 	void ActorMovementSystem::DrawDebug() const
 	{
 		auto view = registry->view<MoveableActor, sgTransform>();
@@ -170,7 +176,7 @@ namespace sage
 			}
 
 			float avoidanceDistance = 10;
-			GridSquare actorIndex;
+			GridSquare actorIndex{};
 			navigationGridSystem->WorldToGridSpace(actorTrans.position(), actorIndex);
 
 

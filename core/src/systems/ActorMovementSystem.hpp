@@ -31,5 +31,6 @@ namespace sage
 		void CancelMovement(const entt::entity& entity) const;
 		void Update() override;
 		void DrawDebug() const;
+		bool ReachedDestination(entt::entity entity) const;
 	};
 }

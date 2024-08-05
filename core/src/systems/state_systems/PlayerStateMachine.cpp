@@ -20,23 +20,38 @@ namespace sage
 {
     namespace playerstates
     {
+// ----------------------------
         void DefaultState::Update()
         {
+            // I think having the player "aggro" when the enemy hits them is bad.
         }
 
         void DefaultState::Draw3D()
         {
         }
 
-        void DefaultState::OnComponentAdded(entt::entity entity)
+        void DefaultState::OnEnemyClick(entt::entity self, entt::entity target)
         {
+            auto& combatable = registry->get<CombatableActor>(self);
+            combatable.target = target;
+            ChangeState<StatePlayerApproachingTarget, PlayerStates>(self);
+        }
+
+        void DefaultState::OnStateEnter(entt::entity entity)
+        {
+            auto& combatableActor = registry->get<CombatableActor>(entity);
+            entt::sink sink {combatableActor.onEnemyClicked};
+            sink.connect<&DefaultState::OnEnemyClick>(this);
+
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void DefaultState::OnComponentRemoved(entt::entity entity)
+        void DefaultState::OnStateExit(entt::entity entity)
         {
-            actorMovementSystem->CancelMovement(entity);
+            auto& combatableActor = registry->get<CombatableActor>(entity);
+            entt::sink sink {combatableActor.onEnemyClicked};
+            sink.disconnect<&DefaultState::OnEnemyClick>(this);
         }
 
         DefaultState::DefaultState(entt::registry* _registry, ActorMovementSystem* _actorMovementSystem)
@@ -44,16 +59,94 @@ namespace sage
         {
         }
 
-        // TODO: Does not account for an enemy being out of range of the player when auto attacking
-        // TODO: Click enemy -> Attack Cancel -> click enemy causes as a crash once the player reaches the enemy
+// ----------------------------
 
-        void InCombatState::Update()
+        void ApproachingTargetState::Update()
         {
-            auto view = registry->view<CombatableActor, StatePlayerCombat>();
-
+            auto view = registry->view<CombatableActor, StatePlayerApproachingTarget>();
             for (const auto& entity : view)
             {
-                auto& c = registry->get<CombatableActor>(entity);
+                auto& combatable = registry->get<CombatableActor>(entity);
+                if (combatable.target == entt::null)
+                {
+                    ChangeState<StatePlayerDefault, PlayerStates>(entity);
+                    continue;
+                }
+            }
+        }
+
+        void ApproachingTargetState::OnEnemyClick(entt::entity self, entt::entity target)
+        {
+
+        }
+
+        void ApproachingTargetState::OnReachedTarget(entt::entity self)
+        {
+            ChangeState<StatePlayerEngagedInCombat, PlayerStates>(self);
+        }
+
+        void ApproachingTargetState::onAttackCancel(entt::entity self)
+        {
+            auto& playerCombatable = registry->get<CombatableActor>(self);
+            playerCombatable.target = entt::null;
+            
+            auto& playerTrans = registry->get<sgTransform>(self);
+            entt::sink sink{playerTrans.onFinishMovement};
+            sink.disconnect<&ApproachingTargetState::OnReachedTarget>(this);
+            
+            controllableActorSystem->CancelMovement(self);
+            ChangeState<StatePlayerDefault, PlayerStates>(self);
+        }
+
+        void ApproachingTargetState::OnStateEnter(entt::entity self)
+        {
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+
+            auto& playerTrans = registry->get<sgTransform>(self);
+            entt::sink sink{playerTrans.onFinishMovement};
+            sink.connect<&ApproachingTargetState::OnReachedTarget>(this);
+
+            auto& combatable = registry->get<CombatableActor>(self);
+            entt::sink combatableSink{combatable.onAttackCancelled};
+            combatableSink.connect<&ApproachingTargetState::onAttackCancel>(this);
+
+            const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
+
+            Vector3 enemyPos = enemyTrans.position();
+            Vector3 direction = Vector3Subtract(enemyPos, playerTrans.position());
+            float length = Vector3Length(direction);
+            direction = Vector3Scale(Vector3Normalize(direction), combatable.attackRange);
+
+            Vector3 targetPos = Vector3Subtract(enemyPos, direction);
+
+            controllableActorSystem->PathfindToLocation(self, targetPos);
+        }
+
+        void ApproachingTargetState::OnStateExit(entt::entity self)
+        {
+            controllableActorSystem->CancelMovement(self);
+
+            auto& playerTrans = registry->get<sgTransform>(self);
+            entt::sink sink{playerTrans.onFinishMovement};
+            sink.disconnect<&ApproachingTargetState::OnReachedTarget>(this);
+
+            auto& combatable = registry->get<CombatableActor>(self);
+            entt::sink combatableSink{combatable.onAttackCancelled};
+            combatableSink.disconnect<&ApproachingTargetState::onAttackCancel>(this);
+        }
+
+        ApproachingTargetState::ApproachingTargetState(entt::registry* _registry, ControllableActorSystem* _controllableActorSystem)
+            : StateMachine(_registry), controllableActorSystem(_controllableActorSystem) {}
+
+// ----------------------------
+
+        void EngagedInCombatState::Update()
+        {
+            auto view = registry->view<CombatableActor, StatePlayerEngagedInCombat>();
+            for (const auto& entity : view)
+            {
+                auto& combatable = registry->get<CombatableActor>(entity);
                 if (!checkInCombat(entity))
                 {
                     auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
@@ -67,193 +160,67 @@ namespace sage
             }
         }
 
-        void InCombatState::Draw3D()
+        void EngagedInCombatState::onTargetDeath(entt::entity self, entt::entity target)
         {
+            auto& playerCombatable = registry->get<CombatableActor>(self);
+            playerCombatable.target = entt::null;
+            ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
 
-        bool InCombatState::checkInCombat(entt::entity entity)
+        void EngagedInCombatState::onAttackCancel(entt::entity self)
         {
-            // If the entity is not the target of any other combatable.
-            // If no current target
-            // Have a timer for aggro and if the player is not within that range for a certain amount of time they
-            // resume their regular task (tasks TBC)
+            auto& playerCombatable = registry->get<CombatableActor>(self);
+            playerCombatable.target = entt::null;
+            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
+            autoAttackAbility.Cancel();
+            ChangeState<StatePlayerDefault, PlayerStates>(self);
+        }
 
-            // TODO: Should only go out of combat if no enemies are targetting the player
+        bool EngagedInCombatState::checkInCombat(entt::entity entity)
+        {
+            auto& combatable = registry->get<CombatableActor>(entity);
+            return combatable.target != entt::null;
+        }
+
+        void EngagedInCombatState::OnStateEnter(entt::entity entity)
+        {
+            auto& animation = registry->get<Animation>(entity);
+            animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
+            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
+            autoAttackAbility.Init(entity);
 
             auto& combatable = registry->get<CombatableActor>(entity);
-            if (combatable.target == entt::null)
-            {
-                return false;
-            }
-            return true;
+            auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
+            entt::sink sink{enemyCombatable.onDeath};
+            sink.connect<&CombatableActor::TargetDeath>(combatable);
+
+            entt::sink combatableSink{combatable.onTargetDeath};
+            combatableSink.connect<&EngagedInCombatState::onTargetDeath>(this);
+
+            entt::sink attackCancelSink{combatable.onAttackCancelled};
+            attackCancelSink.connect<&EngagedInCombatState::onAttackCancel>(this);
         }
 
-        void InCombatState::onDeath(entt::entity entity)
+        void EngagedInCombatState::OnStateExit(entt::entity entity)
         {
-        }
-
-        void InCombatState::onTargetDeath(entt::entity self, entt::entity target)
-        {
-            auto& enemyCombatable = registry->get<CombatableActor>(target);
-            auto& playerCombatable = registry->get<CombatableActor>(self);
+            auto& combatable = registry->get<CombatableActor>(entity);
+            if (combatable.target != entt::null)
             {
-                entt::sink sink{playerCombatable.onTargetDeath};
-                sink.disconnect<&InCombatState::onTargetDeath>(this);
-            }
-            {
-                entt::sink sink{playerCombatable.onAttackCancelled};
-                sink.disconnect<&InCombatState::onAttackCancel>(this);
-            }
-            playerCombatable.target = entt::null;
-        }
-
-        void InCombatState::onAttackCancel(entt::entity self)
-        {
-            auto& playerCombatable = registry->get<CombatableActor>(self);
-            playerCombatable.target = entt::null;
-            auto& playerTrans = registry->get<sgTransform>(self);
-            {
-                entt::sink sink{playerTrans.onFinishMovement};
-                sink.disconnect<&InCombatState::startCombat>(this);
-            }
-            controllableActorSystem->CancelMovement(self);
-            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
-            autoAttackAbility.Cancel();
-        }
-
-        void InCombatState::OnHit(AttackData attackData)
-        {
-            if (!checkInCombat(attackData.hit))
-            {
-                // OnEnemyClick(attackData.hit, attackData.attacker);
-            }
-        }
-
-        void InCombatState::OnEnemyClick(entt::entity self, entt::entity target)
-        {
-            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
-            autoAttackAbility.Cancel();
-
-            auto& combatable = registry->get<CombatableActor>(self);
-            combatable.target = target;
-            {
-                entt::sink sink{combatable.onAttackCancelled};
-                sink.connect<&InCombatState::onAttackCancel>(this);
-            }
-            auto& playerTrans = registry->get<sgTransform>(self);
-            const auto& enemyTrans = registry->get<sgTransform>(target);
-
-            const auto& enemyCollideable = registry->get<Collideable>(combatable.target);
-            Vector3 enemyPos = enemyTrans.position();
-
-            // Calculate the direction vector from player to enemy
-            Vector3 direction = Vector3Subtract(enemyPos, playerTrans.position());
-
-            // Normalize the direction vector
-            float length = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
-            direction.x = (direction.x / length) * combatable.attackRange;
-            direction.y = (direction.y / length) * combatable.attackRange;
-            direction.z = (direction.z / length) * combatable.attackRange;
-
-            // Calculate the target position by subtracting the normalized direction vector
-            // multiplied by the attack range from the enemy position
-            Vector3 targetPos = Vector3Subtract(enemyPos, direction);
-
-            controllableActorSystem->PathfindToLocation(self, targetPos);
-            {
-                entt::sink sink{playerTrans.onFinishMovement};
-                sink.connect<&InCombatState::startCombat>(this);
-            }
-        }
-
-        void InCombatState::startCombat(entt::entity self)
-        {
-            // Remember to set target
-            {
-                auto& playerTrans = registry->get<sgTransform>(self);
-                entt::sink sink{playerTrans.onFinishMovement};
-                sink.disconnect<&InCombatState::startCombat>(this);
-            }
-            ChangeState<StatePlayerCombat, PlayerStates>(self);
-
-            auto& playerCombatable = registry->get<CombatableActor>(self);
-            auto& enemyCombatable = registry->get<CombatableActor>(playerCombatable.target);
-            {
+                auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
                 entt::sink sink{enemyCombatable.onDeath};
-                sink.connect<&CombatableActor::TargetDeath>(playerCombatable);
+                sink.disconnect<&CombatableActor::TargetDeath>(combatable);
             }
-            {
-                entt::sink sink{playerCombatable.onTargetDeath};
-                sink.connect<&InCombatState::onTargetDeath>(this);
-            }
+
+            entt::sink combatableSink{combatable.onTargetDeath};
+            combatableSink.disconnect<&EngagedInCombatState::onTargetDeath>(this);
+
+            entt::sink attackCancelSink{combatable.onAttackCancelled};
+            attackCancelSink.disconnect<&EngagedInCombatState::onAttackCancel>(this);
         }
 
-        void InCombatState::Enable()
-        {
-            auto view = registry->view<CombatableActor>();
-            for (const auto& entity : view)
-            {
-                auto& combatable = registry->get<CombatableActor>(entity);
-                if (combatable.actorType == CombatableActorType::PLAYER)
-                {
-                    {
-                        entt::sink sink{combatable.onEnemyClicked};
-                        sink.connect<&InCombatState::OnEnemyClick>(this);
-                    }
-                    {
-                        entt::sink sink{combatable.onAttackCancelled};
-                        sink.connect<&InCombatState::onAttackCancel>(this);
-                    }
-                    {
-                        entt::sink sink{combatable.onHit};
-                        sink.connect<&InCombatState::OnHit>(this);
-                    }
-                }
-            }
-        }
-
-        void InCombatState::Disable()
-        {
-            // Remove checks to see if the player should be in combat
-            auto view = registry->view<CombatableActor>();
-            for (const auto& entity : view)
-            {
-                auto& combatable = registry->get<CombatableActor>(entity);
-                if (combatable.actorType == CombatableActorType::PLAYER)
-                {
-                    {
-                        entt::sink sink{combatable.onEnemyClicked};
-                        sink.disconnect<&InCombatState::OnEnemyClick>(this);
-                    }
-                    {
-                        entt::sink sink{combatable.onAttackCancelled};
-                        sink.disconnect<&InCombatState::onAttackCancel>(this);
-                    }
-                    {
-                        entt::sink sink{combatable.onHit};
-                        sink.disconnect<&InCombatState::OnHit>(this);
-                    }
-                }
-            }
-        }
-
-        void InCombatState::OnComponentAdded(entt::entity self)
-        {
-            auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
-            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
-            autoAttackAbility.Init(self);
-        }
-
-        void InCombatState::OnComponentRemoved(entt::entity self)
-        {
-            controllableActorSystem->CancelMovement(self);
-        }
-
-        InCombatState::InCombatState(entt::registry* _registry, ControllableActorSystem* _controllableActorSystem, CollisionSystem* _collisionSystem, TimerManager* _timerManager)
-            : StateMachine(_registry), controllableActorSystem(_controllableActorSystem)
-        {
-        }
+        EngagedInCombatState::EngagedInCombatState(entt::registry* _registry) : StateMachine(_registry) {}
+        
+// ----------------------------
     } // namespace playerstates
 
     void PlayerStateController::Update()
@@ -281,8 +248,11 @@ namespace sage
         : registry(_registry), cursor(_cursor), controllableActorSystem(_controllableActorSystem)
     {
         defaultState = std::make_unique<playerstates::DefaultState>(_registry, _actorMovementSystem);
-        inCombatState = std::make_unique<playerstates::InCombatState>(_registry, _controllableActorSystem, _collisionSystem, _timerManager);
+        approachingTargetState = std::make_unique<playerstates::ApproachingTargetState>(_registry, _controllableActorSystem);
+        engagedInCombatState = std::make_unique<playerstates::EngagedInCombatState>(_registry);
+
         systems.push_back(defaultState.get());
-        systems.push_back(inCombatState.get());
+        systems.push_back(approachingTargetState.get());
+        systems.push_back(engagedInCombatState.get());
     }
 } // namespace sage

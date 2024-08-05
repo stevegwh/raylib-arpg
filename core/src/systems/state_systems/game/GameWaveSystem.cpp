@@ -27,14 +27,14 @@ namespace sage
 
 	}
 	
-	void GameWaveSystem::OnComponentAdded(entt::entity entity)
+	void GameWaveSystem::OnStateEnter(entt::entity entity)
 	{
 		// Create waves here (enemies etc)
 		std::cout << "Wave state entered! \n";
 		initWave();
 	}
 	
-	void GameWaveSystem::OnComponentRemoved(entt::entity entity)
+	void GameWaveSystem::OnStateExit(entt::entity entity)
 	{
 
 	}

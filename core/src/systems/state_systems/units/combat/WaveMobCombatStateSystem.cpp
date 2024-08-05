@@ -182,7 +182,7 @@ namespace sage
         c.target = attackData.attacker;
     }
 
-    void WaveMobCombatStateSystem::OnComponentAdded(entt::entity self)
+    void WaveMobCombatStateSystem::OnStateEnter(entt::entity self)
     {
         actorMovementSystem->CancelMovement(self);
         auto& combatable = registry->get<CombatableActor>(self);
@@ -192,7 +192,7 @@ namespace sage
         }
     }
 
-    void WaveMobCombatStateSystem::OnComponentRemoved(entt::entity self)
+    void WaveMobCombatStateSystem::OnStateExit(entt::entity self)
     {
 
     }
