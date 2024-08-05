@@ -13,7 +13,6 @@ namespace sage
 
 	void GameDefaultSystem::OnTimerEnd()
 	{
-		std::cout << "Timer ended! \n";
 		ChangeState<StateGameWaveattack, GameStates>(gameEntity);
 	}
 	
@@ -29,12 +28,11 @@ namespace sage
 	
 	void GameDefaultSystem::OnStateEnter(entt::entity entity)
 	{
-    	timerId = timerManager->AddTimer(5.0f, &GameDefaultSystem::OnTimerEnd, this);
+    	timerId = timerManager->AddTimerOneshot(5.0f, &GameDefaultSystem::OnTimerEnd, this);
 	}
 	
 	void GameDefaultSystem::OnStateExit(entt::entity entity)
 	{
-		timerManager->RemoveTimer(timerId);
 	}
 
 	GameDefaultSystem::GameDefaultSystem(entt::registry* _registry, entt::entity _gameEntity, TimerManager* _timerManager) :

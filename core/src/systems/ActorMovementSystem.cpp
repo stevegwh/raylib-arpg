@@ -41,8 +41,7 @@ namespace sage
 		transform.onMovementCancel.publish(entity);
 	}
 
-	void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination,
-		bool initialMove)
+	void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination)
 		// TODO: Pathfinding/movement needs some sense of movement speed.
 	{
 		{
@@ -142,7 +141,7 @@ namespace sage
 				|| !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
 					moveableActor.path.back(), actorCollideable.worldBoundingBox))
 			{
-				PathfindToLocation(entity, moveableActor.path.back(), false);
+				PathfindToLocation(entity, moveableActor.path.back());
 				navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
 				continue;
 			}
@@ -197,7 +196,7 @@ namespace sage
 					if (Vector3Distance(hitTransform.position(), actorTrans.position()) <
 						Vector3Distance(moveableActor.path.back(), actorTrans.position()))
 					{
-						PathfindToLocation(entity, moveableActor.path.back(), false);
+						PathfindToLocation(entity, moveableActor.path.back());
 						hitCol.debugDraw = true;
 					}
 				}

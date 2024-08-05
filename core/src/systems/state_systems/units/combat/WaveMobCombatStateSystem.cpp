@@ -133,7 +133,7 @@ namespace sage
         const auto& moveableActor = registry->get<MoveableActor>(self);
         if (!moveableActor.isMoving())
         {
-            actorMovementSystem->PathfindToLocation(self, target, true);
+            actorMovementSystem->PathfindToLocation(self, target);
         }
     }
 
