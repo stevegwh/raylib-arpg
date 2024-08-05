@@ -44,6 +44,8 @@ namespace sage
             return false;
         if (combatable.target == entt::null)
         {
+            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
+            autoAttackAbility.Cancel();
             ChangeState<StateEnemyDefault, EnemyStates>(self);
             return false;
         }
@@ -146,11 +148,11 @@ namespace sage
         Vector3 normDirection = Vector3Normalize(direction);
 
 		// TODO: Arbitrary number. Should probably use the navigation system to find the "next best square" from current position
-        if (distance >= 8.0f) 
-        {
-            onTargetOutOfRange(self, normDirection, distance);
-            return;
-        }
+        // if (distance >= 8.0f) 
+        // {
+        //     onTargetOutOfRange(self, normDirection, distance);
+        //     return;
+        // }
         auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
         autoAttackAbility.Init(self);
     }
@@ -192,8 +194,7 @@ namespace sage
 
     void WaveMobCombatStateSystem::OnStateExit(entt::entity self)
     {
-        auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
-        autoAttackAbility.Cancel();
+
     }
 
     WaveMobCombatStateSystem::WaveMobCombatStateSystem(entt::registry* _registry,
