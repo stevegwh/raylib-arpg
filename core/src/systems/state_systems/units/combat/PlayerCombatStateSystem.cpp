@@ -208,7 +208,7 @@ namespace sage
         }
     }
 
-    void PlayerCombatStateSystem::OnStateEnter(entt::entity self)
+    void PlayerCombatStateSystem::OnComponentAdded(entt::entity self)
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
@@ -216,7 +216,7 @@ namespace sage
         autoAttackAbility.Init(self);
     }
 
-    void PlayerCombatStateSystem::OnStateExit(entt::entity self)
+    void PlayerCombatStateSystem::OnComponentRemoved(entt::entity self)
     {
         controllableActorSystem->CancelMovement(self);
     }
@@ -225,7 +225,7 @@ namespace sage
                                                      ControllableActorSystem* _controllableActorSystem,
                                                      CollisionSystem* _collisionSystem, 
                                                      TimerManager* _timerManager)
-        : StateMachineSystem(_registry), controllableActorSystem(_controllableActorSystem)
+        : StateMachine(_registry), controllableActorSystem(_controllableActorSystem)
     {
     }
 } // namespace sage

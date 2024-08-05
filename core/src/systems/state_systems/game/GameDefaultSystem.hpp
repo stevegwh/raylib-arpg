@@ -13,7 +13,7 @@
 namespace sage
 {  
 
-	class GameDefaultSystem : public StateMachineSystem<GameDefaultSystem, StateGameDefault>
+	class GameDefaultSystem : public StateMachine<GameDefaultSystem, StateGameDefault>
 	{
 		entt::entity gameEntity;
 		int timerId = -1;
@@ -25,8 +25,8 @@ namespace sage
 	public:
 		void Update() override;
 		void Draw3D() override;
-		void OnStateEnter(entt::entity entity) override;
-		void OnStateExit(entt::entity entity) override;
+		void OnComponentAdded(entt::entity entity) override;
+		void OnComponentRemoved(entt::entity entity) override;
 		GameDefaultSystem(entt::registry* _registry, entt::entity _gameEntity, TimerManager* _timerManager);
 	};
 
