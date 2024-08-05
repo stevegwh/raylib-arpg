@@ -14,12 +14,14 @@ namespace sage
 			float maxTime;
             float remainingTime;
             int id;
+			bool repeating = true;
         };
 
         std::vector<Timer> timers;
         int nextId = 0;
 
     public:
+
         template <typename Func, typename... Args>
         [[nodiscard]] int AddTimer(float duration, Func&& func, Args&&... args)
         {
@@ -35,6 +37,22 @@ namespace sage
             return id;
         }
 
+		template <typename Func, typename... Args>
+        [[nodiscard]] int AddTimerOneshot(float duration, Func&& func, Args&&... args)
+        {
+            int id = nextId++;
+            timers.push_back({
+                [f = std::forward<Func>(func), ... capturedArgs = std::forward<Args>(args)]() mutable {
+                    std::invoke(f, std::forward<Args>(capturedArgs)...);
+                },
+				duration,
+                duration,
+                id
+            });
+			timers.back().repeating = false;
+            return id;
+        }
+
         // Overload for member functions
         template <typename C, typename R, typename... Args>
         [[nodiscard]] int AddTimer(float duration, R(C::*memFunc)(Args...), C* instance, Args... args)
@@ -44,10 +62,28 @@ namespace sage
             });
         }
 
+		template <typename C, typename R, typename... Args>
+        [[nodiscard]] int AddTimerOneshot(float duration, R(C::*memFunc)(Args...), C* instance, Args... args)
+        {
+            int id = AddTimer(duration, [instance, memFunc, ... capturedArgs = std::move(args)]() mutable {
+                (instance->*memFunc)(std::move(capturedArgs)...);
+            });
+			timers.back().repeating = false;
+			return id;
+        }
+
 		[[nodiscard]] int AddTimer(float duration)
         {
             // Adding a dummy function as callback
             return AddTimer(duration, []() {});
+        }
+
+		[[nodiscard]] int AddTimerOneshot(float duration)
+        {
+            // Adding a dummy function as callback
+            int id = AddTimer(duration, []() {});
+			timers.back().repeating = false;
+			return id;
         }
 
         void Update()
@@ -61,13 +97,20 @@ namespace sage
                 if (it->remainingTime <= 0)
                 {
                     it->func();  // Execute the function
-					it->remainingTime = it->maxTime;
-                    //it = timers.erase(it);  // Remove the timer
+					if (it->repeating)
+					{
+						it->remainingTime = it->maxTime;
+						++it;
+					}
+					else
+					{
+						it = timers.erase(it);  // Remove the timer
+					}
                 }
-                else
-                {
-                    ++it;
-                }
+				else
+				{
+					++it;
+				}
             }
         }
 
