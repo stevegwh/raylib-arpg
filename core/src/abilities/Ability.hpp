@@ -36,7 +36,9 @@ namespace sage
 		}
 		float cooldownTimer() const
 		{
-			return timerManager->GetRemainingTime(cooldownTimerId);
+			float time = timerManager->GetRemainingTime(cooldownTimerId);
+			if (time == -1) time = 0;
+			return time;
 		}
 		float cooldownLimit() const
 		{

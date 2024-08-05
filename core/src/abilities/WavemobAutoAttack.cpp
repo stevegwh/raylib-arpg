@@ -39,8 +39,13 @@ namespace sage
 
     void WavemobAutoAttack::Init(entt::entity self)
     {
+        if (active)
+        {
+            std::cout << "Trying to init but ability already active" << std::endl;
+            return;
+        }
         active = true;
-        timerManager->AddTimer(m_cooldownLimit, &WavemobAutoAttack::Execute, this, self);
+        cooldownTimerId = timerManager->AddTimer(m_cooldownLimit, &WavemobAutoAttack::Execute, this, self);
     }
 
     void WavemobAutoAttack::Cancel()

@@ -21,7 +21,7 @@ namespace sage
 
     public:
         template <typename Func, typename... Args>
-        int AddTimer(float duration, Func&& func, Args&&... args)
+        [[nodiscard]] int AddTimer(float duration, Func&& func, Args&&... args)
         {
             int id = nextId++;
             timers.push_back({
@@ -37,14 +37,14 @@ namespace sage
 
         // Overload for member functions
         template <typename C, typename R, typename... Args>
-        int AddTimer(float duration, R(C::*memFunc)(Args...), C* instance, Args... args)
+        [[nodiscard]] int AddTimer(float duration, R(C::*memFunc)(Args...), C* instance, Args... args)
         {
             return AddTimer(duration, [instance, memFunc, ... capturedArgs = std::move(args)]() mutable {
                 (instance->*memFunc)(std::move(capturedArgs)...);
             });
         }
 
-		int AddTimer(float duration)
+		[[nodiscard]] int AddTimer(float duration)
         {
             // Adding a dummy function as callback
             return AddTimer(duration, []() {});

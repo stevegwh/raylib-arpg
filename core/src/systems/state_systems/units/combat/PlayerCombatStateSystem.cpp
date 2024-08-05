@@ -16,6 +16,7 @@ namespace sage
 {
 
     // TODO: Does not account for an enemy being out of range of the player when auto attacking
+    // TODO: Click enemy -> Attack Cancel -> click enemy causes as a crash once the player reaches the enemy
 
     void PlayerCombatStateSystem::Update()
     {
@@ -25,7 +26,12 @@ namespace sage
         {
             auto& c = registry->get<CombatableActor>(entity);
             if (!checkInCombat(entity))
+            {
+                auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
+                autoAttackAbility.Cancel();
+                ChangeState<StatePlayerDefault, PlayerStates>(entity);
                 continue;
+            }
 
             auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
             autoAttackAbility.Update(entity);
@@ -48,7 +54,6 @@ namespace sage
         auto& combatable = registry->get<CombatableActor>(entity);
         if (combatable.target == entt::null)
         {
-            ChangeState<StatePlayerDefault, PlayerStates>(entity);
             return false;
         }
         return true;
@@ -97,6 +102,9 @@ namespace sage
 
     void PlayerCombatStateSystem::OnEnemyClick(entt::entity self, entt::entity target)
     {
+        auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
+        autoAttackAbility.Cancel();
+
         auto& combatable = registry->get<CombatableActor>(self);
         combatable.target = target;
         {
@@ -211,8 +219,6 @@ namespace sage
     void PlayerCombatStateSystem::OnStateExit(entt::entity self)
     {
         controllableActorSystem->CancelMovement(self);
-        auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
-        autoAttackAbility.Cancel();
     }
 
     PlayerCombatStateSystem::PlayerCombatStateSystem(entt::registry* _registry,
