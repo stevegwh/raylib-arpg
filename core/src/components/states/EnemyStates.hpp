@@ -10,17 +10,35 @@
 
 namespace sage
 {
-	class StateEnemyDefault : public StateMachineComponent
-	{
-	public:
-		~StateEnemyDefault() override = default;
-	};
+    class StateEnemyDefault : public StateMachineComponent
+    {
+      public:
+        ~StateEnemyDefault() override = default;
+    };
 
-	class StateEnemyCombat : public StateMachineComponent
-	{
-	public:
-		~StateEnemyCombat() override = default;
-	};
-	
-	using EnemyStates = std::tuple<StateEnemyDefault, StateEnemyCombat>;
-} // sage
+    class StateEnemyCombat : public StateMachineComponent
+    {
+      public:
+        ~StateEnemyCombat() override = default;
+    };
+
+    class StateEnemyTargetOutOfRange : public StateMachineComponent
+    {
+      public:
+        ~StateEnemyTargetOutOfRange() override = default;
+    };
+
+	class StateEnemyDying : public StateMachineComponent
+    {
+      public:
+        ~StateEnemyDying() override = default;
+    };
+
+	class StateEnemyDead : public StateMachineComponent
+    {
+      public:
+        ~StateEnemyDead() override = default;
+    };
+
+    using EnemyStates = std::tuple<StateEnemyDefault, StateEnemyCombat>;
+} // namespace sage

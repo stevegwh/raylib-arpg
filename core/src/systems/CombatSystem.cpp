@@ -30,6 +30,7 @@ namespace sage
         targetCombat.hp -= attackData.damage;
         if (targetCombat.hp <= 0)
         {
+			targetCombat.dying = true;
             targetCombat.hp = 0;
             targetCombat.target = entt::null;
             targetCombat.onDeath.publish(attackData.hit);
