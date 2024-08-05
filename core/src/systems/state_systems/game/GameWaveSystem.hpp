@@ -13,7 +13,7 @@
 namespace sage
 {
 	class GameData; // forward dec
-	class GameWaveSystem : public StateMachineSystem<GameWaveSystem, StateGameWaveattack>
+	class GameWaveSystem : public StateMachine<GameWaveSystem, StateGameWaveattack>
 	{
 		GameData* gameData;
 		TimerManager* timerManager;
@@ -28,7 +28,7 @@ namespace sage
 				TimerManager* _timerManager);
 		void Update() override;
 		void Draw3D() override;
-		void OnStateEnter(entt::entity entity) override;
-		void OnStateExit(entt::entity entity) override;
+		void OnComponentAdded(entt::entity entity) override;
+		void OnComponentRemoved(entt::entity entity) override;
 	};
 } // sage

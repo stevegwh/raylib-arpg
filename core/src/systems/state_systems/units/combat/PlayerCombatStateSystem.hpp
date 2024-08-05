@@ -17,7 +17,7 @@
 
 namespace sage
 {
-    class PlayerCombatStateSystem : public StateMachineSystem<PlayerCombatStateSystem, StatePlayerCombat>
+    class PlayerCombatStateSystem : public StateMachine<PlayerCombatStateSystem, StatePlayerCombat>
     {
         ControllableActorSystem* controllableActorSystem;
 		
@@ -34,8 +34,8 @@ namespace sage
         void OnHit(AttackData attackData);
         void Enable();
         void Disable();
-        void OnStateEnter(entt::entity self) override;
-        void OnStateExit(entt::entity self) override;
+        void OnComponentAdded(entt::entity self) override;
+        void OnComponentRemoved(entt::entity self) override;
 
         PlayerCombatStateSystem(entt::registry* _registry, ControllableActorSystem* _controllableActorSystem,
                                 CollisionSystem* _collisionSystem, TimerManager* _timerManager);

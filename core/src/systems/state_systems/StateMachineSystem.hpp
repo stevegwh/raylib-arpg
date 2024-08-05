@@ -11,7 +11,7 @@
 namespace sage
 {
 	template<typename Derived, typename DerivedStateComponent>
-	class StateMachineSystem : public BaseSystem
+	class StateMachine : public BaseSystem
 	{
 		template <typename Tuple, size_t... Indices>
 		void RemoveStateComponents(entt::entity entity, std::index_sequence<Indices...>)
@@ -53,13 +53,13 @@ namespace sage
 
 		void Update() override = 0;
 		void Draw3D() override = 0;
-		virtual void OnStateEnter(entt::entity entity) = 0;
-		virtual void OnStateExit(entt::entity entity) = 0;
+		virtual void OnComponentAdded(entt::entity entity) = 0;
+		virtual void OnComponentRemoved(entt::entity entity) = 0;
 
-		explicit StateMachineSystem(entt::registry* _registry) : BaseSystem(_registry)
+		explicit StateMachine(entt::registry* _registry) : BaseSystem(_registry)
 		{
-			registry->template on_construct<DerivedStateComponent>().template connect<&Derived::OnStateEnter>(static_cast<Derived*>(this));
-			registry->template on_destroy<DerivedStateComponent>().template connect<&Derived::OnStateExit>(static_cast<Derived*>(this));
+			registry->template on_construct<DerivedStateComponent>().template connect<&Derived::OnComponentAdded>(static_cast<Derived*>(this));
+			registry->template on_destroy<DerivedStateComponent>().template connect<&Derived::OnComponentRemoved>(static_cast<Derived*>(this));
 		}
 	};
 } // sage

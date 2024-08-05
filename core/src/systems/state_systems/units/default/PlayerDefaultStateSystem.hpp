@@ -10,15 +10,15 @@
 
 namespace sage
 {
-	class PlayerDefaultStateSystem : public StateMachineSystem<PlayerDefaultStateSystem, StatePlayerDefault>
+	class PlayerDefaultStateSystem : public StateMachine<PlayerDefaultStateSystem, StatePlayerDefault>
 	{
 		ActorMovementSystem* actorMovementSystem;
 
 	public:
 		void Update() override;
 		void Draw3D() override;
-		void OnStateEnter(entt::entity entity) override;
-		void OnStateExit(entt::entity entity) override;
+		void OnComponentAdded(entt::entity entity) override;
+		void OnComponentRemoved(entt::entity entity) override;
 		PlayerDefaultStateSystem(entt::registry* _registry,
 			ActorMovementSystem* _actorMovementSystem);
 	};

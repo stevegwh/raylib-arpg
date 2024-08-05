@@ -27,14 +27,14 @@ namespace sage
 
 	}
 	
-	void GameWaveSystem::OnStateEnter(entt::entity entity)
+	void GameWaveSystem::OnComponentAdded(entt::entity entity)
 	{
 		// Create waves here (enemies etc)
 		std::cout << "Wave state entered! \n";
 		initWave();
 	}
 	
-	void GameWaveSystem::OnStateExit(entt::entity entity)
+	void GameWaveSystem::OnComponentRemoved(entt::entity entity)
 	{
 
 	}
@@ -44,7 +44,7 @@ namespace sage
 			GameData* _gameData,
 			entt::entity _gameEntity, 
 			TimerManager* _timerManager) :
-			StateMachineSystem(_registry),
+			StateMachine(_registry),
 			gameData(_gameData)
 	{
 		// Preload model(s)

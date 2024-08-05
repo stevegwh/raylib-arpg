@@ -8,7 +8,7 @@
 
 namespace sage
 {
-	void WaveMobDefaultStateSystem::OnStateEnter(entt::entity entity)
+	void WaveMobDefaultStateSystem::OnComponentAdded(entt::entity entity)
 	{
 		Vector3 target = { 52, 0, -10 };
 		auto& a = registry->get<MoveableActor>(entity);
@@ -18,7 +18,7 @@ namespace sage
 		actorMovementSystem->PathfindToLocation(entity, target);
 	}
 
-	void WaveMobDefaultStateSystem::OnStateExit(entt::entity entity)
+	void WaveMobDefaultStateSystem::OnComponentRemoved(entt::entity entity)
 	{
 		//actorMovementSystem->CancelMovement(entity);
 	}
@@ -35,7 +35,7 @@ namespace sage
 			entt::registry* _registry,
 			ActorMovementSystem* _actorMovementSystem)
 			:
-			StateMachineSystem(_registry),
+			StateMachine(_registry),
 			actorMovementSystem(_actorMovementSystem)
 	{
 	}

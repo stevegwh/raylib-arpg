@@ -182,7 +182,7 @@ namespace sage
         c.target = attackData.attacker;
     }
 
-    void WaveMobCombatStateSystem::OnStateEnter(entt::entity self)
+    void WaveMobCombatStateSystem::OnComponentAdded(entt::entity self)
     {
         actorMovementSystem->CancelMovement(self);
         auto& combatable = registry->get<CombatableActor>(self);
@@ -192,7 +192,7 @@ namespace sage
         }
     }
 
-    void WaveMobCombatStateSystem::OnStateExit(entt::entity self)
+    void WaveMobCombatStateSystem::OnComponentRemoved(entt::entity self)
     {
 
     }
@@ -202,7 +202,7 @@ namespace sage
                                                        CollisionSystem* _collisionSystem,
                                                        NavigationGridSystem* _navigationGridSystem,
                                                        TimerManager* _timerManager)
-        : StateMachineSystem(_registry), navigationGridSystem(_navigationGridSystem),
+        : StateMachine(_registry), navigationGridSystem(_navigationGridSystem),
           actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem)
     {
     }

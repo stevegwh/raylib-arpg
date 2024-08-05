@@ -26,17 +26,17 @@ namespace sage
 
 	}
 	
-	void GameDefaultSystem::OnStateEnter(entt::entity entity)
+	void GameDefaultSystem::OnComponentAdded(entt::entity entity)
 	{
     	timerId = timerManager->AddTimerOneshot(5.0f, &GameDefaultSystem::OnTimerEnd, this);
 	}
 	
-	void GameDefaultSystem::OnStateExit(entt::entity entity)
+	void GameDefaultSystem::OnComponentRemoved(entt::entity entity)
 	{
 	}
 
 	GameDefaultSystem::GameDefaultSystem(entt::registry* _registry, entt::entity _gameEntity, TimerManager* _timerManager) :
-			StateMachineSystem(_registry), gameEntity(_gameEntity), timerManager(_timerManager)
+			StateMachine(_registry), gameEntity(_gameEntity), timerManager(_timerManager)
 	{
 	}
 } // sage

@@ -12,13 +12,13 @@
 
 namespace sage
 {
-	class WaveMobDefaultStateSystem : public StateMachineSystem<WaveMobDefaultStateSystem, StateEnemyDefault>
+	class WaveMobDefaultStateSystem : public StateMachine<WaveMobDefaultStateSystem, StateEnemyDefault>
 	{
 		ActorMovementSystem* actorMovementSystem;
 
 	public:
-		void OnStateEnter(entt::entity entity) override;
-		void OnStateExit(entt::entity entity) override;
+		void OnComponentAdded(entt::entity entity) override;
+		void OnComponentRemoved(entt::entity entity) override;
 		void Update() override;
 		void Draw3D() override;
 		
