@@ -1,14 +1,18 @@
-#include "PlayerAutoAttack.hpp"
+#include "WavemobAutoAttack.hpp"
 
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 
+#include "systems/CollisionSystem.hpp"
+#include "TimerManager.hpp"
+
 #include <raymath.h>
 
 namespace sage
 {
-    void PlayerAutoAttack::Execute(entt::entity self)
+
+    void WavemobAutoAttack::Execute(entt::entity self)
     {
         auto& c = registry->get<CombatableActor>(self);
         if (c.target == entt::null)
@@ -33,24 +37,24 @@ namespace sage
         }
     }
 
-    void PlayerAutoAttack::Init(entt::entity self)
+    void WavemobAutoAttack::Init(entt::entity self)
     {
         active = true;
-        timerManager->AddTimer(m_cooldownLimit, &PlayerAutoAttack::Execute, this, self);
+        timerManager->AddTimer(m_cooldownLimit, &WavemobAutoAttack::Execute, this, self);
     }
 
-    void PlayerAutoAttack::Cancel()
+    void WavemobAutoAttack::Cancel()
     {
         active = false;
         timerManager->RemoveTimer(cooldownTimerId);
         cooldownTimerId = -1;
     }
 
-    void PlayerAutoAttack::Update(entt::entity self)
+    void WavemobAutoAttack::Update(entt::entity self)
     {
     }
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem,
+    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem,
                                        TimerManager* _timerManager)
         : Ability(_registry, _collisionSystem, _timerManager)
     {

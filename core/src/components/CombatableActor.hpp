@@ -47,8 +47,6 @@ namespace sage
 		bool dying = false;
 		entt::entity target{};
 		int attackRange = 5;
-		float autoAttackTick = 0;
-		float autoAttackTickThreshold = 1;
         
         std::vector<entt::delegate<void()>> dots;
         

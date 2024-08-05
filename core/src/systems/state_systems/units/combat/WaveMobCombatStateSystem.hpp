@@ -8,9 +8,13 @@
 #include "components/states/EnemyStates.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
+#include "components/CombatableActor.hpp"
+#include "TimerManager.hpp"
 
 #include "entt/entt.hpp"
-#include "components/CombatableActor.hpp"
+
+#include <memory>
+
 
 namespace sage
 {
@@ -23,7 +27,7 @@ namespace sage
 		void startCombat(entt::entity self);
 		[[nodiscard]] bool checkInCombat(entt::entity self);
 		void onDeath(entt::entity self);
-		void autoAttack(entt::entity self) const;
+		void tryAutoAttack(entt::entity self) const;
 		void destroyEnemy(entt::entity self);
 		void onTargetOutOfRange(entt::entity entity, Vector3& normDirection, float distance) const;
 	public:
@@ -35,6 +39,7 @@ namespace sage
 		WaveMobCombatStateSystem(entt::registry* _registry,
 		                            ActorMovementSystem* _actorMovementSystem,
 		                            CollisionSystem* _collisionSystem,
-		                            NavigationGridSystem* _navigationGridSystem);
+		                            NavigationGridSystem* _navigationGridSystem,
+									TimerManager* _timerManager);
 	};
 } // sage

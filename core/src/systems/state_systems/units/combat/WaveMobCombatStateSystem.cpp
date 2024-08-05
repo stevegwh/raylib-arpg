@@ -2,17 +2,20 @@
 // Created by steve on 05/06/24.
 //
 
-#include "raylib.h"
-#include "raymath.h"
-
 #include "WaveMobCombatStateSystem.hpp"
+
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/HealthBar.hpp"
 #include "components/sgTransform.hpp"
+#include "abilities/WavemobAutoAttack.hpp"
+
+#include "raylib.h"
+#include "raymath.h"
 
 namespace sage
 {
+    // TODO: You have one ability for the entire system, rather than an ability stored in the combatable!
     void WaveMobCombatStateSystem::Update()
     {
         auto view = registry->view<CombatableActor, StateEnemyCombat>();
@@ -22,16 +25,10 @@ namespace sage
             auto& c = registry->get<CombatableActor>(entity);
             if (!checkInCombat(entity))
                 continue;
-
-            // Player is out of combat if no enemy is targetting them?
-            if (c.autoAttackTick >= c.autoAttackTickThreshold)
-            // Maybe can count time since last autoattack to time out combat?
+            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(entity);
+            if (!autoAttackAbility.IsActive())
             {
-                autoAttack(entity);
-            }
-            else
-            {
-                c.autoAttackTick += GetFrameTime();
+                tryAutoAttack(entity);
             }
         }
     }
@@ -64,20 +61,6 @@ namespace sage
         registry->destroy(self);
     }
 
-    void WaveMobCombatStateSystem::OnStateEnter(entt::entity self)
-    {
-        actorMovementSystem->CancelMovement(self);
-        auto& combatable = registry->get<CombatableActor>(self);
-        {
-            entt::sink sink{combatable.onDeath};
-            sink.connect<&WaveMobCombatStateSystem::onDeath>(this);
-        }
-    }
-
-    void WaveMobCombatStateSystem::OnStateExit(entt::entity entity)
-    {
-    }
-
     void WaveMobCombatStateSystem::onDeath(entt::entity self)
     {
         auto& combatable = registry->get<CombatableActor>(self);
@@ -99,6 +82,8 @@ namespace sage
             entt::sink sink{animation.onAnimationEnd};
             sink.connect<&WaveMobCombatStateSystem::destroyEnemy>(this);
         }
+        auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
+        autoAttackAbility.Cancel();
         actorMovementSystem->CancelMovement(self);
     }
 
@@ -120,7 +105,6 @@ namespace sage
         if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
         {
             // Lost line of sight, out of combat
-            actorMovementSystem->CancelMovement(self);
             combatableActor.target = entt::null;
             actorTrans.movementDirectionDebugLine = {};
             return false;
@@ -131,6 +115,8 @@ namespace sage
     inline void WaveMobCombatStateSystem::onTargetOutOfRange(entt::entity self, Vector3& normDirection,
                                                              float distance) const
     {
+        auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
+        autoAttackAbility.Cancel();
         auto& animation = registry->get<Animation>(self);
 		auto& combatableActor = registry->get<CombatableActor>(self);
         auto& target = registry->get<sgTransform>(combatableActor.target).position();
@@ -149,12 +135,10 @@ namespace sage
         }
     }
 
-    void WaveMobCombatStateSystem::autoAttack(entt::entity self) const
+    void WaveMobCombatStateSystem::tryAutoAttack(entt::entity self) const
     {
         auto& combatableActor = registry->get<CombatableActor>(self);
         auto& actorTrans = registry->get<sgTransform>(self);
-        auto& animation = registry->get<Animation>(self);
-
         auto target = registry->get<sgTransform>(combatableActor.target).position();
 
         Vector3 direction = Vector3Subtract(target, actorTrans.position());
@@ -167,21 +151,8 @@ namespace sage
             onTargetOutOfRange(self, normDirection, distance);
             return;
         }
-
-        float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-        actorTrans.SetRotation({0, angle, 0}, self);
-        combatableActor.autoAttackTick = 0;
-
-        auto& targetCombatable = registry->get<CombatableActor>(combatableActor.target);
-
-        // TODO: Need to move all of these things to an ability class
-        AttackData attackData;
-        attackData.attacker = self;
-        attackData.hit = combatableActor.target;
-        attackData.damage = 0;
-        targetCombatable.onHit.publish(attackData);
-
-        animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
+        auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
+        autoAttackAbility.Init(self);
     }
 
     void WaveMobCombatStateSystem::Draw3D()
@@ -209,10 +180,27 @@ namespace sage
         c.target = attackData.attacker;
     }
 
+    void WaveMobCombatStateSystem::OnStateEnter(entt::entity self)
+    {
+        actorMovementSystem->CancelMovement(self);
+        auto& combatable = registry->get<CombatableActor>(self);
+        {
+            entt::sink sink{combatable.onDeath};
+            sink.connect<&WaveMobCombatStateSystem::onDeath>(this);
+        }
+    }
+
+    void WaveMobCombatStateSystem::OnStateExit(entt::entity self)
+    {
+        auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
+        autoAttackAbility.Cancel();
+    }
+
     WaveMobCombatStateSystem::WaveMobCombatStateSystem(entt::registry* _registry,
                                                        ActorMovementSystem* _actorMovementSystem,
                                                        CollisionSystem* _collisionSystem,
-                                                       NavigationGridSystem* _navigationGridSystem)
+                                                       NavigationGridSystem* _navigationGridSystem,
+                                                       TimerManager* _timerManager)
         : StateMachineSystem(_registry), navigationGridSystem(_navigationGridSystem),
           actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem)
     {
