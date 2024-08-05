@@ -32,8 +32,8 @@ namespace sage
 
 	public:
 		std::unique_ptr<WaveMobDefaultStateSystem> waveMobDefaultSubSystem;
-		std::unique_ptr<PlayerDefaultStateSystem> playerDefaultSubSystem;
-		std::unique_ptr<PlayerCombatStateSystem> playerCombatLogicSubSystem;
+		// std::unique_ptr<PlayerDefaultStateSystem> playerDefaultSubSystem;
+		// std::unique_ptr<PlayerCombatStateSystem> playerCombatLogicSubSystem;
 		std::unique_ptr<WaveMobCombatStateSystem> waveMobCombatLogicSubSystem;
 
 		UnitStateSystems(

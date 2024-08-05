@@ -6,11 +6,13 @@ namespace sage
 	{
 		unitSystems->Update();
 		gameSystem->Update();
+		playerStateMachine->Update();
 	}
 
 	void StateSystems::Draw3D()
 	{
 		unitSystems->Draw3D();
+		playerStateMachine->Draw3D();
 		// gameSystem->Draw3D();
 	}
 
@@ -26,6 +28,14 @@ namespace sage
 	{
 
 		unitSystems = std::make_unique<UnitStateSystems>(
+				_registry,
+				_cursor,
+				_controllableActorSystem,
+				_actorMovementSystem,
+				_collisionSystem,
+				_navigationGridSystem,
+				_timerManager);
+		playerStateMachine = std::make_unique<PlayerStateController>(
 				_registry,
 				_cursor,
 				_controllableActorSystem,

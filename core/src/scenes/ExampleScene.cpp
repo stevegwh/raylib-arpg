@@ -70,7 +70,7 @@ namespace sage
 		data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
 		// TODO: Not sure if I like this
-		data->stateSystems->unitSystems->playerCombatLogicSubSystem->Enable();
+		data->stateSystems->playerStateMachine->inCombatState->Enable();
 		
 		fountain = std::make_unique<SpiralFountainVFX>(data->camera->getRaylibCam());
 		explosion = std::make_unique<Explosion>(registry);
