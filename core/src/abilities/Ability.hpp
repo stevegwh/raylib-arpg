@@ -27,7 +27,7 @@ namespace sage
 	public:
 		virtual void ResetCooldown()
 		{
-			timerManager->RemoveTimer(cooldownTimerId);
+			//timerManager->RemoveTimer(cooldownTimerId);
 			cooldownTimerId = -1;
 		}
 		virtual bool IsActive() const

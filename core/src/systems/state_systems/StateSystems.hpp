@@ -3,6 +3,7 @@
 #include <memory>
 #include "units/UnitStateSystems.hpp"
 #include "game/GameStateSystem.hpp"
+#include "PlayerStateMachine.hpp"
 
 namespace sage
 {
@@ -14,6 +15,7 @@ namespace sage
 		// Systems
 		std::unique_ptr<UnitStateSystems> unitSystems;
 		std::unique_ptr<GameStateSystem> gameSystem;
+		std::unique_ptr<PlayerStateController> playerStateMachine;
 		void Update();
 		void Draw3D();
 		StateSystems(

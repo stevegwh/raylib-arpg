@@ -23,8 +23,8 @@ namespace sage
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
 
-		cooldownTimerId = timerManager->AddTimer(m_cooldownLimit, &Ability::ResetCooldown, this);
-		windupTimerId = timerManager->AddTimer(m_windupLimit, &WhirlwindAbility::Execute, this, self);
+		cooldownTimerId = timerManager->AddTimerOneshot(m_cooldownLimit, &Ability::ResetCooldown, this);
+		windupTimerId = timerManager->AddTimerOneshot(m_windupLimit, &WhirlwindAbility::Execute, this, self);
     }
 
     void WhirlwindAbility::Execute(entt::entity self)
@@ -55,7 +55,6 @@ namespace sage
             }
         }
         active = false;
-		timerManager->RemoveTimer(windupTimerId);
 		windupTimerId = -1;
     }
 
