@@ -83,8 +83,7 @@ namespace sage
 
 	AbilitySystem::AbilitySystem(entt::registry* _registry, Camera* _camera, Cursor* _cursor, UserInput* _userInput,
 			ActorMovementSystem* _actorMovementSystem, CollisionSystem* _collisionSystem,
-			ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem,
-			TimerManager* _timerManager)
+			ControllableActorSystem* _controllableActorSystem, NavigationGridSystem* _navigationGridSystem)
 			:
 			registry(_registry), cursor(_cursor), userInput(_userInput),
 			actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem),
@@ -113,11 +112,11 @@ namespace sage
 		}
 
 		currentAbilities.fill(-1);
-		abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem, _timerManager));
-		abilityMap.push_back(std::make_unique<ConeOfCold>(registry, collisionSystem, _timerManager));
+		abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, collisionSystem));
+		abilityMap.push_back(std::make_unique<ConeOfCold>(registry, collisionSystem));
 		abilityMap.push_back(
 				std::make_unique<RainOfFireAbility>(registry, _camera, _cursor, collisionSystem, _navigationGridSystem,
-						controllableActorSystem, _timerManager));
+						controllableActorSystem));
 		// TODO: These should be set by the player or another system
 		ChangeAbility(0, 0);
 		ChangeAbility(1, 1);

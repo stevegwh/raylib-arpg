@@ -12,6 +12,7 @@ namespace sage
 {
 	struct RainOfFireAbility : public Ability
 	{
+		Timer windupTimer{};
 		std::unique_ptr<RainOfFireVFX> vfx;
 		Cursor* cursor;
 		ControllableActorSystem* controllableActorSystem;
@@ -29,7 +30,6 @@ namespace sage
 				Cursor* _cursor,
 				CollisionSystem* _collisionSystem,
 				NavigationGridSystem* _navigationGridSystem,
-				ControllableActorSystem* _controllableActorSystem,
-				TimerManager* _timerManager);
+				ControllableActorSystem* _controllableActorSystem);
 	};
 }

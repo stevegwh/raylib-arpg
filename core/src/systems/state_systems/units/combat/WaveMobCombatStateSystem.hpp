@@ -9,7 +9,6 @@
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "components/CombatableActor.hpp"
-#include "TimerManager.hpp"
 
 #include "entt/entt.hpp"
 
@@ -39,7 +38,6 @@ namespace sage
 		WaveMobCombatStateSystem(entt::registry* _registry,
 		                            ActorMovementSystem* _actorMovementSystem,
 		                            CollisionSystem* _collisionSystem,
-		                            NavigationGridSystem* _navigationGridSystem,
-									TimerManager* _timerManager);
+		                            NavigationGridSystem* _navigationGridSystem);
 	};
 } // sage

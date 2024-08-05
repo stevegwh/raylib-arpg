@@ -6,17 +6,15 @@
 
 #include "components/CombatableActor.hpp"
 #include "systems/CollisionSystem.hpp"
-#include "TimerManager.hpp"
+#include <Timer.hpp>
 
 namespace sage
 {
 	class Ability
 	{
 	protected:
-		int cooldownTimerId = -1;
-		int windupTimerId = -1;
+		Timer timer{};
 		AttackData attackData;
-		TimerManager* timerManager;
         entt::registry* registry;
         CollisionSystem* collisionSystem;
         std::vector<entt::entity> hitUnits;
@@ -27,8 +25,7 @@ namespace sage
 	public:
 		virtual void ResetCooldown()
 		{
-			//timerManager->RemoveTimer(cooldownTimerId);
-			cooldownTimerId = -1;
+			timer.Reset();
 		}
 		virtual bool IsActive() const
 		{
@@ -36,13 +33,12 @@ namespace sage
 		}
 		float cooldownTimer() const
 		{
-			float time = timerManager->GetRemainingTime(cooldownTimerId);
-			if (time == -1) time = 0;
-			return time;
+			return timer.RemainingTime();
+
 		}
 		float cooldownLimit() const
 		{
-			return m_cooldownLimit;
+			return timer.maxTime;
 		}
 		virtual void Execute(entt::entity self) = 0;
         virtual void Update(entt::entity self);
@@ -51,6 +47,6 @@ namespace sage
         virtual ~Ability() = default;
 		Ability(const Ability&) = delete;
 		Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager);
+        Ability(entt::registry* _registry, CollisionSystem* _collisionSystem);
 	};
 }

@@ -22,7 +22,6 @@ namespace sage
 				entt::registry* _registry,
 				GameData* _gameData,
 				Cursor* _cursor,
-				TimerManager* _timerManager,
 				ActorMovementSystem* _actorMovementSystem,
 				CollisionSystem* _collisionSystem,
 				ControllableActorSystem* _controllableActorSystem,

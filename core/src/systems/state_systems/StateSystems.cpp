@@ -20,7 +20,6 @@ namespace sage
 			entt::registry* _registry,
 			GameData* _gameData,
 			Cursor* _cursor,
-			TimerManager* _timerManager,
 			ActorMovementSystem* _actorMovementSystem,
 			CollisionSystem* _collisionSystem,
 			ControllableActorSystem* _controllableActorSystem,
@@ -33,17 +32,15 @@ namespace sage
 				_controllableActorSystem,
 				_actorMovementSystem,
 				_collisionSystem,
-				_navigationGridSystem,
-				_timerManager);
+				_navigationGridSystem);
 		playerStateMachine = std::make_unique<PlayerStateController>(
 				_registry,
 				_cursor,
 				_controllableActorSystem,
 				_actorMovementSystem,
 				_collisionSystem,
-				_navigationGridSystem,
-				_timerManager);
+				_navigationGridSystem);
 
-		gameSystem = std::make_unique<GameStateSystem>(_registry, _gameData, _timerManager);
+		gameSystem = std::make_unique<GameStateSystem>(_registry, _gameData);
 	}
 }//sage

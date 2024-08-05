@@ -5,7 +5,6 @@
 #pragma once
 
 #include "entt/entt.hpp"
-#include "TimerManager.hpp"
 
 #include "components/states/GameStates.hpp"
 #include "systems/state_systems/StateMachine.hpp"
@@ -16,7 +15,6 @@ namespace sage
 	class GameWaveSystem : public StateMachine<GameWaveSystem, StateGameWaveattack>
 	{
 		GameData* gameData;
-		TimerManager* timerManager;
 		void initWave();
 		void OnTimerEnd();
 		entt::delegate<void()> callback;
@@ -24,8 +22,7 @@ namespace sage
 		GameWaveSystem(
 				entt::registry* _registry,
 				GameData* _gameData,
-				entt::entity _gameEntity, 
-				TimerManager* _timerManager);
+				entt::entity _gameEntity);
 		void Update() override;
 		void Draw3D() override;
 		void OnStateEnter(entt::entity entity) override;
