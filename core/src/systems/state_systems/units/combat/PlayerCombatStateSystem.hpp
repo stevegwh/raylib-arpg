@@ -6,7 +6,7 @@
 
 #include "components/CombatableActor.hpp"
 #include "components/states/PlayerStates.hpp"
-#include "systems/state_systems/StateMachineSystem.hpp"
+#include "systems/state_systems/StateMachine.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "TimerManager.hpp"
