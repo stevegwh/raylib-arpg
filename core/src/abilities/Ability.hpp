@@ -47,6 +47,8 @@ namespace sage
 		virtual void Draw3D(entt::entity self);
 		virtual void Init(entt::entity self);
         virtual ~Ability() = default;
+		Ability(const Ability&) = delete;
+		Ability& operator=(const Ability&) = delete;
         Ability(entt::registry* _registry, CollisionSystem* _collisionSystem, TimerManager* _timerManager);
 	};
 }

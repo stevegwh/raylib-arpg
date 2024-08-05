@@ -17,6 +17,8 @@
 #include "components/CombatableActor.hpp"
 #include "components/states/EnemyStates.hpp"
 #include "components/states/PlayerStates.hpp"
+#include "abilities/WavemobAutoAttack.hpp"
+#include "abilities/PlayerAutoAttack.hpp"
 
 #include "raymath.h"
 #include <slib.hpp>
@@ -85,6 +87,7 @@ namespace sage
 			entt::sink sink{ combatable.onHit };
 			sink.connect<&WaveMobCombatStateSystem::OnHit>(game->stateSystems->unitSystems->waveMobCombatLogicSubSystem);
 		}
+		registry->emplace<WavemobAutoAttack>(id, registry, game->collisionSystem.get(), game->timerManager.get());
 		
 		auto& healthbar = registry->emplace<HealthBar>(id);
 		// ---
@@ -228,6 +231,7 @@ namespace sage
 			entt::sink sink{ game->cursor->onFloorClick };
 			sink.connect<&CombatableActor::AttackCancelled>(combatable);
 		}
+		registry->emplace<PlayerAutoAttack>(id, registry, game->collisionSystem.get(), game->timerManager.get());
 		// ---
 
 		Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);

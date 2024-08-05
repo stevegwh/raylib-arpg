@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "abilities/PlayerAutoAttack.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/states/PlayerStates.hpp"
 #include "systems/state_systems/StateMachineSystem.hpp"
@@ -21,7 +20,6 @@ namespace sage
     class PlayerCombatStateSystem : public StateMachineSystem<PlayerCombatStateSystem, StatePlayerCombat>
     {
         ControllableActorSystem* controllableActorSystem;
-        std::unique_ptr<PlayerAutoAttack> autoAttackAbility;
 		
         void startCombat(entt::entity self);
         [[nodiscard]] bool checkInCombat(entt::entity self);
@@ -36,8 +34,8 @@ namespace sage
         void OnHit(AttackData attackData);
         void Enable();
         void Disable();
-        void OnStateEnter(entt::entity entity) override;
-        void OnStateExit(entt::entity entity) override;
+        void OnStateEnter(entt::entity self) override;
+        void OnStateExit(entt::entity self) override;
 
         PlayerCombatStateSystem(entt::registry* _registry, ControllableActorSystem* _controllableActorSystem,
                                 CollisionSystem* _collisionSystem, TimerManager* _timerManager);

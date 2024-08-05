@@ -7,12 +7,16 @@
 #include "components/Animation.hpp"
 #include "components/HealthBar.hpp"
 #include "components/sgTransform.hpp"
+#include "abilities/PlayerAutoAttack.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
 
 namespace sage
 {
+
+    // TODO: Does not account for an enemy being out of range of the player when auto attacking
+
     void PlayerCombatStateSystem::Update()
     {
         auto view = registry->view<CombatableActor, StatePlayerCombat>();
@@ -23,7 +27,8 @@ namespace sage
             if (!checkInCombat(entity))
                 continue;
 
-            autoAttackAbility->Update(entity);
+            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
+            autoAttackAbility.Update(entity);
         }
     }
 
@@ -68,17 +73,18 @@ namespace sage
         playerCombatable.target = entt::null;
     }
 
-    void PlayerCombatStateSystem::onAttackCancel(entt::entity entity)
+    void PlayerCombatStateSystem::onAttackCancel(entt::entity self)
     {
-        auto& playerCombatable = registry->get<CombatableActor>(entity);
+        auto& playerCombatable = registry->get<CombatableActor>(self);
         playerCombatable.target = entt::null;
-        auto& playerTrans = registry->get<sgTransform>(entity);
+        auto& playerTrans = registry->get<sgTransform>(self);
         {
             entt::sink sink{playerTrans.onFinishMovement};
             sink.disconnect<&PlayerCombatStateSystem::startCombat>(this);
         }
-        controllableActorSystem->CancelMovement(entity);
-        autoAttackAbility->Cancel();
+        controllableActorSystem->CancelMovement(self);
+        auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
+        autoAttackAbility.Cancel();
     }
 
     void PlayerCombatStateSystem::OnHit(AttackData attackData)
@@ -198,21 +204,22 @@ namespace sage
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK); // TODO: Change to "combat move" animation
-        autoAttackAbility->Init(self);
+        auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
+        autoAttackAbility.Init(self);
     }
 
     void PlayerCombatStateSystem::OnStateExit(entt::entity self)
     {
         controllableActorSystem->CancelMovement(self);
-        autoAttackAbility->Cancel();
+        auto& autoAttackAbility = registry->get<PlayerAutoAttack>(self);
+        autoAttackAbility.Cancel();
     }
 
     PlayerCombatStateSystem::PlayerCombatStateSystem(entt::registry* _registry,
                                                      ControllableActorSystem* _controllableActorSystem,
                                                      CollisionSystem* _collisionSystem, 
                                                      TimerManager* _timerManager)
-        : StateMachineSystem(_registry), controllableActorSystem(_controllableActorSystem),
-        autoAttackAbility(std::make_unique<PlayerAutoAttack>(registry, _collisionSystem, _timerManager))
+        : StateMachineSystem(_registry), controllableActorSystem(_controllableActorSystem)
     {
     }
 } // namespace sage
