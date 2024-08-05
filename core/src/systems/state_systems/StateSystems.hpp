@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
-#include "units/UnitStateSystems.hpp"
 #include "game/GameStateSystem.hpp"
 #include "PlayerStateMachine.hpp"
+#include "WavemobStateMachine.hpp"
 
 namespace sage
 {
@@ -13,7 +13,7 @@ namespace sage
 
 	public:
 		// Systems
-		std::unique_ptr<UnitStateSystems> unitSystems;
+		std::unique_ptr<WavemobStateController> wavemobStatemachine;
 		std::unique_ptr<GameStateSystem> gameSystem;
 		std::unique_ptr<PlayerStateController> playerStateMachine;
 		void Update();

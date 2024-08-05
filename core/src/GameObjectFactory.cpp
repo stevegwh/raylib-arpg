@@ -19,6 +19,7 @@
 #include "components/states/PlayerStates.hpp"
 #include "abilities/WavemobAutoAttack.hpp"
 #include "abilities/PlayerAutoAttack.hpp"
+#include "systems/state_systems/WavemobStateMachine.hpp"
 
 #include "raymath.h"
 #include <slib.hpp>
@@ -83,11 +84,8 @@ namespace sage
 		// Combat
 		auto& combatable = registry->emplace<CombatableActor>(id);
 		combatable.actorType = CombatableActorType::WAVEMOB;
-		{
-			entt::sink sink{ combatable.onHit };
-			sink.connect<&WaveMobCombatStateSystem::OnHit>(game->stateSystems->unitSystems->waveMobCombatLogicSubSystem);
-		}
 		registry->emplace<WavemobAutoAttack>(id, registry, game->collisionSystem.get());
+
 		
 		auto& healthbar = registry->emplace<HealthBar>(id);
 		// ---
@@ -108,6 +106,7 @@ namespace sage
 		// ---
 
 		auto& worldObject = registry->emplace<WorldObject>(id);
+
 
 		registry->emplace<StateEnemyDefault>(id);
 		// Always set state last to ensure everything is initialised properly before.

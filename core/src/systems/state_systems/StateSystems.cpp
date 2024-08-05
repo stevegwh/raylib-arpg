@@ -4,14 +4,14 @@ namespace sage
 {
 	void StateSystems::Update()
 	{
-		unitSystems->Update();
+		wavemobStatemachine->Update();
 		gameSystem->Update();
 		playerStateMachine->Update();
 	}
 
 	void StateSystems::Draw3D()
 	{
-		unitSystems->Draw3D();
+		wavemobStatemachine->Draw3D();
 		playerStateMachine->Draw3D();
 		// gameSystem->Draw3D();
 	}
@@ -26,7 +26,7 @@ namespace sage
 			NavigationGridSystem* _navigationGridSystem)
 	{
 
-		unitSystems = std::make_unique<UnitStateSystems>(
+		wavemobStatemachine = std::make_unique<WavemobStateController>(
 				_registry,
 				_cursor,
 				_controllableActorSystem,
