@@ -8,11 +8,15 @@
 
 #include <entt/entt.hpp>
 
+#include <vector>
+
 namespace sage
 {
     template <typename Derived, typename DerivedStateComponent>
     class StateMachine : public BaseSystem
     {
+        std::vector<entt::entity> lockedEntities;
+
         template <typename Tuple, size_t... Indices>
         void RemoveStateComponents(entt::entity entity, std::index_sequence<Indices...>)
         {
@@ -35,9 +39,22 @@ namespace sage
         }
 
       protected:
+        void LockState(entt::entity entity)
+        {
+            lockedEntities.push_back(entity);
+        }
+        void UnlockState(entt::entity entity)
+        {
+            std::remove(lockedEntities.begin(), lockedEntities.end(), entity);
+        }
         template <typename NewStateComponent, typename StateComponentsTuple>
         void ChangeState(entt::entity entity)
         {
+            if (std::find(lockedEntities.begin(), lockedEntities.end(), entity) !=
+                lockedEntities.end())
+            {
+                return;
+            }
             // Check if the entity already has the NewStateComponent
             if (registry->any_of<NewStateComponent>(entity)) return;
 

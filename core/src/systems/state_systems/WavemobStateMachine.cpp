@@ -244,6 +244,7 @@ namespace sage
 
         void DyingState::OnStateEnter(entt::entity self)
         {
+            LockState(self); // Target is dying, do not change state
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = entt::null;
             combatable.dying = true;
@@ -261,6 +262,7 @@ namespace sage
 
         void DyingState::OnStateExit(entt::entity self)
         {
+            UnlockState(self);
         }
 
         DyingState::DyingState(
