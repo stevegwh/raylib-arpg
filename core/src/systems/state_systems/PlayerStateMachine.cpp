@@ -13,6 +13,8 @@
 #include "components/HealthBar.hpp"
 #include "components/sgTransform.hpp"
 
+#include <cassert>
+
 #include "raylib.h"
 
 namespace sage
@@ -70,7 +72,17 @@ namespace sage
 
         void ApproachingTargetState::onAttackCancel(entt::entity self)
         {
+            auto& playerCombatable = registry->get<CombatableActor>(self);
+            playerCombatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
+        }
+
+        void ApproachingTargetState::onEnemyClick(entt::entity self, entt::entity target)
+        {
+            ChangeState<StatePlayerDefault, PlayerStates>(self);
+            auto& combatable = registry->get<CombatableActor>(self);
+            combatable.target = target;
+            ChangeState<StatePlayerApproachingTarget, PlayerStates>(self);
         }
 
         void ApproachingTargetState::Update()
@@ -98,8 +110,13 @@ namespace sage
             sink.connect<&ApproachingTargetState::onTargetReached>(this);
 
             auto& combatable = registry->get<CombatableActor>(self);
-            entt::sink combatableSink{combatable.onAttackCancelled};
-            combatableSink.connect<&ApproachingTargetState::onAttackCancel>(this);
+            assert(combatable.target != entt::null);
+
+            entt::sink attackCancelledSink{combatable.onAttackCancelled};
+            attackCancelledSink.connect<&ApproachingTargetState::onAttackCancel>(this);
+
+            entt::sink enemyClickedSink{combatable.onEnemyClicked};
+            enemyClickedSink.disconnect<&ApproachingTargetState::onEnemyClick>(this);
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
@@ -117,9 +134,6 @@ namespace sage
         {
             std::cout << "Approaching target state left \n";
             controllableActorSystem->CancelMovement(self);
-
-            auto& playerCombatable = registry->get<CombatableActor>(self);
-            playerCombatable.target = entt::null;
 
             auto& playerTrans = registry->get<sgTransform>(self);
             entt::sink sink{playerTrans.onFinishMovement};
@@ -185,6 +199,7 @@ namespace sage
             autoAttackAbility.Init(entity);
 
             auto& combatable = registry->get<CombatableActor>(entity);
+            assert(combatable.target != entt::null);
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
             entt::sink sink{enemyCombatable.onDeath};
             sink.connect<&CombatableActor::TargetDeath>(combatable);

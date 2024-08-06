@@ -36,24 +36,16 @@ namespace sage
 
     void PlayerAutoAttack::Init(entt::entity self)
     {
-        if (active)
-        {
-            std::cout << "Trying to init but ability already active" << std::endl;
-            return;
-        }
-        active = true;
         cooldownTimer.Start();
     }
 
     void PlayerAutoAttack::Cancel()
     {
-        active = false;
         cooldownTimer.Stop();
     }
 
     void PlayerAutoAttack::Update(entt::entity self)
     {
-        if (!active) return;
         cooldownTimer.Update(GetFrameTime());
         if (cooldownTimer.HasFinished())
         {

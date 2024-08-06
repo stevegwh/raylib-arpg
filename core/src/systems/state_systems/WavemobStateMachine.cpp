@@ -30,8 +30,8 @@ namespace sage
 
         void DefaultState::OnHit(AttackData attackData)
         {
-            auto& c = registry->get<CombatableActor>(attackData.hit);
-            c.target = attackData.attacker;
+            auto& combatable = registry->get<CombatableActor>(attackData.hit);
+            combatable.target = attackData.attacker;
             // What if it already has a target?
             ChangeState<StateEnemyCombat, EnemyStates>(attackData.hit);
         }
@@ -43,8 +43,6 @@ namespace sage
             sink.connect<&DefaultState::OnHit>(this);
 
             Vector3 target = {52, 0, -10}; // TODO: Just a random location for now
-            auto& a = registry->get<MoveableActor>(entity);
-            auto& t = registry->get<sgTransform>(entity);
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
             actorMovementSystem->PathfindToLocation(entity, target);
@@ -88,20 +86,20 @@ namespace sage
         bool TargetOutOfRangeState::isTargetOutOfSight(entt::entity self)
         {
             auto& combatable = registry->get<CombatableActor>(self);
-            auto& actorTrans = registry->get<sgTransform>(self);
-            auto& target = registry->get<sgTransform>(combatable.target).position();
-            Vector3 direction = Vector3Subtract(target, actorTrans.position());
-            float distance = Vector3Distance(actorTrans.position(), target);
+            auto& trans = registry->get<sgTransform>(self);
+            const auto& target = registry->get<sgTransform>(combatable.target).position();
+            Vector3 direction = Vector3Subtract(target, trans.position());
+            float distance = Vector3Distance(trans.position(), target);
             Vector3 normDirection = Vector3Normalize(direction);
 
             auto& collideable = registry->get<Collideable>(self);
 
             Ray ray;
-            ray.position = actorTrans.position();
+            ray.position = trans.position();
             ray.direction = Vector3Scale(normDirection, distance);
             ray.position.y = 0.5f;
             ray.direction.y = 0.5f;
-            actorTrans.movementDirectionDebugLine = ray;
+            trans.movementDirectionDebugLine = ray;
             auto collisions = collisionSystem->GetCollisionsWithRay(
                 self, ray, collideable.collisionLayer);
 
@@ -110,7 +108,7 @@ namespace sage
             {
                 // Lost line of sight, out of combat
                 combatable.target = entt::null;
-                actorTrans.movementDirectionDebugLine = {};
+                trans.movementDirectionDebugLine = {};
                 return false;
             }
             return true;
@@ -125,23 +123,24 @@ namespace sage
         {
             auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
             autoAttackAbility.Cancel();
-            auto& animation = registry->get<Animation>(self);
-            auto& combatableActor = registry->get<CombatableActor>(self);
-            auto& target = registry->get<sgTransform>(combatableActor.target).position();
 
+            const auto& combatable = registry->get<CombatableActor>(self);
+            const auto& target = registry->get<sgTransform>(combatable.target).position();
+
+            auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
             actorMovementSystem->PathfindToLocation(self, target);
 
-            auto& playerTrans = registry->get<sgTransform>(self);
-            entt::sink sink{playerTrans.onFinishMovement};
+            auto& trans = registry->get<sgTransform>(self);
+            entt::sink sink{trans.onFinishMovement};
             sink.connect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 
         void TargetOutOfRangeState::OnStateExit(entt::entity self)
         {
-            auto& playerTrans = registry->get<sgTransform>(self);
-            entt::sink sink{playerTrans.onFinishMovement};
+            auto& trans = registry->get<sgTransform>(self);
+            entt::sink sink{trans.onFinishMovement};
             sink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 
