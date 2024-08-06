@@ -30,8 +30,8 @@ namespace sage
 
         void DefaultState::OnHit(AttackData attackData)
         {
-			auto& c = registry->get<CombatableActor>(attackData.hit);
-			c.target = attackData.attacker;
+            auto& c = registry->get<CombatableActor>(attackData.hit);
+            c.target = attackData.attacker;
             // What if it already has a target?
             ChangeState<StateEnemyCombat, EnemyStates>(attackData.hit);
         }
@@ -58,7 +58,8 @@ namespace sage
             actorMovementSystem->CancelMovement(entity);
         }
 
-        DefaultState::DefaultState(entt::registry* _registry, ActorMovementSystem* _actorMovementSystem)
+        DefaultState::DefaultState(
+            entt::registry* _registry, ActorMovementSystem* _actorMovementSystem)
             : StateMachine(_registry), actorMovementSystem(_actorMovementSystem)
         {
         }
@@ -101,9 +102,11 @@ namespace sage
             ray.position.y = 0.5f;
             ray.direction.y = 0.5f;
             actorTrans.movementDirectionDebugLine = ray;
-            auto collisions = collisionSystem->GetCollisionsWithRay(self, ray, collideable.collisionLayer);
+            auto collisions = collisionSystem->GetCollisionsWithRay(
+                self, ray, collideable.collisionLayer);
 
-            if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
+            if (!collisions.empty() &&
+                collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
             {
                 // Lost line of sight, out of combat
                 combatable.target = entt::null;
@@ -142,14 +145,16 @@ namespace sage
             sink.disconnect<&TargetOutOfRangeState::OnReachedTarget>(this);
         }
 
-        TargetOutOfRangeState::TargetOutOfRangeState(entt::registry* _registry,
-                                                     ControllableActorSystem* _controllableActorSystem,
-                                                     ActorMovementSystem* _actorMovementSystem,
-                                                     CollisionSystem* _collisionSystem)
-            : StateMachine(_registry), controllableActorSystem(_controllableActorSystem),
-              actorMovementSystem(_actorMovementSystem), collisionSystem(_collisionSystem)
+        TargetOutOfRangeState::TargetOutOfRangeState(
+            entt::registry* _registry,
+            ControllableActorSystem* _controllableActorSystem,
+            ActorMovementSystem* _actorMovementSystem,
+            CollisionSystem* _collisionSystem)
+            : StateMachine(_registry),
+              controllableActorSystem(_controllableActorSystem),
+              actorMovementSystem(_actorMovementSystem),
+              collisionSystem(_collisionSystem)
         {
-			
         }
 
         // ----------------------------
@@ -170,8 +175,8 @@ namespace sage
                 auto target = registry->get<sgTransform>(combatable.target).position();
                 float distance = Vector3Distance(actorTrans.position(), target);
 
-                // TODO: Arbitrary number. Should probably use the navigation system to find the "next best square" from
-                // current position
+                // TODO: Arbitrary number. Should probably use the navigation system to
+                // find the "next best square" from current position
                 if (distance >= 8.0f)
                 {
                     ChangeState<StateEnemyTargetOutOfRange, EnemyStates>(entity);
@@ -226,42 +231,42 @@ namespace sage
                 }
             }
         }
-		
-		void DyingState::destroyEntity(entt::entity self)
-		{
-			auto& animation = registry->get<Animation>(self);
-			animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
-			{
-				entt::sink sink{animation.onAnimationEnd};
-				sink.disconnect<&DyingState::destroyEntity>(this);
-			}
-			registry->destroy(self);
-		}
-		
+
+        void DyingState::destroyEntity(entt::entity self)
+        {
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
+            {
+                entt::sink sink{animation.onAnimationEnd};
+                sink.disconnect<&DyingState::destroyEntity>(this);
+            }
+            registry->destroy(self);
+        }
+
         void DyingState::OnStateEnter(entt::entity self)
         {
-			auto& combatable = registry->get<CombatableActor>(self);
-			combatable.target = entt::null;
-			combatable.dying = true;
+            auto& combatable = registry->get<CombatableActor>(self);
+            combatable.target = entt::null;
+            combatable.dying = true;
 
-			auto& animation = registry->get<Animation>(self);
-			animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
-			{
-				entt::sink sink{animation.onAnimationEnd};
-				sink.connect<&DyingState::destroyEntity>(this);
-			}
-			auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
-			autoAttackAbility.Cancel();
-			actorMovementSystem->CancelMovement(self);
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
+            {
+                entt::sink sink{animation.onAnimationEnd};
+                sink.connect<&DyingState::destroyEntity>(this);
+            }
+            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
+            autoAttackAbility.Cancel();
+            actorMovementSystem->CancelMovement(self);
         }
-		
+
         void DyingState::OnStateExit(entt::entity self)
         {
-
         }
-		
-        DyingState::DyingState(entt::registry* _registry, ActorMovementSystem* _actorMovementSystem) : 
-		StateMachine(_registry), actorMovementSystem(_actorMovementSystem)
+
+        DyingState::DyingState(
+            entt::registry* _registry, ActorMovementSystem* _actorMovementSystem)
+            : StateMachine(_registry), actorMovementSystem(_actorMovementSystem)
         {
         }
 
@@ -285,22 +290,28 @@ namespace sage
         }
     }
 
-    WavemobStateController::WavemobStateController(entt::registry* _registry, Cursor* _cursor,
-                                                   ControllableActorSystem* _controllableActorSystem,
-                                                   ActorMovementSystem* _actorMovementSystem,
-                                                   CollisionSystem* _collisionSystem,
-                                                   NavigationGridSystem* _navigationGridSystem)
-        : registry(_registry), cursor(_cursor), controllableActorSystem(_controllableActorSystem)
+    WavemobStateController::WavemobStateController(
+        entt::registry* _registry,
+        Cursor* _cursor,
+        ControllableActorSystem* _controllableActorSystem,
+        ActorMovementSystem* _actorMovementSystem,
+        CollisionSystem* _collisionSystem,
+        NavigationGridSystem* _navigationGridSystem)
+        : registry(_registry),
+          cursor(_cursor),
+          controllableActorSystem(_controllableActorSystem)
     {
-        defaultState = std::make_unique<enemystates::DefaultState>(_registry, _actorMovementSystem);
+        defaultState =
+            std::make_unique<enemystates::DefaultState>(_registry, _actorMovementSystem);
         targetOutOfRangeState = std::make_unique<enemystates::TargetOutOfRangeState>(
             _registry, _controllableActorSystem, _actorMovementSystem, _collisionSystem);
         engagedInCombatState = std::make_unique<enemystates::CombatState>(_registry);
-		dyingState = std::make_unique<enemystates::DyingState>(_registry, _actorMovementSystem);
+        dyingState =
+            std::make_unique<enemystates::DyingState>(_registry, _actorMovementSystem);
 
         systems.push_back(defaultState.get());
         systems.push_back(targetOutOfRangeState.get());
         systems.push_back(engagedInCombatState.get());
-		systems.push_back(dyingState.get());
+        systems.push_back(dyingState.get());
     }
 } // namespace sage

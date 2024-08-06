@@ -2,5 +2,13 @@
 BasedOnStyle: Microsoft
 NamespaceIndentation: All
 PointerAlignment: Left
-
-...
+AlignAfterOpenBracket: AlwaysBreak
+BinPackArguments: false
+BinPackParameters: false
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ColumnLimit: 90
+SortIncludes: CaseInsensitive
+IncludeBlocks: Preserve

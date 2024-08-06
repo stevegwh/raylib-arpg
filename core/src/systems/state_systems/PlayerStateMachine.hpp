@@ -1,5 +1,6 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
+
 #include "components/states/PlayerStates.hpp"
 #include "systems/BaseSystem.hpp"
 #include "systems/state_systems/StateMachine.hpp"
@@ -22,6 +23,7 @@ namespace sage
         class DefaultState : public StateMachine<DefaultState, StatePlayerDefault>
         {
             ActorMovementSystem* actorMovementSystem;
+
           public:
             virtual ~DefaultState() = default;
             void Update() override;
@@ -29,10 +31,12 @@ namespace sage
             void OnEnemyClick(entt::entity self, entt::entity target);
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
-            DefaultState(entt::registry* registry, ActorMovementSystem* actorMovementSystem);
+            DefaultState(
+                entt::registry* registry, ActorMovementSystem* actorMovementSystem);
         };
 
-        class ApproachingTargetState : public StateMachine<ApproachingTargetState, StatePlayerApproachingTarget>
+        class ApproachingTargetState
+            : public StateMachine<ApproachingTargetState, StatePlayerApproachingTarget>
         {
             ControllableActorSystem* controllableActorSystem;
 
@@ -45,7 +49,9 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~ApproachingTargetState() = default;
-            ApproachingTargetState(entt::registry* registry, ControllableActorSystem* controllableActorSystem);
+            ApproachingTargetState(
+                entt::registry* registry,
+                ControllableActorSystem* controllableActorSystem);
         };
 
         class CombatState : public StateMachine<CombatState, StatePlayerCombat>
@@ -75,10 +81,13 @@ namespace sage
         std::unique_ptr<playerstates::ApproachingTargetState> approachingTargetState;
         std::unique_ptr<playerstates::CombatState> engagedInCombatState;
 
-        PlayerStateController(entt::registry* registry, Cursor* cursor,
-                              ControllableActorSystem* controllableActorSystem,
-                              ActorMovementSystem* actorMovementSystem, CollisionSystem* collisionSystem,
-                              NavigationGridSystem* navigationGridSystem);
+        PlayerStateController(
+            entt::registry* registry,
+            Cursor* cursor,
+            ControllableActorSystem* controllableActorSystem,
+            ActorMovementSystem* actorMovementSystem,
+            CollisionSystem* collisionSystem,
+            NavigationGridSystem* navigationGridSystem);
         void Update();
         void Draw3D();
     };
