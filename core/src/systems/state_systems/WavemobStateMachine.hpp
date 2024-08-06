@@ -22,6 +22,7 @@ namespace sage
         class DefaultState : public StateMachine<DefaultState, StateEnemyDefault>
         {
             ActorMovementSystem* actorMovementSystem;
+
           public:
             virtual ~DefaultState() = default;
             void Update() override;
@@ -45,10 +46,11 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~TargetOutOfRangeState() = default;
-            TargetOutOfRangeState(entt::registry* registry, 
-            ControllableActorSystem* controllableActorSystem,
-            ActorMovementSystem* actorMovementSystem,
-            CollisionSystem* collisionSystem);
+            TargetOutOfRangeState(
+                entt::registry* registry,
+                ControllableActorSystem* controllableActorSystem,
+                ActorMovementSystem* actorMovementSystem,
+                CollisionSystem* collisionSystem);
         };
 
         class CombatState : public StateMachine<CombatState, StateEnemyCombat>
@@ -65,8 +67,9 @@ namespace sage
 
         class DyingState : public StateMachine<DyingState, StateEnemyDying>
         {
-			ActorMovementSystem* actorMovementSystem;
-			void destroyEntity(entt::entity self);
+            ActorMovementSystem* actorMovementSystem;
+            void destroyEntity(entt::entity self);
+
           public:
             virtual ~DyingState() = default;
             void Update() override;
@@ -88,12 +91,15 @@ namespace sage
         std::unique_ptr<enemystates::DefaultState> defaultState;
         std::unique_ptr<enemystates::TargetOutOfRangeState> targetOutOfRangeState;
         std::unique_ptr<enemystates::CombatState> engagedInCombatState;
-		std::unique_ptr<enemystates::DyingState> dyingState;
+        std::unique_ptr<enemystates::DyingState> dyingState;
 
-        WavemobStateController(entt::registry* registry, Cursor* cursor,
-                              ControllableActorSystem* controllableActorSystem,
-                              ActorMovementSystem* actorMovementSystem, CollisionSystem* collisionSystem,
-                              NavigationGridSystem* navigationGridSystem);
+        WavemobStateController(
+            entt::registry* registry,
+            Cursor* cursor,
+            ControllableActorSystem* controllableActorSystem,
+            ActorMovementSystem* actorMovementSystem,
+            CollisionSystem* collisionSystem,
+            NavigationGridSystem* navigationGridSystem);
         void Update();
         void Draw3D();
     };
