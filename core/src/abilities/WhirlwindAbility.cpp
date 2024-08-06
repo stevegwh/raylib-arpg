@@ -3,16 +3,21 @@
 //
 
 #include "WhirlwindAbility.hpp"
+
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
+
 #include "raylib.h"
+
+static constexpr float COOLDOWN = 3.0f;
+static constexpr float WINDUP = 0.65f;
 
 namespace sage
 {
     void WhirlwindAbility::Init(entt::entity self)
     {
-        if (cooldownTimer() > 0)
+        if (GetRemainingCooldownTime() > 0)
         {
             std::cout << "Waiting for cooldown \n";
             return;
@@ -23,7 +28,7 @@ namespace sage
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
 
-        timer.Start();
+        cooldownTimer.Start();
         windupTimer.Start();
     }
 
@@ -36,14 +41,17 @@ namespace sage
 
         for (auto& entity : view)
         {
-            if (entity == self)
-                continue;
-            // if (std::find(hitUnits.begin(), hitUnits.end(), entity) != hitUnits.end()) continue;
+            if (entity == self) continue;
+            // if (std::find(hitUnits.begin(), hitUnits.end(), entity) != hitUnits.end())
+            // continue;
 
             const auto& targetTransform = registry->get<sgTransform>(entity);
             const auto& targetCol = registry->get<Collideable>(entity);
 
-            if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, actorTransform.position(), whirlwindRadius))
+            if (CheckCollisionBoxSphere(
+                    targetCol.worldBoundingBox,
+                    actorTransform.position(),
+                    whirlwindRadius))
             {
                 // hitUnits.push_back(entity);
                 const auto& combatable = registry->get<CombatableActor>(entity);
@@ -59,10 +67,8 @@ namespace sage
 
     void WhirlwindAbility::Update(entt::entity self)
     {
-
-        timer.Update(GetFrameTime());
-        if (!active)
-            return;
+        cooldownTimer.Update(GetFrameTime());
+        if (!active) return;
         windupTimer.Update(GetFrameTime());
         if (windupTimer.HasFinished())
         {
@@ -71,13 +77,11 @@ namespace sage
         }
     }
 
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, _collisionSystem)
+    WhirlwindAbility::WhirlwindAbility(
+        entt::registry* _registry, CollisionSystem* _collisionSystem)
+        : Ability(_registry, COOLDOWN, _collisionSystem)
     {
-        m_windupLimit = 0.65f;
-        m_cooldownLimit = 3.0f;
-        timer.maxTime = m_cooldownLimit;
-        windupTimer.maxTime = m_windupLimit;
+        windupTimer.SetMaxTime(WINDUP);
 
         attackData.damage = 25.0f;
     }

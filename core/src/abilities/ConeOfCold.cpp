@@ -3,25 +3,23 @@
 //
 
 #include "ConeOfCold.hpp"
-#include "raylib.h"
-#include "components/sgTransform.hpp"
-#include "components/CombatableActor.hpp"
 #include "components/Animation.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/sgTransform.hpp"
+#include "raylib.h"
 
 namespace sage
 {
-	void ConeOfCold::Execute(entt::entity actor)
-	{
+    void ConeOfCold::Execute(entt::entity actor)
+    {
+    }
 
-	}
+    void ConeOfCold::Update(entt::entity actor)
+    {
+    }
 
-	void ConeOfCold::Update(entt::entity actor)
-	{
-		
-	}
-
-	ConeOfCold::ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem) :
-			Ability(_registry, _collisionSystem)
-	{
-	}
-}
+    ConeOfCold::ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem)
+        : Ability(_registry, 0, _collisionSystem)
+    {
+    }
+} // namespace sage
