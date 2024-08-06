@@ -32,7 +32,7 @@ namespace sage
         }
         float GetRemainingCooldownTime() const
         {
-            return cooldownTimer.RemainingTime();
+            return cooldownTimer.GetRemainingTime();
         }
         float GetCooldownDuration() const
         {
@@ -40,7 +40,7 @@ namespace sage
         }
         bool CooldownReady() const
         {
-            return cooldownTimer.RemainingTime() <= 0;
+            return cooldownTimer.GetRemainingTime() <= 0;
         }
         virtual void Execute(entt::entity self) = 0;
         virtual void Update(entt::entity self);
