@@ -18,7 +18,12 @@ class Timer
         return maxTime;
     }
 
-    float RemainingTime() const
+    bool IsRunning() const
+    {
+        return active;
+    }
+
+    float GetRemainingTime() const
     {
         return remainingTime;
     }
@@ -59,6 +64,7 @@ class Timer
     void Update(float dt)
     {
         if (!active) return;
+        if (finished) finished = false; // Reset finished flag when active
         remainingTime -= dt;
         if (remainingTime <= 0)
         {

@@ -4,6 +4,7 @@
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 
+#include <iostream>
 #include <raymath.h>
 
 static constexpr float COOLDOWN = 1.0f;
@@ -13,7 +14,12 @@ namespace sage
     void PlayerAutoAttack::Execute(entt::entity self)
     {
         auto& c = registry->get<CombatableActor>(self);
-        if (c.target == entt::null) return;
+        assert(c.target != entt::null);
+        if (c.target == entt::null)
+        {
+            std::cout << "Target lost" << std::endl;
+            return;
+        }
 
         auto& t = registry->get<sgTransform>(self);
         // TODO: Check if target is present
@@ -47,6 +53,8 @@ namespace sage
     void PlayerAutoAttack::Update(entt::entity self)
     {
         cooldownTimer.Update(GetFrameTime());
+        // std::cout << "Autoattack timer: " << cooldownTimer.GetRemainingTime()
+        //           << std::endl;
         if (cooldownTimer.HasFinished())
         {
             Execute(self);

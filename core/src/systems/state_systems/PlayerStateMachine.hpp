@@ -60,6 +60,7 @@ namespace sage
             void onTargetDeath(entt::entity self, entt::entity target);
             void onAttackCancel(entt::entity self);
             bool checkInCombat(entt::entity entity);
+            void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
             void Update() override;

@@ -73,6 +73,7 @@ namespace sage
         void ApproachingTargetState::onAttackCancel(entt::entity self)
         {
             auto& playerCombatable = registry->get<CombatableActor>(self);
+            std::cout << "Attack cancelled called, entity nulled \n";
             playerCombatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
@@ -87,16 +88,16 @@ namespace sage
 
         void ApproachingTargetState::Update()
         {
-            auto view = registry->view<CombatableActor, StatePlayerApproachingTarget>();
-            for (const auto& entity : view)
-            {
-                auto& combatable = registry->get<CombatableActor>(entity);
-                if (combatable.target == entt::null)
-                {
-                    ChangeState<StatePlayerDefault, PlayerStates>(entity);
-                    continue;
-                }
-            }
+            // auto view = registry->view<CombatableActor,
+            // StatePlayerApproachingTarget>(); for (const auto& entity : view)
+            // {
+            //     auto& combatable = registry->get<CombatableActor>(entity);
+            //     if (combatable.target == entt::null)
+            //     {
+            //         ChangeState<StatePlayerDefault, PlayerStates>(entity);
+            //         continue;
+            //     }
+            // }
         }
 
         void ApproachingTargetState::OnStateEnter(entt::entity self)
@@ -155,6 +156,7 @@ namespace sage
         void CombatState::onTargetDeath(entt::entity self, entt::entity target)
         {
             auto& playerCombatable = registry->get<CombatableActor>(self);
+            std::cout << "Target death called, entity nulled \n";
             playerCombatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
@@ -162,6 +164,7 @@ namespace sage
         void CombatState::onAttackCancel(entt::entity self)
         {
             auto& playerCombatable = registry->get<CombatableActor>(self);
+            std::cout << "Attack cancelled called, entity nulled \n";
             playerCombatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
@@ -170,6 +173,14 @@ namespace sage
         {
             // Might do more here later
             return true;
+        }
+
+        void CombatState::onEnemyClick(entt::entity self, entt::entity target)
+        {
+            ChangeState<StatePlayerDefault, PlayerStates>(self);
+            auto& combatable = registry->get<CombatableActor>(self);
+            combatable.target = target;
+            ChangeState<StatePlayerApproachingTarget, PlayerStates>(self);
         }
 
         void CombatState::Update()
@@ -209,6 +220,9 @@ namespace sage
 
             entt::sink attackCancelSink{combatable.onAttackCancelled};
             attackCancelSink.connect<&CombatState::onAttackCancel>(this);
+
+            entt::sink enemyClickedSink{combatable.onEnemyClicked};
+            enemyClickedSink.connect<&CombatState::onEnemyClick>(this);
         }
 
         void CombatState::OnStateExit(entt::entity entity)
@@ -227,6 +241,9 @@ namespace sage
 
             entt::sink attackCancelSink{combatable.onAttackCancelled};
             attackCancelSink.disconnect<&CombatState::onAttackCancel>(this);
+
+            entt::sink enemyClickedSink{combatable.onEnemyClicked};
+            enemyClickedSink.disconnect<&CombatState::onEnemyClick>(this);
 
             auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
             autoAttackAbility.Cancel();
