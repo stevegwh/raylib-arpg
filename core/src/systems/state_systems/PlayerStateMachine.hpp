@@ -43,6 +43,7 @@ namespace sage
 
             void onAttackCancel(entt::entity self);
             void onTargetReached(entt::entity self);
+            void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
             void Update() override;
