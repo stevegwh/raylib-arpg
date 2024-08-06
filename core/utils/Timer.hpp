@@ -35,8 +35,7 @@ class Timer
 
     void Stop()
     {
-        active = false;
-        remainingTime = maxTime;
+        Reset();
     }
 
     void Reset()

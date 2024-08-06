@@ -116,7 +116,7 @@ namespace sage
             return true;
         }
 
-        void TargetOutOfRangeState::OnReachedTarget(entt::entity self)
+        void TargetOutOfRangeState::onTargetReached(entt::entity self)
         {
             ChangeState<StateEnemyCombat, EnemyStates>(self);
         }
@@ -135,14 +135,14 @@ namespace sage
 
             auto& playerTrans = registry->get<sgTransform>(self);
             entt::sink sink{playerTrans.onFinishMovement};
-            sink.connect<&TargetOutOfRangeState::OnReachedTarget>(this);
+            sink.connect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 
         void TargetOutOfRangeState::OnStateExit(entt::entity self)
         {
             auto& playerTrans = registry->get<sgTransform>(self);
             entt::sink sink{playerTrans.onFinishMovement};
-            sink.disconnect<&TargetOutOfRangeState::OnReachedTarget>(this);
+            sink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 
         TargetOutOfRangeState::TargetOutOfRangeState(

@@ -24,24 +24,27 @@ namespace sage
             ActorMovementSystem* actorMovementSystem;
 
           public:
-            virtual ~DefaultState() = default;
+            void OnHit(AttackData attackData);
             void Update() override;
             void Draw3D() override;
-            void OnHit(AttackData attackData);
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
-            DefaultState(entt::registry* registry, ActorMovementSystem* actorMovementSystem);
+            virtual ~DefaultState() = default;
+            DefaultState(
+                entt::registry* registry, ActorMovementSystem* actorMovementSystem);
         };
 
-        class TargetOutOfRangeState : public StateMachine<TargetOutOfRangeState, StateEnemyTargetOutOfRange>
+        class TargetOutOfRangeState
+            : public StateMachine<TargetOutOfRangeState, StateEnemyTargetOutOfRange>
         {
             ControllableActorSystem* controllableActorSystem;
             ActorMovementSystem* actorMovementSystem;
             CollisionSystem* collisionSystem;
 
-          public:
-            void OnReachedTarget(entt::entity self);
+            void onTargetReached(entt::entity self);
             bool isTargetOutOfSight(entt::entity self);
+
+          public:
             void Update() override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
@@ -55,13 +58,15 @@ namespace sage
 
         class CombatState : public StateMachine<CombatState, StateEnemyCombat>
         {
+          private:
+            void onTargetDeath(entt::entity self, entt::entity target);
+            bool checkInCombat(entt::entity self);
+
           public:
-            virtual ~CombatState() = default;
             void Update() override;
             void OnStateEnter(entt::entity self) override;
             void OnStateExit(entt::entity self) override;
-            void onTargetDeath(entt::entity self, entt::entity target);
-            bool checkInCombat(entt::entity self);
+            virtual ~CombatState() = default;
             CombatState(entt::registry* _registry);
         };
 
@@ -71,11 +76,12 @@ namespace sage
             void destroyEntity(entt::entity self);
 
           public:
-            virtual ~DyingState() = default;
             void Update() override;
             void OnStateEnter(entt::entity self) override;
             void OnStateExit(entt::entity self) override;
-            DyingState(entt::registry* _registry, ActorMovementSystem* _actorMovementSystem);
+            virtual ~DyingState() = default;
+            DyingState(
+                entt::registry* _registry, ActorMovementSystem* _actorMovementSystem);
         };
     } // namespace enemystates
 
