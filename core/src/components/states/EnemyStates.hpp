@@ -28,17 +28,15 @@ namespace sage
         ~StateEnemyTargetOutOfRange() override = default;
     };
 
-	class StateEnemyDying : public StateMachineComponent
+    class StateEnemyDying : public StateMachineComponent
     {
       public:
         ~StateEnemyDying() override = default;
     };
 
-	class StateEnemyDead : public StateMachineComponent
-    {
-      public:
-        ~StateEnemyDead() override = default;
-    };
-
-    using EnemyStates = std::tuple<StateEnemyDefault, StateEnemyCombat>;
+    using EnemyStates = std::tuple<
+        StateEnemyDefault,
+        StateEnemyCombat,
+        StateEnemyTargetOutOfRange,
+        StateEnemyDying>;
 } // namespace sage
