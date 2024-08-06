@@ -1,20 +1,21 @@
 #pragma once
 
+#include "GameStateMachine.hpp"
 #include "PlayerStateMachine.hpp"
 #include "WavemobStateMachine.hpp"
-#include "game/GameStateSystem.hpp"
+
 #include <memory>
 
 namespace sage
 {
-    class GameData;
+    class GameData; // forward declaration
     class StateSystems
     {
 
       public:
         // Systems
         std::unique_ptr<WavemobStateController> wavemobStatemachine;
-        std::unique_ptr<GameStateSystem> gameSystem;
+        std::unique_ptr<GameStateController> gameStateMachine;
         std::unique_ptr<PlayerStateController> playerStateMachine;
         void Update();
         void Draw3D();

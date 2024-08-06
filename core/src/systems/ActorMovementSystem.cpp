@@ -154,9 +154,9 @@ namespace sage
                 Vector3Distance(moveableActor.path.front(), actorTrans.position());
 
             //			// TODO: Works when I check if "back" is occupied, but not when I
-            //check if "front" is occupied. Why?
+            // check if "front" is occupied. Why?
             //			// Checks whether the next destination is occupied, and if it is,
-            //then recalculate the path.
+            // then recalculate the path.
             if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
                     moveableActor.path.front(), actorCollideable.worldBoundingBox) ||
                 !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
@@ -267,25 +267,26 @@ namespace sage
 //			ray.direction = { 0, -1, 0 };
 //			debugRays.push_back(ray);
 //			auto collisions = collisionSystem->GetMeshCollisionsWithRay(entity, ray,
-//CollisionLayer::NAVIGATION); 			if (!collisions.empty())
+// CollisionLayer::NAVIGATION); 			if (!collisions.empty())
 //			{
 //				//auto hitentt = collisions.at(0).collidedEntityId;
 //				//if (registry->any_of<Renderable>(hitentt))
 //				//{
 //				//	auto& name =
-//registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
+// registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
 //				//	std::cout << "Hit with object: " << name << std::endl;
 //				//}
 //				//else
 //				//{
 //				//	auto text = TextFormat("Likely hit floor, with entity ID: %d",
-//collisions.at(0).collidedEntityId);
+// collisions.at(0).collidedEntityId);
 //				//	std::cout << text << std::endl;
 //				//}
 //
 //
 //				//auto newPos = Vector3Subtract(actorCollideable.localBoundingBox.max,
-//collisions.at(0).rlCollision.point); 				newY = collisions.at(0).rlCollision.point.y;
+// collisions.at(0).rlCollision.point); 				newY =
+// collisions.at(0).rlCollision.point.y;
 //				//debugCollisions.push_back(collisions.at(0).rlCollision);
 //
 //			}

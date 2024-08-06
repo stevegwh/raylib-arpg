@@ -1,11 +1,13 @@
 #include "StateSystems.hpp"
 
+#include "GameData.hpp"
+
 namespace sage
 {
     void StateSystems::Update()
     {
         wavemobStatemachine->Update();
-        gameSystem->Update();
+        gameStateMachine->Update();
         playerStateMachine->Update();
     }
 
@@ -13,7 +15,7 @@ namespace sage
     {
         wavemobStatemachine->Draw3D();
         playerStateMachine->Draw3D();
-        // gameSystem->Draw3D();
+        // gameStateMachine->Draw3D();
     }
 
     StateSystems::StateSystems(
@@ -41,6 +43,6 @@ namespace sage
             _collisionSystem,
             _navigationGridSystem);
 
-        gameSystem = std::make_unique<GameStateSystem>(_registry, _gameData);
+        gameStateMachine = std::make_unique<GameStateController>(_registry, _gameData);
     }
 } // namespace sage
