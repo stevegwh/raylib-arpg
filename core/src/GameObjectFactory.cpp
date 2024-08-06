@@ -18,7 +18,7 @@
 #include "components/states/EnemyStates.hpp"
 #include "components/states/PlayerStates.hpp"
 #include "components/WorldObject.hpp"
-#include "systems/state_systems/WavemobStateMachine.hpp"
+#include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"
 #include <slib.hpp>

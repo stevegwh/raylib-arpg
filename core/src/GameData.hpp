@@ -15,7 +15,7 @@
 #include "systems/HealthBarSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/RenderSystem.hpp"
-#include "systems/state_systems/StateSystems.hpp"
+#include "systems/states/StateSystems.hpp"
 #include "systems/WorldSystem.hpp"
 
 #include "Settings.hpp"
