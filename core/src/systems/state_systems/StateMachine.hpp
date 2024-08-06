@@ -8,6 +8,7 @@
 
 #include <entt/entt.hpp>
 
+#include <algorithm>
 #include <vector>
 
 namespace sage
@@ -45,7 +46,9 @@ namespace sage
         }
         void UnlockState(entt::entity entity)
         {
-            std::remove(lockedEntities.begin(), lockedEntities.end(), entity);
+            lockedEntities.erase(
+                std::remove(lockedEntities.begin(), lockedEntities.end(), entity),
+                lockedEntities.end());
         }
         template <typename NewStateComponent, typename StateComponentsTuple>
         void ChangeState(entt::entity entity)
