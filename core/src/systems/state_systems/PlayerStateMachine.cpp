@@ -40,7 +40,6 @@ namespace sage
 
         void DefaultState::OnStateEnter(entt::entity entity)
         {
-            std::cout << "Default state entered \n";
             auto& combatableActor = registry->get<CombatableActor>(entity);
             entt::sink sink{combatableActor.onEnemyClicked};
             sink.connect<&DefaultState::onEnemyClick>(this);
@@ -51,7 +50,6 @@ namespace sage
 
         void DefaultState::OnStateExit(entt::entity entity)
         {
-            std::cout << "Default state left \n";
             auto& combatableActor = registry->get<CombatableActor>(entity);
             entt::sink sink{combatableActor.onEnemyClicked};
             sink.disconnect<&DefaultState::onEnemyClick>(this);
@@ -73,7 +71,6 @@ namespace sage
         void ApproachingTargetState::onAttackCancel(entt::entity self)
         {
             auto& playerCombatable = registry->get<CombatableActor>(self);
-            std::cout << "Attack cancelled called, entity nulled \n";
             playerCombatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
@@ -88,21 +85,10 @@ namespace sage
 
         void ApproachingTargetState::Update()
         {
-            // auto view = registry->view<CombatableActor,
-            // StatePlayerApproachingTarget>(); for (const auto& entity : view)
-            // {
-            //     auto& combatable = registry->get<CombatableActor>(entity);
-            //     if (combatable.target == entt::null)
-            //     {
-            //         ChangeState<StatePlayerDefault, PlayerStates>(entity);
-            //         continue;
-            //     }
-            // }
         }
 
         void ApproachingTargetState::OnStateEnter(entt::entity self)
         {
-            std::cout << "Approaching target state entered \n";
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
@@ -133,7 +119,6 @@ namespace sage
 
         void ApproachingTargetState::OnStateExit(entt::entity self)
         {
-            std::cout << "Approaching target state left \n";
             controllableActorSystem->CancelMovement(self);
 
             auto& playerTrans = registry->get<sgTransform>(self);
@@ -155,17 +140,15 @@ namespace sage
 
         void CombatState::onTargetDeath(entt::entity self, entt::entity target)
         {
-            auto& playerCombatable = registry->get<CombatableActor>(self);
-            std::cout << "Target death called, entity nulled \n";
-            playerCombatable.target = entt::null;
+            auto& combatable = registry->get<CombatableActor>(self);
+            combatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
 
         void CombatState::onAttackCancel(entt::entity self)
         {
-            auto& playerCombatable = registry->get<CombatableActor>(self);
-            std::cout << "Attack cancelled called, entity nulled \n";
-            playerCombatable.target = entt::null;
+            auto& combatable = registry->get<CombatableActor>(self);
+            combatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
 
@@ -202,7 +185,6 @@ namespace sage
 
         void CombatState::OnStateEnter(entt::entity entity)
         {
-            std::cout << "Combat state entered \n";
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
@@ -227,7 +209,6 @@ namespace sage
 
         void CombatState::OnStateExit(entt::entity entity)
         {
-            std::cout << "Combat state left \n";
             auto& combatable = registry->get<CombatableActor>(entity);
             if (combatable.target != entt::null)
             {

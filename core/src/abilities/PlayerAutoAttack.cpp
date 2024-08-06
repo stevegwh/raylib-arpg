@@ -17,7 +17,6 @@ namespace sage
         assert(c.target != entt::null);
         if (c.target == entt::null)
         {
-            std::cout << "Target lost" << std::endl;
             return;
         }
 

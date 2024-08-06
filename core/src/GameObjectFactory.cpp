@@ -170,7 +170,7 @@ namespace sage
         auto modelPath = "resources/models/gltf/hero2.glb";
 
         auto& transform = registry->emplace<sgTransform>(id);
-        GridSquare actorIdx;
+        GridSquare actorIdx{};
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height =
             game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)

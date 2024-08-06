@@ -9,16 +9,18 @@
 
 namespace sage
 {
-	class StateGameDefault : public StateMachineComponent
-	{
-	public:
-		~StateGameDefault() override = default;
-	};
 
-	class StateGameWaveattack : public StateMachineComponent
-	{
-	public:
-		~StateGameWaveattack() override = default;
-	};
-	using GameStates = std::tuple<StateGameDefault, StateGameWaveattack>;
-} // sage
+    class StateGameDefault : public StateMachineComponent
+    {
+      public:
+        ~StateGameDefault() override = default;
+    };
+
+    class StateGameWave : public StateMachineComponent
+    {
+      public:
+        ~StateGameWave() override = default;
+    };
+
+    using GameStates = std::tuple<StateGameDefault, StateGameWave>;
+} // namespace sage
