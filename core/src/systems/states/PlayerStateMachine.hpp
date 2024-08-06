@@ -3,7 +3,7 @@
 
 #include "components/states/PlayerStates.hpp"
 #include "systems/BaseSystem.hpp"
-#include "systems/state_systems/StateMachine.hpp"
+#include "systems/states/StateMachine.hpp"
 
 #include <entt/entt.hpp>
 #include <memory>

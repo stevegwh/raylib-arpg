@@ -5,7 +5,7 @@
 #pragma once
 
 #include "components/states/GameStates.hpp"
-#include "systems/state_systems/StateMachine.hpp"
+#include "systems/states/StateMachine.hpp"
 #include <Timer.hpp>
 
 #include <entt/entt.hpp>
@@ -17,7 +17,7 @@ namespace sage
 {
     class GameData;
     class BaseSystem;
-    
+
     namespace gamestates
     {
         class DefaultState : public StateMachine<DefaultState, StateGameDefault>

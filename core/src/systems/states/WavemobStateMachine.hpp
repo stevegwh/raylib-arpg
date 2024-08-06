@@ -2,7 +2,7 @@
 #pragma once
 #include "components/states/EnemyStates.hpp"
 #include "systems/BaseSystem.hpp"
-#include "systems/state_systems/StateMachine.hpp"
+#include "systems/states/StateMachine.hpp"
 
 #include <entt/entt.hpp>
 #include <memory>
