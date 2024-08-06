@@ -24,13 +24,14 @@ namespace sage
         {
             ActorMovementSystem* actorMovementSystem;
 
+            void onEnemyClick(entt::entity self, entt::entity target);
+
           public:
-            virtual ~DefaultState() = default;
             void Update() override;
             void Draw3D() override;
-            void OnEnemyClick(entt::entity self, entt::entity target);
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
+            virtual ~DefaultState() = default;
             DefaultState(
                 entt::registry* registry, ActorMovementSystem* actorMovementSystem);
         };
@@ -40,11 +41,10 @@ namespace sage
         {
             ControllableActorSystem* controllableActorSystem;
 
-          public:
-            void OnEnemyClick(entt::entity self, entt::entity target);
-            void OnReachedTarget(entt::entity self);
             void onAttackCancel(entt::entity self);
+            void onTargetReached(entt::entity self);
 
+          public:
             void Update() override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
@@ -56,14 +56,16 @@ namespace sage
 
         class CombatState : public StateMachine<CombatState, StatePlayerCombat>
         {
-          public:
-            virtual ~CombatState() = default;
-            void Update() override;
-            void OnStateEnter(entt::entity entity) override;
-            void OnStateExit(entt::entity entity) override;
             void onTargetDeath(entt::entity self, entt::entity target);
             void onAttackCancel(entt::entity self);
             bool checkInCombat(entt::entity entity);
+
+          public:
+            void Update() override;
+            void OnStateEnter(entt::entity entity) override;
+            void OnStateExit(entt::entity entity) override;
+            virtual ~CombatState() = default;
+
             CombatState(entt::registry* registry);
         };
     } // namespace playerstates
