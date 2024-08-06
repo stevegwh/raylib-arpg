@@ -6,13 +6,14 @@
 
 #include <raymath.h>
 
+static constexpr float COOLDOWN = 1.0f;
+
 namespace sage
 {
     void PlayerAutoAttack::Execute(entt::entity self)
     {
         auto& c = registry->get<CombatableActor>(self);
-        if (c.target == entt::null)
-            return;
+        if (c.target == entt::null) return;
 
         auto& t = registry->get<sgTransform>(self);
         // TODO: Check if target is present
@@ -41,33 +42,31 @@ namespace sage
             return;
         }
         active = true;
-        timer.Start();
+        cooldownTimer.Start();
     }
 
     void PlayerAutoAttack::Cancel()
     {
         active = false;
-        timer.Stop();
+        cooldownTimer.Stop();
     }
 
     void PlayerAutoAttack::Update(entt::entity self)
     {
-        if (!active)
-            return;
-        timer.Update(GetFrameTime());
-        if (timer.HasFinished())
+        if (!active) return;
+        cooldownTimer.Update(GetFrameTime());
+        if (cooldownTimer.HasFinished())
         {
             Execute(self);
-            timer.Restart();
+            cooldownTimer.Restart();
         }
     }
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, _collisionSystem)
+    PlayerAutoAttack::PlayerAutoAttack(
+        entt::registry* _registry, CollisionSystem* _collisionSystem)
+        : Ability(_registry, COOLDOWN, _collisionSystem)
     {
         attackData.element = AttackElement::PHYSICAL;
         attackData.damage = 10;
-        m_cooldownLimit = 1.0f;
-        timer.maxTime = m_cooldownLimit;
     }
 } // namespace sage

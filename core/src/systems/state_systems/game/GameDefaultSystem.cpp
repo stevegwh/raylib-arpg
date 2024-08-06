@@ -10,43 +10,42 @@
 
 #include "raylib.h"
 
-
 namespace sage
 {
 
-	void GameDefaultSystem::OnTimerEnd()
-	{
-		ChangeState<StateGameWaveattack, GameStates>(gameEntity);
-	}
-	
-	void GameDefaultSystem::Update()
-	{
-		timer.Update(GetFrameTime());
-		if (timer.HasFinished())
-		{
-			OnTimerEnd();
-		}
-	}
-	
-	void GameDefaultSystem::Draw3D()
-	{
+    void GameDefaultSystem::OnTimerEnd()
+    {
+        ChangeState<StateGameWaveattack, GameStates>(gameEntity);
+    }
 
-	}
-	
-	void GameDefaultSystem::OnStateEnter(entt::entity entity)
-	{
-		
-    	timer.Start();
-	}
-	
-	void GameDefaultSystem::OnStateExit(entt::entity entity)
-	{
-		timer.Stop();
-	}
+    void GameDefaultSystem::Update()
+    {
+        timer.Update(GetFrameTime());
+        if (timer.HasFinished())
+        {
+            OnTimerEnd();
+        }
+    }
 
-	GameDefaultSystem::GameDefaultSystem(entt::registry* _registry, entt::entity _gameEntity) :
-			StateMachine(_registry), gameEntity(_gameEntity)
-	{
-		timer.maxTime = 5.0f;
-	}
-} // sage
+    void GameDefaultSystem::Draw3D()
+    {
+    }
+
+    void GameDefaultSystem::OnStateEnter(entt::entity entity)
+    {
+
+        timer.Start();
+    }
+
+    void GameDefaultSystem::OnStateExit(entt::entity entity)
+    {
+        timer.Stop();
+    }
+
+    GameDefaultSystem::GameDefaultSystem(
+        entt::registry* _registry, entt::entity _gameEntity)
+        : StateMachine(_registry), gameEntity(_gameEntity)
+    {
+        timer.SetMaxTime(5.0f);
+    }
+} // namespace sage

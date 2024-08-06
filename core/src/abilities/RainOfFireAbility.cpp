@@ -3,16 +3,22 @@
 //
 
 #include "RainOfFireAbility.hpp"
+
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
+
 #include "raylib.h"
+
+static constexpr float COOLDOWN = 3.0f;
+static constexpr float WINDUP = 0.75f;
+static constexpr float DAMAGE = 25.0f;
 
 namespace sage
 {
     void RainOfFireAbility::Init(entt::entity self)
     {
-        if (cooldownTimer() > 0)
+        if (GetRemainingCooldownTime() > 0)
         {
             std::cout << "Waiting for cooldown \n";
             return;
@@ -43,11 +49,13 @@ namespace sage
 
         for (auto& entity : view)
         {
-            if (entity == self)
-                continue;
+            if (entity == self) continue;
             const auto& targetCol = registry->get<Collideable>(entity);
 
-            if (CheckCollisionBoxSphere(targetCol.worldBoundingBox, cursor->collision().point, whirlwindRadius))
+            if (CheckCollisionBoxSphere(
+                    targetCol.worldBoundingBox,
+                    cursor->collision().point,
+                    whirlwindRadius))
             {
                 // hitUnits.push_back(entity);
                 const auto& combatable = registry->get<CombatableActor>(entity);
@@ -65,7 +73,7 @@ namespace sage
     {
         std::cout << "Rain of fire ability used \n";
 
-        timer.Start();
+        cooldownTimer.Start();
         windupTimer.Start();
 
         active = true;
@@ -88,9 +96,9 @@ namespace sage
 
     void RainOfFireAbility::Update(entt::entity self)
     {
-        timer.Update(GetFrameTime());
+        cooldownTimer.Update(GetFrameTime());
 
-		if (vfx->active)
+        if (vfx->active)
         {
             vfx->Update(GetFrameTime());
         }
@@ -112,19 +120,25 @@ namespace sage
         }
     }
 
-    RainOfFireAbility::RainOfFireAbility(entt::registry* _registry, Camera* _camera, Cursor* _cursor,
-                                         CollisionSystem* _collisionSystem, NavigationGridSystem* _navigationGridSystem,
-                                         ControllableActorSystem* _controllableActorSystem)
-        : Ability(_registry, _collisionSystem), cursor(_cursor), controllableActorSystem(_controllableActorSystem)
+    RainOfFireAbility::RainOfFireAbility(
+        entt::registry* _registry,
+        Camera* _camera,
+        Cursor* _cursor,
+        CollisionSystem* _collisionSystem,
+        NavigationGridSystem* _navigationGridSystem,
+        ControllableActorSystem* _controllableActorSystem)
+        : Ability(_registry, COOLDOWN, _collisionSystem),
+          cursor(_cursor),
+          controllableActorSystem(_controllableActorSystem)
     {
-        m_windupLimit = 0.75f;
-        m_cooldownLimit = 3.0f;
-        timer.maxTime = m_cooldownLimit;
-        windupTimer.maxTime = m_windupLimit;
-        attackData.damage = 25.0f;
+        windupTimer.SetMaxTime(WINDUP);
+        attackData.damage = DAMAGE;
         attackData.element = AttackElement::FIRE;
         spellCursor = std::make_unique<TextureTerrainOverlay>(
-            registry, _navigationGridSystem, "resources/textures/cursor/rainoffire_cursor.png", Color{255, 215, 0, 255},
+            registry,
+            _navigationGridSystem,
+            "resources/textures/cursor/rainoffire_cursor.png",
+            Color{255, 215, 0, 255},
             "resources/shaders/glsl330/bloom.fs");
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
     }

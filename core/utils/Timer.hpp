@@ -5,9 +5,18 @@ class Timer
     bool active = false;
     bool finished = false;
     float remainingTime{};
-    
-public:
     float maxTime{};
+
+  public:
+    void SetMaxTime(float _maxTime)
+    {
+        maxTime = _maxTime;
+    }
+
+    float GetMaxTime() const
+    {
+        return maxTime;
+    }
 
     float RemainingTime() const
     {
@@ -50,8 +59,7 @@ public:
 
     void Update(float dt)
     {
-        if (!active)
-            return;
+        if (!active) return;
         remainingTime -= dt;
         if (remainingTime <= 0)
         {
