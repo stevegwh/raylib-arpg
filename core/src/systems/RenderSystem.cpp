@@ -10,10 +10,6 @@
 
 namespace sage
 {
-    RenderSystem::~RenderSystem()
-    {
-    }
-
     void RenderSystem::Update()
     {
     }
@@ -32,6 +28,10 @@ namespace sage
                 {t.scale(), t.scale(), t.scale()},
                 r.hint);
         });
+    }
+
+    RenderSystem::~RenderSystem()
+    {
     }
 
     RenderSystem::RenderSystem(entt::registry* _registry) : BaseSystem(_registry)

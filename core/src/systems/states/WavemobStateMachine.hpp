@@ -85,8 +85,8 @@ namespace sage
         std::unique_ptr<enemystates::CombatState> engagedInCombatState;
         std::unique_ptr<enemystates::DyingState> dyingState;
 
-        WavemobStateController(entt::registry* registry, GameData* _gameData);
         void Update();
         void Draw3D();
+        WavemobStateController(entt::registry* registry, GameData* _gameData);
     };
 } // namespace sage

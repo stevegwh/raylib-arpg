@@ -34,6 +34,7 @@ namespace sage::editor
         Vector2 screenSize{};
         EditorSettings* editorSettings;
         Settings* settings;
+
         void onWindowResize(Vector2 newScreenSize);
         static void drawDebugCollisionText(Cursor* cursor);
 
@@ -41,7 +42,10 @@ namespace sage::editor
         bool focused = false;
         entt::sigh<void()> saveButtonPressed;
         entt::sigh<void()> onFileOpened;
+
         void OpenFileDialog();
+        void GuiFocused();
+        void GuiNotFocused();
         void Update();
         void Draw(const std::string& mode, Cursor* cursor);
         EditorGui(
@@ -49,8 +53,6 @@ namespace sage::editor
             Settings* _settings,
             UserInput* _userInput,
             Camera* camera);
-        void GuiFocused();
-        void GuiNotFocused();
     };
 } // namespace sage::editor
 // editor

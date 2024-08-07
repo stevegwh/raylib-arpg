@@ -61,7 +61,7 @@ namespace sage
     void AbilitySystem::onActorChanged()
     {
         controlledActor = gameData->controllableActorSystem->GetControlledActor();
-        // Change abilities based on the new actor
+        // TODO: Change abilities based on the new actor
     }
 
     void AbilitySystem::ChangeAbility(int abilitySlot, int newAbilityIndex)
@@ -95,6 +95,7 @@ namespace sage
     AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
+        onActorChanged();
         {
             entt::sink sink{gameData->userInput->keyOnePressed};
             sink.connect<&AbilitySystem::abilityOnePressed>(this);
@@ -111,7 +112,7 @@ namespace sage
             entt::sink sink{gameData->userInput->keyFourPressed};
             sink.connect<&AbilitySystem::abilityFourPressed>(this);
         }
-        onActorChanged();
+
         {
             entt::sink sink{gameData->controllableActorSystem->onControlledActorChange};
             sink.connect<&AbilitySystem::onActorChanged>(this);

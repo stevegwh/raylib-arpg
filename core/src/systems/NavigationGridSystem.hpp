@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseSystem.hpp"
+
 #include "components/NavigationGridSquare.hpp"
 #include <PriorityQueue.hpp>
 
@@ -50,9 +51,6 @@ namespace sage
         int slices{};
         std::string mapPath;
 
-        //---------------------------------------------------------
-        explicit NavigationGridSystem(
-            entt::registry* _registry, CollisionSystem* _collisionSystem);
         //---------------------------------------------------------
         void Init(int _slices, float _spacing, const std::string& _mapPath);
         //---------------------------------------------------------
@@ -171,7 +169,9 @@ namespace sage
         [[nodiscard]] bool CompareSingleSquareOccupant(
             entt::entity entity, const BoundingBox& bb) const;
         //---------------------------------------------------------
-
         void DrawDebug() const;
+        //---------------------------------------------------------
+        explicit NavigationGridSystem(
+            entt::registry* _registry, CollisionSystem* _collisionSystem);
     };
 } // namespace sage

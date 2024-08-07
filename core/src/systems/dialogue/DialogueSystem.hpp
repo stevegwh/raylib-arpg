@@ -30,11 +30,11 @@ namespace sage
         void endConversation(entt::entity actor);
 
       public:
-        explicit DialogueSystem(entt::registry* registry, GameData* _gameData);
         entt::sigh<void()> onConversationStart;
         entt::sigh<void()> onConversationEnd;
 
         void Update();
         void Draw2D();
+        explicit DialogueSystem(entt::registry* registry, GameData* _gameData);
     };
 } // namespace sage
