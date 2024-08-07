@@ -19,7 +19,7 @@ namespace sage
     }
 
     ConeOfCold::ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, 0, _collisionSystem)
+        : Ability(_registry, {}, _collisionSystem)
     {
     }
 } // namespace sage

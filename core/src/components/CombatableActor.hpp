@@ -25,10 +25,10 @@ namespace sage
 
     struct AttackData
     {
-        entt::entity attacker;
-        entt::entity hit = entt::null;
-        int damage = 0;
-        AttackElement element = AttackElement::PHYSICAL;
+        const entt::entity attacker;
+        const entt::entity hit;
+        const int damage;
+        const AttackElement element = AttackElement::PHYSICAL;
     };
 
     struct CombatData

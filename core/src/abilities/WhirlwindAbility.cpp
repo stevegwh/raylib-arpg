@@ -8,13 +8,22 @@
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 
+#include "AbilityFunctions.hpp"
+
 #include "raylib.h"
 
 static constexpr float COOLDOWN = 3.0f;
+static constexpr int DAMAGE = 25;
 static constexpr float WINDUP = 0.65f;
 
 namespace sage
 {
+    static constexpr AbilityData _abilityData{
+        .element = AttackElement::PHYSICAL,
+        .cooldownDuration = COOLDOWN,
+        .baseDamage = DAMAGE,
+        .range = 5};
+
     void WhirlwindAbility::Init(entt::entity self)
     {
         if (GetRemainingCooldownTime() > 0)
@@ -35,33 +44,8 @@ namespace sage
     void WhirlwindAbility::Execute(entt::entity self)
     {
         auto& actorTransform = registry->get<sgTransform>(self);
-        const auto& actorCol = registry->get<Collideable>(self);
-
-        auto view = registry->view<CombatableActor>();
-
-        for (auto& entity : view)
-        {
-            if (entity == self) continue;
-            // if (std::find(hitUnits.begin(), hitUnits.end(), entity) != hitUnits.end())
-            // continue;
-
-            const auto& targetTransform = registry->get<sgTransform>(entity);
-            const auto& targetCol = registry->get<Collideable>(entity);
-
-            if (CheckCollisionBoxSphere(
-                    targetCol.worldBoundingBox,
-                    actorTransform.position(),
-                    whirlwindRadius))
-            {
-                // hitUnits.push_back(entity);
-                const auto& combatable = registry->get<CombatableActor>(entity);
-                AttackData _attackData = attackData;
-                _attackData.hit = entity;
-                _attackData.attacker = self;
-                combatable.onHit.publish(_attackData);
-                std::cout << "Hit unit \n";
-            }
-        }
+        Hit360AroundPoint(
+            registry, self, abilityData, actorTransform.position(), whirlwindRadius);
         active = false;
     }
 
@@ -79,10 +63,12 @@ namespace sage
 
     WhirlwindAbility::WhirlwindAbility(
         entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, COOLDOWN, _collisionSystem)
+        : Ability(_registry, _abilityData, _collisionSystem)
     {
         windupTimer.SetMaxTime(WINDUP);
-
-        attackData.damage = 25.0f;
+        abilityData.element = AttackElement::PHYSICAL;
+        abilityData.baseDamage = DAMAGE;
+        abilityData.cooldownDuration = COOLDOWN;
+        abilityData.range = 5;
     }
 } // namespace sage

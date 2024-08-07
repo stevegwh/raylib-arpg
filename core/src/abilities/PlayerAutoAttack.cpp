@@ -8,9 +8,16 @@
 #include <raymath.h>
 
 static constexpr float COOLDOWN = 1.0f;
+static constexpr int DAMAGE = 10;
 
 namespace sage
 {
+    static constexpr AbilityData _abilityData{
+        .element = AttackElement::PHYSICAL,
+        .cooldownDuration = COOLDOWN,
+        .baseDamage = DAMAGE,
+        .range = 5};
+
     void PlayerAutoAttack::Execute(entt::entity self)
     {
         auto& c = registry->get<CombatableActor>(self);
@@ -21,7 +28,6 @@ namespace sage
         }
 
         auto& t = registry->get<sgTransform>(self);
-        // TODO: Check if target is present
         auto& enemyPos = registry->get<sgTransform>(c.target).position();
         Vector3 direction = Vector3Subtract(enemyPos, t.position());
         float angle = atan2f(direction.x, direction.z) * RAD2DEG;
@@ -32,9 +38,11 @@ namespace sage
         if (registry->any_of<CombatableActor>(c.target))
         {
             auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-            AttackData attack = attackData;
-            attack.attacker = self;
-            attack.hit = c.target;
+            AttackData attack{
+                .attacker = self,
+                .hit = c.target,
+                .damage = abilityData.baseDamage,
+                .element = abilityData.element};
             enemyCombatable.onHit.publish(attack);
         }
     }
@@ -52,8 +60,6 @@ namespace sage
     void PlayerAutoAttack::Update(entt::entity self)
     {
         cooldownTimer.Update(GetFrameTime());
-        // std::cout << "Autoattack timer: " << cooldownTimer.GetRemainingTime()
-        //           << std::endl;
         if (cooldownTimer.HasFinished())
         {
             Execute(self);
@@ -63,9 +69,7 @@ namespace sage
 
     PlayerAutoAttack::PlayerAutoAttack(
         entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, COOLDOWN, _collisionSystem)
+        : Ability(_registry, _abilityData, _collisionSystem)
     {
-        attackData.element = AttackElement::PHYSICAL;
-        attackData.damage = 10;
     }
 } // namespace sage
