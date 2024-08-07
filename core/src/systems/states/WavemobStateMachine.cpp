@@ -1,7 +1,9 @@
 #include "WavemobStateMachine.hpp"
 
 #include "abilities/WavemobAutoAttack.hpp"
+#include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
+#include "components/sgTransform.hpp"
 #include "GameData.hpp"
 
 #include "raylib.h"

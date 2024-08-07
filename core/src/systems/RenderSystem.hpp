@@ -4,19 +4,19 @@
 
 #pragma once
 
-#include "../components/Renderable.hpp"
 #include "BaseSystem.hpp"
+#include "components/Renderable.hpp"
 
 #include "entt/entt.hpp"
 
 namespace sage
 {
-	class RenderSystem : public BaseSystem
-	{
-	public:
-		explicit RenderSystem(entt::registry* _registry);
-		~RenderSystem();
-		void Update() override;
-		void Draw() const;
-	};
-}
+    class RenderSystem : public BaseSystem
+    {
+      public:
+        explicit RenderSystem(entt::registry* _registry);
+        ~RenderSystem();
+        void Update() override;
+        void Draw() const;
+    };
+} // namespace sage

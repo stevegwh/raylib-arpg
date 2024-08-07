@@ -4,6 +4,7 @@
 
 #include "ControllableActorSystem.hpp"
 
+#include "components/sgTransform.hpp"
 #include "GameData.hpp"
 
 namespace sage

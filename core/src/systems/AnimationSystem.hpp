@@ -4,19 +4,17 @@
 
 #pragma once
 
-#include "raylib.h"
-#include "entt/entt.hpp"
-
 #include "BaseSystem.hpp"
-#include "../components/Animation.hpp"
+
+#include "entt/entt.hpp"
 
 namespace sage
 {
-	class AnimationSystem : public BaseSystem
-	{
-	public:
-		void Update() const;
-		void Draw();
-		explicit AnimationSystem(entt::registry* _registry);
-	};
-} // sage
+    class AnimationSystem : public BaseSystem
+    {
+      public:
+        void Update() const;
+        void Draw();
+        explicit AnimationSystem(entt::registry* _registry);
+    };
+} // namespace sage
