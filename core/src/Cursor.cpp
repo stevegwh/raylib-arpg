@@ -6,11 +6,10 @@
 
 #include "GameData.hpp"
 
-#ifndef MSVC
+#ifndef FLT_MAX
 #define FLT_MAX                                                                          \
     340282346638528859811704183484516925440.0f // Maximum value of a float, from bit
                                                // pattern 01111111011111111111111111111111
-
 #endif
 
 namespace sage
@@ -226,6 +225,26 @@ namespace sage
         }
     }
 
+    void Cursor::OnControlledActorChange(entt::entity entity)
+    {
+        controlledActor = entity;
+    }
+
+    const CollisionInfo& Cursor::getMouseHitInfo() const
+    {
+        return m_mouseHitInfo;
+    }
+
+    const RayCollision& Cursor::terrainCollision() const
+    {
+        return m_terrainHitInfo.rlCollision;
+    }
+
+    const RayCollision& Cursor::collision() const
+    {
+        return m_mouseHitInfo.rlCollision;
+    }
+
     void Cursor::Update()
     {
         position = {.x = GetMousePosition().x, .y = GetMousePosition().y};
@@ -264,26 +283,6 @@ namespace sage
                  static_cast<float>(currentTex->height / 2)});
         }
         DrawTextureEx(*currentTex, pos, 0.0, 1.0f, WHITE);
-    }
-
-    void Cursor::OnControlledActorChange(entt::entity entity)
-    {
-        controlledActor = entity;
-    }
-
-    const CollisionInfo& Cursor::getMouseHitInfo() const
-    {
-        return m_mouseHitInfo;
-    }
-
-    const RayCollision& Cursor::terrainCollision() const
-    {
-        return m_terrainHitInfo.rlCollision;
-    }
-
-    const RayCollision& Cursor::collision() const
-    {
-        return m_mouseHitInfo.rlCollision;
     }
 
     Cursor::Cursor(entt::registry* _registry, GameData* _gameData)

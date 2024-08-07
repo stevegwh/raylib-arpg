@@ -174,15 +174,31 @@ namespace sage
         }
     }
 
+    Camera3D* Camera::getRaylibCam()
+    {
+        return &rlCamera;
+    }
+
+    void Camera::ScrollEnable()
+    {
+        scrollEnabled = true;
+    }
+
+    void Camera::ScrollDisable()
+    {
+        scrollEnabled = false;
+    }
+
+    void Camera::SetCamera(Vector3 _pos, Vector3 _target)
+    {
+        rlCamera.position = _pos;
+        rlCamera.target = _target;
+    }
+
     void Camera::Update()
     {
         handleInput();
         UpdateCameraPro(&rlCamera, {0, 0, 0}, {0, 0, 0}, 0);
-    }
-
-    Camera3D* Camera::getRaylibCam()
-    {
-        return &rlCamera;
     }
 
     Camera::Camera(UserInput* userInput) : rlCamera({0})
@@ -241,21 +257,5 @@ namespace sage
             entt::sink keyQUp{userInput->keyQUp};
             keyQUp.connect<&Camera::OnRotateRightKeyUp>(this);
         }
-    }
-
-    void Camera::ScrollEnable()
-    {
-        scrollEnabled = true;
-    }
-
-    void Camera::ScrollDisable()
-    {
-        scrollEnabled = false;
-    }
-
-    void Camera::SetCamera(Vector3 _pos, Vector3 _target)
-    {
-        rlCamera.position = _pos;
-        rlCamera.target = _target;
     }
 } // namespace sage
