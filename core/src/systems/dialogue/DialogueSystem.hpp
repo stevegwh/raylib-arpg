@@ -4,46 +4,37 @@
 
 #pragma once
 
-#include "systems/BaseSystem.hpp"
-#include "Cursor.hpp"
-#include "Camera.hpp"
-#include "components/Dialogue.hpp"
 #include "DialogueWindow.hpp"
-#include "systems/ControllableActorSystem.hpp"
+#include "systems/BaseSystem.hpp"
 
 #include "entt/entt.hpp"
 
 namespace sage
 {
-	class DialogueSystem : public BaseSystem
-	{
-		bool active = false;
-		entt::entity controlledActor;
-		entt::entity clickedNPC;
+    class GameData;
+    class DialogueSystem : public BaseSystem
+    {
+        GameData* gameData;
+        bool active = false;
+        entt::entity controlledActor;
+        entt::entity clickedNPC;
 
-		ControllableActorSystem* controllableActorSystem;
-		Cursor* cursor;
-		Camera* camera;
-		Vector3 oldCamPos;
-		Vector3 oldCamTarget;
-		std::unique_ptr<DialogueWindow> window;
+        Vector3 oldCamPos;
+        Vector3 oldCamTarget;
+        std::unique_ptr<DialogueWindow> window;
 
-		void NPCClicked(entt::entity _clickedNPC);
-		void changeControlledActor(entt::entity entity);
-		void cancelConversation(entt::entity entity);
-		void startConversation(entt::entity actor);
-		void endConversation(entt::entity actor);
+        void NPCClicked(entt::entity _clickedNPC);
+        void changeControlledActor(entt::entity entity);
+        void cancelConversation(entt::entity entity);
+        void startConversation(entt::entity actor);
+        void endConversation(entt::entity actor);
 
-	public:
-		explicit DialogueSystem(entt::registry* registry,
-		                        Cursor* _cursor,
-		                        Camera* camera,
-		                        Settings* _settings,
-		                        ControllableActorSystem* _actorMovementSystem);
-		entt::sigh<void()> onConversationStart;
-		entt::sigh<void()> onConversationEnd;
+      public:
+        explicit DialogueSystem(entt::registry* registry, GameData* _gameData);
+        entt::sigh<void()> onConversationStart;
+        entt::sigh<void()> onConversationEnd;
 
-		void Update();
-		void Draw2D();
-	};
-} // sage
+        void Update();
+        void Draw2D();
+    };
+} // namespace sage
