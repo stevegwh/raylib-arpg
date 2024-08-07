@@ -17,6 +17,7 @@ namespace sage
 {
     namespace gamestates
     {
+        // ----------------------------
         void DefaultState::OnTimerEnd()
         {
             ChangeState<StateGameWave, GameStates>(gameEntity);
@@ -52,15 +53,17 @@ namespace sage
             timer.SetMaxTime(5.0f);
         }
 
+        // ----------------------------
+
         void WaveState::initWave()
         {
-            auto enemy2 = GameObjectFactory::createEnemy(
+            GameObjectFactory::createEnemy(
                 registry, gameData, {52.0f, 0, 10.0f}, "Enemy");
-            auto enemy3 = GameObjectFactory::createEnemy(
+            GameObjectFactory::createEnemy(
                 registry, gameData, {52.0f, 0, 20.0f}, "Enemy");
-            auto enemy4 = GameObjectFactory::createEnemy(
+            GameObjectFactory::createEnemy(
                 registry, gameData, {52.0f, 0, 30.0f}, "Enemy");
-            auto enemy5 = GameObjectFactory::createEnemy(
+            GameObjectFactory::createEnemy(
                 registry, gameData, {52.0f, 0, 40.0f}, "Enemy");
         }
 
@@ -90,6 +93,8 @@ namespace sage
             // Preload model(s)
             ResourceManager::DynamicModelLoad("resources/models/gltf/goblin.glb");
         }
+
+        // ----------------------------
     } // namespace gamestates
 
     void GameStateController::Update()
@@ -101,8 +106,8 @@ namespace sage
     }
     GameStateController::GameStateController(
         entt::registry* _registry, GameData* _gameData)
+        : gameEntity(_registry->create())
     {
-        gameEntity = _registry->create();
         defaultState = std::make_unique<gamestates::DefaultState>(_registry, gameEntity);
         waveState =
             std::make_unique<gamestates::WaveState>(_registry, _gameData, gameEntity);

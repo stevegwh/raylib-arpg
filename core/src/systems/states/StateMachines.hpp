@@ -9,7 +9,7 @@
 namespace sage
 {
     class GameData; // forward declaration
-    class StateSystems
+    class StateMachines
     {
 
       public:
@@ -19,6 +19,6 @@ namespace sage
         std::unique_ptr<PlayerStateController> playerStateMachine;
         void Update();
         void Draw3D();
-        StateSystems(entt::registry* _registry, GameData* _gameData);
+        StateMachines(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

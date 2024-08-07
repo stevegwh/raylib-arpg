@@ -21,12 +21,7 @@ namespace sage
     {
         userInput = std::make_unique<UserInput>(_keyMapping, settings);
         camera = std::make_unique<Camera>(userInput.get());
-        cursor = std::make_unique<Cursor>(
-            registry,
-            collisionSystem.get(),
-            navigationGridSystem.get(),
-            camera.get(),
-            userInput.get());
+        cursor = std::make_unique<Cursor>(registry, this);
 
         controllableActorSystem = std::make_unique<ControllableActorSystem>(
             _registry,
@@ -44,14 +39,7 @@ namespace sage
 
         healthBarSystem = std::make_unique<HealthBarSystem>(_registry, camera.get());
 
-        stateSystems = std::make_unique<StateSystems>(
-            _registry,
-            this,
-            cursor.get(),
-            actorMovementSystem.get(),
-            collisionSystem.get(),
-            controllableActorSystem.get(),
-            navigationGridSystem.get());
+        stateSystems = std::make_unique<StateSystems>(_registry, this);
 
         abilitySystem = std::make_unique<AbilitySystem>(
             _registry,

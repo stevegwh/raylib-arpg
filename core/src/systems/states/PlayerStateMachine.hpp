@@ -1,29 +1,20 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
-
 #include "components/states/PlayerStates.hpp"
 #include "systems/BaseSystem.hpp"
 #include "systems/states/StateMachine.hpp"
-
 #include <entt/entt.hpp>
 #include <memory>
 #include <vector>
 
 namespace sage
 {
-    class ActorMovementSystem;
-    class Cursor;
-    class ControllableActorSystem;
-    class NavigationGridSystem;
-    class CollisionSystem;
-    struct AttackData;
+    class GameData;
 
     namespace playerstates
     {
         class DefaultState : public StateMachine<DefaultState, StatePlayerDefault>
         {
-            ActorMovementSystem* actorMovementSystem;
-
             void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
@@ -32,15 +23,13 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~DefaultState() = default;
-            DefaultState(
-                entt::registry* registry, ActorMovementSystem* actorMovementSystem);
+            DefaultState(entt::registry* _registry);
         };
 
         class ApproachingTargetState
             : public StateMachine<ApproachingTargetState, StatePlayerApproachingTarget>
         {
-            ControllableActorSystem* controllableActorSystem;
-
+            GameData* gameData;
             void onAttackCancel(entt::entity self);
             void onTargetReached(entt::entity self);
             void onEnemyClick(entt::entity self, entt::entity target);
@@ -50,13 +39,12 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~ApproachingTargetState() = default;
-            ApproachingTargetState(
-                entt::registry* registry,
-                ControllableActorSystem* controllableActorSystem);
+            ApproachingTargetState(entt::registry* _registry, GameData* gameData);
         };
 
         class CombatState : public StateMachine<CombatState, StatePlayerCombat>
         {
+            GameData* gameData;
             void onTargetDeath(entt::entity self, entt::entity target);
             void onAttackCancel(entt::entity self);
             bool checkInCombat(entt::entity entity);
@@ -67,17 +55,13 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~CombatState() = default;
-
-            CombatState(entt::registry* registry);
+            CombatState(entt::registry* _registry, GameData* gameData);
         };
     } // namespace playerstates
 
     class PlayerStateController
     {
       private:
-        entt::registry* registry;
-        Cursor* cursor;
-        ControllableActorSystem* controllableActorSystem;
         std::vector<BaseSystem*> systems;
 
       public:
@@ -85,13 +69,7 @@ namespace sage
         std::unique_ptr<playerstates::ApproachingTargetState> approachingTargetState;
         std::unique_ptr<playerstates::CombatState> engagedInCombatState;
 
-        PlayerStateController(
-            entt::registry* registry,
-            Cursor* cursor,
-            ControllableActorSystem* controllableActorSystem,
-            ActorMovementSystem* actorMovementSystem,
-            CollisionSystem* collisionSystem,
-            NavigationGridSystem* navigationGridSystem);
+        PlayerStateController(entt::registry* _registry, GameData* gameData);
         void Update();
         void Draw3D();
     };
