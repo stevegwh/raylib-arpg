@@ -43,13 +43,8 @@ namespace sage
         Execute(self);
     }
 
-    Ability::Ability(
-        entt::registry* _registry,
-        const AbilityData& _abilityData,
-        CollisionSystem* _collisionSystem)
-        : registry(_registry),
-          abilityData(_abilityData),
-          collisionSystem(_collisionSystem)
+    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData)
+        : registry(_registry), abilityData(_abilityData)
     {
         cooldownTimer.SetMaxTime(abilityData.cooldownDuration);
     }

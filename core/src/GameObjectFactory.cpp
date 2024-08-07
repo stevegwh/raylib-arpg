@@ -86,7 +86,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-        registry->emplace<WavemobAutoAttack>(id, registry, game->collisionSystem.get());
+        registry->emplace<WavemobAutoAttack>(id, registry);
 
         auto& healthbar = registry->emplace<HealthBar>(id);
         // ---
@@ -223,7 +223,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::PLAYER;
-        registry->emplace<PlayerAutoAttack>(id, registry, game->collisionSystem.get());
+        registry->emplace<PlayerAutoAttack>(id, registry);
         // Links the cursor's events to the combatable actor which passes on the entity id
         // to the system
         {
