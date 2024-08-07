@@ -4,6 +4,31 @@
 
 namespace sage
 {
+    void Ability::ResetCooldown()
+    {
+        cooldownTimer.Reset();
+    }
+
+    bool Ability::IsActive() const
+    {
+        return active;
+    }
+
+    float Ability::GetRemainingCooldownTime() const
+    {
+        return cooldownTimer.GetRemainingTime();
+    }
+
+    float Ability::GetCooldownDuration() const
+    {
+        return cooldownTimer.GetMaxTime();
+    }
+
+    bool Ability::CooldownReady() const
+    {
+        return cooldownTimer.GetRemainingTime() <= 0;
+    }
+
     void Ability::Update(entt::entity self)
     {
     }

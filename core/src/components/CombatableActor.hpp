@@ -27,8 +27,6 @@ namespace sage
     {
         entt::entity attacker;
         entt::entity hit = entt::null;
-        // TODO: Set the above variables in related functions (e.g., onHit) instead of
-        // passing entities separately
         int damage = 0;
         AttackElement element = AttackElement::PHYSICAL;
     };
