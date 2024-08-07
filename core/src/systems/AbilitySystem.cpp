@@ -19,7 +19,10 @@ namespace sage
                       << "\n";
             return;
         }
-        abilityMap[currentAbilities[0]]->Init(controlledActor);
+        abilityMap[currentAbilities[0]]->Init(
+            gameData->controllableActorSystem->GetControlledActor());
+        // TODO: Above does not work with "controlledactor" member, only with
+        // GetControlledActor()
     }
 
     void AbilitySystem::abilityTwoPressed()
