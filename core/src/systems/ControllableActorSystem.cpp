@@ -4,10 +4,7 @@
 
 #include "ControllableActorSystem.hpp"
 
-#include "ActorMovementSystem.hpp"
-#include "Cursor.hpp"
-#include "NavigationGridSystem.hpp"
-#include "UserInput.hpp"
+#include "GameData.hpp"
 
 namespace sage
 {
@@ -26,7 +23,7 @@ namespace sage
 
     bool ControllableActorSystem::ReachedDestination(entt::entity entity) const
     {
-        return actorMovementSystem->ReachedDestination(entity);
+        return gameData->actorMovementSystem->ReachedDestination(entity);
     }
 
     void ControllableActorSystem::onTargetUpdate(entt::entity target)
@@ -63,13 +60,13 @@ namespace sage
             sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
         }
 
-        actorMovementSystem->CancelMovement(entity);
+        gameData->actorMovementSystem->CancelMovement(entity);
     }
 
     void ControllableActorSystem::onEnemyClick(entt::entity clickedEntity)
     {
         // Flush any previous commands
-        actorMovementSystem->CancelMovement(controlledActorId);
+        gameData->actorMovementSystem->CancelMovement(controlledActorId);
         auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
         controlledActor.targetActor = clickedEntity;
         auto& targetTrans = registry->get<sgTransform>(clickedEntity);
@@ -93,12 +90,13 @@ namespace sage
 
     void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location)
     {
-        actorMovementSystem->PathfindToLocation(id, location);
+        gameData->actorMovementSystem->PathfindToLocation(id, location);
     }
 
     void ControllableActorSystem::MoveToLocation(entt::entity id)
     {
-        actorMovementSystem->PathfindToLocation(id, {cursor->collision().point});
+        gameData->actorMovementSystem->PathfindToLocation(
+            id, {gameData->cursor->collision().point});
     }
 
     void ControllableActorSystem::PatrolLocations(
@@ -110,7 +108,7 @@ namespace sage
     void ControllableActorSystem::onFloorClick(entt::entity entity)
     {
         CancelMovement(controlledActorId); // Flush any previous commands
-        PathfindToLocation(controlledActorId, cursor->collision().point);
+        PathfindToLocation(controlledActorId, gameData->cursor->collision().point);
     }
 
     void ControllableActorSystem::SetControlledActor(entt::entity id)
@@ -127,11 +125,11 @@ namespace sage
     void ControllableActorSystem::Enable()
     {
         {
-            entt::sink onClick{cursor->onFloorClick};
+            entt::sink onClick{gameData->cursor->onFloorClick};
             onClick.connect<&ControllableActorSystem::onFloorClick>(this);
         }
         {
-            entt::sink onClick{cursor->onEnemyClick};
+            entt::sink onClick{gameData->cursor->onEnemyClick};
             onClick.connect<&ControllableActorSystem::onEnemyClick>(this);
         }
     }
@@ -139,31 +137,24 @@ namespace sage
     void ControllableActorSystem::Disable()
     {
         {
-            entt::sink onClick{cursor->onFloorClick};
+            entt::sink onClick{gameData->cursor->onFloorClick};
             onClick.disconnect<&ControllableActorSystem::onFloorClick>(this);
         }
         {
-            entt::sink onClick{cursor->onEnemyClick};
+            entt::sink onClick{gameData->cursor->onEnemyClick};
             onClick.disconnect<&ControllableActorSystem::onEnemyClick>(this);
         }
     }
 
     ControllableActorSystem::ControllableActorSystem(
-        entt::registry* _registry,
-        Cursor* _cursor,
-        UserInput* _userInput,
-        NavigationGridSystem* _navigationGridSystem,
-        ActorMovementSystem* _transformSystem)
-        : BaseSystem(_registry),
-          cursor(_cursor),
-          userInput(_userInput),
-          navigationGridSystem(_navigationGridSystem),
-          actorMovementSystem(_transformSystem)
+        entt::registry* _registry, GameData* _gameData)
+        : BaseSystem(_registry), gameData(_gameData)
+
     {
         Enable();
         {
             entt::sink sink{onControlledActorChange};
-            sink.connect<&Cursor::OnControlledActorChange>(*cursor);
+            sink.connect<&Cursor::OnControlledActorChange>(gameData->cursor.get());
         }
     }
 } // namespace sage

@@ -11,6 +11,7 @@
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
+#include "components/Dialogue.hpp"
 #include "components/HealthBar.hpp"
 #include "components/MovableActor.hpp"
 #include "components/Renderable.hpp"

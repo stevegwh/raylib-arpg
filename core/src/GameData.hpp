@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include "Camera.hpp"
+#include "Cursor.hpp"
+#include "UserInput.hpp"
+
 // Systems
 #include "systems/AbilitySystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
@@ -23,7 +27,6 @@
 #include "entt/entt.hpp"
 
 #include <memory>
-#include <string>
 
 namespace sage
 {
@@ -43,7 +46,6 @@ namespace sage
         std::unique_ptr<CollisionSystem> collisionSystem;
         std::unique_ptr<NavigationGridSystem> navigationGridSystem;
         std::unique_ptr<ActorMovementSystem> actorMovementSystem;
-        std::unique_ptr<WorldSystem> worldSystem;
         std::unique_ptr<ControllableActorSystem> controllableActorSystem;
         std::unique_ptr<AnimationSystem> animationSystem;
         std::unique_ptr<DialogueSystem> dialogueSystem;

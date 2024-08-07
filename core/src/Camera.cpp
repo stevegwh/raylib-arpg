@@ -3,6 +3,8 @@
 //
 
 #include "Camera.hpp"
+
+#include "components/sgTransform.hpp"
 #include "UserInput.hpp"
 
 #include "raymath.h"

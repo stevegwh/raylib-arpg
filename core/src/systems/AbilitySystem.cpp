@@ -1,9 +1,10 @@
 #include "AbilitySystem.hpp"
+
+#include "GameData.hpp"
+
 #include "abilities/ConeOfCold.hpp"
 #include "abilities/RainOfFireAbility.hpp"
 #include "abilities/WhirlwindAbility.hpp"
-
-#include "ControllableActorSystem.hpp"
 
 namespace sage
 {
@@ -18,8 +19,7 @@ namespace sage
                       << "\n";
             return;
         }
-        abilityMap[currentAbilities[0]]->Init(
-            controllableActorSystem->GetControlledActor());
+        abilityMap[currentAbilities[0]]->Init(controlledActor);
     }
 
     void AbilitySystem::abilityTwoPressed()
@@ -57,7 +57,7 @@ namespace sage
 
     void AbilitySystem::onActorChanged()
     {
-        controlledActor = controllableActorSystem->GetControlledActor();
+        controlledActor = gameData->controllableActorSystem->GetControlledActor();
         // Change abilities based on the new actor
     }
 
@@ -72,7 +72,7 @@ namespace sage
     {
         for (auto& ability : abilityMap)
         {
-            ability->Update(controllableActorSystem->GetControlledActor());
+            ability->Update(gameData->controllableActorSystem->GetControlledActor());
         }
     }
 
@@ -85,59 +85,47 @@ namespace sage
     {
         for (auto& ability : abilityMap)
         {
-            ability->Draw3D(controllableActorSystem->GetControlledActor());
+            ability->Draw3D(gameData->controllableActorSystem->GetControlledActor());
         }
     }
 
-    AbilitySystem::AbilitySystem(
-        entt::registry* _registry,
-        Camera* _camera,
-        Cursor* _cursor,
-        UserInput* _userInput,
-        ActorMovementSystem* _actorMovementSystem,
-        CollisionSystem* _collisionSystem,
-        ControllableActorSystem* _controllableActorSystem,
-        NavigationGridSystem* _navigationGridSystem)
-        : registry(_registry),
-          cursor(_cursor),
-          userInput(_userInput),
-          actorMovementSystem(_actorMovementSystem),
-          collisionSystem(_collisionSystem),
-          controllableActorSystem(_controllableActorSystem)
+    AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)
+        : registry(_registry), gameData(_gameData)
     {
         {
-            entt::sink sink{userInput->keyOnePressed};
+            entt::sink sink{gameData->userInput->keyOnePressed};
             sink.connect<&AbilitySystem::abilityOnePressed>(this);
         }
         {
-            entt::sink sink{userInput->keyTwoPressed};
+            entt::sink sink{gameData->userInput->keyTwoPressed};
             sink.connect<&AbilitySystem::abilityTwoPressed>(this);
         }
         {
-            entt::sink sink{userInput->keyThreePressed};
+            entt::sink sink{gameData->userInput->keyThreePressed};
             sink.connect<&AbilitySystem::abilityThreePressed>(this);
         }
         {
-            entt::sink sink{userInput->keyFourPressed};
+            entt::sink sink{gameData->userInput->keyFourPressed};
             sink.connect<&AbilitySystem::abilityFourPressed>(this);
         }
         onActorChanged();
         {
-            entt::sink sink{_controllableActorSystem->onControlledActorChange};
+            entt::sink sink{gameData->controllableActorSystem->onControlledActorChange};
             sink.connect<&AbilitySystem::onActorChanged>(this);
         }
 
         currentAbilities.fill(-1);
+        abilityMap.push_back(std::make_unique<WhirlwindAbility>(
+            registry, gameData->collisionSystem.get()));
         abilityMap.push_back(
-            std::make_unique<WhirlwindAbility>(registry, collisionSystem));
-        abilityMap.push_back(std::make_unique<ConeOfCold>(registry, collisionSystem));
+            std::make_unique<ConeOfCold>(registry, gameData->collisionSystem.get()));
         abilityMap.push_back(std::make_unique<RainOfFireAbility>(
             registry,
-            _camera,
-            _cursor,
-            collisionSystem,
-            _navigationGridSystem,
-            controllableActorSystem));
+            gameData->camera.get(),
+            gameData->cursor.get(),
+            gameData->collisionSystem.get(),
+            gameData->navigationGridSystem.get(),
+            gameData->controllableActorSystem.get()));
         // TODO: These should be set by the player or another system
         ChangeAbility(0, 0);
         ChangeAbility(1, 1);
