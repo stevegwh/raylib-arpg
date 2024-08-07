@@ -6,7 +6,8 @@ namespace sage
 {
     struct WhirlwindAbility : public Ability
     {
-        Timer windupTimer{};
+        bool shouldCast = false;
+        Timer animationDelayTimer{};
         float whirlwindRadius = 15.0f;
         void Init(entt::entity self) override;
         void Execute(entt::entity self) override;

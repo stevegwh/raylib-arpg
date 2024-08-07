@@ -54,7 +54,7 @@ namespace sage
         vfx->InitSystem(cursor->collision().point);
         Hit360AroundPoint(
             registry, self, abilityData, cursor->collision().point, whirlwindRadius);
-        active = false;
+        shouldCast = false;
     }
 
     void RainOfFireAbility::Confirm(entt::entity self)
@@ -62,9 +62,10 @@ namespace sage
         // std::cout << "Rain of fire ability used \n";
 
         cooldownTimer.Start();
-        windupTimer.Start();
 
-        active = true;
+        animationDelayTimer.Start();
+        shouldCast = true;
+
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
         spellCursor->Enable(false);
@@ -94,15 +95,15 @@ namespace sage
         if (spellCursor->active())
         {
             spellCursor->Update(cursor->terrainCollision().point);
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !active)
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !shouldCast)
             {
                 Confirm(self);
             }
             return;
         }
 
-        windupTimer.Update(GetFrameTime());
-        if (windupTimer.HasFinished() && active)
+        animationDelayTimer.Update(GetFrameTime());
+        if (shouldCast && animationDelayTimer.HasFinished())
         {
             Execute(self);
         }
@@ -115,7 +116,7 @@ namespace sage
         NavigationGridSystem* _navigationGridSystem)
         : Ability(_registry, _abilityData), cursor(_cursor)
     {
-        windupTimer.SetMaxTime(WINDUP);
+        animationDelayTimer.SetMaxTime(WINDUP);
         spellCursor = std::make_unique<TextureTerrainOverlay>(
             registry,
             _navigationGridSystem,

@@ -23,7 +23,6 @@ namespace sage
         Timer cooldownTimer{};
         AbilityData abilityData;
         entt::registry* registry;
-        bool active = false;
 
       public:
         virtual void ResetCooldown();

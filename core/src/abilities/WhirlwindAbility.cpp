@@ -28,17 +28,16 @@ namespace sage
     {
         if (GetRemainingCooldownTime() > 0)
         {
-            // std::cout << "Waiting for cooldown \n";
             return;
         }
 
         // std::cout << "Whirlwind ability used \n";
-        active = true;
+        shouldCast = true;
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
 
         cooldownTimer.Start();
-        windupTimer.Start();
+        animationDelayTimer.Start();
     }
 
     void WhirlwindAbility::Execute(entt::entity self)
@@ -46,25 +45,24 @@ namespace sage
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(
             registry, self, abilityData, actorTransform.position(), whirlwindRadius);
-        active = false;
+        shouldCast = false;
     }
 
     void WhirlwindAbility::Update(entt::entity self)
     {
         cooldownTimer.Update(GetFrameTime());
-        if (!active) return;
-        windupTimer.Update(GetFrameTime());
-        if (windupTimer.HasFinished())
+        animationDelayTimer.Update(GetFrameTime());
+        if (shouldCast && animationDelayTimer.HasFinished())
         {
             Execute(self);
-            windupTimer.Reset();
+            animationDelayTimer.Reset();
         }
     }
 
     WhirlwindAbility::WhirlwindAbility(entt::registry* _registry)
         : Ability(_registry, _abilityData)
     {
-        windupTimer.SetMaxTime(WINDUP);
+        animationDelayTimer.SetMaxTime(WINDUP);
         abilityData.element = AttackElement::PHYSICAL;
         abilityData.baseDamage = DAMAGE;
         abilityData.cooldownDuration = COOLDOWN;

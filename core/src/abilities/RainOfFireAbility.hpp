@@ -15,7 +15,8 @@ namespace sage
 
     struct RainOfFireAbility : public Ability
     {
-        Timer windupTimer{};
+        bool shouldCast = false;
+        Timer animationDelayTimer{};
         std::unique_ptr<RainOfFireVFX> vfx;
         Cursor* cursor;
         std::unique_ptr<TextureTerrainOverlay> spellCursor;
