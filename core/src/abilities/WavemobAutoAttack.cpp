@@ -11,10 +11,10 @@ static constexpr int DAMAGE = 10;
 namespace sage
 {
     static constexpr AbilityData _abilityData{
-        .element = AttackElement::PHYSICAL,
         .cooldownDuration = COOLDOWN,
+        .range = 5,
         .baseDamage = DAMAGE,
-        .range = 5};
+        .element = AttackElement::PHYSICAL};
 
     void WavemobAutoAttack::Execute(entt::entity self)
     {

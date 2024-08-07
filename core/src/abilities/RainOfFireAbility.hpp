@@ -13,14 +13,18 @@ namespace sage
     class Cursor;
     class Camera;
 
+    enum class AbilityState;
+
     struct RainOfFireAbility : public Ability
     {
-        bool shouldCast = false;
+        AbilityState state;
         Timer animationDelayTimer{};
         std::unique_ptr<RainOfFireVFX> vfx;
         Cursor* cursor;
         std::unique_ptr<TextureTerrainOverlay> spellCursor;
         float whirlwindRadius = 50.0f;
+        void EnableCursor();
+        void DisableCursor();
         void Init(entt::entity self) override;
         void Execute(entt::entity self) override;
         void Draw3D(entt::entity self) override;
