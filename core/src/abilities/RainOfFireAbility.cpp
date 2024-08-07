@@ -20,33 +20,46 @@ static constexpr int DAMAGE = 25;
 
 namespace sage
 {
+    enum class AbilityState
+    {
+        IDLE,
+        CURSOR_SELECT,
+        AWAITING_EXECUTION
+    };
+
     static constexpr AbilityData _abilityData{
-        .element = AttackElement::FIRE,
         .cooldownDuration = COOLDOWN,
+        .range = 5,
         .baseDamage = DAMAGE,
-        .range = 5};
+        .element = AttackElement::FIRE};
+
+    void RainOfFireAbility::EnableCursor()
+    {
+        spellCursor->Init(cursor->terrainCollision().point);
+        spellCursor->Enable(true);
+        cursor->Disable();
+        cursor->Hide();
+    }
+
+    void RainOfFireAbility::DisableCursor()
+    {
+        cursor->Enable();
+        cursor->Show();
+        spellCursor->Enable(false);
+    }
 
     void RainOfFireAbility::Init(entt::entity self)
     {
-        if (GetRemainingCooldownTime() > 0)
+        if (state == AbilityState::CURSOR_SELECT)
         {
-            // std::cout << "Waiting for cooldown \n";
+            // Cancel cursor
+            DisableCursor();
+            state = AbilityState::IDLE;
             return;
         }
-        if (!spellCursor->active())
-        {
-            spellCursor->Init(cursor->terrainCollision().point);
-            spellCursor->Enable(true);
-            cursor->Disable();
-            cursor->Hide();
-            return;
-        }
-        else
-        {
-            cursor->Enable();
-            cursor->Show();
-            spellCursor->Enable(false); // Cancel move
-        }
+
+        EnableCursor();
+        state = AbilityState::CURSOR_SELECT;
     }
 
     void RainOfFireAbility::Execute(entt::entity self)
@@ -54,7 +67,7 @@ namespace sage
         vfx->InitSystem(cursor->collision().point);
         Hit360AroundPoint(
             registry, self, abilityData, cursor->collision().point, whirlwindRadius);
-        shouldCast = false;
+        state = AbilityState::IDLE;
     }
 
     void RainOfFireAbility::Confirm(entt::entity self)
@@ -64,13 +77,12 @@ namespace sage
         cooldownTimer.Start();
 
         animationDelayTimer.Start();
-        shouldCast = true;
+        state = AbilityState::AWAITING_EXECUTION;
 
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
-        spellCursor->Enable(false);
-        cursor->Enable();
-        cursor->Show();
+
+        DisableCursor();
     }
 
     void RainOfFireAbility::Draw3D(entt::entity self)
@@ -85,6 +97,7 @@ namespace sage
 
     void RainOfFireAbility::Update(entt::entity self)
     {
+
         cooldownTimer.Update(GetFrameTime());
 
         if (vfx->active)
@@ -92,10 +105,10 @@ namespace sage
             vfx->Update(GetFrameTime());
         }
 
-        if (spellCursor->active())
+        if (state == AbilityState::CURSOR_SELECT)
         {
             spellCursor->Update(cursor->terrainCollision().point);
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !shouldCast)
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
                 Confirm(self);
             }
@@ -103,7 +116,8 @@ namespace sage
         }
 
         animationDelayTimer.Update(GetFrameTime());
-        if (shouldCast && animationDelayTimer.HasFinished())
+        if (state == AbilityState::AWAITING_EXECUTION &&
+            animationDelayTimer.HasFinished())
         {
             Execute(self);
         }
@@ -114,7 +128,7 @@ namespace sage
         Camera* _camera,
         Cursor* _cursor,
         NavigationGridSystem* _navigationGridSystem)
-        : Ability(_registry, _abilityData), cursor(_cursor)
+        : Ability(_registry, _abilityData), cursor(_cursor), state(AbilityState::IDLE)
     {
         animationDelayTimer.SetMaxTime(WINDUP);
         spellCursor = std::make_unique<TextureTerrainOverlay>(
