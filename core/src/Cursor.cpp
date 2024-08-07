@@ -3,9 +3,8 @@
 //
 
 #include "Cursor.hpp"
-#include "UserInput.hpp"
-#include "components/ControllableActor.hpp"
-#include "components/Renderable.hpp"
+
+#include "GameData.hpp"
 
 #ifndef MSVC
 #define FLT_MAX                                                                          \
@@ -71,7 +70,7 @@ namespace sage
     bool Cursor::isValidMove() const
     {
         GridSquare clickedSquare{};
-        if (navigationGridSystem->WorldToGridSpace(
+        if (gameData->navigationGridSystem->WorldToGridSpace(
                 m_mouseHitInfo.rlCollision.point, clickedSquare))
         // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as
         // bounds.)
@@ -81,9 +80,9 @@ namespace sage
                 const auto& actor = registry->get<ControllableActor>(controlledActor);
                 GridSquare minRange{};
                 GridSquare maxRange{};
-                navigationGridSystem->GetPathfindRange(
+                gameData->navigationGridSystem->GetPathfindRange(
                     controlledActor, actor.pathfindingBounds, minRange, maxRange);
-                if (!navigationGridSystem->WorldToGridSpace(
+                if (!gameData->navigationGridSystem->WorldToGridSpace(
                         m_mouseHitInfo.rlCollision.point,
                         clickedSquare,
                         minRange,
@@ -98,7 +97,8 @@ namespace sage
         {
             return false;
         }
-        if (navigationGridSystem->GetGridSquare(clickedSquare.row, clickedSquare.col)
+        if (gameData->navigationGridSystem
+                ->GetGridSquare(clickedSquare.row, clickedSquare.col)
                 ->occupied)
         {
             return false;
@@ -165,8 +165,8 @@ namespace sage
         currentColor = defaultColor;
 
         // Get ray and test against objects
-        ray = GetMouseRay(GetMousePosition(), *sCamera->getRaylibCam());
-        auto collisions = collisionSystem->GetCollisionsWithRay(ray);
+        ray = GetMouseRay(GetMousePosition(), *gameData->camera->getRaylibCam());
+        auto collisions = gameData->collisionSystem->GetCollisionsWithRay(ray);
 
         if (collisions.empty())
         {
@@ -286,17 +286,8 @@ namespace sage
         return m_mouseHitInfo.rlCollision;
     }
 
-    Cursor::Cursor(
-        entt::registry* _registry,
-        CollisionSystem* _collisionSystem,
-        NavigationGridSystem* _navigationGridSystem,
-        Camera* _sCamera,
-        UserInput* _userInput)
-        : registry(_registry),
-          collisionSystem(_collisionSystem),
-          navigationGridSystem(_navigationGridSystem),
-          sCamera(_sCamera),
-          userInput(_userInput)
+    Cursor::Cursor(entt::registry* _registry, GameData* _gameData)
+        : registry(_registry), gameData(_gameData)
     {
         regulartex = LoadTexture("resources/textures/cursor/32/regular.png");
         talktex = LoadTexture("resources/textures/cursor/32/talk.png");

@@ -2,6 +2,7 @@
 
 #include "../utils/particle/RainOfFireVFX.hpp"
 #include "Ability.hpp"
+#include "Camera.hpp"
 #include "Cursor.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "TextureTerrainOverlay.hpp"

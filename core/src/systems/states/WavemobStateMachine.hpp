@@ -10,18 +10,14 @@
 
 namespace sage
 {
-    class ActorMovementSystem;
-    class Cursor;
-    class ControllableActorSystem;
-    class NavigationGridSystem;
-    class CollisionSystem;
+    class GameData;
     struct AttackData;
 
     namespace enemystates
     {
         class DefaultState : public StateMachine<DefaultState, StateEnemyDefault>
         {
-            ActorMovementSystem* actorMovementSystem;
+            GameData* gameData;
 
           public:
             void OnHit(AttackData attackData);
@@ -30,16 +26,13 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~DefaultState() = default;
-            DefaultState(
-                entt::registry* registry, ActorMovementSystem* actorMovementSystem);
+            DefaultState(entt::registry* registry, GameData* _gameData);
         };
 
         class TargetOutOfRangeState
             : public StateMachine<TargetOutOfRangeState, StateEnemyTargetOutOfRange>
         {
-            ControllableActorSystem* controllableActorSystem;
-            ActorMovementSystem* actorMovementSystem;
-            CollisionSystem* collisionSystem;
+            GameData* gameData;
 
             void onTargetReached(entt::entity self);
             bool isTargetOutOfSight(entt::entity self);
@@ -49,11 +42,7 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~TargetOutOfRangeState() = default;
-            TargetOutOfRangeState(
-                entt::registry* registry,
-                ControllableActorSystem* controllableActorSystem,
-                ActorMovementSystem* actorMovementSystem,
-                CollisionSystem* collisionSystem);
+            TargetOutOfRangeState(entt::registry* registry, GameData* _gameData);
         };
 
         class CombatState : public StateMachine<CombatState, StateEnemyCombat>
@@ -72,7 +61,7 @@ namespace sage
 
         class DyingState : public StateMachine<DyingState, StateEnemyDying>
         {
-            ActorMovementSystem* actorMovementSystem;
+            GameData* gameData;
             void destroyEntity(entt::entity self);
 
           public:
@@ -80,8 +69,7 @@ namespace sage
             void OnStateEnter(entt::entity self) override;
             void OnStateExit(entt::entity self) override;
             virtual ~DyingState() = default;
-            DyingState(
-                entt::registry* _registry, ActorMovementSystem* _actorMovementSystem);
+            DyingState(entt::registry* _registry, GameData* _gameData);
         };
     } // namespace enemystates
 
@@ -89,8 +77,6 @@ namespace sage
     {
       private:
         entt::registry* registry;
-        Cursor* cursor;
-        ControllableActorSystem* controllableActorSystem;
         std::vector<BaseSystem*> systems;
 
       public:
@@ -99,13 +85,7 @@ namespace sage
         std::unique_ptr<enemystates::CombatState> engagedInCombatState;
         std::unique_ptr<enemystates::DyingState> dyingState;
 
-        WavemobStateController(
-            entt::registry* registry,
-            Cursor* cursor,
-            ControllableActorSystem* controllableActorSystem,
-            ActorMovementSystem* actorMovementSystem,
-            CollisionSystem* collisionSystem,
-            NavigationGridSystem* navigationGridSystem);
+        WavemobStateController(entt::registry* registry, GameData* _gameData);
         void Update();
         void Draw3D();
     };

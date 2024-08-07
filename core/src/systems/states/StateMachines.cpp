@@ -1,25 +1,26 @@
-#include "StateSystems.hpp"
+#include "StateMachines.hpp"
 
 #include "GameData.hpp"
 
 namespace sage
 {
-    void StateSystems::Update()
+    void StateMachines::Update()
     {
         wavemobStatemachine->Update();
         gameStateMachine->Update();
         playerStateMachine->Update();
     }
 
-    void StateSystems::Draw3D()
+    void StateMachines::Draw3D()
     {
         wavemobStatemachine->Draw3D();
         playerStateMachine->Draw3D();
         // gameStateMachine->Draw3D();
     }
 
-    StateSystems::StateSystems(entt::registry* _registry, GameData* _gameData)
+    StateMachines::StateMachines(entt::registry* _registry, GameData* _gameData)
     {
+
         wavemobStatemachine =
             std::make_unique<WavemobStateController>(_registry, _gameData);
         playerStateMachine =

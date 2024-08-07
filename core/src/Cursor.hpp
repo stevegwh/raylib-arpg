@@ -4,85 +4,80 @@
 
 #pragma once
 
-#include "systems/CollisionSystem.hpp"
-#include "systems/NavigationGridSystem.hpp"
-#include "Camera.hpp"
+#include "components/Collideable.hpp"
 
+#include "raylib.h"
 #include <entt/entt.hpp>
 
 namespace sage
 {
-	enum class CursorState
-	{
-		DEFAULT,
-		NPC_HOVER,
-		BUILDING_HOVER
-	};
+    class GameData;
+    enum class CursorState
+    {
+        DEFAULT,
+        NPC_HOVER,
+        BUILDING_HOVER
+    };
 
-	class Cursor
-	{
-		CollisionInfo m_mouseHitInfo{};
-		CollisionInfo m_terrainHitInfo{};
-		
-		Texture2D* currentTex;
-		Texture2D regulartex{};
-		Texture2D talktex{};
-		Texture2D movetex{};
-		Texture2D invalidmovetex{};
-		Texture2D combattex{};
+    class Cursor
+    {
+        entt::registry* registry;
+        GameData* gameData;
 
-		Vector2 position{};
-		entt::registry* registry;
-		Ray ray{};
-		Color defaultColor = WHITE;
-		Color hoverColor = LIME;
-		Color invalidColor = RED;
-		Color currentColor = WHITE;
+        CollisionInfo m_mouseHitInfo{};
+        CollisionInfo m_terrainHitInfo{};
 
-		bool contextLocked = false;
-		bool hideCursor = false;
-		bool enabled = true;
+        Texture2D* currentTex;
+        Texture2D regulartex{};
+        Texture2D talktex{};
+        Texture2D movetex{};
+        Texture2D invalidmovetex{};
+        Texture2D combattex{};
 
-		entt::entity controlledActor;
+        Vector2 position{};
+        Ray ray{};
+        Color defaultColor = WHITE;
+        Color hoverColor = LIME;
+        Color invalidColor = RED;
+        Color currentColor = WHITE;
 
-		CollisionSystem* collisionSystem;
-		NavigationGridSystem* navigationGridSystem;
-		Camera* sCamera;
-		UserInput* userInput;
+        bool contextLocked = false;
+        bool hideCursor = false;
+        bool enabled = true;
 
-		void getMouseRayCollision();
-		void onMouseClick();
-		void changeCursors(CollisionLayer collisionLayer);
-		static void resetHitInfo(CollisionInfo& hitInfo);
-		void findMeshCollision(CollisionInfo& hitInfo);
-	public:
-		std::string hitObjectName{};
-		[[nodiscard]] const CollisionInfo& getMouseHitInfo() const;
-		[[nodiscard]] const RayCollision& terrainCollision() const;
-		[[nodiscard]] const RayCollision& collision() const;
+        entt::entity controlledActor;
 
-		entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
-		entt::sigh<void(entt::entity)> onNPCClick{};
-		entt::sigh<void(entt::entity entity)> onFloorClick{};
-		entt::sigh<void(entt::entity entity)> onAnyClick{};
-		entt::sigh<void(entt::entity)> onEnemyClick{};
+        void getMouseRayCollision();
+        void onMouseClick();
+        void changeCursors(CollisionLayer collisionLayer);
+        static void resetHitInfo(CollisionInfo& hitInfo);
+        void findMeshCollision(CollisionInfo& hitInfo);
 
-		Cursor(entt::registry* registry,
-		       CollisionSystem* _collisionSystem,
-		       NavigationGridSystem* _navigationGridSystem,
-		       Camera* _sCamera,
-		       UserInput* _userInput);
+      public:
+        std::string hitObjectName{};
+        [[nodiscard]] const CollisionInfo& getMouseHitInfo() const;
+        [[nodiscard]] const RayCollision& terrainCollision() const;
+        [[nodiscard]] const RayCollision& collision() const;
 
-		void Update();
-		void Draw3D();
-		void Draw2D();
-		void OnControlledActorChange(entt::entity entity);
-		void DisableContextSwitching();
-		void EnableContextSwitching();
-		void Enable();
-		void Disable();
-		void Hide();
-		void Show();
-		bool isValidMove() const;
-	};
-}
+        entt::sigh<void(entt::entity)>
+            onCollisionHit{}; // Returns the hit entity (all layers)
+        entt::sigh<void(entt::entity)> onNPCClick{};
+        entt::sigh<void(entt::entity entity)> onFloorClick{};
+        entt::sigh<void(entt::entity entity)> onAnyClick{};
+        entt::sigh<void(entt::entity)> onEnemyClick{};
+
+        Cursor(entt::registry* registry, GameData* _gameData);
+
+        void Update();
+        void Draw3D();
+        void Draw2D();
+        void OnControlledActorChange(entt::entity entity);
+        void DisableContextSwitching();
+        void EnableContextSwitching();
+        void Enable();
+        void Disable();
+        void Hide();
+        void Show();
+        bool isValidMove() const;
+    };
+} // namespace sage

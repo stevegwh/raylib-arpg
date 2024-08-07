@@ -1,17 +1,8 @@
 #include "PlayerStateMachine.hpp"
 
-#include "systems/ActorMovementSystem.hpp"
-#include "systems/CollisionSystem.hpp"
-#include "systems/ControllableActorSystem.hpp"
-#include "systems/NavigationGridSystem.hpp"
-
-#include "Cursor.hpp"
+#include "GameData.hpp"
 
 #include "abilities/PlayerAutoAttack.hpp"
-#include "components/Animation.hpp"
-#include "components/CombatableActor.hpp"
-#include "components/HealthBar.hpp"
-#include "components/sgTransform.hpp"
 
 #include <cassert>
 
@@ -55,9 +46,7 @@ namespace sage
             sink.disconnect<&DefaultState::onEnemyClick>(this);
         }
 
-        DefaultState::DefaultState(
-            entt::registry* _registry, ActorMovementSystem* _actorMovementSystem)
-            : StateMachine(_registry), actorMovementSystem(_actorMovementSystem)
+        DefaultState::DefaultState(entt::registry* _registry) : StateMachine(_registry)
         {
         }
 
@@ -114,12 +103,12 @@ namespace sage
 
             Vector3 targetPos = Vector3Subtract(enemyPos, direction);
 
-            controllableActorSystem->PathfindToLocation(self, targetPos);
+            gameData->controllableActorSystem->CancelMovement(self);
         }
 
         void ApproachingTargetState::OnStateExit(entt::entity self)
         {
-            controllableActorSystem->CancelMovement(self);
+            gameData->controllableActorSystem->CancelMovement(self);
 
             auto& playerTrans = registry->get<sgTransform>(self);
             entt::sink sink{playerTrans.onFinishMovement};
@@ -131,8 +120,8 @@ namespace sage
         }
 
         ApproachingTargetState::ApproachingTargetState(
-            entt::registry* _registry, ControllableActorSystem* _controllableActorSystem)
-            : StateMachine(_registry), controllableActorSystem(_controllableActorSystem)
+            entt::registry* _registry, GameData* _gameData)
+            : StateMachine(_registry), gameData(_gameData)
         {
         }
 
@@ -230,7 +219,8 @@ namespace sage
             autoAttackAbility.Cancel();
         }
 
-        CombatState::CombatState(entt::registry* _registry) : StateMachine(_registry)
+        CombatState::CombatState(entt::registry* _registry, GameData* _gameData)
+            : StateMachine(_registry), gameData(_gameData)
         {
         }
 
@@ -254,21 +244,13 @@ namespace sage
     }
 
     PlayerStateController::PlayerStateController(
-        entt::registry* _registry,
-        Cursor* _cursor,
-        ControllableActorSystem* _controllableActorSystem,
-        ActorMovementSystem* _actorMovementSystem,
-        CollisionSystem* _collisionSystem,
-        NavigationGridSystem* _navigationGridSystem)
-        : registry(_registry),
-          cursor(_cursor),
-          controllableActorSystem(_controllableActorSystem)
+        entt::registry* _registry, GameData* _gameData)
     {
-        defaultState =
-            std::make_unique<playerstates::DefaultState>(_registry, _actorMovementSystem);
-        approachingTargetState = std::make_unique<playerstates::ApproachingTargetState>(
-            _registry, _controllableActorSystem);
-        engagedInCombatState = std::make_unique<playerstates::CombatState>(_registry);
+        defaultState = std::make_unique<playerstates::DefaultState>(_registry);
+        approachingTargetState =
+            std::make_unique<playerstates::ApproachingTargetState>(_registry, _gameData);
+        engagedInCombatState =
+            std::make_unique<playerstates::CombatState>(_registry, _gameData);
 
         systems.push_back(defaultState.get());
         systems.push_back(approachingTargetState.get());
