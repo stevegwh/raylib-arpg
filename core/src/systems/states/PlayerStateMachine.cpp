@@ -1,8 +1,9 @@
 #include "PlayerStateMachine.hpp"
 
-#include "GameData.hpp"
-
 #include "abilities/PlayerAutoAttack.hpp"
+#include "components/Animation.hpp"
+#include "components/sgTransform.hpp"
+#include "GameData.hpp"
 
 #include <cassert>
 

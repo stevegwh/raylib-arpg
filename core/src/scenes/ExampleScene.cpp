@@ -3,7 +3,9 @@
 //
 
 #include "ExampleScene.hpp"
-#include "../GameObjectFactory.hpp"
+#include "GameObjectFactory.hpp"
+
+#include "components/sgTransform.hpp"
 
 #include "raylib.h"
 

@@ -1,14 +1,15 @@
 #pragma once
 
-#include "../components/NavigationGridSquare.hpp"
-#include "../utils/PriorityQueue.hpp"
 #include "BaseSystem.hpp"
-#include "CollisionSystem.hpp"
+#include "components/NavigationGridSquare.hpp"
+#include <PriorityQueue.hpp>
 
 #include "entt/entt.hpp"
 
 namespace sage
 {
+    class CollisionSystem;
+
     enum class AStarHeuristic
     {
         DEFAULT,

@@ -5,23 +5,24 @@
 #pragma once
 
 #include "components/HealthBar.hpp"
-#include "Camera.hpp"
 #include "systems/BaseSystem.hpp"
 
 #include "entt/entt.hpp"
 
 namespace sage
 {
-	class HealthBarSystem : public BaseSystem
-	{
-		Camera* camera;
+    class Camera;
 
-		void updateHealthBarTextures();
+    class HealthBarSystem : public BaseSystem
+    {
+        Camera* camera;
 
-	public:
-		HealthBarSystem(entt::registry* _registry, Camera* _camera);
-		void Draw2D();
-		void Draw3D() override;
-		void Update() override;
-	};
-} // sage
+        void updateHealthBarTextures();
+
+      public:
+        HealthBarSystem(entt::registry* _registry, Camera* _camera);
+        void Draw2D();
+        void Draw3D() override;
+        void Update() override;
+    };
+} // namespace sage
