@@ -155,6 +155,10 @@ namespace sage
         gui->Update();
     }
 
+    EditorScene::~EditorScene()
+    {
+    }
+
     EditorScene::EditorScene(
         entt::registry* _registry,
         std::unique_ptr<GameData> _data,
@@ -203,9 +207,5 @@ namespace sage
         lightSubSystem->lights[0] = CreateLight(
             LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
         data->controllableActorSystem->Disable();
-    }
-
-    EditorScene::~EditorScene()
-    {
     }
 } // namespace sage

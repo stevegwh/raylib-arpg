@@ -27,13 +27,8 @@ namespace sage
         bool lockInput = false;
 
       public:
-        explicit Camera(UserInput* userInput);
-
         Camera3D* getRaylibCam();
 
-        void Update();
-
-        void SetCamera(Vector3 _pos, Vector3 _target);
         void ScrollEnable();
         void ScrollDisable();
         void LockInput();
@@ -53,5 +48,9 @@ namespace sage
         void OnRotateLeftKeyUp();
         void OnRotateRightKeyUp();
         void CutscenePose(const sgTransform& location);
+
+        void SetCamera(Vector3 _pos, Vector3 _target);
+        void Update();
+        explicit Camera(UserInput* userInput);
     };
 } // namespace sage

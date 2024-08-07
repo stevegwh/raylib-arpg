@@ -24,14 +24,14 @@ namespace sage
         std::unique_ptr<Explosion> explosion;
 
       public:
-        ExampleScene(
-            entt::registry* _registry,
-            std::unique_ptr<GameData> _data,
-            const std::string& mapPath);
-        ~ExampleScene() override;
         void Update() override;
         void Draw2D() override;
         void Draw3D() override;
         void DrawDebug() override;
+        ~ExampleScene() override;
+        ExampleScene(
+            entt::registry* _registry,
+            std::unique_ptr<GameData> _data,
+            const std::string& mapPath);
     };
 } // namespace sage

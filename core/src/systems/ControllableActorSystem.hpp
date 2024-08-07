@@ -29,7 +29,6 @@ namespace sage
         void onTargetUpdate(entt::entity target);
 
       public:
-        void Update() const;
         void MoveToLocation(entt::entity id);
         void PathfindToLocation(entt::entity id, Vector3 location);
         void CancelMovement(entt::entity entity);
@@ -42,6 +41,7 @@ namespace sage
         entt::sigh<void(entt::entity)> onControlledActorChange;
         void Enable();
         void Disable();
+        void Update() const;
         ControllableActorSystem(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

@@ -5,35 +5,37 @@
 #pragma once
 
 #include "Application.hpp"
-#include "EditorSettings.hpp"
 #include "EditorGui.hpp"
+#include "EditorSettings.hpp"
 
 namespace sage
 {
-	class EditorApplication : public Application
-	{
+    class EditorApplication : public Application
+    {
         enum class StateFlag
         {
             VOID,
             EDITOR,
             PLAY
         };
-        
+
         StateFlag state = StateFlag::EDITOR;
-		std::unique_ptr<EditorSettings> editorSettings;
-		bool debugMode = false;
-        
-		void draw() override;
-		void enablePlayMode();
-		void enableEditMode();
-		void manageEditorState();
-		void initEditorScene();
+        std::unique_ptr<EditorSettings> editorSettings;
+        bool debugMode = false;
+
+        void draw() override;
+        void enablePlayMode();
+        void enableEditMode();
+        void manageEditorState();
+        void initEditorScene();
         void initGameScene();
-	public:
+
+      public:
         static std::string editorSettingsPath;
-		EditorApplication();
-		void Update() override;
+
         static void DeserializeEditorSettings(EditorSettings& settings);
         static void SerializeEditorSettings(EditorSettings* settings);
+        void Update() override;
+        EditorApplication();
     };
-} // sage
+} // namespace sage

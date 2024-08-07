@@ -20,9 +20,9 @@ namespace sage
         void updateHealthBarTextures();
 
       public:
-        HealthBarSystem(entt::registry* _registry, Camera* _camera);
         void Draw2D();
         void Draw3D() override;
         void Update() override;
+        HealthBarSystem(entt::registry* _registry, Camera* _camera);
     };
 } // namespace sage

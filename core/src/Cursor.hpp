@@ -66,8 +66,6 @@ namespace sage
         entt::sigh<void(entt::entity entity)> onAnyClick{};
         entt::sigh<void(entt::entity)> onEnemyClick{};
 
-        Cursor(entt::registry* registry, GameData* _gameData);
-
         void Update();
         void Draw3D();
         void Draw2D();
@@ -79,5 +77,7 @@ namespace sage
         void Hide();
         void Show();
         bool isValidMove() const;
+
+        Cursor(entt::registry* registry, GameData* _gameData);
     };
 } // namespace sage

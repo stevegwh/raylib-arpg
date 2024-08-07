@@ -23,10 +23,7 @@ namespace sage
         NavigationGridSystem* navigationGridSystem;
 
       public:
-        ActorMovementSystem(
-            entt::registry* _registry,
-            CollisionSystem* _collisionSystem,
-            NavigationGridSystem* _navigationGridSystem);
+        bool ReachedDestination(entt::entity entity) const;
         void PruneMoveCommands(const entt::entity& entity) const;
         // TODO: Overload this so you can just update one field at a time if needed
         void PathfindToLocation(const entt::entity& entity, const Vector3& destination);
@@ -34,6 +31,9 @@ namespace sage
         void CancelMovement(const entt::entity& entity) const;
         void Update() override;
         void DrawDebug() const;
-        bool ReachedDestination(entt::entity entity) const;
+        ActorMovementSystem(
+            entt::registry* _registry,
+            CollisionSystem* _collisionSystem,
+            NavigationGridSystem* _navigationGridSystem);
     };
 } // namespace sage

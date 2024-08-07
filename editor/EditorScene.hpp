@@ -4,62 +4,63 @@
 
 #pragma once
 
-#include "../core/src/UserInput.hpp"
-#include "../core/src/Application.hpp"
-#include "scenes/Scene.hpp"
 #include "EditorGui.hpp"
-#include "Settings.hpp"
 #include "EditorSettings.hpp"
+#include "scenes/Scene.hpp"
+#include "Settings.hpp"
+#include "UserInput.hpp"
 
 #include "entt/entt.hpp"
 #include "windows/FloatingWindow.hpp"
-#include "EditorSettings.hpp"
 
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace sage
 {
-	enum EditorMode
-	{
-		IDLE,
-		SELECT,
-		MOVE,
-		CREATE
-	};
+    enum EditorMode
+    {
+        IDLE,
+        SELECT,
+        MOVE,
+        CREATE
+    };
 
-	class EditorScene : public Scene
-	{
-		EditorMode currentEditorMode = IDLE;
+    class EditorScene : public Scene
+    {
+        EditorMode currentEditorMode = IDLE;
 
-		entt::entity boundingBoxHighlight;
+        entt::entity boundingBoxHighlight;
 
-		bool destroySelected = false;
+        bool destroySelected = false;
 
-		std::unique_ptr<editor::EditorGui> gui;
+        std::unique_ptr<editor::EditorGui> gui;
         EditorSettings* editorSettings;
 
-		// Event responses
-		void OnCursorClick();
-		void OnCollisionHit(entt::entity entity);
-		void OnSerializeSave();
-		void OnOpenPressed();
-		void OnOpenClicked();
+        // Event responses
+        void OnCursorClick();
+        void OnCollisionHit(entt::entity entity);
+        void OnSerializeSave();
+        void OnOpenPressed();
+        void OnOpenClicked();
         void OnFileOpened();
-		void OnDeleteModeKeyPressed();
-		void OnCreateModeKeyPressed();
-		void OnGenGridKeyPressed();
+        void OnDeleteModeKeyPressed();
+        void OnCreateModeKeyPressed();
+        void OnGenGridKeyPressed();
 
-		entt::entity selectedObject{};
-		void moveSelectedObjectToCursorHit() const;
+        entt::entity selectedObject{};
+        void moveSelectedObjectToCursorHit() const;
 
-	public:
-		EditorScene(entt::registry* _registry, std::unique_ptr<GameData> _data, EditorSettings* _editorSettings);
-		~EditorScene() override;
-		void Draw3D() override;
-		void Draw2D() override;
+      public:
+        void Draw3D() override;
+        void Draw2D() override;
         void DrawDebug() override;
-		void Update() override;
-	};
-}
+        void Update() override;
+        ~EditorScene() override;
+        EditorScene(
+            entt::registry* _registry,
+            std::unique_ptr<GameData> _data,
+            EditorSettings* _editorSettings);
+    };
+} // namespace sage

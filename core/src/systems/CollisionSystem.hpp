@@ -23,8 +23,6 @@ namespace sage
       public:
         CollisionMatrix collisionMatrix;
 
-        explicit CollisionSystem(entt::registry* _registry);
-        void DrawDebug();
         void OnTransformUpdate(entt::entity entity);
         void UpdateWorldBoundingBox(entt::entity entityId, Matrix mat);
         [[nodiscard]] std::vector<CollisionInfo> GetMeshCollisionsWithRay(
@@ -44,5 +42,7 @@ namespace sage
         void BoundingBoxDraw(entt::entity entityId, Color color = LIME) const;
         static bool CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2);
         bool GetFirstCollision(entt::entity entity);
+        void DrawDebug();
+        explicit CollisionSystem(entt::registry* _registry);
     };
 } // namespace sage
