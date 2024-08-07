@@ -10,6 +10,14 @@
 
 namespace sage
 {
+    struct AbilityData
+    {
+        float cooldownDuration;
+        float range;
+        int baseDamage;
+        AttackElement element;
+    };
+    
     class Ability
     {
       protected:
@@ -18,30 +26,13 @@ namespace sage
         entt::registry* registry;
         CollisionSystem* collisionSystem;
         bool active = false;
-        float m_windupLimit;
-        float duration;
 
       public:
-        virtual void ResetCooldown()
-        {
-            cooldownTimer.Reset();
-        }
-        virtual bool IsActive() const
-        {
-            return active;
-        }
-        float GetRemainingCooldownTime() const
-        {
-            return cooldownTimer.GetRemainingTime();
-        }
-        float GetCooldownDuration() const
-        {
-            return cooldownTimer.GetMaxTime();
-        }
-        bool CooldownReady() const
-        {
-            return cooldownTimer.GetRemainingTime() <= 0;
-        }
+        virtual void ResetCooldown();
+        virtual bool IsActive() const;
+        float GetRemainingCooldownTime() const;
+        float GetCooldownDuration() const;
+        bool CooldownReady() const;
         virtual void Execute(entt::entity self) = 0;
         virtual void Update(entt::entity self);
         virtual void Draw3D(entt::entity self);
