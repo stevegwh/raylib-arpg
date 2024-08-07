@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "components/CombatableActor.hpp"
-#include "systems/CollisionSystem.hpp"
 #include <Timer.hpp>
 
 namespace sage
@@ -24,7 +23,6 @@ namespace sage
         Timer cooldownTimer{};
         AbilityData abilityData;
         entt::registry* registry;
-        CollisionSystem* collisionSystem;
         bool active = false;
 
       public:
@@ -40,9 +38,6 @@ namespace sage
         virtual ~Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(
-            entt::registry* _registry,
-            const AbilityData& _abilityData,
-            CollisionSystem* _collisionSystem);
+        Ability(entt::registry* _registry, const AbilityData& _abilityData);
     };
 } // namespace sage

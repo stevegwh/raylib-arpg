@@ -1,22 +1,23 @@
 #pragma once
 
-#include "../utils/particle/RainOfFireVFX.hpp"
 #include "Ability.hpp"
-#include "Camera.hpp"
-#include "Cursor.hpp"
-#include "systems/ControllableActorSystem.hpp"
+
+#include "particle/RainOfFireVFX.hpp"
 #include "TextureTerrainOverlay.hpp"
 
 #include <memory>
 
 namespace sage
 {
+    class NavigationGridSystem;
+    class Cursor;
+    class Camera;
+
     struct RainOfFireAbility : public Ability
     {
         Timer windupTimer{};
         std::unique_ptr<RainOfFireVFX> vfx;
         Cursor* cursor;
-        ControllableActorSystem* controllableActorSystem;
         std::unique_ptr<TextureTerrainOverlay> spellCursor;
         float whirlwindRadius = 50.0f;
         void Init(entt::entity self) override;
@@ -29,8 +30,6 @@ namespace sage
             entt::registry* _registry,
             Camera* _camera,
             Cursor* _cursor,
-            CollisionSystem* _collisionSystem,
-            NavigationGridSystem* _navigationGridSystem,
-            ControllableActorSystem* _controllableActorSystem);
+            NavigationGridSystem* _navigationGridSystem);
     };
 } // namespace sage

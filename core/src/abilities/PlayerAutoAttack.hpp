@@ -11,6 +11,6 @@ namespace sage
         void Init(entt::entity self) override;
         void Cancel();
         ~PlayerAutoAttack() override = default;
-        PlayerAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem);
+        PlayerAutoAttack(entt::registry* _registry);
     };
 } // namespace sage

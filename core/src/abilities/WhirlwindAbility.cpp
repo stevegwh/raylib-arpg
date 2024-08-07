@@ -28,11 +28,11 @@ namespace sage
     {
         if (GetRemainingCooldownTime() > 0)
         {
-            std::cout << "Waiting for cooldown \n";
+            // std::cout << "Waiting for cooldown \n";
             return;
         }
 
-        std::cout << "Whirlwind ability used \n";
+        // std::cout << "Whirlwind ability used \n";
         active = true;
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
@@ -61,9 +61,8 @@ namespace sage
         }
     }
 
-    WhirlwindAbility::WhirlwindAbility(
-        entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, _abilityData, _collisionSystem)
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry)
+        : Ability(_registry, _abilityData)
     {
         windupTimer.SetMaxTime(WINDUP);
         abilityData.element = AttackElement::PHYSICAL;

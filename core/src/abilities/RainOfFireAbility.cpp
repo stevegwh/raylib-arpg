@@ -4,9 +4,11 @@
 
 #include "RainOfFireAbility.hpp"
 
+#include "Camera.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
+#include "Cursor.hpp"
 
 #include "AbilityFunctions.hpp"
 
@@ -28,7 +30,7 @@ namespace sage
     {
         if (GetRemainingCooldownTime() > 0)
         {
-            std::cout << "Waiting for cooldown \n";
+            // std::cout << "Waiting for cooldown \n";
             return;
         }
         if (!spellCursor->active())
@@ -57,7 +59,7 @@ namespace sage
 
     void RainOfFireAbility::Confirm(entt::entity self)
     {
-        std::cout << "Rain of fire ability used \n";
+        // std::cout << "Rain of fire ability used \n";
 
         cooldownTimer.Start();
         windupTimer.Start();
@@ -110,12 +112,8 @@ namespace sage
         entt::registry* _registry,
         Camera* _camera,
         Cursor* _cursor,
-        CollisionSystem* _collisionSystem,
-        NavigationGridSystem* _navigationGridSystem,
-        ControllableActorSystem* _controllableActorSystem)
-        : Ability(_registry, _abilityData, _collisionSystem),
-          cursor(_cursor),
-          controllableActorSystem(_controllableActorSystem)
+        NavigationGridSystem* _navigationGridSystem)
+        : Ability(_registry, _abilityData), cursor(_cursor)
     {
         windupTimer.SetMaxTime(WINDUP);
         spellCursor = std::make_unique<TextureTerrainOverlay>(

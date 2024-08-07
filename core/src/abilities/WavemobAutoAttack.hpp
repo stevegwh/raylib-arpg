@@ -6,7 +6,6 @@
 
 namespace sage
 {
-    class CollisionSystem;
     struct WavemobAutoAttack : public Ability
     {
         void Execute(entt::entity self) override;
@@ -14,6 +13,6 @@ namespace sage
         void Init(entt::entity self) override;
         void Cancel();
         ~WavemobAutoAttack() override = default;
-        WavemobAutoAttack(entt::registry* _registry, CollisionSystem* _collisionSystem);
+        WavemobAutoAttack(entt::registry* _registry);
     };
 } // namespace sage

@@ -14,4 +14,10 @@ namespace sage
         AbilityData abilityData,
         Vector3 point,
         float radius);
+
+    void HitSingleTarget(
+        entt::registry* registry,
+        entt::entity self,
+        AbilityData abilityData,
+        entt::entity target);
 } // namespace sage

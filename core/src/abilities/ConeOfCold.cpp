@@ -3,10 +3,6 @@
 //
 
 #include "ConeOfCold.hpp"
-#include "components/Animation.hpp"
-#include "components/CombatableActor.hpp"
-#include "components/sgTransform.hpp"
-#include "raylib.h"
 
 namespace sage
 {
@@ -18,8 +14,7 @@ namespace sage
     {
     }
 
-    ConeOfCold::ConeOfCold(entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, {}, _collisionSystem)
+    ConeOfCold::ConeOfCold(entt::registry* _registry) : Ability(_registry, {})
     {
     }
 } // namespace sage

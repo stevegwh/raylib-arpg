@@ -119,17 +119,13 @@ namespace sage
         }
 
         currentAbilities.fill(-1);
-        abilityMap.push_back(std::make_unique<WhirlwindAbility>(
-            registry, gameData->collisionSystem.get()));
-        abilityMap.push_back(
-            std::make_unique<ConeOfCold>(registry, gameData->collisionSystem.get()));
+        abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry));
+        abilityMap.push_back(std::make_unique<ConeOfCold>(registry));
         abilityMap.push_back(std::make_unique<RainOfFireAbility>(
             registry,
             gameData->camera.get(),
             gameData->cursor.get(),
-            gameData->collisionSystem.get(),
-            gameData->navigationGridSystem.get(),
-            gameData->controllableActorSystem.get()));
+            gameData->navigationGridSystem.get()));
         // TODO: These should be set by the player or another system
         ChangeAbility(0, 0);
         ChangeAbility(1, 1);

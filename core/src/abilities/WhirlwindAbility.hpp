@@ -12,6 +12,6 @@ namespace sage
         void Execute(entt::entity self) override;
         void Update(entt::entity self) override;
         ~WhirlwindAbility() override = default;
-        WhirlwindAbility(entt::registry* _registry, CollisionSystem* _collisionSystem);
+        WhirlwindAbility(entt::registry* _registry);
     };
 } // namespace sage
