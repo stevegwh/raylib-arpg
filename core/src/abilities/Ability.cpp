@@ -11,7 +11,7 @@ namespace sage
 
     bool Ability::IsActive() const
     {
-        return active;
+        return cooldownTimer.IsRunning();
     }
 
     float Ability::GetRemainingCooldownTime() const
