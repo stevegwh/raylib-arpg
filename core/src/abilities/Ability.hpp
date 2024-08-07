@@ -17,12 +17,12 @@ namespace sage
         int baseDamage;
         AttackElement element;
     };
-    
+
     class Ability
     {
       protected:
         Timer cooldownTimer{};
-        AttackData attackData;
+        AbilityData abilityData;
         entt::registry* registry;
         CollisionSystem* collisionSystem;
         bool active = false;
@@ -42,7 +42,7 @@ namespace sage
         Ability& operator=(const Ability&) = delete;
         Ability(
             entt::registry* _registry,
-            float _cooldownDuration,
+            const AbilityData& _abilityData,
             CollisionSystem* _collisionSystem);
     };
 } // namespace sage

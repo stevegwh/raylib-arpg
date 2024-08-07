@@ -9,10 +9,15 @@
 #include <raymath.h>
 
 static constexpr float COOLDOWN = 1.0f;
+static constexpr int DAMAGE = 10;
 
 namespace sage
 {
-
+    static constexpr AbilityData _abilityData{
+        .element = AttackElement::PHYSICAL,
+        .cooldownDuration = COOLDOWN,
+        .baseDamage = DAMAGE,
+        .range = 5};
     void WavemobAutoAttack::Execute(entt::entity self)
     {
         auto& c = registry->get<CombatableActor>(self);
@@ -30,9 +35,12 @@ namespace sage
         if (registry->any_of<CombatableActor>(c.target))
         {
             auto& enemyCombatable = registry->get<CombatableActor>(c.target);
-            AttackData attack = attackData;
-            attack.attacker = self;
-            attack.hit = c.target;
+
+            AttackData attack{
+                .attacker = self,
+                .hit = c.target,
+                .damage = abilityData.baseDamage,
+                .element = abilityData.element};
             enemyCombatable.onHit.publish(attack);
         }
     }
@@ -67,9 +75,7 @@ namespace sage
 
     WavemobAutoAttack::WavemobAutoAttack(
         entt::registry* _registry, CollisionSystem* _collisionSystem)
-        : Ability(_registry, COOLDOWN, _collisionSystem)
+        : Ability(_registry, _abilityData, _collisionSystem)
     {
-        attackData.element = AttackElement::PHYSICAL;
-        attackData.damage = 10;
     }
 } // namespace sage

@@ -8,14 +8,22 @@
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 
+#include "AbilityFunctions.hpp"
+
 #include "raylib.h"
 
 static constexpr float COOLDOWN = 3.0f;
 static constexpr float WINDUP = 0.75f;
-static constexpr float DAMAGE = 25.0f;
+static constexpr int DAMAGE = 25;
 
 namespace sage
 {
+    static constexpr AbilityData _abilityData{
+        .element = AttackElement::FIRE,
+        .cooldownDuration = COOLDOWN,
+        .baseDamage = DAMAGE,
+        .range = 5};
+
     void RainOfFireAbility::Init(entt::entity self)
     {
         if (GetRemainingCooldownTime() > 0)
@@ -41,31 +49,9 @@ namespace sage
 
     void RainOfFireAbility::Execute(entt::entity self)
     {
-        const auto& actorCol = registry->get<Collideable>(self);
-
-        auto view = registry->view<CombatableActor>();
-
         vfx->InitSystem(cursor->collision().point);
-
-        for (auto& entity : view)
-        {
-            if (entity == self) continue;
-            const auto& targetCol = registry->get<Collideable>(entity);
-
-            if (CheckCollisionBoxSphere(
-                    targetCol.worldBoundingBox,
-                    cursor->collision().point,
-                    whirlwindRadius))
-            {
-                // hitUnits.push_back(entity);
-                const auto& combatable = registry->get<CombatableActor>(entity);
-                AttackData _attackData = attackData;
-                _attackData.hit = entity;
-                _attackData.attacker = self;
-                combatable.onHit.publish(_attackData);
-                std::cout << "Hit unit \n";
-            }
-        }
+        Hit360AroundPoint(
+            registry, self, abilityData, cursor->collision().point, whirlwindRadius);
         active = false;
     }
 
@@ -127,13 +113,11 @@ namespace sage
         CollisionSystem* _collisionSystem,
         NavigationGridSystem* _navigationGridSystem,
         ControllableActorSystem* _controllableActorSystem)
-        : Ability(_registry, COOLDOWN, _collisionSystem),
+        : Ability(_registry, _abilityData, _collisionSystem),
           cursor(_cursor),
           controllableActorSystem(_controllableActorSystem)
     {
         windupTimer.SetMaxTime(WINDUP);
-        attackData.damage = DAMAGE;
-        attackData.element = AttackElement::FIRE;
         spellCursor = std::make_unique<TextureTerrainOverlay>(
             registry,
             _navigationGridSystem,
