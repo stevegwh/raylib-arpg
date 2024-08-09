@@ -12,3 +12,4 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ColumnLimit: 90
 SortIncludes: CaseInsensitive
 IncludeBlocks: Preserve
+AlwaysBreakTemplateDeclarations: Yes

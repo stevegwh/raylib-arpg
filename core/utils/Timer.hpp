@@ -3,7 +3,7 @@
 class Timer
 {
     bool active = false;
-    bool finished = false;
+    bool finished = true;
     float remainingTime{};
     float maxTime{};
 
