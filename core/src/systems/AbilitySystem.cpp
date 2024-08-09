@@ -3,7 +3,7 @@
 #include "GameData.hpp"
 
 #include "abilities/ConeOfCold.hpp"
-#include "abilities/RainOfFireAbility.hpp"
+#include "abilities/RainOfFire.hpp"
 #include "abilities/WhirlwindAbility.hpp"
 
 namespace sage
@@ -121,7 +121,7 @@ namespace sage
         currentAbilities.fill(-1);
         abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry));
         abilityMap.push_back(std::make_unique<ConeOfCold>(registry));
-        abilityMap.push_back(std::make_unique<RainOfFireAbility>(
+        abilityMap.push_back(std::make_unique<RainOfFire>(
             registry,
             gameData->camera.get(),
             gameData->cursor.get(),
