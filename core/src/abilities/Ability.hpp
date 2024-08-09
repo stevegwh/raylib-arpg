@@ -16,6 +16,7 @@ namespace sage
         float range;
         int baseDamage;
         AttackElement element;
+        float animationDelay;
     };
 
     enum class AbilityState
