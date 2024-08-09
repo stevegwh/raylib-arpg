@@ -1,11 +1,11 @@
 #pragma once
 
+#include "components/CombatableActor.hpp"
+#include <Timer.hpp>
+
 #include <entt/entt.hpp>
 
 #include <vector>
-
-#include "components/CombatableActor.hpp"
-#include <Timer.hpp>
 
 namespace sage
 {
@@ -18,25 +18,20 @@ namespace sage
         AttackElement element;
     };
 
-    enum class AbilityState;
-
-    struct StateBase
+    enum class AbilityState
     {
-        virtual ~StateBase() = default;
+        IDLE,
+        CURSOR_SELECT,
+        AWAITING_EXECUTION
+    };
+
+    struct State
+    {
+        virtual ~State() = default;
         virtual void Update(entt::entity self) {};
         virtual void Draw3D(entt::entity self) {};
         virtual void OnEnter(entt::entity self) {};
         virtual void OnExit(entt::entity self) {};
-    };
-
-    template <typename T>
-    struct State : public StateBase
-    {
-        T* ability;
-        virtual ~State() = default;
-        explicit State(T* _ability) : ability(_ability)
-        {
-        }
     };
 
     class Ability
@@ -45,15 +40,10 @@ namespace sage
         Timer cooldownTimer{};
         AbilityData abilityData;
         entt::registry* registry;
-        std::unordered_map<AbilityState, std::unique_ptr<StateBase>> states;
-        StateBase* state;
+        std::unordered_map<AbilityState, std::unique_ptr<State>> states;
+        State* state;
 
-        void ChangeState(entt::entity self, AbilityState newState)
-        {
-            state->OnExit(self);
-            state = states[newState].get();
-            state->OnEnter(self);
-        }
+        void ChangeState(entt::entity self, AbilityState newState);
 
       public:
         virtual void ResetCooldown();

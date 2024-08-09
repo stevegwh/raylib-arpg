@@ -13,45 +13,6 @@ namespace sage
     class Cursor;
     class Camera;
 
-    template <typename T>
-    class IdleState : public State<T>
-    {
-      public:
-        void Update(entt::entity self) override;
-        void Draw3D(entt::entity self) override;
-        IdleState(T* _ability) : State<T>(_ability)
-        {
-        }
-    };
-
-    template <typename T>
-    class CursorSelectState : public State<T>
-    {
-        bool cursorActive = false;
-        void EnableCursor();
-        void DisableCursor();
-        void ToggleCursor(entt::entity self);
-
-      public:
-        void Update(entt::entity self) override;
-        void OnEnter(entt::entity self) override;
-        void OnExit(entt::entity self) override;
-        CursorSelectState(T* _ability) : State<T>(_ability)
-        {
-        }
-    };
-
-    template <typename T>
-    class AwaitingExecutionState : public State<T>
-    {
-      public:
-        void Update(entt::entity self) override;
-        void OnEnter(entt::entity self) override;
-        AwaitingExecutionState(T* _ability) : State<T>(_ability)
-        {
-        }
-    };
-
     class RainOfFireAbility : public Ability
     {
         Timer animationDelayTimer{};
@@ -59,7 +20,50 @@ namespace sage
         Cursor* cursor;
         std::unique_ptr<TextureTerrainOverlay> spellCursor;
         float whirlwindRadius = 50.0f;
-        void Confirm(entt::entity self);
+
+        class IdleState : public State
+        {
+            RainOfFireAbility* ability;
+
+          public:
+            void Update(entt::entity self) override;
+            void Draw3D(entt::entity self) override;
+            IdleState(RainOfFireAbility* _ability) : ability(_ability)
+            {
+            }
+        };
+
+        class CursorSelectState : public State
+        {
+            RainOfFireAbility* ability;
+            bool cursorActive = false;
+            void enableCursor();
+            void disableCursor();
+            void toggleCursor(entt::entity self);
+
+          public:
+            void Update(entt::entity self) override;
+            void OnEnter(entt::entity self) override;
+            void OnExit(entt::entity self) override;
+            CursorSelectState(RainOfFireAbility* _ability) : ability(_ability)
+            {
+            }
+        };
+
+        class AwaitingExecutionState : public State
+        {
+            RainOfFireAbility* ability;
+
+          public:
+            void Update(entt::entity self) override;
+            void OnEnter(entt::entity self) override;
+            AwaitingExecutionState(RainOfFireAbility* _ability) : ability(_ability)
+            {
+            }
+        };
+
+      protected:
+        virtual void confirm(entt::entity self);
 
       public:
         void Init(entt::entity self) override;
@@ -72,10 +76,5 @@ namespace sage
             Camera* _camera,
             Cursor* _cursor,
             NavigationGridSystem* _navigationGridSystem);
-
-        friend class State<RainOfFireAbility>;
-        friend class IdleState<RainOfFireAbility>;
-        friend class CursorSelectState<RainOfFireAbility>;
-        friend class AwaitingExecutionState<RainOfFireAbility>;
     };
 } // namespace sage

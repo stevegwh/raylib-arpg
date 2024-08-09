@@ -19,7 +19,7 @@
 #include "systems/HealthBarSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/RenderSystem.hpp"
-#include "systems/states/StateSystems.hpp"
+#include "systems/states/StateMachines.hpp"
 
 #include "Settings.hpp"
 
@@ -49,7 +49,7 @@ namespace sage
         std::unique_ptr<AnimationSystem> animationSystem;
         std::unique_ptr<DialogueSystem> dialogueSystem;
         std::unique_ptr<HealthBarSystem> healthBarSystem;
-        std::unique_ptr<StateSystems> stateSystems;
+        std::unique_ptr<StateMachines> stateMachines;
         std::unique_ptr<AbilitySystem> abilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
 

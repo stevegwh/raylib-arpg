@@ -4,6 +4,13 @@
 
 namespace sage
 {
+    void Ability::ChangeState(entt::entity self, AbilityState newState)
+    {
+        state->OnExit(self);
+        state = states[newState].get();
+        state->OnEnter(self);
+    }
+
     void Ability::ResetCooldown()
     {
         cooldownTimer.Reset();
