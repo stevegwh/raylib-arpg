@@ -89,22 +89,33 @@ namespace sage
     }
 
     template <>
+    void CursorSelectState<RainOfFireAbility>::ToggleCursor(entt::entity self)
+    {
+        if (cursorActive)
+        {
+            DisableCursor();
+            cursorActive = false;
+        }
+        else
+        {
+            EnableCursor();
+            cursorActive = true;
+        }
+    }
+
+    template <>
     void CursorSelectState<RainOfFireAbility>::OnExit(entt::entity self)
     {
-        DisableCursor();
-        cursorActive = false;
+        if (cursorActive)
+        {
+            DisableCursor();
+            cursorActive = false;
+        }
     }
 
     template <>
     void CursorSelectState<RainOfFireAbility>::OnEnter(entt::entity self)
     {
-        if (cursorActive)
-        {
-            OnExit(self);
-            ability->state = ability->states[AbilityState::IDLE].get();
-            ability->state->OnEnter(self);
-            return;
-        }
         EnableCursor();
         cursorActive = true;
     }
@@ -148,12 +159,14 @@ namespace sage
 
     void RainOfFireAbility::Init(entt::entity self)
     {
-        if (state != states[AbilityState::CURSOR_SELECT].get())
+        if (state == states[AbilityState::CURSOR_SELECT].get())
         {
-            state->OnExit(self);
+            state->ChangeState(self, AbilityState::IDLE);
         }
-        state = states[AbilityState::CURSOR_SELECT].get();
-        state->OnEnter(self);
+        else
+        {
+            state->ChangeState(self, AbilityState::CURSOR_SELECT);
+        }
     }
 
     void RainOfFireAbility::Execute(entt::entity self)

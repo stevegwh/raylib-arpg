@@ -54,6 +54,7 @@ namespace sage
         bool cursorActive = false;
         void EnableCursor();
         void DisableCursor();
+        void ToggleCursor(entt::entity self);
 
       public:
         void Update(entt::entity self) override;
@@ -102,6 +103,7 @@ namespace sage
             Cursor* _cursor,
             NavigationGridSystem* _navigationGridSystem);
 
+        friend class State<RainOfFireAbility>;
         friend class IdleState<RainOfFireAbility>;
         friend class CursorSelectState<RainOfFireAbility>;
         friend class AwaitingExecutionState<RainOfFireAbility>;
