@@ -13,36 +13,12 @@ namespace sage
     class Cursor;
     class Camera;
 
-    enum class AbilityState;
-
-    template <typename T>
-    struct State
-    {
-        T* ability;
-        virtual ~State() = default;
-        virtual void Update(entt::entity self) = 0;
-        virtual void Draw3D(entt::entity self) = 0;
-        virtual void OnEnter(entt::entity self) = 0;
-        virtual void OnExit(entt::entity self) = 0;
-        void ChangeState(entt::entity self, AbilityState newState)
-        {
-            ability->state->OnExit(self);
-            ability->state = ability->states[newState].get();
-            ability->state->OnEnter(self);
-        }
-        State(T* _ability) : ability(_ability)
-        {
-        }
-    };
-
     template <typename T>
     class IdleState : public State<T>
     {
       public:
         void Update(entt::entity self) override;
         void Draw3D(entt::entity self) override;
-        void OnEnter(entt::entity self) override;
-        void OnExit(entt::entity self) override;
         IdleState(T* _ability) : State<T>(_ability)
         {
         }
@@ -58,7 +34,6 @@ namespace sage
 
       public:
         void Update(entt::entity self) override;
-        void Draw3D(entt::entity self) override;
         void OnEnter(entt::entity self) override;
         void OnExit(entt::entity self) override;
         CursorSelectState(T* _ability) : State<T>(_ability)
@@ -71,9 +46,7 @@ namespace sage
     {
       public:
         void Update(entt::entity self) override;
-        void Draw3D(entt::entity self) override;
         void OnEnter(entt::entity self) override;
-        void OnExit(entt::entity self) override;
         AwaitingExecutionState(T* _ability) : State<T>(_ability)
         {
         }
@@ -81,9 +54,6 @@ namespace sage
 
     class RainOfFireAbility : public Ability
     {
-        std::unordered_map<AbilityState, std::unique_ptr<State<RainOfFireAbility>>>
-            states;
-        State<RainOfFireAbility>* state;
         Timer animationDelayTimer{};
         std::unique_ptr<RainOfFireVFX> vfx;
         Cursor* cursor;

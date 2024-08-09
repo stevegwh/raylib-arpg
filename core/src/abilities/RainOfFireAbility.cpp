@@ -47,16 +47,6 @@ namespace sage
     }
 
     template <>
-    void IdleState<RainOfFireAbility>::OnEnter(entt::entity self)
-    {
-    }
-
-    template <>
-    void IdleState<RainOfFireAbility>::OnExit(entt::entity self)
-    {
-    }
-
-    template <>
     void CursorSelectState<RainOfFireAbility>::EnableCursor()
     {
         ability->spellCursor->Init(ability->cursor->terrainCollision().point);
@@ -81,11 +71,6 @@ namespace sage
         {
             ability->Confirm(self);
         }
-    }
-
-    template <>
-    void CursorSelectState<RainOfFireAbility>::Draw3D(entt::entity self)
-    {
     }
 
     template <>
@@ -131,11 +116,6 @@ namespace sage
     }
 
     template <>
-    void AwaitingExecutionState<RainOfFireAbility>::Draw3D(entt::entity self)
-    {
-    }
-
-    template <>
     void AwaitingExecutionState<RainOfFireAbility>::OnEnter(entt::entity self)
     {
         ability->cooldownTimer.Start();
@@ -144,11 +124,6 @@ namespace sage
 
         auto& animation = ability->registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
-    }
-
-    template <>
-    void AwaitingExecutionState<RainOfFireAbility>::OnExit(entt::entity self)
-    {
     }
 
     static constexpr AbilityData _abilityData{
@@ -161,11 +136,11 @@ namespace sage
     {
         if (state == states[AbilityState::CURSOR_SELECT].get())
         {
-            state->ChangeState(self, AbilityState::IDLE);
+            ChangeState(self, AbilityState::IDLE);
         }
         else
         {
-            state->ChangeState(self, AbilityState::CURSOR_SELECT);
+            ChangeState(self, AbilityState::CURSOR_SELECT);
         }
     }
 
@@ -175,12 +150,12 @@ namespace sage
         Hit360AroundPoint(
             registry, self, abilityData, cursor->collision().point, whirlwindRadius);
 
-        state->ChangeState(self, AbilityState::IDLE);
+        ChangeState(self, AbilityState::IDLE);
     }
 
     void RainOfFireAbility::Confirm(entt::entity self)
     {
-        state->ChangeState(self, AbilityState::AWAITING_EXECUTION);
+        ChangeState(self, AbilityState::AWAITING_EXECUTION);
     }
 
     void RainOfFireAbility::Draw3D(entt::entity self)
