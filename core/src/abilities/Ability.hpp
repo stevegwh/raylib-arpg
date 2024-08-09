@@ -18,15 +18,44 @@ namespace sage
         AttackElement element;
     };
 
+    enum class AbilityState;
+
+    struct StateBase
+    {
+        virtual ~StateBase() = default;
+        virtual void Update(entt::entity self) {};
+        virtual void Draw3D(entt::entity self) {};
+        virtual void OnEnter(entt::entity self) {};
+        virtual void OnExit(entt::entity self) {};
+    };
+
+    template <typename T>
+    struct State : public StateBase
+    {
+        T* ability;
+        virtual ~State() = default;
+        explicit State(T* _ability) : ability(_ability)
+        {
+        }
+    };
+
     class Ability
     {
       protected:
         Timer cooldownTimer{};
         AbilityData abilityData;
         entt::registry* registry;
+        std::unordered_map<AbilityState, std::unique_ptr<StateBase>> states;
+        StateBase* state;
+
+        void ChangeState(entt::entity self, AbilityState newState)
+        {
+            state->OnExit(self);
+            state = states[newState].get();
+            state->OnEnter(self);
+        }
 
       public:
-        // TODO: So many of these do not need to be public
         virtual void ResetCooldown();
         virtual bool IsActive() const;
         float GetRemainingCooldownTime() const;
