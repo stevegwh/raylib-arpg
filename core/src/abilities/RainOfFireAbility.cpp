@@ -31,11 +31,19 @@ namespace sage
     void IdleState<RainOfFireAbility>::Update(entt::entity self)
     {
         ability->cooldownTimer.Update(GetFrameTime());
+        if (ability->vfx->active)
+        {
+            ability->vfx->Update(GetFrameTime());
+        }
     }
 
     template <>
     void IdleState<RainOfFireAbility>::Draw3D(entt::entity self)
     {
+        if (ability->vfx->active)
+        {
+            ability->vfx->Draw3D();
+        }
     }
 
     template <>
@@ -83,7 +91,6 @@ namespace sage
     template <>
     void CursorSelectState<RainOfFireAbility>::OnExit(entt::entity self)
     {
-
         DisableCursor();
         cursorActive = false;
     }
@@ -155,43 +162,23 @@ namespace sage
         Hit360AroundPoint(
             registry, self, abilityData, cursor->collision().point, whirlwindRadius);
 
-        state->OnExit(self);
-        state = states[AbilityState::IDLE].get();
-        state->OnEnter(self);
+        state->ChangeState(self, AbilityState::IDLE);
     }
 
     void RainOfFireAbility::Confirm(entt::entity self)
     {
-        // std::cout << "Rain of fire ability used \n";
-
-        cooldownTimer.Start();
-
-        animationDelayTimer.Start();
-
-        state->OnExit(self);
-        state = states[AbilityState::AWAITING_EXECUTION].get();
-        state->OnEnter(self);
+        state->ChangeState(self, AbilityState::AWAITING_EXECUTION);
     }
 
     void RainOfFireAbility::Draw3D(entt::entity self)
     {
         state->Draw3D(self);
-        if (vfx->active)
-        {
-            vfx->Draw3D();
-        }
-
         Ability::Draw3D(self);
     }
 
     void RainOfFireAbility::Update(entt::entity self)
     {
         state->Update(self);
-
-        if (vfx->active)
-        {
-            vfx->Update(GetFrameTime());
-        }
     }
 
     RainOfFireAbility::RainOfFireAbility(

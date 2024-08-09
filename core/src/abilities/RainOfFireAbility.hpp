@@ -24,6 +24,12 @@ namespace sage
         virtual void Draw3D(entt::entity self) = 0;
         virtual void OnEnter(entt::entity self) = 0;
         virtual void OnExit(entt::entity self) = 0;
+        void ChangeState(entt::entity self, AbilityState newState)
+        {
+            ability->state->OnExit(self);
+            ability->state = ability->states[newState].get();
+            ability->state->OnEnter(self);
+        }
         State(T* _ability) : ability(_ability)
         {
         }
