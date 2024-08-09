@@ -26,7 +26,7 @@ namespace sage
 
     bool Ability::CooldownReady() const
     {
-        return cooldownTimer.GetRemainingTime() <= 0;
+        return cooldownTimer.HasFinished() || !cooldownTimer.IsRunning();
     }
 
     void Ability::Update(entt::entity self)

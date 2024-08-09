@@ -27,39 +27,126 @@ namespace sage
         AWAITING_EXECUTION
     };
 
+    template <>
+    void IdleState<RainOfFireAbility>::Update(entt::entity self)
+    {
+        ability->cooldownTimer.Update(GetFrameTime());
+    }
+
+    template <>
+    void IdleState<RainOfFireAbility>::Draw3D(entt::entity self)
+    {
+    }
+
+    template <>
+    void IdleState<RainOfFireAbility>::OnEnter(entt::entity self)
+    {
+    }
+
+    template <>
+    void IdleState<RainOfFireAbility>::OnExit(entt::entity self)
+    {
+    }
+
+    template <>
+    void CursorSelectState<RainOfFireAbility>::EnableCursor()
+    {
+        ability->spellCursor->Init(ability->cursor->terrainCollision().point);
+        ability->spellCursor->Enable(true);
+        ability->cursor->Disable();
+        ability->cursor->Hide();
+    }
+
+    template <>
+    void CursorSelectState<RainOfFireAbility>::DisableCursor()
+    {
+        ability->cursor->Enable();
+        ability->cursor->Show();
+        ability->spellCursor->Enable(false);
+    }
+
+    template <>
+    void CursorSelectState<RainOfFireAbility>::Update(entt::entity self)
+    {
+        ability->spellCursor->Update(ability->cursor->terrainCollision().point);
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            ability->Confirm(self);
+        }
+    }
+
+    template <>
+    void CursorSelectState<RainOfFireAbility>::Draw3D(entt::entity self)
+    {
+    }
+
+    template <>
+    void CursorSelectState<RainOfFireAbility>::OnExit(entt::entity self)
+    {
+
+        DisableCursor();
+        cursorActive = false;
+    }
+
+    template <>
+    void CursorSelectState<RainOfFireAbility>::OnEnter(entt::entity self)
+    {
+        if (cursorActive)
+        {
+            OnExit(self);
+            ability->state = ability->states[AbilityState::IDLE].get();
+            ability->state->OnEnter(self);
+            return;
+        }
+        EnableCursor();
+        cursorActive = true;
+    }
+
+    template <>
+    void AwaitingExecutionState<RainOfFireAbility>::Update(entt::entity self)
+    {
+        ability->animationDelayTimer.Update(GetFrameTime());
+        if (ability->animationDelayTimer.HasFinished())
+        {
+            ability->Execute(self);
+        }
+    }
+
+    template <>
+    void AwaitingExecutionState<RainOfFireAbility>::Draw3D(entt::entity self)
+    {
+    }
+
+    template <>
+    void AwaitingExecutionState<RainOfFireAbility>::OnEnter(entt::entity self)
+    {
+        ability->cooldownTimer.Start();
+
+        ability->animationDelayTimer.Start();
+
+        auto& animation = ability->registry->get<Animation>(self);
+        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
+    }
+
+    template <>
+    void AwaitingExecutionState<RainOfFireAbility>::OnExit(entt::entity self)
+    {
+    }
+
     static constexpr AbilityData _abilityData{
         .cooldownDuration = COOLDOWN,
         .range = 5,
         .baseDamage = DAMAGE,
         .element = AttackElement::FIRE};
 
-    void RainOfFireAbility::EnableCursor()
-    {
-        spellCursor->Init(cursor->terrainCollision().point);
-        spellCursor->Enable(true);
-        cursor->Disable();
-        cursor->Hide();
-    }
-
-    void RainOfFireAbility::DisableCursor()
-    {
-        cursor->Enable();
-        cursor->Show();
-        spellCursor->Enable(false);
-    }
-
     void RainOfFireAbility::Init(entt::entity self)
     {
-        if (state == AbilityState::CURSOR_SELECT)
+        if (state != states[AbilityState::CURSOR_SELECT].get())
         {
-            // Cancel cursor
-            DisableCursor();
-            state = AbilityState::IDLE;
-            return;
+            state->OnExit(self);
         }
-
-        EnableCursor();
-        state = AbilityState::CURSOR_SELECT;
+        state = states[AbilityState::CURSOR_SELECT].get();
+        state->OnEnter(self);
     }
 
     void RainOfFireAbility::Execute(entt::entity self)
@@ -67,7 +154,10 @@ namespace sage
         vfx->InitSystem(cursor->collision().point);
         Hit360AroundPoint(
             registry, self, abilityData, cursor->collision().point, whirlwindRadius);
-        state = AbilityState::IDLE;
+
+        state->OnExit(self);
+        state = states[AbilityState::IDLE].get();
+        state->OnEnter(self);
     }
 
     void RainOfFireAbility::Confirm(entt::entity self)
@@ -77,16 +167,15 @@ namespace sage
         cooldownTimer.Start();
 
         animationDelayTimer.Start();
-        state = AbilityState::AWAITING_EXECUTION;
 
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
-
-        DisableCursor();
+        state->OnExit(self);
+        state = states[AbilityState::AWAITING_EXECUTION].get();
+        state->OnEnter(self);
     }
 
     void RainOfFireAbility::Draw3D(entt::entity self)
     {
+        state->Draw3D(self);
         if (vfx->active)
         {
             vfx->Draw3D();
@@ -97,29 +186,11 @@ namespace sage
 
     void RainOfFireAbility::Update(entt::entity self)
     {
-
-        cooldownTimer.Update(GetFrameTime());
+        state->Update(self);
 
         if (vfx->active)
         {
             vfx->Update(GetFrameTime());
-        }
-
-        if (state == AbilityState::CURSOR_SELECT)
-        {
-            spellCursor->Update(cursor->terrainCollision().point);
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-            {
-                Confirm(self);
-            }
-            return;
-        }
-
-        animationDelayTimer.Update(GetFrameTime());
-        if (state == AbilityState::AWAITING_EXECUTION &&
-            animationDelayTimer.HasFinished())
-        {
-            Execute(self);
         }
     }
 
@@ -128,8 +199,15 @@ namespace sage
         Camera* _camera,
         Cursor* _cursor,
         NavigationGridSystem* _navigationGridSystem)
-        : Ability(_registry, _abilityData), cursor(_cursor), state(AbilityState::IDLE)
+        : Ability(_registry, _abilityData), cursor(_cursor)
     {
+        states[AbilityState::IDLE] = std::make_unique<IdleState<RainOfFireAbility>>(this);
+        states[AbilityState::CURSOR_SELECT] =
+            std::make_unique<CursorSelectState<RainOfFireAbility>>(this);
+        states[AbilityState::AWAITING_EXECUTION] =
+            std::make_unique<AwaitingExecutionState<RainOfFireAbility>>(this);
+        state = states[AbilityState::IDLE].get();
+
         animationDelayTimer.SetMaxTime(WINDUP);
         spellCursor = std::make_unique<TextureTerrainOverlay>(
             registry,
