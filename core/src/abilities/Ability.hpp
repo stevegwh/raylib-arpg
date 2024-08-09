@@ -9,6 +9,7 @@
 
 namespace sage
 {
+
     struct AbilityData
     {
         float cooldownDuration;
@@ -25,6 +26,7 @@ namespace sage
         entt::registry* registry;
 
       public:
+        // TODO: So many of these do not need to be public
         virtual void ResetCooldown();
         virtual bool IsActive() const;
         float GetRemainingCooldownTime() const;
