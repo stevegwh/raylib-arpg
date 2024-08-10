@@ -24,13 +24,15 @@ namespace sage
             (RemoveStateComponent<std::tuple_element_t<Indices, Tuple>>(entity), ...);
         }
 
-        template <typename Tuple> void RemoveStateComponents(entt::entity entity)
+        template <typename Tuple>
+        void RemoveStateComponents(entt::entity entity)
         {
             RemoveStateComponents<Tuple>(
                 entity, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
         }
 
-        template <typename StateComponent> void RemoveStateComponent(entt::entity entity)
+        template <typename StateComponent>
+        void RemoveStateComponent(entt::entity entity)
         {
             if (registry->any_of<StateComponent>(entity))
             {
@@ -70,9 +72,9 @@ namespace sage
         }
 
       public:
-        virtual void OnStateEnter(entt::entity entity) = 0;
-        virtual void OnStateExit(entt::entity entity) = 0;
-        void Update() override = 0;
+        virtual void OnStateEnter(entt::entity entity) {};
+        virtual void OnStateExit(entt::entity entity) {};
+        void Update() override {};
         void Draw3D() override {};
 
         explicit StateMachine(entt::registry* _registry) : BaseSystem(_registry)
