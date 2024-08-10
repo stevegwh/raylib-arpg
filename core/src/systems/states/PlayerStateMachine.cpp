@@ -60,6 +60,7 @@ namespace sage
 
         void ApproachingTargetState::onAttackCancel(entt::entity self)
         {
+            // gameData->controllableActorSystem->CancelMovement(self);
             auto& playerCombatable = registry->get<CombatableActor>(self);
             playerCombatable.target = entt::null;
             ChangeState<StatePlayerDefault, PlayerStates>(self);
@@ -81,6 +82,8 @@ namespace sage
         {
             // TODO: Below is being set in ControllableActorSystem. State should only be
             // managed here.
+            gameData->actorMovementSystem->CancelMovement(self); // Flush queue
+
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
