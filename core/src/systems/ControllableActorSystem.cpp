@@ -32,7 +32,6 @@ namespace sage
         auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
         if (controlledActor.checkTargetPosTimer.HasFinished())
         {
-            // TODO: bug likely occurs here
             controlledActor.checkTargetPosTimer.Restart();
             auto& targetTrans = registry->get<sgTransform>(target);
             PathfindToLocation(controlledActorId, targetTrans.position());
@@ -63,31 +62,6 @@ namespace sage
         }
 
         gameData->actorMovementSystem->CancelMovement(entity);
-    }
-
-    void ControllableActorSystem::onEnemyClick(entt::entity clickedEntity)
-    {
-        // Flush any previous commands
-        gameData->actorMovementSystem->CancelMovement(controlledActorId);
-        auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
-        controlledActor.targetActor = clickedEntity;
-        auto& targetTrans = registry->get<sgTransform>(clickedEntity);
-        controlledActor.targetActorPos = targetTrans.position();
-        {
-            entt::sink sink{targetTrans.onPositionUpdate};
-            sink.connect<&ControllableActorSystem::onTargetUpdate>(this);
-        }
-        auto& trans = registry->get<sgTransform>(controlledActorId);
-        {
-            entt::sink sink{trans.onMovementCancel};
-            sink.connect<&ControllableActorSystem::CancelMovement>(this);
-        }
-        {
-            entt::sink sink{trans.onFinishMovement};
-            sink.connect<&ControllableActorSystem::CancelMovement>(this);
-        }
-
-        PathfindToLocation(controlledActorId, targetTrans.position());
     }
 
     void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location)
@@ -130,10 +104,6 @@ namespace sage
             entt::sink onClick{gameData->cursor->onFloorClick};
             onClick.connect<&ControllableActorSystem::onFloorClick>(this);
         }
-        {
-            entt::sink onClick{gameData->cursor->onEnemyClick};
-            onClick.connect<&ControllableActorSystem::onEnemyClick>(this);
-        }
     }
 
     void ControllableActorSystem::Disable()
@@ -141,10 +111,6 @@ namespace sage
         {
             entt::sink onClick{gameData->cursor->onFloorClick};
             onClick.disconnect<&ControllableActorSystem::onFloorClick>(this);
-        }
-        {
-            entt::sink onClick{gameData->cursor->onEnemyClick};
-            onClick.disconnect<&ControllableActorSystem::onEnemyClick>(this);
         }
     }
 
