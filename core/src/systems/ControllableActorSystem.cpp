@@ -32,6 +32,7 @@ namespace sage
         auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
         if (controlledActor.checkTargetPosTimer.HasFinished())
         {
+            // TODO: bug likely occurs here
             controlledActor.checkTargetPosTimer.Restart();
             auto& targetTrans = registry->get<sgTransform>(target);
             PathfindToLocation(controlledActorId, targetTrans.position());

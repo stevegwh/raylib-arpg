@@ -252,6 +252,7 @@ namespace sage
         auto& worldObject = registry->emplace<WorldObject>(id);
 
         auto& actor = registry->emplace<ControllableActor>(id);
+        actor.checkTargetPosTimer.SetMaxTime(0.5f);
         actor.pathfindingBounds = 100;
         game->controllableActorSystem->SetControlledActor(id);
         registry->emplace<StatePlayerDefault>(id);

@@ -143,6 +143,10 @@ namespace sage
         state->Update(self);
     }
 
+    void CursorAbility::initStates()
+    {
+    }
+
     CursorAbility::CursorAbility(
         entt::registry* _registry,
         Camera* _camera,
@@ -156,7 +160,6 @@ namespace sage
         states[AbilityState::AWAITING_EXECUTION] =
             std::make_unique<AwaitingExecutionState>(this);
         state = states[AbilityState::IDLE].get();
-
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
         spellCursor = std::move(_spellCursor);
     }

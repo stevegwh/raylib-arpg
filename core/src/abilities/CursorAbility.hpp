@@ -55,6 +55,8 @@ namespace sage
             }
         };
 
+        void initStates();
+
       protected:
         virtual void confirm(entt::entity self);
         CursorAbility(
