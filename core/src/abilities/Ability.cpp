@@ -33,7 +33,7 @@ namespace sage
 
     bool Ability::CooldownReady() const
     {
-        return cooldownTimer.HasFinished() || !cooldownTimer.IsRunning();
+        return cooldownTimer.HasFinished() || cooldownTimer.GetRemainingTime() <= 0;
     }
 
     void Ability::Update(entt::entity self)
@@ -54,5 +54,6 @@ namespace sage
         : registry(_registry), abilityData(_abilityData)
     {
         cooldownTimer.SetMaxTime(abilityData.cooldownDuration);
+        animationDelayTimer.SetMaxTime(abilityData.animationDelay);
     }
 } // namespace sage

@@ -10,9 +10,9 @@ namespace sage
     void AutoAttackAbility::IdleState::Update(entt::entity self)
     {
         ability->cooldownTimer.Update(GetFrameTime());
-        if (ability->cooldownTimer.HasFinished())
+        if (ability->cooldownTimer.HasFinished() && ability->abilityData.repeatable)
         {
-            ability->ChangeState(self, AbilityState::AWAITING_EXECUTION);
+            ability->Init(self);
         }
         // if (ability->vfx->active)
         // {
@@ -22,16 +22,7 @@ namespace sage
 
     void AutoAttackAbility::IdleState::OnEnter(entt::entity self)
     {
-        if (!ability->abilityData.repeatable)
-        {
-            ability->cooldownTimer.Stop();
-            auto& animation = ability->registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::IDLE, true);
-        }
-        else
-        {
-            ability->cooldownTimer.Restart();
-        }
+        ability->cooldownTimer.Restart();
     }
 
     void AutoAttackAbility::IdleState::Draw3D(entt::entity self)
@@ -55,16 +46,10 @@ namespace sage
     {
         ability->cooldownTimer.Start();
         ability->animationDelayTimer.Start();
-
-        auto& animation = ability->registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, true);
     }
 
     void AutoAttackAbility::Execute(entt::entity self)
     {
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
-
         auto target = registry->get<CombatableActor>(self).target;
         HitSingleTarget(registry, self, abilityData, target);
         ChangeState(self, AbilityState::IDLE);
@@ -72,12 +57,15 @@ namespace sage
 
     void AutoAttackAbility::Init(entt::entity self)
     {
+        auto& animation = registry->get<Animation>(self);
+        animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
         ChangeState(self, AbilityState::AWAITING_EXECUTION);
     }
 
     void AutoAttackAbility::Cancel(entt::entity self)
     {
         cooldownTimer.Stop();
+        animationDelayTimer.Stop();
         ChangeState(self, AbilityState::IDLE);
     }
 
