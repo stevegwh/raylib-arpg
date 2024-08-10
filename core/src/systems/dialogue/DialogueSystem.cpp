@@ -7,6 +7,7 @@
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/Dialogue.hpp"
+#include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "GameData.hpp"
 
@@ -58,9 +59,10 @@ namespace sage
         active = true;
 
         {
-            entt::sink sink{actorTrans.onFinishMovement};
+            auto& moveableActor = registry->get<MoveableActor>(controlledActor);
+            entt::sink sink{moveableActor.onFinishMovement};
             sink.disconnect<&DialogueSystem::startConversation>(this);
-            entt::sink sink2{actorTrans.onMovementCancel};
+            entt::sink sink2{moveableActor.onMovementCancel};
             sink2.disconnect<&DialogueSystem::cancelConversation>(this);
         }
     }
@@ -87,16 +89,13 @@ namespace sage
         oldCamTarget = {};
     }
 
-    void DialogueSystem::cancelConversation(
-        entt::entity entity) // Not the best name (isn't on stopping a conversation)
+    void DialogueSystem::cancelConversation(entt::entity entity)
     {
-        {
-            auto& actorTrans = registry->get<sgTransform>(entity);
-            entt::sink sink{actorTrans.onFinishMovement};
-            sink.disconnect<&DialogueSystem::startConversation>(this);
-            entt::sink sink2{actorTrans.onMovementCancel};
-            sink2.disconnect<&DialogueSystem::cancelConversation>(this);
-        }
+        auto& moveableActor = registry->get<MoveableActor>(controlledActor);
+        entt::sink sink{moveableActor.onFinishMovement};
+        sink.disconnect<&DialogueSystem::startConversation>(this);
+        entt::sink sink2{moveableActor.onMovementCancel};
+        sink2.disconnect<&DialogueSystem::cancelConversation>(this);
         clickedNPC = entt::null;
     }
 
@@ -109,11 +108,11 @@ namespace sage
         const auto& npcCol = registry->get<Collideable>(_clickedNPC);
         gameData->controllableActorSystem->PathfindToLocation(
             controlledActor, npc.conversationPos);
-        auto& actorTrans = registry->get<sgTransform>(controlledActor);
         {
-            entt::sink sink{actorTrans.onFinishMovement};
+            auto& moveableActor = registry->get<MoveableActor>(controlledActor);
+            entt::sink sink{moveableActor.onFinishMovement};
             sink.connect<&DialogueSystem::startConversation>(this);
-            entt::sink sink2{actorTrans.onMovementCancel};
+            entt::sink sink2{moveableActor.onMovementCancel};
             sink2.connect<&DialogueSystem::cancelConversation>(this);
         }
     }

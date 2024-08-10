@@ -179,7 +179,7 @@ namespace sage
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
-        registry->emplace<MoveableActor>(id);
+        auto& moveableActor = registry->emplace<MoveableActor>(id);
 
         auto model = LoadModel(modelPath);
 
@@ -194,13 +194,13 @@ namespace sage
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         {
-            entt::sink sink{transform.onFinishMovement};
+            entt::sink sink{moveableActor.onFinishMovement};
             sink.connect<[](Animation& animation, entt::entity entity) {
                 animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
             }>(animation);
         }
         {
-            entt::sink sink{transform.onStartMovement};
+            entt::sink sink{moveableActor.onStartMovement};
             sink.connect<[](Animation& animation, entt::entity entity) {
                 animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
             }>(animation);

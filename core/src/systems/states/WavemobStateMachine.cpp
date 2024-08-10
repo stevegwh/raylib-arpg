@@ -3,6 +3,7 @@
 #include "abilities/WavemobAutoAttack.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
+#include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "GameData.hpp"
 
@@ -124,15 +125,15 @@ namespace sage
 
             gameData->actorMovementSystem->PathfindToLocation(self, target);
 
-            auto& trans = registry->get<sgTransform>(self);
-            entt::sink sink{trans.onFinishMovement};
+            auto& moveableActor = registry->get<MoveableActor>(self);
+            entt::sink sink{moveableActor.onFinishMovement};
             sink.connect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 
         void TargetOutOfRangeState::OnStateExit(entt::entity self)
         {
-            auto& trans = registry->get<sgTransform>(self);
-            entt::sink sink{trans.onFinishMovement};
+            auto& moveableActor = registry->get<MoveableActor>(self);
+            entt::sink sink{moveableActor.onFinishMovement};
             sink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 

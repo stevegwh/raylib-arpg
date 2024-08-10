@@ -2,6 +2,7 @@
 
 #include "abilities/PlayerAutoAttack.hpp"
 #include "components/Animation.hpp"
+#include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "GameData.hpp"
 
@@ -106,15 +107,13 @@ namespace sage
 
         void ApproachingTargetState::OnStateEnter(entt::entity self)
         {
-            // TODO: Below is being set in ControllableActorSystem. State should only be
-            // managed here.
             gameData->actorMovementSystem->CancelMovement(self); // Flush queue
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
-            auto& playerTrans = registry->get<sgTransform>(self);
-            entt::sink sink{playerTrans.onFinishMovement};
+            auto& moveableActor = registry->get<MoveableActor>(self);
+            entt::sink sink{moveableActor.onFinishMovement};
             sink.connect<&ApproachingTargetState::onTargetReached>(this);
 
             auto& combatable = registry->get<CombatableActor>(self);
@@ -128,8 +127,9 @@ namespace sage
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
+            Vector3 playerPos = registry->get<sgTransform>(self).position();
             Vector3 enemyPos = enemyTrans.position();
-            Vector3 direction = Vector3Subtract(enemyPos, playerTrans.position());
+            Vector3 direction = Vector3Subtract(enemyPos, playerPos);
             float length = Vector3Length(direction);
             direction = Vector3Scale(Vector3Normalize(direction), combatable.attackRange);
 
@@ -142,8 +142,8 @@ namespace sage
         {
             gameData->controllableActorSystem->CancelMovement(self);
 
-            auto& playerTrans = registry->get<sgTransform>(self);
-            entt::sink sink{playerTrans.onFinishMovement};
+            auto& moveableActor = registry->get<MoveableActor>(self);
+            entt::sink sink{moveableActor.onFinishMovement};
             sink.disconnect<&ApproachingTargetState::onTargetReached>(this);
 
             auto& combatable = registry->get<CombatableActor>(self);

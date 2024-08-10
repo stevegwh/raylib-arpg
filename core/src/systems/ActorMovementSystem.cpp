@@ -38,8 +38,8 @@ namespace sage
     void ActorMovementSystem::CancelMovement(const entt::entity& entity) const
     {
         PruneMoveCommands(entity);
-        auto& transform = registry->get<sgTransform>(entity);
-        transform.onMovementCancel.publish(entity);
+        auto& moveableActor = registry->get<MoveableActor>(entity);
+        moveableActor.onMovementCancel.publish(entity);
     }
 
     void ActorMovementSystem::PathfindToLocation(
@@ -83,14 +83,14 @@ namespace sage
             entity, actorTrans.position(), destination, minRange, maxRange);
         PruneMoveCommands(entity);
         auto& transform = registry->get<sgTransform>(entity);
-        auto& movableActor = registry->get<MoveableActor>(entity);
+        auto& moveableActor = registry->get<MoveableActor>(entity);
         for (auto n : path)
-            movableActor.path.emplace_back(n);
+            moveableActor.path.emplace_back(n);
         if (!path.empty())
         {
             transform.direction = Vector3Normalize(
-                Vector3Subtract(movableActor.path.front(), transform.position()));
-            transform.onStartMovement.publish(entity);
+                Vector3Subtract(moveableActor.path.front(), transform.position()));
+            moveableActor.onStartMovement.publish(entity);
         }
         // TODO: Handle destination being unreachable. (Change animation to IDLE, for a
         // start)
@@ -187,8 +187,8 @@ namespace sage
                 moveableActor.path.pop_front();
                 if (moveableActor.path.empty())
                 {
-                    actorTrans.onDestinationReached.publish(entity);
-                    actorTrans.onFinishMovement.publish(entity);
+                    moveableActor.onDestinationReached.publish(entity);
+                    moveableActor.onFinishMovement.publish(entity);
                     navigationGridSystem->MarkSquareAreaOccupied(
                         actorCollideable.worldBoundingBox, true, entity);
                     continue;

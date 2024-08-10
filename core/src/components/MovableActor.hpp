@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "raylib.h"
 #include "NavigationGridSquare.hpp"
+#include "raylib.h"
 #include <entt/entt.hpp>
 
 #include <deque>
@@ -14,15 +14,20 @@
 
 namespace sage
 {
-	struct MoveableActor
-	{
-		entt::entity lastHitActor = entt::null;
-		Vector3 hitActorLastPos{};
-		std::deque<Vector3> path{};
-		bool isMoving() const
-		{
-			return !path.empty();
-		}
+    struct MoveableActor
+    {
+        entt::entity lastHitActor = entt::null;
+        Vector3 hitActorLastPos{};
+        std::deque<Vector3> path{};
+        bool isMoving() const
+        {
+            return !path.empty();
+        }
         std::vector<GridSquare> debugRay;
-	};
-} // sage
+		
+        entt::sigh<void(entt::entity)> onStartMovement{};
+        entt::sigh<void(entt::entity)> onFinishMovement{};
+        entt::sigh<void(entt::entity)> onDestinationReached{};
+        entt::sigh<void(entt::entity)> onMovementCancel{};
+    };
+} // namespace sage
