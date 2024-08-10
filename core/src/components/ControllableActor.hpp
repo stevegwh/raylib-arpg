@@ -11,14 +11,24 @@
 
 namespace sage
 {
-    struct ControllableActor
+    class Cursor;
+
+    class ControllableActor
     {
-        // The time between checks for the target position.
+        entt::entity self;
+
+        void EnemyClicked(entt::entity enemy);
+
+      public:
+        entt::sigh<void(entt::entity, entt::entity)>
+            onEnemyClicked{}; // Self, Clicked enemy
+        // Timer to check if the target has moved.
         Timer checkTargetPosTimer{};
         // The max range the actor can pathfind at one time.
-        int pathfindingBounds = 25;
+        int pathfindingBounds = 100;
         // An actor that is the target for pathfinding etc.
         entt::entity targetActor = entt::null;
         Vector3 targetActorPos{};
+        ControllableActor(entt::entity _self, Cursor* _cursor);
     };
 } // namespace sage

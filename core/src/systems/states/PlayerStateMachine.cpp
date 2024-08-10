@@ -2,6 +2,7 @@
 
 #include "abilities/PlayerAutoAttack.hpp"
 #include "components/Animation.hpp"
+#include "components/ControllableActor.hpp"
 #include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "GameData.hpp"
@@ -43,11 +44,12 @@ namespace sage
 
         void DefaultState::OnStateEnter(entt::entity entity)
         {
-            auto& combatableActor = registry->get<CombatableActor>(entity);
 
-            entt::sink sink{combatableActor.onEnemyClicked};
+            auto& controllable = registry->get<ControllableActor>(entity);
+            entt::sink sink{controllable.onEnemyClicked};
             sink.connect<&DefaultState::onEnemyClick>(this);
 
+            auto& combatableActor = registry->get<CombatableActor>(entity);
             entt::sink floorClickSink{combatableActor.onAttackCancelled};
             floorClickSink.connect<&DefaultState::onFloorClick>(this);
 
@@ -57,8 +59,8 @@ namespace sage
 
         void DefaultState::OnStateExit(entt::entity entity)
         {
-            auto& combatableActor = registry->get<CombatableActor>(entity);
-            entt::sink sink{combatableActor.onEnemyClicked};
+            auto& controllable = registry->get<ControllableActor>(entity);
+            entt::sink sink{controllable.onEnemyClicked};
             sink.disconnect<&DefaultState::onEnemyClick>(this);
 
             entt::sink floorClickSink{gameData->cursor->onFloorClick};
@@ -122,7 +124,8 @@ namespace sage
             entt::sink attackCancelledSink{combatable.onAttackCancelled};
             attackCancelledSink.connect<&ApproachingTargetState::onAttackCancel>(this);
 
-            entt::sink enemyClickedSink{combatable.onEnemyClicked};
+            auto& controllable = registry->get<ControllableActor>(self);
+            entt::sink enemyClickedSink{controllable.onEnemyClicked};
             enemyClickedSink.disconnect<&ApproachingTargetState::onEnemyClick>(this);
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
@@ -224,7 +227,8 @@ namespace sage
             entt::sink attackCancelSink{combatable.onAttackCancelled};
             attackCancelSink.connect<&CombatState::onAttackCancel>(this);
 
-            entt::sink enemyClickedSink{combatable.onEnemyClicked};
+            auto& controllable = registry->get<ControllableActor>(entity);
+            entt::sink enemyClickedSink{controllable.onEnemyClicked};
             enemyClickedSink.connect<&CombatState::onEnemyClick>(this);
         }
 
@@ -244,7 +248,9 @@ namespace sage
             entt::sink attackCancelSink{combatable.onAttackCancelled};
             attackCancelSink.disconnect<&CombatState::onAttackCancel>(this);
 
-            entt::sink enemyClickedSink{combatable.onEnemyClicked};
+            auto& controllable = registry->get<ControllableActor>(entity);
+
+            entt::sink enemyClickedSink{controllable.onEnemyClicked};
             enemyClickedSink.disconnect<&CombatState::onEnemyClick>(this);
 
             auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
