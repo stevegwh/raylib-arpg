@@ -9,25 +9,31 @@ namespace sage
 {
     class StatePlayerDefault : public StateMachineComponent
     {
-    public:
+      public:
         ~StatePlayerDefault() override = default;
     };
-   
-    class StatePlayerApproachingTarget : public StateMachineComponent
+
+    class StatePlayerMovingToAttackEnemy : public StateMachineComponent
     {
-    public:
-        ~StatePlayerApproachingTarget() override = default;
+      public:
+        ~StatePlayerMovingToAttackEnemy() override = default;
+    };
+
+    class StatePlayerMovingToTalkToNPC : public StateMachineComponent
+    {
+      public:
+        ~StatePlayerMovingToTalkToNPC() override = default;
     };
 
     class StatePlayerCombat : public StateMachineComponent
     {
-    public:
+      public:
         ~StatePlayerCombat() override = default;
     };
 
     using PlayerStates = std::tuple<
         StatePlayerDefault,
-        StatePlayerApproachingTarget,
-        StatePlayerCombat
-    >;
-} // sage
+        StatePlayerMovingToAttackEnemy,
+        StatePlayerMovingToTalkToNPC,
+        StatePlayerCombat>;
+} // namespace sage

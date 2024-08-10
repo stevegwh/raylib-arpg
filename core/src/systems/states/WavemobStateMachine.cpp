@@ -236,6 +236,9 @@ namespace sage
             combatable.target = entt::null;
             combatable.dying = true;
 
+            auto& bb = registry->get<Collideable>(self).worldBoundingBox;
+            gameData->navigationGridSystem->MarkSquareAreaOccupied(bb, false);
+
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             {
