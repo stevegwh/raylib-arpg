@@ -2,7 +2,7 @@
 #pragma once
 #include "components/states/PlayerStates.hpp"
 #include "systems/BaseSystem.hpp"
-#include "systems/states/StateMachine.hpp"
+#include "systems/states/StateMachineECS.hpp"
 #include <entt/entt.hpp>
 #include <memory>
 #include <vector>
@@ -13,7 +13,7 @@ namespace sage
 
     namespace playerstates
     {
-        class DefaultState : public StateMachine<DefaultState, StatePlayerDefault>
+        class DefaultState : public StateMachineECS<DefaultState, StatePlayerDefault>
         {
             GameData* gameData;
             void onEnemyClick(entt::entity self, entt::entity target);
@@ -28,7 +28,7 @@ namespace sage
         };
 
         class MovingToTalkToNPCState
-            : public StateMachine<MovingToTalkToNPCState, StatePlayerMovingToTalkToNPC>
+            : public StateMachineECS<MovingToTalkToNPCState, StatePlayerMovingToTalkToNPC>
         {
             GameData* gameData;
             // void onMoveCancel(entt::entity self);
@@ -42,7 +42,7 @@ namespace sage
             MovingToTalkToNPCState(entt::registry* _registry, GameData* gameData);
         };
 
-        class MovingToAttackEnemyState : public StateMachine<
+        class MovingToAttackEnemyState : public StateMachineECS<
                                              MovingToAttackEnemyState,
                                              StatePlayerMovingToAttackEnemy>
         {
@@ -58,7 +58,7 @@ namespace sage
             MovingToAttackEnemyState(entt::registry* _registry, GameData* gameData);
         };
 
-        class CombatState : public StateMachine<CombatState, StatePlayerCombat>
+        class CombatState : public StateMachineECS<CombatState, StatePlayerCombat>
         {
             GameData* gameData;
             void onTargetDeath(entt::entity self, entt::entity target);

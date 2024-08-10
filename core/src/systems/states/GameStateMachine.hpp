@@ -5,7 +5,7 @@
 #pragma once
 
 #include "components/states/GameStates.hpp"
-#include "systems/states/StateMachine.hpp"
+#include "systems/states/StateMachineECS.hpp"
 #include <Timer.hpp>
 
 #include <entt/entt.hpp>
@@ -20,7 +20,7 @@ namespace sage
 
     namespace gamestates
     {
-        class DefaultState : public StateMachine<DefaultState, StateGameDefault>
+        class DefaultState : public StateMachineECS<DefaultState, StateGameDefault>
         {
             entt::entity gameEntity;
             Timer timer{};
@@ -34,7 +34,7 @@ namespace sage
             DefaultState(entt::registry* _registry, entt::entity _gameEntity);
         };
 
-        class WaveState : public StateMachine<WaveState, StateGameWave>
+        class WaveState : public StateMachineECS<WaveState, StateGameWave>
         {
             GameData* gameData;
             void initWave();

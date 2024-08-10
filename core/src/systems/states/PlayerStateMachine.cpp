@@ -64,7 +64,7 @@ namespace sage
         }
 
         DefaultState::DefaultState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachineECS(_registry), gameData(_gameData)
         {
         }
 
@@ -113,7 +113,7 @@ namespace sage
 
         MovingToAttackEnemyState::MovingToAttackEnemyState(
             entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachineECS(_registry), gameData(_gameData)
         {
         }
 
@@ -185,7 +185,7 @@ namespace sage
         }
 
         CombatState::CombatState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachineECS(_registry), gameData(_gameData)
         {
         }
 

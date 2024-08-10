@@ -51,7 +51,7 @@ namespace sage
         }
 
         DefaultState::DefaultState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachineECS(_registry), gameData(_gameData)
         {
         }
 
@@ -139,7 +139,7 @@ namespace sage
 
         TargetOutOfRangeState::TargetOutOfRangeState(
             entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachineECS(_registry), gameData(_gameData)
         {
         }
 
@@ -192,7 +192,7 @@ namespace sage
             autoAttackAbility.Cancel(entity);
         }
 
-        CombatState::CombatState(entt::registry* _registry) : StateMachine(_registry)
+        CombatState::CombatState(entt::registry* _registry) : StateMachineECS(_registry)
         {
         }
 
@@ -256,7 +256,7 @@ namespace sage
         }
 
         DyingState::DyingState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachineECS(_registry), gameData(_gameData)
         {
         }
 
