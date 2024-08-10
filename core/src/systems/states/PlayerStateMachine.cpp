@@ -23,6 +23,16 @@ namespace sage
         {
         }
 
+        void DefaultState::onFloorClick(entt::entity self)
+        {
+            gameData->controllableActorSystem->CancelMovement(
+                self); // Flush any previous commands
+            gameData->controllableActorSystem->PathfindToLocation(
+                self, gameData->cursor->collision().point);
+
+            // Change to a different state?
+        }
+
         void DefaultState::onEnemyClick(entt::entity self, entt::entity target)
         {
             auto& combatable = registry->get<CombatableActor>(self);
@@ -33,8 +43,12 @@ namespace sage
         void DefaultState::OnStateEnter(entt::entity entity)
         {
             auto& combatableActor = registry->get<CombatableActor>(entity);
+
             entt::sink sink{combatableActor.onEnemyClicked};
             sink.connect<&DefaultState::onEnemyClick>(this);
+
+            entt::sink floorClickSink{combatableActor.onAttackCancelled};
+            floorClickSink.connect<&DefaultState::onFloorClick>(this);
 
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
@@ -45,9 +59,13 @@ namespace sage
             auto& combatableActor = registry->get<CombatableActor>(entity);
             entt::sink sink{combatableActor.onEnemyClicked};
             sink.disconnect<&DefaultState::onEnemyClick>(this);
+
+            entt::sink floorClickSink{gameData->cursor->onFloorClick};
+            floorClickSink.disconnect<&DefaultState::onFloorClick>(this);
         }
 
-        DefaultState::DefaultState(entt::registry* _registry) : StateMachine(_registry)
+        DefaultState::DefaultState(entt::registry* _registry, GameData* _gameData)
+            : StateMachine(_registry), gameData(_gameData)
         {
         }
 
@@ -63,6 +81,14 @@ namespace sage
             // gameData->controllableActorSystem->CancelMovement(self);
             auto& playerCombatable = registry->get<CombatableActor>(self);
             playerCombatable.target = entt::null;
+
+            // Below is same as DefaultState::onFloorClick
+            gameData->controllableActorSystem->CancelMovement(
+                self); // Flush any previous commands
+            gameData->controllableActorSystem->PathfindToLocation(
+                self, gameData->cursor->collision().point);
+            // ----
+
             ChangeState<StatePlayerDefault, PlayerStates>(self);
         }
 
@@ -252,7 +278,7 @@ namespace sage
     PlayerStateController::PlayerStateController(
         entt::registry* _registry, GameData* _gameData)
     {
-        defaultState = std::make_unique<playerstates::DefaultState>(_registry);
+        defaultState = std::make_unique<playerstates::DefaultState>(_registry, _gameData);
         approachingTargetState =
             std::make_unique<playerstates::ApproachingTargetState>(_registry, _gameData);
         engagedInCombatState =

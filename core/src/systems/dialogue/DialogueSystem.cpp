@@ -53,7 +53,8 @@ namespace sage
         gameData->camera->LockInput();
 
         gameData->cursor->DisableContextSwitching();
-        gameData->controllableActorSystem->Disable();
+        // gameData->controllableActorSystem->Disable();
+        // TODO: Switch to dialogue state. Maybe trigger an onDialogueStart event?
         active = true;
 
         {
@@ -74,7 +75,8 @@ namespace sage
 
         gameData->camera->UnlockInput();
         gameData->cursor->EnableContextSwitching();
-        gameData->controllableActorSystem->Enable();
+        // gameData->controllableActorSystem->Enable();
+        // TODO: Trigger an onDialogueEnd event which changes player state.
         active = false;
         registry->get<Animation>(clickedNPC)
             .ChangeAnimation(0); // TODO: Change to an enum

@@ -15,7 +15,9 @@ namespace sage
     {
         class DefaultState : public StateMachine<DefaultState, StatePlayerDefault>
         {
+            GameData* gameData;
             void onEnemyClick(entt::entity self, entt::entity target);
+            void onFloorClick(entt::entity self);
 
           public:
             void Update() override;
@@ -23,7 +25,7 @@ namespace sage
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~DefaultState() = default;
-            DefaultState(entt::registry* _registry);
+            DefaultState(entt::registry* _registry, GameData* _gameData);
         };
 
         class ApproachingTargetState

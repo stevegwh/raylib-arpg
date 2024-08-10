@@ -24,8 +24,6 @@ namespace sage
         entt::entity controlledActorId{};
         // TODO: Right now this system just controls one unit at a time. What if we wanted
         // more?
-        void onFloorClick(entt::entity entity);
-        void onEnemyClick(entt::entity clickedEntity);
         void onTargetUpdate(entt::entity target);
 
       public:
@@ -39,8 +37,6 @@ namespace sage
         bool ReachedDestination(entt::entity entity) const;
 
         entt::sigh<void(entt::entity)> onControlledActorChange;
-        void Enable();
-        void Disable();
         void Update() const;
         ControllableActorSystem(entt::registry* _registry, GameData* _gameData);
     };

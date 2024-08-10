@@ -40,7 +40,6 @@ namespace sage
 
     void ControllableActorSystem::CancelMovement(entt::entity entity)
     {
-        if (!registry->any_of<ControllableActor>(entity)) return; // TODO: Necessary?
         auto& controlledActor = registry->get<ControllableActor>(entity);
         if (controlledActor.targetActor != entt::null &&
             registry->valid(controlledActor.targetActor))
@@ -50,15 +49,6 @@ namespace sage
                 entt::sink sink{target.onPositionUpdate};
                 sink.disconnect<&ControllableActorSystem::onTargetUpdate>(this);
             }
-        }
-        auto& trans = registry->get<sgTransform>(entity);
-        {
-            entt::sink sink{trans.onMovementCancel};
-            sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
-        }
-        {
-            entt::sink sink{trans.onFinishMovement};
-            sink.disconnect<&ControllableActorSystem::CancelMovement>(this);
         }
 
         gameData->actorMovementSystem->CancelMovement(entity);
@@ -81,12 +71,6 @@ namespace sage
         // actorMovementSystem->PathfindToLocation(id, patrol);
     }
 
-    void ControllableActorSystem::onFloorClick(entt::entity entity)
-    {
-        CancelMovement(controlledActorId); // Flush any previous commands
-        PathfindToLocation(controlledActorId, gameData->cursor->collision().point);
-    }
-
     void ControllableActorSystem::SetControlledActor(entt::entity id)
     {
         onControlledActorChange.publish(id);
@@ -98,28 +82,11 @@ namespace sage
         return controlledActorId;
     }
 
-    void ControllableActorSystem::Enable()
-    {
-        {
-            entt::sink onClick{gameData->cursor->onFloorClick};
-            onClick.connect<&ControllableActorSystem::onFloorClick>(this);
-        }
-    }
-
-    void ControllableActorSystem::Disable()
-    {
-        {
-            entt::sink onClick{gameData->cursor->onFloorClick};
-            onClick.disconnect<&ControllableActorSystem::onFloorClick>(this);
-        }
-    }
-
     ControllableActorSystem::ControllableActorSystem(
         entt::registry* _registry, GameData* _gameData)
         : BaseSystem(_registry), gameData(_gameData)
 
     {
-        Enable();
         {
             entt::sink sink{onControlledActorChange};
             sink.connect<&Cursor::OnControlledActorChange>(gameData->cursor.get());
