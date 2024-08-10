@@ -93,19 +93,11 @@ namespace sage
 
         // Collision
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
-        auto& collideable = registry->emplace<Collideable>(id, bb);
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
-        game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
-        {
-            entt::sink sink{transform.onPositionUpdate};
-            sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
-                collisionSystem.OnTransformUpdate(entity);
-            }>(*game->collisionSystem);
-        }
+        collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely redundant
         // ---
-
-        auto& worldObject = registry->emplace<WorldObject>(id);
 
         registry->emplace<StateEnemyDefault>(id);
         // Always set state last to ensure everything is initialised properly before.
@@ -142,14 +134,12 @@ namespace sage
 
         BoundingBox bb = createRectangularBoundingBox(
             3.0f, 7.0f); // Manually set bounding box dimensions
-        auto& collideable = registry->emplace<Collideable>(id, bb);
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
-        game->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
+        collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely redundant
         {
             entt::sink sink{transform.onPositionUpdate};
-            sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
-                collisionSystem.OnTransformUpdate(entity);
-            }>(*game->collisionSystem);
+            sink.connect<&Collideable::OnTransformUpdate>(collideable);
         }
 
         auto& dialogue = registry->emplace<Dialogue>(id);
@@ -239,13 +229,8 @@ namespace sage
 
         BoundingBox bb = createRectangularBoundingBox(
             3.0f, 7.0f); // Manually set bounding box dimensions
-        auto& collideable = registry->emplace<Collideable>(id, bb);
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
-        {
-            entt::sink sink{transform.onPositionUpdate};
-            sink.connect<&CollisionSystem::OnTransformUpdate>(*game->collisionSystem);
-        }
-        game->collisionSystem->OnTransformUpdate(id);
 
         auto& controllable =
             registry->emplace<ControllableActor>(id, id, game->cursor.get());
@@ -280,13 +265,7 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(
             id, CalculateModelBoundingBox(renderable.model));
         collideable.collisionLayer = CollisionLayer::BUILDING;
-        data->collisionSystem->UpdateWorldBoundingBox(id, transform.GetMatrix());
-        {
-            entt::sink sink{transform.onPositionUpdate};
-            sink.connect<[](CollisionSystem& collisionSystem, entt::entity entity) {
-                collisionSystem.OnTransformUpdate(entity);
-            }>(*data->collisionSystem);
-        }
+        collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely redundant
         registry->emplace<WorldObject>(id);
     }
 
@@ -366,8 +345,8 @@ namespace sage
             {
                 collideable.collisionLayer = CollisionLayer::DEFAULT;
             }
-            scene->data->collisionSystem->UpdateWorldBoundingBox(
-                id, transform.GetMatrix());
+            collideable.SetWorldBoundingBox(
+                transform.GetMatrix()); // TODO: Likely redundant
         }
 
         // Calculate grid based on walkable area
