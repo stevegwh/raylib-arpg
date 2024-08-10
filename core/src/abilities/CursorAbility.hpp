@@ -22,7 +22,7 @@ namespace sage
 
         class IdleState : public State
         {
-            const CursorAbility* ability;
+            CursorAbility* ability;
 
           public:
             void Update(entt::entity self) override;
@@ -34,7 +34,7 @@ namespace sage
 
         class CursorSelectState : public State
         {
-            const CursorAbility* ability;
+            CursorAbility* ability;
             bool cursorActive = false;
             void enableCursor();
             void disableCursor();
@@ -51,7 +51,7 @@ namespace sage
 
         class AwaitingExecutionState : public State
         {
-            const CursorAbility* ability;
+            CursorAbility* ability;
 
           public:
             void Update(entt::entity self) override;

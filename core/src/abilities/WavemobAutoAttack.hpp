@@ -1,17 +1,13 @@
 #pragma once
 
-#include "Ability.hpp"
+#include "AutoAttackAbility.hpp"
 
 #include <entt/entt.hpp>
 
 namespace sage
 {
-    struct WavemobAutoAttack : public Ability
+    struct WavemobAutoAttack : public AutoAttackAbility
     {
-        void Execute(entt::entity self) override;
-        void Update(entt::entity self) override;
-        void Init(entt::entity self) override;
-        void Cancel();
         ~WavemobAutoAttack() override = default;
         WavemobAutoAttack(entt::registry* _registry);
     };

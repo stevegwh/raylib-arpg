@@ -1,15 +1,11 @@
 #pragma once
 
-#include "Ability.hpp"
+#include "AutoAttackAbility.hpp"
 
 namespace sage
 {
-    struct PlayerAutoAttack : public Ability
+    struct PlayerAutoAttack : public AutoAttackAbility
     {
-        void Execute(entt::entity self) override;
-        void Update(entt::entity self) override;
-        void Init(entt::entity self) override;
-        void Cancel();
         ~PlayerAutoAttack() override = default;
         PlayerAutoAttack(entt::registry* _registry);
     };
