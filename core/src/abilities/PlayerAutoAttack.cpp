@@ -16,37 +16,8 @@ namespace sage
         .baseDamage = DAMAGE,
         .range = 5};
 
-    void PlayerAutoAttack::Execute(entt::entity self)
-    {
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
-
-        auto target = registry->get<CombatableActor>(self).target;
-        HitSingleTarget(registry, self, abilityData, target);
-    }
-
-    void PlayerAutoAttack::Init(entt::entity self)
-    {
-        cooldownTimer.Start();
-    }
-
-    void PlayerAutoAttack::Cancel()
-    {
-        cooldownTimer.Stop();
-    }
-
-    void PlayerAutoAttack::Update(entt::entity self)
-    {
-        cooldownTimer.Update(GetFrameTime());
-        if (cooldownTimer.HasFinished())
-        {
-            Execute(self);
-            cooldownTimer.Restart();
-        }
-    }
-
     PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry)
-        : Ability(_registry, _abilityData)
+        : AutoAttackAbility(_registry, _abilityData)
     {
     }
 } // namespace sage
