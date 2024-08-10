@@ -14,23 +14,18 @@ namespace sage
         {
             ability->Init(self);
         }
-        // if (ability->vfx->active)
-        // {
-        //     ability->vfx->Update(GetFrameTime());
-        // }
-    }
-
-    void AutoAttackAbility::IdleState::OnEnter(entt::entity self)
-    {
-        ability->cooldownTimer.Restart();
+        if (ability->vfx && ability->vfx->active)
+        {
+            ability->vfx->Update(GetFrameTime());
+        }
     }
 
     void AutoAttackAbility::IdleState::Draw3D(entt::entity self)
     {
-        // if (ability->vfx->active)
-        // {
-        //     ability->vfx->Draw3D();
-        // }
+        if (ability->vfx && ability->vfx->active)
+        {
+            ability->vfx->Draw3D();
+        }
     }
 
     void AutoAttackAbility::AwaitingExecutionState::Update(entt::entity self)
@@ -80,13 +75,18 @@ namespace sage
         state->Update(self);
     }
 
-    AutoAttackAbility::AutoAttackAbility(
-        entt::registry* _registry, AbilityData _abilityData)
-        : Ability(_registry, _abilityData)
+    void AutoAttackAbility::initStates()
     {
         states[AbilityState::IDLE] = std::make_unique<IdleState>(this);
         states[AbilityState::AWAITING_EXECUTION] =
             std::make_unique<AwaitingExecutionState>(this);
         state = states[AbilityState::IDLE].get();
+    }
+
+    AutoAttackAbility::AutoAttackAbility(
+        entt::registry* _registry, AbilityData _abilityData)
+        : Ability(_registry, _abilityData)
+    {
+        initStates();
     }
 } // namespace sage

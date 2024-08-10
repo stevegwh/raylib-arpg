@@ -2,9 +2,6 @@
 
 #include "Ability.hpp"
 
-#include "particle/RainOfFireVFX.hpp"
-#include "TextureTerrainOverlay.hpp"
-
 #include <memory>
 
 namespace sage
@@ -15,8 +12,6 @@ namespace sage
     class CursorAbility : public Ability
     {
         Cursor* cursor;
-        std::unique_ptr<RainOfFireVFX> vfx;
-        std::unique_ptr<TextureTerrainOverlay> spellCursor;
         float whirlwindRadius = 50.0f;
 
         class IdleState : public State
