@@ -6,11 +6,6 @@
 
 namespace sage
 {
-    void CombatableActor::EnemyClicked(entt::entity enemy)
-    {
-        assert(enemy != entt::null);
-        onEnemyClicked.publish(self, enemy);
-    }
 
     void CombatableActor::AttackCancelled()
     {

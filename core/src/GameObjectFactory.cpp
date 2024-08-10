@@ -121,7 +121,7 @@ namespace sage
         // std::string("resources/models/obj/cube_diffuse.png") };
 
         auto& transform = registry->emplace<sgTransform>(id);
-        GridSquare actorIdx;
+        GridSquare actorIdx{};
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height =
             game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)
@@ -179,6 +179,7 @@ namespace sage
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
+
         auto& moveableActor = registry->emplace<MoveableActor>(id);
 
         auto model = LoadModel(modelPath);
@@ -206,9 +207,9 @@ namespace sage
             }>(animation);
         }
         {
+            // TODO: Just to test animations on demand
             entt::sink sink{game->userInput->keyIPressed};
             sink.connect<[](Animation& animation) {
-                // TODO: Just to test animations on demand
                 if (animation.animIndex == 0)
                 {
                     animation.ChangeAnimationByEnum(AnimationEnum::TALK);
@@ -226,10 +227,6 @@ namespace sage
         registry->emplace<PlayerAutoAttack>(id, registry);
         // Links the cursor's events to the combatable actor which passes on the entity id
         // to the system
-        {
-            entt::sink sink{game->cursor->onEnemyClick};
-            sink.connect<&CombatableActor::EnemyClicked>(combatable);
-        }
         {
             entt::sink sink{game->cursor->onFloorClick};
             sink.connect<&CombatableActor::AttackCancelled>(combatable);
@@ -249,12 +246,11 @@ namespace sage
             sink.connect<&CollisionSystem::OnTransformUpdate>(*game->collisionSystem);
         }
         game->collisionSystem->OnTransformUpdate(id);
-        auto& worldObject = registry->emplace<WorldObject>(id);
 
-        auto& actor = registry->emplace<ControllableActor>(id);
-        actor.checkTargetPosTimer.SetMaxTime(0.5f);
-        actor.pathfindingBounds = 100;
+        auto& controllable =
+            registry->emplace<ControllableActor>(id, id, game->cursor.get());
         game->controllableActorSystem->SetControlledActor(id);
+
         registry->emplace<StatePlayerDefault>(id);
         // Always set state last to ensure everything is initialised properly before.
         return id;
