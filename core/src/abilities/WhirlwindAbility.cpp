@@ -22,50 +22,27 @@ namespace sage
         .element = AttackElement::PHYSICAL,
         .cooldownDuration = COOLDOWN,
         .baseDamage = DAMAGE,
-        .range = 5};
-
-    void WhirlwindAbility::Init(entt::entity self)
-    {
-        if (GetRemainingCooldownTime() > 0)
-        {
-            return;
-        }
-
-        // std::cout << "Whirlwind ability used \n";
-        shouldCast = true;
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, 3, true);
-
-        cooldownTimer.Start();
-        animationDelayTimer.Start();
-    }
+        .range = 5,
+        .animationDelay = WINDUP,
+        .repeatable = false};
 
     void WhirlwindAbility::Execute(entt::entity self)
     {
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(
             registry, self, abilityData, actorTransform.position(), whirlwindRadius);
-        shouldCast = false;
+        ChangeState(self, AbilityState::IDLE);
     }
 
-    void WhirlwindAbility::Update(entt::entity self)
+    void WhirlwindAbility::Init(entt::entity self)
     {
-        cooldownTimer.Update(GetFrameTime());
-        animationDelayTimer.Update(GetFrameTime());
-        if (shouldCast && animationDelayTimer.HasFinished())
-        {
-            Execute(self);
-            animationDelayTimer.Reset();
-        }
+        auto& animation = registry->get<Animation>(self);
+        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
+        ChangeState(self, AbilityState::AWAITING_EXECUTION);
     }
 
     WhirlwindAbility::WhirlwindAbility(entt::registry* _registry)
-        : Ability(_registry, _abilityData)
+        : AutoAttackAbility(_registry, _abilityData)
     {
-        animationDelayTimer.SetMaxTime(WINDUP);
-        abilityData.element = AttackElement::PHYSICAL;
-        abilityData.baseDamage = DAMAGE;
-        abilityData.cooldownDuration = COOLDOWN;
-        abilityData.range = 5;
     }
 } // namespace sage
