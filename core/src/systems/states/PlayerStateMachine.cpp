@@ -79,6 +79,8 @@ namespace sage
 
         void ApproachingTargetState::OnStateEnter(entt::entity self)
         {
+            // TODO: Below is being set in ControllableActorSystem. State should only be
+            // managed here.
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
@@ -104,7 +106,7 @@ namespace sage
 
             Vector3 targetPos = Vector3Subtract(enemyPos, direction);
 
-            gameData->controllableActorSystem->CancelMovement(self);
+            gameData->controllableActorSystem->PathfindToLocation(self, targetPos);
         }
 
         void ApproachingTargetState::OnStateExit(entt::entity self)
