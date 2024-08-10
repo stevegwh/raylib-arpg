@@ -13,7 +13,7 @@ namespace sage
     void Collideable::OnTransformUpdate(entt::entity self)
     {
         auto& trans = registry->get<sgTransform>(self);
-        Matrix mat = trans.GetMatrixNoRot();
+        Matrix mat = trans.GetMatrixNoRot(); // AABB, so no rotation
         SetWorldBoundingBox(mat);
     }
 
@@ -40,6 +40,6 @@ namespace sage
         auto& transform = registry->get<sgTransform>(_self);
         entt::sink sink{transform.onPositionUpdate};
         sink.connect<&Collideable::OnTransformUpdate>(this);
-        OnTransformUpdate(_self);
+        SetWorldBoundingBox(transform.GetMatrix());
     }
 } // namespace sage

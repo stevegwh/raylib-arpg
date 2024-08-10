@@ -18,7 +18,6 @@
 #include "components/sgTransform.hpp"
 #include "components/states/EnemyStates.hpp"
 #include "components/states/PlayerStates.hpp"
-#include "components/WorldObject.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"
@@ -96,7 +95,8 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
-        collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely redundant
+        // collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely
+        // redundant
         // ---
 
         registry->emplace<StateEnemyDefault>(id);
@@ -136,7 +136,8 @@ namespace sage
             3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
-        collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely redundant
+        // collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely
+        // redundant
         {
             entt::sink sink{transform.onPositionUpdate};
             sink.connect<&Collideable::OnTransformUpdate>(collideable);
@@ -147,7 +148,6 @@ namespace sage
         dialogue.conversationPos = Vector3Add(
             transform.position(),
             Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
-        auto& worldObject = registry->emplace<WorldObject>(id);
         return id;
     }
 
@@ -265,8 +265,8 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(
             id, CalculateModelBoundingBox(renderable.model));
         collideable.collisionLayer = CollisionLayer::BUILDING;
-        collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely redundant
-        registry->emplace<WorldObject>(id);
+        // collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely
+        // redundant
     }
 
     BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
@@ -324,6 +324,8 @@ namespace sage
                 LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
             auto& collideable = registry->emplace<Collideable>(
                 id, CalculateModelBoundingBox(renderable.model));
+            collideable.SetWorldBoundingBox(transform.GetMatrix());
+
             if (renderable.name.find("SM_Bld") != std::string::npos)
             {
                 collideable.collisionLayer = CollisionLayer::BUILDING;
@@ -345,8 +347,6 @@ namespace sage
             {
                 collideable.collisionLayer = CollisionLayer::DEFAULT;
             }
-            collideable.SetWorldBoundingBox(
-                transform.GetMatrix()); // TODO: Likely redundant
         }
 
         // Calculate grid based on walkable area
