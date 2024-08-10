@@ -14,7 +14,9 @@ namespace sage
         .cooldownDuration = COOLDOWN,
         .range = 5,
         .baseDamage = DAMAGE,
-        .element = AttackElement::PHYSICAL};
+        .element = AttackElement::PHYSICAL,
+        .animationDelay = 0,
+        .repeatable = true};
 
     WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry)
         : AutoAttackAbility(_registry, _abilityData)
