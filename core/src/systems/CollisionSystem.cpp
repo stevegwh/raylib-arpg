@@ -141,21 +141,6 @@ namespace sage
         return collisions;
     }
 
-    /**
-     * Responsible for updating the collideable when its corresponding transform changes
-     * @param entity
-     **/
-    void CollisionSystem::OnTransformUpdate(entt::entity entity)
-    {
-        auto& trans = registry->get<sgTransform>(entity);
-        auto& col = registry->get<Collideable>(entity);
-        Matrix mat = trans.GetMatrixNoRot();
-        auto bb = col.localBoundingBox;
-        bb.min = Vector3Transform(bb.min, mat);
-        bb.max = Vector3Transform(bb.max, mat);
-        col.worldBoundingBox = bb;
-    }
-
     void CollisionSystem::DrawDebug()
     {
         auto view = registry->view<Collideable>();
