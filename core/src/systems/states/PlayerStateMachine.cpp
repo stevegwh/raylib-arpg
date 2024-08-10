@@ -217,7 +217,7 @@ namespace sage
             enemyClickedSink.disconnect<&CombatState::onEnemyClick>(this);
 
             auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
-            autoAttackAbility.Cancel();
+            autoAttackAbility.Cancel(entity);
         }
 
         CombatState::CombatState(entt::registry* _registry, GameData* _gameData)

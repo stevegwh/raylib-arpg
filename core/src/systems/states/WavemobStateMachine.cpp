@@ -114,7 +114,7 @@ namespace sage
         void TargetOutOfRangeState::OnStateEnter(entt::entity self)
         {
             auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
-            autoAttackAbility.Cancel();
+            autoAttackAbility.Cancel(self);
 
             const auto& combatable = registry->get<CombatableActor>(self);
             const auto& target = registry->get<sgTransform>(combatable.target).position();
@@ -188,7 +188,7 @@ namespace sage
         void CombatState::OnStateExit(entt::entity entity)
         {
             auto& autoAttackAbility = registry->get<WavemobAutoAttack>(entity);
-            autoAttackAbility.Cancel();
+            autoAttackAbility.Cancel(entity);
         }
 
         CombatState::CombatState(entt::registry* _registry) : StateMachine(_registry)
@@ -242,7 +242,7 @@ namespace sage
                 sink.connect<&DyingState::destroyEntity>(this);
             }
             auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
-            autoAttackAbility.Cancel();
+            autoAttackAbility.Cancel(self);
             gameData->actorMovementSystem->CancelMovement(self);
         }
 

@@ -14,9 +14,8 @@ namespace sage
 
     class CursorAbility : public Ability
     {
-        Timer animationDelayTimer{};
-        std::unique_ptr<RainOfFireVFX> vfx;
         Cursor* cursor;
+        std::unique_ptr<RainOfFireVFX> vfx;
         std::unique_ptr<TextureTerrainOverlay> spellCursor;
         float whirlwindRadius = 50.0f;
 

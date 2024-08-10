@@ -15,8 +15,9 @@ namespace sage
         float cooldownDuration;
         float range;
         int baseDamage;
-        AttackElement element;
-        float animationDelay;
+        AttackElement element = AttackElement::PHYSICAL;
+        float animationDelay = 0;
+        bool repeatable = false;
     };
 
     enum class AbilityState
@@ -39,6 +40,8 @@ namespace sage
     {
       protected:
         Timer cooldownTimer{};
+        Timer animationDelayTimer{};
+        // TODO: add vfx here
         AbilityData abilityData;
         entt::registry* registry;
         std::unordered_map<AbilityState, std::unique_ptr<State>> states;
