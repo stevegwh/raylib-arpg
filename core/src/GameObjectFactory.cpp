@@ -215,8 +215,6 @@ namespace sage
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::PLAYER;
         registry->emplace<PlayerAutoAttack>(id, registry);
-        // Links the cursor's events to the combatable actor which passes on the entity id
-        // to the system
         {
             entt::sink sink{game->cursor->onFloorClick};
             sink.connect<&CombatableActor::AttackCancelled>(combatable);

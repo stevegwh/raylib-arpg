@@ -23,34 +23,48 @@ namespace sage
             void Update() override;
             void Draw3D() override;
             void OnStateEnter(entt::entity entity) override;
-            void OnStateExit(entt::entity entity) override;
             virtual ~DefaultState() = default;
             DefaultState(entt::registry* _registry, GameData* _gameData);
         };
 
-        class ApproachingTargetState
-            : public StateMachine<ApproachingTargetState, StatePlayerApproachingTarget>
+        class MovingToTalkToNPCState
+            : public StateMachine<MovingToTalkToNPCState, StatePlayerMovingToTalkToNPC>
         {
             GameData* gameData;
-            void onAttackCancel(entt::entity self);
+            // void onMoveCancel(entt::entity self);
             void onTargetReached(entt::entity self);
-            void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
             void Update() override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
-            virtual ~ApproachingTargetState() = default;
-            ApproachingTargetState(entt::registry* _registry, GameData* gameData);
+            virtual ~MovingToTalkToNPCState() = default;
+            MovingToTalkToNPCState(entt::registry* _registry, GameData* gameData);
+        };
+
+        class MovingToAttackEnemyState : public StateMachine<
+                                             MovingToAttackEnemyState,
+                                             StatePlayerMovingToAttackEnemy>
+        {
+            GameData* gameData;
+            // void onAttackCancel(entt::entity self);
+            void onTargetReached(entt::entity self);
+            // void onEnemyClick(entt::entity self, entt::entity target);
+
+          public:
+            void OnStateEnter(entt::entity entity) override;
+            void OnStateExit(entt::entity entity) override;
+            virtual ~MovingToAttackEnemyState() = default;
+            MovingToAttackEnemyState(entt::registry* _registry, GameData* gameData);
         };
 
         class CombatState : public StateMachine<CombatState, StatePlayerCombat>
         {
             GameData* gameData;
             void onTargetDeath(entt::entity self, entt::entity target);
-            void onAttackCancel(entt::entity self);
+            // void onAttackCancel(entt::entity self);
             bool checkInCombat(entt::entity entity);
-            void onEnemyClick(entt::entity self, entt::entity target);
+            // void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
             void Update() override;
@@ -63,12 +77,14 @@ namespace sage
 
     class PlayerStateController
     {
-      private:
         std::vector<BaseSystem*> systems;
+
+        void onFloorClick(entt::entity self);
+        void onEnemyClick(entt::entity self, entt::entity target);
 
       public:
         std::unique_ptr<playerstates::DefaultState> defaultState;
-        std::unique_ptr<playerstates::ApproachingTargetState> approachingTargetState;
+        std::unique_ptr<playerstates::MovingToAttackEnemyState> approachingTargetState;
         std::unique_ptr<playerstates::CombatState> engagedInCombatState;
 
         PlayerStateController(entt::registry* _registry, GameData* gameData);
