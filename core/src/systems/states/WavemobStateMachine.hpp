@@ -2,7 +2,7 @@
 #pragma once
 #include "components/states/EnemyStates.hpp"
 #include "systems/BaseSystem.hpp"
-#include "systems/states/StateMachine.hpp"
+#include "systems/states/StateMachineECS.hpp"
 
 #include <entt/entt.hpp>
 #include <memory>
@@ -15,7 +15,7 @@ namespace sage
 
     namespace enemystates
     {
-        class DefaultState : public StateMachine<DefaultState, StateEnemyDefault>
+        class DefaultState : public StateMachineECS<DefaultState, StateEnemyDefault>
         {
             GameData* gameData;
 
@@ -30,7 +30,7 @@ namespace sage
         };
 
         class TargetOutOfRangeState
-            : public StateMachine<TargetOutOfRangeState, StateEnemyTargetOutOfRange>
+            : public StateMachineECS<TargetOutOfRangeState, StateEnemyTargetOutOfRange>
         {
             GameData* gameData;
 
@@ -45,7 +45,7 @@ namespace sage
             TargetOutOfRangeState(entt::registry* registry, GameData* _gameData);
         };
 
-        class CombatState : public StateMachine<CombatState, StateEnemyCombat>
+        class CombatState : public StateMachineECS<CombatState, StateEnemyCombat>
         {
           private:
             void onTargetDeath(entt::entity self, entt::entity target);
@@ -59,7 +59,7 @@ namespace sage
             CombatState(entt::registry* _registry);
         };
 
-        class DyingState : public StateMachine<DyingState, StateEnemyDying>
+        class DyingState : public StateMachineECS<DyingState, StateEnemyDying>
         {
             GameData* gameData;
             void destroyEntity(entt::entity self);

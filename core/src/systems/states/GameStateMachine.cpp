@@ -48,7 +48,7 @@ namespace sage
         }
 
         DefaultState::DefaultState(entt::registry* _registry, entt::entity _gameEntity)
-            : StateMachine(_registry), gameEntity(_gameEntity)
+            : StateMachineECS(_registry), gameEntity(_gameEntity)
         {
             timer.SetMaxTime(5.0f);
         }
@@ -88,7 +88,7 @@ namespace sage
 
         WaveState::WaveState(
             entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachineECS(_registry), gameData(_gameData)
         {
             // Preload model(s)
             ResourceManager::DynamicModelLoad("resources/models/gltf/goblin.glb");
