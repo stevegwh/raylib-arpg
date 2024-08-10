@@ -11,7 +11,6 @@ namespace sage
             AutoAttackAbility* ability;
 
           public:
-            void OnEnter(entt::entity self) override;
             void Update(entt::entity self) override;
             void Draw3D(entt::entity self) override;
             IdleState(AutoAttackAbility* _ability) : ability(_ability)
@@ -30,6 +29,8 @@ namespace sage
             {
             }
         };
+
+        void initStates();
 
       protected:
         AutoAttackAbility(entt::registry* _registry, AbilityData _abilityData);

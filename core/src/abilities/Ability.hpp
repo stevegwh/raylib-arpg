@@ -1,6 +1,8 @@
 #pragma once
 
 #include "components/CombatableActor.hpp"
+#include "particle/RainOfFireVFX.hpp"
+#include "TextureTerrainOverlay.hpp"
 #include <Timer.hpp>
 
 #include <entt/entt.hpp>
@@ -39,11 +41,12 @@ namespace sage
     class Ability
     {
       protected:
+        entt::registry* registry;
         Timer cooldownTimer{};
         Timer animationDelayTimer{};
-        // TODO: add vfx here
+        std::unique_ptr<RainOfFireVFX> vfx; // TODO: make a generic VFX class
+        std::unique_ptr<TextureTerrainOverlay> spellCursor;
         AbilityData abilityData;
-        entt::registry* registry;
         std::unordered_map<AbilityState, std::unique_ptr<State>> states;
         State* state;
 

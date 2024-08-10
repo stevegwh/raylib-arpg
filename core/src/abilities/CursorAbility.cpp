@@ -149,9 +149,7 @@ namespace sage
         Cursor* _cursor,
         std::unique_ptr<TextureTerrainOverlay> _spellCursor,
         AbilityData _abilityData)
-        : Ability(_registry, _abilityData),
-          cursor(_cursor),
-          spellCursor(std::move(_spellCursor))
+        : Ability(_registry, _abilityData), cursor(_cursor)
     {
         states[AbilityState::IDLE] = std::make_unique<IdleState>(this);
         states[AbilityState::CURSOR_SELECT] = std::make_unique<CursorSelectState>(this);
@@ -159,7 +157,7 @@ namespace sage
             std::make_unique<AwaitingExecutionState>(this);
         state = states[AbilityState::IDLE].get();
 
-        animationDelayTimer.SetMaxTime(_abilityData.animationDelay);
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
+        spellCursor = std::move(_spellCursor);
     }
 } // namespace sage
