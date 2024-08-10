@@ -145,6 +145,11 @@ namespace sage
 
     void CursorAbility::initStates()
     {
+        states[AbilityState::IDLE] = std::make_unique<IdleState>(this);
+        states[AbilityState::CURSOR_SELECT] = std::make_unique<CursorSelectState>(this);
+        states[AbilityState::AWAITING_EXECUTION] =
+            std::make_unique<AwaitingExecutionState>(this);
+        state = states[AbilityState::IDLE].get();
     }
 
     CursorAbility::CursorAbility(
@@ -155,11 +160,7 @@ namespace sage
         AbilityData _abilityData)
         : Ability(_registry, _abilityData), cursor(_cursor)
     {
-        states[AbilityState::IDLE] = std::make_unique<IdleState>(this);
-        states[AbilityState::CURSOR_SELECT] = std::make_unique<CursorSelectState>(this);
-        states[AbilityState::AWAITING_EXECUTION] =
-            std::make_unique<AwaitingExecutionState>(this);
-        state = states[AbilityState::IDLE].get();
+        initStates();
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
         spellCursor = std::move(_spellCursor);
     }
