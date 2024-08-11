@@ -6,70 +6,11 @@
 
 #include "Camera.hpp"
 #include "components/Animation.hpp"
-#include "components/CombatableActor.hpp"
-#include "components/sgTransform.hpp"
-#include "Cursor.hpp"
 
 #include "AbilityFunctions.hpp"
 
-#include "raylib.h"
-
 namespace sage
 {
-
-    void CursorAbility::CursorSelectState::enableCursor()
-    {
-        ability->spellCursor->Init(ability->cursor->terrainCollision().point);
-        ability->spellCursor->Enable(true);
-        ability->cursor->Disable();
-        ability->cursor->Hide();
-    }
-
-    void CursorAbility::CursorSelectState::disableCursor()
-    {
-        ability->cursor->Enable();
-        ability->cursor->Show();
-        ability->spellCursor->Enable(false);
-    }
-
-    void CursorAbility::CursorSelectState::Update(entt::entity self)
-    {
-        ability->spellCursor->Update(ability->cursor->terrainCollision().point);
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            ability->confirm(self);
-        }
-    }
-
-    void CursorAbility::CursorSelectState::toggleCursor(entt::entity self)
-    {
-        if (cursorActive)
-        {
-            disableCursor();
-            cursorActive = false;
-        }
-        else
-        {
-            enableCursor();
-            cursorActive = true;
-        }
-    }
-
-    void CursorAbility::CursorSelectState::OnExit(entt::entity self)
-    {
-        if (cursorActive)
-        {
-            disableCursor();
-            cursorActive = false;
-        }
-    }
-
-    void CursorAbility::CursorSelectState::OnEnter(entt::entity self)
-    {
-        enableCursor();
-        cursorActive = true;
-    }
-
     void CursorAbility::Init(entt::entity self)
     {
         if (state == states[AbilityState::CURSOR_SELECT].get())
@@ -98,25 +39,8 @@ namespace sage
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
     }
 
-    void CursorAbility::Draw3D(entt::entity self)
-    {
-        state->Draw3D(self);
-        Ability::Draw3D(self);
-    }
-
-    void CursorAbility::Update(entt::entity self)
-    {
-        state->Update(self);
-        Ability::Update(self);
-    }
-
     void CursorAbility::initStates()
     {
-        states[AbilityState::IDLE] = std::make_unique<Ability::IdleState>(this);
-        states[AbilityState::CURSOR_SELECT] = std::make_unique<CursorSelectState>(this);
-        states[AbilityState::AWAITING_EXECUTION] =
-            std::make_unique<Ability::AwaitingExecutionState>(this);
-        state = states[AbilityState::IDLE].get();
     }
 
     CursorAbility::CursorAbility(
@@ -128,6 +52,18 @@ namespace sage
         : Ability(_registry, _abilityData), cursor(_cursor)
     {
         initStates();
+        auto cursorState = std::make_unique<Ability::CursorSelectState>(this, _cursor);
+        {
+            entt::sink sink{cursorState->onConfirm};
+            sink.connect<&CursorAbility::confirm>(this);
+        }
+
+        states[AbilityState::IDLE] = std::make_unique<Ability::IdleState>(this);
+        states[AbilityState::CURSOR_SELECT] = std::move(cursorState);
+        states[AbilityState::AWAITING_EXECUTION] =
+            std::make_unique<Ability::AwaitingExecutionState>(this);
+        state = states[AbilityState::IDLE].get();
+
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
         spellCursor = std::move(_spellCursor);
     }
