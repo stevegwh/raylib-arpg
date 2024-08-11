@@ -20,10 +20,11 @@ namespace sage
         // ----------------------------
         void DefaultState::OnTimerEnd()
         {
-            ChangeState<StateGameWave, GameStates>(gameEntity);
+            auto& gameState = registry->get<GameState>(gameEntity);
+            gameState.ChangeState(gameEntity, GameStateEnum::Wave);
         }
 
-        void DefaultState::Update()
+        void DefaultState::Update(entt::entity entity)
         {
             timer.Update(GetFrameTime());
             if (timer.HasFinished())
@@ -32,13 +33,12 @@ namespace sage
             }
         }
 
-        void DefaultState::Draw3D()
+        void DefaultState::Draw3D(entt::entity entity)
         {
         }
 
         void DefaultState::OnStateEnter(entt::entity entity)
         {
-
             timer.Start();
         }
 
@@ -48,7 +48,7 @@ namespace sage
         }
 
         DefaultState::DefaultState(entt::registry* _registry, entt::entity _gameEntity)
-            : StateMachineECS(_registry), gameEntity(_gameEntity)
+            : StateMachine(_registry), gameEntity(_gameEntity)
         {
             timer.SetMaxTime(5.0f);
         }
@@ -67,11 +67,11 @@ namespace sage
                 registry, gameData, {52.0f, 0, 40.0f}, "Enemy");
         }
 
-        void WaveState::Update()
+        void WaveState::Update(entt::entity entity)
         {
         }
 
-        void WaveState::Draw3D()
+        void WaveState::Draw3D(entt::entity entity)
         {
         }
 
@@ -88,7 +88,7 @@ namespace sage
 
         WaveState::WaveState(
             entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
-            : StateMachineECS(_registry), gameData(_gameData)
+            : StateMachine(_registry), gameData(_gameData)
         {
             // Preload model(s)
             ResourceManager::DynamicModelLoad("resources/models/gltf/goblin.glb");
@@ -97,22 +97,67 @@ namespace sage
         // ----------------------------
     } // namespace gamestates
 
-    void GameStateController::Update()
+    StateMachine* GameStateController::GetSystem(GameStateEnum state)
     {
-        for (auto& system : systems)
+        switch (state)
         {
-            system->Update();
+        case GameStateEnum::Default:
+            return defaultState.get();
+        case GameStateEnum::Wave:
+            return waveState.get();
+        default:
+            return defaultState.get();
         }
     }
+
+    void GameStateController::OnComponentRemoved(entt::entity entity)
+    {
+        auto& gameState = registry->get<GameState>(entity);
+        entt::sink sink{gameState.onStateChanged};
+        sink.disconnect<&GameStateController::ChangeState>(this);
+        GetSystem(gameState.GetCurrentState())
+            ->OnStateExit(entity); // Might not be a good idea if destroyed
+    }
+
+    void GameStateController::OnComponentAdded(entt::entity entity)
+    {
+        auto& gameState = registry->get<GameState>(entity);
+        entt::sink sink{gameState.onStateChanged};
+        sink.connect<&GameStateController::ChangeState>(this);
+        GetSystem(gameState.GetCurrentState())->OnStateEnter(entity);
+    }
+
+    void GameStateController::Update()
+    {
+        auto view = registry->view<GameState>();
+        for (const auto& entity : view)
+        {
+            auto state = registry->get<GameState>(entity).GetCurrentState();
+            GetSystem(state)->Update(entity);
+        }
+    }
+
+    void GameStateController::Draw3D()
+    {
+        auto view = registry->view<GameState>();
+        for (const auto& entity : view)
+        {
+            auto state = registry->get<GameState>(entity).GetCurrentState();
+            GetSystem(state)->Draw3D(entity);
+        }
+    }
+
     GameStateController::GameStateController(
         entt::registry* _registry, GameData* _gameData)
-        : gameEntity(_registry->create())
+        : StateMachineController(_registry),
+          gameEntity(_registry->create()),
+          defaultState(std::make_unique<gamestates::DefaultState>(_registry, gameEntity)),
+          waveState(
+              std::make_unique<gamestates::WaveState>(_registry, _gameData, gameEntity))
     {
-        defaultState = std::make_unique<gamestates::DefaultState>(_registry, gameEntity);
-        waveState =
-            std::make_unique<gamestates::WaveState>(_registry, _gameData, gameEntity);
         systems.push_back(defaultState.get());
         systems.push_back(waveState.get());
-        _registry->emplace<StateGameDefault>(gameEntity);
+
+        _registry->emplace<GameState>(gameEntity);
     }
 } // namespace sage

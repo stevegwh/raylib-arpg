@@ -13,10 +13,10 @@
 #include "components/Dialogue.hpp"
 #include "components/HealthBar.hpp"
 #include "components/MovableActor.hpp"
-#include "components/PlayerState.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/states/EnemyStates.hpp"
+#include "components/states/PlayerState.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"

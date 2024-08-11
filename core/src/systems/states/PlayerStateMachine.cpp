@@ -207,7 +207,7 @@ namespace sage
         auto& playerState = registry->get<PlayerState>(entity);
         entt::sink sink{playerState.onStateChanged};
         sink.disconnect<&PlayerStateController::ChangeState>(this);
-        GetSystem(playerState.currentState)
+        GetSystem(playerState.GetCurrentState())
             ->OnStateExit(entity); // Might not be a good idea if destroyed
     }
 
@@ -216,7 +216,7 @@ namespace sage
         auto& playerState = registry->get<PlayerState>(entity);
         entt::sink sink{playerState.onStateChanged};
         sink.connect<&PlayerStateController::ChangeState>(this);
-        GetSystem(playerState.currentState)->OnStateEnter(entity);
+        GetSystem(playerState.GetCurrentState())->OnStateEnter(entity);
     }
 
     void PlayerStateController::Update()
@@ -224,7 +224,7 @@ namespace sage
         auto view = registry->view<PlayerState>();
         for (const auto& entity : view)
         {
-            auto state = registry->get<PlayerState>(entity).currentState;
+            auto state = registry->get<PlayerState>(entity).GetCurrentState();
             GetSystem(state)->Update(entity);
         }
     }
@@ -234,7 +234,7 @@ namespace sage
         auto view = registry->view<PlayerState>();
         for (const auto& entity : view)
         {
-            auto state = registry->get<PlayerState>(entity).currentState;
+            auto state = registry->get<PlayerState>(entity).GetCurrentState();
             GetSystem(state)->Draw3D(entity);
         }
     }
