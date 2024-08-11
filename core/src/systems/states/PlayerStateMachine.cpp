@@ -16,18 +16,19 @@ namespace sage
     namespace playerstates
     {
         // ----------------------------
-        void DefaultState::Update()
+        void DefaultState::Update(entt::entity entity)
         {
             // Should check here if should be in combat
         }
 
-        void DefaultState::Draw3D()
+        void DefaultState::Draw3D(entt::entity entity)
         {
         }
 
         void DefaultState::onFloorClick(entt::entity self)
         {
-            ChangeState<StatePlayerDefault, PlayerStates>(self);
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::Default);
             auto& playerCombatable = registry->get<CombatableActor>(self);
             playerCombatable.target = entt::null;
 
@@ -41,7 +42,8 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
-            ChangeState<StatePlayerMovingToAttackEnemy, PlayerStates>(self);
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
         }
 
         void DefaultState::OnStateEnter(entt::entity entity)
@@ -64,7 +66,7 @@ namespace sage
         }
 
         DefaultState::DefaultState(entt::registry* _registry, GameData* _gameData)
-            : StateMachineECS(_registry), gameData(_gameData)
+            : StateMachine(_registry), gameData(_gameData)
         {
         }
 
@@ -72,7 +74,8 @@ namespace sage
 
         void MovingToAttackEnemyState::onTargetReached(entt::entity self)
         {
-            ChangeState<StatePlayerCombat, PlayerStates>(self);
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::Combat);
         }
 
         void MovingToAttackEnemyState::OnStateEnter(entt::entity self)
@@ -113,7 +116,7 @@ namespace sage
 
         MovingToAttackEnemyState::MovingToAttackEnemyState(
             entt::registry* _registry, GameData* _gameData)
-            : StateMachineECS(_registry), gameData(_gameData)
+            : StateMachine(_registry), gameData(_gameData)
         {
         }
 
@@ -123,7 +126,8 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = entt::null;
-            ChangeState<StatePlayerDefault, PlayerStates>(self);
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::Default);
         }
 
         bool CombatState::checkInCombat(entt::entity entity)
@@ -132,21 +136,10 @@ namespace sage
             return true;
         }
 
-        void CombatState::Update()
+        void CombatState::Update(entt::entity entity)
         {
-            auto view = registry->view<CombatableActor, StatePlayerCombat>();
-            for (const auto& entity : view)
-            {
-                // auto& combatable = registry->get<CombatableActor>(entity);
-                // if (!checkInCombat(entity))
-                // {
-                //     ChangeState<StatePlayerDefault, PlayerStates>(entity);
-                //     continue;
-                // }
-
-                auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
-                autoAttackAbility.Update(entity);
-            }
+            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
+            autoAttackAbility.Update(entity);
         }
 
         void CombatState::OnStateEnter(entt::entity entity)
@@ -185,40 +178,91 @@ namespace sage
         }
 
         CombatState::CombatState(entt::registry* _registry, GameData* _gameData)
-            : StateMachineECS(_registry), gameData(_gameData)
+            : StateMachine(_registry), gameData(_gameData)
         {
         }
 
         // ----------------------------
     } // namespace playerstates
 
+    StateMachine* PlayerStateController::GetSystem(PlayerStateEnum state)
+    {
+        switch (state)
+        {
+        case PlayerStateEnum::Default:
+            return defaultState.get();
+        case PlayerStateEnum::MovingToAttackEnemy:
+            return approachingTargetState.get();
+        case PlayerStateEnum::MovingToTalkToNPC:
+            return nullptr;
+        case PlayerStateEnum::Combat:
+            return engagedInCombatState.get();
+        default:
+            return defaultState.get();
+        }
+    }
+
+    void PlayerStateController::OnComponentRemoved(entt::entity entity)
+    {
+        auto& playerState = registry->get<PlayerState>(entity);
+        entt::sink sink{playerState.onStateChanged};
+        sink.disconnect<&PlayerStateController::ChangeState>(this);
+        GetSystem(playerState.currentState)
+            ->OnStateExit(entity); // Might not be a good idea if destroyed
+    }
+
+    void PlayerStateController::OnComponentAdded(entt::entity entity)
+    {
+        auto& playerState = registry->get<PlayerState>(entity);
+        entt::sink sink{playerState.onStateChanged};
+        sink.connect<&PlayerStateController::ChangeState>(this);
+        GetSystem(playerState.currentState)->OnStateEnter(entity);
+    }
+
+    void PlayerStateController::ChangeState(
+        entt::entity entity, PlayerStateEnum oldState, PlayerStateEnum newState)
+    {
+        GetSystem(oldState)->OnStateExit(entity);
+        GetSystem(newState)->OnStateEnter(entity);
+    }
+
     void PlayerStateController::Update()
     {
-        for (auto& system : systems)
+        auto view = registry->view<PlayerState>();
+        for (const auto& entity : view)
         {
-            system->Update();
+            auto state = registry->get<PlayerState>(entity).currentState;
+            GetSystem(state)->Update(entity);
         }
     }
 
     void PlayerStateController::Draw3D()
     {
-        for (auto& system : systems)
+        auto view = registry->view<PlayerState>();
+        for (const auto& entity : view)
         {
-            system->Draw3D();
+            auto state = registry->get<PlayerState>(entity).currentState;
+            GetSystem(state)->Draw3D(entity);
         }
     }
 
     PlayerStateController::PlayerStateController(
         entt::registry* _registry, GameData* _gameData)
+        : registry(_registry),
+          defaultState(
+              std::make_unique<playerstates::DefaultState>(_registry, _gameData)),
+          approachingTargetState(std::make_unique<playerstates::MovingToAttackEnemyState>(
+              _registry, _gameData)),
+          engagedInCombatState(
+              std::make_unique<playerstates::CombatState>(_registry, _gameData))
     {
-        defaultState = std::make_unique<playerstates::DefaultState>(_registry, _gameData);
-        approachingTargetState = std::make_unique<playerstates::MovingToAttackEnemyState>(
-            _registry, _gameData);
-        engagedInCombatState =
-            std::make_unique<playerstates::CombatState>(_registry, _gameData);
-
         systems.push_back(defaultState.get());
         systems.push_back(approachingTargetState.get());
         systems.push_back(engagedInCombatState.get());
+
+        registry->on_construct<PlayerState>()
+            .connect<&PlayerStateController::OnComponentAdded>(this);
+        registry->on_destroy<PlayerState>()
+            .connect<&PlayerStateController::OnComponentRemoved>(this);
     }
 } // namespace sage

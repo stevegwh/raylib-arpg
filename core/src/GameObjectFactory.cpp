@@ -13,10 +13,10 @@
 #include "components/Dialogue.hpp"
 #include "components/HealthBar.hpp"
 #include "components/MovableActor.hpp"
+#include "components/PlayerState.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/states/EnemyStates.hpp"
-#include "components/states/PlayerStates.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"
@@ -233,7 +233,7 @@ namespace sage
             registry->emplace<ControllableActor>(id, id, game->cursor.get());
         game->controllableActorSystem->SetControlledActor(id);
 
-        registry->emplace<StatePlayerDefault>(id);
+        registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
         return id;
     }
