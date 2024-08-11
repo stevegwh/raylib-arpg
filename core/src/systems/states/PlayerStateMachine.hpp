@@ -1,8 +1,9 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
-#include "components/states/PlayerStates.hpp"
-#include "systems/BaseSystem.hpp"
-#include "systems/states/StateMachineECS.hpp"
+
+#include "components/PlayerState.hpp"
+#include "systems/states/StateMachine.hpp"
+
 #include <entt/entt.hpp>
 #include <memory>
 #include <vector>
@@ -13,38 +14,35 @@ namespace sage
 
     namespace playerstates
     {
-        class DefaultState : public StateMachineECS<DefaultState, StatePlayerDefault>
+        class DefaultState : public StateMachine
         {
             GameData* gameData;
             void onEnemyClick(entt::entity self, entt::entity target);
             void onFloorClick(entt::entity self);
 
           public:
-            void Update() override;
-            void Draw3D() override;
+            void Update(entt::entity entity) override;
+            void Draw3D(entt::entity entity) override;
             void OnStateEnter(entt::entity entity) override;
             virtual ~DefaultState() = default;
             DefaultState(entt::registry* _registry, GameData* _gameData);
         };
 
-        class MovingToTalkToNPCState
-            : public StateMachineECS<MovingToTalkToNPCState, StatePlayerMovingToTalkToNPC>
+        class MovingToTalkToNPCState : public StateMachine
         {
             GameData* gameData;
             // void onMoveCancel(entt::entity self);
             void onTargetReached(entt::entity self);
 
           public:
-            void Update() override;
+            void Update(entt::entity entity) override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~MovingToTalkToNPCState() = default;
             MovingToTalkToNPCState(entt::registry* _registry, GameData* gameData);
         };
 
-        class MovingToAttackEnemyState : public StateMachineECS<
-                                             MovingToAttackEnemyState,
-                                             StatePlayerMovingToAttackEnemy>
+        class MovingToAttackEnemyState : public StateMachine
         {
             GameData* gameData;
             // void onAttackCancel(entt::entity self);
@@ -58,7 +56,7 @@ namespace sage
             MovingToAttackEnemyState(entt::registry* _registry, GameData* gameData);
         };
 
-        class CombatState : public StateMachineECS<CombatState, StatePlayerCombat>
+        class CombatState : public StateMachine
         {
             GameData* gameData;
             void onTargetDeath(entt::entity self, entt::entity target);
@@ -67,7 +65,7 @@ namespace sage
             // void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
-            void Update() override;
+            void Update(entt::entity entity) override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             virtual ~CombatState() = default;
@@ -77,10 +75,14 @@ namespace sage
 
     class PlayerStateController
     {
-        std::vector<BaseSystem*> systems;
+        entt::registry* registry;
+        std::vector<StateMachine*> systems;
 
-        void onFloorClick(entt::entity self);
-        void onEnemyClick(entt::entity self, entt::entity target);
+        StateMachine* GetSystem(PlayerStateEnum state);
+        void ChangeState(
+            entt::entity entity, PlayerStateEnum oldState, PlayerStateEnum newState);
+        void OnComponentRemoved(entt::entity entity);
+        void OnComponentAdded(entt::entity entity);
 
       public:
         std::unique_ptr<playerstates::DefaultState> defaultState;

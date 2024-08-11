@@ -8,16 +8,17 @@
 
 namespace sage
 {
-	class BaseSystem
-	{
-	protected:
-		bool enabled = true;
-		entt::registry* registry;
-	public:
-		explicit BaseSystem(entt::registry* _registry) : registry(_registry)
-		{
-		}
-		virtual void Update(){};
-		virtual void Draw3D(){};
-	};
-}
+    class BaseSystem
+    {
+      protected:
+        bool enabled = true;
+        entt::registry* registry;
+
+      public:
+        explicit BaseSystem(entt::registry* _registry) : registry(_registry)
+        {
+        }
+        virtual void Update() {};
+        virtual void Draw3D() {};
+    };
+} // namespace sage
