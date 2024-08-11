@@ -6,7 +6,6 @@ namespace sage
 {
     class AutoAttackAbility : public Ability
     {
-
       protected:
         AutoAttackAbility(
             entt::registry* _registry, AbilityData _abilityData, Cursor* _cursor);

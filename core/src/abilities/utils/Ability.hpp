@@ -32,11 +32,17 @@ namespace sage
 
     struct AbilityState
     {
+        Timer& cooldownTimer;
+        Timer& animationDelayTimer;
         virtual ~AbilityState() = default;
         virtual void Update(entt::entity self) {};
         virtual void Draw3D(entt::entity self) {};
         virtual void OnEnter(entt::entity self) {};
         virtual void OnExit(entt::entity self) {};
+        AbilityState(Timer& _cooldownTimer, Timer& _animationDelayTimer)
+            : cooldownTimer(_cooldownTimer), animationDelayTimer(_animationDelayTimer)
+        {
+        }
     };
 
     class Ability
@@ -56,23 +62,27 @@ namespace sage
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
 
         void ChangeState(entt::entity self, AbilityStateEnum newState);
-        virtual void initStates();
 
         class IdleState : public AbilityState
         {
-            Ability* ability;
+            const bool repeatable;
 
           public:
+            entt::sigh<void(entt::entity)> onRestartTriggered;
             void Update(entt::entity self) override;
-            IdleState(Ability* _ability) : ability(_ability)
+            IdleState(
+                Timer& _coolDownTimer, Timer& _animationDelayTimer, bool _repeatable)
+                : AbilityState(_coolDownTimer, _animationDelayTimer),
+                  repeatable(_repeatable)
             {
             }
         };
 
         class CursorSelectState : public AbilityState
         {
-            Ability* ability;
+
             Cursor* cursor;
+            std::unique_ptr<TextureTerrainOverlay> spellCursor;
             bool cursorActive = false;
             void enableCursor();
             void disableCursor();
@@ -83,20 +93,26 @@ namespace sage
             void Update(entt::entity self) override;
             void OnEnter(entt::entity self) override;
             void OnExit(entt::entity self) override;
-            CursorSelectState(Ability* _ability, Cursor* _cursor)
-                : ability(_ability), cursor(_cursor)
+            CursorSelectState(
+                Timer& _coolDownTimer,
+                Timer& _animationDelayTimer,
+                Cursor* _cursor,
+                std::unique_ptr<TextureTerrainOverlay> _spellCursor)
+                : AbilityState(_coolDownTimer, _animationDelayTimer),
+                  cursor(_cursor),
+                  spellCursor(std::move(_spellCursor))
             {
             }
         };
 
         class AwaitingExecutionState : public AbilityState
         {
-            Ability* ability;
-
           public:
+            entt::sigh<void(entt::entity)> onExecute;
             void OnEnter(entt::entity self) override;
             void Update(entt::entity self) override;
-            AwaitingExecutionState(Ability* _ability) : ability(_ability)
+            AwaitingExecutionState(Timer& _coolDownTimer, Timer& _animationDelayTimer)
+                : AbilityState(_coolDownTimer, _animationDelayTimer)
             {
             }
         };

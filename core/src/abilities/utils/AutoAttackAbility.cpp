@@ -26,5 +26,15 @@ namespace sage
         entt::registry* _registry, AbilityData _abilityData, Cursor* _cursor)
         : Ability(_registry, _abilityData, _cursor)
     {
+
+        auto idleState = dynamic_cast<IdleState*>(states[AbilityStateEnum::IDLE].get());
+        entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
+        onRestartTriggeredSink.connect<&AutoAttackAbility::Init>(this);
+
+        auto awaitingExecutionState =
+            std::make_unique<AwaitingExecutionState>(cooldownTimer, animationDelayTimer);
+        entt::sink onExecuteSink{awaitingExecutionState->onExecute};
+        onExecuteSink.connect<&AutoAttackAbility::Execute>(this);
+        states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
     }
 } // namespace sage
