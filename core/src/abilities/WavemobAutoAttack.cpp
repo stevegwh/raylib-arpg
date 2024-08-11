@@ -3,7 +3,7 @@
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 
-#include "AbilityFunctions.hpp"
+#include "utils/AbilityFunctions.hpp"
 
 static constexpr float COOLDOWN = 1.0f;
 static constexpr int DAMAGE = 10;

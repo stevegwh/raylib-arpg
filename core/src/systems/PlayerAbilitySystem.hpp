@@ -2,7 +2,7 @@
 
 #include <entt/entt.hpp>
 
-#include "abilities/Ability.hpp"
+#include "abilities/utils/Ability.hpp"
 
 #include <array>
 #include <memory>
@@ -11,7 +11,7 @@
 namespace sage
 {
     class GameData;
-    class AbilitySystem // PlayerAbilitySystem (ControllableActorAbilitySystem?)
+    class PlayerAbilitySystem
     {
         entt::registry* registry;
         entt::entity controlledActor;
@@ -30,6 +30,6 @@ namespace sage
         void Update();
         void Draw2D();
         void Draw3D();
-        AbilitySystem(entt::registry* _registry, GameData* _gameData);
+        PlayerAbilitySystem(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

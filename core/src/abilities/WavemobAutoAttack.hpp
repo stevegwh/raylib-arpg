@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AutoAttackAbility.hpp"
+#include "utils/AutoAttackAbility.hpp"
 
 #include <entt/entt.hpp>
 

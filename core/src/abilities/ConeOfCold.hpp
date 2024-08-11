@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ability.hpp"
+#include "utils/Ability.hpp"
 
 #include <entt/entt.hpp>
 
