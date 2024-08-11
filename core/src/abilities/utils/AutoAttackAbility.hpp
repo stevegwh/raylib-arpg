@@ -16,8 +16,6 @@ namespace sage
 
       public:
         void Execute(entt::entity self) override;
-        void Update(entt::entity self) override;
-        void Draw3D(entt::entity self) override;
         void Init(entt::entity self) override;
         void Cancel(entt::entity self);
         ~AutoAttackAbility() override = default;

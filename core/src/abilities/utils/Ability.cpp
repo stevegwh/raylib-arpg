@@ -4,6 +4,7 @@
 
 namespace sage
 {
+
     void Ability::IdleState::Update(entt::entity self)
     {
         ability->cooldownTimer.Update(GetFrameTime());
@@ -13,9 +14,63 @@ namespace sage
         }
     }
 
-    void Ability::IdleState::Draw3D(entt::entity self)
+    // --------------------------------------------
+
+    void Ability::CursorSelectState::enableCursor()
     {
+        ability->spellCursor->Init(cursor->terrainCollision().point);
+        ability->spellCursor->Enable(true);
+        cursor->Disable();
+        cursor->Hide();
     }
+
+    void Ability::CursorSelectState::disableCursor()
+    {
+        cursor->Enable();
+        cursor->Show();
+        ability->spellCursor->Enable(false);
+    }
+
+    void Ability::CursorSelectState::Update(entt::entity self)
+    {
+        ability->spellCursor->Update(cursor->terrainCollision().point);
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            // ability->confirm(self);
+            onConfirm.publish(self);
+        }
+    }
+
+    void Ability::CursorSelectState::toggleCursor(entt::entity self)
+    {
+        if (cursorActive)
+        {
+            disableCursor();
+            cursorActive = false;
+        }
+        else
+        {
+            enableCursor();
+            cursorActive = true;
+        }
+    }
+
+    void Ability::CursorSelectState::OnExit(entt::entity self)
+    {
+        if (cursorActive)
+        {
+            disableCursor();
+            cursorActive = false;
+        }
+    }
+
+    void Ability::CursorSelectState::OnEnter(entt::entity self)
+    {
+        enableCursor();
+        cursorActive = true;
+    }
+
+    // --------------------------------------------
 
     void Ability::AwaitingExecutionState::Update(entt::entity self)
     {
@@ -32,6 +87,9 @@ namespace sage
         ability->cooldownTimer.Start();
         ability->animationDelayTimer.Start();
     }
+
+    // --------------------------------------------
+
     void Ability::ChangeState(entt::entity self, AbilityState newState)
     {
         state->OnExit(self);
@@ -64,8 +122,16 @@ namespace sage
         return cooldownTimer.HasFinished() || cooldownTimer.GetRemainingTime() <= 0;
     }
 
+    void Ability::Cancel(entt::entity self)
+    {
+        cooldownTimer.Stop();
+        animationDelayTimer.Stop();
+        ChangeState(self, AbilityState::IDLE);
+    }
+
     void Ability::Update(entt::entity self)
     {
+        state->Update(self);
         if (vfx && vfx->active)
         {
             vfx->Update(GetFrameTime());
@@ -74,6 +140,7 @@ namespace sage
 
     void Ability::Draw3D(entt::entity self)
     {
+        state->Draw3D(self);
         if (vfx && vfx->active)
         {
             vfx->Draw3D();

@@ -6,30 +6,12 @@
 
 namespace sage
 {
-    class Cursor;
     class Camera;
 
     class CursorAbility : public Ability
     {
         Cursor* cursor;
         float whirlwindRadius = 50.0f;
-
-        class CursorSelectState : public State
-        {
-            CursorAbility* ability;
-            bool cursorActive = false;
-            void enableCursor();
-            void disableCursor();
-            void toggleCursor(entt::entity self);
-
-          public:
-            void Update(entt::entity self) override;
-            void OnEnter(entt::entity self) override;
-            void OnExit(entt::entity self) override;
-            CursorSelectState(CursorAbility* _ability) : ability(_ability)
-            {
-            }
-        };
 
         void initStates();
 
@@ -45,8 +27,6 @@ namespace sage
       public:
         void Init(entt::entity self) override;
         void Execute(entt::entity self) override;
-        void Draw3D(entt::entity self) override;
-        void Update(entt::entity self) override;
         ~CursorAbility() override = default;
     };
 } // namespace sage
