@@ -1,6 +1,6 @@
 #include "WavemobStateMachine.hpp"
 
-#include "abilities/WavemobAutoAttack.hpp"
+#include "abilities/AbilityDefinitions.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/MovableActor.hpp"
