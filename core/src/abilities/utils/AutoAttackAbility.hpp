@@ -6,7 +6,6 @@ namespace sage
 {
     class AutoAttackAbility : public Ability
     {
-        void initStates();
 
       protected:
         AutoAttackAbility(

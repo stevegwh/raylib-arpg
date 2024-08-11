@@ -54,7 +54,9 @@ namespace sage
 
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
+
         void ChangeState(entt::entity self, AbilityStateEnum newState);
+        virtual void initStates();
 
         class IdleState : public AbilityState
         {
@@ -117,6 +119,7 @@ namespace sage
         virtual ~Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor);
+        Ability(
+            entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor);
     };
 } // namespace sage
