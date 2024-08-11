@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "components/states/States.hpp"
+#include "components/States.hpp"
 #include "systems/states/StateMachine.hpp"
 #include <Timer.hpp>
 

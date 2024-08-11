@@ -214,7 +214,7 @@ namespace sage
 
     void PlayerStateController::Draw3D()
     {
-        auto& view = registry->get<PlayerState>();
+        auto view = registry->view<PlayerState>();
         for (const auto& entity : view)
         {
             auto state = registry->get<PlayerState>(entity).GetCurrentState();

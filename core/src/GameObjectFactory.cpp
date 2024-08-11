@@ -15,8 +15,7 @@
 #include "components/MovableActor.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
-#include "components/states/EnemyStates.hpp"
-#include "components/states/States.hpp"
+#include "components/States.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"
@@ -98,7 +97,8 @@ namespace sage
         // redundant
         // ---
 
-        registry->emplace<StateEnemyDefault>(id);
+        // registry->emplace<StateEnemyDefault>(id);
+        registry->emplace<WavemobState>(id);
         // Always set state last to ensure everything is initialised properly before.
         return id;
     }
