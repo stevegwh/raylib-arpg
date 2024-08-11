@@ -90,7 +90,7 @@ namespace sage
 
     // --------------------------------------------
 
-    void Ability::ChangeState(entt::entity self, AbilityState newState)
+    void Ability::ChangeState(entt::entity self, AbilityStateEnum newState)
     {
         state->OnExit(self);
         state = states[newState].get();
@@ -126,7 +126,7 @@ namespace sage
     {
         cooldownTimer.Stop();
         animationDelayTimer.Stop();
-        ChangeState(self, AbilityState::IDLE);
+        ChangeState(self, AbilityStateEnum::IDLE);
     }
 
     void Ability::Update(entt::entity self)
@@ -140,7 +140,8 @@ namespace sage
 
     void Ability::Draw3D(entt::entity self)
     {
-        state->Draw3D(self);
+        // TODO: Enabling below causes seg fault
+        // state->Draw3D(self);
         if (vfx && vfx->active)
         {
             vfx->Draw3D();
@@ -152,8 +153,9 @@ namespace sage
         Execute(self);
     }
 
-    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData)
-        : registry(_registry), abilityData(_abilityData)
+    Ability::Ability(
+        entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor)
+        : registry(_registry), abilityData(_abilityData), cursor(_cursor)
     {
         cooldownTimer.SetMaxTime(abilityData.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationDelay);

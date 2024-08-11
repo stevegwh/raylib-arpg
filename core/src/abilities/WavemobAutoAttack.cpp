@@ -18,8 +18,8 @@ namespace sage
         .animationDelay = 0,
         .repeatable = true};
 
-    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry)
-        : AutoAttackAbility(_registry, _abilityData)
+    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, Cursor* _cursor)
+        : AutoAttackAbility(_registry, _abilityData, _cursor)
     {
     }
 } // namespace sage

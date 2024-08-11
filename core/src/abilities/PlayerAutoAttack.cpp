@@ -15,8 +15,8 @@ namespace sage
         .animationDelay = 0,
         .repeatable = true};
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry)
-        : AutoAttackAbility(_registry, _abilityData)
+    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, Cursor* _cursor)
+        : AutoAttackAbility(_registry, _abilityData, _cursor)
     {
     }
 } // namespace sage

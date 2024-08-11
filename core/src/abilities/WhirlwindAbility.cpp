@@ -31,18 +31,18 @@ namespace sage
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(
             registry, self, abilityData, actorTransform.position(), whirlwindRadius);
-        ChangeState(self, AbilityState::IDLE);
+        ChangeState(self, AbilityStateEnum::IDLE);
     }
 
     void WhirlwindAbility::Init(entt::entity self)
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
-        ChangeState(self, AbilityState::AWAITING_EXECUTION);
+        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry)
-        : AutoAttackAbility(_registry, _abilityData)
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, Cursor* _cursor)
+        : AutoAttackAbility(_registry, _abilityData, _cursor)
     {
     }
 } // namespace sage

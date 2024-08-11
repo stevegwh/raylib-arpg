@@ -10,6 +10,6 @@ namespace sage
         void Execute(entt::entity self) override;
         void Init(entt::entity self) override;
         ~WhirlwindAbility() override = default;
-        WhirlwindAbility(entt::registry* _registry);
+        WhirlwindAbility(entt::registry* _registry, Cursor* _cursor);
     };
 } // namespace sage

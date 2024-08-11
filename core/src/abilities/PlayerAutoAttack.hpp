@@ -7,6 +7,6 @@ namespace sage
     struct PlayerAutoAttack : public AutoAttackAbility
     {
         ~PlayerAutoAttack() override = default;
-        PlayerAutoAttack(entt::registry* _registry);
+        PlayerAutoAttack(entt::registry* _registry, Cursor* _cursor);
     };
 } // namespace sage

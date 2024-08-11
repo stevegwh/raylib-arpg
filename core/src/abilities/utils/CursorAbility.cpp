@@ -13,13 +13,13 @@ namespace sage
 {
     void CursorAbility::Init(entt::entity self)
     {
-        if (state == states[AbilityState::CURSOR_SELECT].get())
+        if (state == states[AbilityStateEnum::CURSOR_SELECT].get())
         {
-            ChangeState(self, AbilityState::IDLE);
+            ChangeState(self, AbilityStateEnum::IDLE);
         }
         else
         {
-            ChangeState(self, AbilityState::CURSOR_SELECT);
+            ChangeState(self, AbilityStateEnum::CURSOR_SELECT);
         }
     }
 
@@ -29,12 +29,12 @@ namespace sage
         Hit360AroundPoint(
             registry, self, abilityData, cursor->collision().point, whirlwindRadius);
 
-        ChangeState(self, AbilityState::IDLE);
+        ChangeState(self, AbilityStateEnum::IDLE);
     }
 
     void CursorAbility::confirm(entt::entity self)
     {
-        ChangeState(self, AbilityState::AWAITING_EXECUTION);
+        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
     }
@@ -49,7 +49,7 @@ namespace sage
         Cursor* _cursor,
         std::unique_ptr<TextureTerrainOverlay> _spellCursor,
         AbilityData _abilityData)
-        : Ability(_registry, _abilityData), cursor(_cursor)
+        : Ability(_registry, _abilityData, _cursor)
     {
         initStates();
         auto cursorState = std::make_unique<Ability::CursorSelectState>(this, _cursor);
@@ -58,11 +58,11 @@ namespace sage
             sink.connect<&CursorAbility::confirm>(this);
         }
 
-        states[AbilityState::IDLE] = std::make_unique<Ability::IdleState>(this);
-        states[AbilityState::CURSOR_SELECT] = std::move(cursorState);
-        states[AbilityState::AWAITING_EXECUTION] =
+        states[AbilityStateEnum::IDLE] = std::make_unique<Ability::IdleState>(this);
+        states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
+        states[AbilityStateEnum::AWAITING_EXECUTION] =
             std::make_unique<Ability::AwaitingExecutionState>(this);
-        state = states[AbilityState::IDLE].get();
+        state = states[AbilityStateEnum::IDLE].get();
 
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
         spellCursor = std::move(_spellCursor);

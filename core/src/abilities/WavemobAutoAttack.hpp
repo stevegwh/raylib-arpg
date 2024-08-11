@@ -9,6 +9,6 @@ namespace sage
     struct WavemobAutoAttack : public AutoAttackAbility
     {
         ~WavemobAutoAttack() override = default;
-        WavemobAutoAttack(entt::registry* _registry);
+        WavemobAutoAttack(entt::registry* _registry, Cursor* _cursor);
     };
 } // namespace sage

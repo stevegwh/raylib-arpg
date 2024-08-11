@@ -12,27 +12,27 @@ namespace sage
     {
         auto target = registry->get<CombatableActor>(self).target;
         HitSingleTarget(registry, self, abilityData, target);
-        ChangeState(self, AbilityState::IDLE);
+        ChangeState(self, AbilityStateEnum::IDLE);
     }
 
     void AutoAttackAbility::Init(entt::entity self)
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
-        ChangeState(self, AbilityState::AWAITING_EXECUTION);
+        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     void AutoAttackAbility::initStates()
     {
-        states[AbilityState::IDLE] = std::make_unique<IdleState>(this);
-        states[AbilityState::AWAITING_EXECUTION] =
+        states[AbilityStateEnum::IDLE] = std::make_unique<IdleState>(this);
+        states[AbilityStateEnum::AWAITING_EXECUTION] =
             std::make_unique<AwaitingExecutionState>(this);
-        state = states[AbilityState::IDLE].get();
+        state = states[AbilityStateEnum::IDLE].get();
     }
 
     AutoAttackAbility::AutoAttackAbility(
-        entt::registry* _registry, AbilityData _abilityData)
-        : Ability(_registry, _abilityData)
+        entt::registry* _registry, AbilityData _abilityData, Cursor* _cursor)
+        : Ability(_registry, _abilityData, _cursor)
     {
         initStates();
     }
