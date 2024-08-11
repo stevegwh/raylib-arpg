@@ -58,4 +58,20 @@ namespace sage
         {
         }
     };
+
+    enum class WavemobStateEnum
+    {
+        Default,
+        TargetOutOfRange,
+        Combat,
+        Dying
+    };
+
+    class WavemobState : public BaseState<WavemobState, WavemobStateEnum>
+    {
+      public:
+        WavemobState() : BaseState(WavemobStateEnum::Default)
+        {
+        }
+    };
 } // namespace sage
