@@ -202,23 +202,6 @@ namespace sage
         }
     }
 
-    void PlayerStateController::OnComponentRemoved(entt::entity entity)
-    {
-        auto& playerState = registry->get<PlayerState>(entity);
-        entt::sink sink{playerState.onStateChanged};
-        sink.disconnect<&PlayerStateController::ChangeState>(this);
-        GetSystem(playerState.GetCurrentState())
-            ->OnStateExit(entity); // Might not be a good idea if destroyed
-    }
-
-    void PlayerStateController::OnComponentAdded(entt::entity entity)
-    {
-        auto& playerState = registry->get<PlayerState>(entity);
-        entt::sink sink{playerState.onStateChanged};
-        sink.connect<&PlayerStateController::ChangeState>(this);
-        GetSystem(playerState.GetCurrentState())->OnStateEnter(entity);
-    }
-
     void PlayerStateController::Update()
     {
         auto view = registry->view<PlayerState>();
@@ -231,7 +214,7 @@ namespace sage
 
     void PlayerStateController::Draw3D()
     {
-        auto view = registry->view<PlayerState>();
+        auto& view = registry->get<PlayerState>();
         for (const auto& entity : view)
         {
             auto state = registry->get<PlayerState>(entity).GetCurrentState();
@@ -249,8 +232,5 @@ namespace sage
           engagedInCombatState(
               std::make_unique<playerstates::CombatState>(_registry, _gameData))
     {
-        systems.push_back(defaultState.get());
-        systems.push_back(approachingTargetState.get());
-        systems.push_back(engagedInCombatState.get());
     }
 } // namespace sage

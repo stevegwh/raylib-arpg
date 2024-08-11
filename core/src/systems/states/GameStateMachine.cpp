@@ -110,41 +110,16 @@ namespace sage
         }
     }
 
-    void GameStateController::OnComponentRemoved(entt::entity entity)
-    {
-        auto& gameState = registry->get<GameState>(entity);
-        entt::sink sink{gameState.onStateChanged};
-        sink.disconnect<&GameStateController::ChangeState>(this);
-        GetSystem(gameState.GetCurrentState())
-            ->OnStateExit(entity); // Might not be a good idea if destroyed
-    }
-
-    void GameStateController::OnComponentAdded(entt::entity entity)
-    {
-        auto& gameState = registry->get<GameState>(entity);
-        entt::sink sink{gameState.onStateChanged};
-        sink.connect<&GameStateController::ChangeState>(this);
-        GetSystem(gameState.GetCurrentState())->OnStateEnter(entity);
-    }
-
     void GameStateController::Update()
     {
-        auto view = registry->view<GameState>();
-        for (const auto& entity : view)
-        {
-            auto state = registry->get<GameState>(entity).GetCurrentState();
-            GetSystem(state)->Update(entity);
-        }
+        const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
+        GetSystem(state)->Update(gameEntity);
     }
 
     void GameStateController::Draw3D()
     {
-        auto view = registry->view<GameState>();
-        for (const auto& entity : view)
-        {
-            auto state = registry->get<GameState>(entity).GetCurrentState();
-            GetSystem(state)->Draw3D(entity);
-        }
+        const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
+        GetSystem(state)->Draw3D(gameEntity);
     }
 
     GameStateController::GameStateController(
@@ -155,8 +130,6 @@ namespace sage
           waveState(
               std::make_unique<gamestates::WaveState>(_registry, _gameData, gameEntity))
     {
-        systems.push_back(defaultState.get());
-        systems.push_back(waveState.get());
 
         _registry->emplace<GameState>(gameEntity);
     }

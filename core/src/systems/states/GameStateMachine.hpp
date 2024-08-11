@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "components/states/GameState.hpp"
+#include "components/states/States.hpp"
 #include "systems/states/StateMachine.hpp"
 #include <Timer.hpp>
 
@@ -56,8 +56,6 @@ namespace sage
 
       protected:
         StateMachine* GetSystem(GameStateEnum state) override;
-        void OnComponentRemoved(entt::entity entity) override;
-        void OnComponentAdded(entt::entity entity) override;
 
       public:
         std::unique_ptr<gamestates::DefaultState> defaultState;
