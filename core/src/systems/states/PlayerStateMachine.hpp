@@ -73,16 +73,16 @@ namespace sage
         };
     } // namespace playerstates
 
-    class PlayerStateController
+    class PlayerStateController : public StateMachineController<
+                                      PlayerStateController,
+                                      PlayerState,
+                                      PlayerStateEnum>
     {
-        entt::registry* registry;
-        std::vector<StateMachine*> systems;
 
-        StateMachine* GetSystem(PlayerStateEnum state);
-        void ChangeState(
-            entt::entity entity, PlayerStateEnum oldState, PlayerStateEnum newState);
-        void OnComponentRemoved(entt::entity entity);
-        void OnComponentAdded(entt::entity entity);
+      protected:
+        StateMachine* GetSystem(PlayerStateEnum state) override;
+        void OnComponentRemoved(entt::entity entity) override;
+        void OnComponentAdded(entt::entity entity) override;
 
       public:
         std::unique_ptr<playerstates::DefaultState> defaultState;
@@ -92,5 +92,7 @@ namespace sage
         PlayerStateController(entt::registry* _registry, GameData* gameData);
         void Update();
         void Draw3D();
+
+        friend class StateMachineController; // Required for CRTP
     };
 } // namespace sage

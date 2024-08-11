@@ -219,13 +219,6 @@ namespace sage
         GetSystem(playerState.currentState)->OnStateEnter(entity);
     }
 
-    void PlayerStateController::ChangeState(
-        entt::entity entity, PlayerStateEnum oldState, PlayerStateEnum newState)
-    {
-        GetSystem(oldState)->OnStateExit(entity);
-        GetSystem(newState)->OnStateEnter(entity);
-    }
-
     void PlayerStateController::Update()
     {
         auto view = registry->view<PlayerState>();
@@ -248,7 +241,7 @@ namespace sage
 
     PlayerStateController::PlayerStateController(
         entt::registry* _registry, GameData* _gameData)
-        : registry(_registry),
+        : StateMachineController(_registry),
           defaultState(
               std::make_unique<playerstates::DefaultState>(_registry, _gameData)),
           approachingTargetState(std::make_unique<playerstates::MovingToAttackEnemyState>(
@@ -259,10 +252,5 @@ namespace sage
         systems.push_back(defaultState.get());
         systems.push_back(approachingTargetState.get());
         systems.push_back(engagedInCombatState.get());
-
-        registry->on_construct<PlayerState>()
-            .connect<&PlayerStateController::OnComponentAdded>(this);
-        registry->on_destroy<PlayerState>()
-            .connect<&PlayerStateController::OnComponentRemoved>(this);
     }
 } // namespace sage
