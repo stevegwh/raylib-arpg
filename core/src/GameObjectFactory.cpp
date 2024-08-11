@@ -6,8 +6,7 @@
 #include "ResourceManager.hpp"
 #include "scenes/Scene.hpp"
 
-#include "abilities/PlayerAutoAttack.hpp"
-#include "abilities/WavemobAutoAttack.hpp"
+#include "abilities/AbilityDefinitions.hpp"
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"

@@ -2,9 +2,7 @@
 
 #include "GameData.hpp"
 
-#include "abilities/ConeOfCold.hpp"
-#include "abilities/RainOfFire.hpp"
-#include "abilities/WhirlwindAbility.hpp"
+#include "abilities/AbilityDefinitions.hpp"
 
 namespace sage
 {
@@ -33,7 +31,8 @@ namespace sage
         {
             return;
         }
-        abilityMap[currentAbilities[1]]->Init(controlledActor);
+        abilityMap[currentAbilities[1]]->Init(
+            gameData->controllableActorSystem->GetControlledActor());
     }
 
     void PlayerAbilitySystem::abilityThreePressed()
@@ -123,7 +122,7 @@ namespace sage
         abilityMap.push_back(
             std::make_unique<WhirlwindAbility>(registry, gameData->cursor.get()));
         abilityMap.push_back(
-            std::make_unique<ConeOfCold>(registry, gameData->cursor.get()));
+            std::make_unique<WhirlwindAbility>(registry, gameData->cursor.get()));
         abilityMap.push_back(std::make_unique<RainOfFire>(
             registry,
             gameData->camera.get(),
