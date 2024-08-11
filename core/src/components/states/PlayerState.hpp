@@ -12,10 +12,11 @@ namespace sage
         Combat
     };
 
-    struct PlayerState
+    class PlayerState
     {
         PlayerStateEnum currentState = PlayerStateEnum::Default;
 
+      public:
         // self, old state, new state
         entt::sigh<void(entt::entity, PlayerStateEnum, PlayerStateEnum)> onStateChanged;
 
@@ -23,6 +24,11 @@ namespace sage
         {
             onStateChanged.publish(self, currentState, newState);
             currentState = newState;
+        }
+
+        PlayerStateEnum GetCurrentState() const
+        {
+            return currentState;
         }
     };
 } // namespace sage

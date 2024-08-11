@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "components/states/GameStates.hpp"
-#include "systems/states/StateMachineECS.hpp"
+#include "components/states/GameState.hpp"
+#include "systems/states/StateMachine.hpp"
 #include <Timer.hpp>
 
 #include <entt/entt.hpp>
@@ -16,33 +16,32 @@
 namespace sage
 {
     class GameData;
-    class BaseSystem;
 
     namespace gamestates
     {
-        class DefaultState : public StateMachineECS<DefaultState, StateGameDefault>
+        class DefaultState : public StateMachine
         {
             entt::entity gameEntity;
             Timer timer{};
             void OnTimerEnd();
 
           public:
-            void Update() override;
-            void Draw3D() override;
+            void Update(entt::entity entity) override;
+            void Draw3D(entt::entity entity) override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             DefaultState(entt::registry* _registry, entt::entity _gameEntity);
         };
 
-        class WaveState : public StateMachineECS<WaveState, StateGameWave>
+        class WaveState : public StateMachine
         {
             GameData* gameData;
             void initWave();
             void OnTimerEnd();
 
           public:
-            void Update() override;
-            void Draw3D() override;
+            void Update(entt::entity entity) override;
+            void Draw3D(entt::entity entity) override;
             void OnStateEnter(entt::entity entity) override;
             void OnStateExit(entt::entity entity) override;
             WaveState(
@@ -51,15 +50,24 @@ namespace sage
     } // namespace gamestates
 
     class GameStateController
+        : public StateMachineController<GameStateController, GameState, GameStateEnum>
     {
         entt::entity gameEntity;
-        std::vector<BaseSystem*> systems;
+
+      protected:
+        StateMachine* GetSystem(GameStateEnum state) override;
+        void OnComponentRemoved(entt::entity entity) override;
+        void OnComponentAdded(entt::entity entity) override;
 
       public:
         std::unique_ptr<gamestates::DefaultState> defaultState;
         std::unique_ptr<gamestates::WaveState> waveState;
+
+        GameStateController(entt::registry* _registry, GameData* gameData);
         void Update();
-        GameStateController(entt::registry* _registry, GameData* _gameData);
+        void Draw3D();
+
+        friend class StateMachineController; // Required for CRTP
     };
 
 } // namespace sage

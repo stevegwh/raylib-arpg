@@ -1,7 +1,7 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
 
-#include "components/PlayerState.hpp"
+#include "components/states/PlayerState.hpp"
 #include "systems/states/StateMachine.hpp"
 
 #include <entt/entt.hpp>
