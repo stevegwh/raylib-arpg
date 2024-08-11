@@ -17,23 +17,6 @@
 namespace sage
 {
 
-    void CursorAbility::IdleState::Update(entt::entity self)
-    {
-        ability->cooldownTimer.Update(GetFrameTime());
-        if (ability->vfx->active)
-        {
-            ability->vfx->Update(GetFrameTime());
-        }
-    }
-
-    void CursorAbility::IdleState::Draw3D(entt::entity self)
-    {
-        if (ability->vfx->active)
-        {
-            ability->vfx->Draw3D();
-        }
-    }
-
     void CursorAbility::CursorSelectState::enableCursor()
     {
         ability->spellCursor->Init(ability->cursor->terrainCollision().point);
@@ -87,25 +70,6 @@ namespace sage
         cursorActive = true;
     }
 
-    void CursorAbility::AwaitingExecutionState::Update(entt::entity self)
-    {
-        ability->animationDelayTimer.Update(GetFrameTime());
-        if (ability->animationDelayTimer.HasFinished())
-        {
-            ability->Execute(self);
-        }
-    }
-
-    void CursorAbility::AwaitingExecutionState::OnEnter(entt::entity self)
-    {
-        ability->cooldownTimer.Start();
-
-        ability->animationDelayTimer.Start();
-
-        auto& animation = ability->registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
-    }
-
     void CursorAbility::Init(entt::entity self)
     {
         if (state == states[AbilityState::CURSOR_SELECT].get())
@@ -130,6 +94,8 @@ namespace sage
     void CursorAbility::confirm(entt::entity self)
     {
         ChangeState(self, AbilityState::AWAITING_EXECUTION);
+        auto& animation = registry->get<Animation>(self);
+        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
     }
 
     void CursorAbility::Draw3D(entt::entity self)
@@ -141,14 +107,15 @@ namespace sage
     void CursorAbility::Update(entt::entity self)
     {
         state->Update(self);
+        Ability::Update(self);
     }
 
     void CursorAbility::initStates()
     {
-        states[AbilityState::IDLE] = std::make_unique<IdleState>(this);
+        states[AbilityState::IDLE] = std::make_unique<Ability::IdleState>(this);
         states[AbilityState::CURSOR_SELECT] = std::make_unique<CursorSelectState>(this);
         states[AbilityState::AWAITING_EXECUTION] =
-            std::make_unique<AwaitingExecutionState>(this);
+            std::make_unique<Ability::AwaitingExecutionState>(this);
         state = states[AbilityState::IDLE].get();
     }
 

@@ -4,6 +4,34 @@
 
 namespace sage
 {
+    void Ability::IdleState::Update(entt::entity self)
+    {
+        ability->cooldownTimer.Update(GetFrameTime());
+        if (ability->cooldownTimer.HasFinished() && ability->abilityData.repeatable)
+        {
+            ability->Init(self);
+        }
+    }
+
+    void Ability::IdleState::Draw3D(entt::entity self)
+    {
+    }
+
+    void Ability::AwaitingExecutionState::Update(entt::entity self)
+    {
+        ability->animationDelayTimer.Update(GetFrameTime());
+        if (ability->animationDelayTimer.HasFinished())
+        {
+            // ability->OnAbilityExecute.publish(self);
+            ability->Execute(self);
+        }
+    }
+
+    void Ability::AwaitingExecutionState::OnEnter(entt::entity self)
+    {
+        ability->cooldownTimer.Start();
+        ability->animationDelayTimer.Start();
+    }
     void Ability::ChangeState(entt::entity self, AbilityState newState)
     {
         state->OnExit(self);
@@ -38,11 +66,18 @@ namespace sage
 
     void Ability::Update(entt::entity self)
     {
+        if (vfx && vfx->active)
+        {
+            vfx->Update(GetFrameTime());
+        }
     }
 
     void Ability::Draw3D(entt::entity self)
     {
-        // Draw the ability in 3D space
+        if (vfx && vfx->active)
+        {
+            vfx->Draw3D();
+        }
     }
 
     void Ability::Init(entt::entity self)

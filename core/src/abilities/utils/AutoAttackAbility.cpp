@@ -7,41 +7,6 @@
 
 namespace sage
 {
-    void AutoAttackAbility::IdleState::Update(entt::entity self)
-    {
-        ability->cooldownTimer.Update(GetFrameTime());
-        if (ability->cooldownTimer.HasFinished() && ability->abilityData.repeatable)
-        {
-            ability->Init(self);
-        }
-        if (ability->vfx && ability->vfx->active)
-        {
-            ability->vfx->Update(GetFrameTime());
-        }
-    }
-
-    void AutoAttackAbility::IdleState::Draw3D(entt::entity self)
-    {
-        if (ability->vfx && ability->vfx->active)
-        {
-            ability->vfx->Draw3D();
-        }
-    }
-
-    void AutoAttackAbility::AwaitingExecutionState::Update(entt::entity self)
-    {
-        ability->animationDelayTimer.Update(GetFrameTime());
-        if (ability->animationDelayTimer.HasFinished())
-        {
-            ability->Execute(self);
-        }
-    }
-
-    void AutoAttackAbility::AwaitingExecutionState::OnEnter(entt::entity self)
-    {
-        ability->cooldownTimer.Start();
-        ability->animationDelayTimer.Start();
-    }
 
     void AutoAttackAbility::Execute(entt::entity self)
     {
@@ -73,6 +38,7 @@ namespace sage
     void AutoAttackAbility::Update(entt::entity self)
     {
         state->Update(self);
+        Ability::Update(self);
     }
 
     void AutoAttackAbility::initStates()

@@ -49,8 +49,31 @@ namespace sage
         AbilityData abilityData;
         std::unordered_map<AbilityState, std::unique_ptr<State>> states;
         State* state;
-
         void ChangeState(entt::entity self, AbilityState newState);
+
+        class IdleState : public State
+        {
+            Ability* ability;
+
+          public:
+            void Update(entt::entity self) override;
+            void Draw3D(entt::entity self) override;
+            IdleState(Ability* _ability) : ability(_ability)
+            {
+            }
+        };
+
+        class AwaitingExecutionState : public State
+        {
+            Ability* ability;
+
+          public:
+            void OnEnter(entt::entity self) override;
+            void Update(entt::entity self) override;
+            AwaitingExecutionState(Ability* _ability) : ability(_ability)
+            {
+            }
+        };
 
       public:
         virtual void ResetCooldown();
