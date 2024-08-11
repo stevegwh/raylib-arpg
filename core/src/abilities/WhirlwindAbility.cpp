@@ -8,7 +8,7 @@
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 
-#include "AbilityFunctions.hpp"
+#include "utils/AbilityFunctions.hpp"
 
 #include "raylib.h"
 

@@ -1,4 +1,4 @@
-#include "AbilitySystem.hpp"
+#include "PlayerAbilitySystem.hpp"
 
 #include "GameData.hpp"
 
@@ -8,7 +8,7 @@
 
 namespace sage
 {
-    void AbilitySystem::abilityOnePressed()
+    void PlayerAbilitySystem::abilityOnePressed()
     {
         std::cout << "Ability 1 pressed \n";
         if (currentAbilities[0] == -1 ||
@@ -25,7 +25,7 @@ namespace sage
         // GetControlledActor()
     }
 
-    void AbilitySystem::abilityTwoPressed()
+    void PlayerAbilitySystem::abilityTwoPressed()
     {
         std::cout << "Ability 2 pressed \n";
         if (currentAbilities[1] == -1 ||
@@ -36,7 +36,7 @@ namespace sage
         abilityMap[currentAbilities[1]]->Init(controlledActor);
     }
 
-    void AbilitySystem::abilityThreePressed()
+    void PlayerAbilitySystem::abilityThreePressed()
     {
         std::cout << "Ability 3 pressed \n";
         if (currentAbilities[2] == -1 ||
@@ -47,7 +47,7 @@ namespace sage
         abilityMap[currentAbilities[2]]->Init(controlledActor);
     }
 
-    void AbilitySystem::abilityFourPressed()
+    void PlayerAbilitySystem::abilityFourPressed()
     {
         std::cout << "Ability 4 pressed \n";
         if (currentAbilities[3] == -1 ||
@@ -58,20 +58,20 @@ namespace sage
         abilityMap[currentAbilities[3]]->Init(controlledActor);
     }
 
-    void AbilitySystem::onActorChanged()
+    void PlayerAbilitySystem::onActorChanged()
     {
         controlledActor = gameData->controllableActorSystem->GetControlledActor();
         // TODO: Change abilities based on the new actor
     }
 
-    void AbilitySystem::ChangeAbility(int abilitySlot, int newAbilityIndex)
+    void PlayerAbilitySystem::ChangeAbility(int abilitySlot, int newAbilityIndex)
     {
         // More than likely should subscribe to an "ability end" event which then triggers
         // the change
         currentAbilities[abilitySlot] = newAbilityIndex;
     }
 
-    void AbilitySystem::Update()
+    void PlayerAbilitySystem::Update()
     {
         for (auto& ability : abilityMap)
         {
@@ -79,12 +79,12 @@ namespace sage
         }
     }
 
-    void AbilitySystem::Draw2D()
+    void PlayerAbilitySystem::Draw2D()
     {
         // Draw GUI here (cooldowns etc)
     }
 
-    void AbilitySystem::Draw3D()
+    void PlayerAbilitySystem::Draw3D()
     {
         for (auto& ability : abilityMap)
         {
@@ -92,30 +92,31 @@ namespace sage
         }
     }
 
-    AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)
+    PlayerAbilitySystem::PlayerAbilitySystem(
+        entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
         onActorChanged();
         {
             entt::sink sink{gameData->userInput->keyOnePressed};
-            sink.connect<&AbilitySystem::abilityOnePressed>(this);
+            sink.connect<&PlayerAbilitySystem::abilityOnePressed>(this);
         }
         {
             entt::sink sink{gameData->userInput->keyTwoPressed};
-            sink.connect<&AbilitySystem::abilityTwoPressed>(this);
+            sink.connect<&PlayerAbilitySystem::abilityTwoPressed>(this);
         }
         {
             entt::sink sink{gameData->userInput->keyThreePressed};
-            sink.connect<&AbilitySystem::abilityThreePressed>(this);
+            sink.connect<&PlayerAbilitySystem::abilityThreePressed>(this);
         }
         {
             entt::sink sink{gameData->userInput->keyFourPressed};
-            sink.connect<&AbilitySystem::abilityFourPressed>(this);
+            sink.connect<&PlayerAbilitySystem::abilityFourPressed>(this);
         }
 
         {
             entt::sink sink{gameData->controllableActorSystem->onControlledActorChange};
-            sink.connect<&AbilitySystem::onActorChanged>(this);
+            sink.connect<&PlayerAbilitySystem::onActorChanged>(this);
         }
 
         currentAbilities.fill(-1);
