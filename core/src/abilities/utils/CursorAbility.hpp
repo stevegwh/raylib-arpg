@@ -14,18 +14,6 @@ namespace sage
         Cursor* cursor;
         float whirlwindRadius = 50.0f;
 
-        class IdleState : public State
-        {
-            CursorAbility* ability;
-
-          public:
-            void Update(entt::entity self) override;
-            void Draw3D(entt::entity self) override;
-            IdleState(CursorAbility* _ability) : ability(_ability)
-            {
-            }
-        };
-
         class CursorSelectState : public State
         {
             CursorAbility* ability;
@@ -39,18 +27,6 @@ namespace sage
             void OnEnter(entt::entity self) override;
             void OnExit(entt::entity self) override;
             CursorSelectState(CursorAbility* _ability) : ability(_ability)
-            {
-            }
-        };
-
-        class AwaitingExecutionState : public State
-        {
-            CursorAbility* ability;
-
-          public:
-            void Update(entt::entity self) override;
-            void OnEnter(entt::entity self) override;
-            AwaitingExecutionState(CursorAbility* _ability) : ability(_ability)
             {
             }
         };
