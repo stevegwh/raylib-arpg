@@ -6,13 +6,32 @@
 
 namespace sage
 {
+    std::string getEnumName(
+        AbilityStateEnum state,
+        const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>&
+            _states)
+    {
+        switch (state)
+        {
+        case AbilityStateEnum::IDLE:
+            return "IDLE";
+        case AbilityStateEnum::CURSOR_SELECT:
+            return "CURSOR_SELECT";
+        case AbilityStateEnum::AWAITING_EXECUTION:
+            return "AWAITING_EXECUTION";
+        default:
+            return "UNKNOWN";
+        }
+    }
+
+    // --------------------------------------------
 
     void Ability::IdleState::Update(entt::entity self)
     {
-        ability->cooldownTimer.Update(GetFrameTime());
-        if (ability->cooldownTimer.HasFinished() && ability->abilityData.repeatable)
+        cooldownTimer.Update(GetFrameTime());
+        if (cooldownTimer.HasFinished() && repeatable)
         {
-            ability->Init(self);
+            onRestartTriggered.publish(self);
         }
     }
 
@@ -20,8 +39,8 @@ namespace sage
 
     void Ability::CursorSelectState::enableCursor()
     {
-        ability->spellCursor->Init(cursor->terrainCollision().point);
-        ability->spellCursor->Enable(true);
+        spellCursor->Init(cursor->terrainCollision().point);
+        spellCursor->Enable(true);
         cursor->Disable();
         cursor->Hide();
     }
@@ -30,15 +49,14 @@ namespace sage
     {
         cursor->Enable();
         cursor->Show();
-        ability->spellCursor->Enable(false);
+        spellCursor->Enable(false);
     }
 
     void Ability::CursorSelectState::Update(entt::entity self)
     {
-        ability->spellCursor->Update(cursor->terrainCollision().point);
+        spellCursor->Update(cursor->terrainCollision().point);
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            // ability->confirm(self);
             onConfirm.publish(self);
         }
     }
@@ -76,39 +94,20 @@ namespace sage
 
     void Ability::AwaitingExecutionState::Update(entt::entity self)
     {
-        ability->animationDelayTimer.Update(GetFrameTime());
-        if (ability->animationDelayTimer.HasFinished())
+        animationDelayTimer.Update(GetFrameTime());
+        if (animationDelayTimer.HasFinished())
         {
-            // ability->OnAbilityExecute.publish(self);
-            ability->Execute(self);
+            onExecute.publish(self);
         }
     }
 
     void Ability::AwaitingExecutionState::OnEnter(entt::entity self)
     {
-        ability->cooldownTimer.Start();
-        ability->animationDelayTimer.Start();
+        cooldownTimer.Start();
+        animationDelayTimer.Start();
     }
 
     // --------------------------------------------
-
-    std::string getEnumName(
-        AbilityStateEnum state,
-        const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>&
-            _states)
-    {
-        switch (state)
-        {
-        case AbilityStateEnum::IDLE:
-            return "IDLE";
-        case AbilityStateEnum::CURSOR_SELECT:
-            return "CURSOR_SELECT";
-        case AbilityStateEnum::AWAITING_EXECUTION:
-            return "AWAITING_EXECUTION";
-        default:
-            return "UNKNOWN";
-        }
-    }
 
     void Ability::ChangeState(entt::entity self, AbilityStateEnum newState)
     {
@@ -173,22 +172,16 @@ namespace sage
         Execute(self);
     }
 
-    void Ability::initStates()
-    {
-        states[AbilityStateEnum::IDLE] = std::make_unique<IdleState>(this);
-        states[AbilityStateEnum::CURSOR_SELECT] =
-            std::make_unique<CursorSelectState>(this, cursor);
-        states[AbilityStateEnum::AWAITING_EXECUTION] =
-            std::make_unique<AwaitingExecutionState>(this);
-        state = states[AbilityStateEnum::IDLE].get();
-    }
-
     Ability::Ability(
         entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor)
         : registry(_registry), abilityData(_abilityData), cursor(_cursor)
     {
         cooldownTimer.SetMaxTime(abilityData.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationDelay);
-        initStates();
+
+        auto idleState = std::make_unique<IdleState>(
+            cooldownTimer, animationDelayTimer, _abilityData.repeatable);
+        states[AbilityStateEnum::IDLE] = std::move(idleState);
+        state = states[AbilityStateEnum::IDLE].get();
     }
 } // namespace sage

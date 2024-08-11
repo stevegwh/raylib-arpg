@@ -47,14 +47,22 @@ namespace sage
         AbilityData _abilityData)
         : Ability(_registry, _abilityData, _cursor)
     {
-        auto cursorState = dynamic_cast<CursorSelectState*>(
-            states[AbilityStateEnum::CURSOR_SELECT].get());
-        {
-            entt::sink sink{cursorState->onConfirm};
-            sink.connect<&CursorAbility::confirm>(this);
-        }
+        auto idleState = dynamic_cast<IdleState*>(states[AbilityStateEnum::IDLE].get());
+        entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
+        onRestartTriggeredSink.connect<&CursorAbility::Init>(this);
+
+        auto awaitingExecutionState =
+            std::make_unique<AwaitingExecutionState>(cooldownTimer, animationDelayTimer);
+        entt::sink onExecuteSink{awaitingExecutionState->onExecute};
+        onExecuteSink.connect<&CursorAbility::Execute>(this);
+        states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
+
+        auto cursorState = std::make_unique<CursorSelectState>(
+            cooldownTimer, animationDelayTimer, cursor, std::move(_spellCursor));
+        entt::sink onConfirmSink{cursorState->onConfirm};
+        onConfirmSink.connect<&CursorAbility::confirm>(this);
+        states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
 
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
-        spellCursor = std::move(_spellCursor);
     }
 } // namespace sage
