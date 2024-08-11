@@ -1,7 +1,7 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
 
-#include "components/states/PlayerState.hpp"
+#include "components/states/States.hpp"
 #include "systems/states/StateMachine.hpp"
 
 #include <entt/entt.hpp>
@@ -81,8 +81,6 @@ namespace sage
 
       protected:
         StateMachine* GetSystem(PlayerStateEnum state) override;
-        void OnComponentRemoved(entt::entity entity) override;
-        void OnComponentAdded(entt::entity entity) override;
 
       public:
         std::unique_ptr<playerstates::DefaultState> defaultState;

@@ -16,7 +16,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/states/EnemyStates.hpp"
-#include "components/states/PlayerState.hpp"
+#include "components/states/States.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"

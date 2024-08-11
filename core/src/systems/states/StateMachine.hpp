@@ -47,11 +47,27 @@ namespace sage
     {
       protected:
         entt::registry* registry;
-        std::vector<StateMachine*> systems;
 
         virtual StateMachine* GetSystem(StateEnum state) = 0;
-        virtual void OnComponentRemoved(entt::entity entity) = 0;
-        virtual void OnComponentAdded(entt::entity entity) = 0;
+
+        void OnComponentRemoved(entt::entity entity)
+        {
+            auto* derived = static_cast<Derived*>(this);
+            auto& state = registry->get<StateName>(entity);
+            entt::sink sink{state.onStateChanged};
+            sink.template disconnect<&Derived::ChangeState>(derived);
+            derived->GetSystem(state.GetCurrentState())
+                ->OnStateExit(entity); // Might not be a good idea if destroyed
+        }
+
+        void OnComponentAdded(entt::entity entity)
+        {
+            auto* derived = static_cast<Derived*>(this);
+            auto& state = registry->get<StateName>(entity);
+            entt::sink sink{state.onStateChanged};
+            sink.template connect<&Derived::ChangeState>(derived);
+            derived->GetSystem(state.GetCurrentState())->OnStateEnter(entity);
+        }
 
         void ChangeState(entt::entity entity, StateEnum oldState, StateEnum newState)
         {
@@ -65,11 +81,9 @@ namespace sage
         explicit StateMachineController(entt::registry* _registry) : registry(_registry)
         {
             registry->template on_construct<StateName>()
-                .template connect<&Derived::OnComponentAdded>(
-                    static_cast<Derived*>(this));
+                .template connect<&StateMachineController::OnComponentAdded>(this);
             registry->template on_destroy<StateName>()
-                .template connect<&Derived::OnComponentRemoved>(
-                    static_cast<Derived*>(this));
+                .template connect<&StateMachineController::OnComponentRemoved>(this);
         }
     };
 } // namespace sage
