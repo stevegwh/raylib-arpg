@@ -23,16 +23,16 @@ namespace sage
         bool repeatable = false;
     };
 
-    enum class AbilityState
+    enum class AbilityStateEnum
     {
         IDLE,
         CURSOR_SELECT,
         AWAITING_EXECUTION
     };
 
-    struct State
+    struct AbilityState
     {
-        virtual ~State() = default;
+        virtual ~AbilityState() = default;
         virtual void Update(entt::entity self) {};
         virtual void Draw3D(entt::entity self) {};
         virtual void OnEnter(entt::entity self) {};
@@ -52,11 +52,11 @@ namespace sage
         std::unique_ptr<TextureTerrainOverlay> spellCursor;
         AbilityData abilityData;
 
-        std::unordered_map<AbilityState, std::unique_ptr<State>> states;
-        State* state;
-        void ChangeState(entt::entity self, AbilityState newState);
+        AbilityState* state;
+        std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
+        void ChangeState(entt::entity self, AbilityStateEnum newState);
 
-        class IdleState : public State
+        class IdleState : public AbilityState
         {
             Ability* ability;
 
@@ -67,7 +67,7 @@ namespace sage
             }
         };
 
-        class CursorSelectState : public State
+        class CursorSelectState : public AbilityState
         {
             Ability* ability;
             Cursor* cursor;
@@ -87,7 +87,7 @@ namespace sage
             }
         };
 
-        class AwaitingExecutionState : public State
+        class AwaitingExecutionState : public AbilityState
         {
             Ability* ability;
 
@@ -98,10 +98,6 @@ namespace sage
             {
             }
         };
-
-        class IdleState;
-        class CursorSelectState;
-        class AwaitingExecutionState;
 
       public:
         // Timer functions
@@ -121,6 +117,6 @@ namespace sage
         virtual ~Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* _registry, const AbilityData& _abilityData);
+        Ability(entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor);
     };
 } // namespace sage

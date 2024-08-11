@@ -10,9 +10,7 @@ namespace sage
 
     class CursorAbility : public Ability
     {
-        Cursor* cursor;
         float whirlwindRadius = 50.0f;
-
         void initStates();
 
       protected:

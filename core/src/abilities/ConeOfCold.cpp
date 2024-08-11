@@ -14,7 +14,8 @@ namespace sage
     {
     }
 
-    ConeOfCold::ConeOfCold(entt::registry* _registry) : Ability(_registry, {})
+    ConeOfCold::ConeOfCold(entt::registry* _registry, Cursor* _cursor)
+        : Ability(_registry, {}, _cursor)
     {
     }
 } // namespace sage

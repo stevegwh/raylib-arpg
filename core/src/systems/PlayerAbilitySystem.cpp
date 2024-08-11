@@ -120,8 +120,10 @@ namespace sage
         }
 
         currentAbilities.fill(-1);
-        abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry));
-        abilityMap.push_back(std::make_unique<ConeOfCold>(registry));
+        abilityMap.push_back(
+            std::make_unique<WhirlwindAbility>(registry, gameData->cursor.get()));
+        abilityMap.push_back(
+            std::make_unique<ConeOfCold>(registry, gameData->cursor.get()));
         abilityMap.push_back(std::make_unique<RainOfFire>(
             registry,
             gameData->camera.get(),
