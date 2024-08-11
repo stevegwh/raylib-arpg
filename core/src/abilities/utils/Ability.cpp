@@ -1,5 +1,7 @@
 #include "Ability.hpp"
 
+#include <cassert>
+
 #include "raylib.h"
 
 namespace sage
@@ -90,8 +92,27 @@ namespace sage
 
     // --------------------------------------------
 
+    std::string getEnumName(
+        AbilityStateEnum state,
+        const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>&
+            _states)
+    {
+        switch (state)
+        {
+        case AbilityStateEnum::IDLE:
+            return "IDLE";
+        case AbilityStateEnum::CURSOR_SELECT:
+            return "CURSOR_SELECT";
+        case AbilityStateEnum::AWAITING_EXECUTION:
+            return "AWAITING_EXECUTION";
+        default:
+            return "UNKNOWN";
+        }
+    }
+
     void Ability::ChangeState(entt::entity self, AbilityStateEnum newState)
     {
+        assert(states.contains(newState));
         state->OnExit(self);
         state = states[newState].get();
         state->OnEnter(self);
@@ -140,8 +161,7 @@ namespace sage
 
     void Ability::Draw3D(entt::entity self)
     {
-        // TODO: Enabling below causes seg fault
-        // state->Draw3D(self);
+        state->Draw3D(self);
         if (vfx && vfx->active)
         {
             vfx->Draw3D();
@@ -153,11 +173,22 @@ namespace sage
         Execute(self);
     }
 
+    void Ability::initStates()
+    {
+        states[AbilityStateEnum::IDLE] = std::make_unique<IdleState>(this);
+        states[AbilityStateEnum::CURSOR_SELECT] =
+            std::make_unique<CursorSelectState>(this, cursor);
+        states[AbilityStateEnum::AWAITING_EXECUTION] =
+            std::make_unique<AwaitingExecutionState>(this);
+        state = states[AbilityStateEnum::IDLE].get();
+    }
+
     Ability::Ability(
         entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor)
         : registry(_registry), abilityData(_abilityData), cursor(_cursor)
     {
         cooldownTimer.SetMaxTime(abilityData.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationDelay);
+        initStates();
     }
 } // namespace sage

@@ -22,18 +22,9 @@ namespace sage
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    void AutoAttackAbility::initStates()
-    {
-        states[AbilityStateEnum::IDLE] = std::make_unique<IdleState>(this);
-        states[AbilityStateEnum::AWAITING_EXECUTION] =
-            std::make_unique<AwaitingExecutionState>(this);
-        state = states[AbilityStateEnum::IDLE].get();
-    }
-
     AutoAttackAbility::AutoAttackAbility(
         entt::registry* _registry, AbilityData _abilityData, Cursor* _cursor)
         : Ability(_registry, _abilityData, _cursor)
     {
-        initStates();
     }
 } // namespace sage

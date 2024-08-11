@@ -11,7 +11,6 @@ namespace sage
     class CursorAbility : public Ability
     {
         float whirlwindRadius = 50.0f;
-        void initStates();
 
       protected:
         virtual void confirm(entt::entity self);

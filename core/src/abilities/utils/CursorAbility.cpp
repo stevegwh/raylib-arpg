@@ -39,10 +39,6 @@ namespace sage
         animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
     }
 
-    void CursorAbility::initStates()
-    {
-    }
-
     CursorAbility::CursorAbility(
         entt::registry* _registry,
         Camera* _camera,
@@ -51,18 +47,12 @@ namespace sage
         AbilityData _abilityData)
         : Ability(_registry, _abilityData, _cursor)
     {
-        initStates();
-        auto cursorState = std::make_unique<Ability::CursorSelectState>(this, _cursor);
+        auto cursorState = dynamic_cast<CursorSelectState*>(
+            states[AbilityStateEnum::CURSOR_SELECT].get());
         {
             entt::sink sink{cursorState->onConfirm};
             sink.connect<&CursorAbility::confirm>(this);
         }
-
-        states[AbilityStateEnum::IDLE] = std::make_unique<Ability::IdleState>(this);
-        states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
-        states[AbilityStateEnum::AWAITING_EXECUTION] =
-            std::make_unique<Ability::AwaitingExecutionState>(this);
-        state = states[AbilityStateEnum::IDLE].get();
 
         vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
         spellCursor = std::move(_spellCursor);
