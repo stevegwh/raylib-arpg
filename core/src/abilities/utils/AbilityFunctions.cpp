@@ -10,50 +10,32 @@
 namespace sage
 {
 
-    AbilityFunction::AbilityFunction(entt::registry* _registry) : registry(_registry)
-    {
-    }
-
-    void PlayerAutoAttackFunc::Execute(entt::entity self, const AbilityData& abilityData)
+    void PlayerAutoAttackFunc::Execute(
+        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
     {
         auto target = registry->get<CombatableActor>(self).target;
         HitSingleTarget(registry, self, abilityData, target);
     }
 
-    PlayerAutoAttackFunc::PlayerAutoAttackFunc(entt::registry* _registry)
-        : AbilityFunction(_registry)
-    {
-    }
-
-    void RainOfFireFunc::Execute(entt::entity self, const AbilityData& abilityData)
+    void RainOfFireFunc::Execute(
+        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
     {
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(registry, self, abilityData, actorTransform.position(), 5);
     }
 
-    RainOfFireFunc::RainOfFireFunc(entt::registry* _registry) : AbilityFunction(_registry)
-    {
-    }
-
-    void WavemobAutoAttackFunc::Execute(entt::entity self, const AbilityData& abilityData)
+    void WavemobAutoAttackFunc::Execute(
+        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
     {
         auto target = registry->get<CombatableActor>(self).target;
         HitSingleTarget(registry, self, abilityData, target);
     }
 
-    WavemobAutoAttackFunc::WavemobAutoAttackFunc(entt::registry* _registry)
-        : AbilityFunction(_registry)
-    {
-    }
-
-    void WhirlwindFunc::Execute(entt::entity self, const AbilityData& abilityData)
+    void WhirlwindFunc::Execute(
+        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
     {
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(registry, self, abilityData, actorTransform.position(), 15);
-    }
-
-    WhirlwindFunc::WhirlwindFunc(entt::registry* _registry) : AbilityFunction(_registry)
-    {
     }
 
     AbilityLibrary::AbilityLibrary(entt::registry* reg) : registry(reg)
@@ -63,12 +45,11 @@ namespace sage
     void AbilityLibrary::InitializeAbilities()
     {
         abilityFunctions.emplace(
-            "PlayerAutoAttack", std::make_unique<PlayerAutoAttackFunc>(registry));
+            "PlayerAutoAttack", std::make_unique<PlayerAutoAttackFunc>());
+        abilityFunctions.emplace("RainOfFire", std::make_unique<RainOfFireFunc>());
         abilityFunctions.emplace(
-            "RainOfFire", std::make_unique<RainOfFireFunc>(registry));
-        abilityFunctions.emplace(
-            "WavemobAutoAttack", std::make_unique<WavemobAutoAttackFunc>(registry));
-        abilityFunctions.emplace("Whirlwind", std::make_unique<WhirlwindFunc>(registry));
+            "WavemobAutoAttack", std::make_unique<WavemobAutoAttackFunc>());
+        abilityFunctions.emplace("Whirlwind", std::make_unique<WhirlwindFunc>());
     }
 
     AbilityLibrary& AbilityLibrary::GetInstance(entt::registry* reg)

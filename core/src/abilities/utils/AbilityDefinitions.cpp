@@ -13,17 +13,22 @@ namespace sage
 
     AbilityData PlayerAutoAttack::initAbilityData(entt::registry* _registry)
     {
-        static AbilityData playerAutoAbilityData{
-            .baseData =
-                {.element = AttackElement::PHYSICAL,
-                 .cooldownDuration = 1,
-                 .baseDamage = 10,
-                 .range = 5,
-                 .repeatable = true},
-            .animationParams = {.animationDelay = 0}};
+        // TODO: Fairly sure the issue is that below you are overwriting defaults, causing
+        // weird behaviour
+        static AbilityData playerAutoAbilityData;
+        playerAutoAbilityData.baseData.element = AttackElement::PHYSICAL;
+        playerAutoAbilityData.baseData.cooldownDuration = 1;
+        playerAutoAbilityData.baseData.baseDamage = 10;
+        playerAutoAbilityData.baseData.range = 5;
+        playerAutoAbilityData.baseData.repeatable = true;
+
+        playerAutoAbilityData.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+        playerAutoAbilityData.animationParams.animSpeed = 4;
+        playerAutoAbilityData.animationParams.animationDelay = 0;
 
         playerAutoAbilityData.executeFunc =
             AbilityLibrary::GetInstance(_registry).GetAbility("PlayerAutoAttack");
+
         return playerAutoAbilityData;
     }
 
@@ -34,18 +39,18 @@ namespace sage
 
     AbilityData RainOfFire::initAbilityData(entt::registry* _registry)
     {
-        static AbilityData rainoffireAbilityData{
-            .baseData =
-                {.cooldownDuration = 3,
-                 .range = 5,
-                 .baseDamage = 25,
-                 .element = AttackElement::FIRE,
-                 .repeatable = false},
-            .animationParams = {
-                .animEnum = AnimationEnum::SPIN,
-                .animSpeed = 1,
-                .oneShot = true,
-                .animationDelay = 0.75f}};
+        static AbilityData rainoffireAbilityData;
+
+        rainoffireAbilityData.baseData.cooldownDuration = 3;
+        rainoffireAbilityData.baseData.range = 5;
+        rainoffireAbilityData.baseData.baseDamage = 25;
+        rainoffireAbilityData.baseData.element = AttackElement::FIRE;
+        rainoffireAbilityData.baseData.repeatable = false;
+
+        rainoffireAbilityData.animationParams.animEnum = AnimationEnum::SPIN;
+        rainoffireAbilityData.animationParams.animSpeed = 1;
+        rainoffireAbilityData.animationParams.oneShot = true;
+        rainoffireAbilityData.animationParams.animationDelay = 0.75f;
 
         rainoffireAbilityData.executeFunc =
             AbilityLibrary::GetInstance(_registry).GetAbility("RainOfFire");
@@ -73,13 +78,15 @@ namespace sage
 
     AbilityData WavemobAutoAttack::initAbilityData(entt::registry* _registry)
     {
-        static AbilityData wavemobAutoAbilityData{
-            .baseData = {
-                .cooldownDuration = 1,
-                .range = 5,
-                .baseDamage = 10,
-                .element = AttackElement::PHYSICAL,
-                .repeatable = true}};
+        static AbilityData wavemobAutoAbilityData;
+
+        wavemobAutoAbilityData.baseData.cooldownDuration = 1;
+        wavemobAutoAbilityData.baseData.range = 5;
+        wavemobAutoAbilityData.baseData.baseDamage = 10;
+        wavemobAutoAbilityData.baseData.element = AttackElement::PHYSICAL;
+        wavemobAutoAbilityData.baseData.repeatable = true;
+
+        wavemobAutoAbilityData.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
         wavemobAutoAbilityData.executeFunc =
             AbilityLibrary::GetInstance(_registry).GetAbility("WavemobAutoAttack");
@@ -93,18 +100,18 @@ namespace sage
 
     AbilityData WhirlwindAbility::initAbilityData(entt::registry* _registry)
     {
-        static AbilityData whirlwindAbilityData{
-            .baseData =
-                {.cooldownDuration = 3,
-                 .range = 5,
-                 .baseDamage = 25,
-                 .element = AttackElement::PHYSICAL,
-                 .repeatable = false},
-            .animationParams = {
-                .animEnum = AnimationEnum::SPIN,
-                .animSpeed = 1,
-                .oneShot = true,
-                .animationDelay = 0.65f}};
+        static AbilityData whirlwindAbilityData;
+
+        whirlwindAbilityData.baseData.cooldownDuration = 3;
+        whirlwindAbilityData.baseData.range = 5;
+        whirlwindAbilityData.baseData.baseDamage = 25;
+        whirlwindAbilityData.baseData.element = AttackElement::PHYSICAL;
+        whirlwindAbilityData.baseData.repeatable = false;
+
+        whirlwindAbilityData.animationParams.animEnum = AnimationEnum::SPIN;
+        whirlwindAbilityData.animationParams.animSpeed = 1;
+        whirlwindAbilityData.animationParams.oneShot = true;
+        whirlwindAbilityData.animationParams.animationDelay = 0.65f;
 
         whirlwindAbilityData.executeFunc =
             AbilityLibrary::GetInstance(_registry).GetAbility("Whirlwind");
