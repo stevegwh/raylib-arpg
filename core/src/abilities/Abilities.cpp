@@ -1,4 +1,4 @@
-#include "AbilityDefinitions.hpp"
+#include "Abilities.hpp"
 
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"

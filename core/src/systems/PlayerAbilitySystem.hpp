@@ -2,7 +2,7 @@
 
 #include <entt/entt.hpp>
 
-#include "abilities/utils/Ability.hpp"
+#include "abilities/Ability.hpp"
 
 #include <array>
 #include <memory>

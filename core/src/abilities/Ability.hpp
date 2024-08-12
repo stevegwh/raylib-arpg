@@ -1,6 +1,6 @@
 #pragma once
 
-#include "abilities/utils/AbilityData.hpp"
+#include "abilities/AbilityData.hpp"
 #include "components/Animation.hpp"
 #include "Cursor.hpp"
 #include "particle/RainOfFireVFX.hpp"

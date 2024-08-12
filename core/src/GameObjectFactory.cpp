@@ -6,7 +6,7 @@
 #include "ResourceManager.hpp"
 #include "scenes/Scene.hpp"
 
-#include "abilities/utils/AbilityDefinitions.hpp"
+#include "abilities/Abilities.hpp"
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
