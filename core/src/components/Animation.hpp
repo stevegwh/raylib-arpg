@@ -23,6 +23,13 @@ namespace sage
         SPIN
     };
 
+    struct AnimationParams
+    {
+        AnimationEnum animEnum;
+        int animSpeed;
+        bool oneShot;
+    };
+
     struct Animation
     {
         std::unordered_map<AnimationEnum, int> animationMap;
@@ -46,6 +53,12 @@ namespace sage
 
         Animation(const Animation&) = delete;
         Animation& operator=(const Animation&) = delete;
+
+        bool ChangeAnimationByParams(AnimationParams params)
+        {
+            return ChangeAnimationByEnum(
+                params.animEnum, params.animSpeed, params.oneShot);
+        }
 
         bool ChangeAnimationByEnum(
             AnimationEnum animEnum, int _animSpeed, bool _oneShot = false)

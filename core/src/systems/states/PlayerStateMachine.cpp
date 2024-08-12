@@ -196,7 +196,7 @@ namespace sage
         case PlayerStateEnum::MovingToTalkToNPC:
             return nullptr;
         case PlayerStateEnum::Combat:
-            return engagedInCombatState.get();
+            return combatState.get();
         default:
             return defaultState.get();
         }
@@ -229,8 +229,7 @@ namespace sage
               std::make_unique<playerstates::DefaultState>(_registry, _gameData)),
           approachingTargetState(std::make_unique<playerstates::MovingToAttackEnemyState>(
               _registry, _gameData)),
-          engagedInCombatState(
-              std::make_unique<playerstates::CombatState>(_registry, _gameData))
+          combatState(std::make_unique<playerstates::CombatState>(_registry, _gameData))
     {
     }
 } // namespace sage

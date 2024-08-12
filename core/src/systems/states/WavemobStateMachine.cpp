@@ -261,7 +261,7 @@ namespace sage
         case WavemobStateEnum::TargetOutOfRange:
             return targetOutOfRangeState.get();
         case WavemobStateEnum::Combat:
-            return engagedInCombatState.get();
+            return combatState.get();
         case WavemobStateEnum::Dying:
             return dyingState.get();
         default:
@@ -296,7 +296,7 @@ namespace sage
         defaultState = std::make_unique<enemystates::DefaultState>(_registry, _gameData);
         targetOutOfRangeState =
             std::make_unique<enemystates::TargetOutOfRangeState>(_registry, _gameData);
-        engagedInCombatState = std::make_unique<enemystates::CombatState>(_registry);
+        combatState = std::make_unique<enemystates::CombatState>(_registry);
         dyingState = std::make_unique<enemystates::DyingState>(_registry, _gameData);
     }
 } // namespace sage

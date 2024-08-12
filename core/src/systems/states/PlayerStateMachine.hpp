@@ -31,7 +31,6 @@ namespace sage
         class MovingToTalkToNPCState : public StateMachine
         {
             GameData* gameData;
-            // void onMoveCancel(entt::entity self);
             void onTargetReached(entt::entity self);
 
           public:
@@ -45,9 +44,7 @@ namespace sage
         class MovingToAttackEnemyState : public StateMachine
         {
             GameData* gameData;
-            // void onAttackCancel(entt::entity self);
             void onTargetReached(entt::entity self);
-            // void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
             void OnStateEnter(entt::entity entity) override;
@@ -60,9 +57,7 @@ namespace sage
         {
             GameData* gameData;
             void onTargetDeath(entt::entity self, entt::entity target);
-            // void onAttackCancel(entt::entity self);
             bool checkInCombat(entt::entity entity);
-            // void onEnemyClick(entt::entity self, entt::entity target);
 
           public:
             void Update(entt::entity entity) override;
@@ -78,18 +73,17 @@ namespace sage
                                       PlayerState,
                                       PlayerStateEnum>
     {
-
       protected:
         StateMachine* GetSystem(PlayerStateEnum state) override;
 
       public:
         std::unique_ptr<playerstates::DefaultState> defaultState;
         std::unique_ptr<playerstates::MovingToAttackEnemyState> approachingTargetState;
-        std::unique_ptr<playerstates::CombatState> engagedInCombatState;
+        std::unique_ptr<playerstates::CombatState> combatState;
 
-        PlayerStateController(entt::registry* _registry, GameData* gameData);
         void Update();
         void Draw3D();
+        PlayerStateController(entt::registry* _registry, GameData* gameData);
 
         friend class StateMachineController; // Required for CRTP
     };

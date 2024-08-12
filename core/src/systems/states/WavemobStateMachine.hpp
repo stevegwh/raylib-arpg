@@ -84,7 +84,7 @@ namespace sage
       public:
         std::unique_ptr<enemystates::DefaultState> defaultState;
         std::unique_ptr<enemystates::TargetOutOfRangeState> targetOutOfRangeState;
-        std::unique_ptr<enemystates::CombatState> engagedInCombatState;
+        std::unique_ptr<enemystates::CombatState> combatState;
         std::unique_ptr<enemystates::DyingState> dyingState;
 
         WavemobStateController(entt::registry* _registry, GameData* gameData);
