@@ -37,61 +37,6 @@ namespace sage
 
     // --------------------------------------------
 
-    void Ability::CursorSelectState::enableCursor()
-    {
-        spellCursor->Init(cursor->terrainCollision().point);
-        spellCursor->Enable(true);
-        cursor->Disable();
-        cursor->Hide();
-    }
-
-    void Ability::CursorSelectState::disableCursor()
-    {
-        cursor->Enable();
-        cursor->Show();
-        spellCursor->Enable(false);
-    }
-
-    void Ability::CursorSelectState::Update(entt::entity self)
-    {
-        spellCursor->Update(cursor->terrainCollision().point);
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            onConfirm.publish(self);
-        }
-    }
-
-    void Ability::CursorSelectState::toggleCursor(entt::entity self)
-    {
-        if (cursorActive)
-        {
-            disableCursor();
-            cursorActive = false;
-        }
-        else
-        {
-            enableCursor();
-            cursorActive = true;
-        }
-    }
-
-    void Ability::CursorSelectState::OnExit(entt::entity self)
-    {
-        if (cursorActive)
-        {
-            disableCursor();
-            cursorActive = false;
-        }
-    }
-
-    void Ability::CursorSelectState::OnEnter(entt::entity self)
-    {
-        enableCursor();
-        cursorActive = true;
-    }
-
-    // --------------------------------------------
-
     void Ability::AwaitingExecutionState::Update(entt::entity self)
     {
         animationDelayTimer.Update(GetFrameTime());
@@ -169,19 +114,29 @@ namespace sage
 
     void Ability::Init(entt::entity self)
     {
-        Execute(self);
+        auto& animation = registry->get<Animation>(self);
+        animation.ChangeAnimationByParams(abilityData.animationParams);
+        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    Ability::Ability(
-        entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor)
-        : registry(_registry), abilityData(_abilityData), cursor(_cursor)
+    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData)
+        : registry(_registry), abilityData(_abilityData)
     {
         cooldownTimer.SetMaxTime(abilityData.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationDelay);
 
         auto idleState = std::make_unique<IdleState>(
             cooldownTimer, animationDelayTimer, _abilityData.repeatable);
+        entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
+        onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
+
+        auto awaitingExecutionState =
+            std::make_unique<AwaitingExecutionState>(cooldownTimer, animationDelayTimer);
+        entt::sink onExecuteSink{awaitingExecutionState->onExecute};
+        onExecuteSink.connect<&Ability::Execute>(this);
+        states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
+
         state = states[AbilityStateEnum::IDLE].get();
     }
 } // namespace sage

@@ -20,8 +20,15 @@ namespace sage
         .repeatable = true,
     };
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, Cursor* _cursor)
-        : AutoAttackAbility(_registry, playerAutoAbilityData, _cursor)
+    void PlayerAutoAttack::Execute(entt::entity self)
+    {
+        auto target = registry->get<CombatableActor>(self).target;
+        HitSingleTarget(registry, self, abilityData, target);
+        ChangeState(self, AbilityStateEnum::IDLE);
+    }
+
+    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry)
+        : Ability(_registry, playerAutoAbilityData)
     {
     }
 
@@ -62,8 +69,15 @@ namespace sage
         .animationDelay = 0,
         .repeatable = true};
 
-    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, Cursor* _cursor)
-        : AutoAttackAbility(_registry, wavemobAutoAbilityData, _cursor)
+    void WavemobAutoAttack::Execute(entt::entity self)
+    {
+        auto target = registry->get<CombatableActor>(self).target;
+        HitSingleTarget(registry, self, abilityData, target);
+        ChangeState(self, AbilityStateEnum::IDLE);
+    }
+
+    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry)
+        : Ability(_registry, wavemobAutoAbilityData)
     {
     }
 
@@ -85,8 +99,8 @@ namespace sage
         ChangeState(self, AbilityStateEnum::IDLE);
     }
 
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, Cursor* _cursor)
-        : AutoAttackAbility(_registry, whirlwindAbilityData, _cursor)
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry)
+        : Ability(_registry, whirlwindAbilityData)
     {
     }
 

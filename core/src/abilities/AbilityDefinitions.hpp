@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/AutoAttackAbility.hpp"
+#include "utils/Ability.hpp"
 #include "utils/CursorAbility.hpp"
 
 #include <entt/entt.hpp>
@@ -10,10 +10,11 @@ namespace sage
     class NavigationGridSystem;
     class Camera;
 
-    struct PlayerAutoAttack : public AutoAttackAbility
+    struct PlayerAutoAttack : public Ability
     {
+        void Execute(entt::entity self) override;
         ~PlayerAutoAttack() override = default;
-        PlayerAutoAttack(entt::registry* _registry, Cursor* _cursor);
+        PlayerAutoAttack(entt::registry* _registry);
     };
 
     class RainOfFire : public CursorAbility
@@ -26,17 +27,18 @@ namespace sage
             NavigationGridSystem* _navigationGridSystem);
     };
 
-    struct WavemobAutoAttack : public AutoAttackAbility
+    struct WavemobAutoAttack : public Ability
     {
+        void Execute(entt::entity self) override;
         ~WavemobAutoAttack() override = default;
-        WavemobAutoAttack(entt::registry* _registry, Cursor* _cursor);
+        WavemobAutoAttack(entt::registry* _registry);
     };
 
-    struct WhirlwindAbility : public AutoAttackAbility
+    struct WhirlwindAbility : public Ability
     {
         float whirlwindRadius = 15.0f;
         void Execute(entt::entity self) override;
         ~WhirlwindAbility() override = default;
-        WhirlwindAbility(entt::registry* _registry, Cursor* _cursor);
+        WhirlwindAbility(entt::registry* _registry);
     };
 } // namespace sage
