@@ -122,11 +122,11 @@ namespace sage
     Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData)
         : registry(_registry), abilityData(_abilityData)
     {
-        cooldownTimer.SetMaxTime(abilityData.cooldownDuration);
-        animationDelayTimer.SetMaxTime(abilityData.animationDelay);
+        cooldownTimer.SetMaxTime(abilityData.baseData.cooldownDuration);
+        animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
         auto idleState = std::make_unique<IdleState>(
-            cooldownTimer, animationDelayTimer, _abilityData.repeatable);
+            cooldownTimer, animationDelayTimer, _abilityData.baseData.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);

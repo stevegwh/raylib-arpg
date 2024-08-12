@@ -28,8 +28,8 @@ namespace sage
                 AttackData attackData{
                     .attacker = self,
                     .hit = entity,
-                    .damage = abilityData.baseDamage,
-                    .element = abilityData.element};
+                    .damage = abilityData.baseData.baseDamage,
+                    .element = abilityData.baseData.element};
                 combatable.onHit.publish(attackData);
             }
         }
@@ -55,8 +55,8 @@ namespace sage
             AttackData attack{
                 .attacker = self,
                 .hit = target,
-                .damage = abilityData.baseDamage,
-                .element = abilityData.element};
+                .damage = abilityData.baseData.baseDamage,
+                .element = abilityData.baseData.element};
             enemyCombatable.onHit.publish(attack);
         }
     }

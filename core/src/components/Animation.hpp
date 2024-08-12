@@ -25,9 +25,10 @@ namespace sage
 
     struct AnimationParams
     {
-        AnimationEnum animEnum;
-        int animSpeed;
-        bool oneShot;
+        AnimationEnum animEnum = AnimationEnum::IDLE;
+        int animSpeed = 1;
+        bool oneShot = false;
+        float animationDelay = 0;
     };
 
     struct Animation

@@ -8,6 +8,7 @@
 
 namespace sage
 {
+
     void Hit360AroundPoint(
         entt::registry* registry,
         entt::entity self,

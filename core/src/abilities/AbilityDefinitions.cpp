@@ -11,15 +11,6 @@
 namespace sage
 {
 
-    static constexpr AbilityData playerAutoAbilityData{
-        .element = AttackElement::PHYSICAL,
-        .cooldownDuration = 1,
-        .baseDamage = 10,
-        .range = 5,
-        .animationDelay = 0,
-        .repeatable = true,
-    };
-
     void PlayerAutoAttack::Execute(entt::entity self)
     {
         auto target = registry->get<CombatableActor>(self).target;
@@ -31,16 +22,6 @@ namespace sage
         : Ability(_registry, playerAutoAbilityData)
     {
     }
-
-    static constexpr AbilityData rainoffireAbilityData{
-        .cooldownDuration = 3,
-        .range = 5,
-        .baseDamage = 25,
-        .element = AttackElement::FIRE,
-        .animationDelay = 0.75f,
-        .repeatable = false,
-        .animationParams = {
-            .animEnum = AnimationEnum::SPIN, .animSpeed = 1, .oneShot = true}};
 
     RainOfFire::RainOfFire(
         entt::registry* _registry,
@@ -61,14 +42,6 @@ namespace sage
     {
     }
 
-    static constexpr AbilityData wavemobAutoAbilityData{
-        .cooldownDuration = 1,
-        .range = 5,
-        .baseDamage = 10,
-        .element = AttackElement::PHYSICAL,
-        .animationDelay = 0,
-        .repeatable = true};
-
     void WavemobAutoAttack::Execute(entt::entity self)
     {
         auto target = registry->get<CombatableActor>(self).target;
@@ -80,16 +53,6 @@ namespace sage
         : Ability(_registry, wavemobAutoAbilityData)
     {
     }
-
-    static constexpr AbilityData whirlwindAbilityData{
-        .element = AttackElement::PHYSICAL,
-        .cooldownDuration = 3,
-        .baseDamage = 25,
-        .range = 5,
-        .animationDelay = 0.65f,
-        .repeatable = false,
-        .animationParams = {
-            .animEnum = AnimationEnum::SPIN, .animSpeed = 1, .oneShot = true}};
 
     void WhirlwindAbility::Execute(entt::entity self)
     {
