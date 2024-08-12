@@ -16,18 +16,17 @@ namespace sage
 
     struct AbilityData
     {
-        float cooldownDuration;
-        float range;
-        int baseDamage;
-        AttackElement element = AttackElement::PHYSICAL;
-        float animationDelay = 0;
-        bool repeatable = false;
-        AnimationParams animationParams = {
-            .animEnum = AnimationEnum::AUTOATTACK,
-            .animSpeed = 1,
-            .oneShot = false,
+        struct BaseData
+        {
+            float cooldownDuration;
+            float range;
+            int baseDamage;
+            AttackElement element = AttackElement::PHYSICAL;
+            bool repeatable = false;
         };
-    };
+        BaseData baseData;
+        AnimationParams animationParams;
+    }; // namespace sage
 
     enum class AbilityStateEnum
     {
