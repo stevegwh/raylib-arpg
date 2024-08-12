@@ -55,13 +55,11 @@ namespace sage
     {
       protected:
         entt::registry* registry;
-        Cursor* cursor;
 
         Timer cooldownTimer{};
         Timer animationDelayTimer{};
 
         std::unique_ptr<RainOfFireVFX> vfx; // TODO: make a generic VFX class
-        std::unique_ptr<TextureTerrainOverlay> spellCursor;
         AbilityData abilityData;
 
         AbilityState* state;
@@ -80,33 +78,6 @@ namespace sage
                 Timer& _coolDownTimer, Timer& _animationDelayTimer, bool _repeatable)
                 : AbilityState(_coolDownTimer, _animationDelayTimer),
                   repeatable(_repeatable)
-            {
-            }
-        };
-
-        class CursorSelectState : public AbilityState
-        {
-
-            Cursor* cursor;
-            std::unique_ptr<TextureTerrainOverlay> spellCursor;
-            bool cursorActive = false;
-            void enableCursor();
-            void disableCursor();
-            void toggleCursor(entt::entity self);
-
-          public:
-            entt::sigh<void(entt::entity)> onConfirm;
-            void Update(entt::entity self) override;
-            void OnEnter(entt::entity self) override;
-            void OnExit(entt::entity self) override;
-            CursorSelectState(
-                Timer& _coolDownTimer,
-                Timer& _animationDelayTimer,
-                Cursor* _cursor,
-                std::unique_ptr<TextureTerrainOverlay> _spellCursor)
-                : AbilityState(_coolDownTimer, _animationDelayTimer),
-                  cursor(_cursor),
-                  spellCursor(std::move(_spellCursor))
             {
             }
         };
@@ -141,7 +112,6 @@ namespace sage
         virtual ~Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(
-            entt::registry* _registry, const AbilityData& _abilityData, Cursor* _cursor);
+        Ability(entt::registry* _registry, const AbilityData& _abilityData);
     };
 } // namespace sage

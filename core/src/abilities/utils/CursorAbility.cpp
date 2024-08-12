@@ -11,6 +11,63 @@
 
 namespace sage
 {
+    // --------------------------------------------
+
+    void CursorAbility::CursorSelectState::enableCursor()
+    {
+        spellCursor->Init(cursor->terrainCollision().point);
+        spellCursor->Enable(true);
+        cursor->Disable();
+        cursor->Hide();
+    }
+
+    void CursorAbility::CursorSelectState::disableCursor()
+    {
+        cursor->Enable();
+        cursor->Show();
+        spellCursor->Enable(false);
+    }
+
+    void CursorAbility::CursorSelectState::Update(entt::entity self)
+    {
+        spellCursor->Update(cursor->terrainCollision().point);
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            onConfirm.publish(self);
+        }
+    }
+
+    void CursorAbility::CursorSelectState::toggleCursor(entt::entity self)
+    {
+        if (cursorActive)
+        {
+            disableCursor();
+            cursorActive = false;
+        }
+        else
+        {
+            enableCursor();
+            cursorActive = true;
+        }
+    }
+
+    void CursorAbility::CursorSelectState::OnExit(entt::entity self)
+    {
+        if (cursorActive)
+        {
+            disableCursor();
+            cursorActive = false;
+        }
+    }
+
+    void CursorAbility::CursorSelectState::OnEnter(entt::entity self)
+    {
+        enableCursor();
+        cursorActive = true;
+    }
+
+    // --------------------------------------------
+
     void CursorAbility::Init(entt::entity self)
     {
         if (state == states[AbilityStateEnum::CURSOR_SELECT].get())
@@ -45,20 +102,11 @@ namespace sage
         Cursor* _cursor,
         std::unique_ptr<TextureTerrainOverlay> _spellCursor,
         AbilityData _abilityData)
-        : Ability(_registry, _abilityData, _cursor)
+        : Ability(_registry, _abilityData), cursor(_cursor)
     {
-        auto idleState = dynamic_cast<IdleState*>(states[AbilityStateEnum::IDLE].get());
-        entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
-        onRestartTriggeredSink.connect<&CursorAbility::Init>(this);
-
-        auto awaitingExecutionState =
-            std::make_unique<AwaitingExecutionState>(cooldownTimer, animationDelayTimer);
-        entt::sink onExecuteSink{awaitingExecutionState->onExecute};
-        onExecuteSink.connect<&CursorAbility::Execute>(this);
-        states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
 
         auto cursorState = std::make_unique<CursorSelectState>(
-            cooldownTimer, animationDelayTimer, cursor, std::move(_spellCursor));
+            cooldownTimer, animationDelayTimer, _cursor, std::move(_spellCursor));
         entt::sink onConfirmSink{cursorState->onConfirm};
         onConfirmSink.connect<&CursorAbility::confirm>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
