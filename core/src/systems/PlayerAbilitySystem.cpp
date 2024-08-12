@@ -2,7 +2,7 @@
 
 #include "GameData.hpp"
 
-#include "abilities/AbilityDefinitions.hpp"
+#include "abilities/utils/AbilityDefinitions.hpp"
 
 namespace sage
 {

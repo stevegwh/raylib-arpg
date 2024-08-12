@@ -80,14 +80,14 @@ namespace sage
         }
     }
 
-    void CursorAbility::Execute(entt::entity self)
-    {
-        vfx->InitSystem(cursor->collision().point);
-        Hit360AroundPoint(
-            registry, self, abilityData, cursor->collision().point, whirlwindRadius);
+    // void CursorAbility::Execute(entt::entity self)
+    // {
+    //     //vfx->InitSystem(cursor->collision().point);
+    //     Hit360AroundPoint(
+    //         registry, self, abilityData, cursor->collision().point, whirlwindRadius);
 
-        ChangeState(self, AbilityStateEnum::IDLE);
-    }
+    //     ChangeState(self, AbilityStateEnum::IDLE);
+    // }
 
     void CursorAbility::confirm(entt::entity self)
     {
