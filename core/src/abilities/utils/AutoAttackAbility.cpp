@@ -18,7 +18,7 @@ namespace sage
     void AutoAttackAbility::Init(entt::entity self)
     {
         auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK, 4);
+        animation.ChangeAnimationByParams(abilityData.animationParams);
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 

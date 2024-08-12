@@ -71,6 +71,11 @@ namespace sage
 
         void ChangeState(entt::entity entity, StateEnum oldState, StateEnum newState)
         {
+            // if (std::find(lockedEntities.begin(), lockedEntities.end(), entity) !=
+            //     lockedEntities.end())
+            // {
+            //     return;
+            // }
             auto* derived = static_cast<Derived*>(this);
             derived->GetSystem(oldState)->OnStateExit(entity);
             derived->GetSystem(newState)->OnStateEnter(entity);

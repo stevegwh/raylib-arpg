@@ -36,7 +36,6 @@ namespace sage
     {
         float whirlwindRadius = 15.0f;
         void Execute(entt::entity self) override;
-        void Init(entt::entity self) override;
         ~WhirlwindAbility() override = default;
         WhirlwindAbility(entt::registry* _registry, Cursor* _cursor);
     };

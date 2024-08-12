@@ -1,5 +1,6 @@
 #pragma once
 
+#include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "Cursor.hpp"
 #include "particle/RainOfFireVFX.hpp"
@@ -21,6 +22,11 @@ namespace sage
         AttackElement element = AttackElement::PHYSICAL;
         float animationDelay = 0;
         bool repeatable = false;
+        AnimationParams animationParams = {
+            .animEnum = AnimationEnum::AUTOATTACK,
+            .animSpeed = 1,
+            .oneShot = false,
+        };
     };
 
     enum class AbilityStateEnum

@@ -17,7 +17,8 @@ namespace sage
         .baseDamage = 10,
         .range = 5,
         .animationDelay = 0,
-        .repeatable = true};
+        .repeatable = true,
+    };
 
     PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, Cursor* _cursor)
         : AutoAttackAbility(_registry, playerAutoAbilityData, _cursor)
@@ -29,7 +30,10 @@ namespace sage
         .range = 5,
         .baseDamage = 25,
         .element = AttackElement::FIRE,
-        .animationDelay = 0.75f};
+        .animationDelay = 0.75f,
+        .repeatable = false,
+        .animationParams = {
+            .animEnum = AnimationEnum::SPIN, .animSpeed = 1, .oneShot = true}};
 
     RainOfFire::RainOfFire(
         entt::registry* _registry,
@@ -69,7 +73,9 @@ namespace sage
         .baseDamage = 25,
         .range = 5,
         .animationDelay = 0.65f,
-        .repeatable = false};
+        .repeatable = false,
+        .animationParams = {
+            .animEnum = AnimationEnum::SPIN, .animSpeed = 1, .oneShot = true}};
 
     void WhirlwindAbility::Execute(entt::entity self)
     {
@@ -77,13 +83,6 @@ namespace sage
         Hit360AroundPoint(
             registry, self, abilityData, actorTransform.position(), whirlwindRadius);
         ChangeState(self, AbilityStateEnum::IDLE);
-    }
-
-    void WhirlwindAbility::Init(entt::entity self)
-    {
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
-        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, Cursor* _cursor)

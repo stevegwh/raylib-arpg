@@ -36,7 +36,7 @@ namespace sage
     {
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
         auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByEnum(AnimationEnum::SPIN, true);
+        animation.ChangeAnimationByParams(abilityData.animationParams);
     }
 
     CursorAbility::CursorAbility(
