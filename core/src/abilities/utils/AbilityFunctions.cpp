@@ -10,7 +10,7 @@
 namespace sage
 {
 
-    void PlayerAutoAttackFunc::Execute(
+    void SingleTargetHitFunc::Execute(
         entt::registry* registry, entt::entity self, const AbilityData& abilityData)
     {
         auto target = registry->get<CombatableActor>(self).target;
@@ -22,13 +22,6 @@ namespace sage
     {
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(registry, self, abilityData, actorTransform.position(), 5);
-    }
-
-    void WavemobAutoAttackFunc::Execute(
-        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
-    {
-        auto target = registry->get<CombatableActor>(self).target;
-        HitSingleTarget(registry, self, abilityData, target);
     }
 
     void WhirlwindFunc::Execute(
@@ -45,10 +38,8 @@ namespace sage
     void AbilityLibrary::InitializeAbilities()
     {
         abilityFunctions.emplace(
-            "PlayerAutoAttack", std::make_unique<PlayerAutoAttackFunc>());
+            "SingleTargetHit", std::make_unique<SingleTargetHitFunc>());
         abilityFunctions.emplace("RainOfFire", std::make_unique<RainOfFireFunc>());
-        abilityFunctions.emplace(
-            "WavemobAutoAttack", std::make_unique<WavemobAutoAttackFunc>());
         abilityFunctions.emplace("Whirlwind", std::make_unique<WhirlwindFunc>());
     }
 
