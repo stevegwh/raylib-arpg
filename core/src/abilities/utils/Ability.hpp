@@ -1,7 +1,7 @@
 #pragma once
 
+#include "abilities/utils/AbilityData.hpp"
 #include "components/Animation.hpp"
-#include "components/CombatableActor.hpp"
 #include "Cursor.hpp"
 #include "particle/RainOfFireVFX.hpp"
 #include "TextureTerrainOverlay.hpp"
@@ -13,21 +13,6 @@
 
 namespace sage
 {
-
-    struct AbilityData
-    {
-        struct BaseData
-        {
-            float cooldownDuration;
-            float range;
-            int baseDamage;
-            AttackElement element = AttackElement::PHYSICAL;
-            bool repeatable = false;
-        };
-        BaseData baseData;
-        AnimationParams animationParams;
-    }; // namespace sage
-
     enum class AbilityStateEnum
     {
         IDLE,
@@ -103,7 +88,7 @@ namespace sage
 
         // Ability functions
         virtual void Cancel(entt::entity self);
-        virtual void Execute(entt::entity self) = 0;
+        virtual void Execute(entt::entity self);
         virtual void Update(entt::entity self);
         virtual void Draw3D(entt::entity self);
         virtual void Init(entt::entity self);

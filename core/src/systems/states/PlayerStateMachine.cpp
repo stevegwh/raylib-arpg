@@ -1,6 +1,6 @@
 #include "PlayerStateMachine.hpp"
 
-#include "abilities/AbilityDefinitions.hpp"
+#include "abilities/utils/AbilityDefinitions.hpp"
 #include "components/Animation.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/MovableActor.hpp"

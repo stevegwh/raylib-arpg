@@ -50,7 +50,7 @@ namespace sage
 
       public:
         void Init(entt::entity self) override;
-        void Execute(entt::entity self) override;
+        // void Execute(entt::entity self) override;
         ~CursorAbility() override = default;
     };
 } // namespace sage

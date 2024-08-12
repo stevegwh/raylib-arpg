@@ -1,4 +1,5 @@
 #include "Ability.hpp"
+#include "AbilityFunctions.hpp"
 
 #include <cassert>
 
@@ -110,6 +111,12 @@ namespace sage
         {
             vfx->Draw3D();
         }
+    }
+
+    void Ability::Execute(entt::entity self)
+    {
+        abilityData.executeFunc->Execute(self, abilityData);
+        ChangeState(self, AbilityStateEnum::IDLE);
     }
 
     void Ability::Init(entt::entity self)
