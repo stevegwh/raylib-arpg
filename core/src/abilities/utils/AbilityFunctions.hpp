@@ -12,40 +12,48 @@ namespace sage
     class AbilityFunction
     {
       protected:
-        entt::registry* registry;
-
       public:
         virtual ~AbilityFunction() = default;
-        virtual void Execute(entt::entity self, const AbilityData& abilityData) = 0;
-        AbilityFunction(entt::registry* registry);
+        virtual void Execute(
+            entt::registry* registry,
+            entt::entity self,
+            const AbilityData& abilityData) = 0;
     };
 
     class PlayerAutoAttackFunc : public AbilityFunction
     {
       public:
-        void Execute(entt::entity self, const AbilityData& abilityData) override;
-        PlayerAutoAttackFunc(entt::registry* _registry);
+        void Execute(
+            entt::registry* registry,
+            entt::entity self,
+            const AbilityData& abilityData) override;
     };
 
     class RainOfFireFunc : public AbilityFunction
     {
       public:
-        void Execute(entt::entity self, const AbilityData& abilityData) override;
-        RainOfFireFunc(entt::registry* _registry);
+        void Execute(
+            entt::registry* registry,
+            entt::entity self,
+            const AbilityData& abilityData) override;
     };
 
     class WavemobAutoAttackFunc : public AbilityFunction
     {
       public:
-        void Execute(entt::entity self, const AbilityData& abilityData) override;
-        WavemobAutoAttackFunc(entt::registry* _registry);
+        void Execute(
+            entt::registry* registry,
+            entt::entity self,
+            const AbilityData& abilityData) override;
     };
 
     class WhirlwindFunc : public AbilityFunction
     {
       public:
-        void Execute(entt::entity self, const AbilityData& abilityData) override;
-        WhirlwindFunc(entt::registry* _registry);
+        void Execute(
+            entt::registry* registry,
+            entt::entity self,
+            const AbilityData& abilityData) override;
     };
 
     class AbilityLibrary
