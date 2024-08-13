@@ -1,5 +1,6 @@
 #include "Ability.hpp"
 #include "AbilityFunctions.hpp"
+#include "AbilityResourceManager.hpp"
 #include "Camera.hpp"
 
 #include <cassert>
@@ -10,8 +11,7 @@ namespace sage
 {
     std::string getEnumName(
         AbilityStateEnum state,
-        const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>&
-            _states)
+        const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>& _states)
     {
         switch (state)
         {
@@ -120,7 +120,7 @@ namespace sage
 
     void Ability::Execute(entt::entity self)
     {
-        abilityData.executeFunc->Execute(registry, self, abilityData);
+        abilityData.base.executeFunc->Execute(registry, self, abilityData);
         ChangeState(self, AbilityStateEnum::IDLE);
     }
 
@@ -131,18 +131,16 @@ namespace sage
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    Ability::Ability(
-        entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera)
+    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera)
         : registry(_registry),
           abilityData(_abilityData),
-          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(
-              _abilityData.vfx, _camera))
+          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(_abilityData.vfx, _camera))
     {
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
-        auto idleState = std::make_unique<IdleState>(
-            cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
+        auto idleState =
+            std::make_unique<IdleState>(cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
