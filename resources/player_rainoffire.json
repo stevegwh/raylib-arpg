@@ -1,0 +1,21 @@
+{
+    "value0": {
+        "value0": {
+            "bd.cooldownDuration": 3.0,
+            "bd.baseDamage": 25,
+            "bd.range": 5.0,
+            "bd.radius": 0.0,
+            "bd.element": 1,
+            "bd.repeatable": false
+        },
+        "value1": {
+            "anim.animEnum": 5,
+            "anim.animSpeed": 1,
+            "anim.oneShot": true,
+            "anim.animationDelay": 0.75
+        },
+        "value2": {
+            "vfx.name": "RainOfFire"
+        }
+    }
+}

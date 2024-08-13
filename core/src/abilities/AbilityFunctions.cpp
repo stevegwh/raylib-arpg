@@ -104,8 +104,8 @@ namespace sage
                 AttackData attackData{
                     .attacker = self,
                     .hit = entity,
-                    .damage = abilityData.baseData.baseDamage,
-                    .element = abilityData.baseData.element};
+                    .damage = abilityData.base.baseDamage,
+                    .element = abilityData.base.element};
                 combatable.onHit.publish(attackData);
             }
         }
@@ -131,8 +131,8 @@ namespace sage
             AttackData attack{
                 .attacker = self,
                 .hit = target,
-                .damage = abilityData.baseData.baseDamage,
-                .element = abilityData.baseData.element};
+                .damage = abilityData.base.baseDamage,
+                .element = abilityData.base.element};
             enemyCombatable.onHit.publish(attack);
         }
     }
