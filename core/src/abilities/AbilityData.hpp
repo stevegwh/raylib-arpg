@@ -26,7 +26,6 @@ namespace sage
             AttackElement element = AttackElement::PHYSICAL; // The element of the attack
             bool repeatable = false; // Whether the attack should automatically repeat when off cooldown
             std::string executeFuncName = ""; // Name of function to call on execute
-            AbilityFunction* executeFunc;
         };
         struct VisualFXData
         {
@@ -38,6 +37,7 @@ namespace sage
         VisualFXData vfx{};
 
         Cursor* cursor;
+        AbilityFunction* executeFunc;
     };
 
 } // namespace sage
