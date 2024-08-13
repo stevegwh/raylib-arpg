@@ -1,5 +1,9 @@
 #pragma once
 
+#include "particle/VisualFX.hpp"
+
+#include "AbilityData.hpp"
+
 #include "raylib.h"
 
 #include <entt/entt.hpp>
@@ -8,7 +12,8 @@
 
 namespace sage
 {
-    class AbilityData;
+    class Camera;
+
     class AbilityFunction
     {
       protected:
@@ -24,44 +29,47 @@ namespace sage
     {
       public:
         void Execute(
-            entt::registry* registry,
-            entt::entity self,
-            const AbilityData& abilityData) override;
+            entt::registry* registry, entt::entity self, const AbilityData& ad) override;
     };
 
-    class RainOfFireFunc : public AbilityFunction
+    class MultihitRadiusFromCursor : public AbilityFunction
     {
       public:
         void Execute(
-            entt::registry* registry,
-            entt::entity self,
-            const AbilityData& abilityData) override;
+            entt::registry* registry, entt::entity self, const AbilityData& ad) override;
     };
 
-    class WhirlwindFunc : public AbilityFunction
+    class MultihitRadiusFromCaster : public AbilityFunction
     {
       public:
         void Execute(
-            entt::registry* registry,
-            entt::entity self,
-            const AbilityData& abilityData) override;
+            entt::registry* registry, entt::entity self, const AbilityData& ad) override;
     };
 
-    class AbilityLibrary
+    enum class AbilityFunctionEnum
+    {
+        SingleTargetHit,
+        MultihitRadiusFromCursor,
+        MultihitRadiusFromCaster
+    };
+
+    class AbilityResourceManager
     {
       private:
-        std::unordered_map<std::string, std::unique_ptr<AbilityFunction>>
+        std::unordered_map<AbilityFunctionEnum, std::unique_ptr<AbilityFunction>>
             abilityFunctions;
         entt::registry* registry;
 
-        AbilityLibrary(entt::registry* reg);
-        AbilityLibrary(const AbilityLibrary&) = delete;
-        AbilityLibrary& operator=(const AbilityLibrary&) = delete;
+        AbilityResourceManager(entt::registry* reg);
+        AbilityResourceManager(const AbilityResourceManager&) = delete;
+        AbilityResourceManager& operator=(const AbilityResourceManager&) = delete;
         void InitializeAbilities();
 
       public:
-        static AbilityLibrary& GetInstance(entt::registry* reg);
-        AbilityFunction* GetAbility(const std::string& name);
+        static AbilityResourceManager& GetInstance(entt::registry* reg);
+        AbilityFunction* GetExecuteFunc(AbilityFunctionEnum name);
+        std::unique_ptr<VisualFX> GetVisualFX(
+            AbilityData::VisualFXData data, Camera* _camera);
     };
 
     void Hit360AroundPoint(

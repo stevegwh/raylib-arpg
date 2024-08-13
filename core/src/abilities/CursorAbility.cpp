@@ -7,6 +7,8 @@
 #include "Camera.hpp"
 #include "components/Animation.hpp"
 
+#include "particle/RainOfFireVFX.hpp"
+
 #include "AbilityFunctions.hpp"
 
 namespace sage
@@ -80,20 +82,14 @@ namespace sage
         }
     }
 
-    // void CursorAbility::Execute(entt::entity self)
-    // {
-    //     //vfx->InitSystem(cursor->collision().point);
-    //     Hit360AroundPoint(
-    //         registry, self, abilityData, cursor->collision().point, whirlwindRadius);
-
-    //     ChangeState(self, AbilityStateEnum::IDLE);
-    // }
-
     void CursorAbility::confirm(entt::entity self)
     {
-        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByParams(abilityData.animationParams);
+        if (vfx)
+        {
+            vfx->InitSystem(cursor->terrainCollision()
+                                .point); // TODO: Add a target parameter in abilityData
+        }
+        Ability::Init(self);
     }
 
     CursorAbility::CursorAbility(
@@ -102,15 +98,12 @@ namespace sage
         Cursor* _cursor,
         std::unique_ptr<TextureTerrainOverlay> _spellCursor,
         AbilityData _abilityData)
-        : Ability(_registry, _abilityData), cursor(_cursor)
+        : Ability(_registry, _abilityData, _camera), cursor(_cursor)
     {
-
         auto cursorState = std::make_unique<CursorSelectState>(
             cooldownTimer, animationDelayTimer, _cursor, std::move(_spellCursor));
         entt::sink onConfirmSink{cursorState->onConfirm};
         onConfirmSink.connect<&CursorAbility::confirm>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
-
-        vfx = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
     }
 } // namespace sage

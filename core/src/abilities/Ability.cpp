@@ -1,5 +1,6 @@
 #include "Ability.hpp"
 #include "AbilityFunctions.hpp"
+#include "Camera.hpp"
 
 #include <cassert>
 
@@ -90,6 +91,10 @@ namespace sage
 
     void Ability::Cancel(entt::entity self)
     {
+        if (vfx && vfx->active)
+        {
+            vfx->active = false;
+        }
         cooldownTimer.Stop();
         animationDelayTimer.Stop();
         ChangeState(self, AbilityStateEnum::IDLE);
@@ -126,8 +131,12 @@ namespace sage
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData)
-        : registry(_registry), abilityData(_abilityData)
+    Ability::Ability(
+        entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera)
+        : registry(_registry),
+          abilityData(_abilityData),
+          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(
+              _abilityData.vfx, _camera))
     {
         cooldownTimer.SetMaxTime(abilityData.baseData.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);

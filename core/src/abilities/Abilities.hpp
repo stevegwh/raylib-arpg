@@ -16,12 +16,12 @@ namespace sage
 
       public:
         ~PlayerAutoAttack() override = default;
-        PlayerAutoAttack(entt::registry* _registry);
+        PlayerAutoAttack(entt::registry* _registry, Camera* _camera);
     };
 
     class RainOfFire : public CursorAbility
     {
-        AbilityData initAbilityData(entt::registry* registry);
+        AbilityData initAbilityData(entt::registry* registry, Cursor* cursor);
 
       public:
         RainOfFire(
@@ -37,7 +37,7 @@ namespace sage
 
       public:
         ~WavemobAutoAttack() override = default;
-        WavemobAutoAttack(entt::registry* _registry);
+        WavemobAutoAttack(entt::registry* _registry, Camera* _camera);
     };
 
     class WhirlwindAbility : public Ability
@@ -47,6 +47,6 @@ namespace sage
       public:
         float whirlwindRadius = 15.0f;
         ~WhirlwindAbility() override = default;
-        WhirlwindAbility(entt::registry* _registry);
+        WhirlwindAbility(entt::registry* _registry, Camera* _camera);
     };
 } // namespace sage

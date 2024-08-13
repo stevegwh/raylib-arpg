@@ -83,7 +83,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-        registry->emplace<WavemobAutoAttack>(id, registry);
+        registry->emplace<WavemobAutoAttack>(id, registry, game->camera.get());
 
         auto& healthbar = registry->emplace<HealthBar>(id);
         // ---
@@ -213,7 +213,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::PLAYER;
-        registry->emplace<PlayerAutoAttack>(id, registry);
+        registry->emplace<PlayerAutoAttack>(id, registry, game->camera.get());
         {
             entt::sink sink{game->cursor->onFloorClick};
             sink.connect<&CombatableActor::AttackCancelled>(combatable);

@@ -3,7 +3,7 @@
 #include "abilities/AbilityData.hpp"
 #include "components/Animation.hpp"
 #include "Cursor.hpp"
-#include "particle/RainOfFireVFX.hpp"
+#include "particle/VisualFX.hpp"
 #include "TextureTerrainOverlay.hpp"
 #include <Timer.hpp>
 
@@ -13,6 +13,8 @@
 
 namespace sage
 {
+    class Camera;
+
     enum class AbilityStateEnum
     {
         IDLE,
@@ -37,13 +39,15 @@ namespace sage
 
     class Ability
     {
+        Cursor* cursor;
+
       protected:
         entt::registry* registry;
 
         Timer cooldownTimer{};
         Timer animationDelayTimer{};
 
-        std::unique_ptr<RainOfFireVFX> vfx; // TODO: make a generic VFX class
+        std::unique_ptr<VisualFX> vfx; // TODO: make a generic VFX class
         AbilityData abilityData;
 
         AbilityState* state;
@@ -96,6 +100,7 @@ namespace sage
         virtual ~Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* _registry, const AbilityData& _abilityData);
+        Ability(
+            entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera);
     };
 } // namespace sage

@@ -1,10 +1,15 @@
 #include "Abilities.hpp"
 
+#include "AbilityFunctions.hpp"
+
+#include "Camera.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 
-#include "AbilityFunctions.hpp"
+#include "particle/VisualFX.hpp"
+
+#include <memory>
 
 #include "raylib.h"
 
@@ -13,7 +18,7 @@ namespace sage
 
     AbilityData PlayerAutoAttack::initAbilityData(entt::registry* _registry)
     {
-        static AbilityData ad;
+        AbilityData ad;
         ad.baseData.element = AttackElement::PHYSICAL;
         ad.baseData.cooldownDuration = 1;
         ad.baseData.baseDamage = 10;
@@ -24,20 +29,20 @@ namespace sage
         ad.animationParams.animSpeed = 4;
         ad.animationParams.animationDelay = 0;
 
-        ad.executeFunc =
-            AbilityLibrary::GetInstance(_registry).GetAbility("SingleTargetHit");
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+            AbilityFunctionEnum::SingleTargetHit);
 
         return ad;
     }
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry)
-        : Ability(_registry, initAbilityData(_registry))
+    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, Camera* _camera)
+        : Ability(_registry, initAbilityData(_registry), _camera)
     {
     }
 
-    AbilityData RainOfFire::initAbilityData(entt::registry* _registry)
+    AbilityData RainOfFire::initAbilityData(entt::registry* _registry, Cursor* cursor)
     {
-        static AbilityData ad;
+        AbilityData ad;
 
         ad.baseData.cooldownDuration = 3;
         ad.baseData.range = 5;
@@ -50,7 +55,15 @@ namespace sage
         ad.animationParams.oneShot = true;
         ad.animationParams.animationDelay = 0.75f;
 
-        ad.executeFunc = AbilityLibrary::GetInstance(_registry).GetAbility("RainOfFire");
+        ad.vfx.name = "RainOfFire";
+
+        ad.cursor = cursor;
+
+        // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
+        //     "RainOfFire", _camera);
+
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+            AbilityFunctionEnum::MultihitRadiusFromCursor);
         return ad;
     }
 
@@ -69,13 +82,14 @@ namespace sage
                   "resources/textures/cursor/rainoffire_cursor.png",
                   Color{255, 215, 0, 255},
                   "resources/shaders/glsl330/bloom.fs"),
-              initAbilityData(_registry))
+              initAbilityData(_registry, _cursor))
     {
+        // assert(vfx != nullptr);
     }
 
     AbilityData WavemobAutoAttack::initAbilityData(entt::registry* _registry)
     {
-        static AbilityData ad;
+        AbilityData ad;
 
         ad.baseData.cooldownDuration = 1;
         ad.baseData.range = 5;
@@ -85,19 +99,19 @@ namespace sage
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
-        ad.executeFunc =
-            AbilityLibrary::GetInstance(_registry).GetAbility("SingleTargetHit");
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+            AbilityFunctionEnum::SingleTargetHit);
         return ad;
     }
 
-    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry)
-        : Ability(_registry, initAbilityData(_registry))
+    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, Camera* _camera)
+        : Ability(_registry, initAbilityData(_registry), _camera)
     {
     }
 
     AbilityData WhirlwindAbility::initAbilityData(entt::registry* _registry)
     {
-        static AbilityData ad;
+        AbilityData ad;
 
         ad.baseData.cooldownDuration = 3;
         ad.baseData.range = 5;
@@ -110,13 +124,14 @@ namespace sage
         ad.animationParams.oneShot = true;
         ad.animationParams.animationDelay = 0.65f;
 
-        ad.executeFunc = AbilityLibrary::GetInstance(_registry).GetAbility("Whirlwind");
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+            AbilityFunctionEnum::MultihitRadiusFromCaster);
 
         return ad;
     }
 
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry)
-        : Ability(_registry, initAbilityData(_registry))
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, Camera* _camera)
+        : Ability(_registry, initAbilityData(_registry), _camera)
     {
     }
 
