@@ -120,7 +120,7 @@ namespace sage
 
     void Ability::Execute(entt::entity self)
     {
-        abilityData.base.executeFunc->Execute(registry, self, abilityData);
+        abilityData.executeFunc->Execute(registry, self, abilityData);
         ChangeState(self, AbilityStateEnum::IDLE);
     }
 

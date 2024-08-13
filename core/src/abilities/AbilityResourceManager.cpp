@@ -1,6 +1,7 @@
 #include "AbilityResourceManager.hpp"
 
 #include "particle/RainOfFireVFX.hpp"
+#include "particle/VisualFX.hpp"
 
 #include "AbilityFunctions.hpp"
 
@@ -20,12 +21,6 @@ namespace sage
             AbilityFunctionEnum::MultihitRadiusFromCursor, std::make_unique<MultihitRadiusFromCursor>());
         abilityFunctions.emplace(
             AbilityFunctionEnum::MultihitRadiusFromCaster, std::make_unique<MultihitRadiusFromCaster>());
-    }
-
-    AbilityResourceManager& AbilityResourceManager::GetInstance(entt::registry* reg)
-    {
-        static AbilityResourceManager instance(reg);
-        return instance;
     }
 
     std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
@@ -66,5 +61,11 @@ namespace sage
         }
         auto it = abilityFunctions.find(name);
         return (it != abilityFunctions.end()) ? it->second.get() : nullptr;
+    }
+
+    AbilityResourceManager& AbilityResourceManager::GetInstance(entt::registry* reg)
+    {
+        static AbilityResourceManager instance(reg);
+        return instance;
     }
 } // namespace sage

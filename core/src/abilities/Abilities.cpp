@@ -35,7 +35,7 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/player_auto_attack.json");
 
-        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityFunctionEnum::SingleTargetHit);
 
         return ad;
@@ -76,7 +76,7 @@ namespace sage
 
         serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
         ad.cursor = cursor;
-        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityResourceManager::GetInstance(_registry).StringToExecuteFuncEnum(ad.base.executeFuncName));
 
         return ad;
@@ -117,7 +117,7 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
-        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityFunctionEnum::SingleTargetHit);
         return ad;
     }
@@ -145,7 +145,7 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/whirlwind.json");
 
-        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityFunctionEnum::MultihitRadiusFromCaster);
 
         return ad;

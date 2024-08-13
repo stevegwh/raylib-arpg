@@ -1,10 +1,6 @@
 #pragma once
 
-#include "particle/VisualFX.hpp"
-
 #include "AbilityData.hpp"
-
-#include "raylib.h"
 
 #include <entt/entt.hpp>
 #include <memory>
@@ -16,6 +12,7 @@ namespace sage
     enum class AbilityFunctionEnum;
     class AbilityFunction;
     class Camera;
+    class VisualFX;
 
     class AbilityResourceManager
     {
@@ -28,12 +25,11 @@ namespace sage
         void InitializeAbilities();
 
       public:
-        AbilityResourceManager(const AbilityResourceManager&) = delete;
-        AbilityResourceManager& operator=(const AbilityResourceManager&) = delete;
-
         AbilityFunctionEnum StringToExecuteFuncEnum(const std::string& name);
         AbilityFunction* GetExecuteFunc(AbilityFunctionEnum name);
-        static AbilityResourceManager& GetInstance(entt::registry* reg);
         std::unique_ptr<VisualFX> GetVisualFX(AbilityData::VisualFXData data, Camera* _camera);
+        AbilityResourceManager(const AbilityResourceManager&) = delete;
+        AbilityResourceManager& operator=(const AbilityResourceManager&) = delete;
+        static AbilityResourceManager& GetInstance(entt::registry* reg);
     };
 } // namespace sage
