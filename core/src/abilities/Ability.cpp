@@ -138,11 +138,11 @@ namespace sage
           vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(
               _abilityData.vfx, _camera))
     {
-        cooldownTimer.SetMaxTime(abilityData.baseData.cooldownDuration);
+        cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
         auto idleState = std::make_unique<IdleState>(
-            cooldownTimer, animationDelayTimer, _abilityData.baseData.repeatable);
+            cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
