@@ -1,6 +1,7 @@
 #include "Abilities.hpp"
 
 #include "AbilityFunctions.hpp"
+#include "AbilityResourceManager.hpp"
 
 #include "Camera.hpp"
 #include "components/Animation.hpp"
@@ -26,6 +27,7 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.range = 5;
         ad.base.repeatable = true;
+        ad.base.executeFuncName = "SingleTargetHit";
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animSpeed = 4;
@@ -33,7 +35,7 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/player_auto_attack.json");
 
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityFunctionEnum::SingleTargetHit);
 
         return ad;
@@ -48,28 +50,35 @@ namespace sage
     {
         AbilityData ad;
 
-        ad.base.cooldownDuration = 3;
-        ad.base.range = 5;
-        ad.base.baseDamage = 25;
-        ad.base.element = AttackElement::FIRE;
-        ad.base.repeatable = false;
+        // ad.base.cooldownDuration = 3;
+        // ad.base.range = 5;
+        // ad.base.baseDamage = 25;
+        // ad.base.element = AttackElement::FIRE;
+        // ad.base.repeatable = false;
+        // ad.base.executeFuncName = "MultihitRadiusFromCursor";
 
-        ad.animationParams.animEnum = AnimationEnum::SPIN;
-        ad.animationParams.animSpeed = 1;
-        ad.animationParams.oneShot = true;
-        ad.animationParams.animationDelay = 0.75f;
+        // ad.animationParams.animEnum = AnimationEnum::SPIN;
+        // ad.animationParams.animSpeed = 1;
+        // ad.animationParams.oneShot = true;
+        // ad.animationParams.animationDelay = 0.75f;
 
-        ad.vfx.name = "RainOfFire";
+        // ad.vfx.name = "RainOfFire";
 
+        // ad.cursor = cursor;
+
+        // // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
+        // //     "RainOfFire", _camera);
+
+        // serializer::SaveAbilityData(ad, "resources/player_rainoffire.json");
+
+        // ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        //     AbilityFunctionEnum::MultihitRadiusFromCursor);
+
+        serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
         ad.cursor = cursor;
+        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+            AbilityResourceManager::GetInstance(_registry).StringToExecuteFuncEnum(ad.base.executeFuncName));
 
-        // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
-        //     "RainOfFire", _camera);
-
-        serializer::SaveAbilityData(ad, "resources/player_rainoffire.json");
-
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
-            AbilityFunctionEnum::MultihitRadiusFromCursor);
         return ad;
     }
 
@@ -102,12 +111,13 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
+        ad.base.executeFuncName = "SingleTargetHit";
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
         serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityFunctionEnum::SingleTargetHit);
         return ad;
     }
@@ -126,6 +136,7 @@ namespace sage
         ad.base.baseDamage = 25;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
+        ad.base.executeFuncName = "MultihitRadiusFromCaster";
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 1;
@@ -134,7 +145,7 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/whirlwind.json");
 
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+        ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityFunctionEnum::MultihitRadiusFromCaster);
 
         return ad;

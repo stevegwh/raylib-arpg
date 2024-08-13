@@ -28,4 +28,5 @@ namespace sage::serializer
         const std::string& path,
         const std::vector<std::vector<NavigationGridSquare*>>& gridSquares);
     void SaveAbilityData(const AbilityData& abilityData, const char* path);
+    void LoadAbilityData(AbilityData& abilityData, const char* path);
 } // namespace sage::serializer

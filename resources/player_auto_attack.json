@@ -1,20 +1,21 @@
 {
     "value0": {
-        "value0": {
+        "ad.base": {
             "bd.cooldownDuration": 1.0,
             "bd.baseDamage": 10,
             "bd.range": 5.0,
             "bd.radius": 0.0,
             "bd.element": 0,
-            "bd.repeatable": true
+            "bd.repeatable": true,
+            "bd.executeFuncName": "SingleTargetHit"
         },
-        "value1": {
+        "ad.animationParams": {
             "anim.animEnum": 2,
             "anim.animSpeed": 4,
             "anim.oneShot": false,
             "anim.animationDelay": 0.0
         },
-        "value2": {
+        "ad.vfx": {
             "vfx.name": ""
         }
     }
