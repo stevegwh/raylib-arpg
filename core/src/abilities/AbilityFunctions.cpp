@@ -2,54 +2,78 @@
 
 #include "AbilityData.hpp"
 
+#include "Camera.hpp"
+#include "Cursor.hpp"
+
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
 
+#include "particle/RainOfFireVFX.hpp"
+
 #include "raymath.h"
+#include <memory>
 
 namespace sage
 {
 
     void SingleTargetHitFunc::Execute(
-        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
+        entt::registry* registry, entt::entity self, const AbilityData& ad)
     {
         auto target = registry->get<CombatableActor>(self).target;
-        HitSingleTarget(registry, self, abilityData, target);
+        HitSingleTarget(registry, self, ad, target);
     }
 
-    void RainOfFireFunc::Execute(
-        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
+    void MultihitRadiusFromCursor::Execute(
+        entt::registry* registry, entt::entity self, const AbilityData& ad)
     {
         auto& actorTransform = registry->get<sgTransform>(self);
-        Hit360AroundPoint(registry, self, abilityData, actorTransform.position(), 5);
+        Hit360AroundPoint(registry, self, ad, ad.cursor->collision().point, 15);
     }
 
-    void WhirlwindFunc::Execute(
-        entt::registry* registry, entt::entity self, const AbilityData& abilityData)
+    void MultihitRadiusFromCaster::Execute(
+        entt::registry* registry, entt::entity self, const AbilityData& ad)
     {
         auto& actorTransform = registry->get<sgTransform>(self);
-        Hit360AroundPoint(registry, self, abilityData, actorTransform.position(), 15);
+        Hit360AroundPoint(registry, self, ad, actorTransform.position(), 15);
     }
 
-    AbilityLibrary::AbilityLibrary(entt::registry* reg) : registry(reg)
+    AbilityResourceManager::AbilityResourceManager(entt::registry* reg) : registry(reg)
     {
     }
 
-    void AbilityLibrary::InitializeAbilities()
+    void AbilityResourceManager::InitializeAbilities()
     {
         abilityFunctions.emplace(
-            "SingleTargetHit", std::make_unique<SingleTargetHitFunc>());
-        abilityFunctions.emplace("RainOfFire", std::make_unique<RainOfFireFunc>());
-        abilityFunctions.emplace("Whirlwind", std::make_unique<WhirlwindFunc>());
+            AbilityFunctionEnum::SingleTargetHit,
+            std::make_unique<SingleTargetHitFunc>());
+        abilityFunctions.emplace(
+            AbilityFunctionEnum::MultihitRadiusFromCursor,
+            std::make_unique<MultihitRadiusFromCursor>());
+        abilityFunctions.emplace(
+            AbilityFunctionEnum::MultihitRadiusFromCaster,
+            std::make_unique<MultihitRadiusFromCaster>());
     }
 
-    AbilityLibrary& AbilityLibrary::GetInstance(entt::registry* reg)
+    AbilityResourceManager& AbilityResourceManager::GetInstance(entt::registry* reg)
     {
-        static AbilityLibrary instance(reg);
+        static AbilityResourceManager instance(reg);
         return instance;
     }
 
-    AbilityFunction* AbilityLibrary::GetAbility(const std::string& name)
+    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
+        AbilityData::VisualFXData data, Camera* _camera)
+    {
+        if (data.name == "RainOfFire")
+        {
+            auto obj = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
+            data.ptr = obj.get();
+            return std::move(obj);
+        }
+
+        return nullptr;
+    }
+
+    AbilityFunction* AbilityResourceManager::GetExecuteFunc(AbilityFunctionEnum name)
     {
         if (abilityFunctions.empty())
         {
