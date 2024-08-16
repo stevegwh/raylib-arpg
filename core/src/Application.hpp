@@ -9,32 +9,35 @@
 #include "scenes/Scene.hpp"
 #include "Settings.hpp"
 
-#include "raylib.h"
 #include "entt/entt.hpp"
+#include "raylib.h"
 #include "Settings.hpp"
 
-#include <stack>
 #include <memory>
+#include <stack>
 #include <unordered_map>
 
 namespace sage
 {
-	class Application
-	{
-	protected:
-		std::unique_ptr<Settings> settings;
-		std::unique_ptr<KeyMapping> keyMapping;
-		std::unique_ptr<entt::registry> registry;
-		std::unique_ptr<Scene> scene;
-		virtual void init();
-		static void cleanup();
-		virtual void draw();
+    class Application
+    {
+      protected:
+        std::unique_ptr<Settings> settings;
+        std::unique_ptr<KeyMapping> keyMapping;
+        std::unique_ptr<entt::registry> registry;
+        std::unique_ptr<Scene> scene;
+        bool exitWindowRequested = false; // Flag to request window to exit
+        bool exitWindow = false;          // Flag to set window to exit
 
-	public:
-		Application();
-		~Application();
-		Application(const Application&) = delete;
-		void operator=(const Application&) = delete;
-		virtual void Update();
-	};
-}
+        virtual void init();
+        static void cleanup();
+        virtual void draw();
+
+      public:
+        Application();
+        ~Application();
+        Application(const Application&) = delete;
+        void operator=(const Application&) = delete;
+        virtual void Update();
+    };
+} // namespace sage

@@ -7,6 +7,9 @@
 #include "components/sgTransform.hpp"
 #include "GameObjectFactory.hpp"
 
+// TODO: This shouldn't use "GameData", it should have its own "Data" class that only inits the systems that it
+// needs.
+
 namespace sage
 {
     void EditorScene::moveSelectedObjectToCursorHit() const
@@ -22,10 +25,7 @@ namespace sage
         if (gui->focused) return;
         if (data->cursor->collision().hit)
         {
-            switch (
-                registry
-                    ->get<Collideable>(data->cursor->getMouseHitInfo().collidedEntityId)
-                    .collisionLayer)
+            switch (registry->get<Collideable>(data->cursor->getMouseHitInfo().collidedEntityId).collisionLayer)
             {
             case CollisionLayer::DEFAULT:
                 break;
@@ -160,9 +160,7 @@ namespace sage
     }
 
     EditorScene::EditorScene(
-        entt::registry* _registry,
-        std::unique_ptr<GameData> _data,
-        EditorSettings* _editorSettings)
+        entt::registry* _registry, std::unique_ptr<GameData> _data, EditorSettings* _editorSettings)
         : Scene(_registry, std::move(_data), _editorSettings->lastOpenedMap),
           editorSettings(_editorSettings),
           gui(std::make_unique<editor::EditorGui>(
@@ -204,7 +202,7 @@ namespace sage
             entt::sink loadButton{gui->onFileOpened};
             loadButton.connect<&EditorScene::OnFileOpened>(this);
         }
-        lightSubSystem->lights[0] = CreateLight(
-            LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
+        lightSubSystem->lights[0] =
+            CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
     }
 } // namespace sage
