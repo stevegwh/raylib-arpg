@@ -15,6 +15,7 @@ namespace sage
         virtual void InitSystem(const Vector3& _target) = 0;
         virtual void Update(float dt) = 0;
         virtual void Draw3D() const = 0;
+        virtual void SetOrigin(const Vector3& origin) {};
         explicit VisualFX(Camera3D* _camera) : camera(_camera)
         {
         }
