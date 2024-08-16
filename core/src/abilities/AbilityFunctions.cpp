@@ -8,7 +8,7 @@
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
 
-#include "particle/RainOfFireVFX.hpp"
+#include "vfx/RainOfFireVFX.hpp"
 
 #include "raymath.h"
 #include <memory>
@@ -58,8 +58,7 @@ namespace sage
         }
     }
 
-    void HitSingleTarget(
-        entt::registry* registry, entt::entity self, AbilityData abilityData, entt::entity target)
+    void HitSingleTarget(entt::registry* registry, entt::entity self, AbilityData abilityData, entt::entity target)
     {
         assert(target != entt::null);
 

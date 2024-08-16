@@ -53,7 +53,7 @@ namespace sage
     SpiralFountainVFX::SpiralFountainVFX(Camera3D* _camera) : VisualFX(_camera)
     {
         shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
-        fountain = std::make_unique<FountainEffect>(camera);
+        fountain = std::make_unique<FountainPartSys>(camera);
         InitSystem({30.0f, 4, 20.0f});
     }
 } // namespace sage

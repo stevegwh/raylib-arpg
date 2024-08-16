@@ -7,7 +7,7 @@
 #include "Camera.hpp"
 #include "components/Animation.hpp"
 
-#include "particle/RainOfFireVFX.hpp"
+#include "vfx/RainOfFireVFX.hpp"
 
 #include "AbilityFunctions.hpp"
 

@@ -1,7 +1,7 @@
 #include "AbilityResourceManager.hpp"
 
-#include "particle/RainOfFireVFX.hpp"
-#include "particle/VisualFX.hpp"
+#include "vfx/RainOfFireVFX.hpp"
+#include "vfx/VisualFX.hpp"
 
 #include "AbilityFunctions.hpp"
 

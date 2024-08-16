@@ -6,7 +6,7 @@
 
 #include "VisualFX.hpp"
 
-#include "FlameEffect.hpp"
+#include "FlamePartSys.hpp"
 
 #include "raylib.h"
 
@@ -20,7 +20,7 @@ namespace sage
         Vector3 position;
         Vector3 velocity;
         float radius;
-        std::unique_ptr<FlameEffect> flameEffect;
+        std::unique_ptr<FlamePartSys> flameEffect;
     };
 
     class RainOfFireVFX : public VisualFX

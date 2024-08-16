@@ -31,11 +31,9 @@ namespace sage
         for (auto& fireball : fireballs)
         {
             Vector3 previousPosition = fireball->position;
-            fireball->position =
-                Vector3Add(fireball->position, Vector3Scale(fireball->velocity, dt));
+            fireball->position = Vector3Add(fireball->position, Vector3Scale(fireball->velocity, dt));
             // Calculate the direction of the fireball
-            Vector3 fireballDirection =
-                Vector3Normalize(Vector3Subtract(fireball->position, previousPosition));
+            Vector3 fireballDirection = Vector3Normalize(Vector3Subtract(fireball->position, previousPosition));
             // Calculate the inverse direction
             Vector3 inverseDirection = Vector3Scale(fireballDirection, -1.0f);
             fireball->flameEffect->SetOrigin(fireball->position);
@@ -75,15 +73,13 @@ namespace sage
 
         // Calculate the velocity vector towards the landing point
         Vector3 direction = Vector3Normalize(Vector3Subtract(landingPoint, spawnPoint));
-        float speed = 1.0f + ((float)rand() / RAND_MAX) *
-                                 2.0f; // Speed of fireballs between 1 and 3
-        fireball.velocity = {
-            direction.x * speed, direction.y * speed, direction.z * speed};
+        float speed = 1.0f + ((float)rand() / RAND_MAX) * 2.0f; // Speed of fireballs between 1 and 3
+        fireball.velocity = {direction.x * speed, direction.y * speed, direction.z * speed};
 
         fireball.radius = 0.5f; // Radius of fireballs
         if (!fireball.flameEffect)
         {
-            fireball.flameEffect = std::make_unique<FlameEffect>(camera);
+            fireball.flameEffect = std::make_unique<FlamePartSys>(camera);
         }
     }
 
@@ -97,8 +93,7 @@ namespace sage
         impactRadius = 1.0f;
         target = _target;
         // Base spawn point slightly behind and above the target
-        baseSpawnPoint = {
-            target.x + initialOffset, target.y + height, target.z + initialOffset};
+        baseSpawnPoint = {target.x + initialOffset, target.y + height, target.z + initialOffset};
 
         if (!fireballs.empty())
         {
@@ -126,7 +121,6 @@ namespace sage
 
     RainOfFireVFX::RainOfFireVFX(Camera3D* _camera) : VisualFX(_camera)
     {
-        shader = ResourceManager::ShaderLoad(
-            nullptr, "resources/shaders/glsl330/billboard.fs");
+        shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }
 } // namespace sage
