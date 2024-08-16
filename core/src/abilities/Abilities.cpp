@@ -1,6 +1,7 @@
 #include "Abilities.hpp"
 
 #include "AbilityFunctions.hpp"
+#include "AbilityIndicator.hpp"
 #include "AbilityResourceManager.hpp"
 
 #include "Camera.hpp"
@@ -35,8 +36,8 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/player_auto_attack.json");
 
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
-            AbilityFunctionEnum::SingleTargetHit);
+        ad.executeFunc =
+            AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
 
         return ad;
     }
@@ -50,31 +51,26 @@ namespace sage
     {
         AbilityData ad;
 
-        // ad.base.cooldownDuration = 3;
-        // ad.base.range = 5;
-        // ad.base.baseDamage = 25;
-        // ad.base.element = AttackElement::FIRE;
-        // ad.base.repeatable = false;
-        // ad.base.executeFuncName = "MultihitRadiusFromCursor";
+        ad.base.cooldownDuration = 3;
+        ad.base.range = 5;
+        ad.base.baseDamage = 25;
+        ad.base.element = AttackElement::FIRE;
+        ad.base.repeatable = false;
+        ad.base.executeFuncName = "MultihitRadiusFromCursor";
 
-        // ad.animationParams.animEnum = AnimationEnum::SPIN;
-        // ad.animationParams.animSpeed = 1;
-        // ad.animationParams.oneShot = true;
-        // ad.animationParams.animationDelay = 0.75f;
+        ad.animationParams.animEnum = AnimationEnum::SPIN;
+        ad.animationParams.animSpeed = 1;
+        ad.animationParams.oneShot = true;
+        ad.animationParams.animationDelay = 0.75f;
 
-        // ad.vfx.name = "RainOfFire";
+        ad.vfx.name = "RainOfFire";
 
-        // ad.cursor = cursor;
+        // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
+        //     "RainOfFire", _camera);
 
-        // // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
-        // //     "RainOfFire", _camera);
+        serializer::SaveAbilityData(ad, "resources/player_rainoffire.json");
 
-        // serializer::SaveAbilityData(ad, "resources/player_rainoffire.json");
-
-        // ad.base.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
-        //     AbilityFunctionEnum::MultihitRadiusFromCursor);
-
-        serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
+        // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
         ad.cursor = cursor;
         ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
             AbilityResourceManager::GetInstance(_registry).StringToExecuteFuncEnum(ad.base.executeFuncName));
@@ -83,20 +79,13 @@ namespace sage
     }
 
     RainOfFire::RainOfFire(
-        entt::registry* _registry,
-        Camera* _camera,
-        Cursor* _cursor,
-        NavigationGridSystem* _navigationGridSystem)
+        entt::registry* _registry, Camera* _camera, Cursor* _cursor, NavigationGridSystem* _navigationGridSystem)
         : CursorAbility(
               _registry,
               _camera,
               _cursor,
-              std::make_unique<TextureTerrainOverlay>(
-                  _registry,
-                  _navigationGridSystem,
-                  "resources/textures/cursor/rainoffire_cursor.png",
-                  Color{255, 215, 0, 255},
-                  "resources/shaders/glsl330/bloom.fs"),
+              std::make_unique<AbilityIndicator>(
+                  _registry, _navigationGridSystem, "resources/textures/cursor/rainoffire_cursor.png"),
               initAbilityData(_registry, _cursor))
     {
         // assert(vfx != nullptr);
@@ -117,8 +106,8 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
-            AbilityFunctionEnum::SingleTargetHit);
+        ad.executeFunc =
+            AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
         return ad;
     }
 

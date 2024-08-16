@@ -31,9 +31,8 @@ namespace sage
         float initialHeight{};
         float minHeight{};
         float impactRadius{};
-        const float initialOffset = 1.0f; // Initial diagonal offset from the target
-        const float spawnAreaRadius =
-            2.0f; // Radius around the spawn point to vary starting positions
+        const float initialOffset = 1.0f;   // Initial diagonal offset from the target
+        const float spawnAreaRadius = 2.0f; // Radius around the spawn point to vary starting positions
         std::vector<std::unique_ptr<Fireball>> fireballs;
         void generateFireball(Fireball& fireball);
 

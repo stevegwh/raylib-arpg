@@ -10,8 +10,7 @@
 namespace sage
 {
     std::string getEnumName(
-        AbilityStateEnum state,
-        const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>& _states)
+        AbilityStateEnum state, const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>& _states)
     {
         switch (state)
         {
@@ -145,8 +144,7 @@ namespace sage
         onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
-        auto awaitingExecutionState =
-            std::make_unique<AwaitingExecutionState>(cooldownTimer, animationDelayTimer);
+        auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(cooldownTimer, animationDelayTimer);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
         onExecuteSink.connect<&Ability::Execute>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);

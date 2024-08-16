@@ -17,8 +17,8 @@ namespace sage
 
     void CursorAbility::CursorSelectState::enableCursor()
     {
-        spellCursor->Init(cursor->terrainCollision().point);
-        spellCursor->Enable(true);
+        abilityIndicator->Init(cursor->terrainCollision().point);
+        abilityIndicator->Enable(true);
         cursor->Disable();
         cursor->Hide();
     }
@@ -27,12 +27,12 @@ namespace sage
     {
         cursor->Enable();
         cursor->Show();
-        spellCursor->Enable(false);
+        abilityIndicator->Enable(false);
     }
 
     void CursorAbility::CursorSelectState::Update(entt::entity self)
     {
-        spellCursor->Update(cursor->terrainCollision().point);
+        abilityIndicator->Update(cursor->terrainCollision().point);
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             onConfirm.publish(self);
@@ -86,8 +86,7 @@ namespace sage
     {
         if (vfx)
         {
-            vfx->InitSystem(cursor->terrainCollision()
-                                .point); // TODO: Add a target parameter in abilityData
+            vfx->InitSystem(cursor->terrainCollision().point); // TODO: Add a target parameter in abilityData
         }
         Ability::Init(self);
     }
@@ -96,12 +95,12 @@ namespace sage
         entt::registry* _registry,
         Camera* _camera,
         Cursor* _cursor,
-        std::unique_ptr<TextureTerrainOverlay> _spellCursor,
+        std::unique_ptr<AbilityIndicator> _abilityIndicator,
         AbilityData _abilityData)
         : Ability(_registry, _abilityData, _camera), cursor(_cursor)
     {
         auto cursorState = std::make_unique<CursorSelectState>(
-            cooldownTimer, animationDelayTimer, _cursor, std::move(_spellCursor));
+            cooldownTimer, animationDelayTimer, _cursor, std::move(_abilityIndicator));
         entt::sink onConfirmSink{cursorState->onConfirm};
         onConfirmSink.connect<&CursorAbility::confirm>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);

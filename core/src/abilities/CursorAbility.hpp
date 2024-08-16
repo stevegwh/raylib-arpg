@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ability.hpp"
+#include "AbilityIndicator.hpp"
 
 #include <memory>
 
@@ -16,7 +17,7 @@ namespace sage
         class CursorSelectState : public AbilityState
         {
             Cursor* cursor;
-            std::unique_ptr<TextureTerrainOverlay> spellCursor;
+            std::unique_ptr<AbilityIndicator> abilityIndicator;
             bool cursorActive = false;
             void enableCursor();
             void disableCursor();
@@ -31,10 +32,10 @@ namespace sage
                 Timer& _coolDownTimer,
                 Timer& _animationDelayTimer,
                 Cursor* _cursor,
-                std::unique_ptr<TextureTerrainOverlay> _spellCursor)
+                std::unique_ptr<AbilityIndicator> _abilityIndicator)
                 : AbilityState(_coolDownTimer, _animationDelayTimer),
                   cursor(_cursor),
-                  spellCursor(std::move(_spellCursor))
+                  abilityIndicator(std::move(_abilityIndicator))
             {
             }
         };
@@ -45,7 +46,7 @@ namespace sage
             entt::registry* _registry,
             Camera* _camera,
             Cursor* _cursor,
-            std::unique_ptr<TextureTerrainOverlay> _spellCursor,
+            std::unique_ptr<AbilityIndicator> _abilityIndicator,
             AbilityData _abilityData);
 
       public:

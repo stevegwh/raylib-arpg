@@ -13,18 +13,21 @@ namespace sage
     class AbilityFunction;
     class Camera;
     class VisualFX;
+    class AbilityIndicator;
 
     class AbilityResourceManager
     {
       private:
-        std::unordered_map<AbilityFunctionEnum, std::unique_ptr<AbilityFunction>> abilityFunctions;
         entt::registry* registry;
+        std::unordered_map<AbilityFunctionEnum, std::unique_ptr<AbilityFunction>> abilityFunctions;
+        std::unordered_map<std::string, std::string> spellIndicators;
 
         AbilityResourceManager(entt::registry* reg);
 
         void InitializeAbilities();
 
       public:
+        // std::unique_ptr<AbilityIndicator> GetIndicator(std::string key);
         AbilityFunctionEnum StringToExecuteFuncEnum(const std::string& name);
         AbilityFunction* GetExecuteFunc(AbilityFunctionEnum name);
         std::unique_ptr<VisualFX> GetVisualFX(AbilityData::VisualFXData data, Camera* _camera);

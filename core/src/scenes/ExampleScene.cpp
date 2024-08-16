@@ -21,8 +21,8 @@ namespace sage
         data->healthBarSystem->Update();
         data->stateMachines->Update();
         data->abilitySystem->Update();
-        const auto& playerTransform = registry->get<sgTransform>(
-            data->controllableActorSystem->GetControlledActor());
+        const auto& playerTransform =
+            registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
         fountain->SetOrigin(playerTransform.position());
         fountain->Update(GetFrameTime());
         if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))

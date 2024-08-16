@@ -9,22 +9,17 @@
 
 namespace sage
 {
-    AbilityResourceManager::AbilityResourceManager(entt::registry* reg) : registry(reg)
-    {
-    }
 
     void AbilityResourceManager::InitializeAbilities()
     {
-        abilityFunctions.emplace(
-            AbilityFunctionEnum::SingleTargetHit, std::make_unique<SingleTargetHitFunc>());
+        abilityFunctions.emplace(AbilityFunctionEnum::SingleTargetHit, std::make_unique<SingleTargetHitFunc>());
         abilityFunctions.emplace(
             AbilityFunctionEnum::MultihitRadiusFromCursor, std::make_unique<MultihitRadiusFromCursor>());
         abilityFunctions.emplace(
             AbilityFunctionEnum::MultihitRadiusFromCaster, std::make_unique<MultihitRadiusFromCaster>());
     }
 
-    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
-        AbilityData::VisualFXData data, Camera* _camera)
+    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(AbilityData::VisualFXData data, Camera* _camera)
     {
         if (data.name == "RainOfFire")
         {
@@ -67,5 +62,9 @@ namespace sage
     {
         static AbilityResourceManager instance(reg);
         return instance;
+    }
+
+    AbilityResourceManager::AbilityResourceManager(entt::registry* reg) : registry(reg)
+    {
     }
 } // namespace sage
