@@ -60,25 +60,21 @@ namespace sage
     }
 
     ExampleScene::ExampleScene(
-        entt::registry* _registry,
-        std::unique_ptr<GameData> _data,
-        const std::string& mapPath)
+        entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath)
         : Scene(_registry, std::move(_data), mapPath)
     {
-        lightSubSystem->lights[0] = CreateLight(
-            LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
+        lightSubSystem->lights[0] =
+            CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
         // std::string mapPath = "resources/models/obj/level-basic.obj";
-        auto playerId = GameObjectFactory::createPlayer(
-            registry, data.get(), {30.0f, 0, 20.0f}, "Player");
-        auto knight = GameObjectFactory::createKnight(
-            registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
+        auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
+        auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
 
         // TODO: tmp
         const auto& col = registry->get<Collideable>(knight);
-        data->navigationGridSystem->MarkSquareAreaOccupied(
-            col.worldBoundingBox, true, knight);
+        data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
-        fountain = std::make_unique<SpiralFountainVFX>(data->camera->getRaylibCam());
+        fountain = std::make_unique<SpiralFountainVFX>(data->camera.get());
+        fountain->InitSystem({30.0f, 4, 20.0f});
         explosion = std::make_unique<Explosion>(registry);
         explosion->SetOrigin({0, 3, 0});
     }

@@ -31,11 +31,11 @@ namespace sage
 
       public:
         bool active = false;
-        ~SpiralFountainVFX();
-        explicit SpiralFountainVFX(Camera3D* camera);
         void InitSystem(const Vector3& _target) override;
         void Update(float dt) override;
         void Draw3D() const override;
         void SetOrigin(const Vector3& origin) override;
+        ~SpiralFountainVFX();
+        explicit SpiralFountainVFX(Camera* camera);
     };
 } // namespace sage

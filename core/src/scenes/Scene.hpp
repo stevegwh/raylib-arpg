@@ -50,16 +50,12 @@ namespace sage
         {
         }
 
-        explicit Scene(
-            entt::registry* _registry,
-            std::unique_ptr<GameData> _data,
-            const std::string& mapPath)
+        explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath)
             : registry(_registry),
               data(std::move(_data)),
               lightSubSystem(std::make_unique<LightSubSystem>(_registry))
         {
             data->Load();
-            // TODO: Keep getting "Failed to open file" errors when deserializing
             float slices = 500;
             if (!FileExists("resources/output.bin"))
             {

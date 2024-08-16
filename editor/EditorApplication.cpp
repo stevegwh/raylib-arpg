@@ -3,16 +3,15 @@
 //
 
 #include "EditorApplication.hpp"
-#include "../src/scenes/ExampleScene.hpp"
 #include "EditorScene.hpp"
+#include "scenes/ExampleScene.hpp"
 #include "Serializer.hpp"
 
 #include <fstream>
 #include <memory>
 
-#include "cereal/cereal.hpp"
-// #include <cereal/archives/json.hpp>
 #include "cereal/archives/xml.hpp"
+#include "cereal/cereal.hpp"
 
 namespace sage
 {
