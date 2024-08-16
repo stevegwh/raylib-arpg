@@ -49,6 +49,12 @@ namespace sage
         void OnRotateRightKeyUp();
         void CutscenePose(const sgTransform& location);
 
+        Vector3 GetForward();
+        Vector3 GetRight();
+        Vector3 GetBackward();
+        Vector3 GetLeft();
+        Vector3 GetPosition();
+
         void SetCamera(Vector3 _pos, Vector3 _target);
         void Update();
         explicit Camera(UserInput* userInput);

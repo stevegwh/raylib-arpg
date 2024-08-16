@@ -5,6 +5,7 @@
 #include "Camera.hpp"
 
 #include "components/sgTransform.hpp"
+#include "slib.hpp"
 #include "UserInput.hpp"
 
 #include "raymath.h"
@@ -101,8 +102,8 @@ namespace sage
 
     void Camera::handleInput()
     {
-        if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL) ||
-            IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT) || lockInput)
+        if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL) || IsKeyDown(KEY_LEFT_ALT) ||
+            IsKeyDown(KEY_RIGHT_ALT) || lockInput)
             return;
 
         if (backKeyDown)
@@ -123,8 +124,7 @@ namespace sage
 
         if (leftKeyDown)
         {
-            rlCamera.position =
-                Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
+            rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
             rlCamera.target = Vector3Subtract(rlCamera.target, GetCameraRight(&rlCamera));
         }
 
@@ -141,8 +141,7 @@ namespace sage
 
         if (rotateRightKeyDown)
         {
-            rlCamera.position =
-                Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
+            rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
         }
 
         if (scrollEnabled)
@@ -157,8 +156,7 @@ namespace sage
                     up.y *= 2.0f;
                     up.z *= 2.0f;
                     rlCamera.position = Vector3Subtract(rlCamera.position, up);
-                    rlCamera.position =
-                        Vector3Add(GetCameraForward(&rlCamera), rlCamera.position);
+                    rlCamera.position = Vector3Add(GetCameraForward(&rlCamera), rlCamera.position);
                 }
             }
             if (mouseScroll.y < 0)
@@ -168,8 +166,7 @@ namespace sage
                 up.y *= 2.0f;
                 up.z *= 2.0f;
                 rlCamera.position = Vector3Add(up, rlCamera.position);
-                rlCamera.position =
-                    Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
+                rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
             }
         }
     }
@@ -187,6 +184,31 @@ namespace sage
     void Camera::ScrollDisable()
     {
         scrollEnabled = false;
+    }
+
+    Vector3 Camera::GetForward()
+    {
+        return GetCameraForward(getRaylibCam());
+    }
+
+    Vector3 Camera::GetRight()
+    {
+        return GetCameraRight(getRaylibCam());
+    }
+
+    Vector3 Camera::GetBackward()
+    {
+        return NegateVector(GetForward());
+    }
+
+    Vector3 Camera::GetLeft()
+    {
+        return NegateVector(GetRight());
+    }
+
+    Vector3 Camera::GetPosition()
+    {
+        return rlCamera.position;
     }
 
     void Camera::SetCamera(Vector3 _pos, Vector3 _target)
