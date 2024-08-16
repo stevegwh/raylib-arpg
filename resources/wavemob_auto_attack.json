@@ -1,22 +1,22 @@
 {
     "value0": {
-        "ad.base": {
-            "bd.cooldownDuration": 1.0,
-            "bd.baseDamage": 10,
-            "bd.range": 5.0,
-            "bd.radius": 0.0,
-            "bd.element": 0,
-            "bd.repeatable": true,
-            "bd.executeFuncName": "SingleTargetHit"
+        "base": {
+            "cooldownDuration": 1.0,
+            "baseDamage": 10,
+            "range": 5.0,
+            "radius": 0.0,
+            "element": 0,
+            "repeatable": true,
+            "executeFuncName": "SingleTargetHit"
         },
-        "ad.animationParams": {
-            "anim.animEnum": 2,
-            "anim.animSpeed": 1,
-            "anim.oneShot": false,
-            "anim.animationDelay": 0.0
+        "animationParams": {
+            "animEnum": 2,
+            "animSpeed": 1,
+            "oneShot": false,
+            "animationDelay": 0.0
         },
-        "ad.vfx": {
-            "vfx.name": ""
+        "vfx": {
+            "name": ""
         }
     }
 }

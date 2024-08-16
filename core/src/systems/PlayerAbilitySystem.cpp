@@ -9,16 +9,13 @@ namespace sage
     void PlayerAbilitySystem::abilityOnePressed()
     {
         std::cout << "Ability 1 pressed \n";
-        if (currentAbilities[0] == -1 ||
-            !abilityMap[currentAbilities[0]]->CooldownReady())
+        if (currentAbilities[0] == -1 || !abilityMap[currentAbilities[0]]->CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: "
-                      << abilityMap[currentAbilities[0]]->GetRemainingCooldownTime()
-                      << "\n";
+                      << abilityMap[currentAbilities[0]]->GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilityMap[currentAbilities[0]]->Init(
-            gameData->controllableActorSystem->GetControlledActor());
+        abilityMap[currentAbilities[0]]->Init(gameData->controllableActorSystem->GetControlledActor());
         // TODO: Above does not work with "controlledactor" member, only with
         // GetControlledActor()
     }
@@ -26,21 +23,22 @@ namespace sage
     void PlayerAbilitySystem::abilityTwoPressed()
     {
         std::cout << "Ability 2 pressed \n";
-        if (currentAbilities[1] == -1 ||
-            !abilityMap[currentAbilities[1]]->CooldownReady())
+        if (currentAbilities[1] == -1 || !abilityMap[currentAbilities[1]]->CooldownReady())
         {
+            std::cout << "Waiting for cooldown timer: "
+                      << abilityMap[currentAbilities[1]]->GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilityMap[currentAbilities[1]]->Init(
-            gameData->controllableActorSystem->GetControlledActor());
+        abilityMap[currentAbilities[1]]->Init(gameData->controllableActorSystem->GetControlledActor());
     }
 
     void PlayerAbilitySystem::abilityThreePressed()
     {
         std::cout << "Ability 3 pressed \n";
-        if (currentAbilities[2] == -1 ||
-            !abilityMap[currentAbilities[2]]->CooldownReady())
+        if (currentAbilities[2] == -1 || !abilityMap[currentAbilities[2]]->CooldownReady())
         {
+            std::cout << "Waiting for cooldown timer: "
+                      << abilityMap[currentAbilities[2]]->GetRemainingCooldownTime() << "\n";
             return;
         }
         abilityMap[currentAbilities[2]]->Init(controlledActor);
@@ -49,9 +47,10 @@ namespace sage
     void PlayerAbilitySystem::abilityFourPressed()
     {
         std::cout << "Ability 4 pressed \n";
-        if (currentAbilities[3] == -1 ||
-            !abilityMap[currentAbilities[3]]->CooldownReady())
+        if (currentAbilities[3] == -1 || !abilityMap[currentAbilities[3]]->CooldownReady())
         {
+            std::cout << "Waiting for cooldown timer: "
+                      << abilityMap[currentAbilities[3]]->GetRemainingCooldownTime() << "\n";
             return;
         }
         abilityMap[currentAbilities[3]]->Init(controlledActor);

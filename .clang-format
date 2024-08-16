@@ -9,7 +9,7 @@ AllowAllConstructorInitializersOnNextLine: true
 AllowAllArgumentsOnNextLine: true
 AllowShortIfStatementsOnASingleLine: WithoutElse
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
-ColumnLimit: 110
+ColumnLimit: 115
 SortIncludes: CaseInsensitive
 IncludeBlocks: Preserve
 AlwaysBreakTemplateDeclarations: Yes

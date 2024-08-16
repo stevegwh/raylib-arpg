@@ -1,22 +1,22 @@
 {
     "value0": {
-        "ad.base": {
-            "bd.cooldownDuration": 3.0,
-            "bd.baseDamage": 25,
-            "bd.range": 5.0,
-            "bd.radius": 0.0,
-            "bd.element": 1,
-            "bd.repeatable": false,
-            "bd.executeFuncName": "MultihitRadiusFromCursor"
+        "base": {
+            "cooldownDuration": 3.0,
+            "baseDamage": 25,
+            "range": 5.0,
+            "radius": 0.0,
+            "element": 1,
+            "repeatable": false,
+            "executeFuncName": "MultihitRadiusFromCursor"
         },
-        "ad.animationParams": {
-            "anim.animEnum": 5,
-            "anim.animSpeed": 1,
-            "anim.oneShot": true,
-            "anim.animationDelay": 0.75
+        "animationParams": {
+            "animEnum": 5,
+            "animSpeed": 1,
+            "oneShot": true,
+            "animationDelay": 0.75
         },
-        "ad.vfx": {
-            "vfx.name": "RainOfFire"
+        "vfx": {
+            "name": "RainOfFire"
         }
     }
 }
