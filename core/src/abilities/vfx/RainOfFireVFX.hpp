@@ -6,8 +6,6 @@
 
 #include "VisualFX.hpp"
 
-#include "FlamePartSys.hpp"
-
 #include "raylib.h"
 
 #include <memory>
@@ -15,13 +13,7 @@
 
 namespace sage
 {
-    struct Fireball
-    {
-        Vector3 position;
-        Vector3 velocity;
-        float radius;
-        std::unique_ptr<FlamePartSys> flameEffect;
-    };
+    struct Fireball;
 
     class RainOfFireVFX : public VisualFX
     {
@@ -31,8 +23,7 @@ namespace sage
         float initialHeight{};
         float minHeight{};
         float impactRadius{};
-        const float initialOffset = 1.0f;   // Initial diagonal offset from the target
-        const float spawnAreaRadius = 2.0f; // Radius around the spawn point to vary starting positions
+        const float initialOffset = 1.0f; // Initial diagonal offset from the target
         std::vector<std::unique_ptr<Fireball>> fireballs;
         void generateFireball(Fireball& fireball);
 
@@ -41,6 +32,6 @@ namespace sage
         void Update(float dt) override;
         void Draw3D() const override;
         ~RainOfFireVFX();
-        explicit RainOfFireVFX(Camera3D* _camera);
+        explicit RainOfFireVFX(Camera* _camera);
     };
 } // namespace sage

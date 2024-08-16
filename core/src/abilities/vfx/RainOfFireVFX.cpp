@@ -4,9 +4,12 @@
 
 #include "RainOfFireVFX.hpp"
 
+#include "FlamePartSys.hpp"
+#include "ResourceManager.hpp"
+
 #include "raylib.h"
 #include "raymath.h"
-#include "ResourceManager.hpp"
+#include "slib.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -14,12 +17,19 @@
 
 namespace sage
 {
+
+    struct Fireball
+    {
+        Vector3 position;
+        Vector3 velocity;
+        std::unique_ptr<FlamePartSys> flameEffect;
+    };
+
     void RainOfFireVFX::Draw3D() const
     {
         BeginShaderMode(shader);
         for (const auto& fireball : fireballs)
         {
-            // DrawSphere(fireball->position, fireball->radius, RED);
             fireball->flameEffect->DrawOldestFirst();
         }
         EndShaderMode();
@@ -32,12 +42,10 @@ namespace sage
         {
             Vector3 previousPosition = fireball->position;
             fireball->position = Vector3Add(fireball->position, Vector3Scale(fireball->velocity, dt));
-            // Calculate the direction of the fireball
-            Vector3 fireballDirection = Vector3Normalize(Vector3Subtract(fireball->position, previousPosition));
-            // Calculate the inverse direction
-            Vector3 inverseDirection = Vector3Scale(fireballDirection, -1.0f);
+
+            // fireball->flameEffect->SetDirection(fireball->velocity);
             fireball->flameEffect->SetOrigin(fireball->position);
-            fireball->flameEffect->SetDirection(inverseDirection);
+
             fireball->flameEffect->Update(dt);
             if (fireball->position.y < minHeight)
             {
@@ -48,38 +56,38 @@ namespace sage
 
     void RainOfFireVFX::generateFireball(Fireball& fireball)
     {
+        // Start diagonally and to the right of the camera
+        // Travel parallel to the camera
+        // Camera->Right + position?
 
-        // Add randomness to the spawn position within a semi-circular area
-        float spawnAngle = ((float)rand() / RAND_MAX) * PI;
-        float spawnRadius = ((float)rand() / RAND_MAX) * spawnAreaRadius;
+        int maxRadius = 5; // TODO: temporary. Should be the radius of the ability's cursor
 
-        Vector3 spawnPoint = {
-            baseSpawnPoint.x + spawnRadius * cos(spawnAngle),
-            baseSpawnPoint.y + spawnRadius * sin(spawnAngle), // slight vertical variation
-            baseSpawnPoint.z + spawnRadius * sin(spawnAngle)};
+        auto right = camera->GetRight();
+        auto aerialSpawn = Vector3MultiplyByValue(right, 3);
 
-        // Randomize angle for initial trajectory within a 360-degree spread
-        float angle = 200 * DEG2RAD;
-        float radius = ((float)rand() / RAND_MAX) * impactRadius;
-
-        // Calculate the landing point within the circle at the ground level
-        Vector3 landingPoint = {
-            target.x + radius * cos(angle),
-            target.y, // Ground level
-            target.z + radius * sin(angle)};
+        // Calculate a random point in the circle around the target
+        float angle = GetRandomValue(0, 360) * DEG2RAD;
+        int radius = GetRandomValue(1, maxRadius);
+        float x = radius * cos(angle);
+        float y = radius * sin(angle);
+        Vector3 randomGroundPoint{.x = x, .y = 0, .z = y};
+        randomGroundPoint = Vector3Add(target, randomGroundPoint);
+        aerialSpawn = Vector3Add(randomGroundPoint, aerialSpawn);
+        aerialSpawn.y = initialHeight;
 
         // Set fireball spawn position
-        fireball.position = spawnPoint;
+        fireball.position = aerialSpawn;
 
         // Calculate the velocity vector towards the landing point
-        Vector3 direction = Vector3Normalize(Vector3Subtract(landingPoint, spawnPoint));
-        float speed = 1.0f + ((float)rand() / RAND_MAX) * 2.0f; // Speed of fireballs between 1 and 3
+        Vector3 direction = Vector3Normalize(Vector3Subtract(randomGroundPoint, aerialSpawn));
+        float speed = GetRandomValue(2, 5);
         fireball.velocity = {direction.x * speed, direction.y * speed, direction.z * speed};
 
-        fireball.radius = 0.5f; // Radius of fireballs
         if (!fireball.flameEffect)
         {
-            fireball.flameEffect = std::make_unique<FlamePartSys>(camera);
+            fireball.flameEffect = std::make_unique<FlamePartSys>(camera->getRaylibCam());
+            fireball.flameEffect->SetOrigin(fireball.position);
+            fireball.flameEffect->SetDirection(fireball.velocity);
         }
     }
 
@@ -87,7 +95,7 @@ namespace sage
     {
         active = true;
         const int numFireballs = 20; // Total number of fireballs
-        const float height = 3.0f;   // Base height above the target
+        const float height = 15.0f;  // Base height above the target
         initialHeight = height;
         minHeight = 0.0f;
         impactRadius = 1.0f;
@@ -115,11 +123,12 @@ namespace sage
 
     RainOfFireVFX::~RainOfFireVFX()
     {
+
         UnloadShader(shader);
         std::cout << "RainOfFireVFX destroyed" << std::endl;
     }
 
-    RainOfFireVFX::RainOfFireVFX(Camera3D* _camera) : VisualFX(_camera)
+    RainOfFireVFX::RainOfFireVFX(Camera* _camera) : VisualFX(_camera)
     {
         shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }

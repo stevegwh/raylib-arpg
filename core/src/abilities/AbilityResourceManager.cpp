@@ -23,7 +23,7 @@ namespace sage
     {
         if (data.name == "RainOfFire")
         {
-            auto obj = std::make_unique<RainOfFireVFX>(_camera->getRaylibCam());
+            auto obj = std::make_unique<RainOfFireVFX>(_camera);
             data.ptr = obj.get();
             return std::move(obj);
         }
