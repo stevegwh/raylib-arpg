@@ -24,7 +24,7 @@ namespace sage
         float minHeight{};
         float impactRadius{};
         const float initialOffset = 1.0f; // Initial diagonal offset from the target
-        std::vector<std::unique_ptr<Fireball>> fireballs;
+        std::vector<Fireball> fireballs;
         void generateFireball(Fireball& fireball);
 
       public:

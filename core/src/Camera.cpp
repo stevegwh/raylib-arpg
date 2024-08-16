@@ -206,7 +206,7 @@ namespace sage
         return NegateVector(GetRight());
     }
 
-    Vector3 Camera::GetPosition()
+    Vector3 Camera::GetPosition() const
     {
         return rlCamera.position;
     }

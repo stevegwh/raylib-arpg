@@ -10,7 +10,6 @@ namespace sage
     struct FlamePartSys : public ParticleSystem
     {
         Texture2D texCircle16{};
-        Texture2D texCircle8{};
 
         ~FlamePartSys();
         explicit FlamePartSys(Camera3D* cam);

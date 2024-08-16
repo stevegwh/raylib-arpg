@@ -53,7 +53,7 @@ namespace sage
         Vector3 GetRight();
         Vector3 GetBackward();
         Vector3 GetLeft();
-        Vector3 GetPosition();
+        Vector3 GetPosition() const;
 
         void SetCamera(Vector3 _pos, Vector3 _target);
         void Update();
