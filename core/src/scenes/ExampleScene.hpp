@@ -7,8 +7,8 @@
 #include "GameData.hpp"
 #include "Scene.hpp"
 
-#include "particle/Explosion.hpp"
-#include "particle/SpiralFountainVFX.hpp"
+#include "abilities/vfx/Explosion.hpp"
+#include "abilities/vfx/SpiralFountainVFX.hpp"
 
 #include <entt/entt.hpp>
 
@@ -29,9 +29,6 @@ namespace sage
         void Draw3D() override;
         void DrawDebug() override;
         ~ExampleScene() override;
-        ExampleScene(
-            entt::registry* _registry,
-            std::unique_ptr<GameData> _data,
-            const std::string& mapPath);
+        ExampleScene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath);
     };
 } // namespace sage

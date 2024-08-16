@@ -6,7 +6,7 @@
 
 #include "VisualFX.hpp"
 
-#include "FountainEffect.hpp"
+#include "FountainPartSys.hpp"
 
 #include "raylib.h"
 
@@ -27,7 +27,7 @@ namespace sage
         float spiralSpeed = 10.0f;            // Speed of rotation (in radians per second)
         float spiralAngle = 0.0f;             // Current angle of rotation
         float spiralGrowth = 0.5f;            // How much the radius grows per second
-        std::unique_ptr<FountainEffect> fountain;
+        std::unique_ptr<FountainPartSys> fountain;
 
       public:
         bool active = false;

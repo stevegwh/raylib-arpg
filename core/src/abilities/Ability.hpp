@@ -3,8 +3,8 @@
 #include "abilities/AbilityData.hpp"
 #include "components/Animation.hpp"
 #include "Cursor.hpp"
-#include "particle/VisualFX.hpp"
 #include "TextureTerrainOverlay.hpp"
+#include "vfx/VisualFX.hpp"
 #include <Timer.hpp>
 
 #include <entt/entt.hpp>
@@ -62,10 +62,8 @@ namespace sage
           public:
             entt::sigh<void(entt::entity)> onRestartTriggered;
             void Update(entt::entity self) override;
-            IdleState(
-                Timer& _coolDownTimer, Timer& _animationDelayTimer, bool _repeatable)
-                : AbilityState(_coolDownTimer, _animationDelayTimer),
-                  repeatable(_repeatable)
+            IdleState(Timer& _coolDownTimer, Timer& _animationDelayTimer, bool _repeatable)
+                : AbilityState(_coolDownTimer, _animationDelayTimer), repeatable(_repeatable)
             {
             }
         };
@@ -100,7 +98,6 @@ namespace sage
         virtual ~Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(
-            entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera);
+        Ability(entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera);
     };
 } // namespace sage

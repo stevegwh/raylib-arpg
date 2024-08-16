@@ -9,7 +9,7 @@
 #include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 
-#include "particle/VisualFX.hpp"
+#include "vfx/VisualFX.hpp"
 
 #include <memory>
 
