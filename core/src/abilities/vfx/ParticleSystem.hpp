@@ -89,6 +89,7 @@ namespace sage
     // Emitter is a single (point) source emitting many particles.
     struct Emitter
     {
+        RenderTexture2D textureBuffer;
         EmitterConfig config;
         float mustEmit;   // Amount of particles to be emitted within next update call.
         Vector2 offset{}; // Offset holds half the width and height of the texture.
@@ -100,7 +101,8 @@ namespace sage
         void Start();
         void Stop();
         void Burst();
-        void Update(float dt);
+        void UpdateRenderTexture(Camera3D* camera);
+        void Update(float dt, Camera3D* camera);
         void Draw(Camera3D* camera) const;
         void Draw(Camera3D* camera, const Shader& shader) const;
         void DrawOldestFirst(Camera3D* const camera) const;
@@ -124,8 +126,6 @@ namespace sage
         Vector3 origin;
         std::vector<std::unique_ptr<Emitter>> emitters;
 
-        explicit ParticleSystem(Camera3D* _camera);
-        void Update(float dt);
         bool Register(std::unique_ptr<Emitter> emitter);
         bool Deregister(Emitter* emitter);
         void SetOrigin(Vector3 _origin);
@@ -133,9 +133,11 @@ namespace sage
         void Start();
         void Stop();
         void Burst();
-        void Draw(const Shader& shader) const;
-        void Draw() const;
         void DrawOldestFirst() const;
         void DrawOldestFirst(const Shader& shader) const;
+        void Update(float dt);
+        void Draw(const Shader& shader) const;
+        void Draw() const;
+        explicit ParticleSystem(Camera3D* _camera);
     };
 } // namespace sage

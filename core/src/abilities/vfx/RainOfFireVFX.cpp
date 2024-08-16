@@ -31,7 +31,7 @@ namespace sage
         BeginShaderMode(shader);
         for (const auto& fireball : fireballs)
         {
-            fireball.flameEffect->DrawOldestFirst();
+            fireball.flameEffect->Draw();
         }
         EndShaderMode();
     }

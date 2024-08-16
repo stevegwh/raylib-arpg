@@ -142,6 +142,7 @@ namespace sage
         {
             particles.push_back(std::make_unique<Particle>(config.particle_Deactivator));
         }
+        textureBuffer = LoadRenderTexture(1280, 720); // TODO: get screen width/height
     }
 
     // Emitter_Reinit reinits the given Emitter with a new EmitterConfig.
@@ -206,9 +207,32 @@ namespace sage
         }
     }
 
-    // Emitter_Update updates all particles and returns
-    // the current amount of active particles.
-    void Emitter::Update(float dt)
+    void Emitter::UpdateRenderTexture(Camera3D* camera)
+    {
+        BeginTextureMode(textureBuffer);
+        ClearBackground(BLANK);
+        BeginMode3D(*camera);
+        BeginBlendMode(config.blendMode);
+        for (int i = 0; i < config.capacity; i++)
+        {
+            auto& p = particles[i];
+            if (!p->active) continue;
+
+            DrawBillboard(
+                *camera,
+                config.texture,
+                p->position,
+                p->size,
+                LinearFade(config.startColor, config.endColor, p->age / p->ttl));
+        }
+
+        EndBlendMode();
+        EndMode3D();
+        EndTextureMode();
+    }
+
+    // Emitter_Update updates all particles
+    void Emitter::Update(float dt, Camera3D* camera)
     {
         size_t emitNow = 0;
 
@@ -234,6 +258,8 @@ namespace sage
                 mustEmit--;
             }
         }
+
+        UpdateRenderTexture(camera);
     }
 
     void Emitter::DrawOldestFirst(Camera3D* const camera) const
@@ -273,20 +299,18 @@ namespace sage
         EndShaderMode();
     }
 
-    // Emitter_Draw draws all active particles.
     void Emitter::Draw(Camera3D* const camera) const
     {
-        BeginBlendMode(config.blendMode);
-        for (const auto& p : particles)
-        {
-            DrawBillboard(
-                *camera,
-                config.texture,
-                p->position,
-                p->size,
-                LinearFade(config.startColor, config.endColor, p->age / p->ttl));
-        }
-        EndBlendMode();
+        // Get the dimensions of the texture
+        float width = (float)textureBuffer.texture.width;
+        float height = (float)textureBuffer.texture.height;
+
+        // Draw the texture, flipping it vertically
+        DrawTextureRec(
+            textureBuffer.texture,
+            (Rectangle){0, 0, width, -height}, // Note the negative height
+            (Vector2){0, 0},
+            WHITE);
     }
 
     void Emitter::Draw(Camera3D* const camera, const Shader& shader) const
@@ -308,7 +332,7 @@ namespace sage
     {
         for (size_t i = 0; i < length; i++)
         {
-            emitters[i]->Update(dt);
+            emitters[i]->Update(dt, camera);
         }
     }
 
