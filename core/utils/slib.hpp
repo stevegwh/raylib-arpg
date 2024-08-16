@@ -28,5 +28,6 @@ namespace sage
     Vector3 NegateVector(const Vector3& vec3);
     Vector3 Vector3MultiplyByValue(const Vector3& vec3, float value);
     BoundingBox CalculateModelBoundingBox(Model& model);
+    Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer);
 
 } // namespace sage
