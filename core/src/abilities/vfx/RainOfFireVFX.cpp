@@ -11,6 +11,7 @@
 #include "raymath.h"
 #include "slib.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -30,36 +31,31 @@ namespace sage
         BeginShaderMode(shader);
         for (const auto& fireball : fireballs)
         {
-            fireball->flameEffect->DrawOldestFirst();
+            fireball.flameEffect->DrawOldestFirst();
         }
         EndShaderMode();
     }
 
     void RainOfFireVFX::Update(float dt)
     {
-
         for (auto& fireball : fireballs)
         {
-            Vector3 previousPosition = fireball->position;
-            fireball->position = Vector3Add(fireball->position, Vector3Scale(fireball->velocity, dt));
+            Vector3 previousPosition = fireball.position;
+            fireball.position = Vector3Add(fireball.position, Vector3Scale(fireball.velocity, dt));
 
             // fireball->flameEffect->SetDirection(fireball->velocity);
-            fireball->flameEffect->SetOrigin(fireball->position);
+            fireball.flameEffect->SetOrigin(fireball.position);
 
-            fireball->flameEffect->Update(dt);
-            if (fireball->position.y < minHeight)
+            fireball.flameEffect->Update(dt);
+            if (fireball.position.y < minHeight)
             {
-                generateFireball(*fireball);
+                generateFireball(fireball);
             }
         }
     }
 
     void RainOfFireVFX::generateFireball(Fireball& fireball)
     {
-        // Start diagonally and to the right of the camera
-        // Travel parallel to the camera
-        // Camera->Right + position?
-
         int maxRadius = 5; // TODO: temporary. Should be the radius of the ability's cursor
 
         auto right = camera->GetRight();
@@ -75,12 +71,11 @@ namespace sage
         aerialSpawn = Vector3Add(randomGroundPoint, aerialSpawn);
         aerialSpawn.y = initialHeight;
 
-        // Set fireball spawn position
         fireball.position = aerialSpawn;
 
         // Calculate the velocity vector towards the landing point
         Vector3 direction = Vector3Normalize(Vector3Subtract(randomGroundPoint, aerialSpawn));
-        float speed = GetRandomValue(2, 5);
+        float speed = GetRandomValue(4, 8);
         fireball.velocity = {direction.x * speed, direction.y * speed, direction.z * speed};
 
         if (!fireball.flameEffect)
@@ -107,7 +102,7 @@ namespace sage
         {
             for (auto& fireball : fireballs)
             {
-                generateFireball(*fireball);
+                generateFireball(fireball);
             }
         }
         else
@@ -116,7 +111,7 @@ namespace sage
             {
                 Fireball fireball;
                 generateFireball(fireball);
-                fireballs.push_back(std::make_unique<Fireball>(std::move(fireball)));
+                fireballs.push_back(std::move(fireball));
             }
         }
     }

@@ -4,6 +4,8 @@
 
 #include "FlamePartSys.hpp"
 
+#include "ResourceManager.hpp"
+
 namespace sage
 {
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer)
@@ -62,23 +64,23 @@ namespace sage
 
     FlamePartSys::~FlamePartSys()
     {
-        UnloadTexture(texCircle8);
         UnloadTexture(texCircle16);
     }
 
     FlamePartSys::FlamePartSys(Camera3D* cam) : ParticleSystem(cam)
     {
-        Image imgCircle16 = GenImageGradientRadialTrans(16, 16, 0.3f, WHITE, BLACK);
-        texCircle16 = LoadTextureFromImage(imgCircle16);
-        Image imgCircle8 = GenImageGradientRadialTrans(8, 8, 0.5f, WHITE, BLACK);
-        texCircle8 = LoadTextureFromImage(imgCircle8);
-        ExportImage(imgCircle16, "resources/radialimage.png");
+        // Image imgCircle16 = GenImageGradientRadialTrans(16, 16, 0.3f, WHITE, BLACK);
+        // texCircle16 = LoadTextureFromImage(imgCircle16);
+        // Image imgCircle8 = GenImageGradientRadialTrans(8, 8, 0.5f, WHITE, BLACK);
+        // texCircle8 = LoadTextureFromImage(imgCircle8);
 
-        UnloadImage(imgCircle8);
-        UnloadImage(imgCircle16);
+        texCircle16 = LoadTextureFromImage(ResourceManager::LoadTexture("resources/textures/spark_flame.png"));
+
+        // UnloadImage(imgCircle8);
+        // UnloadImage(imgCircle16);
 
         EmitterConfig ecfg1;
-        ecfg1.size = 0.5f;
+        ecfg1.size = 1.0f;
         ecfg1.direction = Vector3{0, 1, 0};
         ecfg1.velocity = FloatRange{0.7, 0.73};
         ecfg1.directionAngle = FloatRange{-6, 6};
@@ -99,12 +101,6 @@ namespace sage
 
         auto emitterFountain1 = std::make_unique<Emitter>(ecfg1);
         Register(std::move(emitterFountain1));
-
-        ecfg1.directionAngle = FloatRange{-1.5, 1.5};
-        ecfg1.velocity = FloatRange{0.8, 0.85};
-        ecfg1.texture = texCircle8;
-        auto emitterFountain2 = std::make_unique<Emitter>(ecfg1);
-        Register(std::move(emitterFountain2));
 
         Start();
     }
