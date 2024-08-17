@@ -8,21 +8,20 @@
 
 #include "raylib.h"
 
-#include <memory>
-#include <vector>
-
 namespace sage
 {
     class FloorFireVFX : public VisualFX
     {
+        Vector2 screenSize;
         Vector3 targetPos;
         float time = 0;
         int secondsLoc;
         int screenSizeLoc;
-        Shader shader{};
+
         Model renderModel;
 
       public:
+        Shader shader{};
         void InitSystem(const Vector3& _target) override;
         void Update(float dt) override;
         void Draw3D() const override;

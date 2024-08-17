@@ -8,11 +8,6 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "slib.hpp"
-
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
 #include <iostream>
 
 namespace sage
@@ -21,25 +16,21 @@ namespace sage
     void FloorFireVFX::Draw3D() const
     {
         BeginShaderMode(shader);
-        // Draw quad here (Just make it a renderable?)
+        //  Draw quad here (Just make it a renderable?)
         DrawModel(renderModel, targetPos, 1.0f, WHITE);
         EndShaderMode();
     }
 
     void FloorFireVFX::Update(float dt)
     {
-        time += 3 * dt;
+        time += 3 * GetFrameTime();
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
     }
 
     void FloorFireVFX::InitSystem(const Vector3& _target)
     {
+        active = true;
         targetPos = _target;
-        secondsLoc = GetShaderLocation(shader, "seconds");
-        screenSizeLoc = GetShaderLocation(shader, "screenSize");
-
-        Vector2 screenSize = {(float)1280, (float)720}; // TODO: Guess I'll need to pass in settings here
-        SetShaderValue(shader, screenSizeLoc, &screenSize, SHADER_UNIFORM_VEC2);
     }
 
     FloorFireVFX::~FloorFireVFX()
@@ -52,7 +43,14 @@ namespace sage
 
     FloorFireVFX::FloorFireVFX(Camera* _camera) : VisualFX(_camera)
     {
-        shader = ResourceManager::ShaderLoad(nullptr, "resources/floorfirefx.fs");
-        renderModel = LoadModelFromMesh(GenMeshPlane(2.0f, 2.0f, 1, 1));
+        shader = LoadShader(nullptr, "resources/shaders/floorfirefx.fs");
+
+        renderModel = LoadModelFromMesh(GenMeshPlane(10.0f, 10.0f, 1, 1));
+        renderModel.materials[0].shader = shader;
+        secondsLoc = GetShaderLocation(shader, "seconds");
+        screenSizeLoc = GetShaderLocation(shader, "screenSize");
+
+        screenSize = {(float)1280, (float)720}; // TODO: Guess I'll need to pass in settings here
+        SetShaderValue(shader, screenSizeLoc, &screenSize, SHADER_UNIFORM_VEC2);
     }
 } // namespace sage
