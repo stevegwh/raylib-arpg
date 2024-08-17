@@ -20,13 +20,10 @@ namespace sage
         view.each([](const auto& r, const auto& t) {
             if (!r.active) return;
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
+            // BeginShaderMode(r.model.materials[0].shader);
             DrawModelEx(
-                r.model,
-                t.position(),
-                rotationAxis,
-                t.rotation().y,
-                {t.scale(), t.scale(), t.scale()},
-                r.hint);
+                r.model, t.position(), rotationAxis, t.rotation().y, {t.scale(), t.scale(), t.scale()}, r.hint);
+            // EndShaderMode();
         });
     }
 

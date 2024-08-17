@@ -31,6 +31,18 @@ namespace sage
             NavigationGridSystem* _navigationGridSystem);
     };
 
+    class FloorFire : public CursorAbility
+    {
+        AbilityData initAbilityData(entt::registry* registry, Cursor* cursor);
+
+      public:
+        FloorFire(
+            entt::registry* _registry,
+            Camera* _camera,
+            Cursor* _cursor,
+            NavigationGridSystem* _navigationGridSystem);
+    };
+
     class WavemobAutoAttack : public Ability
     {
         AbilityData initAbilityData(entt::registry* registry);

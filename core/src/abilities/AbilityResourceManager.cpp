@@ -1,5 +1,6 @@
 #include "AbilityResourceManager.hpp"
 
+#include "vfx/FloorFireVFX.hpp"
 #include "vfx/RainOfFireVFX.hpp"
 #include "vfx/VisualFX.hpp"
 
@@ -24,6 +25,12 @@ namespace sage
         if (data.name == "RainOfFire")
         {
             auto obj = std::make_unique<RainOfFireVFX>(_camera);
+            data.ptr = obj.get();
+            return std::move(obj);
+        }
+        else if (data.name == "FloorFire")
+        {
+            auto obj = std::make_unique<FloorFireVFX>(_camera);
             data.ptr = obj.get();
             return std::move(obj);
         }
