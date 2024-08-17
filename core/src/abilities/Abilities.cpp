@@ -91,6 +91,50 @@ namespace sage
         // assert(vfx != nullptr);
     }
 
+    AbilityData FloorFire::initAbilityData(entt::registry* _registry, Cursor* cursor)
+    {
+        AbilityData ad;
+
+        ad.base.cooldownDuration = 3;
+        ad.base.range = 5;
+        ad.base.baseDamage = 25;
+        ad.base.element = AttackElement::FIRE;
+        ad.base.repeatable = false;
+        ad.base.executeFuncName = "MultihitRadiusFromCursor";
+
+        ad.animationParams.animEnum = AnimationEnum::SPIN;
+        ad.animationParams.animSpeed = 1;
+        ad.animationParams.oneShot = true;
+        ad.animationParams.animationDelay = 0.75f;
+
+        ad.vfx.name = "FloorFire";
+
+        // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
+        //     "RainOfFire", _camera);
+
+        serializer::SaveAbilityData(ad, "resources/player_floorfire.json");
+
+        // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
+        ad.cursor = cursor;
+        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
+            AbilityResourceManager::GetInstance(_registry).StringToExecuteFuncEnum(ad.base.executeFuncName));
+
+        return ad;
+    }
+
+    FloorFire::FloorFire(
+        entt::registry* _registry, Camera* _camera, Cursor* _cursor, NavigationGridSystem* _navigationGridSystem)
+        : CursorAbility(
+              _registry,
+              _camera,
+              _cursor,
+              std::make_unique<AbilityIndicator>(
+                  _registry, _navigationGridSystem, "resources/textures/cursor/rainoffire_cursor.png"),
+              initAbilityData(_registry, _cursor))
+    {
+        // assert(vfx != nullptr);
+    }
+
     AbilityData WavemobAutoAttack::initAbilityData(entt::registry* _registry)
     {
         AbilityData ad;
