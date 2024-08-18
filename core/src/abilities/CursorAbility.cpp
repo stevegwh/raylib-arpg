@@ -4,7 +4,8 @@
 
 #include "CursorAbility.hpp"
 
-#include "Camera.hpp"
+#include "GameData.hpp"
+
 #include "components/Animation.hpp"
 
 #include "vfx/RainOfFireVFX.hpp"
@@ -93,14 +94,13 @@ namespace sage
 
     CursorAbility::CursorAbility(
         entt::registry* _registry,
-        Camera* _camera,
-        Cursor* _cursor,
-        std::unique_ptr<AbilityIndicator> _abilityIndicator,
-        AbilityData _abilityData)
-        : Ability(_registry, _abilityData, _camera), cursor(_cursor)
+        AbilityData _abilityData,
+        GameData* _gameData,
+        std::unique_ptr<AbilityIndicator> _abilityIndicator)
+        : Ability(_registry, _abilityData, _gameData), cursor(_gameData->cursor.get())
     {
         auto cursorState = std::make_unique<CursorSelectState>(
-            cooldownTimer, animationDelayTimer, _cursor, std::move(_abilityIndicator));
+            cooldownTimer, animationDelayTimer, _gameData->cursor.get(), std::move(_abilityIndicator));
         entt::sink onConfirmSink{cursorState->onConfirm};
         onConfirmSink.connect<&CursorAbility::confirm>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);

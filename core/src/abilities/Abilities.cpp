@@ -4,6 +4,8 @@
 #include "AbilityIndicator.hpp"
 #include "AbilityResourceManager.hpp"
 
+#include "GameData.hpp"
+
 #include "Camera.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
@@ -42,8 +44,8 @@ namespace sage
         return ad;
     }
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, Camera* _camera)
-        : Ability(_registry, initAbilityData(_registry), _camera)
+    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, GameData* _gameData)
+        : Ability(_registry, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -78,15 +80,15 @@ namespace sage
         return ad;
     }
 
-    RainOfFire::RainOfFire(
-        entt::registry* _registry, Camera* _camera, Cursor* _cursor, NavigationGridSystem* _navigationGridSystem)
+    RainOfFire::RainOfFire(entt::registry* _registry, GameData* _gameData)
         : CursorAbility(
               _registry,
-              _camera,
-              _cursor,
+              initAbilityData(_registry, _gameData->cursor.get()),
+              _gameData,
               std::make_unique<AbilityIndicator>(
-                  _registry, _navigationGridSystem, "resources/textures/cursor/rainoffire_cursor.png"),
-              initAbilityData(_registry, _cursor))
+                  _registry,
+                  _gameData->navigationGridSystem.get(),
+                  "resources/textures/cursor/rainoffire_cursor.png"))
     {
         // assert(vfx != nullptr);
     }
@@ -122,15 +124,15 @@ namespace sage
         return ad;
     }
 
-    FloorFire::FloorFire(
-        entt::registry* _registry, Camera* _camera, Cursor* _cursor, NavigationGridSystem* _navigationGridSystem)
+    FloorFire::FloorFire(entt::registry* _registry, GameData* _gameData)
         : CursorAbility(
               _registry,
-              _camera,
-              _cursor,
+              initAbilityData(_registry, _gameData->cursor.get()),
+              _gameData,
               std::make_unique<AbilityIndicator>(
-                  _registry, _navigationGridSystem, "resources/textures/cursor/rainoffire_cursor.png"),
-              initAbilityData(_registry, _cursor))
+                  _registry,
+                  _gameData->navigationGridSystem.get(),
+                  "resources/textures/cursor/rainoffire_cursor.png"))
     {
         // assert(vfx != nullptr);
     }
@@ -155,8 +157,8 @@ namespace sage
         return ad;
     }
 
-    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, Camera* _camera)
-        : Ability(_registry, initAbilityData(_registry), _camera)
+    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, GameData* _gameData)
+        : Ability(_registry, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -184,8 +186,8 @@ namespace sage
         return ad;
     }
 
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, Camera* _camera)
-        : Ability(_registry, initAbilityData(_registry), _camera)
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, GameData* _gameData)
+        : Ability(_registry, initAbilityData(_registry), _gameData)
     {
     }
 

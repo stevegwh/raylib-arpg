@@ -7,8 +7,6 @@
 
 namespace sage
 {
-    class Camera;
-
     class CursorAbility : public Ability
     {
         Cursor* cursor;
@@ -44,10 +42,9 @@ namespace sage
         virtual void confirm(entt::entity self);
         CursorAbility(
             entt::registry* _registry,
-            Camera* _camera,
-            Cursor* _cursor,
-            std::unique_ptr<AbilityIndicator> _abilityIndicator,
-            AbilityData _abilityData);
+            AbilityData _abilityData,
+            GameData* _gameData,
+            std::unique_ptr<AbilityIndicator> _abilityIndicator);
 
       public:
         void Init(entt::entity self) override;
