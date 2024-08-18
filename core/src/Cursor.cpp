@@ -6,8 +6,10 @@
 
 #include "GameData.hpp"
 
+#include <algorithm>
+
 #ifndef FLT_MAX
-#define FLT_MAX                                                                          \
+#define FLT_MAX                                                                                                   \
     340282346638528859811704183484516925440.0f // Maximum value of a float, from bit
                                                // pattern 01111111011111111111111111111111
 #endif
@@ -18,8 +20,7 @@ namespace sage
     {
         if (!enabled) return;
 
-        const auto& layer =
-            registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+        const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         if (layer == CollisionLayer::NPC)
         {
             onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
@@ -69,8 +70,7 @@ namespace sage
     bool Cursor::isValidMove() const
     {
         GridSquare clickedSquare{};
-        if (gameData->navigationGridSystem->WorldToGridSpace(
-                m_mouseHitInfo.rlCollision.point, clickedSquare))
+        if (gameData->navigationGridSystem->WorldToGridSpace(m_mouseHitInfo.rlCollision.point, clickedSquare))
         // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as
         // bounds.)
         {
@@ -82,10 +82,7 @@ namespace sage
                 gameData->navigationGridSystem->GetPathfindRange(
                     controlledActor, actor.pathfindingBounds, minRange, maxRange);
                 if (!gameData->navigationGridSystem->WorldToGridSpace(
-                        m_mouseHitInfo.rlCollision.point,
-                        clickedSquare,
-                        minRange,
-                        maxRange))
+                        m_mouseHitInfo.rlCollision.point, clickedSquare, minRange, maxRange))
                 // Out of player's movement range
                 {
                     return false;
@@ -96,9 +93,7 @@ namespace sage
         {
             return false;
         }
-        if (gameData->navigationGridSystem
-                ->GetGridSquare(clickedSquare.row, clickedSquare.col)
-                ->occupied)
+        if (gameData->navigationGridSystem->GetGridSquare(clickedSquare.row, clickedSquare.col)->occupied)
         {
             return false;
         }
@@ -123,8 +118,7 @@ namespace sage
             }
             if (registry->all_of<Renderable>(m_mouseHitInfo.collidedEntityId))
             {
-                hitObjectName =
-                    registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
+                hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
             }
         }
         else if (layer == CollisionLayer::BUILDING)
@@ -133,8 +127,7 @@ namespace sage
             currentColor = invalidColor;
             if (registry->all_of<Renderable>(m_mouseHitInfo.collidedEntityId))
             {
-                hitObjectName =
-                    registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
+                hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
             }
         }
         else if (layer == CollisionLayer::PLAYER)
@@ -152,6 +145,22 @@ namespace sage
             currentTex = &combattex;
             hitObjectName = "NPC";
         }
+    }
+
+    bool compareDistance(const CollisionInfo& a, const CollisionInfo& b, const Vector3& cameraPos)
+    {
+        float distA = Vector3Distance(a.rlCollision.point, cameraPos);
+        float distB = Vector3Distance(b.rlCollision.point, cameraPos);
+        return distA < distB;
+    }
+
+    // Function to sort the vector
+    void sortCollisionsByDistance(std::vector<CollisionInfo>& collisions, const Vector3& cameraPos)
+    {
+        std::sort(
+            collisions.begin(), collisions.end(), [&cameraPos](const CollisionInfo& a, const CollisionInfo& b) {
+                return compareDistance(a, b, cameraPos);
+            });
     }
 
     void Cursor::getMouseRayCollision()
@@ -172,33 +181,40 @@ namespace sage
             return;
         }
 
-        // Set initial hit info
-        m_mouseHitInfo = collisions[0];
+        // Replace floor BB hit with mesh hit then re-sort vector
+        // Discards hits with a BB that do not have a mesh collision
+        for (auto it = collisions.begin(); it != collisions.end();)
+        {
+            if (!findMeshCollision(*it))
+            {
+                it = collisions.erase(it);
+                continue;
+            }
+            ++it;
+        }
 
-        // Find first non-floor collision for mouse hit
-        auto nonFloorIt = std::find_if(
-            collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
-                return coll.collisionLayer != CollisionLayer::FLOOR;
+        Vector3 cameraPos = gameData->camera->GetPosition();
+        sortCollisionsByDistance(collisions, cameraPos);
+
+        m_mouseHitInfo = collisions[0];
+        m_terrainHitInfo = m_mouseHitInfo;
+
+        if (m_mouseHitInfo.collisionLayer != CollisionLayer::FLOOR)
+        {
+            // Find first non-floor collision for mouse hit
+            auto terrainIt = std::find_if(collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
+                return coll.collisionLayer == CollisionLayer::FLOOR;
             });
 
-        if (nonFloorIt != collisions.end())
-        {
-            m_mouseHitInfo = *nonFloorIt;
-            m_terrainHitInfo =
-                collisions[0]; // Keep the first hit (likely floor) as terrain hit
-            findMeshCollision(m_terrainHitInfo);
+            if (terrainIt != collisions.end())
+            {
+                m_terrainHitInfo = *terrainIt;
+            }
         }
-        else
-        {
-            m_terrainHitInfo = m_mouseHitInfo;
-        }
-
-        findMeshCollision(m_mouseHitInfo);
 
         onCollisionHit.publish(m_mouseHitInfo.collidedEntityId);
 
-        auto layer =
-            registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+        auto layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         changeCursors(layer);
     }
 
@@ -210,19 +226,25 @@ namespace sage
     }
 
     // Find the terrain's mesh collision (instead of using its bounding box)
-    void Cursor::findMeshCollision(CollisionInfo& hitInfo)
+    bool Cursor::findMeshCollision(CollisionInfo& hitInfo)
     {
         if (hitInfo.collisionLayer == CollisionLayer::FLOOR &&
             registry->any_of<Renderable>(hitInfo.collidedEntityId))
         {
             auto& renderable = registry->get<Renderable>(hitInfo.collidedEntityId);
-            auto meshCollision = GetRayCollisionMesh(
-                ray, *renderable.model.meshes, renderable.model.transform);
-            if (meshCollision.hit)
+
+            for (int i = 0; i < renderable.model.meshCount; ++i)
             {
-                hitInfo.rlCollision = meshCollision;
+                auto meshCollision =
+                    GetRayCollisionMesh(ray, renderable.model.meshes[i], renderable.model.transform);
+                if (meshCollision.hit)
+                {
+                    hitInfo.rlCollision = meshCollision;
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     void Cursor::OnControlledActorChange(entt::entity entity)
@@ -247,12 +269,24 @@ namespace sage
 
     void Cursor::Update()
     {
-        position = {.x = GetMousePosition().x, .y = GetMousePosition().y};
         getMouseRayCollision();
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             onMouseClick();
         }
+    }
+
+    void Cursor::DrawDebug()
+    {
+        // if (!m_mouseHitInfo.rlCollision.hit) return;
+        // if (contextLocked) return;
+        // DrawCube(m_mouseHitInfo.rlCollision.point, 0.5f, 0.5f, 0.5f, currentColor);
+        // Vector3 normalEnd;
+        // normalEnd.x = m_mouseHitInfo.rlCollision.point.x + m_mouseHitInfo.rlCollision.normal.x;
+        // normalEnd.y = m_mouseHitInfo.rlCollision.point.y + m_mouseHitInfo.rlCollision.normal.y;
+        // normalEnd.z = m_mouseHitInfo.rlCollision.point.z + m_mouseHitInfo.rlCollision.normal.z;
+
+        // DrawLine3D(m_mouseHitInfo.rlCollision.point, normalEnd, RED);
     }
 
     void Cursor::Draw3D()
@@ -261,12 +295,9 @@ namespace sage
         if (contextLocked) return;
         DrawCube(m_mouseHitInfo.rlCollision.point, 0.5f, 0.5f, 0.5f, currentColor);
         Vector3 normalEnd;
-        normalEnd.x =
-            m_mouseHitInfo.rlCollision.point.x + m_mouseHitInfo.rlCollision.normal.x;
-        normalEnd.y =
-            m_mouseHitInfo.rlCollision.point.y + m_mouseHitInfo.rlCollision.normal.y;
-        normalEnd.z =
-            m_mouseHitInfo.rlCollision.point.z + m_mouseHitInfo.rlCollision.normal.z;
+        normalEnd.x = m_mouseHitInfo.rlCollision.point.x + m_mouseHitInfo.rlCollision.normal.x;
+        normalEnd.y = m_mouseHitInfo.rlCollision.point.y + m_mouseHitInfo.rlCollision.normal.y;
+        normalEnd.z = m_mouseHitInfo.rlCollision.point.z + m_mouseHitInfo.rlCollision.normal.z;
 
         DrawLine3D(m_mouseHitInfo.rlCollision.point, normalEnd, RED);
     }
@@ -274,19 +305,16 @@ namespace sage
     void Cursor::Draw2D()
     {
         if (hideCursor) return;
-        Vector2 pos = position;
+        Vector2 pos = GetMousePosition();
         if (currentTex != &regulartex)
         {
             pos = Vector2Subtract(
-                position,
-                {static_cast<float>(currentTex->width / 2),
-                 static_cast<float>(currentTex->height / 2)});
+                pos, {static_cast<float>(currentTex->width / 2), static_cast<float>(currentTex->height / 2)});
         }
         DrawTextureEx(*currentTex, pos, 0.0, 1.0f, WHITE);
     }
 
-    Cursor::Cursor(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    Cursor::Cursor(entt::registry* _registry, GameData* _gameData) : registry(_registry), gameData(_gameData)
     {
         regulartex = LoadTexture("resources/textures/cursor/32/regular.png");
         talktex = LoadTexture("resources/textures/cursor/32/talk.png");

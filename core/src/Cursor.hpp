@@ -34,7 +34,6 @@ namespace sage
         Texture2D invalidmovetex{};
         Texture2D combattex{};
 
-        Vector2 position{};
         Ray ray{};
         Color defaultColor = WHITE;
         Color hoverColor = LIME;
@@ -51,7 +50,7 @@ namespace sage
         void onMouseClick();
         void changeCursors(CollisionLayer collisionLayer);
         static void resetHitInfo(CollisionInfo& hitInfo);
-        void findMeshCollision(CollisionInfo& hitInfo);
+        [[nodiscard]] bool findMeshCollision(CollisionInfo& hitInfo);
 
       public:
         std::string hitObjectName{};
@@ -59,14 +58,14 @@ namespace sage
         [[nodiscard]] const RayCollision& terrainCollision() const;
         [[nodiscard]] const RayCollision& collision() const;
 
-        entt::sigh<void(entt::entity)>
-            onCollisionHit{}; // Returns the hit entity (all layers)
+        entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
         entt::sigh<void(entt::entity)> onNPCClick{};
         entt::sigh<void(entt::entity entity)> onFloorClick{};
         entt::sigh<void(entt::entity entity)> onAnyClick{};
         entt::sigh<void(entt::entity)> onEnemyClick{};
 
         void Update();
+        void DrawDebug();
         void Draw3D();
         void Draw2D();
         void OnControlledActorChange(entt::entity entity);
