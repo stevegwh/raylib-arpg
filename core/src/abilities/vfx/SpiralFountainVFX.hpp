@@ -36,6 +36,6 @@ namespace sage
         void Draw3D() const override;
         void SetOrigin(const Vector3& origin) override;
         ~SpiralFountainVFX();
-        explicit SpiralFountainVFX(Camera* camera);
+        explicit SpiralFountainVFX(GameData* _gameData);
     };
 } // namespace sage

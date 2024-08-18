@@ -4,6 +4,8 @@
 
 #include "SpiralFountainVFX.hpp"
 
+#include "GameData.hpp"
+
 #include "raylib.h"
 #include "raymath.h"
 #include "ResourceManager.hpp"
@@ -50,9 +52,9 @@ namespace sage
         UnloadShader(shader);
     }
 
-    SpiralFountainVFX::SpiralFountainVFX(Camera* _camera) : VisualFX(_camera)
+    SpiralFountainVFX::SpiralFountainVFX(GameData* _gameData) : VisualFX(_gameData)
     {
         shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
-        fountain = std::make_unique<FountainPartSys>(camera->getRaylibCam());
+        fountain = std::make_unique<FountainPartSys>(_gameData->camera->getRaylibCam());
     }
 } // namespace sage

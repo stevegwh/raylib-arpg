@@ -4,6 +4,8 @@
 
 #include "FloorFireVFX.hpp"
 
+#include "GameData.hpp"
+
 #include "ResourceManager.hpp"
 
 #include "raylib.h"
@@ -15,10 +17,6 @@ namespace sage
 
     void FloorFireVFX::Draw3D() const
     {
-        BeginShaderMode(shader);
-        //  Draw quad here (Just make it a renderable?)
-        DrawModel(renderModel, targetPos, 1.0f, WHITE);
-        EndShaderMode();
     }
 
     void FloorFireVFX::Update(float dt)
@@ -30,27 +28,27 @@ namespace sage
     void FloorFireVFX::InitSystem(const Vector3& _target)
     {
         active = true;
-        targetPos = _target;
+        texture->Init(_target);
+        texture->Enable(true);
     }
 
     FloorFireVFX::~FloorFireVFX()
     {
-
-        UnloadShader(shader);
-        std::cout << "FloorFireVFX destroyed" << std::endl;
-        UnloadModel(renderModel);
     }
 
-    FloorFireVFX::FloorFireVFX(Camera* _camera) : VisualFX(_camera)
+    FloorFireVFX::FloorFireVFX(GameData* _gameData)
+        : VisualFX(_gameData),
+          texture(std::make_unique<TextureTerrainOverlay>(
+              gameData->registry,
+              gameData->navigationGridSystem.get(),
+              "resources/textures/cursor/rainoffire_cursor.png",
+              WHITE,
+              "resources/shaders/floorfirefx.fs")),
+          shader(gameData->registry->get<Renderable>(texture->entity).shader.value())
     {
-        shader = LoadShader(nullptr, "resources/shaders/floorfirefx.fs");
-
-        renderModel = LoadModelFromMesh(GenMeshPlane(10.0f, 10.0f, 1, 1));
-        renderModel.materials[0].shader = shader;
         secondsLoc = GetShaderLocation(shader, "seconds");
         screenSizeLoc = GetShaderLocation(shader, "screenSize");
-
-        screenSize = {(float)1280, (float)720}; // TODO: Guess I'll need to pass in settings here
+        screenSize = {static_cast<float>(gameData->settings->screenWidth), static_cast<float>(gameData->settings->screenHeight)};
         SetShaderValue(shader, screenSizeLoc, &screenSize, SHADER_UNIFORM_VEC2);
     }
 } // namespace sage

@@ -14,10 +14,10 @@
 
 namespace sage
 {
+    class GameData;
     class FloorFireVFX : public VisualFX
     {
         Vector2 screenSize;
-        Vector3 targetPos;
         float time = 0;
         int secondsLoc;
         int screenSizeLoc;
@@ -32,6 +32,6 @@ namespace sage
         void Update(float dt) override;
         void Draw3D() const override;
         ~FloorFireVFX();
-        explicit FloorFireVFX(Camera* _camera);
+        explicit FloorFireVFX(GameData* _gameData);
     };
 } // namespace sage

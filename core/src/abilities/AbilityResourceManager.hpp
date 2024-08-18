@@ -11,7 +11,7 @@ namespace sage
 {
     enum class AbilityFunctionEnum;
     class AbilityFunction;
-    class Camera;
+    class GameData;
     class VisualFX;
     class AbilityIndicator;
 
@@ -30,7 +30,7 @@ namespace sage
         // std::unique_ptr<AbilityIndicator> GetIndicator(std::string key);
         AbilityFunctionEnum StringToExecuteFuncEnum(const std::string& name);
         AbilityFunction* GetExecuteFunc(AbilityFunctionEnum name);
-        std::unique_ptr<VisualFX> GetVisualFX(AbilityData::VisualFXData data, Camera* _camera);
+        std::unique_ptr<VisualFX> GetVisualFX(AbilityData::VisualFXData data, GameData* _gameData);
         AbilityResourceManager(const AbilityResourceManager&) = delete;
         AbilityResourceManager& operator=(const AbilityResourceManager&) = delete;
         static AbilityResourceManager& GetInstance(entt::registry* reg);

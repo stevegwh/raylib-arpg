@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Camera.hpp"
 #include "raylib.h"
 
 namespace sage
 {
+    class GameData;
     class VisualFX
     {
       protected:
-        Camera* camera;
+        GameData* gameData;
 
       public:
         bool active = false;
@@ -18,7 +18,7 @@ namespace sage
         virtual void Draw3D() const = 0;
         virtual void SetOrigin(const Vector3& origin) {};
         VisualFX(const VisualFX&) = delete;
-        explicit VisualFX(Camera* _camera) : camera(_camera)
+        explicit VisualFX(GameData* _gameData) : gameData(_gameData)
         {
         }
     };

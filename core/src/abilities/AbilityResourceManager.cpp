@@ -20,17 +20,18 @@ namespace sage
             AbilityFunctionEnum::MultihitRadiusFromCaster, std::make_unique<MultihitRadiusFromCaster>());
     }
 
-    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(AbilityData::VisualFXData data, Camera* _camera)
+    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
+        AbilityData::VisualFXData data, GameData* _gameData)
     {
         if (data.name == "RainOfFire")
         {
-            auto obj = std::make_unique<RainOfFireVFX>(_camera);
+            auto obj = std::make_unique<RainOfFireVFX>(_gameData);
             data.ptr = obj.get();
             return std::move(obj);
         }
         else if (data.name == "FloorFire")
         {
-            auto obj = std::make_unique<FloorFireVFX>(_camera);
+            auto obj = std::make_unique<FloorFireVFX>(_gameData);
             data.ptr = obj.get();
             return std::move(obj);
         }
