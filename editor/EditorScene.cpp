@@ -147,6 +147,7 @@ namespace sage
     void EditorScene::DrawDebug()
     {
         DrawGrid(data->navigationGridSystem->slices, data->navigationGridSystem->spacing);
+        Scene::DrawDebug();
     }
 
     void EditorScene::Update()

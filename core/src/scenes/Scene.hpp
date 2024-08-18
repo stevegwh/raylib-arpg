@@ -36,7 +36,6 @@ namespace sage
             data->renderSystem->Draw();
             // If we hit something, draw the cursor at the hit point
             data->cursor->Draw3D();
-            lightSubSystem->DrawDebugLights();
         };
 
         virtual void Draw2D()
@@ -48,6 +47,8 @@ namespace sage
 
         virtual void DrawDebug()
         {
+            data->cursor->DrawDebug();
+            lightSubSystem->DrawDebugLights();
         }
 
         explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath)
