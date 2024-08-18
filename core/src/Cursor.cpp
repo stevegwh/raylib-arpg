@@ -184,9 +184,12 @@ namespace sage
         gameData->collisionSystem->SortCollisionsByDistance(collisions);
 
         m_mouseHitInfo = collisions[0];
-        m_terrainHitInfo = m_mouseHitInfo;
 
-        if (m_mouseHitInfo.collisionLayer != CollisionLayer::FLOOR)
+        if (m_mouseHitInfo.collisionLayer == CollisionLayer::FLOOR)
+        {
+            m_terrainHitInfo = m_mouseHitInfo;
+        }
+        else
         {
             // Find first non-floor collision for mouse hit
             auto terrainIt = std::find_if(collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
