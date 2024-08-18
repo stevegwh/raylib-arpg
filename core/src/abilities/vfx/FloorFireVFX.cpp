@@ -23,6 +23,7 @@ namespace sage
     {
         time += 3 * GetFrameTime();
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
+        // texture->Update(gameData->cursor->terrainCollision().point);
     }
 
     void FloorFireVFX::InitSystem(const Vector3& _target)
@@ -48,7 +49,9 @@ namespace sage
     {
         secondsLoc = GetShaderLocation(shader, "seconds");
         screenSizeLoc = GetShaderLocation(shader, "screenSize");
-        screenSize = {static_cast<float>(gameData->settings->screenWidth), static_cast<float>(gameData->settings->screenHeight)};
+        screenSize = {
+            static_cast<float>(gameData->settings->screenWidth),
+            static_cast<float>(gameData->settings->screenHeight)};
         SetShaderValue(shader, screenSizeLoc, &screenSize, SHADER_UNIFORM_VEC2);
     }
 } // namespace sage
