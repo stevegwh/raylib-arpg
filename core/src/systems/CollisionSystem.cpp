@@ -9,8 +9,7 @@
 
 #include <algorithm>
 
-bool compareRayCollisionDistances(
-    const sage::CollisionInfo& a, const sage::CollisionInfo& b)
+bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
 {
     return a.rlCollision.distance < b.rlCollision.distance;
 }
@@ -25,8 +24,7 @@ namespace sage
         auto view = registry->view<Collideable>();
 
         view.each([&](auto entity, const auto& c) {
-            if (collisionMatrix[static_cast<int>(layer)]
-                               [static_cast<int>(c.collisionLayer)])
+            if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 if (CheckCollisionBoxes(bb, c.worldBoundingBox))
                 {
@@ -45,20 +43,17 @@ namespace sage
         return collisions;
     }
 
-    std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(
-        const Ray& ray, CollisionLayer layer)
+    std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(const Ray& ray, CollisionLayer layer)
     {
         return GetCollisionsWithRay(entt::null, ray, layer);
     }
 
-    bool CollisionSystem::GetFirstCollisionWithRay(
-        const Ray& ray, CollisionInfo& info, CollisionLayer layer)
+    bool CollisionSystem::GetFirstCollisionWithRay(const Ray& ray, CollisionInfo& info, CollisionLayer layer)
     {
         auto view = registry->view<Collideable>();
 
         view.each([&](auto entity, const auto& c) {
-            if (collisionMatrix[static_cast<int>(layer)]
-                               [static_cast<int>(c.collisionLayer)])
+            if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
                 if (col.hit)
@@ -85,8 +80,7 @@ namespace sage
 
         view.each([&](auto entity, const auto& c) {
             if (entity == caster) return;
-            if (collisionMatrix[static_cast<int>(layer)]
-                               [static_cast<int>(c.collisionLayer)])
+            if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 if (registry->any_of<Renderable>(entity))
                 {
@@ -120,8 +114,7 @@ namespace sage
 
         view.each([&](auto entity, const auto& c) {
             if (entity == caster) return;
-            if (collisionMatrix[static_cast<int>(layer)]
-                               [static_cast<int>(c.collisionLayer)])
+            if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
                 if (col.hit)
@@ -168,6 +161,8 @@ namespace sage
         float height = max.y - min.y;
         float depth = max.z - min.z;
 
+        color.a = 100;
+
         // Draw the cube at the calculated center with the correct dimensions
         DrawCube(center, width, height, depth, color);
     }
@@ -178,8 +173,7 @@ namespace sage
      * @param entityId The id of the entity
      * @param mat The transform matrix for the local bounding box
      */
-    void CollisionSystem::UpdateWorldBoundingBox(
-        entt::entity entityId, Matrix mat) // TODO: I don't like the name
+    void CollisionSystem::UpdateWorldBoundingBox(entt::entity entityId, Matrix mat) // TODO: I don't like the name
     {
         registry->patch<Collideable>(entityId, [mat](auto& col) {
             auto bb = col.localBoundingBox;
@@ -189,8 +183,7 @@ namespace sage
         });
     }
 
-    bool CollisionSystem::CheckBoxCollision(
-        const BoundingBox& col1, const BoundingBox& col2)
+    bool CollisionSystem::CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2)
     {
         return CheckCollisionBoxes(col1, col2);
     }
@@ -207,8 +200,7 @@ namespace sage
             const auto& c = view.get<Collideable>(ent);
             if (c.collisionLayer != CollisionLayer::BUILDING) continue;
             // TODO: Wanted to query a collision matrix but is far too slow
-            bool colHit =
-                CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
+            bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
             if (colHit) return true;
         }
         return false;
@@ -217,41 +209,27 @@ namespace sage
     CollisionMatrix CollisionSystem::CreateCollisionMatrix()
     {
         int numLayers = static_cast<int>(CollisionLayer::COUNT);
-        std::vector<std::vector<bool>> matrix(
-            numLayers, std::vector<bool>(numLayers, false));
+        std::vector<std::vector<bool>> matrix(numLayers, std::vector<bool>(numLayers, false));
 
-        matrix[static_cast<int>(CollisionLayer::DEFAULT)]
-              [static_cast<int>(CollisionLayer::PLAYER)] = true;
-        matrix[static_cast<int>(CollisionLayer::DEFAULT)]
-              [static_cast<int>(CollisionLayer::ENEMY)] = true;
-        matrix[static_cast<int>(CollisionLayer::DEFAULT)]
-              [static_cast<int>(CollisionLayer::NPC)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::PLAYER)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::ENEMY)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::NPC)] = true;
         // matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::NAVIGATION)]
         // = true;
-        matrix[static_cast<int>(CollisionLayer::DEFAULT)]
-              [static_cast<int>(CollisionLayer::BUILDING)] = true;
-        matrix[static_cast<int>(CollisionLayer::DEFAULT)]
-              [static_cast<int>(CollisionLayer::FLOOR)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::BUILDING)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::FLOOR)] = true;
 
-        matrix[static_cast<int>(CollisionLayer::PLAYER)]
-              [static_cast<int>(CollisionLayer::ENEMY)] = true;
-        matrix[static_cast<int>(CollisionLayer::PLAYER)]
-              [static_cast<int>(CollisionLayer::BUILDING)] = true;
+        matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::ENEMY)] = true;
+        matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::BUILDING)] = true;
 
-        matrix[static_cast<int>(CollisionLayer::ENEMY)]
-              [static_cast<int>(CollisionLayer::PLAYER)] = true;
-        matrix[static_cast<int>(CollisionLayer::ENEMY)]
-              [static_cast<int>(CollisionLayer::BUILDING)] = true;
+        matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::PLAYER)] = true;
+        matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::BUILDING)] = true;
 
-        matrix[static_cast<int>(CollisionLayer::BOYD)]
-              [static_cast<int>(CollisionLayer::PLAYER)] = true;
-        matrix[static_cast<int>(CollisionLayer::BOYD)]
-              [static_cast<int>(CollisionLayer::NPC)] = true;
-        matrix[static_cast<int>(CollisionLayer::BOYD)]
-              [static_cast<int>(CollisionLayer::ENEMY)] = true;
+        matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::PLAYER)] = true;
+        matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::NPC)] = true;
+        matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::ENEMY)] = true;
 
-        matrix[static_cast<int>(CollisionLayer::NAVIGATION)]
-              [static_cast<int>(CollisionLayer::FLOOR)] = true;
+        matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::FLOOR)] = true;
 
         return matrix;
     }
