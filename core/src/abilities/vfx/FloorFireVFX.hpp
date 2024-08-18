@@ -6,7 +6,11 @@
 
 #include "VisualFX.hpp"
 
+#include "TextureTerrainOverlay.hpp"
+
 #include "raylib.h"
+
+#include <memory>
 
 namespace sage
 {
@@ -17,6 +21,8 @@ namespace sage
         float time = 0;
         int secondsLoc;
         int screenSizeLoc;
+
+        std::unique_ptr<TextureTerrainOverlay> texture;
 
         Model renderModel;
 

@@ -56,9 +56,7 @@ namespace sage
         auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx{};
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height =
-            game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)
-                ->terrainHeight;
+        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
@@ -83,7 +81,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-        registry->emplace<WavemobAutoAttack>(id, registry, game->camera.get());
+        registry->emplace<WavemobAutoAttack>(id, registry, game);
 
         auto& healthbar = registry->emplace<HealthBar>(id);
         // ---
@@ -114,9 +112,7 @@ namespace sage
         auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx{};
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height =
-            game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)
-                ->terrainHeight;
+        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
@@ -131,8 +127,7 @@ namespace sage
 
         // auto& combat = registry->emplace<HealthBar>(id);
 
-        BoundingBox bb = createRectangularBoundingBox(
-            3.0f, 7.0f); // Manually set bounding box dimensions
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
         // collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely
@@ -144,9 +139,8 @@ namespace sage
 
         auto& dialogue = registry->emplace<Dialogue>(id);
         dialogue.sentence = "Hello, this is a test sentence.";
-        dialogue.conversationPos = Vector3Add(
-            transform.position(),
-            Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+        dialogue.conversationPos =
+            Vector3Add(transform.position(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
         return id;
     }
 
@@ -162,9 +156,7 @@ namespace sage
         auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx{};
         game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height =
-            game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)
-                ->terrainHeight;
+        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
@@ -213,7 +205,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::PLAYER;
-        registry->emplace<PlayerAutoAttack>(id, registry, game->camera.get());
+        registry->emplace<PlayerAutoAttack>(id, registry, game);
         {
             entt::sink sink{game->cursor->onFloorClick};
             sink.connect<&CombatableActor::AttackCancelled>(combatable);
@@ -224,13 +216,11 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
         renderable.name = name;
 
-        BoundingBox bb = createRectangularBoundingBox(
-            3.0f, 7.0f); // Manually set bounding box dimensions
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
-        auto& controllable =
-            registry->emplace<ControllableActor>(id, id, game->cursor.get());
+        auto& controllable = registry->emplace<ControllableActor>(id, id, game->cursor.get());
         game->controllableActorSystem->SetControlledActor(id);
 
         registry->emplace<PlayerState>(id);
@@ -256,11 +246,9 @@ namespace sage
         matPaths.diffuse = texturePath;
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
             LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
-        auto& renderable =
-            registry->emplace<Renderable>(id, model, matPaths, MatrixIdentity());
+        auto& renderable = registry->emplace<Renderable>(id, model, matPaths, MatrixIdentity());
         renderable.name = name;
-        auto& collideable = registry->emplace<Collideable>(
-            id, CalculateModelBoundingBox(renderable.model));
+        auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
         collideable.collisionLayer = CollisionLayer::BUILDING;
         // collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely
         // redundant
@@ -272,13 +260,11 @@ namespace sage
         BoundingBox mapBB{Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
         for (const auto& col : floorMeshes)
         {
-            if (col->worldBoundingBox.min.x <= mapBB.min.x &&
-                col->worldBoundingBox.min.z <= mapBB.min.z)
+            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
             {
                 mapBB.min = col->worldBoundingBox.min;
             }
-            if (col->worldBoundingBox.max.x >= mapBB.max.x &&
-                col->worldBoundingBox.max.z >= mapBB.max.z)
+            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
             {
                 mapBB.max = col->worldBoundingBox.max;
             }
@@ -289,10 +275,7 @@ namespace sage
     }
 
     void GameObjectFactory::loadMap(
-        entt::registry* registry,
-        Scene* scene,
-        float& slices,
-        const std::string& _mapPath)
+        entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
     {
 
         MaterialPaths matPaths;
@@ -311,16 +294,14 @@ namespace sage
             Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
             Model model = LoadModelFromMesh(parent.meshes[i]);
             // Matrix modelTransform = MatrixScale(1,1,1);
-            auto& renderable =
-                registry->emplace<Renderable>(id, model, matPaths, modelTransform);
+            auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
             renderable.name = parent.meshes[i].name;
             renderable.serializable = false;
 
             scene->lightSubSystem->LinkRenderableToLight(&renderable);
             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
                 LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
-            auto& collideable = registry->emplace<Collideable>(
-                id, CalculateModelBoundingBox(renderable.model));
+            auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
             collideable.SetWorldBoundingBox(transform.GetMatrix());
 
             if (renderable.name.find("SM_Bld") != std::string::npos)
@@ -355,8 +336,7 @@ namespace sage
         createFloor(registry, scene, mapBB);
     }
 
-    void GameObjectFactory::createFloor(
-        entt::registry* registry, Scene* scene, BoundingBox bb)
+    void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)
     {
         entt::entity floor = registry->create();
         auto& floorCollidable = registry->emplace<Collideable>(floor, bb);

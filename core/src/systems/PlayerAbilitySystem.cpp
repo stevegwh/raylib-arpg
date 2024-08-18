@@ -117,11 +117,9 @@ namespace sage
         }
 
         currentAbilities.fill(-1);
-        abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, gameData->camera.get()));
-        abilityMap.push_back(std::make_unique<FloorFire>(
-            registry, gameData->camera.get(), gameData->cursor.get(), gameData->navigationGridSystem.get()));
-        abilityMap.push_back(std::make_unique<RainOfFire>(
-            registry, gameData->camera.get(), gameData->cursor.get(), gameData->navigationGridSystem.get()));
+        abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, gameData));
+        abilityMap.push_back(std::make_unique<FloorFire>(registry, gameData));
+        abilityMap.push_back(std::make_unique<RainOfFire>(registry, gameData));
         // TODO: These should be set by the player or another system
         ChangeAbility(0, 0);
         ChangeAbility(1, 1);

@@ -23,20 +23,17 @@ namespace sage
       public:
         CollisionMatrix collisionMatrix;
 
+        void SortCollisionsByDistance(std::vector<CollisionInfo>& collisions);
         void OnTransformUpdate(entt::entity entity);
         void UpdateWorldBoundingBox(entt::entity entityId, Matrix mat);
         [[nodiscard]] std::vector<CollisionInfo> GetMeshCollisionsWithRay(
             const entt::entity& caster, const Ray& ray, CollisionLayer layer);
         [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(
-            const entt::entity& caster,
-            const Ray& ray,
-            CollisionLayer layer = CollisionLayer::DEFAULT);
+            const entt::entity& caster, const Ray& ray, CollisionLayer layer = CollisionLayer::DEFAULT);
         [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(
             const Ray& ray, CollisionLayer layer = CollisionLayer::DEFAULT);
         [[nodiscard]] bool GetFirstCollisionWithRay(
-            const Ray& ray,
-            CollisionInfo& info,
-            CollisionLayer layer = CollisionLayer::DEFAULT);
+            const Ray& ray, CollisionInfo& info, CollisionLayer layer = CollisionLayer::DEFAULT);
         [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithBoundingBox(
             const BoundingBox& bb, CollisionLayer layer = CollisionLayer::DEFAULT);
         void BoundingBoxDraw(entt::entity entityId, Color color = LIME) const;

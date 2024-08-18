@@ -1,7 +1,8 @@
 #include "Ability.hpp"
 #include "AbilityFunctions.hpp"
 #include "AbilityResourceManager.hpp"
-#include "Camera.hpp"
+
+#include "GameData.hpp"
 
 #include <cassert>
 
@@ -130,10 +131,10 @@ namespace sage
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera)
+    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData, GameData* gameData)
         : registry(_registry),
           abilityData(_abilityData),
-          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(_abilityData.vfx, _camera))
+          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(_abilityData.vfx, gameData->camera.get()))
     {
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);

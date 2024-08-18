@@ -9,13 +9,16 @@
 
 #include <algorithm>
 
-bool compareRayCollisionDistances(const sage::CollisionInfo& a, const sage::CollisionInfo& b)
-{
-    return a.rlCollision.distance < b.rlCollision.distance;
-}
-
 namespace sage
 {
+
+    void CollisionSystem::SortCollisionsByDistance(std::vector<CollisionInfo>& collisions)
+    {
+        std::sort(collisions.begin(), collisions.end(), [](const CollisionInfo& a, const CollisionInfo& b) {
+            return a.rlCollision.distance < b.rlCollision.distance;
+        });
+    }
+
     std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithBoundingBox(
         const BoundingBox& bb, CollisionLayer layer)
     {
@@ -38,7 +41,7 @@ namespace sage
             }
         });
 
-        std::sort(collisions.begin(), collisions.end(), compareRayCollisionDistances);
+        SortCollisionsByDistance(collisions);
 
         return collisions;
     }
@@ -100,7 +103,7 @@ namespace sage
             }
         });
 
-        std::sort(collisions.begin(), collisions.end(), compareRayCollisionDistances);
+        SortCollisionsByDistance(collisions);
 
         return collisions;
     }
@@ -129,7 +132,7 @@ namespace sage
             }
         });
 
-        std::sort(collisions.begin(), collisions.end(), compareRayCollisionDistances);
+        SortCollisionsByDistance(collisions);
 
         return collisions;
     }

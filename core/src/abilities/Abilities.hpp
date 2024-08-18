@@ -7,8 +7,8 @@
 
 namespace sage
 {
-    class NavigationGridSystem;
     class Camera;
+    class GameData;
 
     class PlayerAutoAttack : public Ability
     {
@@ -16,7 +16,7 @@ namespace sage
 
       public:
         ~PlayerAutoAttack() override = default;
-        PlayerAutoAttack(entt::registry* _registry, Camera* _camera);
+        PlayerAutoAttack(entt::registry* _registry, GameData* _gameData);
     };
 
     class RainOfFire : public CursorAbility
@@ -24,11 +24,7 @@ namespace sage
         AbilityData initAbilityData(entt::registry* registry, Cursor* cursor);
 
       public:
-        RainOfFire(
-            entt::registry* _registry,
-            Camera* _camera,
-            Cursor* _cursor,
-            NavigationGridSystem* _navigationGridSystem);
+        RainOfFire(entt::registry* _registry, GameData* _gameData);
     };
 
     class FloorFire : public CursorAbility
@@ -36,11 +32,7 @@ namespace sage
         AbilityData initAbilityData(entt::registry* registry, Cursor* cursor);
 
       public:
-        FloorFire(
-            entt::registry* _registry,
-            Camera* _camera,
-            Cursor* _cursor,
-            NavigationGridSystem* _navigationGridSystem);
+        FloorFire(entt::registry* _registry, GameData* _gameData);
     };
 
     class WavemobAutoAttack : public Ability
@@ -49,7 +41,7 @@ namespace sage
 
       public:
         ~WavemobAutoAttack() override = default;
-        WavemobAutoAttack(entt::registry* _registry, Camera* _camera);
+        WavemobAutoAttack(entt::registry* _registry, GameData* _gameData);
     };
 
     class WhirlwindAbility : public Ability
@@ -59,6 +51,6 @@ namespace sage
       public:
         float whirlwindRadius = 15.0f;
         ~WhirlwindAbility() override = default;
-        WhirlwindAbility(entt::registry* _registry, Camera* _camera);
+        WhirlwindAbility(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

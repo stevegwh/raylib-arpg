@@ -14,6 +14,7 @@
 namespace sage
 {
     class Camera;
+    class GameData;
 
     enum class AbilityStateEnum
     {
@@ -98,6 +99,6 @@ namespace sage
         virtual ~Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* _registry, const AbilityData& _abilityData, Camera* _camera);
+        Ability(entt::registry* _registry, const AbilityData& _abilityData, GameData* _gameData);
     };
 } // namespace sage

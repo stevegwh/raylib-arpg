@@ -147,22 +147,6 @@ namespace sage
         }
     }
 
-    bool compareDistance(const CollisionInfo& a, const CollisionInfo& b, const Vector3& cameraPos)
-    {
-        float distA = Vector3Distance(a.rlCollision.point, cameraPos);
-        float distB = Vector3Distance(b.rlCollision.point, cameraPos);
-        return distA < distB;
-    }
-
-    // Function to sort the vector
-    void sortCollisionsByDistance(std::vector<CollisionInfo>& collisions, const Vector3& cameraPos)
-    {
-        std::sort(
-            collisions.begin(), collisions.end(), [&cameraPos](const CollisionInfo& a, const CollisionInfo& b) {
-                return compareDistance(a, b, cameraPos);
-            });
-    }
-
     void Cursor::getMouseRayCollision()
     {
         // Reset hit information
@@ -185,16 +169,19 @@ namespace sage
         // Discards hits with a BB that do not have a mesh collision
         for (auto it = collisions.begin(); it != collisions.end();)
         {
-            if (!findMeshCollision(*it))
+            if (it->collisionLayer == CollisionLayer::FLOOR)
             {
-                it = collisions.erase(it);
-                continue;
+                if (!findMeshCollision(*it))
+                {
+                    it = collisions.erase(it);
+                    continue;
+                }
             }
+
             ++it;
         }
 
-        Vector3 cameraPos = gameData->camera->GetPosition();
-        sortCollisionsByDistance(collisions, cameraPos);
+        gameData->collisionSystem->SortCollisionsByDistance(collisions);
 
         m_mouseHitInfo = collisions[0];
         m_terrainHitInfo = m_mouseHitInfo;
@@ -228,8 +215,7 @@ namespace sage
     // Find the terrain's mesh collision (instead of using its bounding box)
     bool Cursor::findMeshCollision(CollisionInfo& hitInfo)
     {
-        if (hitInfo.collisionLayer == CollisionLayer::FLOOR &&
-            registry->any_of<Renderable>(hitInfo.collidedEntityId))
+        if (registry->any_of<Renderable>(hitInfo.collidedEntityId))
         {
             auto& renderable = registry->get<Renderable>(hitInfo.collidedEntityId);
 
