@@ -31,9 +31,9 @@ namespace sage
 {
     class GameData
     {
-        entt::registry* registry;
 
       public:
+        entt::registry* registry;
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
 
         std::unique_ptr<UserInput> userInput;

@@ -74,7 +74,7 @@ namespace sage
         const auto& col = registry->get<Collideable>(knight);
         data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
-        fountain = std::make_unique<SpiralFountainVFX>(data->camera.get());
+        fountain = std::make_unique<SpiralFountainVFX>(data.get());
         fountain->InitSystem({30.0f, 4, 20.0f});
         explosion = std::make_unique<Explosion>(registry);
         explosion->SetOrigin({0, 3, 0});

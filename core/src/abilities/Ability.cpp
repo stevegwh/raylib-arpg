@@ -134,7 +134,7 @@ namespace sage
     Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData, GameData* gameData)
         : registry(_registry),
           abilityData(_abilityData),
-          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(_abilityData.vfx, gameData->camera.get()))
+          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(_abilityData.vfx, gameData))
     {
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);

@@ -4,6 +4,8 @@
 
 #include "RainOfFireVFX.hpp"
 
+#include "GameData.hpp"
+
 #include "FlamePartSys.hpp"
 #include "ResourceManager.hpp"
 
@@ -58,7 +60,7 @@ namespace sage
     {
         int maxRadius = 5; // TODO: temporary. Should be the radius of the ability's cursor
 
-        auto right = camera->GetRight();
+        auto right = gameData->camera->GetRight();
         auto aerialSpawn = Vector3MultiplyByValue(right, 3);
 
         // Calculate a random point in the circle around the target
@@ -80,7 +82,7 @@ namespace sage
 
         if (!fireball.flameEffect)
         {
-            fireball.flameEffect = std::make_unique<FlamePartSys>(camera->getRaylibCam());
+            fireball.flameEffect = std::make_unique<FlamePartSys>(gameData->camera->getRaylibCam());
             fireball.flameEffect->SetOrigin(fireball.position);
             fireball.flameEffect->SetDirection(fireball.velocity);
         }
@@ -123,7 +125,7 @@ namespace sage
         std::cout << "RainOfFireVFX destroyed" << std::endl;
     }
 
-    RainOfFireVFX::RainOfFireVFX(Camera* _camera) : VisualFX(_camera)
+    RainOfFireVFX::RainOfFireVFX(GameData* _gameData) : VisualFX(_gameData)
     {
         shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }
