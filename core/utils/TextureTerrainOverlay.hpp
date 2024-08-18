@@ -18,16 +18,16 @@ namespace sage
         GridSquare minRange{}, maxRange{};
         bool initialised = false;
         bool m_active = false;
+        Vector3 meshOffset{};
 
         void updateTerrainPolygon();
         Model generateTerrainPolygon();
         void updateMeshData(Mesh& mesh);
         Mesh createInitialMesh();
-        void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol, const Vector3& centerPos);
+        void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol);
         void updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol);
         void updateTexCoordData(Mesh& mesh, int vertexIndex, int row, int col, int maxRow, int maxCol);
         void generateIndices(Mesh& mesh, int maxRow, int maxCol);
-        Vector3 calculateCenterPosition();
 
       public:
         const entt::entity entity;
