@@ -9,7 +9,6 @@ namespace sage
     {
         int maxRow = maxRange.row - minRange.row;
         int maxCol = maxRange.col - minRange.col;
-        Vector3 centerPos = calculateCenterPosition();
 
         for (int row = 0; row < maxRow; ++row)
         {
@@ -19,7 +18,7 @@ namespace sage
                 int gridRow = row + minRange.row;
                 int gridCol = col + minRange.col;
 
-                updateVertexData(mesh, vertexIndex, gridRow, gridCol, centerPos);
+                updateVertexData(mesh, vertexIndex, gridRow, gridCol);
                 updateNormalData(mesh, vertexIndex, gridRow, gridCol);
                 updateTexCoordData(mesh, vertexIndex, row, col, maxRow, maxCol);
             }
@@ -46,13 +45,13 @@ namespace sage
         return mesh;
     }
 
-    void TextureTerrainOverlay::updateVertexData(
-        Mesh& mesh, int vertexIndex, int gridRow, int gridCol, const Vector3& centerPos)
+    void TextureTerrainOverlay::updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol)
     {
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
-        mesh.vertices[vertexIndex * 3] = gridSquares[gridRow][gridCol]->worldPosMin.x - centerPos.x;
-        mesh.vertices[vertexIndex * 3 + 1] = gridSquares[gridRow][gridCol]->terrainHeight;
-        mesh.vertices[vertexIndex * 3 + 2] = gridSquares[gridRow][gridCol]->worldPosMin.z - centerPos.z;
+        mesh.vertices[vertexIndex * 3] = gridSquares[gridRow][gridCol]->worldPosMin.x;
+        mesh.vertices[vertexIndex * 3 + 1] = gridSquares[gridRow][gridCol]->terrainHeight +
+                                             0.3; // Little buffer so the overlay doesnt blend into terrain
+        mesh.vertices[vertexIndex * 3 + 2] = gridSquares[gridRow][gridCol]->worldPosMin.z;
     }
 
     void TextureTerrainOverlay::updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol)
@@ -93,23 +92,6 @@ namespace sage
                 mesh.indices[indexCount++] = bottomRight;
             }
         }
-    }
-
-    Vector3 TextureTerrainOverlay::calculateCenterPosition()
-    {
-        // TODO: I think the height value in this function is causing all the issues
-        // Also, what happens if the shape is concave?
-        const auto& gridSquares = navigationGridSystem->GetGridSquares();
-        return {
-            (gridSquares[minRange.row][minRange.col]->worldPosMin.x +
-             gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMin.x) *
-                0.5f,
-            (gridSquares[minRange.row][minRange.col]->terrainHeight +
-             gridSquares[maxRange.row - 1][maxRange.col - 1]->terrainHeight) *
-                0.5f,
-            (gridSquares[minRange.row][minRange.col]->worldPosMin.z +
-             gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMin.z) *
-                0.5f};
     }
 
     void TextureTerrainOverlay::updateTerrainPolygon()
@@ -157,10 +139,23 @@ namespace sage
         renderable.model = generateTerrainPolygon();
         renderable.model.materials[0].shader = renderable.shader.value();
 
+        // Calculate the center of the mesh in world space
+        const auto& gridSquares = navigationGridSystem->GetGridSquares();
+        Vector3 meshMin = {
+            gridSquares[minRange.row][minRange.col]->worldPosMin.x,
+            gridSquares[minRange.row][minRange.col]->terrainHeight,
+            gridSquares[minRange.row][minRange.col]->worldPosMin.z};
+        Vector3 meshMax = {
+            gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMax.x,
+            gridSquares[maxRange.row - 1][maxRange.col - 1]->terrainHeight,
+            gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMax.z};
+        Vector3 meshCenter = {(meshMin.x + meshMax.x) * 0.5f, 0, (meshMin.z + meshMax.z) * 0.5f};
+
+        // Calculate the offset to center the mesh on the mouse position
+        meshOffset = {mouseRayHit.x - meshCenter.x, 0, mouseRayHit.z - meshCenter.z};
+
         auto& trans = registry->get<sgTransform>(entity);
-        Vector3 centerPos = calculateCenterPosition();
-        centerPos.y = mouseRayHit.y;
-        trans.SetPosition(centerPos, entity);
+        trans.SetPosition(meshOffset, entity);
         renderable.model.transform = MatrixIdentity();
     }
 
@@ -183,10 +178,7 @@ namespace sage
         updateTerrainPolygon();
 
         auto& trans = registry->get<sgTransform>(entity);
-        Vector3 centerPos = calculateCenterPosition();
-        centerPos.y = mouseRayHit.y;
-        trans.SetPosition(centerPos, entity);
-        renderable.model.transform = MatrixIdentity();
+        trans.SetPosition(meshOffset, entity);
     }
 
     TextureTerrainOverlay::~TextureTerrainOverlay()
