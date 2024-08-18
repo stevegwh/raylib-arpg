@@ -9,7 +9,6 @@ namespace sage
     {
         int maxRow = maxRange.row - minRange.row;
         int maxCol = maxRange.col - minRange.col;
-        int vertexCount = maxRow * maxCol;
         Vector3 centerPos = calculateCenterPosition();
 
         for (int row = 0; row < maxRow; ++row)
@@ -52,13 +51,15 @@ namespace sage
     {
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
         mesh.vertices[vertexIndex * 3] = gridSquares[gridRow][gridCol]->worldPosMin.x - centerPos.x;
-        mesh.vertices[vertexIndex * 3 + 1] = gridSquares[gridRow][gridCol]->terrainHeight - centerPos.y;
+        mesh.vertices[vertexIndex * 3 + 1] = gridSquares[gridRow][gridCol]->terrainHeight;
         mesh.vertices[vertexIndex * 3 + 2] = gridSquares[gridRow][gridCol]->worldPosMin.z - centerPos.z;
     }
 
     void TextureTerrainOverlay::updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol)
     {
-		const auto& gridSquares = navigationGridSystem->GetGridSquares();
+        // TODO: I think the mesh created is actually really big, that's why this offset is so weird
+        // the grid "range" could be vastly reduced.
+        const auto& gridSquares = navigationGridSystem->GetGridSquares();
         mesh.normals[vertexIndex * 3] = gridSquares[gridRow][gridCol]->terrainNormal.x;
         mesh.normals[vertexIndex * 3 + 1] = gridSquares[gridRow][gridCol]->terrainNormal.y;
         mesh.normals[vertexIndex * 3 + 2] = gridSquares[gridRow][gridCol]->terrainNormal.z;
@@ -96,7 +97,9 @@ namespace sage
 
     Vector3 TextureTerrainOverlay::calculateCenterPosition()
     {
-		const auto& gridSquares = navigationGridSystem->GetGridSquares();
+        // TODO: I think the height value in this function is causing all the issues
+        // Also, what happens if the shape is concave?
+        const auto& gridSquares = navigationGridSystem->GetGridSquares();
         return {
             (gridSquares[minRange.row][minRange.col]->worldPosMin.x +
              gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMin.x) *
