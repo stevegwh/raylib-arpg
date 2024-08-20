@@ -4,12 +4,16 @@
 
 #include "DialogueSystem.hpp"
 
+#include "Camera.hpp"
+#include "Cursor.hpp"
+#include "GameData.hpp"
+
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/Dialogue.hpp"
 #include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
+#include "systems/ControllableActorSystem.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -29,8 +33,7 @@ namespace sage
 
         const auto& npcDiag = registry->get<Dialogue>(clickedNPC);
         std::cout << npcDiag.sentence << std::endl;
-        registry->get<Animation>(clickedNPC)
-            .ChangeAnimation(1); // TODO: Change to an enum
+        registry->get<Animation>(clickedNPC).ChangeAnimation(1); // TODO: Change to an enum
 
         // Rotate to look at NPC
         auto& actorTrans = registry->get<sgTransform>(controlledActor);
@@ -39,8 +42,7 @@ namespace sage
         direction = Vector3Normalize(direction);
         float angle = atan2f(direction.x, direction.z);
         actorTrans.SetRotation(
-            {actorTrans.rotation().x, RAD2DEG * angle, actorTrans.rotation().z},
-            controlledActor);
+            {actorTrans.rotation().x, RAD2DEG * angle, actorTrans.rotation().z}, controlledActor);
 
         {
             entt::sink sink{gameData->cursor->onAnyClick};
@@ -80,8 +82,7 @@ namespace sage
         // gameData->controllableActorSystem->Enable();
         // TODO: Trigger an onDialogueEnd event which changes player state.
         active = false;
-        registry->get<Animation>(clickedNPC)
-            .ChangeAnimation(0); // TODO: Change to an enum
+        registry->get<Animation>(clickedNPC).ChangeAnimation(0); // TODO: Change to an enum
         clickedNPC = entt::null;
 
         gameData->camera->SetCamera(oldCamPos, oldCamTarget);
@@ -106,8 +107,7 @@ namespace sage
         const auto& npc = registry->get<Dialogue>(_clickedNPC);
         const auto& actorCol = registry->get<Collideable>(controlledActor);
         const auto& npcCol = registry->get<Collideable>(_clickedNPC);
-        gameData->controllableActorSystem->PathfindToLocation(
-            controlledActor, npc.conversationPos);
+        gameData->controllableActorSystem->PathfindToLocation(controlledActor, npc.conversationPos);
         {
             auto& moveableActor = registry->get<MoveableActor>(controlledActor);
             entt::sink sink{moveableActor.onFinishMovement};

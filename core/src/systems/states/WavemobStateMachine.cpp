@@ -1,11 +1,14 @@
 #include "WavemobStateMachine.hpp"
 
+#include "GameData.hpp"
+
 #include "abilities/Abilities.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
+#include "systems/ActorMovementSystem.hpp"
+#include "systems/CollisionSystem.hpp"
 
 #include "raylib.h"
 
@@ -99,11 +102,10 @@ namespace sage
             ray.position.y = 0.5f;
             ray.direction.y = 0.5f;
             trans.movementDirectionDebugLine = ray;
-            auto collisions = gameData->collisionSystem->GetCollisionsWithRay(
-                self, ray, collideable.collisionLayer);
+            auto collisions =
+                gameData->collisionSystem->GetCollisionsWithRay(self, ray, collideable.collisionLayer);
 
-            if (!collisions.empty() &&
-                collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
+            if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
             {
                 // Lost line of sight, out of combat
                 combatable.target = entt::null;
@@ -144,8 +146,7 @@ namespace sage
             sink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 
-        TargetOutOfRangeState::TargetOutOfRangeState(
-            entt::registry* _registry, GameData* _gameData)
+        TargetOutOfRangeState::TargetOutOfRangeState(entt::registry* _registry, GameData* _gameData)
             : StateMachine(_registry), gameData(_gameData)
         {
         }
@@ -289,13 +290,11 @@ namespace sage
         }
     }
 
-    WavemobStateController::WavemobStateController(
-        entt::registry* _registry, GameData* _gameData)
+    WavemobStateController::WavemobStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry)
     {
         defaultState = std::make_unique<enemystates::DefaultState>(_registry, _gameData);
-        targetOutOfRangeState =
-            std::make_unique<enemystates::TargetOutOfRangeState>(_registry, _gameData);
+        targetOutOfRangeState = std::make_unique<enemystates::TargetOutOfRangeState>(_registry, _gameData);
         combatState = std::make_unique<enemystates::CombatState>(_registry);
         dyingState = std::make_unique<enemystates::DyingState>(_registry, _gameData);
     }

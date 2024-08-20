@@ -3,9 +3,11 @@
 //
 
 #include "ControllableActorSystem.hpp"
+#include "GameData.hpp"
 
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
+#include "Cursor.hpp"
+#include "systems/ActorMovementSystem.hpp"
 
 namespace sage
 {
@@ -41,8 +43,7 @@ namespace sage
     void ControllableActorSystem::CancelMovement(entt::entity entity)
     {
         auto& controlledActor = registry->get<ControllableActor>(entity);
-        if (controlledActor.targetActor != entt::null &&
-            registry->valid(controlledActor.targetActor))
+        if (controlledActor.targetActor != entt::null && registry->valid(controlledActor.targetActor))
         {
             auto& target = registry->get<sgTransform>(controlledActor.targetActor);
             {
@@ -61,12 +62,10 @@ namespace sage
 
     void ControllableActorSystem::MoveToLocation(entt::entity id)
     {
-        gameData->actorMovementSystem->PathfindToLocation(
-            id, {gameData->cursor->collision().point});
+        gameData->actorMovementSystem->PathfindToLocation(id, {gameData->cursor->collision().point});
     }
 
-    void ControllableActorSystem::PatrolLocations(
-        entt::entity id, const std::vector<Vector3>& patrol)
+    void ControllableActorSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
     {
         // actorMovementSystem->PathfindToLocation(id, patrol);
     }
@@ -82,8 +81,7 @@ namespace sage
         return controlledActorId;
     }
 
-    ControllableActorSystem::ControllableActorSystem(
-        entt::registry* _registry, GameData* _gameData)
+    ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, GameData* _gameData)
         : BaseSystem(_registry), gameData(_gameData)
 
     {

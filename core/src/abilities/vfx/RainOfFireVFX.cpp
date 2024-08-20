@@ -6,6 +6,8 @@
 
 #include "GameData.hpp"
 
+#include "Camera.hpp"
+
 #include "FlamePartSys.hpp"
 #include "ResourceManager.hpp"
 

@@ -6,6 +6,8 @@
 
 #include "GameData.hpp"
 
+#include "Camera.hpp"
+
 #include "raylib.h"
 #include "raymath.h"
 #include "ResourceManager.hpp"

@@ -1,11 +1,15 @@
 #include "PlayerStateMachine.hpp"
 
+#include "GameData.hpp"
+
 #include "abilities/Abilities.hpp"
 #include "components/Animation.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
+
+#include "systems/ActorMovementSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
 
 #include <cassert>
 
@@ -32,10 +36,8 @@ namespace sage
             auto& playerCombatable = registry->get<CombatableActor>(self);
             playerCombatable.target = entt::null;
 
-            gameData->controllableActorSystem->CancelMovement(
-                self); // Flush any previous commands
-            gameData->controllableActorSystem->PathfindToLocation(
-                self, gameData->cursor->collision().point);
+            gameData->controllableActorSystem->CancelMovement(self); // Flush any previous commands
+            gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->collision().point);
         }
 
         void DefaultState::onEnemyClick(entt::entity self, entt::entity target)
@@ -114,8 +116,7 @@ namespace sage
             sink.disconnect<&MovingToAttackEnemyState::onTargetReached>(this);
         }
 
-        MovingToAttackEnemyState::MovingToAttackEnemyState(
-            entt::registry* _registry, GameData* _gameData)
+        MovingToAttackEnemyState::MovingToAttackEnemyState(entt::registry* _registry, GameData* _gameData)
             : StateMachine(_registry), gameData(_gameData)
         {
         }
@@ -222,13 +223,10 @@ namespace sage
         }
     }
 
-    PlayerStateController::PlayerStateController(
-        entt::registry* _registry, GameData* _gameData)
+    PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry),
-          defaultState(
-              std::make_unique<playerstates::DefaultState>(_registry, _gameData)),
-          approachingTargetState(std::make_unique<playerstates::MovingToAttackEnemyState>(
-              _registry, _gameData)),
+          defaultState(std::make_unique<playerstates::DefaultState>(_registry, _gameData)),
+          approachingTargetState(std::make_unique<playerstates::MovingToAttackEnemyState>(_registry, _gameData)),
           combatState(std::make_unique<playerstates::CombatState>(_registry, _gameData))
     {
     }

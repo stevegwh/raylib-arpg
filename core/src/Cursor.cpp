@@ -6,6 +6,13 @@
 
 #include "GameData.hpp"
 
+#include "Camera.hpp"
+#include "components/ControllableActor.hpp"
+#include "components/NavigationGridSquare.hpp"
+#include "components/Renderable.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
+
 #include <algorithm>
 
 #ifndef FLT_MAX
