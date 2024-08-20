@@ -7,8 +7,6 @@
 #include "EditorGui.hpp"
 #include "EditorSettings.hpp"
 #include "scenes/Scene.hpp"
-#include "Settings.hpp"
-#include "UserInput.hpp"
 
 #include "entt/entt.hpp"
 #include "windows/FloatingWindow.hpp"
@@ -26,6 +24,9 @@ namespace sage
         MOVE,
         CREATE
     };
+
+    struct Settings;
+    class UserInput;
 
     class EditorScene : public Scene
     {
@@ -60,7 +61,8 @@ namespace sage
         ~EditorScene() override;
         EditorScene(
             entt::registry* _registry,
-            std::unique_ptr<GameData> _data,
+            KeyMapping* _keyMapping,
+            Settings* _settings,
             EditorSettings* _editorSettings);
     };
 } // namespace sage

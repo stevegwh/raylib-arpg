@@ -7,6 +7,14 @@
 #include "scenes/ExampleScene.hpp"
 #include "Serializer.hpp"
 
+// TODO: To move GameData in the scene requires all of this. Should just make it here?
+#include "Camera.hpp"
+#include "Cursor.hpp"
+#include "GameData.hpp"
+#include "KeyMapping.hpp"
+#include "Settings.hpp"
+#include "UserInput.hpp"
+
 #include <fstream>
 #include <memory>
 
@@ -30,8 +38,8 @@ namespace sage
     void EditorApplication::initEditorScene()
     {
         // "resources/models/obj/level-basic.obj"
-        auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
-        scene = std::make_unique<EditorScene>(registry.get(), std::move(data), editorSettings.get());
+        scene =
+            std::make_unique<EditorScene>(registry.get(), keyMapping.get(), settings.get(), editorSettings.get());
         {
             entt::sink keyRPressed{scene->data->userInput->keyRPressed};
             keyRPressed.connect<&EditorApplication::enablePlayMode>(this);
@@ -45,8 +53,8 @@ namespace sage
 
     void EditorApplication::initGameScene()
     {
-        auto data = std::make_unique<GameData>(registry.get(), keyMapping.get(), settings.get());
-        scene = std::make_unique<ExampleScene>(registry.get(), std::move(data), editorSettings->lastOpenedMap);
+        scene = std::make_unique<ExampleScene>(
+            registry.get(), keyMapping.get(), settings.get(), editorSettings->lastOpenedMap);
         {
             entt::sink keyRPressed{scene->data->userInput->keyRPressed};
             keyRPressed.connect<&EditorApplication::enableEditMode>(this);

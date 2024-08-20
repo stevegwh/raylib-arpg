@@ -5,32 +5,16 @@
 #pragma once
 
 #include "entt/entt.hpp"
-#include "GameData.hpp"
-#include "systems/LightSubSystem.hpp"
-#include <GameObjectFactory.hpp>
-
-#include "Camera.hpp"
-#include "Cursor.hpp"
-#include "Settings.hpp"
-#include "UserInput.hpp"
-
-// Systems
-#include "systems/ActorMovementSystem.hpp"
-#include "systems/AnimationSystem.hpp"
-#include "systems/CollisionSystem.hpp"
-#include "systems/CombatSystem.hpp"
-#include "systems/ControllableActorSystem.hpp"
-#include "systems/dialogue/DialogueSystem.hpp"
-#include "systems/HealthBarSystem.hpp"
-#include "systems/NavigationGridSystem.hpp"
-#include "systems/PlayerAbilitySystem.hpp"
-#include "systems/RenderSystem.hpp"
-#include "systems/states/StateMachines.hpp"
 
 #include <memory>
 
 namespace sage
 {
+    class GameData;
+    class LightSubSystem;
+    struct Settings;
+    struct KeyMapping;
+
     class Scene
     {
       protected:
@@ -42,15 +26,11 @@ namespace sage
         entt::sigh<void()> sceneChange;
 
         virtual void Update();
-
         virtual void Draw3D();
-
         virtual void Draw2D();
-
         virtual ~Scene();
-
         virtual void DrawDebug();
-
-        explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath);
+        explicit Scene(
+            entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath);
     };
 } // namespace sage

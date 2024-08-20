@@ -7,6 +7,7 @@
 #include "scenes/ExampleScene.hpp"
 
 #include "Camera.hpp"
+#include "GameData.hpp"
 #include "Serializer.hpp"
 
 namespace sage

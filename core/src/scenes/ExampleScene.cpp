@@ -5,10 +5,20 @@
 #include "ExampleScene.hpp"
 #include "GameObjectFactory.hpp"
 
+#include "GameData.hpp"
+
+// TMP
+#include "abilities/vfx/Explosion.hpp"
+#include "abilities/vfx/SpiralFountainVFX.hpp"
+
+#include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
 
+// TODO: To move GameData in the scene requires all of this. Should just make it here?
 #include "Camera.hpp"
 #include "Cursor.hpp"
+#include "KeyMapping.hpp"
+#include "Settings.hpp"
 
 // Systems
 #include "systems/ActorMovementSystem.hpp"
@@ -18,6 +28,7 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
+#include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
@@ -77,8 +88,8 @@ namespace sage
     }
 
     ExampleScene::ExampleScene(
-        entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath)
-        : Scene(_registry, std::move(_data), mapPath)
+        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath)
+        : Scene(_registry, _keyMapping, _settings, mapPath)
     {
         lightSubSystem->lights[0] =
             CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
