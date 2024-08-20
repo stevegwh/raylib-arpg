@@ -2,8 +2,6 @@
 
 #include <entt/entt.hpp>
 
-#include "abilities/Ability.hpp"
-
 #include <array>
 #include <memory>
 #include <vector>
@@ -11,6 +9,7 @@
 namespace sage
 {
     class GameData;
+    class Ability;
     class PlayerAbilitySystem
     {
         entt::registry* registry;

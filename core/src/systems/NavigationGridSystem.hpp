@@ -2,14 +2,16 @@
 
 #include "BaseSystem.hpp"
 
-#include "components/NavigationGridSquare.hpp"
 #include <PriorityQueue.hpp>
 
 #include "entt/entt.hpp"
+#include "raylib.h"
 
 namespace sage
 {
     class CollisionSystem;
+    struct NavigationGridSquare;
+    struct GridSquare;
 
     enum class AStarHeuristic
     {
@@ -30,8 +32,7 @@ namespace sage
             const GridSquare& start,
             const GridSquare& finish) const;
         //---------------------------------------------------------
-        static bool checkInside(
-            GridSquare square, GridSquare minRange, GridSquare maxRange);
+        static bool checkInside(GridSquare square, GridSquare minRange, GridSquare maxRange);
         //---------------------------------------------------------
         bool getExtents(entt::entity entity, GridSquare& extents) const;
         //---------------------------------------------------------
@@ -56,30 +57,21 @@ namespace sage
         //---------------------------------------------------------
         void PopulateGrid();
         //---------------------------------------------------------
-        bool GetGridRange(
-            Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
+        bool GetGridRange(Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------
-        bool GetGridRange(
-            BoundingBox bb, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
+        bool GetGridRange(BoundingBox bb, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------
         bool GetPathfindRange(
-            const entt::entity& actorId,
-            int bounds,
-            GridSquare& minRange,
-            GridSquare& maxRange) const;
+            const entt::entity& actorId, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------
         bool GridToWorldSpace(GridSquare gridPos, Vector3& out) const;
         //---------------------------------------------------------
         bool WorldToGridSpace(Vector3 worldPos, GridSquare& out) const;
         //---------------------------------------------------------
         bool WorldToGridSpace(
-            Vector3 worldPos,
-            GridSquare& out,
-            const GridSquare& _minRange,
-            const GridSquare& _maxRange) const;
+            Vector3 worldPos, GridSquare& out, const GridSquare& _minRange, const GridSquare& _maxRange) const;
         //---------------------------------------------------------
-        [[nodiscard]] GridSquare FindNextBestLocation(
-            entt::entity entity, GridSquare target) const;
+        [[nodiscard]] GridSquare FindNextBestLocation(entt::entity entity, GridSquare target) const;
         //---------------------------------------------------------
         [[nodiscard]] GridSquare FindNextBestLocation(
             GridSquare currentPos,
@@ -110,9 +102,7 @@ namespace sage
             AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
         //---------------------------------------------------------
         [[nodiscard]] std::vector<Vector3> BFSPathfind(
-            const entt::entity& entity,
-            const Vector3& startPos,
-            const Vector3& finishPos);
+            const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos);
         //---------------------------------------------------------
         [[nodiscard]] std::vector<Vector3> BFSPathfind(
             const entt::entity& entity,
@@ -125,53 +115,39 @@ namespace sage
         //---------------------------------------------------------
         const NavigationGridSquare* GetGridSquare(int row, int col);
         //---------------------------------------------------------
-        void DrawDebugPathfinding(
-            const GridSquare& minRange, const GridSquare& maxRange) const;
+        void DrawDebugPathfinding(const GridSquare& minRange, const GridSquare& maxRange) const;
         //---------------------------------------------------------
         void MarkSquareAreaOccupiedIfSteep(const BoundingBox& occupant, bool occupied);
         //---------------------------------------------------------
         void MarkSquareAreaOccupied(
-            const BoundingBox& occupant,
-            bool occupied,
-            entt::entity occupantEntity = entt::null) const;
+            const BoundingBox& occupant, bool occupied, entt::entity occupantEntity = entt::null) const;
         //---------------------------------------------------------
-        void MarkSquaresOccupied(
-            const std::vector<GridSquare>& squares, bool occupied = true) const;
+        void MarkSquaresOccupied(const std::vector<GridSquare>& squares, bool occupied = true) const;
         //---------------------------------------------------------
-        void MarkSquaresDebug(
-            const std::vector<GridSquare>& squares,
-            Color color,
-            bool occupied = true) const;
+        void MarkSquaresDebug(const std::vector<GridSquare>& squares, Color color, bool occupied = true) const;
         //---------------------------------------------------------
         [[nodiscard]] bool CheckSingleSquareOccupied(Vector3 worldPos) const;
         //---------------------------------------------------------
         [[nodiscard]] bool CheckSingleSquareOccupied(GridSquare position) const;
         //---------------------------------------------------------
-        [[nodiscard]] bool CheckBoundingBoxAreaUnoccupied(
-            Vector3 worldPos, const BoundingBox& bb) const;
+        [[nodiscard]] bool CheckBoundingBoxAreaUnoccupied(Vector3 worldPos, const BoundingBox& bb) const;
         //---------------------------------------------------------
-        [[nodiscard]] bool CheckBoundingBoxAreaUnoccupied(
-            GridSquare square, const BoundingBox& bb) const;
+        [[nodiscard]] bool CheckBoundingBoxAreaUnoccupied(GridSquare square, const BoundingBox& bb) const;
         //---------------------------------------------------------
         [[nodiscard]] entt::entity CheckSingleSquareOccupant(Vector3 worldPos) const;
         //---------------------------------------------------------
         [[nodiscard]] entt::entity CheckSingleSquareOccupant(GridSquare position) const;
         //---------------------------------------------------------
-        [[nodiscard]] entt::entity CheckSquareAreaOccupant(
-            Vector3 worldPos, const BoundingBox& bb) const;
+        [[nodiscard]] entt::entity CheckSquareAreaOccupant(Vector3 worldPos, const BoundingBox& bb) const;
         //---------------------------------------------------------
-        [[nodiscard]] entt::entity CheckSquareAreaOccupant(
-            GridSquare square, const BoundingBox& bb) const;
+        [[nodiscard]] entt::entity CheckSquareAreaOccupant(GridSquare square, const BoundingBox& bb) const;
         //---------------------------------------------------------
-        [[nodiscard]] bool CompareSquareAreaOccupant(
-            entt::entity entity, const BoundingBox& bb) const;
+        [[nodiscard]] bool CompareSquareAreaOccupant(entt::entity entity, const BoundingBox& bb) const;
         //---------------------------------------------------------
-        [[nodiscard]] bool CompareSingleSquareOccupant(
-            entt::entity entity, const BoundingBox& bb) const;
+        [[nodiscard]] bool CompareSingleSquareOccupant(entt::entity entity, const BoundingBox& bb) const;
         //---------------------------------------------------------
         void DrawDebug() const;
         //---------------------------------------------------------
-        explicit NavigationGridSystem(
-            entt::registry* _registry, CollisionSystem* _collisionSystem);
+        explicit NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem);
     };
 } // namespace sage

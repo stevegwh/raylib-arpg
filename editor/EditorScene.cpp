@@ -11,6 +11,7 @@
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
+#include "raymath.h"
 #include "Settings.hpp"
 #include "UserInput.hpp"
 

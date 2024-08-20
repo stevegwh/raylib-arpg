@@ -4,6 +4,7 @@
 
 #include "RenderSystem.hpp"
 
+#include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 
 #include "raylib.h"

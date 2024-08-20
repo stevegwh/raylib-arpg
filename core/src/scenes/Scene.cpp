@@ -6,6 +6,7 @@
 #include "Cursor.hpp"
 #include "UserInput.hpp"
 
+#include "abilities/Ability.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
