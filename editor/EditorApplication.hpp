@@ -5,11 +5,15 @@
 #pragma once
 
 #include "Application.hpp"
-#include "EditorGui.hpp"
 #include "EditorSettings.hpp"
 
 namespace sage
 {
+    namespace editor
+    {
+        class EditorGui;
+    }
+
     class EditorApplication : public Application
     {
         enum class StateFlag

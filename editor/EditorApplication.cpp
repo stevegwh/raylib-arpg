@@ -3,15 +3,15 @@
 //
 
 #include "EditorApplication.hpp"
-#include "EditorScene.hpp"
-#include "scenes/ExampleScene.hpp"
-#include "Serializer.hpp"
-
-// TODO: To move GameData in the scene requires all of this. Should just make it here?
 #include "Camera.hpp"
 #include "Cursor.hpp"
+#include "EditorGui.hpp"
+#include "EditorScene.hpp"
+#include "EditorSettings.hpp"
 #include "GameData.hpp"
 #include "KeyMapping.hpp"
+#include "scenes/ExampleScene.hpp"
+#include "Serializer.hpp"
 #include "Settings.hpp"
 #include "UserInput.hpp"
 

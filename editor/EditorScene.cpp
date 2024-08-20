@@ -5,11 +5,14 @@
 #include "EditorScene.hpp"
 
 #include "components/sgTransform.hpp"
+#include "EditorGui.hpp"
+#include "EditorSettings.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+#include "windows/FloatingWindow.hpp"
 
 #include "raymath.h"
 #include "Settings.hpp"
