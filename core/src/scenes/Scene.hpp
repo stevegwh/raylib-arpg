@@ -9,6 +9,24 @@
 #include "systems/LightSubSystem.hpp"
 #include <GameObjectFactory.hpp>
 
+#include "Camera.hpp"
+#include "Cursor.hpp"
+#include "Settings.hpp"
+#include "UserInput.hpp"
+
+// Systems
+#include "systems/ActorMovementSystem.hpp"
+#include "systems/AnimationSystem.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/CombatSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
+#include "systems/dialogue/DialogueSystem.hpp"
+#include "systems/HealthBarSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
+#include "systems/PlayerAbilitySystem.hpp"
+#include "systems/RenderSystem.hpp"
+#include "systems/states/StateMachines.hpp"
+
 #include <memory>
 
 namespace sage
@@ -29,7 +47,7 @@ namespace sage
 
         virtual void Draw2D();
 
-        virtual ~Scene() = default;
+        virtual ~Scene();
 
         virtual void DrawDebug();
 

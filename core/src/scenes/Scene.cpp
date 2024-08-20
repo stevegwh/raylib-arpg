@@ -42,11 +42,11 @@ namespace sage
         lightSubSystem->DrawDebugLights();
     }
 
-    // Scene::~Scene()
-    // {
-    //     delete data;
-    //     delete lightSubSystem;
-    // }
+    Scene::~Scene()
+    {
+        // delete data;
+        // delete lightSubSystem;
+    }
 
     Scene::Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath)
         : registry(_registry), data(std::move(_data)), lightSubSystem(std::make_unique<LightSubSystem>(_registry))

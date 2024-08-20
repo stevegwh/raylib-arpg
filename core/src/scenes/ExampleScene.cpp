@@ -7,6 +7,22 @@
 
 #include "components/sgTransform.hpp"
 
+#include "Camera.hpp"
+#include "Cursor.hpp"
+
+// Systems
+#include "systems/ActorMovementSystem.hpp"
+#include "systems/AnimationSystem.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/CombatSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
+#include "systems/dialogue/DialogueSystem.hpp"
+#include "systems/HealthBarSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
+#include "systems/PlayerAbilitySystem.hpp"
+#include "systems/RenderSystem.hpp"
+#include "systems/states/StateMachines.hpp"
+
 #include "raylib.h"
 
 namespace sage

@@ -6,7 +6,9 @@
 
 #include "GameData.hpp"
 
+#include "components/Renderable.hpp"
 #include "ResourceManager.hpp"
+#include "Settings.hpp"
 
 #include "raylib.h"
 #include "raymath.h"

@@ -2,6 +2,9 @@
 
 #include "GameData.hpp"
 
+#include "systems/ControllableActorSystem.hpp"
+#include "UserInput.hpp"
+
 #include "abilities/Abilities.hpp"
 
 namespace sage

@@ -3,7 +3,10 @@
 //
 
 #include "Application.hpp"
+
 #include "scenes/ExampleScene.hpp"
+
+#include "Camera.hpp"
 #include "Serializer.hpp"
 
 namespace sage

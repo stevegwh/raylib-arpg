@@ -4,34 +4,32 @@
 
 #pragma once
 
-#include "Camera.hpp"
-#include "Cursor.hpp"
-#include "UserInput.hpp"
-
-// Systems
-#include "systems/ActorMovementSystem.hpp"
-#include "systems/AnimationSystem.hpp"
-#include "systems/CollisionSystem.hpp"
-#include "systems/CombatSystem.hpp"
-#include "systems/ControllableActorSystem.hpp"
-#include "systems/dialogue/DialogueSystem.hpp"
-#include "systems/HealthBarSystem.hpp"
-#include "systems/NavigationGridSystem.hpp"
-#include "systems/PlayerAbilitySystem.hpp"
-#include "systems/RenderSystem.hpp"
-#include "systems/states/StateMachines.hpp"
-
-#include "Settings.hpp"
-
 #include "entt/entt.hpp"
 
 #include <memory>
 
 namespace sage
 {
+    class Cursor;
+    class UserInput;
+    class Camera;
+    struct Settings;
+    struct KeyMapping;
+
+    class RenderSystem;
+    class CollisionSystem;
+    class NavigationGridSystem;
+    class ActorMovementSystem;
+    class ControllableActorSystem;
+    class AnimationSystem;
+    class DialogueSystem;
+    class HealthBarSystem;
+    class StateMachines;
+    class PlayerAbilitySystem;
+    class CombatSystem;
+
     class GameData
     {
-
       public:
         entt::registry* registry;
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
