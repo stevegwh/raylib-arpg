@@ -5,7 +5,14 @@
 #include "EditorScene.hpp"
 
 #include "components/sgTransform.hpp"
+#include "GameData.hpp"
 #include "GameObjectFactory.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/LightSubSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
+
+#include "Settings.hpp"
+#include "UserInput.hpp"
 
 // TODO: This shouldn't use "GameData", it should have its own "Data" class that only inits the systems that it
 // needs.
@@ -161,11 +168,11 @@ namespace sage
     }
 
     EditorScene::EditorScene(
-        entt::registry* _registry, std::unique_ptr<GameData> _data, EditorSettings* _editorSettings)
-        : Scene(_registry, std::move(_data), _editorSettings->lastOpenedMap),
+        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, EditorSettings* _editorSettings)
+        : Scene(_registry, _keyMapping, _settings, _editorSettings->lastOpenedMap),
           editorSettings(_editorSettings),
           gui(std::make_unique<editor::EditorGui>(
-              _editorSettings, data->settings, data->userInput.get(), data->camera.get()))
+              _editorSettings, _settings, data->userInput.get(), data->camera.get()))
     {
         {
             entt::sink onClickEvent{data->cursor->onAnyClick};

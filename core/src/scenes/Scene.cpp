@@ -6,10 +6,18 @@
 #include "Cursor.hpp"
 #include "UserInput.hpp"
 
-#include "systems/RenderSystem.hpp"
-
+#include "systems/ActorMovementSystem.hpp"
+#include "systems/AnimationSystem.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/CombatSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
+#include "systems/dialogue/DialogueSystem.hpp"
+#include "systems/HealthBarSystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+#include "systems/PlayerAbilitySystem.hpp"
+#include "systems/RenderSystem.hpp"
+#include "systems/states/StateMachines.hpp"
 
 #include <GameObjectFactory.hpp>
 
@@ -48,8 +56,11 @@ namespace sage
         // delete lightSubSystem;
     }
 
-    Scene::Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath)
-        : registry(_registry), data(std::move(_data)), lightSubSystem(std::make_unique<LightSubSystem>(_registry))
+    Scene::Scene(
+        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath)
+        : registry(_registry),
+          data(std::make_unique<GameData>(_registry, _keyMapping, _settings)),
+          lightSubSystem(std::make_unique<LightSubSystem>(_registry))
     {
         data->Load();
         float slices = 500;

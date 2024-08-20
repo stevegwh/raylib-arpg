@@ -32,7 +32,6 @@ namespace sage
     {
       public:
         entt::registry* registry;
-        GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
 
         std::unique_ptr<UserInput> userInput;
         std::unique_ptr<Cursor> cursor;
@@ -53,5 +52,6 @@ namespace sage
 
         void Load();
         void Save() const;
+        GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };
 } // namespace sage

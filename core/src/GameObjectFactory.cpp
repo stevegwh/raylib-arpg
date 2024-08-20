@@ -6,16 +6,22 @@
 #include "ResourceManager.hpp"
 #include "scenes/Scene.hpp"
 
+#include "UserInput.hpp"
+
 #include "abilities/Abilities.hpp"
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
+#include "components/ControllableActor.hpp"
 #include "components/Dialogue.hpp"
 #include "components/HealthBar.hpp"
 #include "components/MovableActor.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
+#include "GameData.hpp"
+#include "systems/ControllableActorSystem.hpp"
+#include "systems/LightSubSystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"
