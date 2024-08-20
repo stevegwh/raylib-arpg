@@ -7,6 +7,7 @@
 #include "components/ControllableActor.hpp"
 #include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
+#include "Cursor.hpp"
 
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TextureTerrainOverlay.hpp"
 #include <entt/entt.hpp>
 
 #include <memory>
@@ -9,7 +10,6 @@
 
 namespace sage
 {
-    class TextureTerrainOverlay;
     class NavigationGridSystem;
     class AbilityIndicator
     {
