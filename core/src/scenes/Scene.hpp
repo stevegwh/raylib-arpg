@@ -23,51 +23,16 @@ namespace sage
         std::unique_ptr<LightSubSystem> lightSubSystem;
         entt::sigh<void()> sceneChange;
 
-        virtual void Update()
-        {
-            data->renderSystem->Update();
-            data->camera->Update();
-            data->userInput->ListenForInput();
-            data->cursor->Update();
-        }
+        virtual void Update();
 
-        virtual void Draw3D()
-        {
-            data->renderSystem->Draw();
-            // If we hit something, draw the cursor at the hit point
-            data->cursor->Draw3D();
-        };
+        virtual void Draw3D();
 
-        virtual void Draw2D()
-        {
-            data->cursor->Draw2D();
-        }
+        virtual void Draw2D();
 
         virtual ~Scene() = default;
 
-        virtual void DrawDebug()
-        {
-            data->cursor->DrawDebug();
-            lightSubSystem->DrawDebugLights();
-        }
+        virtual void DrawDebug();
 
-        explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath)
-            : registry(_registry),
-              data(std::move(_data)),
-              lightSubSystem(std::make_unique<LightSubSystem>(_registry))
-        {
-            data->Load();
-            float slices = 500;
-            if (!FileExists("resources/output.bin"))
-            {
-                GameObjectFactory::loadMap(registry, this, slices, mapPath);
-            }
-            else
-            {
-                lightSubSystem->LinkAllRenderablesToLight();
-            }
-            data->navigationGridSystem->Init(slices, 1.0f, mapPath);
-            data->navigationGridSystem->PopulateGrid();
-        };
+        explicit Scene(entt::registry* _registry, std::unique_ptr<GameData> _data, const std::string& mapPath);
     };
 } // namespace sage
