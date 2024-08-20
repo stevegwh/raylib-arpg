@@ -1,20 +1,16 @@
 #pragma once
 
-#include "abilities/AbilityData.hpp"
-#include "components/Animation.hpp"
-#include "Cursor.hpp"
-#include "TextureTerrainOverlay.hpp"
-#include "vfx/VisualFX.hpp"
-#include <Timer.hpp>
+#include "AbilityData.hpp"
+#include "Timer.hpp"
 
 #include <entt/entt.hpp>
-
-#include <vector>
+#include <memory>
+#include <unordered_map>
 
 namespace sage
 {
-    class Camera;
     class GameData;
+    class VisualFX;
 
     enum class AbilityStateEnum
     {
@@ -23,82 +19,66 @@ namespace sage
         AWAITING_EXECUTION
     };
 
-    struct AbilityState
-    {
-        Timer& cooldownTimer;
-        Timer& animationDelayTimer;
-        virtual ~AbilityState() = default;
-        virtual void Update(entt::entity self) {};
-        virtual void Draw3D(entt::entity self) {};
-        virtual void OnEnter(entt::entity self) {};
-        virtual void OnExit(entt::entity self) {};
-        AbilityState(Timer& _cooldownTimer, Timer& _animationDelayTimer)
-            : cooldownTimer(_cooldownTimer), animationDelayTimer(_animationDelayTimer)
-        {
-        }
-    };
-
     class Ability
     {
-        Cursor* cursor;
-
       protected:
         entt::registry* registry;
-
-        Timer cooldownTimer{};
-        Timer animationDelayTimer{};
-
-        std::unique_ptr<VisualFX> vfx; // TODO: make a generic VFX class
+        Timer cooldownTimer;
+        Timer animationDelayTimer;
+        std::unique_ptr<VisualFX> vfx;
         AbilityData abilityData;
+
+        class AbilityState
+        {
+          public:
+            Timer& cooldownTimer;
+            Timer& animationDelayTimer;
+
+            virtual ~AbilityState() = default;
+            virtual void Update(entt::entity self)
+            {
+            }
+            virtual void Draw3D(entt::entity self)
+            {
+            }
+            virtual void OnEnter(entt::entity self)
+            {
+            }
+            virtual void OnExit(entt::entity self)
+            {
+            }
+
+            AbilityState(Timer& cooldownTimer, Timer& animationDelayTimer)
+                : cooldownTimer(cooldownTimer), animationDelayTimer(animationDelayTimer)
+            {
+            }
+        };
 
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
 
         void ChangeState(entt::entity self, AbilityStateEnum newState);
 
-        class IdleState : public AbilityState
-        {
-            const bool repeatable;
-
-          public:
-            entt::sigh<void(entt::entity)> onRestartTriggered;
-            void Update(entt::entity self) override;
-            IdleState(Timer& _coolDownTimer, Timer& _animationDelayTimer, bool _repeatable)
-                : AbilityState(_coolDownTimer, _animationDelayTimer), repeatable(_repeatable)
-            {
-            }
-        };
-
-        class AwaitingExecutionState : public AbilityState
-        {
-          public:
-            entt::sigh<void(entt::entity)> onExecute;
-            void OnEnter(entt::entity self) override;
-            void Update(entt::entity self) override;
-            AwaitingExecutionState(Timer& _coolDownTimer, Timer& _animationDelayTimer)
-                : AbilityState(_coolDownTimer, _animationDelayTimer)
-            {
-            }
-        };
+        class IdleState;
+        class AwaitingExecutionState;
 
       public:
-        // Timer functions
         virtual void ResetCooldown();
         virtual bool IsActive() const;
         float GetRemainingCooldownTime() const;
         float GetCooldownDuration() const;
         bool CooldownReady() const;
 
-        // Ability functions
         virtual void Cancel(entt::entity self);
         virtual void Execute(entt::entity self);
         virtual void Update(entt::entity self);
         virtual void Draw3D(entt::entity self);
         virtual void Init(entt::entity self);
 
-        virtual ~Ability() = default;
+        virtual ~Ability();
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* _registry, const AbilityData& _abilityData, GameData* _gameData);
+        Ability(entt::registry* registry, const AbilityData& abilityData, GameData* gameData);
     };
+
 } // namespace sage
