@@ -1,32 +1,46 @@
 #include "Ability.hpp"
+
+#include "abilities/AbilityData.hpp"
 #include "AbilityFunctions.hpp"
 #include "AbilityResourceManager.hpp"
-
+#include "components/Animation.hpp"
+#include "Cursor.hpp"
 #include "GameData.hpp"
-
-#include <cassert>
-
 #include "raylib.h"
+#include "TextureTerrainOverlay.hpp"
+#include "Timer.hpp"
+#include "vfx/VisualFX.hpp"
+#include <cassert>
 
 namespace sage
 {
-    std::string getEnumName(
-        AbilityStateEnum state, const std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>>& _states)
-    {
-        switch (state)
-        {
-        case AbilityStateEnum::IDLE:
-            return "IDLE";
-        case AbilityStateEnum::CURSOR_SELECT:
-            return "CURSOR_SELECT";
-        case AbilityStateEnum::AWAITING_EXECUTION:
-            return "AWAITING_EXECUTION";
-        default:
-            return "UNKNOWN";
-        }
-    }
 
-    // --------------------------------------------
+    class Ability::IdleState : public Ability::AbilityState
+    {
+        const bool repeatable;
+
+      public:
+        entt::sigh<void(entt::entity)> onRestartTriggered;
+        void Update(entt::entity self) override;
+
+        IdleState(Timer& coolDownTimer, Timer& animationDelayTimer, bool repeatable)
+            : AbilityState(coolDownTimer, animationDelayTimer), repeatable(repeatable)
+        {
+        }
+    };
+
+    class Ability::AwaitingExecutionState : public Ability::AbilityState
+    {
+      public:
+        entt::sigh<void(entt::entity)> onExecute;
+        void OnEnter(entt::entity self) override;
+        void Update(entt::entity self) override;
+
+        AwaitingExecutionState(Timer& coolDownTimer, Timer& animationDelayTimer)
+            : AbilityState(coolDownTimer, animationDelayTimer)
+        {
+        }
+    };
 
     void Ability::IdleState::Update(entt::entity self)
     {
@@ -36,8 +50,6 @@ namespace sage
             onRestartTriggered.publish(self);
         }
     }
-
-    // --------------------------------------------
 
     void Ability::AwaitingExecutionState::Update(entt::entity self)
     {
@@ -53,8 +65,6 @@ namespace sage
         cooldownTimer.Start();
         animationDelayTimer.Start();
     }
-
-    // --------------------------------------------
 
     void Ability::ChangeState(entt::entity self, AbilityStateEnum newState)
     {
@@ -131,16 +141,20 @@ namespace sage
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    Ability::Ability(entt::registry* _registry, const AbilityData& _abilityData, GameData* gameData)
-        : registry(_registry),
-          abilityData(_abilityData),
-          vfx(AbilityResourceManager::GetInstance(_registry).GetVisualFX(_abilityData.vfx, gameData))
+    Ability::~Ability()
+    {
+    }
+
+    Ability::Ability(entt::registry* registry, const AbilityData& abilityData, GameData* gameData)
+        : registry(registry),
+          abilityData(abilityData),
+          vfx(AbilityResourceManager::GetInstance(registry).GetVisualFX(abilityData.vfx, gameData))
     {
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
         auto idleState =
-            std::make_unique<IdleState>(cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
+            std::make_unique<IdleState>(cooldownTimer, animationDelayTimer, abilityData.base.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
@@ -152,4 +166,5 @@ namespace sage
 
         state = states[AbilityStateEnum::IDLE].get();
     }
+
 } // namespace sage

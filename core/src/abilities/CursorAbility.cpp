@@ -4,13 +4,10 @@
 
 #include "CursorAbility.hpp"
 
-#include "GameData.hpp"
-
-#include "components/Animation.hpp"
-
-#include "vfx/RainOfFireVFX.hpp"
-
 #include "AbilityFunctions.hpp"
+#include "components/Animation.hpp"
+#include "GameData.hpp"
+#include "vfx/VisualFX.hpp"
 
 namespace sage
 {

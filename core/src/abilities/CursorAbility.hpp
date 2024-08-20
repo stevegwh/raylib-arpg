@@ -2,11 +2,14 @@
 
 #include "Ability.hpp"
 #include "AbilityIndicator.hpp"
+#include "Cursor.hpp"
+#include "TextureTerrainOverlay.hpp"
 
 #include <memory>
 
 namespace sage
 {
+
     class CursorAbility : public Ability
     {
         Cursor* cursor;
