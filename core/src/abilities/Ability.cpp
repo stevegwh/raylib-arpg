@@ -3,6 +3,7 @@
 #include "abilities/AbilityData.hpp"
 #include "AbilityFunctions.hpp"
 #include "AbilityResourceManager.hpp"
+#include "AbilityState.hpp"
 #include "components/Animation.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
@@ -15,7 +16,7 @@
 namespace sage
 {
 
-    class Ability::IdleState : public Ability::AbilityState
+    class Ability::IdleState : public AbilityState
     {
         const bool repeatable;
 
@@ -29,7 +30,7 @@ namespace sage
         }
     };
 
-    class Ability::AwaitingExecutionState : public Ability::AbilityState
+    class Ability::AwaitingExecutionState : public AbilityState
     {
       public:
         entt::sigh<void(entt::entity)> onExecute;

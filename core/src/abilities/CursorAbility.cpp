@@ -5,13 +5,38 @@
 #include "CursorAbility.hpp"
 
 #include "AbilityFunctions.hpp"
+#include "AbilityIndicator.hpp"
+#include "AbilityState.hpp"
 #include "components/Animation.hpp"
+#include "Cursor.hpp"
 #include "GameData.hpp"
+#include "TextureTerrainOverlay.hpp"
 #include "vfx/VisualFX.hpp"
 
 namespace sage
 {
     // --------------------------------------------
+
+    class CursorAbility::CursorSelectState : public AbilityState
+    {
+        Cursor* cursor;
+        std::unique_ptr<AbilityIndicator> abilityIndicator;
+        bool cursorActive = false;
+        void enableCursor();
+        void disableCursor();
+        void toggleCursor(entt::entity self);
+
+      public:
+        entt::sigh<void(entt::entity)> onConfirm;
+        void Update(entt::entity self) override;
+        void OnEnter(entt::entity self) override;
+        void OnExit(entt::entity self) override;
+        CursorSelectState(
+            Timer& _coolDownTimer,
+            Timer& _animationDelayTimer,
+            Cursor* _cursor,
+            std::unique_ptr<AbilityIndicator> _abilityIndicator);
+    };
 
     void CursorAbility::CursorSelectState::enableCursor()
     {
@@ -64,6 +89,17 @@ namespace sage
     {
         enableCursor();
         cursorActive = true;
+    }
+
+    CursorAbility::CursorSelectState::CursorSelectState(
+        Timer& _coolDownTimer,
+        Timer& _animationDelayTimer,
+        Cursor* _cursor,
+        std::unique_ptr<AbilityIndicator> _abilityIndicator)
+        : AbilityState(_coolDownTimer, _animationDelayTimer),
+          cursor(_cursor),
+          abilityIndicator(std::move(_abilityIndicator))
+    {
     }
 
     // --------------------------------------------

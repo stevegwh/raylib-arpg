@@ -9,6 +9,7 @@
 #include "components/sgTransform.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
 
 #include "raylib.h"
 

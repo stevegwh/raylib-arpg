@@ -11,6 +11,7 @@ namespace sage
 {
     class GameData;
     class VisualFX;
+    class AbilityState;
 
     enum class AbilityStateEnum
     {
@@ -28,35 +29,8 @@ namespace sage
         std::unique_ptr<VisualFX> vfx;
         AbilityData abilityData;
 
-        class AbilityState
-        {
-          public:
-            Timer& cooldownTimer;
-            Timer& animationDelayTimer;
-
-            virtual ~AbilityState() = default;
-            virtual void Update(entt::entity self)
-            {
-            }
-            virtual void Draw3D(entt::entity self)
-            {
-            }
-            virtual void OnEnter(entt::entity self)
-            {
-            }
-            virtual void OnExit(entt::entity self)
-            {
-            }
-
-            AbilityState(Timer& cooldownTimer, Timer& animationDelayTimer)
-                : cooldownTimer(cooldownTimer), animationDelayTimer(animationDelayTimer)
-            {
-            }
-        };
-
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
-
         void ChangeState(entt::entity self, AbilityStateEnum newState);
 
         class IdleState;

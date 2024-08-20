@@ -22,6 +22,7 @@
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "raymath.h"
