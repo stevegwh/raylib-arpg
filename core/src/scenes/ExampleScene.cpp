@@ -14,7 +14,6 @@
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
 
-// TODO: To move GameData in the scene requires all of this. Should just make it here?
 #include "Camera.hpp"
 #include "Cursor.hpp"
 #include "KeyMapping.hpp"

@@ -5,7 +5,6 @@
 #pragma once
 
 #include "BaseSystem.hpp"
-#include "components/Renderable.hpp"
 
 #include "entt/entt.hpp"
 

@@ -1,11 +1,10 @@
 #include "PlayerAbilitySystem.hpp"
 
+#include "abilities/Abilities.hpp"
+#include "abilities/Ability.hpp"
 #include "GameData.hpp"
-
 #include "systems/ControllableActorSystem.hpp"
 #include "UserInput.hpp"
-
-#include "abilities/Abilities.hpp"
 
 namespace sage
 {
