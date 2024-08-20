@@ -4,9 +4,14 @@
 
 #include "EditorGui.hpp"
 
+#include "Camera.hpp"
+#include "Cursor.hpp"
 #include "EditorApplication.hpp"
+#include "EditorSettings.hpp"
+#include "Settings.hpp"
 #include "UserInput.hpp"
 #include "windows/FloatingWindow.hpp"
+#include "windows/Window.hpp"
 
 namespace sage::editor
 {

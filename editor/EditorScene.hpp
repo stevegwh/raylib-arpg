@@ -4,12 +4,9 @@
 
 #pragma once
 
-#include "EditorGui.hpp"
-#include "EditorSettings.hpp"
 #include "scenes/Scene.hpp"
 
 #include "entt/entt.hpp"
-#include "windows/FloatingWindow.hpp"
 
 #include <memory>
 #include <string>
@@ -17,6 +14,16 @@
 
 namespace sage
 {
+    struct Settings;
+    struct EditorSettings;
+    class UserInput;
+
+    namespace editor
+    {
+        class EditorGui;
+        class FloatingWindow;
+    } // namespace editor
+
     enum EditorMode
     {
         IDLE,
@@ -24,9 +31,6 @@ namespace sage
         MOVE,
         CREATE
     };
-
-    struct Settings;
-    class UserInput;
 
     class EditorScene : public Scene
     {
