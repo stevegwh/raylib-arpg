@@ -9,31 +9,29 @@
 #include "cereal/cereal.hpp"
 #include "raylib.h"
 
-
-struct EditorSettings
+namespace sage
 {
-	std::string resourcePath = "resources/";
-    std::string lastOpenedMap;
-    std::string lastVisitedDirectory;
-    
-    EditorSettings()
+    struct EditorSettings
     {
-        lastVisitedDirectory = GetWorkingDirectory();
-    }
+        std::string resourcePath = "resources/";
+        std::string lastOpenedMap;
+        std::string lastVisitedDirectory;
 
-	template <class Archive>
-	void save(Archive& archive) const
-	{
-		archive(CEREAL_NVP(resourcePath),
-                CEREAL_NVP(lastOpenedMap),
-                CEREAL_NVP(lastVisitedDirectory));
-	}
+        EditorSettings()
+        {
+            lastVisitedDirectory = GetWorkingDirectory();
+        }
 
-	template <class Archive>
-	void load(Archive& archive)
-	{
-        archive(CEREAL_NVP(resourcePath),
-                CEREAL_NVP(lastOpenedMap),
-                CEREAL_NVP(lastVisitedDirectory));
-	}
-};
+        template <class Archive>
+        void save(Archive& archive) const
+        {
+            archive(CEREAL_NVP(resourcePath), CEREAL_NVP(lastOpenedMap), CEREAL_NVP(lastVisitedDirectory));
+        }
+
+        template <class Archive>
+        void load(Archive& archive)
+        {
+            archive(CEREAL_NVP(resourcePath), CEREAL_NVP(lastOpenedMap), CEREAL_NVP(lastVisitedDirectory));
+        }
+    };
+} // namespace sage
