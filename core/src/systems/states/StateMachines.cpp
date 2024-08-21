@@ -2,6 +2,10 @@
 
 #include "GameData.hpp"
 
+#include "GameStateMachine.hpp"
+#include "PlayerStateMachine.hpp"
+#include "WavemobStateMachine.hpp"
+
 namespace sage
 {
     void StateMachines::Update()
@@ -18,14 +22,17 @@ namespace sage
         // gameStateMachine->Draw3D();
     }
 
-    StateMachines::StateMachines(entt::registry* _registry, GameData* _gameData)
+    StateMachines::~StateMachines()
     {
+        delete wavemobStatemachine;
+        delete playerStateMachine;
+        delete gameStateMachine;
+    }
 
-        wavemobStatemachine =
-            std::make_unique<WavemobStateController>(_registry, _gameData);
-        playerStateMachine =
-            std::make_unique<PlayerStateController>(_registry, _gameData);
-
-        gameStateMachine = std::make_unique<GameStateController>(_registry, _gameData);
+    StateMachines::StateMachines(entt::registry* _registry, GameData* _gameData)
+        : wavemobStatemachine(new WavemobStateController(_registry, _gameData)),
+          playerStateMachine(new PlayerStateController(_registry, _gameData)),
+          gameStateMachine(new GameStateController(_registry, _gameData))
+    {
     }
 } // namespace sage

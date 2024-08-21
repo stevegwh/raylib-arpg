@@ -1,24 +1,25 @@
 #pragma once
 
-#include "GameStateMachine.hpp"
-#include "PlayerStateMachine.hpp"
-#include "WavemobStateMachine.hpp"
-
-#include <memory>
+#include <entt/entt.hpp>
 
 namespace sage
 {
     class GameData; // forward declaration
+    class WavemobStateController;
+    class GameStateController;
+    class PlayerStateController;
+
     class StateMachines
     {
+        // Systems
+        WavemobStateController* wavemobStatemachine;
+        GameStateController* gameStateMachine;
+        PlayerStateController* playerStateMachine;
 
       public:
-        // Systems
-        std::unique_ptr<WavemobStateController> wavemobStatemachine;
-        std::unique_ptr<GameStateController> gameStateMachine;
-        std::unique_ptr<PlayerStateController> playerStateMachine;
         void Update();
         void Draw3D();
+        ~StateMachines();
         StateMachines(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

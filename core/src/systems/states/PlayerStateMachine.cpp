@@ -18,19 +18,11 @@
 
 namespace sage
 {
-    namespace playerstates
+    class PlayerStateController::DefaultState : public StateMachine
     {
-        // ----------------------------
-        void DefaultState::Update(entt::entity entity)
-        {
-            // Should check here if should be in combat
-        }
+        GameData* gameData;
 
-        void DefaultState::Draw3D(entt::entity entity)
-        {
-        }
-
-        void DefaultState::onFloorClick(entt::entity self)
+        void onFloorClick(entt::entity self)
         {
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::Default);
@@ -41,7 +33,7 @@ namespace sage
             gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->collision().point);
         }
 
-        void DefaultState::onEnemyClick(entt::entity self, entt::entity target)
+        void onEnemyClick(entt::entity self, entt::entity target)
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
@@ -49,7 +41,17 @@ namespace sage
             playerState.ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
         }
 
-        void DefaultState::OnStateEnter(entt::entity entity)
+      public:
+        void Update(entt::entity entity) override
+        {
+            // Should check here if should be in combat
+        }
+
+        void Draw3D(entt::entity entity) override
+        {
+        }
+
+        void OnStateEnter(entt::entity entity) override
         {
             // TODO: Unsure if this causes problems if "connect" is called multiple times.
             // Might have to first disconnect
@@ -68,20 +70,40 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        DefaultState::DefaultState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+        virtual ~DefaultState() = default;
+
+        DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
         {
         }
+    };
 
-        // ----------------------------
+    class PlayerStateController::MovingToTalkToNPCState : public StateMachine
+    {
+        GameData* gameData;
+        void onTargetReached(entt::entity self);
 
-        void MovingToAttackEnemyState::onTargetReached(entt::entity self)
+      public:
+        void Update(entt::entity entity) override;
+        void OnStateEnter(entt::entity entity) override;
+        void OnStateExit(entt::entity entity) override;
+        virtual ~MovingToTalkToNPCState() = default;
+        MovingToTalkToNPCState(entt::registry* _registry, GameData* gameData);
+    };
+
+    // ----------------------------
+
+    class PlayerStateController::MovingToAttackEnemyState : public StateMachine
+    {
+        GameData* gameData;
+
+        void onTargetReached(entt::entity self)
         {
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::Combat);
         }
 
-        void MovingToAttackEnemyState::OnStateEnter(entt::entity self)
+      public:
+        void OnStateEnter(entt::entity self) override
         {
             gameData->actorMovementSystem->CancelMovement(self); // Flush queue
 
@@ -108,7 +130,7 @@ namespace sage
             gameData->controllableActorSystem->PathfindToLocation(self, targetPos);
         }
 
-        void MovingToAttackEnemyState::OnStateExit(entt::entity self)
+        void OnStateExit(entt::entity self) override
         {
             gameData->controllableActorSystem->CancelMovement(self);
 
@@ -117,14 +139,21 @@ namespace sage
             sink.disconnect<&MovingToAttackEnemyState::onTargetReached>(this);
         }
 
-        MovingToAttackEnemyState::MovingToAttackEnemyState(entt::registry* _registry, GameData* _gameData)
+        virtual ~MovingToAttackEnemyState() = default;
+
+        MovingToAttackEnemyState(entt::registry* _registry, GameData* _gameData)
             : StateMachine(_registry), gameData(_gameData)
         {
         }
+    };
 
-        // ----------------------------
+    // ----------------------------
 
-        void CombatState::onTargetDeath(entt::entity self, entt::entity target)
+    class PlayerStateController::CombatState : public StateMachine
+    {
+        GameData* gameData;
+
+        void onTargetDeath(entt::entity self, entt::entity target)
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = entt::null;
@@ -132,19 +161,20 @@ namespace sage
             playerState.ChangeState(self, PlayerStateEnum::Default);
         }
 
-        bool CombatState::checkInCombat(entt::entity entity)
+        bool checkInCombat(entt::entity entity)
         {
             // Might do more here later
             return true;
         }
 
-        void CombatState::Update(entt::entity entity)
+      public:
+        void Update(entt::entity entity) override
         {
             auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
             autoAttackAbility.Update(entity);
         }
 
-        void CombatState::OnStateEnter(entt::entity entity)
+        void OnStateEnter(entt::entity entity) override
         {
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
@@ -162,7 +192,7 @@ namespace sage
             combatableSink.connect<&CombatState::onTargetDeath>(this);
         }
 
-        void CombatState::OnStateExit(entt::entity entity)
+        void OnStateExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
             if (combatable.target != entt::null)
@@ -179,28 +209,28 @@ namespace sage
             autoAttackAbility.Cancel(entity);
         }
 
-        CombatState::CombatState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+        virtual ~CombatState() = default;
+        CombatState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
         {
         }
+    };
 
-        // ----------------------------
-    } // namespace playerstates
+    // ----------------------------
 
     StateMachine* PlayerStateController::GetSystem(PlayerStateEnum state)
     {
         switch (state)
         {
         case PlayerStateEnum::Default:
-            return defaultState.get();
+            return defaultState;
         case PlayerStateEnum::MovingToAttackEnemy:
-            return approachingTargetState.get();
+            return approachingTargetState;
         case PlayerStateEnum::MovingToTalkToNPC:
             return nullptr;
         case PlayerStateEnum::Combat:
-            return combatState.get();
+            return combatState;
         default:
-            return defaultState.get();
+            return defaultState;
         }
     }
 
@@ -224,11 +254,18 @@ namespace sage
         }
     }
 
+    PlayerStateController::~PlayerStateController()
+    {
+        delete defaultState;
+        delete approachingTargetState;
+        delete combatState;
+    }
+
     PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry),
-          defaultState(std::make_unique<playerstates::DefaultState>(_registry, _gameData)),
-          approachingTargetState(std::make_unique<playerstates::MovingToAttackEnemyState>(_registry, _gameData)),
-          combatState(std::make_unique<playerstates::CombatState>(_registry, _gameData))
+          defaultState(new DefaultState(_registry, _gameData)),
+          approachingTargetState(new MovingToAttackEnemyState(_registry, _gameData)),
+          combatState(new CombatState(_registry, _gameData))
     {
     }
 } // namespace sage
