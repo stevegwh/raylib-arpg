@@ -15,16 +15,19 @@
 
 namespace sage
 {
-    namespace gamestates
+    class GameStateController::DefaultState : public StateMachine
     {
-        // ----------------------------
-        void DefaultState::OnTimerEnd()
+        entt::entity gameEntity;
+        Timer timer{};
+
+        void OnTimerEnd()
         {
             auto& gameState = registry->get<GameState>(gameEntity);
             gameState.ChangeState(gameEntity, GameStateEnum::Wave);
         }
 
-        void DefaultState::Update(entt::entity entity)
+      public:
+        void Update(entt::entity entity) override
         {
             timer.Update(GetFrameTime());
             if (timer.HasFinished())
@@ -33,80 +36,82 @@ namespace sage
             }
         }
 
-        void DefaultState::Draw3D(entt::entity entity)
+        void Draw3D(entt::entity entity) override
         {
         }
 
-        void DefaultState::OnStateEnter(entt::entity entity)
+        void OnStateEnter(entt::entity entity) override
         {
             timer.Start();
         }
 
-        void DefaultState::OnStateExit(entt::entity entity)
+        void OnStateExit(entt::entity entity) override
         {
             timer.Stop();
         }
 
-        DefaultState::DefaultState(entt::registry* _registry, entt::entity _gameEntity)
+        DefaultState(entt::registry* _registry, entt::entity _gameEntity)
             : StateMachine(_registry), gameEntity(_gameEntity)
         {
             timer.SetMaxTime(5.0f);
         }
+    };
 
-        // ----------------------------
+    // ----------------------------
 
-        void WaveState::initWave()
+    class GameStateController::WaveState : public StateMachine
+    {
+        GameData* gameData;
+        void OnTimerEnd();
+
+        void initWave()
         {
-            GameObjectFactory::createEnemy(
-                registry, gameData, {52.0f, 0, 10.0f}, "Enemy");
-            GameObjectFactory::createEnemy(
-                registry, gameData, {52.0f, 0, 20.0f}, "Enemy");
-            GameObjectFactory::createEnemy(
-                registry, gameData, {52.0f, 0, 30.0f}, "Enemy");
-            GameObjectFactory::createEnemy(
-                registry, gameData, {52.0f, 0, 40.0f}, "Enemy");
+            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 10.0f}, "Enemy");
+            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 20.0f}, "Enemy");
+            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 30.0f}, "Enemy");
+            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 40.0f}, "Enemy");
         }
 
-        void WaveState::Update(entt::entity entity)
+      public:
+        void Update(entt::entity entity) override
         {
         }
 
-        void WaveState::Draw3D(entt::entity entity)
+        void Draw3D(entt::entity entity) override
         {
         }
 
-        void WaveState::OnStateEnter(entt::entity entity)
+        void OnStateEnter(entt::entity entity) override
         {
             // Create waves here (enemies etc)
             std::cout << "Wave state entered! \n";
             initWave();
         }
 
-        void WaveState::OnStateExit(entt::entity entity)
+        void OnStateExit(entt::entity entity) override
         {
         }
 
-        WaveState::WaveState(
-            entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
+        WaveState(entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
             : StateMachine(_registry), gameData(_gameData)
         {
             // Preload model(s)
             ResourceManager::DynamicModelLoad("resources/models/gltf/goblin.glb");
         }
+    };
 
-        // ----------------------------
-    } // namespace gamestates
+    // ----------------------------
 
     StateMachine* GameStateController::GetSystem(GameStateEnum state)
     {
         switch (state)
         {
         case GameStateEnum::Default:
-            return defaultState.get();
+            return defaultState;
         case GameStateEnum::Wave:
-            return waveState.get();
+            return waveState;
         default:
-            return defaultState.get();
+            return defaultState;
         }
     }
 
@@ -122,13 +127,11 @@ namespace sage
         GetSystem(state)->Draw3D(gameEntity);
     }
 
-    GameStateController::GameStateController(
-        entt::registry* _registry, GameData* _gameData)
+    GameStateController::GameStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry),
           gameEntity(_registry->create()),
-          defaultState(std::make_unique<gamestates::DefaultState>(_registry, gameEntity)),
-          waveState(
-              std::make_unique<gamestates::WaveState>(_registry, _gameData, gameEntity))
+          defaultState(new DefaultState(_registry, gameEntity)),
+          waveState(new WaveState(_registry, _gameData, gameEntity))
     {
 
         _registry->emplace<GameState>(gameEntity);

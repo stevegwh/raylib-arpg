@@ -43,6 +43,8 @@ namespace sage
         }
     };
 
+    // ----------------------------
+
     void Ability::IdleState::Update(entt::entity self)
     {
         cooldownTimer.Update(GetFrameTime());
@@ -51,6 +53,8 @@ namespace sage
             onRestartTriggered.publish(self);
         }
     }
+
+    // ----------------------------
 
     void Ability::AwaitingExecutionState::Update(entt::entity self)
     {
@@ -66,6 +70,8 @@ namespace sage
         cooldownTimer.Start();
         animationDelayTimer.Start();
     }
+
+    // ----------------------------
 
     void Ability::ChangeState(entt::entity self, AbilityStateEnum newState)
     {

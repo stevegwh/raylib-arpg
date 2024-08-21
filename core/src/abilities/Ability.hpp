@@ -22,6 +22,9 @@ namespace sage
 
     class Ability
     {
+        class IdleState;
+        class AwaitingExecutionState;
+
       protected:
         entt::registry* registry;
         Timer cooldownTimer;
@@ -32,9 +35,6 @@ namespace sage
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
         void ChangeState(entt::entity self, AbilityStateEnum newState);
-
-        class IdleState;
-        class AwaitingExecutionState;
 
       public:
         virtual void ResetCooldown();
