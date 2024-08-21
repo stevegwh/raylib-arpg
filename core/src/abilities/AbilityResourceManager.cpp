@@ -1,10 +1,13 @@
 #include "AbilityResourceManager.hpp"
 
+#include "GameData.hpp"
+
 #include "vfx/FloorFireVFX.hpp"
 #include "vfx/RainOfFireVFX.hpp"
 #include "vfx/VisualFX.hpp"
 
 #include "AbilityFunctions.hpp"
+#include "AbilityIndicator.hpp"
 
 #include "Camera.hpp"
 
@@ -18,6 +21,24 @@ namespace sage
             AbilityFunctionEnum::MultihitRadiusFromCursor, std::make_unique<MultihitRadiusFromCursor>());
         abilityFunctions.emplace(
             AbilityFunctionEnum::MultihitRadiusFromCaster, std::make_unique<MultihitRadiusFromCaster>());
+    }
+
+    std::unique_ptr<AbilityIndicator> AbilityResourceManager::GetIndicator(
+        AbilityData::IndicatorData data, GameData* _gameData)
+    {
+        // if (data.indicatorKey == "CircularCursor")
+        // {
+        //     return std::make_unique<AbilityIndicator>(
+        //         registry,
+        //         _gameData->navigationGridSystem.get(),
+        //         "resources/textures/cursor/rainoffire_cursor.png");
+        // }
+        // return nullptr;
+
+        return std::make_unique<AbilityIndicator>(
+            _gameData->registry,
+            _gameData->navigationGridSystem.get(),
+            "resources/textures/cursor/rainoffire_cursor.png");
     }
 
     std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
@@ -66,13 +87,13 @@ namespace sage
         return (it != abilityFunctions.end()) ? it->second.get() : nullptr;
     }
 
-    AbilityResourceManager& AbilityResourceManager::GetInstance(entt::registry* reg)
+    AbilityResourceManager& AbilityResourceManager::GetInstance()
     {
-        static AbilityResourceManager instance(reg);
+        static AbilityResourceManager instance;
         return instance;
     }
 
-    AbilityResourceManager::AbilityResourceManager(entt::registry* reg) : registry(reg)
+    AbilityResourceManager::AbilityResourceManager()
     {
     }
 } // namespace sage

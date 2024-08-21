@@ -39,7 +39,7 @@ namespace sage
         serializer::SaveAbilityData(ad, "resources/player_auto_attack.json");
 
         ad.executeFunc =
-            AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
+            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
 
         return ad;
     }
@@ -66,6 +66,7 @@ namespace sage
         ad.animationParams.animationDelay = 0.75f;
 
         ad.vfx.name = "RainOfFire";
+        ad.indicator.indicatorKey = "CircularCursor";
 
         // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
         //     "RainOfFire", _camera);
@@ -74,21 +75,15 @@ namespace sage
 
         // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
         ad.cursor = cursor;
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
-            AbilityResourceManager::GetInstance(_registry).StringToExecuteFuncEnum(ad.base.executeFuncName));
+
+        ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
+            AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
 
         return ad;
     }
 
     RainOfFire::RainOfFire(entt::registry* _registry, GameData* _gameData)
-        : CursorAbility(
-              _registry,
-              initAbilityData(_registry, _gameData->cursor.get()),
-              _gameData,
-              std::make_unique<AbilityIndicator>(
-                  _registry,
-                  _gameData->navigationGridSystem.get(),
-                  "resources/textures/cursor/rainoffire_cursor.png"))
+        : CursorAbility(_registry, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
     {
         // assert(vfx != nullptr);
     }
@@ -110,6 +105,7 @@ namespace sage
         ad.animationParams.animationDelay = 0.75f;
 
         ad.vfx.name = "FloorFire";
+        ad.indicator.indicatorKey = "CircularCursor";
 
         // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
         //     "RainOfFire", _camera);
@@ -117,22 +113,16 @@ namespace sage
         serializer::SaveAbilityData(ad, "resources/player_floorfire.json");
 
         // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
+
         ad.cursor = cursor;
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
-            AbilityResourceManager::GetInstance(_registry).StringToExecuteFuncEnum(ad.base.executeFuncName));
+        ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
+            AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
 
         return ad;
     }
 
     FloorFire::FloorFire(entt::registry* _registry, GameData* _gameData)
-        : CursorAbility(
-              _registry,
-              initAbilityData(_registry, _gameData->cursor.get()),
-              _gameData,
-              std::make_unique<AbilityIndicator>(
-                  _registry,
-                  _gameData->navigationGridSystem.get(),
-                  "resources/textures/cursor/rainoffire_cursor.png"))
+        : CursorAbility(_registry, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
     {
         // assert(vfx != nullptr);
     }
@@ -153,7 +143,7 @@ namespace sage
         serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
         ad.executeFunc =
-            AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
+            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
         return ad;
     }
 
@@ -180,8 +170,8 @@ namespace sage
 
         serializer::SaveAbilityData(ad, "resources/whirlwind.json");
 
-        ad.executeFunc = AbilityResourceManager::GetInstance(_registry).GetExecuteFunc(
-            AbilityFunctionEnum::MultihitRadiusFromCaster);
+        ad.executeFunc =
+            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::MultihitRadiusFromCaster);
 
         return ad;
     }

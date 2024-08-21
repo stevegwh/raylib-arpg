@@ -6,6 +6,7 @@
 
 #include "AbilityFunctions.hpp"
 #include "AbilityIndicator.hpp"
+#include "AbilityResourceManager.hpp"
 #include "AbilityState.hpp"
 #include "components/Animation.hpp"
 #include "Cursor.hpp"
@@ -31,11 +32,17 @@ namespace sage
         void Update(entt::entity self) override;
         void OnEnter(entt::entity self) override;
         void OnExit(entt::entity self) override;
+
         CursorSelectState(
             Timer& _coolDownTimer,
             Timer& _animationDelayTimer,
             Cursor* _cursor,
-            std::unique_ptr<AbilityIndicator> _abilityIndicator);
+            std::unique_ptr<AbilityIndicator> _abilityIndicator)
+            : AbilityState(_coolDownTimer, _animationDelayTimer),
+              cursor(_cursor),
+              abilityIndicator(std::move(_abilityIndicator))
+        {
+        }
     };
 
     void CursorAbility::CursorSelectState::enableCursor()
@@ -91,17 +98,6 @@ namespace sage
         cursorActive = true;
     }
 
-    CursorAbility::CursorSelectState::CursorSelectState(
-        Timer& _coolDownTimer,
-        Timer& _animationDelayTimer,
-        Cursor* _cursor,
-        std::unique_ptr<AbilityIndicator> _abilityIndicator)
-        : AbilityState(_coolDownTimer, _animationDelayTimer),
-          cursor(_cursor),
-          abilityIndicator(std::move(_abilityIndicator))
-    {
-    }
-
     // --------------------------------------------
 
     void CursorAbility::Init(entt::entity self)
@@ -125,15 +121,18 @@ namespace sage
         Ability::Init(self);
     }
 
-    CursorAbility::CursorAbility(
-        entt::registry* _registry,
-        AbilityData _abilityData,
-        GameData* _gameData,
-        std::unique_ptr<AbilityIndicator> _abilityIndicator)
+    CursorAbility::~CursorAbility()
+    {
+    }
+
+    CursorAbility::CursorAbility(entt::registry* _registry, AbilityData _abilityData, GameData* _gameData)
         : Ability(_registry, _abilityData, _gameData), cursor(_gameData->cursor.get())
     {
         auto cursorState = std::make_unique<CursorSelectState>(
-            cooldownTimer, animationDelayTimer, _gameData->cursor.get(), std::move(_abilityIndicator));
+            cooldownTimer,
+            animationDelayTimer,
+            _gameData->cursor.get(),
+            AbilityResourceManager::GetInstance().GetIndicator(abilityData.indicator, _gameData));
         entt::sink onConfirmSink{cursorState->onConfirm};
         onConfirmSink.connect<&CursorAbility::confirm>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
