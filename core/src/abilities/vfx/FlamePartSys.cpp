@@ -21,7 +21,7 @@ namespace sage
         // Image imgCircle8 = GenImageGradientRadialTrans(8, 8, 0.5f, WHITE, BLACK);
         // texCircle8 = LoadTextureFromImage(imgCircle8);
 
-        texCircle16 = LoadTextureFromImage(ResourceManager::LoadTexture("resources/textures/spark_flame.png"));
+        texCircle16 = LoadTextureFromImage(ResourceManager::ImageLoad("resources/textures/spark_flame.png"));
 
         // UnloadImage(imgCircle8);
         // UnloadImage(imgCircle16);

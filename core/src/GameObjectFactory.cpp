@@ -252,7 +252,7 @@ namespace sage
         MaterialPaths matPaths;
         matPaths.diffuse = texturePath;
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-            LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
+            LoadTextureFromImage(ResourceManager::ImageLoad(matPaths.diffuse));
         auto& renderable = registry->emplace<Renderable>(id, model, matPaths, MatrixIdentity());
         renderable.name = name;
         auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
@@ -307,7 +307,7 @@ namespace sage
 
             scene->lightSubSystem->LinkRenderableToLight(&renderable);
             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-                LoadTextureFromImage(ResourceManager::LoadTexture(matPaths.diffuse));
+                LoadTextureFromImage(ResourceManager::ImageLoad(matPaths.diffuse));
             auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
             collideable.SetWorldBoundingBox(transform.GetMatrix());
 
