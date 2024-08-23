@@ -25,6 +25,8 @@
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
+#include <Timer.hpp>
+
 #include "raymath.h"
 #include <slib.hpp>
 
@@ -344,5 +346,52 @@ namespace sage
         entt::entity floor = registry->create();
         auto& floorCollidable = registry->emplace<Collideable>(floor, bb);
         floorCollidable.collisionLayer = CollisionLayer::FLOOR;
+    }
+
+    void createPortal(entt::registry* registry, GameData* data, Vector3 position)
+    {
+        entt::entity id = registry->create();
+
+        auto& transform = registry->emplace<sgTransform>(id);
+        GridSquare actorIdx{};
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        transform.SetPosition({position.x, height, position.z}, id);
+        transform.SetScale(1.0f, id);
+        transform.SetRotation({0, 0, 0}, id);
+
+        Texture2D texture = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_50.png");
+        Texture2D texture2 = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_45.png");
+
+        Matrix modelTransform = MatrixRotateY(90 * DEG2RAD);
+        Model model = LoadModelFromMesh(GenMeshPlane(1, 1, 1, 1));
+        model.transform = modelTransform;
+
+        auto& timer = registry->emplace<Timer>(id);
+
+        // Update
+        // time += GetFrameTime();
+        // SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
+
+        Shader shader = LoadShader(NULL, "resources/shaders/glsl330/portal.frag");
+        int secondsLoc = GetShaderLocation(shader, "seconds");
+        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+        // Using MATERIAL_MAP_EMISSION as a spare slot to use for 2nd texture
+        model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = texture2;
+        shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
+        model.materials[0].shader = shader;
+
+        auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+        renderable.name = "Portal";
+        renderable.textures.push_back(texture);
+        renderable.textures.push_back(texture2);
+        {
+            entt::sink sink{renderable.reqShaderUpdate};
+            // sink.connect
+        }
+
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
+        collideable.collisionLayer = CollisionLayer::PLAYER;
     }
 } // namespace sage

@@ -4,7 +4,7 @@ class Timer
 {
     bool active = false;
     bool finished = true;
-    float remainingTime{};
+    float counter{};
     float maxTime{};
 
   public:
@@ -25,7 +25,7 @@ class Timer
 
     float GetRemainingTime() const
     {
-        return remainingTime;
+        return maxTime - counter;
     }
 
     bool HasFinished() const
@@ -47,7 +47,7 @@ class Timer
     {
         active = false;
         finished = false;
-        remainingTime = maxTime;
+        counter = 0;
     }
 
     void Restart()
@@ -65,8 +65,8 @@ class Timer
     {
         if (!active) return;
         if (finished) finished = false; // Reset finished flag when active
-        remainingTime -= dt;
-        if (remainingTime <= 0)
+        counter += dt;
+        if (counter >= maxTime)
         {
             finished = true;
             active = false;
