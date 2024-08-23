@@ -18,8 +18,7 @@ namespace sage
     static std::unordered_map<std::string, Image> textureImages;
     static std::unordered_map<std::string, Model> staticModels;
     static std::unordered_map<std::string, Model> dynamicModels;
-    static std::unordered_map<std::string, std::pair<ModelAnimation*, int>>
-        modelAnimations;
+    static std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations;
     static std::unordered_map<std::string, char*> vertShaders;
     static std::unordered_map<std::string, char*> fragShaders;
 
@@ -62,7 +61,7 @@ namespace sage
         return shader;
     }
 
-    Image ResourceManager::LoadTexture(const std::string& path)
+    Image ResourceManager::ImageLoad(const std::string& path)
     {
         if (textureImages.find(path) == textureImages.end())
         {
@@ -103,16 +102,12 @@ namespace sage
         if (oldMesh.texcoords)
         {
             mesh.texcoords = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
-            memcpy(
-                mesh.texcoords, oldMesh.texcoords, mesh.vertexCount * 2 * sizeof(float));
+            memcpy(mesh.texcoords, oldMesh.texcoords, mesh.vertexCount * 2 * sizeof(float));
         }
         if (oldMesh.texcoords2)
         {
             mesh.texcoords2 = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
-            memcpy(
-                mesh.texcoords2,
-                oldMesh.texcoords2,
-                mesh.vertexCount * 2 * sizeof(float));
+            memcpy(mesh.texcoords2, oldMesh.texcoords2, mesh.vertexCount * 2 * sizeof(float));
         }
         if (oldMesh.normals)
         {
@@ -126,56 +121,35 @@ namespace sage
         }
         if (oldMesh.colors)
         {
-            mesh.colors =
-                (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
-            memcpy(
-                mesh.colors,
-                oldMesh.colors,
-                mesh.vertexCount * 4 * sizeof(unsigned char));
+            mesh.colors = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
+            memcpy(mesh.colors, oldMesh.colors, mesh.vertexCount * 4 * sizeof(unsigned char));
         }
         if (oldMesh.indices)
         {
-            mesh.indices = (unsigned short*)RL_MALLOC(
-                mesh.triangleCount * 3 * sizeof(unsigned short));
-            memcpy(
-                mesh.indices,
-                oldMesh.indices,
-                mesh.triangleCount * 3 * sizeof(unsigned short));
+            mesh.indices = (unsigned short*)RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short));
+            memcpy(mesh.indices, oldMesh.indices, mesh.triangleCount * 3 * sizeof(unsigned short));
         }
 
         // Copy animation vertex data
         if (oldMesh.animVertices)
         {
             mesh.animVertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-            memcpy(
-                mesh.animVertices,
-                oldMesh.animVertices,
-                mesh.vertexCount * 3 * sizeof(float));
+            memcpy(mesh.animVertices, oldMesh.animVertices, mesh.vertexCount * 3 * sizeof(float));
         }
         if (oldMesh.animNormals)
         {
             mesh.animNormals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-            memcpy(
-                mesh.animNormals,
-                oldMesh.animNormals,
-                mesh.vertexCount * 3 * sizeof(float));
+            memcpy(mesh.animNormals, oldMesh.animNormals, mesh.vertexCount * 3 * sizeof(float));
         }
         if (oldMesh.boneIds)
         {
-            mesh.boneIds =
-                (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
-            memcpy(
-                mesh.boneIds,
-                oldMesh.boneIds,
-                mesh.vertexCount * 4 * sizeof(unsigned char));
+            mesh.boneIds = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
+            memcpy(mesh.boneIds, oldMesh.boneIds, mesh.vertexCount * 4 * sizeof(unsigned char));
         }
         if (oldMesh.boneWeights)
         {
             mesh.boneWeights = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
-            memcpy(
-                mesh.boneWeights,
-                oldMesh.boneWeights,
-                mesh.vertexCount * 4 * sizeof(float));
+            memcpy(mesh.boneWeights, oldMesh.boneWeights, mesh.vertexCount * 4 * sizeof(float));
         }
 
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
@@ -226,8 +200,7 @@ namespace sage
             model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
             model.materials[0] = LoadMaterialDefault();
 
-            if (model.meshMaterial == NULL)
-                model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
+            if (model.meshMaterial == NULL) model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
         }
         else
         {
@@ -240,26 +213,19 @@ namespace sage
 
                 // Deep copy shader
                 model.materials[i].shader = oldModel.materials[i].shader;
-                model.materials[i].shader.locs =
-                    (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int));
+                model.materials[i].shader.locs = (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int));
                 memcpy(
                     model.materials[i].shader.locs,
                     oldModel.materials[i].shader.locs,
                     RL_MAX_SHADER_LOCATIONS * sizeof(int));
 
                 // Deep copy maps
-                model.materials[i].maps =
-                    (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
+                model.materials[i].maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
                 memcpy(
-                    model.materials[i].maps,
-                    oldModel.materials[i].maps,
-                    MAX_MATERIAL_MAPS * sizeof(MaterialMap));
+                    model.materials[i].maps, oldModel.materials[i].maps, MAX_MATERIAL_MAPS * sizeof(MaterialMap));
 
                 // Copy params
-                memcpy(
-                    model.materials[i].params,
-                    oldModel.materials[i].params,
-                    4 * sizeof(float));
+                memcpy(model.materials[i].params, oldModel.materials[i].params, 4 * sizeof(float));
             }
 
             for (size_t i = 0; i < model.meshCount; ++i)
@@ -291,8 +257,7 @@ namespace sage
         return model;
     }
 
-    ModelAnimation* ResourceManager::ModelAnimationLoad(
-        const std::string& path, int* animsCount)
+    ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
     {
         if (modelAnimations.find(path) == modelAnimations.end())
         {

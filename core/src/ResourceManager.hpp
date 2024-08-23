@@ -11,15 +11,15 @@
 namespace sage
 {
 
-class ResourceManager
-{
-public:
-	static Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
-    static Image LoadTexture(const std::string& path);
-	static Model StaticModelLoad(const std::string& path);
-	static Model DynamicModelLoad(const std::string& path);
-	static ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
-    ~ResourceManager();
-};
+    class ResourceManager
+    {
+      public:
+        static Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
+        static Image ImageLoad(const std::string& path);
+        static Model StaticModelLoad(const std::string& path);
+        static Model DynamicModelLoad(const std::string& path);
+        static ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
+        ~ResourceManager();
+    };
 
-} // sage
+} // namespace sage
