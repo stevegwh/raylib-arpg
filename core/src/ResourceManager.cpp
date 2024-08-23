@@ -74,7 +74,7 @@ namespace sage
 
     /**
      * @brief Returns a shallow copy of the loaded model
-     *
+     * NB: Caller should not free the memory.
      * @param path
      * @return Model
      */
@@ -166,6 +166,7 @@ namespace sage
     /**
      * @brief Creates a deep copy of the loaded model. Cuts down model loading times as
      * it's faster copying buffers rather than reading/parsing model files.
+     * NB: Caller must take ownership of freeing memory.
      * @param path
      * @return
      */
