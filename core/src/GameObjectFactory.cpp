@@ -98,8 +98,6 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
-        // collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely
-        // redundant
         // ---
 
         // registry->emplace<StateEnemyDefault>(id);
@@ -257,8 +255,6 @@ namespace sage
         renderable.name = name;
         auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
         collideable.collisionLayer = CollisionLayer::BUILDING;
-        // collideable.SetWorldBoundingBox(transform.GetMatrix()); // TODO: Likely
-        // redundant
     }
 
     BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)

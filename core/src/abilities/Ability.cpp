@@ -1,16 +1,14 @@
 #include "Ability.hpp"
 
-#include "abilities/AbilityData.hpp"
 #include "AbilityFunctions.hpp"
 #include "AbilityResourceManager.hpp"
 #include "AbilityState.hpp"
 #include "components/Animation.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
-#include "raylib.h"
-#include "TextureTerrainOverlay.hpp"
-#include "Timer.hpp"
 #include "vfx/VisualFX.hpp"
+
+#include "raylib.h"
 #include <cassert>
 
 namespace sage
@@ -22,7 +20,15 @@ namespace sage
 
       public:
         entt::sigh<void(entt::entity)> onRestartTriggered;
-        void Update(entt::entity self) override;
+
+        void Update(entt::entity self) override
+        {
+            cooldownTimer.Update(GetFrameTime());
+            if (cooldownTimer.HasFinished() && repeatable)
+            {
+                onRestartTriggered.publish(self);
+            }
+        }
 
         IdleState(Timer& coolDownTimer, Timer& animationDelayTimer, bool repeatable)
             : AbilityState(coolDownTimer, animationDelayTimer), repeatable(repeatable)
@@ -34,42 +40,27 @@ namespace sage
     {
       public:
         entt::sigh<void(entt::entity)> onExecute;
-        void OnEnter(entt::entity self) override;
-        void Update(entt::entity self) override;
+
+        void OnEnter(entt::entity self) override
+        {
+            cooldownTimer.Start();
+            animationDelayTimer.Start();
+        }
+
+        void Update(entt::entity self) override
+        {
+            animationDelayTimer.Update(GetFrameTime());
+            if (animationDelayTimer.HasFinished())
+            {
+                onExecute.publish(self);
+            }
+        }
 
         AwaitingExecutionState(Timer& coolDownTimer, Timer& animationDelayTimer)
             : AbilityState(coolDownTimer, animationDelayTimer)
         {
         }
     };
-
-    // ----------------------------
-
-    void Ability::IdleState::Update(entt::entity self)
-    {
-        cooldownTimer.Update(GetFrameTime());
-        if (cooldownTimer.HasFinished() && repeatable)
-        {
-            onRestartTriggered.publish(self);
-        }
-    }
-
-    // ----------------------------
-
-    void Ability::AwaitingExecutionState::Update(entt::entity self)
-    {
-        animationDelayTimer.Update(GetFrameTime());
-        if (animationDelayTimer.HasFinished())
-        {
-            onExecute.publish(self);
-        }
-    }
-
-    void Ability::AwaitingExecutionState::OnEnter(entt::entity self)
-    {
-        cooldownTimer.Start();
-        animationDelayTimer.Start();
-    }
 
     // ----------------------------
 

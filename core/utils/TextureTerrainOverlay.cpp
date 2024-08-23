@@ -56,8 +56,6 @@ namespace sage
 
     void TextureTerrainOverlay::updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol)
     {
-        // TODO: I think the mesh created is actually really big, that's why this offset is so weird
-        // the grid "range" could be vastly reduced.
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
         mesh.normals[vertexIndex * 3] = gridSquares[gridRow][gridCol]->terrainNormal.x;
         mesh.normals[vertexIndex * 3 + 1] = gridSquares[gridRow][gridCol]->terrainNormal.y;
