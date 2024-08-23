@@ -4,16 +4,15 @@
 
 #pragma once
 
+#include "ResourceManager.hpp"
 #include <slib.hpp>
 
+#include "cereal/cereal.hpp"
+#include "cereal/types/string.hpp"
+#include "raylib-cereal.hpp"
 #include "raylib.h"
 #include "raymath.h"
-
-#include "cereal/cereal.hpp"
-#include "raylib-cereal.hpp"
-
-#include "cereal/types/string.hpp"
-#include "ResourceManager.hpp"
+#include <entt/entt.hpp>
 
 #include <optional>
 #include <string>
@@ -28,8 +27,9 @@ namespace sage
         bool active = true;
         Matrix initialTransform{};
         MaterialPaths materials;
-        Model model{}; // was const
+        Model model{};
         std::optional<Shader> shader;
+        entt::sigh<void(entt::entity)> reqShaderUpdate; // Hook function to respond to request
         std::string name = "Default";
         bool serializable = true;
 

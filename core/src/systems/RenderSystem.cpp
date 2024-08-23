@@ -18,12 +18,16 @@ namespace sage
     void RenderSystem::Draw() const
     {
         const auto& view = registry->view<Renderable, sgTransform>();
-        view.each([](const auto& r, const auto& t) {
-            if (!r.active) return;
+        for (auto entity : view)
+        {
+            auto& r = registry->get<Renderable>(entity);
+            if (!r.active) continue;
+            r.reqShaderUpdate.publish(entity);
+            auto& t = registry->get<sgTransform>(entity);
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
             DrawModelEx(
                 r.model, t.position(), rotationAxis, t.rotation().y, {t.scale(), t.scale(), t.scale()}, r.hint);
-        });
+        };
     }
 
     RenderSystem::~RenderSystem()
