@@ -2,11 +2,13 @@
 
 #include "GameData.hpp"
 
+// NB: We have to include all the headers required to build GameData
 #include "Camera.hpp"
 #include "Cursor.hpp"
 #include "UserInput.hpp"
 
 #include "abilities/Ability.hpp"
+#include "EntityEventBridge.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"

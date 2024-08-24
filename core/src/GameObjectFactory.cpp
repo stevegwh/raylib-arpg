@@ -19,6 +19,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
+#include "EntityEventBridge.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
@@ -218,8 +219,11 @@ namespace sage
         //     sink.connect<&CombatableActor::AttackCancelled>(combatable);
         // }
         // combatable.onAttackCancelled->SetObservableEvent(game->cursor->onFloorClick);
-        combatable.onAttackCancelledBridge->BridgeEvents(
-            game->cursor->onFloorClick, combatable.onAttackCancelledSig);
+
+        game->bridgeManager->CreateBridge<entt::entity>(
+            id, game->cursor->onFloorClick, combatable.onAttackCancelledSig);
+        // combatable.onAttackCancelledBridge->BridgeEvents(
+        //     game->cursor->onFloorClick, combatable.onAttackCancelledSig);
         // ---
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);

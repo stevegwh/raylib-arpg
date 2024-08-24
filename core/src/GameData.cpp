@@ -12,6 +12,7 @@
 
 // Systems
 #include "abilities/Ability.hpp"
+#include "EntityEventBridge.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -45,7 +46,8 @@ namespace sage
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
           abilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),
-          timerSystem(std::make_unique<TimerSystem>(_registry))
+          timerSystem(std::make_unique<TimerSystem>(_registry)),
+          bridgeManager(std::make_unique<BridgeManager>())
     {
     }
 

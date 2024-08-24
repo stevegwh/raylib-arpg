@@ -7,12 +7,19 @@
 
 namespace sage
 {
+
+    class BridgeBase
+    {
+      public:
+        virtual ~BridgeBase() {};
+    };
+
     /*
      * Below offers a way to hook onto mouse events (etc.) and publish the original signals but with a
      * reference to the caller's entity id ("self") so the system can use the entity to get the component data.
      */
     template <typename... Args>
-    class EntityEventBridge
+    class EntityEventBridge : public BridgeBase
     {
       private:
         entt::entity subscriber;
@@ -36,19 +43,33 @@ namespace sage
             outSignal = &_outSignal;
         }
 
-        void StopObserving()
+        ~EntityEventBridge() override
         {
             connection.release();
         }
+    };
 
-        void DisconnectAll()
+    class BridgeManager
+    {
+        std::vector<std::unique_ptr<BridgeBase>> bridges;
+        int counter = -1;
+
+      public:
+        template <typename... Args>
+        int CreateBridge(
+            entt::entity entity,
+            entt::sigh<void(Args...)>& inSignal,
+            entt::sigh<void(entt::entity, Args...)>& outSignal)
         {
-            StopObserving();
+            auto bridge = std::make_unique<EntityEventBridge<Args...>>(entity);
+            bridge->BridgeEvents(inSignal, outSignal);
+            bridges.push_back(std::move(bridge));
+            return ++counter;
         }
 
-        ~EntityEventBridge()
+        void RemoveBridge(int id)
         {
-            DisconnectAll();
+            bridges[id].reset();
         }
     };
 
