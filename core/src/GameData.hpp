@@ -28,7 +28,7 @@ namespace sage
     class PlayerAbilitySystem;
     class CombatSystem;
     class TimerSystem;
-    class BridgeManager;
+    class EntityReflectionSignalRouter;
 
     class GameData
     {
@@ -52,7 +52,7 @@ namespace sage
         std::unique_ptr<PlayerAbilitySystem> abilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
-        std::unique_ptr<BridgeManager> bridgeManager;
+        std::unique_ptr<EntityReflectionSignalRouter> signalReflectionManager;
 
         void Load();
         void Save() const;

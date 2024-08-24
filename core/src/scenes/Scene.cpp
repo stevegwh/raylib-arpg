@@ -8,7 +8,7 @@
 #include "UserInput.hpp"
 
 #include "abilities/Ability.hpp"
-#include "EntityEventBridge.hpp"
+#include "EntityReflectionSignalRouter.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
