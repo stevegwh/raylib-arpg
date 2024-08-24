@@ -89,7 +89,7 @@ namespace sage
         // ---
 
         // Combat
-        auto& combatable = registry->emplace<CombatableActor>(id, id);
+        auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
         registry->emplace<WavemobAutoAttack>(id, registry, game);
 
@@ -211,19 +211,11 @@ namespace sage
         }
 
         // Combat
-        auto& combatable = registry->emplace<CombatableActor>(id, id);
+        auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
         registry->emplace<PlayerAutoAttack>(id, registry, game);
-        // {
-        //     entt::sink sink{game->cursor->onFloorClick};
-        //     sink.connect<&CombatableActor::AttackCancelled>(combatable);
-        // }
-        // combatable.onAttackCancelled->SetObservableEvent(game->cursor->onFloorClick);
-
         game->bridgeManager->CreateBridge<entt::entity>(
-            id, game->cursor->onFloorClick, combatable.onAttackCancelledSig);
-        // combatable.onAttackCancelledBridge->BridgeEvents(
-        //     game->cursor->onFloorClick, combatable.onAttackCancelledSig);
+            id, game->cursor->onFloorClick, combatable.onAttackCancelled);
         // ---
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
