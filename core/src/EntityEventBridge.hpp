@@ -7,6 +7,10 @@
 
 namespace sage
 {
+    /*
+     * Below offers a way to hook onto mouse events (etc.) and publish the original signals but with a
+     * reference to the caller's entity id ("self") so the system can use the entity to get the component data.
+     */
     template <typename... Args>
     class EntityEventBridge
     {

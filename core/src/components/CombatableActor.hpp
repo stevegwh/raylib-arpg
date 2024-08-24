@@ -44,11 +44,8 @@ namespace sage
     {
 
       public:
-        // Below are "bridge" functions that hook onto mouse events (etc.) and publish the
-        // above signals but with a reference to the self (entity) so the system can use
-        // the entity to get the component data.
-        std::unique_ptr<EntityEventBridge<entt::entity>> onAttackCancelled;
-        std::unique_ptr<EntityEventBridge<entt::entity>> onTargetDeath;
+        std::unique_ptr<EntityEventBridge<entt::entity>> onAttackCancelledBridge;
+        std::unique_ptr<EntityEventBridge<entt::entity>> onTargetDeathBridge;
 
         int hp = 100;
         entt::entity self;
