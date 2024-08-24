@@ -22,7 +22,7 @@ namespace sage
         {
             auto& r = registry->get<Renderable>(entity);
             if (!r.active) continue;
-            r.reqShaderUpdate.publish(entity);
+            if (r.reqShaderUpdate) r.reqShaderUpdate(entity);
             auto& t = registry->get<sgTransform>(entity);
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
             DrawModelEx(

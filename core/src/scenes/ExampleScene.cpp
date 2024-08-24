@@ -32,6 +32,7 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
+#include "systems/TimerSystem.hpp"
 
 #include "raylib.h"
 
@@ -57,6 +58,7 @@ namespace sage
             explosion->SetOrigin(data->cursor->terrainCollision().point);
         }
         explosion->Update();
+        data->timerSystem->Update();
     }
 
     void ExampleScene::Draw2D()
@@ -95,7 +97,7 @@ namespace sage
         // std::string mapPath = "resources/models/obj/level-basic.obj";
         auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
-
+        GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
         // TODO: tmp
         const auto& col = registry->get<Collideable>(knight);
         data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);

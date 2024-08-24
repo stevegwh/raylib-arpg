@@ -14,8 +14,10 @@
 #include "raymath.h"
 #include <entt/entt.hpp>
 
+#include <functional>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace sage
@@ -29,7 +31,8 @@ namespace sage
         MaterialPaths materials;
         Model model{};
         std::optional<Shader> shader;
-        entt::sigh<void(entt::entity)> reqShaderUpdate; // Hook function to respond to request
+        std::unordered_map<std::string, int> shaderLocs;
+        std::function<void(entt::entity)> reqShaderUpdate;
         std::string name = "Default";
         bool serializable = true;
 

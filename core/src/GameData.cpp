@@ -23,6 +23,7 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
+#include "systems/TimerSystem.hpp"
 
 namespace sage
 {
@@ -43,7 +44,8 @@ namespace sage
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
           abilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
-          combatSystem(std::make_unique<CombatSystem>(_registry))
+          combatSystem(std::make_unique<CombatSystem>(_registry)),
+          timerSystem(std::make_unique<TimerSystem>(_registry))
     {
     }
 

@@ -27,6 +27,7 @@ namespace sage
     class StateMachines;
     class PlayerAbilitySystem;
     class CombatSystem;
+    class TimerSystem;
 
     class GameData
     {
@@ -49,6 +50,7 @@ namespace sage
         std::unique_ptr<StateMachines> stateMachines;
         std::unique_ptr<PlayerAbilitySystem> abilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
+        std::unique_ptr<TimerSystem> timerSystem;
 
         void Load();
         void Save() const;

@@ -28,6 +28,11 @@ class Timer
         return maxTime - counter;
     }
 
+    float GetCurrentTime() const
+    {
+        return counter;
+    }
+
     bool HasFinished() const
     {
         return finished;
