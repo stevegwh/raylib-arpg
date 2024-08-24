@@ -190,7 +190,7 @@ namespace sage
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
 
-            combatable.onTargetDeath->BridgeEvents(enemyCombatable.onDeath, combatable.onTargetDeathSig);
+            combatable.onTargetDeathBridge->BridgeEvents(enemyCombatable.onDeath, combatable.onTargetDeathSig);
             entt::sink sink{combatable.onTargetDeathSig};
             sink.connect<&CombatState::onTargetDeath>(this);
             // combatable.onTargetDeath->SetCallback<CombatState, &CombatState::onTargetDeath>(*this);
@@ -206,7 +206,7 @@ namespace sage
             //     sink.disconnect<&CombatableActor::TargetDeath>(combatable);
             // }
 
-            combatable.onTargetDeath->DisconnectAll();
+            combatable.onTargetDeathBridge->DisconnectAll();
             entt::sink sink{combatable.onTargetDeathSig};
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
