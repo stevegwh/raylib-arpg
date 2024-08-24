@@ -21,8 +21,6 @@ namespace sage
     class PlayerStateController::DefaultState : public StateMachine
     {
         GameData* gameData;
-        entt::connection cnxOnFloorClick;
-        entt::connection cnxOnEnemyClick;
 
         void onFloorClick(entt::entity self)
         {
@@ -61,11 +59,13 @@ namespace sage
             // Below are not disconnected in OnStateExit
             auto& controllable = registry->get<ControllableActor>(entity);
             entt::sink sink{controllable.onEnemyClicked};
-            cnxOnEnemyClick = sink.connect<&DefaultState::onEnemyClick>(this);
+            sink.connect<&DefaultState::onEnemyClick>(this);
 
             auto& combatableActor = registry->get<CombatableActor>(entity);
-            entt::sink floorClickSink{combatableActor.onAttackCancelled};
-            cnxOnFloorClick = floorClickSink.connect<&DefaultState::onFloorClick>(this);
+            combatableActor.onAttackCancelledb->Subscribe<DefaultState, &DefaultState::onFloorClick>(*this);
+
+            // entt::sink floorClickSink{combatableActor.onAttackCancelled};
+            // cnxOnFloorClick = floorClickSink.connect<&DefaultState::onFloorClick>(this);
             // ----------------------------
 
             auto& animation = registry->get<Animation>(entity);
@@ -138,7 +138,7 @@ namespace sage
 
             auto& moveableActor = registry->get<MoveableActor>(self);
             entt::sink sink{moveableActor.onFinishMovement};
-            sink.disconnect(this);
+            sink.disconnect<&MovingToAttackEnemyState::onTargetReached>(this);
         }
 
         virtual ~MovingToAttackEnemyState() = default;
@@ -186,6 +186,7 @@ namespace sage
 
             auto& combatable = registry->get<CombatableActor>(entity);
             assert(combatable.target != entt::null);
+
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
             entt::sink sink{enemyCombatable.onDeath};
             sink.connect<&CombatableActor::TargetDeath>(combatable);
