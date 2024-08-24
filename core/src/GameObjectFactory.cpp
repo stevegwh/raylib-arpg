@@ -19,7 +19,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
-#include "EntityEventBridge.hpp"
+#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
@@ -214,7 +214,7 @@ namespace sage
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
         registry->emplace<PlayerAutoAttack>(id, registry, game);
-        game->bridgeManager->CreateBridge<entt::entity>(
+        game->signalReflectionManager->CreateHook<entt::entity>(
             id, game->cursor->onFloorClick, combatable.onAttackCancelled);
         // ---
 

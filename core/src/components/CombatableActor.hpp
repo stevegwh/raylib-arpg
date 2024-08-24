@@ -7,7 +7,7 @@
 #include <entt/entt.hpp>
 #include <memory>
 
-#include "EntityEventBridge.hpp"
+#include "EntityReflectionSignalRouter.hpp"
 
 namespace sage
 {
