@@ -53,18 +53,15 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
-            // TODO: Unsure if this causes problems if "connect" is called multiple times.
-            // Might have to first disconnect
-
             // Below are not disconnected in OnStateExit
             auto& controllable = registry->get<ControllableActor>(entity);
             entt::sink sink{controllable.onEnemyClicked};
             sink.connect<&DefaultState::onEnemyClick>(this);
 
             auto& combatableActor = registry->get<CombatableActor>(entity);
-            // combatableActor.onAttackCancelled->SetCallback<DefaultState, &DefaultState::onFloorClick>(*this);
 
-            entt::sink floorClickSink{combatableActor.onAttackCancelledSig};
+            // Bridge was created in GameObjectFactory to connect this to cursor
+            entt::sink floorClickSink{combatableActor.onAttackCancelled};
             floorClickSink.connect<&DefaultState::onFloorClick>(this);
             // ----------------------------
 
@@ -192,30 +189,18 @@ namespace sage
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
 
             onTargetDeathBridge = gameData->bridgeManager->CreateBridge<entt::entity>(
-                entity, enemyCombatable.onDeath, combatable.onTargetDeathSig);
-            // combatable.onTargetDeathBridge->BridgeEvents(enemyCombatable.onDeath, combatable.onTargetDeathSig);
-            entt::sink sink{combatable.onTargetDeathSig};
+                entity, enemyCombatable.onDeath, combatable.onTargetDeath);
+            entt::sink sink{combatable.onTargetDeath};
             sink.connect<&CombatState::onTargetDeath>(this);
-            // combatable.onTargetDeath->SetCallback<CombatState, &CombatState::onTargetDeath>(*this);
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
-            // if (combatable.target != entt::null)
-            // {
-            //     auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
-            //     entt::sink sink{enemyCombatable.onDeath};
-            //     sink.disconnect<&CombatableActor::TargetDeath>(combatable);
-            // }
 
-            // combatable.onTargetDeathBridge->DisconnectAll();
             gameData->bridgeManager->RemoveBridge(onTargetDeathBridge);
-            entt::sink sink{combatable.onTargetDeathSig};
+            entt::sink sink{combatable.onTargetDeath};
             sink.disconnect<&CombatState::onTargetDeath>(this);
-
-            // entt::sink combatableSink{combatable.onTargetDeath};
-            // combatableSink.disconnect<&CombatState::onTargetDeath>(this);
 
             auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
             autoAttackAbility.Cancel(entity);
