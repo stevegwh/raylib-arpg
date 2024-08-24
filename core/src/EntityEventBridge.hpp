@@ -28,15 +28,16 @@ namespace sage
         {
         }
 
-        void Connect(entt::sigh<void(Args...)>& signal)
+        void Observe(entt::sigh<void(Args...)>& signal)
         {
             entt::sink sink{signal};
             connection = sink.template connect<&EntityEventBridge::onEventPublish>(*this);
         }
 
         template <typename Instance, auto Func>
-        void Subscribe(Instance& instance)
+        void SetCallback(Instance& instance)
         {
+            // assert(callback == nullptr);
             if constexpr (std::is_invocable_v<decltype(Func), Instance&, entt::entity, Args...>)
             {
                 callback = [&instance](entt::entity e, Args... args) {
@@ -47,29 +48,27 @@ namespace sage
             {
                 callback = [&instance](entt::entity e, Args...) { (instance.*Func)(e); };
             }
-            // else
-            // {
-            //     static_assert(false, "Subscribe: Invalid function signature");
-            // }
         }
 
-        void Unsubscribe()
+        void RemoveCallback()
         {
             callback = nullptr;
         }
 
-        void UnsubscribeAll()
+        void StopObserving()
         {
-            Unsubscribe();
-            if (connection)
-            {
-                connection.release();
-            }
+            connection.release();
+        }
+
+        void DisconnectAll()
+        {
+            RemoveCallback();
+            StopObserving();
         }
 
         ~EntityEventBridge()
         {
-            UnsubscribeAll();
+            DisconnectAll();
         }
     };
 

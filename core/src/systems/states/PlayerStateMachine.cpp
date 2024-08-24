@@ -62,7 +62,7 @@ namespace sage
             sink.connect<&DefaultState::onEnemyClick>(this);
 
             auto& combatableActor = registry->get<CombatableActor>(entity);
-            combatableActor.onAttackCancelledb->Subscribe<DefaultState, &DefaultState::onFloorClick>(*this);
+            combatableActor.onAttackCancelled->SetCallback<DefaultState, &DefaultState::onFloorClick>(*this);
 
             // entt::sink floorClickSink{combatableActor.onAttackCancelled};
             // cnxOnFloorClick = floorClickSink.connect<&DefaultState::onFloorClick>(this);
@@ -188,25 +188,25 @@ namespace sage
             assert(combatable.target != entt::null);
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
-            entt::sink sink{enemyCombatable.onDeath};
-            sink.connect<&CombatableActor::TargetDeath>(combatable);
 
-            entt::sink combatableSink{combatable.onTargetDeath};
-            combatableSink.connect<&CombatState::onTargetDeath>(this);
+            combatable.onTargetDeath->Observe(enemyCombatable.onDeath);
+            combatable.onTargetDeath->SetCallback<CombatState, &CombatState::onTargetDeath>(*this);
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
-            if (combatable.target != entt::null)
-            {
-                auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
-                entt::sink sink{enemyCombatable.onDeath};
-                sink.disconnect<&CombatableActor::TargetDeath>(combatable);
-            }
+            // if (combatable.target != entt::null)
+            // {
+            //     auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
+            //     entt::sink sink{enemyCombatable.onDeath};
+            //     sink.disconnect<&CombatableActor::TargetDeath>(combatable);
+            // }
 
-            entt::sink combatableSink{combatable.onTargetDeath};
-            combatableSink.disconnect<&CombatState::onTargetDeath>(this);
+            combatable.onTargetDeath->DisconnectAll();
+
+            // entt::sink combatableSink{combatable.onTargetDeath};
+            // combatableSink.disconnect<&CombatState::onTargetDeath>(this);
 
             auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
             autoAttackAbility.Cancel(entity);

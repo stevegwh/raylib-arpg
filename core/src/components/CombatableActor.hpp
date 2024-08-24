@@ -47,10 +47,8 @@ namespace sage
         // Below are "bridge" functions that hook onto mouse events (etc.) and publish the
         // above signals but with a reference to the self (entity) so the system can use
         // the entity to get the component data.
-        void AttackCancelled();
-        void TargetDeath(entt::entity _target);
-
-        std::unique_ptr<EntityEventBridge<entt::entity>> onAttackCancelledb;
+        std::unique_ptr<EntityEventBridge<entt::entity>> onAttackCancelled;
+        std::unique_ptr<EntityEventBridge<entt::entity>> onTargetDeath;
 
         int hp = 100;
         entt::entity self;
@@ -61,8 +59,8 @@ namespace sage
 
         entt::sigh<void(AttackData)> onHit{}; // Self, attacker, damage
         entt::sigh<void(entt::entity)> onDeath{};
-        entt::sigh<void(entt::entity)> onAttackCancelled{};           // Self
-        entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
+        // entt::sigh<void(entt::entity)> onAttackCancelled{};           // Self
+        // entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(entt::entity _self);
     };
