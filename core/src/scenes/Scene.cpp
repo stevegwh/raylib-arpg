@@ -19,6 +19,7 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
+#include "systems/TimerSystem.hpp"
 
 #include <GameObjectFactory.hpp>
 
