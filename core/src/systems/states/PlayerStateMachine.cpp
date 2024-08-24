@@ -22,7 +22,7 @@ namespace sage
     {
         GameData* gameData;
 
-        void onFloorClick(entt::entity self)
+        void onFloorClick(entt::entity self, entt::entity x)
         {
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::Default);
@@ -62,10 +62,10 @@ namespace sage
             sink.connect<&DefaultState::onEnemyClick>(this);
 
             auto& combatableActor = registry->get<CombatableActor>(entity);
-            combatableActor.onAttackCancelled->SetCallback<DefaultState, &DefaultState::onFloorClick>(*this);
+            // combatableActor.onAttackCancelled->SetCallback<DefaultState, &DefaultState::onFloorClick>(*this);
 
-            // entt::sink floorClickSink{combatableActor.onAttackCancelled};
-            // cnxOnFloorClick = floorClickSink.connect<&DefaultState::onFloorClick>(this);
+            entt::sink floorClickSink{combatableActor.onAttackCancelledSig};
+            floorClickSink.connect<&DefaultState::onFloorClick>(this);
             // ----------------------------
 
             auto& animation = registry->get<Animation>(entity);
@@ -157,6 +157,7 @@ namespace sage
 
         void onTargetDeath(entt::entity self, entt::entity target)
         {
+
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = entt::null;
             auto& playerState = registry->get<PlayerState>(self);
@@ -189,8 +190,10 @@ namespace sage
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
 
-            combatable.onTargetDeath->Observe(enemyCombatable.onDeath);
-            combatable.onTargetDeath->SetCallback<CombatState, &CombatState::onTargetDeath>(*this);
+            combatable.onTargetDeath->BridgeEvents(enemyCombatable.onDeath, combatable.onTargetDeathSig);
+            entt::sink sink{combatable.onTargetDeathSig};
+            sink.connect<&CombatState::onTargetDeath>(this);
+            // combatable.onTargetDeath->SetCallback<CombatState, &CombatState::onTargetDeath>(*this);
         }
 
         void OnStateExit(entt::entity entity) override
@@ -204,6 +207,8 @@ namespace sage
             // }
 
             combatable.onTargetDeath->DisconnectAll();
+            entt::sink sink{combatable.onTargetDeathSig};
+            sink.disconnect<&CombatState::onTargetDeath>(this);
 
             // entt::sink combatableSink{combatable.onTargetDeath};
             // combatableSink.disconnect<&CombatState::onTargetDeath>(this);

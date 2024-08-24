@@ -13,14 +13,11 @@ namespace sage
       private:
         entt::entity subscriber;
         entt::connection connection;
-        std::function<void(entt::entity, Args...)> callback;
+        entt::sigh<void(entt::entity, Args...)>* outSignal;
 
         void onEventPublish(Args... args)
         {
-            if (callback)
-            {
-                callback(subscriber, std::forward<Args>(args)...);
-            }
+            outSignal->publish(subscriber, args...);
         }
 
       public:
@@ -28,31 +25,11 @@ namespace sage
         {
         }
 
-        void Observe(entt::sigh<void(Args...)>& signal)
+        void BridgeEvents(entt::sigh<void(Args...)>& signal, entt::sigh<void(entt::entity, Args...)>& _outSignal)
         {
             entt::sink sink{signal};
             connection = sink.template connect<&EntityEventBridge::onEventPublish>(*this);
-        }
-
-        template <typename Instance, auto Func>
-        void SetCallback(Instance& instance)
-        {
-            // assert(callback == nullptr);
-            if constexpr (std::is_invocable_v<decltype(Func), Instance&, entt::entity, Args...>)
-            {
-                callback = [&instance](entt::entity e, Args... args) {
-                    (instance.*Func)(e, std::forward<Args>(args)...);
-                };
-            }
-            else if constexpr (std::is_invocable_v<decltype(Func), Instance&, entt::entity>)
-            {
-                callback = [&instance](entt::entity e, Args...) { (instance.*Func)(e); };
-            }
-        }
-
-        void RemoveCallback()
-        {
-            callback = nullptr;
+            outSignal = &_outSignal;
         }
 
         void StopObserving()
@@ -62,7 +39,6 @@ namespace sage
 
         void DisconnectAll()
         {
-            RemoveCallback();
             StopObserving();
         }
 
