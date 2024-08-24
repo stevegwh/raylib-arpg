@@ -213,10 +213,11 @@ namespace sage
         auto& combatable = registry->emplace<CombatableActor>(id, id);
         combatable.actorType = CombatableActorType::PLAYER;
         registry->emplace<PlayerAutoAttack>(id, registry, game);
-        {
-            entt::sink sink{game->cursor->onFloorClick};
-            sink.connect<&CombatableActor::AttackCancelled>(combatable);
-        }
+        // {
+        //     entt::sink sink{game->cursor->onFloorClick};
+        //     sink.connect<&CombatableActor::AttackCancelled>(combatable);
+        // }
+        combatable.onAttackCancelledb->Connect(game->cursor->onFloorClick);
         // ---
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);

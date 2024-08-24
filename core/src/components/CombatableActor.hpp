@@ -5,6 +5,9 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <memory>
+
+#include "EntityEventBridge.hpp"
 
 namespace sage
 {
@@ -47,6 +50,8 @@ namespace sage
         void AttackCancelled();
         void TargetDeath(entt::entity _target);
 
+        std::unique_ptr<EntityEventBridge<entt::entity>> onAttackCancelledb;
+
         int hp = 100;
         entt::entity self;
         CombatableActorType actorType = CombatableActorType::WAVEMOB;
@@ -56,9 +61,8 @@ namespace sage
 
         entt::sigh<void(AttackData)> onHit{}; // Self, attacker, damage
         entt::sigh<void(entt::entity)> onDeath{};
-        entt::sigh<void(entt::entity)> onAttackCancelled{}; // Self
-        entt::sigh<void(entt::entity, entt::entity)>
-            onTargetDeath{}; // Self, target (that died)
+        entt::sigh<void(entt::entity)> onAttackCancelled{};           // Self
+        entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(entt::entity _self);
     };
