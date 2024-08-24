@@ -217,7 +217,8 @@ namespace sage
         //     entt::sink sink{game->cursor->onFloorClick};
         //     sink.connect<&CombatableActor::AttackCancelled>(combatable);
         // }
-        combatable.onAttackCancelled->Observe(game->cursor->onFloorClick);
+        // combatable.onAttackCancelled->SetObservableEvent(game->cursor->onFloorClick);
+        combatable.onAttackCancelled->BridgeEvents(game->cursor->onFloorClick, combatable.onAttackCancelledSig);
         // ---
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);

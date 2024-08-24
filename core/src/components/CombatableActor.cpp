@@ -12,5 +12,7 @@ namespace sage
           onAttackCancelled(std::make_unique<EntityEventBridge<entt::entity>>(_self)),
           onTargetDeath(std::make_unique<EntityEventBridge<entt::entity>>(_self))
     {
+        // onAttackCancelled->SetOutSignal(onAttackCancelledSig);
+        // onTargetDeath->SetOutSignal(onTargetDeathSig);
     }
 } // namespace sage
