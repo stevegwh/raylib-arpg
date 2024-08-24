@@ -1,6 +1,7 @@
 #include "StateMachines.hpp"
 
 #include "GameData.hpp"
+#include "scenes/Scene.hpp"
 
 #include "GameStateMachine.hpp"
 #include "PlayerStateMachine.hpp"

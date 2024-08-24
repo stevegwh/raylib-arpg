@@ -5,6 +5,7 @@
 namespace sage
 {
     class GameData; // forward declaration
+    class Scene;    // forward declaration
     class WavemobStateController;
     class GameStateController;
     class PlayerStateController;

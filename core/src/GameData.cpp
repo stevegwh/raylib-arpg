@@ -20,6 +20,7 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
+#include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
@@ -28,7 +29,8 @@
 
 namespace sage
 {
-    GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
+    GameData::GameData(
+        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, LightSubSystem* _lightSubSystem)
         : registry(_registry),
           userInput(std::make_unique<UserInput>(_keyMapping, settings)),
           cursor(std::make_unique<Cursor>(registry, this)),
@@ -47,7 +49,8 @@ namespace sage
           abilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),
           timerSystem(std::make_unique<TimerSystem>(_registry)),
-          signalReflectionManager(std::make_unique<EntityReflectionSignalRouter>())
+          signalReflectionManager(std::make_unique<EntityReflectionSignalRouter>()),
+          lightSubSystem(_lightSubSystem)
     {
     }
 

@@ -21,8 +21,8 @@ namespace sage
         entt::registry* registry;
 
       public:
-        std::unique_ptr<GameData> data;
         std::unique_ptr<LightSubSystem> lightSubSystem;
+        std::unique_ptr<GameData> data;
         entt::sigh<void()> sceneChange;
 
         virtual void Update();

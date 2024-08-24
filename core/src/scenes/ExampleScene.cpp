@@ -93,7 +93,7 @@ namespace sage
         : Scene(_registry, _keyMapping, _settings, mapPath)
     {
         lightSubSystem->lights[0] =
-            CreateLight(LIGHT_POINT, {0, 25, 0}, Vector3Zero(), WHITE, lightSubSystem->shader);
+            CreateLight(LIGHT_POINT, {0, 50, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
         // std::string mapPath = "resources/models/obj/level-basic.obj";
         auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
