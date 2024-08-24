@@ -44,8 +44,8 @@ namespace sage
     {
 
       public:
-        std::unique_ptr<EntityEventBridge<entt::entity>> onAttackCancelledBridge;
-        std::unique_ptr<EntityEventBridge<entt::entity>> onTargetDeathBridge;
+        // std::unique_ptr<EntityEventBridge<entt::entity>> onAttackCancelledBridge;
+        // std::unique_ptr<EntityEventBridge<entt::entity>> onTargetDeathBridge;
 
         int hp = 100;
         entt::entity self;

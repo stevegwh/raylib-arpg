@@ -154,6 +154,7 @@ namespace sage
     class PlayerStateController::CombatState : public StateMachine
     {
         GameData* gameData;
+        int onTargetDeathBridge;
 
         void onTargetDeath(entt::entity self, entt::entity target)
         {
@@ -190,7 +191,9 @@ namespace sage
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
 
-            combatable.onTargetDeathBridge->BridgeEvents(enemyCombatable.onDeath, combatable.onTargetDeathSig);
+            onTargetDeathBridge = gameData->bridgeManager->CreateBridge<entt::entity>(
+                entity, enemyCombatable.onDeath, combatable.onTargetDeathSig);
+            // combatable.onTargetDeathBridge->BridgeEvents(enemyCombatable.onDeath, combatable.onTargetDeathSig);
             entt::sink sink{combatable.onTargetDeathSig};
             sink.connect<&CombatState::onTargetDeath>(this);
             // combatable.onTargetDeath->SetCallback<CombatState, &CombatState::onTargetDeath>(*this);
@@ -206,7 +209,8 @@ namespace sage
             //     sink.disconnect<&CombatableActor::TargetDeath>(combatable);
             // }
 
-            combatable.onTargetDeathBridge->DisconnectAll();
+            // combatable.onTargetDeathBridge->DisconnectAll();
+            gameData->bridgeManager->RemoveBridge(onTargetDeathBridge);
             entt::sink sink{combatable.onTargetDeathSig};
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
