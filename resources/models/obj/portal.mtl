@@ -1,0 +1,13 @@
+# Blender 4.1.1 MTL File: 'Fantasy Portal 3D LowPoly Model.blend'
+# www.blender.org
+
+newmtl Fantasy_Portal_3D_LowPoly_Model_Textures
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd Fantasy Portal 3D LowPoly Model_Textures_01.png
+map_refl Fantasy Portal 3D LowPoly Model_Textures_Metallic.png
+map_Ke Fantasy Portal 3D LowPoly Model_Textures_Emissive.png

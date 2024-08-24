@@ -29,6 +29,7 @@ namespace sage
     class CombatSystem;
     class TimerSystem;
     class EntityReflectionSignalRouter;
+    class LightSubSystem;
 
     class GameData
     {
@@ -53,9 +54,14 @@ namespace sage
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
         std::unique_ptr<EntityReflectionSignalRouter> signalReflectionManager;
+        LightSubSystem* lightSubSystem;
 
         void Load();
         void Save() const;
-        GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
+        GameData(
+            entt::registry* _registry,
+            KeyMapping* _keyMapping,
+            Settings* _settings,
+            LightSubSystem* _lightSubSystem);
     };
 } // namespace sage

@@ -63,11 +63,13 @@ namespace sage
     Scene::Scene(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath)
         : registry(_registry),
-          data(std::make_unique<GameData>(_registry, _keyMapping, _settings)),
-          lightSubSystem(std::make_unique<LightSubSystem>(_registry))
+          lightSubSystem(std::make_unique<LightSubSystem>(_registry)),
+          data(std::make_unique<GameData>(_registry, _keyMapping, _settings, lightSubSystem.get()))
     {
         data->Load();
         float slices = 500;
+
+        // TODO: wat
         if (!FileExists("resources/output.bin"))
         {
             GameObjectFactory::loadMap(registry, this, slices, mapPath);

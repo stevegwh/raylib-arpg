@@ -54,10 +54,9 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createEnemy(
-        entt::registry* registry, GameData* game, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
-
         // Model/Rendering
         auto modelPath = "resources/models/gltf/goblin.glb";
         // sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"),
@@ -65,8 +64,8 @@ namespace sage
 
         auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx{};
-        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
@@ -91,7 +90,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-        registry->emplace<WavemobAutoAttack>(id, registry, game);
+        registry->emplace<WavemobAutoAttack>(id, registry, data);
 
         auto& healthbar = registry->emplace<HealthBar>(id);
         // ---
@@ -103,14 +102,14 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::ENEMY;
         // ---
 
-        // registry->emplace<StateEnemyDefault>(id);
+        data->lightSubSystem->LinkRenderableToLight(&renderable);
         registry->emplace<WavemobState>(id);
         // Always set state last to ensure everything is initialised properly before.
         return id;
     }
 
     entt::entity GameObjectFactory::createKnight(
-        entt::registry* registry, GameData* game, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
         auto modelPath = "resources/models/gltf/arissa.glb";
@@ -119,8 +118,8 @@ namespace sage
 
         auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx{};
-        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
@@ -131,6 +130,7 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+        renderable.name = name;
         renderable.name = name;
 
         // auto& combat = registry->emplace<HealthBar>(id);
@@ -149,11 +149,13 @@ namespace sage
         dialogue.sentence = "Hello, this is a test sentence.";
         dialogue.conversationPos =
             Vector3Add(transform.position(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+
+        data->lightSubSystem->LinkRenderableToLight(&renderable);
         return id;
     }
 
     entt::entity GameObjectFactory::createPlayer(
-        entt::registry* registry, GameData* game, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         // TODO: On load, the actor's collision box doesn't seem to be correct. Causes a
         // bug that, if I don't move before casting a move, the enemies don't register
@@ -163,8 +165,8 @@ namespace sage
 
         auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx{};
-        game->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = game->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z}, id);
         transform.SetScale(1.0f, id);
         transform.SetRotation({0, 0, 0}, id);
@@ -197,7 +199,7 @@ namespace sage
         }
         {
             // TODO: Just to test animations on demand
-            entt::sink sink{game->userInput->keyIPressed};
+            entt::sink sink{data->userInput->keyIPressed};
             sink.connect<[](Animation& animation) {
                 if (animation.animIndex == 0)
                 {
@@ -213,9 +215,9 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
-        registry->emplace<PlayerAutoAttack>(id, registry, game);
-        game->signalReflectionManager->CreateHook<entt::entity>(
-            id, game->cursor->onFloorClick, combatable.onAttackCancelled);
+        registry->emplace<PlayerAutoAttack>(id, registry, data);
+        data->signalReflectionManager->CreateHook<entt::entity>(
+            id, data->cursor->onFloorClick, combatable.onAttackCancelled);
         // ---
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
@@ -226,10 +228,11 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
-        auto& controllable = registry->emplace<ControllableActor>(id, id, game->cursor.get());
-        game->controllableActorSystem->SetControlledActor(id);
+        auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
+        data->controllableActorSystem->SetControlledActor(id);
 
         registry->emplace<PlayerState>(id);
+        data->lightSubSystem->LinkRenderableToLight(&renderable);
         // Always set state last to ensure everything is initialised properly before.
         return id;
     }
@@ -349,46 +352,72 @@ namespace sage
 
     void GameObjectFactory::createPortal(entt::registry* registry, GameData* data, Vector3 position)
     {
+        {
+
+            entt::entity id = registry->create();
+
+            auto& transform = registry->emplace<sgTransform>(id);
+            GridSquare actorIdx{};
+            data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+            float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+            transform.SetPosition({position.x, 12, position.z}, id);
+            transform.SetScale(1.0f, id);
+            transform.SetRotation({0, 0, 0}, id);
+
+            Texture2D texture = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_50.png");
+            Texture2D texture2 = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_45.png");
+
+            Matrix modelTransform = MatrixRotateX(90 * DEG2RAD);
+            Model model = LoadModelFromMesh(GenMeshPlane(20, 20, 1, 1));
+            model.transform = modelTransform;
+
+            auto& timer = registry->emplace<Timer>(id);
+            timer.SetMaxTime(1000000);
+            timer.Start();
+
+            Shader shader = LoadShader(NULL, "resources/shaders/glsl330/portal.frag");
+            int secondsLoc = GetShaderLocation(shader, "seconds");
+            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+            // Using MATERIAL_MAP_EMISSION as a spare slot to use for 2nd texture
+            model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = texture2;
+            shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
+            model.materials[0].shader = shader;
+
+            auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+            renderable.name = "Portal";
+            renderable.textures.push_back(texture);
+            renderable.textures.push_back(texture2);
+            renderable.shader = shader;
+            renderable.reqShaderUpdate = [data, secondsLoc](entt::entity entity) -> void {
+                auto& r = data->registry->get<Renderable>(entity);
+                auto& t = data->registry->get<Timer>(entity);
+                auto time = t.GetCurrentTime();
+                SetShaderValue(r.shader.value(), secondsLoc, &time, SHADER_UNIFORM_FLOAT);
+            };
+
+            BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
+            auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
+            collideable.collisionLayer = CollisionLayer::BUILDING;
+        }
+
         entt::entity id = registry->create();
 
         auto& transform = registry->emplace<sgTransform>(id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, 12, position.z}, id);
-        transform.SetScale(1.0f, id);
+        transform.SetPosition({position.x, height, position.z}, id);
+        transform.SetScale(10.0f, id);
         transform.SetRotation({0, 0, 0}, id);
 
-        Texture2D texture = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_50.png");
-        Texture2D texture2 = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_45.png");
+        Matrix modelTransform = MatrixIdentity();
+        Model model = ResourceManager::StaticModelLoad("resources/models/obj/portal.obj");
 
-        Matrix modelTransform = MatrixRotateX(90 * DEG2RAD);
-        Model model = LoadModelFromMesh(GenMeshPlane(15, 20, 1, 1));
         model.transform = modelTransform;
 
-        auto& timer = registry->emplace<Timer>(id);
-        timer.SetMaxTime(1000000);
-        timer.Start();
-
-        Shader shader = LoadShader(NULL, "resources/shaders/glsl330/portal.frag");
-        int secondsLoc = GetShaderLocation(shader, "seconds");
-        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-        // Using MATERIAL_MAP_EMISSION as a spare slot to use for 2nd texture
-        model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = texture2;
-        shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
-        model.materials[0].shader = shader;
-
         auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
-        renderable.name = "Portal";
-        renderable.textures.push_back(texture);
-        renderable.textures.push_back(texture2);
-        renderable.shader = shader;
-        renderable.reqShaderUpdate = [data, secondsLoc](entt::entity entity) -> void {
-            auto& r = data->registry->get<Renderable>(entity);
-            auto& t = data->registry->get<Timer>(entity);
-            auto time = t.GetCurrentTime();
-            SetShaderValue(r.shader.value(), secondsLoc, &time, SHADER_UNIFORM_FLOAT);
-        };
+        renderable.name = "Portal Outer";
+        data->lightSubSystem->LinkRenderableToLight(&renderable);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);

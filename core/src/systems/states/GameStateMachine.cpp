@@ -7,6 +7,7 @@
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "systems/BaseSystem.hpp"
+#include "systems/LightSubSystem.hpp"
 #include <ResourceManager.hpp>
 
 #include <iostream>
