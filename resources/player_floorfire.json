@@ -16,7 +16,7 @@
             "animationDelay": 0.75
         },
         "vfx": {
-            "name": "FloorFire"
+            "name": "Fireball"
         }
     }
 }

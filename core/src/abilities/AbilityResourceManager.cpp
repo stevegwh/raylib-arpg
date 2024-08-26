@@ -4,7 +4,9 @@
 
 #include "vfx/VisualFX.hpp"
 
+#include "vfx/FireballVFX.hpp"
 #include "vfx/FloorFireVFX.hpp"
+#include "vfx/LightningBallVFX.hpp"
 #include "vfx/RainOfFireVFX.hpp"
 #include "vfx/WhirlwindVFX.hpp"
 
@@ -44,28 +46,33 @@ namespace sage
     }
 
     std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
-        AbilityData::VisualFXData data, GameData* _gameData)
+        AbilityData::VisualFXData& data, GameData* _gameData)
     {
+        std::unique_ptr<VisualFX> obj;
+
         if (data.name == "RainOfFire")
         {
-            auto obj = std::make_unique<RainOfFireVFX>(_gameData);
-            data.ptr = obj.get();
-            return std::move(obj);
+            obj = std::make_unique<RainOfFireVFX>(_gameData);
         }
         else if (data.name == "FloorFire")
         {
-            auto obj = std::make_unique<FloorFireVFX>(_gameData);
-            data.ptr = obj.get();
-            return std::move(obj);
+            obj = std::make_unique<FloorFireVFX>(_gameData);
         }
         else if (data.name == "360SwordSlash")
         {
-            auto obj = std::make_unique<WhirlwindVFX>(_gameData);
-            data.ptr = obj.get();
-            return std::move(obj);
+            obj = std::make_unique<WhirlwindVFX>(_gameData);
         }
-
-        return nullptr;
+        else if (data.name == "LightningBall")
+        {
+            obj = std::make_unique<LightningBallVFX>(_gameData);
+        }
+        else if (data.name == "Fireball")
+        {
+            obj = std::make_unique<FireballVFX>(_gameData);
+        }
+        data.ptr = obj.get();
+        return std::move(obj);
+        ;
     }
 
     AbilityFunctionEnum AbilityResourceManager::StringToExecuteFuncEnum(const std::string& name)
