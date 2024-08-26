@@ -114,10 +114,10 @@ namespace sage
 
     void CursorAbility::confirm(entt::entity self)
     {
-        if (vfx)
-        {
-            vfx->InitSystem(cursor->terrainCollision().point); // TODO: Add a target parameter in abilityData
-        }
+        // if (vfx)
+        // {
+        //     vfx->InitSystem(cursor->terrainCollision().point); // TODO: Add a target parameter in abilityData
+        // }
         Ability::Init(self);
     }
 

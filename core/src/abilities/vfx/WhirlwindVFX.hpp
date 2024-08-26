@@ -26,7 +26,6 @@ namespace sage
         Model slashModel;
 
       public:
-        bool active = false;
         void InitSystem(const Vector3& _target) override;
         void Update(float dt) override;
         void Draw3D() const override;

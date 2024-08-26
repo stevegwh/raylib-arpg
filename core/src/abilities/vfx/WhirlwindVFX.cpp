@@ -25,18 +25,18 @@ namespace sage
     {
         // Draw model (if needed)
         rlDisableBackfaceCulling();
-        DrawModelEx(slashModel, origin, Vector3{0, 1, 0}, time * 1000, Vector3{3.0, 3.0, 3.0}, WHITE);
+        DrawModelEx(slashModel, origin, Vector3{0, 1, 0}, time * 1000, Vector3{5.0, 1.0, 5.0}, WHITE);
         rlEnableBackfaceCulling();
     }
 
     void WhirlwindVFX::Update(float dt)
     {
-        time += GetFrameTime();
-        // if (time > 0.3) // TODO: Magic number
-        // {
-        //     time = 0;
-        //     active = false;
-        // }
+        time += dt;
+        if (time > 0.1) // TODO: Magic number
+        {
+            time = 0;
+            active = false;
+        }
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
     }
 
@@ -49,21 +49,20 @@ namespace sage
     {
         active = true;
         origin = _target;
-        origin.y = 0.5; // TODO: tmp
+        origin.y = 5; // TODO: tmp
         time = 0;
     }
 
     WhirlwindVFX::~WhirlwindVFX()
     {
-        // UnloadShader(shader);
-        // UnloadTexture(texture);
-        // UnloadTexture(texture2);
-        // UnloadModel(slashModel);
+        UnloadShader(shader);
+        UnloadTexture(texture);
+        UnloadTexture(texture2);
+        UnloadModel(slashModel);
     }
 
     WhirlwindVFX::WhirlwindVFX(GameData* _gameData) : VisualFX(_gameData)
     {
-        std::cout << "Whirlwind VFX created \n";
         // Texture/Material
         texture = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_59.png");
         texture2 = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_45.png");
@@ -72,6 +71,7 @@ namespace sage
         secondsLoc = GetShaderLocation(shader, "seconds");
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
         slashModel = LoadModel("resources/models/obj/flattorus.obj");
+        // slashModel.transform = MatrixRotateY(180);
 
         slashModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
         // Using MATERIAL_MAP_EMISSION as a spare slot to use for 2nd texture
