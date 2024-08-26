@@ -29,10 +29,10 @@ namespace sage
 
       protected:
         entt::registry* registry;
+        AbilityData abilityData;
         Timer cooldownTimer;
         Timer animationDelayTimer;
         std::unique_ptr<VisualFX> vfx;
-        AbilityData abilityData;
 
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;

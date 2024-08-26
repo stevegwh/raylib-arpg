@@ -104,7 +104,7 @@ namespace sage
         ad.animationParams.oneShot = true;
         ad.animationParams.animationDelay = 0.75f;
 
-        ad.vfx.name = "FloorFire";
+        ad.vfx.name = "Fireball";
         ad.indicator.indicatorKey = "CircularCursor";
 
         // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(

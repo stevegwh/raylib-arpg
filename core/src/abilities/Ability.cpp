@@ -172,7 +172,7 @@ namespace sage
         : registry(registry),
           abilityData(_abilityData),
           gameData(_gameData),
-          vfx(AbilityResourceManager::GetInstance().GetVisualFX(_abilityData.vfx, _gameData))
+          vfx(AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData))
     {
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
