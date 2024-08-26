@@ -126,6 +126,7 @@ namespace sage
         state->Update(self);
         if (vfx && vfx->active)
         {
+            // assert(true == false);
             vfx->Update(GetFrameTime());
         }
     }
@@ -143,6 +144,13 @@ namespace sage
     {
         abilityData.executeFunc->Execute(registry, self, abilityData);
 
+        ChangeState(self, AbilityStateEnum::IDLE);
+    }
+
+    void Ability::Init(entt::entity self)
+    {
+        auto& animation = registry->get<Animation>(self);
+        animation.ChangeAnimationByParams(abilityData.animationParams);
         // if (ad.vfx.behaviour == AbilityData::VFXBehaviour::SpawnAtPlayer)
         // vfx->InitSystem(data->controllableActorSystem->GetControlledActor()); // TODO: store caster's entity ID
         // in AbilityData
@@ -153,14 +161,6 @@ namespace sage
                 registry->get<sgTransform>(gameData->controllableActorSystem->GetControlledActor()).position();
             vfx->InitSystem(casterPos);
         }
-
-        ChangeState(self, AbilityStateEnum::IDLE);
-    }
-
-    void Ability::Init(entt::entity self)
-    {
-        auto& animation = registry->get<Animation>(self);
-        animation.ChangeAnimationByParams(abilityData.animationParams);
         ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 

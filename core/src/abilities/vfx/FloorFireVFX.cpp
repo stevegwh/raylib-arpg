@@ -42,12 +42,12 @@ namespace sage
     FloorFireVFX::FloorFireVFX(GameData* _gameData)
         : VisualFX(_gameData),
           texture(std::make_unique<TextureTerrainOverlay>(
-              gameData->registry,
-              gameData->navigationGridSystem.get(),
+              _gameData->registry,
+              _gameData->navigationGridSystem.get(),
               "resources/textures/cursor/rainoffire_cursor.png",
               WHITE,
               "resources/shaders/floorfirefx.fs")),
-          shader(gameData->registry->get<Renderable>(texture->entity).shader.value())
+          shader(_gameData->registry->get<Renderable>(texture->entity).shader.value())
     {
         secondsLoc = GetShaderLocation(shader, "seconds");
         screenSizeLoc = GetShaderLocation(shader, "screenSize");

@@ -1,9 +1,9 @@
 {
     "value0": {
         "base": {
-            "cooldownDuration": 3.0,
-            "baseDamage": 25,
-            "range": 5.0,
+            "cooldownDuration": 0.15000000596046449,
+            "baseDamage": 10,
+            "range": 15.0,
             "radius": 0.0,
             "element": 0,
             "repeatable": false,
@@ -11,9 +11,9 @@
         },
         "animationParams": {
             "animEnum": 5,
-            "animSpeed": 1,
+            "animSpeed": 5,
             "oneShot": true,
-            "animationDelay": 0.6499999761581421
+            "animationDelay": 0.25
         },
         "vfx": {
             "name": "360SwordSlash"

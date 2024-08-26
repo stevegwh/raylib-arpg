@@ -128,7 +128,11 @@ namespace sage
 
     void TextureTerrainOverlay::Init(Vector3 mouseRayHit) // TODO: Should take radius as a parameter
     {
-        if (initialised) return;
+        if (initialised)
+        {
+            Update(mouseRayHit);
+            return;
+        };
         initialised = true;
 
         navigationGridSystem->WorldToGridSpace(mouseRayHit, lastHit);

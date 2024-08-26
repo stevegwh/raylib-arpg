@@ -156,17 +156,17 @@ namespace sage
     {
         AbilityData ad;
 
-        ad.base.cooldownDuration = 3;
-        ad.base.range = 5;
-        ad.base.baseDamage = 25;
+        ad.base.cooldownDuration = 0.15;
+        ad.base.range = 15;
+        ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.executeFuncName = "MultihitRadiusFromCaster";
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
-        ad.animationParams.animSpeed = 1;
+        ad.animationParams.animSpeed = 5;
         ad.animationParams.oneShot = true;
-        ad.animationParams.animationDelay = 0.65f;
+        ad.animationParams.animationDelay = 0.25f;
 
         ad.vfx.name = "360SwordSlash";
 
