@@ -48,16 +48,16 @@ namespace sage
         data->healthBarSystem->Update();
         data->stateMachines->Update();
         data->abilitySystem->Update();
-        const auto& playerTransform =
-            registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
-        fountain->SetOrigin(playerTransform.position());
-        fountain->Update(GetFrameTime());
-        if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
-        {
-            explosion->Restart();
-            explosion->SetOrigin(data->cursor->terrainCollision().point);
-        }
-        explosion->Update();
+        // const auto& playerTransform =
+        //     registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
+        // fountain->SetOrigin(playerTransform.position());
+        // fountain->Update(GetFrameTime());
+        // if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+        // {
+        //     explosion->Restart();
+        //     explosion->SetOrigin(data->cursor->terrainCollision().point);
+        // }
+        // explosion->Update();
         data->timerSystem->Update();
     }
 
@@ -72,7 +72,7 @@ namespace sage
 
         data->stateMachines->Draw3D();
         Scene::Draw3D();
-        fountain->Draw3D();
+        // fountain->Draw3D();
         data->healthBarSystem->Draw3D();
         data->abilitySystem->Draw3D();
     }
@@ -102,9 +102,9 @@ namespace sage
         const auto& col = registry->get<Collideable>(knight);
         data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
-        fountain = std::make_unique<SpiralFountainVFX>(data.get());
-        fountain->InitSystem({30.0f, 4, 20.0f});
-        explosion = std::make_unique<Explosion>(registry);
-        explosion->SetOrigin({0, 3, 0});
+        // fountain = std::make_unique<SpiralFountainVFX>(data.get());
+        // fountain->InitSystem({30.0f, 4, 20.0f});
+        // explosion = std::make_unique<Explosion>(registry);
+        // explosion->SetOrigin({0, 3, 0});
     }
 } // namespace sage

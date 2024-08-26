@@ -168,6 +168,8 @@ namespace sage
         ad.animationParams.oneShot = true;
         ad.animationParams.animationDelay = 0.65f;
 
+        ad.vfx.name = "360SwordSlash";
+
         serializer::SaveAbilityData(ad, "resources/whirlwind.json");
 
         ad.executeFunc =
