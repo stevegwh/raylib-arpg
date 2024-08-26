@@ -375,7 +375,7 @@ namespace sage
             timer.SetMaxTime(1000000);
             timer.Start();
 
-            Shader shader = LoadShader(NULL, "resources/shaders/glsl330/portal.frag");
+            Shader shader = LoadShader(NULL, "resources/shaders/custom/portal.fs");
             int secondsLoc = GetShaderLocation(shader, "seconds");
             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
             // Using MATERIAL_MAP_EMISSION as a spare slot to use for 2nd texture
@@ -385,8 +385,11 @@ namespace sage
 
             auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
             renderable.name = "Portal";
+
+            // Textures managed in renderable
             renderable.textures.push_back(texture);
             renderable.textures.push_back(texture2);
+
             renderable.shader = shader;
             renderable.reqShaderUpdate = [data, secondsLoc](entt::entity entity) -> void {
                 auto& r = data->registry->get<Renderable>(entity);

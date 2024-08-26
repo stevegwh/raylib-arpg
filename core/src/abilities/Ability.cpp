@@ -13,6 +13,10 @@
 #include "vfx/VisualFX.hpp"
 #include <cassert>
 
+#include "components/sgTransform.hpp"
+#include "systems/ControllableActorSystem.hpp"
+#include <iostream>
+
 namespace sage
 {
 
@@ -138,6 +142,18 @@ namespace sage
     void Ability::Execute(entt::entity self)
     {
         abilityData.executeFunc->Execute(registry, self, abilityData);
+
+        // if (ad.vfx.behaviour == AbilityData::VFXBehaviour::SpawnAtPlayer)
+        // vfx->InitSystem(data->controllableActorSystem->GetControlledActor()); // TODO: store caster's entity ID
+        // in AbilityData
+
+        if (vfx)
+        {
+            auto casterPos =
+                registry->get<sgTransform>(gameData->controllableActorSystem->GetControlledActor()).position();
+            vfx->InitSystem(casterPos);
+        }
+
         ChangeState(self, AbilityStateEnum::IDLE);
     }
 
@@ -152,16 +168,17 @@ namespace sage
     {
     }
 
-    Ability::Ability(entt::registry* registry, const AbilityData& abilityData, GameData* gameData)
+    Ability::Ability(entt::registry* registry, const AbilityData& _abilityData, GameData* _gameData)
         : registry(registry),
-          abilityData(abilityData),
-          vfx(AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, gameData))
+          abilityData(_abilityData),
+          gameData(_gameData),
+          vfx(AbilityResourceManager::GetInstance().GetVisualFX(_abilityData.vfx, _gameData))
     {
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
         auto idleState =
-            std::make_unique<IdleState>(cooldownTimer, animationDelayTimer, abilityData.base.repeatable);
+            std::make_unique<IdleState>(cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);

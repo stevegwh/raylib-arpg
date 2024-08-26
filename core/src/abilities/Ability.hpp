@@ -25,6 +25,8 @@ namespace sage
         class IdleState;
         class AwaitingExecutionState;
 
+        GameData* gameData;
+
       protected:
         entt::registry* registry;
         Timer cooldownTimer;
@@ -52,7 +54,7 @@ namespace sage
         virtual ~Ability();
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* registry, const AbilityData& abilityData, GameData* gameData);
+        Ability(entt::registry* registry, const AbilityData& abilityData, GameData* _gameData);
     };
 
 } // namespace sage
