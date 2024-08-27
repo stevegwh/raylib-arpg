@@ -274,19 +274,6 @@ namespace sage
 
     void Cursor::DrawDebug()
     {
-        // if (!m_mouseHitInfo.rlCollision.hit) return;
-        // if (contextLocked) return;
-        // DrawCube(m_mouseHitInfo.rlCollision.point, 0.5f, 0.5f, 0.5f, currentColor);
-        // Vector3 normalEnd;
-        // normalEnd.x = m_mouseHitInfo.rlCollision.point.x + m_mouseHitInfo.rlCollision.normal.x;
-        // normalEnd.y = m_mouseHitInfo.rlCollision.point.y + m_mouseHitInfo.rlCollision.normal.y;
-        // normalEnd.z = m_mouseHitInfo.rlCollision.point.z + m_mouseHitInfo.rlCollision.normal.z;
-
-        // DrawLine3D(m_mouseHitInfo.rlCollision.point, normalEnd, RED);
-    }
-
-    void Cursor::Draw3D()
-    {
         if (!m_mouseHitInfo.rlCollision.hit) return;
         if (contextLocked) return;
         DrawCube(m_mouseHitInfo.rlCollision.point, 0.5f, 0.5f, 0.5f, currentColor);
@@ -294,8 +281,11 @@ namespace sage
         normalEnd.x = m_mouseHitInfo.rlCollision.point.x + m_mouseHitInfo.rlCollision.normal.x;
         normalEnd.y = m_mouseHitInfo.rlCollision.point.y + m_mouseHitInfo.rlCollision.normal.y;
         normalEnd.z = m_mouseHitInfo.rlCollision.point.z + m_mouseHitInfo.rlCollision.normal.z;
-
         DrawLine3D(m_mouseHitInfo.rlCollision.point, normalEnd, RED);
+    }
+
+    void Cursor::Draw3D()
+    {
     }
 
     void Cursor::Draw2D()

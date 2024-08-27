@@ -26,8 +26,7 @@ namespace sage
         void UnlockState(entt::entity entity)
         {
             lockedEntities.erase(
-                std::remove(lockedEntities.begin(), lockedEntities.end(), entity),
-                lockedEntities.end());
+                std::remove(lockedEntities.begin(), lockedEntities.end(), entity), lockedEntities.end());
         }
         virtual ~StateMachine() = default;
 
@@ -36,6 +35,15 @@ namespace sage
         }
 
       public:
+        bool StateLocked(entt::entity entity)
+        {
+            if (std::find(lockedEntities.begin(), lockedEntities.end(), entity) != lockedEntities.end())
+            {
+                return true;
+            }
+            return false;
+        }
+
         virtual void OnStateEnter(entt::entity entity) {};
         virtual void OnStateExit(entt::entity entity) {};
         virtual void Update(entt::entity entity) {};
@@ -71,12 +79,12 @@ namespace sage
 
         void ChangeState(entt::entity entity, StateEnum oldState, StateEnum newState)
         {
-            // if (std::find(lockedEntities.begin(), lockedEntities.end(), entity) !=
-            //     lockedEntities.end())
-            // {
-            //     return;
-            // }
+
             auto* derived = static_cast<Derived*>(this);
+            if (derived->GetSystem(oldState)->StateLocked(entity))
+            {
+                return;
+            }
             derived->GetSystem(oldState)->OnStateExit(entity);
             derived->GetSystem(newState)->OnStateEnter(entity);
         }

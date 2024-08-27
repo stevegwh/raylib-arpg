@@ -41,9 +41,26 @@ namespace sage
     void Application::Update()
     {
         init();
+
+        scene = std::make_unique<ExampleScene>(
+            registry.get(), keyMapping.get(), settings.get(), "resources/models/obj/level-basic.obj");
+
         SetTargetFPS(60);
-        while (!WindowShouldClose()) // Detect window close button or ESC key
+        while (!exitWindow) // Detect window close button or ESC key
         {
+
+            if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;
+
+            if (exitWindowRequested)
+            {
+                // A request for close window has been issued, we can save data before closing
+                // or just show a message asking for confirmation
+
+                if (IsKeyPressed(KEY_Y))
+                    exitWindow = true;
+                else if (IsKeyPressed(KEY_N))
+                    exitWindowRequested = false;
+            }
             scene->Update();
             draw();
         }
@@ -52,11 +69,25 @@ namespace sage
     void Application::draw()
     {
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLUE);
         BeginMode3D(*scene->data->camera->getRaylibCam());
         scene->Draw3D();
         EndMode3D();
         scene->Draw2D();
+        DrawFPS(10, 10);
+
+        if (exitWindowRequested)
+        {
+            DrawRectangle(0, 100, settings->screenWidth, 200, BLACK);
+            auto textSize = MeasureText("Are you sure you want to exit program? [Y/N]", 30);
+            DrawText(
+                "Are you sure you want to exit program? [Y/N]",
+                (settings->screenWidth - textSize) / 2,
+                180,
+                30,
+                WHITE);
+        }
+
         EndDrawing();
     };
 
