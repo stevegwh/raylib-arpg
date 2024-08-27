@@ -28,6 +28,7 @@ namespace sage
         // callback function can call (I assume I can't pass these on as parameters
         // directly without some generic programming trickery)
         auto& targetCombat = registry->get<CombatableActor>(attackData.hit);
+        if (targetCombat.dying) return;
         targetCombat.hp -= attackData.damage;
         if (targetCombat.hp <= 0)
         {
@@ -44,9 +45,7 @@ namespace sage
 
     CombatSystem::CombatSystem(entt::registry* _registry) : registry(_registry)
     {
-        registry->on_construct<CombatableActor>()
-            .connect<&CombatSystem::onComponentAdded>(this);
-        registry->on_destroy<CombatableActor>()
-            .connect<&CombatSystem::onComponentRemoved>(this);
+        registry->on_construct<CombatableActor>().connect<&CombatSystem::onComponentAdded>(this);
+        registry->on_destroy<CombatableActor>().connect<&CombatSystem::onComponentRemoved>(this);
     }
 } // namespace sage
