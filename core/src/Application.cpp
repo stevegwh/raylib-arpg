@@ -43,7 +43,10 @@ namespace sage
         init();
 
         scene = std::make_unique<ExampleScene>(
-            registry.get(), keyMapping.get(), settings.get(), "resources/models/obj/level-basic.obj");
+            registry.get(),
+            keyMapping.get(),
+            settings.get(),
+            ""); // TODO: Map path is ignored atm (just loads output.bin)
 
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
