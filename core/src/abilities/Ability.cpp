@@ -168,6 +168,9 @@ namespace sage
     {
     }
 
+    // TODO: I feel the "self" arguments are redundant, might as well just make it a member (as entities hold full
+    // instances of abilities)
+
     Ability::Ability(entt::registry* registry, const AbilityData& _abilityData, GameData* _gameData)
         : registry(registry),
           abilityData(_abilityData),

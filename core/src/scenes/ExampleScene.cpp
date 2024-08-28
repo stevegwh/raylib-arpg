@@ -20,6 +20,7 @@
 #include "Settings.hpp"
 
 // Systems
+#include "systems/AbilitySystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -48,6 +49,7 @@ namespace sage
         data->healthBarSystem->Update();
         data->stateMachines->Update();
         data->abilitySystem->Update();
+        data->playerAbilitySystem->Update();
         // const auto& playerTransform =
         //     registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
         // fountain->SetOrigin(playerTransform.position());
@@ -75,6 +77,7 @@ namespace sage
         // fountain->Draw3D();
         data->healthBarSystem->Draw3D();
         data->abilitySystem->Draw3D();
+        data->playerAbilitySystem->Draw3D();
     }
 
     void ExampleScene::DrawDebug()
@@ -97,7 +100,10 @@ namespace sage
         // std::string mapPath = "resources/models/obj/level-basic.obj";
         auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
-        GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
+        // GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
+
+        GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
+
         // TODO: tmp
         const auto& col = registry->get<Collideable>(knight);
         data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);

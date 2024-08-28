@@ -29,11 +29,11 @@ namespace sage
         // directly without some generic programming trickery)
         auto& targetCombat = registry->get<CombatableActor>(attackData.hit);
         if (targetCombat.dying) return;
-        targetCombat.hp -= attackData.damage;
-        if (targetCombat.hp <= 0)
+        targetCombat.data.hp -= attackData.damage;
+        if (targetCombat.data.hp <= 0)
         {
             targetCombat.dying = true;
-            targetCombat.hp = 0;
+            targetCombat.data.hp = 0;
             targetCombat.onDeath.publish(attackData.hit);
         }
         if (registry->any_of<HealthBar>(attackData.hit))

@@ -4,6 +4,7 @@
 #include "components/CombatableActor.hpp"
 
 #include <cereal/cereal.hpp>
+#include <string>
 
 namespace sage
 {
@@ -17,6 +18,7 @@ namespace sage
     class AbilityData
     {
       public:
+        std::string name;
         struct BaseData
         {
             float cooldownDuration = 0;                      // How long per tick or per use

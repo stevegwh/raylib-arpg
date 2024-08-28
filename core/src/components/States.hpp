@@ -74,4 +74,18 @@ namespace sage
         {
         }
     };
+
+    enum class TowerStateEnum
+    {
+        Default,
+        Combat
+    };
+
+    class TowerState : public BaseState<TowerState, TowerStateEnum>
+    {
+      public:
+        TowerState() : BaseState(TowerStateEnum::Default)
+        {
+        }
+    };
 } // namespace sage
