@@ -10,6 +10,7 @@
 #include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 
+#include "systems/AbilitySystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
@@ -172,8 +173,8 @@ namespace sage
       public:
         void Update(entt::entity entity) override
         {
-            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
-            autoAttackAbility.Update(entity);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            autoAttackAbility->Update(entity);
         }
 
         void OnStateEnter(entt::entity entity) override
@@ -181,8 +182,8 @@ namespace sage
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
-            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
-            autoAttackAbility.Init(entity);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            autoAttackAbility->Init(entity);
 
             auto& combatable = registry->get<CombatableActor>(entity);
             assert(combatable.target != entt::null);
@@ -203,8 +204,8 @@ namespace sage
             entt::sink sink{combatable.onTargetDeath};
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
-            auto& autoAttackAbility = registry->get<PlayerAutoAttack>(entity);
-            autoAttackAbility.Cancel(entity);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            autoAttackAbility->Cancel(entity);
         }
 
         virtual ~CombatState() = default;
