@@ -13,7 +13,7 @@
             "animEnum": 5,
             "animSpeed": 5,
             "oneShot": true,
-            "animationDelay": 0.25
+            "animationDelay": 0.0
         },
         "vfx": {
             "name": "360SwordSlash"

@@ -6,9 +6,13 @@
 #include "ResourceManager.hpp"
 #include "scenes/Scene.hpp"
 
+#include "EntityReflectionSignalRouter.hpp"
+#include "GameData.hpp"
 #include "UserInput.hpp"
+#include <Timer.hpp>
 
 #include "abilities/Abilities.hpp"
+
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
@@ -19,14 +23,13 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
-#include "EntityReflectionSignalRouter.hpp"
-#include "GameData.hpp"
+
+#include "systems/AbilitySystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+#include "systems/PlayerAbilitySystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
-
-#include <Timer.hpp>
 
 #include "raymath.h"
 #include <slib.hpp>
@@ -90,6 +93,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
+
         registry->emplace<WavemobAutoAttack>(id, registry, data);
 
         auto& healthbar = registry->emplace<HealthBar>(id);
@@ -212,12 +216,24 @@ namespace sage
             }>(animation);
         }
 
+        auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
+        data->controllableActorSystem->SetControlledActor(id);
+
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
+
         registry->emplace<PlayerAutoAttack>(id, registry, data);
+        // data->abilitySystem->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
+
+        // Initialise starting abilities
+        data->abilitySystem->RegisterAbility(id, AbilityEnum::WHIRLWIND);
+        data->abilitySystem->RegisterAbility(id, AbilityEnum::RAINFOFIRE);
+        data->playerAbilitySystem->RefreshAbilities();
+
         data->signalReflectionManager->CreateHook<entt::entity>(
             id, data->cursor->onFloorClick, combatable.onAttackCancelled);
+
         // ---
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
@@ -228,11 +244,9 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
-        auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
-        data->controllableActorSystem->SetControlledActor(id);
+        data->lightSubSystem->LinkRenderableToLight(&renderable);
 
         registry->emplace<PlayerState>(id);
-        data->lightSubSystem->LinkRenderableToLight(&renderable);
         // Always set state last to ensure everything is initialised properly before.
         return id;
     }

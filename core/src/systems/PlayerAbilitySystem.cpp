@@ -1,23 +1,33 @@
 #include "PlayerAbilitySystem.hpp"
 
+#include "AbilitySystem.hpp"
+
 #include "abilities/Abilities.hpp"
 #include "abilities/Ability.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "UserInput.hpp"
 
+#include <cassert>
+
 namespace sage
 {
     void PlayerAbilitySystem::abilityOnePressed()
     {
+        // if (currentAbilities.empty())
+        // {
+        //     currentAbilities =
+        //         gameData->abilitySystem->GetAbilities(gameData->controllableActorSystem->GetControlledActor());
+        // }
+
         std::cout << "Ability 1 pressed \n";
-        if (currentAbilities[0] == -1 || !abilityMap[currentAbilities[0]]->CooldownReady())
+        if (abilitySlots[0] == -1 || !currentAbilities[abilitySlots[0]]->CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: "
-                      << abilityMap[currentAbilities[0]]->GetRemainingCooldownTime() << "\n";
+                      << currentAbilities[abilitySlots[0]]->GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilityMap[currentAbilities[0]]->Init(gameData->controllableActorSystem->GetControlledActor());
+        currentAbilities[abilitySlots[0]]->Init(gameData->controllableActorSystem->GetControlledActor());
         // TODO: Above does not work with "controlledactor" member, only with
         // GetControlledActor()
     }
@@ -25,42 +35,49 @@ namespace sage
     void PlayerAbilitySystem::abilityTwoPressed()
     {
         std::cout << "Ability 2 pressed \n";
-        if (currentAbilities[1] == -1 || !abilityMap[currentAbilities[1]]->CooldownReady())
+        if (abilitySlots[1] == -1 || !currentAbilities[abilitySlots[1]]->CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: "
-                      << abilityMap[currentAbilities[1]]->GetRemainingCooldownTime() << "\n";
+                      << currentAbilities[abilitySlots[1]]->GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilityMap[currentAbilities[1]]->Init(gameData->controllableActorSystem->GetControlledActor());
+        currentAbilities[abilitySlots[1]]->Init(gameData->controllableActorSystem->GetControlledActor());
     }
 
     void PlayerAbilitySystem::abilityThreePressed()
     {
         std::cout << "Ability 3 pressed \n";
-        if (currentAbilities[2] == -1 || !abilityMap[currentAbilities[2]]->CooldownReady())
+        if (abilitySlots[2] == -1 || !currentAbilities[abilitySlots[2]]->CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: "
-                      << abilityMap[currentAbilities[2]]->GetRemainingCooldownTime() << "\n";
+                      << currentAbilities[abilitySlots[2]]->GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilityMap[currentAbilities[2]]->Init(controlledActor);
+        currentAbilities[abilitySlots[2]]->Init(controlledActor);
     }
 
     void PlayerAbilitySystem::abilityFourPressed()
     {
         std::cout << "Ability 4 pressed \n";
-        if (currentAbilities[3] == -1 || !abilityMap[currentAbilities[3]]->CooldownReady())
+        if (abilitySlots[3] == -1 || !currentAbilities[abilitySlots[3]]->CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: "
-                      << abilityMap[currentAbilities[3]]->GetRemainingCooldownTime() << "\n";
+                      << currentAbilities[abilitySlots[3]]->GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilityMap[currentAbilities[3]]->Init(controlledActor);
+        currentAbilities[abilitySlots[3]]->Init(controlledActor);
+    }
+
+    void PlayerAbilitySystem::RefreshAbilities()
+    {
+        currentAbilities =
+            gameData->abilitySystem->GetAbilities(gameData->controllableActorSystem->GetControlledActor());
     }
 
     void PlayerAbilitySystem::onActorChanged()
     {
         controlledActor = gameData->controllableActorSystem->GetControlledActor();
+        RefreshAbilities();
         // TODO: Change abilities based on the new actor
     }
 
@@ -68,12 +85,12 @@ namespace sage
     {
         // More than likely should subscribe to an "ability end" event which then triggers
         // the change
-        currentAbilities[abilitySlot] = newAbilityIndex;
+        abilitySlots[abilitySlot] = newAbilityIndex;
     }
 
     void PlayerAbilitySystem::Update()
     {
-        for (auto& ability : abilityMap)
+        for (auto& ability : currentAbilities)
         {
             ability->Update(gameData->controllableActorSystem->GetControlledActor());
         }
@@ -86,7 +103,7 @@ namespace sage
 
     void PlayerAbilitySystem::Draw3D()
     {
-        for (auto& ability : abilityMap)
+        for (auto& ability : currentAbilities)
         {
             ability->Draw3D(gameData->controllableActorSystem->GetControlledActor());
         }
@@ -118,10 +135,24 @@ namespace sage
             sink.connect<&PlayerAbilitySystem::onActorChanged>(this);
         }
 
-        currentAbilities.fill(-1);
-        abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, gameData));
-        abilityMap.push_back(std::make_unique<FloorFire>(registry, gameData));
-        abilityMap.push_back(std::make_unique<RainOfFire>(registry, gameData));
+        abilitySlots.fill(-1);
+
+        // TODO: This should not be the main ability system.
+        // Owner of abilities should be a different class. This should be just for player control of abilities
+        // The AbilityResourceManager could initialise the abilities and manage them (but its static)
+
+        // abilityMap.push_back(std::make_unique<WhirlwindAbility>(registry, gameData));
+        // abilityMap.push_back(std::make_unique<FloorFire>(registry, gameData));
+        // abilityMap.push_back(std::make_unique<RainOfFire>(registry, gameData));
+
+        // TODO: Can get all abilities easily, but how to filter the auto attack? Do I just do it by name? Seems
+        // fragile and "hard coded"
+
+        assert(_gameData->controllableActorSystem->GetControlledActor() != entt::null);
+
+        // TODO: Abilities is empty here
+        // assert(!currentAbilities.empty());
+
         // TODO: These should be set by the player or another system
         ChangeAbility(0, 0);
         ChangeAbility(1, 1);
