@@ -25,6 +25,7 @@ namespace sage
     class DialogueSystem;
     class HealthBarSystem;
     class StateMachines;
+    class AbilitySystem;
     class PlayerAbilitySystem;
     class CombatSystem;
     class TimerSystem;
@@ -50,7 +51,8 @@ namespace sage
         std::unique_ptr<DialogueSystem> dialogueSystem;
         std::unique_ptr<HealthBarSystem> healthBarSystem;
         std::unique_ptr<StateMachines> stateMachines;
-        std::unique_ptr<PlayerAbilitySystem> abilitySystem;
+        std::unique_ptr<AbilitySystem> abilitySystem;
+        std::unique_ptr<PlayerAbilitySystem> playerAbilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
         std::unique_ptr<EntityReflectionSignalRouter> signalReflectionManager;

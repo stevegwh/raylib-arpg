@@ -16,8 +16,8 @@ namespace sage
         entt::entity controlledActor;
         GameData* gameData;
 
-        std::vector<std::unique_ptr<Ability>> abilityMap;
-        std::array<int, 4> currentAbilities{};
+        std::vector<Ability*> currentAbilities;
+        std::array<int, 4> abilitySlots{};
         void abilityOnePressed();
         void abilityTwoPressed();
         void abilityThreePressed();
@@ -26,6 +26,7 @@ namespace sage
 
       public:
         void ChangeAbility(int abilitySlot, int newAbilityIndex);
+        void RefreshAbilities();
         void Update();
         void Draw2D();
         void Draw3D();
