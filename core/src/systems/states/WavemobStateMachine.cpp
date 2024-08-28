@@ -7,6 +7,7 @@
 #include "components/CombatableActor.hpp"
 #include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
+#include "systems/AbilitySystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
@@ -128,8 +129,8 @@ namespace sage
 
         void OnStateEnter(entt::entity self) override
         {
-            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
-            autoAttackAbility.Cancel(self);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            autoAttackAbility->Cancel(self);
             const auto& combatable = registry->get<CombatableActor>(self);
             const auto& target = registry->get<sgTransform>(combatable.target).position();
             auto& animation = registry->get<Animation>(self);
@@ -159,6 +160,7 @@ namespace sage
 
     class WavemobStateController::CombatState : public StateMachine
     {
+        GameData* gameData;
         void onTargetDeath(entt::entity self, entt::entity target)
         {
             // This method is declared but not implemented in the original code
@@ -190,25 +192,26 @@ namespace sage
                 state.ChangeState(self, WavemobStateEnum::TargetOutOfRange);
                 return;
             }
-            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
-            autoAttackAbility.Update(self);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            autoAttackAbility->Update(self);
         }
 
         void OnStateEnter(entt::entity entity) override
         {
-            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(entity);
-            autoAttackAbility.Init(entity);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+            autoAttackAbility->Init(entity);
         }
 
         void OnStateExit(entt::entity entity) override
         {
-            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(entity);
-            autoAttackAbility.Cancel(entity);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+
+            autoAttackAbility->Cancel(entity);
         }
 
         virtual ~CombatState() = default;
 
-        CombatState(entt::registry* registry) : StateMachine(registry)
+        CombatState(entt::registry* registry, GameData* _gameData) : StateMachine(registry), gameData(_gameData)
         {
         }
     };
@@ -245,8 +248,8 @@ namespace sage
                 entt::sink sink{animation.onAnimationEnd};
                 sink.connect<&DyingState::destroyEntity>(this);
             }
-            auto& autoAttackAbility = registry->get<WavemobAutoAttack>(self);
-            autoAttackAbility.Cancel(self);
+            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            autoAttackAbility->Cancel(self);
             gameData->actorMovementSystem->CancelMovement(self);
         }
 
@@ -305,7 +308,7 @@ namespace sage
         : StateMachineController(registry),
           defaultState(new DefaultState(registry, gameData)),
           targetOutOfRangeState(new TargetOutOfRangeState(registry, gameData)),
-          combatState(new CombatState(registry)),
+          combatState(new CombatState(registry, gameData)),
           dyingState(new DyingState(registry, gameData))
     {
     }

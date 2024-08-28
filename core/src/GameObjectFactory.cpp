@@ -93,8 +93,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-
-        registry->emplace<WavemobAutoAttack>(id, registry, data);
+        data->abilitySystem->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
 
         auto& healthbar = registry->emplace<HealthBar>(id);
         // ---
@@ -223,13 +222,12 @@ namespace sage
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
 
-        registry->emplace<PlayerAutoAttack>(id, registry, data);
-        // data->abilitySystem->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
-
         // Initialise starting abilities
         data->abilitySystem->RegisterAbility(id, AbilityEnum::WHIRLWIND);
         data->abilitySystem->RegisterAbility(id, AbilityEnum::RAINFOFIRE);
         data->playerAbilitySystem->RefreshAbilities();
+        data->abilitySystem->RegisterAbility(
+            id, AbilityEnum::PLAYER_AUTOATTACK); // hack to avoid PAS having autoattack
 
         data->signalReflectionManager->CreateHook<entt::entity>(
             id, data->cursor->onFloorClick, combatable.onAttackCancelled);
