@@ -426,4 +426,32 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::BUILDING;
     }
+
+    void GameObjectFactory::createWizardTower(entt::registry* registry, GameData* data, Vector3 position)
+    {
+        entt::entity id = registry->create();
+
+        auto& transform = registry->emplace<sgTransform>(id);
+        GridSquare actorIdx{};
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        transform.SetPosition({position.x, height, position.z}, id);
+        transform.SetScale(1.0f, id);
+        transform.SetRotation({0, 0, 0}, id);
+
+        Matrix modelTransform = MatrixIdentity();
+        Model model = ResourceManager::StaticModelLoad("resources/models/obj/Wizard Tower 1.obj");
+
+        model.transform = modelTransform;
+
+        auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+        renderable.name = "Wizard Tower";
+        data->lightSubSystem->LinkRenderableToLight(&renderable);
+
+        BoundingBox bb = CalculateModelBoundingBox(model);
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
+        collideable.collisionLayer = CollisionLayer::BUILDING;
+
+        registry->emplace<TowerState>(id);
+    }
 } // namespace sage

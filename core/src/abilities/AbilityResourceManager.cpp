@@ -72,7 +72,6 @@ namespace sage
         }
         data.ptr = obj.get();
         return std::move(obj);
-        ;
     }
 
     AbilityFunctionEnum AbilityResourceManager::StringToExecuteFuncEnum(const std::string& name)

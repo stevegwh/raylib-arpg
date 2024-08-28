@@ -2,13 +2,15 @@
 
 #include "GameData.hpp"
 
-// NB: We have to include all the headers required to build GameData
+#include "abilities/Ability.hpp"
+#include "EntityReflectionSignalRouter.hpp"
+
 #include "Camera.hpp"
 #include "Cursor.hpp"
 #include "UserInput.hpp"
 
-#include "abilities/Ability.hpp"
-#include "EntityReflectionSignalRouter.hpp"
+// NB: We have to include all the headers required to build GameData
+#include "systems/AbilitySystem.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"

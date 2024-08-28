@@ -36,7 +36,7 @@ namespace sage
         ad.animationParams.animSpeed = 4;
         ad.animationParams.animationDelay = 0;
 
-        serializer::SaveAbilityData(ad, "resources/player_auto_attack.json");
+        // serializer::SaveAbilityData(ad, "resources/player_auto_attack.json");
 
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
@@ -71,7 +71,7 @@ namespace sage
         // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
         //     "RainOfFire", _camera);
 
-        serializer::SaveAbilityData(ad, "resources/player_rainoffire.json");
+        // serializer::SaveAbilityData(ad, "resources/player_rainoffire.json");
 
         // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
         ad.cursor = cursor;
@@ -110,7 +110,7 @@ namespace sage
         // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
         //     "RainOfFire", _camera);
 
-        serializer::SaveAbilityData(ad, "resources/player_floorfire.json");
+        // serializer::SaveAbilityData(ad, "resources/player_floorfire.json");
 
         // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
 
@@ -127,6 +127,60 @@ namespace sage
         // assert(vfx != nullptr);
     }
 
+    AbilityData Fireball::initAbilityData(entt::registry* _registry)
+    {
+        AbilityData ad;
+
+        ad.base.cooldownDuration = 1;
+        ad.base.range = 5;
+        ad.base.baseDamage = 10;
+        ad.base.element = AttackElement::PHYSICAL;
+        ad.base.repeatable = true;
+        ad.base.executeFuncName = "SingleTargetHit";
+
+        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+
+        ad.vfx.name = "Fireball";
+
+        // serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
+
+        ad.executeFunc =
+            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
+        return ad;
+    }
+
+    Fireball::Fireball(entt::registry* _registry, GameData* _gameData)
+        : Ability(_registry, initAbilityData(_registry), _gameData)
+    {
+    }
+
+    AbilityData LightningBall::initAbilityData(entt::registry* _registry)
+    {
+        AbilityData ad;
+
+        ad.base.cooldownDuration = 1;
+        ad.base.range = 5;
+        ad.base.baseDamage = 10;
+        ad.base.element = AttackElement::PHYSICAL;
+        ad.base.repeatable = true;
+        ad.base.executeFuncName = "SingleTargetHit";
+
+        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+
+        ad.vfx.name = "LightningBall";
+
+        // serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
+
+        ad.executeFunc =
+            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
+        return ad;
+    }
+
+    LightningBall::LightningBall(entt::registry* _registry, GameData* _gameData)
+        : Ability(_registry, initAbilityData(_registry), _gameData)
+    {
+    }
+
     AbilityData WavemobAutoAttack::initAbilityData(entt::registry* _registry)
     {
         AbilityData ad;
@@ -140,7 +194,7 @@ namespace sage
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
-        serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
+        // serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
@@ -166,11 +220,11 @@ namespace sage
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 5;
         ad.animationParams.oneShot = true;
-        ad.animationParams.animationDelay = 0.25f;
+        ad.animationParams.animationDelay = 0;
 
         ad.vfx.name = "360SwordSlash";
 
-        serializer::SaveAbilityData(ad, "resources/whirlwind.json");
+        // serializer::SaveAbilityData(ad, "resources/whirlwind.json");
 
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::MultihitRadiusFromCaster);

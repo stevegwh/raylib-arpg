@@ -27,6 +27,22 @@ namespace sage
         RainOfFire(entt::registry* _registry, GameData* _gameData);
     };
 
+    class Fireball : public Ability
+    {
+        AbilityData initAbilityData(entt::registry* registry);
+
+      public:
+        Fireball(entt::registry* _registry, GameData* _gameData);
+    };
+
+    class LightningBall : public Ability
+    {
+        AbilityData initAbilityData(entt::registry* registry);
+
+      public:
+        LightningBall(entt::registry* _registry, GameData* _gameData);
+    };
+
     class FloorFire : public CursorAbility
     {
         AbilityData initAbilityData(entt::registry* registry, Cursor* cursor);
