@@ -28,7 +28,7 @@ namespace sage
                       << "\n";
             return;
         }
-        abilitySlots[0].second->Init(gameData->controllableActorSystem->GetControlledActor());
+        abilitySlots[0].second->Init();
         // TODO: Above does not work with "controlledactor" member, only with
         // GetControlledActor()
     }
@@ -48,9 +48,7 @@ namespace sage
                       << "\n";
             return;
         }
-        abilitySlots[1].second->Init(gameData->controllableActorSystem->GetControlledActor());
-        // TODO: Above does not work with "controlledactor" member, only with
-        // GetControlledActor()
+        abilitySlots[1].second->Init();
     }
     void PlayerAbilitySystem::abilityThreePressed()
     {
@@ -68,9 +66,7 @@ namespace sage
                       << "\n";
             return;
         }
-        abilitySlots[2].second->Init(gameData->controllableActorSystem->GetControlledActor());
-        // TODO: Above does not work with "controlledactor" member, only with
-        // GetControlledActor()
+        abilitySlots[2].second->Init();
     }
 
     void PlayerAbilitySystem::abilityFourPressed()
@@ -89,9 +85,7 @@ namespace sage
                       << "\n";
             return;
         }
-        abilitySlots[3].second->Init(gameData->controllableActorSystem->GetControlledActor());
-        // TODO: Above does not work with "controlledactor" member, only with
-        // GetControlledActor()
+        abilitySlots[3].second->Init();
     }
 
     void PlayerAbilitySystem::onActorChanged()

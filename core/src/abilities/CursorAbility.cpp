@@ -23,80 +23,74 @@ namespace sage
         Cursor* cursor;
         std::unique_ptr<AbilityIndicator> abilityIndicator;
         bool cursorActive = false;
-        void enableCursor();
-        void disableCursor();
-        void toggleCursor(entt::entity self);
+
+        void enableCursor()
+        {
+            abilityIndicator->Init(cursor->terrainCollision().point);
+            abilityIndicator->Enable(true);
+            cursor->Disable();
+            cursor->Hide();
+        }
+
+        void disableCursor()
+        {
+            cursor->Enable();
+            cursor->Show();
+            abilityIndicator->Enable(false);
+        }
+
+        void toggleCursor()
+        {
+            if (cursorActive)
+            {
+                disableCursor();
+                cursorActive = false;
+            }
+            else
+            {
+                enableCursor();
+                cursorActive = true;
+            }
+        }
 
       public:
         entt::sigh<void(entt::entity)> onConfirm;
-        void Update(entt::entity self) override;
-        void OnEnter(entt::entity self) override;
-        void OnExit(entt::entity self) override;
+        void Update() override
+        {
+            abilityIndicator->Update(cursor->terrainCollision().point);
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+            {
+                onConfirm.publish(self);
+            }
+        }
+
+        void OnEnter() override
+        {
+            enableCursor();
+            cursorActive = true;
+        }
+
+        void OnExit() override
+        {
+            if (cursorActive)
+            {
+                disableCursor();
+                cursorActive = false;
+            }
+        }
 
         CursorSelectState(
+            entt::entity _self,
             Timer& _coolDownTimer,
             Timer& _animationDelayTimer,
             Cursor* _cursor,
             std::unique_ptr<AbilityIndicator> _abilityIndicator)
-            : AbilityState(_coolDownTimer, _animationDelayTimer),
+            : AbilityState(_self, _coolDownTimer, _animationDelayTimer),
               cursor(_cursor),
               abilityIndicator(std::move(_abilityIndicator))
         {
         }
     };
-
-    void CursorAbility::CursorSelectState::enableCursor()
-    {
-        abilityIndicator->Init(cursor->terrainCollision().point);
-        abilityIndicator->Enable(true);
-        cursor->Disable();
-        cursor->Hide();
-    }
-
-    void CursorAbility::CursorSelectState::disableCursor()
-    {
-        cursor->Enable();
-        cursor->Show();
-        abilityIndicator->Enable(false);
-    }
-
-    void CursorAbility::CursorSelectState::Update(entt::entity self)
-    {
-        abilityIndicator->Update(cursor->terrainCollision().point);
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            onConfirm.publish(self);
-        }
-    }
-
-    void CursorAbility::CursorSelectState::toggleCursor(entt::entity self)
-    {
-        if (cursorActive)
-        {
-            disableCursor();
-            cursorActive = false;
-        }
-        else
-        {
-            enableCursor();
-            cursorActive = true;
-        }
-    }
-
-    void CursorAbility::CursorSelectState::OnExit(entt::entity self)
-    {
-        if (cursorActive)
-        {
-            disableCursor();
-            cursorActive = false;
-        }
-    }
-
-    void CursorAbility::CursorSelectState::OnEnter(entt::entity self)
-    {
-        enableCursor();
-        cursorActive = true;
-    }
 
     // --------------------------------------------
 
@@ -106,19 +100,19 @@ namespace sage
         return Ability::IsActive() || state == current;
     }
 
-    void CursorAbility::Init(entt::entity self)
+    void CursorAbility::Init()
     {
         if (state == states[AbilityStateEnum::CURSOR_SELECT].get())
         {
-            ChangeState(self, AbilityStateEnum::IDLE);
+            ChangeState(AbilityStateEnum::IDLE);
         }
         else
         {
-            ChangeState(self, AbilityStateEnum::CURSOR_SELECT);
+            ChangeState(AbilityStateEnum::CURSOR_SELECT);
         }
     }
 
-    void CursorAbility::confirm(entt::entity self)
+    void CursorAbility::confirm()
     {
         // Ability::Init(self);
         auto& animation = registry->get<Animation>(self);
@@ -128,17 +122,19 @@ namespace sage
         {
             vfx->InitSystem(cursor->terrainCollision().point);
         }
-        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
+        ChangeState(AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     CursorAbility::~CursorAbility()
     {
     }
 
-    CursorAbility::CursorAbility(entt::registry* _registry, AbilityData _abilityData, GameData* _gameData)
-        : Ability(_registry, _abilityData, _gameData), cursor(_gameData->cursor.get())
+    CursorAbility::CursorAbility(
+        entt::registry* _registry, entt::entity _self, AbilityData _abilityData, GameData* _gameData)
+        : Ability(_registry, _self, _abilityData, _gameData), cursor(_gameData->cursor.get())
     {
         auto cursorState = std::make_unique<CursorSelectState>(
+            _self,
             cooldownTimer,
             animationDelayTimer,
             _gameData->cursor.get(),

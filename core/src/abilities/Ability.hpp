@@ -29,14 +29,15 @@ namespace sage
 
       protected:
         entt::registry* registry;
-        AbilityData abilityData;
+        entt::entity self;
+        AbilityData abilityData; // Make component
         Timer cooldownTimer;
         Timer animationDelayTimer;
         std::unique_ptr<VisualFX> vfx;
 
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
-        void ChangeState(entt::entity self, AbilityStateEnum newState);
+        void ChangeState(AbilityStateEnum newState);
 
       public:
         virtual void ResetCooldown();
@@ -45,16 +46,16 @@ namespace sage
         float GetCooldownDuration() const;
         bool CooldownReady() const;
 
-        virtual void Cancel(entt::entity self);
-        virtual void Execute(entt::entity self);
-        virtual void Update(entt::entity self);
-        virtual void Draw3D(entt::entity self);
-        virtual void Init(entt::entity self);
+        virtual void Cancel();
+        virtual void Execute();
+        virtual void Update();
+        virtual void Draw3D();
+        virtual void Init();
 
         virtual ~Ability();
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* registry, const AbilityData& abilityData, GameData* _gameData);
+        Ability(entt::registry* registry, entt::entity _self, const AbilityData& abilityData, GameData* _gameData);
     };
 
 } // namespace sage

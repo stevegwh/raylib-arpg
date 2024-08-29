@@ -26,7 +26,7 @@ namespace sage
 
       public:
         entt::sigh<void(entt::entity)> onRestartTriggered;
-        void Update(entt::entity self) override
+        void Update() override
         {
             cooldownTimer.Update(GetFrameTime());
             if (cooldownTimer.HasFinished() && repeatable)
@@ -35,8 +35,8 @@ namespace sage
             }
         }
 
-        IdleState(Timer& coolDownTimer, Timer& animationDelayTimer, bool repeatable)
-            : AbilityState(coolDownTimer, animationDelayTimer), repeatable(repeatable)
+        IdleState(entt::entity _self, Timer& coolDownTimer, Timer& animationDelayTimer, bool repeatable)
+            : AbilityState(_self, coolDownTimer, animationDelayTimer), repeatable(repeatable)
         {
         }
     };
@@ -45,13 +45,13 @@ namespace sage
     {
       public:
         entt::sigh<void(entt::entity)> onExecute;
-        void OnEnter(entt::entity self) override
+        void OnEnter() override
         {
             cooldownTimer.Start();
             animationDelayTimer.Start();
         }
 
-        void Update(entt::entity self) override
+        void Update() override
         {
             animationDelayTimer.Update(GetFrameTime());
             if (animationDelayTimer.HasFinished())
@@ -60,20 +60,20 @@ namespace sage
             }
         }
 
-        AwaitingExecutionState(Timer& coolDownTimer, Timer& animationDelayTimer)
-            : AbilityState(coolDownTimer, animationDelayTimer)
+        AwaitingExecutionState(entt::entity _self, Timer& coolDownTimer, Timer& animationDelayTimer)
+            : AbilityState(_self, coolDownTimer, animationDelayTimer)
         {
         }
     };
 
     // ----------------------------
 
-    void Ability::ChangeState(entt::entity self, AbilityStateEnum newState)
+    void Ability::ChangeState(AbilityStateEnum newState)
     {
         assert(states.contains(newState));
-        state->OnExit(self);
+        state->OnExit();
         state = states[newState].get();
-        state->OnEnter(self);
+        state->OnEnter();
     }
 
     void Ability::ResetCooldown()
@@ -101,7 +101,7 @@ namespace sage
         return cooldownTimer.HasFinished() || cooldownTimer.GetRemainingTime() <= 0;
     }
 
-    void Ability::Cancel(entt::entity self)
+    void Ability::Cancel()
     {
         if (vfx && vfx->active)
         {
@@ -109,13 +109,13 @@ namespace sage
         }
         cooldownTimer.Stop();
         animationDelayTimer.Stop();
-        ChangeState(self, AbilityStateEnum::IDLE);
+        ChangeState(AbilityStateEnum::IDLE);
     }
 
-    void Ability::Update(entt::entity self)
+    void Ability::Update()
     {
         if (!IsActive()) return;
-        state->Update(self);
+        state->Update();
         if (vfx && vfx->active)
         {
             // assert(true == false);
@@ -123,24 +123,24 @@ namespace sage
         }
     }
 
-    void Ability::Draw3D(entt::entity self)
+    void Ability::Draw3D()
     {
         if (!IsActive()) return;
-        state->Draw3D(self);
+        state->Draw3D();
         if (vfx && vfx->active)
         {
             vfx->Draw3D();
         }
     }
 
-    void Ability::Execute(entt::entity self)
+    void Ability::Execute()
     {
         abilityData.executeFunc->Execute(registry, self, abilityData);
 
-        ChangeState(self, AbilityStateEnum::IDLE);
+        ChangeState(AbilityStateEnum::IDLE);
     }
 
-    void Ability::Init(entt::entity self)
+    void Ability::Init()
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByParams(abilityData.animationParams);
@@ -154,7 +154,7 @@ namespace sage
                 registry->get<sgTransform>(gameData->controllableActorSystem->GetControlledActor()).position();
             vfx->InitSystem(casterPos);
         }
-        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
+        ChangeState(AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     Ability::~Ability()
@@ -164,8 +164,10 @@ namespace sage
     // TODO: I feel the "self" arguments are redundant, might as well just make it a member (as entities hold full
     // instances of abilities)
 
-    Ability::Ability(entt::registry* registry, const AbilityData& _abilityData, GameData* _gameData)
+    Ability::Ability(
+        entt::registry* registry, entt::entity _self, const AbilityData& _abilityData, GameData* _gameData)
         : registry(registry),
+          self(_self),
           abilityData(_abilityData),
           gameData(_gameData),
           vfx(AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData))
@@ -174,12 +176,13 @@ namespace sage
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
         auto idleState =
-            std::make_unique<IdleState>(cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
+            std::make_unique<IdleState>(_self, cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&Ability::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
-        auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(cooldownTimer, animationDelayTimer);
+        auto awaitingExecutionState =
+            std::make_unique<AwaitingExecutionState>(_self, cooldownTimer, animationDelayTimer);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
         onExecuteSink.connect<&Ability::Execute>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
