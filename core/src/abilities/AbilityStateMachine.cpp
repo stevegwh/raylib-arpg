@@ -135,9 +135,7 @@ namespace sage
 
     void AbilityStateMachine::Execute()
     {
-        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
-        abilityData.executeFunc->Execute(registry, self, abilityDataEntity);
-
+        executeFunc->Execute(registry, self, abilityDataEntity);
         ChangeState(AbilityStateEnum::IDLE);
     }
 
@@ -172,6 +170,9 @@ namespace sage
         // entity id as an arg
         auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
+        auto executeFuncType =
+            AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(abilityData.base.executeFuncName);
+        executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(executeFuncType);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);

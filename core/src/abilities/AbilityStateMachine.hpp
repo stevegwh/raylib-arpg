@@ -12,6 +12,7 @@ namespace sage
     class GameData;
     class VisualFX;
     class AbilityState;
+    class AbilityFunction;
 
     enum class AbilityStateEnum
     {
@@ -34,7 +35,9 @@ namespace sage
         // AbilityData abilityData;
         Timer cooldownTimer;
         Timer animationDelayTimer;
+
         std::unique_ptr<VisualFX> vfx;
+        std::unique_ptr<AbilityFunction> executeFunc;
 
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
