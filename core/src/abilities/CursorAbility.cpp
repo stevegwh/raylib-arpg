@@ -100,6 +100,12 @@ namespace sage
 
     // --------------------------------------------
 
+    bool CursorAbility::IsActive()
+    {
+        const auto current = states[AbilityStateEnum::CURSOR_SELECT].get();
+        return Ability::IsActive() || state == current;
+    }
+
     void CursorAbility::Init(entt::entity self)
     {
         if (state == states[AbilityStateEnum::CURSOR_SELECT].get())
@@ -114,7 +120,15 @@ namespace sage
 
     void CursorAbility::confirm(entt::entity self)
     {
-        Ability::Init(self);
+        // Ability::Init(self);
+        auto& animation = registry->get<Animation>(self);
+        animation.ChangeAnimationByParams(abilityData.animationParams);
+
+        if (vfx)
+        {
+            vfx->InitSystem(cursor->terrainCollision().point);
+        }
+        ChangeState(self, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     CursorAbility::~CursorAbility()

@@ -74,24 +74,24 @@ namespace sage
 
     void AbilitySystem::Update()
     {
-        // for (auto& kv : abilityMap)
-        // {
-        //     for (auto& ability : kv.second)
-        //     {
-        //         ability.second->Update(kv.first);
-        //     }
-        // }
+        for (auto& kv : abilityMap)
+        {
+            for (auto& ability : kv.second)
+            {
+                ability.second->Update(kv.first);
+            }
+        }
     }
 
     void AbilitySystem::Draw3D()
     {
-        // for (auto& kv : abilityMap)
-        // {
-        //     for (auto& ability : kv.second)
-        //     {
-        //         ability.second->Draw3D(kv.first);
-        //     }
-        // }
+        for (auto& kv : abilityMap)
+        {
+            for (auto& ability : kv.second)
+            {
+                ability.second->Draw3D(kv.first);
+            }
+        }
     }
 
     AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)

@@ -26,7 +26,14 @@ namespace sage
 
       public:
         entt::sigh<void(entt::entity)> onRestartTriggered;
-        void Update(entt::entity self) override;
+        void Update(entt::entity self) override
+        {
+            cooldownTimer.Update(GetFrameTime());
+            if (cooldownTimer.HasFinished() && repeatable)
+            {
+                onRestartTriggered.publish(self);
+            }
+        }
 
         IdleState(Timer& coolDownTimer, Timer& animationDelayTimer, bool repeatable)
             : AbilityState(coolDownTimer, animationDelayTimer), repeatable(repeatable)
@@ -38,42 +45,26 @@ namespace sage
     {
       public:
         entt::sigh<void(entt::entity)> onExecute;
-        void OnEnter(entt::entity self) override;
-        void Update(entt::entity self) override;
+        void OnEnter(entt::entity self) override
+        {
+            cooldownTimer.Start();
+            animationDelayTimer.Start();
+        }
+
+        void Update(entt::entity self) override
+        {
+            animationDelayTimer.Update(GetFrameTime());
+            if (animationDelayTimer.HasFinished())
+            {
+                onExecute.publish(self);
+            }
+        }
 
         AwaitingExecutionState(Timer& coolDownTimer, Timer& animationDelayTimer)
             : AbilityState(coolDownTimer, animationDelayTimer)
         {
         }
     };
-
-    // ----------------------------
-
-    void Ability::IdleState::Update(entt::entity self)
-    {
-        cooldownTimer.Update(GetFrameTime());
-        if (cooldownTimer.HasFinished() && repeatable)
-        {
-            onRestartTriggered.publish(self);
-        }
-    }
-
-    // ----------------------------
-
-    void Ability::AwaitingExecutionState::Update(entt::entity self)
-    {
-        animationDelayTimer.Update(GetFrameTime());
-        if (animationDelayTimer.HasFinished())
-        {
-            onExecute.publish(self);
-        }
-    }
-
-    void Ability::AwaitingExecutionState::OnEnter(entt::entity self)
-    {
-        cooldownTimer.Start();
-        animationDelayTimer.Start();
-    }
 
     // ----------------------------
 
@@ -90,7 +81,7 @@ namespace sage
         cooldownTimer.Reset();
     }
 
-    bool Ability::IsActive() const
+    bool Ability::IsActive()
     {
         return cooldownTimer.IsRunning();
     }
@@ -123,6 +114,7 @@ namespace sage
 
     void Ability::Update(entt::entity self)
     {
+        if (!IsActive()) return;
         state->Update(self);
         if (vfx && vfx->active)
         {
@@ -133,6 +125,7 @@ namespace sage
 
     void Ability::Draw3D(entt::entity self)
     {
+        if (!IsActive()) return;
         state->Draw3D(self);
         if (vfx && vfx->active)
         {

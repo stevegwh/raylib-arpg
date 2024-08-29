@@ -191,20 +191,30 @@ namespace sage
         return CheckCollisionBoxes(col1, col2);
     }
 
-    bool CollisionSystem::GetFirstCollision(entt::entity entity)
-    // TODO: Terrible name. Should be "CheckAnyBoxCollision"
+    bool CollisionSystem::GetFirstCollisionBB(
+        entt::entity caller, BoundingBox bb, CollisionLayer layer, CollisionInfo& out)
     {
-        const auto& targetCol = registry->get<Collideable>(entity);
-
         auto view = registry->view<Collideable>();
 
-        for (const auto& ent : view)
+        for (const auto& entity : view)
         {
-            const auto& c = view.get<Collideable>(ent);
-            if (c.collisionLayer != CollisionLayer::BUILDING) continue;
-            // TODO: Wanted to query a collision matrix but is far too slow
-            bool colHit = CheckBoxCollision(targetCol.worldBoundingBox, c.worldBoundingBox);
-            if (colHit) return true;
+            if (caller == entity) continue;
+            const auto& col = view.get<Collideable>(entity);
+            if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(col.collisionLayer)])
+            {
+                bool colHit = CheckBoxCollision(bb, col.worldBoundingBox);
+                if (colHit)
+                {
+                    CollisionInfo colInfo;
+                    colInfo = {
+                        .collidedBB = col.worldBoundingBox,
+                        .collidedEntityId = entity,
+                        .collisionLayer = layer,
+                        .rlCollision = {}};
+                    out = colInfo;
+                    return true;
+                };
+            }
         }
         return false;
     }
@@ -235,6 +245,22 @@ namespace sage
         matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::FLOOR)] = true;
 
         return matrix;
+    }
+
+    void CollisionSystem::Update()
+    {
+        auto view = registry->view<Collideable, CollisionChecker>();
+        for (entt::entity entity : view)
+        {
+            const auto& col = registry->get<Collideable>(entity);
+            auto& bb = col.worldBoundingBox;
+            CollisionInfo out;
+            if (GetFirstCollisionBB(entity, bb, col.collisionLayer, out))
+            {
+                auto& colChecker = registry->get<CollisionChecker>(entity);
+                colChecker.onHit.publish(entity, out);
+            }
+        }
     }
 
     CollisionSystem::CollisionSystem(entt::registry* _registry) : BaseSystem(_registry)

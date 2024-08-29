@@ -4,20 +4,21 @@
 
 #include <array>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace sage
 {
     class GameData;
     class Ability;
+    enum class AbilityEnum;
     class PlayerAbilitySystem
     {
         entt::registry* registry;
         entt::entity controlledActor;
         GameData* gameData;
 
-        std::vector<Ability*> currentAbilities;
-        std::array<int, 4> abilitySlots{};
+        std::array<std::pair<AbilityEnum, Ability*>, 4> abilitySlots{};
         void abilityOnePressed();
         void abilityTwoPressed();
         void abilityThreePressed();
@@ -25,8 +26,7 @@ namespace sage
         void onActorChanged();
 
       public:
-        void ChangeAbility(int abilitySlot, int newAbilityIndex);
-        void RefreshAbilities();
+        void SetSlot(int slot, AbilityEnum abilityEnum);
         void Update();
         void Draw2D();
         void Draw3D();

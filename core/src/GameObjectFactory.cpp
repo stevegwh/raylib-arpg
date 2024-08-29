@@ -225,9 +225,9 @@ namespace sage
         // Initialise starting abilities
         data->abilitySystem->RegisterAbility(id, AbilityEnum::WHIRLWIND);
         data->abilitySystem->RegisterAbility(id, AbilityEnum::RAINFOFIRE);
-        data->playerAbilitySystem->RefreshAbilities();
-        data->abilitySystem->RegisterAbility(
-            id, AbilityEnum::PLAYER_AUTOATTACK); // hack to avoid PAS having autoattack
+        data->playerAbilitySystem->SetSlot(0, AbilityEnum::WHIRLWIND);
+        data->playerAbilitySystem->SetSlot(1, AbilityEnum::RAINFOFIRE);
+        data->abilitySystem->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         data->signalReflectionManager->CreateHook<entt::entity>(
             id, data->cursor->onFloorClick, combatable.onAttackCancelled);
