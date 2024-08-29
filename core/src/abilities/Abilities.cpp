@@ -45,8 +45,8 @@ namespace sage
         return entity;
     }
 
-    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
+    PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, entt::entity _self, GameData* _gameData)
+        : AbilityStateMachine(_registry, _self, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -85,8 +85,8 @@ namespace sage
         return entity;
     }
 
-    RainOfFire::RainOfFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : CursorAbility(_registry, _entity, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
+    RainOfFire::RainOfFire(entt::registry* _registry, entt::entity _self, GameData* _gameData)
+        : CursorAbility(_registry, _self, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
     {
         // assert(vfx != nullptr);
     }
@@ -126,8 +126,8 @@ namespace sage
         return entity;
     }
 
-    FloorFire::FloorFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : CursorAbility(_registry, _entity, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
+    FloorFire::FloorFire(entt::registry* _registry, entt::entity _self, GameData* _gameData)
+        : CursorAbility(_registry, _self, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
     {
         // assert(vfx != nullptr);
     }
@@ -156,8 +156,8 @@ namespace sage
         return entity;
     }
 
-    Fireball::Fireball(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
+    Fireball::Fireball(entt::registry* _registry, entt::entity _self, GameData* _gameData)
+        : AbilityStateMachine(_registry, _self, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -185,8 +185,8 @@ namespace sage
         return entity;
     }
 
-    LightningBall::LightningBall(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
+    LightningBall::LightningBall(entt::registry* _registry, entt::entity _self, GameData* _gameData)
+        : AbilityStateMachine(_registry, _self, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -212,8 +212,8 @@ namespace sage
         return entity;
     }
 
-    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
+    WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, entt::entity _self, GameData* _gameData)
+        : AbilityStateMachine(_registry, _self, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -245,8 +245,8 @@ namespace sage
         return entity;
     }
 
-    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
+    WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, entt::entity _self, GameData* _gameData)
+        : AbilityStateMachine(_registry, _self, initAbilityData(_registry), _gameData)
     {
     }
 

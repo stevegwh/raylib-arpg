@@ -135,7 +135,7 @@ namespace sage
 
     void AbilityStateMachine::Execute()
     {
-        executeFunc->Execute(registry, self, abilityDataEntity);
+        executeFunc->Execute(abilityDataEntity);
         ChangeState(AbilityStateEnum::IDLE);
     }
 
@@ -162,8 +162,8 @@ namespace sage
     }
 
     AbilityStateMachine::AbilityStateMachine(
-        entt::registry* registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
-        : registry(registry), self(_self), abilityDataEntity(_abilityDataEntity), gameData(_gameData)
+        entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+        : registry(_registry), self(_self), abilityDataEntity(_abilityDataEntity), gameData(_gameData)
     {
 
         // TODO: Does VFX need to be defined here? I'd prefer initialising AbilityData ASAP and just passing the
@@ -172,7 +172,8 @@ namespace sage
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
         auto executeFuncType =
             AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(abilityData.base.executeFuncName);
-        executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(executeFuncType);
+        executeFunc =
+            AbilityResourceManager::GetInstance().GetExecuteFunc(executeFuncType, _registry, _self, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
