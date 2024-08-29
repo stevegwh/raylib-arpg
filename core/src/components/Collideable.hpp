@@ -32,6 +32,12 @@ namespace sage
         CollisionLayer collisionLayer{};
     };
 
+    struct CollisionChecker
+    {
+        float maxDistance;
+        entt::sigh<void(entt::entity, CollisionInfo)> onHit;
+    };
+
     class Collideable
     {
         entt::registry* registry{};
@@ -49,8 +55,7 @@ namespace sage
         // Static object
         explicit Collideable(BoundingBox _boundingBox);
         // Dynamic object
-        Collideable(
-            entt::registry* _registry, entt::entity _self, BoundingBox _boundingBox);
+        Collideable(entt::registry* _registry, entt::entity _self, BoundingBox _boundingBox);
         // Static object (required for serialization)
         Collideable() = default;
 

@@ -61,6 +61,7 @@ namespace sage
         // }
         // explosion->Update();
         data->timerSystem->Update();
+        data->collisionSystem->Update();
     }
 
     void ExampleScene::Draw2D()

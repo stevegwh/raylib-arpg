@@ -173,8 +173,8 @@ namespace sage
       public:
         void Update(entt::entity entity) override
         {
-            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            autoAttackAbility->Update(entity);
+            // auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity,
+            // AbilityEnum::PLAYER_AUTOATTACK); autoAttackAbility->Update(entity);
         }
 
         void OnStateEnter(entt::entity entity) override

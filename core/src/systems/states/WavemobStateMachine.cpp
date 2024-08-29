@@ -192,8 +192,8 @@ namespace sage
                 state.ChangeState(self, WavemobStateEnum::TargetOutOfRange);
                 return;
             }
-            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            autoAttackAbility->Update(self);
+            // auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            // autoAttackAbility->Update(self);
         }
 
         void OnStateEnter(entt::entity entity) override

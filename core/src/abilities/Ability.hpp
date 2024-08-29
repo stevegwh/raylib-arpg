@@ -40,7 +40,7 @@ namespace sage
 
       public:
         virtual void ResetCooldown();
-        virtual bool IsActive() const;
+        virtual bool IsActive();
         float GetRemainingCooldownTime() const;
         float GetCooldownDuration() const;
         bool CooldownReady() const;

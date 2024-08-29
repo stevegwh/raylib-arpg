@@ -19,6 +19,7 @@ namespace sage
         CursorAbility(entt::registry* _registry, AbilityData _abilityData, GameData* _gameData);
 
       public:
+        bool IsActive() override;
         void Init(entt::entity self) override;
         // void Execute(entt::entity self) override;
         ~CursorAbility() override;

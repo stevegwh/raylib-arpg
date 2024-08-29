@@ -38,8 +38,9 @@ namespace sage
             const BoundingBox& bb, CollisionLayer layer = CollisionLayer::DEFAULT);
         void BoundingBoxDraw(entt::entity entityId, Color color = LIME) const;
         static bool CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2);
-        bool GetFirstCollision(entt::entity entity);
+        bool GetFirstCollisionBB(entt::entity caller, BoundingBox bb, CollisionLayer layer, CollisionInfo& out);
         void DrawDebug();
+        void Update();
         explicit CollisionSystem(entt::registry* _registry);
     };
 } // namespace sage
