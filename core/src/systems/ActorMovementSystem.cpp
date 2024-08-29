@@ -42,8 +42,11 @@ namespace sage
         moveableActor.onMovementCancel.publish(entity);
     }
 
-    void ActorMovementSystem::PathfindToLocation(
-        const entt::entity& entity, const Vector3& destination)
+    void ActorMovementSystem::MoveToLocation(const entt::entity& entity, Vector3 location)
+    {
+    }
+
+    void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination)
     // TODO: Pathfinding/movement needs some sense of movement speed.
     {
         {
@@ -62,25 +65,22 @@ namespace sage
         }
 
         const auto& actorCollideable = registry->get<Collideable>(entity);
-        navigationGridSystem->MarkSquareAreaOccupied(
-            actorCollideable.worldBoundingBox, false);
+        navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
         GridSquare minRange{};
         GridSquare maxRange{};
         navigationGridSystem->GetPathfindRange(entity, bounds, minRange, maxRange);
         {
             // If location outside of actor's movement range, then return
             GridSquare tmp{};
-            if (!navigationGridSystem->WorldToGridSpace(
-                    destination, tmp, minRange, maxRange))
-                return;
+            if (!navigationGridSystem->WorldToGridSpace(destination, tmp, minRange, maxRange)) return;
         }
         navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
 
         const auto& actorTrans = registry->get<sgTransform>(entity);
         // auto path = navigationGridSystem->BFSPathfind(entity, actorTrans.position(),
         // destination, minRange, maxRange);
-        auto path = navigationGridSystem->AStarPathfind(
-            entity, actorTrans.position(), destination, minRange, maxRange);
+        auto path =
+            navigationGridSystem->AStarPathfind(entity, actorTrans.position(), destination, minRange, maxRange);
         PruneMoveCommands(entity);
         auto& transform = registry->get<sgTransform>(entity);
         auto& moveableActor = registry->get<MoveableActor>(entity);
@@ -88,8 +88,8 @@ namespace sage
             moveableActor.path.emplace_back(n);
         if (!path.empty())
         {
-            transform.direction = Vector3Normalize(
-                Vector3Subtract(moveableActor.path.front(), transform.position()));
+            transform.direction =
+                Vector3Normalize(Vector3Subtract(moveableActor.path.front(), transform.position()));
             moveableActor.onStartMovement.publish(entity);
         }
         // TODO: Handle destination being unreachable. (Change animation to IDLE, for a
@@ -121,10 +121,7 @@ namespace sage
 
         for (auto& ray : debugRays)
         {
-            DrawLine3D(
-                ray.position,
-                Vector3Add(ray.position, Vector3Multiply(ray.direction, {5, 1, 5})),
-                RED);
+            DrawLine3D(ray.position, Vector3Add(ray.position, Vector3Multiply(ray.direction, {5, 1, 5})), RED);
         }
 
         for (auto& col : debugCollisions)
@@ -152,10 +149,8 @@ namespace sage
                 continue;
             }
 
-            navigationGridSystem->MarkSquareAreaOccupied(
-                actorCollideable.worldBoundingBox, false);
-            auto nextPointDist =
-                Vector3Distance(moveableActor.path.front(), actorTrans.position());
+            navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
+            auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position());
 
             //			// TODO: Works when I check if "back" is occupied, but not when I
             // check if "front" is occupied. Why?
@@ -167,8 +162,7 @@ namespace sage
                     moveableActor.path.back(), actorCollideable.worldBoundingBox))
             {
                 PathfindToLocation(entity, moveableActor.path.back());
-                navigationGridSystem->MarkSquareAreaOccupied(
-                    actorCollideable.worldBoundingBox, true, entity);
+                navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
                 continue;
             }
 
@@ -176,21 +170,17 @@ namespace sage
             {
                 // Set continuous pos to grid/discrete pos
                 GridSquare targetGridPos{};
-                navigationGridSystem->WorldToGridSpace(
-                    moveableActor.path.front(), targetGridPos);
-                auto square = navigationGridSystem->GetGridSquare(
-                    targetGridPos.row, targetGridPos.col);
+                navigationGridSystem->WorldToGridSpace(moveableActor.path.front(), targetGridPos);
+                auto square = navigationGridSystem->GetGridSquare(targetGridPos.row, targetGridPos.col);
                 actorTrans.SetPosition(
-                    {square->worldPosMin.x, square->terrainHeight, square->worldPosMin.z},
-                    entity);
+                    {square->worldPosMin.x, square->terrainHeight, square->worldPosMin.z}, entity);
 
                 moveableActor.path.pop_front();
                 if (moveableActor.path.empty())
                 {
                     moveableActor.onDestinationReached.publish(entity);
                     moveableActor.onFinishMovement.publish(entity);
-                    navigationGridSystem->MarkSquareAreaOccupied(
-                        actorCollideable.worldBoundingBox, true, entity);
+                    navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
                     continue;
                 }
             }
@@ -228,37 +218,27 @@ namespace sage
                 }
             }
 
-            actorTrans.direction = Vector3Normalize(
-                Vector3Subtract(moveableActor.path.front(), actorTrans.position()));
+            actorTrans.direction =
+                Vector3Normalize(Vector3Subtract(moveableActor.path.front(), actorTrans.position()));
             // Calculate rotation angle based on direction
-            float angle =
-                atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
-            actorTrans.SetRotation(
-                {actorTrans.rotation().x, angle, actorTrans.rotation().z}, entity);
+            float angle = atan2f(actorTrans.direction.x, actorTrans.direction.z) * RAD2DEG;
+            actorTrans.SetRotation({actorTrans.rotation().x, angle, actorTrans.rotation().z}, entity);
 
-            auto gridSquare =
-                navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
+            auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
             Vector3 newPos = {
-                actorTrans.position().x +
-                    actorTrans.direction.x * actorTrans.movementSpeed,
+                actorTrans.position().x + actorTrans.direction.x * actorTrans.movementSpeed,
                 gridSquare->terrainHeight,
-                actorTrans.position().z +
-                    actorTrans.direction.z * actorTrans.movementSpeed};
+                actorTrans.position().z + actorTrans.direction.z * actorTrans.movementSpeed};
 
             actorTrans.SetPosition(newPos, entity);
 
-            navigationGridSystem->MarkSquareAreaOccupied(
-                actorCollideable.worldBoundingBox, true, entity);
+            navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, true, entity);
         }
     }
 
     ActorMovementSystem::ActorMovementSystem(
-        entt::registry* _registry,
-        CollisionSystem* _collisionSystem,
-        NavigationGridSystem* _navigationGridSystem)
-        : BaseSystem(_registry),
-          collisionSystem(_collisionSystem),
-          navigationGridSystem(_navigationGridSystem)
+        entt::registry* _registry, CollisionSystem* _collisionSystem, NavigationGridSystem* _navigationGridSystem)
+        : BaseSystem(_registry), collisionSystem(_collisionSystem), navigationGridSystem(_navigationGridSystem)
     {
     }
 } // namespace sage

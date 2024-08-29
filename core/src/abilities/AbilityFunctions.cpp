@@ -8,6 +8,7 @@
 
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
+#include "systems/ActorMovementSystem.hpp"
 
 #include "vfx/RainOfFireVFX.hpp"
 
@@ -34,6 +35,39 @@ namespace sage
     {
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(registry, self, abilityDataEntity, actorTransform.position(), 15);
+    }
+
+    void ProjectileExplosionFromCaster::onHit(entt::entity caster, CollisionInfo collisionInfo)
+    {
+        Vector3 point = registry->get<sgTransform>(collisionInfo.collidedEntityId).position();
+        Hit360AroundPoint(registry, self, abilityDataEntity, point, 15);
+
+        auto& checker = registry->get<CollisionChecker>(abilityDataEntity);
+        entt::sink sink{checker.onHit};
+        sink.disconnect<&ProjectileExplosionFromCaster::onHit>(this);
+        registry->remove<CollisionChecker>(abilityDataEntity);
+    }
+
+    void ProjectileExplosionFromCaster::Execute()
+    {
+        auto& projectileTrans = registry->emplace<sgTransform>(abilityDataEntity);
+        auto& projectileCol = registry->emplace<Collideable>(abilityDataEntity);
+        projectileCol.collisionLayer = CollisionLayer::PLAYER;
+        auto& casterPos = registry->emplace<sgTransform>(self).position();
+        projectileTrans.SetPosition(casterPos, self);
+
+        auto target = registry->get<CombatableActor>(self).target;
+        Vector3 point = registry->get<sgTransform>(target).position();
+
+        gameData->actorMovementSystem->MoveToLocation(abilityDataEntity, point);
+
+        auto& checker = registry->emplace<CollisionChecker>(abilityDataEntity);
+        entt::sink sink{checker.onHit};
+        sink.connect<&ProjectileExplosionFromCaster::onHit>(this);
+
+        // On hit, call 360 around point
+
+        // How to sync vfx? Through ability data pointer?
     }
 
     void Hit360AroundPoint(
@@ -86,19 +120,4 @@ namespace sage
         }
     }
 
-    void ProjectileExplosion(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, Vector3 point)
-    {
-
-        // Spawn projectile bb at caster position
-        // Fire projectile
-        // Wait
-        // Check for hit periodically
-        auto& checker = registry->emplace<CollisionChecker>(caster);
-        entt::sink sink{checker.onHit};
-
-        // On hit, call 360 around point
-
-        // How to sync vfx? Through ability data pointer?
-    }
 } // namespace sage
