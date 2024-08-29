@@ -36,32 +36,32 @@ namespace sage
     {
         if (abilityEnum == AbilityEnum::PLAYER_AUTOATTACK)
         {
-            auto obj = std::make_unique<PlayerAutoAttack>(registry, gameData);
+            auto obj = std::make_unique<PlayerAutoAttack>(registry, entity, gameData);
             abilityMap[entity].emplace(abilityEnum, std::move(obj));
         }
         else if (abilityEnum == AbilityEnum::ENEMY_AUTOATTACK)
         {
-            auto obj = std::make_unique<WavemobAutoAttack>(registry, gameData);
+            auto obj = std::make_unique<WavemobAutoAttack>(registry, entity, gameData);
             abilityMap[entity].emplace(abilityEnum, std::move(obj));
         }
         else if (abilityEnum == AbilityEnum::FIREBALL)
         {
-            auto obj = std::make_unique<Fireball>(registry, gameData);
+            auto obj = std::make_unique<Fireball>(registry, entity, gameData);
             abilityMap[entity].emplace(abilityEnum, std::move(obj));
         }
         else if (abilityEnum == AbilityEnum::LIGHTNINGBALL)
         {
-            auto obj = std::make_unique<LightningBall>(registry, gameData);
+            auto obj = std::make_unique<LightningBall>(registry, entity, gameData);
             abilityMap[entity].emplace(abilityEnum, std::move(obj));
         }
         else if (abilityEnum == AbilityEnum::RAINFOFIRE)
         {
-            auto obj = std::make_unique<RainOfFire>(registry, gameData);
+            auto obj = std::make_unique<RainOfFire>(registry, entity, gameData);
             abilityMap[entity].emplace(abilityEnum, std::move(obj));
         }
         else if (abilityEnum == AbilityEnum::WHIRLWIND)
         {
-            auto obj = std::make_unique<WhirlwindAbility>(registry, gameData);
+            auto obj = std::make_unique<WhirlwindAbility>(registry, entity, gameData);
             abilityMap[entity].emplace(abilityEnum, std::move(obj));
         }
         else
@@ -78,7 +78,7 @@ namespace sage
         {
             for (auto& ability : kv.second)
             {
-                ability.second->Update(kv.first);
+                ability.second->Update();
             }
         }
     }
@@ -89,7 +89,7 @@ namespace sage
         {
             for (auto& ability : kv.second)
             {
-                ability.second->Draw3D(kv.first);
+                ability.second->Draw3D();
             }
         }
     }

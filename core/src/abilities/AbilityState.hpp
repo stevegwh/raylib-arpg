@@ -8,14 +8,15 @@ namespace sage
     class AbilityState
     {
       public:
+        entt::entity self;
         Timer& cooldownTimer;
         Timer& animationDelayTimer;
 
-        virtual void Update(entt::entity self);
-        virtual void Draw3D(entt::entity self);
-        virtual void OnEnter(entt::entity self);
-        virtual void OnExit(entt::entity self);
+        virtual void Update();
+        virtual void Draw3D();
+        virtual void OnEnter();
+        virtual void OnExit();
         virtual ~AbilityState();
-        AbilityState(Timer& cooldownTimer, Timer& animationDelayTimer);
+        AbilityState(entt::entity self, Timer& cooldownTimer, Timer& animationDelayTimer);
     };
 } // namespace sage

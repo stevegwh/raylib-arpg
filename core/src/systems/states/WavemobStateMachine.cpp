@@ -130,7 +130,7 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            autoAttackAbility->Cancel(self);
+            autoAttackAbility->Cancel();
             const auto& combatable = registry->get<CombatableActor>(self);
             const auto& target = registry->get<sgTransform>(combatable.target).position();
             auto& animation = registry->get<Animation>(self);
@@ -199,14 +199,14 @@ namespace sage
         void OnStateEnter(entt::entity entity) override
         {
             auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            autoAttackAbility->Init(entity);
+            autoAttackAbility->Init();
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
 
-            autoAttackAbility->Cancel(entity);
+            autoAttackAbility->Cancel();
         }
 
         virtual ~CombatState() = default;
@@ -249,7 +249,7 @@ namespace sage
                 sink.connect<&DyingState::destroyEntity>(this);
             }
             auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            autoAttackAbility->Cancel(self);
+            autoAttackAbility->Cancel();
             gameData->actorMovementSystem->CancelMovement(self);
         }
 
