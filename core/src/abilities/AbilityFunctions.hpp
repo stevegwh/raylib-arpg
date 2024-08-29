@@ -21,14 +21,15 @@ namespace sage
       protected:
         entt::registry* registry;
         entt::entity self;
-        entt::entity abilityData;
+        entt::entity abilityDataEntity;
         GameData* gameData;
 
       public:
-        virtual void Execute(entt::entity abilityDataEntity) = 0;
+        virtual void Execute() = 0;
         virtual ~AbilityFunction() = default;
-        AbilityFunction(entt::registry* _registry, entt::entity _self, GameData* _gameData)
-            : registry(_registry), self(_self), gameData(_gameData)
+        AbilityFunction(
+            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+            : registry(_registry), self(_self), abilityDataEntity(_abilityDataEntity), gameData(_gameData)
         {
         }
     };
@@ -36,25 +37,28 @@ namespace sage
     class SingleTargetHitFunc : public AbilityFunction
     {
       public:
-        void Execute(entt::entity abilityDataEntity) override;
-        SingleTargetHitFunc(entt::registry* _registry, entt::entity _self, GameData* _gameData)
-            : AbilityFunction(_registry, _self, _gameData) {};
+        void Execute() override;
+        SingleTargetHitFunc(
+            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+            : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
     class MultihitRadiusFromCursor : public AbilityFunction
     {
       public:
-        void Execute(entt::entity abilityDataEntity) override;
-        MultihitRadiusFromCursor(entt::registry* _registry, entt::entity _self, GameData* _gameData)
-            : AbilityFunction(_registry, _self, _gameData) {};
+        void Execute() override;
+        MultihitRadiusFromCursor(
+            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+            : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
     class MultihitRadiusFromCaster : public AbilityFunction
     {
       public:
-        void Execute(entt::entity abilityDataEntity) override;
-        MultihitRadiusFromCaster(entt::registry* _registry, entt::entity _self, GameData* _gameData)
-            : AbilityFunction(_registry, _self, _gameData) {};
+        void Execute() override;
+        MultihitRadiusFromCaster(
+            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+            : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
     void Hit360AroundPoint(

@@ -135,7 +135,7 @@ namespace sage
 
     void AbilityStateMachine::Execute()
     {
-        executeFunc->Execute(abilityDataEntity);
+        executeFunc->Execute();
         ChangeState(AbilityStateEnum::IDLE);
     }
 
@@ -166,14 +166,14 @@ namespace sage
         : registry(_registry), self(_self), abilityDataEntity(_abilityDataEntity), gameData(_gameData)
     {
 
-        // TODO: Does VFX need to be defined here? I'd prefer initialising AbilityData ASAP and just passing the
-        // entity id as an arg
+        // TODO: Would be great to find a way of pushing executefunc and visual fx to the registry.
+        // Atm it's difficult due to polymorphism
         auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
         auto executeFuncType =
             AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(abilityData.base.executeFuncName);
-        executeFunc =
-            AbilityResourceManager::GetInstance().GetExecuteFunc(executeFuncType, _registry, _self, _gameData);
+        executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
+            executeFuncType, _registry, _self, _abilityDataEntity, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
