@@ -10,6 +10,7 @@ namespace sage
 {
 
     class AbilityFunction;
+    enum class AbilityFunctionEnum;
     class Cursor;
     class VisualFX;
 
@@ -28,6 +29,7 @@ namespace sage
             AttackElement element = AttackElement::PHYSICAL; // The element of the attack
             bool repeatable = false;          // Whether the attack should automatically repeat when off cooldown
             std::string executeFuncName = ""; // Name of function to call on execute
+            AbilityFunctionEnum executeFuncEnum;
         };
         struct VisualFXData
         {

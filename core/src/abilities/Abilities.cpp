@@ -31,6 +31,7 @@ namespace sage
         ad.base.range = 5;
         ad.base.repeatable = true;
         ad.base.executeFuncName = "SingleTargetHit";
+        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animSpeed = 4;
@@ -60,6 +61,7 @@ namespace sage
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
         ad.base.executeFuncName = "MultihitRadiusFromCursor";
+        ad.base.executeFuncEnum = AbilityFunctionEnum::MultihitRadiusFromCursor;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 1;
@@ -101,6 +103,7 @@ namespace sage
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
         ad.base.executeFuncName = "MultihitRadiusFromCursor";
+        ad.base.executeFuncEnum = AbilityFunctionEnum::MultihitRadiusFromCursor;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 1;
@@ -142,6 +145,7 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
         ad.base.executeFuncName = "SingleTargetHit";
+        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
@@ -171,6 +175,7 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
         ad.base.executeFuncName = "SingleTargetHit";
+        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
@@ -200,6 +205,7 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
         ad.base.executeFuncName = "SingleTargetHit";
+        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
@@ -227,6 +233,7 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.executeFuncName = "MultihitRadiusFromCaster";
+        ad.base.executeFuncEnum = AbilityFunctionEnum::MultihitRadiusFromCaster;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 5;

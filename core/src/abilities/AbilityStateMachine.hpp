@@ -12,7 +12,6 @@ namespace sage
     class GameData;
     class VisualFX;
     class AbilityState;
-    class AbilityFunction;
 
     enum class AbilityStateEnum
     {
@@ -28,6 +27,21 @@ namespace sage
 
         GameData* gameData;
 
+        template <typename AbilityFunc>
+        AbilityFunc& GetExecuteFunc(
+            entt::registry* _registry, entt::entity caster, entt::entity _abilityDataEntity, GameData* _gameData)
+        {
+            if (_registry->any_of<AbilityFunc>(_abilityDataEntity))
+            {
+                return _registry->get<AbilityFunc>(_abilityDataEntity);
+            }
+            else
+            {
+                return _registry->emplace<AbilityFunc>(
+                    _abilityDataEntity, _registry, caster, _abilityDataEntity, _gameData);
+            }
+        }
+
       protected:
         entt::registry* registry;
         entt::entity self;
@@ -37,7 +51,7 @@ namespace sage
         Timer animationDelayTimer;
 
         std::unique_ptr<VisualFX> vfx;
-        std::unique_ptr<AbilityFunction> executeFunc;
+        // std::unique_ptr<AbilityFunction> executeFunc;
 
         AbilityState* state;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
@@ -51,7 +65,7 @@ namespace sage
         bool CooldownReady() const;
 
         virtual void Cancel();
-        virtual void Execute();
+        void Execute();
         virtual void Update();
         virtual void Draw3D();
         virtual void Init();

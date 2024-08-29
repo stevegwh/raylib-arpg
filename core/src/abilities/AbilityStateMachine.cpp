@@ -135,7 +135,26 @@ namespace sage
 
     void AbilityStateMachine::Execute()
     {
-        executeFunc->Execute();
+        auto& ad = registry->get<AbilityData>(abilityDataEntity);
+
+        if (ad.base.executeFuncEnum == AbilityFunctionEnum::SingleTargetHit)
+        {
+            auto& executeFunc = GetExecuteFunc<SingleTargetHitFunc>(registry, self, abilityDataEntity, gameData);
+            executeFunc.Execute();
+        }
+        else if (ad.base.executeFuncEnum == AbilityFunctionEnum::MultihitRadiusFromCaster)
+        {
+            auto& executeFunc =
+                GetExecuteFunc<MultihitRadiusFromCaster>(registry, self, abilityDataEntity, gameData);
+            executeFunc.Execute();
+        }
+        else if (ad.base.executeFuncEnum == AbilityFunctionEnum::MultihitRadiusFromCursor)
+        {
+            auto& executeFunc =
+                GetExecuteFunc<MultihitRadiusFromCursor>(registry, self, abilityDataEntity, gameData);
+            executeFunc.Execute();
+        }
+
         ChangeState(AbilityStateEnum::IDLE);
     }
 
@@ -159,6 +178,7 @@ namespace sage
 
     AbilityStateMachine::~AbilityStateMachine()
     {
+        registry->destroy(abilityDataEntity);
     }
 
     AbilityStateMachine::AbilityStateMachine(
@@ -170,10 +190,6 @@ namespace sage
         // Atm it's difficult due to polymorphism
         auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
-        auto executeFuncType =
-            AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(abilityData.base.executeFuncName);
-        executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
-            executeFuncType, _registry, _self, _abilityDataEntity, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);

@@ -7,6 +7,7 @@
 namespace sage
 {
     class Camera;
+    struct CollisionInfo;
     class GameData;
 
     enum class AbilityFunctionEnum
@@ -61,6 +62,17 @@ namespace sage
             : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
+    class ProjectileExplosionFromCaster : public AbilityFunction
+    {
+        void onHit(entt::entity caster, CollisionInfo collisionInfo);
+
+      public:
+        void Execute() override;
+        ProjectileExplosionFromCaster(
+            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+            : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
+    };
+
     void Hit360AroundPoint(
         entt::registry* registry,
         entt::entity caster,
@@ -71,6 +83,4 @@ namespace sage
     void HitSingleTarget(
         entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, entt::entity target);
 
-    void ProjectileExplosion(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, Vector3 point);
 } // namespace sage
