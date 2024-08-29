@@ -12,7 +12,7 @@ namespace sage
 
     class PlayerAutoAttack : public AbilityStateMachine
     {
-        AbilityData initAbilityData(entt::registry* registry);
+        entt::entity initAbilityData(entt::registry* registry);
 
       public:
         ~PlayerAutoAttack() override = default;
@@ -21,7 +21,7 @@ namespace sage
 
     class RainOfFire : public CursorAbility
     {
-        AbilityData initAbilityData(entt::registry* registry, Cursor* cursor);
+        entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
 
       public:
         RainOfFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
@@ -29,7 +29,7 @@ namespace sage
 
     class Fireball : public AbilityStateMachine
     {
-        AbilityData initAbilityData(entt::registry* registry);
+        entt::entity initAbilityData(entt::registry* registry);
 
       public:
         Fireball(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
@@ -37,7 +37,7 @@ namespace sage
 
     class LightningBall : public AbilityStateMachine
     {
-        AbilityData initAbilityData(entt::registry* registry);
+        entt::entity initAbilityData(entt::registry* registry);
 
       public:
         LightningBall(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
@@ -45,7 +45,7 @@ namespace sage
 
     class FloorFire : public CursorAbility
     {
-        AbilityData initAbilityData(entt::registry* registry, Cursor* cursor);
+        entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
 
       public:
         FloorFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
@@ -53,7 +53,7 @@ namespace sage
 
     class WavemobAutoAttack : public AbilityStateMachine
     {
-        AbilityData initAbilityData(entt::registry* registry);
+        entt::entity initAbilityData(entt::registry* registry);
 
       public:
         ~WavemobAutoAttack() override = default;
@@ -62,7 +62,7 @@ namespace sage
 
     class WhirlwindAbility : public AbilityStateMachine
     {
-        AbilityData initAbilityData(entt::registry* registry);
+        entt::entity initAbilityData(entt::registry* registry);
 
       public:
         float whirlwindRadius = 15.0f;

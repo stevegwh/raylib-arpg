@@ -22,7 +22,7 @@
 namespace sage
 {
 
-    AbilityData PlayerAutoAttack::initAbilityData(entt::registry* _registry)
+    entt::entity PlayerAutoAttack::initAbilityData(entt::registry* _registry)
     {
         AbilityData ad;
         ad.base.element = AttackElement::PHYSICAL;
@@ -41,7 +41,11 @@ namespace sage
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
 
-        return ad;
+        // TODO: Why can't we initialise vfx here?
+
+        auto entity = _registry->create();
+        _registry->emplace<AbilityData>(entity, ad);
+        return entity;
     }
 
     PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
@@ -49,7 +53,7 @@ namespace sage
     {
     }
 
-    AbilityData RainOfFire::initAbilityData(entt::registry* _registry, Cursor* cursor)
+    entt::entity RainOfFire::initAbilityData(entt::registry* _registry, Cursor* cursor)
     {
         AbilityData ad;
 
@@ -79,7 +83,9 @@ namespace sage
         ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
             AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
 
-        return ad;
+        auto entity = _registry->create();
+        _registry->emplace<AbilityData>(entity, ad);
+        return entity;
     }
 
     RainOfFire::RainOfFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
@@ -88,7 +94,7 @@ namespace sage
         // assert(vfx != nullptr);
     }
 
-    AbilityData FloorFire::initAbilityData(entt::registry* _registry, Cursor* cursor)
+    entt::entity FloorFire::initAbilityData(entt::registry* _registry, Cursor* cursor)
     {
         AbilityData ad;
 
@@ -118,7 +124,9 @@ namespace sage
         ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
             AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
 
-        return ad;
+        auto entity = _registry->create();
+        _registry->emplace<AbilityData>(entity, ad);
+        return entity;
     }
 
     FloorFire::FloorFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
@@ -127,7 +135,7 @@ namespace sage
         // assert(vfx != nullptr);
     }
 
-    AbilityData Fireball::initAbilityData(entt::registry* _registry)
+    entt::entity Fireball::initAbilityData(entt::registry* _registry)
     {
         AbilityData ad;
 
@@ -146,7 +154,9 @@ namespace sage
 
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
-        return ad;
+        auto entity = _registry->create();
+        _registry->emplace<AbilityData>(entity, ad);
+        return entity;
     }
 
     Fireball::Fireball(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
@@ -154,7 +164,7 @@ namespace sage
     {
     }
 
-    AbilityData LightningBall::initAbilityData(entt::registry* _registry)
+    entt::entity LightningBall::initAbilityData(entt::registry* _registry)
     {
         AbilityData ad;
 
@@ -173,7 +183,9 @@ namespace sage
 
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
-        return ad;
+        auto entity = _registry->create();
+        _registry->emplace<AbilityData>(entity, ad);
+        return entity;
     }
 
     LightningBall::LightningBall(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
@@ -181,7 +193,7 @@ namespace sage
     {
     }
 
-    AbilityData WavemobAutoAttack::initAbilityData(entt::registry* _registry)
+    entt::entity WavemobAutoAttack::initAbilityData(entt::registry* _registry)
     {
         AbilityData ad;
 
@@ -198,7 +210,9 @@ namespace sage
 
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
-        return ad;
+        auto entity = _registry->create();
+        _registry->emplace<AbilityData>(entity, ad);
+        return entity;
     }
 
     WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
@@ -206,7 +220,7 @@ namespace sage
     {
     }
 
-    AbilityData WhirlwindAbility::initAbilityData(entt::registry* _registry)
+    entt::entity WhirlwindAbility::initAbilityData(entt::registry* _registry)
     {
         AbilityData ad;
 
@@ -229,7 +243,9 @@ namespace sage
         ad.executeFunc =
             AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::MultihitRadiusFromCaster);
 
-        return ad;
+        auto entity = _registry->create();
+        _registry->emplace<AbilityData>(entity, ad);
+        return entity;
     }
 
     WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, entt::entity _entity, GameData* _gameData)

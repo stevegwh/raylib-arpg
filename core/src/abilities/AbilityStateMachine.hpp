@@ -57,7 +57,7 @@ namespace sage
         AbilityStateMachine(const AbilityStateMachine&) = delete;
         AbilityStateMachine& operator=(const AbilityStateMachine&) = delete;
         AbilityStateMachine(
-            entt::registry* registry, entt::entity _self, AbilityData abilityData, GameData* _gameData);
+            entt::registry* registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData);
     };
 
 } // namespace sage

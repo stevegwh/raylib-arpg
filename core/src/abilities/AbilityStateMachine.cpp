@@ -164,14 +164,13 @@ namespace sage
     }
 
     AbilityStateMachine::AbilityStateMachine(
-        entt::registry* registry, entt::entity _self, AbilityData _abilityData, GameData* _gameData)
-        : registry(registry), self(_self), gameData(_gameData)
+        entt::registry* registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+        : registry(registry), self(_self), abilityDataEntity(_abilityDataEntity), gameData(_gameData)
     {
 
         // TODO: Does VFX need to be defined here? I'd prefer initialising AbilityData ASAP and just passing the
         // entity id as an arg
-        abilityDataEntity = registry->create();
-        auto& abilityData = registry->emplace<AbilityData>(abilityDataEntity, _abilityData);
+        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
