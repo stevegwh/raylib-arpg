@@ -4,6 +4,7 @@
 
 #include "CursorAbility.hpp"
 
+#include "AbilityData.hpp"
 #include "AbilityFunctions.hpp"
 #include "AbilityIndicator.hpp"
 #include "AbilityResourceManager.hpp"
@@ -116,6 +117,7 @@ namespace sage
     {
         // Ability::Init(self);
         auto& animation = registry->get<Animation>(self);
+        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         animation.ChangeAnimationByParams(abilityData.animationParams);
 
         if (vfx)
@@ -133,6 +135,7 @@ namespace sage
         entt::registry* _registry, entt::entity _self, AbilityData _abilityData, GameData* _gameData)
         : AbilityStateMachine(_registry, _self, _abilityData, _gameData), cursor(_gameData->cursor.get())
     {
+        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         auto cursorState = std::make_unique<CursorSelectState>(
             _self,
             cooldownTimer,

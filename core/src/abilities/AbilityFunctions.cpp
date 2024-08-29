@@ -16,27 +16,32 @@
 namespace sage
 {
 
-    void SingleTargetHitFunc::Execute(entt::registry* registry, entt::entity caster, const AbilityData& ad)
+    void SingleTargetHitFunc::Execute(
+        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity)
     {
         auto target = registry->get<CombatableActor>(caster).target;
-        HitSingleTarget(registry, caster, ad, target);
+        HitSingleTarget(registry, caster, abilityDataEntity, target);
     }
 
-    void MultihitRadiusFromCursor::Execute(entt::registry* registry, entt::entity caster, const AbilityData& ad)
+    void MultihitRadiusFromCursor::Execute(
+        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity)
     {
+        auto& ad = registry->get<AbilityData>(abilityDataEntity);
         auto& actorTransform = registry->get<sgTransform>(caster);
-        Hit360AroundPoint(registry, caster, ad, ad.cursor->collision().point, 15);
+        Hit360AroundPoint(registry, caster, abilityDataEntity, ad.cursor->collision().point, 15);
     }
 
-    void MultihitRadiusFromCaster::Execute(entt::registry* registry, entt::entity caster, const AbilityData& ad)
+    void MultihitRadiusFromCaster::Execute(
+        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity)
     {
         auto& actorTransform = registry->get<sgTransform>(caster);
-        Hit360AroundPoint(registry, caster, ad, actorTransform.position(), 15);
+        Hit360AroundPoint(registry, caster, abilityDataEntity, actorTransform.position(), 15);
     }
 
     void Hit360AroundPoint(
-        entt::registry* registry, entt::entity caster, AbilityData abilityData, Vector3 point, float radius)
+        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, Vector3 point, float radius)
     {
+        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         auto view = registry->view<CombatableActor>();
         for (auto& entity : view)
         {
@@ -59,9 +64,11 @@ namespace sage
     }
 
     void HitSingleTarget(
-        entt::registry* registry, entt::entity caster, AbilityData abilityData, entt::entity target)
+        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, entt::entity target)
     {
         assert(target != entt::null);
+
+        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
 
         auto& t = registry->get<sgTransform>(caster);
         auto& enemyPos = registry->get<sgTransform>(target).position();
@@ -81,7 +88,8 @@ namespace sage
         }
     }
 
-    void ProjectileExplosion(entt::registry* registry, entt::entity caster, AbilityData abilityData, Vector3 point)
+    void ProjectileExplosion(
+        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, Vector3 point)
     {
 
         // Spawn projectile bb at caster position

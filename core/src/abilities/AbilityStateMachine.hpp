@@ -30,7 +30,8 @@ namespace sage
       protected:
         entt::registry* registry;
         entt::entity self;
-        AbilityData abilityData; // Make component
+        entt::entity abilityDataEntity;
+        // AbilityData abilityData;
         Timer cooldownTimer;
         Timer animationDelayTimer;
         std::unique_ptr<VisualFX> vfx;
@@ -56,7 +57,7 @@ namespace sage
         AbilityStateMachine(const AbilityStateMachine&) = delete;
         AbilityStateMachine& operator=(const AbilityStateMachine&) = delete;
         AbilityStateMachine(
-            entt::registry* registry, entt::entity _self, const AbilityData& abilityData, GameData* _gameData);
+            entt::registry* registry, entt::entity _self, AbilityData abilityData, GameData* _gameData);
     };
 
 } // namespace sage

@@ -135,7 +135,8 @@ namespace sage
 
     void AbilityStateMachine::Execute()
     {
-        abilityData.executeFunc->Execute(registry, self, abilityData);
+        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
+        abilityData.executeFunc->Execute(registry, self, abilityDataEntity);
 
         ChangeState(AbilityStateEnum::IDLE);
     }
@@ -143,6 +144,7 @@ namespace sage
     void AbilityStateMachine::Init()
     {
         auto& animation = registry->get<Animation>(self);
+        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         animation.ChangeAnimationByParams(abilityData.animationParams);
         // if (ad.vfx.behaviour == AbilityData::VFXBehaviour::SpawnAtPlayer)
         // vfx->InitSystem(data->controllableActorSystem->GetControlledActor()); // TODO: store caster's entity ID
@@ -161,22 +163,22 @@ namespace sage
     {
     }
 
-    // TODO: I feel the "self" arguments are redundant, might as well just make it a member (as entities hold full
-    // instances of abilities)
-
     AbilityStateMachine::AbilityStateMachine(
-        entt::registry* registry, entt::entity _self, const AbilityData& _abilityData, GameData* _gameData)
-        : registry(registry),
-          self(_self),
-          abilityData(_abilityData),
-          gameData(_gameData),
-          vfx(AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData))
+        entt::registry* registry, entt::entity _self, AbilityData _abilityData, GameData* _gameData)
+        : registry(registry), self(_self), gameData(_gameData)
     {
+
+        // TODO: Does VFX need to be defined here? I'd prefer initialising AbilityData ASAP and just passing the
+        // entity id as an arg
+        abilityDataEntity = registry->create();
+        auto& abilityData = registry->emplace<AbilityData>(abilityDataEntity, _abilityData);
+        vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
+
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
         auto idleState =
-            std::make_unique<IdleState>(_self, cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
+            std::make_unique<IdleState>(_self, cooldownTimer, animationDelayTimer, abilityData.base.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&AbilityStateMachine::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
