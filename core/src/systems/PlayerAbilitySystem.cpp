@@ -3,7 +3,7 @@
 #include "AbilitySystem.hpp"
 
 #include "abilities/Abilities.hpp"
-#include "abilities/Ability.hpp"
+#include "abilities/AbilityStateMachine.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "UserInput.hpp"

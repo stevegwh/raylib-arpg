@@ -20,7 +20,7 @@ namespace sage
         AWAITING_EXECUTION
     };
 
-    class Ability
+    class AbilityStateMachine
     {
         class IdleState;
         class AwaitingExecutionState;
@@ -52,10 +52,11 @@ namespace sage
         virtual void Draw3D();
         virtual void Init();
 
-        virtual ~Ability();
-        Ability(const Ability&) = delete;
-        Ability& operator=(const Ability&) = delete;
-        Ability(entt::registry* registry, entt::entity _self, const AbilityData& abilityData, GameData* _gameData);
+        virtual ~AbilityStateMachine();
+        AbilityStateMachine(const AbilityStateMachine&) = delete;
+        AbilityStateMachine& operator=(const AbilityStateMachine&) = delete;
+        AbilityStateMachine(
+            entt::registry* registry, entt::entity _self, const AbilityData& abilityData, GameData* _gameData);
     };
 
 } // namespace sage

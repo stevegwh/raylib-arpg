@@ -7,7 +7,7 @@
 
 namespace sage
 {
-    class Ability;
+    class AbilityStateMachine;
     class GameData;
 
     // In charge of initialising, updating, drawing, returning and changing entity's abilities
@@ -26,12 +26,13 @@ namespace sage
     {
         entt::registry* registry;
         GameData* gameData;
-        std::unordered_map<entt::entity, std::unordered_map<AbilityEnum, std::unique_ptr<Ability>>> abilityMap;
+        std::unordered_map<entt::entity, std::unordered_map<AbilityEnum, std::unique_ptr<AbilityStateMachine>>>
+            abilityMap;
 
       public:
-        Ability* GetAbility(entt::entity entity, AbilityEnum abilityEnum);
-        std::vector<Ability*> GetAbilities(entt::entity entity);
-        Ability* RegisterAbility(entt::entity entity, AbilityEnum abilityEnum);
+        AbilityStateMachine* GetAbility(entt::entity entity, AbilityEnum abilityEnum);
+        std::vector<AbilityStateMachine*> GetAbilities(entt::entity entity);
+        AbilityStateMachine* RegisterAbility(entt::entity entity, AbilityEnum abilityEnum);
         // Create custom ability?
         void Update();
         void Draw3D();

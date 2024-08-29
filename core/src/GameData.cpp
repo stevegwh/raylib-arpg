@@ -11,7 +11,7 @@
 #include "UserInput.hpp"
 
 // Systems
-#include "abilities/Ability.hpp"
+#include "abilities/AbilityStateMachine.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 #include "systems/AbilitySystem.hpp"
 #include "systems/ActorMovementSystem.hpp"

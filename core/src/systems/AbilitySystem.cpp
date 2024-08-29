@@ -1,13 +1,13 @@
 #include "AbilitySystem.hpp"
 
 #include "abilities/Abilities.hpp"
-#include "abilities/Ability.hpp"
+#include "abilities/AbilityStateMachine.hpp"
 #include "GameData.hpp"
 
 namespace sage
 {
 
-    Ability* AbilitySystem::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
+    AbilityStateMachine* AbilitySystem::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
         if (!abilityMap.contains(entity))
         {
@@ -22,9 +22,9 @@ namespace sage
         return nullptr;
     }
 
-    std::vector<Ability*> AbilitySystem::GetAbilities(entt::entity entity)
+    std::vector<AbilityStateMachine*> AbilitySystem::GetAbilities(entt::entity entity)
     {
-        std::vector<Ability*> abilities;
+        std::vector<AbilityStateMachine*> abilities;
         for (const auto& ability : abilityMap[entity])
         {
             abilities.push_back(ability.second.get());
@@ -32,7 +32,7 @@ namespace sage
         return abilities;
     }
 
-    Ability* AbilitySystem::RegisterAbility(entt::entity entity, AbilityEnum abilityEnum)
+    AbilityStateMachine* AbilitySystem::RegisterAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
         if (abilityEnum == AbilityEnum::PLAYER_AUTOATTACK)
         {

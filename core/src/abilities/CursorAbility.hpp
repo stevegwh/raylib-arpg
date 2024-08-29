@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ability.hpp"
+#include "AbilityStateMachine.hpp"
 
 #include <memory>
 
@@ -9,7 +9,7 @@ namespace sage
     class AbilityIndicator;
     class Cursor;
 
-    class CursorAbility : public Ability
+    class CursorAbility : public AbilityStateMachine
     {
         class CursorSelectState;
         Cursor* cursor;

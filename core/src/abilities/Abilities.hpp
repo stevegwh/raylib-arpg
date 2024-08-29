@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ability.hpp"
+#include "AbilityStateMachine.hpp"
 #include "CursorAbility.hpp"
 
 #include <entt/entt.hpp>
@@ -10,7 +10,7 @@ namespace sage
     class Camera;
     class GameData;
 
-    class PlayerAutoAttack : public Ability
+    class PlayerAutoAttack : public AbilityStateMachine
     {
         AbilityData initAbilityData(entt::registry* registry);
 
@@ -27,7 +27,7 @@ namespace sage
         RainOfFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
     };
 
-    class Fireball : public Ability
+    class Fireball : public AbilityStateMachine
     {
         AbilityData initAbilityData(entt::registry* registry);
 
@@ -35,7 +35,7 @@ namespace sage
         Fireball(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
     };
 
-    class LightningBall : public Ability
+    class LightningBall : public AbilityStateMachine
     {
         AbilityData initAbilityData(entt::registry* registry);
 
@@ -51,7 +51,7 @@ namespace sage
         FloorFire(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
     };
 
-    class WavemobAutoAttack : public Ability
+    class WavemobAutoAttack : public AbilityStateMachine
     {
         AbilityData initAbilityData(entt::registry* registry);
 
@@ -60,7 +60,7 @@ namespace sage
         WavemobAutoAttack(entt::registry* _registry, entt::entity _entity, GameData* _gameData);
     };
 
-    class WhirlwindAbility : public Ability
+    class WhirlwindAbility : public AbilityStateMachine
     {
         AbilityData initAbilityData(entt::registry* registry);
 
