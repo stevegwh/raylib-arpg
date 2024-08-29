@@ -17,20 +17,20 @@
 namespace sage
 {
 
-    void SingleTargetHitFunc::Execute(entt::entity abilityDataEntity)
+    void SingleTargetHitFunc::Execute()
     {
         auto target = registry->get<CombatableActor>(self).target;
         HitSingleTarget(registry, self, abilityDataEntity, target);
     }
 
-    void MultihitRadiusFromCursor::Execute(entt::entity abilityDataEntity)
+    void MultihitRadiusFromCursor::Execute()
     {
         auto& ad = registry->get<AbilityData>(abilityDataEntity);
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(registry, self, abilityDataEntity, ad.cursor->collision().point, 15);
     }
 
-    void MultihitRadiusFromCaster::Execute(entt::entity abilityDataEntity)
+    void MultihitRadiusFromCaster::Execute()
     {
         auto& actorTransform = registry->get<sgTransform>(self);
         Hit360AroundPoint(registry, self, abilityDataEntity, actorTransform.position(), 15);
