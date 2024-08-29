@@ -45,7 +45,7 @@ namespace sage
     }
 
     PlayerAutoAttack::PlayerAutoAttack(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : Ability(_registry, _entity, initAbilityData(_registry), _gameData)
+        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -150,7 +150,7 @@ namespace sage
     }
 
     Fireball::Fireball(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : Ability(_registry, _entity, initAbilityData(_registry), _gameData)
+        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -177,7 +177,7 @@ namespace sage
     }
 
     LightningBall::LightningBall(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : Ability(_registry, _entity, initAbilityData(_registry), _gameData)
+        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -202,7 +202,7 @@ namespace sage
     }
 
     WavemobAutoAttack::WavemobAutoAttack(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : Ability(_registry, _entity, initAbilityData(_registry), _gameData)
+        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
     {
     }
 
@@ -233,7 +233,7 @@ namespace sage
     }
 
     WhirlwindAbility::WhirlwindAbility(entt::registry* _registry, entt::entity _entity, GameData* _gameData)
-        : Ability(_registry, _entity, initAbilityData(_registry), _gameData)
+        : AbilityStateMachine(_registry, _entity, initAbilityData(_registry), _gameData)
     {
     }
 

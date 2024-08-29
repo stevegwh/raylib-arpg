@@ -1,4 +1,4 @@
-#include "Ability.hpp"
+#include "AbilityStateMachine.hpp"
 
 #include "abilities/AbilityData.hpp"
 #include "AbilityFunctions.hpp"
@@ -20,7 +20,7 @@
 namespace sage
 {
 
-    class Ability::IdleState : public AbilityState
+    class AbilityStateMachine::IdleState : public AbilityState
     {
         const bool repeatable;
 
@@ -41,7 +41,7 @@ namespace sage
         }
     };
 
-    class Ability::AwaitingExecutionState : public AbilityState
+    class AbilityStateMachine::AwaitingExecutionState : public AbilityState
     {
       public:
         entt::sigh<void(entt::entity)> onExecute;
@@ -68,7 +68,7 @@ namespace sage
 
     // ----------------------------
 
-    void Ability::ChangeState(AbilityStateEnum newState)
+    void AbilityStateMachine::ChangeState(AbilityStateEnum newState)
     {
         assert(states.contains(newState));
         state->OnExit();
@@ -76,32 +76,32 @@ namespace sage
         state->OnEnter();
     }
 
-    void Ability::ResetCooldown()
+    void AbilityStateMachine::ResetCooldown()
     {
         cooldownTimer.Reset();
     }
 
-    bool Ability::IsActive()
+    bool AbilityStateMachine::IsActive()
     {
         return cooldownTimer.IsRunning();
     }
 
-    float Ability::GetRemainingCooldownTime() const
+    float AbilityStateMachine::GetRemainingCooldownTime() const
     {
         return cooldownTimer.GetRemainingTime();
     }
 
-    float Ability::GetCooldownDuration() const
+    float AbilityStateMachine::GetCooldownDuration() const
     {
         return cooldownTimer.GetMaxTime();
     }
 
-    bool Ability::CooldownReady() const
+    bool AbilityStateMachine::CooldownReady() const
     {
         return cooldownTimer.HasFinished() || cooldownTimer.GetRemainingTime() <= 0;
     }
 
-    void Ability::Cancel()
+    void AbilityStateMachine::Cancel()
     {
         if (vfx && vfx->active)
         {
@@ -112,7 +112,7 @@ namespace sage
         ChangeState(AbilityStateEnum::IDLE);
     }
 
-    void Ability::Update()
+    void AbilityStateMachine::Update()
     {
         if (!IsActive()) return;
         state->Update();
@@ -123,7 +123,7 @@ namespace sage
         }
     }
 
-    void Ability::Draw3D()
+    void AbilityStateMachine::Draw3D()
     {
         if (!IsActive()) return;
         state->Draw3D();
@@ -133,14 +133,14 @@ namespace sage
         }
     }
 
-    void Ability::Execute()
+    void AbilityStateMachine::Execute()
     {
         abilityData.executeFunc->Execute(registry, self, abilityData);
 
         ChangeState(AbilityStateEnum::IDLE);
     }
 
-    void Ability::Init()
+    void AbilityStateMachine::Init()
     {
         auto& animation = registry->get<Animation>(self);
         animation.ChangeAnimationByParams(abilityData.animationParams);
@@ -157,14 +157,14 @@ namespace sage
         ChangeState(AbilityStateEnum::AWAITING_EXECUTION);
     }
 
-    Ability::~Ability()
+    AbilityStateMachine::~AbilityStateMachine()
     {
     }
 
     // TODO: I feel the "self" arguments are redundant, might as well just make it a member (as entities hold full
     // instances of abilities)
 
-    Ability::Ability(
+    AbilityStateMachine::AbilityStateMachine(
         entt::registry* registry, entt::entity _self, const AbilityData& _abilityData, GameData* _gameData)
         : registry(registry),
           self(_self),
@@ -178,13 +178,13 @@ namespace sage
         auto idleState =
             std::make_unique<IdleState>(_self, cooldownTimer, animationDelayTimer, _abilityData.base.repeatable);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
-        onRestartTriggeredSink.connect<&Ability::Init>(this);
+        onRestartTriggeredSink.connect<&AbilityStateMachine::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState =
             std::make_unique<AwaitingExecutionState>(_self, cooldownTimer, animationDelayTimer);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
-        onExecuteSink.connect<&Ability::Execute>(this);
+        onExecuteSink.connect<&AbilityStateMachine::Execute>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
 
         state = states[AbilityStateEnum::IDLE].get();

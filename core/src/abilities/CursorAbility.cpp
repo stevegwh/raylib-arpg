@@ -97,7 +97,7 @@ namespace sage
     bool CursorAbility::IsActive()
     {
         const auto current = states[AbilityStateEnum::CURSOR_SELECT].get();
-        return Ability::IsActive() || state == current;
+        return AbilityStateMachine::IsActive() || state == current;
     }
 
     void CursorAbility::Init()
@@ -131,7 +131,7 @@ namespace sage
 
     CursorAbility::CursorAbility(
         entt::registry* _registry, entt::entity _self, AbilityData _abilityData, GameData* _gameData)
-        : Ability(_registry, _self, _abilityData, _gameData), cursor(_gameData->cursor.get())
+        : AbilityStateMachine(_registry, _self, _abilityData, _gameData), cursor(_gameData->cursor.get())
     {
         auto cursorState = std::make_unique<CursorSelectState>(
             _self,

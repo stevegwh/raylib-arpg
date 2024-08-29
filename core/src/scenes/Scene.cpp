@@ -2,7 +2,7 @@
 
 #include "GameData.hpp"
 
-#include "abilities/Ability.hpp"
+#include "abilities/AbilityStateMachine.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 
 #include "Camera.hpp"
