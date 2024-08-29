@@ -132,8 +132,8 @@ namespace sage
     }
 
     CursorAbility::CursorAbility(
-        entt::registry* _registry, entt::entity _self, AbilityData _abilityData, GameData* _gameData)
-        : AbilityStateMachine(_registry, _self, _abilityData, _gameData), cursor(_gameData->cursor.get())
+        entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
+        : AbilityStateMachine(_registry, _self, _abilityDataEntity, _gameData), cursor(_gameData->cursor.get())
     {
         auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
         auto cursorState = std::make_unique<CursorSelectState>(

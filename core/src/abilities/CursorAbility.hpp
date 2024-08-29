@@ -17,7 +17,7 @@ namespace sage
       protected:
         virtual void confirm();
         CursorAbility(
-            entt::registry* _registry, entt::entity _self, AbilityData _abilityData, GameData* _gameData);
+            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData);
 
       public:
         bool IsActive() override;
