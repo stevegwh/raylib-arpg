@@ -38,9 +38,6 @@ namespace sage
 
         // serializer::SaveAbilityData(ad, "resources/player_auto_attack.json");
 
-        ad.executeFunc =
-            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
-
         // TODO: Why can't we initialise vfx here?
 
         auto entity = _registry->create();
@@ -80,8 +77,8 @@ namespace sage
         // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
         ad.cursor = cursor;
 
-        ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
-            AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
+        // ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
+        //     AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
 
         auto entity = _registry->create();
         _registry->emplace<AbilityData>(entity, ad);
@@ -121,8 +118,8 @@ namespace sage
         // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
 
         ad.cursor = cursor;
-        ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
-            AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
+        // ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
+        //     AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
 
         auto entity = _registry->create();
         _registry->emplace<AbilityData>(entity, ad);
@@ -152,8 +149,8 @@ namespace sage
 
         // serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
-        ad.executeFunc =
-            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
+        // ad.executeFunc =
+        //     AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
         auto entity = _registry->create();
         _registry->emplace<AbilityData>(entity, ad);
         return entity;
@@ -181,8 +178,8 @@ namespace sage
 
         // serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
-        ad.executeFunc =
-            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
+        // ad.executeFunc =
+        //     AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
         auto entity = _registry->create();
         _registry->emplace<AbilityData>(entity, ad);
         return entity;
@@ -208,8 +205,8 @@ namespace sage
 
         // serializer::SaveAbilityData(ad, "resources/wavemob_auto_attack.json");
 
-        ad.executeFunc =
-            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
+        // ad.executeFunc =
+        //     AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::SingleTargetHit);
         auto entity = _registry->create();
         _registry->emplace<AbilityData>(entity, ad);
         return entity;
@@ -240,8 +237,8 @@ namespace sage
 
         // serializer::SaveAbilityData(ad, "resources/whirlwind.json");
 
-        ad.executeFunc =
-            AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::MultihitRadiusFromCaster);
+        // ad.executeFunc =
+        //     AbilityResourceManager::GetInstance().GetExecuteFunc(AbilityFunctionEnum::MultihitRadiusFromCaster);
 
         auto entity = _registry->create();
         _registry->emplace<AbilityData>(entity, ad);

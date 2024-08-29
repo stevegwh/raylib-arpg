@@ -48,7 +48,6 @@ namespace sage
         IndicatorData indicator{};
 
         Cursor* cursor;
-        AbilityFunction* executeFunc;
     };
 
 } // namespace sage

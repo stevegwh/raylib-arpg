@@ -91,14 +91,21 @@ namespace sage
         return AbilityFunctionEnum::SingleTargetHit; // TODO: Null?
     }
 
-    AbilityFunction* AbilityResourceManager::GetExecuteFunc(AbilityFunctionEnum name)
+    std::unique_ptr<AbilityFunction> AbilityResourceManager::GetExecuteFunc(AbilityFunctionEnum name)
     {
-        if (abilityFunctions.empty())
+        if (name == AbilityFunctionEnum::SingleTargetHit)
         {
-            InitializeAbilities();
+            return std::make_unique<SingleTargetHitFunc>();
         }
-        auto it = abilityFunctions.find(name);
-        return (it != abilityFunctions.end()) ? it->second.get() : nullptr;
+        else if (name == AbilityFunctionEnum::MultihitRadiusFromCaster)
+        {
+            return std::make_unique<MultihitRadiusFromCaster>();
+        }
+        else if (name == AbilityFunctionEnum::MultihitRadiusFromCursor)
+        {
+            return std::make_unique<MultihitRadiusFromCursor>();
+        }
+        return nullptr;
     }
 
     AbilityResourceManager& AbilityResourceManager::GetInstance()
