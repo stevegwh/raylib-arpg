@@ -18,15 +18,6 @@
 namespace sage
 {
 
-    void AbilityResourceManager::InitializeAbilities()
-    {
-        abilityFunctions.emplace(AbilityFunctionEnum::SingleTargetHit, std::make_unique<SingleTargetHitFunc>());
-        abilityFunctions.emplace(
-            AbilityFunctionEnum::MultihitRadiusFromCursor, std::make_unique<MultihitRadiusFromCursor>());
-        abilityFunctions.emplace(
-            AbilityFunctionEnum::MultihitRadiusFromCaster, std::make_unique<MultihitRadiusFromCaster>());
-    }
-
     std::unique_ptr<AbilityIndicator> AbilityResourceManager::GetIndicator(
         AbilityData::IndicatorData data, GameData* _gameData)
     {
@@ -91,19 +82,20 @@ namespace sage
         return AbilityFunctionEnum::SingleTargetHit; // TODO: Null?
     }
 
-    std::unique_ptr<AbilityFunction> AbilityResourceManager::GetExecuteFunc(AbilityFunctionEnum name)
+    std::unique_ptr<AbilityFunction> AbilityResourceManager::GetExecuteFunc(
+        AbilityFunctionEnum name, entt::registry* _registry, entt::entity caster, GameData* _gameData)
     {
         if (name == AbilityFunctionEnum::SingleTargetHit)
         {
-            return std::make_unique<SingleTargetHitFunc>();
+            return std::make_unique<SingleTargetHitFunc>(_registry, caster, _gameData);
         }
         else if (name == AbilityFunctionEnum::MultihitRadiusFromCaster)
         {
-            return std::make_unique<MultihitRadiusFromCaster>();
+            return std::make_unique<MultihitRadiusFromCaster>(_registry, caster, _gameData);
         }
         else if (name == AbilityFunctionEnum::MultihitRadiusFromCursor)
         {
-            return std::make_unique<MultihitRadiusFromCursor>();
+            return std::make_unique<MultihitRadiusFromCursor>(_registry, caster, _gameData);
         }
         return nullptr;
     }

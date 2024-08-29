@@ -4,6 +4,7 @@
 
 #include "Camera.hpp"
 #include "Cursor.hpp"
+#include "GameData.hpp"
 
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
@@ -16,26 +17,23 @@
 namespace sage
 {
 
-    void SingleTargetHitFunc::Execute(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity)
+    void SingleTargetHitFunc::Execute(entt::entity abilityDataEntity)
     {
-        auto target = registry->get<CombatableActor>(caster).target;
-        HitSingleTarget(registry, caster, abilityDataEntity, target);
+        auto target = registry->get<CombatableActor>(self).target;
+        HitSingleTarget(registry, self, abilityDataEntity, target);
     }
 
-    void MultihitRadiusFromCursor::Execute(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity)
+    void MultihitRadiusFromCursor::Execute(entt::entity abilityDataEntity)
     {
         auto& ad = registry->get<AbilityData>(abilityDataEntity);
-        auto& actorTransform = registry->get<sgTransform>(caster);
-        Hit360AroundPoint(registry, caster, abilityDataEntity, ad.cursor->collision().point, 15);
+        auto& actorTransform = registry->get<sgTransform>(self);
+        Hit360AroundPoint(registry, self, abilityDataEntity, ad.cursor->collision().point, 15);
     }
 
-    void MultihitRadiusFromCaster::Execute(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity)
+    void MultihitRadiusFromCaster::Execute(entt::entity abilityDataEntity)
     {
-        auto& actorTransform = registry->get<sgTransform>(caster);
-        Hit360AroundPoint(registry, caster, abilityDataEntity, actorTransform.position(), 15);
+        auto& actorTransform = registry->get<sgTransform>(self);
+        Hit360AroundPoint(registry, self, abilityDataEntity, actorTransform.position(), 15);
     }
 
     void Hit360AroundPoint(

@@ -23,13 +23,12 @@ namespace sage
 
         AbilityResourceManager();
 
-        void InitializeAbilities();
-
       public:
         std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, GameData* _gameData);
         // std::unique_ptr<AbilityIndicator> GetIndicator(std::string key);
         AbilityFunctionEnum StringToExecuteFuncEnum(const std::string& name);
-        std::unique_ptr<AbilityFunction> GetExecuteFunc(AbilityFunctionEnum name);
+        std::unique_ptr<AbilityFunction> GetExecuteFunc(
+            AbilityFunctionEnum name, entt::registry* _registry, entt::entity caster, GameData* _gameData);
         std::unique_ptr<VisualFX> GetVisualFX(AbilityData::VisualFXData& data, GameData* _gameData);
         AbilityResourceManager(const AbilityResourceManager&) = delete;
         AbilityResourceManager& operator=(const AbilityResourceManager&) = delete;
