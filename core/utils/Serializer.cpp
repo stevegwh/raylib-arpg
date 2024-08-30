@@ -156,8 +156,8 @@ namespace sage
                 while (storage.peek() != EOF)
                 {
                     auto entt = destination->create();
-                    entity entityId{};
-                    auto& transform = destination->emplace<sgTransform>(entt);
+                    entity entityId{}; // ignore this
+                    auto& transform = destination->emplace<sgTransform>(entt, entt);
                     auto& collideable = destination->emplace<Collideable>(entt);
                     auto& renderable = destination->emplace<Renderable>(entt);
 

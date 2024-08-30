@@ -68,13 +68,13 @@ namespace sage
         // sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"),
         // std::string("resources/models/obj/cube_diffuse.png") };
 
-        auto& transform = registry->emplace<sgTransform>(id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z}, id);
-        transform.SetScale(1.0f, id);
-        transform.SetRotation({0, 0, 0}, id);
+        transform.SetPosition({position.x, height, position.z});
+        transform.SetScale(1.0f);
+        transform.SetRotation({0, 0, 0});
         transform.movementSpeed = 0.05f;
         registry->emplace<MoveableActor>(id);
 
@@ -122,13 +122,13 @@ namespace sage
         // sage::Material mat = { LoadTexture("resources/models/obj/cube_diffuse.png"),
         // std::string("resources/models/obj/cube_diffuse.png") };
 
-        auto& transform = registry->emplace<sgTransform>(id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z}, id);
-        transform.SetScale(1.0f, id);
-        transform.SetRotation({0, 0, 0}, id);
+        transform.SetPosition({position.x, height, position.z});
+        transform.SetScale(1.0f);
+        transform.SetRotation({0, 0, 0});
 
         auto model = LoadModel(modelPath);
         auto& animation = registry->emplace<Animation>(id, modelPath, &model);
@@ -154,7 +154,7 @@ namespace sage
         auto& dialogue = registry->emplace<Dialogue>(id);
         dialogue.sentence = "Hello, this is a test sentence.";
         dialogue.conversationPos =
-            Vector3Add(transform.position(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
         data->lightSubSystem->LinkRenderableToLight(&renderable);
         return id;
@@ -169,13 +169,13 @@ namespace sage
         entt::entity id = registry->create();
         auto modelPath = "resources/models/gltf/hero2.glb";
 
-        auto& transform = registry->emplace<sgTransform>(id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z}, id);
-        transform.SetScale(1.0f, id);
-        transform.SetRotation({0, 0, 0}, id);
+        transform.SetPosition({position.x, height, position.z});
+        transform.SetScale(1.0f);
+        transform.SetRotation({0, 0, 0});
 
         auto& moveableActor = registry->emplace<MoveableActor>(id);
 
@@ -268,10 +268,10 @@ namespace sage
         const char* texturePath)
     {
         auto id = registry->create();
-        auto& transform = registry->emplace<sgTransform>(id);
-        transform.SetPosition(position, id);
-        transform.SetScale(2.0f, id);
-        transform.SetRotation({0, 0, 0}, id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
+        transform.SetPosition(position);
+        transform.SetScale(2.0f);
+        transform.SetRotation({0, 0, 0});
         auto model = LoadModel(modelPath);
         MaterialPaths matPaths;
         matPaths.diffuse = texturePath;
@@ -315,10 +315,10 @@ namespace sage
         for (int i = 0; i < parent.meshCount; ++i)
         {
             entt::entity id = registry->create();
-            auto& transform = registry->emplace<sgTransform>(id);
-            transform.SetPosition({0, 0, 0}, id);
-            transform.SetScale(1.0f, id);
-            transform.SetRotation({0, 0, 0}, id);
+            auto& transform = registry->emplace<sgTransform>(id, id);
+            transform.SetPosition({0, 0, 0});
+            transform.SetScale(1.0f);
+            transform.SetRotation({0, 0, 0});
 
             Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
             Model model = LoadModelFromMesh(parent.meshes[i]);
@@ -378,13 +378,13 @@ namespace sage
 
             entt::entity id = registry->create();
 
-            auto& transform = registry->emplace<sgTransform>(id);
+            auto& transform = registry->emplace<sgTransform>(id, id);
             GridSquare actorIdx{};
             data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
             float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-            transform.SetPosition({position.x, 12, position.z}, id);
-            transform.SetScale(1.0f, id);
-            transform.SetRotation({0, 0, 0}, id);
+            transform.SetPosition({position.x, 12, position.z});
+            transform.SetScale(1.0f);
+            transform.SetRotation({0, 0, 0});
 
             Texture2D texture = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_50.png");
             Texture2D texture2 = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_45.png");
@@ -427,13 +427,13 @@ namespace sage
 
         entt::entity id = registry->create();
 
-        auto& transform = registry->emplace<sgTransform>(id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z}, id);
-        transform.SetScale(10.0f, id);
-        transform.SetRotation({0, 0, 0}, id);
+        transform.SetPosition({position.x, height, position.z});
+        transform.SetScale(10.0f);
+        transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
         Model model = ResourceManager::StaticModelLoad("resources/models/obj/portal.obj");
@@ -453,13 +453,13 @@ namespace sage
     {
         entt::entity id = registry->create();
 
-        auto& transform = registry->emplace<sgTransform>(id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z}, id);
-        transform.SetScale(1.0f, id);
-        transform.SetRotation({0, 0, 0}, id);
+        transform.SetPosition({position.x, height, position.z});
+        transform.SetScale(1.0f);
+        transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
         Model model = ResourceManager::StaticModelLoad("resources/models/obj/Wizard Tower 1.obj");
@@ -482,17 +482,17 @@ namespace sage
     {
         auto& ad = registry->get<AbilityData>(abilityEntity);
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
-        auto& casterPos = registry->get<sgTransform>(caster).position();
+        auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
         auto point = data->cursor->terrainCollision().point;
 
         if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
         {
-            projectileTrans.SetPosition(casterPos, caster);
+            projectileTrans.SetPosition(casterPos);
         }
         else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
         {
             auto cursorPos = data->cursor->terrainCollision().point;
-            projectileTrans.SetPosition(cursorPos, caster);
+            projectileTrans.SetPosition(cursorPos);
         }
 
         data->actorMovementSystem->MoveToLocation(abilityEntity, point);

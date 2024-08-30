@@ -7,14 +7,21 @@
 #include "cereal/cereal.hpp"
 #include "entt/entt.hpp"
 #include "raylib.h"
+#include <vector>
 
 namespace sage
 {
     class sgTransform
     {
-        Vector3 m_position{};
+        entt::entity self;
+        Vector3 m_positionWorld{};
+        Vector3 m_positionLocal{};
         Vector3 m_rotation{};
         float m_scale = 1.0f;
+        sgTransform* m_parent = nullptr;
+        std::vector<sgTransform*> m_children;
+
+        void updateChildren();
 
       public:
         Vector3 direction{};
@@ -22,20 +29,16 @@ namespace sage
 
         Ray movementDirectionDebugLine{};
 
-        sgTransform() = default;
-        sgTransform(const sgTransform&) = delete;
-        sgTransform& operator=(const sgTransform&) = delete;
-
         template <class Archive>
         void save(Archive& archive) const
         {
-            archive(m_position, m_rotation, m_scale);
+            archive(m_positionWorld, m_rotation, m_scale);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            archive(m_position, m_rotation, m_scale);
+            archive(m_positionWorld, m_rotation, m_scale);
         }
 
         entt::sigh<void(entt::entity)> onPositionUpdate{};
@@ -43,11 +46,21 @@ namespace sage
         [[nodiscard]] Matrix GetMatrixNoRot() const;
         [[nodiscard]] Matrix GetMatrix() const;
         [[nodiscard]] Vector3 forward() const;
-        [[nodiscard]] const Vector3& position() const;
-        [[nodiscard]] const Vector3& rotation() const;
-        [[nodiscard]] float scale() const;
-        void SetPosition(const Vector3& position, const entt::entity& entity);
-        void SetRotation(const Vector3& rotation, const entt::entity& entity);
-        void SetScale(float scale, const entt::entity& entity);
+        [[nodiscard]] const Vector3& GetWorldPos() const;
+        [[nodiscard]] const Vector3& GetLocalPos() const;
+        [[nodiscard]] const Vector3& GetRotation() const;
+        [[nodiscard]] float GetScale() const;
+        void SetPosition(const Vector3& position);
+        void SetRotation(const Vector3& rotation);
+        void SetScale(float scale);
+        sgTransform* GetParent();
+        const std::vector<sgTransform*>& GetChildren();
+        void SetParent(sgTransform* newParent);
+        void AddChild(sgTransform* newChild);
+
+        // sgTransform() = default;
+        sgTransform(entt::entity _self);
+        sgTransform(const sgTransform&) = delete;
+        sgTransform& operator=(const sgTransform&) = delete;
     };
 } // namespace sage

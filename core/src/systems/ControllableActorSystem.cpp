@@ -36,7 +36,7 @@ namespace sage
         {
             controlledActor.checkTargetPosTimer.Restart();
             auto& targetTrans = registry->get<sgTransform>(target);
-            PathfindToLocation(controlledActorId, targetTrans.position());
+            PathfindToLocation(controlledActorId, targetTrans.GetWorldPos());
         }
     }
 

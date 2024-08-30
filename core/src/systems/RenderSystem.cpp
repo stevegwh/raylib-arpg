@@ -26,7 +26,12 @@ namespace sage
             auto& t = registry->get<sgTransform>(entity);
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
             DrawModelEx(
-                r.model, t.position(), rotationAxis, t.rotation().y, {t.scale(), t.scale(), t.scale()}, r.hint);
+                r.model,
+                t.GetWorldPos(),
+                rotationAxis,
+                t.GetRotation().y,
+                {t.GetScale(), t.GetScale(), t.GetScale()},
+                r.hint);
         };
     }
 

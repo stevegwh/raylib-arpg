@@ -730,7 +730,7 @@ namespace sage
         }
         GridSquare currentPos;
         auto& trans = registry->get<sgTransform>(entity);
-        if (!WorldToGridSpace(trans.position(), currentPos))
+        if (!WorldToGridSpace(trans.GetWorldPos(), currentPos))
         {
             return {};
         }

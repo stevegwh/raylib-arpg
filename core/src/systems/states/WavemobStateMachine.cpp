@@ -93,13 +93,13 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(self);
             auto& trans = registry->get<sgTransform>(self);
-            const auto& target = registry->get<sgTransform>(combatable.target).position();
-            Vector3 direction = Vector3Subtract(target, trans.position());
-            float distance = Vector3Distance(trans.position(), target);
+            const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
+            Vector3 direction = Vector3Subtract(target, trans.GetWorldPos());
+            float distance = Vector3Distance(trans.GetWorldPos(), target);
             Vector3 normDirection = Vector3Normalize(direction);
             auto& collideable = registry->get<Collideable>(self);
             Ray ray;
-            ray.position = trans.position();
+            ray.position = trans.GetWorldPos();
             ray.direction = Vector3Scale(normDirection, distance);
             ray.position.y = 0.5f;
             ray.direction.y = 0.5f;
@@ -132,7 +132,7 @@ namespace sage
             auto* autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             autoAttackAbility->Cancel();
             const auto& combatable = registry->get<CombatableActor>(self);
-            const auto& target = registry->get<sgTransform>(combatable.target).position();
+            const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
             gameData->actorMovementSystem->PathfindToLocation(self, target);
@@ -183,8 +183,8 @@ namespace sage
                 return;
             }
             auto& actorTrans = registry->get<sgTransform>(self);
-            auto target = registry->get<sgTransform>(combatable.target).position();
-            float distance = Vector3Distance(actorTrans.position(), target);
+            auto target = registry->get<sgTransform>(combatable.target).GetWorldPos();
+            float distance = Vector3Distance(actorTrans.GetWorldPos(), target);
             // TODO: Arbitrary number. Should probably use the navigation system to
             // find the "next best square" from current position
             if (distance >= 8.0f)

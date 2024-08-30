@@ -24,7 +24,6 @@ namespace sage
         bb.max = Vector3Transform(bb.max, mat);
         worldBoundingBox = bb;
     }
-
     Collideable::Collideable(BoundingBox _boundingBox)
         : localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
     {

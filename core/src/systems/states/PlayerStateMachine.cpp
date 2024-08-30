@@ -129,8 +129,8 @@ namespace sage
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
-            Vector3 playerPos = registry->get<sgTransform>(self).position();
-            Vector3 enemyPos = enemyTrans.position();
+            Vector3 playerPos = registry->get<sgTransform>(self).GetWorldPos();
+            Vector3 enemyPos = enemyTrans.GetWorldPos();
             Vector3 direction = Vector3Subtract(enemyPos, playerPos);
             float length = Vector3Length(direction);
             direction = Vector3Scale(Vector3Normalize(direction), combatable.attackRange);
