@@ -10,15 +10,14 @@
 namespace sage
 {
     class GameData;
-    class AbilityStateMachine;
-    enum class AbilityEnum;
+
     class PlayerAbilitySystem
     {
         entt::registry* registry;
         entt::entity controlledActor;
         GameData* gameData;
 
-        std::array<std::pair<AbilityEnum, AbilityStateMachine*>, 4> abilitySlots{};
+        std::array<entt::entity, 4> abilitySlots{};
         void abilityOnePressed();
         void abilityTwoPressed();
         void abilityThreePressed();
@@ -26,7 +25,7 @@ namespace sage
         void onActorChanged();
 
       public:
-        void SetSlot(int slot, AbilityEnum abilityEnum);
+        void SetSlot(int slot, entt::entity abilityEntity);
         void Update();
         void Draw2D();
         void Draw3D();

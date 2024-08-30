@@ -19,76 +19,56 @@ namespace sage
     {
         std::cout << "Ability 1 pressed \n";
 
-        if (abilitySlots[0].second == nullptr)
-        {
-            abilitySlots[0].second = gameData->abilitySystem->GetAbility(
-                gameData->controllableActorSystem->GetControlledActor(), abilitySlots[0].first);
-        }
+        auto& ab = registry->get<Ability>(abilitySlots[0]);
 
-        if (!abilitySlots[0].second->CooldownReady())
+        if (ab.CooldownReady())
         {
-            std::cout << "Waiting for cooldown timer: " << abilitySlots[0].second->GetRemainingCooldownTime()
-                      << "\n";
+            std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilitySlots[0].second->Init();
-        // TODO: Above does not work with "controlledactor" member, only with
-        // GetControlledActor()
+        gameData->abilityStateMachine->Init(abilitySlots[0]);
     }
+
     void PlayerAbilitySystem::abilityTwoPressed()
     {
         std::cout << "Ability 2 pressed \n";
 
-        if (abilitySlots[1].second == nullptr)
-        {
-            abilitySlots[1].second = gameData->abilitySystem->GetAbility(
-                gameData->controllableActorSystem->GetControlledActor(), abilitySlots[1].first);
-        }
+        auto& ab = registry->get<Ability>(abilitySlots[1]);
 
-        if (!abilitySlots[1].second->CooldownReady())
+        if (ab.CooldownReady())
         {
-            std::cout << "Waiting for cooldown timer: " << abilitySlots[1].second->GetRemainingCooldownTime()
-                      << "\n";
+            std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilitySlots[1].second->Init();
+        gameData->abilityStateMachine->Init(abilitySlots[1]);
     }
+
     void PlayerAbilitySystem::abilityThreePressed()
     {
         std::cout << "Ability 3 pressed \n";
 
-        if (abilitySlots[2].second == nullptr)
-        {
-            abilitySlots[2].second = gameData->abilitySystem->GetAbility(
-                gameData->controllableActorSystem->GetControlledActor(), abilitySlots[2].first);
-        }
+        auto& ab = registry->get<Ability>(abilitySlots[2]);
 
-        if (!abilitySlots[2].second->CooldownReady())
+        if (ab.CooldownReady())
         {
-            std::cout << "Waiting for cooldown timer: " << abilitySlots[2].second->GetRemainingCooldownTime()
-                      << "\n";
+            std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilitySlots[2].second->Init();
+        gameData->abilityStateMachine->Init(abilitySlots[2]);
     }
 
     void PlayerAbilitySystem::abilityFourPressed()
     {
         std::cout << "Ability 4 pressed \n";
 
-        if (abilitySlots[3].second == nullptr)
-        {
-            abilitySlots[3].second = gameData->abilitySystem->GetAbility(
-                gameData->controllableActorSystem->GetControlledActor(), abilitySlots[3].first);
-        }
+        auto& ab = registry->get<Ability>(abilitySlots[3]);
 
-        if (!abilitySlots[3].second->CooldownReady())
+        if (ab.CooldownReady())
         {
-            std::cout << "Waiting for cooldown timer: " << abilitySlots[3].second->GetRemainingCooldownTime()
-                      << "\n";
+            std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        abilitySlots[3].second->Init();
+        gameData->abilityStateMachine->Init(abilitySlots[3]);
     }
 
     void PlayerAbilitySystem::onActorChanged()
@@ -97,13 +77,10 @@ namespace sage
         // TODO: Change abilities based on the new actor
     }
 
-    void PlayerAbilitySystem::SetSlot(int slot, AbilityEnum abilityEnum)
+    void PlayerAbilitySystem::SetSlot(int slot, entt::entity abilityEntity)
     {
         assert(slot < 4);
-        abilitySlots[slot] = std::make_pair(
-            abilityEnum,
-            gameData->abilitySystem->GetAbility(
-                gameData->controllableActorSystem->GetControlledActor(), abilityEnum));
+        abilitySlots[slot] = abilityEntity;
     }
 
     void PlayerAbilitySystem::Update()

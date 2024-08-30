@@ -182,8 +182,6 @@ namespace sage
       public:
         void Update(entt::entity entity) override
         {
-            // auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity,
-            // AbilityEnum::PLAYER_AUTOATTACK); autoAttackAbility->Update(entity);
         }
 
         void OnStateEnter(entt::entity entity) override
@@ -191,8 +189,8 @@ namespace sage
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
-            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            autoAttackAbility->Init();
+            auto autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            gameData->abilityStateMachine->Init(autoAttackAbility);
 
             auto& combatable = registry->get<CombatableActor>(entity);
             assert(combatable.target != entt::null);
@@ -213,8 +211,8 @@ namespace sage
             entt::sink sink{combatable.onTargetDeath};
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
-            auto* autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            autoAttackAbility->Cancel();
+            auto autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            gameData->abilityStateMachine->Cancel(autoAttackAbility);
         }
 
         virtual ~CombatState() = default;
