@@ -30,8 +30,8 @@ namespace sage
         Timer cooldownTimer;
         Timer executionDelayTimer;
 
-        VisualFX* vfx;
-        AbilityIndicator* abilityIndicator;
+        std::unique_ptr<VisualFX> vfx;
+        std::unique_ptr<AbilityIndicator> abilityIndicator;
 
         AbilityStateEnum state = AbilityStateEnum::IDLE;
 
