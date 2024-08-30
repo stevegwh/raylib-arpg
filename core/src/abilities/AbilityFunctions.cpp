@@ -40,36 +40,6 @@ namespace sage
         }
     }
 
-    void SpawnProjectile::onHit(entt::entity caster, CollisionInfo collisionInfo)
-    {
-        Vector3 point = registry->get<sgTransform>(collisionInfo.collidedEntityId).position();
-        Hit360AroundPoint(registry, caster, abilityEntity, point, 15);
-
-        auto& checker = registry->get<CollisionChecker>(abilityEntity);
-        entt::sink sink{checker.onHit};
-        sink.disconnect<&SpawnProjectile::onHit>(this);
-        registry->remove<CollisionChecker>(abilityEntity);
-    }
-
-    void SpawnProjectile::Execute()
-    {
-
-        auto& ad = registry->get<AbilityData>(abilityEntity);
-
-        GameObjectFactory::createProjectile(registry, abilityEntity, caster, gameData);
-
-        auto& checker = registry->emplace<CollisionChecker>(abilityEntity);
-        entt::sink sink{checker.onHit};
-        sink.connect<&SpawnProjectile::onHit>(this);
-
-        // Need to link origin of vfx to projectile movement
-        // abilityData.vfx.ptr->SetOrigin
-
-        // On hit, call 360 around point
-
-        // How to sync vfx? Through ability data pointer?
-    }
-
     void Hit360AroundPoint(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Vector3 point, float radius)
     {

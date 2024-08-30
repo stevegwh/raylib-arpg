@@ -44,6 +44,10 @@ namespace sage
 
     void ActorMovementSystem::MoveToLocation(const entt::entity& entity, Vector3 location)
     {
+        if (!registry->any_of<MoveableActor>(entity))
+        {
+            registry->emplace<MoveableActor>(entity);
+        }
         const auto& actorTrans = registry->get<sgTransform>(entity);
         PruneMoveCommands(entity);
         auto& transform = registry->get<sgTransform>(entity);
@@ -57,6 +61,10 @@ namespace sage
     void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination)
     // TODO: Pathfinding/movement needs some sense of movement speed.
     {
+        if (!registry->any_of<MoveableActor>(entity))
+        {
+            registry->emplace<MoveableActor>(entity);
+        }
         {
             // If location outside of bounds, then return
             GridSquare tmp{};
@@ -140,30 +148,26 @@ namespace sage
 
     void ActorMovementSystem::Update()
     {
-        // TODO: Instead of always calling this no matter what... maybe choose to call it
-        // (or not) based on the state. So, you can pass in the entity to Update and
-        // iterate over a collectioon from another system
         debugRays.erase(debugRays.begin(), debugRays.end());
         debugCollisions.erase(debugCollisions.begin(), debugCollisions.end());
-        auto view = registry->view<MoveableActor, sgTransform>();
+        auto view = registry->view<MoveableActor, Collideable, sgTransform>();
         for (auto& entity : view)
         {
             auto& actorTrans = registry->get<sgTransform>(entity);
             auto& moveableActor = registry->get<MoveableActor>(entity);
-            const auto& actorCollideable = registry->get<Collideable>(entity);
 
             if (moveableActor.path.empty())
             {
                 continue;
             }
 
+            const auto& actorCollideable = registry->get<Collideable>(entity);
             navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
+
             auto nextPointDist = Vector3Distance(moveableActor.path.front(), actorTrans.position());
 
-            //			// TODO: Works when I check if "back" is occupied, but not when I
-            // check if "front" is occupied. Why?
-            //			// Checks whether the next destination is occupied, and if it is,
-            // then recalculate the path.
+            // TODO: Works when I check if "back" is occupied, but not when I check if "front" is occupied. Why?
+            // Checks whether the next destination is occupied, and if it is, then recalculate the path.
             if (!navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
                     moveableActor.path.front(), actorCollideable.worldBoundingBox) ||
                 !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(

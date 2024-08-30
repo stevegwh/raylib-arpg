@@ -252,12 +252,18 @@ namespace sage
         auto view = registry->view<Collideable, CollisionChecker>();
         for (entt::entity entity : view)
         {
+            CollisionInfo out;
+            auto& colChecker = registry->get<CollisionChecker>(entity);
+            if (Vector3Distance(colChecker.origin, colChecker.destination) > colChecker.maxDistance)
+            {
+                colChecker.onHit.publish(entity, out);
+                registry->remove<CollisionChecker>(entity);
+                continue;
+            }
             const auto& col = registry->get<Collideable>(entity);
             auto& bb = col.worldBoundingBox;
-            CollisionInfo out;
             if (GetFirstCollisionBB(entity, bb, col.collisionLayer, out))
             {
-                auto& colChecker = registry->get<CollisionChecker>(entity);
                 colChecker.onHit.publish(entity, out);
             }
         }

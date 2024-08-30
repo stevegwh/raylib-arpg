@@ -5,6 +5,7 @@
 #include "AbilityResourceManager.hpp"
 #include "AbilityState.hpp"
 #include "components/Animation.hpp"
+#include "components/MovableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
@@ -69,8 +70,8 @@ namespace sage
             if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
             {
                 GameObjectFactory::createProjectile(registry, caster, abilityEntity, gameData);
-                auto& checker = registry->emplace<CollisionChecker>(abilityEntity);
-                entt::sink sink{checker.onHit};
+                auto& moveable = registry->get<MoveableActor>(abilityEntity);
+                entt::sink sink{moveable.onFinishMovement};
                 sink.connect<&AwaitingExecutionState::signalExecute>(this);
             }
         }

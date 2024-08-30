@@ -480,13 +480,10 @@ namespace sage
     {
         auto& ad = registry->get<AbilityData>(abilityEntity);
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
-        BoundingBox bb = createRectangularBoundingBox(5, 5);
-        auto& projectileCol = registry->emplace<Collideable>(abilityEntity, registry, abilityEntity, bb);
-        projectileCol.collisionLayer = CollisionLayer::PLAYER;
 
         if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
         {
-            auto& casterPos = registry->emplace<sgTransform>(caster).position();
+            auto& casterPos = registry->get<sgTransform>(caster).position();
             projectileTrans.SetPosition(casterPos, caster);
         }
         else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)

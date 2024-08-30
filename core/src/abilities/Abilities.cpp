@@ -146,7 +146,7 @@ namespace sage
         ad.base.range = 5;
         ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
-        ad.base.repeatable = true;
+        ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
         ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
@@ -177,7 +177,7 @@ namespace sage
         ad.base.range = 5;
         ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
-        ad.base.repeatable = true;
+        ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
         ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
