@@ -21,11 +21,8 @@
 namespace sage
 {
 
-    // Temporary
-    static std::vector<std::unique_ptr<VisualFX>> allVfx;
-    static std::vector<std::unique_ptr<AbilityIndicator>> allIndicators;
-
-    AbilityIndicator* AbilityResourceManager::GetIndicator(AbilityData::IndicatorData data, GameData* _gameData)
+    std::unique_ptr<AbilityIndicator> AbilityResourceManager::GetIndicator(
+        AbilityData::IndicatorData data, GameData* _gameData)
     {
         // if (data.indicatorKey == "CircularCursor")
         // {
@@ -36,17 +33,13 @@ namespace sage
         // }
         // return nullptr;
 
-        auto obj = std::make_unique<AbilityIndicator>(
+        return std::make_unique<AbilityIndicator>(
             _gameData->registry,
             _gameData->navigationGridSystem.get(),
             "resources/textures/cursor/rainoffire_cursor.png");
-
-        auto ptr = obj.get();
-        allIndicators.push_back(std::move(obj));
-        return ptr;
     }
 
-    VisualFX* AbilityResourceManager::GetVisualFX(
+    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
         AbilityData::VisualFXData& data, entt::entity entity, GameData* _gameData)
     {
         std::unique_ptr<VisualFX> obj;
@@ -79,8 +72,7 @@ namespace sage
             obj = std::make_unique<FireballVFX>(_gameData, &transform);
         }
         data.ptr = obj.get();
-        allVfx.push_back(std::move(obj));
-        return data.ptr;
+        return std::move(obj);
     }
 
     AbilityResourceManager& AbilityResourceManager::GetInstance()

@@ -22,9 +22,10 @@ namespace sage
         AbilityResourceManager();
 
       public:
-        AbilityIndicator* GetIndicator(AbilityData::IndicatorData data, GameData* _gameData);
+        std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, GameData* _gameData);
         // std::unique_ptr<AbilityIndicator> GetIndicator(std::string key);
-        VisualFX* GetVisualFX(AbilityData::VisualFXData& data, entt::entity entity, GameData* _gameData);
+        std::unique_ptr<VisualFX> GetVisualFX(
+            AbilityData::VisualFXData& data, entt::entity entity, GameData* _gameData);
         AbilityResourceManager(const AbilityResourceManager&) = delete;
         AbilityResourceManager& operator=(const AbilityResourceManager&) = delete;
         static AbilityResourceManager& GetInstance();
