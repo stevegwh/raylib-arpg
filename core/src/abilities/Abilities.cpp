@@ -143,8 +143,9 @@ namespace sage
         AbilityData ad;
 
         ad.base.cooldownDuration = 1;
-        ad.base.range = 15;
+        ad.base.range = 30;
         ad.base.baseDamage = 50;
+        ad.base.radius = 10;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
@@ -152,6 +153,7 @@ namespace sage
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+        ad.animationParams.animationDelay = 0;
 
         ad.vfx.name = "Fireball";
 
@@ -236,6 +238,7 @@ namespace sage
         ad.base.cooldownDuration = 0.15;
         ad.base.range = 15;
         ad.base.baseDamage = 10;
+        ad.base.radius = 15;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;

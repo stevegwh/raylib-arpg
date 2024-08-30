@@ -32,11 +32,6 @@ namespace sage
     void FireballVFX::Update(float dt)
     {
         time += dt;
-        if (time > 0.5) // TODO: Magic number
-        {
-            time = 0;
-            active = false;
-        }
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
     }
 

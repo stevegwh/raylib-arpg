@@ -28,15 +28,16 @@ namespace sage
     void HitAllInRadius::Execute()
     {
         auto& ad = registry->get<AbilityData>(abilityEntity);
-        if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
+
+        if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
         {
-            auto& actorTransform = registry->get<sgTransform>(caster);
-            Hit360AroundPoint(registry, caster, abilityEntity, ad.cursor->collision().point, 15);
+            auto& projPos = registry->get<sgTransform>(abilityEntity).position();
+            Hit360AroundPoint(registry, caster, abilityEntity, projPos, ad.base.radius);
         }
-        else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
+        else if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
         {
-            auto& actorTransform = registry->get<sgTransform>(caster);
-            Hit360AroundPoint(registry, caster, abilityEntity, actorTransform.position(), 15);
+            auto& casterPos = registry->get<sgTransform>(caster).position();
+            Hit360AroundPoint(registry, caster, abilityEntity, casterPos, ad.base.radius);
         }
     }
 

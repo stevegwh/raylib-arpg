@@ -44,8 +44,8 @@ namespace sage
             entt::entity _abilityEntity,
             GameData* _gameData,
             Timer& cooldownTimer,
-            Timer& animationDelayTimer)
-            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer)
+            Timer& executionDelayTimer)
+            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer)
         {
         }
     };
@@ -65,7 +65,7 @@ namespace sage
         void OnEnter() override
         {
             cooldownTimer.Start();
-            animationDelayTimer.Start();
+            executionDelayTimer.Start();
 
             auto& ad = registry->get<AbilityData>(abilityEntity);
             if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
@@ -79,7 +79,7 @@ namespace sage
 
         void Update() override
         {
-            animationDelayTimer.Update(GetFrameTime()); // Execute delay timer?
+            executionDelayTimer.Update(GetFrameTime());
 
             // Depending on vfx behaviour, update its position here
             auto& ad = registry->get<AbilityData>(abilityEntity);
@@ -110,7 +110,7 @@ namespace sage
             }
             // ----
 
-            if (animationDelayTimer.HasFinished() &&
+            if (executionDelayTimer.HasFinished() &&
                 ad.base.behaviourPreHit != AbilityBehaviourPreHit::DETACHED_PROJECTILE)
             {
                 onExecute.publish();
@@ -123,9 +123,9 @@ namespace sage
             entt::entity _abilityEntity,
             GameData* _gameData,
             Timer& cooldownTimer,
-            Timer& animationDelayTimer,
+            Timer& executionDelayTimer,
             VisualFX* _vfx)
-            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer),
+            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer),
               vfx(_vfx)
 
         {
@@ -174,7 +174,7 @@ namespace sage
             vfx->active = false;
         }
         cooldownTimer.Stop();
-        animationDelayTimer.Stop();
+        executionDelayTimer.Stop();
         ChangeState(AbilityStateEnum::IDLE);
     }
 
@@ -218,9 +218,7 @@ namespace sage
 
     void AbilityStateMachine::Init()
     {
-        auto& animation = registry->get<Animation>(caster);
         auto& ad = registry->get<AbilityData>(abilityEntity);
-        animation.ChangeAnimationByParams(ad.animationParams);
 
         // Spawn target is either at cursor, at enemy, or at player
         // After spawned: Follow caster position, follow enemy position (maybe), follow the ability's detached
@@ -231,6 +229,19 @@ namespace sage
             registry->emplace<sgTransform>(abilityEntity);
         }
         auto& trans = registry->get<sgTransform>(abilityEntity);
+
+        if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
+        {
+            auto& casterPos = registry->get<sgTransform>(caster).position();
+            auto point = gameData->cursor->terrainCollision().point;
+            if (Vector3Distance(point, casterPos) > ad.base.range)
+            {
+                return;
+            }
+        }
+
+        auto& animation = registry->get<Animation>(caster);
+        animation.ChangeAnimationByParams(ad.animationParams);
 
         if (vfx)
         {
@@ -246,6 +257,7 @@ namespace sage
                 trans.SetPosition(gameData->cursor->terrainCollision().point, abilityEntity);
             }
         }
+
         ChangeState(AbilityStateEnum::AWAITING_EXECUTION);
     }
 
@@ -265,16 +277,16 @@ namespace sage
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
-        animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
+        executionDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
         auto idleState = std::make_unique<IdleState>(
-            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer);
+            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&AbilityStateMachine::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(
-            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer, vfx.get());
+            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer, vfx.get());
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
         onExecuteSink.connect<&AbilityStateMachine::Execute>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);

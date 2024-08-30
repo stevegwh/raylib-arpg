@@ -84,9 +84,9 @@ namespace sage
             entt::entity _abilityEntity,
             GameData* _gameData,
             Timer& cooldownTimer,
-            Timer& animationDelayTimer,
+            Timer& executionDelayTimer,
             std::unique_ptr<AbilityIndicator> _abilityIndicator)
-            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer),
+            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer),
               abilityIndicator(std::move(_abilityIndicator))
         {
         }
@@ -132,7 +132,7 @@ namespace sage
             _abilityEntity,
             _gameData,
             cooldownTimer,
-            animationDelayTimer,
+            executionDelayTimer,
             AbilityResourceManager::GetInstance().GetIndicator(abilityData.indicator, _gameData));
         entt::sink onConfirmSink{cursorState->onConfirm};
         onConfirmSink.connect<&CursorAbility::confirm>(this);
