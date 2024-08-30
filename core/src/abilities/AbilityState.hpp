@@ -14,7 +14,7 @@ namespace sage
         entt::entity abilityEntity;
         GameData* gameData;
         Timer& cooldownTimer;
-        Timer& animationDelayTimer;
+        Timer& executionDelayTimer;
 
       public:
         virtual void Update();
@@ -28,6 +28,6 @@ namespace sage
             entt::entity _abilityEntity,
             GameData* _gameData,
             Timer& cooldownTimer,
-            Timer& animationDelayTimer);
+            Timer& executionDelayTimer);
     };
 } // namespace sage

@@ -48,7 +48,7 @@ namespace sage
         entt::entity abilityEntity;
         // AbilityData abilityData;
         Timer cooldownTimer;
-        Timer animationDelayTimer;
+        Timer executionDelayTimer;
 
         std::unique_ptr<VisualFX> vfx;
         // std::unique_ptr<AbilityFunction> executeFunc;

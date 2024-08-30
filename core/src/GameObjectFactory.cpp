@@ -35,6 +35,8 @@
 #include "raymath.h"
 #include <slib.hpp>
 
+#include <iostream>
+
 namespace sage
 {
     BoundingBox createRectangularBoundingBox(float length, float height)
@@ -480,21 +482,19 @@ namespace sage
     {
         auto& ad = registry->get<AbilityData>(abilityEntity);
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
+        auto& casterPos = registry->get<sgTransform>(caster).position();
+        auto point = data->cursor->terrainCollision().point;
 
         if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
         {
-            auto& casterPos = registry->get<sgTransform>(caster).position();
             projectileTrans.SetPosition(casterPos, caster);
         }
         else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
         {
-            projectileTrans.SetPosition(data->cursor->terrainCollision().point, caster);
+            auto cursorPos = data->cursor->terrainCollision().point;
+            projectileTrans.SetPosition(cursorPos, caster);
         }
 
-        auto point = data->cursor->terrainCollision().point;
-
         data->actorMovementSystem->MoveToLocation(abilityEntity, point);
-
-        // connect
     }
 } // namespace sage
