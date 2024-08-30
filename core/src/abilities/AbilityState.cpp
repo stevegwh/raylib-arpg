@@ -22,8 +22,19 @@ namespace sage
     {
     }
 
-    AbilityState::AbilityState(entt::entity _self, Timer& cooldownTimer, Timer& animationDelayTimer)
-        : caster(_self), cooldownTimer(cooldownTimer), animationDelayTimer(animationDelayTimer)
+    AbilityState::AbilityState(
+        entt::registry* _registry,
+        entt::entity _caster,
+        entt::entity _abilityEntity,
+        GameData* _gameData,
+        Timer& cooldownTimer,
+        Timer& animationDelayTimer)
+        : registry(_registry),
+          caster(_caster),
+          abilityEntity(_abilityEntity),
+          gameData(_gameData),
+          cooldownTimer(cooldownTimer),
+          animationDelayTimer(animationDelayTimer)
     {
     }
 }; // namespace sage

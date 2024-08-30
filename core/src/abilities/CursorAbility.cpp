@@ -21,22 +21,21 @@ namespace sage
 
     class CursorAbility::CursorSelectState : public AbilityState
     {
-        Cursor* cursor;
         std::unique_ptr<AbilityIndicator> abilityIndicator;
         bool cursorActive = false;
 
         void enableCursor()
         {
-            abilityIndicator->Init(cursor->terrainCollision().point);
+            abilityIndicator->Init(gameData->cursor->terrainCollision().point);
             abilityIndicator->Enable(true);
-            cursor->Disable();
-            cursor->Hide();
+            gameData->cursor->Disable();
+            gameData->cursor->Hide();
         }
 
         void disableCursor()
         {
-            cursor->Enable();
-            cursor->Show();
+            gameData->cursor->Enable();
+            gameData->cursor->Show();
             abilityIndicator->Enable(false);
         }
 
@@ -58,7 +57,7 @@ namespace sage
         entt::sigh<void(entt::entity)> onConfirm;
         void Update() override
         {
-            abilityIndicator->Update(cursor->terrainCollision().point);
+            abilityIndicator->Update(gameData->cursor->terrainCollision().point);
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
                 onConfirm.publish(caster);
@@ -81,13 +80,14 @@ namespace sage
         }
 
         CursorSelectState(
-            entt::entity _self,
-            Timer& _coolDownTimer,
-            Timer& _animationDelayTimer,
-            Cursor* _cursor,
+            entt::registry* _registry,
+            entt::entity _caster,
+            entt::entity _abilityEntity,
+            GameData* _gameData,
+            Timer& cooldownTimer,
+            Timer& animationDelayTimer,
             std::unique_ptr<AbilityIndicator> _abilityIndicator)
-            : AbilityState(_self, _coolDownTimer, _animationDelayTimer),
-              cursor(_cursor),
+            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer),
               abilityIndicator(std::move(_abilityIndicator))
         {
         }
@@ -123,15 +123,17 @@ namespace sage
     }
 
     CursorAbility::CursorAbility(
-        entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
-        : AbilityStateMachine(_registry, _self, _abilityDataEntity, _gameData), cursor(_gameData->cursor.get())
+        entt::registry* _registry, entt::entity _caster, entt::entity _abilityEntity, GameData* _gameData)
+        : AbilityStateMachine(_registry, _caster, _abilityEntity, _gameData)
     {
         auto& abilityData = registry->get<AbilityData>(abilityEntity);
         auto cursorState = std::make_unique<CursorSelectState>(
-            _self,
+            _registry,
+            _caster,
+            _abilityEntity,
+            _gameData,
             cooldownTimer,
             animationDelayTimer,
-            _gameData->cursor.get(),
             AbilityResourceManager::GetInstance().GetIndicator(abilityData.indicator, _gameData));
         entt::sink onConfirmSink{cursorState->onConfirm};
         onConfirmSink.connect<&CursorAbility::confirm>(this);

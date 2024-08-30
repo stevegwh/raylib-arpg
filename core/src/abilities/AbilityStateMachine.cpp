@@ -23,27 +23,35 @@ namespace sage
 
     class AbilityStateMachine::IdleState : public AbilityState
     {
-        const bool repeatable;
 
       public:
         entt::sigh<void(entt::entity)> onRestartTriggered;
         void Update() override
         {
+            auto& ad = registry->get<AbilityData>(abilityEntity);
             cooldownTimer.Update(GetFrameTime());
-            if (cooldownTimer.HasFinished() && repeatable)
+            if (cooldownTimer.HasFinished() && ad.base.repeatable)
             {
                 onRestartTriggered.publish(caster);
             }
         }
 
-        IdleState(entt::entity _self, Timer& coolDownTimer, Timer& animationDelayTimer, bool repeatable)
-            : AbilityState(_self, coolDownTimer, animationDelayTimer), repeatable(repeatable)
+        IdleState(
+            entt::registry* _registry,
+            entt::entity _caster,
+            entt::entity _abilityEntity,
+            GameData* _gameData,
+            Timer& cooldownTimer,
+            Timer& animationDelayTimer)
+            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer)
         {
         }
     };
 
     class AbilityStateMachine::AwaitingExecutionState : public AbilityState
     {
+        entt::entity abilityEntity;
+
       public:
         entt::sigh<void(entt::entity)> onExecute;
         void OnEnter() override
@@ -55,14 +63,21 @@ namespace sage
         void Update() override
         {
             animationDelayTimer.Update(GetFrameTime());
+            // TODO: If its a projectile, then update it here? Execute if it hits something
             if (animationDelayTimer.HasFinished())
             {
                 onExecute.publish(caster);
             }
         }
 
-        AwaitingExecutionState(entt::entity _self, Timer& coolDownTimer, Timer& animationDelayTimer)
-            : AbilityState(_self, coolDownTimer, animationDelayTimer)
+        AwaitingExecutionState(
+            entt::registry* _registry,
+            entt::entity _caster,
+            entt::entity _abilityEntity,
+            GameData* _gameData,
+            Timer& cooldownTimer,
+            Timer& animationDelayTimer)
+            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer)
         {
         }
     };
@@ -201,8 +216,8 @@ namespace sage
     }
 
     AbilityStateMachine::AbilityStateMachine(
-        entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
-        : registry(_registry), caster(_self), abilityEntity(_abilityDataEntity), gameData(_gameData)
+        entt::registry* _registry, entt::entity _caster, entt::entity _abilityEntity, GameData* _gameData)
+        : registry(_registry), caster(_caster), abilityEntity(_abilityEntity), gameData(_gameData)
     {
 
         // TODO: Would be great to find a way of pushing visual fx to the registry.
@@ -213,14 +228,14 @@ namespace sage
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         animationDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);
 
-        auto idleState =
-            std::make_unique<IdleState>(_self, cooldownTimer, animationDelayTimer, abilityData.base.repeatable);
+        auto idleState = std::make_unique<IdleState>(
+            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&AbilityStateMachine::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
-        auto awaitingExecutionState =
-            std::make_unique<AwaitingExecutionState>(_self, cooldownTimer, animationDelayTimer);
+        auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(
+            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
         onExecuteSink.connect<&AbilityStateMachine::Execute>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
