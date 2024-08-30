@@ -1,6 +1,8 @@
 #pragma once
 
 #include "AbilityData.hpp"
+
+#include "components/Ability.hpp"
 #include "Timer.hpp"
 
 #include <entt/entt.hpp>
@@ -13,18 +15,14 @@ namespace sage
     class VisualFX;
     class AbilityState;
 
-    enum class AbilityStateEnum
-    {
-        IDLE,
-        CURSOR_SELECT,
-        AWAITING_EXECUTION
-    };
-
     class AbilityStateMachine
     {
         class IdleState;
         class AwaitingExecutionState;
         class CursorSelectState;
+
+        entt::registry* registry;
+        std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
 
         GameData* gameData;
 
@@ -43,41 +41,21 @@ namespace sage
             }
         }
 
-      protected:
-        entt::registry* registry;
-        entt::entity caster;
-        entt::entity abilityEntity;
-        // AbilityData abilityData;
-        Timer cooldownTimer;
-        Timer executionDelayTimer;
-
-        std::unique_ptr<VisualFX> vfx;
-        // std::unique_ptr<AbilityFunction> executeFunc;
-
-        AbilityState* state;
-        std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
-        void ChangeState(AbilityStateEnum newState);
+        void ChangeState(entt::entity abilityEntity, AbilityStateEnum newState);
 
       public:
-        virtual void ResetCooldown();
-        virtual bool IsActive();
-        float GetRemainingCooldownTime() const;
-        float GetCooldownDuration() const;
-        bool CooldownReady() const;
+        void Cancel(entt::entity abilityEntity);
+        void Execute(entt::entity abilityEntity);
 
-        virtual void Cancel();
-        void Execute();
+        void Update();
+        void Draw3D();
+        void Init(entt::entity abilityEntity);
+        void Confirm(entt::entity abilityEntity);
 
-        virtual void Update();
-        virtual void Draw3D();
-        virtual void Init();
-        void Confirm();
-
-        virtual ~AbilityStateMachine();
+        ~AbilityStateMachine();
         AbilityStateMachine(const AbilityStateMachine&) = delete;
         AbilityStateMachine& operator=(const AbilityStateMachine&) = delete;
-        AbilityStateMachine(
-            entt::registry* _registry, entt::entity _caster, entt::entity _abilityEntity, GameData* _gameData);
+        AbilityStateMachine(entt::registry* _registry, GameData* _gameData);
     };
 
 } // namespace sage

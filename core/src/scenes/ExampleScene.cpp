@@ -20,7 +20,7 @@
 #include "Settings.hpp"
 
 // Systems
-#include "systems/AbilitySystem.hpp"
+#include "abilities/AbilityStateMachine.hpp" // TODO: move
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -48,7 +48,7 @@ namespace sage
         data->dialogueSystem->Update();
         data->healthBarSystem->Update();
         data->stateMachines->Update();
-        data->abilitySystem->Update();
+        data->abilityStateMachine->Update();
         data->playerAbilitySystem->Update();
         // const auto& playerTransform =
         //     registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
@@ -77,7 +77,7 @@ namespace sage
         Scene::Draw3D();
         // fountain->Draw3D();
         data->healthBarSystem->Draw3D();
-        data->abilitySystem->Draw3D();
+        data->abilityStateMachine->Draw3D();
         data->playerAbilitySystem->Draw3D();
     }
 
