@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AbilityStateMachine.hpp"
-#include "CursorAbility.hpp"
 
 #include <entt/entt.hpp>
 
@@ -19,7 +18,7 @@ namespace sage
         PlayerAutoAttack(entt::registry* _registry, entt::entity _self, GameData* _gameData);
     };
 
-    class RainOfFire : public CursorAbility
+    class RainOfFire : public AbilityStateMachine
     {
         entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
 
@@ -43,7 +42,7 @@ namespace sage
         LightningBall(entt::registry* _registry, entt::entity _self, GameData* _gameData);
     };
 
-    class FloorFire : public CursorAbility
+    class FloorFire : public AbilityStateMachine
     {
         entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
 

@@ -72,6 +72,7 @@ namespace sage
         AnimationParams animationParams{};
         VisualFXData vfx{};
         IndicatorData indicator{};
+        bool cursorBased = false;
 
         Cursor* cursor;
     };

@@ -24,6 +24,7 @@ namespace sage
     {
         class IdleState;
         class AwaitingExecutionState;
+        class CursorSelectState;
 
         GameData* gameData;
 
@@ -66,9 +67,11 @@ namespace sage
 
         virtual void Cancel();
         void Execute();
+
         virtual void Update();
         virtual void Draw3D();
         virtual void Init();
+        void Confirm();
 
         virtual ~AbilityStateMachine();
         AbilityStateMachine(const AbilityStateMachine&) = delete;

@@ -57,7 +57,7 @@ namespace sage
         AbilityData ad;
 
         ad.base.cooldownDuration = 3;
-        ad.base.range = 5;
+        ad.base.range = 15;
         ad.base.baseDamage = 25;
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
@@ -72,6 +72,7 @@ namespace sage
 
         ad.vfx.name = "RainOfFire";
         ad.indicator.indicatorKey = "CircularCursor";
+        ad.cursorBased = true;
 
         // vfx = AbilityResourceManager::GetInstance(_registry).GetVisualFX(
         //     "RainOfFire", _camera);
@@ -90,7 +91,7 @@ namespace sage
     }
 
     RainOfFire::RainOfFire(entt::registry* _registry, entt::entity _self, GameData* _gameData)
-        : CursorAbility(_registry, _self, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
+        : AbilityStateMachine(_registry, _self, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
     {
         // assert(vfx != nullptr);
     }
@@ -102,6 +103,7 @@ namespace sage
         ad.base.cooldownDuration = 3;
         ad.base.range = 5;
         ad.base.baseDamage = 25;
+        ad.base.radius = 30;
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
@@ -124,6 +126,7 @@ namespace sage
         // serializer::LoadAbilityData(ad, "resources/player_rainoffire.json");
 
         ad.cursor = cursor;
+        ad.cursorBased = true;
         // ad.executeFunc = AbilityResourceManager::GetInstance().GetExecuteFunc(
         //     AbilityResourceManager::GetInstance().StringToExecuteFuncEnum(ad.base.executeFuncName));
 
@@ -133,7 +136,7 @@ namespace sage
     }
 
     FloorFire::FloorFire(entt::registry* _registry, entt::entity _self, GameData* _gameData)
-        : CursorAbility(_registry, _self, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
+        : AbilityStateMachine(_registry, _self, initAbilityData(_registry, _gameData->cursor.get()), _gameData)
     {
         // assert(vfx != nullptr);
     }
