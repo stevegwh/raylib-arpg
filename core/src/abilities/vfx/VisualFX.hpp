@@ -5,6 +5,7 @@
 namespace sage
 {
     class GameData;
+
     class VisualFX
     {
       protected:

@@ -30,8 +30,9 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.range = 5;
         ad.base.repeatable = true;
-        ad.base.executeFuncName = "SingleTargetHit";
-        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_TARGETED_UNIT;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animSpeed = 4;
@@ -60,8 +61,9 @@ namespace sage
         ad.base.baseDamage = 25;
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
-        ad.base.executeFuncName = "MultihitRadiusFromCursor";
-        ad.base.executeFuncEnum = AbilityFunctionEnum::MultihitRadiusFromCursor;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_STATIONARY;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 1;
@@ -102,8 +104,9 @@ namespace sage
         ad.base.baseDamage = 25;
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
-        ad.base.executeFuncName = "MultihitRadiusFromCursor";
-        ad.base.executeFuncEnum = AbilityFunctionEnum::MultihitRadiusFromCursor;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_STATIONARY;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 1;
@@ -144,8 +147,9 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
-        ad.base.executeFuncName = "SingleTargetHit";
-        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
@@ -174,8 +178,9 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
-        ad.base.executeFuncName = "SingleTargetHit";
-        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
@@ -204,8 +209,9 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
-        ad.base.executeFuncName = "SingleTargetHit";
-        ad.base.executeFuncEnum = AbilityFunctionEnum::SingleTargetHit;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_TARGETED_UNIT;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
@@ -232,8 +238,9 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
-        ad.base.executeFuncName = "MultihitRadiusFromCaster";
-        ad.base.executeFuncEnum = AbilityFunctionEnum::MultihitRadiusFromCaster;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 5;

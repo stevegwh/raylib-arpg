@@ -61,7 +61,7 @@ namespace sage
             abilityIndicator->Update(cursor->terrainCollision().point);
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
-                onConfirm.publish(self);
+                onConfirm.publish(caster);
             }
         }
 
@@ -115,16 +115,7 @@ namespace sage
 
     void CursorAbility::confirm()
     {
-        // Ability::Init(self);
-        auto& animation = registry->get<Animation>(self);
-        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
-        animation.ChangeAnimationByParams(abilityData.animationParams);
-
-        if (vfx)
-        {
-            vfx->InitSystem(cursor->terrainCollision().point);
-        }
-        ChangeState(AbilityStateEnum::AWAITING_EXECUTION);
+        AbilityStateMachine::Init();
     }
 
     CursorAbility::~CursorAbility()
@@ -135,7 +126,7 @@ namespace sage
         entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
         : AbilityStateMachine(_registry, _self, _abilityDataEntity, _gameData), cursor(_gameData->cursor.get())
     {
-        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
+        auto& abilityData = registry->get<AbilityData>(abilityEntity);
         auto cursorState = std::make_unique<CursorSelectState>(
             _self,
             cooldownTimer,

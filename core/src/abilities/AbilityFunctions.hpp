@@ -13,16 +13,15 @@ namespace sage
     enum class AbilityFunctionEnum
     {
         SingleTargetHit,
-        MultihitRadiusFromCursor,
-        MultihitRadiusFromCaster
+        HitAllInRadius
     };
 
     class AbilityFunction
     {
       protected:
         entt::registry* registry;
-        entt::entity self;
-        entt::entity abilityDataEntity;
+        entt::entity caster;
+        entt::entity abilityEntity;
         GameData* gameData;
 
       public:
@@ -30,57 +29,44 @@ namespace sage
         virtual ~AbilityFunction() = default;
         AbilityFunction(
             entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
-            : registry(_registry), self(_self), abilityDataEntity(_abilityDataEntity), gameData(_gameData)
+            : registry(_registry), caster(_self), abilityEntity(_abilityDataEntity), gameData(_gameData)
         {
         }
     };
 
-    class SingleTargetHitFunc : public AbilityFunction
+    class SingleTargetHit : public AbilityFunction
     {
       public:
         void Execute() override;
-        SingleTargetHitFunc(
+        SingleTargetHit(
             entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
             : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
-    class MultihitRadiusFromCursor : public AbilityFunction
+    class HitAllInRadius : public AbilityFunction
     {
       public:
         void Execute() override;
-        MultihitRadiusFromCursor(
+        HitAllInRadius(
             entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
             : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
-    class MultihitRadiusFromCaster : public AbilityFunction
-    {
-      public:
-        void Execute() override;
-        MultihitRadiusFromCaster(
-            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
-            : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
-    };
-
-    class ProjectileExplosionFromCaster : public AbilityFunction
+    class SpawnProjectile : public AbilityFunction
     {
         void onHit(entt::entity caster, CollisionInfo collisionInfo);
 
       public:
         void Execute() override;
-        ProjectileExplosionFromCaster(
+        SpawnProjectile(
             entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
             : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
     void Hit360AroundPoint(
-        entt::registry* registry,
-        entt::entity caster,
-        entt::entity abilityDataEntity,
-        Vector3 point,
-        float radius);
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Vector3 point, float radius);
 
     void HitSingleTarget(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, entt::entity target);
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, entt::entity target);
 
 } // namespace sage

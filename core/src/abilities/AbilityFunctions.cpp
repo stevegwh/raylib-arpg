@@ -5,6 +5,7 @@
 #include "Camera.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
+#include "GameObjectFactory.hpp"
 
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
@@ -18,52 +19,51 @@
 namespace sage
 {
 
-    void SingleTargetHitFunc::Execute()
+    void SingleTargetHit::Execute()
     {
-        auto target = registry->get<CombatableActor>(self).target;
-        HitSingleTarget(registry, self, abilityDataEntity, target);
+        auto target = registry->get<CombatableActor>(caster).target;
+        HitSingleTarget(registry, caster, abilityEntity, target);
     }
 
-    void MultihitRadiusFromCursor::Execute()
+    void HitAllInRadius::Execute()
     {
-        auto& ad = registry->get<AbilityData>(abilityDataEntity);
-        auto& actorTransform = registry->get<sgTransform>(self);
-        Hit360AroundPoint(registry, self, abilityDataEntity, ad.cursor->collision().point, 15);
+        auto& ad = registry->get<AbilityData>(abilityEntity);
+        if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
+        {
+            auto& actorTransform = registry->get<sgTransform>(caster);
+            Hit360AroundPoint(registry, caster, abilityEntity, ad.cursor->collision().point, 15);
+        }
+        else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
+        {
+            auto& actorTransform = registry->get<sgTransform>(caster);
+            Hit360AroundPoint(registry, caster, abilityEntity, actorTransform.position(), 15);
+        }
     }
 
-    void MultihitRadiusFromCaster::Execute()
-    {
-        auto& actorTransform = registry->get<sgTransform>(self);
-        Hit360AroundPoint(registry, self, abilityDataEntity, actorTransform.position(), 15);
-    }
-
-    void ProjectileExplosionFromCaster::onHit(entt::entity caster, CollisionInfo collisionInfo)
+    void SpawnProjectile::onHit(entt::entity caster, CollisionInfo collisionInfo)
     {
         Vector3 point = registry->get<sgTransform>(collisionInfo.collidedEntityId).position();
-        Hit360AroundPoint(registry, self, abilityDataEntity, point, 15);
+        Hit360AroundPoint(registry, caster, abilityEntity, point, 15);
 
-        auto& checker = registry->get<CollisionChecker>(abilityDataEntity);
+        auto& checker = registry->get<CollisionChecker>(abilityEntity);
         entt::sink sink{checker.onHit};
-        sink.disconnect<&ProjectileExplosionFromCaster::onHit>(this);
-        registry->remove<CollisionChecker>(abilityDataEntity);
+        sink.disconnect<&SpawnProjectile::onHit>(this);
+        registry->remove<CollisionChecker>(abilityEntity);
     }
 
-    void ProjectileExplosionFromCaster::Execute()
+    void SpawnProjectile::Execute()
     {
-        auto& projectileTrans = registry->emplace<sgTransform>(abilityDataEntity);
-        auto& projectileCol = registry->emplace<Collideable>(abilityDataEntity);
-        projectileCol.collisionLayer = CollisionLayer::PLAYER;
-        auto& casterPos = registry->emplace<sgTransform>(self).position();
-        projectileTrans.SetPosition(casterPos, self);
 
-        auto target = registry->get<CombatableActor>(self).target;
-        Vector3 point = registry->get<sgTransform>(target).position();
+        auto& ad = registry->get<AbilityData>(abilityEntity);
 
-        gameData->actorMovementSystem->MoveToLocation(abilityDataEntity, point);
+        GameObjectFactory::createProjectile(registry, abilityEntity, caster, gameData);
 
-        auto& checker = registry->emplace<CollisionChecker>(abilityDataEntity);
+        auto& checker = registry->emplace<CollisionChecker>(abilityEntity);
         entt::sink sink{checker.onHit};
-        sink.connect<&ProjectileExplosionFromCaster::onHit>(this);
+        sink.connect<&SpawnProjectile::onHit>(this);
+
+        // Need to link origin of vfx to projectile movement
+        // abilityData.vfx.ptr->SetOrigin
 
         // On hit, call 360 around point
 
@@ -71,9 +71,9 @@ namespace sage
     }
 
     void Hit360AroundPoint(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, Vector3 point, float radius)
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Vector3 point, float radius)
     {
-        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
+        auto& abilityData = registry->get<AbilityData>(abilityEntity);
         auto view = registry->view<CombatableActor>();
         for (auto& entity : view)
         {
@@ -96,11 +96,11 @@ namespace sage
     }
 
     void HitSingleTarget(
-        entt::registry* registry, entt::entity caster, entt::entity abilityDataEntity, entt::entity target)
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, entt::entity target)
     {
         assert(target != entt::null);
 
-        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
+        auto& abilityData = registry->get<AbilityData>(abilityEntity);
 
         auto& t = registry->get<sgTransform>(caster);
         auto& enemyPos = registry->get<sgTransform>(target).position();

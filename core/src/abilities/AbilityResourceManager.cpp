@@ -65,45 +65,6 @@ namespace sage
         return std::move(obj);
     }
 
-    AbilityFunctionEnum AbilityResourceManager::StringToExecuteFuncEnum(const std::string& name)
-    {
-        if (name == "SingleTargetHit")
-        {
-            return AbilityFunctionEnum::SingleTargetHit;
-        }
-        else if (name == "MultihitRadiusFromCaster")
-        {
-            return AbilityFunctionEnum::MultihitRadiusFromCaster;
-        }
-        else if (name == "MultihitRadiusFromCursor")
-        {
-            return AbilityFunctionEnum::MultihitRadiusFromCursor;
-        }
-        return AbilityFunctionEnum::SingleTargetHit; // TODO: Null?
-    }
-
-    // std::unique_ptr<AbilityFunction> AbilityResourceManager::GetExecuteFunc(
-    //     AbilityFunctionEnum name,
-    //     entt::registry* _registry,
-    //     entt::entity caster,
-    //     entt::entity _abilityDataEntity,
-    //     GameData* _gameData)
-    // {
-    //     if (name == AbilityFunctionEnum::SingleTargetHit)
-    //     {
-    //         return std::make_unique<SingleTargetHitFunc>(_registry, caster, _abilityDataEntity, _gameData);
-    //     }
-    //     else if (name == AbilityFunctionEnum::MultihitRadiusFromCaster)
-    //     {
-    //         return std::make_unique<MultihitRadiusFromCaster>(_registry, caster, _abilityDataEntity, _gameData);
-    //     }
-    //     else if (name == AbilityFunctionEnum::MultihitRadiusFromCursor)
-    //     {
-    //         return std::make_unique<MultihitRadiusFromCursor>(_registry, caster, _abilityDataEntity, _gameData);
-    //     }
-    //     return nullptr;
-    // }
-
     AbilityResourceManager& AbilityResourceManager::GetInstance()
     {
         static AbilityResourceManager instance;
