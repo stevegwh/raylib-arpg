@@ -7,6 +7,7 @@
 #include "GameData.hpp"
 
 #include "components/Renderable.hpp"
+#include "components/sgTransform.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
 
@@ -28,10 +29,10 @@ namespace sage
         // texture->Update(gameData->cursor->terrainCollision().point);
     }
 
-    void FloorFireVFX::InitSystem(const Vector3& _target)
+    void FloorFireVFX::InitSystem()
     {
         active = true;
-        texture->Init(_target);
+        texture->Init(transform->GetWorldPos());
         texture->Enable(true);
     }
 
@@ -39,8 +40,8 @@ namespace sage
     {
     }
 
-    FloorFireVFX::FloorFireVFX(GameData* _gameData)
-        : VisualFX(_gameData),
+    FloorFireVFX::FloorFireVFX(GameData* _gameData, sgTransform* _transform)
+        : VisualFX(_gameData, _transform),
           texture(std::make_unique<TextureTerrainOverlay>(
               _gameData->registry,
               _gameData->navigationGridSystem.get(),

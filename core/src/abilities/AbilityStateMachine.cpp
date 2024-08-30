@@ -80,35 +80,7 @@ namespace sage
         void Update() override
         {
             executionDelayTimer.Update(GetFrameTime());
-
-            // Depending on vfx behaviour, update its position here
             auto& ad = registry->get<AbilityData>(abilityEntity);
-
-            // TODO: With a transform hierarchy, below wouldn't be necessary. About time to allow transform
-            // parents/children?
-            if (vfx)
-            {
-                if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
-                {
-                    auto casterPos = registry->get<sgTransform>(caster).GetWorldPos();
-                    auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
-                    abilityTrans.SetPosition(casterPos);
-                    GridSquare gs;
-                    gameData->navigationGridSystem->WorldToGridSpace(abilityTrans.GetWorldPos(), gs);
-
-                    vfx->SetOrigin(
-                        {abilityTrans.GetWorldPos().x,
-                         gameData->navigationGridSystem->GetGridSquare(gs.row, gs.col)->terrainHeight + 3.0f,
-                         abilityTrans.GetWorldPos().z});
-                }
-                else if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
-                {
-                    auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
-                    // Need some options for height
-                    vfx->SetOrigin({abilityTrans.GetWorldPos().x, 5.0f, abilityTrans.GetWorldPos().z});
-                }
-            }
-            // ----
 
             if (executionDelayTimer.HasFinished() &&
                 ad.base.behaviourPreHit != AbilityBehaviourPreHit::DETACHED_PROJECTILE)
@@ -247,13 +219,14 @@ namespace sage
         {
             if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
             {
-                auto casterPos = registry->get<sgTransform>(caster).GetWorldPos();
-                vfx->InitSystem(casterPos);
-                trans.SetPosition(casterPos);
+                auto& casterTrans = registry->get<sgTransform>(caster);
+                vfx->InitSystem();
+                trans.SetPosition(casterTrans.GetWorldPos());
+                trans.SetParent(&casterTrans);
             }
             else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
             {
-                vfx->InitSystem(gameData->cursor->terrainCollision().point);
+                vfx->InitSystem();
                 trans.SetPosition(gameData->cursor->terrainCollision().point);
             }
         }
@@ -274,7 +247,7 @@ namespace sage
         // TODO: Would be great to find a way of pushing visual fx to the registry.
         // Atm it's difficult due to polymorphism
         auto& abilityData = registry->get<AbilityData>(_abilityEntity);
-        vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
+        vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _abilityEntity, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
         executionDelayTimer.SetMaxTime(abilityData.animationParams.animationDelay);

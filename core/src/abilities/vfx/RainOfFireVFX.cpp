@@ -7,6 +7,7 @@
 #include "GameData.hpp"
 
 #include "Camera.hpp"
+#include "components/sgTransform.hpp"
 
 #include "FlamePartSys.hpp"
 #include "ResourceManager.hpp"
@@ -90,7 +91,7 @@ namespace sage
         }
     }
 
-    void RainOfFireVFX::InitSystem(const Vector3& _target)
+    void RainOfFireVFX::InitSystem()
     {
         active = true;
         const int numFireballs = 20; // Total number of fireballs
@@ -98,7 +99,7 @@ namespace sage
         initialHeight = height;
         minHeight = 0.0f;
         impactRadius = 1.0f;
-        target = _target;
+        target = transform->GetWorldPos();
         // Base spawn point slightly behind and above the target
         baseSpawnPoint = {target.x + initialOffset, target.y + height, target.z + initialOffset};
 
@@ -127,7 +128,7 @@ namespace sage
         std::cout << "RainOfFireVFX destroyed" << std::endl;
     }
 
-    RainOfFireVFX::RainOfFireVFX(GameData* _gameData) : VisualFX(_gameData)
+    RainOfFireVFX::RainOfFireVFX(GameData* _gameData, sgTransform* _transform) : VisualFX(_gameData, _transform)
     {
         shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }

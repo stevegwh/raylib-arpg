@@ -25,7 +25,8 @@ namespace sage
     {
         // Draw model (if needed)
         rlDisableBackfaceCulling();
-        DrawModelEx(slashModel, origin, Vector3{0, 1, 0}, time * 1000, Vector3{5.0, 1.0, 5.0}, WHITE);
+        DrawModelEx(
+            slashModel, transform->GetWorldPos(), Vector3{0, 1, 0}, time * 1000, Vector3{5.0, 1.0, 5.0}, WHITE);
         rlEnableBackfaceCulling();
     }
 
@@ -40,16 +41,9 @@ namespace sage
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
     }
 
-    void WhirlwindVFX::SetOrigin(const Vector3& _origin)
-    {
-        origin = _origin;
-    }
-
-    void WhirlwindVFX::InitSystem(const Vector3& _target)
+    void WhirlwindVFX::InitSystem()
     {
         active = true;
-        origin = _target;
-        origin.y = 5; // TODO: tmp
         time = 0;
     }
 
@@ -61,7 +55,7 @@ namespace sage
         UnloadModel(slashModel);
     }
 
-    WhirlwindVFX::WhirlwindVFX(GameData* _gameData) : VisualFX(_gameData)
+    WhirlwindVFX::WhirlwindVFX(GameData* _gameData, sgTransform* _transform) : VisualFX(_gameData, _transform)
     {
         // Texture/Material
         texture = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_59.png");

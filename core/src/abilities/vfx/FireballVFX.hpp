@@ -26,11 +26,10 @@ namespace sage
         Model model;
 
       public:
-        void InitSystem(const Vector3& _target) override;
+        void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        void SetOrigin(const Vector3& origin) override;
         ~FireballVFX();
-        explicit FireballVFX(GameData* _gameData);
+        explicit FireballVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage
