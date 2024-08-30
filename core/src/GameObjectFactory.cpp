@@ -231,12 +231,9 @@ namespace sage
         combatable.actorType = CombatableActorType::PLAYER;
 
         // Initialise starting abilities
-        data->abilitySystem->RegisterAbility(id, AbilityEnum::WHIRLWIND);
-        data->abilitySystem->RegisterAbility(id, AbilityEnum::RAINFOFIRE);
-        data->abilitySystem->RegisterAbility(id, AbilityEnum::FIREBALL);
-        data->playerAbilitySystem->SetSlot(0, AbilityEnum::WHIRLWIND);
-        data->playerAbilitySystem->SetSlot(1, AbilityEnum::RAINFOFIRE);
-        data->playerAbilitySystem->SetSlot(2, AbilityEnum::FIREBALL);
+        data->playerAbilitySystem->SetSlot(0, data->abilitySystem->RegisterAbility(id, AbilityEnum::WHIRLWIND));
+        data->playerAbilitySystem->SetSlot(1, data->abilitySystem->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
+        data->playerAbilitySystem->SetSlot(2, data->abilitySystem->RegisterAbility(id, AbilityEnum::FIREBALL));
         data->abilitySystem->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         data->signalReflectionManager->CreateHook<entt::entity>(

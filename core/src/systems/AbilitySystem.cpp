@@ -7,91 +7,55 @@
 namespace sage
 {
 
-    AbilityStateMachine* AbilitySystem::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
+    entt::entity AbilitySystem::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
         if (!abilityMap.contains(entity))
         {
-            return nullptr;
+            return entt::null;
         }
 
         if (abilityMap[entity].contains(abilityEnum))
         {
-            return abilityMap[entity][abilityEnum].get();
+            return abilityMap[entity][abilityEnum];
         }
 
-        return nullptr;
+        return entt::null;
     }
 
-    std::vector<AbilityStateMachine*> AbilitySystem::GetAbilities(entt::entity entity)
+    entt::entity AbilitySystem::RegisterAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
-        std::vector<AbilityStateMachine*> abilities;
-        for (const auto& ability : abilityMap[entity])
-        {
-            abilities.push_back(ability.second.get());
-        }
-        return abilities;
-    }
+        entt::entity out = entt::null;
 
-    AbilityStateMachine* AbilitySystem::RegisterAbility(entt::entity entity, AbilityEnum abilityEnum)
-    {
-        if (abilityEnum == AbilityEnum::PLAYER_AUTOATTACK)
+        switch (abilityEnum)
         {
-            auto obj = std::make_unique<PlayerAutoAttack>(registry, entity, gameData);
-            abilityMap[entity].emplace(abilityEnum, std::move(obj));
-        }
-        else if (abilityEnum == AbilityEnum::ENEMY_AUTOATTACK)
-        {
-            auto obj = std::make_unique<WavemobAutoAttack>(registry, entity, gameData);
-            abilityMap[entity].emplace(abilityEnum, std::move(obj));
-        }
-        else if (abilityEnum == AbilityEnum::FIREBALL)
-        {
-            auto obj = std::make_unique<Fireball>(registry, entity, gameData);
-            abilityMap[entity].emplace(abilityEnum, std::move(obj));
-        }
-        else if (abilityEnum == AbilityEnum::LIGHTNINGBALL)
-        {
-            auto obj = std::make_unique<LightningBall>(registry, entity, gameData);
-            abilityMap[entity].emplace(abilityEnum, std::move(obj));
-        }
-        else if (abilityEnum == AbilityEnum::RAINFOFIRE)
-        {
-            auto obj = std::make_unique<RainOfFire>(registry, entity, gameData);
-            abilityMap[entity].emplace(abilityEnum, std::move(obj));
-        }
-        else if (abilityEnum == AbilityEnum::WHIRLWIND)
-        {
-            auto obj = std::make_unique<WhirlwindAbility>(registry, entity, gameData);
-            abilityMap[entity].emplace(abilityEnum, std::move(obj));
-        }
-        else
-        {
-            return nullptr;
+        case AbilityEnum::PLAYER_AUTOATTACK:
+            out = CreatePlayerAutoAttack(registry, entity, gameData);
+            break;
+        case AbilityEnum::ENEMY_AUTOATTACK:
+            out = CreateWavemobAutoAttackAbility(registry, entity, gameData);
+            break;
+        case AbilityEnum::FIREBALL:
+            out = CreateFireballAbility(registry, entity, gameData);
+            break;
+        case AbilityEnum::LIGHTNINGBALL:
+            out = CreateLightningBallAbility(registry, entity, gameData);
+            break;
+        case AbilityEnum::RAINFOFIRE:
+            out = CreateRainOfFireAbility(registry, entity, gameData);
+            break;
+        case AbilityEnum::WHIRLWIND:
+            out = CreateWhirlwindAbility(registry, entity, gameData);
+            break;
+        default:
+            break;
         }
 
-        return abilityMap[entity][abilityEnum].get();
-    }
-
-    void AbilitySystem::Update()
-    {
-        for (auto& kv : abilityMap)
+        if (out != entt::null)
         {
-            for (auto& ability : kv.second)
-            {
-                ability.second->Update();
-            }
+            abilityMap[entity].emplace(abilityEnum, out);
         }
-    }
 
-    void AbilitySystem::Draw3D()
-    {
-        for (auto& kv : abilityMap)
-        {
-            for (auto& ability : kv.second)
-            {
-                ability.second->Draw3D();
-            }
-        }
+        return out;
     }
 
     AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)

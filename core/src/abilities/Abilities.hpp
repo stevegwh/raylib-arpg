@@ -6,68 +6,65 @@
 
 namespace sage
 {
-    class Camera;
+    class Camera; // TODO: Why?
     class GameData;
 
-    void CreatePlayerAutoAttack(entt::registry* registry, entt::entity caster, GameData* gameData);
+    entt::entity CreatePlayerAutoAttack(entt::registry* registry, entt::entity caster, GameData* gameData);
+    entt::entity CreateRainOfFireAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
+    entt::entity CreateFloorFireAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
+    entt::entity CreateFireballAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
+    entt::entity CreateLightningBallAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
+    entt::entity CreateWavemobAutoAttackAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
+    entt::entity CreateWhirlwindAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
 
-    class PlayerAutoAttack : public AbilityStateMachine
-    {
-        entt::entity initAbilityData(entt::registry* registry);
+    // class RainOfFire : public AbilityStateMachine
+    // {
+    //     entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
 
-      public:
-        ~PlayerAutoAttack() override = default;
-        PlayerAutoAttack(entt::registry* _registry, entt::entity _self, GameData* _gameData);
-    };
+    //   public:
+    //     RainOfFire(entt::registry* _registry, entt::entity _self, GameData* _gameData);
+    // };
 
-    class RainOfFire : public AbilityStateMachine
-    {
-        entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
+    // class Fireball : public AbilityStateMachine
+    // {
+    //     entt::entity initAbilityData(entt::registry* registry);
 
-      public:
-        RainOfFire(entt::registry* _registry, entt::entity _self, GameData* _gameData);
-    };
+    //   public:
+    //     Fireball(entt::registry* _registry, entt::entity _self, GameData* _gameData);
+    // };
 
-    class Fireball : public AbilityStateMachine
-    {
-        entt::entity initAbilityData(entt::registry* registry);
+    // class LightningBall : public AbilityStateMachine
+    // {
+    //     entt::entity initAbilityData(entt::registry* registry);
 
-      public:
-        Fireball(entt::registry* _registry, entt::entity _self, GameData* _gameData);
-    };
+    //   public:
+    //     LightningBall(entt::registry* _registry, entt::entity _self, GameData* _gameData);
+    // };
 
-    class LightningBall : public AbilityStateMachine
-    {
-        entt::entity initAbilityData(entt::registry* registry);
+    // class FloorFire : public AbilityStateMachine
+    // {
+    //     entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
 
-      public:
-        LightningBall(entt::registry* _registry, entt::entity _self, GameData* _gameData);
-    };
+    //   public:
+    //     FloorFire(entt::registry* _registry, entt::entity _self, GameData* _gameData);
+    // };
 
-    class FloorFire : public AbilityStateMachine
-    {
-        entt::entity initAbilityData(entt::registry* registry, Cursor* cursor);
+    // class WavemobAutoAttack : public AbilityStateMachine
+    // {
+    //     entt::entity initAbilityData(entt::registry* registry);
 
-      public:
-        FloorFire(entt::registry* _registry, entt::entity _self, GameData* _gameData);
-    };
+    //   public:
+    //     ~WavemobAutoAttack() override = default;
+    //     WavemobAutoAttack(entt::registry* _registry, entt::entity _self, GameData* _gameData);
+    // };
 
-    class WavemobAutoAttack : public AbilityStateMachine
-    {
-        entt::entity initAbilityData(entt::registry* registry);
+    // class WhirlwindAbility : public AbilityStateMachine
+    // {
+    //     entt::entity initAbilityData(entt::registry* registry);
 
-      public:
-        ~WavemobAutoAttack() override = default;
-        WavemobAutoAttack(entt::registry* _registry, entt::entity _self, GameData* _gameData);
-    };
-
-    class WhirlwindAbility : public AbilityStateMachine
-    {
-        entt::entity initAbilityData(entt::registry* registry);
-
-      public:
-        float whirlwindRadius = 15.0f;
-        ~WhirlwindAbility() override = default;
-        WhirlwindAbility(entt::registry* _registry, entt::entity _self, GameData* _gameData);
-    };
+    //   public:
+    //     float whirlwindRadius = 15.0f;
+    //     ~WhirlwindAbility() override = default;
+    //     WhirlwindAbility(entt::registry* _registry, entt::entity _self, GameData* _gameData);
+    // };
 } // namespace sage

@@ -31,5 +31,4 @@ namespace sage
     {
         return cooldownTimer.HasFinished() || cooldownTimer.GetRemainingTime() <= 0;
     }
-};
-} // namespace sage
+}; // namespace sage

@@ -22,20 +22,15 @@ namespace sage
         LIGHTNINGBALL
     };
 
-    class AbilitySystem
+    class AbilitySystem // TODO: Rename to "AbilityRegistry"
     {
         entt::registry* registry;
         GameData* gameData;
-        std::unordered_map<entt::entity, std::unordered_map<AbilityEnum, std::unique_ptr<AbilityStateMachine>>>
-            abilityMap;
+        std::unordered_map<entt::entity, std::unordered_map<AbilityEnum, entt::entity>> abilityMap;
 
       public:
-        AbilityStateMachine* GetAbility(entt::entity entity, AbilityEnum abilityEnum);
-        std::vector<AbilityStateMachine*> GetAbilities(entt::entity entity);
-        AbilityStateMachine* RegisterAbility(entt::entity entity, AbilityEnum abilityEnum);
-        // Create custom ability?
-        void Update();
-        void Draw3D();
+        entt::entity GetAbility(entt::entity entity, AbilityEnum abilityEnum);
+        entt::entity RegisterAbility(entt::entity entity, AbilityEnum abilityEnum);
 
         AbilitySystem(entt::registry* _registry, GameData* _gameData);
     };

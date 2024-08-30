@@ -28,12 +28,14 @@ namespace sage
         GameData* gameData;
 
       public:
-        virtual void Update(entt::entity abilityEntity);
-        virtual void Draw3D(entt::entity abilityEntity);
-        virtual void OnEnter(entt::entity abilityEntity);
-        virtual void OnExit(entt::entity abilityEntity);
-        virtual ~AbilityState();
-        AbilityState(entt::registry* _registry, GameData* _gameData);
+        virtual void Update(entt::entity abilityEntity) {};
+        virtual void Draw3D(entt::entity abilityEntity) {};
+        virtual void OnEnter(entt::entity abilityEntity) {};
+        virtual void OnExit(entt::entity abilityEntity) {};
+        virtual ~AbilityState() {};
+        AbilityState(entt::registry* _registry, GameData* _gameData) : registry(_registry), gameData(_gameData)
+        {
+        }
     };
 
     class AbilityStateMachine::IdleState : public AbilityState

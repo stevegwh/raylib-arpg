@@ -1,6 +1,8 @@
 #pragma once
 
 #include "abilities/AbilityData.hpp"
+#include "abilities/AbilityIndicator.hpp"
+#include "abilities/vfx/VisualFX.hpp"
 #include <Timer.hpp>
 
 #include <entt/entt.hpp>
@@ -17,8 +19,8 @@ namespace sage
     };
 
     class AbilityState;
-    class AbilityIndicator;
-    class VisualFX;
+    // class AbilityIndicator;
+    // class VisualFX;
 
     struct Ability
     {
@@ -28,8 +30,8 @@ namespace sage
         Timer cooldownTimer;
         Timer executionDelayTimer;
 
-        std::unique_ptr<VisualFX> vfx;
-        std::unique_ptr<AbilityIndicator> abilityIndicator;
+        VisualFX* vfx;
+        AbilityIndicator* abilityIndicator;
 
         AbilityStateEnum state = AbilityStateEnum::IDLE;
 
@@ -38,5 +40,9 @@ namespace sage
         float GetRemainingCooldownTime() const;
         float GetCooldownDuration() const;
         bool CooldownReady() const;
+
+        Ability() = default;
+        Ability(const Ability&) = delete;
+        Ability& operator=(const Ability&) = delete;
     };
 } // namespace sage
