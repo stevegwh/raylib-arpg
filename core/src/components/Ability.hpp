@@ -1,5 +1,6 @@
 #pragma once
 
+#include "abilities/AbilityData.hpp"
 #include <Timer.hpp>
 
 #include <entt/entt.hpp>
@@ -7,9 +8,16 @@
 
 namespace sage
 {
+
+    enum class AbilityStateEnum
+    {
+        IDLE,
+        CURSOR_SELECT,
+        AWAITING_EXECUTION
+    };
+
     class AbilityState;
-    class AbilityStateEnum;
-    class AbilityData;
+    class AbilityIndicator;
     class VisualFX;
 
     struct Ability
@@ -21,7 +29,14 @@ namespace sage
         Timer executionDelayTimer;
 
         std::unique_ptr<VisualFX> vfx;
+        std::unique_ptr<AbilityIndicator> abilityIndicator;
 
-        AbilityState* state;
+        AbilityStateEnum state = AbilityStateEnum::IDLE;
+
+        void ResetCooldown();
+        bool IsActive();
+        float GetRemainingCooldownTime() const;
+        float GetCooldownDuration() const;
+        bool CooldownReady() const;
     };
 } // namespace sage

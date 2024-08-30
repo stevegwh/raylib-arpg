@@ -46,6 +46,11 @@ namespace sage
         ability.self = entity;
         ability.caster = caster;
         ability.ad = ad;
+        ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
+        ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
+
+        // ability.abilityIndicator = AbilityResourceManager::GetInstance().GetIndicator(ad.indicator, gameData);
+
         // Would much prefer emplacing the vfx with the above entity id, instead.
         ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
 

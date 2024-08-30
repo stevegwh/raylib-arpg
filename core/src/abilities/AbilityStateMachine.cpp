@@ -4,7 +4,6 @@
 #include "AbilityFunctions.hpp"
 #include "AbilityIndicator.hpp"
 #include "AbilityResourceManager.hpp"
-#include "AbilityState.hpp"
 #include "components/Animation.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
@@ -22,6 +21,20 @@
 
 namespace sage
 {
+    class AbilityState
+    {
+      protected:
+        entt::registry* registry;
+        GameData* gameData;
+
+      public:
+        virtual void Update(entt::entity abilityEntity);
+        virtual void Draw3D(entt::entity abilityEntity);
+        virtual void OnEnter(entt::entity abilityEntity);
+        virtual void OnExit(entt::entity abilityEntity);
+        virtual ~AbilityState();
+        AbilityState(entt::registry* _registry, GameData* _gameData);
+    };
 
     class AbilityStateMachine::IdleState : public AbilityState
     {
@@ -29,24 +42,18 @@ namespace sage
       public:
         entt::sigh<void(entt::entity)> onRestartTriggered;
 
-        void Update() override
+        void Update(entt::entity abilityEntity) override
         {
-            auto& ad = registry->get<AbilityData>(abilityEntity);
-            cooldownTimer.Update(GetFrameTime());
-            if (cooldownTimer.HasFinished() && ad.base.repeatable)
+            auto& ab = registry->get<Ability>(abilityEntity);
+            ab.cooldownTimer.Update(GetFrameTime());
+            if (ab.cooldownTimer.HasFinished() && ab.ad.base.repeatable)
             {
-                onRestartTriggered.publish(caster);
+                onRestartTriggered.publish(
+                    abilityEntity); // Was "caster". I think it was a mistake, so passed abilityEntity
             }
         }
 
-        IdleState(
-            entt::registry* _registry,
-            entt::entity _caster,
-            entt::entity _abilityEntity,
-            GameData* _gameData,
-            Timer& cooldownTimer,
-            Timer& executionDelayTimer)
-            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer)
+        IdleState(entt::registry* _registry, GameData* _gameData) : AbilityState(_registry, _gameData)
         {
         }
     };
@@ -55,74 +62,67 @@ namespace sage
 
     class AbilityStateMachine::CursorSelectState : public AbilityState
     {
-        std::unique_ptr<AbilityIndicator> abilityIndicator;
-        bool cursorActive = false;
+        bool cursorActive = false; // Limits us to one cursor at once (I assume this is fine)
 
-        void enableCursor()
+        void enableCursor(entt::entity abilityEntity)
         {
-            abilityIndicator->Init(gameData->cursor->terrainCollision().point);
-            abilityIndicator->Enable(true);
+            auto& ab = registry->get<Ability>(abilityEntity);
+            ab.abilityIndicator->Init(gameData->cursor->terrainCollision().point);
+            ab.abilityIndicator->Enable(true);
             gameData->cursor->Disable();
             gameData->cursor->Hide();
         }
 
-        void disableCursor()
+        void disableCursor(entt::entity abilityEntity)
         {
+            auto& ab = registry->get<Ability>(abilityEntity);
             gameData->cursor->Enable();
             gameData->cursor->Show();
-            abilityIndicator->Enable(false);
+            ab.abilityIndicator->Enable(false);
         }
 
-        void toggleCursor()
+        void toggleCursor(entt::entity abilityEntity)
         {
             if (cursorActive)
             {
-                disableCursor();
+                disableCursor(abilityEntity);
                 cursorActive = false;
             }
             else
             {
-                enableCursor();
+                enableCursor(abilityEntity);
                 cursorActive = true;
             }
         }
 
       public:
         entt::sigh<void(entt::entity)> onConfirm;
-        void Update() override
+        void Update(entt::entity abilityEntity) override
         {
-            abilityIndicator->Update(gameData->cursor->terrainCollision().point);
+            auto& ab = registry->get<Ability>(abilityEntity);
+            ab.abilityIndicator->Update(gameData->cursor->terrainCollision().point);
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
-                onConfirm.publish(caster);
+                onConfirm.publish(abilityEntity);
             }
         }
 
-        void OnEnter() override
+        void OnEnter(entt::entity abilityEntity) override
         {
-            enableCursor();
+            enableCursor(abilityEntity);
             cursorActive = true;
         }
 
-        void OnExit() override
+        void OnExit(entt::entity abilityEntity) override
         {
             if (cursorActive)
             {
-                disableCursor();
+                disableCursor(abilityEntity);
                 cursorActive = false;
             }
         }
 
-        CursorSelectState(
-            entt::registry* _registry,
-            entt::entity _caster,
-            entt::entity _abilityEntity,
-            GameData* _gameData,
-            Timer& cooldownTimer,
-            Timer& executionDelayTimer,
-            std::unique_ptr<AbilityIndicator> _abilityIndicator)
-            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer),
-              abilityIndicator(std::move(_abilityIndicator))
+        CursorSelectState(entt::registry* _registry, GameData* _gameData) : AbilityState(_registry, _gameData)
         {
         }
     };
@@ -132,49 +132,44 @@ namespace sage
     class AbilityStateMachine::AwaitingExecutionState : public AbilityState
     {
 
-        void signalExecute()
+        void signalExecute(entt::entity abilityEntity)
         {
-            onExecute.publish();
+            onExecute.publish(abilityEntity);
         }
 
       public:
-        entt::sigh<void()> onExecute;
+        entt::sigh<void(entt::entity)> onExecute;
 
-        void OnEnter() override
+        void OnEnter(entt::entity abilityEntity) override
         {
-            cooldownTimer.Start();
-            executionDelayTimer.Start();
+            auto& ab = registry->get<Ability>(abilityEntity);
+            ab.cooldownTimer.Start();
+            ab.executionDelayTimer.Start();
 
-            auto& ad = registry->get<AbilityData>(abilityEntity);
+            auto& ad = ab.ad;
             if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
             {
-                GameObjectFactory::createProjectile(registry, caster, abilityEntity, gameData);
+                GameObjectFactory::createProjectile(registry, ab.caster, abilityEntity, gameData);
                 auto& moveable = registry->get<MoveableActor>(abilityEntity);
                 entt::sink sink{moveable.onDestinationReached};
                 sink.connect<&AwaitingExecutionState::signalExecute>(this);
             }
         }
 
-        void Update() override
+        void Update(entt::entity abilityEntity) override
         {
-            executionDelayTimer.Update(GetFrameTime());
-            auto& ad = registry->get<AbilityData>(abilityEntity);
+            auto& ab = registry->get<Ability>(abilityEntity);
+            ab.executionDelayTimer.Update(GetFrameTime());
+            auto& ad = ab.ad;
 
-            if (executionDelayTimer.HasFinished() &&
+            if (ab.executionDelayTimer.HasFinished() &&
                 ad.base.behaviourPreHit != AbilityBehaviourPreHit::DETACHED_PROJECTILE)
             {
-                onExecute.publish();
+                onExecute.publish(abilityEntity);
             }
         }
 
-        AwaitingExecutionState(
-            entt::registry* _registry,
-            entt::entity _caster,
-            entt::entity _abilityEntity,
-            GameData* _gameData,
-            Timer& cooldownTimer,
-            Timer& executionDelayTimer)
-            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer)
+        AwaitingExecutionState(entt::registry* _registry, GameData* _gameData) : AbilityState(_registry, _gameData)
 
         {
         }
@@ -182,102 +177,83 @@ namespace sage
 
     // ----------------------------
 
-    void AbilityStateMachine::ChangeState(AbilityStateEnum newState)
+    void AbilityStateMachine::ChangeState(entt::entity abilityEntity, AbilityStateEnum newState)
     {
         assert(states.contains(newState));
-        state->OnExit();
-        state = states[newState].get();
-        state->OnEnter();
+        auto& ab = registry->get<Ability>(abilityEntity);
+        states[ab.state]->OnExit(abilityEntity);
+        ab.state = newState;
+        states[ab.state]->OnEnter(abilityEntity);
     }
 
-    void AbilityStateMachine::ResetCooldown()
+    void AbilityStateMachine::Cancel(entt::entity abilityEntity)
     {
-        cooldownTimer.Reset();
-    }
-
-    bool AbilityStateMachine::IsActive()
-    {
-        auto& ad = registry->get<AbilityData>(abilityEntity);
-        if (ad.cursorBased)
+        auto& ab = registry->get<Ability>(abilityEntity);
+        if (ab.vfx && ab.vfx->active)
         {
-            const auto current = states[AbilityStateEnum::CURSOR_SELECT].get();
-            return cooldownTimer.IsRunning() || state == current;
+            ab.vfx->active = false;
         }
-        return cooldownTimer.IsRunning();
-    }
-
-    float AbilityStateMachine::GetRemainingCooldownTime() const
-    {
-        return cooldownTimer.GetRemainingTime();
-    }
-
-    float AbilityStateMachine::GetCooldownDuration() const
-    {
-        return cooldownTimer.GetMaxTime();
-    }
-
-    bool AbilityStateMachine::CooldownReady() const
-    {
-        return cooldownTimer.HasFinished() || cooldownTimer.GetRemainingTime() <= 0;
-    }
-
-    void AbilityStateMachine::Cancel()
-    {
-        if (vfx && vfx->active)
-        {
-            vfx->active = false;
-        }
-        cooldownTimer.Stop();
-        executionDelayTimer.Stop();
-        ChangeState(AbilityStateEnum::IDLE);
+        ab.cooldownTimer.Stop();
+        ab.executionDelayTimer.Stop();
+        ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
     void AbilityStateMachine::Update()
     {
-        if (!IsActive()) return;
-        state->Update();
-        if (vfx && vfx->active)
+        auto view = registry->view<Ability>();
+        for (auto abilityEntity : view)
         {
-            vfx->Update(GetFrameTime());
+            auto& ab = registry->get<Ability>(abilityEntity);
+            if (!ab.IsActive()) continue;
+            states[ab.state]->Update(abilityEntity);
+            if (ab.vfx && ab.vfx->active)
+            {
+                ab.vfx->Update(GetFrameTime());
+            }
         }
     }
 
     void AbilityStateMachine::Draw3D()
     {
-        if (!IsActive()) return;
-        state->Draw3D();
-        if (vfx && vfx->active)
+        auto view = registry->view<Ability>();
+        for (auto abilityEntity : view)
         {
-            vfx->Draw3D();
+            auto& ab = registry->get<Ability>(abilityEntity);
+            if (!ab.IsActive()) continue;
+            states[ab.state]->Draw3D(abilityEntity);
+            if (ab.vfx && ab.vfx->active)
+            {
+                ab.vfx->Draw3D();
+            }
         }
     }
 
-    void AbilityStateMachine::Execute()
+    void AbilityStateMachine::Execute(entt::entity abilityEntity)
     {
-        auto& ad = registry->get<AbilityData>(abilityEntity);
+        auto& ab = registry->get<Ability>(abilityEntity);
+        auto& ad = ab.ad;
 
         if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_TARGETED_UNIT)
         {
-            auto& executeFunc = GetExecuteFunc<SingleTargetHit>(registry, caster, abilityEntity, gameData);
+            auto& executeFunc = GetExecuteFunc<SingleTargetHit>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
         else if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS)
         {
-            auto& executeFunc = GetExecuteFunc<HitAllInRadius>(registry, caster, abilityEntity, gameData);
+            auto& executeFunc = GetExecuteFunc<HitAllInRadius>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
 
-        ChangeState(AbilityStateEnum::IDLE);
+        ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilityStateMachine::Confirm()
+    void AbilityStateMachine::Confirm(entt::entity abilityEntity)
     {
-
         // Spawn target is either at cursor, at enemy, or at player
         // After spawned: Follow caster position, follow enemy position (maybe), follow the ability's detached
         // transform/collider (abilityEntity) and follow its position, or do nothing.
-
-        auto& ad = registry->get<AbilityData>(abilityEntity);
+        auto& ab = registry->get<Ability>(abilityEntity);
+        auto& ad = ab.ad;
         if (!registry->any_of<sgTransform>(abilityEntity))
         {
             registry->emplace<sgTransform>(abilityEntity, abilityEntity);
@@ -287,7 +263,7 @@ namespace sage
         if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE ||
             ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_STATIONARY)
         {
-            auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
+            auto& casterPos = registry->get<sgTransform>(ab.caster).GetWorldPos();
             auto point = gameData->cursor->terrainCollision().point;
             if (Vector3Distance(point, casterPos) > ad.base.range)
             {
@@ -295,97 +271,73 @@ namespace sage
             }
         }
 
-        auto& animation = registry->get<Animation>(caster);
+        auto& animation = registry->get<Animation>(ab.caster);
         animation.ChangeAnimationByParams(ad.animationParams);
 
-        if (vfx)
+        if (ab.vfx)
         {
             if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
             {
-                auto& casterTrans = registry->get<sgTransform>(caster);
+                auto& casterTrans = registry->get<sgTransform>(ab.caster);
                 trans.SetPosition(casterTrans.GetWorldPos());
                 trans.SetParent(&casterTrans);
-                vfx->InitSystem();
+                ab.vfx->InitSystem();
             }
             else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
             {
                 trans.SetPosition(gameData->cursor->terrainCollision().point);
-                vfx->InitSystem();
+                ab.vfx->InitSystem();
             }
         }
 
-        ChangeState(AbilityStateEnum::AWAITING_EXECUTION);
+        ChangeState(abilityEntity, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     // Determines if we need to display an indicator or not
-    void AbilityStateMachine::Init()
+    void AbilityStateMachine::Init(entt::entity abilityEntity)
     {
 
-        auto& ad = registry->get<AbilityData>(abilityEntity);
+        auto& ab = registry->get<Ability>(abilityEntity);
 
-        if (ad.cursorBased) // Toggle indicator
+        if (ab.ad.cursorBased) // Toggle indicator
         {
-            if (state == states[AbilityStateEnum::CURSOR_SELECT].get())
+            if (ab.state == AbilityStateEnum::CURSOR_SELECT)
             {
-                ChangeState(AbilityStateEnum::IDLE);
+                ChangeState(abilityEntity, AbilityStateEnum::IDLE);
             }
             else
             {
-                ChangeState(AbilityStateEnum::CURSOR_SELECT);
+                ChangeState(abilityEntity, AbilityStateEnum::CURSOR_SELECT);
             }
         }
         else
         {
-            Confirm();
+            Confirm(abilityEntity);
         }
     }
 
     AbilityStateMachine::~AbilityStateMachine()
     {
-        registry->destroy(abilityEntity);
     }
 
-    AbilityStateMachine::AbilityStateMachine(
-        entt::registry* _registry, entt::entity _caster, entt::entity _abilityEntity, GameData* _gameData)
-        : registry(_registry), caster(_caster), abilityEntity(_abilityEntity), gameData(_gameData)
+    AbilityStateMachine::AbilityStateMachine(entt::registry* _registry, GameData* _gameData)
+        : registry(_registry), gameData(_gameData)
     {
 
-        // TODO: Would be great to find a way of pushing visual fx to the registry.
-        // Atm it's difficult due to polymorphism
-        auto& ad = registry->get<AbilityData>(_abilityEntity);
-        vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, _abilityEntity, _gameData);
-
-        cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
-        executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
-
-        auto idleState = std::make_unique<IdleState>(
-            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer);
+        auto idleState = std::make_unique<IdleState>(_registry, _gameData);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
         onRestartTriggeredSink.connect<&AbilityStateMachine::Init>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
-        auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(
-            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, executionDelayTimer);
+        auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(_registry, _gameData);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
         onExecuteSink.connect<&AbilityStateMachine::Execute>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
 
-        if (ad.cursorBased)
-        {
-            auto cursorState = std::make_unique<CursorSelectState>(
-                _registry,
-                _caster,
-                _abilityEntity,
-                _gameData,
-                cooldownTimer,
-                executionDelayTimer,
-                AbilityResourceManager::GetInstance().GetIndicator(ad.indicator, _gameData));
-            entt::sink onConfirmSink{cursorState->onConfirm};
-            onConfirmSink.connect<&AbilityStateMachine::Confirm>(this);
-            states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
-        }
-
-        state = states[AbilityStateEnum::IDLE].get();
+        auto cursorState = std::make_unique<CursorSelectState>(_registry, _gameData);
+        entt::sink onConfirmSink{cursorState->onConfirm};
+        onConfirmSink.connect<&AbilityStateMachine::Confirm>(this);
+        states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
     }
 
 } // namespace sage
