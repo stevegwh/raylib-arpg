@@ -9,12 +9,14 @@ namespace sage
 {
     class AbilityState;
     class AbilityStateEnum;
+    class AbilityData;
     class VisualFX;
 
     struct Ability
     {
         entt::entity self;
         entt::entity caster;
+        AbilityData ad;
         Timer cooldownTimer;
         Timer executionDelayTimer;
 

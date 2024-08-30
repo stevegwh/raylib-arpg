@@ -13,6 +13,8 @@
 
 #include "vfx/VisualFX.hpp"
 
+#include "components/Ability.hpp"
+
 #include <memory>
 
 #include "raylib.h"
@@ -21,6 +23,34 @@
 
 namespace sage
 {
+    // TODO: Can rename file to AbilityFactory, or just move to GameObjectFactory
+
+    void CreatePlayerAutoAttack(entt::registry* registry, entt::entity caster, GameData* gameData)
+    {
+        AbilityData ad;
+        ad.base.element = AttackElement::PHYSICAL;
+        ad.base.cooldownDuration = 1;
+        ad.base.baseDamage = 10;
+        ad.base.range = 5;
+        ad.base.repeatable = true;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_TARGETED_UNIT;
+        ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
+        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
+
+        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+        ad.animationParams.animSpeed = 4;
+        ad.animationParams.animationDelay = 0;
+
+        auto entity = registry->create();
+        Ability ability;
+        ability.self = entity;
+        ability.caster = caster;
+        ability.ad = ad;
+        // Would much prefer emplacing the vfx with the above entity id, instead.
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
+
+        registry->emplace<Ability>(entity, ability);
+    }
 
     entt::entity PlayerAutoAttack::initAbilityData(entt::registry* _registry)
     {
