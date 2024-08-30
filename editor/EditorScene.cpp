@@ -179,7 +179,7 @@ namespace sage
               _editorSettings, _settings, data->userInput.get(), data->camera.get()))
     {
         {
-            entt::sink onClickEvent{data->cursor->onAnyClick};
+            entt::sink onClickEvent{data->cursor->onAnyLeftClick};
             onClickEvent.connect<&EditorScene::OnCursorClick>(this);
         }
         {

@@ -45,7 +45,7 @@ namespace sage
             {actorTrans.rotation().x, RAD2DEG * angle, actorTrans.rotation().z}, controlledActor);
 
         {
-            entt::sink sink{gameData->cursor->onAnyClick};
+            entt::sink sink{gameData->cursor->onAnyLeftClick};
             sink.connect<&DialogueSystem::endConversation>(this);
         }
 
@@ -73,7 +73,7 @@ namespace sage
     {
         onConversationEnd.publish();
         {
-            entt::sink sink{gameData->cursor->onAnyClick};
+            entt::sink sink{gameData->cursor->onAnyLeftClick};
             sink.disconnect<&DialogueSystem::endConversation>(this);
         }
 

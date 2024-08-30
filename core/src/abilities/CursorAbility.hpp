@@ -2,17 +2,13 @@
 
 #include "AbilityStateMachine.hpp"
 
-#include <memory>
-
 namespace sage
 {
     class AbilityIndicator;
-    class Cursor;
 
     class CursorAbility : public AbilityStateMachine
     {
         class CursorSelectState;
-        Cursor* cursor;
 
       protected:
         virtual void confirm();

@@ -219,6 +219,11 @@ namespace sage
         auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
         data->controllableActorSystem->SetControlledActor(id);
 
+        data->signalReflectionManager->CreateHook<entt::entity>(
+            id, data->cursor->onEnemyLeftClick, controllable.onEnemyLeftClick);
+        data->signalReflectionManager->CreateHook<entt::entity>(
+            id, data->cursor->onEnemyRightClick, controllable.onEnemyRightClick);
+
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
@@ -226,8 +231,10 @@ namespace sage
         // Initialise starting abilities
         data->abilitySystem->RegisterAbility(id, AbilityEnum::WHIRLWIND);
         data->abilitySystem->RegisterAbility(id, AbilityEnum::RAINFOFIRE);
+        data->abilitySystem->RegisterAbility(id, AbilityEnum::FIREBALL);
         data->playerAbilitySystem->SetSlot(0, AbilityEnum::WHIRLWIND);
         data->playerAbilitySystem->SetSlot(1, AbilityEnum::RAINFOFIRE);
+        data->playerAbilitySystem->SetSlot(2, AbilityEnum::FIREBALL);
         data->abilitySystem->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         data->signalReflectionManager->CreateHook<entt::entity>(
@@ -469,7 +476,7 @@ namespace sage
     }
 
     void GameObjectFactory::createProjectile(
-        entt::registry* registry, entt::entity abilityEntity, entt::entity caster, GameData* data)
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data)
     {
         auto& ad = registry->get<AbilityData>(abilityEntity);
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);

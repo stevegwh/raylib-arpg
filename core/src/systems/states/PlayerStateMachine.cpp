@@ -35,7 +35,13 @@ namespace sage
             gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->collision().point);
         }
 
-        void onEnemyClick(entt::entity self, entt::entity target)
+        void onEnemyLeftClick(entt::entity self, entt::entity target)
+        {
+            auto& combatable = registry->get<CombatableActor>(self);
+            combatable.target = target;
+        }
+
+        void onEnemyRightClick(entt::entity self, entt::entity target)
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
@@ -56,9 +62,12 @@ namespace sage
         void OnStateEnter(entt::entity entity) override
         {
             // Below are not disconnected in OnStateExit
+            // Bridge was created in GameObjectFactory to connect this to cursor
             auto& controllable = registry->get<ControllableActor>(entity);
-            entt::sink sink{controllable.onEnemyClicked};
-            sink.connect<&DefaultState::onEnemyClick>(this);
+            entt::sink leftSink{controllable.onEnemyLeftClick};
+            leftSink.connect<&DefaultState::onEnemyLeftClick>(this);
+            entt::sink rightSink{controllable.onEnemyRightClick};
+            rightSink.connect<&DefaultState::onEnemyRightClick>(this);
 
             auto& combatableActor = registry->get<CombatableActor>(entity);
 

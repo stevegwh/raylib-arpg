@@ -5,15 +5,14 @@
 #include "CursorAbility.hpp"
 
 #include "AbilityData.hpp"
-#include "AbilityFunctions.hpp"
 #include "AbilityIndicator.hpp"
 #include "AbilityResourceManager.hpp"
 #include "AbilityState.hpp"
-#include "components/Animation.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
 #include "TextureTerrainOverlay.hpp"
-#include "vfx/VisualFX.hpp"
+
+#include <memory>
 
 namespace sage
 {

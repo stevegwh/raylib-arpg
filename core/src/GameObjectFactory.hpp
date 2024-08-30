@@ -32,6 +32,6 @@ namespace sage
         static void createPortal(entt::registry* registry, GameData* data, Vector3 position);
         static void createWizardTower(entt::registry* registry, GameData* data, Vector3 position);
         static void createProjectile(
-            entt::registry* registry, entt::entity abilityEntity, entt::entity caster, GameData* data);
+            entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data);
     };
 } // namespace sage

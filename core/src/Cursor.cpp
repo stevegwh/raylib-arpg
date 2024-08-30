@@ -23,7 +23,7 @@
 
 namespace sage
 {
-    void Cursor::onMouseClick()
+    void Cursor::onMouseLeftClick()
     {
         if (!enabled) return;
 
@@ -38,9 +38,21 @@ namespace sage
         }
         else if (layer == CollisionLayer::ENEMY)
         {
-            onEnemyClick.publish(m_mouseHitInfo.collidedEntityId);
+            onEnemyLeftClick.publish(m_mouseHitInfo.collidedEntityId);
         }
-        onAnyClick.publish(m_mouseHitInfo.collidedEntityId);
+        onAnyLeftClick.publish(m_mouseHitInfo.collidedEntityId);
+    }
+
+    void Cursor::onMouseRightClick()
+    {
+        if (!enabled) return;
+
+        const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+        if (layer == CollisionLayer::ENEMY)
+        {
+            onEnemyRightClick.publish(m_mouseHitInfo.collidedEntityId);
+        }
+        onAnyRightClick.publish(m_mouseHitInfo.collidedEntityId);
     }
 
     void Cursor::DisableContextSwitching() // Lock mouse context? Like changing depending
@@ -268,7 +280,11 @@ namespace sage
         getMouseRayCollision();
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            onMouseClick();
+            onMouseLeftClick();
+        }
+        else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+        {
+            onMouseRightClick();
         }
     }
 
