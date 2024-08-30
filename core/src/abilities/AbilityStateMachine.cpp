@@ -27,6 +27,7 @@ namespace sage
 
       public:
         entt::sigh<void(entt::entity)> onRestartTriggered;
+
         void Update() override
         {
             auto& ad = registry->get<AbilityData>(abilityEntity);
@@ -71,7 +72,7 @@ namespace sage
             {
                 GameObjectFactory::createProjectile(registry, caster, abilityEntity, gameData);
                 auto& moveable = registry->get<MoveableActor>(abilityEntity);
-                entt::sink sink{moveable.onFinishMovement};
+                entt::sink sink{moveable.onDestinationReached};
                 sink.connect<&AwaitingExecutionState::signalExecute>(this);
             }
         }
@@ -92,12 +93,19 @@ namespace sage
                     auto casterPos = registry->get<sgTransform>(caster).position();
                     auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
                     abilityTrans.SetPosition(casterPos, abilityEntity);
-                    vfx->SetOrigin({abilityTrans.position().x, 5.0f, abilityTrans.position().z});
+                    GridSquare gs;
+                    gameData->navigationGridSystem->WorldToGridSpace(abilityTrans.position(), gs);
+
+                    vfx->SetOrigin(
+                        {abilityTrans.position().x,
+                         gameData->navigationGridSystem->GetGridSquare(gs.row, gs.col)->terrainHeight + 3.0f,
+                         abilityTrans.position().z});
                 }
                 else if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
                 {
                     auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
-                    vfx->SetOrigin(abilityTrans.position());
+                    // Need some options for height
+                    vfx->SetOrigin({abilityTrans.position().x, 5.0f, abilityTrans.position().z});
                 }
             }
             // ----
