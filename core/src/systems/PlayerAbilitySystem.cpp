@@ -10,9 +10,6 @@
 
 #include <cassert>
 
-// TODO: After moving ability state system to the new format, all you need to do here is store the ability entities
-// in a slot and call them
-
 namespace sage
 {
     void PlayerAbilitySystem::abilityOnePressed()
