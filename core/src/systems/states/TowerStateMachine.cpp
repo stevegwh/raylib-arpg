@@ -5,7 +5,7 @@
 #include "abilities/Abilities.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
-#include "components/MovableActor.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
