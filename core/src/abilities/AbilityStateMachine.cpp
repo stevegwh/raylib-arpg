@@ -5,7 +5,7 @@
 #include "AbilityResourceManager.hpp"
 #include "AbilityState.hpp"
 #include "components/Animation.hpp"
-#include "components/MovableActor.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"

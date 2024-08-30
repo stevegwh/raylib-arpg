@@ -1,7 +1,7 @@
 #include "ActorMovementSystem.hpp"
 #include "CollisionSystem.hpp"
 #include "components/ControllableActor.hpp"
-#include "components/MovableActor.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"

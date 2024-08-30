@@ -11,7 +11,7 @@
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/Dialogue.hpp"
-#include "components/MovableActor.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "systems/ControllableActorSystem.hpp"
 

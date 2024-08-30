@@ -19,7 +19,7 @@
 #include "components/ControllableActor.hpp"
 #include "components/Dialogue.hpp"
 #include "components/HealthBar.hpp"
-#include "components/MovableActor.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
