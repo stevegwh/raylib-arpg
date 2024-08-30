@@ -47,7 +47,8 @@ namespace sage
         entt::entity controlledActor;
 
         void getMouseRayCollision();
-        void onMouseClick();
+        void onMouseLeftClick();
+        void onMouseRightClick();
         void changeCursors(CollisionLayer collisionLayer);
         static void resetHitInfo(CollisionInfo& hitInfo);
         [[nodiscard]] bool findMeshCollision(CollisionInfo& hitInfo);
@@ -61,8 +62,10 @@ namespace sage
         entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
         entt::sigh<void(entt::entity)> onNPCClick{};
         entt::sigh<void(entt::entity entity)> onFloorClick{};
-        entt::sigh<void(entt::entity entity)> onAnyClick{};
-        entt::sigh<void(entt::entity)> onEnemyClick{};
+        entt::sigh<void(entt::entity entity)> onAnyLeftClick{};
+        entt::sigh<void(entt::entity entity)> onAnyRightClick{};
+        entt::sigh<void(entt::entity)> onEnemyLeftClick{};
+        entt::sigh<void(entt::entity)> onEnemyRightClick{};
 
         void Update();
         void DrawDebug();

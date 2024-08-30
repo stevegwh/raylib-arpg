@@ -17,11 +17,9 @@ namespace sage
     {
         entt::entity self;
 
-        void EnemyClicked(entt::entity enemy);
-
       public:
-        entt::sigh<void(entt::entity, entt::entity)>
-            onEnemyClicked{}; // Self, Clicked enemy
+        entt::sigh<void(entt::entity, entt::entity)> onEnemyLeftClick{};  // Self, Clicked enemy
+        entt::sigh<void(entt::entity, entt::entity)> onEnemyRightClick{}; // Self, Clicked enemy
         // Timer to check if the target has moved.
         Timer checkTargetPosTimer{};
         // The max range the actor can pathfind at one time.

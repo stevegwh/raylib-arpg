@@ -44,6 +44,14 @@ namespace sage
 
     void ActorMovementSystem::MoveToLocation(const entt::entity& entity, Vector3 location)
     {
+        const auto& actorTrans = registry->get<sgTransform>(entity);
+        PruneMoveCommands(entity);
+        auto& transform = registry->get<sgTransform>(entity);
+        auto& moveableActor = registry->get<MoveableActor>(entity);
+        moveableActor.path.emplace_back(transform.position());
+        moveableActor.path.emplace_back(location);
+        transform.direction = Vector3Normalize(Vector3Subtract(moveableActor.path.front(), transform.position()));
+        moveableActor.onStartMovement.publish(entity);
     }
 
     void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination)

@@ -8,14 +8,14 @@
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
-#include "raylib.h"
+#include "GameObjectFactory.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "TextureTerrainOverlay.hpp"
 #include "Timer.hpp"
 #include "vfx/VisualFX.hpp"
-#include <cassert>
 
-#include "components/sgTransform.hpp"
-#include "systems/ControllableActorSystem.hpp"
+#include "raylib.h"
+#include <cassert>
 #include <iostream>
 
 namespace sage
@@ -50,23 +50,61 @@ namespace sage
 
     class AbilityStateMachine::AwaitingExecutionState : public AbilityState
     {
-        entt::entity abilityEntity;
+        VisualFX* vfx;
+
+        void signalExecute()
+        {
+            onExecute.publish();
+        }
 
       public:
-        entt::sigh<void(entt::entity)> onExecute;
+        entt::sigh<void()> onExecute;
+
         void OnEnter() override
         {
             cooldownTimer.Start();
             animationDelayTimer.Start();
+
+            auto& ad = registry->get<AbilityData>(abilityEntity);
+            if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
+            {
+                GameObjectFactory::createProjectile(registry, caster, abilityEntity, gameData);
+                auto& checker = registry->emplace<CollisionChecker>(abilityEntity);
+                entt::sink sink{checker.onHit};
+                sink.connect<&AwaitingExecutionState::signalExecute>(this);
+            }
         }
 
         void Update() override
         {
-            animationDelayTimer.Update(GetFrameTime());
-            // TODO: If its a projectile, then update it here? Execute if it hits something
-            if (animationDelayTimer.HasFinished())
+            animationDelayTimer.Update(GetFrameTime()); // Execute delay timer?
+
+            // Depending on vfx behaviour, update its position here
+            auto& ad = registry->get<AbilityData>(abilityEntity);
+
+            // TODO: With a transform hierarchy, below wouldn't be necessary. About time to allow transform
+            // parents/children?
+            if (vfx)
             {
-                onExecute.publish(caster);
+                if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
+                {
+                    auto casterPos = registry->get<sgTransform>(caster).position();
+                    auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
+                    abilityTrans.SetPosition(casterPos, abilityEntity);
+                    vfx->SetOrigin({abilityTrans.position().x, 5.0f, abilityTrans.position().z});
+                }
+                else if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
+                {
+                    auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
+                    vfx->SetOrigin(abilityTrans.position());
+                }
+            }
+            // ----
+
+            if (animationDelayTimer.HasFinished() &&
+                ad.base.behaviourPreHit != AbilityBehaviourPreHit::DETACHED_PROJECTILE)
+            {
+                onExecute.publish();
             }
         }
 
@@ -76,8 +114,11 @@ namespace sage
             entt::entity _abilityEntity,
             GameData* _gameData,
             Timer& cooldownTimer,
-            Timer& animationDelayTimer)
-            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer)
+            Timer& animationDelayTimer,
+            VisualFX* _vfx)
+            : AbilityState(_registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer),
+              vfx(_vfx)
+
         {
         }
     };
@@ -134,17 +175,6 @@ namespace sage
         state->Update();
         if (vfx && vfx->active)
         {
-            // Depending on vfx behaviour, update its position here
-            auto& ad = registry->get<AbilityData>(abilityEntity);
-            if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
-            {
-                // TODO: With a transform hierarchy, this wouldn't be necessary. About time to allow transform
-                // parents/children?
-                auto casterPos = registry->get<sgTransform>(caster).position();
-                auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
-                abilityTrans.SetPosition(casterPos, abilityEntity);
-            }
-
             vfx->Update(GetFrameTime());
         }
     }
@@ -222,7 +252,7 @@ namespace sage
 
         // TODO: Would be great to find a way of pushing visual fx to the registry.
         // Atm it's difficult due to polymorphism
-        auto& abilityData = registry->get<AbilityData>(abilityEntity);
+        auto& abilityData = registry->get<AbilityData>(_abilityEntity);
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);
@@ -235,7 +265,7 @@ namespace sage
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(
-            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer);
+            _registry, _caster, _abilityEntity, _gameData, cooldownTimer, animationDelayTimer, vfx.get());
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
         onExecuteSink.connect<&AbilityStateMachine::Execute>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
