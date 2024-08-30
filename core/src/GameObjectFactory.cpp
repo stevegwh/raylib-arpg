@@ -491,8 +491,7 @@ namespace sage
             projectileTrans.SetPosition(data->cursor->terrainCollision().point, caster);
         }
 
-        auto target = registry->get<CombatableActor>(caster).target;
-        Vector3 point = registry->get<sgTransform>(target).position();
+        auto point = data->cursor->terrainCollision().point;
 
         data->actorMovementSystem->MoveToLocation(abilityEntity, point);
 

@@ -143,8 +143,8 @@ namespace sage
         AbilityData ad;
 
         ad.base.cooldownDuration = 1;
-        ad.base.range = 5;
-        ad.base.baseDamage = 10;
+        ad.base.range = 15;
+        ad.base.baseDamage = 50;
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
