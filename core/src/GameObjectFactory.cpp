@@ -25,6 +25,7 @@
 #include "components/States.hpp"
 
 #include "systems/AbilitySystem.hpp"
+#include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
@@ -465,5 +466,32 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::BUILDING;
 
         registry->emplace<TowerState>(id);
+    }
+
+    void GameObjectFactory::createProjectile(
+        entt::registry* registry, entt::entity abilityEntity, entt::entity caster, GameData* data)
+    {
+        auto& ad = registry->get<AbilityData>(abilityEntity);
+        auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
+        BoundingBox bb = createRectangularBoundingBox(5, 5);
+        auto& projectileCol = registry->emplace<Collideable>(abilityEntity, registry, abilityEntity, bb);
+        projectileCol.collisionLayer = CollisionLayer::PLAYER;
+
+        if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
+        {
+            auto& casterPos = registry->emplace<sgTransform>(caster).position();
+            projectileTrans.SetPosition(casterPos, caster);
+        }
+        else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
+        {
+            projectileTrans.SetPosition(data->cursor->terrainCollision().point, caster);
+        }
+
+        auto target = registry->get<CombatableActor>(caster).target;
+        Vector3 point = registry->get<sgTransform>(target).position();
+
+        data->actorMovementSystem->MoveToLocation(abilityEntity, point);
+
+        // connect
     }
 } // namespace sage

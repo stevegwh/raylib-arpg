@@ -5,6 +5,7 @@
 #include "AbilityResourceManager.hpp"
 #include "AbilityState.hpp"
 #include "components/Animation.hpp"
+#include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
 #include "raylib.h"
@@ -31,7 +32,7 @@ namespace sage
             cooldownTimer.Update(GetFrameTime());
             if (cooldownTimer.HasFinished() && repeatable)
             {
-                onRestartTriggered.publish(self);
+                onRestartTriggered.publish(caster);
             }
         }
 
@@ -56,7 +57,7 @@ namespace sage
             animationDelayTimer.Update(GetFrameTime());
             if (animationDelayTimer.HasFinished())
             {
-                onExecute.publish(self);
+                onExecute.publish(caster);
             }
         }
 
@@ -118,7 +119,17 @@ namespace sage
         state->Update();
         if (vfx && vfx->active)
         {
-            // assert(true == false);
+            // Depending on vfx behaviour, update its position here
+            auto& ad = registry->get<AbilityData>(abilityEntity);
+            if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
+            {
+                // TODO: With a transform hierarchy, this wouldn't be necessary. About time to allow transform
+                // parents/children?
+                auto casterPos = registry->get<sgTransform>(caster).position();
+                auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
+                abilityTrans.SetPosition(casterPos, abilityEntity);
+            }
+
             vfx->Update(GetFrameTime());
         }
     }
@@ -135,23 +146,16 @@ namespace sage
 
     void AbilityStateMachine::Execute()
     {
-        auto& ad = registry->get<AbilityData>(abilityDataEntity);
+        auto& ad = registry->get<AbilityData>(abilityEntity);
 
-        if (ad.base.executeFuncEnum == AbilityFunctionEnum::SingleTargetHit)
+        if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_TARGETED_UNIT)
         {
-            auto& executeFunc = GetExecuteFunc<SingleTargetHitFunc>(registry, self, abilityDataEntity, gameData);
+            auto& executeFunc = GetExecuteFunc<SingleTargetHit>(registry, caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
-        else if (ad.base.executeFuncEnum == AbilityFunctionEnum::MultihitRadiusFromCaster)
+        else if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS)
         {
-            auto& executeFunc =
-                GetExecuteFunc<MultihitRadiusFromCaster>(registry, self, abilityDataEntity, gameData);
-            executeFunc.Execute();
-        }
-        else if (ad.base.executeFuncEnum == AbilityFunctionEnum::MultihitRadiusFromCursor)
-        {
-            auto& executeFunc =
-                GetExecuteFunc<MultihitRadiusFromCursor>(registry, self, abilityDataEntity, gameData);
+            auto& executeFunc = GetExecuteFunc<HitAllInRadius>(registry, caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
 
@@ -160,35 +164,50 @@ namespace sage
 
     void AbilityStateMachine::Init()
     {
-        auto& animation = registry->get<Animation>(self);
-        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
-        animation.ChangeAnimationByParams(abilityData.animationParams);
-        // if (ad.vfx.behaviour == AbilityData::VFXBehaviour::SpawnAtPlayer)
-        // vfx->InitSystem(data->controllableActorSystem->GetControlledActor()); // TODO: store caster's entity ID
-        // in AbilityData
+        auto& animation = registry->get<Animation>(caster);
+        auto& ad = registry->get<AbilityData>(abilityEntity);
+        animation.ChangeAnimationByParams(ad.animationParams);
+
+        // Spawn target is either at cursor, at enemy, or at player
+        // After spawned: Follow caster position, follow enemy position (maybe), follow the ability's detached
+        // transform/collider (abilityEntity) and follow its position, or do nothing.
+
+        if (!registry->any_of<sgTransform>(abilityEntity))
+        {
+            registry->emplace<sgTransform>(abilityEntity);
+        }
+        auto& trans = registry->get<sgTransform>(abilityEntity);
 
         if (vfx)
         {
-            auto casterPos =
-                registry->get<sgTransform>(gameData->controllableActorSystem->GetControlledActor()).position();
-            vfx->InitSystem(casterPos);
+            if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
+            {
+                auto casterPos = registry->get<sgTransform>(caster).position();
+                vfx->InitSystem(casterPos);
+                trans.SetPosition(casterPos, abilityEntity);
+            }
+            else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
+            {
+                vfx->InitSystem(gameData->cursor->terrainCollision().point);
+                trans.SetPosition(gameData->cursor->terrainCollision().point, abilityEntity);
+            }
         }
         ChangeState(AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     AbilityStateMachine::~AbilityStateMachine()
     {
-        registry->destroy(abilityDataEntity);
+        registry->destroy(abilityEntity);
     }
 
     AbilityStateMachine::AbilityStateMachine(
         entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
-        : registry(_registry), self(_self), abilityDataEntity(_abilityDataEntity), gameData(_gameData)
+        : registry(_registry), caster(_self), abilityEntity(_abilityDataEntity), gameData(_gameData)
     {
 
-        // TODO: Would be great to find a way of pushing executefunc and visual fx to the registry.
+        // TODO: Would be great to find a way of pushing visual fx to the registry.
         // Atm it's difficult due to polymorphism
-        auto& abilityData = registry->get<AbilityData>(abilityDataEntity);
+        auto& abilityData = registry->get<AbilityData>(abilityEntity);
         vfx = AbilityResourceManager::GetInstance().GetVisualFX(abilityData.vfx, _gameData);
 
         cooldownTimer.SetMaxTime(abilityData.base.cooldownDuration);

@@ -37,8 +37,9 @@ namespace sage
             cereal::make_nvp("range", bd.range),
             cereal::make_nvp("radius", bd.radius),
             cereal::make_nvp("element", bd.element),
-            cereal::make_nvp("repeatable", bd.repeatable),
-            cereal::make_nvp("executeFuncName", bd.executeFuncName));
+            cereal::make_nvp("repeatable", bd.repeatable)
+            // cereal::make_nvp("executeFuncName", bd.executeFuncName)
+        );
     }
 
     template <typename Archive>
@@ -50,8 +51,9 @@ namespace sage
             cereal::make_nvp("range", bd.range),
             cereal::make_nvp("radius", bd.radius),
             cereal::make_nvp("element", bd.element),
-            cereal::make_nvp("repeatable", bd.repeatable),
-            cereal::make_nvp("executeFuncName", bd.executeFuncName));
+            cereal::make_nvp("repeatable", bd.repeatable)
+            // cereal::make_nvp("executeFuncName", bd.executeFuncName)
+        );
     }
 
     template <typename Archive>

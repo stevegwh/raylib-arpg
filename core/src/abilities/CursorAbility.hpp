@@ -22,7 +22,7 @@ namespace sage
       public:
         bool IsActive() override;
         void Init() override;
-        // void Execute(entt::entity self) override;
+        // void Execute(entt::entity caster) override;
         ~CursorAbility() override;
     };
 } // namespace sage

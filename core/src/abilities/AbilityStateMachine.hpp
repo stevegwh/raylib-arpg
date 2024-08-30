@@ -44,8 +44,8 @@ namespace sage
 
       protected:
         entt::registry* registry;
-        entt::entity self;
-        entt::entity abilityDataEntity;
+        entt::entity caster;
+        entt::entity abilityEntity;
         // AbilityData abilityData;
         Timer cooldownTimer;
         Timer animationDelayTimer;
