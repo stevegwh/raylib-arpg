@@ -25,7 +25,7 @@ namespace sage
     {
         // Draw model (if needed)
         rlDisableBackfaceCulling();
-        DrawModelEx(model, origin, Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
+        DrawModelEx(model, transform->GetWorldPos(), Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
         rlEnableBackfaceCulling();
     }
 
@@ -40,16 +40,9 @@ namespace sage
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
     }
 
-    void LightningBallVFX::SetOrigin(const Vector3& _origin)
-    {
-        origin = _origin;
-    }
-
-    void LightningBallVFX::InitSystem(const Vector3& _target)
+    void LightningBallVFX::InitSystem()
     {
         active = true;
-        origin = _target;
-        origin.y = 5; // TODO: tmp
         time = 0;
     }
 
@@ -61,7 +54,8 @@ namespace sage
         UnloadModel(model);
     }
 
-    LightningBallVFX::LightningBallVFX(GameData* _gameData) : VisualFX(_gameData)
+    LightningBallVFX::LightningBallVFX(GameData* _gameData, sgTransform* _transform)
+        : VisualFX(_gameData, _transform)
     {
         // Texture/Material
         texture =

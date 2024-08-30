@@ -23,9 +23,8 @@ namespace sage
 {
     void FireballVFX::Draw3D() const
     {
-        // Draw model (if needed)
         rlDisableBackfaceCulling();
-        DrawModelEx(model, origin, Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
+        DrawModelEx(model, transform->GetWorldPos(), Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
         rlEnableBackfaceCulling();
     }
 
@@ -35,16 +34,9 @@ namespace sage
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
     }
 
-    void FireballVFX::SetOrigin(const Vector3& _origin)
-    {
-        origin = _origin;
-    }
-
-    void FireballVFX::InitSystem(const Vector3& _target)
+    void FireballVFX::InitSystem()
     {
         active = true;
-        origin = _target;
-        origin.y = 5; // TODO: tmp
         time = 0;
     }
 
@@ -56,7 +48,7 @@ namespace sage
         UnloadModel(model);
     }
 
-    FireballVFX::FireballVFX(GameData* _gameData) : VisualFX(_gameData)
+    FireballVFX::FireballVFX(GameData* _gameData, sgTransform* _transform) : VisualFX(_gameData, _transform)
     {
         // Texture/Material
         texture = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_50.png");

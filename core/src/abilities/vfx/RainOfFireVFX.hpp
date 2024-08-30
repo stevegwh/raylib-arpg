@@ -28,10 +28,10 @@ namespace sage
         void generateFireball(Fireball& fireball);
 
       public:
-        void InitSystem(const Vector3& _target) override;
+        void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
         ~RainOfFireVFX();
-        explicit RainOfFireVFX(GameData* _gameData);
+        explicit RainOfFireVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage

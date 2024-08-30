@@ -20,7 +20,6 @@ namespace sage
     {
         Shader shader{};
 
-        Vector3 spiralCentre{};
         float minSpiralRadius = 2.0f;         // Minimum radius of the spiral
         float maxSpiralRadius = 5.0f;         // Maximum radius of the spiral
         float spiralRadius = minSpiralRadius; // Current radius of the spiral
@@ -31,11 +30,10 @@ namespace sage
 
       public:
         bool active = false;
-        void InitSystem(const Vector3& _target) override;
+        void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        void SetOrigin(const Vector3& origin) override;
         ~SpiralFountainVFX();
-        explicit SpiralFountainVFX(GameData* _gameData);
+        explicit SpiralFountainVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage

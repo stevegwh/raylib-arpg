@@ -21,16 +21,14 @@ namespace sage
         Texture2D texture;
         Texture2D texture2;
 
-        Vector3 origin{};
         float time = 0.0f;
         Model model;
 
       public:
-        void InitSystem(const Vector3& _target) override;
+        void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        void SetOrigin(const Vector3& origin) override;
         ~LightningBallVFX();
-        explicit LightningBallVFX(GameData* _gameData);
+        explicit LightningBallVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage

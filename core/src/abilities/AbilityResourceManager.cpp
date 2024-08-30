@@ -1,5 +1,6 @@
 #include "AbilityResourceManager.hpp"
 
+#include "components/sgTransform.hpp"
 #include "GameData.hpp"
 
 #include "vfx/VisualFX.hpp"
@@ -37,29 +38,36 @@ namespace sage
     }
 
     std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
-        AbilityData::VisualFXData& data, GameData* _gameData)
+        AbilityData::VisualFXData& data, entt::entity entity, GameData* _gameData)
     {
         std::unique_ptr<VisualFX> obj;
 
+        if (!_gameData->registry->any_of<sgTransform>(entity))
+        {
+            _gameData->registry->emplace<sgTransform>(entity, entity);
+        }
+
+        auto& transform = _gameData->registry->get<sgTransform>(entity);
+
         if (data.name == "RainOfFire")
         {
-            obj = std::make_unique<RainOfFireVFX>(_gameData);
+            obj = std::make_unique<RainOfFireVFX>(_gameData, &transform);
         }
         else if (data.name == "FloorFire")
         {
-            obj = std::make_unique<FloorFireVFX>(_gameData);
+            obj = std::make_unique<FloorFireVFX>(_gameData, &transform);
         }
         else if (data.name == "360SwordSlash")
         {
-            obj = std::make_unique<WhirlwindVFX>(_gameData);
+            obj = std::make_unique<WhirlwindVFX>(_gameData, &transform);
         }
         else if (data.name == "LightningBall")
         {
-            obj = std::make_unique<LightningBallVFX>(_gameData);
+            obj = std::make_unique<LightningBallVFX>(_gameData, &transform);
         }
         else if (data.name == "Fireball")
         {
-            obj = std::make_unique<FireballVFX>(_gameData);
+            obj = std::make_unique<FireballVFX>(_gameData, &transform);
         }
         data.ptr = obj.get();
         return std::move(obj);

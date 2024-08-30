@@ -4,9 +4,9 @@
 
 #include "SpiralFountainVFX.hpp"
 
-#include "GameData.hpp"
-
 #include "Camera.hpp"
+#include "components/sgTransform.hpp"
+#include "GameData.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -34,19 +34,13 @@ namespace sage
             cosf(spiralAngle) * spiralRadius,
             spiralRadius / 2, // This makes the spiral move upwards as it expands
             sinf(spiralAngle) * spiralRadius};
-        fountain->SetOrigin(Vector3Add(spiralCentre, spiralPos));
+        fountain->SetOrigin(transform->GetWorldPos());
         fountain->Update(dt);
     }
 
-    void SpiralFountainVFX::SetOrigin(const Vector3& origin)
-    {
-        spiralCentre = origin;
-    }
-
-    void SpiralFountainVFX::InitSystem(const Vector3& _target)
+    void SpiralFountainVFX::InitSystem()
     {
         active = true;
-        spiralCentre = _target;
     }
 
     SpiralFountainVFX::~SpiralFountainVFX()
@@ -54,7 +48,8 @@ namespace sage
         UnloadShader(shader);
     }
 
-    SpiralFountainVFX::SpiralFountainVFX(GameData* _gameData) : VisualFX(_gameData)
+    SpiralFountainVFX::SpiralFountainVFX(GameData* _gameData, sgTransform* _transform)
+        : VisualFX(_gameData, _transform)
     {
         shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
         fountain = std::make_unique<FountainPartSys>(_gameData->camera->getRaylibCam());

@@ -28,10 +28,10 @@ namespace sage
 
       public:
         Shader shader{};
-        void InitSystem(const Vector3& _target) override;
+        void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
         ~FloorFireVFX();
-        explicit FloorFireVFX(GameData* _gameData);
+        explicit FloorFireVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage
