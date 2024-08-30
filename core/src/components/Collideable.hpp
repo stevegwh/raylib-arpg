@@ -34,7 +34,9 @@ namespace sage
 
     struct CollisionChecker
     {
-        float maxDistance;
+        float maxDistance = 0;
+        Vector3 origin;
+        Vector3 destination;
         entt::sigh<void(entt::entity, CollisionInfo)> onHit;
     };
 

@@ -52,17 +52,6 @@ namespace sage
             : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
     };
 
-    class SpawnProjectile : public AbilityFunction
-    {
-        void onHit(entt::entity caster, CollisionInfo collisionInfo);
-
-      public:
-        void Execute() override;
-        SpawnProjectile(
-            entt::registry* _registry, entt::entity _self, entt::entity _abilityDataEntity, GameData* _gameData)
-            : AbilityFunction(_registry, _self, _abilityDataEntity, _gameData) {};
-    };
-
     void Hit360AroundPoint(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Vector3 point, float radius);
 
