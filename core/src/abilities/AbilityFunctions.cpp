@@ -1,12 +1,11 @@
 #include "AbilityFunctions.hpp"
 
-#include "AbilityData.hpp"
-
 #include "Camera.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 
+#include "components/Ability.hpp"
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
 #include "systems/ActorMovementSystem.hpp"
@@ -27,7 +26,7 @@ namespace sage
 
     void HitAllInRadius::Execute()
     {
-        auto& ad = registry->get<AbilityData>(abilityEntity);
+        auto& ad = registry->get<Ability>(abilityEntity).ad;
 
         if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
         {
@@ -44,7 +43,7 @@ namespace sage
     void Hit360AroundPoint(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Vector3 point, float radius)
     {
-        auto& abilityData = registry->get<AbilityData>(abilityEntity);
+        auto& abilityData = registry->get<Ability>(abilityEntity).ad;
         auto view = registry->view<CombatableActor>();
         for (auto& entity : view)
         {
@@ -71,7 +70,7 @@ namespace sage
     {
         assert(target != entt::null);
 
-        auto& abilityData = registry->get<AbilityData>(abilityEntity);
+        auto& abilityData = registry->get<Ability>(abilityEntity).ad;
 
         auto& t = registry->get<sgTransform>(caster);
         auto& enemyPos = registry->get<sgTransform>(target).GetWorldPos();
