@@ -31,12 +31,12 @@ namespace sage
 
         if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
         {
-            auto& projPos = registry->get<sgTransform>(abilityEntity).position();
+            auto& projPos = registry->get<sgTransform>(abilityEntity).GetWorldPos();
             Hit360AroundPoint(registry, caster, abilityEntity, projPos, ad.base.radius);
         }
         else if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
         {
-            auto& casterPos = registry->get<sgTransform>(caster).position();
+            auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
             Hit360AroundPoint(registry, caster, abilityEntity, casterPos, ad.base.radius);
         }
     }
@@ -74,10 +74,10 @@ namespace sage
         auto& abilityData = registry->get<AbilityData>(abilityEntity);
 
         auto& t = registry->get<sgTransform>(caster);
-        auto& enemyPos = registry->get<sgTransform>(target).position();
-        Vector3 direction = Vector3Subtract(enemyPos, t.position());
+        auto& enemyPos = registry->get<sgTransform>(target).GetWorldPos();
+        Vector3 direction = Vector3Subtract(enemyPos, t.GetWorldPos());
         float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-        t.SetRotation({0, angle, 0}, caster);
+        t.SetRotation({0, angle, 0});
 
         if (registry->any_of<CombatableActor>(target))
         {

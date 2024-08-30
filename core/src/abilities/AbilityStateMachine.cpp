@@ -90,22 +90,22 @@ namespace sage
             {
                 if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
                 {
-                    auto casterPos = registry->get<sgTransform>(caster).position();
+                    auto casterPos = registry->get<sgTransform>(caster).GetWorldPos();
                     auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
-                    abilityTrans.SetPosition(casterPos, abilityEntity);
+                    abilityTrans.SetPosition(casterPos);
                     GridSquare gs;
-                    gameData->navigationGridSystem->WorldToGridSpace(abilityTrans.position(), gs);
+                    gameData->navigationGridSystem->WorldToGridSpace(abilityTrans.GetWorldPos(), gs);
 
                     vfx->SetOrigin(
-                        {abilityTrans.position().x,
+                        {abilityTrans.GetWorldPos().x,
                          gameData->navigationGridSystem->GetGridSquare(gs.row, gs.col)->terrainHeight + 3.0f,
-                         abilityTrans.position().z});
+                         abilityTrans.GetWorldPos().z});
                 }
                 else if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
                 {
                     auto& abilityTrans = registry->get<sgTransform>(abilityEntity);
                     // Need some options for height
-                    vfx->SetOrigin({abilityTrans.position().x, 5.0f, abilityTrans.position().z});
+                    vfx->SetOrigin({abilityTrans.GetWorldPos().x, 5.0f, abilityTrans.GetWorldPos().z});
                 }
             }
             // ----
@@ -226,13 +226,13 @@ namespace sage
 
         if (!registry->any_of<sgTransform>(abilityEntity))
         {
-            registry->emplace<sgTransform>(abilityEntity);
+            registry->emplace<sgTransform>(abilityEntity, abilityEntity);
         }
         auto& trans = registry->get<sgTransform>(abilityEntity);
 
         if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
         {
-            auto& casterPos = registry->get<sgTransform>(caster).position();
+            auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
             auto point = gameData->cursor->terrainCollision().point;
             if (Vector3Distance(point, casterPos) > ad.base.range)
             {
@@ -247,14 +247,14 @@ namespace sage
         {
             if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
             {
-                auto casterPos = registry->get<sgTransform>(caster).position();
+                auto casterPos = registry->get<sgTransform>(caster).GetWorldPos();
                 vfx->InitSystem(casterPos);
-                trans.SetPosition(casterPos, abilityEntity);
+                trans.SetPosition(casterPos);
             }
             else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
             {
                 vfx->InitSystem(gameData->cursor->terrainCollision().point);
-                trans.SetPosition(gameData->cursor->terrainCollision().point, abilityEntity);
+                trans.SetPosition(gameData->cursor->terrainCollision().point);
             }
         }
 

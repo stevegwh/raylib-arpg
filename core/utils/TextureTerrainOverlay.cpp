@@ -157,7 +157,7 @@ namespace sage
         meshOffset = {mouseRayHit.x - meshCenter.x, 0, mouseRayHit.z - meshCenter.z};
 
         auto& trans = registry->get<sgTransform>(entity);
-        trans.SetPosition(meshOffset, entity);
+        trans.SetPosition(meshOffset);
         renderable.model.transform = MatrixIdentity();
     }
 
@@ -180,7 +180,7 @@ namespace sage
         updateTerrainPolygon();
 
         auto& trans = registry->get<sgTransform>(entity);
-        trans.SetPosition(meshOffset, entity);
+        trans.SetPosition(meshOffset);
     }
 
     TextureTerrainOverlay::~TextureTerrainOverlay()
@@ -202,7 +202,7 @@ namespace sage
         auto& r = registry->emplace<Renderable>(entity);
         r.shader = std::make_optional(LoadShader(nullptr, shaderPath));
         r.hint = _hint;
-        registry->emplace<sgTransform>(entity);
+        registry->emplace<sgTransform>(entity, entity);
     }
 
 } // namespace sage

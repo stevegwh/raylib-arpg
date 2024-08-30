@@ -38,11 +38,10 @@ namespace sage
         // Rotate to look at NPC
         auto& actorTrans = registry->get<sgTransform>(controlledActor);
         auto& npcTrans = registry->get<sgTransform>(clickedNPC);
-        Vector3 direction = Vector3Subtract(npcTrans.position(), actorTrans.position());
+        Vector3 direction = Vector3Subtract(npcTrans.GetWorldPos(), actorTrans.GetWorldPos());
         direction = Vector3Normalize(direction);
         float angle = atan2f(direction.x, direction.z);
-        actorTrans.SetRotation(
-            {actorTrans.rotation().x, RAD2DEG * angle, actorTrans.rotation().z}, controlledActor);
+        actorTrans.SetRotation({actorTrans.GetRotation().x, RAD2DEG * angle, actorTrans.GetRotation().z});
 
         {
             entt::sink sink{gameData->cursor->onAnyLeftClick};
