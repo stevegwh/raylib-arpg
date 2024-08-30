@@ -9,6 +9,8 @@ namespace sage
     class Camera;
     class GameData;
 
+    void CreatePlayerAutoAttack(entt::registry* registry, entt::entity caster, GameData* gameData);
+
     class PlayerAutoAttack : public AbilityStateMachine
     {
         entt::entity initAbilityData(entt::registry* registry);
