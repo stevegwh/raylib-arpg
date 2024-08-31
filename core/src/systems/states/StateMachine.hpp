@@ -67,25 +67,22 @@ namespace sage
 
         void OnComponentRemoved(entt::entity entity)
         {
-            auto* derived = static_cast<Derived*>(this);
             auto& state = registry->get<StateName>(entity);
             entt::sink sink{state.onStateChanged};
-            sink.template disconnect<&Derived::ChangeState>(derived);
+            sink.template disconnect<&StateMachineController::ChangeState>(this);
 
             // TODO: Below seems like a bad idea
-            derived->GetSystem(state.GetCurrentState())
-                ->OnStateExit(entity); // Might not be a good idea if destroyed
+            GetSystem(state.GetCurrentState())->OnStateExit(entity); // Might not be a good idea if destroyed
         }
 
         void OnComponentAdded(entt::entity entity)
         {
-            auto* derived = static_cast<Derived*>(this);
             auto& state = registry->get<StateName>(entity);
             entt::sink sink{state.onStateChanged};
-            sink.template connect<&Derived::ChangeState>(derived);
+            sink.template connect<&StateMachineController::ChangeState>(this);
 
             // TODO: Unsure if we really want to call OnStateEnter immediately. (Would init IDLESTATE)
-            derived->GetSystem(state.GetCurrentState())->OnStateEnter(entity);
+            GetSystem(state.GetCurrentState())->OnStateEnter(entity);
         }
 
         void ChangeState(entt::entity entity, StateEnum newState)
