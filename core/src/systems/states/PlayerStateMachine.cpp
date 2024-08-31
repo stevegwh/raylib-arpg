@@ -189,7 +189,7 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            gameData->abilityStateMachine->InitAbility(autoAttackAbility);
+            gameData->abilityStateMachine->StartCast(autoAttackAbility);
 
             auto& combatable = registry->get<CombatableActor>(entity);
             assert(combatable.target != entt::null);
@@ -211,7 +211,7 @@ namespace sage
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            gameData->abilityStateMachine->CancelAbility(autoAttackAbility);
+            gameData->abilityStateMachine->CancelCast(autoAttackAbility);
         }
 
         virtual ~CombatState() = default;

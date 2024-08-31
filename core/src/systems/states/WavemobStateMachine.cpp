@@ -128,7 +128,7 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->CancelAbility(autoAttackAbility);
+            gameData->abilityStateMachine->CancelCast(autoAttackAbility);
             const auto& combatable = registry->get<CombatableActor>(self);
             const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
             auto& animation = registry->get<Animation>(self);
@@ -193,13 +193,13 @@ namespace sage
         void OnStateEnter(entt::entity entity) override
         {
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->InitAbility(autoAttackAbility);
+            gameData->abilityStateMachine->StartCast(autoAttackAbility);
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->CancelAbility(autoAttackAbility);
+            gameData->abilityStateMachine->CancelCast(autoAttackAbility);
         }
 
         virtual ~CombatState() = default;
@@ -241,7 +241,7 @@ namespace sage
                 sink.connect<&DyingState::destroyEntity>(this);
             }
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->CancelAbility(autoAttackAbility);
+            gameData->abilityStateMachine->CancelCast(autoAttackAbility);
 
             gameData->actorMovementSystem->CancelMovement(self);
         }

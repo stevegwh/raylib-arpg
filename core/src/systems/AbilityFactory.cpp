@@ -2,7 +2,8 @@
 
 #include "abilities/AbilityIndicator.hpp"
 #include "abilities/AbilityResourceManager.hpp"
-#include "Camera.hpp"
+#include "components/sgTransform.hpp"
+#include "components/States.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
 #include "systems/states/AbilityStateMachine.hpp"
@@ -13,13 +14,20 @@
 
 namespace sage
 {
-    entt::entity CreatePlayerAutoAttack(entt::registry* registry, entt::entity caster, GameData* gameData);
-    entt::entity CreateRainOfFireAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
-    entt::entity CreateFloorFireAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
-    entt::entity CreateFireballAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
-    entt::entity CreateLightningBallAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
-    entt::entity CreateWavemobAutoAttackAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
-    entt::entity CreateWhirlwindAbility(entt::registry* registry, entt::entity caster, GameData* gameData);
+    void CreatePlayerAutoAttack(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
+    void CreateRainOfFireAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
+    void CreateFloorFireAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
+    void CreateFireballAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
+    void CreateLightningBallAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
+    void CreateWavemobAutoAttackAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
+    void CreateWhirlwindAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
 
     entt::entity AbilityFactory::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
@@ -36,39 +44,35 @@ namespace sage
         return entt::null;
     }
 
-    entt::entity AbilityFactory::RegisterAbility(entt::entity entity, AbilityEnum abilityEnum)
+    entt::entity AbilityFactory::RegisterAbility(entt::entity caster, AbilityEnum abilityEnum)
     {
-        entt::entity out = entt::null;
+        entt::entity out = registry->create();
+        registry->emplace<AbilityState>(out);
+        registry->emplace<sgTransform>(out, out);
+        abilityMap[caster].emplace(abilityEnum, out);
 
         switch (abilityEnum)
         {
         case AbilityEnum::PLAYER_AUTOATTACK:
-            out = CreatePlayerAutoAttack(registry, entity, gameData);
+            CreatePlayerAutoAttack(registry, caster, gameData, out);
             break;
         case AbilityEnum::ENEMY_AUTOATTACK:
-            out = CreateWavemobAutoAttackAbility(registry, entity, gameData);
+            CreateWavemobAutoAttackAbility(registry, caster, gameData, out);
             break;
         case AbilityEnum::FIREBALL:
-            out = CreateFireballAbility(registry, entity, gameData);
+            CreateFireballAbility(registry, caster, gameData, out);
             break;
         case AbilityEnum::LIGHTNINGBALL:
-            out = CreateLightningBallAbility(registry, entity, gameData);
+            CreateLightningBallAbility(registry, caster, gameData, out);
             break;
         case AbilityEnum::RAINFOFIRE:
-            out = CreateRainOfFireAbility(registry, entity, gameData);
+            CreateRainOfFireAbility(registry, caster, gameData, out);
             break;
         case AbilityEnum::WHIRLWIND:
-            out = CreateWhirlwindAbility(registry, entity, gameData);
+            CreateWhirlwindAbility(registry, caster, gameData, out);
             break;
         default:
             break;
-        }
-
-        assert(registry->any_of<AbilityState>(out));
-
-        if (out != entt::null)
-        {
-            abilityMap[entity].emplace(abilityEnum, out);
         }
 
         return out;
@@ -81,7 +85,8 @@ namespace sage
 
     // --------------------------------------------
 
-    entt::entity CreatePlayerAutoAttack(entt::registry* registry, entt::entity caster, GameData* gameData)
+    void CreatePlayerAutoAttack(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
         ad.base.element = AttackElement::PHYSICAL;
@@ -89,7 +94,7 @@ namespace sage
         ad.base.baseDamage = 10;
         ad.base.range = 5;
         ad.base.repeatable = true;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_TARGETED_UNIT;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_TARGET;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
 
@@ -97,10 +102,8 @@ namespace sage
         ad.animationParams.animSpeed = 4;
         ad.animationParams.animationDelay = 0;
 
-        auto entity = registry->create();
-        registry->emplace<AbilityState>(entity);
-        auto& ability = registry->emplace<Ability>(entity);
-        ability.self = entity;
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
         ability.caster = caster;
         ability.ad = ad;
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
@@ -109,13 +112,12 @@ namespace sage
         // ability.abilityIndicator = AbilityResourceManager::GetInstance().GetIndicator(ad.indicator, gameData);
 
         // Would much prefer emplacing the vfx with the above entity id, instead.
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
-
-        return entity;
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
     // RainOfFire factory function
-    entt::entity CreateRainOfFireAbility(entt::registry* registry, entt::entity caster, GameData* gameData)
+    void CreateRainOfFireAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
 
@@ -126,7 +128,7 @@ namespace sage
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_STATIONARY;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
@@ -138,24 +140,20 @@ namespace sage
         ad.indicator.indicatorKey = "CircularCursor";
         ad.requiresIndicator = true;
 
-        auto entity = registry->create();
-
-        auto& ability = registry->emplace<Ability>(entity);
-        registry->emplace<AbilityState>(entity);
-        ability.self = entity;
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
         ability.caster = caster;
         ability.ad = ad;
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
         ability.abilityIndicator = AbilityResourceManager::GetInstance().GetIndicator(ad.indicator, gameData);
-
-        return entity;
     }
 
     // FloorFire factory function
-    entt::entity CreateFloorFireAbility(entt::registry* registry, entt::entity caster, GameData* gameData)
+    void CreateFloorFireAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
 
@@ -166,7 +164,7 @@ namespace sage
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_STATIONARY;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
@@ -179,23 +177,19 @@ namespace sage
 
         ad.requiresIndicator = true;
 
-        auto entity = registry->create();
-
-        auto& ability = registry->emplace<Ability>(entity);
-        registry->emplace<AbilityState>(entity);
-        ability.self = entity;
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
         ability.caster = caster;
         ability.ad = ad;
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
-
-        return entity;
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
     // Fireball factory function
-    entt::entity CreateFireballAbility(entt::registry* registry, entt::entity caster, GameData* gameData)
+    void CreateFireballAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
 
@@ -206,7 +200,7 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
@@ -214,23 +208,19 @@ namespace sage
 
         ad.vfx.name = "Fireball";
 
-        auto entity = registry->create();
-
-        auto& ability = registry->emplace<Ability>(entity);
-        registry->emplace<AbilityState>(entity);
-        ability.self = entity;
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
         ability.caster = caster;
         ability.ad = ad;
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
-
-        return entity;
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
     // LightningBall factory function
-    entt::entity CreateLightningBallAbility(entt::registry* registry, entt::entity caster, GameData* gameData)
+    void CreateLightningBallAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
 
@@ -240,30 +230,26 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
         ad.vfx.name = "LightningBall";
 
-        auto entity = registry->create();
-
-        auto& ability = registry->emplace<Ability>(entity);
-        registry->emplace<AbilityState>(entity);
-        ability.self = entity;
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
         ability.caster = caster;
         ability.ad = ad;
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
-
-        return entity;
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
     // WavemobAutoAttack factory function
-    entt::entity CreateWavemobAutoAttackAbility(entt::registry* registry, entt::entity caster, GameData* gameData)
+    void CreateWavemobAutoAttackAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
 
@@ -273,28 +259,24 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = true;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_TARGETED_UNIT;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_TARGET;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
-        auto entity = registry->create();
-
-        auto& ability = registry->emplace<Ability>(entity);
-        registry->emplace<AbilityState>(entity);
-        ability.self = entity;
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
         ability.caster = caster;
         ability.ad = ad;
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
-
-        return entity;
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
     // WhirlwindAbility factory function
-    entt::entity CreateWhirlwindAbility(entt::registry* registry, entt::entity caster, GameData* gameData)
+    void CreateWhirlwindAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
 
@@ -305,7 +287,7 @@ namespace sage
         ad.base.element = AttackElement::PHYSICAL;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS;
+        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
         ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
@@ -315,19 +297,14 @@ namespace sage
 
         ad.vfx.name = "360SwordSlash";
 
-        auto entity = registry->create();
-
-        auto& ability = registry->emplace<Ability>(entity);
-        registry->emplace<AbilityState>(entity);
-        ability.self = entity;
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
         ability.caster = caster;
         ability.ad = ad;
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
-
-        return entity;
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
 } // namespace sage

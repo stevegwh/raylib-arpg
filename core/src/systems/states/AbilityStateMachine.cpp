@@ -161,7 +161,7 @@ namespace sage
 
     // ----------------------------
 
-    void AbilityStateController::CancelAbility(entt::entity abilityEntity)
+    void AbilityStateController::CancelCast(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         if (ab.vfx && ab.vfx->active)
@@ -178,12 +178,14 @@ namespace sage
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
 
-        if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_TARGETED_UNIT)
+        // TODO: Starting to think it would make a lot more sense just to call the ability functions directly here
+        // and deduce args
+        if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::ATTACK_TARGET)
         {
             auto& executeFunc = getExecuteFunc<SingleTargetHit>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
-        else if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS)
+        else if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::ATTACK_AOE)
         {
             auto& executeFunc = getExecuteFunc<HitAllInRadius>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
@@ -192,19 +194,11 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilityStateController::confirmAbility(entt::entity abilityEntity)
+    bool AbilityStateController::checkRange(entt::entity abilityEntity)
     {
-        // Spawn target is either at cursor, at enemy, or at player
-        // After spawned: Follow caster position, follow enemy position (maybe), follow the ability's detached
-        // transform/collider (abilityEntity) and follow its position, or do nothing.
+        // TODO: Should account for more possiblities with flags here.
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
-        if (!registry->any_of<sgTransform>(abilityEntity))
-        {
-            registry->emplace<sgTransform>(abilityEntity, abilityEntity);
-        }
-        auto& trans = registry->get<sgTransform>(abilityEntity);
-
         if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE ||
             ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_STATIONARY)
         {
@@ -213,15 +207,32 @@ namespace sage
             if (Vector3Distance(point, casterPos) > ad.base.range)
             {
                 std::cout << "Out of range. \n";
-                return;
+                castFailed.publish("Out of range");
+                return false;
             }
         }
+        return true;
+    }
+
+    void AbilityStateController::spawnAbility(entt::entity abilityEntity)
+    {
+        auto& ab = registry->get<Ability>(abilityEntity);
+        auto& ad = ab.ad;
+
+        // TODO: Below seems weird here. Should do this in ability factory.
+        if (!registry->any_of<sgTransform>(abilityEntity))
+        {
+            registry->emplace<sgTransform>(abilityEntity, abilityEntity);
+        }
+
+        if (!checkRange(abilityEntity)) return;
 
         auto& animation = registry->get<Animation>(ab.caster);
         animation.ChangeAnimationByParams(ad.animationParams);
 
         if (ab.vfx)
         {
+            auto& trans = registry->get<sgTransform>(abilityEntity);
             if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
             {
                 auto& casterTrans = registry->get<sgTransform>(ab.caster);
@@ -244,7 +255,7 @@ namespace sage
     }
 
     // Determines if we need to display an indicator or not
-    void AbilityStateController::InitAbility(entt::entity abilityEntity)
+    void AbilityStateController::StartCast(entt::entity abilityEntity)
     {
 
         auto& ab = registry->get<Ability>(abilityEntity);
@@ -263,7 +274,7 @@ namespace sage
         }
         else
         {
-            confirmAbility(abilityEntity);
+            spawnAbility(abilityEntity);
         }
     }
 
@@ -316,7 +327,7 @@ namespace sage
 
         auto idleState = std::make_unique<IdleState>(_registry, _gameData);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
-        onRestartTriggeredSink.connect<&AbilityStateController::InitAbility>(this);
+        onRestartTriggeredSink.connect<&AbilityStateController::StartCast>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(_registry, _gameData);
@@ -326,7 +337,7 @@ namespace sage
 
         auto cursorState = std::make_unique<CursorSelectState>(_registry, _gameData);
         entt::sink onConfirmSink{cursorState->onConfirm};
-        onConfirmSink.connect<&AbilityStateController::confirmAbility>(this);
+        onConfirmSink.connect<&AbilityStateController::spawnAbility>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
     }
 
