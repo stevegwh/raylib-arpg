@@ -161,7 +161,7 @@ namespace sage
         ad.base.AddBehaviour(
             AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_NONE |
             AbilityBehaviour::MOVEMENT_PROJECTILE | AbilityBehaviour::CAST_INSTANT |
-            AbilityBehaviour::ATTACK_AOE_TARGET);
+            AbilityBehaviour::ATTACK_AOE_POINT);
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animationDelay = 0;
@@ -245,7 +245,6 @@ namespace sage
             AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_CASTER |
             AbilityBehaviour::MOVEMENT_STATIONARY | AbilityBehaviour::CAST_INSTANT |
             AbilityBehaviour::ATTACK_AOE_POINT);
-
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 5;
         ad.animationParams.oneShot = true;

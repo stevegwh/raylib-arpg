@@ -473,6 +473,7 @@ namespace sage
         registry->emplace<TowerState>(id);
     }
 
+    // TODO: Move to ability factory
     void GameObjectFactory::createProjectile(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data)
     {

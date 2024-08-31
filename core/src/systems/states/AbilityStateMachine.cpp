@@ -115,6 +115,7 @@ namespace sage
     // --------------------------------------------
 
     // TODO: I think this should be split into two states depending on whether its detached or not
+    // Or maybe if it has a cast time or not...
     class AbilityStateController::AwaitingExecutionState : public StateMachine
     {
 
@@ -148,8 +149,10 @@ namespace sage
             ab.executionDelayTimer.Update(GetFrameTime());
             auto& ad = ab.ad;
 
+            // "executionDelayTimer" should just be a cast timer. Therefore, below should check for cast time
+            // behaviour
             if (ab.executionDelayTimer.HasFinished() &&
-                ad.base.HasBehaviour(AbilityBehaviour::MOVEMENT_PROJECTILE)) // Might be FOLLOW_NONE
+                !ad.base.HasBehaviour(AbilityBehaviour::CAST_REGULAR)) // Might be FOLLOW_NONE
             {
                 onExecute.publish(abilityEntity);
             }
