@@ -2,7 +2,6 @@
 
 #include "GameData.hpp"
 
-#include "abilities/AbilityStateMachine.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/ControllableActor.hpp"
@@ -10,6 +9,7 @@
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "systems/states/AbilitySystem.hpp"
 
 #include "systems/AbilityRegistry.hpp"
 #include "systems/ActorMovementSystem.hpp"
@@ -191,7 +191,7 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            gameData->abilityStateMachine->Init(autoAttackAbility);
+            gameData->abilityStateMachine->InitAbility(autoAttackAbility);
 
             auto& combatable = registry->get<CombatableActor>(entity);
             assert(combatable.target != entt::null);
@@ -213,7 +213,7 @@ namespace sage
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
             auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            gameData->abilityStateMachine->Cancel(autoAttackAbility);
+            gameData->abilityStateMachine->CancelAbility(autoAttackAbility);
         }
 
         virtual ~CombatState() = default;

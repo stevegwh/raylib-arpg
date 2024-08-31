@@ -1,9 +1,10 @@
-#include "AbilityStateMachine.hpp"
+#include "AbilitySystem.hpp"
 
 #include "abilities/AbilityData.hpp"
-#include "AbilityFunctions.hpp"
-#include "AbilityIndicator.hpp"
-#include "AbilityResourceManager.hpp"
+#include "abilities/AbilityFunctions.hpp"
+#include "abilities/AbilityIndicator.hpp"
+#include "abilities/AbilityResourceManager.hpp"
+#include "abilities/vfx/VisualFX.hpp"
 #include "components/Animation.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
@@ -13,7 +14,6 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "TextureTerrainOverlay.hpp"
 #include "Timer.hpp"
-#include "vfx/VisualFX.hpp"
 
 #include "raylib.h"
 #include <cassert>
@@ -188,7 +188,7 @@ namespace sage
         states[ab.state]->OnEnter(abilityEntity);
     }
 
-    void AbilitySystem::Cancel(entt::entity abilityEntity)
+    void AbilitySystem::CancelAbility(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         if (ab.vfx && ab.vfx->active)
@@ -200,7 +200,7 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilitySystem::Execute(entt::entity abilityEntity)
+    void AbilitySystem::ExecuteAbility(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
@@ -219,7 +219,7 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilitySystem::Confirm(entt::entity abilityEntity)
+    void AbilitySystem::ConfirmAbility(entt::entity abilityEntity)
     {
         // Spawn target is either at cursor, at enemy, or at player
         // After spawned: Follow caster position, follow enemy position (maybe), follow the ability's detached
@@ -266,7 +266,7 @@ namespace sage
     }
 
     // Determines if we need to display an indicator or not
-    void AbilitySystem::Init(entt::entity abilityEntity)
+    void AbilitySystem::InitAbility(entt::entity abilityEntity)
     {
 
         auto& ab = registry->get<Ability>(abilityEntity);
@@ -284,7 +284,7 @@ namespace sage
         }
         else
         {
-            Confirm(abilityEntity);
+            ConfirmAbility(abilityEntity);
         }
     }
 
@@ -328,17 +328,17 @@ namespace sage
 
         auto idleState = std::make_unique<IdleState>(_registry, _gameData);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
-        onRestartTriggeredSink.connect<&AbilitySystem::Init>(this);
+        onRestartTriggeredSink.connect<&AbilitySystem::InitAbility>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(_registry, _gameData);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
-        onExecuteSink.connect<&AbilitySystem::Execute>(this);
+        onExecuteSink.connect<&AbilitySystem::ExecuteAbility>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
 
         auto cursorState = std::make_unique<CursorSelectState>(_registry, _gameData);
         entt::sink onConfirmSink{cursorState->onConfirm};
-        onConfirmSink.connect<&AbilitySystem::Confirm>(this);
+        onConfirmSink.connect<&AbilitySystem::ConfirmAbility>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
     }
 

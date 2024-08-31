@@ -7,7 +7,7 @@
 
 namespace sage
 {
-    class AbilityStateMachine;
+    class AbilitySystem;
     class GameData;
 
     // In charge of initialising, updating, drawing, returning and changing entity's abilities

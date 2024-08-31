@@ -1,7 +1,6 @@
 #pragma once
 
-#include "AbilityData.hpp"
-
+#include "abilities/AbilityData.hpp"
 #include "components/Ability.hpp"
 #include "Timer.hpp"
 
@@ -15,7 +14,7 @@ namespace sage
     class VisualFX;
     class AbilityState;
 
-    class AbilityStateMachine
+    class AbilitySystem
     {
         class IdleState;
         class AwaitingExecutionState;
@@ -44,17 +43,17 @@ namespace sage
         void ChangeState(entt::entity abilityEntity, AbilityStateEnum newState);
 
       public:
-        void Cancel(entt::entity abilityEntity);
-        void Execute(entt::entity abilityEntity);
-        void Init(entt::entity abilityEntity);
-        void Confirm(entt::entity abilityEntity);
+        void CancelAbility(entt::entity abilityEntity);
+        void ExecuteAbility(entt::entity abilityEntity);
+        void InitAbility(entt::entity abilityEntity);
+        void ConfirmAbility(entt::entity abilityEntity);
         void Update();
         void Draw3D();
 
-        ~AbilityStateMachine();
-        AbilityStateMachine(const AbilityStateMachine&) = delete;
-        AbilityStateMachine& operator=(const AbilityStateMachine&) = delete;
-        AbilityStateMachine(entt::registry* _registry, GameData* _gameData);
+        ~AbilitySystem();
+        AbilitySystem(const AbilitySystem&) = delete;
+        AbilitySystem& operator=(const AbilitySystem&) = delete;
+        AbilitySystem(entt::registry* _registry, GameData* _gameData);
     };
 
 } // namespace sage

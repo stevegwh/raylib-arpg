@@ -2,8 +2,8 @@
 
 #include "GameData.hpp"
 
-#include "abilities/AbilityStateMachine.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "systems/states/AbilitySystem.hpp"
 
 #include "Camera.hpp"
 #include "Cursor.hpp"
