@@ -157,8 +157,7 @@ namespace sage
             }
             bool HasBehaviour(AbilityBehaviour b) const
             {
-                return (static_cast<unsigned int>(behaviour) & static_cast<unsigned int>(b)) ==
-                       static_cast<unsigned int>(b);
+                return (static_cast<unsigned int>(behaviour) & static_cast<unsigned int>(b)) != 0;
             }
             bool HasAllBehaviours(AbilityBehaviour b) const
             {
@@ -178,8 +177,7 @@ namespace sage
             }
             bool HasOptionalBehaviour(AbilityBehaviourOptional b) const
             {
-                return (static_cast<unsigned int>(optional) & static_cast<unsigned int>(b)) ==
-                       static_cast<unsigned int>(b);
+                return (static_cast<unsigned int>(optional) & static_cast<unsigned int>(b)) != 0;
             }
             bool HasAllOptionalBehaviours(AbilityBehaviourOptional b) const
             {
@@ -199,13 +197,12 @@ namespace sage
             }
             bool HasElement(AbilityElement e) const
             {
+                return (static_cast<unsigned int>(elements) & static_cast<unsigned int>(e)) != 0;
+            }
+            bool HasAllElements(AbilityElement e) const
+            {
                 return (static_cast<unsigned int>(elements) & static_cast<unsigned int>(e)) ==
                        static_cast<unsigned int>(e);
-            }
-            bool HasAllElements(AbilityElement b) const
-            {
-                return (static_cast<unsigned int>(elements) & static_cast<unsigned int>(b)) ==
-                       static_cast<unsigned int>(b);
             }
         };
 
