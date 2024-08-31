@@ -12,7 +12,7 @@
 
 // Systems
 #include "EntityReflectionSignalRouter.hpp"
-#include "systems/AbilityRegistry.hpp"
+#include "systems/AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -47,7 +47,7 @@ namespace sage
           dialogueSystem(std::make_unique<DialogueSystem>(_registry, this)),
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
-          abilityRegistry(std::make_unique<AbilityRegistry>(_registry, this)),
+          abilityRegistry(std::make_unique<AbilityFactory>(_registry, this)),
           abilityStateMachine(std::make_unique<AbilityStateController>(_registry, this)),
           playerAbilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),

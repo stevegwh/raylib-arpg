@@ -1,8 +1,7 @@
 #include "PlayerAbilitySystem.hpp"
 
-#include "AbilityRegistry.hpp"
+#include "AbilityFactory.hpp"
 
-#include "abilities/AbilityFactory.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/states/AbilityStateMachine.hpp"

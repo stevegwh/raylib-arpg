@@ -1,16 +1,11 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include <memory>
 #include <unordered_map>
-#include <vector>
 
 namespace sage
 {
-    class AbilityStateController;
     class GameData;
-
-    // In charge of initialising, updating, drawing, returning and changing entity's abilities
 
     enum class AbilityEnum // Names of premade abilities.
     {
@@ -22,7 +17,7 @@ namespace sage
         LIGHTNINGBALL
     };
 
-    class AbilityRegistry // TODO: Rename to "AbilityRegistry"
+    class AbilityFactory
     {
         entt::registry* registry;
         GameData* gameData;
@@ -32,6 +27,7 @@ namespace sage
         entt::entity GetAbility(entt::entity entity, AbilityEnum abilityEnum);
         entt::entity RegisterAbility(entt::entity entity, AbilityEnum abilityEnum);
 
-        AbilityRegistry(entt::registry* _registry, GameData* _gameData);
+        AbilityFactory(entt::registry* _registry, GameData* _gameData);
     };
+
 } // namespace sage

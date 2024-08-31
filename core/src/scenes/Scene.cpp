@@ -10,7 +10,7 @@
 #include "UserInput.hpp"
 
 // NB: We have to include all the headers required to build GameData
-#include "systems/AbilityRegistry.hpp"
+#include "systems/AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
