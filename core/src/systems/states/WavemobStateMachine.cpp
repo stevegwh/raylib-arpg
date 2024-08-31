@@ -8,7 +8,7 @@
 #include "components/CombatableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "systems/AbilitySystem.hpp"
+#include "systems/AbilityRegistry.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
@@ -130,7 +130,7 @@ namespace sage
 
         void OnStateEnter(entt::entity self) override
         {
-            auto autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             gameData->abilityStateMachine->Cancel(autoAttackAbility);
             const auto& combatable = registry->get<CombatableActor>(self);
             const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
@@ -197,13 +197,13 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
-            auto autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
             gameData->abilityStateMachine->Init(autoAttackAbility);
         }
 
         void OnStateExit(entt::entity entity) override
         {
-            auto autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
             gameData->abilityStateMachine->Cancel(autoAttackAbility);
         }
 
@@ -246,7 +246,7 @@ namespace sage
                 entt::sink sink{animation.onAnimationEnd};
                 sink.connect<&DyingState::destroyEntity>(this);
             }
-            auto autoAttackAbility = gameData->abilitySystem->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             gameData->abilityStateMachine->Cancel(autoAttackAbility);
 
             gameData->actorMovementSystem->CancelMovement(self);

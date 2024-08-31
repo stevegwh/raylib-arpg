@@ -1,6 +1,6 @@
 #include "PlayerAbilitySystem.hpp"
 
-#include "AbilitySystem.hpp"
+#include "AbilityRegistry.hpp"
 
 #include "abilities/Abilities.hpp"
 #include "abilities/AbilityStateMachine.hpp"

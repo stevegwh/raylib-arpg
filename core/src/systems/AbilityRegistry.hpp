@@ -22,7 +22,7 @@ namespace sage
         LIGHTNINGBALL
     };
 
-    class AbilitySystem // TODO: Rename to "AbilityRegistry"
+    class AbilityRegistry // TODO: Rename to "AbilityRegistry"
     {
         entt::registry* registry;
         GameData* gameData;
@@ -32,6 +32,6 @@ namespace sage
         entt::entity GetAbility(entt::entity entity, AbilityEnum abilityEnum);
         entt::entity RegisterAbility(entt::entity entity, AbilityEnum abilityEnum);
 
-        AbilitySystem(entt::registry* _registry, GameData* _gameData);
+        AbilityRegistry(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

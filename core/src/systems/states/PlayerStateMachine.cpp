@@ -11,7 +11,7 @@
 #include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 
-#include "systems/AbilitySystem.hpp"
+#include "systems/AbilityRegistry.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
@@ -190,7 +190,7 @@ namespace sage
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
-            auto autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             gameData->abilityStateMachine->Init(autoAttackAbility);
 
             auto& combatable = registry->get<CombatableActor>(entity);
@@ -212,7 +212,7 @@ namespace sage
             entt::sink sink{combatable.onTargetDeath};
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
-            auto autoAttackAbility = gameData->abilitySystem->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             gameData->abilityStateMachine->Cancel(autoAttackAbility);
         }
 

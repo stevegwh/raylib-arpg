@@ -1,4 +1,4 @@
-#include "AbilitySystem.hpp"
+#include "AbilityRegistry.hpp"
 
 #include "abilities/Abilities.hpp"
 #include "abilities/AbilityStateMachine.hpp"
@@ -7,7 +7,7 @@
 namespace sage
 {
 
-    entt::entity AbilitySystem::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
+    entt::entity AbilityRegistry::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
         if (!abilityMap.contains(entity))
         {
@@ -22,7 +22,7 @@ namespace sage
         return entt::null;
     }
 
-    entt::entity AbilitySystem::RegisterAbility(entt::entity entity, AbilityEnum abilityEnum)
+    entt::entity AbilityRegistry::RegisterAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
         entt::entity out = entt::null;
 
@@ -58,7 +58,7 @@ namespace sage
         return out;
     }
 
-    AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)
+    AbilityRegistry::AbilityRegistry(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
     }
