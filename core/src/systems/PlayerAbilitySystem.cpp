@@ -3,9 +3,9 @@
 #include "AbilityRegistry.hpp"
 
 #include "abilities/Abilities.hpp"
-#include "abilities/AbilityStateMachine.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
+#include "systems/states/AbilitySystem.hpp"
 #include "UserInput.hpp"
 
 #include <cassert>
@@ -23,7 +23,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->Init(abilitySlots[0]);
+        gameData->abilityStateMachine->InitAbility(abilitySlots[0]);
     }
 
     void PlayerAbilitySystem::abilityTwoPressed()
@@ -37,7 +37,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->Init(abilitySlots[1]);
+        gameData->abilityStateMachine->InitAbility(abilitySlots[1]);
     }
 
     void PlayerAbilitySystem::abilityThreePressed()
@@ -51,7 +51,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->Init(abilitySlots[2]);
+        gameData->abilityStateMachine->InitAbility(abilitySlots[2]);
     }
 
     void PlayerAbilitySystem::abilityFourPressed()
@@ -65,7 +65,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->Init(abilitySlots[3]);
+        gameData->abilityStateMachine->InitAbility(abilitySlots[3]);
     }
 
     void PlayerAbilitySystem::onActorChanged()

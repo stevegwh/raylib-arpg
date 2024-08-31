@@ -20,7 +20,6 @@
 #include "Settings.hpp"
 
 // Systems
-#include "abilities/AbilityStateMachine.hpp" // TODO: move
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -32,6 +31,7 @@
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
+#include "systems/states/AbilitySystem.hpp" // TODO: move
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 

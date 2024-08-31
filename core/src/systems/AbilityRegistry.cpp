@@ -1,8 +1,8 @@
 #include "AbilityRegistry.hpp"
 
 #include "abilities/Abilities.hpp"
-#include "abilities/AbilityStateMachine.hpp"
 #include "GameData.hpp"
+#include "systems/states/AbilitySystem.hpp"
 
 namespace sage
 {
