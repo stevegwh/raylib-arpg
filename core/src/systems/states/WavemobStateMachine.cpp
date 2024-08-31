@@ -11,7 +11,7 @@
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
-#include "systems/states/AbilitySystem.hpp"
+#include "systems/states/AbilityStateMachine.hpp"
 
 #include "raylib.h"
 

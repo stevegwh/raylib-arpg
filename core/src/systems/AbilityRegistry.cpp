@@ -2,7 +2,7 @@
 
 #include "abilities/AbilityFactory.hpp"
 #include "GameData.hpp"
-#include "systems/states/AbilitySystem.hpp"
+#include "systems/states/AbilityStateMachine.hpp"
 
 namespace sage
 {

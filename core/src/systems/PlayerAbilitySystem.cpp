@@ -5,7 +5,7 @@
 #include "abilities/AbilityFactory.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/states/AbilitySystem.hpp"
+#include "systems/states/AbilityStateMachine.hpp"
 #include "UserInput.hpp"
 
 #include <cassert>

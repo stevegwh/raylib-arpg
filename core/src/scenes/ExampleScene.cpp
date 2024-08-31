@@ -31,7 +31,7 @@
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
-#include "systems/states/AbilitySystem.hpp" // TODO: move
+#include "systems/states/AbilityStateMachine.hpp" // TODO: move
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 
