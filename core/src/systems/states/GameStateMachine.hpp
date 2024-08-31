@@ -23,16 +23,12 @@ namespace sage
         class DefaultState;
         class WaveState;
 
-        DefaultState* defaultState;
-        WaveState* waveState;
-
-      protected:
-        StateMachine* GetSystem(GameStateEnum state) override;
-
       public:
-        GameStateController(entt::registry* _registry, GameData* gameData);
         void Update();
         void Draw3D();
+
+        ~GameStateController();
+        GameStateController(entt::registry* _registry, GameData* gameData);
 
         friend class StateMachineController; // Required for CRTP
     };

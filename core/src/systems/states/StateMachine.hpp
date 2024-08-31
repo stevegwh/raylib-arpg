@@ -28,7 +28,6 @@ namespace sage
             lockedEntities.erase(
                 std::remove(lockedEntities.begin(), lockedEntities.end(), entity), lockedEntities.end());
         }
-        virtual ~StateMachine() = default;
 
         explicit StateMachine(entt::registry* _registry) : registry(_registry)
         {
@@ -43,7 +42,7 @@ namespace sage
             }
             return false;
         }
-
+        virtual ~StateMachine() = default;
         virtual void OnStateEnter(entt::entity entity) {};
         virtual void OnStateExit(entt::entity entity) {};
         virtual void Update(entt::entity entity) {};
@@ -56,7 +55,12 @@ namespace sage
       protected:
         entt::registry* registry;
 
-        virtual StateMachine* GetSystem(StateEnum state) = 0;
+        std::unordered_map<StateEnum, std::unique_ptr<StateMachine>> states;
+
+        StateMachine* GetSystem(StateEnum state)
+        {
+            return states[state].get();
+        }
 
         void OnComponentRemoved(entt::entity entity)
         {
@@ -94,9 +98,9 @@ namespace sage
             oldState.SetState(newState);
             derived->GetSystem(newState)->OnStateEnter(entity);
         }
-        virtual ~StateMachineController() = default;
 
       public:
+        virtual ~StateMachineController() = default;
         explicit StateMachineController(entt::registry* _registry) : registry(_registry)
         {
             registry->template on_construct<StateName>()

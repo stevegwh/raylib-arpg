@@ -103,19 +103,6 @@ namespace sage
 
     // ----------------------------
 
-    StateMachine* GameStateController::GetSystem(GameStateEnum state)
-    {
-        switch (state)
-        {
-        case GameStateEnum::Default:
-            return defaultState;
-        case GameStateEnum::Wave:
-            return waveState;
-        default:
-            return defaultState;
-        }
-    }
-
     void GameStateController::Update()
     {
         const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
@@ -128,12 +115,16 @@ namespace sage
         GetSystem(state)->Draw3D(gameEntity);
     }
 
-    GameStateController::GameStateController(entt::registry* _registry, GameData* _gameData)
-        : StateMachineController(_registry),
-          gameEntity(_registry->create()),
-          defaultState(new DefaultState(_registry, gameEntity)),
-          waveState(new WaveState(_registry, _gameData, gameEntity))
+    GameStateController::~GameStateController()
     {
+        }
+
+    GameStateController::GameStateController(entt::registry* _registry, GameData* _gameData)
+        : StateMachineController(_registry), gameEntity(_registry->create())
+    {
+
+        states[GameStateEnum::Default] = std::make_unique<DefaultState>(_registry, gameEntity);
+        states[GameStateEnum::Wave] = std::make_unique<WaveState>(_registry, _gameData, gameEntity);
 
         _registry->emplace<GameState>(gameEntity);
     }

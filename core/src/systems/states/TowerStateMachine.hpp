@@ -17,17 +17,12 @@ namespace sage
         class DefaultState;
         class CombatState;
 
-        DefaultState* defaultState;
-        CombatState* combatState;
-
-      protected:
-        StateMachine* GetSystem(TowerStateEnum state) override;
-
       public:
-        TowerStateController(entt::registry* _registry, GameData* gameData);
         void Update();
         void Draw3D();
 
+        ~TowerStateController();
+        TowerStateController(entt::registry* _registry, GameData* _gameData);
         friend class StateMachineController; // Required for CRTP
     };
 } // namespace sage
