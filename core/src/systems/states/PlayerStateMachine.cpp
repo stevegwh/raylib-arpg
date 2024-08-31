@@ -23,7 +23,6 @@ namespace sage
 {
     class PlayerStateController::DefaultState : public StateMachine
     {
-        GameData* gameData;
 
         void onFloorClick(entt::entity self, entt::entity x)
         {
@@ -83,14 +82,13 @@ namespace sage
 
         virtual ~DefaultState() = default;
 
-        DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
+        DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
 
     class PlayerStateController::MovingToTalkToNPCState : public StateMachine
     {
-        GameData* gameData;
         void onTargetReached(entt::entity self);
 
       public:
@@ -98,14 +96,15 @@ namespace sage
         void OnStateEnter(entt::entity entity) override;
         void OnStateExit(entt::entity entity) override;
         virtual ~MovingToTalkToNPCState() = default;
-        MovingToTalkToNPCState(entt::registry* _registry, GameData* gameData);
+        MovingToTalkToNPCState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
+        {
+        }
     };
 
     // ----------------------------
 
     class PlayerStateController::MovingToAttackEnemyState : public StateMachine
     {
-        GameData* gameData;
 
         void onTargetReached(entt::entity self)
         {
@@ -153,7 +152,7 @@ namespace sage
         virtual ~MovingToAttackEnemyState() = default;
 
         MovingToAttackEnemyState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry), gameData(_gameData)
+            : StateMachine(_registry, _gameData)
         {
         }
     };
@@ -162,7 +161,6 @@ namespace sage
 
     class PlayerStateController::CombatState : public StateMachine
     {
-        GameData* gameData;
         int onTargetDeathBridge;
 
         void onTargetDeath(entt::entity self, entt::entity target)
@@ -217,7 +215,7 @@ namespace sage
         }
 
         virtual ~CombatState() = default;
-        CombatState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
+        CombatState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
@@ -246,7 +244,7 @@ namespace sage
 
     PlayerStateController::~PlayerStateController()
     {
-        }
+    }
 
     PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry)

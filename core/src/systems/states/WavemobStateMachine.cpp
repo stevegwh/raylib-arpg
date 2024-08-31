@@ -19,7 +19,6 @@ namespace sage
 {
     class WavemobStateController::DefaultState : public StateMachine
     {
-        GameData* gameData;
 
       public:
         void OnDeath(entt::entity entity)
@@ -73,7 +72,7 @@ namespace sage
 
         virtual ~DefaultState() = default;
 
-        DefaultState(entt::registry* registry, GameData* _gameData) : StateMachine(registry), gameData(_gameData)
+        DefaultState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
         {
         }
     };
@@ -82,7 +81,6 @@ namespace sage
 
     class WavemobStateController::TargetOutOfRangeState : public StateMachine
     {
-        GameData* gameData;
 
         void onTargetReached(entt::entity self)
         {
@@ -151,8 +149,7 @@ namespace sage
 
         virtual ~TargetOutOfRangeState() = default;
 
-        TargetOutOfRangeState(entt::registry* registry, GameData* _gameData)
-            : StateMachine(registry), gameData(_gameData)
+        TargetOutOfRangeState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
         {
         }
     };
@@ -161,7 +158,6 @@ namespace sage
 
     class WavemobStateController::CombatState : public StateMachine
     {
-        GameData* gameData;
         void onTargetDeath(entt::entity self, entt::entity target)
         {
             // This method is declared but not implemented in the original code
@@ -209,7 +205,7 @@ namespace sage
 
         virtual ~CombatState() = default;
 
-        CombatState(entt::registry* registry, GameData* _gameData) : StateMachine(registry), gameData(_gameData)
+        CombatState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
         {
         }
     };
@@ -218,7 +214,6 @@ namespace sage
 
     class WavemobStateController::DyingState : public StateMachine
     {
-        GameData* gameData;
 
         void destroyEntity(entt::entity self)
         {
@@ -259,7 +254,7 @@ namespace sage
 
         virtual ~DyingState() = default;
 
-        DyingState(entt::registry* registry, GameData* gameData) : StateMachine(registry), gameData(gameData)
+        DyingState(entt::registry* registry, GameData* gameData) : StateMachine(registry, gameData)
         {
         }
     };

@@ -17,7 +17,6 @@ namespace sage
 {
     class TowerStateController::DefaultState : public StateMachine
     {
-        GameData* gameData;
 
       public:
         void Update(entt::entity entity) override
@@ -38,14 +37,13 @@ namespace sage
 
         virtual ~DefaultState() = default;
 
-        DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
+        DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
 
     class TowerStateController::CombatState : public StateMachine
     {
-        GameData* gameData;
 
         void onTargetDeath(entt::entity self, entt::entity target)
         {
@@ -71,7 +69,7 @@ namespace sage
 
         virtual ~CombatState() = default;
 
-        CombatState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
+        CombatState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
