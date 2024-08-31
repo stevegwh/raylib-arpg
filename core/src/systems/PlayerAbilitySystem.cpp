@@ -18,7 +18,7 @@ namespace sage
 
         auto& ab = registry->get<Ability>(abilitySlots[0]);
 
-        if (ab.CooldownReady())
+        if (!ab.CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
@@ -32,7 +32,7 @@ namespace sage
 
         auto& ab = registry->get<Ability>(abilitySlots[1]);
 
-        if (ab.CooldownReady())
+        if (!ab.CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
@@ -46,7 +46,7 @@ namespace sage
 
         auto& ab = registry->get<Ability>(abilitySlots[2]);
 
-        if (ab.CooldownReady())
+        if (!ab.CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
@@ -60,7 +60,7 @@ namespace sage
 
         auto& ab = registry->get<Ability>(abilitySlots[3]);
 
-        if (ab.CooldownReady())
+        if (!ab.CooldownReady())
         {
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
@@ -77,6 +77,7 @@ namespace sage
     void PlayerAbilitySystem::SetSlot(int slot, entt::entity abilityEntity)
     {
         assert(slot < 4);
+        assert(abilityEntity != entt::null);
         abilitySlots[slot] = abilityEntity;
     }
 
