@@ -39,13 +39,16 @@ namespace sage
         }
 
         void executeAbility(entt::entity abilityEntity);
-        void confirmAbility(entt::entity abilityEntity);
+        bool checkRange(entt::entity abilityEntity);
+        void spawnAbility(entt::entity abilityEntity);
 
       public:
-        void CancelAbility(entt::entity abilityEntity);
-        void InitAbility(entt::entity abilityEntity);
+        void CancelCast(entt::entity abilityEntity);
+        void StartCast(entt::entity abilityEntity);
         void Update();
         void Draw3D();
+
+        entt::sigh<void(const char*)> castFailed; // Reason as a string. (Should change to a flag)
 
         ~AbilityStateController();
         AbilityStateController(const AbilityStateController&) = delete;

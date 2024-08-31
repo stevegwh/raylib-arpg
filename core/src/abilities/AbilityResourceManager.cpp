@@ -44,11 +44,6 @@ namespace sage
     {
         std::unique_ptr<VisualFX> obj;
 
-        if (!_gameData->registry->any_of<sgTransform>(entity))
-        {
-            _gameData->registry->emplace<sgTransform>(entity, entity);
-        }
-
         auto& transform = _gameData->registry->get<sgTransform>(entity);
 
         if (data.name == "RainOfFire")
@@ -71,7 +66,6 @@ namespace sage
         {
             obj = std::make_unique<FireballVFX>(_gameData, &transform);
         }
-        data.ptr = obj.get();
         return std::move(obj);
     }
 
