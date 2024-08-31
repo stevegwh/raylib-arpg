@@ -46,11 +46,10 @@ namespace sage
       public:
         void Cancel(entt::entity abilityEntity);
         void Execute(entt::entity abilityEntity);
-
-        void Update();
-        void Draw3D();
         void Init(entt::entity abilityEntity);
         void Confirm(entt::entity abilityEntity);
+        void Update();
+        void Draw3D();
 
         ~AbilityStateMachine();
         AbilityStateMachine(const AbilityStateMachine&) = delete;

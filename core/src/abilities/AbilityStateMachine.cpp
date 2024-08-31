@@ -200,36 +200,6 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilityStateMachine::Update()
-    {
-        auto view = registry->view<Ability>();
-        for (auto abilityEntity : view)
-        {
-            auto& ab = registry->get<Ability>(abilityEntity);
-            if (!ab.IsActive()) continue;
-            states[ab.state]->Update(abilityEntity);
-            if (ab.vfx && ab.vfx->active)
-            {
-                ab.vfx->Update(GetFrameTime());
-            }
-        }
-    }
-
-    void AbilityStateMachine::Draw3D()
-    {
-        auto view = registry->view<Ability>();
-        for (auto abilityEntity : view)
-        {
-            auto& ab = registry->get<Ability>(abilityEntity);
-            if (!ab.IsActive()) continue;
-            states[ab.state]->Draw3D(abilityEntity);
-            if (ab.vfx && ab.vfx->active)
-            {
-                ab.vfx->Draw3D();
-            }
-        }
-    }
-
     void AbilityStateMachine::Execute(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
@@ -315,6 +285,36 @@ namespace sage
         else
         {
             Confirm(abilityEntity);
+        }
+    }
+
+    void AbilityStateMachine::Update()
+    {
+        auto view = registry->view<Ability>();
+        for (auto abilityEntity : view)
+        {
+            auto& ab = registry->get<Ability>(abilityEntity);
+            if (!ab.IsActive()) continue;
+            states[ab.state]->Update(abilityEntity);
+            if (ab.vfx && ab.vfx->active)
+            {
+                ab.vfx->Update(GetFrameTime());
+            }
+        }
+    }
+
+    void AbilityStateMachine::Draw3D()
+    {
+        auto view = registry->view<Ability>();
+        for (auto abilityEntity : view)
+        {
+            auto& ab = registry->get<Ability>(abilityEntity);
+            if (!ab.IsActive()) continue;
+            states[ab.state]->Draw3D(abilityEntity);
+            if (ab.vfx && ab.vfx->active)
+            {
+                ab.vfx->Draw3D();
+            }
         }
     }
 
