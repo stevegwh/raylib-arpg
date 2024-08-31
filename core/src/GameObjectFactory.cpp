@@ -25,7 +25,7 @@
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 
-#include "systems/AbilitySystem.hpp"
+#include "systems/AbilityRegistry.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
@@ -97,7 +97,7 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-        data->abilitySystem->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
+        data->abilityRegistry->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
 
         auto& healthbar = registry->emplace<HealthBar>(id);
         // ---
@@ -232,10 +232,10 @@ namespace sage
         combatable.actorType = CombatableActorType::PLAYER;
 
         // Initialise starting abilities
-        data->playerAbilitySystem->SetSlot(0, data->abilitySystem->RegisterAbility(id, AbilityEnum::WHIRLWIND));
-        data->playerAbilitySystem->SetSlot(1, data->abilitySystem->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
-        data->playerAbilitySystem->SetSlot(2, data->abilitySystem->RegisterAbility(id, AbilityEnum::FIREBALL));
-        data->abilitySystem->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
+        data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
+        data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
+        data->playerAbilitySystem->SetSlot(2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::FIREBALL));
+        data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         data->signalReflectionManager->CreateHook<entt::entity>(
             id, data->cursor->onFloorClick, combatable.onAttackCancelled);
