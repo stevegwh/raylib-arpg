@@ -2,7 +2,7 @@
 
 #include "AbilityRegistry.hpp"
 
-#include "abilities/Abilities.hpp"
+#include "abilities/AbilityFactory.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/states/AbilitySystem.hpp"
