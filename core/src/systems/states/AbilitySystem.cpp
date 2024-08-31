@@ -251,7 +251,10 @@ namespace sage
             if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
             {
                 auto& casterTrans = registry->get<sgTransform>(ab.caster);
-                trans.SetPosition(casterTrans.GetWorldPos());
+                auto& casterBB = registry->get<Collideable>(ab.caster).localBoundingBox;
+                float heightOffset = Vector3Distance(casterBB.max, casterBB.min);
+                Vector3 pos = {casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
+                trans.SetPosition(pos);
                 trans.SetParent(&casterTrans);
                 ab.vfx->InitSystem();
             }
