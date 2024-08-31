@@ -50,6 +50,8 @@ namespace sage
             break;
         }
 
+        assert(registry->any_of<AbilityState>(out));
+
         if (out != entt::null)
         {
             abilityMap[entity].emplace(abilityEnum, out);

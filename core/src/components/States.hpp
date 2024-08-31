@@ -29,6 +29,9 @@ namespace sage
             return currentState;
         }
 
+        BaseState(const BaseState&) = delete;
+        BaseState& operator=(const BaseState&) = delete;
+
         BaseState(StateEnum initialState) : currentState(initialState)
         {
         }
@@ -93,4 +96,20 @@ namespace sage
         {
         }
     };
+
+    enum class AbilityStateEnum
+    {
+        IDLE,
+        CURSOR_SELECT,
+        AWAITING_EXECUTION
+    };
+
+    class AbilityState : public BaseState<AbilityState, AbilityStateEnum>
+    {
+      public:
+        AbilityState() : BaseState(AbilityStateEnum::IDLE)
+        {
+        }
+    };
+
 } // namespace sage

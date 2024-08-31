@@ -10,15 +10,6 @@
 
 namespace sage
 {
-
-    enum class AbilityStateEnum
-    {
-        IDLE,
-        CURSOR_SELECT,
-        AWAITING_EXECUTION
-    };
-
-    class AbilityState;
     // class AbilityIndicator;
     // class VisualFX;
 
@@ -32,8 +23,6 @@ namespace sage
 
         std::unique_ptr<VisualFX> vfx;
         std::unique_ptr<AbilityIndicator> abilityIndicator;
-
-        AbilityStateEnum state = AbilityStateEnum::IDLE;
 
         void ResetCooldown();
         bool IsActive();
