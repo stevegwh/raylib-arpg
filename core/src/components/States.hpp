@@ -10,12 +10,17 @@ namespace sage
         StateEnum currentState;
 
       public:
-        // self, old state, new state
-        entt::sigh<void(entt::entity, StateEnum, StateEnum)> onStateChanged;
+        // self, new state
+        entt::sigh<void(entt::entity, StateEnum)> onStateChanged;
 
         void ChangeState(entt::entity self, StateEnum newState)
         {
-            onStateChanged.publish(self, currentState, newState);
+            onStateChanged.publish(self, newState);
+            currentState = newState;
+        }
+
+        void SetState(StateEnum newState)
+        {
             currentState = newState;
         }
 

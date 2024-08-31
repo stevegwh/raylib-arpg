@@ -64,6 +64,8 @@ namespace sage
             auto& state = registry->get<StateName>(entity);
             entt::sink sink{state.onStateChanged};
             sink.template disconnect<&Derived::ChangeState>(derived);
+
+            // TODO: Below seems like a bad idea
             derived->GetSystem(state.GetCurrentState())
                 ->OnStateExit(entity); // Might not be a good idea if destroyed
         }
@@ -74,18 +76,22 @@ namespace sage
             auto& state = registry->get<StateName>(entity);
             entt::sink sink{state.onStateChanged};
             sink.template connect<&Derived::ChangeState>(derived);
+
+            // TODO: Unsure if we really want to call OnStateEnter immediately. (Would init IDLESTATE)
             derived->GetSystem(state.GetCurrentState())->OnStateEnter(entity);
         }
 
-        void ChangeState(entt::entity entity, StateEnum oldState, StateEnum newState)
+        void ChangeState(entt::entity entity, StateEnum newState)
         {
-
+            StateName oldState = registry->get<StateName>(entity);
+            StateEnum oldStateEnum = registry->get<StateName>(entity).GetCurrentState();
             auto* derived = static_cast<Derived*>(this);
-            if (derived->GetSystem(oldState)->StateLocked(entity))
+            if (derived->GetSystem(oldStateEnum)->StateLocked(entity))
             {
                 return;
             }
-            derived->GetSystem(oldState)->OnStateExit(entity);
+            derived->GetSystem(oldStateEnum)->OnStateExit(entity);
+            oldState.SetState(newState);
             derived->GetSystem(newState)->OnStateEnter(entity);
         }
         virtual ~StateMachineController() = default;
