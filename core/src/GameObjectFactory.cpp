@@ -477,7 +477,7 @@ namespace sage
     void GameObjectFactory::createProjectile(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data)
     {
-        auto& ad = registry->get<AbilityData>(abilityEntity);
+        auto& ad = registry->get<Ability>(abilityEntity).ad;
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
         auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
         auto point = data->cursor->terrainCollision().point;
