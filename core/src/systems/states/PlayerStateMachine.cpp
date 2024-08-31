@@ -9,7 +9,7 @@
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
-#include "systems/states/AbilitySystem.hpp"
+#include "systems/states/AbilityStateMachine.hpp"
 
 #include "systems/AbilityRegistry.hpp"
 #include "systems/ActorMovementSystem.hpp"

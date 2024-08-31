@@ -1,4 +1,4 @@
-#include "AbilitySystem.hpp"
+#include "AbilityStateMachine.hpp"
 
 #include "abilities/AbilityData.hpp"
 #include "abilities/AbilityFunctions.hpp"
@@ -21,7 +21,7 @@
 
 namespace sage
 {
-    class AbilitySystem::IdleState : public StateMachine
+    class AbilityStateController::IdleState : public StateMachine
     {
 
       public:
@@ -45,7 +45,7 @@ namespace sage
 
     // --------------------------------------------
 
-    class AbilitySystem::CursorSelectState : public StateMachine
+    class AbilityStateController::CursorSelectState : public StateMachine
     {
         bool cursorActive = false; // Limits us to one cursor at once (I assume this is fine)
 
@@ -114,7 +114,7 @@ namespace sage
 
     // --------------------------------------------
 
-    class AbilitySystem::AwaitingExecutionState : public StateMachine
+    class AbilityStateController::AwaitingExecutionState : public StateMachine
     {
 
         void signalExecute(entt::entity abilityEntity)
@@ -162,7 +162,7 @@ namespace sage
 
     // ----------------------------
 
-    void AbilitySystem::CancelAbility(entt::entity abilityEntity)
+    void AbilityStateController::CancelAbility(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         if (ab.vfx && ab.vfx->active)
@@ -174,7 +174,7 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilitySystem::executeAbility(entt::entity abilityEntity)
+    void AbilityStateController::executeAbility(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
@@ -193,7 +193,7 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilitySystem::confirmAbility(entt::entity abilityEntity)
+    void AbilityStateController::confirmAbility(entt::entity abilityEntity)
     {
         // Spawn target is either at cursor, at enemy, or at player
         // After spawned: Follow caster position, follow enemy position (maybe), follow the ability's detached
@@ -243,7 +243,7 @@ namespace sage
     }
 
     // Determines if we need to display an indicator or not
-    void AbilitySystem::InitAbility(entt::entity abilityEntity)
+    void AbilityStateController::InitAbility(entt::entity abilityEntity)
     {
 
         auto& ab = registry->get<Ability>(abilityEntity);
@@ -266,7 +266,7 @@ namespace sage
         }
     }
 
-    void AbilitySystem::Update()
+    void AbilityStateController::Update()
     {
         auto view = registry->view<AbilityState, Ability>();
         for (auto abilityEntity : view)
@@ -282,7 +282,7 @@ namespace sage
         }
     }
 
-    void AbilitySystem::Draw3D()
+    void AbilityStateController::Draw3D()
     {
         auto view = registry->view<AbilityState, Ability>();
         for (auto abilityEntity : view)
@@ -298,27 +298,27 @@ namespace sage
         }
     }
 
-    AbilitySystem::~AbilitySystem()
+    AbilityStateController::~AbilityStateController()
     {
     }
 
-    AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)
+    AbilityStateController::AbilityStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry), gameData(_gameData)
     {
 
         auto idleState = std::make_unique<IdleState>(_registry, _gameData);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
-        onRestartTriggeredSink.connect<&AbilitySystem::InitAbility>(this);
+        onRestartTriggeredSink.connect<&AbilityStateController::InitAbility>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(_registry, _gameData);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
-        onExecuteSink.connect<&AbilitySystem::executeAbility>(this);
+        onExecuteSink.connect<&AbilityStateController::executeAbility>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
 
         auto cursorState = std::make_unique<CursorSelectState>(_registry, _gameData);
         entt::sink onConfirmSink{cursorState->onConfirm};
-        onConfirmSink.connect<&AbilitySystem::confirmAbility>(this);
+        onConfirmSink.connect<&AbilityStateController::confirmAbility>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
     }
 
