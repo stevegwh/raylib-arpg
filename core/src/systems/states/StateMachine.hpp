@@ -10,6 +10,7 @@
 
 namespace sage
 {
+    class GameData;
 
     class StateMachine
     {
@@ -17,6 +18,7 @@ namespace sage
 
       protected:
         entt::registry* registry;
+        GameData* gameData;
 
         void LockState(entt::entity entity)
         {
@@ -29,7 +31,8 @@ namespace sage
                 std::remove(lockedEntities.begin(), lockedEntities.end(), entity), lockedEntities.end());
         }
 
-        explicit StateMachine(entt::registry* _registry) : registry(_registry)
+        explicit StateMachine(entt::registry* _registry, GameData* _gameData)
+            : registry(_registry), gameData(_gameData)
         {
         }
 
