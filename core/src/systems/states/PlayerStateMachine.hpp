@@ -20,13 +20,6 @@ namespace sage
         class MovingToTalkToNPCState;
         class CombatState;
 
-        DefaultState* defaultState;
-        MovingToAttackEnemyState* approachingTargetState;
-        CombatState* combatState;
-
-      protected:
-        StateMachine* GetSystem(PlayerStateEnum state) override;
-
       public:
         void Update();
         void Draw3D();

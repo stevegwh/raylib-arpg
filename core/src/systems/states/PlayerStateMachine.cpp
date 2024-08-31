@@ -224,23 +224,6 @@ namespace sage
 
     // ----------------------------
 
-    StateMachine* PlayerStateController::GetSystem(PlayerStateEnum state)
-    {
-        switch (state)
-        {
-        case PlayerStateEnum::Default:
-            return defaultState;
-        case PlayerStateEnum::MovingToAttackEnemy:
-            return approachingTargetState;
-        case PlayerStateEnum::MovingToTalkToNPC:
-            return nullptr;
-        case PlayerStateEnum::Combat:
-            return combatState;
-        default:
-            return defaultState;
-        }
-    }
-
     void PlayerStateController::Update()
     {
         auto view = registry->view<PlayerState>();
@@ -263,16 +246,15 @@ namespace sage
 
     PlayerStateController::~PlayerStateController()
     {
-        delete defaultState;
-        delete approachingTargetState;
-        delete combatState;
-    }
+        }
 
     PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)
-        : StateMachineController(_registry),
-          defaultState(new DefaultState(_registry, _gameData)),
-          approachingTargetState(new MovingToAttackEnemyState(_registry, _gameData)),
-          combatState(new CombatState(_registry, _gameData))
+        : StateMachineController(_registry)
     {
+
+        states[PlayerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData);
+        states[PlayerStateEnum::MovingToAttackEnemy] =
+            std::make_unique<MovingToAttackEnemyState>(_registry, _gameData);
+        states[PlayerStateEnum::Combat] = std::make_unique<CombatState>(_registry, _gameData);
     }
 } // namespace sage

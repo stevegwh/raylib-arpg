@@ -38,13 +38,15 @@ namespace sage
 
         virtual ~DefaultState() = default;
 
-        DefaultState(entt::registry* registry, GameData* _gameData) : StateMachine(registry), gameData(_gameData)
+        DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
         {
         }
     };
 
     class TowerStateController::CombatState : public StateMachine
     {
+        GameData* gameData;
+
         void onTargetDeath(entt::entity self, entt::entity target)
         {
         }
@@ -69,25 +71,12 @@ namespace sage
 
         virtual ~CombatState() = default;
 
-        CombatState(entt::registry* registry) : StateMachine(registry)
+        CombatState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry), gameData(_gameData)
         {
         }
     };
 
     // ----------------------------
-
-    StateMachine* TowerStateController::GetSystem(TowerStateEnum state)
-    {
-        switch (state)
-        {
-        case TowerStateEnum::Default:
-            return defaultState;
-        case TowerStateEnum::Combat:
-            return combatState;
-        default:
-            return defaultState;
-        }
-    }
 
     void TowerStateController::Update()
     {
@@ -108,10 +97,15 @@ namespace sage
             GetSystem(state)->Draw3D(entity);
         }
     }
-    TowerStateController::TowerStateController(entt::registry* registry, GameData* gameData)
-        : StateMachineController(registry),
-          defaultState(new DefaultState(registry, gameData)),
-          combatState(new CombatState(registry))
+
+    TowerStateController::~TowerStateController()
     {
+    }
+
+    TowerStateController::TowerStateController(entt::registry* _registry, GameData* _gameData)
+        : StateMachineController(_registry)
+    {
+        states[TowerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData);
+        states[TowerStateEnum::Combat] = std::make_unique<CombatState>(_registry, _gameData);
     }
 } // namespace sage

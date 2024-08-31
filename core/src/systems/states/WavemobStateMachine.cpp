@@ -266,23 +266,6 @@ namespace sage
 
     // ----------------------------
 
-    StateMachine* WavemobStateController::GetSystem(WavemobStateEnum state)
-    {
-        switch (state)
-        {
-        case WavemobStateEnum::Default:
-            return defaultState;
-        case WavemobStateEnum::TargetOutOfRange:
-            return targetOutOfRangeState;
-        case WavemobStateEnum::Combat:
-            return combatState;
-        case WavemobStateEnum::Dying:
-            return dyingState;
-        default:
-            return defaultState;
-        }
-    }
-
     void WavemobStateController::Update()
     {
         auto view = registry->view<WavemobState>();
@@ -303,12 +286,16 @@ namespace sage
         }
     }
 
-    WavemobStateController::WavemobStateController(entt::registry* registry, GameData* gameData)
-        : StateMachineController(registry),
-          defaultState(new DefaultState(registry, gameData)),
-          targetOutOfRangeState(new TargetOutOfRangeState(registry, gameData)),
-          combatState(new CombatState(registry, gameData)),
-          dyingState(new DyingState(registry, gameData))
+    WavemobStateController::~WavemobStateController()
     {
+    }
+
+    WavemobStateController::WavemobStateController(entt::registry* _registry, GameData* _gameData)
+        : StateMachineController(_registry)
+    {
+        states[WavemobStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData);
+        states[WavemobStateEnum::TargetOutOfRange] = std::make_unique<TargetOutOfRangeState>(_registry, _gameData);
+        states[WavemobStateEnum::Combat] = std::make_unique<CombatState>(_registry, _gameData);
+        states[WavemobStateEnum::Dying] = std::make_unique<DyingState>(_registry, _gameData);
     }
 } // namespace sage
