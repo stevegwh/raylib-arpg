@@ -11,8 +11,6 @@
 #include "UserInput.hpp"
 #include <Timer.hpp>
 
-#include "abilities/AbilityFactory.hpp"
-
 #include "components/Ability.hpp"
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
@@ -25,7 +23,7 @@
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 
-#include "systems/AbilityRegistry.hpp"
+#include "systems/AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"

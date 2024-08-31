@@ -33,8 +33,7 @@ namespace sage
             ab.cooldownTimer.Update(GetFrameTime());
             if (ab.cooldownTimer.HasFinished() && ab.ad.base.repeatable)
             {
-                onRestartTriggered.publish(
-                    abilityEntity); // Was "caster". I think it was a mistake, so passed abilityEntity
+                onRestartTriggered.publish(abilityEntity);
             }
         }
 

@@ -26,7 +26,7 @@ namespace sage
     class HealthBarSystem;
     class StateMachines;
     class AbilityStateController;
-    class AbilityRegistry;
+    class AbilityFactory;
     class PlayerAbilitySystem;
     class CombatSystem;
     class TimerSystem;
@@ -53,7 +53,7 @@ namespace sage
         std::unique_ptr<HealthBarSystem> healthBarSystem;
         std::unique_ptr<StateMachines> stateMachines;
         std::unique_ptr<AbilityStateController> abilityStateMachine;
-        std::unique_ptr<AbilityRegistry> abilityRegistry;
+        std::unique_ptr<AbilityFactory> abilityRegistry;
         std::unique_ptr<PlayerAbilitySystem> playerAbilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
