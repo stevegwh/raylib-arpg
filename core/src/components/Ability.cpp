@@ -10,10 +10,6 @@ namespace sage
 
     bool Ability::IsActive()
     {
-        // if (ad.cursorBased)
-        // {
-        //     return cooldownTimer.IsRunning() || state == AbilityStateEnum::CURSOR_SELECT;
-        // }
         return cooldownTimer.IsRunning();
     }
 
