@@ -92,14 +92,13 @@ namespace sage
         {
             StateName oldState = registry->get<StateName>(entity);
             StateEnum oldStateEnum = registry->get<StateName>(entity).GetCurrentState();
-            auto* derived = static_cast<Derived*>(this);
-            if (derived->GetSystem(oldStateEnum)->StateLocked(entity))
+            if (GetSystem(oldStateEnum)->StateLocked(entity))
             {
                 return;
             }
-            derived->GetSystem(oldStateEnum)->OnStateExit(entity);
+            GetSystem(oldStateEnum)->OnStateExit(entity);
             oldState.SetState(newState);
-            derived->GetSystem(newState)->OnStateEnter(entity);
+            GetSystem(newState)->OnStateEnter(entity);
         }
 
       public:
