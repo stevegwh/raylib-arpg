@@ -87,6 +87,7 @@ namespace sage
             ab.abilityIndicator->Update(gameData->cursor->terrainCollision().point);
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
+                std::cout << "Mouse button down \n";
                 onConfirm.publish(abilityEntity);
             }
         }
@@ -212,6 +213,7 @@ namespace sage
             auto point = gameData->cursor->terrainCollision().point;
             if (Vector3Distance(point, casterPos) > ad.base.range)
             {
+                std::cout << "Out of range. \n";
                 return;
             }
         }
@@ -224,8 +226,9 @@ namespace sage
             if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
             {
                 auto& casterTrans = registry->get<sgTransform>(ab.caster);
-                auto& casterBB = registry->get<Collideable>(ab.caster).localBoundingBox;
-                float heightOffset = Vector3Distance(casterBB.max, casterBB.min);
+                auto& casterBB = registry->get<Collideable>(ab.caster).worldBoundingBox;
+                // TODO: Below doesn't work as intended
+                float heightOffset = Vector3Subtract(casterBB.max, casterBB.min).y;
                 Vector3 pos = {casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
                 trans.SetPosition(pos);
                 trans.SetParent(&casterTrans);
@@ -271,8 +274,12 @@ namespace sage
         for (auto abilityEntity : view)
         {
             auto& ab = registry->get<Ability>(abilityEntity);
-            if (!ab.IsActive()) continue;
             auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            if (!(ab.IsActive() || state == AbilityStateEnum::CURSOR_SELECT))
+            {
+                continue;
+            }
+
             states.at(state)->Update(abilityEntity);
             if (ab.vfx && ab.vfx->active)
             {
@@ -287,8 +294,11 @@ namespace sage
         for (auto abilityEntity : view)
         {
             auto& ab = registry->get<Ability>(abilityEntity);
-            if (!ab.IsActive()) continue;
             auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            if (!(ab.IsActive() || state == AbilityStateEnum::CURSOR_SELECT))
+            {
+                continue;
+            }
             states.at(state)->Draw3D(abilityEntity);
             if (ab.vfx && ab.vfx->active)
             {

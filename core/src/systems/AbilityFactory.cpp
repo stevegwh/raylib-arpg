@@ -79,7 +79,7 @@ namespace sage
     {
     }
 
-    // ------
+    // --------------------------------------------
 
     entt::entity CreatePlayerAutoAttack(entt::registry* registry, entt::entity caster, GameData* gameData)
     {
@@ -120,8 +120,9 @@ namespace sage
         AbilityData ad;
 
         ad.base.cooldownDuration = 3;
-        ad.base.range = 15;
+        ad.base.range = 30;
         ad.base.baseDamage = 25;
+        ad.base.radius = 30;
         ad.base.element = AttackElement::FIRE;
         ad.base.repeatable = false;
         ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
@@ -131,7 +132,7 @@ namespace sage
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 1;
         ad.animationParams.oneShot = true;
-        ad.animationParams.animationDelay = 0.75f;
+        ad.animationParams.animationDelay = 0;
 
         ad.vfx.name = "RainOfFire";
         ad.indicator.indicatorKey = "CircularCursor";

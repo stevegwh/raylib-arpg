@@ -44,8 +44,8 @@ namespace sage
         {
             float cooldownDuration = 0;                      // How long per tick or per use
             int baseDamage = 0;                              // The base damage of the attack
-            float range = 0;                                 // The range the ability can be cast
-            float radius = 0;                                // The radius of the ability from the attack point
+            float range = 20;                                // The range the ability can be cast
+            float radius = 10;                               // The radius of the ability from the attack point
             AttackElement element = AttackElement::PHYSICAL; // The element of the attack
             bool repeatable = false; // Whether the attack should automatically repeat when off cooldown
             AbilitySpawnBehaviour spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;

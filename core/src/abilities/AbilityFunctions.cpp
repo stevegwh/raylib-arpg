@@ -13,6 +13,7 @@
 #include "vfx/RainOfFireVFX.hpp"
 
 #include "raymath.h"
+#include <iostream>
 #include <memory>
 
 namespace sage
@@ -28,7 +29,8 @@ namespace sage
     {
         auto& ad = registry->get<Ability>(abilityEntity).ad;
 
-        if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
+        if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE ||
+            ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_STATIONARY)
         {
             auto& projPos = registry->get<sgTransform>(abilityEntity).GetWorldPos();
             Hit360AroundPoint(registry, caster, abilityEntity, projPos, ad.base.radius);
@@ -37,6 +39,10 @@ namespace sage
         {
             auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
             Hit360AroundPoint(registry, caster, abilityEntity, casterPos, ad.base.radius);
+        }
+        else
+        {
+            std::cout << "WARNING: Ability behaviour not accounted for. \n";
         }
     }
 
