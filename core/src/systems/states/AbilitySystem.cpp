@@ -21,24 +21,7 @@
 
 namespace sage
 {
-    class AbilityState
-    {
-      protected:
-        entt::registry* registry;
-        GameData* gameData;
-
-      public:
-        virtual void Update(entt::entity abilityEntity) {};
-        virtual void Draw3D(entt::entity abilityEntity) {};
-        virtual void OnEnter(entt::entity abilityEntity) {};
-        virtual void OnExit(entt::entity abilityEntity) {};
-        virtual ~AbilityState() {};
-        AbilityState(entt::registry* _registry, GameData* _gameData) : registry(_registry), gameData(_gameData)
-        {
-        }
-    };
-
-    class AbilitySystem::IdleState : public AbilityState
+    class AbilitySystem::IdleState : public StateMachine
     {
 
       public:
@@ -55,14 +38,14 @@ namespace sage
             }
         }
 
-        IdleState(entt::registry* _registry, GameData* _gameData) : AbilityState(_registry, _gameData)
+        IdleState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
 
     // --------------------------------------------
 
-    class AbilitySystem::CursorSelectState : public AbilityState
+    class AbilitySystem::CursorSelectState : public StateMachine
     {
         bool cursorActive = false; // Limits us to one cursor at once (I assume this is fine)
 
@@ -109,13 +92,13 @@ namespace sage
             }
         }
 
-        void OnEnter(entt::entity abilityEntity) override
+        void OnStateEnter(entt::entity abilityEntity) override
         {
             enableCursor(abilityEntity);
             cursorActive = true;
         }
 
-        void OnExit(entt::entity abilityEntity) override
+        void OnStateExit(entt::entity abilityEntity) override
         {
             if (cursorActive)
             {
@@ -124,14 +107,14 @@ namespace sage
             }
         }
 
-        CursorSelectState(entt::registry* _registry, GameData* _gameData) : AbilityState(_registry, _gameData)
+        CursorSelectState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
 
     // --------------------------------------------
 
-    class AbilitySystem::AwaitingExecutionState : public AbilityState
+    class AbilitySystem::AwaitingExecutionState : public StateMachine
     {
 
         void signalExecute(entt::entity abilityEntity)
@@ -142,7 +125,7 @@ namespace sage
       public:
         entt::sigh<void(entt::entity)> onExecute;
 
-        void OnEnter(entt::entity abilityEntity) override
+        void OnStateEnter(entt::entity abilityEntity) override
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             ab.cooldownTimer.Start();
@@ -171,22 +154,13 @@ namespace sage
             }
         }
 
-        AwaitingExecutionState(entt::registry* _registry, GameData* _gameData) : AbilityState(_registry, _gameData)
+        AwaitingExecutionState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
 
         {
         }
     };
 
     // ----------------------------
-
-    void AbilitySystem::changeState(entt::entity abilityEntity, AbilityStateEnum newState)
-    {
-        assert(states.contains(newState));
-        auto& ab = registry->get<Ability>(abilityEntity);
-        states[ab.state]->OnExit(abilityEntity);
-        ab.state = newState;
-        states[ab.state]->OnEnter(abilityEntity);
-    }
 
     void AbilitySystem::CancelAbility(entt::entity abilityEntity)
     {
@@ -197,7 +171,7 @@ namespace sage
         }
         ab.cooldownTimer.Stop();
         ab.executionDelayTimer.Stop();
-        changeState(abilityEntity, AbilityStateEnum::IDLE);
+        ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
     void AbilitySystem::executeAbility(entt::entity abilityEntity)
@@ -216,7 +190,7 @@ namespace sage
             executeFunc.Execute();
         }
 
-        changeState(abilityEntity, AbilityStateEnum::IDLE);
+        ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
     void AbilitySystem::confirmAbility(entt::entity abilityEntity)
@@ -265,7 +239,7 @@ namespace sage
             }
         }
 
-        changeState(abilityEntity, AbilityStateEnum::AWAITING_EXECUTION);
+        ChangeState(abilityEntity, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     // Determines if we need to display an indicator or not
@@ -276,13 +250,14 @@ namespace sage
 
         if (ab.ad.cursorBased) // Toggle indicator
         {
-            if (ab.state == AbilityStateEnum::CURSOR_SELECT)
+            auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            if (state == AbilityStateEnum::CURSOR_SELECT)
             {
-                changeState(abilityEntity, AbilityStateEnum::IDLE);
+                ChangeState(abilityEntity, AbilityStateEnum::IDLE);
             }
             else
             {
-                changeState(abilityEntity, AbilityStateEnum::CURSOR_SELECT);
+                ChangeState(abilityEntity, AbilityStateEnum::CURSOR_SELECT);
             }
         }
         else
@@ -293,12 +268,13 @@ namespace sage
 
     void AbilitySystem::Update()
     {
-        auto view = registry->view<Ability>();
+        auto view = registry->view<AbilityState, Ability>();
         for (auto abilityEntity : view)
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             if (!ab.IsActive()) continue;
-            states[ab.state]->Update(abilityEntity);
+            auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            states.at(state)->Update(abilityEntity);
             if (ab.vfx && ab.vfx->active)
             {
                 ab.vfx->Update(GetFrameTime());
@@ -308,12 +284,13 @@ namespace sage
 
     void AbilitySystem::Draw3D()
     {
-        auto view = registry->view<Ability>();
+        auto view = registry->view<AbilityState, Ability>();
         for (auto abilityEntity : view)
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             if (!ab.IsActive()) continue;
-            states[ab.state]->Draw3D(abilityEntity);
+            auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            states.at(state)->Draw3D(abilityEntity);
             if (ab.vfx && ab.vfx->active)
             {
                 ab.vfx->Draw3D();
@@ -326,7 +303,7 @@ namespace sage
     }
 
     AbilitySystem::AbilitySystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+        : StateMachineController(_registry), gameData(_gameData)
     {
 
         auto idleState = std::make_unique<IdleState>(_registry, _gameData);

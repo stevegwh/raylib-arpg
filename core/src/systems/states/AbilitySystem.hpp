@@ -2,6 +2,8 @@
 
 #include "abilities/AbilityData.hpp"
 #include "components/Ability.hpp"
+#include "components/States.hpp"
+#include "StateMachine.hpp"
 #include "Timer.hpp"
 
 #include <entt/entt.hpp>
@@ -12,17 +14,14 @@ namespace sage
 {
     class GameData;
     class VisualFX;
-    class AbilityState;
 
-    class AbilitySystem
+    class AbilitySystem : StateMachineController<AbilitySystem, AbilityState, AbilityStateEnum>
     {
         class IdleState;
         class AwaitingExecutionState;
         class CursorSelectState;
 
-        entt::registry* registry;
         GameData* gameData;
-        std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
 
         template <typename AbilityFunc>
         AbilityFunc& getExecuteFunc(
@@ -39,7 +38,6 @@ namespace sage
             }
         }
 
-        void changeState(entt::entity abilityEntity, AbilityStateEnum newState);
         void executeAbility(entt::entity abilityEntity);
         void confirmAbility(entt::entity abilityEntity);
 
@@ -53,6 +51,8 @@ namespace sage
         AbilitySystem(const AbilitySystem&) = delete;
         AbilitySystem& operator=(const AbilitySystem&) = delete;
         AbilitySystem(entt::registry* _registry, GameData* _gameData);
+
+        friend class StateMachineController; // Required for CRTP
     };
 
 } // namespace sage

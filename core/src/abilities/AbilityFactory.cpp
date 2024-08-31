@@ -3,6 +3,7 @@
 #include "AbilityFunctions.hpp"
 #include "AbilityIndicator.hpp"
 #include "AbilityResourceManager.hpp"
+#include "components/States.hpp"
 
 #include "components/Ability.hpp"
 #include "GameData.hpp"
@@ -33,6 +34,7 @@ namespace sage
         ad.animationParams.animationDelay = 0;
 
         auto entity = registry->create();
+        registry->emplace<AbilityState>(entity);
         auto& ability = registry->emplace<Ability>(entity);
         ability.self = entity;
         ability.caster = caster;
@@ -76,6 +78,7 @@ namespace sage
         auto entity = registry->create();
 
         auto& ability = registry->emplace<Ability>(entity);
+        registry->emplace<AbilityState>(entity);
         ability.self = entity;
         ability.caster = caster;
         ability.ad = ad;
@@ -117,6 +120,7 @@ namespace sage
         auto entity = registry->create();
 
         auto& ability = registry->emplace<Ability>(entity);
+        registry->emplace<AbilityState>(entity);
         ability.self = entity;
         ability.caster = caster;
         ability.ad = ad;
@@ -151,6 +155,7 @@ namespace sage
         auto entity = registry->create();
 
         auto& ability = registry->emplace<Ability>(entity);
+        registry->emplace<AbilityState>(entity);
         ability.self = entity;
         ability.caster = caster;
         ability.ad = ad;
@@ -183,6 +188,7 @@ namespace sage
         auto entity = registry->create();
 
         auto& ability = registry->emplace<Ability>(entity);
+        registry->emplace<AbilityState>(entity);
         ability.self = entity;
         ability.caster = caster;
         ability.ad = ad;
@@ -213,6 +219,7 @@ namespace sage
         auto entity = registry->create();
 
         auto& ability = registry->emplace<Ability>(entity);
+        registry->emplace<AbilityState>(entity);
         ability.self = entity;
         ability.caster = caster;
         ability.ad = ad;
@@ -249,6 +256,7 @@ namespace sage
         auto entity = registry->create();
 
         auto& ability = registry->emplace<Ability>(entity);
+        registry->emplace<AbilityState>(entity);
         ability.self = entity;
         ability.caster = caster;
         ability.ad = ad;

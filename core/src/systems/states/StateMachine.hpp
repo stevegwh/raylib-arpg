@@ -87,7 +87,7 @@ namespace sage
 
         void ChangeState(entt::entity entity, StateEnum newState)
         {
-            StateName oldState = registry->get<StateName>(entity);
+            auto& oldState = registry->get<StateName>(entity);
             StateEnum oldStateEnum = registry->get<StateName>(entity).GetCurrentState();
             if (GetSystem(oldStateEnum)->StateLocked(entity))
             {
