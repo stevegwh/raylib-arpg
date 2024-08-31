@@ -92,6 +92,7 @@ namespace sage
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
         ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, entity, gameData);
+        ability.abilityIndicator = AbilityResourceManager::GetInstance().GetIndicator(ad.indicator, gameData);
 
         return entity;
     }
