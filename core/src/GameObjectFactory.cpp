@@ -11,7 +11,7 @@
 #include "UserInput.hpp"
 #include <Timer.hpp>
 
-#include "abilities/Abilities.hpp"
+#include "abilities/AbilityFactory.hpp"
 
 #include "components/Ability.hpp"
 #include "components/Animation.hpp"
