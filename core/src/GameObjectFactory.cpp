@@ -481,11 +481,11 @@ namespace sage
         auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
         auto point = data->cursor->terrainCollision().point;
 
-        if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
+        if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
         {
             projectileTrans.SetPosition(casterPos);
         }
-        else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
+        else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
         {
             auto cursorPos = data->cursor->terrainCollision().point;
             projectileTrans.SetPosition(cursorPos);

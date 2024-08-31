@@ -31,7 +31,8 @@ namespace sage
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             ab.cooldownTimer.Update(GetFrameTime());
-            if (ab.cooldownTimer.HasFinished() && ab.ad.base.repeatable)
+            if (ab.cooldownTimer.HasFinished() &&
+                ab.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO))
             {
                 onRestartTriggered.publish(abilityEntity);
             }
@@ -113,6 +114,7 @@ namespace sage
 
     // --------------------------------------------
 
+    // TODO: I think this should be split into two states depending on whether its detached or not
     class AbilityStateController::AwaitingExecutionState : public StateMachine
     {
 
@@ -131,7 +133,7 @@ namespace sage
             ab.executionDelayTimer.Start();
 
             auto& ad = ab.ad;
-            if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE)
+            if (ad.base.HasBehaviour(AbilityBehaviour::MOVEMENT_PROJECTILE))
             {
                 GameObjectFactory::createProjectile(registry, ab.caster, abilityEntity, gameData);
                 auto& moveable = registry->get<MoveableActor>(abilityEntity);
@@ -147,7 +149,7 @@ namespace sage
             auto& ad = ab.ad;
 
             if (ab.executionDelayTimer.HasFinished() &&
-                ad.base.behaviourPreHit != AbilityBehaviourPreHit::DETACHED_PROJECTILE)
+                ad.base.HasBehaviour(AbilityBehaviour::MOVEMENT_PROJECTILE)) // Might be FOLLOW_NONE
             {
                 onExecute.publish(abilityEntity);
             }
@@ -180,12 +182,12 @@ namespace sage
 
         // TODO: Starting to think it would make a lot more sense just to call the ability functions directly here
         // and deduce args
-        if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::ATTACK_TARGET)
+        if (ad.base.HasBehaviour(AbilityBehaviour::ATTACK_TARGET))
         {
             auto& executeFunc = getExecuteFunc<SingleTargetHit>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
-        else if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::ATTACK_AOE)
+        else if (ad.base.HasBehaviour(AbilityBehaviour::ATTACK_AOE_POINT))
         {
             auto& executeFunc = getExecuteFunc<HitAllInRadius>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
@@ -199,8 +201,8 @@ namespace sage
         // TODO: Should account for more possiblities with flags here.
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
-        if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE ||
-            ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_STATIONARY)
+
+        if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
         {
             auto& casterPos = registry->get<sgTransform>(ab.caster).GetWorldPos();
             auto point = gameData->cursor->terrainCollision().point;
@@ -227,7 +229,7 @@ namespace sage
         if (ab.vfx)
         {
             auto& trans = registry->get<sgTransform>(abilityEntity);
-            if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CASTER)
+            if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
             {
                 auto& casterTrans = registry->get<sgTransform>(ab.caster);
                 auto& casterBB = registry->get<Collideable>(ab.caster).worldBoundingBox;
@@ -238,7 +240,7 @@ namespace sage
                 trans.SetParent(&casterTrans);
                 ab.vfx->InitSystem();
             }
-            else if (ad.base.spawnBehaviour == AbilitySpawnBehaviour::AT_CURSOR)
+            else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
             {
                 trans.SetPosition(gameData->cursor->terrainCollision().point);
                 ab.vfx->InitSystem();
@@ -254,7 +256,7 @@ namespace sage
 
         auto& ab = registry->get<Ability>(abilityEntity);
 
-        if (ab.ad.requiresIndicator) // Toggle indicator
+        if (ab.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
             auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
             if (state == AbilityStateEnum::CURSOR_SELECT)
