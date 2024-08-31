@@ -89,14 +89,15 @@ namespace sage
         entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
         AbilityData ad;
-        ad.base.element = AttackElement::PHYSICAL;
+        ad.base.AddElement(AbilityElement::PHYSICAL);
         ad.base.cooldownDuration = 1;
         ad.base.baseDamage = 10;
         ad.base.range = 5;
-        ad.base.repeatable = true;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_TARGET;
-        ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
-        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
+        ad.base.AddBehaviour(
+            AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_CASTER |
+            AbilityBehaviour::MOVEMENT_HITSCAN | AbilityBehaviour::CAST_INSTANT | AbilityBehaviour::ATTACK_TARGET);
+        ad.base.AddOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO);
+        ad.base.targetType = AbilityTargetType::TARGET_ENEMY;
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animSpeed = 4;
@@ -109,13 +110,9 @@ namespace sage
         ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
         ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
 
-        // ability.abilityIndicator = AbilityResourceManager::GetInstance().GetIndicator(ad.indicator, gameData);
-
-        // Would much prefer emplacing the vfx with the above entity id, instead.
         ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
-    // RainOfFire factory function
     void CreateRainOfFireAbility(
         entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
@@ -125,11 +122,12 @@ namespace sage
         ad.base.range = 30;
         ad.base.baseDamage = 25;
         ad.base.radius = 30;
-        ad.base.element = AttackElement::FIRE;
-        ad.base.repeatable = false;
-        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
-        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_STATIONARY;
+        ad.base.AddElement(AbilityElement::FIRE);
+        ad.base.AddBehaviour(
+            AbilityBehaviour::SPAWN_AT_CURSOR | AbilityBehaviour::FOLLOW_NONE |
+            AbilityBehaviour::MOVEMENT_STATIONARY | AbilityBehaviour::CAST_INSTANT |
+            AbilityBehaviour::ATTACK_AOE_POINT);
+        ad.base.AddOptionalBehaviour(AbilityBehaviourOptional::INDICATOR);
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 1;
@@ -138,7 +136,6 @@ namespace sage
 
         ad.vfx.name = "RainOfFire";
         ad.indicator.indicatorKey = "CircularCursor";
-        ad.requiresIndicator = true;
 
         auto& ability = registry->emplace<Ability>(abilityEntity);
         ability.self = abilityEntity;
@@ -151,43 +148,6 @@ namespace sage
         ability.abilityIndicator = AbilityResourceManager::GetInstance().GetIndicator(ad.indicator, gameData);
     }
 
-    // FloorFire factory function
-    void CreateFloorFireAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
-    {
-        AbilityData ad;
-
-        ad.base.cooldownDuration = 3;
-        ad.base.range = 5;
-        ad.base.baseDamage = 25;
-        ad.base.radius = 30;
-        ad.base.element = AttackElement::FIRE;
-        ad.base.repeatable = false;
-        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CURSOR;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
-        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_STATIONARY;
-
-        ad.animationParams.animEnum = AnimationEnum::SPIN;
-        ad.animationParams.animSpeed = 1;
-        ad.animationParams.oneShot = true;
-        ad.animationParams.animationDelay = 0.75f;
-
-        ad.vfx.name = "Fireball";
-        ad.indicator.indicatorKey = "CircularCursor";
-
-        ad.requiresIndicator = true;
-
-        auto& ability = registry->emplace<Ability>(abilityEntity);
-        ability.self = abilityEntity;
-        ability.caster = caster;
-        ability.ad = ad;
-        ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
-        ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
-
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
-    }
-
-    // Fireball factory function
     void CreateFireballAbility(
         entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
@@ -197,11 +157,11 @@ namespace sage
         ad.base.range = 30;
         ad.base.baseDamage = 50;
         ad.base.radius = 10;
-        ad.base.element = AttackElement::PHYSICAL;
-        ad.base.repeatable = false;
-        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
-        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
+        ad.base.AddElement(AbilityElement::PHYSICAL);
+        ad.base.AddBehaviour(
+            AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_NONE |
+            AbilityBehaviour::MOVEMENT_PROJECTILE | AbilityBehaviour::CAST_INSTANT |
+            AbilityBehaviour::ATTACK_AOE_TARGET);
 
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animationDelay = 0;
@@ -218,7 +178,32 @@ namespace sage
         ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
-    // LightningBall factory function
+    void CreateWavemobAutoAttackAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    {
+        AbilityData ad;
+
+        ad.base.cooldownDuration = 1;
+        ad.base.range = 5;
+        ad.base.baseDamage = 10;
+        ad.base.AddElement(AbilityElement::PHYSICAL);
+        ad.base.AddBehaviour(
+            AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_CASTER |
+            AbilityBehaviour::MOVEMENT_HITSCAN | AbilityBehaviour::CAST_INSTANT | AbilityBehaviour::ATTACK_TARGET);
+        ad.base.AddOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO);
+
+        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+
+        auto& ability = registry->emplace<Ability>(abilityEntity);
+        ability.self = abilityEntity;
+        ability.caster = caster;
+        ability.ad = ad;
+        ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
+        ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
+
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
+    }
+
     void CreateLightningBallAbility(
         entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
@@ -227,12 +212,11 @@ namespace sage
         ad.base.cooldownDuration = 1;
         ad.base.range = 5;
         ad.base.baseDamage = 10;
-        ad.base.element = AttackElement::PHYSICAL;
-        ad.base.repeatable = false;
-        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
-        ad.base.behaviourPreHit = AbilityBehaviourPreHit::DETACHED_PROJECTILE;
-
+        ad.base.AddElement(AbilityElement::LIGHTNING);
+        ad.base.AddBehaviour(
+            AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_NONE |
+            AbilityBehaviour::MOVEMENT_PROJECTILE | AbilityBehaviour::CAST_INSTANT |
+            AbilityBehaviour::ATTACK_AOE_TARGET);
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
 
         ad.vfx.name = "LightningBall";
@@ -247,34 +231,6 @@ namespace sage
         ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
     }
 
-    // WavemobAutoAttack factory function
-    void CreateWavemobAutoAttackAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
-    {
-        AbilityData ad;
-
-        ad.base.cooldownDuration = 1;
-        ad.base.range = 5;
-        ad.base.baseDamage = 10;
-        ad.base.element = AttackElement::PHYSICAL;
-        ad.base.repeatable = true;
-        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_TARGET;
-        ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
-
-        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
-
-        auto& ability = registry->emplace<Ability>(abilityEntity);
-        ability.self = abilityEntity;
-        ability.caster = caster;
-        ability.ad = ad;
-        ability.cooldownTimer.SetMaxTime(ad.base.cooldownDuration);
-        ability.executionDelayTimer.SetMaxTime(ad.animationParams.animationDelay);
-
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ad.vfx, abilityEntity, gameData);
-    }
-
-    // WhirlwindAbility factory function
     void CreateWhirlwindAbility(
         entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
@@ -284,11 +240,11 @@ namespace sage
         ad.base.range = 15;
         ad.base.baseDamage = 10;
         ad.base.radius = 15;
-        ad.base.element = AttackElement::PHYSICAL;
-        ad.base.repeatable = false;
-        ad.base.spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
-        ad.base.behaviourOnHit = AbilityBehaviourOnHit::ATTACK_AOE;
-        ad.base.behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
+        ad.base.AddElement(AbilityElement::PHYSICAL);
+        ad.base.AddBehaviour(
+            AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_CASTER |
+            AbilityBehaviour::MOVEMENT_STATIONARY | AbilityBehaviour::CAST_INSTANT |
+            AbilityBehaviour::ATTACK_AOE_POINT);
 
         ad.animationParams.animEnum = AnimationEnum::SPIN;
         ad.animationParams.animSpeed = 5;

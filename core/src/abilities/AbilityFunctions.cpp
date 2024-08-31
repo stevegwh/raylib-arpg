@@ -7,6 +7,7 @@
 
 #include "components/Ability.hpp"
 #include "components/Collideable.hpp"
+#include "components/CombatableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "systems/ActorMovementSystem.hpp"
 
@@ -29,13 +30,12 @@ namespace sage
     {
         auto& ad = registry->get<Ability>(abilityEntity).ad;
 
-        if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_PROJECTILE ||
-            ad.base.behaviourPreHit == AbilityBehaviourPreHit::DETACHED_STATIONARY)
+        if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_NONE))
         {
             auto& projPos = registry->get<sgTransform>(abilityEntity).GetWorldPos();
             Hit360AroundPoint(registry, caster, abilityEntity, projPos, ad.base.radius);
         }
-        else if (ad.base.behaviourPreHit == AbilityBehaviourPreHit::FOLLOW_CASTER)
+        else if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_CASTER))
         {
             auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
             Hit360AroundPoint(registry, caster, abilityEntity, casterPos, ad.base.radius);
@@ -65,7 +65,7 @@ namespace sage
                     .attacker = caster,
                     .hit = entity,
                     .damage = abilityData.base.baseDamage,
-                    .element = abilityData.base.element};
+                    .elements = abilityData.base.elements};
                 combatable.onHit.publish(attackData);
             }
         }
@@ -91,7 +91,7 @@ namespace sage
                 .attacker = caster,
                 .hit = target,
                 .damage = abilityData.base.baseDamage,
-                .element = abilityData.base.element};
+                .elements = abilityData.base.elements};
             enemyCombatable.onHit.publish(attack);
         }
     }

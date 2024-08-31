@@ -8,6 +8,8 @@
 #include <memory>
 #include <vector>
 
+#include "abilities/AbilityData.hpp"
+
 namespace sage
 {
 
@@ -17,21 +19,12 @@ namespace sage
         WAVEMOB
     };
 
-    enum class AttackElement
-    {
-        PHYSICAL,
-        FIRE,
-        ICE,
-        LIGHTNING,
-        POISON
-    };
-
     struct AttackData
     {
         const entt::entity attacker;
         const entt::entity hit;
         const int damage;
-        const AttackElement element = AttackElement::PHYSICAL;
+        const AbilityElement elements = AbilityElement::PHYSICAL;
     };
 
     struct CombatData
