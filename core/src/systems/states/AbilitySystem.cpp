@@ -179,7 +179,7 @@ namespace sage
 
     // ----------------------------
 
-    void AbilitySystem::ChangeState(entt::entity abilityEntity, AbilityStateEnum newState)
+    void AbilitySystem::changeState(entt::entity abilityEntity, AbilityStateEnum newState)
     {
         assert(states.contains(newState));
         auto& ab = registry->get<Ability>(abilityEntity);
@@ -197,29 +197,29 @@ namespace sage
         }
         ab.cooldownTimer.Stop();
         ab.executionDelayTimer.Stop();
-        ChangeState(abilityEntity, AbilityStateEnum::IDLE);
+        changeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilitySystem::ExecuteAbility(entt::entity abilityEntity)
+    void AbilitySystem::executeAbility(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
 
         if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_TARGETED_UNIT)
         {
-            auto& executeFunc = GetExecuteFunc<SingleTargetHit>(registry, ab.caster, abilityEntity, gameData);
+            auto& executeFunc = getExecuteFunc<SingleTargetHit>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
         else if (ad.base.behaviourOnHit == AbilityBehaviourOnHit::HIT_ALL_IN_RADIUS)
         {
-            auto& executeFunc = GetExecuteFunc<HitAllInRadius>(registry, ab.caster, abilityEntity, gameData);
+            auto& executeFunc = getExecuteFunc<HitAllInRadius>(registry, ab.caster, abilityEntity, gameData);
             executeFunc.Execute();
         }
 
-        ChangeState(abilityEntity, AbilityStateEnum::IDLE);
+        changeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilitySystem::ConfirmAbility(entt::entity abilityEntity)
+    void AbilitySystem::confirmAbility(entt::entity abilityEntity)
     {
         // Spawn target is either at cursor, at enemy, or at player
         // After spawned: Follow caster position, follow enemy position (maybe), follow the ability's detached
@@ -262,7 +262,7 @@ namespace sage
             }
         }
 
-        ChangeState(abilityEntity, AbilityStateEnum::AWAITING_EXECUTION);
+        changeState(abilityEntity, AbilityStateEnum::AWAITING_EXECUTION);
     }
 
     // Determines if we need to display an indicator or not
@@ -275,16 +275,16 @@ namespace sage
         {
             if (ab.state == AbilityStateEnum::CURSOR_SELECT)
             {
-                ChangeState(abilityEntity, AbilityStateEnum::IDLE);
+                changeState(abilityEntity, AbilityStateEnum::IDLE);
             }
             else
             {
-                ChangeState(abilityEntity, AbilityStateEnum::CURSOR_SELECT);
+                changeState(abilityEntity, AbilityStateEnum::CURSOR_SELECT);
             }
         }
         else
         {
-            ConfirmAbility(abilityEntity);
+            confirmAbility(abilityEntity);
         }
     }
 
@@ -333,12 +333,12 @@ namespace sage
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(_registry, _gameData);
         entt::sink onExecuteSink{awaitingExecutionState->onExecute};
-        onExecuteSink.connect<&AbilitySystem::ExecuteAbility>(this);
+        onExecuteSink.connect<&AbilitySystem::executeAbility>(this);
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
 
         auto cursorState = std::make_unique<CursorSelectState>(_registry, _gameData);
         entt::sink onConfirmSink{cursorState->onConfirm};
-        onConfirmSink.connect<&AbilitySystem::ConfirmAbility>(this);
+        onConfirmSink.connect<&AbilitySystem::confirmAbility>(this);
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
     }
 

@@ -21,12 +21,11 @@ namespace sage
         class CursorSelectState;
 
         entt::registry* registry;
+        GameData* gameData;
         std::unordered_map<AbilityStateEnum, std::unique_ptr<AbilityState>> states;
 
-        GameData* gameData;
-
         template <typename AbilityFunc>
-        AbilityFunc& GetExecuteFunc(
+        AbilityFunc& getExecuteFunc(
             entt::registry* _registry, entt::entity caster, entt::entity _abilityDataEntity, GameData* _gameData)
         {
             if (_registry->any_of<AbilityFunc>(_abilityDataEntity))
@@ -40,13 +39,13 @@ namespace sage
             }
         }
 
-        void ChangeState(entt::entity abilityEntity, AbilityStateEnum newState);
+        void changeState(entt::entity abilityEntity, AbilityStateEnum newState);
+        void executeAbility(entt::entity abilityEntity);
+        void confirmAbility(entt::entity abilityEntity);
 
       public:
         void CancelAbility(entt::entity abilityEntity);
-        void ExecuteAbility(entt::entity abilityEntity);
         void InitAbility(entt::entity abilityEntity);
-        void ConfirmAbility(entt::entity abilityEntity);
         void Update();
         void Draw3D();
 
