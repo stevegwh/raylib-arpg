@@ -136,9 +136,7 @@ namespace sage
 
         ad.vfx.name = "RainOfFire";
         ad.indicator.indicatorKey = "CircularCursor";
-        ad.cursorBased = true;
-
-        ad.cursor = gameData->cursor.get();
+        ad.requiresIndicator = true;
 
         auto entity = registry->create();
 
@@ -179,8 +177,7 @@ namespace sage
         ad.vfx.name = "Fireball";
         ad.indicator.indicatorKey = "CircularCursor";
 
-        ad.cursor = gameData->cursor.get();
-        ad.cursorBased = true;
+        ad.requiresIndicator = true;
 
         auto entity = registry->create();
 
