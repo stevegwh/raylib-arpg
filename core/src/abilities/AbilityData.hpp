@@ -51,30 +51,21 @@ namespace sage
             AbilitySpawnBehaviour spawnBehaviour = AbilitySpawnBehaviour::AT_CASTER;
             AbilityBehaviourOnHit behaviourOnHit = AbilityBehaviourOnHit::HIT_TARGETED_UNIT;
             AbilityBehaviourPreHit behaviourPreHit = AbilityBehaviourPreHit::FOLLOW_CASTER;
-
-            // std::string executeFuncName = ""; // Name of function to call on execute
-            // AbilityFunctionEnum executeFuncEnum;
         };
         struct VisualFXData
         {
             std::string name = "";
             VisualFX* ptr = nullptr;
-
-            // VFX behaviour? (Follow player, cast to cursor, )
         };
         struct IndicatorData
         {
             std::string indicatorKey = ""; // Key to an indicator/cursor class that has the texture etc.
-            Cursor* cursor;
-            // indicator behaviour? (spawn at cursor, spawn at player, spawn at target)
         };
         BaseData base{};
         AnimationParams animationParams{};
         VisualFXData vfx{};
         IndicatorData indicator{};
-        bool cursorBased = false;
-
-        Cursor* cursor;
+        bool requiresIndicator = false;
     };
 
 } // namespace sage

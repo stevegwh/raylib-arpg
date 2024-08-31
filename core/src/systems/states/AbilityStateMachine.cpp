@@ -87,7 +87,6 @@ namespace sage
             ab.abilityIndicator->Update(gameData->cursor->terrainCollision().point);
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
-                std::cout << "Mouse button down \n";
                 onConfirm.publish(abilityEntity);
             }
         }
@@ -250,7 +249,7 @@ namespace sage
 
         auto& ab = registry->get<Ability>(abilityEntity);
 
-        if (ab.ad.cursorBased) // Toggle indicator
+        if (ab.ad.requiresIndicator) // Toggle indicator
         {
             auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
             if (state == AbilityStateEnum::CURSOR_SELECT)
