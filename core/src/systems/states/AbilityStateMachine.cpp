@@ -219,12 +219,6 @@ namespace sage
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
 
-        // TODO: Below seems weird here. Should do this in ability factory.
-        if (!registry->any_of<sgTransform>(abilityEntity))
-        {
-            registry->emplace<sgTransform>(abilityEntity, abilityEntity);
-        }
-
         if (!checkRange(abilityEntity)) return;
 
         auto& animation = registry->get<Animation>(ab.caster);
