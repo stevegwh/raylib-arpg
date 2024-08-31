@@ -2,8 +2,9 @@
 
 #include "GameData.hpp"
 
-#include "abilities/Abilities.hpp"
+#include "abilities/AbilityStateMachine.hpp"
 #include "components/Animation.hpp"
+#include "components/CombatableActor.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"

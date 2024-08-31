@@ -3,6 +3,7 @@
 #include "GameData.hpp"
 
 #include "abilities/Abilities.hpp"
+#include "abilities/AbilityStateMachine.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/MoveableActor.hpp"
