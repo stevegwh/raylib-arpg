@@ -109,7 +109,7 @@ namespace sage
                 }
                 else
                 {
-                    pixels[y * width + x] = (Color){0, 0, 0, 0}; // Fully transparent
+                    pixels[y * width + x] = Color{0, 0, 0, 0}; // Fully transparent
                 }
             }
         }

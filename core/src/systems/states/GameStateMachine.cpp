@@ -43,6 +43,7 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
+            // if scene init
             timer.Start();
         }
 
@@ -124,6 +125,8 @@ namespace sage
 
         states[GameStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData, gameEntity);
         states[GameStateEnum::Wave] = std::make_unique<WaveState>(_registry, _gameData, gameEntity);
+
+        
 
         _registry->emplace<GameState>(gameEntity);
     }

@@ -56,13 +56,13 @@ namespace sage
 		{
 			// We only use the XYZ components of position and velocity.
 			// Use the remainder for extra effects if needed, or create more buffers.
-			positions[i] = (Vector4){
+			positions[i] = Vector4{
 				GetRandomFloat(-0.5, 0.5),
 				GetRandomFloat(-0.5, 0.5),
 				GetRandomFloat(-0.5, 0.5),
 				0,
 			};
-			velocities[i] = (Vector4){ 0, 0, 0, 0 };
+			velocities[i] = Vector4{ 0, 0, 0, 0 };
 		}
 
 		// Load three buffers: Position, Velocity and Starting Position. Read/Write=RL_DYNAMIC_COPY.
@@ -153,6 +153,6 @@ namespace sage
 		rlDisableVertexArray();
 		rlDisableShader();
 
-		DrawCubeWires((Vector3){ 0, 0, 0 }, 1.0, 1.0, 1.0, DARKGRAY);
+		DrawCubeWires(Vector3{ 0, 0, 0 }, 1.0, 1.0, 1.0, DARKGRAY);
 	}
 } // sage
