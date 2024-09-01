@@ -25,7 +25,6 @@ namespace sage
     class DialogueSystem;
     class HealthBarSystem;
     class StateMachines;
-    class AbilityStateController;
     class AbilityFactory;
     class PlayerAbilitySystem;
     class CombatSystem;
@@ -52,7 +51,6 @@ namespace sage
         std::unique_ptr<DialogueSystem> dialogueSystem;
         std::unique_ptr<HealthBarSystem> healthBarSystem;
         std::unique_ptr<StateMachines> stateMachines;
-        std::unique_ptr<AbilityStateController> abilityStateMachine;
         std::unique_ptr<AbilityFactory> abilityRegistry;
         std::unique_ptr<PlayerAbilitySystem> playerAbilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;

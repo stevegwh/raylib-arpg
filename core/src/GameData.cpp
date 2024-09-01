@@ -24,7 +24,6 @@
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
-#include "systems/states/AbilityStateMachine.hpp"
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 
@@ -48,7 +47,6 @@ namespace sage
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
           abilityRegistry(std::make_unique<AbilityFactory>(_registry, this)),
-          abilityStateMachine(std::make_unique<AbilityStateController>(_registry, this)),
           playerAbilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),
           timerSystem(std::make_unique<TimerSystem>(_registry)),
