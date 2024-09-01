@@ -23,6 +23,10 @@ namespace sage
 
         void OnTimerEnd()
         {
+            // if (!registry->any_of<GameState>(gameEntity))
+            // {
+            //     registry->emplace<GameState>(gameEntity);
+            // }
             auto& gameState = registry->get<GameState>(gameEntity);
             gameState.ChangeState(gameEntity, GameStateEnum::Wave);
         }
@@ -122,12 +126,9 @@ namespace sage
     GameStateController::GameStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry), gameEntity(_registry->create())
     {
-
-        states[GameStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData, gameEntity);
-        states[GameStateEnum::Wave] = std::make_unique<WaveState>(_registry, _gameData, gameEntity);
-
-        
-
-        _registry->emplace<GameState>(gameEntity);
+        assert(gameEntity != entt::null);
+        states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _gameData, gameEntity);
+        states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _gameData, gameEntity);
+        registry->emplace<GameState>(gameEntity);
     }
 } // namespace sage
