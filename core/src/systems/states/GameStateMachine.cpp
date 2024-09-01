@@ -23,6 +23,7 @@ namespace sage
 
         void OnTimerEnd()
         {
+            // TODO: Below stops a weird race condition happening.
             // if (!registry->any_of<GameState>(gameEntity))
             // {
             //     registry->emplace<GameState>(gameEntity);
@@ -47,7 +48,6 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
-            // if scene init
             timer.Start();
         }
 
@@ -57,9 +57,9 @@ namespace sage
         }
 
         DefaultState(entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
-            : StateMachine(_registry, _gameData)
+            : StateMachine(_registry, _gameData), gameEntity(_gameEntity)
         {
-            timer.SetMaxTime(5.0f);
+            timer.SetMaxTime(2.0f);
         }
     };
 
@@ -67,7 +67,6 @@ namespace sage
 
     class GameStateController::WaveState : public StateMachine
     {
-        void OnTimerEnd();
 
         void initWave()
         {
@@ -119,14 +118,9 @@ namespace sage
         GetSystem(state)->Draw3D(gameEntity);
     }
 
-    GameStateController::~GameStateController()
-    {
-    }
-
     GameStateController::GameStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry), gameEntity(_registry->create())
     {
-        assert(gameEntity != entt::null);
         states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _gameData, gameEntity);
         states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _gameData, gameEntity);
         registry->emplace<GameState>(gameEntity);

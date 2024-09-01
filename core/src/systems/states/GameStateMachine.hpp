@@ -26,8 +26,7 @@ namespace sage
       public:
         void Update();
         void Draw3D();
-
-        ~GameStateController();
+        
         GameStateController(entt::registry* _registry, GameData* gameData);
 
         friend class StateMachineController; // Required for CRTP

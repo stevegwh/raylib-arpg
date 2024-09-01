@@ -77,7 +77,7 @@ namespace sage
         {
             lightSubSystem->LinkAllRenderablesToLight();
         }
-        data->navigationGridSystem->Init(slices, 1.0f, mapPath);
+        data->navigationGridSystem->Init(slices, 1.0f, "resources/output.bin");
         data->navigationGridSystem->PopulateGrid();
     };
 

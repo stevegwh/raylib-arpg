@@ -12,7 +12,8 @@
 
 namespace sage
 {
-    Application::Application() : registry(std::make_unique<entt::registry>())
+
+    void Application::init()
     {
         Settings _settings;
         serializer::DeserializeSettings(_settings, "resources/settings.xml");
@@ -21,32 +22,24 @@ namespace sage
         KeyMapping _keyMapping;
         serializer::DeserializeKeyMapping(_keyMapping, "resources/keybinding.xml");
         keyMapping = std::make_unique<KeyMapping>(_keyMapping);
-    }
 
-    Application::~Application()
-    {
-        cleanup();
-    }
-
-    void Application::init()
-    {
-        InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
         // SetConfigFlags(FLAG_MSAA_4X_HINT);
+        InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
         Image icon = LoadImage("resources/icon.png");
         SetWindowIcon(icon);
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
-    }
-
-    void Application::Update()
-    {
-        init();
 
         scene = std::make_unique<ExampleScene>(
             registry.get(),
             keyMapping.get(),
             settings.get(),
             ""); // TODO: Map path is ignored atm (just loads output.bin)
+    }
+
+    void Application::Update()
+    {
+        init();
 
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
@@ -97,5 +90,14 @@ namespace sage
     void Application::cleanup()
     {
         CloseWindow();
+    }
+
+    Application::~Application()
+    {
+        cleanup();
+    }
+
+    Application::Application() : registry(std::make_unique<entt::registry>())
+    {
     }
 } // namespace sage
