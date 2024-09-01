@@ -58,7 +58,7 @@ namespace sage
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
         std::unique_ptr<EntityReflectionSignalRouter> signalReflectionManager;
-        LightSubSystem* lightSubSystem;
+        LightSubSystem* lightSubSystem; // Owned by scene (TODO: Why?)
 
         void Load();
         void Save() const;

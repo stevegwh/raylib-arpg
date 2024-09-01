@@ -139,7 +139,7 @@ namespace sage
             int baseDamage = 0;         // The base damage of the attack
             float range = 20;           // The range the ability can be cast
             float radius = 10;          // The radius of the ability from the attack point
-            float castTime = 0;
+            float castTime = 0;         // How long an ability takes to execute
             AbilityElement elements = static_cast<AbilityElement>(0); // The elements of the attack
             AbilityBehaviour behaviour = static_cast<AbilityBehaviour>(0);
             AbilityBehaviourOptional optional = static_cast<AbilityBehaviourOptional>(0);
