@@ -13,10 +13,10 @@ namespace sage
     class VisualFX;
     class AbilityIndicator;
 
+    // TODO: Move to ability factory
     class AbilityResourceManager
     {
       private:
-        std::unordered_map<AbilityFunctionEnum, std::unique_ptr<AbilityFunction>> abilityFunctions;
         std::unordered_map<std::string, std::string> spellIndicators;
 
         AbilityResourceManager();

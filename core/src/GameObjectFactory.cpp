@@ -23,7 +23,7 @@
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 
-#include "systems/AbilityFactory.hpp"
+#include "AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
@@ -473,25 +473,4 @@ namespace sage
         registry->emplace<TowerState>(id);
     }
 
-    // TODO: Move to ability factory
-    void GameObjectFactory::createProjectile(
-        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data)
-    {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
-        auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
-        auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
-        auto point = data->cursor->terrainCollision().point;
-
-        if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
-        {
-            projectileTrans.SetPosition(casterPos);
-        }
-        else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
-        {
-            auto cursorPos = data->cursor->terrainCollision().point;
-            projectileTrans.SetPosition(cursorPos);
-        }
-
-        data->actorMovementSystem->MoveToLocation(abilityEntity, point);
-    }
 } // namespace sage

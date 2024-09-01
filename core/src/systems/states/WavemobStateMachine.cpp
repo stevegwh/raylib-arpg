@@ -2,11 +2,11 @@
 
 #include "GameData.hpp"
 
+#include "AbilityFactory.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "systems/AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
