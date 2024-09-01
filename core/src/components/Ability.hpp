@@ -19,7 +19,7 @@ namespace sage
         entt::entity caster;
         AbilityData ad;
         Timer cooldownTimer;
-        Timer executionDelayTimer;
+        Timer castTimer;
 
         std::unique_ptr<VisualFX> vfx;
         std::unique_ptr<AbilityIndicator> abilityIndicator;
