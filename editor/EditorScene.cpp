@@ -28,7 +28,7 @@ namespace sage
         // TODO: Confirm this works
         // (It does not. Set event to update the bb of the selected object)
         auto& selectedObjectTrans = registry->get<sgTransform>(selectedObject);
-        selectedObjectTrans.SetPosition(data->cursor->collision().point, selectedObject);
+        selectedObjectTrans.SetPosition(data->cursor->collision().point);
     }
 
     void EditorScene::OnCursorClick()
