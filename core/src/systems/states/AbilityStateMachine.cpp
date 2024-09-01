@@ -133,7 +133,7 @@ namespace sage
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             ab.cooldownTimer.Start();
-            ab.executionDelayTimer.Start();
+            ab.castTimer.Start();
 
             auto& ad = ab.ad;
             if (ad.base.HasBehaviour(AbilityBehaviour::MOVEMENT_PROJECTILE))
@@ -148,12 +148,12 @@ namespace sage
         void Update(entt::entity abilityEntity) override
         {
             auto& ab = registry->get<Ability>(abilityEntity);
-            ab.executionDelayTimer.Update(GetFrameTime());
+            ab.castTimer.Update(GetFrameTime());
             auto& ad = ab.ad;
 
             // "executionDelayTimer" should just be a cast timer. Therefore, below should check for cast time
             // behaviour
-            if (ab.executionDelayTimer.HasFinished() &&
+            if (ab.castTimer.HasFinished() &&
                 !ad.base.HasBehaviour(AbilityBehaviour::CAST_REGULAR)) // Might be FOLLOW_NONE
             {
                 onExecute.publish(abilityEntity);
@@ -176,7 +176,7 @@ namespace sage
             ab.vfx->active = false;
         }
         ab.cooldownTimer.Stop();
-        ab.executionDelayTimer.Stop();
+        ab.castTimer.Stop();
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 

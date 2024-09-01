@@ -31,6 +31,8 @@ namespace sage
         float animationDelay = 0;
     };
 
+    // TODO: Use a timer for animation delay
+    // TODO: Add queue/priorities for animations
     struct Animation
     {
         std::unordered_map<AnimationEnum, int> animationMap;
@@ -57,12 +59,10 @@ namespace sage
 
         bool ChangeAnimationByParams(AnimationParams params)
         {
-            return ChangeAnimationByEnum(
-                params.animEnum, params.animSpeed, params.oneShot);
+            return ChangeAnimationByEnum(params.animEnum, params.animSpeed, params.oneShot);
         }
 
-        bool ChangeAnimationByEnum(
-            AnimationEnum animEnum, int _animSpeed, bool _oneShot = false)
+        bool ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed, bool _oneShot = false)
         {
             if (!animationMap.contains(animEnum)) return false;
             ChangeAnimation(animationMap.at(animEnum), _animSpeed, _oneShot);
