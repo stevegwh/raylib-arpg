@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <cereal>
 	<value0>
-		<SCREEN_WIDTH>1280</SCREEN_WIDTH>
-		<SCREEN_HEIGHT>720</SCREEN_HEIGHT>
+		<screenWidthUser>1280</screenWidthUser>
+		<screenHeightUser>720</screenHeightUser>
 	</value0>
 </cereal>
 

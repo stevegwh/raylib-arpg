@@ -36,11 +36,11 @@ namespace sage
     {
       public:
         entt::registry* registry;
+        Settings* settings;
 
         std::unique_ptr<UserInput> userInput;
         std::unique_ptr<Cursor> cursor;
         std::unique_ptr<Camera> camera;
-        Settings* settings;
 
         std::unique_ptr<RenderSystem> renderSystem;
         std::unique_ptr<CollisionSystem> collisionSystem;

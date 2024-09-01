@@ -10,33 +10,36 @@ namespace sage
 {
     struct Settings
     {
+		// Current settings
         int screenWidth = 1280;
         int screenHeight = 720;
 
         void ResetScreenSize()
         {
-            screenWidth = SCREEN_WIDTH;
-            screenHeight = SCREEN_HEIGHT;
+            screenWidth = screenWidthUser;
+            screenHeight = screenHeightUser;
         }
 
-        template <class Archive>
-        void save(Archive& archive) const
-        {
-            archive(CEREAL_NVP(SCREEN_WIDTH), CEREAL_NVP(SCREEN_HEIGHT));
-        }
+		void ResetDefaultScreenSize()
+		{
+			screenWidth = SCREEN_WIDTH;
+			screenHeight = SCREEN_HEIGHT;
+		}
 
-        // TODO: Fairly sure below my logic is reversed (im saving and loading the default values, not the user
-        // settings)
         template <class Archive>
-        void load(Archive& archive)
+        void serialize(Archive& archive)
         {
-            archive(CEREAL_NVP(SCREEN_WIDTH), CEREAL_NVP(SCREEN_HEIGHT));
-            screenWidth = SCREEN_WIDTH;
-            screenHeight = SCREEN_HEIGHT;
+			// TODO: Change NVP to remove user
+            archive(CEREAL_NVP(screenWidthUser), CEREAL_NVP(screenHeightUser));
         }
 
       private:
-        int SCREEN_WIDTH = 1280;
-        int SCREEN_HEIGHT = 720;
+		// Loaded defaults
+		int screenWidthUser = 1280;
+		int screenHeightUser = 720;
+		
+        // Hardcoded defaults
+        static constexpr int SCREEN_WIDTH = 1280;
+		static constexpr int SCREEN_HEIGHT = 720;
     };
 } // namespace sage

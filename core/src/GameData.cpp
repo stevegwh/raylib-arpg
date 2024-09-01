@@ -32,10 +32,10 @@ namespace sage
     GameData::GameData(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, LightSubSystem* _lightSubSystem)
         : registry(_registry),
-          userInput(std::make_unique<UserInput>(_keyMapping, settings)),
+          settings(_settings),
+          userInput(std::make_unique<UserInput>(_keyMapping, _settings)),
           cursor(std::make_unique<Cursor>(registry, this)),
           camera(std::make_unique<Camera>(userInput.get())),
-          settings(_settings),
           renderSystem(std::make_unique<RenderSystem>(_registry)),
           collisionSystem(std::make_unique<CollisionSystem>(_registry)),
           navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
