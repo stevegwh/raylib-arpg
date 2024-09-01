@@ -31,7 +31,5 @@ namespace sage
         static void createFloor(entt::registry* registry, Scene* scene, BoundingBox bb);
         static void createPortal(entt::registry* registry, GameData* data, Vector3 position);
         static void createWizardTower(entt::registry* registry, GameData* data, Vector3 position);
-        static void createProjectile(
-            entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data);
     };
 } // namespace sage

@@ -11,8 +11,8 @@
 #include "UserInput.hpp"
 
 // Systems
+#include "AbilityFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
-#include "systems/AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"

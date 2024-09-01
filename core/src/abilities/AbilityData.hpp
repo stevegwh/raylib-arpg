@@ -7,7 +7,6 @@
 
 namespace sage
 {
-    class AbilityFunction;
     enum class AbilityFunctionEnum;
     class Cursor;
     class VisualFX;

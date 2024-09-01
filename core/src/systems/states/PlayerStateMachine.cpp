@@ -11,7 +11,7 @@
 #include "EntityReflectionSignalRouter.hpp"
 #include "systems/states/AbilityStateMachine.hpp"
 
-#include "systems/AbilityFactory.hpp"
+#include "AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 

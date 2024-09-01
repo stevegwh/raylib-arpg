@@ -23,21 +23,6 @@ namespace sage
 
         GameData* gameData;
 
-        template <typename AbilityFunc>
-        AbilityFunc& getExecuteFunc(
-            entt::registry* _registry, entt::entity caster, entt::entity _abilityDataEntity, GameData* _gameData)
-        {
-            if (_registry->any_of<AbilityFunc>(_abilityDataEntity))
-            {
-                return _registry->get<AbilityFunc>(_abilityDataEntity);
-            }
-            else
-            {
-                return _registry->emplace<AbilityFunc>(
-                    _abilityDataEntity, _registry, caster, _abilityDataEntity, _gameData);
-            }
-        }
-
         void executeAbility(entt::entity abilityEntity);
         bool checkRange(entt::entity abilityEntity);
         void spawnAbility(entt::entity abilityEntity);

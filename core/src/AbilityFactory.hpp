@@ -17,6 +17,9 @@ namespace sage
         LIGHTNINGBALL
     };
 
+    void createProjectile(
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data);
+
     class AbilityFactory
     {
         entt::registry* registry;

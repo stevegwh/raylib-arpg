@@ -5,7 +5,9 @@
 #include "abilities/AbilityIndicator.hpp"
 #include "abilities/AbilityResourceManager.hpp"
 #include "abilities/vfx/VisualFX.hpp"
+#include "AbilityFactory.hpp"
 #include "components/Animation.hpp"
+#include "components/CombatableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
@@ -136,7 +138,7 @@ namespace sage
             auto& ad = ab.ad;
             if (ad.base.HasBehaviour(AbilityBehaviour::MOVEMENT_PROJECTILE))
             {
-                GameObjectFactory::createProjectile(registry, ab.caster, abilityEntity, gameData);
+                createProjectile(registry, ab.caster, abilityEntity, gameData);
                 auto& moveable = registry->get<MoveableActor>(abilityEntity);
                 entt::sink sink{moveable.onDestinationReached};
                 sink.connect<&AwaitingExecutionState::signalExecute>(this);
@@ -183,17 +185,24 @@ namespace sage
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
 
-        // TODO: Starting to think it would make a lot more sense just to call the ability functions directly here
-        // and deduce args
         if (ad.base.HasBehaviour(AbilityBehaviour::ATTACK_TARGET))
         {
-            auto& executeFunc = getExecuteFunc<SingleTargetHit>(registry, ab.caster, abilityEntity, gameData);
-            executeFunc.Execute();
+            auto target = registry->get<CombatableActor>(ab.caster).target;
+            HitSingleTarget(registry, ab.caster, abilityEntity, target);
         }
         else if (ad.base.HasBehaviour(AbilityBehaviour::ATTACK_AOE_POINT))
         {
-            auto& executeFunc = getExecuteFunc<HitAllInRadius>(registry, ab.caster, abilityEntity, gameData);
-            executeFunc.Execute();
+            Vector3 targetPos{};
+
+            if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_NONE))
+            {
+                targetPos = registry->get<sgTransform>(abilityEntity).GetWorldPos();
+            }
+            else if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_CASTER))
+            {
+                targetPos = registry->get<sgTransform>(ab.caster).GetWorldPos();
+            }
+            AOEAtPoint(registry, ab.caster, abilityEntity, targetPos, ad.base.radius);
         }
 
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);

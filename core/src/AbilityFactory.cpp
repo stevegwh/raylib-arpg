@@ -6,6 +6,7 @@
 #include "components/States.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
+#include "systems/ActorMovementSystem.hpp"
 #include "systems/states/AbilityStateMachine.hpp"
 #include <Serializer.hpp>
 
@@ -81,6 +82,29 @@ namespace sage
     AbilityFactory::AbilityFactory(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
+    }
+
+    // --------------------------------------------
+
+    void createProjectile(
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data)
+    {
+        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
+        auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
+        auto point = data->cursor->terrainCollision().point;
+
+        if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
+        {
+            projectileTrans.SetPosition(casterPos);
+        }
+        else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
+        {
+            auto cursorPos = data->cursor->terrainCollision().point;
+            projectileTrans.SetPosition(cursorPos);
+        }
+
+        data->actorMovementSystem->MoveToLocation(abilityEntity, point);
     }
 
     // --------------------------------------------

@@ -19,34 +19,7 @@
 
 namespace sage
 {
-
-    void SingleTargetHit::Execute()
-    {
-        auto target = registry->get<CombatableActor>(caster).target;
-        HitSingleTarget(registry, caster, abilityEntity, target);
-    }
-
-    void HitAllInRadius::Execute()
-    {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
-
-        if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_NONE))
-        {
-            auto& projPos = registry->get<sgTransform>(abilityEntity).GetWorldPos();
-            Hit360AroundPoint(registry, caster, abilityEntity, projPos, ad.base.radius);
-        }
-        else if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_CASTER))
-        {
-            auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
-            Hit360AroundPoint(registry, caster, abilityEntity, casterPos, ad.base.radius);
-        }
-        else
-        {
-            std::cout << "WARNING: Ability behaviour not accounted for. \n";
-        }
-    }
-
-    void Hit360AroundPoint(
+    void AOEAtPoint(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Vector3 point, float radius)
     {
         auto& abilityData = registry->get<Ability>(abilityEntity).ad;
