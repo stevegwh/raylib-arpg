@@ -3,6 +3,7 @@
 #include "GameData.hpp"
 
 #include "AbilityFactory.hpp"
+#include "components/Ability.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/MoveableActor.hpp"
@@ -10,7 +11,6 @@
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
-#include "systems/states/AbilityStateMachine.hpp"
 
 #include "raylib.h"
 
@@ -127,8 +127,8 @@ namespace sage
 
         void OnStateEnter(entt::entity self) override
         {
-            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->CancelCast(autoAttackAbility);
+            auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
             const auto& combatable = registry->get<CombatableActor>(self);
             const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
             auto& animation = registry->get<Animation>(self);
@@ -192,14 +192,14 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
-            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->StartCast(autoAttackAbility);
+            auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+            registry->get<Ability>(abilityEntity).startCast.publish(abilityEntity);
         }
 
         void OnStateExit(entt::entity entity) override
         {
-            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->CancelCast(autoAttackAbility);
+            auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+            registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
         }
 
         virtual ~CombatState() = default;
@@ -240,8 +240,9 @@ namespace sage
                 entt::sink sink{animation.onAnimationEnd};
                 sink.connect<&DyingState::destroyEntity>(this);
             }
-            auto autoAttackAbility = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            gameData->abilityStateMachine->CancelCast(autoAttackAbility);
+
+            auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
 
             gameData->actorMovementSystem->CancelMovement(self);
         }

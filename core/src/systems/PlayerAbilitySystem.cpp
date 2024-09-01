@@ -2,9 +2,9 @@
 
 #include "AbilityFactory.hpp"
 
+#include "components/Ability.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/states/AbilityStateMachine.hpp"
 #include "UserInput.hpp"
 
 #include <cassert>
@@ -22,7 +22,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->StartCast(abilitySlots[0]);
+        ab.startCast.publish(abilitySlots[0]);
     }
 
     void PlayerAbilitySystem::abilityTwoPressed()
@@ -36,7 +36,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->StartCast(abilitySlots[1]);
+        ab.startCast.publish(abilitySlots[1]);
     }
 
     void PlayerAbilitySystem::abilityThreePressed()
@@ -50,7 +50,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->StartCast(abilitySlots[2]);
+        ab.startCast.publish(abilitySlots[2]);
     }
 
     void PlayerAbilitySystem::abilityFourPressed()
@@ -64,7 +64,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        gameData->abilityStateMachine->StartCast(abilitySlots[3]);
+        ab.startCast.publish(abilitySlots[3]);
     }
 
     void PlayerAbilitySystem::onActorChanged()

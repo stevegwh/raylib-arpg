@@ -121,6 +121,12 @@ namespace sage
         ENERGY
     };
 
+    enum class AbilityCastFail
+    {
+        OUT_OF_RANGE,
+        INTERRUPTED
+    };
+
     /**
      * Auto attack: REPEAT_AUTO | SPAWN_AT_CASTER (needed?) | CASTER_FOLLOW | MOVEMENT_HITSCAN | CAST_INSTANT |
      * ATTACK_TARGET (And TARGET_ENEMY)

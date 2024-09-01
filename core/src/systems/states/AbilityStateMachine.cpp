@@ -168,7 +168,7 @@ namespace sage
 
     // ----------------------------
 
-    void AbilityStateController::CancelCast(entt::entity abilityEntity)
+    void AbilityStateController::cancelCast(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         if (ab.vfx && ab.vfx->active)
@@ -221,7 +221,7 @@ namespace sage
             if (Vector3Distance(point, casterPos) > ad.base.range)
             {
                 std::cout << "Out of range. \n";
-                castFailed.publish("Out of range");
+                ab.castFailed.publish(abilityEntity, AbilityCastFail::OUT_OF_RANGE);
                 return false;
             }
         }
@@ -263,7 +263,7 @@ namespace sage
     }
 
     // Determines if we need to display an indicator or not
-    void AbilityStateController::StartCast(entt::entity abilityEntity)
+    void AbilityStateController::startCast(entt::entity abilityEntity)
     {
 
         auto& ab = registry->get<Ability>(abilityEntity);
@@ -325,6 +325,24 @@ namespace sage
         }
     }
 
+    void AbilityStateController::onComponentAdded(entt::entity addedEntity)
+    {
+        auto& ability = registry->get<Ability>(addedEntity);
+        entt::sink castSink{ability.startCast};
+        castSink.connect<&AbilityStateController::startCast>(this);
+        entt::sink cancelCastSink{ability.cancelCast};
+        cancelCastSink.connect<&AbilityStateController::cancelCast>(this);
+    }
+
+    void AbilityStateController::onComponentRemoved(entt::entity addedEntity)
+    {
+        auto& ability = registry->get<Ability>(addedEntity);
+        entt::sink castSink{ability.startCast};
+        castSink.disconnect<&AbilityStateController::startCast>(this);
+        entt::sink cancelCastSink{ability.cancelCast};
+        cancelCastSink.disconnect<&AbilityStateController::cancelCast>(this);
+    }
+
     AbilityStateController::~AbilityStateController()
     {
     }
@@ -332,10 +350,12 @@ namespace sage
     AbilityStateController::AbilityStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry), gameData(_gameData)
     {
+        registry->on_construct<Ability>().connect<&AbilityStateController::onComponentAdded>(this);
+        registry->on_destroy<Ability>().connect<&AbilityStateController::onComponentRemoved>(this);
 
         auto idleState = std::make_unique<IdleState>(_registry, _gameData);
         entt::sink onRestartTriggeredSink{idleState->onRestartTriggered};
-        onRestartTriggeredSink.connect<&AbilityStateController::StartCast>(this);
+        onRestartTriggeredSink.connect<&AbilityStateController::startCast>(this);
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(_registry, _gameData);
