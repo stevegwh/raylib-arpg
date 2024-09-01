@@ -85,6 +85,12 @@ namespace sage
 
         ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ability.ad.vfx, out, gameData);
 
+        if (ability.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
+        {
+            ability.abilityIndicator =
+                AbilityResourceManager::GetInstance().GetIndicator(ability.ad.indicator, gameData);
+        }
+
         return out;
     }
 

@@ -22,6 +22,8 @@ namespace sage
         Timer castTimer;
 
         std::unique_ptr<VisualFX> vfx;
+        // TODO: VFX should have before, during and after.
+
         std::unique_ptr<AbilityIndicator> abilityIndicator;
 
         void ResetCooldown();
@@ -29,6 +31,10 @@ namespace sage
         float GetRemainingCooldownTime() const;
         float GetCooldownDuration() const;
         bool CooldownReady() const;
+
+        entt::sigh<void(entt::entity)> startCast;
+        entt::sigh<void(entt::entity)> cancelCast;
+        entt::sigh<void(entt::entity, AbilityCastFail)> castFailed;
 
         Ability() = default;
         Ability(const Ability&) = delete;
