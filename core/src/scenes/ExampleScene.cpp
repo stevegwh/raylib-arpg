@@ -31,7 +31,6 @@
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
-#include "systems/states/AbilityStateMachine.hpp" // TODO: move
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 
@@ -48,7 +47,6 @@ namespace sage
         data->dialogueSystem->Update();
         data->healthBarSystem->Update();
         data->stateMachines->Update();
-        data->abilityStateMachine->Update();
         data->playerAbilitySystem->Update();
         // const auto& playerTransform =
         //     registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
@@ -72,13 +70,11 @@ namespace sage
 
     void ExampleScene::Draw3D()
     {
-
-        data->stateMachines->Draw3D();
         Scene::Draw3D();
         // fountain->Draw3D();
         data->healthBarSystem->Draw3D();
-        data->abilityStateMachine->Draw3D();
         data->playerAbilitySystem->Draw3D();
+        data->stateMachines->Draw3D();
     }
 
     void ExampleScene::DrawDebug()

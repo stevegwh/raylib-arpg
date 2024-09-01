@@ -10,6 +10,7 @@ namespace sage
         gameStateMachine->Update();
         wavemobStatemachine->Update();
         playerStateMachine->Update();
+        abilityStateMachine->Update();
     }
 
     void StateMachines::Draw3D()
@@ -17,12 +18,14 @@ namespace sage
         wavemobStatemachine->Draw3D();
         playerStateMachine->Draw3D();
         // gameStateMachine->Draw3D();
+        abilityStateMachine->Draw3D();
     }
 
     StateMachines::StateMachines(entt::registry* _registry, GameData* _gameData)
         : gameStateMachine(std::make_unique<GameStateController>(_registry, _gameData)),
           wavemobStatemachine(std::make_unique<WavemobStateController>(_registry, _gameData)),
-          playerStateMachine(std::make_unique<PlayerStateController>(_registry, _gameData))
+          playerStateMachine(std::make_unique<PlayerStateController>(_registry, _gameData)),
+          abilityStateMachine(std::make_unique<AbilityStateController>(_registry, _gameData))
     {
     }
 } // namespace sage
