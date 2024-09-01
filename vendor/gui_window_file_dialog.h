@@ -179,11 +179,11 @@ GuiWindowFileDialogState InitGuiWindowFileDialog(const char *initPath)
     GuiWindowFileDialogState state = { 0 };
 
     // Init window data
-    state.windowBounds = (Rectangle){ static_cast<float>(GetScreenWidth() / 2 - 440 / 2), static_cast<float>(GetScreenHeight() / 2 - 310 / 2), 440, 310 };
+    state.windowBounds = Rectangle{ static_cast<float>(GetScreenWidth() / 2 - 440 / 2), static_cast<float>(GetScreenHeight() / 2 - 310 / 2), 440, 310 };
     state.windowActive = false;
     state.supportDrag = true;
     state.dragMode = false;
-    state.panOffset = (Vector2){ 0, 0 };
+    state.panOffset = Vector2{ 0, 0 };
 
     // Init path data
     state.dirPathEditMode = false;
@@ -238,7 +238,7 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state)
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
                 // Window can be dragged from the top window bar
-                if (CheckCollisionPointRec(mousePosition, (Rectangle){ state->windowBounds.x, state->windowBounds.y, (float)state->windowBounds.width, RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT }))
+                if (CheckCollisionPointRec(mousePosition, Rectangle{ state->windowBounds.x, state->windowBounds.y, (float)state->windowBounds.width, RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT }))
                 {
                     state->dragMode = true;
                     state->panOffset.x = mousePosition.x - state->windowBounds.x;
@@ -281,7 +281,7 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state)
         state->windowActive = !GuiWindowBox(state->windowBounds, "#198# Select File Dialog");
 
         // Draw previous directory button + logic
-        if (GuiButton((Rectangle){ state->windowBounds.x + state->windowBounds.width - 48, state->windowBounds.y + 24 + 12, 40, 24 }, "< .."))
+        if (GuiButton(Rectangle{ state->windowBounds.x + state->windowBounds.width - 48, state->windowBounds.y + 24 + 12, 40, 24 }, "< .."))
         {
             // Move dir path one level up
             strcpy(state->dirPathText, GetPrevDirectoryPath(state->dirPathText));
@@ -295,7 +295,7 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state)
         }
 
         // Draw current directory text box info + path editing logic
-        if (GuiTextBox((Rectangle){ state->windowBounds.x + 8, state->windowBounds.y + 24 + 12, state->windowBounds.width - 48 - 16, 24 }, state->dirPathText, 1024, state->dirPathEditMode))
+        if (GuiTextBox(Rectangle{ state->windowBounds.x + 8, state->windowBounds.y + 24 + 12, state->windowBounds.width - 48 - 16, 24 }, state->dirPathText, 1024, state->dirPathEditMode))
         {
             if (state->dirPathEditMode)
             {
@@ -321,7 +321,7 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state)
 # if defined(USE_CUSTOM_LISTVIEW_FILEINFO)
         state->filesListActive = GuiListViewFiles((Rectangle){ state->position.x + 8, state->position.y + 48 + 20, state->windowBounds.width - 16, state->windowBounds.height - 60 - 16 - 68 }, fileInfo, state->dirFiles.count, &state->itemFocused, &state->filesListScrollIndex, state->filesListActive);
 # else
-        GuiListViewEx((Rectangle){ state->windowBounds.x + 8, state->windowBounds.y + 48 + 20, state->windowBounds.width - 16, state->windowBounds.height - 60 - 16 - 68 }, 
+        GuiListViewEx(Rectangle{ state->windowBounds.x + 8, state->windowBounds.y + 48 + 20, state->windowBounds.width - 16, state->windowBounds.height - 60 - 16 - 68 }, 
                       (const char**)dirFilesIcon, state->dirFiles.count, &state->filesListScrollIndex, &state->filesListActive, &state->itemFocused);
 # endif
         GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, prevTextAlignment);
@@ -355,8 +355,8 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state)
 
         // Draw bottom controls
         //--------------------------------------------------------------------------------------
-        GuiLabel((Rectangle){ state->windowBounds.x + 8, state->windowBounds.y + state->windowBounds.height - 68, 60, 24 }, "File name:");
-        if (GuiTextBox((Rectangle){ state->windowBounds.x + 72, state->windowBounds.y + state->windowBounds.height - 68, state->windowBounds.width - 184, 24 }, state->fileNameText, 128, state->fileNameEditMode))
+        GuiLabel(Rectangle{ state->windowBounds.x + 8, state->windowBounds.y + state->windowBounds.height - 68, 60, 24 }, "File name:");
+        if (GuiTextBox(Rectangle{ state->windowBounds.x + 72, state->windowBounds.y + state->windowBounds.height - 68, state->windowBounds.width - 184, 24 }, state->fileNameText, 128, state->fileNameEditMode))
         {
             if (*state->fileNameText)
             {
@@ -383,12 +383,12 @@ void GuiWindowFileDialog(GuiWindowFileDialogState *state)
             state->fileNameEditMode = !state->fileNameEditMode;
         }
 
-        GuiLabel((Rectangle){ state->windowBounds.x + 8, state->windowBounds.y + state->windowBounds.height - 24 - 12, 68, 24 }, "File filter:");
-        GuiComboBox((Rectangle){ state->windowBounds.x + 72, state->windowBounds.y + state->windowBounds.height - 24 - 12, state->windowBounds.width - 184, 24 }, "All files", &state->fileTypeActive);
+        GuiLabel(Rectangle{ state->windowBounds.x + 8, state->windowBounds.y + state->windowBounds.height - 24 - 12, 68, 24 }, "File filter:");
+        GuiComboBox(Rectangle{ state->windowBounds.x + 72, state->windowBounds.y + state->windowBounds.height - 24 - 12, state->windowBounds.width - 184, 24 }, "All files", &state->fileTypeActive);
 
-        state->SelectFilePressed = GuiButton((Rectangle){ state->windowBounds.x + state->windowBounds.width - 96 - 8, state->windowBounds.y + state->windowBounds.height - 68, 96, 24 }, "Select");
+        state->SelectFilePressed = GuiButton(Rectangle{ state->windowBounds.x + state->windowBounds.width - 96 - 8, state->windowBounds.y + state->windowBounds.height - 68, 96, 24 }, "Select");
 
-        if (GuiButton((Rectangle){ state->windowBounds.x + state->windowBounds.width - 96 - 8, state->windowBounds.y + state->windowBounds.height - 24 - 12, 96, 24 }, "Cancel")) state->windowActive = false;
+        if (GuiButton(Rectangle{ state->windowBounds.x + state->windowBounds.width - 96 - 8, state->windowBounds.y + state->windowBounds.height - 24 - 12, 96, 24 }, "Cancel")) state->windowActive = false;
         //--------------------------------------------------------------------------------------
 
         // Exit on file selected

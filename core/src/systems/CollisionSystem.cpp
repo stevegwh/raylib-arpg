@@ -207,10 +207,11 @@ namespace sage
                 {
                     CollisionInfo colInfo;
                     colInfo = {
-                        .collidedBB = col.worldBoundingBox,
                         .collidedEntityId = entity,
-                        .collisionLayer = layer,
-                        .rlCollision = {}};
+                        .collidedBB = col.worldBoundingBox,
+                        .rlCollision = {},
+                        .collisionLayer = layer
+                    };
                     out = colInfo;
                     return true;
                 };

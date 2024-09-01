@@ -17,12 +17,14 @@ namespace sage
 
     class Scene
     {
+
       protected:
         entt::registry* registry;
 
       public:
         std::unique_ptr<LightSubSystem> lightSubSystem;
         std::unique_ptr<GameData> data;
+        entt::sigh<void()> sceneLoadingFinished; // Currently unused
         entt::sigh<void()> sceneChange;
 
         virtual void Update();

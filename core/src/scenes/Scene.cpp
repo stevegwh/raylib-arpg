@@ -57,8 +57,6 @@ namespace sage
 
     Scene::~Scene()
     {
-        // delete data;
-        // delete lightSubSystem;
     }
 
     Scene::Scene(

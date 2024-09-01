@@ -72,7 +72,7 @@ namespace sage
             sink.template disconnect<&StateMachineController::ChangeState>(this);
 
             // TODO: Below seems like a bad idea
-            GetSystem(state.GetCurrentState())->OnStateExit(entity); // Might not be a good idea if destroyed
+            // GetSystem(state.GetCurrentState())->OnStateExit(entity); // Might not be a good idea if destroyed
         }
 
         void OnComponentAdded(entt::entity entity)
@@ -81,7 +81,6 @@ namespace sage
             entt::sink sink{state.onStateChanged};
             sink.template connect<&StateMachineController::ChangeState>(this);
 
-            // TODO: Unsure if we really want to call OnStateEnter immediately. (Would init IDLESTATE)
             GetSystem(state.GetCurrentState())->OnStateEnter(entity);
         }
 
