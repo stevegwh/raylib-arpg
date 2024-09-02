@@ -5,8 +5,10 @@
 #pragma once
 
 #include "raygui.h"
-
 #include <gui_window_file_dialog.h>
+
+#include "imgui.h"
+#include "rlImGui.h"
 
 #include <entt/entt.hpp>
 
@@ -51,6 +53,7 @@ namespace sage
             void GuiNotFocused();
             void Update();
             void Draw(const std::string& mode, Cursor* cursor);
+            ~EditorGui();
             EditorGui(EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* camera);
         };
     } // namespace editor
