@@ -43,7 +43,7 @@ namespace sage
         ~SafeModel();
         SafeModel(const char* path);
         SafeModel(Model _model);
-        SafeModel(Mesh _mesh);
+        SafeModel(const Mesh& _mesh);
         SafeModel() = default;
     };
 

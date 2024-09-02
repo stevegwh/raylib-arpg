@@ -83,16 +83,18 @@ namespace sage
     {
         lightSubSystem->lights[0] =
             CreateLight(LIGHT_POINT, {0, 50, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
+
         // std::string mapPath = "resources/models/obj/level-basic.obj";
-        auto playerId = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
+        auto player = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
+
         // GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
 
         GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
 
         // TODO: tmp
-        const auto& col = registry->get<Collideable>(knight);
-        data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
+        // const auto& col = registry->get<Collideable>(knight);
+        // data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
 
         // fountain = std::make_unique<SpiralFountainVFX>(data.get());
         // fountain->InitSystem({30.0f, 4, 20.0f});

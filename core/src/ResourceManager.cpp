@@ -69,7 +69,7 @@ namespace sage
      * @param path
      * @return Model
      */
-    Model ResourceManager::StaticModelLoad(const std::string& path)
+    Model ResourceManager::InstantiateModel(const std::string& path)
     {
         if (staticModels.find(path) == staticModels.end())
         {
@@ -158,7 +158,7 @@ namespace sage
      */
     SafeModel ResourceManager::DynamicModelLoad(const std::string& path)
     {
-        if (dynamicModels.find(path) == dynamicModels.end())
+        if (!dynamicModels.contains(path))
         {
             // Create a base copy that will be used for the copies (memory managed by ResourceManager)
             dynamicModels.try_emplace(path, SafeModel(path.c_str()));
@@ -187,7 +187,7 @@ namespace sage
             model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
             model.materials[0] = LoadMaterialDefault();
 
-            if (model.meshMaterial == NULL) model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
+            if (model.meshMaterial == nullptr) model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
         }
         else
         {
@@ -241,7 +241,7 @@ namespace sage
         // else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data",
         // "Cereal Model Import");
 
-        return SafeModel(model);
+        return {model};
     }
 
     ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)

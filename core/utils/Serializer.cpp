@@ -141,6 +141,8 @@ namespace sage
 
         void Load(entt::registry* destination)
         {
+            assert(destination != nullptr);
+
             std::cout << "Load called" << std::endl;
             using namespace entt::literals;
             std::ifstream storage("resources/output.bin", std::ios::binary);
@@ -155,16 +157,15 @@ namespace sage
 
                 while (storage.peek() != EOF)
                 {
-                    auto entt = destination->create();
                     entity entityId{}; // ignore this
+                    auto entt = destination->create();
                     auto& transform = destination->emplace<sgTransform>(entt, entt);
                     auto& collideable = destination->emplace<Collideable>(entt);
                     auto& renderable = destination->emplace<Renderable>(entt);
 
                     try
                     {
-                        input(entityId, transform, collideable);
-                        // input(entityId, transform, collideable, renderable);
+                        input(entityId, transform, collideable, renderable);
                     }
                     catch (const cereal::Exception& e)
                     {

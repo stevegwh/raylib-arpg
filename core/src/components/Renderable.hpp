@@ -38,8 +38,8 @@ namespace sage
         std::function<void(entt::entity)> reqShaderUpdate;
         std::string name = "Default";
         bool serializable = true;
-        void SetModel(SafeModel _model);
-        Model GetModel();
+        // void SetModel(SafeModel _model);
+        [[nodiscard]] Model GetModel() const;
 
         Renderable() = default;
         Renderable(const Renderable&) = delete;

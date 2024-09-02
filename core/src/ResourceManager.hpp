@@ -33,7 +33,7 @@ namespace sage
 
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Image ImageLoad(const std::string& path);
-        Model StaticModelLoad(const std::string& path);
+        Model InstantiateModel(const std::string& path);
         static void DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
         SafeModel DynamicModelLoad(const std::string& path);
         ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
