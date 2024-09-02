@@ -259,8 +259,7 @@ namespace sage
             else
             {
                 // File doesn't exist, create a new file with the default key mapping
-                std::cout << "Key mapping file not found. Creating a new file with the "
-                             "default key mapping."
+                std::cout << "Settings file not found. Creating a new file with default settings."
                           << std::endl;
                 SerializeSettings(settings, path);
             }

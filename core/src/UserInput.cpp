@@ -20,7 +20,7 @@ namespace sage
             }
             else if (IsWindowFullscreen())
             {
-                settings->ResetScreenSize();
+                settings->ResetToUserDefined();
             }
             onWindowUpdate.publish(
                 {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
