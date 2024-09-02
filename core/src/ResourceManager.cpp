@@ -174,6 +174,7 @@ namespace sage
     {
         if (dynamicModels.find(path) == dynamicModels.end())
         {
+            // Create a base copy that will be used for the copies (memory managed by ResourceManager)
             Model model = LoadModel(path.c_str());
             dynamicModels[path] = model;
         }
@@ -273,27 +274,27 @@ namespace sage
 
     ResourceManager::~ResourceManager()
     {
-        for (auto kv : textureImages)
+        for (const auto& kv : textureImages)
         {
             UnloadImage(kv.second);
         }
-        for (auto kv : staticModels)
+        for (const auto& kv : staticModels)
         {
             UnloadModel(kv.second);
         }
-        for (auto kv : dynamicModels)
+        for (const auto& kv : dynamicModels)
         {
             UnloadModel(kv.second);
         }
-        for (auto kv : modelAnimations)
+        for (const auto& kv : modelAnimations)
         {
             UnloadModelAnimations(kv.second.first, kv.second.second);
         }
-        for (auto kv : vertShaders)
+        for (const auto& kv : vertShaders)
         {
             UnloadFileText(kv.second);
         }
-        for (auto kv : fragShaders)
+        for (const auto& kv : fragShaders)
         {
             UnloadFileText(kv.second);
         }
