@@ -87,9 +87,9 @@ namespace sage
             {
                 if (registry->any_of<Renderable>(entity))
                 {
-                    auto& r = registry->get<Renderable>(entity);
-                    auto mesh = *r.model.meshes;
-                    auto col = GetRayCollisionMesh(ray, mesh, r.model.transform);
+                    auto& renderable = registry->get<Renderable>(entity);
+                    auto mesh = *renderable.GetModel().meshes;
+                    auto col = GetRayCollisionMesh(ray, mesh, renderable.GetModel().transform);
                     if (col.hit)
                     {
                         CollisionInfo info = {
@@ -210,8 +210,7 @@ namespace sage
                         .collidedEntityId = entity,
                         .collidedBB = col.worldBoundingBox,
                         .rlCollision = {},
-                        .collisionLayer = layer
-                    };
+                        .collisionLayer = layer};
                     out = colInfo;
                     return true;
                 };

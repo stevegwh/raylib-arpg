@@ -94,7 +94,7 @@ namespace sage
 
     void TextureTerrainOverlay::updateTerrainPolygon()
     {
-        auto& mesh = *registry->get<Renderable>(entity).model.meshes;
+        auto& mesh = *registry->get<Renderable>(entity).GetModel().meshes;
         updateMeshData(mesh);
 
         int vertexCount = mesh.vertexCount;
@@ -103,7 +103,7 @@ namespace sage
         UpdateMeshBuffer(mesh, 2, mesh.texcoords, vertexCount * 2 * sizeof(float), 0);
     }
 
-    Model TextureTerrainOverlay::generateTerrainPolygon()
+    SafeModel TextureTerrainOverlay::generateTerrainPolygon()
     {
         Mesh mesh = createInitialMesh();
 
@@ -115,7 +115,7 @@ namespace sage
         model.materialCount = 1;
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 
-        return model;
+        return SafeModel(model);
     }
 
     void TextureTerrainOverlay::Enable(bool enable)
@@ -138,8 +138,8 @@ namespace sage
         navigationGridSystem->WorldToGridSpace(mouseRayHit, lastHit);
         navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
         auto& renderable = registry->get<Renderable>(entity);
-        renderable.model = generateTerrainPolygon();
-        renderable.model.materials[0].shader = renderable.shader.value();
+        renderable.SetModel(generateTerrainPolygon());
+        renderable.GetModel().materials[0].shader = renderable.shader.value();
 
         // Calculate the center of the mesh in world space
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
@@ -158,7 +158,7 @@ namespace sage
 
         auto& trans = registry->get<sgTransform>(entity);
         trans.SetPosition(meshOffset);
-        renderable.model.transform = MatrixIdentity();
+        renderable.GetModel().transform = MatrixIdentity();
     }
 
     bool TextureTerrainOverlay::active() const

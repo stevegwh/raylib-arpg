@@ -16,9 +16,9 @@ namespace sage
 
     void LightSubSystem::LinkRenderableToLight(Renderable* renderable)
     {
-        for (int i = 0; i < renderable->model.materialCount; ++i)
+        for (int i = 0; i < renderable->GetModel().materialCount; ++i)
         {
-            renderable->model.materials[i].shader = shader;
+            renderable->GetModel().materials[i].shader = shader;
         }
     }
 

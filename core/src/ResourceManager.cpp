@@ -6,7 +6,6 @@
 
 #include <cstring>
 #include <unordered_map>
-#include <utility>
 
 #include "raylib/src/config.h"
 #include "raymath.h"
@@ -74,15 +73,13 @@ namespace sage
     {
         if (staticModels.find(path) == staticModels.end())
         {
-            Model model = LoadModel(path.c_str());
-            staticModels[path] = model;
-            return model;
+            staticModels.try_emplace(path, SafeModel(path.c_str()));
         }
 
-        return staticModels[path];
+        return staticModels.at(path).rlModel();
     }
 
-    Mesh deepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
+    void ResourceManager::DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
     {
         mesh.vertexCount = oldMesh.vertexCount;
         mesh.triangleCount = oldMesh.triangleCount;
@@ -151,27 +148,23 @@ namespace sage
         {
             mesh.name = strdup(oldMesh.name);
         }
-
-        return mesh;
     }
 
     /**
      * @brief Creates a deep copy of the loaded model. Cuts down model loading times as
      * it's faster copying buffers rather than reading/parsing model files.
-     * NB: Caller must take ownership of freeing memory.
      * @param path
      * @return
      */
-    Model ResourceManager::DynamicModelLoad(const std::string& path)
+    SafeModel ResourceManager::DynamicModelLoad(const std::string& path)
     {
         if (dynamicModels.find(path) == dynamicModels.end())
         {
             // Create a base copy that will be used for the copies (memory managed by ResourceManager)
-            Model model = LoadModel(path.c_str());
-            dynamicModels[path] = model;
+            dynamicModels.try_emplace(path, SafeModel(path.c_str()));
         }
         Model model;
-        const Model& oldModel = dynamicModels[path];
+        const Model& oldModel = dynamicModels[path].rlModel();
         // deep copy model here
         model.meshCount = oldModel.meshCount;
         model.materialCount = oldModel.materialCount;
@@ -182,7 +175,7 @@ namespace sage
 
         for (size_t i = 0; i < model.meshCount; ++i)
         {
-            deepCopyMesh(oldModel.meshes[i], model.meshes[i]);
+            DeepCopyMesh(oldModel.meshes[i], model.meshes[i]);
         }
 
         if (model.materialCount == 0)
@@ -248,7 +241,7 @@ namespace sage
         // else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data",
         // "Cereal Model Import");
 
-        return model;
+        return SafeModel(model);
     }
 
     ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
@@ -264,19 +257,11 @@ namespace sage
         return pair.first;
     }
 
-    ResourceManager::~ResourceManager()
+    void ResourceManager::UnloadAll()
     {
         for (const auto& kv : textureImages)
         {
             UnloadImage(kv.second);
-        }
-        for (const auto& kv : staticModels)
-        {
-            UnloadModel(kv.second);
-        }
-        for (const auto& kv : dynamicModels)
-        {
-            UnloadModel(kv.second);
         }
         for (const auto& kv : modelAnimations)
         {
@@ -290,5 +275,10 @@ namespace sage
         {
             UnloadFileText(kv.second);
         }
+    }
+
+    ResourceManager::~ResourceManager()
+    {
+        UnloadAll();
     }
 } // namespace sage

@@ -37,7 +37,6 @@ namespace sage
     {
         std::unordered_map<AnimationEnum, int> animationMap;
         ModelAnimation* animations;
-        Model* model;
         unsigned int animIndex = 0;
         unsigned int animCurrentFrame = 0;
         unsigned int animLastFrame = 0;
@@ -47,7 +46,7 @@ namespace sage
         entt::sigh<void(entt::entity)> onAnimationEnd{};
         entt::sigh<void(entt::entity)> onAnimationStart{};
 
-        Animation(const char* _modelPath, Model* _model) : model(_model)
+        Animation(const char* _modelPath)
         {
             animsCount = 0;
             animations = ResourceManager::GetInstance().ModelAnimationLoad(_modelPath, &animsCount);

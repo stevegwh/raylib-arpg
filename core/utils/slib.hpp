@@ -24,10 +24,32 @@ namespace sage
         };
     };
 
+    /**
+     * Defines a memory safe wrapper for raylib model. Does not safeguard against access to underlying pointers.
+     */
+    class SafeModel
+    {
+        Model model{};
+
+      public:
+        Model& rlModel();
+        Shader GetShader();
+        void SetShader(const char* path);
+        void SetModel(Model& _model);
+        SafeModel(const SafeModel&) = delete;
+        SafeModel& operator=(const SafeModel&) = delete;
+        SafeModel(SafeModel&& other) noexcept;
+        SafeModel& operator=(SafeModel&& other) noexcept;
+        ~SafeModel();
+        SafeModel(const char* path);
+        SafeModel(Model _model);
+        SafeModel(Mesh _mesh);
+        SafeModel() = default;
+    };
+
     Vector2 Vec3ToVec2(const Vector3& vec3);
     Vector3 NegateVector(const Vector3& vec3);
     Vector3 Vector3MultiplyByValue(const Vector3& vec3, float value);
-    BoundingBox CalculateModelBoundingBox(Model& model);
+    BoundingBox CalculateModelBoundingBox(const Model& model);
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer);
-
 } // namespace sage

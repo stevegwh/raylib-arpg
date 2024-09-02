@@ -163,7 +163,8 @@ namespace sage
 
                     try
                     {
-                        input(entityId, transform, collideable, renderable);
+                        input(entityId, transform, collideable);
+                        // input(entityId, transform, collideable, renderable);
                     }
                     catch (const cereal::Exception& e)
                     {
@@ -259,8 +260,7 @@ namespace sage
             else
             {
                 // File doesn't exist, create a new file with the default key mapping
-                std::cout << "Settings file not found. Creating a new file with default settings."
-                          << std::endl;
+                std::cout << "Settings file not found. Creating a new file with default settings." << std::endl;
                 SerializeSettings(settings, path);
             }
             std::cout << "Load finished" << std::endl;

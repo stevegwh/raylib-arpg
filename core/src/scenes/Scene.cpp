@@ -57,6 +57,7 @@ namespace sage
 
     Scene::~Scene()
     {
+        // ResourceManager::GetInstance().UnloadAll();
     }
 
     Scene::Scene(
@@ -67,17 +68,17 @@ namespace sage
     {
         data->Load();
         float slices = 500;
-
+        GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
         // TODO: wat
-        if (!FileExists("resources/output.bin"))
-        {
-            GameObjectFactory::loadMap(registry, this, slices, mapPath);
-        }
-        else
-        {
-            lightSubSystem->LinkAllRenderablesToLight();
-        }
-        data->navigationGridSystem->Init(slices, 1.0f, "resources/output.bin");
+        // if (!FileExists("resources/output.bin"))
+        // {
+        //     GameObjectFactory::loadMap(registry, this, slices, mapPath);
+        // }
+        // else
+        // {
+        //     lightSubSystem->LinkAllRenderablesToLight();
+        // }
+        data->navigationGridSystem->Init(slices, 1.0f, "resources/models/obj/level-basic.obj");
         data->navigationGridSystem->PopulateGrid();
     };
 

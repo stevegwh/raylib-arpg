@@ -5,32 +5,40 @@
 
 #include "Renderable.hpp"
 
-#include <cstring>
-#include <utility>
+#include <memory>
 
 namespace sage
 {
+
+    void Renderable::SetModel(SafeModel _model)
+    {
+        model = std::make_unique<SafeModel>(std::move(_model));
+    }
+
+    Model Renderable::GetModel()
+    {
+        return model->rlModel();
+    }
+
     Renderable::~Renderable()
     {
         if (shader.has_value())
         {
             UnloadShader(shader.value());
         }
-        UnloadModel(model);
-        for (auto& texture : textures)
-        {
-            UnloadTexture(texture);
-        }
     }
 
-    Renderable::Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform)
-        : initialTransform(_localTransform), materials(std::move(_materials)), model(_model)
+    Renderable::Renderable(SafeModel _model, MaterialPaths _materials, Matrix _localTransform)
+        : initialTransform(_localTransform),
+          materials(std::move(_materials)),
+          model(std::make_unique<SafeModel>(std::move(_model)))
     {
-        model.transform = initialTransform;
+        model->rlModel().transform = initialTransform;
     }
 
-    Renderable::Renderable(Model _model, Matrix _localTransform) : initialTransform(_localTransform), model(_model)
+    Renderable::Renderable(SafeModel _model, Matrix _localTransform)
+        : initialTransform(_localTransform), model(std::make_unique<SafeModel>(std::move(_model)))
     {
-        model.transform = initialTransform;
+        model->rlModel().transform = initialTransform;
     }
 } // namespace sage
