@@ -144,6 +144,7 @@ namespace sage
             manageEditorState();
             scene->Update();
             draw();
+            handleScreenUpdate();
         }
     }
 
