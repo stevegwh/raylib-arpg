@@ -6,8 +6,10 @@
 #include "raylib.h"
 #include "slib.hpp"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace sage
 {
@@ -21,7 +23,6 @@ namespace sage
         std::unordered_map<std::string, Image> textureImages{};
         std::unordered_map<std::string, Texture> textures{};
         std::unordered_map<std::string, SafeModel> staticModels{};
-        std::unordered_map<std::string, SafeModel> dynamicModels{};
         std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations{};
         std::unordered_map<std::string, char*> vertShaders{};
         std::unordered_map<std::string, char*> fragShaders{};
@@ -38,10 +39,12 @@ namespace sage
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
         Image ImageLoad(const std::string& path);
-        Model InstantiateModel(const std::string& path);
+        Model LoadModelCopy(const std::string& path);
         static void DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
-        SafeModel DynamicModelLoad(const std::string& path);
+        SafeModel LoadModelUnique(const std::string& path);
         ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
+        void UnloadImages();
+        void UnloadShaderFileText();
 
         void UnloadAll();
         ResourceManager(const ResourceManager&) = delete;
