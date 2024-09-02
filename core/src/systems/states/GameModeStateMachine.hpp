@@ -16,7 +16,8 @@ namespace sage
 {
     class GameData;
 
-    class GameStateController : public StateMachineController<GameStateController, GameState, GameStateEnum>
+    class GameModeStateController
+        : public StateMachineController<GameModeStateController, GameState, GameStateEnum>
     {
         entt::entity gameEntity;
 
@@ -26,8 +27,8 @@ namespace sage
       public:
         void Update();
         void Draw3D();
-        
-        GameStateController(entt::registry* _registry, GameData* gameData);
+
+        GameModeStateController(entt::registry* _registry, GameData* gameData);
 
         friend class StateMachineController; // Required for CRTP
     };

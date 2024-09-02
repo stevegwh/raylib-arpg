@@ -2,7 +2,7 @@
 // Created by Steve Wheeler on 31/07/2024.
 //
 
-#include "GameStateMachine.hpp"
+#include "GameModeStateMachine.hpp"
 
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
@@ -16,18 +16,13 @@
 
 namespace sage
 {
-    class GameStateController::DefaultState : public StateMachine
+    class GameModeStateController::DefaultState : public StateMachine
     {
         entt::entity gameEntity;
         Timer timer{};
 
         void OnTimerEnd()
         {
-            // TODO: Below stops a weird race condition happening.
-            // if (!registry->any_of<GameState>(gameEntity))
-            // {
-            //     registry->emplace<GameState>(gameEntity);
-            // }
             auto& gameState = registry->get<GameState>(gameEntity);
             gameState.ChangeState(gameEntity, GameStateEnum::Wave);
         }
@@ -65,7 +60,7 @@ namespace sage
 
     // ----------------------------
 
-    class GameStateController::WaveState : public StateMachine
+    class GameModeStateController::WaveState : public StateMachine
     {
 
         void initWave()
@@ -106,19 +101,19 @@ namespace sage
 
     // ----------------------------
 
-    void GameStateController::Update()
+    void GameModeStateController::Update()
     {
         const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
         GetSystem(state)->Update(gameEntity);
     }
 
-    void GameStateController::Draw3D()
+    void GameModeStateController::Draw3D()
     {
         const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
         GetSystem(state)->Draw3D(gameEntity);
     }
 
-    GameStateController::GameStateController(entt::registry* _registry, GameData* _gameData)
+    GameModeStateController::GameModeStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry), gameEntity(_registry->create())
     {
         states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _gameData, gameEntity);

@@ -169,6 +169,12 @@ namespace sage
         ad.indicator.indicatorKey = "CircularCursor";
     }
 
+    void CreateFloorFireAbility(
+        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    {
+        // TODO: Implement
+    }
+
     void CreateFireballAbility(
         entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
     {
