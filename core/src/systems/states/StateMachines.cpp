@@ -7,7 +7,7 @@ namespace sage
 {
     void StateMachines::Update()
     {
-        gameStateMachine->Update();
+        gameModeStateMachine->Update();
         wavemobStatemachine->Update();
         playerStateMachine->Update();
         abilityStateMachine->Update();
@@ -22,7 +22,7 @@ namespace sage
     }
 
     StateMachines::StateMachines(entt::registry* _registry, GameData* _gameData)
-        : gameStateMachine(std::make_unique<GameStateController>(_registry, _gameData)),
+        : gameModeStateMachine(std::make_unique<GameModeStateController>(_registry, _gameData)),
           wavemobStatemachine(std::make_unique<WavemobStateController>(_registry, _gameData)),
           playerStateMachine(std::make_unique<PlayerStateController>(_registry, _gameData)),
           abilityStateMachine(std::make_unique<AbilityStateController>(_registry, _gameData))

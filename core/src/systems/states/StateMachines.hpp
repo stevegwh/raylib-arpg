@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AbilityStateMachine.hpp"
-#include "GameStateMachine.hpp"
+#include "GameModeStateMachine.hpp"
 #include "PlayerStateMachine.hpp"
 #include "WavemobStateMachine.hpp"
 
@@ -17,7 +17,7 @@ namespace sage
     {
       public:
         // Systems
-        std::unique_ptr<GameStateController> gameStateMachine;
+        std::unique_ptr<GameModeStateController> gameModeStateMachine;
         std::unique_ptr<WavemobStateController> wavemobStatemachine;
         std::unique_ptr<PlayerStateController> playerStateMachine;
         std::unique_ptr<AbilityStateController> abilityStateMachine;
