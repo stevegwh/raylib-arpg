@@ -22,6 +22,11 @@
 
 namespace sage
 {
+    // Emplace this "tag" to draw this renderable "last" (or, at least, with the other deferred renderables)
+    struct RenderableDeferred
+    {
+    };
+
     struct Renderable
     {
         std::vector<Texture> textures;
