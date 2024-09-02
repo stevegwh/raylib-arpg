@@ -78,7 +78,7 @@ namespace sage
         registry->emplace<MoveableActor>(id);
 
         // auto model = LoadModel(modelPath);
-        auto model = ResourceManager::DynamicModelLoad(modelPath);
+        auto model = ResourceManager::GetInstance().DynamicModelLoad(modelPath);
 
         auto& animation = registry->emplace<Animation>(id, modelPath, &model);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -272,7 +272,7 @@ namespace sage
         MaterialPaths matPaths;
         matPaths.diffuse = texturePath;
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-            LoadTextureFromImage(ResourceManager::ImageLoad(matPaths.diffuse));
+            LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(matPaths.diffuse));
         auto& renderable = registry->emplace<Renderable>(id, model, matPaths, MatrixIdentity());
         renderable.name = name;
         auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
@@ -325,7 +325,7 @@ namespace sage
 
             scene->lightSubSystem->LinkRenderableToLight(&renderable);
             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-                LoadTextureFromImage(ResourceManager::ImageLoad(matPaths.diffuse));
+                LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(matPaths.diffuse));
             auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
             collideable.SetWorldBoundingBox(transform.GetMatrix());
 
@@ -351,6 +351,8 @@ namespace sage
                 collideable.collisionLayer = CollisionLayer::DEFAULT;
             }
         }
+
+        // UnloadModel(parent);
 
         // Calculate grid based on walkable area
         BoundingBox mapBB{Vector3{-500, 0, -500}, Vector3{500, 0, 500}}; // min, max
@@ -432,7 +434,7 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
-        Model model = ResourceManager::StaticModelLoad("resources/models/obj/portal.obj");
+        Model model = ResourceManager::GetInstance().StaticModelLoad("resources/models/obj/portal.obj");
 
         model.transform = modelTransform;
 
@@ -458,7 +460,7 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
-        Model model = ResourceManager::StaticModelLoad("resources/models/obj/Wizard Tower 1.obj");
+        Model model = ResourceManager::GetInstance().StaticModelLoad("resources/models/obj/Wizard Tower 1.obj");
 
         model.transform = modelTransform;
 

@@ -65,19 +65,19 @@ namespace sage
 
             if (FileExists(materials.diffuse.c_str()))
             {
-                auto texture = LoadTextureFromImage(ResourceManager::ImageLoad(materials.diffuse));
+                auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.diffuse));
                 model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
                 textures.push_back(texture);
             }
             if (FileExists(materials.specular.c_str()))
             {
-                auto texture = LoadTextureFromImage(ResourceManager::ImageLoad(materials.specular));
+                auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.specular));
                 model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = texture;
                 textures.push_back(texture);
             }
             if (FileExists(materials.normal.c_str()))
             {
-                auto texture = LoadTextureFromImage(ResourceManager::ImageLoad(materials.normal));
+                auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.normal));
                 model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = texture;
                 textures.push_back(texture);
             }

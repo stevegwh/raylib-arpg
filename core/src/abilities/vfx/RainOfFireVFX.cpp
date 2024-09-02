@@ -123,13 +123,12 @@ namespace sage
 
     RainOfFireVFX::~RainOfFireVFX()
     {
-
         UnloadShader(shader);
         std::cout << "RainOfFireVFX destroyed" << std::endl;
     }
 
     RainOfFireVFX::RainOfFireVFX(GameData* _gameData, sgTransform* _transform) : VisualFX(_gameData, _transform)
     {
-        shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }
 } // namespace sage
