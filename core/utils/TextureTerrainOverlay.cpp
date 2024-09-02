@@ -186,8 +186,11 @@ namespace sage
     TextureTerrainOverlay::~TextureTerrainOverlay()
     {
         UnloadTexture(texture);
+        registry->remove<TextureTerrainOverlay>(entity);
     }
 
+    // TODO: This is currently rendered incorrectly due to its draw order.
+    // Without deferred rendering, these models need to be drawn last.
     TextureTerrainOverlay::TextureTerrainOverlay(
         entt::registry* _registry,
         NavigationGridSystem* _navigationGridSystem,
@@ -203,6 +206,7 @@ namespace sage
         r.shader = std::make_optional(LoadShader(nullptr, shaderPath));
         r.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);
+        registry->emplace<RenderableDeferred>(entity);
     }
 
 } // namespace sage
