@@ -15,29 +15,33 @@ namespace sage
         int screenHeight = 720;
         bool toggleFullScreenRequested = false;
 
-        void ResetScreenSize()
+        void ResetToUserDefined()
         {
             screenWidth = screenWidthUser;
             screenHeight = screenHeightUser;
         }
 
-        void ResetDefaultScreenSize()
+        void ResetToDefaults()
         {
-            screenWidth = SCREEN_WIDTH;
-            screenHeight = SCREEN_HEIGHT;
+            screenWidthUser = SCREEN_WIDTH;
+            screenHeightUser = SCREEN_HEIGHT;
+            ResetToUserDefined();
         }
 
         template <class Archive>
         void serialize(Archive& archive)
         {
-            // TODO: Change NVP to remove user
-            archive(CEREAL_NVP(screenWidthUser), CEREAL_NVP(screenHeightUser));
+            ResetToDefaults();
+            archive(
+                cereal::make_nvp("screen_width", screenWidthUser),
+                cereal::make_nvp("screen_height", screenHeightUser));
+            ResetToUserDefined();
         }
 
       private:
-        // Loaded defaults
-        int screenWidthUser = 1280;
-        int screenHeightUser = 720;
+        // Serialized settings (loaded from settings.xml)
+        int screenWidthUser;
+        int screenHeightUser;
 
         // Hardcoded defaults
         static constexpr int SCREEN_WIDTH = 1280;
