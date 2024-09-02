@@ -57,27 +57,31 @@ namespace sage
         template <class Archive>
         void load(Archive& archive)
         {
-            archive(model, name, materials, initialTransform);
+            Model _model;
+
+            archive(_model, name, materials, initialTransform);
 
             char* _name = new char[this->name.size() + 1];
-            model->rlModel().meshes[0].name = _name;
-            model->rlModel().transform = initialTransform;
+            _model.meshes[0].name = _name;
+            _model.transform = initialTransform;
 
             if (FileExists(materials.diffuse.c_str()))
             {
                 auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.diffuse));
-                model->rlModel().materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+                _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
             }
             if (FileExists(materials.specular.c_str()))
             {
                 auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.specular));
-                model->rlModel().materials[0].maps[MATERIAL_MAP_SPECULAR].texture = texture;
+                _model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = texture;
             }
             if (FileExists(materials.normal.c_str()))
             {
                 auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.normal));
-                model->rlModel().materials[0].maps[MATERIAL_MAP_NORMAL].texture = texture;
+                _model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = texture;
             }
+
+            model = std::make_unique<SafeModel>(_model);
         }
 
       private:
