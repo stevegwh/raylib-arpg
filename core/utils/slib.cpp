@@ -56,7 +56,7 @@ namespace sage
         UnloadModel(model);
     }
 
-    SafeModel::SafeModel(Mesh _mesh)
+    SafeModel::SafeModel(const Mesh& _mesh)
     {
         Mesh meshCopy;
         ResourceManager::DeepCopyMesh(_mesh, meshCopy);
@@ -65,7 +65,7 @@ namespace sage
 
     SafeModel::SafeModel(Model _model) : model(_model)
     {
-        // Should deep copy Model and unload the old one
+        // Should deep copy Model and unload the old one?
     }
 
     SafeModel::SafeModel(const char* path)

@@ -10,13 +10,14 @@
 namespace sage
 {
 
-    void Renderable::SetModel(SafeModel _model)
-    {
-        model = std::make_unique<SafeModel>(std::move(_model));
-    }
+    // void Renderable::SetModel(SafeModel _model)
+    // {
+    //     model = std::make_unique<SafeModel>(std::move(_model));
+    // }
 
-    Model Renderable::GetModel()
+    Model Renderable::GetModel() const
     {
+        // assert(model != nullptr);
         return model->rlModel();
     }
 

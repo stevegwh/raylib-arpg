@@ -38,7 +38,7 @@ namespace sage
             ""); // TODO: Map path is ignored atm (just loads output.bin)
     }
 
-    void Application::handleScreenUpdate()
+    void Application::handleScreenUpdate() const
     {
         if (settings->toggleFullScreenRequested)
         {
