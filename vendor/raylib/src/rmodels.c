@@ -1756,6 +1756,7 @@ void UnloadMesh(Mesh mesh)
     if (mesh.vboId != NULL) for (int i = 0; i < MAX_MESH_VERTEX_BUFFERS; i++) rlUnloadVertexBuffer(mesh.vboId[i]);
     RL_FREE(mesh.vboId);
 
+    RL_FREE(mesh.name);
     RL_FREE(mesh.vertices);
     RL_FREE(mesh.texcoords);
     RL_FREE(mesh.normals);

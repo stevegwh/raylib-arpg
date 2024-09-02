@@ -10,9 +10,6 @@
 #include "systems/states/AbilityStateMachine.hpp"
 #include <Serializer.hpp>
 
-#include "raymath.h"
-#include <memory>
-
 namespace sage
 {
     void CreatePlayerAutoAttack(
