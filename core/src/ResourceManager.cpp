@@ -32,7 +32,6 @@ namespace sage
      * @param vShaderStr
      * @param fShaderStr
      * @return Shader
-
     */
     Shader ResourceManager::ShaderLoad(const char* vsFileName, const char* fsFileName)
     {
@@ -91,7 +90,7 @@ namespace sage
      * @param path
      * @return Model
      */
-    Model ResourceManager::InstantiateModel(const std::string& path)
+    Model ResourceManager::LoadModelCopy(const std::string& path)
     {
         if (staticModels.find(path) == staticModels.end())
         {
@@ -178,15 +177,10 @@ namespace sage
      * @param path
      * @return
      */
-    SafeModel ResourceManager::DynamicModelLoad(const std::string& path)
+    SafeModel ResourceManager::LoadModelUnique(const std::string& path)
     {
-        if (!dynamicModels.contains(path))
-        {
-            // Create a base copy that will be used for the copies (memory managed by ResourceManager)
-            dynamicModels.try_emplace(path, SafeModel(path.c_str()));
-        }
         Model model;
-        const Model& oldModel = dynamicModels[path].rlModel();
+        const Model& oldModel = LoadModelCopy(path);
         // deep copy model here
         model.meshCount = oldModel.meshCount;
         model.materialCount = oldModel.materialCount;
@@ -263,12 +257,13 @@ namespace sage
         // else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data",
         // "Cereal Model Import");
 
+        // Return shared_ptr?
         return SafeModel{model};
     }
 
     ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
     {
-        if (modelAnimations.find(path) == modelAnimations.end())
+        if (!modelAnimations.contains(path))
         {
             auto animations = LoadModelAnimations(path.c_str(), animsCount);
             modelAnimations[path] = std::make_pair(animations, *animsCount);
@@ -277,6 +272,29 @@ namespace sage
         const auto& pair = modelAnimations[path];
         *animsCount = pair.second;
         return pair.first;
+    }
+
+    void ResourceManager::UnloadImages()
+    {
+        for (const auto& kv : textureImages)
+        {
+            UnloadImage(kv.second);
+        }
+        textureImages.clear();
+    }
+
+    void ResourceManager::UnloadShaderFileText()
+    {
+        for (const auto& kv : vertShaders)
+        {
+            UnloadFileText(kv.second);
+        }
+        for (const auto& kv : fragShaders)
+        {
+            UnloadFileText(kv.second);
+        }
+        vertShaders.clear();
+        fragShaders.clear();
     }
 
     void ResourceManager::UnloadAll()
