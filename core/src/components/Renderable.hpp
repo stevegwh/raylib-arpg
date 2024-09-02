@@ -67,18 +67,18 @@ namespace sage
 
             if (FileExists(materials.diffuse.c_str()))
             {
-                auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.diffuse));
-                _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+                _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
+                    ResourceManager::GetInstance().TextureLoad(materials.diffuse);
             }
             if (FileExists(materials.specular.c_str()))
             {
-                auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.specular));
-                _model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = texture;
+                _model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture =
+                    ResourceManager::GetInstance().TextureLoad(materials.specular);
             }
             if (FileExists(materials.normal.c_str()))
             {
-                auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.normal));
-                _model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = texture;
+                _model.materials[0].maps[MATERIAL_MAP_NORMAL].texture =
+                    ResourceManager::GetInstance().TextureLoad(materials.normal);
             }
 
             model = std::make_unique<SafeModel>(_model);

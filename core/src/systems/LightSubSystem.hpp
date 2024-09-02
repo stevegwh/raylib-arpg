@@ -25,7 +25,6 @@ namespace sage
         void LinkAllRenderablesToLight();
         void LinkRenderableToLight(Renderable* renderable);
         void DrawDebugLights();
-        ~LightSubSystem();
         explicit LightSubSystem(entt::registry* _registry);
     };
 } // namespace sage

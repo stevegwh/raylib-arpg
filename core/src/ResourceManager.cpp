@@ -13,6 +13,18 @@
 namespace sage
 {
 
+    Shader ResourceManager::gpuShaderLoad(const std::string& vs, const std::string& fs)
+    {
+        std::string concat = vs + fs;
+
+        if (!shaders.contains(concat))
+        {
+            shaders[concat] = LoadShaderFromMemory(vs.c_str(), fs.c_str());
+        }
+
+        return shaders[concat];
+    }
+
     /*
     * @brief Stores the shader's text file in memory, saving on reading the file multiple
     times.
@@ -24,14 +36,13 @@ namespace sage
     */
     Shader ResourceManager::ShaderLoad(const char* vsFileName, const char* fsFileName)
     {
-        Shader shader = {0};
 
         char* vShaderStr = nullptr;
         char* fShaderStr = nullptr;
 
         if (vsFileName != nullptr)
         {
-            if (vertShaders.find(vsFileName) == vertShaders.end())
+            if (!vertShaders.contains(vsFileName))
             {
                 vertShaders[vsFileName] = LoadFileText(vsFileName);
             }
@@ -40,21 +51,32 @@ namespace sage
 
         if (fsFileName != nullptr)
         {
-            if (fragShaders.find(fsFileName) == fragShaders.end())
+            if (!fragShaders.contains(fsFileName))
             {
                 fragShaders[fsFileName] = LoadFileText(fsFileName);
             }
             fShaderStr = fragShaders[fsFileName];
         }
 
-        shader = LoadShaderFromMemory(vShaderStr, fShaderStr);
+        std::string vStr = vShaderStr == nullptr ? "" : vShaderStr;
+        std::string fStr = fShaderStr == nullptr ? "" : fShaderStr;
 
-        return shader;
+        return gpuShaderLoad(std::string(vStr), std::string(fStr));
+    }
+
+    Texture ResourceManager::TextureLoad(const std::string& path)
+    {
+        if (!textures.contains(path))
+        {
+            auto img = ImageLoad(path.c_str());
+            textures[path] = LoadTextureFromImage(img);
+        }
+        return textures[path];
     }
 
     Image ResourceManager::ImageLoad(const std::string& path)
     {
-        if (textureImages.find(path) == textureImages.end())
+        if (!textureImages.contains(path))
         {
             Image img = LoadImage(path.c_str());
             textureImages[path] = img;
@@ -241,7 +263,7 @@ namespace sage
         // else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data",
         // "Cereal Model Import");
 
-        return {model};
+        return SafeModel{model};
     }
 
     ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
@@ -259,6 +281,10 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
+        for (const auto& kv : textures)
+        {
+            UnloadTexture(kv.second);
+        }
         for (const auto& kv : textureImages)
         {
             UnloadImage(kv.second);
@@ -266,6 +292,10 @@ namespace sage
         for (const auto& kv : modelAnimations)
         {
             UnloadModelAnimations(kv.second.first, kv.second.second);
+        }
+        for (const auto& kv : shaders)
+        {
+            UnloadShader(kv.second);
         }
         for (const auto& kv : vertShaders)
         {

@@ -33,11 +33,6 @@ namespace sage
         }
     }
 
-    LightSubSystem::~LightSubSystem()
-    {
-        UnloadShader(shader);
-    }
-
     LightSubSystem::LightSubSystem(entt::registry* _registry) : registry(_registry)
     {
         shader = ResourceManager::GetInstance().ShaderLoad(

@@ -33,7 +33,6 @@ namespace sage
         void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        ~SpiralFountainVFX();
         explicit SpiralFountainVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage
