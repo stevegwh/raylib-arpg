@@ -50,7 +50,7 @@ namespace sage
         Animation(const char* _modelPath, Model* _model) : model(_model)
         {
             animsCount = 0;
-            animations = ResourceManager::ModelAnimationLoad(_modelPath, &animsCount);
+            animations = ResourceManager::GetInstance().ModelAnimationLoad(_modelPath, &animsCount);
             animIndex = 0;
         }
 

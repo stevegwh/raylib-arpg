@@ -95,7 +95,7 @@ namespace sage
             : StateMachine(_registry, _gameData)
         {
             // Preload model(s)
-            Model model = ResourceManager::DynamicModelLoad("resources/models/gltf/goblin.glb");
+            Model model = ResourceManager::GetInstance().DynamicModelLoad("resources/models/gltf/goblin.glb");
             UnloadModel(model);
         }
     };

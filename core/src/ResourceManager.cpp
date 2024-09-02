@@ -4,23 +4,15 @@
 
 #include "ResourceManager.hpp"
 
-#include <string.h>
+#include <cstring>
 #include <unordered_map>
 #include <utility>
 
 #include "raylib/src/config.h"
 #include "raymath.h"
-#include "rlgl.h"
 
 namespace sage
 {
-
-    static std::unordered_map<std::string, Image> textureImages;
-    static std::unordered_map<std::string, Model> staticModels;
-    static std::unordered_map<std::string, Model> dynamicModels;
-    static std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations;
-    static std::unordered_map<std::string, char*> vertShaders;
-    static std::unordered_map<std::string, char*> fragShaders;
 
     /*
     * @brief Stores the shader's text file in memory, saving on reading the file multiple

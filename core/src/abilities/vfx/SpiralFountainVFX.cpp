@@ -51,7 +51,7 @@ namespace sage
     SpiralFountainVFX::SpiralFountainVFX(GameData* _gameData, sgTransform* _transform)
         : VisualFX(_gameData, _transform)
     {
-        shader = ResourceManager::ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
         fountain = std::make_unique<FountainPartSys>(_gameData->camera->getRaylibCam());
     }
 } // namespace sage

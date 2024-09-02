@@ -33,9 +33,14 @@ namespace sage
         }
     }
 
+    LightSubSystem::~LightSubSystem()
+    {
+        UnloadShader(shader);
+    }
+
     LightSubSystem::LightSubSystem(entt::registry* _registry) : registry(_registry)
     {
-        shader = ResourceManager::ShaderLoad(
+        shader = ResourceManager::GetInstance().ShaderLoad(
             TextFormat("resources/shaders/glsl%i/lighting.vs", 330),
             TextFormat("resources/shaders/glsl%i/lighting.fs", 330));
         // Ambient light level (some basic lighting)

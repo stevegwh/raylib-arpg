@@ -12,7 +12,7 @@
 
 namespace sage
 {
-    using Renderable = struct Renderable; // forward dec
+    struct Renderable;
     class LightSubSystem
     {
         entt::registry* registry;
@@ -25,6 +25,7 @@ namespace sage
         void LinkAllRenderablesToLight();
         void LinkRenderableToLight(Renderable* renderable);
         void DrawDebugLights();
+        ~LightSubSystem();
         explicit LightSubSystem(entt::registry* _registry);
     };
 } // namespace sage
