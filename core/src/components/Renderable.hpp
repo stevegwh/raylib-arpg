@@ -29,29 +29,29 @@ namespace sage
 
     struct Renderable
     {
-        std::vector<Texture> textures;
         Color hint = WHITE;
         bool active = true;
         Matrix initialTransform{};
         MaterialPaths materials;
-        Model model{};
         std::optional<Shader> shader;
         std::unordered_map<std::string, int> shaderLocs;
         std::function<void(entt::entity)> reqShaderUpdate;
         std::string name = "Default";
         bool serializable = true;
+        void SetModel(SafeModel _model);
+        Model GetModel();
 
         Renderable() = default;
         Renderable(const Renderable&) = delete;
         Renderable& operator=(const Renderable&) = delete;
-        Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform);
-        Renderable(Model _model, Matrix _localTransform);
+        Renderable(SafeModel _model, MaterialPaths _materials, Matrix _localTransform);
+        Renderable(SafeModel _model, Matrix _localTransform);
         ~Renderable();
 
         template <class Archive>
         void save(Archive& archive) const
         {
-            archive(model, name, materials, initialTransform);
+            archive(model->rlModel(), name, materials, initialTransform);
         }
 
         template <class Archive>
@@ -60,27 +60,27 @@ namespace sage
             archive(model, name, materials, initialTransform);
 
             char* _name = new char[this->name.size() + 1];
-            model.meshes[0].name = _name;
-            model.transform = initialTransform;
+            model->rlModel().meshes[0].name = _name;
+            model->rlModel().transform = initialTransform;
 
             if (FileExists(materials.diffuse.c_str()))
             {
                 auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.diffuse));
-                model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-                textures.push_back(texture);
+                model->rlModel().materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
             }
             if (FileExists(materials.specular.c_str()))
             {
                 auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.specular));
-                model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture = texture;
-                textures.push_back(texture);
+                model->rlModel().materials[0].maps[MATERIAL_MAP_SPECULAR].texture = texture;
             }
             if (FileExists(materials.normal.c_str()))
             {
                 auto texture = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(materials.normal));
-                model.materials[0].maps[MATERIAL_MAP_NORMAL].texture = texture;
-                textures.push_back(texture);
+                model->rlModel().materials[0].maps[MATERIAL_MAP_NORMAL].texture = texture;
             }
         }
+
+      private:
+        std::unique_ptr<SafeModel> model;
     };
 } // namespace sage

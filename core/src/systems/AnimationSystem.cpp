@@ -101,9 +101,7 @@ namespace sage
                             animVertex = Vector3Subtract(animVertex, inTranslation);
                             animVertex = Vector3Multiply(animVertex, outScale);
                             animVertex = Vector3RotateByQuaternion(
-                                animVertex,
-                                QuaternionMultiply(
-                                    outRotation, QuaternionInvert(inRotation)));
+                                animVertex, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
                             animVertex = Vector3Add(animVertex, outTranslation);
                             mesh->animVertices[vCounter] += animVertex.x * boneWeight;
                             mesh->animVertices[vCounter + 1] += animVertex.y * boneWeight;
@@ -117,14 +115,10 @@ namespace sage
                                     mesh->normals[vCounter + 1],
                                     mesh->normals[vCounter + 2]};
                                 animNormal = Vector3RotateByQuaternion(
-                                    animNormal,
-                                    QuaternionMultiply(
-                                        outRotation, QuaternionInvert(inRotation)));
+                                    animNormal, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
                                 mesh->animNormals[vCounter] += animNormal.x * boneWeight;
-                                mesh->animNormals[vCounter + 1] +=
-                                    animNormal.y * boneWeight;
-                                mesh->animNormals[vCounter + 2] +=
-                                    animNormal.z * boneWeight;
+                                mesh->animNormals[vCounter + 1] += animNormal.y * boneWeight;
+                                mesh->animNormals[vCounter + 2] += animNormal.z * boneWeight;
                             }
                         }
                     }
@@ -143,17 +137,11 @@ namespace sage
                 {
                     Mesh* mesh = &model.meshes[m];
                     rlUpdateVertexBuffer(
-                        mesh->vboId[0],
-                        mesh->animVertices,
-                        mesh->vertexCount * 3 * sizeof(float),
-                        0);
+                        mesh->vboId[0], mesh->animVertices, mesh->vertexCount * 3 * sizeof(float), 0);
                     if (mesh->animNormals != NULL)
                     {
                         rlUpdateVertexBuffer(
-                            mesh->vboId[2],
-                            mesh->animNormals,
-                            mesh->vertexCount * 3 * sizeof(float),
-                            0);
+                            mesh->vboId[2], mesh->animNormals, mesh->vertexCount * 3 * sizeof(float), 0);
                     }
                 }
             }
@@ -166,24 +154,24 @@ namespace sage
         const auto& view = registry->view<Animation, Renderable>();
         for (auto& entity : view)
         {
-            auto& a = registry->get<Animation>(entity);
-            const auto& r = registry->get<Renderable>(entity);
-            const ModelAnimation& anim = a.animations[a.animIndex];
+            auto& animation = registry->get<Animation>(entity);
+            auto& renderable = registry->get<Renderable>(entity);
+            const ModelAnimation& anim = animation.animations[animation.animIndex];
 
-            if (a.animCurrentFrame == 0 || a.animCurrentFrame < a.animLastFrame)
+            if (animation.animCurrentFrame == 0 || animation.animCurrentFrame < animation.animLastFrame)
             {
-                a.onAnimationStart.publish(entity);
+                animation.onAnimationStart.publish(entity);
             }
 
-            if (a.animCurrentFrame + a.animSpeed >= anim.frameCount)
+            if (animation.animCurrentFrame + animation.animSpeed >= anim.frameCount)
             {
-                a.onAnimationEnd.publish(entity);
-                if (a.oneShot) continue;
+                animation.onAnimationEnd.publish(entity);
+                if (animation.oneShot) continue;
             }
             if (!registry->valid(entity)) continue;
-            a.animLastFrame = a.animCurrentFrame;
-            a.animCurrentFrame = (a.animCurrentFrame + a.animSpeed) % anim.frameCount;
-            sage::UpdateModelAnimation(r.model, anim, a.animCurrentFrame);
+            animation.animLastFrame = animation.animCurrentFrame;
+            animation.animCurrentFrame = (animation.animCurrentFrame + animation.animSpeed) % anim.frameCount;
+            sage::UpdateModelAnimation(renderable.GetModel(), anim, animation.animCurrentFrame);
         }
     }
 

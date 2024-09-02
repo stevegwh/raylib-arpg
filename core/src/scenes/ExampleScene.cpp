@@ -48,16 +48,6 @@ namespace sage
         data->healthBarSystem->Update();
         data->stateMachines->Update();
         data->playerAbilitySystem->Update();
-        // const auto& playerTransform =
-        //     registry->get<sgTransform>(data->controllableActorSystem->GetControlledActor());
-        // fountain->SetOrigin(playerTransform.position());
-        // fountain->Update(GetFrameTime());
-        // if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
-        // {
-        //     explosion->Restart();
-        //     explosion->SetOrigin(data->cursor->terrainCollision().point);
-        // }
-        // explosion->Update();
         data->timerSystem->Update();
         data->collisionSystem->Update();
     }
@@ -71,7 +61,6 @@ namespace sage
     void ExampleScene::Draw3D()
     {
         Scene::Draw3D();
-        // fountain->Draw3D();
         data->healthBarSystem->Draw3D();
         data->playerAbilitySystem->Draw3D();
         data->stateMachines->Draw3D();

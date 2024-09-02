@@ -15,36 +15,36 @@ namespace sage
     {
     }
 
-    void RenderSystem::Draw() const
+    void RenderSystem::Draw() // Can't be const as GetModel returns pointers
     {
-        const auto normalView = registry->view<Renderable, sgTransform>(entt::exclude<RenderableDeferred>);
-        const auto deferredView = registry->view<Renderable, sgTransform, RenderableDeferred>();
+        auto normalView = registry->view<Renderable, sgTransform>(entt::exclude<RenderableDeferred>);
+        auto deferredView = registry->view<Renderable, sgTransform, RenderableDeferred>();
 
-        auto renderEntity = [this](const auto& r, const auto& t, const entt::entity entity) {
-            if (!r.active) return;
+        auto renderEntity = [this](auto& renderable, const auto& transform, const entt::entity entity) {
+            if (!renderable.active) return;
 
-            if (r.reqShaderUpdate) r.reqShaderUpdate(entity);
+            if (renderable.reqShaderUpdate) renderable.reqShaderUpdate(entity);
 
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
             DrawModelEx(
-                r.model,
-                t.GetWorldPos(),
+                renderable.GetModel(),
+                transform.GetWorldPos(),
                 rotationAxis,
-                t.GetRotation().y,
-                {t.GetScale(), t.GetScale(), t.GetScale()},
-                r.hint);
+                transform.GetRotation().y,
+                {transform.GetScale(), transform.GetScale(), transform.GetScale()},
+                renderable.hint);
         };
 
         for (auto entity : normalView)
         {
-            const auto& r = normalView.get<Renderable>(entity);
+            auto& r = normalView.get<Renderable>(entity);
             const auto& t = normalView.get<sgTransform>(entity);
             renderEntity(r, t, entity);
         }
 
         for (auto entity : deferredView)
         {
-            const auto& r = deferredView.get<Renderable>(entity);
+            auto& r = deferredView.get<Renderable>(entity);
             const auto& t = deferredView.get<sgTransform>(entity);
             renderEntity(r, t, entity);
         }

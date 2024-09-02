@@ -45,9 +45,9 @@ namespace sage
         sphere = LoadModelFromMesh(GenMeshHemiSphere(1.0f, 16, 16));
         entity = registry->create();
         registry->emplace<sgTransform>(entity, entity);
-        auto& r = registry->emplace<Renderable>(entity, sphere, MatrixIdentity());
-        r.hint = Color{255, 0, 0, 100};
+        auto& renderable = registry->emplace<Renderable>(entity, sphere, MatrixIdentity());
+        renderable.hint = Color{255, 0, 0, 100};
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/bloom.fs");
-        r.model.materials[0].shader = shader;
+        renderable.GetModel().materials[0].shader = shader;
     }
 } // namespace sage

@@ -5,17 +5,80 @@
 #include "slib.hpp"
 
 #include "raymath.h"
+#include "ResourceManager.hpp"
+
 #include <cstring>
 #include <vector>
 
 namespace sage
 {
+
+    Shader SafeModel::GetShader()
+    {
+        return model.materials[MATERIAL_MAP_DIFFUSE].shader;
+    }
+
+    Model& SafeModel::rlModel()
+    {
+        return model;
+    }
+
+    SafeModel::SafeModel(SafeModel&& other) noexcept : model(other.model)
+    {
+        // Reset the source object's model to prevent double deletion
+        other.model = {};
+    }
+
+    SafeModel& SafeModel::operator=(SafeModel&& other) noexcept
+    {
+        if (this != &other)
+        {
+            // Clean up existing resources
+            UnloadModel(model);
+
+            // Move resources from other
+            model = other.model;
+
+            // Reset the source object's model
+            other.model = {};
+        }
+        return *this;
+    }
+
+    void SafeModel::SetModel(Model& _model)
+    {
+        UnloadModel(model);
+        model = _model;
+    }
+
+    SafeModel::~SafeModel()
+    {
+        UnloadModel(model);
+    }
+
+    SafeModel::SafeModel(Mesh _mesh)
+    {
+        Mesh meshCopy;
+        ResourceManager::DeepCopyMesh(_mesh, meshCopy);
+        model = LoadModelFromMesh(meshCopy);
+    }
+
+    SafeModel::SafeModel(Model _model) : model(_model)
+    {
+        // Should deep copy Model and unload the old one
+    }
+
+    SafeModel::SafeModel(const char* path)
+    {
+        model = LoadModel(path);
+    }
+
     Vector2 Vec3ToVec2(const Vector3& vec3)
     {
         return {vec3.x, vec3.z};
     }
 
-    BoundingBox CalculateModelBoundingBox(Model& model)
+    BoundingBox CalculateModelBoundingBox(const Model& model)
     {
         Mesh mesh = model.meshes[0];
         std::vector<float> vertices(mesh.vertexCount * 3);

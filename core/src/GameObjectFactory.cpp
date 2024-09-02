@@ -77,19 +77,18 @@ namespace sage
         transform.movementSpeed = 0.05f;
         registry->emplace<MoveableActor>(id);
 
-        // auto model = LoadModel(modelPath);
-        auto model = ResourceManager::GetInstance().DynamicModelLoad(modelPath);
+        Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
+        auto& renderable = registry->emplace<Renderable>(
+            id, ResourceManager::GetInstance().DynamicModelLoad(modelPath), modelTransform);
+        renderable.name = name;
 
-        auto& animation = registry->emplace<Animation>(id, modelPath, &model);
+        auto& animation = registry->emplace<Animation>(id, modelPath);
         animation.animationMap[AnimationEnum::IDLE] = 0;
         animation.animationMap[AnimationEnum::DEATH] = 0;
         animation.animationMap[AnimationEnum::MOVE] = 3;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
         animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
 
-        Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
-        auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
-        renderable.name = name;
         // ---
 
         // Combat
@@ -129,13 +128,12 @@ namespace sage
         transform.SetScale(1.0f);
         transform.SetRotation({0, 0, 0});
 
-        auto model = LoadModel(modelPath);
-        auto& animation = registry->emplace<Animation>(id, modelPath, &model);
+        auto& animation = registry->emplace<Animation>(id, modelPath);
         animation.ChangeAnimation(0);
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
-        auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
-        renderable.name = name;
+        auto& renderable = registry->emplace<Renderable>(
+            id, ResourceManager::GetInstance().DynamicModelLoad(modelPath), modelTransform);
         renderable.name = name;
 
         // auto& combat = registry->emplace<HealthBar>(id);
@@ -178,10 +176,8 @@ namespace sage
 
         auto& moveableActor = registry->emplace<MoveableActor>(id);
 
-        auto model = LoadModel(modelPath);
-
         // Set animation hooks
-        auto& animation = registry->emplace<Animation>(id, modelPath, &model);
+        auto& animation = registry->emplace<Animation>(id, modelPath);
 
         animation.animationMap[AnimationEnum::IDLE] = 2;
         animation.animationMap[AnimationEnum::MOVE] = 5;
@@ -241,7 +237,8 @@ namespace sage
         // ---
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
-        auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+        auto& renderable = registry->emplace<Renderable>(
+            id, ResourceManager::GetInstance().DynamicModelLoad(modelPath), modelTransform);
         renderable.name = name;
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
@@ -253,30 +250,6 @@ namespace sage
         registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
         return id;
-    }
-
-    void GameObjectFactory::createBuilding(
-        entt::registry* registry,
-        GameData* data,
-        Vector3 position,
-        const char* name,
-        const char* modelPath,
-        const char* texturePath)
-    {
-        auto id = registry->create();
-        auto& transform = registry->emplace<sgTransform>(id, id);
-        transform.SetPosition(position);
-        transform.SetScale(2.0f);
-        transform.SetRotation({0, 0, 0});
-        auto model = LoadModel(modelPath);
-        MaterialPaths matPaths;
-        matPaths.diffuse = texturePath;
-        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-            LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(matPaths.diffuse));
-        auto& renderable = registry->emplace<Renderable>(id, model, matPaths, MatrixIdentity());
-        renderable.name = name;
-        auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
-        collideable.collisionLayer = CollisionLayer::BUILDING;
     }
 
     BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
@@ -305,10 +278,10 @@ namespace sage
 
         MaterialPaths matPaths;
         matPaths.diffuse = "resources/models/obj/PolyAdventureTexture_01.png";
-        Model parent = LoadModel(_mapPath.c_str());
+        SafeModel parent(LoadModel(_mapPath.c_str()));
         std::vector<Collideable*> floorMeshes;
 
-        for (int i = 0; i < parent.meshCount; ++i)
+        for (int i = 0; i < parent.rlModel().meshCount; ++i)
         {
             entt::entity id = registry->create();
             auto& transform = registry->emplace<sgTransform>(id, id);
@@ -317,16 +290,16 @@ namespace sage
             transform.SetRotation({0, 0, 0});
 
             Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
-            Model model = LoadModelFromMesh(parent.meshes[i]);
-            // Matrix modelTransform = MatrixScale(1,1,1);
-            auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
-            renderable.name = parent.meshes[i].name;
-            renderable.serializable = false;
+
+            auto& renderable =
+                registry->emplace<Renderable>(id, SafeModel(parent.rlModel().meshes[i]), matPaths, modelTransform);
+            renderable.name = parent.rlModel().meshes[i].name;
 
             scene->lightSubSystem->LinkRenderableToLight(&renderable);
-            model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
+            renderable.GetModel().materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
                 LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(matPaths.diffuse));
-            auto& collideable = registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.model));
+            auto& collideable =
+                registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.GetModel()));
             collideable.SetWorldBoundingBox(transform.GetMatrix());
 
             if (renderable.name.find("SM_Bld") != std::string::npos)
@@ -351,8 +324,6 @@ namespace sage
                 collideable.collisionLayer = CollisionLayer::DEFAULT;
             }
         }
-
-        // UnloadModel(parent);
 
         // Calculate grid based on walkable area
         BoundingBox mapBB{Vector3{-500, 0, -500}, Vector3{500, 0, 500}}; // min, max
@@ -403,12 +374,8 @@ namespace sage
             shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
             model.materials[0].shader = shader;
 
-            auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+            auto& renderable = registry->emplace<Renderable>(id, SafeModel(model), modelTransform);
             renderable.name = "Portal";
-
-            // Textures managed in renderable
-            renderable.textures.push_back(texture);
-            renderable.textures.push_back(texture2);
 
             renderable.shader = shader;
             renderable.reqShaderUpdate = [data, secondsLoc](entt::entity entity) -> void {
@@ -434,11 +401,9 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
-        Model model = ResourceManager::GetInstance().StaticModelLoad("resources/models/obj/portal.obj");
 
-        model.transform = modelTransform;
-
-        auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+        auto& renderable =
+            registry->emplace<Renderable>(id, SafeModel("resources/models/obj/portal.obj"), modelTransform);
         renderable.name = "Portal Outer";
         data->lightSubSystem->LinkRenderableToLight(&renderable);
 
@@ -460,15 +425,13 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
-        Model model = ResourceManager::GetInstance().StaticModelLoad("resources/models/obj/Wizard Tower 1.obj");
 
-        model.transform = modelTransform;
-
-        auto& renderable = registry->emplace<Renderable>(id, model, modelTransform);
+        auto& renderable = registry->emplace<Renderable>(
+            id, SafeModel("resources/models/obj/Wizard Tower 1.obj"), modelTransform);
         renderable.name = "Wizard Tower";
         data->lightSubSystem->LinkRenderableToLight(&renderable);
 
-        BoundingBox bb = CalculateModelBoundingBox(model);
+        BoundingBox bb = CalculateModelBoundingBox(renderable.GetModel());
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::BUILDING;
 

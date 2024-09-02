@@ -14,7 +14,7 @@ namespace sage
     {
       public:
         void Update() override;
-        void Draw() const;
+        void Draw();
         explicit RenderSystem(entt::registry* _registry);
     };
 } // namespace sage

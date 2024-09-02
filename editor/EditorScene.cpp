@@ -43,13 +43,6 @@ namespace sage
             case CollisionLayer::FLOOR:
                 if (currentEditorMode == CREATE)
                 {
-                    GameObjectFactory::createBuilding(
-                        registry,
-                        data.get(),
-                        data->cursor->collision().point,
-                        "Tower Instance",
-                        "resources/models/obj/turret.obj",
-                        "resources/models/obj/turret_diffuse.png");
                 }
                 else if (currentEditorMode == SELECT)
                 {

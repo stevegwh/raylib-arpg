@@ -57,7 +57,7 @@ namespace sage
 
     void GameData::Load()
     {
-        serializer::Load(registry);
+        // serializer::Load(registry);
     }
 
     void GameData::Save() const

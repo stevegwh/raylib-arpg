@@ -2,6 +2,7 @@
 
 #include "components/NavigationGridSquare.hpp"
 #include "raylib.h"
+#include "slib.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include <entt/entity/registry.hpp>
 
@@ -21,7 +22,7 @@ namespace sage
         Vector3 meshOffset{};
 
         void updateTerrainPolygon();
-        Model generateTerrainPolygon();
+        SafeModel generateTerrainPolygon();
         void updateMeshData(Mesh& mesh);
         Mesh createInitialMesh();
         void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol);
