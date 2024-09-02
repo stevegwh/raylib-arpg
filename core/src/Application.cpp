@@ -57,13 +57,15 @@ namespace sage
                 else if (IsKeyPressed(KEY_N))
                     exitWindowRequested = false;
             }
+
             scene->Update();
             draw();
         }
     }
-
+    bool show_demo_window = true;
     void Application::draw()
     {
+
         BeginDrawing();
         ClearBackground(BLACK);
         BeginMode3D(*scene->data->camera->getRaylibCam());

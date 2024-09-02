@@ -9,10 +9,7 @@
 #include "EditorScene.hpp"
 #include "EditorSettings.hpp"
 #include "GameData.hpp"
-#include "KeyMapping.hpp"
 #include "scenes/ExampleScene.hpp"
-#include "Serializer.hpp"
-#include "Settings.hpp"
 #include "UserInput.hpp"
 
 #include <fstream>
@@ -138,9 +135,6 @@ namespace sage
 
             if (exitWindowRequested)
             {
-                // A request for close window has been issued, we can save data before closing
-                // or just show a message asking for confirmation
-
                 if (IsKeyPressed(KEY_Y))
                     exitWindow = true;
                 else if (IsKeyPressed(KEY_N))

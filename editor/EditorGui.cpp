@@ -6,12 +6,10 @@
 
 #include "Camera.hpp"
 #include "Cursor.hpp"
-#include "EditorApplication.hpp"
 #include "EditorSettings.hpp"
 #include "Settings.hpp"
 #include "UserInput.hpp"
 #include "windows/FloatingWindow.hpp"
-#include "windows/Window.hpp"
 
 namespace sage::editor
 {
@@ -34,59 +32,66 @@ namespace sage::editor
 
     void EditorGui::Update()
     {
-        if (fileDialogState->CancelFilePressed)
-        {
-            EditorApplication::SerializeEditorSettings(editorSettings);
-        }
-        if (fileDialogState->SelectFilePressed)
-        {
-            auto previousMap = editorSettings->lastOpenedMap;
-            std::cout << TextFormat("%s", fileDialogState->dirPathText) << std::endl;
-            editorSettings->lastOpenedMap =
-                TextFormat("%s/%s", fileDialogState->dirPathText, fileDialogState->fileNameText);
-            editorSettings->lastVisitedDirectory = fileDialogState->dirPathText;
-            fileDialogState->SelectFilePressed = false;
-            if (previousMap != editorSettings->lastOpenedMap)
-            {
-                EditorApplication::SerializeEditorSettings(editorSettings);
-                onFileOpened.publish();
-            }
-        }
+        //        if (fileDialogState->CancelFilePressed)
+        //        {
+        //            EditorApplication::SerializeEditorSettings(editorSettings);
+        //        }
+        //        if (fileDialogState->SelectFilePressed)
+        //        {
+        //            auto previousMap = editorSettings->lastOpenedMap;
+        //            std::cout << TextFormat("%s", fileDialogState->dirPathText) << std::endl;
+        //            editorSettings->lastOpenedMap =
+        //                TextFormat("%s/%s", fileDialogState->dirPathText, fileDialogState->fileNameText);
+        //            editorSettings->lastVisitedDirectory = fileDialogState->dirPathText;
+        //            fileDialogState->SelectFilePressed = false;
+        //            if (previousMap != editorSettings->lastOpenedMap)
+        //            {
+        //                EditorApplication::SerializeEditorSettings(editorSettings);
+        //                onFileOpened.publish();
+        //            }
+        //        }
     }
 
     void EditorGui::Draw(const std::string& mode, Cursor* cursor)
     {
-        if (fileDialogState->windowActive)
-        {
-            GuiLock();
-            GuiFocused();
-        }
-        else
-        {
-            GuiNotFocused();
-        }
+        // NB: This is being called within Draw2D, I am not sure if that matters. Should separate scene from UI
+        // completely, I think
+        rlImGuiBegin();
+        bool open = true;
+        ImGui::ShowDemoWindow(&open);
+        rlImGuiEnd();
+
+        //        if (fileDialogState->windowActive)
+        //        {
+        //            GuiLock();
+        //            GuiFocused();
+        //        }
+        //        else
+        //        {
+        //            GuiNotFocused();
+        //        }
         drawDebugCollisionText(cursor);
-        float modifier = 100;
-        GuiGroupBox({0 + modifier, 8, 184, 30}, nullptr);
-        DrawRectangle(0 + modifier, 8, 184, 30, Fade(GRAY, 0.8f));
-        if (GuiButton({8 + modifier, 8, 24, 24}, "#002#")) // Save button
-        {
-            saveButtonPressed.publish();
-        }
-        if (GuiButton({40 + modifier, 8, 24, 24}, "#001#")) // Load button
-        {
-            OpenFileDialog();
-        }
-
-        for (auto& window : windows)
-        {
-            window->Update();
-        }
-
+        //        float modifier = 100;
+        //        GuiGroupBox({0 + modifier, 8, 184, 30}, nullptr);
+        //        DrawRectangle(0 + modifier, 8, 184, 30, Fade(GRAY, 0.8f));
+        //        if (GuiButton({8 + modifier, 8, 24, 24}, "#002#")) // Save button
+        //        {
+        //            saveButtonPressed.publish();
+        //        }
+        //        if (GuiButton({40 + modifier, 8, 24, 24}, "#001#")) // Load button
+        //        {
+        //            OpenFileDialog();
+        //        }
+        //
+        //        for (auto& window : windows)
+        //        {
+        //            window->Update();
+        //        }
+        //
         DrawText(TextFormat("EditorApplication Mode: %s", mode.c_str()), screenSize.x - 150, 50, 10, BLACK);
-
-        GuiUnlock();
-        GuiWindowFileDialog(fileDialogState.get());
+        //
+        //        GuiUnlock();
+        //        GuiWindowFileDialog(fileDialogState.get());
     }
 
     const char* getCollisionLayerName(CollisionLayer layer)
@@ -169,10 +174,16 @@ namespace sage::editor
         toolprops->content_size = {140, 320};
     }
 
+    EditorGui::~EditorGui()
+    {
+        rlImGuiShutdown();
+    }
+
     EditorGui::EditorGui(
         EditorSettings* _editorSettings, Settings* _settings, UserInput* _userInput, Camera* _camera)
         : editorSettings(_editorSettings), camera(_camera), settings(_settings)
     {
+
         // TODO: No hardcoded values
         // TODO: Resolution aware fonts
         // TODO: Toolbox (create mode) and toolbox properties
@@ -217,5 +228,7 @@ namespace sage::editor
         }
         fileDialogState = std::make_unique<GuiWindowFileDialogState>(
             InitGuiWindowFileDialog(editorSettings->lastVisitedDirectory.c_str()));
+
+        rlImGuiSetup(true);
     }
 } // namespace sage::editor

@@ -57,6 +57,29 @@ namespace sage
         LIGHT = 1 << 7
     };
 
+    enum class AbilityTargetType
+    {
+        TARGET_NONE,
+        TARGET_SELF,
+        TARGET_FRIENDLY,
+        TARGET_ENEMY,
+        TARGET_ALL
+    };
+
+    enum class AbilityResource
+    {
+        NONE,
+        MANA,
+        HEALTH,
+        ENERGY
+    };
+
+    enum class AbilityCastFail
+    {
+        OUT_OF_RANGE,
+        INTERRUPTED
+    };
+
     // Enable bitwise operations
     template <typename E>
     struct EnableBitMaskOperators
@@ -103,29 +126,6 @@ namespace sage
         lhs = lhs | rhs;
         return lhs;
     }
-
-    enum class AbilityTargetType
-    {
-        TARGET_NONE,
-        TARGET_SELF,
-        TARGET_FRIENDLY,
-        TARGET_ENEMY,
-        TARGET_ALL
-    };
-
-    enum class AbilityResource
-    {
-        NONE,
-        MANA,
-        HEALTH,
-        ENERGY
-    };
-
-    enum class AbilityCastFail
-    {
-        OUT_OF_RANGE,
-        INTERRUPTED
-    };
 
     /**
      * Auto attack: REPEAT_AUTO | SPAWN_AT_CASTER (needed?) | CASTER_FOLLOW | MOVEMENT_HITSCAN | CAST_INSTANT |
