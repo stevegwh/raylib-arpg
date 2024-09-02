@@ -29,6 +29,7 @@ namespace sage
         bool exitWindowRequested = false; // Flag to request window to exit
         bool exitWindow = false;          // Flag to set window to exit
 
+        void handleScreenUpdate();
         virtual void init();
         static void cleanup();
         virtual void draw();

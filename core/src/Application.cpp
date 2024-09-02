@@ -24,7 +24,8 @@ namespace sage
         keyMapping = std::make_unique<KeyMapping>(_keyMapping);
 
         // SetConfigFlags(FLAG_MSAA_4X_HINT);
-        InitWindow(settings->screenWidth, settings->screenHeight, "Baldur's Raylib");
+        InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
+
         Image icon = LoadImage("resources/icon.png");
         SetWindowIcon(icon);
         HideCursor();
@@ -35,6 +36,24 @@ namespace sage
             keyMapping.get(),
             settings.get(),
             ""); // TODO: Map path is ignored atm (just loads output.bin)
+    }
+
+    void Application::handleScreenUpdate()
+    {
+        if (settings->toggleFullScreenRequested)
+        {
+            if (!IsWindowFullscreen())
+            {
+                SetWindowSize(settings->screenWidth, settings->screenHeight);
+                ToggleFullscreen();
+            }
+            else if (IsWindowFullscreen())
+            {
+                ToggleFullscreen();
+                SetWindowSize(settings->screenWidth, settings->screenHeight);
+            }
+            settings->toggleFullScreenRequested = false;
+        }
     }
 
     void Application::Update()
@@ -60,6 +79,7 @@ namespace sage
 
             scene->Update();
             draw();
+            handleScreenUpdate();
         }
     }
     bool show_demo_window = true;

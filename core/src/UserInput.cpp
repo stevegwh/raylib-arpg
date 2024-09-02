@@ -6,36 +6,25 @@
 
 namespace sage
 {
-    void UserInput::toggleFullScreen() const
+    void UserInput::ListenForInput() const
     {
-        // TODO: This is currently scuffed and an issue on raylib's side.
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
         {
+            settings->toggleFullScreenRequested = true;
+
             if (!IsWindowFullscreen())
             {
                 const int current_screen = GetCurrentMonitor();
-                SetWindowSize(GetMonitorWidth(current_screen), GetMonitorHeight(current_screen));
                 settings->screenWidth = static_cast<float>(GetMonitorWidth(current_screen));
                 settings->screenHeight = static_cast<float>(GetMonitorHeight(current_screen));
-                onWindowUpdate.publish(
-                    {static_cast<float>(GetMonitorWidth(current_screen)),
-                     static_cast<float>(GetMonitorHeight(current_screen))});
-                ToggleFullscreen();
             }
             else if (IsWindowFullscreen())
             {
-                ToggleFullscreen();
                 settings->ResetScreenSize();
-                SetWindowSize(settings->screenWidth, settings->screenHeight);
-                onWindowUpdate.publish(
-                    {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
             }
+            onWindowUpdate.publish(
+                {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
         }
-    }
-
-    void UserInput::ListenForInput() const
-    {
-        toggleFullScreen();
 
         if (IsKeyPressed(keyMapping->keyA))
         {
