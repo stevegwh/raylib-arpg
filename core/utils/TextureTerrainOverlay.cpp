@@ -115,7 +115,7 @@ namespace sage
         model.materialCount = 1;
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 
-        return {model};
+        return SafeModel{model};
     }
 
     void TextureTerrainOverlay::Enable(bool enable)
@@ -181,7 +181,6 @@ namespace sage
 
     TextureTerrainOverlay::~TextureTerrainOverlay()
     {
-        UnloadTexture(texture);
         registry->remove<TextureTerrainOverlay>(entity);
     }
 
@@ -196,7 +195,7 @@ namespace sage
         : registry(_registry),
           navigationGridSystem(_navigationGridSystem),
           entity(_registry->create()),
-          texture(LoadTexture(texturePath))
+          texture(ResourceManager::GetInstance().TextureLoad(texturePath))
     {
         auto& renderable = registry->emplace<Renderable>(entity, generateTerrainPolygon(), MatrixIdentity());
 

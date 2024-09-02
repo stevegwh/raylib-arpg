@@ -13,10 +13,10 @@
 namespace sage
 {
 
-    Shader SafeModel::GetShader()
-    {
-        return model.materials[MATERIAL_MAP_DIFFUSE].shader;
-    }
+    // Shader SafeModel::GetShader()
+    // {
+    //     return model.materials[MATERIAL_MAP_DIFFUSE].shader;
+    // }
 
     Model& SafeModel::rlModel()
     {

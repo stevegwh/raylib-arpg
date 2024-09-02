@@ -14,7 +14,7 @@ namespace sage
       private:
         entt::registry* registry;
         NavigationGridSystem* navigationGridSystem;
-        Texture2D texture;
+        Texture texture;
         GridSquare lastHit{};
         GridSquare minRange{}, maxRange{};
         bool initialised = false;

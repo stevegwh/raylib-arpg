@@ -6,27 +6,25 @@
 
 #include "raylib.h"
 
-
 #include <entt/entt.hpp>
 
 namespace sage
 {
 
-	class Explosion
-	{
-		entt::registry* registry;
-		entt::entity entity;
-		Shader shader;
-		Model sphere;
-		float scale = 0;
-		float maxScale = 10;
-		float increment = 30.0f;
-	public:
-		void Update();
-		void Restart();
-		void SetOrigin(Vector3 origin);
-		~Explosion();
-		explicit Explosion(entt::registry* _registry);
-	};
+    class Explosion
+    {
+        entt::registry* registry;
+        entt::entity entity;
+        Shader shader;
+        float scale = 0;
+        float maxScale = 10;
+        float increment = 30.0f;
 
-} // sage
+      public:
+        void Update();
+        void Restart();
+        void SetOrigin(Vector3 origin);
+        explicit Explosion(entt::registry* _registry);
+    };
+
+} // namespace sage

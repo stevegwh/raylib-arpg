@@ -17,12 +17,16 @@ namespace sage
         ResourceManager() = default;
         ~ResourceManager();
 
-        std::unordered_map<std::string, Image> textureImages;
-        std::unordered_map<std::string, SafeModel> staticModels;
-        std::unordered_map<std::string, SafeModel> dynamicModels;
-        std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations;
-        std::unordered_map<std::string, char*> vertShaders;
-        std::unordered_map<std::string, char*> fragShaders;
+        std::unordered_map<std::string, Shader> shaders{};
+        std::unordered_map<std::string, Image> textureImages{};
+        std::unordered_map<std::string, Texture> textures{};
+        std::unordered_map<std::string, SafeModel> staticModels{};
+        std::unordered_map<std::string, SafeModel> dynamicModels{};
+        std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations{};
+        std::unordered_map<std::string, char*> vertShaders{};
+        std::unordered_map<std::string, char*> fragShaders{};
+
+        Shader gpuShaderLoad(const std::string& vs, const std::string& fs);
 
       public:
         static ResourceManager& GetInstance()
@@ -32,6 +36,7 @@ namespace sage
         }
 
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
+        Texture TextureLoad(const std::string& path);
         Image ImageLoad(const std::string& path);
         Model InstantiateModel(const std::string& path);
         static void DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh);

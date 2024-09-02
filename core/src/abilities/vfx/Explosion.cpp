@@ -34,20 +34,15 @@ namespace sage
         transform.SetPosition(origin);
     }
 
-    Explosion::~Explosion()
-    {
-        UnloadShader(shader);
-    }
-
     Explosion::Explosion(entt::registry* _registry)
     {
         registry = _registry;
-        sphere = LoadModelFromMesh(GenMeshHemiSphere(1.0f, 16, 16));
+        auto sphere = LoadModelFromMesh(GenMeshHemiSphere(1.0f, 16, 16));
         entity = registry->create();
         registry->emplace<sgTransform>(entity, entity);
-        auto& renderable = registry->emplace<Renderable>(entity, sphere, MatrixIdentity());
+        auto& renderable = registry->emplace<Renderable>(entity, SafeModel(sphere), MatrixIdentity());
         renderable.hint = Color{255, 0, 0, 100};
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/bloom.fs");
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs");
         renderable.GetModel().materials[0].shader = shader;
     }
 } // namespace sage
