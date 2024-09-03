@@ -90,14 +90,14 @@ namespace sage
      * @param path
      * @return Model
      */
-    Model ResourceManager::LoadModelCopy(const std::string& path)
+    std::shared_ptr<SafeModel> ResourceManager::LoadModelCopy(const std::string& path)
     {
         if (staticModels.find(path) == staticModels.end())
         {
-            staticModels.try_emplace(path, SafeModel(path.c_str()));
+            staticModels.try_emplace(path, std::make_unique<SafeModel>(path.c_str()));
         }
 
-        return staticModels.at(path).rlModel();
+        return staticModels.at(path);
     }
 
     void ResourceManager::DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
@@ -177,10 +177,10 @@ namespace sage
      * @param path
      * @return
      */
-    SafeModel ResourceManager::LoadModelUnique(const std::string& path)
+    std::shared_ptr<SafeModel> ResourceManager::LoadModelUnique(const std::string& path)
     {
         Model model;
-        const Model& oldModel = LoadModelCopy(path);
+        const Model& oldModel = LoadModelCopy(path)->rlModel();
         // deep copy model here
         model.meshCount = oldModel.meshCount;
         model.materialCount = oldModel.materialCount;
@@ -258,7 +258,7 @@ namespace sage
         // "Cereal Model Import");
 
         // Return shared_ptr?
-        return SafeModel{model};
+        return std::make_shared<SafeModel>(model);
     }
 
     ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
