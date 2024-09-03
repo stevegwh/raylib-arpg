@@ -90,6 +90,8 @@ namespace sage
         // ----
 
         data->navigationGridSystem->PopulateGrid();
+        ResourceManager::GetInstance().UnloadImages();
+        ResourceManager::GetInstance().UnloadShaderFileText();
     };
 
 } // namespace sage
