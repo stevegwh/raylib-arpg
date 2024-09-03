@@ -28,7 +28,7 @@ namespace sage
         std::unordered_map<std::string, char*> vertShaderFileText{};
         std::unordered_map<std::string, char*> fragShaderFileText{};
 
-        Shader gpuShaderLoad(const std::string& vs, const std::string& fs);
+        Shader gpuShaderLoad(const char* vs, const char* fs);
         Image imageLoad(const std::string& path);
 
         static void deepCopyModel(const Model& oldModel, Model& newModel);

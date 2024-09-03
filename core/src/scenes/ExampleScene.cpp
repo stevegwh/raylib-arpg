@@ -91,7 +91,7 @@ namespace sage
         // auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
 
         // TODO: Portal shader not working
-        // GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
+        GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
 
         // GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
 

@@ -202,13 +202,15 @@ namespace sage
         TRACELOG(LOG_INFO, "MODEL: Unloaded model (NOT meshes) from RAM");
     }
 
-    Shader ResourceManager::gpuShaderLoad(const std::string& vs, const std::string& fs)
+    Shader ResourceManager::gpuShaderLoad(const char* vs, const char* fs)
     {
-        std::string concat = vs + fs;
+        std::string vs_str = vs == nullptr ? "" : std::string(vs);
+        std::string fs_str = fs == nullptr ? "" : std::string(fs);
+        std::string concat = vs_str + fs_str;
 
         if (!shaders.contains(concat))
         {
-            shaders[concat] = LoadShaderFromMemory(vs.c_str(), fs.c_str());
+            shaders[concat] = LoadShaderFromMemory(vs, fs);
         }
 
         return shaders[concat];
@@ -252,10 +254,7 @@ namespace sage
             fShaderStr = fragShaderFileText[fsFileName];
         }
 
-        std::string vStr = vShaderStr == nullptr ? "" : vShaderStr;
-        std::string fStr = fShaderStr == nullptr ? "" : fShaderStr;
-
-        return gpuShaderLoad(std::string(vStr), std::string(fStr));
+        return gpuShaderLoad(vShaderStr, fShaderStr);
     }
 
     Texture ResourceManager::TextureLoad(const std::string& path)
