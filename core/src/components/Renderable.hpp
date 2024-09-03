@@ -33,12 +33,9 @@ namespace sage
         bool active = true;
         Matrix initialTransform{};
         MaterialPaths materials;
-        std::optional<Shader> shader;
-        std::unordered_map<std::string, int> shaderLocs;
         std::function<void(entt::entity)> reqShaderUpdate;
         std::string name = "Default";
         bool serializable = true;
-        // void SetModel(SafeModel _model);
         [[nodiscard]] ModelSafe* GetModel() const;
 
         Renderable() = default;
@@ -50,7 +47,6 @@ namespace sage
         Renderable(Model _model, Matrix _localTransform);
         Renderable(ModelSafe _model, MaterialPaths _materials, Matrix _localTransform);
         Renderable(ModelSafe _model, Matrix _localTransform);
-        ~Renderable();
 
         template <class Archive>
         void save(Archive& archive) const

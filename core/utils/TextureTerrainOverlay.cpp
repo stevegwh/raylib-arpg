@@ -1,6 +1,8 @@
 #include "TextureTerrainOverlay.hpp"
+
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
+#include "systems/NavigationGridSystem.hpp"
 
 namespace sage
 {
@@ -184,8 +186,27 @@ namespace sage
         registry->remove<TextureTerrainOverlay>(entity);
     }
 
-    // TODO: This is currently rendered incorrectly due to its draw order.
-    // Without deferred rendering, these models need to be drawn last.
+    TextureTerrainOverlay::TextureTerrainOverlay(
+        entt::registry* _registry,
+        NavigationGridSystem* _navigationGridSystem,
+        const char* texturePath,
+        Color _hint,
+        Shader shader)
+        : registry(_registry),
+          navigationGridSystem(_navigationGridSystem),
+          entity(_registry->create()),
+          texture(ResourceManager::GetInstance().TextureLoad(texturePath))
+    {
+        auto& renderable =
+            registry->emplace<Renderable>(entity, std::move(generateTerrainPolygon()), MatrixIdentity());
+
+        renderable.GetModel()->SetShader(shader, 0);
+
+        renderable.hint = _hint;
+        registry->emplace<sgTransform>(entity, entity);
+        registry->emplace<RenderableDeferred>(entity);
+    }
+
     TextureTerrainOverlay::TextureTerrainOverlay(
         entt::registry* _registry,
         NavigationGridSystem* _navigationGridSystem,
@@ -200,9 +221,7 @@ namespace sage
         auto& renderable =
             registry->emplace<Renderable>(entity, std::move(generateTerrainPolygon()), MatrixIdentity());
 
-        // TODO: Still not sure why im storing the shader in renderable
-        renderable.shader = std::make_optional(LoadShader(nullptr, shaderPath));
-        renderable.GetModel()->SetShader(renderable.shader.value(), 0);
+        renderable.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
 
         renderable.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);

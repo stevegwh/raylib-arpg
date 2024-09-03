@@ -1,17 +1,18 @@
 #pragma once
 
-#include "components/NavigationGridSquare.hpp"
+#include "components/NavigationGridSquare.hpp" // Needed for GridSquare
+
 #include "raylib.h"
 #include "slib.hpp"
-#include "systems/NavigationGridSystem.hpp"
-#include <entt/entity/registry.hpp>
+
+#include <entt/entt.hpp>
 
 namespace sage
 {
+    class NavigationGridSystem;
 
     class TextureTerrainOverlay
     {
-      private:
         entt::registry* registry;
         NavigationGridSystem* navigationGridSystem;
         Texture texture;
@@ -35,9 +36,15 @@ namespace sage
 
         void Enable(bool enable);
         void Init(Vector3 mouseRayHit);
-        bool active() const;
+        [[nodiscard]] bool active() const;
         void Update(Vector3 mouseRayHit);
         ~TextureTerrainOverlay();
+        TextureTerrainOverlay(
+            entt::registry* _registry,
+            NavigationGridSystem* _navigationGridSystem,
+            const char* texturePath,
+            Color _hint,
+            Shader shader);
         TextureTerrainOverlay(
             entt::registry* _registry,
             NavigationGridSystem* _navigationGridSystem,
