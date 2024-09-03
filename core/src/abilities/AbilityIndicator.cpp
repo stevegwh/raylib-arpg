@@ -26,7 +26,11 @@ namespace sage
         NavigationGridSystem* _navigationGridSystem,
         const std::string& cursorTexturePath)
         : indicatorTexture(std::make_unique<TextureTerrainOverlay>(
-              _registry, _navigationGridSystem, cursorTexturePath.c_str(), WHITE, ""))
+              _registry,
+              _navigationGridSystem,
+              cursorTexturePath.c_str(),
+              WHITE,
+              "resources/shaders/glsl330/base.fs"))
     {
     }
 } // namespace sage

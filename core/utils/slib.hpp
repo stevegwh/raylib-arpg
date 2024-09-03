@@ -24,6 +24,19 @@ namespace sage
         };
     };
 
+    class ImageSafe
+    {
+        Image image{};
+
+      public:
+        [[nodiscard]] Color GetColor(int x, int y) const;
+        [[nodiscard]] bool HasLoaded() const;
+        [[nodiscard]] int GetWidth() const;
+        [[nodiscard]] int GetHeight() const;
+        ~ImageSafe();
+        explicit ImageSafe(const std::string& path);
+    };
+
     // Allowed unsafe access to model
     class Renderable;            // Forward dec for friend (Needed for serialisation)
     class ResourceManager;       // Forward dec for friend (Needs friend due to deep copy (could move that here))
@@ -40,7 +53,7 @@ namespace sage
         void UnloadModelTextures() const;
 
       public:
-        [[nodiscard]] BoundingBox CalculateModelBoundingBox();
+        [[nodiscard]] BoundingBox CalculateModelBoundingBox() const;
         [[nodiscard]] RayCollision GetRayMeshCollision(Ray ray, int meshNum) const;
         void UpdateAnimation(ModelAnimation anim, int frame);
         void Draw(Vector3 position, float scale, Color tint);

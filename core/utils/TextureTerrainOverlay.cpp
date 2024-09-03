@@ -200,6 +200,9 @@ namespace sage
           entity(_registry->create()),
           texture(LoadTexture(texturePath))
     {
+        assert(texturePath != nullptr);
+        assert(shaderPath != nullptr);
+
         GridSquare minRange{}, maxRange{};
         auto& r =
             registry->emplace<Renderable>(entity, generateTerrainPolygon(minRange, maxRange), MatrixIdentity());

@@ -3,6 +3,7 @@
 #include "BaseSystem.hpp"
 
 #include <PriorityQueue.hpp>
+#include <slib.hpp>
 
 #include "entt/entt.hpp"
 #include "raylib.h"
@@ -42,9 +43,9 @@ namespace sage
         //---------------------------------------------------------
         void calculateTerrainHeightAndNormals(const entt::entity& entity);
         //---------------------------------------------------------
-        void loadTerrainNormalMap(const Image& normalMap);
+        void loadTerrainNormalMap(const ImageSafe& normalMap);
         //---------------------------------------------------------
-        void loadTerrainHeightMap(const Image& heightMap, float maxHeight);
+        void loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight);
         //---------------------------------------------------------
 
       public:
@@ -113,7 +114,7 @@ namespace sage
         //---------------------------------------------------------
         const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
         //---------------------------------------------------------
-        const NavigationGridSquare* GetGridSquare(int row, int col);
+        const NavigationGridSquare* GetGridSquare(int row, int col) const;
         //---------------------------------------------------------
         void DrawDebugPathfinding(const GridSquare& minRange, const GridSquare& maxRange) const;
         //---------------------------------------------------------

@@ -86,11 +86,14 @@ namespace sage
 
         // std::string mapPath = "resources/models/obj/level-basic.obj";
         auto player = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
-        auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
 
+        // TODO Memory leak in create knight
+        // auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
+
+        // TODO: Portal shader not working
         // GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
 
-        GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
+        // GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
 
         // TODO: tmp
         // const auto& col = registry->get<Collideable>(knight);

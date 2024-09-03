@@ -4,6 +4,7 @@
 
 #include "slib.hpp"
 
+#include "../../../../../../Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/ImageIO.framework/Headers/CGImageAnimation.h"
 #include "raymath.h"
 #include "ResourceManager.hpp"
 
@@ -13,7 +14,7 @@
 namespace sage
 {
 
-    BoundingBox ModelSafe::CalculateModelBoundingBox()
+    BoundingBox ModelSafe::CalculateModelBoundingBox() const
     {
         Mesh mesh = rlmodel.meshes[0];
         std::vector<float> vertices(mesh.vertexCount * 3);
@@ -55,6 +56,35 @@ namespace sage
         }
 
         return bb;
+    }
+
+    Color ImageSafe::GetColor(int x, int y) const
+    {
+        return GetImageColor(image, x, y);
+    }
+
+    bool ImageSafe::HasLoaded() const
+    {
+        return image.data != nullptr;
+    }
+
+    int ImageSafe::GetWidth() const
+    {
+        return image.width;
+    }
+
+    int ImageSafe::GetHeight() const
+    {
+        return image.height;
+    }
+
+    ImageSafe::~ImageSafe()
+    {
+        UnloadImage(image);
+    }
+
+    ImageSafe::ImageSafe(const std::string& path) : image(LoadImage(path.c_str()))
+    {
     }
 
     RayCollision ModelSafe::GetRayMeshCollision(Ray ray, int meshNum) const

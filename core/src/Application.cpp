@@ -28,6 +28,7 @@ namespace sage
 
         Image icon = LoadImage("resources/icon.png");
         SetWindowIcon(icon);
+        UnloadImage(icon);
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 
