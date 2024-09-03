@@ -18,7 +18,7 @@ namespace sage
         bool m_active = false;
         Vector3 meshOffset{};
 
-        void updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange);
+        void updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange) const;
         Model generateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange);
         void updateMeshData(Mesh& mesh, const GridSquare& minRange, const GridSquare& maxRange) const;
         Mesh createInitialMesh(const GridSquare& minRange, const GridSquare& maxRange);
