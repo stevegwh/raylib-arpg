@@ -9,7 +9,6 @@
 #include "Camera.hpp"
 #include "components/sgTransform.hpp"
 
-#include "FlamePartSys.hpp"
 #include "ResourceManager.hpp"
 
 #include "raylib.h"
@@ -24,21 +23,12 @@
 namespace sage
 {
 
-    struct Fireball
-    {
-        Vector3 position;
-        Vector3 velocity;
-        std::unique_ptr<FlamePartSys> flameEffect;
-    };
-
     void RainOfFireVFX::Draw3D() const
     {
-        BeginShaderMode(shader);
         for (const auto& fireball : fireballs)
         {
             fireball.flameEffect->DrawOldestFirst();
         }
-        EndShaderMode();
     }
 
     void RainOfFireVFX::Update(float dt)
@@ -121,14 +111,7 @@ namespace sage
         }
     }
 
-    RainOfFireVFX::~RainOfFireVFX()
-    {
-        UnloadShader(shader);
-        std::cout << "RainOfFireVFX destroyed" << std::endl;
-    }
-
     RainOfFireVFX::RainOfFireVFX(GameData* _gameData, sgTransform* _transform) : VisualFX(_gameData, _transform)
     {
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }
 } // namespace sage

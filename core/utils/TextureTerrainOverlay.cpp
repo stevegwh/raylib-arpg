@@ -1,8 +1,6 @@
 #include "TextureTerrainOverlay.hpp"
-
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
-#include "systems/NavigationGridSystem.hpp"
 
 namespace sage
 {
@@ -105,19 +103,19 @@ namespace sage
         UpdateMeshBuffer(mesh, 2, mesh.texcoords, vertexCount * 2 * sizeof(float), 0);
     }
 
-    ModelSafe TextureTerrainOverlay::generateTerrainPolygon()
+    Model TextureTerrainOverlay::generateTerrainPolygon()
     {
         Mesh mesh = createInitialMesh();
 
         UploadMesh(&mesh, false);
-        Model _model = LoadModelFromMesh(mesh);
-        _model.materials = (Material*)RL_MALLOC(sizeof(Material));
-        _model.materials[0] = LoadMaterialDefault();
-        _model.materialCount = 1;
-        _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-        ModelSafe model(_model);
+        Model model = LoadModelFromMesh(mesh);
 
-        return std::move(model);
+        model.materials = (Material*)RL_MALLOC(sizeof(Material));
+        model.materials[0] = LoadMaterialDefault();
+        model.materialCount = 1;
+        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+
+        return model;
     }
 
     void TextureTerrainOverlay::Enable(bool enable)
@@ -139,6 +137,8 @@ namespace sage
 
         navigationGridSystem->WorldToGridSpace(mouseRayHit, lastHit);
         navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
+        auto& renderable = registry->get<Renderable>(entity);
+        renderable.GetModel()->rlmodel = generateTerrainPolygon();
 
         // Calculate the center of the mesh in world space
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
@@ -157,6 +157,7 @@ namespace sage
 
         auto& trans = registry->get<sgTransform>(entity);
         trans.SetPosition(meshOffset);
+        renderable.GetModel()->SetTransform(MatrixIdentity());
     }
 
     bool TextureTerrainOverlay::active() const
@@ -183,28 +184,8 @@ namespace sage
 
     TextureTerrainOverlay::~TextureTerrainOverlay()
     {
+        UnloadTexture(texture);
         registry->remove<TextureTerrainOverlay>(entity);
-    }
-
-    TextureTerrainOverlay::TextureTerrainOverlay(
-        entt::registry* _registry,
-        NavigationGridSystem* _navigationGridSystem,
-        const char* texturePath,
-        Color _hint,
-        Shader shader)
-        : registry(_registry),
-          navigationGridSystem(_navigationGridSystem),
-          entity(_registry->create()),
-          texture(ResourceManager::GetInstance().TextureLoad(texturePath))
-    {
-        auto& renderable =
-            registry->emplace<Renderable>(entity, std::move(generateTerrainPolygon()), MatrixIdentity());
-
-        renderable.GetModel()->SetShader(shader, 0);
-
-        renderable.hint = _hint;
-        registry->emplace<sgTransform>(entity, entity);
-        registry->emplace<RenderableDeferred>(entity);
     }
 
     TextureTerrainOverlay::TextureTerrainOverlay(
@@ -216,14 +197,31 @@ namespace sage
         : registry(_registry),
           navigationGridSystem(_navigationGridSystem),
           entity(_registry->create()),
+          texture(LoadTexture(texturePath))
+    {
+        auto& r = registry->emplace<Renderable>(entity, generateTerrainPolygon(), MatrixIdentity());
+        r.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
+        // r.shader = std::make_optional(LoadShader(nullptr, shaderPath));
+        r.hint = _hint;
+        registry->emplace<sgTransform>(entity, entity);
+        registry->emplace<RenderableDeferred>(entity);
+    }
+
+    TextureTerrainOverlay::TextureTerrainOverlay(
+        entt::registry* _registry,
+        NavigationGridSystem* _navigationGridSystem,
+        const char* texturePath,
+        Color _hint,
+        Shader _shader)
+        : registry(_registry),
+          navigationGridSystem(_navigationGridSystem),
+          entity(_registry->create()),
           texture(ResourceManager::GetInstance().TextureLoad(texturePath))
     {
-        auto& renderable =
-            registry->emplace<Renderable>(entity, std::move(generateTerrainPolygon()), MatrixIdentity());
+        auto& r = registry->emplace<Renderable>(entity, generateTerrainPolygon(), MatrixIdentity());
+        r.GetModel()->SetShader(_shader, 0);
+        r.hint = _hint;
 
-        // renderable.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
-
-        renderable.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);
         registry->emplace<RenderableDeferred>(entity);
     }

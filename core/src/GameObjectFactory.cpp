@@ -162,6 +162,11 @@ namespace sage
         transform.SetScale(1.0f);
         transform.SetRotation({0, 0, 0});
 
+        Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
+        auto& renderable = registry->emplace<Renderable>(
+            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
+        renderable.name = "Player";
+
         auto& moveableActor = registry->emplace<MoveableActor>(id);
 
         // Set animation hooks
@@ -215,8 +220,7 @@ namespace sage
 
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
-        // data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id,
-        // AbilityEnum::RAINFOFIRE));
+        data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
         data->playerAbilitySystem->SetSlot(2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::FIREBALL));
         data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
@@ -224,11 +228,6 @@ namespace sage
             id, data->cursor->onFloorClick, combatable.onAttackCancelled);
 
         // ---
-
-        Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
-        auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
-        renderable.name = "Player";
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
