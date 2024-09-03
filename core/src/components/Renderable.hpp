@@ -44,6 +44,10 @@ namespace sage
         Renderable() = default;
         Renderable(const Renderable&) = delete;
         Renderable& operator=(const Renderable&) = delete;
+        Renderable(std::shared_ptr<SafeModel> _model, MaterialPaths _materials, Matrix _localTransform);
+        Renderable(std::shared_ptr<SafeModel> _model, Matrix _localTransform);
+        Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform);
+        Renderable(Model _model, Matrix _localTransform);
         Renderable(SafeModel _model, MaterialPaths _materials, Matrix _localTransform);
         Renderable(SafeModel _model, Matrix _localTransform);
         ~Renderable();
@@ -85,6 +89,6 @@ namespace sage
         }
 
       private:
-        std::unique_ptr<SafeModel> model;
+        std::shared_ptr<SafeModel> model;
     };
 } // namespace sage

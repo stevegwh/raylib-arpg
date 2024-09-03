@@ -22,7 +22,7 @@ namespace sage
         std::unordered_map<std::string, Shader> shaders{};
         std::unordered_map<std::string, Image> textureImages{};
         std::unordered_map<std::string, Texture> textures{};
-        std::unordered_map<std::string, SafeModel> staticModels{};
+        std::unordered_map<std::string, std::shared_ptr<SafeModel>> staticModels{};
         std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations{};
         std::unordered_map<std::string, char*> vertShaders{};
         std::unordered_map<std::string, char*> fragShaders{};
@@ -39,9 +39,9 @@ namespace sage
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
         Image ImageLoad(const std::string& path);
-        Model LoadModelCopy(const std::string& path);
+        std::shared_ptr<SafeModel> LoadModelCopy(const std::string& path);
         static void DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
-        SafeModel LoadModelUnique(const std::string& path);
+        std::shared_ptr<SafeModel> LoadModelUnique(const std::string& path);
         ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
         void UnloadImages();
         void UnloadShaderFileText();
