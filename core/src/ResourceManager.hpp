@@ -31,15 +31,15 @@ namespace sage
         Shader gpuShaderLoad(const std::string& vs, const std::string& fs);
         Image imageLoad(const std::string& path);
 
+        static void deepCopyModel(const Model& oldModel, Model& newModel);
+        static void deepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
+
       public:
         static ResourceManager& GetInstance()
         {
             static ResourceManager instance;
             return instance;
         }
-
-        static void DeepCopyModel(const Model& oldModel, Model& newModel);
-        static void DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
         static void UnloadModelKeepMeshes(Model& model);
         static std::vector<entt::entity> UnpackOBJMap(
             entt::registry* registry, MaterialPaths material_paths, const std::string& mapPath);

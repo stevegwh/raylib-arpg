@@ -137,8 +137,36 @@ namespace sage
         return *this;
     }
 
+    // Only needed if deep copying model's shaders
+    void ModelSafe::UnloadShaderLocs() const
+    {
+        // The shader program gets unloaded by the resource manager
+        for (int i = 0; i < rlmodel.materialCount; i++)
+        {
+            RL_FREE(rlmodel.materials[i].shader.locs);
+        }
+    }
+
+    void ModelSafe::UnloadModelTextures() const
+    {
+        // Texture data managed by resource manager
+        for (int i = 0; i < rlmodel.meshCount; i++)
+        {
+            if (rlmodel.meshes[i].texcoords)
+            {
+                RL_FREE(rlmodel.meshes[i].texcoords);
+            }
+            if (rlmodel.meshes[i].texcoords2)
+            {
+                RL_FREE(rlmodel.meshes[i].texcoords2);
+            }
+        }
+    }
+
     ModelSafe::~ModelSafe()
     {
+        // UnloadShaderLocs();
+        // UnloadModelTextures();
         UnloadModel(rlmodel);
     }
 
@@ -147,9 +175,8 @@ namespace sage
         _model = {};
     }
 
-    ModelSafe::ModelSafe(const char* path)
+    ModelSafe::ModelSafe(const char* path) : rlmodel(LoadModel(path))
     {
-        rlmodel = LoadModel(path);
     }
 
     Vector2 Vec3ToVec2(const Vector3& vec3)

@@ -17,7 +17,7 @@
 namespace sage
 {
 
-    void ResourceManager::DeepCopyModel(const Model& oldModel, Model& model)
+    void ResourceManager::deepCopyModel(const Model& oldModel, Model& model)
     {
         model.meshCount = oldModel.meshCount;
         model.materialCount = oldModel.materialCount;
@@ -28,7 +28,7 @@ namespace sage
 
         for (size_t i = 0; i < model.meshCount; ++i)
         {
-            DeepCopyMesh(oldModel.meshes[i], model.meshes[i]);
+            deepCopyMesh(oldModel.meshes[i], model.meshes[i]);
         }
 
         if (model.materialCount == 0)
@@ -50,14 +50,18 @@ namespace sage
             for (size_t i = 0; i < model.materialCount; ++i)
             {
                 model.materials[i] = oldModel.materials[i];
-
-                // Deep copy shader
                 model.materials[i].shader = oldModel.materials[i].shader;
-                model.materials[i].shader.locs = (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int));
-                memcpy(
-                    model.materials[i].shader.locs,
-                    oldModel.materials[i].shader.locs,
-                    RL_MAX_SHADER_LOCATIONS * sizeof(int));
+
+                // // NB: If wanting to deep copy the shader, you MUST deallocate shader.locs in the destructor.
+                // // Deep copy shader locs
+                // model.materials[i].shader.locs = (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int));
+                // memcpy(
+                //     model.materials[i].shader.locs,
+                //     oldModel.materials[i].shader.locs,
+                //     RL_MAX_SHADER_LOCATIONS * sizeof(int));
+
+                // Shallow copy shader locs
+                model.materials[i].shader.locs = oldModel.materials[i].shader.locs;
 
                 // Deep copy maps
                 model.materials[i].maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
@@ -95,7 +99,7 @@ namespace sage
         // "Cereal Model Import");
     }
 
-    void ResourceManager::DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
+    void ResourceManager::deepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
     {
         mesh.vertexCount = oldMesh.vertexCount;
         mesh.triangleCount = oldMesh.triangleCount;
@@ -323,7 +327,7 @@ namespace sage
     std::shared_ptr<ModelSafe> ResourceManager::LoadModelDeepCopy(const std::string& path)
     {
         Model model;
-        DeepCopyModel(LoadModelCopy(path)->rlmodel, model);
+        deepCopyModel(LoadModelCopy(path)->rlmodel, model);
         return std::make_shared<ModelSafe>(model);
     }
 

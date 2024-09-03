@@ -36,6 +36,9 @@ namespace sage
     {
         Model rlmodel{};
 
+        void UnloadShaderLocs() const;
+        void UnloadModelTextures() const;
+
       public:
         [[nodiscard]] BoundingBox CalculateModelBoundingBox();
         [[nodiscard]] RayCollision GetRayMeshCollision(Ray ray, int meshNum) const;
