@@ -46,7 +46,7 @@ namespace sage
         entt::sigh<void(entt::entity)> onAnimationEnd{};
         entt::sigh<void(entt::entity)> onAnimationStart{};
 
-        Animation(const char* _modelPath)
+        explicit Animation(const char* _modelPath)
         {
             animsCount = 0;
             animations = ResourceManager::GetInstance().ModelAnimationLoad(_modelPath, &animsCount);
