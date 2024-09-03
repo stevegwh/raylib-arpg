@@ -110,14 +110,14 @@ namespace sage
         Mesh mesh = createInitialMesh();
 
         UploadMesh(&mesh, false);
-        Model model = LoadModelFromMesh(mesh);
+        Model _model = LoadModelFromMesh(mesh);
+        _model.materials = (Material*)RL_MALLOC(sizeof(Material));
+        _model.materials[0] = LoadMaterialDefault();
+        _model.materialCount = 1;
+        _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+        ModelSafe model(_model);
 
-        model.materials = (Material*)RL_MALLOC(sizeof(Material));
-        model.materials[0] = LoadMaterialDefault();
-        model.materialCount = 1;
-        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-
-        return ModelSafe{model};
+        return std::move(model);
     }
 
     void TextureTerrainOverlay::Enable(bool enable)
@@ -221,7 +221,7 @@ namespace sage
         auto& renderable =
             registry->emplace<Renderable>(entity, std::move(generateTerrainPolygon()), MatrixIdentity());
 
-        renderable.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
+        // renderable.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
 
         renderable.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);
