@@ -92,7 +92,7 @@ namespace sage
         }
     }
 
-    void TextureTerrainOverlay::updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange)
+    void TextureTerrainOverlay::updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange) const
     {
         auto& mesh = *registry->get<Renderable>(entity).GetModel()->rlmodel.meshes;
         updateMeshData(mesh, minRange, maxRange);
