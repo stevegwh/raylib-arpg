@@ -366,6 +366,7 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
+        modelCopies.clear();
         for (const auto& kv : textures)
         {
             UnloadTexture(kv.second);
@@ -390,6 +391,12 @@ namespace sage
         {
             UnloadFileText(kv.second);
         }
+        textures.clear();
+        textureImages.clear();
+        modelAnimations.clear();
+        shaders.clear();
+        vertShaderFileText.clear();
+        fragShaderFileText.clear();
     }
 
     ResourceManager::~ResourceManager()
