@@ -88,8 +88,7 @@ namespace sage
                 if (registry->any_of<Renderable>(entity))
                 {
                     auto& renderable = registry->get<Renderable>(entity);
-                    auto mesh = *renderable.GetModel().meshes;
-                    auto col = GetRayCollisionMesh(ray, mesh, renderable.GetModel().transform);
+                    auto col = renderable.GetModel()->GetRayMeshCollision(ray, 0);
                     if (col.hit)
                     {
                         CollisionInfo info = {

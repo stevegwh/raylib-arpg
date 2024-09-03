@@ -3,9 +3,8 @@
 // Created by Steve Wheeler on 03/05/2024.
 //
 
-#include "Renderable.hpp"
-
 #include <memory>
+#include <utility>
 
 namespace sage
 {
@@ -15,10 +14,10 @@ namespace sage
     //     model = std::make_unique<SafeModel>(std::move(_model));
     // }
 
-    Model Renderable::GetModel() const
+    ModelSafe* Renderable::GetModel() const
     {
         // assert(model != nullptr);
-        return model->rlModel();
+        return model.get();
     }
 
     Renderable::~Renderable()
@@ -30,15 +29,15 @@ namespace sage
     }
 
     Renderable::Renderable(std::shared_ptr<ModelSafe> _model, MaterialPaths _materials, Matrix _localTransform)
-        : initialTransform(_localTransform), materials(std::move(_materials)), model(_model)
+        : initialTransform(_localTransform), materials(std::move(_materials)), model(std::move(_model))
     {
-        model->rlModel().transform = initialTransform;
+        model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(std::shared_ptr<ModelSafe> _model, Matrix _localTransform)
-        : initialTransform(_localTransform), model(_model)
+        : initialTransform(_localTransform), model(std::move(_model))
     {
-        model->rlModel().transform = initialTransform;
+        model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform)
@@ -46,13 +45,13 @@ namespace sage
           materials(std::move(_materials)),
           model(std::make_shared<ModelSafe>(_model))
     {
-        model->rlModel().transform = initialTransform;
+        model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(Model _model, Matrix _localTransform)
         : initialTransform(_localTransform), model(std::make_shared<ModelSafe>(_model))
     {
-        model->rlModel().transform = initialTransform;
+        model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(ModelSafe _model, MaterialPaths _materials, Matrix _localTransform)
@@ -60,12 +59,12 @@ namespace sage
           materials(std::move(_materials)),
           model(std::make_shared<ModelSafe>(std::move(_model)))
     {
-        model->rlModel().transform = initialTransform;
+        model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(ModelSafe _model, Matrix _localTransform)
         : initialTransform(_localTransform), model(std::make_unique<ModelSafe>(std::move(_model)))
     {
-        model->rlModel().transform = initialTransform;
+        model->SetTransform(_localTransform);
     }
 } // namespace sage

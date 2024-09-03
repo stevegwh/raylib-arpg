@@ -94,7 +94,7 @@ namespace sage
 
     void TextureTerrainOverlay::updateTerrainPolygon()
     {
-        auto& mesh = *registry->get<Renderable>(entity).GetModel().meshes;
+        auto& mesh = *registry->get<Renderable>(entity).GetModel()->rlmodel.meshes;
         updateMeshData(mesh);
 
         int vertexCount = mesh.vertexCount;
@@ -197,10 +197,13 @@ namespace sage
           entity(_registry->create()),
           texture(ResourceManager::GetInstance().TextureLoad(texturePath))
     {
-        auto& renderable = registry->emplace<Renderable>(entity, generateTerrainPolygon(), MatrixIdentity());
+        auto& renderable =
+            registry->emplace<Renderable>(entity, std::move(generateTerrainPolygon()), MatrixIdentity());
 
+        // TODO: Still not sure why im storing the shader in renderable
         renderable.shader = std::make_optional(LoadShader(nullptr, shaderPath));
-        renderable.GetModel().materials[0].shader = renderable.shader.value();
+        renderable.GetModel()->SetShader(renderable.shader.value(), 0);
+
         renderable.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);
         registry->emplace<RenderableDeferred>(entity);

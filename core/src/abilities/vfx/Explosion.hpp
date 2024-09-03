@@ -15,7 +15,6 @@ namespace sage
     {
         entt::registry* registry;
         entt::entity entity;
-        Shader shader;
         float scale = 0;
         float maxScale = 10;
         float increment = 30.0f;

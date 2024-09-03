@@ -8,6 +8,8 @@
 #include "Cursor.hpp"
 #include "UserInput.hpp"
 
+#include "components/Renderable.hpp"
+
 // NB: We have to include all the headers required to build GameData
 #include "AbilityFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
@@ -72,7 +74,12 @@ namespace sage
         // ----
         data->Load();
         data->navigationGridSystem->Init(slices, 1.0f, "resources/output.bin");
-        lightSubSystem->LinkAllRenderablesToLight();
+
+        // Dependent on only the map/static meshes having been loaded at this point
+        auto view = registry->view<Renderable>();
+        for (auto entity : view)
+            data->lightSubSystem->LinkRenderableToLight(entity);
+
         // ----
         // GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
         // data->navigationGridSystem->Init(slices, 1.0f, "resources/models/obj/level-basic.obj");
@@ -82,10 +89,6 @@ namespace sage
         // if (!FileExists("resources/output.bin"))
         // {
         //     GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
-        // }
-        // else
-        // {
-        //     lightSubSystem->LinkAllRenderablesToLight();
         // }
         // ----
 

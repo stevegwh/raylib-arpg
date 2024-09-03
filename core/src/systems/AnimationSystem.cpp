@@ -171,7 +171,7 @@ namespace sage
             if (!registry->valid(entity)) continue;
             animation.animLastFrame = animation.animCurrentFrame;
             animation.animCurrentFrame = (animation.animCurrentFrame + animation.animSpeed) % anim.frameCount;
-            sage::UpdateModelAnimation(renderable.GetModel(), anim, animation.animCurrentFrame);
+            renderable.GetModel()->UpdateAnimation(anim, animation.animCurrentFrame);
         }
     }
 

@@ -8,17 +8,18 @@
 namespace sage
 {
 
-    void LightSubSystem::LinkAllRenderablesToLight()
-    {
-        registry->view<Renderable>().each(
-            [&](auto entity, Renderable& renderable) { LinkRenderableToLight(&renderable); });
-    }
+    // void LightSubSystem::LinkAllRenderablesToLight()
+    // {
+    //     registry->view<Renderable>().each(
+    //         [&](auto entity, Renderable& renderable) { LinkRenderableToLight(&renderable); });
+    // }
 
-    void LightSubSystem::LinkRenderableToLight(Renderable* renderable)
+    void LightSubSystem::LinkRenderableToLight(entt::entity entity) const
     {
-        for (int i = 0; i < renderable->GetModel().materialCount; ++i)
+        auto& renderable = registry->get<Renderable>(entity);
+        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
         {
-            renderable->GetModel().materials[i].shader = shader;
+            renderable.GetModel()->SetShader(shader, i);
         }
     }
 

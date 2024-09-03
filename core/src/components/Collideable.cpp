@@ -24,6 +24,7 @@ namespace sage
         bb.max = Vector3Transform(bb.max, mat);
         worldBoundingBox = bb;
     }
+    
     Collideable::Collideable(BoundingBox _boundingBox)
         : localBoundingBox(_boundingBox), worldBoundingBox(_boundingBox)
     {
@@ -35,6 +36,7 @@ namespace sage
           localBoundingBox(_boundingBox),
           worldBoundingBox(_boundingBox)
     {
+        // TODO: Feels like this should be in the CollisionSystem as "on_create"...
         // Link the transform to the collideable
         auto& transform = registry->get<sgTransform>(_self);
         entt::sink sink{transform.onPositionUpdate};
