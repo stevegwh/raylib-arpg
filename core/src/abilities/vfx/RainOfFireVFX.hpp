@@ -6,6 +6,8 @@
 
 #include "VisualFX.hpp"
 
+#include "FlamePartSys.hpp"
+
 #include "raylib.h"
 
 #include <memory>
@@ -13,11 +15,15 @@
 
 namespace sage
 {
-    struct Fireball;
+    struct Fireball
+    {
+        Vector3 position;
+        Vector3 velocity;
+        std::unique_ptr<FlamePartSys> flameEffect;
+    };
 
     class RainOfFireVFX : public VisualFX
     {
-        Shader shader{};
         Vector3 target{};
         Vector3 baseSpawnPoint{};
         float initialHeight{};
@@ -31,7 +37,6 @@ namespace sage
         void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        ~RainOfFireVFX();
         explicit RainOfFireVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage

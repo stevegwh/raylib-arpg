@@ -1,21 +1,18 @@
 #pragma once
 
-#include "components/NavigationGridSquare.hpp" // Needed for GridSquare
-
+#include "components/NavigationGridSquare.hpp"
 #include "raylib.h"
-#include "slib.hpp"
-
+#include "systems/NavigationGridSystem.hpp"
 #include <entt/entt.hpp>
 
 namespace sage
 {
-    class NavigationGridSystem;
 
     class TextureTerrainOverlay
     {
         entt::registry* registry;
         NavigationGridSystem* navigationGridSystem;
-        Texture texture;
+        Texture2D texture;
         GridSquare lastHit{};
         GridSquare minRange{}, maxRange{};
         bool initialised = false;
@@ -23,7 +20,7 @@ namespace sage
         Vector3 meshOffset{};
 
         void updateTerrainPolygon();
-        ModelSafe generateTerrainPolygon();
+        Model generateTerrainPolygon();
         void updateMeshData(Mesh& mesh);
         Mesh createInitialMesh();
         void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol);
@@ -32,11 +29,11 @@ namespace sage
         void generateIndices(Mesh& mesh, int maxRow, int maxCol);
 
       public:
-        const entt::entity entity;
+        entt::entity entity;
 
         void Enable(bool enable);
         void Init(Vector3 mouseRayHit);
-        [[nodiscard]] bool active() const;
+        bool active() const;
         void Update(Vector3 mouseRayHit);
         ~TextureTerrainOverlay();
         TextureTerrainOverlay(
@@ -44,13 +41,13 @@ namespace sage
             NavigationGridSystem* _navigationGridSystem,
             const char* texturePath,
             Color _hint,
-            Shader shader);
+            const char* shaderPath);
         TextureTerrainOverlay(
             entt::registry* _registry,
             NavigationGridSystem* _navigationGridSystem,
             const char* texturePath,
             Color _hint,
-            const char* shaderPath);
+            Shader _shader);
     };
 
 } // namespace sage
