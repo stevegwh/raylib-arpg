@@ -42,7 +42,7 @@ namespace sage
         ModelSafe& operator=(ModelSafe&& other) noexcept;
         ~ModelSafe();
         explicit ModelSafe(const char* path);
-        explicit ModelSafe(Model _model);
+        explicit ModelSafe(Model& _model);
         ModelSafe() = default;
     };
 

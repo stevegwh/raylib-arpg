@@ -56,8 +56,9 @@ namespace sage
         UnloadModel(model);
     }
 
-    ModelSafe::ModelSafe(Model _model) : model(_model)
+    ModelSafe::ModelSafe(Model& _model) : model(_model)
     {
+        _model = {};
         // Should deep copy Model and unload the old one?
     }
 
