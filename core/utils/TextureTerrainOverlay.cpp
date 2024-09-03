@@ -4,8 +4,8 @@
 
 namespace sage
 {
-
-    void TextureTerrainOverlay::updateMeshData(Mesh& mesh)
+    void TextureTerrainOverlay::updateMeshData(
+        Mesh& mesh, const GridSquare& minRange, const GridSquare& maxRange) const
     {
         int maxRow = maxRange.row - minRange.row;
         int maxCol = maxRange.col - minRange.col;
@@ -25,7 +25,7 @@ namespace sage
         }
     }
 
-    Mesh TextureTerrainOverlay::createInitialMesh()
+    Mesh TextureTerrainOverlay::createInitialMesh(const GridSquare& minRange, const GridSquare& maxRange)
     {
         int maxRow = maxRange.row - minRange.row;
         int maxCol = maxRange.col - minRange.col;
@@ -39,13 +39,13 @@ namespace sage
         mesh.texcoords = (float*)RL_MALLOC(vertexCount * 2 * sizeof(float));
         mesh.indices = (unsigned short*)RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short));
 
-        updateMeshData(mesh);
+        updateMeshData(mesh, minRange, maxRange);
         generateIndices(mesh, maxRow, maxCol);
 
         return mesh;
     }
 
-    void TextureTerrainOverlay::updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol)
+    void TextureTerrainOverlay::updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol) const
     {
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
         mesh.vertices[vertexIndex * 3] = gridSquares[gridRow][gridCol]->worldPosMin.x;
@@ -54,7 +54,7 @@ namespace sage
         mesh.vertices[vertexIndex * 3 + 2] = gridSquares[gridRow][gridCol]->worldPosMin.z;
     }
 
-    void TextureTerrainOverlay::updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol)
+    void TextureTerrainOverlay::updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol) const
     {
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
         mesh.normals[vertexIndex * 3] = gridSquares[gridRow][gridCol]->terrainNormal.x;
@@ -92,10 +92,10 @@ namespace sage
         }
     }
 
-    void TextureTerrainOverlay::updateTerrainPolygon()
+    void TextureTerrainOverlay::updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange)
     {
         auto& mesh = *registry->get<Renderable>(entity).GetModel()->rlmodel.meshes;
-        updateMeshData(mesh);
+        updateMeshData(mesh, minRange, maxRange);
 
         int vertexCount = mesh.vertexCount;
         UpdateMeshBuffer(mesh, 0, mesh.vertices, vertexCount * 3 * sizeof(float), 0);
@@ -103,9 +103,9 @@ namespace sage
         UpdateMeshBuffer(mesh, 2, mesh.texcoords, vertexCount * 2 * sizeof(float), 0);
     }
 
-    Model TextureTerrainOverlay::generateTerrainPolygon()
+    Model TextureTerrainOverlay::generateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange)
     {
-        Mesh mesh = createInitialMesh();
+        Mesh mesh = createInitialMesh(minRange, maxRange);
 
         UploadMesh(&mesh, false);
         Model model = LoadModelFromMesh(mesh);
@@ -136,9 +136,10 @@ namespace sage
         initialised = true;
 
         navigationGridSystem->WorldToGridSpace(mouseRayHit, lastHit);
+        GridSquare minRange{}, maxRange{};
         navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
         auto& renderable = registry->get<Renderable>(entity);
-        renderable.GetModel()->rlmodel = generateTerrainPolygon();
+        renderable.GetModel()->rlmodel = generateTerrainPolygon(minRange, maxRange);
 
         // Calculate the center of the mesh in world space
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
@@ -160,7 +161,7 @@ namespace sage
         renderable.GetModel()->SetTransform(MatrixIdentity());
     }
 
-    bool TextureTerrainOverlay::active() const
+    bool TextureTerrainOverlay::IsActive() const
     {
         return m_active;
     }
@@ -173,10 +174,10 @@ namespace sage
         if (lastHit == mousePosGrid) return;
 
         lastHit = mousePosGrid;
+        GridSquare minRange{}, maxRange{};
         navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
 
-        auto& renderable = registry->get<Renderable>(entity);
-        updateTerrainPolygon();
+        updateTerrainPolygon(minRange, maxRange);
 
         auto& trans = registry->get<sgTransform>(entity);
         trans.SetPosition(meshOffset);
@@ -199,9 +200,10 @@ namespace sage
           entity(_registry->create()),
           texture(LoadTexture(texturePath))
     {
-        auto& r = registry->emplace<Renderable>(entity, generateTerrainPolygon(), MatrixIdentity());
+        GridSquare minRange{}, maxRange{};
+        auto& r =
+            registry->emplace<Renderable>(entity, generateTerrainPolygon(minRange, maxRange), MatrixIdentity());
         r.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
-        // r.shader = std::make_optional(LoadShader(nullptr, shaderPath));
         r.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);
         registry->emplace<RenderableDeferred>(entity);
@@ -218,7 +220,9 @@ namespace sage
           entity(_registry->create()),
           texture(ResourceManager::GetInstance().TextureLoad(texturePath))
     {
-        auto& r = registry->emplace<Renderable>(entity, generateTerrainPolygon(), MatrixIdentity());
+        GridSquare minRange{}, maxRange{};
+        auto& r =
+            registry->emplace<Renderable>(entity, generateTerrainPolygon(minRange, maxRange), MatrixIdentity());
         r.GetModel()->SetShader(_shader, 0);
         r.hint = _hint;
 

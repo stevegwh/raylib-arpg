@@ -1,0 +1,3473 @@
+<?xml version="1.0"?>
+
+<valgrindoutput>
+
+<protocolversion>4</protocolversion>
+<protocoltool>memcheck</protocoltool>
+
+<preamble>
+  <line>Memcheck, a memory error detector</line>
+  <line>Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.</line>
+  <line>Using Valgrind-3.23.0 and LibVEX; rerun with -h for copyright info</line>
+  <line>Command: /home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</line>
+</preamble>
+
+<pid>6464</pid>
+<ppid>5309</ppid>
+<tool>memcheck</tool>
+
+<args>
+  <vargv>
+    <exe>/usr/bin/valgrind</exe>
+    <arg>--tool=memcheck</arg>
+    <arg>--xml=yes</arg>
+    <arg>--xml-file=/tmp/clion-valgrind67229b91-1379-417a-a518-e6151f3fa079/valgrind_output_%p</arg>
+    <arg>--gen-suppressions=all</arg>
+    <arg>--leak-check=full</arg>
+    <arg>--leak-resolution=med</arg>
+    <arg>--track-origins=yes</arg>
+    <arg>--vgdb=no</arg>
+  </vargv>
+  <argv>
+    <exe>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</exe>
+  </argv>
+</args>
+
+<status>
+  <state>RUNNING</state>
+  <time>00:00:00:00.090 </time>
+</status>
+
+<error>
+  <unique>0x0</unique>
+  <tid>1</tid>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x12D6F6</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::handleInput()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>109</line>
+    </frame>
+    <frame>
+      <ip>0x12EA95</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>222</line>
+    </frame>
+    <frame>
+      <ip>0x137AF1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>35</line>
+    </frame>
+    <frame>
+      <ip>0x136428</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>43</line>
+    </frame>
+    <frame>
+      <ip>0x11E544</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>80</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a heap allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x4844F93</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>487</line>
+    </frame>
+    <frame>
+      <ip>0x2201D4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::Camera&gt;::__single_object std::make_unique&lt;sage::Camera, sage::UserInput*&gt;(sage::UserInput*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x21FB79</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::GameData(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, sage::LightSubSystem*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>38</line>
+    </frame>
+    <frame>
+      <ip>0x1381FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameData&gt;::__single_object std::make_unique&lt;sage::GameData, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x137D64</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x136799</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>82</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x1</unique>
+  <tid>1</tid>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x12D948</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::handleInput()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>117</line>
+    </frame>
+    <frame>
+      <ip>0x12EA95</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>222</line>
+    </frame>
+    <frame>
+      <ip>0x137AF1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>35</line>
+    </frame>
+    <frame>
+      <ip>0x136428</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>43</line>
+    </frame>
+    <frame>
+      <ip>0x11E544</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>80</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a heap allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x4844F93</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>487</line>
+    </frame>
+    <frame>
+      <ip>0x2201D4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::Camera&gt;::__single_object std::make_unique&lt;sage::Camera, sage::UserInput*&gt;(sage::UserInput*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x21FB79</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::GameData(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, sage::LightSubSystem*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>38</line>
+    </frame>
+    <frame>
+      <ip>0x1381FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameData&gt;::__single_object std::make_unique&lt;sage::GameData, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x137D64</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x136799</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>82</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x2</unique>
+  <tid>1</tid>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x12DC09</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::handleInput()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>125</line>
+    </frame>
+    <frame>
+      <ip>0x12EA95</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>222</line>
+    </frame>
+    <frame>
+      <ip>0x137AF1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>35</line>
+    </frame>
+    <frame>
+      <ip>0x136428</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>43</line>
+    </frame>
+    <frame>
+      <ip>0x11E544</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>80</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a heap allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x4844F93</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>487</line>
+    </frame>
+    <frame>
+      <ip>0x2201D4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::Camera&gt;::__single_object std::make_unique&lt;sage::Camera, sage::UserInput*&gt;(sage::UserInput*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x21FB79</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::GameData(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, sage::LightSubSystem*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>38</line>
+    </frame>
+    <frame>
+      <ip>0x1381FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameData&gt;::__single_object std::make_unique&lt;sage::GameData, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x137D64</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x136799</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>82</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x3</unique>
+  <tid>1</tid>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x12DDE1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::handleInput()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>131</line>
+    </frame>
+    <frame>
+      <ip>0x12EA95</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>222</line>
+    </frame>
+    <frame>
+      <ip>0x137AF1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>35</line>
+    </frame>
+    <frame>
+      <ip>0x136428</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>43</line>
+    </frame>
+    <frame>
+      <ip>0x11E544</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>80</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a heap allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x4844F93</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>487</line>
+    </frame>
+    <frame>
+      <ip>0x2201D4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::Camera&gt;::__single_object std::make_unique&lt;sage::Camera, sage::UserInput*&gt;(sage::UserInput*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x21FB79</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::GameData(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, sage::LightSubSystem*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>38</line>
+    </frame>
+    <frame>
+      <ip>0x1381FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameData&gt;::__single_object std::make_unique&lt;sage::GameData, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x137D64</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x136799</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>82</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x4</unique>
+  <tid>1</tid>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x12DFC7</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::handleInput()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>137</line>
+    </frame>
+    <frame>
+      <ip>0x12EA95</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>222</line>
+    </frame>
+    <frame>
+      <ip>0x137AF1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>35</line>
+    </frame>
+    <frame>
+      <ip>0x136428</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>43</line>
+    </frame>
+    <frame>
+      <ip>0x11E544</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>80</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a heap allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x4844F93</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>487</line>
+    </frame>
+    <frame>
+      <ip>0x2201D4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::Camera&gt;::__single_object std::make_unique&lt;sage::Camera, sage::UserInput*&gt;(sage::UserInput*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x21FB79</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::GameData(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, sage::LightSubSystem*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>38</line>
+    </frame>
+    <frame>
+      <ip>0x1381FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameData&gt;::__single_object std::make_unique&lt;sage::GameData, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x137D64</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x136799</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>82</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x5</unique>
+  <tid>1</tid>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x12E0C5</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::handleInput()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>142</line>
+    </frame>
+    <frame>
+      <ip>0x12EA95</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Camera::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Camera.cpp</file>
+      <line>222</line>
+    </frame>
+    <frame>
+      <ip>0x137AF1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>35</line>
+    </frame>
+    <frame>
+      <ip>0x136428</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>43</line>
+    </frame>
+    <frame>
+      <ip>0x11E544</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>80</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a heap allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x4844F93</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>487</line>
+    </frame>
+    <frame>
+      <ip>0x2201D4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::Camera&gt;::__single_object std::make_unique&lt;sage::Camera, sage::UserInput*&gt;(sage::UserInput*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x21FB79</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::GameData(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, sage::LightSubSystem*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>38</line>
+    </frame>
+    <frame>
+      <ip>0x1381FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameData&gt;::__single_object std::make_unique&lt;sage::GameData, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x137D64</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x136799</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>82</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4sage6Camera11handleInputEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage6Camera6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage5Scene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleScene6UpdateEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4sage6Camera11handleInputEv
+   fun:_ZN4sage6Camera6UpdateEv
+   fun:_ZN4sage5Scene6UpdateEv
+   fun:_ZN4sage12ExampleScene6UpdateEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x6</unique>
+  <tid>5</tid>
+  <threadname>game:sh_opt0</threadname>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x8CA8223</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::ConstantExpr::getGetElementPtr(llvm::Type*, llvm::Constant*, llvm::ArrayRef&lt;llvm::Value*&gt;, bool, std::optional&lt;unsigned int&gt;, llvm::Type*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>Constants.cpp</file>
+      <line>2311</line>
+    </frame>
+    <frame>
+      <ip>0x8CBD17C</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>FoldGEP</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/include/llvm/IR</dir>
+      <file>ConstantFolder.h</file>
+      <line>119</line>
+    </frame>
+    <frame>
+      <ip>0x8CBD17C</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>CreateGEP</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/include/llvm/IR</dir>
+      <file>IRBuilder.h</file>
+      <line>1867</line>
+    </frame>
+    <frame>
+      <ip>0x8CBD17C</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>LLVMBuildGEP2</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>Core.cpp</file>
+      <line>3741</line>
+    </frame>
+    <frame>
+      <ip>0x66EC49B</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>get_memory_ptr.isra.0</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>63</line>
+    </frame>
+    <frame>
+      <ip>0x66F3E53</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>visit_load_shared</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>2532</line>
+    </frame>
+    <frame>
+      <ip>0x66F3E53</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>visit_intrinsic</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>3083</line>
+    </frame>
+    <frame>
+      <ip>0x66F6DAA</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>visit_block</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>4178</line>
+    </frame>
+    <frame>
+      <ip>0x66F6DAA</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>visit_cf_list.isra.0</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>4253</line>
+    </frame>
+    <frame>
+      <ip>0x66F719C</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>visit_if</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>4218</line>
+    </frame>
+    <frame>
+      <ip>0x66F719C</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>visit_cf_list.isra.0</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>4258</line>
+    </frame>
+    <frame>
+      <ip>0x66F8B56</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>ac_nir_translate</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/amd/llvm</dir>
+      <file>ac_nir_to_llvm.c</file>
+      <line>4384</line>
+    </frame>
+    <frame>
+      <ip>0x663AD22</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_llvm_translate_nir</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader_llvm.c</file>
+      <line>752</line>
+    </frame>
+    <frame>
+      <ip>0x663B894</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_llvm_compile_shader</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader_llvm.c</file>
+      <line>829</line>
+    </frame>
+    <frame>
+      <ip>0x65C1657</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_compile_shader</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader.c</file>
+      <line>2927</line>
+    </frame>
+    <frame>
+      <ip>0x65C296C</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_create_shader_variant</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader.c</file>
+      <line>3378</line>
+    </frame>
+    <frame>
+      <ip>0x65F892A</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_build_shader_variant(si_shader*, int, bool)</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_state_shaders.cpp</file>
+      <line>2840</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a stack allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x8CBD0A0</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>LLVMBuildGEP2</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>Core.cpp</file>
+      <line>3739</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_</fun> </sframe>
+    <sframe> <fun>FoldGEP</fun> </sframe>
+    <sframe> <fun>CreateGEP</fun> </sframe>
+    <sframe> <fun>LLVMBuildGEP2</fun> </sframe>
+    <sframe> <fun>get_memory_ptr.isra.0</fun> </sframe>
+    <sframe> <fun>visit_load_shared</fun> </sframe>
+    <sframe> <fun>visit_intrinsic</fun> </sframe>
+    <sframe> <fun>visit_block</fun> </sframe>
+    <sframe> <fun>visit_cf_list.isra.0</fun> </sframe>
+    <sframe> <fun>visit_if</fun> </sframe>
+    <sframe> <fun>visit_cf_list.isra.0</fun> </sframe>
+    <sframe> <fun>ac_nir_translate</fun> </sframe>
+    <sframe> <fun>si_llvm_translate_nir</fun> </sframe>
+    <sframe> <fun>si_llvm_compile_shader</fun> </sframe>
+    <sframe> <fun>si_compile_shader</fun> </sframe>
+    <sframe> <fun>si_create_shader_variant</fun> </sframe>
+    <sframe> <fun>_ZL23si_build_shader_variantP9si_shaderib</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_
+   fun:FoldGEP
+   fun:CreateGEP
+   fun:LLVMBuildGEP2
+   fun:get_memory_ptr.isra.0
+   fun:visit_load_shared
+   fun:visit_intrinsic
+   fun:visit_block
+   fun:visit_cf_list.isra.0
+   fun:visit_if
+   fun:visit_cf_list.isra.0
+   fun:ac_nir_translate
+   fun:si_llvm_translate_nir
+   fun:si_llvm_compile_shader
+   fun:si_compile_shader
+   fun:si_create_shader_variant
+   fun:_ZL23si_build_shader_variantP9si_shaderib
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_</fun> </sframe>
+    <sframe> <fun>FoldGEP</fun> </sframe>
+    <sframe> <fun>CreateGEP</fun> </sframe>
+    <sframe> <fun>LLVMBuildGEP2</fun> </sframe>
+    <sframe> <fun>get_memory_ptr.isra.0</fun> </sframe>
+    <sframe> <fun>visit_load_shared</fun> </sframe>
+    <sframe> <fun>visit_intrinsic</fun> </sframe>
+    <sframe> <fun>visit_block</fun> </sframe>
+    <sframe> <fun>visit_cf_list.isra.0</fun> </sframe>
+    <sframe> <fun>visit_if</fun> </sframe>
+    <sframe> <fun>visit_cf_list.isra.0</fun> </sframe>
+    <sframe> <fun>ac_nir_translate</fun> </sframe>
+    <sframe> <fun>si_llvm_translate_nir</fun> </sframe>
+    <sframe> <fun>si_llvm_compile_shader</fun> </sframe>
+    <sframe> <fun>si_compile_shader</fun> </sframe>
+    <sframe> <fun>si_create_shader_variant</fun> </sframe>
+    <sframe> <fun>_ZL23si_build_shader_variantP9si_shaderib</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_
+   fun:FoldGEP
+   fun:CreateGEP
+   fun:LLVMBuildGEP2
+   fun:get_memory_ptr.isra.0
+   fun:visit_load_shared
+   fun:visit_intrinsic
+   fun:visit_block
+   fun:visit_cf_list.isra.0
+   fun:visit_if
+   fun:visit_cf_list.isra.0
+   fun:ac_nir_translate
+   fun:si_llvm_translate_nir
+   fun:si_llvm_compile_shader
+   fun:si_compile_shader
+   fun:si_create_shader_variant
+   fun:_ZL23si_build_shader_variantP9si_shaderib
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x7</unique>
+  <tid>5</tid>
+  <threadname>game:sh_opt0</threadname>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x8CA8223</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::ConstantExpr::getGetElementPtr(llvm::Type*, llvm::Constant*, llvm::ArrayRef&lt;llvm::Value*&gt;, bool, std::optional&lt;unsigned int&gt;, llvm::Type*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>Constants.cpp</file>
+      <line>2311</line>
+    </frame>
+    <frame>
+      <ip>0xA951C8E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>getGetElementPtr</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/include/llvm/IR</dir>
+      <file>Constants.h</file>
+      <line>1191</line>
+    </frame>
+    <frame>
+      <ip>0xA951C8E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>(anonymous namespace)::ConstantFoldInstOperandsImpl(llvm::Value const*, unsigned int, llvm::ArrayRef&lt;llvm::Constant*&gt;, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1030</line>
+    </frame>
+    <frame>
+      <ip>0xA94FC32</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>(anonymous namespace)::ConstantFoldConstantImpl(llvm::Constant const*, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*, llvm::SmallDenseMap&lt;llvm::Constant*, llvm::Constant*, 4u, llvm::DenseMapInfo&lt;llvm::Constant*, void&gt;, llvm::detail::DenseMapPair&lt;llvm::Constant*, llvm::Constant*&gt; &gt;&amp;) [clone .part.0]</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1118</line>
+    </frame>
+    <frame>
+      <ip>0xA952225</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>ConstantFoldConstantImpl</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1095</line>
+    </frame>
+    <frame>
+      <ip>0xA952225</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::ConstantFoldInstruction(llvm::Instruction*, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1170</line>
+    </frame>
+    <frame>
+      <ip>0x9FF88D8</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::InstCombinerImpl::prepareWorklist(llvm::Function&amp;, llvm::ReversePostOrderTraversal&lt;llvm::BasicBlock*, llvm::GraphTraits&lt;llvm::BasicBlock*&gt; &gt;&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4646</line>
+    </frame>
+    <frame>
+      <ip>0xA009BF3</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>combineInstructionsOverFunction(llvm::Function&amp;, llvm::InstructionWorklist&amp;, llvm::AAResults*, llvm::AssumptionCache&amp;, llvm::TargetLibraryInfo&amp;, llvm::TargetTransformInfo&amp;, llvm::DominatorTree&amp;, llvm::OptimizationRemarkEmitter&amp;, llvm::BlockFrequencyInfo*, llvm::ProfileSummaryInfo*, llvm::LoopInfo*, llvm::InstCombineOptions const&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4798</line>
+    </frame>
+    <frame>
+      <ip>0xA00ADE5</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>runOnFunction</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4906</line>
+    </frame>
+    <frame>
+      <ip>0xA00ADE5</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::InstructionCombiningPass::runOnFunction(llvm::Function&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4884</line>
+    </frame>
+    <frame>
+      <ip>0x8DC50D2</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::FPPassManager::runOnFunction(llvm::Function&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>1443</line>
+    </frame>
+    <frame>
+      <ip>0x8DC54A3</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::FPPassManager::runOnModule(llvm::Module&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>1489</line>
+    </frame>
+    <frame>
+      <ip>0x8DC6F6E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>runOnModule</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>1558</line>
+    </frame>
+    <frame>
+      <ip>0x8DC6F6E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::legacy::PassManagerImpl::run(llvm::Module&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>541</line>
+    </frame>
+    <frame>
+      <ip>0x8CC1F4D</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>LLVMRunPassManager</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>Core.cpp</file>
+      <line>4247</line>
+    </frame>
+    <frame>
+      <ip>0x663B8EB</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_llvm_optimize_module</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader_llvm.c</file>
+      <line>239</line>
+    </frame>
+    <frame>
+      <ip>0x663B8EB</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_llvm_compile_shader</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader_llvm.c</file>
+      <line>861</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a stack allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0xA9519C0</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>(anonymous namespace)::ConstantFoldInstOperandsImpl(llvm::Value const*, unsigned int, llvm::ArrayRef&lt;llvm::Constant*&gt;, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>994</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_</fun> </sframe>
+    <sframe> <fun>getGetElementPtr</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0</fun> </sframe>
+    <sframe> <fun>ConstantFoldConstantImpl</fun> </sframe>
+    <sframe> <fun>_ZN4llvm23ConstantFoldInstructionEPNS_11InstructionERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE</fun> </sframe>
+    <sframe> <fun>_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE</fun> </sframe>
+    <sframe> <fun>runOnFunction</fun> </sframe>
+    <sframe> <fun>_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>runOnModule</fun> </sframe>
+    <sframe> <fun>_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>LLVMRunPassManager</fun> </sframe>
+    <sframe> <fun>si_llvm_optimize_module</fun> </sframe>
+    <sframe> <fun>si_llvm_compile_shader</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_
+   fun:getGetElementPtr
+   fun:_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE
+   fun:_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0
+   fun:ConstantFoldConstantImpl
+   fun:_ZN4llvm23ConstantFoldInstructionEPNS_11InstructionERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE
+   fun:_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE
+   fun:_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE
+   fun:runOnFunction
+   fun:_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE
+   fun:runOnModule
+   fun:_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE
+   fun:LLVMRunPassManager
+   fun:si_llvm_optimize_module
+   fun:si_llvm_compile_shader
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_</fun> </sframe>
+    <sframe> <fun>getGetElementPtr</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0</fun> </sframe>
+    <sframe> <fun>ConstantFoldConstantImpl</fun> </sframe>
+    <sframe> <fun>_ZN4llvm23ConstantFoldInstructionEPNS_11InstructionERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE</fun> </sframe>
+    <sframe> <fun>_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE</fun> </sframe>
+    <sframe> <fun>runOnFunction</fun> </sframe>
+    <sframe> <fun>_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>runOnModule</fun> </sframe>
+    <sframe> <fun>_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>LLVMRunPassManager</fun> </sframe>
+    <sframe> <fun>si_llvm_optimize_module</fun> </sframe>
+    <sframe> <fun>si_llvm_compile_shader</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_
+   fun:getGetElementPtr
+   fun:_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE
+   fun:_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0
+   fun:ConstantFoldConstantImpl
+   fun:_ZN4llvm23ConstantFoldInstructionEPNS_11InstructionERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE
+   fun:_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE
+   fun:_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE
+   fun:runOnFunction
+   fun:_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE
+   fun:runOnModule
+   fun:_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE
+   fun:LLVMRunPassManager
+   fun:si_llvm_optimize_module
+   fun:si_llvm_compile_shader
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x8</unique>
+  <tid>5</tid>
+  <threadname>game:sh_opt0</threadname>
+  <kind>UninitCondition</kind>
+  <what>Conditional jump or move depends on uninitialised value(s)</what>
+  <stack>
+    <frame>
+      <ip>0x8CA8223</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::ConstantExpr::getGetElementPtr(llvm::Type*, llvm::Constant*, llvm::ArrayRef&lt;llvm::Value*&gt;, bool, std::optional&lt;unsigned int&gt;, llvm::Type*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>Constants.cpp</file>
+      <line>2311</line>
+    </frame>
+    <frame>
+      <ip>0xA951C8E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>getGetElementPtr</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/include/llvm/IR</dir>
+      <file>Constants.h</file>
+      <line>1191</line>
+    </frame>
+    <frame>
+      <ip>0xA951C8E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>(anonymous namespace)::ConstantFoldInstOperandsImpl(llvm::Value const*, unsigned int, llvm::ArrayRef&lt;llvm::Constant*&gt;, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1030</line>
+    </frame>
+    <frame>
+      <ip>0xA94FC32</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>(anonymous namespace)::ConstantFoldConstantImpl(llvm::Constant const*, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*, llvm::SmallDenseMap&lt;llvm::Constant*, llvm::Constant*, 4u, llvm::DenseMapInfo&lt;llvm::Constant*, void&gt;, llvm::detail::DenseMapPair&lt;llvm::Constant*, llvm::Constant*&gt; &gt;&amp;) [clone .part.0]</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1118</line>
+    </frame>
+    <frame>
+      <ip>0xA9506DA</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>ConstantFoldConstantImpl</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1095</line>
+    </frame>
+    <frame>
+      <ip>0xA9506DA</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::ConstantFoldConstant(llvm::Constant const*, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>1180</line>
+    </frame>
+    <frame>
+      <ip>0x9FF8EE9</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::InstCombinerImpl::prepareWorklist(llvm::Function&amp;, llvm::ReversePostOrderTraversal&lt;llvm::BasicBlock*, llvm::GraphTraits&lt;llvm::BasicBlock*&gt; &gt;&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4665</line>
+    </frame>
+    <frame>
+      <ip>0xA009BF3</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>combineInstructionsOverFunction(llvm::Function&amp;, llvm::InstructionWorklist&amp;, llvm::AAResults*, llvm::AssumptionCache&amp;, llvm::TargetLibraryInfo&amp;, llvm::TargetTransformInfo&amp;, llvm::DominatorTree&amp;, llvm::OptimizationRemarkEmitter&amp;, llvm::BlockFrequencyInfo*, llvm::ProfileSummaryInfo*, llvm::LoopInfo*, llvm::InstCombineOptions const&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4798</line>
+    </frame>
+    <frame>
+      <ip>0xA00ADE5</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>runOnFunction</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4906</line>
+    </frame>
+    <frame>
+      <ip>0xA00ADE5</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::InstructionCombiningPass::runOnFunction(llvm::Function&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Transforms/InstCombine</dir>
+      <file>InstructionCombining.cpp</file>
+      <line>4884</line>
+    </frame>
+    <frame>
+      <ip>0x8DC50D2</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::FPPassManager::runOnFunction(llvm::Function&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>1443</line>
+    </frame>
+    <frame>
+      <ip>0x8DC54A3</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::FPPassManager::runOnModule(llvm::Module&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>1489</line>
+    </frame>
+    <frame>
+      <ip>0x8DC6F6E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>runOnModule</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>1558</line>
+    </frame>
+    <frame>
+      <ip>0x8DC6F6E</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>llvm::legacy::PassManagerImpl::run(llvm::Module&amp;)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>LegacyPassManager.cpp</file>
+      <line>541</line>
+    </frame>
+    <frame>
+      <ip>0x8CC1F4D</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>LLVMRunPassManager</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/IR</dir>
+      <file>Core.cpp</file>
+      <line>4247</line>
+    </frame>
+    <frame>
+      <ip>0x663B8EB</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_llvm_optimize_module</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader_llvm.c</file>
+      <line>239</line>
+    </frame>
+    <frame>
+      <ip>0x663B8EB</ip>
+      <obj>/usr/lib/libgallium-24.2.1-arch1.1.so</obj>
+      <fn>si_llvm_compile_shader</fn>
+      <dir>/usr/src/debug/mesa/build/../mesa-24.2.1/src/gallium/drivers/radeonsi</dir>
+      <file>si_shader_llvm.c</file>
+      <line>861</line>
+    </frame>
+  </stack>
+  <auxwhat>Uninitialised value was created by a stack allocation</auxwhat>
+  <stack>
+    <frame>
+      <ip>0xA9519C0</ip>
+      <obj>/usr/lib/libLLVM.so.18.1</obj>
+      <fn>(anonymous namespace)::ConstantFoldInstOperandsImpl(llvm::Value const*, unsigned int, llvm::ArrayRef&lt;llvm::Constant*&gt;, llvm::DataLayout const&amp;, llvm::TargetLibraryInfo const*)</fn>
+      <dir>/usr/src/debug/llvm/llvm-18.1.8.src/lib/Analysis</dir>
+      <file>ConstantFolding.cpp</file>
+      <line>994</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_</fun> </sframe>
+    <sframe> <fun>getGetElementPtr</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0</fun> </sframe>
+    <sframe> <fun>ConstantFoldConstantImpl</fun> </sframe>
+    <sframe> <fun>_ZN4llvm20ConstantFoldConstantEPKNS_8ConstantERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE</fun> </sframe>
+    <sframe> <fun>_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE</fun> </sframe>
+    <sframe> <fun>runOnFunction</fun> </sframe>
+    <sframe> <fun>_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>runOnModule</fun> </sframe>
+    <sframe> <fun>_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>LLVMRunPassManager</fun> </sframe>
+    <sframe> <fun>si_llvm_optimize_module</fun> </sframe>
+    <sframe> <fun>si_llvm_compile_shader</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_
+   fun:getGetElementPtr
+   fun:_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE
+   fun:_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0
+   fun:ConstantFoldConstantImpl
+   fun:_ZN4llvm20ConstantFoldConstantEPKNS_8ConstantERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE
+   fun:_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE
+   fun:_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE
+   fun:runOnFunction
+   fun:_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE
+   fun:runOnModule
+   fun:_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE
+   fun:LLVMRunPassManager
+   fun:si_llvm_optimize_module
+   fun:si_llvm_compile_shader
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Cond</skind>
+    <sframe> <fun>_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_</fun> </sframe>
+    <sframe> <fun>getGetElementPtr</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0</fun> </sframe>
+    <sframe> <fun>ConstantFoldConstantImpl</fun> </sframe>
+    <sframe> <fun>_ZN4llvm20ConstantFoldConstantEPKNS_8ConstantERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE</fun> </sframe>
+    <sframe> <fun>_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE</fun> </sframe>
+    <sframe> <fun>runOnFunction</fun> </sframe>
+    <sframe> <fun>_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE</fun> </sframe>
+    <sframe> <fun>_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>runOnModule</fun> </sframe>
+    <sframe> <fun>_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE</fun> </sframe>
+    <sframe> <fun>LLVMRunPassManager</fun> </sframe>
+    <sframe> <fun>si_llvm_optimize_module</fun> </sframe>
+    <sframe> <fun>si_llvm_compile_shader</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN4llvm12ConstantExpr16getGetElementPtrEPNS_4TypeEPNS_8ConstantENS_8ArrayRefIPNS_5ValueEEEbSt8optionalIjES2_
+   fun:getGetElementPtr
+   fun:_ZN12_GLOBAL__N_128ConstantFoldInstOperandsImplEPKN4llvm5ValueEjNS0_8ArrayRefIPNS0_8ConstantEEERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoE
+   fun:_ZN12_GLOBAL__N_124ConstantFoldConstantImplEPKN4llvm8ConstantERKNS0_10DataLayoutEPKNS0_17TargetLibraryInfoERNS0_13SmallDenseMapIPS1_SB_Lj4ENS0_12DenseMapInfoISB_vEENS0_6detail12DenseMapPairISB_SB_EEEE.part.0
+   fun:ConstantFoldConstantImpl
+   fun:_ZN4llvm20ConstantFoldConstantEPKNS_8ConstantERKNS_10DataLayoutEPKNS_17TargetLibraryInfoE
+   fun:_ZN4llvm16InstCombinerImpl15prepareWorklistERNS_8FunctionERNS_25ReversePostOrderTraversalIPNS_10BasicBlockENS_11GraphTraitsIS5_EEEE
+   fun:_ZL31combineInstructionsOverFunctionRN4llvm8FunctionERNS_19InstructionWorklistEPNS_9AAResultsERNS_15AssumptionCacheERNS_17TargetLibraryInfoERNS_19TargetTransformInfoERNS_13DominatorTreeERNS_25OptimizationRemarkEmitterEPNS_18BlockFrequencyInfoEPNS_18ProfileSummaryInfoEPNS_8LoopInfoERKNS_18InstCombineOptionsE
+   fun:runOnFunction
+   fun:_ZN4llvm24InstructionCombiningPass13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager13runOnFunctionERNS_8FunctionE
+   fun:_ZN4llvm13FPPassManager11runOnModuleERNS_6ModuleE
+   fun:runOnModule
+   fun:_ZN4llvm6legacy15PassManagerImpl3runERNS_6ModuleE
+   fun:LLVMRunPassManager
+   fun:si_llvm_optimize_module
+   fun:si_llvm_compile_shader
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0xe</unique>
+  <tid>1</tid>
+  <kind>MismatchedFree</kind>
+  <what>Mismatched free() / delete / delete []</what>
+  <stack>
+    <frame>
+      <ip>0x48478EF</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>free</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>989</line>
+    </frame>
+    <frame>
+      <ip>0x30650A</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>UnloadMesh</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src</dir>
+      <file>rmodels.c</file>
+      <line>1759</line>
+    </frame>
+    <frame>
+      <ip>0x30370C</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>UnloadModel</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src</dir>
+      <file>rmodels.c</file>
+      <line>1118</line>
+    </frame>
+    <frame>
+      <ip>0x213429</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ModelSafe::~ModelSafe()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/utils/slib.cpp</file>
+      <line>56</line>
+    </frame>
+    <frame>
+      <ip>0x1F8FCA</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::default_delete&lt;sage::ModelSafe&gt;::operator()(sage::ModelSafe*) const</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>93</line>
+    </frame>
+    <frame>
+      <ip>0x1F8E4C</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::_Sp_counted_deleter&lt;sage::ModelSafe*, std::default_delete&lt;sage::ModelSafe&gt;, std::allocator&lt;void&gt;, (__gnu_cxx::_Lock_policy)2&gt;::_M_dispose()</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>shared_ptr_base.h</file>
+      <line>527</line>
+    </frame>
+    <frame>
+      <ip>0x11DFDD</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::_Sp_counted_base&lt;(__gnu_cxx::_Lock_policy)2&gt;::_M_release()</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>shared_ptr_base.h</file>
+      <line>346</line>
+    </frame>
+    <frame>
+      <ip>0x11DF59</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__shared_count&lt;(__gnu_cxx::_Lock_policy)2&gt;::~__shared_count()</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>shared_ptr_base.h</file>
+      <line>1069</line>
+    </frame>
+    <frame>
+      <ip>0x1F8968</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__shared_ptr&lt;sage::ModelSafe, (__gnu_cxx::_Lock_policy)2&gt;::~__shared_ptr()</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>shared_ptr_base.h</file>
+      <line>1525</line>
+    </frame>
+    <frame>
+      <ip>0x225CD4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::shared_ptr&lt;sage::ModelSafe&gt;::~shared_ptr()</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>shared_ptr.h</file>
+      <line>175</line>
+    </frame>
+    <frame>
+      <ip>0x252E33</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Renderable::~Renderable()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/components/Renderable.cpp</file>
+      <line>30</line>
+    </frame>
+    <frame>
+      <ip>0x1685B4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>void std::destroy_at&lt;sage::Renderable&gt;(sage::Renderable*)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>stl_construct.h</file>
+      <line>88</line>
+    </frame>
+  </stack>
+  <auxwhat>Address 0x1d2e15a0 is 0 bytes inside a block of size 34 alloc'd</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x4846613</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new[](unsigned long)</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>729</line>
+    </frame>
+    <frame>
+      <ip>0x1EFFB7</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>void sage::Renderable::load&lt;cereal::BinaryInputArchive&gt;(cereal::BinaryInputArchive&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/components/Renderable.hpp</file>
+      <line>68</line>
+    </frame>
+    <frame>
+      <ip>0x1EFF2C</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>decltype (({parm#2}.load)({parm#1})) cereal::access::member_load&lt;cereal::BinaryInputArchive, sage::Renderable&gt;(cereal::BinaryInputArchive&amp;, sage::Renderable&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>vendor/cereal/access.hpp</file>
+      <line>258</line>
+    </frame>
+    <frame>
+      <ip>0x1EFEE4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>_ZN6cereal12InputArchiveINS_18BinaryInputArchiveELj1EE11processImplIN4sage10RenderableETnNS_6traits6detail14EnableIfHelperIJXsr6traits15has_member_loadIT_S1_EE5valueEXntsr6traits28has_invalid_input_versioningIS9_S1_EE5valueEXaasr6traits21is_input_serializableIS9_S1_EE5valueoosr6traits26is_specialized_member_loadIS9_S1_EE5valuentsr6traits14is_specializedIS9_S1_EE5valueEEE4typeELNS7_6sfinaeE0EEERS1_RS9_</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>vendor/cereal/cereal.hpp</file>
+      <line>933</line>
+    </frame>
+    <frame>
+      <ip>0x1EF9B5</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>void cereal::InputArchive&lt;cereal::BinaryInputArchive, 1u&gt;::process&lt;sage::Renderable&amp;&gt;(sage::Renderable&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>vendor/cereal/cereal.hpp</file>
+      <line>853</line>
+    </frame>
+    <frame>
+      <ip>0x1EF501</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>void cereal::InputArchive&lt;cereal::BinaryInputArchive, 1u&gt;::process&lt;sage::Collideable&amp;, sage::Renderable&amp;&gt;(sage::Collideable&amp;, sage::Renderable&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>vendor/cereal/cereal.hpp</file>
+      <line>862</line>
+    </frame>
+    <frame>
+      <ip>0x1EF049</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>void cereal::InputArchive&lt;cereal::BinaryInputArchive, 1u&gt;::process&lt;sage::sgTransform&amp;, sage::Collideable&amp;, sage::Renderable&amp;&gt;(sage::sgTransform&amp;, sage::Collideable&amp;, sage::Renderable&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>vendor/cereal/cereal.hpp</file>
+      <line>862</line>
+    </frame>
+    <frame>
+      <ip>0x1EEFB1</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>void cereal::InputArchive&lt;cereal::BinaryInputArchive, 1u&gt;::process&lt;sage::serializer::entity&amp;, sage::sgTransform&amp;, sage::Collideable&amp;, sage::Renderable&amp;&gt;(sage::serializer::entity&amp;, sage::sgTransform&amp;, sage::Collideable&amp;, sage::Renderable&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>vendor/cereal/cereal.hpp</file>
+      <line>862</line>
+    </frame>
+    <frame>
+      <ip>0x1C48D8</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>cereal::BinaryInputArchive&amp; cereal::InputArchive&lt;cereal::BinaryInputArchive, 1u&gt;::operator()&lt;sage::serializer::entity&amp;, sage::sgTransform&amp;, sage::Collideable&amp;, sage::Renderable&amp;&gt;(sage::serializer::entity&amp;, sage::sgTransform&amp;, sage::Collideable&amp;, sage::Renderable&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>vendor/cereal/cereal.hpp</file>
+      <line>730</line>
+    </frame>
+    <frame>
+      <ip>0x1C2D1B</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::serializer::Load(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/utils/Serializer.cpp</file>
+      <line>168</line>
+    </frame>
+    <frame>
+      <ip>0x220087</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::Load()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>60</line>
+    </frame>
+    <frame>
+      <ip>0x137DB9</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>73</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Free</skind>
+    <sframe> <fun>free</fun> </sframe>
+    <sframe> <fun>UnloadMesh</fun> </sframe>
+    <sframe> <fun>UnloadModel</fun> </sframe>
+    <sframe> <fun>_ZN4sage9ModelSafeD1Ev</fun> </sframe>
+    <sframe> <fun>_ZNKSt14default_deleteIN4sage9ModelSafeEEclEPS1_</fun> </sframe>
+    <sframe> <fun>_ZNSt19_Sp_counted_deleterIPN4sage9ModelSafeESt14default_deleteIS1_ESaIvELN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv</fun> </sframe>
+    <sframe> <fun>_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE10_M_releaseEv</fun> </sframe>
+    <sframe> <fun>_ZNSt14__shared_countILN9__gnu_cxx12_Lock_policyE2EED2Ev</fun> </sframe>
+    <sframe> <fun>_ZNSt12__shared_ptrIN4sage9ModelSafeELN9__gnu_cxx12_Lock_policyE2EED2Ev</fun> </sframe>
+    <sframe> <fun>_ZNSt10shared_ptrIN4sage9ModelSafeEED2Ev</fun> </sframe>
+    <sframe> <fun>_ZN4sage10RenderableD1Ev</fun> </sframe>
+    <sframe> <fun>_ZSt10destroy_atIN4sage10RenderableEEvPT_</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Free
+   fun:free
+   fun:UnloadMesh
+   fun:UnloadModel
+   fun:_ZN4sage9ModelSafeD1Ev
+   fun:_ZNKSt14default_deleteIN4sage9ModelSafeEEclEPS1_
+   fun:_ZNSt19_Sp_counted_deleterIPN4sage9ModelSafeESt14default_deleteIS1_ESaIvELN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv
+   fun:_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE10_M_releaseEv
+   fun:_ZNSt14__shared_countILN9__gnu_cxx12_Lock_policyE2EED2Ev
+   fun:_ZNSt12__shared_ptrIN4sage9ModelSafeELN9__gnu_cxx12_Lock_policyE2EED2Ev
+   fun:_ZNSt10shared_ptrIN4sage9ModelSafeEED2Ev
+   fun:_ZN4sage10RenderableD1Ev
+   fun:_ZSt10destroy_atIN4sage10RenderableEEvPT_
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Free</skind>
+    <sframe> <fun>free</fun> </sframe>
+    <sframe> <fun>UnloadMesh</fun> </sframe>
+    <sframe> <fun>UnloadModel</fun> </sframe>
+    <sframe> <fun>_ZN4sage9ModelSafeD1Ev</fun> </sframe>
+    <sframe> <fun>_ZNKSt14default_deleteIN4sage9ModelSafeEEclEPS1_</fun> </sframe>
+    <sframe> <fun>_ZNSt19_Sp_counted_deleterIPN4sage9ModelSafeESt14default_deleteIS1_ESaIvELN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv</fun> </sframe>
+    <sframe> <fun>_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE10_M_releaseEv</fun> </sframe>
+    <sframe> <fun>_ZNSt14__shared_countILN9__gnu_cxx12_Lock_policyE2EED2Ev</fun> </sframe>
+    <sframe> <fun>_ZNSt12__shared_ptrIN4sage9ModelSafeELN9__gnu_cxx12_Lock_policyE2EED2Ev</fun> </sframe>
+    <sframe> <fun>_ZNSt10shared_ptrIN4sage9ModelSafeEED2Ev</fun> </sframe>
+    <sframe> <fun>_ZN4sage10RenderableD1Ev</fun> </sframe>
+    <sframe> <fun>_ZSt10destroy_atIN4sage10RenderableEEvPT_</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Free
+   fun:free
+   fun:UnloadMesh
+   fun:UnloadModel
+   fun:_ZN4sage9ModelSafeD1Ev
+   fun:_ZNKSt14default_deleteIN4sage9ModelSafeEEclEPS1_
+   fun:_ZNSt19_Sp_counted_deleterIPN4sage9ModelSafeESt14default_deleteIS1_ESaIvELN9__gnu_cxx12_Lock_policyE2EE10_M_disposeEv
+   fun:_ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE10_M_releaseEv
+   fun:_ZNSt14__shared_countILN9__gnu_cxx12_Lock_policyE2EED2Ev
+   fun:_ZNSt12__shared_ptrIN4sage9ModelSafeELN9__gnu_cxx12_Lock_policyE2EED2Ev
+   fun:_ZNSt10shared_ptrIN4sage9ModelSafeEED2Ev
+   fun:_ZN4sage10RenderableD1Ev
+   fun:_ZSt10destroy_atIN4sage10RenderableEEvPT_
+}
+]]>
+    </rawtext>
+  </suppression>
+
+<status>
+  <state>FINISHED</state>
+  <time>00:00:05:18.841 </time>
+</status>
+
+<error>
+  <unique>0x33a</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>256 bytes in 2 blocks are definitely lost in loss record 74 of 109</text>
+    <leakedbytes>256</leakedbytes>
+    <leakedblocks>2</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x48447A8</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>malloc</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>446</line>
+    </frame>
+    <frame>
+      <ip>0x23BAA4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::DeepCopyModel(Model const&amp;, Model&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>56</line>
+    </frame>
+    <frame>
+      <ip>0x23D60F</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::LoadModelDeepCopy(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>327</line>
+    </frame>
+    <frame>
+      <ip>0x2227A2</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameObjectFactory::createKnight(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::GameData*, Vector3, char const*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameObjectFactory.cpp</file>
+      <line>136</line>
+    </frame>
+    <frame>
+      <ip>0x1369FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>89</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application4initEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage11Application4initEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application4initEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage11Application4initEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x33d</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>384 bytes in 3 blocks are definitely lost in loss record 77 of 109</text>
+    <leakedbytes>384</leakedbytes>
+    <leakedblocks>3</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x48447A8</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>malloc</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>446</line>
+    </frame>
+    <frame>
+      <ip>0x23BAA4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::DeepCopyModel(Model const&amp;, Model&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>56</line>
+    </frame>
+    <frame>
+      <ip>0x23D60F</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::LoadModelDeepCopy(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>327</line>
+    </frame>
+    <frame>
+      <ip>0x27F0F9</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameModeStateController::WaveState::WaveState(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::GameData*, entt::entity)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/systems/states/GameModeStateMachine.cpp</file>
+      <line>98</line>
+    </frame>
+    <frame>
+      <ip>0x275A9F</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameModeStateController::WaveState&gt;::__single_object std::make_unique&lt;sage::GameModeStateController::WaveState, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::GameData*&amp;, entt::entity&amp;&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::GameData*&amp;, entt::entity&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x27558C</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameModeStateController::GameModeStateController(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::GameData*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/systems/states/GameModeStateMachine.cpp</file>
+      <line>120</line>
+    </frame>
+    <frame>
+      <ip>0x1ABA85</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameModeStateController&gt;::__single_object std::make_unique&lt;sage::GameModeStateController, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::GameData*&amp;&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::GameData*&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x1AB8D4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::StateMachines::StateMachines(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::GameData*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/systems/states/StateMachines.cpp</file>
+      <line>25</line>
+    </frame>
+    <frame>
+      <ip>0x220685</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::StateMachines&gt;::__single_object std::make_unique&lt;sage::StateMachines, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::GameData*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::GameData*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x21FD23</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameData::GameData(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, sage::LightSubSystem*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameData.cpp</file>
+      <line>48</line>
+    </frame>
+    <frame>
+      <ip>0x1381FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::GameData&gt;::__single_object std::make_unique&lt;sage::GameData, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;, sage::KeyMapping*&amp;, sage::Settings*&amp;, sage::LightSubSystem*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x137D64</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Scene::Scene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/Scene.cpp</file>
+      <line>67</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateController9WaveStateC2EPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS_8GameDataES4_</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage23GameModeStateController9WaveStateEJRPN4entt14basic_registryINS3_6entityESaIS5_EEERPNS0_8GameDataERS5_EENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateControllerC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage23GameModeStateControllerEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage13StateMachinesC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage13StateMachinesEJRPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage8GameDataC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsEPNS_14LightSubSystemE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage8GameDataEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_10KeyMappingERPNS0_8SettingsEPNS0_14LightSubSystemEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage5SceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage23GameModeStateController9WaveStateC2EPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS_8GameDataES4_
+   fun:_ZSt11make_uniqueIN4sage23GameModeStateController9WaveStateEJRPN4entt14basic_registryINS3_6entityESaIS5_EEERPNS0_8GameDataERS5_EENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage23GameModeStateControllerC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE
+   fun:_ZSt11make_uniqueIN4sage23GameModeStateControllerEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage13StateMachinesC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE
+   fun:_ZSt11make_uniqueIN4sage13StateMachinesEJRPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage8GameDataC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsEPNS_14LightSubSystemE
+   fun:_ZSt11make_uniqueIN4sage8GameDataEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_10KeyMappingERPNS0_8SettingsEPNS0_14LightSubSystemEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage5SceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateController9WaveStateC2EPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS_8GameDataES4_</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage23GameModeStateController9WaveStateEJRPN4entt14basic_registryINS3_6entityESaIS5_EEERPNS0_8GameDataERS5_EENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateControllerC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage23GameModeStateControllerEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage13StateMachinesC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage13StateMachinesEJRPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage8GameDataC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsEPNS_14LightSubSystemE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage8GameDataEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_10KeyMappingERPNS0_8SettingsEPNS0_14LightSubSystemEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage5SceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage23GameModeStateController9WaveStateC2EPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS_8GameDataES4_
+   fun:_ZSt11make_uniqueIN4sage23GameModeStateController9WaveStateEJRPN4entt14basic_registryINS3_6entityESaIS5_EEERPNS0_8GameDataERS5_EENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage23GameModeStateControllerC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE
+   fun:_ZSt11make_uniqueIN4sage23GameModeStateControllerEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage13StateMachinesC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE
+   fun:_ZSt11make_uniqueIN4sage13StateMachinesEJRPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_8GameDataEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage8GameDataC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsEPNS_14LightSubSystemE
+   fun:_ZSt11make_uniqueIN4sage8GameDataEJRPN4entt14basic_registryINS2_6entityESaIS4_EEERPNS0_10KeyMappingERPNS0_8SettingsEPNS0_14LightSubSystemEEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage5SceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x33e</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>384 bytes in 3 blocks are definitely lost in loss record 78 of 109</text>
+    <leakedbytes>384</leakedbytes>
+    <leakedblocks>3</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x48447A8</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>malloc</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>446</line>
+    </frame>
+    <frame>
+      <ip>0x23BAA4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::DeepCopyModel(Model const&amp;, Model&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>56</line>
+    </frame>
+    <frame>
+      <ip>0x23D60F</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::LoadModelDeepCopy(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>327</line>
+    </frame>
+    <frame>
+      <ip>0x223144</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameObjectFactory::createPlayer(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::GameData*, Vector3, char const*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameObjectFactory.cpp</file>
+      <line>242</line>
+    </frame>
+    <frame>
+      <ip>0x13696B</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>88</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+    <frame>
+      <ip>0x11DE71</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/main.cpp</file>
+      <line>7</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory12createPlayerEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application4initEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory12createPlayerEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage11Application4initEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory12createPlayerEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application4initEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <sframe> <fun>main</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory12createPlayerEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage11Application4initEv
+   fun:_ZN4sage11Application6UpdateEv
+   fun:main
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x34b</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>1,536 bytes in 12 blocks are definitely lost in loss record 91 of 109</text>
+    <leakedbytes>1536</leakedbytes>
+    <leakedblocks>12</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x48447A8</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>malloc</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>446</line>
+    </frame>
+    <frame>
+      <ip>0x23BAA4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::DeepCopyModel(Model const&amp;, Model&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>56</line>
+    </frame>
+    <frame>
+      <ip>0x23D60F</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::LoadModelDeepCopy(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>327</line>
+    </frame>
+    <frame>
+      <ip>0x2222C5</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameObjectFactory::createEnemy(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::GameData*, Vector3, char const*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameObjectFactory.cpp</file>
+      <line>82</line>
+    </frame>
+    <frame>
+      <ip>0x27F3C4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameModeStateController::WaveState::initWave()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/systems/states/GameModeStateMachine.cpp</file>
+      <line>70</line>
+    </frame>
+    <frame>
+      <ip>0x27F282</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameModeStateController::WaveState::OnStateEnter(entt::entity)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/systems/states/GameModeStateMachine.cpp</file>
+      <line>87</line>
+    </frame>
+    <frame>
+      <ip>0x27C58C</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::ChangeState(entt::entity, sage::GameStateEnum)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/systems/states/StateMachine.hpp</file>
+      <line>97</line>
+    </frame>
+    <frame>
+      <ip>0x27CCEC</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>void std::__invoke_impl&lt;void, void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity, sage::GameStateEnum&gt;(std::__invoke_memfun_deref, void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*&amp;&amp;)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity&amp;&amp;, sage::GameStateEnum&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>invoke.h</file>
+      <line>74</line>
+    </frame>
+    <frame>
+      <ip>0x27CC5C</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__invoke_result&lt;void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity, sage::GameStateEnum&gt;::type std::__invoke&lt;void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity, sage::GameStateEnum&gt;(void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*&amp;&amp;)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity&amp;&amp;, sage::GameStateEnum&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>invoke.h</file>
+      <line>96</line>
+    </frame>
+    <frame>
+      <ip>0x27CC1C</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::invoke_result&lt;void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity, sage::GameStateEnum&gt;::type std::invoke&lt;void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity, sage::GameStateEnum&gt;(void (sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;::*&amp;&amp;)(entt::entity, sage::GameStateEnum), sage::StateMachineController&lt;sage::GameModeStateController, sage::GameState, sage::GameStateEnum&gt;*&amp;, entt::entity&amp;&amp;, sage::GameStateEnum&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1</dir>
+      <file>functional</file>
+      <line>120</line>
+    </frame>
+    <frame>
+      <ip>0x27CBC2</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENKUlPKvS1_S3_E_clESE_S1_S3_</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug</dir>
+      <file>_deps/entt-src/src/entt/entity/../signal/delegate.hpp</file>
+      <line>210</line>
+    </frame>
+    <frame>
+      <ip>0x27CB41</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENUlPKvS1_S3_E_8__invokeESE_S1_S3_</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug</dir>
+      <file>_deps/entt-src/src/entt/entity/../signal/delegate.hpp</file>
+      <line>208</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory11createEnemyEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateController9WaveState8initWaveEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateController9WaveState12OnStateEnterEN4entt6entityE</fun> </sframe>
+    <sframe> <fun>_ZN4sage22StateMachineControllerINS_23GameModeStateControllerENS_9GameStateENS_13GameStateEnumEE11ChangeStateEN4entt6entityES3_</fun> </sframe>
+    <sframe> <fun>_ZSt13__invoke_implIvMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_ERPS5_JS7_S4_EET_St21__invoke_memfun_derefOT0_OT1_DpOT2_</fun> </sframe>
+    <sframe> <fun>_ZSt8__invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt15__invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_</fun> </sframe>
+    <sframe> <fun>_ZSt6invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt13invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_</fun> </sframe>
+    <sframe> <fun>_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENKUlPKvS1_S3_E_clESE_S1_S3_</fun> </sframe>
+    <sframe> <fun>_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENUlPKvS1_S3_E_8__invokeESE_S1_S3_</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory11createEnemyEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage23GameModeStateController9WaveState8initWaveEv
+   fun:_ZN4sage23GameModeStateController9WaveState12OnStateEnterEN4entt6entityE
+   fun:_ZN4sage22StateMachineControllerINS_23GameModeStateControllerENS_9GameStateENS_13GameStateEnumEE11ChangeStateEN4entt6entityES3_
+   fun:_ZSt13__invoke_implIvMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_ERPS5_JS7_S4_EET_St21__invoke_memfun_derefOT0_OT1_DpOT2_
+   fun:_ZSt8__invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt15__invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_
+   fun:_ZSt6invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt13invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_
+   fun:_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENKUlPKvS1_S3_E_clESE_S1_S3_
+   fun:_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENUlPKvS1_S3_E_8__invokeESE_S1_S3_
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory11createEnemyEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateController9WaveState8initWaveEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage23GameModeStateController9WaveState12OnStateEnterEN4entt6entityE</fun> </sframe>
+    <sframe> <fun>_ZN4sage22StateMachineControllerINS_23GameModeStateControllerENS_9GameStateENS_13GameStateEnumEE11ChangeStateEN4entt6entityES3_</fun> </sframe>
+    <sframe> <fun>_ZSt13__invoke_implIvMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_ERPS5_JS7_S4_EET_St21__invoke_memfun_derefOT0_OT1_DpOT2_</fun> </sframe>
+    <sframe> <fun>_ZSt8__invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt15__invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_</fun> </sframe>
+    <sframe> <fun>_ZSt6invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt13invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_</fun> </sframe>
+    <sframe> <fun>_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENKUlPKvS1_S3_E_clESE_S1_S3_</fun> </sframe>
+    <sframe> <fun>_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENUlPKvS1_S3_E_8__invokeESE_S1_S3_</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_ZN4sage15ResourceManager13DeepCopyModelERK5ModelRS1_
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory11createEnemyEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage23GameModeStateController9WaveState8initWaveEv
+   fun:_ZN4sage23GameModeStateController9WaveState12OnStateEnterEN4entt6entityE
+   fun:_ZN4sage22StateMachineControllerINS_23GameModeStateControllerENS_9GameStateENS_13GameStateEnumEE11ChangeStateEN4entt6entityES3_
+   fun:_ZSt13__invoke_implIvMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_ERPS5_JS7_S4_EET_St21__invoke_memfun_derefOT0_OT1_DpOT2_
+   fun:_ZSt8__invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt15__invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_
+   fun:_ZSt6invokeIMN4sage22StateMachineControllerINS0_23GameModeStateControllerENS0_9GameStateENS0_13GameStateEnumEEEFvN4entt6entityES4_EJRPS5_S7_S4_EENSt13invoke_resultIT_JDpT0_EE4typeEOSD_DpOSE_
+   fun:_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENKUlPKvS1_S3_E_clESE_S1_S3_
+   fun:_ZZN4entt8delegateIFvNS_6entityEN4sage13GameStateEnumEEE7connectITnDaXadL_ZNS2_22StateMachineControllerINS2_23GameModeStateControllerENS2_9GameStateES3_E11ChangeStateES1_S3_EESA_EEvPT0_ENUlPKvS1_S3_E_8__invokeESE_S1_S3_
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x35b</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>262,144 bytes in 1 blocks are definitely lost in loss record 107 of 109</text>
+    <leakedbytes>262144</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x48447A8</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>malloc</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>446</line>
+    </frame>
+    <frame>
+      <ip>0x347000</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__malloc</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>985</line>
+    </frame>
+    <frame>
+      <ip>0x3471EA</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__malloc_mad2</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1049</line>
+    </frame>
+    <frame>
+      <ip>0x34CB26</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__expand_png_palette</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>4962</line>
+    </frame>
+    <frame>
+      <ip>0x34DC19</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__parse_png_file</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>5228</line>
+    </frame>
+    <frame>
+      <ip>0x34DDA3</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__do_png</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>5266</line>
+    </frame>
+    <frame>
+      <ip>0x34DFA9</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__png_load</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>5298</line>
+    </frame>
+    <frame>
+      <ip>0x347427</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__load_main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1145</line>
+    </frame>
+    <frame>
+      <ip>0x347849</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__load_and_postprocess_8bit</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1261</line>
+    </frame>
+    <frame>
+      <ip>0x347F2B</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi_load_from_memory</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1431</line>
+    </frame>
+    <frame>
+      <ip>0x3BB278</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>LoadImageFromMemory</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src</dir>
+      <file>rtextures.c</file>
+      <line>482</line>
+    </frame>
+    <frame>
+      <ip>0x3BAE8D</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>LoadImage</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src</dir>
+      <file>rtextures.c</file>
+      <line>286</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc_mad2</fun> </sframe>
+    <sframe> <fun>stbi__expand_png_palette</fun> </sframe>
+    <sframe> <fun>stbi__parse_png_file</fun> </sframe>
+    <sframe> <fun>stbi__do_png</fun> </sframe>
+    <sframe> <fun>stbi__png_load</fun> </sframe>
+    <sframe> <fun>stbi__load_main</fun> </sframe>
+    <sframe> <fun>stbi__load_and_postprocess_8bit</fun> </sframe>
+    <sframe> <fun>stbi_load_from_memory</fun> </sframe>
+    <sframe> <fun>LoadImageFromMemory</fun> </sframe>
+    <sframe> <fun>LoadImage</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:stbi__malloc
+   fun:stbi__malloc_mad2
+   fun:stbi__expand_png_palette
+   fun:stbi__parse_png_file
+   fun:stbi__do_png
+   fun:stbi__png_load
+   fun:stbi__load_main
+   fun:stbi__load_and_postprocess_8bit
+   fun:stbi_load_from_memory
+   fun:LoadImageFromMemory
+   fun:LoadImage
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc_mad2</fun> </sframe>
+    <sframe> <fun>stbi__expand_png_palette</fun> </sframe>
+    <sframe> <fun>stbi__parse_png_file</fun> </sframe>
+    <sframe> <fun>stbi__do_png</fun> </sframe>
+    <sframe> <fun>stbi__png_load</fun> </sframe>
+    <sframe> <fun>stbi__load_main</fun> </sframe>
+    <sframe> <fun>stbi__load_and_postprocess_8bit</fun> </sframe>
+    <sframe> <fun>stbi_load_from_memory</fun> </sframe>
+    <sframe> <fun>LoadImageFromMemory</fun> </sframe>
+    <sframe> <fun>LoadImage</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:stbi__malloc
+   fun:stbi__malloc_mad2
+   fun:stbi__expand_png_palette
+   fun:stbi__parse_png_file
+   fun:stbi__do_png
+   fun:stbi__png_load
+   fun:stbi__load_main
+   fun:stbi__load_and_postprocess_8bit
+   fun:stbi_load_from_memory
+   fun:LoadImageFromMemory
+   fun:LoadImage
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x35c</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>286,320 bytes in 24 blocks are definitely lost in loss record 108 of 109</text>
+    <leakedbytes>286320</leakedbytes>
+    <leakedblocks>24</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x48447A8</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>malloc</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>446</line>
+    </frame>
+    <frame>
+      <ip>0x31BAF9</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>LoadGLTF</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src</dir>
+      <file>rmodels.c</file>
+      <line>5013</line>
+    </frame>
+    <frame>
+      <ip>0x302EF4</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>LoadModel</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src</dir>
+      <file>rmodels.c</file>
+      <line>1043</line>
+    </frame>
+    <frame>
+      <ip>0x213612</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ModelSafe::ModelSafe(char const*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/utils/slib.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x23E43A</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ModelSafe&gt;::__single_object std::make_unique&lt;sage::ModelSafe, char const*&gt;(char const*&amp;&amp;)</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x23D481</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::LoadModelCopy(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>311</line>
+    </frame>
+    <frame>
+      <ip>0x23D5BE</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ResourceManager::LoadModelDeepCopy(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/ResourceManager.cpp</file>
+      <line>326</line>
+    </frame>
+    <frame>
+      <ip>0x2227A2</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::GameObjectFactory::createKnight(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::GameData*, Vector3, char const*)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/GameObjectFactory.cpp</file>
+      <line>136</line>
+    </frame>
+    <frame>
+      <ip>0x1369FB</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::ExampleScene::ExampleScene(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;)</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/scenes/ExampleScene.cpp</file>
+      <line>89</line>
+    </frame>
+    <frame>
+      <ip>0x11EC25</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>std::__detail::_MakeUniq&lt;sage::ExampleScene&gt;::__single_object std::make_unique&lt;sage::ExampleScene, entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*, sage::KeyMapping*, sage::Settings*, char const (&amp;) [1]&gt;(entt::basic_registry&lt;entt::entity, std::allocator&lt;entt::entity&gt; &gt;*&amp;&amp;, sage::KeyMapping*&amp;&amp;, sage::Settings*&amp;&amp;, char const (&amp;) [1])</fn>
+      <dir>/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/14.2.1/../../../../include/c++/14.2.1/bits</dir>
+      <file>unique_ptr.h</file>
+      <line>1076</line>
+    </frame>
+    <frame>
+      <ip>0x11E350</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::init()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>34</line>
+    </frame>
+    <frame>
+      <ip>0x11E488</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>sage::Application::Update()</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib</dir>
+      <file>core/src/Application.cpp</file>
+      <line>61</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>LoadGLTF</fun> </sframe>
+    <sframe> <fun>LoadModel</fun> </sframe>
+    <sframe> <fun>_ZN4sage9ModelSafeC1EPKc</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage9ModelSafeEJPKcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13LoadModelCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application4initEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:LoadGLTF
+   fun:LoadModel
+   fun:_ZN4sage9ModelSafeC1EPKc
+   fun:_ZSt11make_uniqueIN4sage9ModelSafeEJPKcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage15ResourceManager13LoadModelCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage11Application4initEv
+   fun:_ZN4sage11Application6UpdateEv
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: definite</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>LoadGLTF</fun> </sframe>
+    <sframe> <fun>LoadModel</fun> </sframe>
+    <sframe> <fun>_ZN4sage9ModelSafeC1EPKc</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage9ModelSafeEJPKcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager13LoadModelCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc</fun> </sframe>
+    <sframe> <fun>_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE</fun> </sframe>
+    <sframe> <fun>_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application4initEv</fun> </sframe>
+    <sframe> <fun>_ZN4sage11Application6UpdateEv</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:LoadGLTF
+   fun:LoadModel
+   fun:_ZN4sage9ModelSafeC1EPKc
+   fun:_ZSt11make_uniqueIN4sage9ModelSafeEJPKcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage15ResourceManager13LoadModelCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage15ResourceManager17LoadModelDeepCopyERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN4sage17GameObjectFactory12createKnightEPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_8GameDataE7Vector3PKc
+   fun:_ZN4sage12ExampleSceneC1EPN4entt14basic_registryINS1_6entityESaIS3_EEEPNS_10KeyMappingEPNS_8SettingsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZSt11make_uniqueIN4sage12ExampleSceneEJPN4entt14basic_registryINS2_6entityESaIS4_EEEPNS0_10KeyMappingEPNS0_8SettingsERA1_KcEENSt8__detail9_MakeUniqIT_E15__single_objectEDpOT0_
+   fun:_ZN4sage11Application4initEv
+   fun:_ZN4sage11Application6UpdateEv
+}
+]]>
+    </rawtext>
+  </suppression>
+<error>
+  <unique>0x35d</unique>
+  <tid>1</tid>
+  <kind>Leak_PossiblyLost</kind>
+  <xwhat>
+    <text>1,000,000 bytes in 1 blocks are possibly lost in loss record 109 of 109</text>
+    <leakedbytes>1000000</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x48447A8</ip>
+      <obj>/usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>malloc</fn>
+      <dir>/usr/src/debug/valgrind/valgrind-3.23.0/coregrind/m_replacemalloc</dir>
+      <file>vg_replace_malloc.c</file>
+      <line>446</line>
+    </frame>
+    <frame>
+      <ip>0x347000</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__malloc</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>985</line>
+    </frame>
+    <frame>
+      <ip>0x34723A</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__malloc_mad3</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1056</line>
+    </frame>
+    <frame>
+      <ip>0x34B0A0</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__create_png_image_raw</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>4664</line>
+    </frame>
+    <frame>
+      <ip>0x34C46A</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__create_png_image</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>4869</line>
+    </frame>
+    <frame>
+      <ip>0x34DAF2</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__parse_png_file</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>5213</line>
+    </frame>
+    <frame>
+      <ip>0x34DDA3</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__do_png</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>5266</line>
+    </frame>
+    <frame>
+      <ip>0x34DFA9</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__png_load</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>5298</line>
+    </frame>
+    <frame>
+      <ip>0x347427</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__load_main</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1145</line>
+    </frame>
+    <frame>
+      <ip>0x347849</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi__load_and_postprocess_8bit</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1261</line>
+    </frame>
+    <frame>
+      <ip>0x347F2B</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>stbi_load_from_memory</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src/external</dir>
+      <file>stb_image.h</file>
+      <line>1431</line>
+    </frame>
+    <frame>
+      <ip>0x3BB278</ip>
+      <obj>/home/roxie/CLionProjects/BG3Raylib/cmake-build-debug/game</obj>
+      <fn>LoadImageFromMemory</fn>
+      <dir>/home/roxie/CLionProjects/BG3Raylib/vendor/raylib/src</dir>
+      <file>rtextures.c</file>
+      <line>482</line>
+    </frame>
+  </stack>
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: possible</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc_mad3</fun> </sframe>
+    <sframe> <fun>stbi__create_png_image_raw</fun> </sframe>
+    <sframe> <fun>stbi__create_png_image</fun> </sframe>
+    <sframe> <fun>stbi__parse_png_file</fun> </sframe>
+    <sframe> <fun>stbi__do_png</fun> </sframe>
+    <sframe> <fun>stbi__png_load</fun> </sframe>
+    <sframe> <fun>stbi__load_main</fun> </sframe>
+    <sframe> <fun>stbi__load_and_postprocess_8bit</fun> </sframe>
+    <sframe> <fun>stbi_load_from_memory</fun> </sframe>
+    <sframe> <fun>LoadImageFromMemory</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:stbi__malloc
+   fun:stbi__malloc_mad3
+   fun:stbi__create_png_image_raw
+   fun:stbi__create_png_image
+   fun:stbi__parse_png_file
+   fun:stbi__do_png
+   fun:stbi__png_load
+   fun:stbi__load_main
+   fun:stbi__load_and_postprocess_8bit
+   fun:stbi_load_from_memory
+   fun:LoadImageFromMemory
+}
+]]>
+    </rawtext>
+  </suppression>
+</error>
+
+  <suppression>
+    <sname>insert_a_suppression_name_here</sname>
+    <skind>Memcheck:Leak</skind>
+    <skaux>match-leak-kinds: possible</skaux>
+    <sframe> <fun>malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc</fun> </sframe>
+    <sframe> <fun>stbi__malloc_mad3</fun> </sframe>
+    <sframe> <fun>stbi__create_png_image_raw</fun> </sframe>
+    <sframe> <fun>stbi__create_png_image</fun> </sframe>
+    <sframe> <fun>stbi__parse_png_file</fun> </sframe>
+    <sframe> <fun>stbi__do_png</fun> </sframe>
+    <sframe> <fun>stbi__png_load</fun> </sframe>
+    <sframe> <fun>stbi__load_main</fun> </sframe>
+    <sframe> <fun>stbi__load_and_postprocess_8bit</fun> </sframe>
+    <sframe> <fun>stbi_load_from_memory</fun> </sframe>
+    <sframe> <fun>LoadImageFromMemory</fun> </sframe>
+    <rawtext>
+<![CDATA[
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:stbi__malloc
+   fun:stbi__malloc_mad3
+   fun:stbi__create_png_image_raw
+   fun:stbi__create_png_image
+   fun:stbi__parse_png_file
+   fun:stbi__do_png
+   fun:stbi__png_load
+   fun:stbi__load_main
+   fun:stbi__load_and_postprocess_8bit
+   fun:stbi_load_from_memory
+   fun:LoadImageFromMemory
+}
+]]>
+    </rawtext>
+  </suppression>
+<errorcounts>
+  <pair>
+    <count>739</count>
+    <unique>0xe</unique>
+  </pair>
+  <pair>
+    <count>4</count>
+    <unique>0x8</unique>
+  </pair>
+  <pair>
+    <count>2</count>
+    <unique>0x7</unique>
+  </pair>
+  <pair>
+    <count>2</count>
+    <unique>0x6</unique>
+  </pair>
+  <pair>
+    <count>1</count>
+    <unique>0x5</unique>
+  </pair>
+  <pair>
+    <count>1</count>
+    <unique>0x4</unique>
+  </pair>
+  <pair>
+    <count>1</count>
+    <unique>0x3</unique>
+  </pair>
+  <pair>
+    <count>1</count>
+    <unique>0x2</unique>
+  </pair>
+  <pair>
+    <count>1</count>
+    <unique>0x1</unique>
+  </pair>
+  <pair>
+    <count>1</count>
+    <unique>0x0</unique>
+  </pair>
+</errorcounts>
+
+<suppcounts>
+  <pair>
+    <count>1</count>
+    <name>dtv-addr-init</name>
+  </pair>
+</suppcounts>
+
+</valgrindoutput>
+
+

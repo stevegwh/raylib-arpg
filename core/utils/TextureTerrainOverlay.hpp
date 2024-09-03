@@ -7,33 +7,30 @@
 
 namespace sage
 {
-
     class TextureTerrainOverlay
     {
         entt::registry* registry;
         NavigationGridSystem* navigationGridSystem;
         Texture2D texture;
+        const entt::entity entity;
         GridSquare lastHit{};
-        GridSquare minRange{}, maxRange{};
         bool initialised = false;
         bool m_active = false;
         Vector3 meshOffset{};
 
-        void updateTerrainPolygon();
-        Model generateTerrainPolygon();
-        void updateMeshData(Mesh& mesh);
-        Mesh createInitialMesh();
-        void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol);
-        void updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol);
-        void updateTexCoordData(Mesh& mesh, int vertexIndex, int row, int col, int maxRow, int maxCol);
-        void generateIndices(Mesh& mesh, int maxRow, int maxCol);
+        void updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange);
+        Model generateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange);
+        void updateMeshData(Mesh& mesh, const GridSquare& minRange, const GridSquare& maxRange) const;
+        Mesh createInitialMesh(const GridSquare& minRange, const GridSquare& maxRange);
+        void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol) const;
+        void updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol) const;
+        static void updateTexCoordData(Mesh& mesh, int vertexIndex, int row, int col, int maxRow, int maxCol);
+        static void generateIndices(Mesh& mesh, int maxRow, int maxCol);
 
       public:
-        entt::entity entity;
-
         void Enable(bool enable);
         void Init(Vector3 mouseRayHit);
-        bool active() const;
+        [[nodiscard]] bool IsActive() const;
         void Update(Vector3 mouseRayHit);
         ~TextureTerrainOverlay();
         TextureTerrainOverlay(
