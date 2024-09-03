@@ -27,8 +27,11 @@ namespace sage
     {
     };
 
-    struct Renderable
+    class Renderable
     {
+        std::shared_ptr<ModelSafe> model;
+
+      public:
         Color hint = WHITE;
         bool active = true;
         Matrix initialTransform{};
@@ -85,8 +88,5 @@ namespace sage
             // Trying to phase out passing a raylib model into the constructor
             model = std::make_unique<ModelSafe>(std::move(modelsafe));
         }
-
-      private:
-        std::shared_ptr<ModelSafe> model;
     };
 } // namespace sage

@@ -25,7 +25,7 @@ namespace sage
     };
 
     // Allowed unsafe access to model
-    struct Renderable;           // Forward dec for friend (TODO: Needs to be a friend?)
+    class Renderable;            // Forward dec for friend (Needed for serialisation)
     class ResourceManager;       // Forward dec for friend (Needs friend due to deep copy (could move that here))
     class TextureTerrainOverlay; // Forward dec for friend (Changes mesh data on the fly)
 
@@ -58,7 +58,7 @@ namespace sage
         explicit ModelSafe(Model& _model);
         ModelSafe() = default;
 
-        friend struct Renderable;
+        friend class Renderable;
         friend class ResourceManager;
         friend class TextureTerrainOverlay;
     };
