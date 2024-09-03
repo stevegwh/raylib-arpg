@@ -304,11 +304,11 @@ namespace sage
      * @param path
      * @return Model
      */
-    std::shared_ptr<SafeModel> ResourceManager::LoadModelCopy(const std::string& path)
+    std::shared_ptr<ModelSafe> ResourceManager::LoadModelCopy(const std::string& path)
     {
         if (modelCopies.find(path) == modelCopies.end())
         {
-            modelCopies.try_emplace(path, std::make_unique<SafeModel>(path.c_str()));
+            modelCopies.try_emplace(path, std::make_unique<ModelSafe>(path.c_str()));
         }
 
         return modelCopies.at(path);
@@ -320,12 +320,12 @@ namespace sage
      * @param path
      * @return
      */
-    std::shared_ptr<SafeModel> ResourceManager::LoadModelDeepCopy(const std::string& path)
+    std::shared_ptr<ModelSafe> ResourceManager::LoadModelDeepCopy(const std::string& path)
     {
         Model model;
         const Model& oldModel = LoadModelCopy(path)->rlModel();
         DeepCopyModel(oldModel, model);
-        return std::make_shared<SafeModel>(model);
+        return std::make_shared<ModelSafe>(model);
     }
 
     ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)

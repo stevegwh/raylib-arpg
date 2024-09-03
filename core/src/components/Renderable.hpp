@@ -44,12 +44,12 @@ namespace sage
         Renderable() = default;
         Renderable(const Renderable&) = delete;
         Renderable& operator=(const Renderable&) = delete;
-        Renderable(std::shared_ptr<SafeModel> _model, MaterialPaths _materials, Matrix _localTransform);
-        Renderable(std::shared_ptr<SafeModel> _model, Matrix _localTransform);
+        Renderable(std::shared_ptr<ModelSafe> _model, MaterialPaths _materials, Matrix _localTransform);
+        Renderable(std::shared_ptr<ModelSafe> _model, Matrix _localTransform);
         Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform);
         Renderable(Model _model, Matrix _localTransform);
-        Renderable(SafeModel _model, MaterialPaths _materials, Matrix _localTransform);
-        Renderable(SafeModel _model, Matrix _localTransform);
+        Renderable(ModelSafe _model, MaterialPaths _materials, Matrix _localTransform);
+        Renderable(ModelSafe _model, Matrix _localTransform);
         ~Renderable();
 
         template <class Archive>
@@ -85,10 +85,10 @@ namespace sage
                     ResourceManager::GetInstance().TextureLoad(materials.normal);
             }
 
-            model = std::make_unique<SafeModel>(_model);
+            model = std::make_unique<ModelSafe>(_model);
         }
 
       private:
-        std::shared_ptr<SafeModel> model;
+        std::shared_ptr<ModelSafe> model;
     };
 } // namespace sage

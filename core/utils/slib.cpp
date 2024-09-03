@@ -18,18 +18,18 @@ namespace sage
     //     return model.materials[MATERIAL_MAP_DIFFUSE].shader;
     // }
 
-    Model& SafeModel::rlModel()
+    Model& ModelSafe::rlModel()
     {
         return model;
     }
 
-    SafeModel::SafeModel(SafeModel&& other) noexcept : model(other.model)
+    ModelSafe::ModelSafe(ModelSafe&& other) noexcept : model(other.model)
     {
         // Reset the source object's model to prevent double deletion
         other.model = {};
     }
 
-    SafeModel& SafeModel::operator=(SafeModel&& other) noexcept
+    ModelSafe& ModelSafe::operator=(ModelSafe&& other) noexcept
     {
         if (this != &other)
         {
@@ -51,17 +51,17 @@ namespace sage
     //     model = _model;
     // }
 
-    SafeModel::~SafeModel()
+    ModelSafe::~ModelSafe()
     {
         UnloadModel(model);
     }
 
-    SafeModel::SafeModel(Model _model) : model(_model)
+    ModelSafe::ModelSafe(Model _model) : model(_model)
     {
         // Should deep copy Model and unload the old one?
     }
 
-    SafeModel::SafeModel(const char* path)
+    ModelSafe::ModelSafe(const char* path)
     {
         model = LoadModel(path);
     }
