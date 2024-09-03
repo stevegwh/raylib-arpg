@@ -17,21 +17,18 @@ namespace sage
     class GameData;
     class FloorFireVFX : public VisualFX
     {
-        Vector2 screenSize;
+        Vector2 screenSize{};
         float time = 0;
         int secondsLoc;
         int screenSizeLoc;
 
         std::unique_ptr<TextureTerrainOverlay> texture;
 
-        Model renderModel;
-
       public:
         Shader shader{};
         void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        ~FloorFireVFX();
         explicit FloorFireVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage

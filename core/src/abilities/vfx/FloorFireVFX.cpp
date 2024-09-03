@@ -26,7 +26,6 @@ namespace sage
     {
         time += 3 * GetFrameTime();
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
-        // texture->Update(gameData->cursor->terrainCollision().point);
     }
 
     void FloorFireVFX::InitSystem()
@@ -36,25 +35,24 @@ namespace sage
         texture->Enable(true);
     }
 
-    FloorFireVFX::~FloorFireVFX()
-    {
-    }
-
     FloorFireVFX::FloorFireVFX(GameData* _gameData, sgTransform* _transform)
         : VisualFX(_gameData, _transform),
-          texture(std::make_unique<TextureTerrainOverlay>(
-              _gameData->registry,
-              _gameData->navigationGridSystem.get(),
-              "resources/textures/cursor/rainoffire_cursor.png",
-              WHITE,
-              "resources/shaders/floorfirefx.fs")),
-          shader(_gameData->registry->get<Renderable>(texture->entity).shader.value())
+          shader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/floorfirefx.fs"))
     {
         secondsLoc = GetShaderLocation(shader, "seconds");
+
+        // Screen size likely not used
         screenSizeLoc = GetShaderLocation(shader, "screenSize");
         screenSize = {
             static_cast<float>(gameData->settings->screenWidth),
             static_cast<float>(gameData->settings->screenHeight)};
         SetShaderValue(shader, screenSizeLoc, &screenSize, SHADER_UNIFORM_VEC2);
+
+        texture = std::make_unique<TextureTerrainOverlay>(
+            _gameData->registry,
+            _gameData->navigationGridSystem.get(),
+            "resources/textures/cursor/rainoffire_cursor.png",
+            WHITE,
+            shader);
     }
 } // namespace sage

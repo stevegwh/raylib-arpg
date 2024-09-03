@@ -362,12 +362,11 @@ namespace sage
             shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
             renderable.GetModel()->SetShader(shader, 0);
 
-            renderable.shader = shader;
             renderable.reqShaderUpdate = [data, secondsLoc](entt::entity entity) -> void {
                 auto& r = data->registry->get<Renderable>(entity);
                 auto& t = data->registry->get<Timer>(entity);
                 auto time = t.GetCurrentTime();
-                SetShaderValue(r.shader.value(), secondsLoc, &time, SHADER_UNIFORM_FLOAT);
+                SetShaderValue(r.GetModel()->GetShader(0), secondsLoc, &time, SHADER_UNIFORM_FLOAT);
             };
 
             BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
