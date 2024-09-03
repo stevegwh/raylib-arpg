@@ -17,6 +17,84 @@
 namespace sage
 {
 
+    void ResourceManager::DeepCopyModel(const Model& oldModel, Model& model)
+    {
+        model.meshCount = oldModel.meshCount;
+        model.materialCount = oldModel.materialCount;
+        model.boneCount = oldModel.boneCount;
+        model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
+        model.bones = (BoneInfo*)RL_MALLOC(model.boneCount * sizeof(BoneInfo));
+        model.bindPose = (Transform*)RL_MALLOC(model.boneCount * sizeof(Transform));
+
+        for (size_t i = 0; i < model.meshCount; ++i)
+        {
+            DeepCopyMesh(oldModel.meshes[i], model.meshes[i]);
+        }
+
+        if (model.materialCount == 0)
+        {
+            // TRACELOG(LOG_WARNING, "MATERIAL: [%s] Failed to load model material data,
+            // default to white material", fileName);
+
+            model.materialCount = 1;
+            model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+            model.materials[0] = LoadMaterialDefault();
+
+            if (model.meshMaterial == nullptr) model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
+        }
+        else
+        {
+            model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+            model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
+
+            for (size_t i = 0; i < model.materialCount; ++i)
+            {
+                model.materials[i] = oldModel.materials[i];
+
+                // Deep copy shader
+                model.materials[i].shader = oldModel.materials[i].shader;
+                model.materials[i].shader.locs = (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int));
+                memcpy(
+                    model.materials[i].shader.locs,
+                    oldModel.materials[i].shader.locs,
+                    RL_MAX_SHADER_LOCATIONS * sizeof(int));
+
+                // Deep copy maps
+                model.materials[i].maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
+                memcpy(
+                    model.materials[i].maps, oldModel.materials[i].maps, MAX_MATERIAL_MAPS * sizeof(MaterialMap));
+
+                // Copy params
+                memcpy(model.materials[i].params, oldModel.materials[i].params, 4 * sizeof(float));
+            }
+
+            for (size_t i = 0; i < model.meshCount; ++i)
+            {
+                model.meshMaterial[i] = oldModel.meshMaterial[i];
+            }
+        }
+
+        for (size_t i = 0; i < model.boneCount; ++i)
+        {
+            model.bones[i] = oldModel.bones[i];
+        }
+        for (size_t i = 0; i < model.boneCount; ++i)
+        {
+            model.bindPose[i] = oldModel.bindPose[i];
+        }
+
+        // Below taken from raylib's LoadModel().
+        model.transform = MatrixIdentity();
+        if ((model.meshCount != 0) && (model.meshes != NULL))
+        {
+            // Upload vertex data to GPU (static meshes)
+            for (int i = 0; i < model.meshCount; i++)
+                UploadMesh(&model.meshes[i], false);
+        }
+        // else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data",
+        // "Cereal Model Import");
+    }
+
     void ResourceManager::DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
     {
         mesh.vertexCount = oldMesh.vertexCount;
@@ -140,20 +218,20 @@ namespace sage
 
         if (vsFileName != nullptr)
         {
-            if (!vertShaders.contains(vsFileName))
+            if (!vertShaderFileText.contains(vsFileName))
             {
-                vertShaders[vsFileName] = LoadFileText(vsFileName);
+                vertShaderFileText[vsFileName] = LoadFileText(vsFileName);
             }
-            vShaderStr = vertShaders[vsFileName];
+            vShaderStr = vertShaderFileText[vsFileName];
         }
 
         if (fsFileName != nullptr)
         {
-            if (!fragShaders.contains(fsFileName))
+            if (!fragShaderFileText.contains(fsFileName))
             {
-                fragShaders[fsFileName] = LoadFileText(fsFileName);
+                fragShaderFileText[fsFileName] = LoadFileText(fsFileName);
             }
-            fShaderStr = fragShaders[fsFileName];
+            fShaderStr = fragShaderFileText[fsFileName];
         }
 
         std::string vStr = vShaderStr == nullptr ? "" : vShaderStr;
@@ -166,13 +244,13 @@ namespace sage
     {
         if (!textures.contains(path))
         {
-            auto img = ImageLoad(path.c_str());
+            auto img = imageLoad(path.c_str());
             textures[path] = LoadTextureFromImage(img);
         }
         return textures[path];
     }
 
-    Image ResourceManager::ImageLoad(const std::string& path)
+    Image ResourceManager::imageLoad(const std::string& path)
     {
         if (!textureImages.contains(path))
         {
@@ -228,12 +306,12 @@ namespace sage
      */
     std::shared_ptr<SafeModel> ResourceManager::LoadModelCopy(const std::string& path)
     {
-        if (staticModels.find(path) == staticModels.end())
+        if (modelCopies.find(path) == modelCopies.end())
         {
-            staticModels.try_emplace(path, std::make_unique<SafeModel>(path.c_str()));
+            modelCopies.try_emplace(path, std::make_unique<SafeModel>(path.c_str()));
         }
 
-        return staticModels.at(path);
+        return modelCopies.at(path);
     }
 
     /**
@@ -242,87 +320,11 @@ namespace sage
      * @param path
      * @return
      */
-    std::shared_ptr<SafeModel> ResourceManager::LoadModelUnique(const std::string& path)
+    std::shared_ptr<SafeModel> ResourceManager::LoadModelDeepCopy(const std::string& path)
     {
         Model model;
         const Model& oldModel = LoadModelCopy(path)->rlModel();
-        // deep copy model here
-        model.meshCount = oldModel.meshCount;
-        model.materialCount = oldModel.materialCount;
-        model.boneCount = oldModel.boneCount;
-        model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
-        model.bones = (BoneInfo*)RL_MALLOC(model.boneCount * sizeof(BoneInfo));
-        model.bindPose = (Transform*)RL_MALLOC(model.boneCount * sizeof(Transform));
-
-        for (size_t i = 0; i < model.meshCount; ++i)
-        {
-            DeepCopyMesh(oldModel.meshes[i], model.meshes[i]);
-        }
-
-        if (model.materialCount == 0)
-        {
-            // TRACELOG(LOG_WARNING, "MATERIAL: [%s] Failed to load model material data,
-            // default to white material", fileName);
-
-            model.materialCount = 1;
-            model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
-            model.materials[0] = LoadMaterialDefault();
-
-            if (model.meshMaterial == nullptr) model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
-        }
-        else
-        {
-            model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
-            model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
-
-            for (size_t i = 0; i < model.materialCount; ++i)
-            {
-                model.materials[i] = oldModel.materials[i];
-
-                // Deep copy shader
-                model.materials[i].shader = oldModel.materials[i].shader;
-                model.materials[i].shader.locs = (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int));
-                memcpy(
-                    model.materials[i].shader.locs,
-                    oldModel.materials[i].shader.locs,
-                    RL_MAX_SHADER_LOCATIONS * sizeof(int));
-
-                // Deep copy maps
-                model.materials[i].maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
-                memcpy(
-                    model.materials[i].maps, oldModel.materials[i].maps, MAX_MATERIAL_MAPS * sizeof(MaterialMap));
-
-                // Copy params
-                memcpy(model.materials[i].params, oldModel.materials[i].params, 4 * sizeof(float));
-            }
-
-            for (size_t i = 0; i < model.meshCount; ++i)
-            {
-                model.meshMaterial[i] = oldModel.meshMaterial[i];
-            }
-        }
-
-        for (size_t i = 0; i < model.boneCount; ++i)
-        {
-            model.bones[i] = oldModel.bones[i];
-        }
-        for (size_t i = 0; i < model.boneCount; ++i)
-        {
-            model.bindPose[i] = oldModel.bindPose[i];
-        }
-
-        // Below taken from raylib's LoadModel().
-        model.transform = MatrixIdentity();
-        if ((model.meshCount != 0) && (model.meshes != NULL))
-        {
-            // Upload vertex data to GPU (static meshes)
-            for (int i = 0; i < model.meshCount; i++)
-                UploadMesh(&model.meshes[i], false);
-        }
-        // else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data",
-        // "Cereal Model Import");
-
-        // Return shared_ptr?
+        DeepCopyModel(oldModel, model);
         return std::make_shared<SafeModel>(model);
     }
 
@@ -350,16 +352,16 @@ namespace sage
 
     void ResourceManager::UnloadShaderFileText()
     {
-        for (const auto& kv : vertShaders)
+        for (const auto& kv : vertShaderFileText)
         {
             UnloadFileText(kv.second);
         }
-        for (const auto& kv : fragShaders)
+        for (const auto& kv : fragShaderFileText)
         {
             UnloadFileText(kv.second);
         }
-        vertShaders.clear();
-        fragShaders.clear();
+        vertShaderFileText.clear();
+        fragShaderFileText.clear();
     }
 
     void ResourceManager::UnloadAll()
@@ -380,11 +382,11 @@ namespace sage
         {
             UnloadShader(kv.second);
         }
-        for (const auto& kv : vertShaders)
+        for (const auto& kv : vertShaderFileText)
         {
             UnloadFileText(kv.second);
         }
-        for (const auto& kv : fragShaders)
+        for (const auto& kv : fragShaderFileText)
         {
             UnloadFileText(kv.second);
         }

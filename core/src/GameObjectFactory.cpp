@@ -79,7 +79,7 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelUnique(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = name;
 
         auto& animation = registry->emplace<Animation>(id, modelPath);
@@ -133,7 +133,7 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelUnique(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = name;
 
         // auto& combat = registry->emplace<HealthBar>(id);
@@ -239,7 +239,7 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelUnique(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = "Player";
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions

@@ -9,11 +9,6 @@
 namespace sage
 {
 
-    FlamePartSys::~FlamePartSys()
-    {
-        UnloadTexture(texCircle16);
-    }
-
     FlamePartSys::FlamePartSys(Camera3D* cam) : ParticleSystem(cam)
     {
         // Image imgCircle16 = GenImageGradientRadialTrans(16, 16, 0.3f, WHITE, BLACK);
@@ -21,7 +16,7 @@ namespace sage
         // Image imgCircle8 = GenImageGradientRadialTrans(8, 8, 0.5f, WHITE, BLACK);
         // texCircle8 = LoadTextureFromImage(imgCircle8);
 
-        texCircle16 = LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad("resources/textures/spark_flame.png"));
+        texCircle16 = ResourceManager::GetInstance().TextureLoad("resources/textures/spark_flame.png");
 
         // UnloadImage(imgCircle8);
         // UnloadImage(imgCircle16);

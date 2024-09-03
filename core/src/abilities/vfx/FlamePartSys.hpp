@@ -11,7 +11,6 @@ namespace sage
     {
         Texture2D texCircle16{};
 
-        ~FlamePartSys();
         explicit FlamePartSys(Camera3D* cam);
     };
 } // namespace sage
