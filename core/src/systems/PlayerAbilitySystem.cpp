@@ -137,9 +137,9 @@ namespace sage
             sink.connect<&PlayerAbilitySystem::onActorChanged>(this);
         }
 
-        SetSlot(0, entt::null);
-        SetSlot(1, entt::null);
-        SetSlot(2, entt::null);
-        SetSlot(3, entt::null);
+        abilitySlots[0] = entt::null;
+        abilitySlots[1] = entt::null;
+        abilitySlots[2] = entt::null;
+        abilitySlots[3] = entt::null;
     }
 } // namespace sage
