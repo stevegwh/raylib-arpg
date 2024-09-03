@@ -13,68 +13,9 @@
 namespace sage
 {
 
-    // Shader SafeModel::GetShader()
-    // {
-    //     return model.materials[MATERIAL_MAP_DIFFUSE].shader;
-    // }
-
-    Model& ModelSafe::rlModel()
+    BoundingBox ModelSafe::CalculateModelBoundingBox()
     {
-        return model;
-    }
-
-    ModelSafe::ModelSafe(ModelSafe&& other) noexcept : model(other.model)
-    {
-        // Reset the source object's model to prevent double deletion
-        other.model = {};
-    }
-
-    ModelSafe& ModelSafe::operator=(ModelSafe&& other) noexcept
-    {
-        if (this != &other)
-        {
-            // Clean up existing resources
-            UnloadModel(model);
-
-            // Move resources from other
-            model = other.model;
-
-            // Reset the source object's model
-            other.model = {};
-        }
-        return *this;
-    }
-
-    // void SafeModel::SetModel(Model& _model)
-    // {
-    //     UnloadModel(model);
-    //     model = _model;
-    // }
-
-    ModelSafe::~ModelSafe()
-    {
-        UnloadModel(model);
-    }
-
-    ModelSafe::ModelSafe(Model& _model) : model(_model)
-    {
-        _model = {};
-        // Should deep copy Model and unload the old one?
-    }
-
-    ModelSafe::ModelSafe(const char* path)
-    {
-        model = LoadModel(path);
-    }
-
-    Vector2 Vec3ToVec2(const Vector3& vec3)
-    {
-        return {vec3.x, vec3.z};
-    }
-
-    BoundingBox CalculateModelBoundingBox(const Model& model)
-    {
-        Mesh mesh = model.meshes[0];
+        Mesh mesh = rlmodel.meshes[0];
         std::vector<float> vertices(mesh.vertexCount * 3);
         memcpy(&vertices[0], mesh.vertices, sizeof(float) * mesh.vertexCount * 3);
 
@@ -90,7 +31,7 @@ namespace sage
             Vector3 v = {x, y, z};
             // Assuming rl.Vector3Transform is a function that transforms a Vector3
             // using the given transform.
-            v = Vector3Transform(v, model.transform);
+            v = Vector3Transform(v, rlmodel.transform);
 
             bb.min = bb.max = v;
         }
@@ -102,7 +43,7 @@ namespace sage
             float z = vertices[i + 2];
 
             Vector3 v = {x, y, z};
-            v = Vector3Transform(v, model.transform);
+            v = Vector3Transform(v, rlmodel.transform);
 
             bb.min.x = std::min(bb.min.x, v.x);
             bb.min.y = std::min(bb.min.y, v.y);
@@ -114,6 +55,106 @@ namespace sage
         }
 
         return bb;
+    }
+
+    RayCollision ModelSafe::GetRayMeshCollision(Ray ray, int meshNum) const
+    {
+        assert(meshNum < GetMeshCount());
+        return GetRayCollisionMesh(ray, rlmodel.meshes[meshNum], rlmodel.transform);
+    }
+
+    void ModelSafe::UpdateAnimation(ModelAnimation anim, int frame)
+    {
+        UpdateModelAnimation(rlmodel, anim, frame);
+    }
+
+    void ModelSafe::Draw(Vector3 position, float scale, Color tint)
+    {
+        DrawModel(rlmodel, position, scale, tint);
+    }
+
+    void ModelSafe::Draw(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint)
+    {
+        DrawModelEx(rlmodel, position, rotationAxis, rotationAngle, scale, tint);
+    }
+
+    int ModelSafe::GetMeshCount() const
+    {
+        return rlmodel.meshCount;
+    }
+
+    int ModelSafe::GetMaterialCount() const
+    {
+        return rlmodel.materialCount;
+    }
+
+    Matrix ModelSafe::GetTransform() const
+    {
+        return rlmodel.transform;
+    }
+
+    void ModelSafe::SetTransform(Matrix trans)
+    {
+        rlmodel.transform = trans;
+    }
+
+    void ModelSafe::SetTexture(Texture texture, int materialIdx, MaterialMapIndex mapIdx) const
+    {
+        rlmodel.materials[materialIdx].maps[mapIdx].texture = texture;
+    }
+
+    Shader ModelSafe::GetShader(int materialIdx) const
+    {
+        assert(materialIdx < rlmodel.materialCount);
+        return rlmodel.materials[materialIdx].shader;
+    }
+
+    void ModelSafe::SetShader(Shader shader, int materialIdx) const
+    {
+        assert(materialIdx < rlmodel.materialCount);
+        rlmodel.materials[materialIdx].shader = shader;
+    }
+
+    ModelSafe::ModelSafe(ModelSafe&& other) noexcept : rlmodel(other.rlmodel)
+    {
+        // Reset the source object's model to prevent double deletion
+        other.rlmodel = {};
+    }
+
+    ModelSafe& ModelSafe::operator=(ModelSafe&& other) noexcept
+    {
+        if (this != &other)
+        {
+            // Clean up existing resources
+            UnloadModel(rlmodel);
+
+            // Move resources from other
+            rlmodel = other.rlmodel;
+
+            // Reset the source object's model
+            other.rlmodel = {};
+        }
+        return *this;
+    }
+
+    ModelSafe::~ModelSafe()
+    {
+        UnloadModel(rlmodel);
+    }
+
+    ModelSafe::ModelSafe(Model& _model) : rlmodel(_model)
+    {
+        _model = {};
+    }
+
+    ModelSafe::ModelSafe(const char* path)
+    {
+        rlmodel = LoadModel(path);
+    }
+
+    Vector2 Vec3ToVec2(const Vector3& vec3)
+    {
+        return {vec3.x, vec3.z};
     }
 
     Vector3 NegateVector(const Vector3& vec3)

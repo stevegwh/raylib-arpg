@@ -360,7 +360,6 @@ namespace sage
 
         auto& renderable = registry->get<Renderable>(entity);
         auto& transform = registry->get<sgTransform>(entity);
-        Mesh mesh = *renderable.GetModel().meshes;
 
         int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
         int max_col = std::min(
@@ -380,7 +379,7 @@ namespace sage
 
                 Ray ray = {gridCenter, {0, -1, 0}}; // Cast ray down
 
-                RayCollision collision = GetRayCollisionMesh(ray, mesh, renderable.GetModel().transform);
+                RayCollision collision = renderable.GetModel()->GetRayMeshCollision(ray, 0);
 
                 if (collision.hit)
                 {

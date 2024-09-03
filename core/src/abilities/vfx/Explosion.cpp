@@ -42,7 +42,7 @@ namespace sage
         registry->emplace<sgTransform>(entity, entity);
         auto& renderable = registry->emplace<Renderable>(entity, ModelSafe(sphere), MatrixIdentity());
         renderable.hint = Color{255, 0, 0, 100};
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs");
-        renderable.GetModel().materials[0].shader = shader;
+        renderable.GetModel()->SetShader(
+            ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"), 0);
     }
 } // namespace sage

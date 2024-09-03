@@ -26,8 +26,7 @@ namespace sage
             if (renderable.reqShaderUpdate) renderable.reqShaderUpdate(entity);
 
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
-            DrawModelEx(
-                renderable.GetModel(),
+            renderable.GetModel()->Draw(
                 transform.GetWorldPos(),
                 rotationAxis,
                 transform.GetRotation().y,

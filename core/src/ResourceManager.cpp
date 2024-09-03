@@ -294,7 +294,7 @@ namespace sage
             auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
             renderable.name = parent.meshes[i].name;
         }
-        ResourceManager::UnloadModelKeepMeshes(parent);
+        UnloadModelKeepMeshes(parent);
         return out;
     }
 
@@ -323,8 +323,7 @@ namespace sage
     std::shared_ptr<ModelSafe> ResourceManager::LoadModelDeepCopy(const std::string& path)
     {
         Model model;
-        const Model& oldModel = LoadModelCopy(path)->rlModel();
-        DeepCopyModel(oldModel, model);
+        DeepCopyModel(LoadModelCopy(path)->rlmodel, model);
         return std::make_shared<ModelSafe>(model);
     }
 
@@ -366,7 +365,10 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
-        modelCopies.clear();
+        for (auto& [path, modelSafe] : modelCopies)
+        {
+            modelSafe.reset();
+        }
         for (const auto& kv : textures)
         {
             UnloadTexture(kv.second);
@@ -391,6 +393,7 @@ namespace sage
         {
             UnloadFileText(kv.second);
         }
+        modelCopies.clear();
         textures.clear();
         textureImages.clear();
         modelAnimations.clear();

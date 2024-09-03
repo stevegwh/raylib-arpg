@@ -8,22 +8,16 @@
 #include "rlights.h"
 #include <entt/entt.hpp>
 
-#include <vector>
-
 namespace sage
 {
-    struct Renderable;
     class LightSubSystem
     {
         entt::registry* registry;
-        std::vector<Renderable*> renderables;
 
       public:
         Shader shader;
         Light lights[MAX_LIGHTS]{};
-
-        void LinkAllRenderablesToLight();
-        void LinkRenderableToLight(Renderable* renderable);
+        void LinkRenderableToLight(entt::entity entity) const;
         void DrawDebugLights();
         explicit LightSubSystem(entt::registry* _registry);
     };

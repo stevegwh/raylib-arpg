@@ -39,7 +39,7 @@ namespace sage
         std::string name = "Default";
         bool serializable = true;
         // void SetModel(SafeModel _model);
-        [[nodiscard]] Model GetModel() const;
+        [[nodiscard]] ModelSafe* GetModel() const;
 
         Renderable() = default;
         Renderable(const Renderable&) = delete;
@@ -55,13 +55,14 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            archive(model->rlModel(), name, materials, initialTransform);
+            archive(model->rlmodel, name, materials, initialTransform);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            Model _model;
+            ModelSafe modelsafe;
+            Model& _model = modelsafe.rlmodel;
 
             archive(_model, name, materials, initialTransform);
 
@@ -85,7 +86,8 @@ namespace sage
                     ResourceManager::GetInstance().TextureLoad(materials.normal);
             }
 
-            model = std::make_unique<ModelSafe>(_model);
+            // Trying to phase out passing a raylib model into the constructor
+            model = std::make_unique<ModelSafe>(std::move(modelsafe));
         }
 
       private:

@@ -241,10 +241,9 @@ namespace sage
         {
             auto& renderable = registry->get<Renderable>(hitInfo.collidedEntityId);
 
-            for (int i = 0; i < renderable.GetModel().meshCount; ++i)
+            for (int i = 0; i < renderable.GetModel()->GetMeshCount(); ++i)
             {
-                auto meshCollision =
-                    GetRayCollisionMesh(ray, renderable.GetModel().meshes[i], renderable.GetModel().transform);
+                auto meshCollision = renderable.GetModel()->GetRayMeshCollision(ray, i);
                 if (meshCollision.hit)
                 {
                     hitInfo.rlCollision = meshCollision;
