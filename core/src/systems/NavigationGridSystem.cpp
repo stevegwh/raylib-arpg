@@ -9,7 +9,6 @@
 
 #include <iostream>
 #include <queue>
-#include <utility>
 
 Vector3 calculateGridsquareCentre(Vector3 min, Vector3 max)
 {
@@ -395,14 +394,14 @@ namespace sage
         }
     }
 
-    void NavigationGridSystem::loadTerrainNormalMap(const Image& normalMap)
+    void NavigationGridSystem::loadTerrainNormalMap(const ImageSafe& normalMap)
     {
         for (int j = 0; j < slices; ++j)
         {
             for (int i = 0; i < slices; ++i)
             {
                 // Get the color of the pixel
-                Color color = GetImageColor(normalMap, i, j);
+                Color color = normalMap.GetColor(i, j);
 
                 // Convert the color values back to the range [-1, 1]
                 float normalX = (static_cast<float>(color.r) / 127.5f) - 1.0f;
@@ -426,7 +425,7 @@ namespace sage
         std::cout << "Terrain normal map loaded and applied to grid." << std::endl;
     }
 
-    void NavigationGridSystem::loadTerrainHeightMap(const Image& heightMap, float maxHeight)
+    void NavigationGridSystem::loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight)
     {
 
         int halfSlices = slices / 2;
@@ -436,7 +435,7 @@ namespace sage
             for (int i = 0; i < slices; ++i)
             {
                 // Get the color of the pixel
-                Color color = GetImageColor(heightMap, i, j);
+                Color color = heightMap.GetColor(i, j);
 
                 // The height is stored in the red channel, normalized to 0-255
                 float normalizedHeight = static_cast<float>(color.r) / 255.0f;
@@ -991,18 +990,17 @@ namespace sage
         const auto& view = registry->view<Collideable, Renderable>();
         size_t lastindex = mapPath.find_last_of('.');
         std::string imgPath = mapPath.substr(0, lastindex);
-        Image heightMapImage = LoadImage(std::string(imgPath + "-height.png").c_str());
-        Image normalMapImage = LoadImage(std::string(imgPath + "-normal.png").c_str());
+        ImageSafe heightMapImage(std::string(imgPath + "-height.png"));
+        ImageSafe normalMapImage(std::string(imgPath + "-normal.png"));
 
-        bool heightMapValid =
-            heightMapImage.data && heightMapImage.width == slices && heightMapImage.height == slices;
-        bool normalMapValid =
-            heightMapImage.data && heightMapImage.width == slices && heightMapImage.height == slices;
+        bool heightMapValid = heightMapImage.HasLoaded() && heightMapImage.GetWidth() == slices &&
+                              heightMapImage.GetHeight() == slices;
+        bool normalMapValid = heightMapImage.HasLoaded() && heightMapImage.GetWidth() == slices &&
+                              heightMapImage.GetHeight() == slices;
         if (heightMapValid && normalMapValid)
         {
             loadTerrainNormalMap(normalMapImage);
             loadTerrainHeightMap(heightMapImage, serializer::GetMaxHeight(registry, slices));
-            UnloadImage(heightMapImage);
         }
         else
         {
@@ -1041,7 +1039,7 @@ namespace sage
         return gridSquares;
     }
 
-    const NavigationGridSquare* NavigationGridSystem::GetGridSquare(int row, int col)
+    const NavigationGridSquare* NavigationGridSystem::GetGridSquare(int row, int col) const
     {
         return gridSquares[row][col];
     }

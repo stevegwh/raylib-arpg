@@ -17,7 +17,7 @@ namespace sage
 
     class ResourceManager
     {
-        ResourceManager() = default;
+        ResourceManager();
         ~ResourceManager();
 
         std::unordered_map<std::string, Shader> shaders{};
@@ -38,6 +38,7 @@ namespace sage
         static ResourceManager& GetInstance()
         {
             static ResourceManager instance;
+            // shaders.emplace("DEFAULT", LoadMaterialDefault().shader);
             return instance;
         }
         static void UnloadModelKeepMeshes(Model& model);

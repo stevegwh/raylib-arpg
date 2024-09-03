@@ -220,7 +220,8 @@ namespace sage
 
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
-        data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
+        // data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id,
+        // AbilityEnum::RAINFOFIRE));
         data->playerAbilitySystem->SetSlot(2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::FIREBALL));
         data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 

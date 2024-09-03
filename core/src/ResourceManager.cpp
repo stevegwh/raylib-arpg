@@ -8,6 +8,7 @@
 
 #include "raylib/src/config.h"
 #include "raymath.h"
+#include "rlgl.h"
 
 #include <cstring>
 #include <sstream>
@@ -16,6 +17,13 @@
 
 namespace sage
 {
+    ResourceManager::ResourceManager()
+    {
+        Shader shader;
+        shader.id = rlGetShaderIdDefault();
+        shader.locs = rlGetShaderLocsDefault();
+        shaders.emplace("DEFAULT", shader);
+    }
 
     void ResourceManager::deepCopyModel(const Model& oldModel, Model& model)
     {
@@ -216,6 +224,12 @@ namespace sage
     */
     Shader ResourceManager::ShaderLoad(const char* vsFileName, const char* fsFileName)
     {
+        if (vsFileName == nullptr && fsFileName == nullptr || (vsFileName != nullptr && !FileExists(vsFileName) &&
+                                                               (fsFileName != nullptr && !FileExists(fsFileName))))
+        {
+            std::cout << "WARNING: Both files nullptr or do not exist. Loading default shader. \n";
+            return shaders["DEFAULT"];
+        }
 
         char* vShaderStr = nullptr;
         char* fShaderStr = nullptr;
@@ -248,8 +262,7 @@ namespace sage
     {
         if (!textures.contains(path))
         {
-            auto img = imageLoad(path.c_str());
-            textures[path] = LoadTextureFromImage(img);
+            textures[path] = LoadTextureFromImage(imageLoad(path));
         }
         return textures[path];
     }
@@ -258,9 +271,7 @@ namespace sage
     {
         if (!textureImages.contains(path))
         {
-            Image img = LoadImage(path.c_str());
-            textureImages[path] = img;
-            return img;
+            textureImages[path] = LoadImage(path.c_str());
         }
         return textureImages[path];
     }
