@@ -29,13 +29,13 @@ namespace sage
         }
     }
 
-    Renderable::Renderable(std::shared_ptr<SafeModel> _model, MaterialPaths _materials, Matrix _localTransform)
+    Renderable::Renderable(std::shared_ptr<ModelSafe> _model, MaterialPaths _materials, Matrix _localTransform)
         : initialTransform(_localTransform), materials(std::move(_materials)), model(_model)
     {
         model->rlModel().transform = initialTransform;
     }
 
-    Renderable::Renderable(std::shared_ptr<SafeModel> _model, Matrix _localTransform)
+    Renderable::Renderable(std::shared_ptr<ModelSafe> _model, Matrix _localTransform)
         : initialTransform(_localTransform), model(_model)
     {
         model->rlModel().transform = initialTransform;
@@ -44,27 +44,27 @@ namespace sage
     Renderable::Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform)
         : initialTransform(_localTransform),
           materials(std::move(_materials)),
-          model(std::make_shared<SafeModel>(_model))
+          model(std::make_shared<ModelSafe>(_model))
     {
         model->rlModel().transform = initialTransform;
     }
 
     Renderable::Renderable(Model _model, Matrix _localTransform)
-        : initialTransform(_localTransform), model(std::make_shared<SafeModel>(_model))
+        : initialTransform(_localTransform), model(std::make_shared<ModelSafe>(_model))
     {
         model->rlModel().transform = initialTransform;
     }
 
-    Renderable::Renderable(SafeModel _model, MaterialPaths _materials, Matrix _localTransform)
+    Renderable::Renderable(ModelSafe _model, MaterialPaths _materials, Matrix _localTransform)
         : initialTransform(_localTransform),
           materials(std::move(_materials)),
-          model(std::make_shared<SafeModel>(std::move(_model)))
+          model(std::make_shared<ModelSafe>(std::move(_model)))
     {
         model->rlModel().transform = initialTransform;
     }
 
-    Renderable::Renderable(SafeModel _model, Matrix _localTransform)
-        : initialTransform(_localTransform), model(std::make_unique<SafeModel>(std::move(_model)))
+    Renderable::Renderable(ModelSafe _model, Matrix _localTransform)
+        : initialTransform(_localTransform), model(std::make_unique<ModelSafe>(std::move(_model)))
     {
         model->rlModel().transform = initialTransform;
     }

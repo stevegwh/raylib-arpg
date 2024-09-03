@@ -22,7 +22,7 @@ namespace sage
         Vector3 meshOffset{};
 
         void updateTerrainPolygon();
-        SafeModel generateTerrainPolygon();
+        ModelSafe generateTerrainPolygon();
         void updateMeshData(Mesh& mesh);
         Mesh createInitialMesh();
         void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol);

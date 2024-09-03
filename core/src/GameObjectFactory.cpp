@@ -369,7 +369,7 @@ namespace sage
             shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
             model.materials[0].shader = shader;
 
-            auto& renderable = registry->emplace<Renderable>(id, SafeModel(model), modelTransform);
+            auto& renderable = registry->emplace<Renderable>(id, ModelSafe(model), modelTransform);
             renderable.name = "Portal";
 
             renderable.shader = shader;
@@ -398,7 +398,7 @@ namespace sage
         Matrix modelTransform = MatrixIdentity();
 
         auto& renderable =
-            registry->emplace<Renderable>(id, SafeModel("resources/models/obj/portal.obj"), modelTransform);
+            registry->emplace<Renderable>(id, ModelSafe("resources/models/obj/portal.obj"), modelTransform);
         renderable.name = "Portal Outer";
         data->lightSubSystem->LinkRenderableToLight(&renderable);
 
@@ -422,7 +422,7 @@ namespace sage
         Matrix modelTransform = MatrixIdentity();
 
         auto& renderable = registry->emplace<Renderable>(
-            id, SafeModel("resources/models/obj/Wizard Tower 1.obj"), modelTransform);
+            id, ModelSafe("resources/models/obj/Wizard Tower 1.obj"), modelTransform);
         renderable.name = "Wizard Tower";
         data->lightSubSystem->LinkRenderableToLight(&renderable);
 

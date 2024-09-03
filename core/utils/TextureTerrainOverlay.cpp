@@ -103,7 +103,7 @@ namespace sage
         UpdateMeshBuffer(mesh, 2, mesh.texcoords, vertexCount * 2 * sizeof(float), 0);
     }
 
-    SafeModel TextureTerrainOverlay::generateTerrainPolygon()
+    ModelSafe TextureTerrainOverlay::generateTerrainPolygon()
     {
         Mesh mesh = createInitialMesh();
 
@@ -115,7 +115,7 @@ namespace sage
         model.materialCount = 1;
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 
-        return SafeModel{model};
+        return ModelSafe{model};
     }
 
     void TextureTerrainOverlay::Enable(bool enable)
