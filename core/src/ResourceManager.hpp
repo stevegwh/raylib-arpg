@@ -6,6 +6,7 @@
 #include "raylib.h"
 #include "slib.hpp"
 
+#include <entt/entt.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -36,11 +37,14 @@ namespace sage
             return instance;
         }
 
+        static void DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
+        static void UnloadModelKeepMeshes(Model& model);
+        static std::vector<entt::entity> UnpackOBJMap(
+            entt::registry* registry, MaterialPaths material_paths, const std::string& mapPath);
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
         Image ImageLoad(const std::string& path);
         std::shared_ptr<SafeModel> LoadModelCopy(const std::string& path);
-        static void DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
         std::shared_ptr<SafeModel> LoadModelUnique(const std::string& path);
         ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
         void UnloadImages();

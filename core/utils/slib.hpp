@@ -35,7 +35,7 @@ namespace sage
         Model& rlModel();
         // Shader GetShader();
         // void SetShader(const char* path);
-        void SetModel(Model& _model);
+        // void SetModel(Model& _model);
         SafeModel(const SafeModel&) = delete;
         SafeModel& operator=(const SafeModel&) = delete;
         SafeModel(SafeModel&& other) noexcept;
@@ -43,7 +43,6 @@ namespace sage
         ~SafeModel();
         explicit SafeModel(const char* path);
         explicit SafeModel(Model _model);
-        explicit SafeModel(const Mesh& _mesh);
         SafeModel() = default;
     };
 
