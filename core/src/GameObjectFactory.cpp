@@ -276,29 +276,23 @@ namespace sage
     void GameObjectFactory::loadMap(
         entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
     {
-
-        MaterialPaths matPaths;
-        matPaths.diffuse = "resources/models/obj/PolyAdventureTexture_01.png";
-        SafeModel parent(LoadModel(_mapPath.c_str()));
         std::vector<Collideable*> floorMeshes;
 
-        for (int i = 0; i < parent.rlModel().meshCount; ++i)
+        // Temporary
+        MaterialPaths matPaths{};
+        matPaths.diffuse = "resources/models/obj/PolyAdventureTexture_01.png";
+        // ---
+        auto modelIds = ResourceManager::UnpackOBJMap(registry, matPaths, _mapPath);
+        for (auto id : modelIds)
         {
-            entt::entity id = registry->create();
             auto& transform = registry->emplace<sgTransform>(id, id);
             transform.SetPosition({0, 0, 0});
             transform.SetScale(1.0f);
             transform.SetRotation({0, 0, 0});
 
-            Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
-
-            auto& renderable =
-                registry->emplace<Renderable>(id, SafeModel(parent.rlModel().meshes[i]), matPaths, modelTransform);
-            renderable.name = parent.rlModel().meshes[i].name;
-
+            auto& renderable = registry->get<Renderable>(id);
             scene->lightSubSystem->LinkRenderableToLight(&renderable);
-            renderable.GetModel().materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-                LoadTextureFromImage(ResourceManager::GetInstance().ImageLoad(matPaths.diffuse));
+
             auto& collideable =
                 registry->emplace<Collideable>(id, CalculateModelBoundingBox(renderable.GetModel()));
             collideable.SetWorldBoundingBox(transform.GetMatrix());

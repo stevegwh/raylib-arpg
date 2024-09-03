@@ -66,18 +66,29 @@ namespace sage
           lightSubSystem(std::make_unique<LightSubSystem>(_registry)),
           data(std::make_unique<GameData>(_registry, _keyMapping, _settings, lightSubSystem.get()))
     {
-        data->Load();
+
         float slices = 500;
 
-        if (!FileExists("resources/output.bin"))
-        {
-            GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
-        }
-        else
-        {
-            lightSubSystem->LinkAllRenderablesToLight();
-        }
+        // ----
+        data->Load();
         data->navigationGridSystem->Init(slices, 1.0f, "resources/output.bin");
+        lightSubSystem->LinkAllRenderablesToLight();
+        // ----
+        // GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
+        // data->navigationGridSystem->Init(slices, 1.0f, "resources/models/obj/level-basic.obj");
+        // ----
+
+        // ----
+        // if (!FileExists("resources/output.bin"))
+        // {
+        //     GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
+        // }
+        // else
+        // {
+        //     lightSubSystem->LinkAllRenderablesToLight();
+        // }
+        // ----
+
         data->navigationGridSystem->PopulateGrid();
     };
 

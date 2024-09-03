@@ -45,22 +45,15 @@ namespace sage
         return *this;
     }
 
-    void SafeModel::SetModel(Model& _model)
-    {
-        UnloadModel(model);
-        model = _model;
-    }
+    // void SafeModel::SetModel(Model& _model)
+    // {
+    //     UnloadModel(model);
+    //     model = _model;
+    // }
 
     SafeModel::~SafeModel()
     {
         UnloadModel(model);
-    }
-
-    SafeModel::SafeModel(const Mesh& _mesh)
-    {
-        Mesh meshCopy;
-        ResourceManager::DeepCopyMesh(_mesh, meshCopy);
-        model = LoadModelFromMesh(meshCopy);
     }
 
     SafeModel::SafeModel(Model _model) : model(_model)

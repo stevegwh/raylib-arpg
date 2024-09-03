@@ -4,14 +4,113 @@
 
 #include "ResourceManager.hpp"
 
-#include <cstring>
-#include <unordered_map>
+#include "components/Renderable.hpp"
 
 #include "raylib/src/config.h"
 #include "raymath.h"
 
+#include <cstring>
+#include <sstream>
+#include <unordered_map>
+#include <utils.h>
+
 namespace sage
 {
+
+    void ResourceManager::DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
+    {
+        mesh.vertexCount = oldMesh.vertexCount;
+        mesh.triangleCount = oldMesh.triangleCount;
+
+        // Copy basic vertex data
+        mesh.vertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+        memcpy(mesh.vertices, oldMesh.vertices, mesh.vertexCount * 3 * sizeof(float));
+
+        if (oldMesh.texcoords)
+        {
+            mesh.texcoords = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
+            memcpy(mesh.texcoords, oldMesh.texcoords, mesh.vertexCount * 2 * sizeof(float));
+        }
+        if (oldMesh.texcoords2)
+        {
+            mesh.texcoords2 = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
+            memcpy(mesh.texcoords2, oldMesh.texcoords2, mesh.vertexCount * 2 * sizeof(float));
+        }
+        if (oldMesh.normals)
+        {
+            mesh.normals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+            memcpy(mesh.normals, oldMesh.normals, mesh.vertexCount * 3 * sizeof(float));
+        }
+        if (oldMesh.tangents)
+        {
+            mesh.tangents = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
+            memcpy(mesh.tangents, oldMesh.tangents, mesh.vertexCount * 4 * sizeof(float));
+        }
+        if (oldMesh.colors)
+        {
+            mesh.colors = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
+            memcpy(mesh.colors, oldMesh.colors, mesh.vertexCount * 4 * sizeof(unsigned char));
+        }
+        if (oldMesh.indices)
+        {
+            mesh.indices = (unsigned short*)RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short));
+            memcpy(mesh.indices, oldMesh.indices, mesh.triangleCount * 3 * sizeof(unsigned short));
+        }
+
+        // Copy animation vertex data
+        if (oldMesh.animVertices)
+        {
+            mesh.animVertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+            memcpy(mesh.animVertices, oldMesh.animVertices, mesh.vertexCount * 3 * sizeof(float));
+        }
+        if (oldMesh.animNormals)
+        {
+            mesh.animNormals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+            memcpy(mesh.animNormals, oldMesh.animNormals, mesh.vertexCount * 3 * sizeof(float));
+        }
+        if (oldMesh.boneIds)
+        {
+            mesh.boneIds = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
+            memcpy(mesh.boneIds, oldMesh.boneIds, mesh.vertexCount * 4 * sizeof(unsigned char));
+        }
+        if (oldMesh.boneWeights)
+        {
+            mesh.boneWeights = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
+            memcpy(mesh.boneWeights, oldMesh.boneWeights, mesh.vertexCount * 4 * sizeof(float));
+        }
+
+        mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
+
+        // Copy name if it exists
+        if (oldMesh.name)
+        {
+            mesh.name = strdup(oldMesh.name);
+        }
+    }
+
+    /**
+     * Frees model data but keeps the meshes in memory.
+     * Allows us to "unpack" a parent model into multiple models from its children.
+     * Used for taking in single OBJ files as maps and instantiating the meshes as different entities
+     * @param model
+     */
+    void ResourceManager::UnloadModelKeepMeshes(Model& model)
+    {
+        // Drop tables (does not unload materials
+        for (int i = 0; i < model.materialCount; i++)
+            RL_FREE(model.materials[i].maps);
+
+        // Unload arrays
+        RL_FREE(model.meshes);
+        RL_FREE(model.materials);
+        RL_FREE(model.meshMaterial);
+
+        // Unload animation data
+        RL_FREE(model.bones);
+        RL_FREE(model.bindPose);
+
+        TRACELOG(LOG_INFO, "MODEL: Unloaded model (NOT meshes) from RAM");
+    }
 
     Shader ResourceManager::gpuShaderLoad(const std::string& vs, const std::string& fs)
     {
@@ -84,6 +183,43 @@ namespace sage
         return textureImages[path];
     }
 
+    std::vector<entt::entity> ResourceManager::UnpackOBJMap(
+        entt::registry* registry, MaterialPaths matPaths, const std::string& mapPath)
+    {
+        std::vector<entt::entity> out;
+
+        Model parent = LoadModel(mapPath.c_str());
+        Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
+        for (int i = 0; i < parent.meshCount; ++i)
+        {
+            entt::entity id = registry->create();
+            out.push_back(id);
+
+            Model model = LoadModelFromMesh(parent.meshes[i]);
+
+            if (FileExists(matPaths.diffuse.c_str()))
+            {
+                model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
+                    ResourceManager::GetInstance().TextureLoad(matPaths.diffuse);
+            }
+            if (FileExists(matPaths.specular.c_str()))
+            {
+                model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture =
+                    ResourceManager::GetInstance().TextureLoad(matPaths.specular);
+            }
+            if (FileExists(matPaths.normal.c_str()))
+            {
+                model.materials[0].maps[MATERIAL_MAP_NORMAL].texture =
+                    ResourceManager::GetInstance().TextureLoad(matPaths.normal);
+            }
+
+            auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
+            renderable.name = parent.meshes[i].name;
+        }
+        ResourceManager::UnloadModelKeepMeshes(parent);
+        return out;
+    }
+
     /**
      * @brief Returns a shallow copy of the loaded model
      * NB: Caller should not free the memory.
@@ -98,77 +234,6 @@ namespace sage
         }
 
         return staticModels.at(path);
-    }
-
-    void ResourceManager::DeepCopyMesh(const Mesh& oldMesh, Mesh& mesh)
-    {
-        mesh.vertexCount = oldMesh.vertexCount;
-        mesh.triangleCount = oldMesh.triangleCount;
-
-        // Copy basic vertex data
-        mesh.vertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-        memcpy(mesh.vertices, oldMesh.vertices, mesh.vertexCount * 3 * sizeof(float));
-
-        if (oldMesh.texcoords)
-        {
-            mesh.texcoords = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
-            memcpy(mesh.texcoords, oldMesh.texcoords, mesh.vertexCount * 2 * sizeof(float));
-        }
-        if (oldMesh.texcoords2)
-        {
-            mesh.texcoords2 = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
-            memcpy(mesh.texcoords2, oldMesh.texcoords2, mesh.vertexCount * 2 * sizeof(float));
-        }
-        if (oldMesh.normals)
-        {
-            mesh.normals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-            memcpy(mesh.normals, oldMesh.normals, mesh.vertexCount * 3 * sizeof(float));
-        }
-        if (oldMesh.tangents)
-        {
-            mesh.tangents = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
-            memcpy(mesh.tangents, oldMesh.tangents, mesh.vertexCount * 4 * sizeof(float));
-        }
-        if (oldMesh.colors)
-        {
-            mesh.colors = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
-            memcpy(mesh.colors, oldMesh.colors, mesh.vertexCount * 4 * sizeof(unsigned char));
-        }
-        if (oldMesh.indices)
-        {
-            mesh.indices = (unsigned short*)RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short));
-            memcpy(mesh.indices, oldMesh.indices, mesh.triangleCount * 3 * sizeof(unsigned short));
-        }
-
-        // Copy animation vertex data
-        if (oldMesh.animVertices)
-        {
-            mesh.animVertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-            memcpy(mesh.animVertices, oldMesh.animVertices, mesh.vertexCount * 3 * sizeof(float));
-        }
-        if (oldMesh.animNormals)
-        {
-            mesh.animNormals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-            memcpy(mesh.animNormals, oldMesh.animNormals, mesh.vertexCount * 3 * sizeof(float));
-        }
-        if (oldMesh.boneIds)
-        {
-            mesh.boneIds = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
-            memcpy(mesh.boneIds, oldMesh.boneIds, mesh.vertexCount * 4 * sizeof(unsigned char));
-        }
-        if (oldMesh.boneWeights)
-        {
-            mesh.boneWeights = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
-            memcpy(mesh.boneWeights, oldMesh.boneWeights, mesh.vertexCount * 4 * sizeof(float));
-        }
-
-        mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
-
-        // Copy name if it exists
-        if (oldMesh.name)
-        {
-            mesh.name = strdup(oldMesh.name);
-        }
     }
 
     /**
