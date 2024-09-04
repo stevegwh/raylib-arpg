@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "raylib.h"
-#include "cereal/cereal.hpp"
+#include "../../vendor/cereal/cereal.hpp"
+#include "../../vendor/raylib/src/raylib.h"
 
 namespace sage
 {
