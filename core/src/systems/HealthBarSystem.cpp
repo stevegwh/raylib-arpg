@@ -28,25 +28,27 @@ namespace sage
 
             if (hb.damageTaken < 0.1f) hb.damageTaken = 0; // Reset to zero when it's very small
 
+            float width = 200;
+            float height = 20;
             BeginTextureMode(hb.healthBarTexture);
             ClearBackground(BLANK);
 
-            DrawRectangle(0, 0, 200, 20, hb.healthBarBgColor);
+            DrawRectangle(0, 0, width, height, hb.healthBarBgColor);
             float healthPercentage = static_cast<float>(c.data.hp) / 100.0f;
             float damageTakenPercentage = static_cast<float>(hb.damageTaken) / 100.0f;
-            int fillWidth = static_cast<int>(healthPercentage * 200);
-            DrawRectangle(0, 0, fillWidth, 20, hb.healthBarColor);
+            int fillWidth = static_cast<int>(healthPercentage * width);
+            DrawRectangle(0, 0, fillWidth, height, hb.healthBarColor);
             DrawRectangle(fillWidth, 0, static_cast<int>(damageTakenPercentage * 200), 20, WHITE);
-            DrawRectangleLines(0, 0, 200, 20, hb.healthBarBorderColor);
+            DrawRectangleLines(0, 0, width, height, hb.healthBarBorderColor);
 
-            Vector2 textSize = MeasureTextEx(GetFontDefault(), TextFormat("HP: %03i", c.data.hp), 20, 1);
-            DrawTextEx(
-                GetFontDefault(),
-                TextFormat("HP: %03i", c.data.hp),
-                {10, hb.healthBarTexture.texture.height - 30 - textSize.y},
-                20,
-                1,
-                GREEN);
+            // Vector2 textSize = MeasureTextEx(GetFontDefault(), TextFormat("HP: %03i", c.data.hp), 20, 1);
+            // DrawTextEx(
+            //     GetFontDefault(),
+            //     TextFormat("HP: %03i", c.data.hp),
+            //     {10, hb.healthBarTexture.texture.height - 30 - textSize.y},
+            //     20,
+            //     1,
+            //     GREEN);
 
             EndTextureMode();
         }
@@ -69,7 +71,7 @@ namespace sage
                 static_cast<float>(c.healthBarTexture.texture.width),
                 static_cast<float>(-c.healthBarTexture.texture.height)};
             DrawBillboardRec(
-                *camera->getRaylibCam(), c.healthBarTexture.texture, sourceRec, billboardPos, {1.0f, 1.0f}, WHITE);
+                *camera->getRaylibCam(), c.healthBarTexture.texture, sourceRec, billboardPos, {3.0f, 1.0f}, WHITE);
         });
     }
 
