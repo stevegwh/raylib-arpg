@@ -4,10 +4,10 @@
 
 #pragma once
 
+#include "../src/KeyMapping.hpp"
 #include "abilities/AbilityData.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "entt/entity/registry.hpp"
-#include "KeyMapping.hpp"
 #include "Settings.hpp"
 
 namespace sage::serializer

@@ -5,6 +5,7 @@
 #include "systems/NavigationGridSystem.hpp"
 #include <entt/entt.hpp>
 
+// TODO: This causes a "bad access" error RenderSystem->Draw 75% of times (but sometimes not). Race condition?
 namespace sage
 {
     class TextureTerrainOverlay
