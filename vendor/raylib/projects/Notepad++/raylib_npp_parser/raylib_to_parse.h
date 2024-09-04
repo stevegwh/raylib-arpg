@@ -134,7 +134,7 @@ RLAPI void *MemRealloc(void *ptr, unsigned int size);             // Internal me
 RLAPI void MemFree(void *ptr);                                    // Internal memory free
 
 // Set custom callbacks
-// WARNING: Callbacks setup is intended for advance users
+// WARNING: Callbacks setup is intended for advanced users
 RLAPI void SetTraceLogCallback(TraceLogCallback callback);         // Set custom trace log
 RLAPI void SetLoadFileDataCallback(LoadFileDataCallback callback); // Set custom file binary data loader
 RLAPI void SetSaveFileDataCallback(SaveFileDataCallback callback); // Set custom file binary data saver
@@ -375,6 +375,7 @@ RLAPI void ImageAlphaClear(Image *image, Color color, float threshold);         
 RLAPI void ImageAlphaMask(Image *image, Image alphaMask);                                                // Apply alpha mask to image
 RLAPI void ImageAlphaPremultiply(Image *image);                                                          // Premultiply alpha channel
 RLAPI void ImageBlurGaussian(Image *image, int blurSize);                                                // Apply Gaussian blur using a box blur approximation
+RLAPI void ImageKernelConvolution(Image *image, float* kernel, int kernelSize);                         // Apply Custom Square image convolution kernel
 RLAPI void ImageResize(Image *image, int newWidth, int newHeight);                                       // Resize image (Bicubic scaling algorithm)
 RLAPI void ImageResizeNN(Image *image, int newWidth,int newHeight);                                      // Resize image (Nearest-Neighbor scaling algorithm)
 RLAPI void ImageResizeCanvas(Image *image, int newWidth, int newHeight, int offsetX, int offsetY, Color fill);  // Resize canvas and fill with color
