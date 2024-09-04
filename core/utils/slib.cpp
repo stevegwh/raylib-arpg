@@ -4,7 +4,6 @@
 
 #include "slib.hpp"
 
-#include "../../../../../../Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/ImageIO.framework/Headers/CGImageAnimation.h"
 #include "raymath.h"
 #include "ResourceManager.hpp"
 
