@@ -43,6 +43,21 @@ namespace sage
     {
         if (settings->toggleFullScreenRequested)
         {
+#ifdef __APPLE__
+            if (!IsWindowFullscreen())
+            {
+                int monitor = GetCurrentMonitor();
+                SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+
+                ToggleFullscreen();
+            }
+            else
+            {
+                ToggleFullscreen();
+                settings->ResetToUserDefined();
+                SetWindowSize(settings->screenWidth, settings->screenHeight);
+            }
+#else
             bool maximized = GetScreenWidth() == GetMonitorWidth(GetCurrentMonitor()) &&
                              GetScreenHeight() == GetMonitorHeight(GetCurrentMonitor());
             if (!maximized)
@@ -59,6 +74,7 @@ namespace sage
                 settings->ResetToUserDefined();
                 SetWindowSize(settings->screenWidth, settings->screenHeight);
             }
+#endif
             settings->toggleFullScreenRequested = false;
         }
     }
