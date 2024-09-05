@@ -3,11 +3,6 @@ build
 .DS_Store
 .idea
 .vscode
-resources/models/gltf/level.glb
-resources/models/obj/level.obj
-resources/models/obj/level2.obj
-resources/models/obj/level-basic.obj
-resources/output.bin
-resources/editor-settings.xml
+resources
 out
 .vs

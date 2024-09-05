@@ -21,7 +21,7 @@ namespace sage
         void Update();
         void Draw3D();
 
-        ~TowerStateController();
+        ~TowerStateController() override;
         TowerStateController(entt::registry* _registry, GameData* _gameData);
         friend class StateMachineController; // Required for CRTP
     };
