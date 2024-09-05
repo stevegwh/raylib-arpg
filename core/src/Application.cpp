@@ -43,16 +43,20 @@ namespace sage
     {
         if (settings->toggleFullScreenRequested)
         {
-            if (!IsWindowFullscreen())
+            bool maximized = GetScreenWidth() == GetMonitorWidth(GetCurrentMonitor()) &&
+                             GetScreenHeight() == GetMonitorHeight(GetCurrentMonitor());
+            if (!maximized)
             {
 
                 int monitor = GetCurrentMonitor();
                 SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-                ToggleFullscreen();
+
+                ToggleBorderlessWindowed();
             }
-            else if (IsWindowFullscreen())
+            else
             {
-                ToggleFullscreen();
+                ToggleBorderlessWindowed();
+                settings->ResetToUserDefined();
                 SetWindowSize(settings->screenWidth, settings->screenHeight);
             }
             settings->toggleFullScreenRequested = false;
