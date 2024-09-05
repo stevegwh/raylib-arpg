@@ -36,7 +36,7 @@ namespace sage
         void Update();
         void Draw3D();
 
-        ~AbilityStateController();
+        ~AbilityStateController() override;
         AbilityStateController(const AbilityStateController&) = delete;
         AbilityStateController& operator=(const AbilityStateController&) = delete;
         AbilityStateController(entt::registry* _registry, GameData* _gameData);
