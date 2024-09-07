@@ -72,14 +72,16 @@ namespace sage
 
         auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
 
-        auto& renderable =
-            registry->emplace<Renderable>(entity, std::move(model), matPaths, MatrixScale(scalex, scaley, scalez));
+        Matrix rotMat = MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
+        Matrix mat = MatrixMultiply(MatrixScale(scalex, scaley, scalez), MatrixTranslate(x, y, z));
+
+        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), matPaths, mat);
         renderable.name = objectName;
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
-        Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
-        trans.SetPosition({scaledPosition.x, scaledPosition.y, scaledPosition.z});
-        trans.SetRotation({rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG});
+        Vector3 scaledPosition = scaleFromOrigin(trans.GetWorldPos(), WORLD_SCALE);
+        trans.SetPosition(scaledPosition);
+        // trans.SetRotation({rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG});
         trans.SetScale(
             {trans.GetScale().x * WORLD_SCALE,
              trans.GetScale().y * WORLD_SCALE,
@@ -87,10 +89,15 @@ namespace sage
 
         // Almost works
         auto bb = renderable.GetModel()->CalcLocalBoundingBox();
-        bb.min = Vector3Transform(bb.min, MatrixScale(trans.GetScale().x, trans.GetScale().y, trans.GetScale().z));
-        bb.max = Vector3Transform(bb.max, MatrixScale(trans.GetScale().x, trans.GetScale().y, trans.GetScale().z));
-        bb.min = Vector3Transform(bb.min, MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z));
-        bb.max = Vector3Transform(bb.max, MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z));
+        bb.min = Vector3Transform(bb.min, trans.GetMatrix());
+        bb.max = Vector3Transform(bb.max, trans.GetMatrix());
+
+        // bb.min = Vector3Transform(bb.min, MatrixScale(trans.GetScale().x, trans.GetScale().y,
+        // trans.GetScale().z)); bb.max = Vector3Transform(bb.max, MatrixScale(trans.GetScale().x,
+        // trans.GetScale().y, trans.GetScale().z)); bb.min = Vector3Transform(
+        //     bb.min, MatrixTranslate(trans.GetWorldPos().x, trans.GetWorldPos().y, trans.GetWorldPos().z));
+        // bb.max = Vector3Transform(
+        //     bb.max, MatrixTranslate(trans.GetWorldPos().x, trans.GetWorldPos().y, trans.GetWorldPos().z));
 
         auto& collideable = registry->emplace<Collideable>(entity, bb);
 
