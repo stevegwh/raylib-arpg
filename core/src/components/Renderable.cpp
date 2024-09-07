@@ -15,13 +15,13 @@ namespace sage
         return model.get();
     }
 
-    Renderable::Renderable(std::shared_ptr<ModelSafe> _model, MaterialPaths _materials, Matrix _localTransform)
+    Renderable::Renderable(std::unique_ptr<ModelSafe> _model, MaterialPaths _materials, Matrix _localTransform)
         : initialTransform(_localTransform), materials(std::move(_materials)), model(std::move(_model))
     {
         model->SetTransform(_localTransform);
     }
 
-    Renderable::Renderable(std::shared_ptr<ModelSafe> _model, Matrix _localTransform)
+    Renderable::Renderable(std::unique_ptr<ModelSafe> _model, Matrix _localTransform)
         : initialTransform(_localTransform), materials(), model(std::move(_model))
     {
         model->SetTransform(_localTransform);
@@ -30,13 +30,13 @@ namespace sage
     Renderable::Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform)
         : initialTransform(_localTransform),
           materials(std::move(_materials)),
-          model(std::make_shared<ModelSafe>(_model))
+          model(std::make_unique<ModelSafe>(_model))
     {
         model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(Model _model, Matrix _localTransform)
-        : initialTransform(_localTransform), materials(), model(std::make_shared<ModelSafe>(_model))
+        : initialTransform(_localTransform), materials(), model(std::make_unique<ModelSafe>(_model))
     {
         model->SetTransform(_localTransform);
     }
@@ -44,7 +44,7 @@ namespace sage
     Renderable::Renderable(ModelSafe _model, MaterialPaths _materials, Matrix _localTransform)
         : initialTransform(_localTransform),
           materials(std::move(_materials)),
-          model(std::make_shared<ModelSafe>(std::move(_model)))
+          model(std::make_unique<ModelSafe>(std::move(_model)))
     {
         model->SetTransform(_localTransform);
     }
