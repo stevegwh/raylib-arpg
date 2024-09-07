@@ -114,5 +114,9 @@ namespace sage
 
     sgTransform::sgTransform(entt::entity _self) : self(_self)
     {
+        m_positionLocal = Vector3Zero();
+        m_positionWorld = Vector3Zero();
+        m_rotation = Vector3Zero();
+        m_scale = Vector3{1, 1, 1};
     }
 } // namespace sage
