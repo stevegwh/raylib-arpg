@@ -1940,7 +1940,6 @@ void UnloadMesh(Mesh mesh)
             rlUnloadVertexBuffer(mesh.vboId[i]);
     RL_FREE(mesh.vboId);
 
-    RL_FREE(mesh.name);
     RL_FREE(mesh.vertices);
     RL_FREE(mesh.texcoords);
     RL_FREE(mesh.normals);
@@ -4525,14 +4524,6 @@ static Model LoadOBJ(const char* fileName)
         model.meshes[i].normals = (float*)MemAlloc(sizeof(float) * vertexCount * 3);
         model.meshes[i].texcoords = (float*)MemAlloc(sizeof(float) * vertexCount * 2);
         model.meshes[i].colors = (unsigned char*)MemAlloc(sizeof(unsigned char) * vertexCount * 4);
-
-        // Store mesh name
-        size_t len = strlen(objShapes[i].name) + 1; // +1 for null terminator
-        model.meshes[i].name = (char*)RL_CALLOC(len, sizeof(char));
-        if (model.meshes[i].name != NULL)
-        {
-            memcpy(model.meshes[i].name, objShapes[i].name, len);
-        }
     }
 
     MemFree(localMeshVertexCounts);
