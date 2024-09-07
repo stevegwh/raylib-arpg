@@ -29,7 +29,7 @@ namespace sage
 
     class Renderable
     {
-        std::shared_ptr<ModelSafe> model;
+        std::unique_ptr<ModelSafe> model;
 
       public:
         Color hint = WHITE;
@@ -44,8 +44,8 @@ namespace sage
         Renderable() = default;
         Renderable(const Renderable&) = delete;
         Renderable& operator=(const Renderable&) = delete;
-        Renderable(std::shared_ptr<ModelSafe> _model, MaterialPaths _materials, Matrix _localTransform);
-        Renderable(std::shared_ptr<ModelSafe> _model, Matrix _localTransform);
+        Renderable(std::unique_ptr<ModelSafe> _model, MaterialPaths _materials, Matrix _localTransform);
+        Renderable(std::unique_ptr<ModelSafe> _model, Matrix _localTransform);
         Renderable(Model _model, MaterialPaths _materials, Matrix _localTransform);
         Renderable(Model _model, Matrix _localTransform);
         Renderable(ModelSafe _model, MaterialPaths _materials, Matrix _localTransform);
