@@ -137,7 +137,7 @@ namespace sage
             std::cout << filePath << std::endl;
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
-                auto model = ResourceManager::GetInstance().LoadModelCopy(filePath);
+                ResourceManager::GetInstance().EmplaceModel(filePath);
             }
         }
 
