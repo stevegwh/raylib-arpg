@@ -43,11 +43,13 @@ namespace sage
     class TextureTerrainOverlay; // Forward dec for friend (Changes mesh data on the fly)
 
     /**
-     * Defines a memory safe wrapper for raylib model. Does not safeguard against access to underlying pointers.
+     * Defines a memory safe wrapper for raylib model.
+     * Set "instanced" to true to disable memory management.
      */
     class ModelSafe
     {
         Model rlmodel{};
+        bool instanced = false;
 
         void UnloadShaderLocs() const;
         void UnloadModelTextures() const;
@@ -70,8 +72,8 @@ namespace sage
         ModelSafe(ModelSafe&& other) noexcept;
         ModelSafe& operator=(ModelSafe&& other) noexcept;
         ~ModelSafe();
-        explicit ModelSafe(const char* path);
-        explicit ModelSafe(Model& _model);
+        explicit ModelSafe(const char* path, bool _instanced = false);
+        explicit ModelSafe(Model& _model, bool _instanced = false);
         ModelSafe() = default;
 
         friend class Renderable;
