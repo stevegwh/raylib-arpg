@@ -74,9 +74,9 @@ namespace sage
         float scalex, scaley, scalez;
         infile >> scalex >> scaley >> scalez;
 
-        convertBlenderCoords(x, y, z);
-        convertBlenderCoords(rotx, roty, rotz);
-        convertBlenderCoords(scalex, scaley, scalez);
+        // convertBlenderCoords(x, y, z);
+        // convertBlenderCoords(rotx, roty, rotz);
+        // convertBlenderCoords(scalex, scaley, scalez);
         Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
 
         auto entity = registry->create();
@@ -88,7 +88,7 @@ namespace sage
         renderable.name = objectName;
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
-        trans.SetPosition({scaledPosition.x, scaledPosition.y, -scaledPosition.z});
+        trans.SetPosition({scaledPosition.x, scaledPosition.y, scaledPosition.z});
         trans.SetRotation({rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG});
         trans.SetScale({scalex, scaley, scalez});
 

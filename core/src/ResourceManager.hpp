@@ -46,6 +46,7 @@ namespace sage
             entt::registry* registry, MaterialPaths material_paths, const std::string& mapPath);
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
+        void EmplaceModel(const std::string& path);
         std::shared_ptr<ModelSafe> LoadModelCopy(const std::string& path);
         std::shared_ptr<ModelSafe> LoadModelDeepCopy(const std::string& path);
         ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);

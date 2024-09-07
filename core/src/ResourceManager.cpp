@@ -312,6 +312,14 @@ namespace sage
         return out;
     }
 
+    void ResourceManager::EmplaceModel(const std::string& path)
+    {
+        if (modelCopies.find(path) == modelCopies.end())
+        {
+            modelCopies.try_emplace(path, std::make_unique<ModelSafe>(path.c_str()));
+        }
+    }
+
     /**
      * @brief Returns a shallow copy of the loaded model
      * NB: Caller should not free the memory.
@@ -320,12 +328,10 @@ namespace sage
      */
     std::shared_ptr<ModelSafe> ResourceManager::LoadModelCopy(const std::string& path)
     {
-        if (modelCopies.find(path) == modelCopies.end())
-        {
-            modelCopies.try_emplace(path, std::make_unique<ModelSafe>(path.c_str()));
-        }
-
-        return modelCopies.at(path);
+        EmplaceModel(path);
+        Model model;
+        model = modelCopies.at(path)->rlmodel;
+        return std::make_shared<ModelSafe>(model, true); // TODO: pointless this being a shared_ptr
     }
 
     /**
@@ -337,7 +343,8 @@ namespace sage
     std::shared_ptr<ModelSafe> ResourceManager::LoadModelDeepCopy(const std::string& path)
     {
         Model model;
-        deepCopyModel(LoadModelCopy(path)->rlmodel, model);
+        EmplaceModel(path);
+        deepCopyModel(modelCopies.at(path)->rlmodel, model);
         return std::make_shared<ModelSafe>(model);
     }
 

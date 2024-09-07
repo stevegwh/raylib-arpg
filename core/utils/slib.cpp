@@ -147,6 +147,7 @@ namespace sage
     ModelSafe::ModelSafe(ModelSafe&& other) noexcept : rlmodel(other.rlmodel)
     {
         // Reset the source object's model to prevent double deletion
+        instanced = other.instanced;
         other.rlmodel = {};
     }
 
@@ -159,6 +160,7 @@ namespace sage
 
             // Move resources from other
             rlmodel = other.rlmodel;
+            instanced = other.instanced;
 
             // Reset the source object's model
             other.rlmodel = {};
@@ -194,17 +196,22 @@ namespace sage
 
     ModelSafe::~ModelSafe()
     {
-        // UnloadShaderLocs();
-        // UnloadModelTextures();
-        UnloadModel(rlmodel);
+        if (!instanced)
+        {
+            UnloadModel(rlmodel);
+        }
     }
 
-    ModelSafe::ModelSafe(Model& _model) : rlmodel(_model)
+    ModelSafe::ModelSafe(Model& _model, bool _instanced) : rlmodel(_model)
     {
-        _model = {};
+        instanced = _instanced;
+        if (!_instanced)
+        {
+            _model = {};
+        }
     }
 
-    ModelSafe::ModelSafe(const char* path) : rlmodel(LoadModel(path))
+    ModelSafe::ModelSafe(const char* path, bool _instanced) : rlmodel(LoadModel(path)), instanced(_instanced)
     {
     }
 
