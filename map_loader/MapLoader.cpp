@@ -83,14 +83,13 @@ namespace sage
         std::cout << meshPath + meshName << std::endl;
 
         auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
-        auto& renderable = registry->emplace<Renderable>(
-            entity, model, matPaths, MatrixScale(WORLD_SCALE, WORLD_SCALE, WORLD_SCALE));
+        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), matPaths, MatrixIdentity());
         renderable.name = objectName;
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
         trans.SetPosition({scaledPosition.x, scaledPosition.y, scaledPosition.z});
         trans.SetRotation({rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG});
-        trans.SetScale({scalex, scaley, scalez});
+        trans.SetScale({scalex * WORLD_SCALE, scaley * WORLD_SCALE, scalez * WORLD_SCALE});
 
         auto& collideable =
             registry->emplace<Collideable>(entity, renderable.GetModel()->CalculateModelBoundingBox());
@@ -137,7 +136,7 @@ namespace sage
             std::cout << filePath << std::endl;
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
-                ResourceManager::GetInstance().EmplaceModel(filePath);
+                auto model = ResourceManager::GetInstance().LoadModelCopy(filePath);
             }
         }
 
