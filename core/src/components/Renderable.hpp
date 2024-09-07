@@ -65,8 +65,6 @@ namespace sage
 
             archive(_model, name, materials, initialTransform);
 
-            char* _name = new char[this->name.size() + 1];
-            _model.meshes[0].name = _name;
             _model.transform = initialTransform;
 
             if (FileExists(materials.diffuse.c_str()))
