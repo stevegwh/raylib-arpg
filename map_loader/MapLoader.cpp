@@ -72,8 +72,12 @@ namespace sage
 
         auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
 
-        Matrix rotMat = MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
-        Matrix mat = MatrixMultiply(MatrixScale(scalex, scaley, scalez), MatrixTranslate(x, y, z));
+        Matrix rotMat =
+            MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
+        Matrix transMat = MatrixTranslate(x, y, z);
+        Matrix scaleMat = MatrixScale(scalex, scaley, scalez);
+
+        Matrix mat = MatrixMultiply(MatrixMultiply(scaleMat, rotMat), transMat);
 
         auto& renderable = registry->emplace<Renderable>(entity, std::move(model), matPaths, mat);
         renderable.name = objectName;
@@ -81,7 +85,6 @@ namespace sage
         auto& trans = registry->emplace<sgTransform>(entity, entity);
         Vector3 scaledPosition = scaleFromOrigin(trans.GetWorldPos(), WORLD_SCALE);
         trans.SetPosition(scaledPosition);
-        // trans.SetRotation({rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG});
         trans.SetScale(
             {trans.GetScale().x * WORLD_SCALE,
              trans.GetScale().y * WORLD_SCALE,
@@ -92,29 +95,22 @@ namespace sage
         bb.min = Vector3Transform(bb.min, trans.GetMatrix());
         bb.max = Vector3Transform(bb.max, trans.GetMatrix());
 
-        // bb.min = Vector3Transform(bb.min, MatrixScale(trans.GetScale().x, trans.GetScale().y,
-        // trans.GetScale().z)); bb.max = Vector3Transform(bb.max, MatrixScale(trans.GetScale().x,
-        // trans.GetScale().y, trans.GetScale().z)); bb.min = Vector3Transform(
-        //     bb.min, MatrixTranslate(trans.GetWorldPos().x, trans.GetWorldPos().y, trans.GetWorldPos().z));
-        // bb.max = Vector3Transform(
-        //     bb.max, MatrixTranslate(trans.GetWorldPos().x, trans.GetWorldPos().y, trans.GetWorldPos().z));
-
         auto& collideable = registry->emplace<Collideable>(entity, bb);
 
-        if (renderable.name.find("SM_Bld") != std::string::npos)
+        if (meshName.find("SM_Bld") != std::string::npos)
         {
             collideable.collisionLayer = CollisionLayer::BUILDING;
         }
-        else if (renderable.name.find("SM_Env_NoWalk") != std::string::npos)
+        else if (meshName.find("SM_Env_NoWalk") != std::string::npos)
         {
             collideable.collisionLayer = CollisionLayer::TERRAIN;
         }
-        else if (renderable.name.find("SM_Env") != std::string::npos)
+        else if (meshName.find("SM_Env") != std::string::npos)
         {
             collideable.collisionLayer = CollisionLayer::FLOOR;
             floorMeshes.push_back(&collideable);
         }
-        else if (renderable.name.find("SM_Prop") != std::string::npos)
+        else if (meshName.find("SM_Prop") != std::string::npos)
         {
             collideable.collisionLayer = CollisionLayer::BUILDING;
         }
@@ -166,6 +162,8 @@ namespace sage
         serializer::Save(*registry);
 
         // Generate height/normal maps here.
+
+        
         CloseWindow();
         std::cout << "Map saved." << std::endl;
     }
