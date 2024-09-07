@@ -275,42 +275,42 @@ namespace sage
         return textureImages[path];
     }
 
-    std::vector<entt::entity> ResourceManager::UnpackOBJMap(
-        entt::registry* registry, MaterialPaths matPaths, const std::string& mapPath)
-    {
-        std::vector<entt::entity> out;
-
-        Model parent = LoadModel(mapPath.c_str());
-        Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
-        for (int i = 0; i < parent.meshCount; ++i)
-        {
-            entt::entity id = registry->create();
-            out.push_back(id);
-
-            Model model = LoadModelFromMesh(parent.meshes[i]);
-
-            if (FileExists(matPaths.diffuse.c_str()))
-            {
-                model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-                    ResourceManager::GetInstance().TextureLoad(matPaths.diffuse);
-            }
-            if (FileExists(matPaths.specular.c_str()))
-            {
-                model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture =
-                    ResourceManager::GetInstance().TextureLoad(matPaths.specular);
-            }
-            if (FileExists(matPaths.normal.c_str()))
-            {
-                model.materials[0].maps[MATERIAL_MAP_NORMAL].texture =
-                    ResourceManager::GetInstance().TextureLoad(matPaths.normal);
-            }
-
-            auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
-            renderable.name = parent.meshes[i].name;
-        }
-        UnloadModelKeepMeshes(parent);
-        return out;
-    }
+    // std::vector<entt::entity> ResourceManager::UnpackOBJMap(
+    //     entt::registry* registry, MaterialPaths matPaths, const std::string& mapPath)
+    // {
+    //     std::vector<entt::entity> out;
+    //
+    //     Model parent = LoadModel(mapPath.c_str());
+    //     Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
+    //     for (int i = 0; i < parent.meshCount; ++i)
+    //     {
+    //         entt::entity id = registry->create();
+    //         out.push_back(id);
+    //
+    //         Model model = LoadModelFromMesh(parent.meshes[i]);
+    //
+    //         if (FileExists(matPaths.diffuse.c_str()))
+    //         {
+    //             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
+    //                 ResourceManager::GetInstance().TextureLoad(matPaths.diffuse);
+    //         }
+    //         if (FileExists(matPaths.specular.c_str()))
+    //         {
+    //             model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture =
+    //                 ResourceManager::GetInstance().TextureLoad(matPaths.specular);
+    //         }
+    //         if (FileExists(matPaths.normal.c_str()))
+    //         {
+    //             model.materials[0].maps[MATERIAL_MAP_NORMAL].texture =
+    //                 ResourceManager::GetInstance().TextureLoad(matPaths.normal);
+    //         }
+    //
+    //         auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
+    //         renderable.name = parent.meshes[i].name;
+    //     }
+    //     UnloadModelKeepMeshes(parent);
+    //     return out;
+    // }
 
     void ResourceManager::EmplaceModel(const std::string& path)
     {
@@ -331,7 +331,7 @@ namespace sage
         EmplaceModel(path);
         Model model;
         model = modelCopies.at(path)->rlmodel;
-        return std::make_unique<ModelSafe>(model, true); // TODO: pointless this being a shared_ptr
+        return std::make_unique<ModelSafe>(model, true);
     }
 
     /**

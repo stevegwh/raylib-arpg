@@ -29,13 +29,6 @@ namespace sage
         floorCollidable.collisionLayer = CollisionLayer::FLOOR;
     }
 
-    void convertBlenderCoords(float& x, float& y, float& z)
-    {
-        float _z = z;
-        z = y;
-        y = _z;
-    }
-
     Vector3 scaleFromOrigin(const Vector3& point, float scale)
     {
         return Vector3Scale(point, scale);
@@ -74,26 +67,32 @@ namespace sage
         float scalex, scaley, scalez;
         infile >> scalex >> scaley >> scalez;
 
-        // convertBlenderCoords(x, y, z);
-        // convertBlenderCoords(rotx, roty, rotz);
-        // convertBlenderCoords(scalex, scaley, scalez);
-        Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
-
         auto entity = registry->create();
         std::cout << meshPath + meshName << std::endl;
 
         auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
-        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), matPaths, MatrixIdentity());
+
+        auto& renderable =
+            registry->emplace<Renderable>(entity, std::move(model), matPaths, MatrixScale(scalex, scaley, scalez));
         renderable.name = objectName;
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
+        Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         trans.SetPosition({scaledPosition.x, scaledPosition.y, scaledPosition.z});
         trans.SetRotation({rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG});
-        trans.SetScale({scalex * WORLD_SCALE, scaley * WORLD_SCALE, scalez * WORLD_SCALE});
+        trans.SetScale(
+            {trans.GetScale().x * WORLD_SCALE,
+             trans.GetScale().y * WORLD_SCALE,
+             trans.GetScale().z * WORLD_SCALE});
 
-        auto& collideable =
-            registry->emplace<Collideable>(entity, renderable.GetModel()->CalculateModelBoundingBox());
-        collideable.SetWorldBoundingBox(trans.GetMatrix());
+        // Almost works
+        auto bb = renderable.GetModel()->CalcLocalBoundingBox();
+        bb.min = Vector3Transform(bb.min, MatrixScale(trans.GetScale().x, trans.GetScale().y, trans.GetScale().z));
+        bb.max = Vector3Transform(bb.max, MatrixScale(trans.GetScale().x, trans.GetScale().y, trans.GetScale().z));
+        bb.min = Vector3Transform(bb.min, MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z));
+        bb.max = Vector3Transform(bb.max, MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z));
+
+        auto& collideable = registry->emplace<Collideable>(entity, bb);
 
         if (renderable.name.find("SM_Bld") != std::string::npos)
         {
@@ -136,7 +135,7 @@ namespace sage
             std::cout << filePath << std::endl;
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
-                auto model = ResourceManager::GetInstance().LoadModelCopy(filePath);
+                ResourceManager::GetInstance().EmplaceModel(filePath);
             }
         }
 

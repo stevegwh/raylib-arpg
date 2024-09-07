@@ -12,8 +12,12 @@
 
 namespace sage
 {
+    const Model& ModelSafe::GetRlModel() const
+    {
+        return rlmodel;
+    }
 
-    BoundingBox ModelSafe::CalculateModelBoundingBox() const
+    BoundingBox ModelSafe::CalcLocalBoundingBox() const
     {
         Mesh mesh = rlmodel.meshes[0];
         std::vector<float> vertices(mesh.vertexCount * 3);
@@ -29,8 +33,6 @@ namespace sage
             float z = vertices[2];
 
             Vector3 v = {x, y, z};
-            // Assuming rl.Vector3Transform is a function that transforms a Vector3
-            // using the given transform.
             v = Vector3Transform(v, rlmodel.transform);
 
             bb.min = bb.max = v;

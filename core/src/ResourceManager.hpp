@@ -42,8 +42,8 @@ namespace sage
             return instance;
         }
         static void UnloadModelKeepMeshes(Model& model);
-        static std::vector<entt::entity> UnpackOBJMap(
-            entt::registry* registry, MaterialPaths material_paths, const std::string& mapPath);
+        // static std::vector<entt::entity> UnpackOBJMap(
+        //     entt::registry* registry, MaterialPaths material_paths, const std::string& mapPath);
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
         void EmplaceModel(const std::string& path);
