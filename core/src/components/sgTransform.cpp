@@ -10,7 +10,7 @@ namespace sage
     Matrix sgTransform::GetMatrixNoRot() const
     {
         Matrix trans = MatrixTranslate(m_positionWorld.x, m_positionWorld.y, m_positionWorld.z);
-        Matrix _scale = MatrixScale(m_scale, m_scale, m_scale);
+        Matrix _scale = MatrixScale(m_scale.x, m_scale.y, m_scale.z);
         // Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y,
         // DEG2RAD*transform->rotation.z});
         return MatrixMultiply(trans, _scale);
@@ -19,7 +19,7 @@ namespace sage
     Matrix sgTransform::GetMatrix() const
     {
         Matrix trans = MatrixTranslate(m_positionWorld.x, m_positionWorld.y, m_positionWorld.z);
-        Matrix _scale = MatrixScale(m_scale, m_scale, m_scale);
+        Matrix _scale = MatrixScale(m_scale.x, m_scale.y, m_scale.z);
         Matrix rot = MatrixRotateXYZ({DEG2RAD * m_rotation.x, DEG2RAD * m_rotation.y, DEG2RAD * m_rotation.z});
         return MatrixMultiply(MatrixMultiply(trans, rot), _scale);
     }
@@ -29,6 +29,11 @@ namespace sage
         Matrix matrix = GetMatrix();
         Vector3 forward = {matrix.m8, matrix.m9, matrix.m10};
         return Vector3Normalize(forward);
+    }
+
+    const Vector3& sgTransform::GetLocalPos() const
+    {
+        return m_positionLocal;
     }
 
     const Vector3& sgTransform::GetWorldPos() const
@@ -41,7 +46,7 @@ namespace sage
         return m_rotation;
     }
 
-    float sgTransform::GetScale() const
+    const Vector3& sgTransform::GetScale() const
     {
         return m_scale;
     }
@@ -75,9 +80,14 @@ namespace sage
         m_rotation = rotation;
     }
 
-    void sgTransform::SetScale(float scale)
+    void sgTransform::SetScale(const Vector3& scale)
     {
         m_scale = scale;
+    }
+
+    void sgTransform::SetScale(float scale)
+    {
+        m_scale = {scale, scale, scale};
     }
 
     sgTransform* sgTransform::GetParent()

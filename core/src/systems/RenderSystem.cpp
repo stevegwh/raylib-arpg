@@ -30,7 +30,7 @@ namespace sage
                 transform.GetWorldPos(),
                 rotationAxis,
                 transform.GetRotation().y,
-                {transform.GetScale(), transform.GetScale(), transform.GetScale()},
+                transform.GetScale(),
                 renderable.hint);
         };
 

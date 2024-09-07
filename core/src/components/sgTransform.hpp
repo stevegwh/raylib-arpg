@@ -17,7 +17,7 @@ namespace sage
         Vector3 m_positionWorld{};
         Vector3 m_positionLocal{};
         Vector3 m_rotation{};
-        float m_scale = 1.0f;
+        Vector3 m_scale{};
         sgTransform* m_parent = nullptr;
         std::vector<sgTransform*> m_children;
 
@@ -38,7 +38,12 @@ namespace sage
         template <class Archive>
         void load(Archive& archive)
         {
-            archive(m_positionWorld, m_rotation, m_scale);
+            // To be compatible with old map format
+            float _scale;
+            archive(m_positionWorld, m_rotation, _scale);
+            m_scale = {_scale, _scale, _scale};
+            // Alternatively...
+            // archive(m_positionWorld, m_rotation, m_scale);
         }
 
         entt::sigh<void(entt::entity)> onPositionUpdate{};
@@ -49,9 +54,10 @@ namespace sage
         [[nodiscard]] const Vector3& GetWorldPos() const;
         [[nodiscard]] const Vector3& GetLocalPos() const;
         [[nodiscard]] const Vector3& GetRotation() const;
-        [[nodiscard]] float GetScale() const;
+        [[nodiscard]] const Vector3& GetScale() const;
         void SetPosition(const Vector3& position);
         void SetRotation(const Vector3& rotation);
+        void SetScale(const Vector3& scale);
         void SetScale(float scale);
         sgTransform* GetParent();
         const std::vector<sgTransform*>& GetChildren();

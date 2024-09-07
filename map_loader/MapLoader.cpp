@@ -83,13 +83,14 @@ namespace sage
         std::cout << meshPath + meshName << std::endl;
 
         auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
-        auto& renderable = registry->emplace<Renderable>(entity, model, matPaths, MatrixIdentity());
+        auto& renderable = registry->emplace<Renderable>(
+            entity, model, matPaths, MatrixScale(WORLD_SCALE, WORLD_SCALE, WORLD_SCALE));
         renderable.name = objectName;
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
         trans.SetPosition({scaledPosition.x, scaledPosition.y, -scaledPosition.z});
         trans.SetRotation({rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG});
-        trans.SetScale({scalex * WORLD_SCALE, scaley * WORLD_SCALE, scalez * WORLD_SCALE});
+        trans.SetScale({scalex, scaley, scalez});
 
         auto& collideable =
             registry->emplace<Collideable>(entity, renderable.GetModel()->CalculateModelBoundingBox());
