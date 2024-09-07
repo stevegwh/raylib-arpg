@@ -6,6 +6,7 @@
 
 #include "raylib.h"
 
+#include <entt/entt.hpp>
 #include <string>
 
 namespace sage
@@ -55,7 +56,8 @@ namespace sage
         void UnloadModelTextures() const;
 
       public:
-        [[nodiscard]] BoundingBox CalculateModelBoundingBox() const;
+        const Model& GetRlModel() const;
+        [[nodiscard]] BoundingBox CalcLocalBoundingBox() const;
         [[nodiscard]] RayCollision GetRayMeshCollision(Ray ray, int meshNum) const;
         void UpdateAnimation(ModelAnimation anim, int frame);
         void Draw(Vector3 position, float scale, Color tint);
@@ -71,10 +73,10 @@ namespace sage
         ModelSafe& operator=(const ModelSafe&) = delete;
         ModelSafe(ModelSafe&& other) noexcept;
         ModelSafe& operator=(ModelSafe&& other) noexcept;
-        ~ModelSafe();
         explicit ModelSafe(const char* path, bool _instanced = false);
         explicit ModelSafe(Model& _model, bool _instanced = false);
         ModelSafe() = default;
+        ~ModelSafe();
 
         friend class Renderable;
         friend class ResourceManager;

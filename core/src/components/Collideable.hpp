@@ -7,6 +7,7 @@
 #include "cereal/cereal.hpp"
 #include "entt/entt.hpp"
 #include "raylib.h"
+#include "raymath.h"
 
 namespace sage
 {
