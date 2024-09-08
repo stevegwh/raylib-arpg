@@ -88,10 +88,11 @@ namespace sage
     {
     }
 
-    RayCollision ModelSafe::GetRayMeshCollision(Ray ray, int meshNum) const
+    RayCollision ModelSafe::GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const
     {
         assert(meshNum < GetMeshCount());
-        return GetRayCollisionMesh(ray, rlmodel.meshes[meshNum], rlmodel.transform);
+        Matrix mat = MatrixMultiply(rlmodel.transform, transform);
+        return GetRayCollisionMesh(ray, rlmodel.meshes[meshNum], mat);
     }
 
     void ModelSafe::UpdateAnimation(ModelAnimation anim, int frame)
