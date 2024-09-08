@@ -16,32 +16,32 @@ template <typename Archive>
 void save(Archive& archive, Image const& image)
 {
     std::vector<unsigned char> data;
-
-    unsigned char* _data = (unsigned char*)image.data;
-
+    unsigned char* _data = static_cast<unsigned char*>(image.data);
     int len = image.format * image.width * image.height;
     data.reserve(len);
-
     for (int i = 0; i < len; ++i)
     {
-        data[i] = _data[i];
+        data.push_back(_data[i]);
     }
-
     archive(data, image.format, image.height, image.width);
-};
+}
 
 template <typename Archive>
 void load(Archive& archive, Image& image)
 {
     std::vector<unsigned char> data;
-    int width;
-    int height;
-    int format;
-
-    archive(data, format, height, width);
-    int len = image.format * image.width * image.height;
-    image = LoadImageFromMemory(".png", data.data(), len);
-};
+    archive(data, image.format, image.height, image.width);
+    int len = data.size();
+    image.data = (unsigned char*)RL_MALLOC(len * sizeof(unsigned char));
+    if (image.data != nullptr)
+    {
+        std::memcpy(image.data, data.data(), len);
+    }
+    else
+    {
+        // Handle memory allocation failure
+    }
+}
 
 template <typename Archive>
 void serialize(Archive& archive, Vector3& v3)
