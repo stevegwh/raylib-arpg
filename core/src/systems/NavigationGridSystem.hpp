@@ -114,7 +114,7 @@ namespace sage
         //---------------------------------------------------------
         const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
         //---------------------------------------------------------
-        const NavigationGridSquare* GetGridSquare(int row, int col) const;
+        [[nodiscard]] const NavigationGridSquare* GetGridSquare(int row, int col) const;
         //---------------------------------------------------------
         void DrawDebugPathfinding(const GridSquare& minRange, const GridSquare& maxRange) const;
         //---------------------------------------------------------

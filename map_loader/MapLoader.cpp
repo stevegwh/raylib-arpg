@@ -3,6 +3,8 @@
 #include "components/Collideable.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
+#include "systems/CollisionSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
 #include <ResourceManager.hpp>
 #include <Serializer.hpp>
 
@@ -118,8 +120,11 @@ namespace sage
         }
     }
 
-    void MapLoader::ConstructMap(entt::registry* registry, const char* path)
+    void MapLoader::ConstructMap(
+        entt::registry* registry, NavigationGridSystem* navigationGridSystem, const char* path)
     {
+        navigationGridSystem->Init(500, 1.0f, path);
+
         auto meshPath = std::string(std::string(path) + "/mesh");
         if (!DirectoryExists(path) || !DirectoryExists(meshPath.c_str()))
         {
@@ -157,10 +162,11 @@ namespace sage
         // Create floor
         createFloor(registry, mapBB);
 
-        serializer::Save(*registry);
-
         // Generate height/normal maps here.
+        navigationGridSystem->PopulateGrid();
 
+        serializer::Save(*registry);
+        
         CloseWindow();
         std::cout << "Map saved." << std::endl;
     }

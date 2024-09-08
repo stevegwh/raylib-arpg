@@ -24,8 +24,6 @@ namespace sage
         CollisionMatrix collisionMatrix;
 
         void SortCollisionsByDistance(std::vector<CollisionInfo>& collisions);
-        void OnTransformUpdate(entt::entity entity);
-        void UpdateWorldBoundingBox(entt::entity entityId, Matrix mat);
         [[nodiscard]] std::vector<CollisionInfo> GetMeshCollisionsWithRay(
             const entt::entity& caster, const Ray& ray, CollisionLayer layer);
         [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(
@@ -40,7 +38,7 @@ namespace sage
         static bool CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2);
         bool GetFirstCollisionBB(entt::entity caller, BoundingBox bb, CollisionLayer layer, CollisionInfo& out);
         void DrawDebug();
-        void Update();
+        void Update() override;
         explicit CollisionSystem(entt::registry* _registry);
     };
 } // namespace sage

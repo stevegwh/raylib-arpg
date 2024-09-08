@@ -13,6 +13,41 @@
 #include "utils.h"
 
 template <typename Archive>
+void save(Archive& archive, Image const& image)
+{
+    std::vector<unsigned char> data;
+
+    unsigned char* _data = (unsigned char*)image.data;
+
+    int len = image.format * image.width*image.height;
+    data.reserve(len);
+
+    for (int i = 0; i < len; i+=4)
+    {
+        data[i] = _data[i];
+        data[i+1] = _data[i+1];
+        data[i+2] = _data[i+2];
+        data[i+3] = _data[i+3];
+    }
+    
+    
+    archive(data, image.format, image.height, image.width);
+};
+
+template <typename Archive>
+void load(Archive& archive, Image& image)
+{
+    std::vector<unsigned char> data;
+    int width;
+    int height;
+    int format;
+    
+    archive(data, format, height, width);
+    int len = image.format * image.width*image.height;
+    image = LoadImageFromMemory(".png", data.data(), len);
+};
+
+template <typename Archive>
 void serialize(Archive& archive, Vector3& v3)
 {
     archive(v3.x, v3.y, v3.z);
