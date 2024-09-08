@@ -394,6 +394,84 @@ namespace sage
         }
     }
 
+    void NavigationGridSystem::GenerateNormalMap(ImageSafe& image)
+    {
+        int slices = gridSquares.size();
+
+        Image normalMap = GenImageColor(slices, slices, BLACK);
+        std::cout << "Generating normal map..." << std::endl;
+        for (int y = 0; y < slices; ++y)
+        {
+            for (int x = 0; x < slices; ++x)
+            {
+                auto normal = gridSquares[y][x]->terrainNormal;
+
+                // Map the normal components from [-1, 1] to [0, 255]
+                unsigned char r = static_cast<unsigned char>((normal.x + 1.0f) * 127.5f);
+                unsigned char g = static_cast<unsigned char>((normal.y + 1.0f) * 127.5f);
+                unsigned char b = static_cast<unsigned char>((normal.z + 1.0f) * 127.5f);
+
+                Color pixelColor = {r, g, b, 255};
+                ImageDrawPixel(&normalMap, x, y, pixelColor);
+            }
+        }
+        image.SetImage(normalMap);
+    }
+
+    float NavigationGridSystem::getMaxHeight(float slices)
+    {
+        float max = 0;
+        BoundingBox bb = {.min = {-slices, 0.1f, -slices}, .max = {slices, 0.1f, slices}};
+
+        auto inside = [bb](float x, float z) {
+            return x >= bb.min.x && x <= bb.max.x && z >= bb.min.z && z <= bb.max.z;
+        };
+
+        auto view = registry->view<Collideable, Renderable>();
+
+        for (const auto& entity : view)
+        {
+            const auto& c = registry->get<Collideable>(entity);
+            if (c.collisionLayer != CollisionLayer::FLOOR) continue;
+
+            // Check if either min or max point of the bounding box is inside the defined
+            // area
+            if (inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z) ||
+                inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z))
+            {
+                if (c.worldBoundingBox.max.y > max)
+                {
+                    max = c.worldBoundingBox.max.y;
+                }
+            }
+        }
+
+        return max;
+    }
+
+    void NavigationGridSystem::GenerateHeightMap(ImageSafe& image)
+    {
+        int slices = gridSquares.size();
+        float maxHeight = getMaxHeight(slices); // TODO
+
+        Image heightMap = GenImageColor(slices, slices, BLACK);
+        std::cout << "Generating height map..." << std::endl;
+        for (int y = 0; y < slices; ++y)
+        {
+            for (int x = 0; x < slices; ++x)
+            {
+                float height = gridSquares[y][x]->terrainHeight;
+
+                unsigned char heightValue =
+                    static_cast<unsigned char>(std::min((height / maxHeight) * 255.0f, 255.0f));
+
+                Color pixelColor = {heightValue, heightValue, heightValue, 255};
+                ImageDrawPixel(&heightMap, x, y, pixelColor);
+            }
+        }
+        image.SetImage(heightMap);
+    }
+
     void NavigationGridSystem::loadTerrainNormalMap(const ImageSafe& normalMap)
     {
         for (int j = 0; j < slices; ++j)
@@ -1008,7 +1086,7 @@ namespace sage
 
         // Load from image
         loadTerrainNormalMap(normalMap);
-        loadTerrainHeightMap(heightMap, serializer::GetMaxHeight(registry, slices));
+        loadTerrainHeightMap(heightMap, getMaxHeight(slices));
 
         std::cout << "Populating grid started. \n";
         for (const auto& entity : view)

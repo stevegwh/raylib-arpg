@@ -166,9 +166,8 @@ namespace sage
         ImageSafe heightmap, normalMap;
 
         navigationGridSystem->InitGridHeightNormals(); // Calculates grid terrain height and gets normals
-        // TODO: Move below functions to here (or navigation grid)
-        serializer::GenerateHeightMap(registry, navigationGridSystem->GetGridSquares(), heightmap);
-        serializer::GenerateNormalMap(registry, navigationGridSystem->GetGridSquares(), normalMap);
+        navigationGridSystem->GenerateHeightMap(heightmap);
+        navigationGridSystem->GenerateNormalMap(normalMap);
 
         // Exporting for debug purposes
         ExportImage(heightmap.GetImage(), "heightmap.png");

@@ -38,11 +38,6 @@ namespace sage
         template <class Archive>
         void load(Archive& archive)
         {
-            // To be compatible with old map format
-            // float _scale;
-            // archive(m_positionWorld, m_rotation, _scale);
-            // m_scale = {_scale, _scale, _scale};
-            // Alternatively...
             archive(m_positionWorld, m_rotation, m_scale);
         }
 
