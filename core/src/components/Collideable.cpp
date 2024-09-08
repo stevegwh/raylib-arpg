@@ -34,7 +34,7 @@ namespace sage
     Collideable::Collideable(entt::registry* _registry, entt::entity _self, BoundingBox _localBoundingBox)
         : registry(_registry), localBoundingBox(_localBoundingBox), worldBoundingBox(_localBoundingBox)
     {
-        assert(registry->any_of<sgTransform>(entity));
+        assert(registry->any_of<sgTransform>(_self));
         auto& transform = registry->get<sgTransform>(_self);
         entt::sink sink{transform.onPositionUpdate};
         sink.connect<&Collideable::OnTransformUpdate>(this);
