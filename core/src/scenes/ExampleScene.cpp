@@ -7,10 +7,6 @@
 
 #include "GameData.hpp"
 
-// TMP
-#include "abilities/vfx/Explosion.hpp"
-#include "abilities/vfx/SpiralFountainVFX.hpp"
-
 #include "components/Collideable.hpp"
 #include "components/sgTransform.hpp"
 
@@ -95,10 +91,5 @@ namespace sage
         // TODO: tmp
         // const auto& col = registry->get<Collideable>(knight);
         // data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
-
-        // fountain = std::make_unique<SpiralFountainVFX>(data.get());
-        // fountain->InitSystem({30.0f, 4, 20.0f});
-        // explosion = std::make_unique<Explosion>(registry);
-        // explosion->SetOrigin({0, 3, 0});
     }
 } // namespace sage
