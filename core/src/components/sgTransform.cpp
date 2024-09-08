@@ -11,8 +11,6 @@ namespace sage
     {
         Matrix trans = MatrixTranslate(m_positionWorld.x, m_positionWorld.y, m_positionWorld.z);
         Matrix _scale = MatrixScale(m_scale.x, m_scale.y, m_scale.z);
-        // Matrix rot = MatrixRotateXYZ({DEG2RAD*transform->rotation.x, DEG2RAD*transform->rotation.y,
-        // DEG2RAD*transform->rotation.z});
         return MatrixMultiply(trans, _scale);
     }
 
@@ -20,7 +18,9 @@ namespace sage
     {
         Matrix trans = MatrixTranslate(m_positionWorld.x, m_positionWorld.y, m_positionWorld.z);
         Matrix _scale = MatrixScale(m_scale.x, m_scale.y, m_scale.z);
-        Matrix rot = MatrixRotateXYZ({DEG2RAD * m_rotation.x, DEG2RAD * m_rotation.y, DEG2RAD * m_rotation.z});
+        Matrix rot = MatrixMultiply(
+            MatrixMultiply(MatrixRotateZ(DEG2RAD * m_rotation.z), MatrixRotateY(DEG2RAD * m_rotation.y)),
+            MatrixRotateX(DEG2RAD * m_rotation.x));
         return MatrixMultiply(MatrixMultiply(trans, rot), _scale);
     }
 

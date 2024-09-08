@@ -72,10 +72,11 @@ namespace sage
 
         auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
 
+        Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         Matrix rotMat =
             MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
-        Matrix transMat = MatrixTranslate(x, y, z);
-        Matrix scaleMat = MatrixScale(scalex, scaley, scalez);
+        Matrix transMat = MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z);
+        Matrix scaleMat = MatrixScale(scalex * WORLD_SCALE, scaley * WORLD_SCALE, scalez * WORLD_SCALE);
 
         Matrix mat = MatrixMultiply(MatrixMultiply(scaleMat, rotMat), transMat);
 
@@ -83,14 +84,7 @@ namespace sage
         renderable.name = objectName;
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
-        Vector3 scaledPosition = scaleFromOrigin(trans.GetWorldPos(), WORLD_SCALE);
-        trans.SetPosition(scaledPosition);
-        trans.SetScale(
-            {trans.GetScale().x * WORLD_SCALE,
-             trans.GetScale().y * WORLD_SCALE,
-             trans.GetScale().z * WORLD_SCALE});
 
-        // Almost works
         auto bb = renderable.GetModel()->CalcLocalBoundingBox();
         bb.min = Vector3Transform(bb.min, trans.GetMatrix());
         bb.max = Vector3Transform(bb.max, trans.GetMatrix());
@@ -101,7 +95,7 @@ namespace sage
         {
             collideable.collisionLayer = CollisionLayer::BUILDING;
         }
-        else if (meshName.find("SM_Env_NoWalk") != std::string::npos)
+        else if (meshName.find("SM_Env_Mountain") != std::string::npos)
         {
             collideable.collisionLayer = CollisionLayer::TERRAIN;
         }
@@ -163,7 +157,6 @@ namespace sage
 
         // Generate height/normal maps here.
 
-        
         CloseWindow();
         std::cout << "Map saved." << std::endl;
     }
