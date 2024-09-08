@@ -41,7 +41,7 @@ namespace sage
 
         // Temporary
         MaterialPaths matPaths{};
-        matPaths.diffuse = "resources/models/obj/PolyAdventureTexture_01.png";
+        matPaths.diffuse = "resources/maps/level/Texture_01.png";
         // ---
 
         std::ifstream infile(txtPath);
@@ -72,6 +72,9 @@ namespace sage
 
         auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
 
+        // You could just use x,y,z and the regular scale and then later store "scaled position" and "scalex *
+        // WORLD_SCALE" into the sgTransform data. This makes the mesh centre its position in world space, as
+        // opposed to the world centre. For static objects, this won't really matter.
         Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         Matrix rotMat =
             MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
@@ -91,6 +94,7 @@ namespace sage
 
         auto& collideable = registry->emplace<Collideable>(entity, bb);
 
+        // TODO: Need a better tagging system for the meshes.
         if (meshName.find("SM_Bld") != std::string::npos)
         {
             collideable.collisionLayer = CollisionLayer::BUILDING;
