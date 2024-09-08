@@ -36,6 +36,12 @@ namespace sage
         [[nodiscard]] int GetHeight() const;
         ~ImageSafe();
         explicit ImageSafe(const std::string& path);
+
+        template <typename Archive>
+        void serialize(Archive& archive, ImageSafe& image)
+        {
+            archive(image);
+        };
     };
 
     // Allowed unsafe access to model

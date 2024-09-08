@@ -170,22 +170,6 @@ namespace sage
         DrawCube(center, width, height, depth, color);
     }
 
-    /**
-     * Calculates worldBoundingBox by multiplying localBoundingBox with the passed
-     * transform matrix
-     * @param entityId The id of the entity
-     * @param mat The transform matrix for the local bounding box
-     */
-    void CollisionSystem::UpdateWorldBoundingBox(entt::entity entityId, Matrix mat) // TODO: I don't like the name
-    {
-        registry->patch<Collideable>(entityId, [mat](auto& col) {
-            auto bb = col.localBoundingBox;
-            bb.min = Vector3Transform(bb.min, mat);
-            bb.max = Vector3Transform(bb.max, mat);
-            col.worldBoundingBox = bb;
-        });
-    }
-
     bool CollisionSystem::CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2)
     {
         return CheckCollisionBoxes(col1, col2);

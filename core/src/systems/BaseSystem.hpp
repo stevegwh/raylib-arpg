@@ -15,6 +15,7 @@ namespace sage
         entt::registry* registry;
 
       public:
+        virtual ~BaseSystem() = default;
         explicit BaseSystem(entt::registry* _registry) : registry(_registry)
         {
         }

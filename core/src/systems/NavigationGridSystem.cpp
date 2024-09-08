@@ -990,6 +990,7 @@ namespace sage
         const auto& view = registry->view<Collideable, Renderable>();
         size_t lastindex = mapPath.find_last_of('.');
         std::string imgPath = mapPath.substr(0, lastindex);
+        
         ImageSafe heightMapImage(std::string(imgPath + "-height.png"));
         ImageSafe normalMapImage(std::string(imgPath + "-normal.png"));
 
@@ -997,6 +998,7 @@ namespace sage
                               heightMapImage.GetHeight() == slices;
         bool normalMapValid = heightMapImage.HasLoaded() && heightMapImage.GetWidth() == slices &&
                               heightMapImage.GetHeight() == slices;
+        
         if (heightMapValid && normalMapValid)
         {
             loadTerrainNormalMap(normalMapImage);
