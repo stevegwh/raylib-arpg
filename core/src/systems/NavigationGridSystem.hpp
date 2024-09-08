@@ -43,6 +43,8 @@ namespace sage
         //---------------------------------------------------------
         void calculateTerrainHeightAndNormals(const entt::entity& entity);
         //---------------------------------------------------------
+        float getMaxHeight(float slices);
+        //---------------------------------------------------------
         void loadTerrainNormalMap(const ImageSafe& normalMap);
         //---------------------------------------------------------
         void loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight);
@@ -57,6 +59,10 @@ namespace sage
         void Init(int _slices, float _spacing, const std::string& _mapPath);
         //---------------------------------------------------------
         void InitGridHeightNormals();
+        //---------------------------------------------------------
+        void GenerateNormalMap(ImageSafe& image);
+        //---------------------------------------------------------
+        void GenerateHeightMap(ImageSafe& image);
         //---------------------------------------------------------
         void PopulateGrid(ImageSafe& heightMap, ImageSafe& normalMap);
         //---------------------------------------------------------
