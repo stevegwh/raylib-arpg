@@ -106,7 +106,7 @@ namespace sage
 
         // ----------------------------------------------
 
-        void Save(const entt::registry& source)
+        void SaveMap(const entt::registry& source, ImageSafe& heightMap, ImageSafe& normalMap)
         {
             std::cout << "Save called" << std::endl;
             using namespace entt::literals;
@@ -122,6 +122,9 @@ namespace sage
             {
                 // output finishes flushing its contents when it goes out of scope
                 cereal::BinaryOutputArchive output{storage};
+
+                output(heightMap, normalMap);
+
                 const auto view = source.view<sgTransform, Renderable, Collideable>();
                 for (const auto& ent : view)
                 {
@@ -139,7 +142,7 @@ namespace sage
             std::cout << "Save finished" << std::endl;
         }
 
-        void Load(entt::registry* destination)
+        void LoadMap(entt::registry* destination, ImageSafe& heightMap, ImageSafe& normalMap)
         {
             assert(destination != nullptr);
 
@@ -154,6 +157,9 @@ namespace sage
 
             {
                 cereal::BinaryInputArchive input(storage);
+
+                input(heightMap, normalMap);
+                // Use height/normal map to initiate navigation grid
 
                 while (storage.peek() != EOF)
                 {
@@ -269,8 +275,8 @@ namespace sage
 
         void GenerateNormalMap(
             entt::registry* registry,
-            const std::string& path,
-            const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
+            const std::vector<std::vector<NavigationGridSquare*>>& gridSquares,
+            ImageSafe& image)
         {
             int slices = gridSquares.size();
 
@@ -291,12 +297,7 @@ namespace sage
                     ImageDrawPixel(&normalMap, x, y, pixelColor);
                 }
             }
-            size_t lastindex = path.find_last_of('.');
-            std::string strippedPath = path.substr(0, lastindex);
-            ExportImage(normalMap, TextFormat("%s-normal.png", strippedPath.c_str()));
-            UnloadImage(normalMap);
-
-            std::cout << "Normal map saved as '" << strippedPath << "-normal.png'" << std::endl;
+            image.SetImage(normalMap);
         }
 
         float GetMaxHeight(entt::registry* registry, float slices)
@@ -332,8 +333,8 @@ namespace sage
 
         void GenerateHeightMap(
             entt::registry* registry,
-            const std::string& path,
-            const std::vector<std::vector<NavigationGridSquare*>>& gridSquares)
+            const std::vector<std::vector<NavigationGridSquare*>>& gridSquares,
+            ImageSafe& image)
         {
             int slices = gridSquares.size();
             float maxHeight = GetMaxHeight(registry, slices); // TODO
@@ -353,12 +354,7 @@ namespace sage
                     ImageDrawPixel(&heightMap, x, y, pixelColor);
                 }
             }
-            size_t lastindex = path.find_last_of('.');
-            std::string strippedPath = path.substr(0, lastindex);
-            ExportImage(heightMap, TextFormat("%s-height.png", strippedPath.c_str()));
-            UnloadImage(heightMap);
-
-            std::cout << "Height map saved as '" << strippedPath << ".png'" << std::endl;
+            image.SetImage(heightMap);
         }
 
         void SaveAbilityData(const AbilityData& abilityData, const char* path)

@@ -12,6 +12,7 @@
 
 // NB: We have to include all the headers required to build GameData
 #include "AbilityFactory.hpp"
+#include "Serializer.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -71,8 +72,8 @@ namespace sage
 
         float slices = 500;
 
-        // ----
-        data->Load();
+        ImageSafe heightMap, normalMap;
+        serializer::LoadMap(registry, heightMap, normalMap);
         data->navigationGridSystem->Init(slices, 1.0f, "resources/output.bin");
 
         // Dependent on only the map/static meshes having been loaded at this point
@@ -80,19 +81,7 @@ namespace sage
         for (auto entity : view)
             data->lightSubSystem->LinkRenderableToLight(entity);
 
-        // ----
-        // GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
-        // data->navigationGridSystem->Init(slices, 1.0f, "resources/models/obj/level-basic.obj");
-        // ----
-
-        // ----
-        // if (!FileExists("resources/output.bin"))
-        // {
-        //     GameObjectFactory::loadMap(registry, this, slices, "resources/models/obj/level-basic.obj");
-        // }
-        // ----
-
-        data->navigationGridSystem->PopulateGrid();
+        data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
         ResourceManager::GetInstance().UnloadImages();
         ResourceManager::GetInstance().UnloadShaderFileText();
     };

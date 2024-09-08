@@ -163,10 +163,20 @@ namespace sage
         createFloor(registry, mapBB);
 
         // Generate height/normal maps here.
-        navigationGridSystem->PopulateGrid();
+        ImageSafe heightmap, normalMap;
 
-        serializer::Save(*registry);
-        
+        navigationGridSystem->InitGridHeightNormals(); // Calculates grid terrain height and gets normals
+        // TODO: Move below functions to here (or navigation grid)
+        serializer::GenerateHeightMap(registry, navigationGridSystem->GetGridSquares(), heightmap);
+        serializer::GenerateNormalMap(registry, navigationGridSystem->GetGridSquares(), normalMap);
+
+        // Exporting for debug purposes
+        ExportImage(heightmap.GetImage(), "heightmap.png");
+        ExportImage(normalMap.GetImage(), "normalmap.png");
+
+        // Height map gets saved here.
+        serializer::SaveMap(*registry, heightmap, normalMap);
+
         CloseWindow();
         std::cout << "Map saved." << std::endl;
     }

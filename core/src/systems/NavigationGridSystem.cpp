@@ -972,11 +972,26 @@ namespace sage
         return tracebackPath(came_from, start, finish);
     }
 
+    void NavigationGridSystem::InitGridHeightNormals()
+    {
+        std::cout << "Initialising grid height and normals \n";
+        const auto& view = registry->view<Collideable, Renderable>();
+        for (const auto& entity : view)
+        {
+            const auto& bb = view.get<Collideable>(entity);
+
+            if (bb.collisionLayer == CollisionLayer::FLOOR)
+            {
+                calculateTerrainHeightAndNormals(entity);
+            }
+        }
+    }
+
     /*
      * This function finds the collisions between buildings in the world and the grid
      * squares and marks them as occupied.
      */
-    void NavigationGridSystem::PopulateGrid()
+    void NavigationGridSystem::PopulateGrid(ImageSafe& heightMap, ImageSafe& normalMap)
     {
         // TODO: The below crashes when trying to autogenerate the amount of slices
         for (auto& row : gridSquares)
@@ -990,25 +1005,10 @@ namespace sage
         const auto& view = registry->view<Collideable, Renderable>();
         size_t lastindex = mapPath.find_last_of('.');
         std::string imgPath = mapPath.substr(0, lastindex);
-        
-        ImageSafe heightMapImage(std::string(imgPath + "-height.png"));
-        ImageSafe normalMapImage(std::string(imgPath + "-normal.png"));
 
-        bool heightMapValid = heightMapImage.HasLoaded() && heightMapImage.GetWidth() == slices &&
-                              heightMapImage.GetHeight() == slices;
-        bool normalMapValid = heightMapImage.HasLoaded() && heightMapImage.GetWidth() == slices &&
-                              heightMapImage.GetHeight() == slices;
-        
-        if (heightMapValid && normalMapValid)
-        {
-            loadTerrainNormalMap(normalMapImage);
-            loadTerrainHeightMap(heightMapImage, serializer::GetMaxHeight(registry, slices));
-        }
-        else
-        {
-            std::cout << "Height or Normal map not loaded or size mismatch. Generating "
-                         "new one.. \n";
-        }
+        // Load from image
+        loadTerrainNormalMap(normalMap);
+        loadTerrainHeightMap(heightMap, serializer::GetMaxHeight(registry, slices));
 
         std::cout << "Populating grid started. \n";
         for (const auto& entity : view)
@@ -1021,17 +1021,8 @@ namespace sage
             }
             else if (bb.collisionLayer == CollisionLayer::FLOOR)
             {
-                if (!heightMapValid)
-                {
-                    calculateTerrainHeightAndNormals(entity);
-                }
                 MarkSquareAreaOccupiedIfSteep(bb.worldBoundingBox, true);
             }
-        }
-        if (!heightMapValid)
-        {
-            serializer::GenerateHeightMap(registry, mapPath, GetGridSquares());
-            serializer::GenerateNormalMap(registry, mapPath, GetGridSquares());
         }
         std::cout << "Populating grid finished. \n";
     }

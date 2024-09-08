@@ -19,18 +19,14 @@ void save(Archive& archive, Image const& image)
 
     unsigned char* _data = (unsigned char*)image.data;
 
-    int len = image.format * image.width*image.height;
+    int len = image.format * image.width * image.height;
     data.reserve(len);
 
-    for (int i = 0; i < len; i+=4)
+    for (int i = 0; i < len; ++i)
     {
         data[i] = _data[i];
-        data[i+1] = _data[i+1];
-        data[i+2] = _data[i+2];
-        data[i+3] = _data[i+3];
     }
-    
-    
+
     archive(data, image.format, image.height, image.width);
 };
 
@@ -41,9 +37,9 @@ void load(Archive& archive, Image& image)
     int width;
     int height;
     int format;
-    
+
     archive(data, format, height, width);
-    int len = image.format * image.width*image.height;
+    int len = image.format * image.width * image.height;
     image = LoadImageFromMemory(".png", data.data(), len);
 };
 

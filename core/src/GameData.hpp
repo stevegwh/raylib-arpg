@@ -58,8 +58,6 @@ namespace sage
         std::unique_ptr<EntityReflectionSignalRouter> signalReflectionManager;
         LightSubSystem* lightSubSystem; // Owned by scene (TODO: Why?)
 
-        void Load();
-        void Save() const;
         GameData(
             entt::registry* _registry,
             KeyMapping* _keyMapping,

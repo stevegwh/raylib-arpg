@@ -54,14 +54,4 @@ namespace sage
           lightSubSystem(_lightSubSystem)
     {
     }
-
-    void GameData::Load()
-    {
-        serializer::Load(registry);
-    }
-
-    void GameData::Save() const
-    {
-        serializer::Save(*registry);
-    }
 } // namespace sage
