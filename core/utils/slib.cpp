@@ -59,6 +59,17 @@ namespace sage
         return bb;
     }
 
+    const Image& ImageSafe::GetImage()
+    {
+        return image;
+    }
+
+    void ImageSafe::SetImage(Image& _image)
+    {
+        image = _image;
+        _image = {};
+    }
+
     Color ImageSafe::GetColor(int x, int y) const
     {
         return GetImageColor(image, x, y);

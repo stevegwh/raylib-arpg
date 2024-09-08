@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "raylib-cereal.hpp"
 #include "raylib.h"
 
 #include <entt/entt.hpp>
@@ -30,15 +31,18 @@ namespace sage
         Image image{};
 
       public:
+        const Image& GetImage();
+        void SetImage(Image& _image);
         [[nodiscard]] Color GetColor(int x, int y) const;
         [[nodiscard]] bool HasLoaded() const;
         [[nodiscard]] int GetWidth() const;
         [[nodiscard]] int GetHeight() const;
         ~ImageSafe();
         explicit ImageSafe(const std::string& path);
+        ImageSafe() = default;
 
         template <typename Archive>
-        void serialize(Archive& archive, ImageSafe& image)
+        void serialize(Archive& archive)
         {
             archive(image);
         };

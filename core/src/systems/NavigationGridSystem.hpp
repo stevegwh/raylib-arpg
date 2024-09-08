@@ -56,7 +56,9 @@ namespace sage
         //---------------------------------------------------------
         void Init(int _slices, float _spacing, const std::string& _mapPath);
         //---------------------------------------------------------
-        void PopulateGrid();
+        void InitGridHeightNormals();
+        //---------------------------------------------------------
+        void PopulateGrid(ImageSafe& heightMap, ImageSafe& normalMap);
         //---------------------------------------------------------
         bool GetGridRange(Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------

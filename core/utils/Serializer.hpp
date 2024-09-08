@@ -12,21 +12,21 @@
 
 namespace sage::serializer
 {
-    void Save(const entt::registry& registry);
-    void Load(entt::registry* registry);
+    void SaveMap(const entt::registry& registry, ImageSafe& heightMap, ImageSafe& normalMap);
+    void LoadMap(entt::registry* destination, ImageSafe& heightMap, ImageSafe& normalMap);
     void SerializeKeyMapping(KeyMapping& keymapping, const char* path);
     void DeserializeKeyMapping(KeyMapping& keymapping, const char* path);
     void SerializeSettings(Settings& settings, const char* path);
     void DeserializeSettings(Settings& settings, const char* path);
     void GenerateNormalMap(
         entt::registry* registry,
-        const std::string& path,
-        const std::vector<std::vector<NavigationGridSquare*>>& gridSquares);
+        const std::vector<std::vector<NavigationGridSquare*>>& gridSquares,
+        ImageSafe& image);
     float GetMaxHeight(entt::registry* registry, float slices);
     void GenerateHeightMap(
         entt::registry* registry,
-        const std::string& path,
-        const std::vector<std::vector<NavigationGridSquare*>>& gridSquares);
+        const std::vector<std::vector<NavigationGridSquare*>>& gridSquares,
+        ImageSafe& image);
     void SaveAbilityData(const AbilityData& abilityData, const char* path);
     void LoadAbilityData(AbilityData& abilityData, const char* path);
 } // namespace sage::serializer
