@@ -90,11 +90,8 @@ namespace sage
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
 
-        auto bb = renderable.GetModel()->CalcLocalBoundingBox();
-        bb.min = Vector3Transform(bb.min, trans.GetMatrix());
-        bb.max = Vector3Transform(bb.max, trans.GetMatrix());
-
-        auto& collideable = registry->emplace<Collideable>(entity, bb);
+        auto& collideable = registry->emplace<Collideable>(
+            entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
 
         // TODO: Need a better tagging system for the meshes.
         if (meshName.find("SM_Bld") != std::string::npos)
@@ -132,7 +129,7 @@ namespace sage
             exit(1);
         }
 
-        InitWindow(100, 100, "Loading Map!");
+        InitWindow(300, 100, "Loading Map!");
 
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
@@ -156,6 +153,7 @@ namespace sage
         }
 
         // Calculate grid based on walkable area
+        // TODO: Below should be based on the bounding box of all the floor meshes, as opposed to a magic number.
         BoundingBox mapBB{Vector3{-500, 0, -500}, Vector3{500, 0, 500}}; // min, max
         // BoundingBox mapBB = calculateFloorSize(floorMeshes);
 
@@ -170,8 +168,8 @@ namespace sage
         navigationGridSystem->GenerateNormalMap(normalMap);
 
         // Exporting for debug purposes
-        ExportImage(heightmap.GetImage(), "heightmap.png");
-        ExportImage(normalMap.GetImage(), "normalmap.png");
+        // ExportImage(heightmap.GetImage(), "heightmap.png");
+        // ExportImage(normalMap.GetImage(), "normalmap.png");
 
         // Height map gets saved here.
         serializer::SaveMap(*registry, heightmap, normalMap);

@@ -56,9 +56,9 @@ namespace sage
         void SetWorldBoundingBox(Matrix mat);
 
         // Static object
-        explicit Collideable(BoundingBox _boundingBox);
+        explicit Collideable(BoundingBox _localBoundingBox, Matrix worldMatrix);
         // Dynamic object
-        Collideable(entt::registry* _registry, entt::entity _self, BoundingBox _boundingBox);
+        Collideable(entt::registry* _registry, entt::entity _self, BoundingBox _localBoundingBox);
         // Static object (required for serialization)
         Collideable() = default;
 
