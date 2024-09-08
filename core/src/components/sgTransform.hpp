@@ -65,7 +65,7 @@ namespace sage
         void AddChild(sgTransform* newChild);
 
         // sgTransform() = default;
-        sgTransform(entt::entity _self);
+        explicit sgTransform(entt::entity _self);
         sgTransform(const sgTransform&) = delete;
         sgTransform& operator=(const sgTransform&) = delete;
     };

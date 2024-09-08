@@ -6,13 +6,9 @@
 
 #include "Scene.hpp"
 
-
-
 #include <entt/entt.hpp>
 
-#include <memory>
 #include <string>
-#include <vector>
 
 namespace sage
 {
@@ -23,8 +19,6 @@ namespace sage
 
     class ExampleScene : public Scene
     {
-        std::unique_ptr<SpiralFountainVFX> fountain;
-        std::unique_ptr<Explosion> explosion;
 
       public:
         void Update() override;
