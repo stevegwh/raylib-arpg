@@ -1,7 +1,7 @@
 #pragma once
-#include <../../cmake-build-debug/_deps/entt-src/src/entt/entt.hpp>
 #include <algorithm>
 #include <cassert>
+#include <entt/entt.hpp>
 #include <functional>
 #include <vector>
 
@@ -16,7 +16,7 @@ namespace sage
         class ReflectionSignalBase
         {
           public:
-            virtual ~ReflectionSignalBase() {};
+            virtual ~ReflectionSignalBase(){};
         };
 
         template <typename... Args>
