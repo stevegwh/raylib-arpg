@@ -351,7 +351,7 @@ namespace sage
     void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity)
     {
         BoundingBox area = registry->get<Collideable>(entity).worldBoundingBox;
-        GridSquare topLeftIndex, bottomRightIndex;
+        GridSquare topLeftIndex{}, bottomRightIndex{};
         if (!WorldToGridSpace(area.min, topLeftIndex) || !WorldToGridSpace(area.max, bottomRightIndex))
         {
             return;
@@ -378,7 +378,7 @@ namespace sage
 
                 Ray ray = {gridCenter, {0, -1, 0}}; // Cast ray down
 
-                RayCollision collision = renderable.GetModel()->GetRayMeshCollision(ray, 0);
+                RayCollision collision = renderable.GetModel()->GetRayMeshCollision(ray, 0, transform.GetMatrix());
 
                 if (collision.hit)
                 {

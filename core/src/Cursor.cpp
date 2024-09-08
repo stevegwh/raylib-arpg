@@ -10,6 +10,7 @@
 #include "components/ControllableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/Renderable.hpp"
+#include "components/sgTransform.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
@@ -240,10 +241,11 @@ namespace sage
         if (registry->any_of<Renderable>(hitInfo.collidedEntityId))
         {
             auto& renderable = registry->get<Renderable>(hitInfo.collidedEntityId);
+            auto& transform = registry->get<sgTransform>(hitInfo.collidedEntityId);
 
             for (int i = 0; i < renderable.GetModel()->GetMeshCount(); ++i)
             {
-                auto meshCollision = renderable.GetModel()->GetRayMeshCollision(ray, i);
+                auto meshCollision = renderable.GetModel()->GetRayMeshCollision(ray, i, transform.GetMatrix());
                 if (meshCollision.hit)
                 {
                     hitInfo.rlCollision = meshCollision;
