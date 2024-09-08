@@ -317,7 +317,7 @@ namespace sage
     void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)
     {
         entt::entity floor = registry->create();
-        auto& floorCollidable = registry->emplace<Collideable>(floor, bb);
+        auto& floorCollidable = registry->emplace<Collideable>(floor, bb, MatrixIdentity());
         floorCollidable.collisionLayer = CollisionLayer::FLOOR;
     }
 
