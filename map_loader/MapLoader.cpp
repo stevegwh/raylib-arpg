@@ -51,6 +51,7 @@ namespace sage
         infile >> key;
         std::string meshName;
         infile >> meshName;
+
         // Strip file extension (Could do this in blender script, instead).
         size_t lastindex = meshName.find_last_of(".");
         meshName = meshName.substr(0, lastindex);
@@ -93,6 +94,7 @@ namespace sage
             entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
 
         // TODO: Need a better tagging system for the meshes.
+        // TODO: Fairly sure I could map this in a json file or something
         if (meshName.find("SM_Bld") != std::string::npos)
         {
             collideable.collisionLayer = CollisionLayer::BUILDING;
@@ -135,21 +137,33 @@ namespace sage
             std::string filePath = entry.path().string();
             std::string fileName = entry.path().stem().string();
             std::cout << filePath << std::endl;
-            std::string materialName = "Texture_01";
-
-            if (IsFileExtension(filePath.c_str(), ".mtl"))
-            {
-                // TODO: This assumes file order and does no error checking
-                // for whether every model has a mtl file. Should put this when we find an obj and see if the obj
-                // has an accompanying mtl file or not
-
-                // TODO: Need to get mtl file's texture name here to pass to resource manager. Passing in the known
-                // file name for the moment
-                materialName = "Texture_01";
-            }
+            std::string materialName = "DEFAULT"; // Load default raylib mat
 
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
+                size_t lastindex = filePath.find_last_of(".");
+                std::string mtlPath = fileName.substr(0, lastindex) + ".mtl";
+                if (FileExists(mtlPath.c_str()))
+                {
+                    std::ifstream infile(filePath);
+                    materialName = "";
+                    std::string line;
+                    while (std::getline(infile, line))
+                    {
+                        if (line.substr(0, 6) == "map_Kd")
+                        {
+                            infile.close();
+                            // Find the position of the first non-whitespace character after "map_Kd"
+                            size_t textureNameStart = line.find_first_not_of(" \t", 6);
+
+                            if (textureNameStart != std::string::npos)
+                            {
+                                // Return the substring from the first non-whitespace character to the end
+                                materialName = line.substr(textureNameStart);
+                            }
+                        }
+                    }
+                }
 
                 ResourceManager::GetInstance().EmplaceModel(fileName, materialName, filePath);
             }
