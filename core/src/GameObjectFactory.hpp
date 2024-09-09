@@ -20,8 +20,6 @@ namespace sage
             entt::registry* registry, GameData* data, Vector3 position, const char* name);
         static entt::entity createPlayer(
             entt::registry* registry, GameData* data, Vector3 position, const char* name);
-        // static void loadMap(entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath);
-        static void createFloor(entt::registry* registry, Scene* scene, BoundingBox bb);
         static void createPortal(entt::registry* registry, GameData* data, Vector3 position);
         static void createWizardTower(entt::registry* registry, GameData* data, Vector3 position);
     };

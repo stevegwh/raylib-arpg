@@ -24,11 +24,78 @@ namespace sage
 
     constexpr float WORLD_SCALE = 5.0f;
 
+    CollisionLayer setCollisionLayer(const std::string& meshName)
+    {
+        // TODO: Need a better tagging system for the meshes.
+        if (meshName.find("SM_Bld") != std::string::npos)
+        {
+            return CollisionLayer::BUILDING;
+        }
+        if (meshName.find("SM_Env_Mountain") != std::string::npos)
+        {
+            return CollisionLayer::TERRAIN;
+        }
+        if (meshName.find("SM_Env") != std::string::npos)
+        {
+            return CollisionLayer::FLOOR;
+        }
+        if (meshName.find("SM_Prop") != std::string::npos)
+        {
+            return CollisionLayer::BUILDING;
+        }
+
+        return CollisionLayer::DEFAULT;
+    }
+
+    void parseMtlFile(const std::string& mtlPath, std::string& materialName)
+    {
+        if (FileExists(mtlPath.c_str()))
+        {
+            std::ifstream infile(mtlPath.c_str());
+            std::string line;
+            while (std::getline(infile, line))
+            {
+                if (line.substr(0, 6) == "map_Kd")
+                {
+                    infile.close();
+                    // Find the position of the first non-whitespace character after "map_Kd"
+                    size_t textureNameStart = line.find_first_not_of(" \t", 6);
+
+                    if (textureNameStart != std::string::npos)
+                    {
+                        // Return the substring from the first non-whitespace character to the end
+                        materialName = line.substr(textureNameStart);
+                    }
+                }
+            }
+        }
+    }
+
     void createFloor(entt::registry* registry, BoundingBox bb)
     {
         entt::entity floor = registry->create();
         auto& floorCollidable = registry->emplace<Collideable>(floor, bb, MatrixIdentity());
         floorCollidable.collisionLayer = CollisionLayer::FLOOR;
+    }
+
+    BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
+    {
+        // TODO: Below doesn't seem to work always, depending on the map.
+        BoundingBox mapBB{Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
+        for (const auto& col : floorMeshes)
+        {
+            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
+            {
+                mapBB.min = col->worldBoundingBox.min;
+            }
+            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
+            {
+                mapBB.max = col->worldBoundingBox.max;
+            }
+        }
+        mapBB.min.y = 0.1f;
+        mapBB.max.y = 0.1f;
+        return mapBB;
     }
 
     Vector3 scaleFromOrigin(const Vector3& point, float scale)
@@ -37,9 +104,11 @@ namespace sage
     }
 
     void processTxtFile(
-        entt::registry* registry, const std::string& meshPath, const std::filesystem::path& txtPath)
+        entt::registry* registry,
+        const std::string& meshPath,
+        const std::filesystem::path& txtPath,
+        std::vector<Collideable*>& floorMeshes)
     {
-        std::vector<Collideable*> floorMeshes;
 
         std::ifstream infile(txtPath);
         std::string key;
@@ -93,35 +162,13 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(
             entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
 
-        // TODO: Need a better tagging system for the meshes.
-        // TODO: Fairly sure I could map this in a json file or something
-        if (meshName.find("SM_Bld") != std::string::npos)
-        {
-            collideable.collisionLayer = CollisionLayer::BUILDING;
-        }
-        else if (meshName.find("SM_Env_Mountain") != std::string::npos)
-        {
-            collideable.collisionLayer = CollisionLayer::TERRAIN;
-        }
-        else if (meshName.find("SM_Env") != std::string::npos)
-        {
-            collideable.collisionLayer = CollisionLayer::FLOOR;
-            floorMeshes.push_back(&collideable);
-        }
-        else if (meshName.find("SM_Prop") != std::string::npos)
-        {
-            collideable.collisionLayer = CollisionLayer::BUILDING;
-        }
-        else
-        {
-            collideable.collisionLayer = CollisionLayer::DEFAULT;
-        }
+        collideable.collisionLayer = setCollisionLayer(meshName);
+        if (collideable.collisionLayer == CollisionLayer::FLOOR) floorMeshes.push_back(&collideable);
     }
 
     void MapLoader::ConstructMap(
         entt::registry* registry, NavigationGridSystem* navigationGridSystem, const char* path)
     {
-
         auto meshPath = std::string(std::string(path) + "/mesh");
         if (!DirectoryExists(path) || !DirectoryExists(meshPath.c_str()))
         {
@@ -137,38 +184,19 @@ namespace sage
             std::string filePath = entry.path().string();
             std::string fileName = entry.path().stem().string();
             std::cout << filePath << std::endl;
-            std::string materialName = "DEFAULT"; // Load default raylib mat
 
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
+                std::string materialName = "DEFAULT"; // Load default raylib mat
                 size_t lastindex = filePath.find_last_of(".");
-                std::string mtlPath = fileName.substr(0, lastindex) + ".mtl";
-                if (FileExists(mtlPath.c_str()))
-                {
-                    std::ifstream infile(filePath);
-                    materialName = "";
-                    std::string line;
-                    while (std::getline(infile, line))
-                    {
-                        if (line.substr(0, 6) == "map_Kd")
-                        {
-                            infile.close();
-                            // Find the position of the first non-whitespace character after "map_Kd"
-                            size_t textureNameStart = line.find_first_not_of(" \t", 6);
-
-                            if (textureNameStart != std::string::npos)
-                            {
-                                // Return the substring from the first non-whitespace character to the end
-                                materialName = line.substr(textureNameStart);
-                            }
-                        }
-                    }
-                }
-
+                std::string mtlPath = filePath.substr(0, lastindex) + ".mtl";
+                parseMtlFile(mtlPath, materialName);
                 ResourceManager::GetInstance().EmplaceModel(fileName, materialName, filePath);
             }
         }
         std::cout << "FINISH: Loading mesh data into resource manager. \n";
+
+        std::vector<Collideable*> floorMeshes;
 
         std::cout << "START: Processing txt data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(path)) // txt files
@@ -177,16 +205,14 @@ namespace sage
             std::string fileName = entry.path().stem().string();
             if (IsFileExtension(filePath.c_str(), ".txt"))
             {
-                processTxtFile(registry, meshPath, entry.path());
+                processTxtFile(registry, meshPath, entry.path(), floorMeshes);
             }
         }
         std::cout << "FINISH: Processing txt data into resource manager. \n";
 
         // Calculate grid based on walkable area
-        // TODO: Below should be based on the bounding box of all the floor meshes, as opposed to a magic number.
-        BoundingBox mapBB{Vector3{-500, 0, -500}, Vector3{500, 0, 500}}; // min, max
-        // BoundingBox mapBB = calculateFloorSize(floorMeshes);
-
+        // BoundingBox mapBB{Vector3{-500, 0, -500}, Vector3{500, 0, 500}}; // min, max
+        BoundingBox mapBB = calculateFloorSize(floorMeshes);
         // Create floor
         createFloor(registry, mapBB);
 
