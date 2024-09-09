@@ -30,7 +30,6 @@ void save(Archive& archive, Image const& image)
 template <typename Archive>
 void load(Archive& archive, Image& image)
 {
-
     std::vector<unsigned char> data;
     archive(data, image.format, image.height, image.width, image.mipmaps);
     int len = data.size();
@@ -267,10 +266,10 @@ void load(Archive& archive, MaterialMap& map)
     archive(image, map.color, map.value);
     if (!image.data)
     {
-        UnloadImage(image);
         return;
     }
     map.texture = LoadTextureFromImage(image);
+    UnloadImage(image);
 };
 
 template <typename Archive>

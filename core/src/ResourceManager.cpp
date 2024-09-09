@@ -353,12 +353,9 @@ namespace sage
         fragShaderFileText.clear();
     }
 
-    // Unload material from memory, minus shaders (freed later)
+    // Unload material from memory, not shaders or maps (freed later)
     void sgUnloadMaterial(Material material)
     {
-        // Unload material shader (avoid unloading default shader, managed by raylib)
-        // if (material.shader.id != rlGetShaderIdDefault()) UnloadShader(material.shader);
-
         // Unload loaded texture maps (avoid unloading default texture, managed by raylib)
         if (material.maps != nullptr)
         {
@@ -368,8 +365,6 @@ namespace sage
                     rlUnloadTexture(material.maps[i].texture.id);
             }
         }
-
-        RL_FREE(material.maps);
     }
 
     void sgUnloadModel(Model model)
@@ -377,9 +372,6 @@ namespace sage
         // Unload meshes
         for (int i = 0; i < model.meshCount; i++)
             UnloadMesh(model.meshes[i]);
-
-        // for (int i = 0; i < model.materialCount; i++)
-        //     RL_FREE(model.materials[i].maps);
 
         // Unload arrays
         RL_FREE(model.meshes);
