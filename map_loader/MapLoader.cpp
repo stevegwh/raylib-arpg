@@ -135,7 +135,7 @@ namespace sage
             std::string filePath = entry.path().string();
             std::string fileName = entry.path().stem().string();
             std::cout << filePath << std::endl;
-            std::string materialName;
+            std::string materialName = "Texture_01";
 
             if (IsFileExtension(filePath.c_str(), ".mtl"))
             {

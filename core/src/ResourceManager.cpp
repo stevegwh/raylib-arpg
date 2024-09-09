@@ -34,11 +34,11 @@ namespace sage
 
     Image ResourceManager::imageLoad(const std::string& path)
     {
-        if (!textureImages.contains(path))
+        if (!images.contains(path))
         {
-            textureImages[path] = LoadImage(path.c_str());
+            images[path] = LoadImage(path.c_str());
         }
-        return textureImages[path];
+        return images[path];
     }
 
     void ResourceManager::deepCopyModel(const Model& oldModel, Model& model)
@@ -258,11 +258,11 @@ namespace sage
 
     Texture ResourceManager::TextureLoad(const std::string& path)
     {
-        if (!textures.contains(path))
+        if (!nonModelTextures.contains(path))
         {
-            textures[path] = LoadTextureFromImage(imageLoad(path));
+            nonModelTextures[path] = LoadTextureFromImage(imageLoad(path));
         }
-        return textures[path];
+        return nonModelTextures[path];
     }
 
     void ResourceManager::EmplaceModel(const std::string& path)
@@ -275,7 +275,7 @@ namespace sage
     {
         if (!modelCopies.contains(modelKey))
         {
-            ModelResource modelResource;
+            ModelCereal modelResource;
             modelResource.model = LoadModel(path.c_str());
             modelResource.materialKey = materialKey;
             modelCopies.try_emplace(modelKey, modelResource);
@@ -332,25 +332,44 @@ namespace sage
 
     void ResourceManager::UnloadImages()
     {
-        for (const auto& kv : textureImages)
+        for (const auto& [key, image] : images)
         {
-            UnloadImage(kv.second);
+            UnloadImage(image);
         }
-        textureImages.clear();
+        images.clear();
     }
 
     void ResourceManager::UnloadShaderFileText()
     {
-        for (const auto& kv : vertShaderFileText)
+        for (const auto& [key, vs] : vertShaderFileText)
         {
-            UnloadFileText(kv.second);
+            UnloadFileText(vs);
         }
-        for (const auto& kv : fragShaderFileText)
+        for (const auto& [key, fs] : fragShaderFileText)
         {
-            UnloadFileText(kv.second);
+            UnloadFileText(fs);
         }
         vertShaderFileText.clear();
         fragShaderFileText.clear();
+    }
+
+    // Unload material from memory, minus shaders (freed later)
+    void sgUnloadMaterial(Material material)
+    {
+        // Unload material shader (avoid unloading default shader, managed by raylib)
+        // if (material.shader.id != rlGetShaderIdDefault()) UnloadShader(material.shader);
+
+        // Unload loaded texture maps (avoid unloading default texture, managed by raylib)
+        if (material.maps != nullptr)
+        {
+            for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
+            {
+                if (material.maps[i].texture.id != rlGetTextureIdDefault())
+                    rlUnloadTexture(material.maps[i].texture.id);
+            }
+        }
+
+        RL_FREE(material.maps);
     }
 
     void sgUnloadModel(Model model)
@@ -379,18 +398,18 @@ namespace sage
         {
             for (const auto& mat : materials)
             {
-                UnloadMaterial(mat);
+                sgUnloadMaterial(mat);
             }
         }
         for (auto& [path, model] : modelCopies)
         {
             sgUnloadModel(model.model);
         }
-        for (const auto& [key, tex] : textures)
+        for (const auto& [key, tex] : nonModelTextures)
         {
             UnloadTexture(tex);
         }
-        for (const auto& [key, image] : textureImages)
+        for (const auto& [key, image] : images)
         {
             UnloadImage(image);
         }
@@ -411,8 +430,8 @@ namespace sage
             UnloadFileText(text);
         }
         modelCopies.clear();
-        textures.clear();
-        textureImages.clear();
+        nonModelTextures.clear();
+        images.clear();
         modelAnimations.clear();
         shaders.clear();
         vertShaderFileText.clear();
