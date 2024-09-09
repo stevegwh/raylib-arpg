@@ -46,9 +46,9 @@ namespace sage
         model.meshCount = oldModel.meshCount;
         model.materialCount = oldModel.materialCount;
         model.boneCount = oldModel.boneCount;
-        model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
-        model.bones = (BoneInfo*)RL_MALLOC(model.boneCount * sizeof(BoneInfo));
-        model.bindPose = (Transform*)RL_MALLOC(model.boneCount * sizeof(Transform));
+        model.meshes = static_cast<Mesh*>(RL_CALLOC(model.meshCount, sizeof(Mesh)));
+        model.bones = static_cast<BoneInfo*>(RL_MALLOC(model.boneCount * sizeof(BoneInfo)));
+        model.bindPose = static_cast<Transform*>(RL_MALLOC(model.boneCount * sizeof(Transform)));
 
         for (size_t i = 0; i < model.meshCount; ++i)
         {
@@ -61,15 +61,16 @@ namespace sage
             // default to white material", fileName);
 
             model.materialCount = 1;
-            model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+            model.materials = static_cast<Material*>(RL_CALLOC(model.materialCount, sizeof(Material)));
             model.materials[0] = LoadMaterialDefault();
 
-            if (model.meshMaterial == nullptr) model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
+            if (model.meshMaterial == nullptr)
+                model.meshMaterial = static_cast<int*>(RL_CALLOC(model.meshCount, sizeof(int)));
         }
         else
         {
-            model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
-            model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
+            model.materials = static_cast<Material*>(RL_CALLOC(model.materialCount, sizeof(Material)));
+            model.meshMaterial = static_cast<int*>(RL_CALLOC(model.meshCount, sizeof(int)));
 
             for (size_t i = 0; i < model.materialCount; ++i)
             {
@@ -88,7 +89,8 @@ namespace sage
                 model.materials[i].shader.locs = oldModel.materials[i].shader.locs;
 
                 // Deep copy maps
-                model.materials[i].maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
+                model.materials[i].maps =
+                    static_cast<MaterialMap*>(RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap)));
                 memcpy(
                     model.materials[i].maps, oldModel.materials[i].maps, MAX_MATERIAL_MAPS * sizeof(MaterialMap));
 
@@ -129,59 +131,60 @@ namespace sage
         mesh.triangleCount = oldMesh.triangleCount;
 
         // Copy basic vertex data
-        mesh.vertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+        mesh.vertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
         memcpy(mesh.vertices, oldMesh.vertices, mesh.vertexCount * 3 * sizeof(float));
 
         if (oldMesh.texcoords)
         {
-            mesh.texcoords = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
+            mesh.texcoords = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
             memcpy(mesh.texcoords, oldMesh.texcoords, mesh.vertexCount * 2 * sizeof(float));
         }
         if (oldMesh.texcoords2)
         {
-            mesh.texcoords2 = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
+            mesh.texcoords2 = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
             memcpy(mesh.texcoords2, oldMesh.texcoords2, mesh.vertexCount * 2 * sizeof(float));
         }
         if (oldMesh.normals)
         {
-            mesh.normals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+            mesh.normals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
             memcpy(mesh.normals, oldMesh.normals, mesh.vertexCount * 3 * sizeof(float));
         }
         if (oldMesh.tangents)
         {
-            mesh.tangents = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
+            mesh.tangents = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
             memcpy(mesh.tangents, oldMesh.tangents, mesh.vertexCount * 4 * sizeof(float));
         }
         if (oldMesh.colors)
         {
-            mesh.colors = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
+            mesh.colors = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
             memcpy(mesh.colors, oldMesh.colors, mesh.vertexCount * 4 * sizeof(unsigned char));
         }
         if (oldMesh.indices)
         {
-            mesh.indices = (unsigned short*)RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short));
+            mesh.indices =
+                static_cast<unsigned short*>(RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short)));
             memcpy(mesh.indices, oldMesh.indices, mesh.triangleCount * 3 * sizeof(unsigned short));
         }
 
         // Copy animation vertex data
         if (oldMesh.animVertices)
         {
-            mesh.animVertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+            mesh.animVertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
             memcpy(mesh.animVertices, oldMesh.animVertices, mesh.vertexCount * 3 * sizeof(float));
         }
         if (oldMesh.animNormals)
         {
-            mesh.animNormals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
+            mesh.animNormals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
             memcpy(mesh.animNormals, oldMesh.animNormals, mesh.vertexCount * 3 * sizeof(float));
         }
         if (oldMesh.boneIds)
         {
-            mesh.boneIds = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
+            mesh.boneIds = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
             memcpy(mesh.boneIds, oldMesh.boneIds, mesh.vertexCount * 4 * sizeof(unsigned char));
         }
         if (oldMesh.boneWeights)
         {
-            mesh.boneWeights = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
+            mesh.boneWeights = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
             memcpy(mesh.boneWeights, oldMesh.boneWeights, mesh.vertexCount * 4 * sizeof(float));
         }
 
@@ -306,7 +309,7 @@ namespace sage
      * @param path
      * @return
      */
-    ModelSafe ResourceManager::LoadModelDeepCopy(const std::string& key)
+    ModelSafe ResourceManager::LoadModelDeepCopy(const std::string& key) const
     {
         assert(modelCopies.contains(key));
         Model model;
@@ -350,35 +353,62 @@ namespace sage
         fragShaderFileText.clear();
     }
 
+    void sgUnloadModel(Model model)
+    {
+        // Unload meshes
+        for (int i = 0; i < model.meshCount; i++)
+            UnloadMesh(model.meshes[i]);
+
+        // for (int i = 0; i < model.materialCount; i++)
+        //     RL_FREE(model.materials[i].maps);
+
+        // Unload arrays
+        RL_FREE(model.meshes);
+        RL_FREE(model.meshMaterial);
+
+        // Unload animation data
+        RL_FREE(model.bones);
+        RL_FREE(model.bindPose);
+
+        TRACELOG(LOG_INFO, "MODEL: Unloaded model (and meshes) from RAM and VRAM");
+    }
+
     void ResourceManager::UnloadAll()
     {
+        for (auto& [key, materials] : modelMaterials)
+        {
+            for (const auto& mat : materials)
+            {
+                UnloadMaterial(mat);
+            }
+        }
         for (auto& [path, model] : modelCopies)
         {
-            UnloadModel(model.model);
+            sgUnloadModel(model.model);
         }
-        for (const auto& kv : textures)
+        for (const auto& [key, tex] : textures)
         {
-            UnloadTexture(kv.second);
+            UnloadTexture(tex);
         }
-        for (const auto& kv : textureImages)
+        for (const auto& [key, image] : textureImages)
         {
-            UnloadImage(kv.second);
+            UnloadImage(image);
         }
-        for (const auto& kv : modelAnimations)
+        for (const auto& [key, p] : modelAnimations)
         {
-            UnloadModelAnimations(kv.second.first, kv.second.second);
+            UnloadModelAnimations(p.first, p.second);
         }
-        for (const auto& kv : shaders)
+        for (const auto& [key, shader] : shaders)
         {
-            UnloadShader(kv.second);
+            UnloadShader(shader);
         }
-        for (const auto& kv : vertShaderFileText)
+        for (const auto& [key, text] : vertShaderFileText)
         {
-            UnloadFileText(kv.second);
+            UnloadFileText(text);
         }
-        for (const auto& kv : fragShaderFileText)
+        for (const auto& [key, text] : fragShaderFileText)
         {
-            UnloadFileText(kv.second);
+            UnloadFileText(text);
         }
         modelCopies.clear();
         textures.clear();

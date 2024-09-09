@@ -24,14 +24,15 @@ void save(Archive& archive, Image const& image)
     {
         data.push_back(_data[i]);
     }
-    archive(data, image.format, image.height, image.width);
+    archive(data, image.format, image.height, image.width, image.mipmaps);
 }
 
 template <typename Archive>
 void load(Archive& archive, Image& image)
 {
+
     std::vector<unsigned char> data;
-    archive(data, image.format, image.height, image.width);
+    archive(data, image.format, image.height, image.width, image.mipmaps);
     int len = data.size();
     image.data = (unsigned char*)RL_MALLOC(len * sizeof(unsigned char));
     if (image.data != nullptr)
@@ -265,7 +266,6 @@ void save(Archive& archive, MaterialMap const& map)
 {
     Image image{};
     image = LoadImageFromTexture(map.texture);
-
     archive(image, map.color, map.value);
     UnloadImage(image);
 };
@@ -394,7 +394,7 @@ void load(Archive& archive, Model& model)
         bindPose);
 
     model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
-    model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+    // model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
     model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
     model.bones = (BoneInfo*)RL_MALLOC(model.boneCount * sizeof(BoneInfo));
     model.bindPose = (Transform*)RL_MALLOC(model.boneCount * sizeof(Transform));
