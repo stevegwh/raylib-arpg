@@ -49,24 +49,23 @@ namespace sage
 
     void parseMtlFile(const std::string& mtlPath, std::string& materialName)
     {
-        if (FileExists(mtlPath.c_str()))
+        if (!FileExists(mtlPath.c_str())) return;
+        std::ifstream infile(mtlPath.c_str());
+        std::string line;
+        while (std::getline(infile, line))
         {
-            std::ifstream infile(mtlPath.c_str());
-            std::string line;
-            while (std::getline(infile, line))
-            {
-                if (line.substr(0, 6) == "map_Kd")
-                {
-                    infile.close();
-                    // Find the position of the first non-whitespace character after "map_Kd"
-                    size_t textureNameStart = line.find_first_not_of(" \t", 6);
+            if (line.substr(0, 6) != "newmtl") continue;
 
-                    if (textureNameStart != std::string::npos)
-                    {
-                        // Return the substring from the first non-whitespace character to the end
-                        materialName = line.substr(textureNameStart);
-                    }
-                }
+            infile.close();
+            size_t textureNameStart = line.find_first_not_of(" \t", 6);
+
+            if (textureNameStart != std::string::npos)
+            {
+                materialName = line.substr(textureNameStart);
+            }
+            else
+            {
+                std::cout << "ERROR: Failed to read material name \n";
             }
         }
     }
