@@ -68,7 +68,7 @@ namespace sage
 
     void EditorScene::OnSerializeSave()
     {
-        data->Save();
+        // data->Save();
     }
 
     void EditorScene::OnOpenPressed()

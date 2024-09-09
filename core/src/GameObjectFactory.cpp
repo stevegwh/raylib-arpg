@@ -246,33 +246,6 @@ namespace sage
         return id;
     }
 
-    BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
-    {
-        // TODO: Below doesn't seem to work always, depending on the map.
-        BoundingBox mapBB{Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
-        for (const auto& col : floorMeshes)
-        {
-            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
-            {
-                mapBB.min = col->worldBoundingBox.min;
-            }
-            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
-            {
-                mapBB.max = col->worldBoundingBox.max;
-            }
-        }
-        mapBB.min.y = 0.1f;
-        mapBB.max.y = 0.1f;
-        return mapBB;
-    }
-
-    void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)
-    {
-        entt::entity floor = registry->create();
-        auto& floorCollidable = registry->emplace<Collideable>(floor, bb, MatrixIdentity());
-        floorCollidable.collisionLayer = CollisionLayer::FLOOR;
-    }
-
     void GameObjectFactory::createPortal(entt::registry* registry, GameData* data, Vector3 position)
     {
         {
