@@ -107,7 +107,7 @@ namespace sage
         void EmplaceModel(const std::string& path);
         void EmplaceModel(const std::string& modelKey, const std::string& materialKey, const std::string& path);
         ModelSafe LoadModelCopy(const std::string& path);
-        ModelSafe LoadModelDeepCopy(const std::string& path);
+        ModelSafe LoadModelDeepCopy(const std::string& path) const;
         ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
         void UnloadImages();
         void UnloadShaderFileText();
