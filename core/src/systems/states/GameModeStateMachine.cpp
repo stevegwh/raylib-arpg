@@ -6,8 +6,6 @@
 
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
-#include "systems/BaseSystem.hpp"
-#include "systems/LightSubSystem.hpp"
 #include <ResourceManager.hpp>
 
 #include <iostream>
@@ -95,7 +93,7 @@ namespace sage
             : StateMachine(_registry, _gameData)
         {
             // Preload model(s)
-            ResourceManager::GetInstance().LoadModelDeepCopy("resources/models/gltf/goblin.glb");
+            ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
         }
     };
 

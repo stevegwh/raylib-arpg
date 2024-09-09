@@ -27,7 +27,7 @@ namespace sage
     void createFloor(entt::registry* registry, BoundingBox bb)
     {
         entt::entity floor = registry->create();
-        auto& floorCollidable = registry->emplace<Collideable>(floor, bb);
+        auto& floorCollidable = registry->emplace<Collideable>(floor, bb, MatrixIdentity());
         floorCollidable.collisionLayer = CollisionLayer::FLOOR;
     }
 
@@ -56,6 +56,9 @@ namespace sage
         infile >> key;
         std::string meshName;
         infile >> meshName;
+        // Strip file extension (Could do this in blender script, instead).
+        size_t lastindex = meshName.find_last_of(".");
+        meshName = meshName.substr(0, lastindex);
 
         infile >> key;
         float x, y, z;
@@ -70,9 +73,10 @@ namespace sage
         infile >> scalex >> scaley >> scalez;
 
         auto entity = registry->create();
-        std::cout << meshPath + meshName << std::endl;
 
-        auto model = ResourceManager::GetInstance().LoadModelCopy(meshPath + "/" + meshName);
+        auto model = ResourceManager::GetInstance().LoadModelCopy(meshName);
+        assert(!meshName.empty());
+        model.SetKey(meshName);
 
         // You could just use x,y,z and the regular scale and then later store "scaled position" and "scalex *
         // WORLD_SCALE" into the sgTransform data. This makes the mesh centre its position in world space, as
@@ -120,7 +124,6 @@ namespace sage
     void MapLoader::ConstructMap(
         entt::registry* registry, NavigationGridSystem* navigationGridSystem, const char* path)
     {
-        navigationGridSystem->Init(500, 1.0f, path);
 
         auto meshPath = std::string(std::string(path) + "/mesh");
         if (!DirectoryExists(path) || !DirectoryExists(meshPath.c_str()))
@@ -131,6 +134,7 @@ namespace sage
 
         InitWindow(300, 100, "Loading Map!");
 
+        std::cout << "START: Loading mesh data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
             std::string filePath = entry.path().string();
@@ -138,10 +142,12 @@ namespace sage
             std::cout << filePath << std::endl;
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
-                ResourceManager::GetInstance().EmplaceModel(filePath);
+                ResourceManager::GetInstance().EmplaceModel(fileName, filePath);
             }
         }
+        std::cout << "FINISH: Loading mesh data into resource manager. \n";
 
+        std::cout << "START: Processing txt data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(path)) // txt files
         {
             std::string filePath = entry.path().string();
@@ -151,6 +157,7 @@ namespace sage
                 processTxtFile(registry, meshPath, entry.path());
             }
         }
+        std::cout << "FINISH: Processing txt data into resource manager. \n";
 
         // Calculate grid based on walkable area
         // TODO: Below should be based on the bounding box of all the floor meshes, as opposed to a magic number.
@@ -162,7 +169,7 @@ namespace sage
 
         // Generate height/normal maps here.
         ImageSafe heightmap, normalMap;
-
+        navigationGridSystem->Init(500, 1.0f);
         navigationGridSystem->InitGridHeightNormals(); // Calculates grid terrain height and gets normals
         navigationGridSystem->GenerateHeightMap(heightmap);
         navigationGridSystem->GenerateNormalMap(normalMap);

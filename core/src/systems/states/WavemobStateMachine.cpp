@@ -69,7 +69,7 @@ namespace sage
             gameData->actorMovementSystem->CancelMovement(entity);
         }
 
-        virtual ~DefaultState() = default;
+        ~DefaultState() override = default;
 
         DefaultState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
         {
@@ -146,7 +146,7 @@ namespace sage
             sink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
         }
 
-        virtual ~TargetOutOfRangeState() = default;
+        ~TargetOutOfRangeState() override = default;
 
         TargetOutOfRangeState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
         {
@@ -202,7 +202,7 @@ namespace sage
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
         }
 
-        virtual ~CombatState() = default;
+        ~CombatState() override = default;
 
         CombatState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
         {
@@ -252,7 +252,7 @@ namespace sage
             UnlockState(self);
         }
 
-        virtual ~DyingState() = default;
+        ~DyingState() override = default;
 
         DyingState(entt::registry* registry, GameData* gameData) : StateMachine(registry, gameData)
         {

@@ -74,7 +74,7 @@ namespace sage
 
         ImageSafe heightMap, normalMap;
         serializer::LoadMap(registry, heightMap, normalMap);
-        data->navigationGridSystem->Init(slices, 1.0f, "resources/output.bin");
+        data->navigationGridSystem->Init(slices, 1.0f);
 
         // Dependent on only the map/static meshes having been loaded at this point
         auto view = registry->view<Renderable>();
@@ -82,6 +82,8 @@ namespace sage
             data->lightSubSystem->LinkRenderableToLight(entity);
 
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
+
+        // Clear any CPU resources that are no longer needed
         ResourceManager::GetInstance().UnloadImages();
         ResourceManager::GetInstance().UnloadShaderFileText();
     };

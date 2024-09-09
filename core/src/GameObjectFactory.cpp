@@ -62,8 +62,6 @@ namespace sage
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
-        // Model/Rendering
-        auto modelPath = "resources/models/gltf/goblin.glb";
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
@@ -76,6 +74,9 @@ namespace sage
         registry->emplace<MoveableActor>(id);
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
+        auto modelPath = "resources/models/gltf/goblin.glb";
+        // In case it has not been preloaded
+        ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = name;
@@ -125,6 +126,8 @@ namespace sage
 
         auto modelPath = "resources/models/gltf/arissa.glb";
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+        // In case it has not been loaded already
+        ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = name;
@@ -152,7 +155,6 @@ namespace sage
         // bug that, if I don't move before casting a move, the enemies don't register
         // that the player has a collision box.
         entt::entity id = registry->create();
-        auto modelPath = "resources/models/gltf/hero2.glb";
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
@@ -163,6 +165,9 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
+        auto modelPath = "resources/models/gltf/hero2.glb";
+        // In case it has not been loaded already
+        ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = "Player";

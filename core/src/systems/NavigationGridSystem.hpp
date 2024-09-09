@@ -53,10 +53,9 @@ namespace sage
       public:
         float spacing{};
         int slices{};
-        std::string mapPath;
 
         //---------------------------------------------------------
-        void Init(int _slices, float _spacing, const std::string& _mapPath);
+        void Init(int _slices, float _spacing);
         //---------------------------------------------------------
         void InitGridHeightNormals();
         //---------------------------------------------------------

@@ -17,13 +17,6 @@
 
 namespace sage
 {
-    ResourceManager::ResourceManager()
-    {
-        Shader shader;
-        shader.id = rlGetShaderIdDefault();
-        shader.locs = rlGetShaderLocsDefault();
-        shaders.emplace("DEFAULT", shader);
-    }
 
     void ResourceManager::deepCopyModel(const Model& oldModel, Model& model)
     {
@@ -170,12 +163,11 @@ namespace sage
         }
 
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
+    }
 
-        // Copy name if it exists
-        if (oldMesh.name)
-        {
-            mesh.name = strdup(oldMesh.name);
-        }
+    void ResourceManager::emplaceModelData(const std::string& key, Model model)
+    {
+        modelCopies.emplace(key, model);
     }
 
     /**
@@ -275,48 +267,16 @@ namespace sage
         return textureImages[path];
     }
 
-    // std::vector<entt::entity> ResourceManager::UnpackOBJMap(
-    //     entt::registry* registry, MaterialPaths matPaths, const std::string& mapPath)
-    // {
-    //     std::vector<entt::entity> out;
-    //
-    //     Model parent = LoadModel(mapPath.c_str());
-    //     Matrix modelTransform = MatrixScale(5.0f, 5.0f, 5.0f);
-    //     for (int i = 0; i < parent.meshCount; ++i)
-    //     {
-    //         entt::entity id = registry->create();
-    //         out.push_back(id);
-    //
-    //         Model model = LoadModelFromMesh(parent.meshes[i]);
-    //
-    //         if (FileExists(matPaths.diffuse.c_str()))
-    //         {
-    //             model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
-    //                 ResourceManager::GetInstance().TextureLoad(matPaths.diffuse);
-    //         }
-    //         if (FileExists(matPaths.specular.c_str()))
-    //         {
-    //             model.materials[0].maps[MATERIAL_MAP_SPECULAR].texture =
-    //                 ResourceManager::GetInstance().TextureLoad(matPaths.specular);
-    //         }
-    //         if (FileExists(matPaths.normal.c_str()))
-    //         {
-    //             model.materials[0].maps[MATERIAL_MAP_NORMAL].texture =
-    //                 ResourceManager::GetInstance().TextureLoad(matPaths.normal);
-    //         }
-    //
-    //         auto& renderable = registry->emplace<Renderable>(id, model, matPaths, modelTransform);
-    //         renderable.name = parent.meshes[i].name;
-    //     }
-    //     UnloadModelKeepMeshes(parent);
-    //     return out;
-    // }
-
     void ResourceManager::EmplaceModel(const std::string& path)
     {
-        if (modelCopies.find(path) == modelCopies.end())
+        EmplaceModel(path, path);
+    }
+
+    void ResourceManager::EmplaceModel(const std::string& key, const std::string& path)
+    {
+        if (!modelCopies.contains(key))
         {
-            modelCopies.try_emplace(path, std::make_unique<ModelSafe>(path.c_str()));
+            modelCopies.try_emplace(key, LoadModel(path.c_str()));
         }
     }
 
@@ -326,12 +286,19 @@ namespace sage
      * @param path
      * @return Model
      */
-    std::unique_ptr<ModelSafe> ResourceManager::LoadModelCopy(const std::string& path)
+    ModelSafe ResourceManager::LoadModelCopy(const std::string& key)
     {
-        EmplaceModel(path);
+        std::cout << "Printing model copies map. \n";
+        for (const auto& kv : modelCopies)
+        {
+            std::cout << kv.first << std::endl;
+        }
+        std::cout << "--------------- \n";
+        std::cout << "Requested key: " << key << std::endl;
+        assert(modelCopies.contains(key));
         Model model;
-        model = modelCopies.at(path)->rlmodel;
-        return std::make_unique<ModelSafe>(model, true);
+        model = modelCopies.at(key);
+        return ModelSafe(model, true);
     }
 
     /**
@@ -340,12 +307,12 @@ namespace sage
      * @param path
      * @return
      */
-    std::unique_ptr<ModelSafe> ResourceManager::LoadModelDeepCopy(const std::string& path)
+    ModelSafe ResourceManager::LoadModelDeepCopy(const std::string& key)
     {
+        assert(modelCopies.contains(key));
         Model model;
-        EmplaceModel(path);
-        deepCopyModel(modelCopies.at(path)->rlmodel, model);
-        return std::make_unique<ModelSafe>(model);
+        deepCopyModel(modelCopies.at(key), model);
+        return ModelSafe(model);
     }
 
     ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
@@ -386,9 +353,9 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
-        for (auto& [path, modelSafe] : modelCopies)
+        for (auto& [path, model] : modelCopies)
         {
-            modelSafe.reset();
+            UnloadModel(model);
         }
         for (const auto& kv : textures)
         {
@@ -426,5 +393,13 @@ namespace sage
     ResourceManager::~ResourceManager()
     {
         UnloadAll();
+    }
+
+    ResourceManager::ResourceManager()
+    {
+        Shader shader;
+        shader.id = rlGetShaderIdDefault();
+        shader.locs = rlGetShaderLocsDefault();
+        shaders.emplace("DEFAULT", shader);
     }
 } // namespace sage
