@@ -68,24 +68,6 @@ void serialize(Archive& archive, BoundingBox& bb)
     archive(bb.min, bb.max);
 };
 
-// char* name;             // Name of mesh (if applicable)
-// int vertexCount;        // Number of vertices stored in arrays
-// int triangleCount;      // Number of triangles stored (indexed or not)
-
-//// Vertex attributes data
-// float *vertices;        // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
-// float *texcoords;       // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
-// float *texcoords2;      // Vertex texture second coordinates (UV - 2 components per vertex) (shader-location =
-// 5) float *normals;         // Vertex normals (XYZ - 3 components per vertex) (shader-location = 2) float
-// *tangents;        // Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4) unsigned char
-// *colors;      // Vertex colors (RGBA - 4 components per vertex) (shader-location = 3) unsigned short *indices;
-// // Vertex indices (in case vertex data comes indexed)
-
-//// Animation vertex data
-// float *animVertices;    // Animated vertex positions (after bones transformations)
-// float *animNormals;     // Animated normals (after bones transformations)
-// unsigned char *boneIds; // Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning)
-// float *boneWeights;     // Vertex bone weight, up to 4 bones influence by vertex (skinning)
 template <typename Archive>
 void save(Archive& archive, Mesh const& mesh)
 {
@@ -301,14 +283,16 @@ template <typename Archive>
 void save(Archive& archive, Material const& material)
 {
     std::vector<MaterialMap> maps;
-    maps.resize(MAX_MATERIAL_MAPS);
-    std::array<float, 4> params;
+    // maps.resize(MAX_MATERIAL_MAPS);
+    std::array<float, 4> params{};
 
-    for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
-    {
-        if (maps[i].texture.id == 0 || maps[i].texture.id == rlGetTextureIdDefault()) continue;
-        maps[i] = material.maps[i];
-    }
+    maps.push_back(material.maps[MATERIAL_MAP_DIFFUSE]);
+
+    // for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
+    // {
+    //     if (maps[i].texture.id == 0 || maps[i].texture.id == rlGetTextureIdDefault()) continue;
+    //     maps[i] = material.maps[i];
+    // }
     for (size_t i = 0; i < 4; i++)
     {
         params[i] = material.params[i];
@@ -325,11 +309,12 @@ void load(Archive& archive, Material& material)
     std::array<float, 4> params{};
 
     archive(maps, params);
-    material.maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
-    for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
-    {
-        material.maps[i] = maps[i];
-    }
+    material.maps[MATERIAL_MAP_DIFFUSE] = maps[MATERIAL_MAP_DIFFUSE];
+    // material.maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
+    // for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
+    // {
+    //     material.maps[i] = maps[i];
+    // }
 };
 
 template <typename Archive>
@@ -348,12 +333,12 @@ void save(Archive& archive, Model const& model)
         meshes.push_back(model.meshes[i]);
     }
 
-    std::vector<Material> materials;
-    materials.reserve(model.materialCount);
-    for (size_t i = 0; i < model.materialCount; i++)
-    {
-        materials.push_back(model.materials[i]);
-    }
+    // std::vector<Material> materials;
+    // materials.reserve(model.materialCount);
+    // for (size_t i = 0; i < model.materialCount; i++)
+    // {
+    //     materials.push_back(model.materials[i]);
+    // }
 
     std::vector<BoneInfo> bones;
     bones.reserve(model.boneCount);
@@ -370,7 +355,7 @@ void save(Archive& archive, Model const& model)
     }
 
     std::vector<int> meshMaterial;
-    bindPose.reserve(model.boneCount);
+    meshMaterial.reserve(model.boneCount);
     for (size_t i = 0; i < model.meshCount; i++)
     {
         meshMaterial.push_back(model.meshMaterial[i]);
@@ -381,7 +366,7 @@ void save(Archive& archive, Model const& model)
         model.meshCount,
         model.materialCount,
         meshes,
-        materials,
+        // materials,
         meshMaterial,
         model.boneCount,
         bones,
@@ -392,7 +377,7 @@ template <typename Archive>
 void load(Archive& archive, Model& model)
 {
     std::vector<Mesh> meshes;
-    std::vector<Material> materials;
+    // std::vector<Material> materials;
     std::vector<int> meshMaterial;
     std::vector<BoneInfo> bones;
     std::vector<Transform> bindPose;
@@ -402,7 +387,7 @@ void load(Archive& archive, Model& model)
         model.meshCount,
         model.materialCount,
         meshes,
-        materials,
+        // materials,
         meshMaterial,
         model.boneCount,
         bones,
@@ -418,11 +403,11 @@ void load(Archive& archive, Model& model)
     {
         model.meshes[i] = meshes[i];
     }
-    for (size_t i = 0; i < model.materialCount; ++i)
-    {
-        model.materials[i] = LoadMaterialDefault(); // TODO: Redundant?
-        model.materials[i] = materials[i];
-    }
+    // for (size_t i = 0; i < model.materialCount; ++i)
+    // {
+    //     model.materials[i] = LoadMaterialDefault(); // TODO: Redundant?
+    //     model.materials[i] = materials[i];
+    // }
     for (size_t i = 0; i < model.meshCount; ++i)
     {
         model.meshMaterial[i] = meshMaterial[i];
