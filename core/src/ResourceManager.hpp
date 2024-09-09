@@ -13,7 +13,7 @@
 
 namespace sage
 {
-    struct ModelResource
+    struct ModelCereal
     {
         Model model;
         std::string materialKey;
@@ -30,10 +30,10 @@ namespace sage
         ~ResourceManager();
 
         std::unordered_map<std::string, Shader> shaders{};
-        std::unordered_map<std::string, std::vector<Material>> modelMaterials{};
-        std::unordered_map<std::string, Image> textureImages{}; // Change to "images"?
-        std::unordered_map<std::string, Texture> textures{};    // Change to "freeTextures"?
-        std::unordered_map<std::string, ModelResource> modelCopies{};
+        std::unordered_map<std::string, std::vector<Material>> modelMaterials{}; // Shared model materials
+        std::unordered_map<std::string, Image> images{};                         // Image (CPU) data
+        std::unordered_map<std::string, Texture> nonModelTextures{}; // Textures loaded outside of model loading
+        std::unordered_map<std::string, ModelCereal> modelCopies{};
         std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations{};
         std::unordered_map<std::string, char*> vertShaderFileText{};
         std::unordered_map<std::string, char*> fragShaderFileText{};
@@ -48,17 +48,29 @@ namespace sage
         static ResourceManager& GetInstance()
         {
             static ResourceManager instance;
-            // shaders.emplace("DEFAULT", LoadMaterialDefault().shader);
             return instance;
         }
+
+        static void UnloadModelKeepMeshes(Model& model);
+        Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
+        Texture TextureLoad(const std::string& path);
+        void EmplaceModel(const std::string& path);
+        void EmplaceModel(const std::string& modelKey, const std::string& materialKey, const std::string& path);
+        [[nodiscard]] ModelSafe LoadModelCopy(const std::string& path);
+        [[nodiscard]] ModelSafe LoadModelDeepCopy(const std::string& path) const;
+        ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
+        void UnloadImages();
+        void UnloadShaderFileText();
+
+        void UnloadAll();
+        ResourceManager(const ResourceManager&) = delete;
+        ResourceManager& operator=(const ResourceManager&) = delete;
 
         template <class Archive>
         void save(Archive& archive) const
         {
-            // Must already be initialised here.
-            // TODO: Add "IsInitialised()" function
             std::vector<std::string> modelKeys;
-            std::vector<ModelResource> modelData;
+            std::vector<ModelCereal> modelData;
 
             std::vector<std::string> materialKeys;
             std::vector<std::vector<Material>> materialData;
@@ -82,7 +94,7 @@ namespace sage
         void load(Archive& archive)
         {
             std::vector<std::string> modelKeys;
-            std::vector<ModelResource> modelData;
+            std::vector<ModelCereal> modelData;
 
             std::vector<std::string> materialKeys;
             std::vector<std::vector<Material>> materialData;
@@ -100,21 +112,6 @@ namespace sage
                 GetInstance().modelCopies.emplace(modelKeys[i], modelData[i]);
             }
         }
-
-        static void UnloadModelKeepMeshes(Model& model);
-        Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
-        Texture TextureLoad(const std::string& path);
-        void EmplaceModel(const std::string& path);
-        void EmplaceModel(const std::string& modelKey, const std::string& materialKey, const std::string& path);
-        ModelSafe LoadModelCopy(const std::string& path);
-        ModelSafe LoadModelDeepCopy(const std::string& path) const;
-        ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
-        void UnloadImages();
-        void UnloadShaderFileText();
-
-        void UnloadAll();
-        ResourceManager(const ResourceManager&) = delete;
-        ResourceManager& operator=(const ResourceManager&) = delete;
     };
 
 } // namespace sage
