@@ -10,6 +10,7 @@
 #include "raylib.h"
 #include "raylib/src/config.h"
 #include "raymath.h"
+#include "rlgl.h"
 #include "utils.h"
 
 template <typename Archive>
@@ -253,17 +254,17 @@ void serialize(Archive& archive, Color& color)
     archive(color.r, color.g, color.b, color.a);
 };
 
-template <typename Archive>
-void save(Archive& archive, Texture const& texture)
-{
-    archive(texture.width, texture.height, texture.mipmaps, texture.format);
-};
-
-template <typename Archive>
-void load(Archive& archive, Texture& texture)
-{
-    archive(texture.width, texture.height, texture.mipmaps, texture.format);
-};
+// template <typename Archive>
+// void save(Archive& archive, Texture const& texture)
+// {
+//     archive(texture.width, texture.height, texture.mipmaps, texture.format);
+// };
+//
+// template <typename Archive>
+// void load(Archive& archive, Texture& texture)
+// {
+//     archive(texture.width, texture.height, texture.mipmaps, texture.format);
+// };
 
 template <typename Archive>
 void serialize(Archive& archive, Vector4& v4)
@@ -278,12 +279,22 @@ void serialize(Archive& archive, Transform& transform)
 };
 
 template <typename Archive>
-void serialize(Archive& archive, MaterialMap& map)
+void save(Archive& archive, MaterialMap const& map)
 {
-    archive(
-        // map.texture,
-        map.color,
-        map.value);
+    Image image{};
+    image = LoadImageFromTexture(map.texture);
+
+    archive(image, map.color, map.value);
+    UnloadImage(image);
+};
+
+template <typename Archive>
+void load(Archive& archive, MaterialMap& map)
+{
+    Image image;
+    archive(image, map.color, map.value);
+    map.texture = LoadTextureFromImage(image);
+    UnloadImage(image);
 };
 
 template <typename Archive>
@@ -295,7 +306,8 @@ void save(Archive& archive, Material const& material)
 
     for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
     {
-        maps.push_back(material.maps[i]);
+        if (maps[i].texture.id == 0 || maps[i].texture.id == rlGetTextureIdDefault()) continue;
+        maps[i] = material.maps[i];
     }
     for (size_t i = 0; i < 4; i++)
     {
@@ -336,12 +348,12 @@ void save(Archive& archive, Model const& model)
         meshes.push_back(model.meshes[i]);
     }
 
-    // std::vector<Material> materials;
-    // materials.reserve(model.materialCount);
-    // for (size_t i = 0; i < model.materialCount; i++)
-    //{
-    //	materials.push_back(model.materials[i]);
-    // }
+    std::vector<Material> materials;
+    materials.reserve(model.materialCount);
+    for (size_t i = 0; i < model.materialCount; i++)
+    {
+        materials.push_back(model.materials[i]);
+    }
 
     std::vector<BoneInfo> bones;
     bones.reserve(model.boneCount);
@@ -369,7 +381,7 @@ void save(Archive& archive, Model const& model)
         model.meshCount,
         model.materialCount,
         meshes,
-        // materials,
+        materials,
         meshMaterial,
         model.boneCount,
         bones,
@@ -380,7 +392,7 @@ template <typename Archive>
 void load(Archive& archive, Model& model)
 {
     std::vector<Mesh> meshes;
-    // std::vector<Material> materials;
+    std::vector<Material> materials;
     std::vector<int> meshMaterial;
     std::vector<BoneInfo> bones;
     std::vector<Transform> bindPose;
@@ -390,7 +402,7 @@ void load(Archive& archive, Model& model)
         model.meshCount,
         model.materialCount,
         meshes,
-        // materials,
+        materials,
         meshMaterial,
         model.boneCount,
         bones,
@@ -409,9 +421,7 @@ void load(Archive& archive, Model& model)
     for (size_t i = 0; i < model.materialCount; ++i)
     {
         model.materials[i] = LoadMaterialDefault(); // TODO: Redundant?
-                                                    // model.materials[i] = materials[i];
-        // model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = (Texture2D){ rlGetTextureIdDefault(), 1, 1, 1,
-        // PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 }; // Load a default texture.
+        model.materials[i] = materials[i];
     }
     for (size_t i = 0; i < model.meshCount; ++i)
     {
@@ -428,7 +438,7 @@ void load(Archive& archive, Model& model)
 
     // Below taken from raylib's LoadModel().
     model.transform = MatrixIdentity();
-    if ((model.meshCount != 0) && (model.meshes != NULL))
+    if ((model.meshCount != 0) && (model.meshes != nullptr))
     {
         // Upload vertex data to GPU (static meshes)
         for (int i = 0; i < model.meshCount; i++)

@@ -12,20 +12,6 @@
 
 namespace sage
 {
-    struct MaterialPaths
-    {
-        std::string diffuse{};
-        std::string specular{};
-        std::string normal{};
-        Color emission;
-
-        template <typename Archive>
-        void serialize(Archive& archive)
-        {
-            archive(diffuse, specular, normal, emission);
-        };
-    };
-
     class ImageSafe
     {
         Image image{};

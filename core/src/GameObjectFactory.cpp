@@ -266,59 +266,6 @@ namespace sage
         return mapBB;
     }
 
-    // void GameObjectFactory::loadMap(
-    //     entt::registry* registry, Scene* scene, float& slices, const std::string& _mapPath)
-    // {
-    //     std::vector<Collideable*> floorMeshes;
-    //
-    //     // Temporary
-    //     MaterialPaths matPaths{};
-    //     matPaths.diffuse = "resources/models/obj/PolyAdventureTexture_01.png";
-    //     // ---
-    //     auto modelIds = ResourceManager::UnpackOBJMap(registry, matPaths, _mapPath);
-    //     for (auto id : modelIds)
-    //     {
-    //         auto& transform = registry->emplace<sgTransform>(id, id);
-    //
-    //         auto& renderable = registry->get<Renderable>(id);
-    //         scene->lightSubSystem->LinkRenderableToLight(id);
-    //
-    //         auto& collideable = registry->emplace<Collideable>(id,
-    //         renderable.GetModel()->CalcLocalBoundingBox());
-    //         collideable.SetWorldBoundingBox(transform.GetMatrix());
-    //
-    //         if (renderable.name.find("SM_Bld") != std::string::npos)
-    //         {
-    //             collideable.collisionLayer = CollisionLayer::BUILDING;
-    //         }
-    //         else if (renderable.name.find("SM_Env_NoWalk") != std::string::npos)
-    //         {
-    //             collideable.collisionLayer = CollisionLayer::TERRAIN;
-    //         }
-    //         else if (renderable.name.find("SM_Env") != std::string::npos)
-    //         {
-    //             collideable.collisionLayer = CollisionLayer::FLOOR;
-    //             floorMeshes.push_back(&collideable);
-    //         }
-    //         else if (renderable.name.find("SM_Prop") != std::string::npos)
-    //         {
-    //             collideable.collisionLayer = CollisionLayer::BUILDING;
-    //         }
-    //         else
-    //         {
-    //             collideable.collisionLayer = CollisionLayer::DEFAULT;
-    //         }
-    //     }
-    //
-    //     // Calculate grid based on walkable area
-    //     BoundingBox mapBB{Vector3{-500, 0, -500}, Vector3{500, 0, 500}}; // min, max
-    //     // BoundingBox mapBB = calculateFloorSize(floorMeshes);
-    //
-    //     slices = mapBB.max.x - mapBB.min.x;
-    //     // Create floor
-    //     createFloor(registry, scene, mapBB);
-    // }
-
     void GameObjectFactory::createFloor(entt::registry* registry, Scene* scene, BoundingBox bb)
     {
         entt::entity floor = registry->create();

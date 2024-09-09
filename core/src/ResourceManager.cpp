@@ -18,6 +18,29 @@
 namespace sage
 {
 
+    Shader ResourceManager::gpuShaderLoad(const char* vs, const char* fs)
+    {
+        std::string vs_str = vs == nullptr ? "" : std::string(vs);
+        std::string fs_str = fs == nullptr ? "" : std::string(fs);
+        std::string concat = vs_str + fs_str;
+
+        if (!shaders.contains(concat))
+        {
+            shaders[concat] = LoadShaderFromMemory(vs, fs);
+        }
+
+        return shaders[concat];
+    }
+
+    Image ResourceManager::imageLoad(const std::string& path)
+    {
+        if (!textureImages.contains(path))
+        {
+            textureImages[path] = LoadImage(path.c_str());
+        }
+        return textureImages[path];
+    }
+
     void ResourceManager::deepCopyModel(const Model& oldModel, Model& model)
     {
         model.meshCount = oldModel.meshCount;
@@ -165,7 +188,7 @@ namespace sage
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
     }
 
-    void ResourceManager::emplaceModelData(const std::string& key, Model model)
+    void ResourceManager::deserialiseModel(const std::string& key, Model model)
     {
         modelCopies.emplace(key, model);
     }
@@ -192,20 +215,6 @@ namespace sage
         RL_FREE(model.bindPose);
 
         TRACELOG(LOG_INFO, "MODEL: Unloaded model (NOT meshes) from RAM");
-    }
-
-    Shader ResourceManager::gpuShaderLoad(const char* vs, const char* fs)
-    {
-        std::string vs_str = vs == nullptr ? "" : std::string(vs);
-        std::string fs_str = fs == nullptr ? "" : std::string(fs);
-        std::string concat = vs_str + fs_str;
-
-        if (!shaders.contains(concat))
-        {
-            shaders[concat] = LoadShaderFromMemory(vs, fs);
-        }
-
-        return shaders[concat];
     }
 
     /*
@@ -258,15 +267,6 @@ namespace sage
         return textures[path];
     }
 
-    Image ResourceManager::imageLoad(const std::string& path)
-    {
-        if (!textureImages.contains(path))
-        {
-            textureImages[path] = LoadImage(path.c_str());
-        }
-        return textureImages[path];
-    }
-
     void ResourceManager::EmplaceModel(const std::string& path)
     {
         EmplaceModel(path, path);
@@ -277,6 +277,7 @@ namespace sage
         if (!modelCopies.contains(key))
         {
             modelCopies.try_emplace(key, LoadModel(path.c_str()));
+            auto model = modelCopies.at(key);
         }
     }
 
@@ -288,17 +289,10 @@ namespace sage
      */
     ModelSafe ResourceManager::LoadModelCopy(const std::string& key)
     {
-        std::cout << "Printing model copies map. \n";
-        for (const auto& kv : modelCopies)
-        {
-            std::cout << kv.first << std::endl;
-        }
-        std::cout << "--------------- \n";
-        std::cout << "Requested key: " << key << std::endl;
         assert(modelCopies.contains(key));
-        Model model;
-        model = modelCopies.at(key);
-        return ModelSafe(model, true);
+        ModelSafe modelsafe(modelCopies.at(key), true);
+        modelsafe.SetKey(key);
+        return std::move(modelsafe);
     }
 
     /**

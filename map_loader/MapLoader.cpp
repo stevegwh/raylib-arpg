@@ -41,11 +41,6 @@ namespace sage
     {
         std::vector<Collideable*> floorMeshes;
 
-        // Temporary
-        MaterialPaths matPaths{};
-        matPaths.diffuse = "resources/maps/level/Texture_01.png";
-        // ---
-
         std::ifstream infile(txtPath);
         std::string key;
 
@@ -89,7 +84,7 @@ namespace sage
 
         Matrix mat = MatrixMultiply(MatrixMultiply(scaleMat, rotMat), transMat);
 
-        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), matPaths, mat);
+        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), mat);
         renderable.name = objectName;
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
