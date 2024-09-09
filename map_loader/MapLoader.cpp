@@ -135,9 +135,23 @@ namespace sage
             std::string filePath = entry.path().string();
             std::string fileName = entry.path().stem().string();
             std::cout << filePath << std::endl;
+            std::string materialName;
+
+            if (IsFileExtension(filePath.c_str(), ".mtl"))
+            {
+                // TODO: This assumes file order and does no error checking
+                // for whether every model has a mtl file. Should put this when we find an obj and see if the obj
+                // has an accompanying mtl file or not
+
+                // TODO: Need to get mtl file's texture name here to pass to resource manager. Passing in the known
+                // file name for the moment
+                materialName = "Texture_01";
+            }
+
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
-                ResourceManager::GetInstance().EmplaceModel(fileName, filePath);
+
+                ResourceManager::GetInstance().EmplaceModel(fileName, materialName, filePath);
             }
         }
         std::cout << "FINISH: Loading mesh data into resource manager. \n";

@@ -188,11 +188,6 @@ namespace sage
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
     }
 
-    void ResourceManager::deserialiseModel(const std::string& key, Model model)
-    {
-        modelCopies.emplace(key, model);
-    }
-
     /**
      * Frees model data but keeps the meshes in memory.
      * Allows us to "unpack" a parent model into multiple models from its children.
@@ -269,15 +264,25 @@ namespace sage
 
     void ResourceManager::EmplaceModel(const std::string& path)
     {
-        EmplaceModel(path, path);
+        EmplaceModel(path, path, path);
     }
 
-    void ResourceManager::EmplaceModel(const std::string& key, const std::string& path)
+    void ResourceManager::EmplaceModel(
+        const std::string& modelKey, const std::string& materialKey, const std::string& path)
     {
-        if (!modelCopies.contains(key))
+        if (!modelCopies.contains(modelKey))
         {
-            modelCopies.try_emplace(key, LoadModel(path.c_str()));
-            auto model = modelCopies.at(key);
+            ModelResource modelResource;
+            modelResource.model = LoadModel(path.c_str());
+            modelResource.materialKey = materialKey;
+            modelCopies.try_emplace(modelKey, modelResource);
+            if (!modelMaterials.contains(materialKey))
+            {
+                std::vector<Material> materials(
+                    modelResource.model.materials,
+                    modelResource.model.materials + modelResource.model.materialCount);
+                modelMaterials.try_emplace(materialKey, materials);
+            }
         }
     }
 
@@ -290,7 +295,7 @@ namespace sage
     ModelSafe ResourceManager::LoadModelCopy(const std::string& key)
     {
         assert(modelCopies.contains(key));
-        ModelSafe modelsafe(modelCopies.at(key), true);
+        ModelSafe modelsafe(modelCopies.at(key).model, true);
         modelsafe.SetKey(key);
         return std::move(modelsafe);
     }
@@ -305,7 +310,7 @@ namespace sage
     {
         assert(modelCopies.contains(key));
         Model model;
-        deepCopyModel(modelCopies.at(key), model);
+        deepCopyModel(modelCopies.at(key).model, model);
         return ModelSafe(model);
     }
 
@@ -349,7 +354,7 @@ namespace sage
     {
         for (auto& [path, model] : modelCopies)
         {
-            UnloadModel(model);
+            UnloadModel(model.model);
         }
         for (const auto& kv : textures)
         {
