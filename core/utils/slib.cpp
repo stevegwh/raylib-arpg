@@ -224,6 +224,18 @@ namespace sage
     {
         if (!instanced)
         {
+            for (int i = 0; i < rlmodel.materialCount; ++i)
+            {
+                // Unload loaded texture maps (avoid unloading default texture, managed by raylib)
+                if (rlmodel.materials[i].maps != NULL)
+                {
+                    for (int j = 0; j < MAX_MATERIAL_MAPS; j++)
+                    {
+                        if (rlmodel.materials[i].maps[j].texture.id != rlGetTextureIdDefault())
+                            rlUnloadTexture(rlmodel.materials[i].maps[j].texture.id);
+                    }
+                }
+            }
             UnloadModel(rlmodel);
         }
     }
