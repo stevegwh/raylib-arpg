@@ -275,24 +275,31 @@ void load(Archive& archive, MaterialMap& map)
 {
     Image image;
     archive(image, map.color, map.value);
+    if (!image.data)
+    {
+        UnloadImage(image);
+        return;
+    }
     map.texture = LoadTextureFromImage(image);
-    UnloadImage(image);
 };
 
 template <typename Archive>
 void save(Archive& archive, Material const& material)
 {
     std::vector<MaterialMap> maps;
-    // maps.resize(MAX_MATERIAL_MAPS);
+    maps.resize(MAX_MATERIAL_MAPS);
     std::array<float, 4> params{};
 
-    maps.push_back(material.maps[MATERIAL_MAP_DIFFUSE]);
+    // maps.push_back(material.maps[MATERIAL_MAP_DIFFUSE]);
+    // maps.push_back(material.maps[MATERIAL_MAP_SPECULAR]);
 
-    // for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
-    // {
-    //     if (maps[i].texture.id == 0 || maps[i].texture.id == rlGetTextureIdDefault()) continue;
-    //     maps[i] = material.maps[i];
-    // }
+    for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
+    {
+        if (maps[i].texture.format >= PIXELFORMAT_COMPRESSED_DXT1_RGB ||
+            maps[i].texture.id == rlGetTextureIdDefault())
+            continue;
+        maps[i] = material.maps[i];
+    }
     for (size_t i = 0; i < 4; i++)
     {
         params[i] = material.params[i];
@@ -309,12 +316,12 @@ void load(Archive& archive, Material& material)
     std::array<float, 4> params{};
 
     archive(maps, params);
-    material.maps[MATERIAL_MAP_DIFFUSE] = maps[MATERIAL_MAP_DIFFUSE];
-    // material.maps = (MaterialMap*)RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap));
-    // for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
-    // {
-    //     material.maps[i] = maps[i];
-    // }
+    // material.maps[MATERIAL_MAP_DIFFUSE] = maps[MATERIAL_MAP_DIFFUSE];
+    // material.maps[MATERIAL_MAP_SPECULAR] = maps[MATERIAL_MAP_SPECULAR];
+    for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
+    {
+        material.maps[i] = maps[i];
+    }
 };
 
 template <typename Archive>
