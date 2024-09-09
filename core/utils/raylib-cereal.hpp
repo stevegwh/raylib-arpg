@@ -34,7 +34,7 @@ void load(Archive& archive, Image& image)
     std::vector<unsigned char> data;
     archive(data, image.format, image.height, image.width, image.mipmaps);
     int len = data.size();
-    image.data = (unsigned char*)RL_MALLOC(len * sizeof(unsigned char));
+    image.data = static_cast<unsigned char*>(RL_MALLOC(len * sizeof(unsigned char)));
     if (image.data != nullptr)
     {
         std::memcpy(image.data, data.data(), len);
@@ -46,15 +46,27 @@ void load(Archive& archive, Image& image)
 }
 
 template <typename Archive>
+void serialize(Archive& archive, Vector2& v2)
+{
+    archive(v2.x, v2.y);
+};
+
+template <typename Archive>
 void serialize(Archive& archive, Vector3& v3)
 {
     archive(v3.x, v3.y, v3.z);
 };
 
 template <typename Archive>
-void serialize(Archive& archive, Vector2& v2)
+void serialize(Archive& archive, Vector4& v4)
 {
-    archive(v2.x, v2.y);
+    archive(v4.x, v4.y, v4.z, v4.w);
+};
+
+template <typename Archive>
+void serialize(Archive& archive, Transform& transform)
+{
+    archive(transform.translation, transform.rotation, transform.scale);
 };
 
 template <typename Archive>
@@ -161,12 +173,14 @@ void load(Archive& archive, Mesh& mesh)
 
     archive(mesh.vertexCount, mesh.triangleCount, vertices, texcoords, texcoords2, normals, tangents, colors);
 
-    mesh.vertices = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-    if (!texcoords.empty()) mesh.texcoords = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
-    if (!texcoords2.empty()) mesh.texcoords2 = (float*)RL_MALLOC(mesh.vertexCount * 2 * sizeof(float));
-    if (!normals.empty()) mesh.normals = (float*)RL_MALLOC(mesh.vertexCount * 3 * sizeof(float));
-    if (!tangents.empty()) mesh.tangents = (float*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(float));
-    if (!colors.empty()) mesh.colors = (unsigned char*)RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char));
+    mesh.vertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
+    if (!texcoords.empty()) mesh.texcoords = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
+    if (!texcoords2.empty())
+        mesh.texcoords2 = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
+    if (!normals.empty()) mesh.normals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
+    if (!tangents.empty()) mesh.tangents = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
+    if (!colors.empty())
+        mesh.colors = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
 
     for (int i = 0; i < vertices.size(); ++i)
     {
@@ -223,7 +237,7 @@ void load(Archive& archive, Shader& shader)
 {
     std::vector<int> locs;
     locs.reserve(RL_MAX_SHADER_LOCATIONS);
-    shader.locs = (int*)RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int));
+    shader.locs = static_cast<int*>(RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int)));
     archive(shader.id, locs);
     for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++)
     {
@@ -235,30 +249,6 @@ template <typename Archive>
 void serialize(Archive& archive, Color& color)
 {
     archive(color.r, color.g, color.b, color.a);
-};
-
-// template <typename Archive>
-// void save(Archive& archive, Texture const& texture)
-// {
-//     archive(texture.width, texture.height, texture.mipmaps, texture.format);
-// };
-//
-// template <typename Archive>
-// void load(Archive& archive, Texture& texture)
-// {
-//     archive(texture.width, texture.height, texture.mipmaps, texture.format);
-// };
-
-template <typename Archive>
-void serialize(Archive& archive, Vector4& v4)
-{
-    archive(v4.x, v4.y, v4.z, v4.w);
-};
-
-template <typename Archive>
-void serialize(Archive& archive, Transform& transform)
-{
-    archive(transform.translation, transform.rotation, transform.scale);
 };
 
 template <typename Archive>
@@ -290,9 +280,6 @@ void save(Archive& archive, Material const& material)
     maps.resize(MAX_MATERIAL_MAPS);
     std::array<float, 4> params{};
 
-    // maps.push_back(material.maps[MATERIAL_MAP_DIFFUSE]);
-    // maps.push_back(material.maps[MATERIAL_MAP_SPECULAR]);
-
     for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
     {
         if (maps[i].texture.format >= PIXELFORMAT_COMPRESSED_DXT1_RGB ||
@@ -316,8 +303,6 @@ void load(Archive& archive, Material& material)
     std::array<float, 4> params{};
 
     archive(maps, params);
-    // material.maps[MATERIAL_MAP_DIFFUSE] = maps[MATERIAL_MAP_DIFFUSE];
-    // material.maps[MATERIAL_MAP_SPECULAR] = maps[MATERIAL_MAP_SPECULAR];
     for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
     {
         material.maps[i] = maps[i];
@@ -400,11 +385,11 @@ void load(Archive& archive, Model& model)
         bones,
         bindPose);
 
-    model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
+    model.meshes = static_cast<Mesh*>(RL_CALLOC(model.meshCount, sizeof(Mesh)));
     // model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
-    model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
-    model.bones = (BoneInfo*)RL_MALLOC(model.boneCount * sizeof(BoneInfo));
-    model.bindPose = (Transform*)RL_MALLOC(model.boneCount * sizeof(Transform));
+    model.meshMaterial = static_cast<int*>(RL_CALLOC(model.meshCount, sizeof(int)));
+    model.bones = static_cast<BoneInfo*>(RL_MALLOC(model.boneCount * sizeof(BoneInfo)));
+    model.bindPose = static_cast<Transform*>(RL_MALLOC(model.boneCount * sizeof(Transform)));
 
     for (size_t i = 0; i < model.meshCount; ++i)
     {
