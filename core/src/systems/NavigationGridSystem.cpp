@@ -70,11 +70,10 @@ namespace sage
         return diagonal_distance;
     }
 
-    void NavigationGridSystem::Init(int _slices, float _spacing, const std::string& _mapPath)
+    void NavigationGridSystem::Init(int _slices, float _spacing)
     {
         slices = _slices;
         spacing = _spacing;
-        mapPath = _mapPath;
 
         int halfSlices = slices / 2;
 
@@ -1081,10 +1080,7 @@ namespace sage
         }
 
         const auto& view = registry->view<Collideable, Renderable>();
-        size_t lastindex = mapPath.find_last_of('.');
-        std::string imgPath = mapPath.substr(0, lastindex);
-
-        // Load from image
+        // Load from image data
         loadTerrainNormalMap(normalMap);
         loadTerrainHeightMap(heightMap, getMaxHeight(slices));
 

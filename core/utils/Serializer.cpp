@@ -124,6 +124,7 @@ namespace sage
                 cereal::BinaryOutputArchive output{storage};
 
                 output(heightMap, normalMap);
+                output(ResourceManager::GetInstance());
 
                 const auto view = source.view<sgTransform, Renderable, Collideable>();
                 for (const auto& ent : view)
@@ -159,6 +160,7 @@ namespace sage
                 cereal::BinaryInputArchive input(storage);
 
                 input(heightMap, normalMap);
+                input(ResourceManager::GetInstance());
                 // Use height/normal map to initiate navigation grid
 
                 while (storage.peek() != EOF)

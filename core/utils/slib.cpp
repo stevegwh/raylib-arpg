@@ -158,10 +158,21 @@ namespace sage
         rlmodel.materials[materialIdx].shader = shader;
     }
 
+    void ModelSafe::SetKey(const std::string& newKey)
+    {
+        modelKey = newKey;
+    }
+
+    std::string ModelSafe::GetKey() const
+    {
+        return modelKey;
+    }
+
     ModelSafe::ModelSafe(ModelSafe&& other) noexcept : rlmodel(other.rlmodel)
     {
         // Reset the source object's model to prevent double deletion
         instanced = other.instanced;
+        modelKey = other.modelKey;
         other.rlmodel = {};
     }
 
@@ -175,6 +186,7 @@ namespace sage
             // Move resources from other
             rlmodel = other.rlmodel;
             instanced = other.instanced;
+            modelKey = other.modelKey;
 
             // Reset the source object's model
             other.rlmodel = {};
