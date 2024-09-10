@@ -3,6 +3,7 @@
 #include "components/Collideable.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
+#include "GameObjectFactory.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include <ResourceManager.hpp>
@@ -230,7 +231,9 @@ namespace sage
         // "assetlib.bin" or something. For now, we can just hand-load them into the map binary.
         // TODO: We need to be able to serialize animation data
         // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/arissa.glb");
-        // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
+        ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/arissa.glb");
+        int tmp;
+        ResourceManager::GetInstance().ModelAnimationLoad("resources/models/gltf/arissa.glb", &tmp);
         // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/hero2.glb");
         ResourceManager::GetInstance().EmplaceModel("resources/models/obj/portal.obj");
 

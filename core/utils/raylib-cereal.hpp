@@ -84,20 +84,13 @@ void save(Archive& archive, Mesh const& mesh)
         colors.assign(mesh.colors, mesh.colors + mesh.vertexCount * 4); // vec4
     }
 
+    std::vector<unsigned short> indices;
+    if (mesh.indices)
+    {
+        indices.assign(mesh.indices, mesh.indices + mesh.triangleCount * 3);
+    }
+
     // Animations
-
-    // animVertices/animNormals are just copies of vertices/normal arrays. No need to save them.
-    // std::vector<float> animVertices;
-    // if (mesh.animVertices)
-    // {
-    //     animVertices.assign(mesh.animVertices, mesh.animVertices + mesh.vertexCount * 3);
-    // }
-    // std::vector<float> animNormals;
-    // if (mesh.animNormals)
-    // {
-    //     animNormals.assign(mesh.animNormals, mesh.animNormals + mesh.vertexCount * 3);
-    // }
-
     std::vector<unsigned char> boneIds;
     if (mesh.boneIds)
     {
@@ -118,8 +111,7 @@ void save(Archive& archive, Mesh const& mesh)
         normals,
         tangents,
         colors,
-        // animVertices,
-        // animNormals,
+        indices,
         boneIds,
         boneWeights);
 }
@@ -133,8 +125,7 @@ void load(Archive& archive, Mesh& mesh)
     std::vector<float> normals;
     std::vector<float> tangents;
     std::vector<unsigned char> colors;
-    std::vector<float> animVertices;
-    std::vector<float> animNormals;
+    std::vector<unsigned short> indices;
     std::vector<unsigned char> boneIds;
     std::vector<float> boneWeights;
 
@@ -147,8 +138,7 @@ void load(Archive& archive, Mesh& mesh)
         normals,
         tangents,
         colors,
-        // animVertices,
-        // animNormals,
+        indices,
         boneIds,
         boneWeights);
 
@@ -181,6 +171,11 @@ void load(Archive& archive, Mesh& mesh)
     {
         mesh.colors = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
         std::memcpy(mesh.colors, colors.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
+    }
+    if (!indices.empty())
+    {
+        mesh.indices = static_cast<unsigned short*>(RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short)));
+        std::memcpy(mesh.indices, indices.data(), mesh.triangleCount * 3 * sizeof(unsigned short));
     }
 
     // Animations
