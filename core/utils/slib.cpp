@@ -204,18 +204,18 @@ namespace sage
         }
     }
 
-    void ModelSafe::UnloadModelTextures() const
+    void ModelSafe::UnloadMaterials() const
     {
-        // Texture data managed by resource manager
-        for (int i = 0; i < rlmodel.meshCount; i++)
+        for (int i = 0; i < rlmodel.materialCount; ++i)
         {
-            if (rlmodel.meshes[i].texcoords)
+            // Unload loaded texture maps (avoid unloading default texture, managed by raylib)
+            if (rlmodel.materials[i].maps != NULL)
             {
-                RL_FREE(rlmodel.meshes[i].texcoords);
-            }
-            if (rlmodel.meshes[i].texcoords2)
-            {
-                RL_FREE(rlmodel.meshes[i].texcoords2);
+                for (int j = 0; j < MAX_MATERIAL_MAPS; j++)
+                {
+                    if (rlmodel.materials[i].maps[j].texture.id != rlGetTextureIdDefault())
+                        rlUnloadTexture(rlmodel.materials[i].maps[j].texture.id);
+                }
             }
         }
     }
@@ -224,18 +224,7 @@ namespace sage
     {
         if (!instanced)
         {
-            for (int i = 0; i < rlmodel.materialCount; ++i)
-            {
-                // Unload loaded texture maps (avoid unloading default texture, managed by raylib)
-                if (rlmodel.materials[i].maps != NULL)
-                {
-                    for (int j = 0; j < MAX_MATERIAL_MAPS; j++)
-                    {
-                        if (rlmodel.materials[i].maps[j].texture.id != rlGetTextureIdDefault())
-                            rlUnloadTexture(rlmodel.materials[i].maps[j].texture.id);
-                    }
-                }
-            }
+            this->UnloadMaterials();
             UnloadModel(rlmodel);
         }
     }

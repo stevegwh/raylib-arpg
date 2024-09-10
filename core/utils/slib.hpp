@@ -50,7 +50,7 @@ namespace sage
         bool instanced = false;
 
         void UnloadShaderLocs() const;
-        void UnloadModelTextures() const;
+        void UnloadMaterials() const;
 
       public:
         [[nodiscard]] const Model& GetRlModel() const;

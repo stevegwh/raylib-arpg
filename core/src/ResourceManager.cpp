@@ -275,17 +275,23 @@ namespace sage
     {
         if (!modelCopies.contains(modelKey))
         {
-            ModelCereal modelResource;
-            modelResource.model = LoadModel(path.c_str());
-            modelResource.materialKey = materialKey;
-            modelCopies.try_emplace(modelKey, modelResource);
+            ModelCereal modelCereal;
+            modelCereal.model = LoadModel(path.c_str());
+            modelCereal.materialKey = materialKey;
             if (!modelMaterials.contains(materialKey))
             {
                 std::vector<Material> materials(
-                    modelResource.model.materials,
-                    modelResource.model.materials + modelResource.model.materialCount);
-                modelMaterials.try_emplace(materialKey, materials);
+                    modelCereal.model.materials, modelCereal.model.materials + modelCereal.model.materialCount);
+                modelMaterials.emplace(materialKey, materials);
             }
+            else
+            {
+                UnloadMaterial(*modelCereal.model.materials);
+                RL_FREE(modelCereal.model.materials);
+            }
+
+            modelCopies.emplace(modelKey, modelCereal);
+            // TODO: Leak here based on LoadMaterialDefault();
         }
     }
 
