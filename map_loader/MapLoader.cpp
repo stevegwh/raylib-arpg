@@ -232,7 +232,7 @@ namespace sage
         // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/arissa.glb");
         // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
         // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/hero2.glb");
-        // ResourceManager::GetInstance().EmplaceModel("resources/models/obj/portal.obj");
+        ResourceManager::GetInstance().EmplaceModel("resources/models/obj/portal.obj");
 
         // Height map gets saved here.
         serializer::SaveMap(*registry, heightmap, normalMap);

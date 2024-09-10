@@ -52,12 +52,37 @@ void serialize(Archive& archive, BoundingBox& bb)
 template <typename Archive>
 void save(Archive& archive, Mesh const& mesh)
 {
-    std::vector<Vector3> vertices;
-    std::vector<Vector2> texcoords;
-    std::vector<Vector2> texcoords2;
-    std::vector<Vector3> normals;
-    std::vector<Vector4> tangents;
-    std::vector<Color> colors;
+    std::vector<float> vertices(mesh.vertices, mesh.vertices + mesh.vertexCount * 3); // vec3
+
+    std::vector<float> texcoords;
+    if (mesh.texcoords)
+    {
+        texcoords.assign(mesh.texcoords, mesh.texcoords + mesh.vertexCount * 2); // vec2
+    }
+
+    std::vector<float> texcoords2;
+    if (mesh.texcoords2)
+    {
+        texcoords2.assign(mesh.texcoords2, mesh.texcoords2 + mesh.vertexCount * 2); // vec2
+    }
+
+    std::vector<float> normals;
+    if (mesh.normals)
+    {
+        normals.assign(mesh.normals, mesh.normals + mesh.vertexCount * 3); // vec3
+    }
+
+    std::vector<float> tangents;
+    if (mesh.tangents)
+    {
+        tangents.assign(mesh.tangents, mesh.tangents + mesh.vertexCount * 4); // vec4
+    }
+
+    std::vector<unsigned char> colors;
+    if (mesh.colors)
+    {
+        colors.assign(mesh.colors, mesh.colors + mesh.vertexCount * 4); // vec4
+    }
 
     // Animations not supported right now
     // std::vector<Vector3> animVertices;
@@ -66,125 +91,52 @@ void save(Archive& archive, Mesh const& mesh)
     // std::vector<Vector4> boneWeights; // float* (4 bones per vertex)
     // TODO: Bone IDs and weights are missing
 
-    vertices.reserve(mesh.vertexCount * 3);
-    texcoords.reserve(mesh.vertexCount * 2);
-    texcoords2.reserve(mesh.vertexCount * 2);
-    normals.reserve(mesh.vertexCount * 3);
-    tangents.reserve(mesh.vertexCount * 4);
-    colors.reserve(mesh.vertexCount * 4);
-
-    // animVertices.reserve(mesh.vertexCount*3);
-    // animNormals.reserve(mesh.vertexCount*3);
-
-    for (int i = 0; i < mesh.vertexCount; ++i)
-    {
-        vertices.push_back({mesh.vertices[i * 3], mesh.vertices[i * 3 + 1], mesh.vertices[i * 3 + 2]});
-        if (mesh.texcoords)
-        {
-            texcoords.push_back({mesh.texcoords[i * 2], mesh.texcoords[i * 2 + 1]});
-        }
-
-        if (mesh.texcoords2)
-        {
-            texcoords2.push_back({mesh.texcoords2[i * 2], mesh.texcoords2[i * 2 + 1]});
-        }
-        if (mesh.normals)
-        {
-            normals.push_back({mesh.normals[i * 3], mesh.normals[i * 3 + 1], mesh.normals[i * 3 + 2]});
-        }
-        if (mesh.tangents)
-        {
-            tangents.push_back(
-                {mesh.tangents[i * 4],
-                 mesh.tangents[i * 4 + 1],
-                 mesh.tangents[i * 4 + 2],
-                 mesh.tangents[i * 4 + 3]});
-        }
-        if (mesh.colors)
-        {
-            colors.push_back(
-                {mesh.colors[i * 4], mesh.colors[i * 4 + 1], mesh.colors[i * 4 + 2], mesh.colors[i * 4 + 3]});
-        }
-        // if (animVertices)
-        //{
-        //	animVertices.push_back({
-        //		mesh.animVertices[i * 3],
-        //		mesh.animVertices[i * 3 + 1],
-        //		mesh.animVertices[i * 3 + 2]
-        //	});
-        // }
-        // if (animNormals)
-        //{
-        //	animNormals.push_back({
-        //		mesh.animNormals[i * 3],
-        //		mesh.animNormals[i * 3 + 1],
-        //		mesh.animNormals[i * 3 + 2]
-        //	});
-        // }
-    }
     archive(
         mesh.vertexCount, mesh.triangleCount, vertices, texcoords, texcoords2, normals, tangents, colors
         // animVertices,
         // animNormals,
     );
-};
+}
 
 template <typename Archive>
 void load(Archive& archive, Mesh& mesh)
 {
-    std::vector<Vector3> vertices;
-    std::vector<Vector2> texcoords;
-    std::vector<Vector2> texcoords2;
-    std::vector<Vector3> normals;
-    std::vector<Vector4> tangents;
-    std::vector<Color> colors;
+    std::vector<float> vertices;
+    std::vector<float> texcoords;
+    std::vector<float> texcoords2;
+    std::vector<float> normals;
+    std::vector<float> tangents;
+    std::vector<unsigned char> colors;
 
     archive(mesh.vertexCount, mesh.triangleCount, vertices, texcoords, texcoords2, normals, tangents, colors);
 
     mesh.vertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
-    if (!texcoords.empty()) mesh.texcoords = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
-    if (!texcoords2.empty())
-        mesh.texcoords2 = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
-    if (!normals.empty()) mesh.normals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
-    if (!tangents.empty()) mesh.tangents = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
-    if (!colors.empty())
-        mesh.colors = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
+    std::memcpy(mesh.vertices, vertices.data(), mesh.vertexCount * 3 * sizeof(float));
 
-    for (int i = 0; i < vertices.size(); ++i)
+    if (!texcoords.empty())
     {
-        mesh.vertices[i * 3] = vertices[i].x;
-        mesh.vertices[i * 3 + 1] = vertices[i].y;
-        mesh.vertices[i * 3 + 2] = vertices[i].z;
-        if (!texcoords.empty())
-        {
-            mesh.texcoords[i * 2] = texcoords[i].x;
-            mesh.texcoords[i * 2 + 1] = texcoords[i].y;
-        }
-        if (!texcoords2.empty())
-        {
-            mesh.texcoords2[i * 2] = texcoords2[i].x;
-            mesh.texcoords2[i * 2 + 1] = texcoords2[i].y;
-        }
-        if (!normals.empty())
-        {
-            mesh.normals[i * 3] = normals[i].x;
-            mesh.normals[i * 3 + 1] = normals[i].y;
-            mesh.normals[i * 3 + 2] = normals[i].z;
-        }
-        if (!tangents.empty())
-        {
-            mesh.tangents[i * 4] = tangents[i].x;
-            mesh.tangents[i * 4 + 1] = tangents[i].y;
-            mesh.tangents[i * 4 + 2] = tangents[i].z;
-            mesh.tangents[i * 4 + 3] = tangents[i].w;
-        }
-        if (!colors.empty())
-        {
-            mesh.colors[i * 4] = colors[i].r;
-            mesh.colors[i * 4 + 1] = colors[i].g;
-            mesh.colors[i * 4 + 2] = colors[i].b;
-            mesh.colors[i * 4 + 3] = colors[i].a;
-        }
+        mesh.texcoords = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
+        std::memcpy(mesh.texcoords, texcoords.data(), mesh.vertexCount * 2 * sizeof(float));
+    }
+    if (!texcoords2.empty())
+    {
+        mesh.texcoords2 = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 2 * sizeof(float)));
+        std::memcpy(mesh.texcoords2, texcoords2.data(), mesh.vertexCount * 2 * sizeof(float));
+    }
+    if (!normals.empty())
+    {
+        mesh.normals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
+        std::memcpy(mesh.normals, normals.data(), mesh.vertexCount * 3 * sizeof(float));
+    }
+    if (!tangents.empty())
+    {
+        mesh.tangents = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
+        std::memcpy(mesh.tangents, tangents.data(), mesh.vertexCount * 4 * sizeof(float));
+    }
+    if (!colors.empty())
+    {
+        mesh.colors = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
+        std::memcpy(mesh.colors, colors.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
     }
 };
 
