@@ -50,6 +50,42 @@ void serialize(Archive& archive, BoundingBox& bb)
 };
 
 template <typename Archive>
+void save(Archive& archive, ModelAnimation const& modelAnimation)
+{
+    std::vector<BoneInfo> bones(modelAnimation.bones, modelAnimation.bones + modelAnimation.boneCount);
+    std::vector<std::vector<Transform>> framePoses(modelAnimation.frameCount);
+
+    for (int i = 0; i < modelAnimation.frameCount; i++)
+    {
+        framePoses[i].assign(
+            modelAnimation.framePoses[i], modelAnimation.framePoses[i] + modelAnimation.boneCount);
+    }
+
+    archive(modelAnimation.boneCount, modelAnimation.frameCount, bones, framePoses, modelAnimation.name);
+}
+
+template <typename Archive>
+void load(Archive& archive, ModelAnimation& modelAnimation)
+{
+    std::vector<BoneInfo> bones;
+    std::vector<std::vector<Transform>> framePoses;
+
+    archive(modelAnimation.boneCount, modelAnimation.frameCount, bones, framePoses, modelAnimation.name);
+
+    modelAnimation.bones = static_cast<BoneInfo*>(RL_MALLOC(modelAnimation.boneCount * sizeof(BoneInfo)));
+    std::copy(bones.begin(), bones.end(), modelAnimation.bones);
+
+    modelAnimation.framePoses =
+        static_cast<Transform**>(RL_MALLOC(modelAnimation.frameCount * sizeof(Transform*)));
+    for (int i = 0; i < modelAnimation.frameCount; i++)
+    {
+        modelAnimation.framePoses[i] =
+            static_cast<Transform*>(RL_MALLOC(modelAnimation.boneCount * sizeof(Transform)));
+        std::copy(framePoses[i].begin(), framePoses[i].end(), modelAnimation.framePoses[i]);
+    }
+}
+
+template <typename Archive>
 void save(Archive& archive, Mesh const& mesh)
 {
     std::vector<float> vertices(mesh.vertices, mesh.vertices + mesh.vertexCount * 3); // vec3

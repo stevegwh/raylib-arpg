@@ -8,6 +8,7 @@
 #include "slib.hpp"
 
 #include <entt/entt.hpp>
+#include <external/glad.h>
 #include <string>
 #include <unordered_map>
 
@@ -16,6 +17,7 @@ namespace sage
     struct ModelCereal
     {
         Model model;
+        // animations
         std::string materialKey;
         template <class Archive>
         void serialize(Archive& archive)
@@ -51,13 +53,13 @@ namespace sage
             return instance;
         }
 
-        static void UnloadModelKeepMeshes(Model& model);
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
         void EmplaceModel(const std::string& path);
         void EmplaceModel(const std::string& modelKey, const std::string& materialKey, const std::string& path);
         [[nodiscard]] ModelSafe LoadModelCopy(const std::string& path);
         [[nodiscard]] ModelSafe LoadModelDeepCopy(const std::string& path) const;
+        void EmplaceModelAnimation(const std::string& path);
         ModelAnimation* ModelAnimationLoad(const std::string& path, int* animsCount);
         void UnloadImages();
         void UnloadShaderFileText();
@@ -72,6 +74,10 @@ namespace sage
             std::vector<std::string> modelKeys;
             std::vector<ModelCereal> modelData;
 
+            std::vector<std::string> animatedModelKeys;
+            std::vector<int> modelAnimCounts;
+            std::vector<std::vector<ModelAnimation>> modelAnimationsData;
+
             std::vector<std::string> materialKeys;
             std::vector<std::vector<Material>> materialData;
 
@@ -81,13 +87,28 @@ namespace sage
                 materialData.push_back(kv.second);
             }
 
-            for (const auto& kv : modelCopies)
+            for (const auto& [modelKey, modelCereal] : modelCopies)
             {
-                modelKeys.push_back(kv.first);
-                modelData.push_back(kv.second);
+                modelKeys.push_back(modelKey);
+                modelData.push_back(modelCereal);
+
+                if (modelAnimations.contains(modelKey))
+                {
+                    animatedModelKeys.push_back(modelKey);
+                    const auto& [modelAnims, count] = modelAnimations.at(modelKey);
+                    modelAnimCounts.push_back(count);
+                    modelAnimationsData.emplace_back(modelAnims, modelAnims + count);
+                }
             }
 
-            archive(modelKeys, modelData, materialKeys, materialData);
+            archive(
+                modelKeys,
+                modelData,
+                materialKeys,
+                materialData,
+                animatedModelKeys,
+                modelAnimCounts,
+                modelAnimationsData);
         }
 
         template <class Archive>
@@ -96,10 +117,21 @@ namespace sage
             std::vector<std::string> modelKeys;
             std::vector<ModelCereal> modelData;
 
+            std::vector<std::string> animatedModelKeys;
+            std::vector<int> modelAnimCounts;
+            std::vector<std::vector<ModelAnimation>> modelAnimationsData;
+
             std::vector<std::string> materialKeys;
             std::vector<std::vector<Material>> materialData;
 
-            archive(modelKeys, modelData, materialKeys, materialData);
+            archive(
+                modelKeys,
+                modelData,
+                materialKeys,
+                materialData,
+                animatedModelKeys,
+                modelAnimCounts,
+                modelAnimationsData);
 
             for (int i = 0; i < materialKeys.size(); ++i)
             {
@@ -110,6 +142,14 @@ namespace sage
             {
                 modelData[i].model.materials = modelMaterials.at(modelData[i].materialKey).data();
                 GetInstance().modelCopies.emplace(modelKeys[i], modelData[i]);
+            }
+
+            for (int i = 0; i < animatedModelKeys.size(); ++i)
+            {
+                auto count = modelAnimCounts[i];
+                auto* animations = static_cast<ModelAnimation*>(RL_MALLOC(count * sizeof(ModelAnimation)));
+                std::memcpy(animations, modelAnimationsData[i].data(), count * sizeof(ModelAnimation));
+                GetInstance().modelAnimations.emplace(animatedModelKeys[i], std::make_pair(animations, count));
             }
         }
     };

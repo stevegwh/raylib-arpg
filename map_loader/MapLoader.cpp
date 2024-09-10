@@ -230,11 +230,13 @@ namespace sage
         // TODO: Need a library of enums to modelKeys and modelKey/paths and store them all in a separate bin.
         // "assetlib.bin" or something. For now, we can just hand-load them into the map binary.
         // TODO: We need to be able to serialize animation data
-        // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/arissa.glb");
+        ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
+        ResourceManager::GetInstance().EmplaceModelAnimation("resources/models/gltf/goblin.glb");
         ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/arissa.glb");
-        int tmp;
-        ResourceManager::GetInstance().ModelAnimationLoad("resources/models/gltf/arissa.glb", &tmp);
-        // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/hero2.glb");
+        ResourceManager::GetInstance().EmplaceModelAnimation("resources/models/gltf/arissa.glb");
+        ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/hero2.glb");
+        ResourceManager::GetInstance().EmplaceModelAnimation("resources/models/gltf/hero2.glb");
+
         ResourceManager::GetInstance().EmplaceModel("resources/models/obj/portal.obj");
 
         // Height map gets saved here.
