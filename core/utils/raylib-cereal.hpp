@@ -296,12 +296,15 @@ void save(Archive& archive, Material const& material)
 template <typename Archive>
 void load(Archive& archive, Material& material)
 {
-    material = LoadMaterialDefault();
     std::vector<MaterialMap> maps;
     maps.resize(MAX_MATERIAL_MAPS);
     std::array<float, 4> params{};
 
     archive(maps, params);
+
+    material = LoadMaterialDefault();
+    //  material.maps[MATERIAL_MAP_DIFFUSE] = maps.at(0);
+
     for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
     {
         material.maps[i] = maps[i];
