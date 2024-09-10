@@ -127,7 +127,7 @@ namespace sage
         auto modelPath = "resources/models/gltf/arissa.glb";
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         // In case it has not been loaded already
-        ResourceManager::GetInstance().EmplaceModel(modelPath);
+        // ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = name;
