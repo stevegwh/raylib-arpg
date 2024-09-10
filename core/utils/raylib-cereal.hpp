@@ -14,33 +14,6 @@
 #include "utils.h"
 
 template <typename Archive>
-void save(Archive& archive, Image const& image)
-{
-
-    unsigned char* _data = static_cast<unsigned char*>(image.data);
-    int len = image.format * image.width * image.height;
-    std::vector<unsigned char> data(_data, _data + len);
-    archive(data, image.format, image.height, image.width, image.mipmaps);
-}
-
-template <typename Archive>
-void load(Archive& archive, Image& image)
-{
-    std::vector<unsigned char> data;
-    archive(data, image.format, image.height, image.width, image.mipmaps);
-    int len = data.size();
-    image.data = static_cast<unsigned char*>(RL_MALLOC(len * sizeof(unsigned char)));
-    if (image.data != nullptr)
-    {
-        std::memcpy(image.data, data.data(), len);
-    }
-    else
-    {
-        // Handle memory allocation failure
-    }
-}
-
-template <typename Archive>
 void serialize(Archive& archive, Vector2& v2)
 {
     archive(v2.x, v2.y);
@@ -216,14 +189,36 @@ void load(Archive& archive, Mesh& mesh)
 };
 
 template <typename Archive>
+void save(Archive& archive, Image const& image)
+{
+
+    unsigned char* _data = static_cast<unsigned char*>(image.data);
+    int len = image.format * image.width * image.height;
+    std::vector<unsigned char> data(_data, _data + len);
+    archive(data, image.format, image.height, image.width, image.mipmaps);
+}
+
+template <typename Archive>
+void load(Archive& archive, Image& image)
+{
+    std::vector<unsigned char> data;
+    archive(data, image.format, image.height, image.width, image.mipmaps);
+    int len = data.size();
+    image.data = static_cast<unsigned char*>(RL_MALLOC(len * sizeof(unsigned char)));
+    if (image.data != nullptr)
+    {
+        std::memcpy(image.data, data.data(), len * sizeof(unsigned char));
+    }
+    else
+    {
+        // Handle memory allocation failure
+    }
+}
+
+template <typename Archive>
 void save(Archive& archive, Shader const& shader)
 {
-    std::vector<int> locs;
-    locs.reserve(RL_MAX_SHADER_LOCATIONS);
-    for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++)
-    {
-        locs.push_back(shader.locs[i]);
-    }
+    std::vector<int> locs(shader.locs, shader.locs + RL_MAX_SHADER_LOCATIONS);
     archive(shader.id, locs);
 };
 
@@ -231,13 +226,9 @@ template <typename Archive>
 void load(Archive& archive, Shader& shader)
 {
     std::vector<int> locs;
-    locs.reserve(RL_MAX_SHADER_LOCATIONS);
-    shader.locs = static_cast<int*>(RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int)));
     archive(shader.id, locs);
-    for (int i = 0; i < RL_MAX_SHADER_LOCATIONS; i++)
-    {
-        shader.locs[i] = locs[i];
-    }
+    shader.locs = static_cast<int*>(RL_MALLOC(RL_MAX_SHADER_LOCATIONS * sizeof(int)));
+    std::memcpy(shader.locs, locs.data(), RL_MAX_SHADER_LOCATIONS * sizeof(int));
 };
 
 template <typename Archive>
@@ -262,6 +253,7 @@ void load(Archive& archive, MaterialMap& map)
     archive(image, map.color, map.value);
     if (!image.data)
     {
+        UnloadImage(image);
         return;
     }
     map.texture = LoadTextureFromImage(image);
@@ -300,7 +292,7 @@ void load(Archive& archive, Material& material)
 
     material = LoadMaterialDefault();
     //  material.maps[MATERIAL_MAP_DIFFUSE] = maps.at(0);
-    std::memcpy(material.maps, maps.data(), MAX_MATERIAL_MAPS);
+    std::memcpy(material.maps, maps.data(), MAX_MATERIAL_MAPS * sizeof(MaterialMap));
 };
 
 template <typename Archive>
@@ -356,27 +348,11 @@ void load(Archive& archive, Model& model)
     model.bones = static_cast<BoneInfo*>(RL_MALLOC(model.boneCount * sizeof(BoneInfo)));
     model.bindPose = static_cast<Transform*>(RL_MALLOC(model.boneCount * sizeof(Transform)));
 
-    for (size_t i = 0; i < model.meshCount; ++i)
-    {
-        model.meshes[i] = meshes[i];
-    }
-    // for (size_t i = 0; i < model.materialCount; ++i)
-    // {
-    //     model.materials[i] = LoadMaterialDefault(); // TODO: Redundant?
-    //     model.materials[i] = materials[i];
-    // }
-    for (size_t i = 0; i < model.meshCount; ++i)
-    {
-        model.meshMaterial[i] = meshMaterial[i];
-    }
-    for (size_t i = 0; i < model.boneCount; ++i)
-    {
-        model.bones[i] = bones[i];
-    }
-    for (size_t i = 0; i < model.boneCount; ++i)
-    {
-        model.bindPose[i] = bindPose[i];
-    }
+    std::memcpy(model.meshes, meshes.data(), model.meshCount * sizeof(Mesh));
+    // std::memcpy(model.materials, materials.data(), model.materialCount * sizeof(Material);
+    std::memcpy(model.meshMaterial, meshMaterial.data(), model.meshCount * sizeof(int));
+    std::memcpy(model.bones, bones.data(), model.boneCount * sizeof(BoneInfo));
+    std::memcpy(model.bindPose, bindPose.data(), model.boneCount * sizeof(Transform));
 
     // Below taken from raylib's LoadModel().
     model.transform = MatrixIdentity();

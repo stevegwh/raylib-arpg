@@ -276,26 +276,36 @@ namespace sage
         if (!modelCopies.contains(modelKey))
         {
             ModelCereal modelCereal;
-            // Would be nice if the materials were not allocated at all if the material already exists
             modelCereal.model = LoadModel(path.c_str());
             modelCereal.materialKey = materialKey;
 
-            // TODO: What is material is "DEFAULT"?
             if (!modelMaterials.contains(materialKey))
             {
-                std::vector<Material> materials(
-                    modelCereal.model.materials, modelCereal.model.materials + modelCereal.model.materialCount);
-                modelMaterials.emplace(materialKey, materials);
+                std::vector<Material> materials;
+                materials.reserve(modelCereal.model.materialCount);
+                for (int i = 0; i < modelCereal.model.materialCount; ++i)
+                {
+                    materials.push_back(modelCereal.model.materials[i]);
+                }
+                modelMaterials.emplace(materialKey, std::move(materials));
+
+                // Free the original materials array
+                RL_FREE(modelCereal.model.materials);
             }
             else
             {
-                UnloadMaterial(*modelCereal.model.materials);
+                // Free the loaded materials as we're going to use existing ones
+                for (int i = 0; i < modelCereal.model.materialCount; ++i)
+                {
+                    UnloadMaterial(modelCereal.model.materials[i]);
+                }
                 RL_FREE(modelCereal.model.materials);
-                modelCereal.model.materials = modelMaterials.at(materialKey).data();
             }
 
-            modelCopies.emplace(modelKey, modelCereal);
-            // TODO: Leak here based on LoadMaterialDefault();
+            // Set the materials pointer to the stored materials
+            modelCereal.model.materials = modelMaterials[materialKey].data();
+
+            modelCopies.emplace(modelKey, std::move(modelCereal));
         }
     }
 
@@ -363,20 +373,6 @@ namespace sage
         fragShaderFileText.clear();
     }
 
-    // Unload material from memory, not shaders or maps (freed later)
-    void sgUnloadMaterial(Material material)
-    {
-        // Unload loaded texture maps (avoid unloading default texture, managed by raylib)
-        if (material.maps != nullptr)
-        {
-            for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
-            {
-                if (material.maps[i].texture.id != rlGetTextureIdDefault())
-                    rlUnloadTexture(material.maps[i].texture.id);
-            }
-        }
-    }
-
     void sgUnloadModel(Model model)
     {
         // Unload meshes
@@ -398,9 +394,13 @@ namespace sage
     {
         for (auto& [key, materials] : modelMaterials)
         {
-            for (const auto& mat : materials)
+            for (auto& mat : materials)
             {
-                sgUnloadMaterial(mat);
+                for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
+                {
+                    if (mat.maps[i].texture.id != rlGetTextureIdDefault()) rlUnloadTexture(mat.maps[i].texture.id);
+                }
+                RL_FREE(mat.maps);
             }
         }
         for (auto& [path, model] : modelCopies)
