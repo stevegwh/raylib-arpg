@@ -276,8 +276,11 @@ namespace sage
         if (!modelCopies.contains(modelKey))
         {
             ModelCereal modelCereal;
+            // Would be nice if the materials were not allocated at all if the material already exists
             modelCereal.model = LoadModel(path.c_str());
             modelCereal.materialKey = materialKey;
+
+            // TODO: What is material is "DEFAULT"?
             if (!modelMaterials.contains(materialKey))
             {
                 std::vector<Material> materials(
@@ -288,6 +291,7 @@ namespace sage
             {
                 UnloadMaterial(*modelCereal.model.materials);
                 RL_FREE(modelCereal.model.materials);
+                modelCereal.model.materials = modelMaterials.at(materialKey).data();
             }
 
             modelCopies.emplace(modelKey, modelCereal);
