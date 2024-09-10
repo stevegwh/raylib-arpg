@@ -16,14 +16,10 @@
 template <typename Archive>
 void save(Archive& archive, Image const& image)
 {
-    std::vector<unsigned char> data;
+
     unsigned char* _data = static_cast<unsigned char*>(image.data);
     int len = image.format * image.width * image.height;
-    data.reserve(len);
-    for (int i = 0; i < len; ++i)
-    {
-        data.push_back(_data[i]);
-    }
+    std::vector<unsigned char> data(_data, _data + len);
     archive(data, image.format, image.height, image.width, image.mipmaps);
 }
 
@@ -304,11 +300,7 @@ void load(Archive& archive, Material& material)
 
     material = LoadMaterialDefault();
     //  material.maps[MATERIAL_MAP_DIFFUSE] = maps.at(0);
-
-    for (size_t i = 0; i < MAX_MATERIAL_MAPS; i++)
-    {
-        material.maps[i] = maps[i];
-    }
+    std::memcpy(material.maps, maps.data(), MAX_MATERIAL_MAPS);
 };
 
 template <typename Archive>
@@ -320,40 +312,11 @@ void serialize(Archive& archive, BoneInfo& boneInfo)
 template <typename Archive>
 void save(Archive& archive, Model const& model)
 {
-    std::vector<Mesh> meshes;
-    meshes.reserve(model.meshCount);
-    for (size_t i = 0; i < model.meshCount; i++)
-    {
-        meshes.push_back(model.meshes[i]);
-    }
-
-    // std::vector<Material> materials;
-    // materials.reserve(model.materialCount);
-    // for (size_t i = 0; i < model.materialCount; i++)
-    // {
-    //     materials.push_back(model.materials[i]);
-    // }
-
-    std::vector<BoneInfo> bones;
-    bones.reserve(model.boneCount);
-    for (size_t i = 0; i < model.boneCount; i++)
-    {
-        bones.push_back(model.bones[i]);
-    }
-
-    std::vector<Transform> bindPose;
-    bindPose.reserve(model.boneCount);
-    for (size_t i = 0; i < model.boneCount; i++)
-    {
-        bindPose.push_back(model.bindPose[i]);
-    }
-
-    std::vector<int> meshMaterial;
-    meshMaterial.reserve(model.boneCount);
-    for (size_t i = 0; i < model.meshCount; i++)
-    {
-        meshMaterial.push_back(model.meshMaterial[i]);
-    }
+    std::vector<Mesh> meshes(model.meshes, model.meshes + model.meshCount);
+    // std::vector<Material> materials(model.materials, model.materials+model.materialCount);
+    std::vector<BoneInfo> bones(model.bones, model.bones + model.boneCount);
+    std::vector<Transform> bindPose(model.bindPose, model.bindPose + model.boneCount);
+    std::vector<int> meshMaterial(model.meshMaterial, model.meshMaterial + model.meshCount);
 
     archive(
         model.transform,
