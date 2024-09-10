@@ -166,6 +166,7 @@ namespace sage
             memcpy(mesh.indices, oldMesh.indices, mesh.triangleCount * 3 * sizeof(unsigned short));
         }
 
+        // TODO: These do not need to be copied (copy vertices/normals, instead)
         // Copy animation vertex data
         if (oldMesh.animVertices)
         {
@@ -177,6 +178,8 @@ namespace sage
             mesh.animNormals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
             memcpy(mesh.animNormals, oldMesh.animNormals, mesh.vertexCount * 3 * sizeof(float));
         }
+        // -----
+
         if (oldMesh.boneIds)
         {
             mesh.boneIds = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
@@ -189,30 +192,6 @@ namespace sage
         }
 
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
-    }
-
-    /**
-     * Frees model data but keeps the meshes in memory.
-     * Allows us to "unpack" a parent model into multiple models from its children.
-     * Used for taking in single OBJ files as maps and instantiating the meshes as different entities
-     * @param model
-     */
-    void ResourceManager::UnloadModelKeepMeshes(Model& model)
-    {
-        // Drop tables (does not unload materials
-        for (int i = 0; i < model.materialCount; i++)
-            RL_FREE(model.materials[i].maps);
-
-        // Unload arrays
-        RL_FREE(model.meshes);
-        RL_FREE(model.materials);
-        RL_FREE(model.meshMaterial);
-
-        // Unload animation data
-        RL_FREE(model.bones);
-        RL_FREE(model.bindPose);
-
-        TRACELOG(LOG_INFO, "MODEL: Unloaded model (NOT meshes) from RAM");
     }
 
     /*
@@ -341,14 +320,19 @@ namespace sage
         return ModelSafe(model);
     }
 
-    ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
+    void ResourceManager::EmplaceModelAnimation(const std::string& path)
     {
         if (!modelAnimations.contains(path))
         {
-            auto animations = LoadModelAnimations(path.c_str(), animsCount);
-            modelAnimations[path] = std::make_pair(animations, *animsCount);
-            return animations;
+            int animsCount;
+            auto animations = LoadModelAnimations(path.c_str(), &animsCount);
+            modelAnimations[path] = std::make_pair(animations, animsCount);
         }
+    }
+
+    ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
+    {
+        assert(modelAnimations.contains(path));
         const auto& pair = modelAnimations[path];
         *animsCount = pair.second;
         return pair.first;

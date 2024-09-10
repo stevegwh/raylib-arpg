@@ -76,7 +76,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto modelPath = "resources/models/gltf/goblin.glb";
         // In case it has not been preloaded
-        ResourceManager::GetInstance().EmplaceModel(modelPath);
+        // ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = name;
@@ -167,7 +167,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto modelPath = "resources/models/gltf/hero2.glb";
         // In case it has not been loaded already
-        ResourceManager::GetInstance().EmplaceModel(modelPath);
+        // ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
         renderable.name = "Player";
