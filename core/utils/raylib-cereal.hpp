@@ -85,16 +85,19 @@ void save(Archive& archive, Mesh const& mesh)
     }
 
     // Animations
-    std::vector<float> animVertices;
-    if (mesh.animVertices)
-    {
-        animVertices.assign(mesh.animVertices, mesh.animVertices + mesh.vertexCount * 3);
-    }
-    std::vector<float> animNormals;
-    if (mesh.animNormals)
-    {
-        animNormals.assign(mesh.animNormals, mesh.animNormals + mesh.vertexCount * 3);
-    }
+
+    // animVertices/animNormals are just copies of vertices/normal arrays. No need to save them.
+    // std::vector<float> animVertices;
+    // if (mesh.animVertices)
+    // {
+    //     animVertices.assign(mesh.animVertices, mesh.animVertices + mesh.vertexCount * 3);
+    // }
+    // std::vector<float> animNormals;
+    // if (mesh.animNormals)
+    // {
+    //     animNormals.assign(mesh.animNormals, mesh.animNormals + mesh.vertexCount * 3);
+    // }
+
     std::vector<unsigned char> boneIds;
     if (mesh.boneIds)
     {
@@ -115,8 +118,8 @@ void save(Archive& archive, Mesh const& mesh)
         normals,
         tangents,
         colors,
-        animVertices,
-        animNormals,
+        // animVertices,
+        // animNormals,
         boneIds,
         boneWeights);
 }
@@ -144,10 +147,12 @@ void load(Archive& archive, Mesh& mesh)
         normals,
         tangents,
         colors,
-        animVertices,
-        animNormals,
+        // animVertices,
+        // animNormals,
         boneIds,
         boneWeights);
+
+    bool animations = !boneIds.empty();
 
     mesh.vertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
     std::memcpy(mesh.vertices, vertices.data(), mesh.vertexCount * 3 * sizeof(float));
@@ -179,25 +184,23 @@ void load(Archive& archive, Mesh& mesh)
     }
 
     // Animations
-    if (!animVertices.empty())
+    if (animations)
     {
-        mesh.animVertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
+        mesh.animVertices = static_cast<float*>(RL_CALLOC(mesh.vertexCount * 3, sizeof(float)));
         std::memcpy(mesh.animVertices, vertices.data(), mesh.vertexCount * 3 * sizeof(float));
-    }
-    if (!animNormals.empty())
-    {
-        mesh.animNormals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
-        std::memcpy(mesh.animNormals, vertices.data(), mesh.vertexCount * 3 * sizeof(float));
-    }
-    if (!boneIds.empty())
-    {
-        mesh.boneIds = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
-        std::memcpy(mesh.boneIds, boneIds.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
-    }
-    if (!boneWeights.empty())
-    {
-        mesh.boneWeights = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
-        std::memcpy(mesh.boneWeights, boneWeights.data(), mesh.vertexCount * 4 * sizeof(float));
+        mesh.animNormals = static_cast<float*>(RL_CALLOC(mesh.vertexCount * 3, sizeof(float)));
+        std::memcpy(mesh.animNormals, normals.data(), mesh.vertexCount * 3 * sizeof(float));
+
+        if (!boneIds.empty())
+        {
+            mesh.boneIds = static_cast<unsigned char*>(RL_CALLOC(mesh.vertexCount * 4, sizeof(unsigned char)));
+            std::memcpy(mesh.boneIds, boneIds.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
+        }
+        if (!boneWeights.empty())
+        {
+            mesh.boneWeights = static_cast<float*>(RL_CALLOC(mesh.vertexCount * 4, sizeof(float)));
+            std::memcpy(mesh.boneWeights, boneWeights.data(), mesh.vertexCount * 4 * sizeof(float));
+        }
     }
 };
 

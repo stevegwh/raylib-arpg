@@ -308,8 +308,9 @@ namespace sage
 
         Matrix modelTransform = MatrixIdentity();
 
-        auto& renderable =
-            registry->emplace<Renderable>(id, ModelSafe("resources/models/obj/portal.obj"), modelTransform);
+        const char* modelPath = "resources/models/obj/portal.obj";
+        auto& renderable = registry->emplace<Renderable>(
+            id, ResourceManager::GetInstance().LoadModelCopy(modelPath), modelTransform);
         renderable.name = "Portal Outer";
         data->lightSubSystem->LinkRenderableToLight(id);
 
