@@ -276,6 +276,10 @@ namespace sage
         if (!modelCopies.contains(modelKey))
         {
             ModelCereal modelCereal;
+            // TODO: We're still loading and allocating a material here, potentially unnecessarily
+            // This might not be a big deal, if we limit "EmplaceModel" to only be used when constructing the map
+            // binary. If the goblin (etc) mesh is archived in the binary, then EmplaceModel will never need to be
+            // called at runtime.
             modelCereal.model = LoadModel(path.c_str());
             modelCereal.materialKey = materialKey;
 

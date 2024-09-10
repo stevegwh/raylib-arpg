@@ -21,7 +21,7 @@ namespace sage
       public:
         void Update();
         void Draw3D();
-        ~WavemobStateController() override;
+        ~WavemobStateController() override = default;
         WavemobStateController(entt::registry* _registry, GameData* _gameData);
 
         friend class StateMachineController; // Required for CRTP
