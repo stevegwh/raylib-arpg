@@ -84,18 +84,41 @@ void save(Archive& archive, Mesh const& mesh)
         colors.assign(mesh.colors, mesh.colors + mesh.vertexCount * 4); // vec4
     }
 
-    // Animations not supported right now
-    // std::vector<Vector3> animVertices;
-    // std::vector<Vector3> animNormals;
-    // std::vector<std::string> boneIds; // Unsigned char*
-    // std::vector<Vector4> boneWeights; // float* (4 bones per vertex)
-    // TODO: Bone IDs and weights are missing
+    // Animations
+    std::vector<float> animVertices;
+    if (mesh.animVertices)
+    {
+        animVertices.assign(mesh.animVertices, mesh.animVertices + mesh.vertexCount * 3);
+    }
+    std::vector<float> animNormals;
+    if (mesh.animNormals)
+    {
+        animNormals.assign(mesh.animNormals, mesh.animNormals + mesh.vertexCount * 3);
+    }
+    std::vector<unsigned char> boneIds;
+    if (mesh.boneIds)
+    {
+        boneIds.assign(mesh.boneIds, mesh.boneIds + mesh.vertexCount * 4);
+    }
+    std::vector<float> boneWeights;
+    if (mesh.boneWeights)
+    {
+        boneWeights.assign(mesh.boneWeights, mesh.boneWeights + mesh.vertexCount * 4); // vec4
+    }
 
     archive(
-        mesh.vertexCount, mesh.triangleCount, vertices, texcoords, texcoords2, normals, tangents, colors
-        // animVertices,
-        // animNormals,
-    );
+        mesh.vertexCount,
+        mesh.triangleCount,
+        vertices,
+        texcoords,
+        texcoords2,
+        normals,
+        tangents,
+        colors,
+        animVertices,
+        animNormals,
+        boneIds,
+        boneWeights);
 }
 
 template <typename Archive>
@@ -107,8 +130,24 @@ void load(Archive& archive, Mesh& mesh)
     std::vector<float> normals;
     std::vector<float> tangents;
     std::vector<unsigned char> colors;
+    std::vector<float> animVertices;
+    std::vector<float> animNormals;
+    std::vector<unsigned char> boneIds;
+    std::vector<float> boneWeights;
 
-    archive(mesh.vertexCount, mesh.triangleCount, vertices, texcoords, texcoords2, normals, tangents, colors);
+    archive(
+        mesh.vertexCount,
+        mesh.triangleCount,
+        vertices,
+        texcoords,
+        texcoords2,
+        normals,
+        tangents,
+        colors,
+        animVertices,
+        animNormals,
+        boneIds,
+        boneWeights);
 
     mesh.vertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
     std::memcpy(mesh.vertices, vertices.data(), mesh.vertexCount * 3 * sizeof(float));
@@ -137,6 +176,28 @@ void load(Archive& archive, Mesh& mesh)
     {
         mesh.colors = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
         std::memcpy(mesh.colors, colors.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
+    }
+
+    // Animations
+    if (!animVertices.empty())
+    {
+        mesh.animVertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
+        std::memcpy(mesh.animVertices, vertices.data(), mesh.vertexCount * 3 * sizeof(float));
+    }
+    if (!animNormals.empty())
+    {
+        mesh.animNormals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
+        std::memcpy(mesh.animNormals, vertices.data(), mesh.vertexCount * 3 * sizeof(float));
+    }
+    if (!boneIds.empty())
+    {
+        mesh.boneIds = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
+        std::memcpy(mesh.boneIds, boneIds.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
+    }
+    if (!boneWeights.empty())
+    {
+        mesh.boneWeights = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
+        std::memcpy(mesh.boneWeights, boneWeights.data(), mesh.vertexCount * 4 * sizeof(float));
     }
 };
 
