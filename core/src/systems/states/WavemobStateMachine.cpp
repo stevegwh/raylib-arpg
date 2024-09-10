@@ -281,10 +281,6 @@ namespace sage
         }
     }
 
-    WavemobStateController::~WavemobStateController()
-    {
-    }
-
     WavemobStateController::WavemobStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry)
     {
