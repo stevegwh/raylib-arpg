@@ -22,9 +22,6 @@ namespace sage
         void Init(Vector3 mouseRayHit);
         void Update(Vector3 mouseRayHit);
         void Enable(bool enable);
-        AbilityIndicator(
-            entt::registry* _registry,
-            NavigationGridSystem* _navigationGridSystem,
-            const std::string& cursorTexturePath);
+        AbilityIndicator(entt::registry* _registry, NavigationGridSystem* _navigationGridSystem, AssetID assetId);
     };
 } // namespace sage

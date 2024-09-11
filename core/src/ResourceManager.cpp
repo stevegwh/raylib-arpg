@@ -4,6 +4,7 @@
 
 #include "ResourceManager.hpp"
 
+#include "AssetManager.hpp"
 #include "components/Renderable.hpp"
 
 #include "raylib/src/config.h"
@@ -227,63 +228,60 @@ namespace sage
         return gpuShaderLoad(vShaderStr, fShaderStr);
     }
 
-    Texture ResourceManager::TextureLoad(const std::string& path)
+    Texture ResourceManager::TextureLoad(const AssetID id)
     {
-        if (!nonModelTextures.contains(path))
+        if (!nonModelTextures.contains(id))
         {
-            assert(images.contains(path));
-            nonModelTextures[path] = LoadTextureFromImage(images[path]);
+            assert(images.contains(id));
+            nonModelTextures[id] = LoadTextureFromImage(images[id]);
         }
-        return nonModelTextures[path];
+        return nonModelTextures[id];
     }
 
-    void ResourceManager::ImageUnload(const std::string& path)
+    void ResourceManager::ImageUnload(const AssetID id)
     {
-        if (images.contains(path))
+        if (images.contains(id))
         {
-            UnloadImage(images.at(path));
-            images.erase(path);
+            UnloadImage(images.at(id));
+            images.erase(id);
         }
     }
 
-    ImageSafe ResourceManager::GetImage(const std::string& path)
+    ImageSafe ResourceManager::GetImage(const AssetID id)
     {
-        assert(images.contains(path));
-        return ImageSafe(images[path], false);
+        assert(images.contains(id));
+        return ImageSafe(images[id], false);
     }
 
-    void ResourceManager::EmplaceImage(const std::string& path)
+    void ResourceManager::ImageLoadFromFile(const AssetID id, Image image)
     {
-        EmplaceImage(path, path);
-    }
-
-    void ResourceManager::EmplaceImage(const std::string& key, Image image)
-    {
-        if (!images.contains(key))
+        if (!images.contains(id))
         {
-            images[key] = image;
+            images[id] = image;
             image = {};
         }
     }
 
-    void ResourceManager::EmplaceImage(const std::string& key, const std::string& path)
+    void ResourceManager::ImageLoadFromFile(const AssetID id)
     {
-        if (!images.contains(key))
+        auto path = getAssetPath(id);
+        if (!images.contains(id))
         {
-            images[key] = LoadImage(path.c_str());
+            images[id] = LoadImage(path.c_str());
         }
     }
 
-    void ResourceManager::EmplaceModel(const std::string& path)
+    void ResourceManager::ModelLoadFromFile(const AssetID id)
     {
-        EmplaceModel(path, path, path);
+        const auto path = getAssetPath(id);
+        ModelLoadFromFile(id, path);
     }
 
-    void ResourceManager::EmplaceModel(
-        const std::string& modelKey, const std::string& materialKey, const std::string& path)
+    void ResourceManager::ModelLoadFromFile(const AssetID id, const std::string& materialKey)
     {
-        if (!modelCopies.contains(modelKey))
+        if (!modelCopies.contains(id))
         {
+            const auto path = getAssetPath(id);
             ModelCereal modelCereal;
             // TODO: We're still loading and allocating a material here, potentially unnecessarily
             // This might not be a big deal, if we limit "EmplaceModel" to only be used when constructing the map
@@ -318,7 +316,7 @@ namespace sage
             // Set the materials pointer to the stored materials
             modelCereal.model.materials = modelMaterials[materialKey].data();
 
-            modelCopies.emplace(modelKey, std::move(modelCereal));
+            modelCopies.emplace(id, std::move(modelCereal));
         }
     }
 
@@ -328,11 +326,11 @@ namespace sage
      * @param path
      * @return Model
      */
-    ModelSafe ResourceManager::LoadModelCopy(const std::string& key)
+    ModelSafe ResourceManager::GetModelCopy(AssetID id)
     {
-        assert(modelCopies.contains(key));
-        ModelSafe modelsafe(modelCopies.at(key).model, false);
-        modelsafe.SetKey(key);
+        assert(modelCopies.contains(id));
+        ModelSafe modelsafe(modelCopies.at(id).model, false);
+        modelsafe.SetKey(id);
         return std::move(modelsafe);
     }
 
@@ -342,34 +340,40 @@ namespace sage
      * @param path
      * @return
      */
-    ModelSafe ResourceManager::LoadModelDeepCopy(const std::string& key) const
+    ModelSafe ResourceManager::GetModelDeepCopy(AssetID id) const
     {
         // TODO: Unsure if deep copy is ever really necessary.
         // For animated models, I believe all that's needed is to shallow copy the mesh minus
         // animVertices/animNormals. So, allocate memory for new meshes, shallow copy the majority of its data, but
         // allocate and point to new animVertices/animNormals arrays
-        assert(modelCopies.contains(key));
-        Model model = modelCopies.at(key).model;
-        deepCopyModel(modelCopies.at(key).model, model);
+        assert(modelCopies.contains(id));
+        Model model = modelCopies.at(id).model;
+        deepCopyModel(modelCopies.at(id).model, model);
         return ModelSafe(model);
     }
 
-    void ResourceManager::EmplaceModelAnimation(const std::string& path)
+    void ResourceManager::ModelAnimationLoadFromFile(const AssetID id)
     {
-        if (!modelAnimations.contains(path))
+        if (!modelAnimations.contains(id))
         {
+            const auto& path = getAssetPath(id);
             int animsCount;
             auto animations = LoadModelAnimations(path.c_str(), &animsCount);
-            modelAnimations[path] = std::make_pair(animations, animsCount);
+            modelAnimations[id] = std::make_pair(animations, animsCount);
         }
     }
 
-    ModelAnimation* ResourceManager::ModelAnimationLoad(const std::string& path, int* animsCount)
+    ModelAnimation* ResourceManager::GetModelAnimation(AssetID id, int* animsCount)
     {
-        assert(modelAnimations.contains(path));
-        const auto& pair = modelAnimations[path];
+        assert(modelAnimations.contains(id));
+        const auto& pair = modelAnimations[id];
         *animsCount = pair.second;
         return pair.first;
+    }
+
+    const std::string& ResourceManager::getAssetPath(AssetID id)
+    {
+        return AssetManager::GetInstance().GetAssetPath(id);
     }
 
     void ResourceManager::UnloadImages()
@@ -473,5 +477,6 @@ namespace sage
         shader.id = rlGetShaderIdDefault();
         shader.locs = rlGetShaderLocsDefault();
         shaders.emplace("DEFAULT", shader);
+        AssetManager::GetInstance(); // Init paths, if not already
     }
 } // namespace sage

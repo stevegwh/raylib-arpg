@@ -74,14 +74,11 @@ namespace sage
         registry->emplace<MoveableActor>(id);
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
-        auto modelPath = "resources/models/gltf/goblin.glb";
-        // In case it has not been preloaded
-        // ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_ENEMY_GOBLIN), modelTransform);
         renderable.name = name;
 
-        auto& animation = registry->emplace<Animation>(id, modelPath);
+        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_ENEMY_GOBLIN);
         animation.animationMap[AnimationEnum::IDLE] = 0;
         animation.animationMap[AnimationEnum::DEATH] = 0;
         animation.animationMap[AnimationEnum::MOVE] = 3;
@@ -124,15 +121,12 @@ namespace sage
         transform.SetScale(1.0f);
         transform.SetRotation({0, 0, 0});
 
-        auto modelPath = "resources/models/gltf/arissa.glb";
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
-        // In case it has not been loaded already
-        // ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
 
-        auto& animation = registry->emplace<Animation>(id, modelPath);
+        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.ChangeAnimation(0);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
@@ -165,17 +159,14 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
-        auto modelPath = "resources/models/gltf/hero2.glb";
-        // In case it has not been loaded already
-        // ResourceManager::GetInstance().EmplaceModel(modelPath);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelDeepCopy(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = "Player";
 
         auto& moveableActor = registry->emplace<MoveableActor>(id);
 
         // Set animation hooks
-        auto& animation = registry->emplace<Animation>(id, modelPath);
+        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
 
         animation.animationMap[AnimationEnum::IDLE] = 2;
         animation.animationMap[AnimationEnum::MOVE] = 5;
@@ -264,10 +255,8 @@ namespace sage
             timer.SetMaxTime(1000000);
             timer.Start();
 
-            Texture texture = ResourceManager::GetInstance().TextureLoad(
-                "resources/textures/luos/Noise_Gradients/T_Random_50.png");
-            Texture texture2 = ResourceManager::GetInstance().TextureLoad(
-                "resources/textures/luos/Noise_Gradients/T_Random_45.png");
+            Texture texture = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE50);
+            Texture texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE45);
 
             Matrix modelTransform = MatrixRotateX(90 * DEG2RAD);
 
@@ -308,9 +297,8 @@ namespace sage
 
         Matrix modelTransform = MatrixIdentity();
 
-        const char* modelPath = "resources/models/obj/portal.obj";
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelCopy(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_BUILDING_PORTAL), modelTransform);
         renderable.name = "Portal Outer";
         data->lightSubSystem->LinkRenderableToLight(id);
 
@@ -332,9 +320,8 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
-        const char* modelPath = "resources/models/obj/Wizard Tower 1.obj";
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().LoadModelCopy(modelPath), modelTransform);
+            id, ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_BUILDING_WIZARDTOWER1), modelTransform);
         renderable.name = "Wizard Tower";
         data->lightSubSystem->LinkRenderableToLight(id);
 

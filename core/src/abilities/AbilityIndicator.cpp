@@ -22,15 +22,9 @@ namespace sage
     }
 
     AbilityIndicator::AbilityIndicator(
-        entt::registry* _registry,
-        NavigationGridSystem* _navigationGridSystem,
-        const std::string& cursorTexturePath)
+        entt::registry* _registry, NavigationGridSystem* _navigationGridSystem, const AssetID assetId)
         : indicatorTexture(std::make_unique<TextureTerrainOverlay>(
-              _registry,
-              _navigationGridSystem,
-              cursorTexturePath.c_str(),
-              WHITE,
-              "resources/shaders/glsl330/base.fs"))
+              _registry, _navigationGridSystem, assetId, WHITE, "resources/shaders/glsl330/base.fs"))
     {
     }
 } // namespace sage

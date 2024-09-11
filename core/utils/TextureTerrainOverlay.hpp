@@ -37,13 +37,13 @@ namespace sage
         TextureTerrainOverlay(
             entt::registry* _registry,
             NavigationGridSystem* _navigationGridSystem,
-            const char* texturePath,
+            AssetID assetId,
             Color _hint,
             const char* shaderPath);
         TextureTerrainOverlay(
             entt::registry* _registry,
             NavigationGridSystem* _navigationGridSystem,
-            const char* texturePath,
+            AssetID assetId,
             Color _hint,
             Shader _shader);
     };

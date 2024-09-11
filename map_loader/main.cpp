@@ -5,6 +5,8 @@
 
 int main(int argc, char* argv[])
 {
+    sage::AssetManager::GetInstance().GenerateBlankJson();
+    return 0;
     sage::MapLoader mapLoader;
     entt::registry registry{};
     sage::CollisionSystem collisionSystem(&registry);

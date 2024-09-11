@@ -1,17 +1,33 @@
 #pragma once
 
-#include <array>
+#include "AssetID.hpp"
 
-#include "cereal/archives/binary.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/array.hpp"
 #include "cereal/types/string.hpp"
 #include "cereal/types/vector.hpp"
+#include "magic_enum.hpp"
 #include "raylib.h"
 #include "raylib/src/config.h"
 #include "raymath.h"
 #include "rlgl.h"
 #include "utils.h"
+#include <array>
+
+namespace cereal
+{
+    template <class Archive>
+    inline std::string save_minimal(Archive const&, const sage::AssetID& t)
+    {
+        return std::string(magic_enum::enum_name(t));
+    }
+
+    template <class Archive>
+    inline void load_minimal(Archive const&, sage::AssetID& t, std::string const& value)
+    {
+        t = magic_enum::enum_cast<sage::AssetID>(value).value();
+    }
+} // namespace cereal
 
 template <typename Archive>
 void serialize(Archive& archive, Vector2& v2)

@@ -1,7 +1,20 @@
 #include "AssetManager.hpp"
-#include "raylib.h"
 
+#include "cereal/archives/binary.hpp"
+#include "cereal/archives/xml.hpp"
+#include "cereal/cereal.hpp"
+#include "cereal/types/string.hpp"
+#include "entt/core/hashed_string.hpp"
+#include "entt/core/type_traits.hpp"
+#include "raylib-cereal.hpp"
+#include "raylib.h"
 #include <cassert>
+#include <cereal/archives/json.hpp>
+#include <entt/entt.hpp>
+#include <fstream>
+#include <magic_enum.hpp>
+#include <type_traits>
+#include <vector>
 
 namespace sage
 {
@@ -33,10 +46,10 @@ namespace sage
     {
         std::cout << "START: Saving asset paths to JSON file \n";
         using namespace entt::literals;
-        if (FileExists(jsonPath.c_str()))
+        if (FileExists(jsonPath))
         {
-            auto file = LoadFileText(jsonPath.c_str());
-            SaveFileText(std::string(jsonPath + ".bak").c_str(), file);
+            auto file = LoadFileText(jsonPath);
+            SaveFileText(std::string(std::string(jsonPath) + ".bak").c_str(), file);
             UnloadFileText(file);
         }
 
@@ -59,7 +72,7 @@ namespace sage
     {
         std::cout << "START: Loading asset paths from JSON file \n";
 
-        if (!FileExists(jsonPath.c_str()))
+        if (!FileExists(jsonPath))
         {
             std::cout << "WARNING: No asset path file detected. \n";
             assert(0);
@@ -74,6 +87,11 @@ namespace sage
             storage.close();
         }
         std::cout << "FINISH: Loading asset paths from JSON file \n";
+    }
+
+    AssetManager::AssetManager()
+    {
+        LoadPaths();
     }
 
 }; // namespace sage
