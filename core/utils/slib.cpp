@@ -213,8 +213,9 @@ namespace sage
             {
                 for (int j = 0; j < MAX_MATERIAL_MAPS; j++)
                 {
-                    if (rlmodel.materials[i].maps[j].texture.id != rlGetTextureIdDefault())
-                        rlUnloadTexture(rlmodel.materials[i].maps[j].texture.id);
+                    // NB: Textures are currently shared between meshes
+                    // if (rlmodel.materials[i].maps[j].texture.id != rlGetTextureIdDefault())
+                    //     rlUnloadTexture(rlmodel.materials[i].maps[j].texture.id);
                 }
             }
         }

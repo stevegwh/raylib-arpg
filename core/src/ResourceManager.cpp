@@ -91,11 +91,16 @@ namespace sage
                 // Deep copy maps
                 model.materials[i].maps =
                     static_cast<MaterialMap*>(RL_MALLOC(MAX_MATERIAL_MAPS * sizeof(MaterialMap)));
-                memcpy(
+                std::memcpy(
                     model.materials[i].maps, oldModel.materials[i].maps, MAX_MATERIAL_MAPS * sizeof(MaterialMap));
 
+                // TODO: Does not set a new texture id, causing issues when freeing it in ModelSafe
+                // See "LoadTextureFromImage" and raylib-cereal.
+                // Consider if you really want a new texture per model or if "deep copy" is unnecessary
+                // I think a shallow copy but new animVertices and animNormals would be fine.
+
                 // Copy params
-                memcpy(model.materials[i].params, oldModel.materials[i].params, 4 * sizeof(float));
+                std::memcpy(model.materials[i].params, oldModel.materials[i].params, 4 * sizeof(float));
             }
 
             for (size_t i = 0; i < model.meshCount; ++i)
@@ -166,20 +171,16 @@ namespace sage
             memcpy(mesh.indices, oldMesh.indices, mesh.triangleCount * 3 * sizeof(unsigned short));
         }
 
-        // TODO: These do not need to be copied (copy vertices/normals, instead)
-        // Copy animation vertex data
         if (oldMesh.animVertices)
         {
             mesh.animVertices = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
-            memcpy(mesh.animVertices, oldMesh.animVertices, mesh.vertexCount * 3 * sizeof(float));
+            memcpy(mesh.animVertices, oldMesh.vertices, mesh.vertexCount * 3 * sizeof(float));
         }
         if (oldMesh.animNormals)
         {
             mesh.animNormals = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 3 * sizeof(float)));
-            memcpy(mesh.animNormals, oldMesh.animNormals, mesh.vertexCount * 3 * sizeof(float));
+            memcpy(mesh.animNormals, oldMesh.normals, mesh.vertexCount * 3 * sizeof(float));
         }
-        // -----
-
         if (oldMesh.boneIds)
         {
             mesh.boneIds = static_cast<unsigned char*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(unsigned char)));
