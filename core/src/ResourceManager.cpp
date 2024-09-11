@@ -315,8 +315,12 @@ namespace sage
      */
     ModelSafe ResourceManager::LoadModelDeepCopy(const std::string& key) const
     {
+        // TODO: Unsure if deep copy is ever really necessary.
+        // For animated models, I believe all that's needed is to shallow copy the mesh minus
+        // animVertices/animNormals. So, allocate memory for new meshes, shallow copy the majority of its data, but
+        // allocate and point to new animVertices/animNormals arrays
         assert(modelCopies.contains(key));
-        Model model;
+        Model model = modelCopies.at(key).model;
         deepCopyModel(modelCopies.at(key).model, model);
         return ModelSafe(model);
     }
