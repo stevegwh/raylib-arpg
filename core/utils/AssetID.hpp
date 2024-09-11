@@ -6,7 +6,7 @@
 
 namespace sage
 {
-    enum class ResEnum
+    enum class AssetID
     {
         MDL_PLAYER_DEFAULT,
         MDL_NPC_ARISSA,

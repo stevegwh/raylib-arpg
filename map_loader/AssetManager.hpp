@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ResEnum.hpp"
+#include "AssetID.hpp"
 
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"
@@ -21,43 +21,43 @@
 namespace cereal
 {
     template <class Archive>
-    inline std::string save_minimal(Archive const&, const sage::ResEnum& t)
+    inline std::string save_minimal(Archive const&, const sage::AssetID& t)
     {
         return std::string(magic_enum::enum_name(t));
     }
 
     template <class Archive>
-    inline void load_minimal(Archive const&, sage::ResEnum& t, std::string const& value)
+    inline void load_minimal(Archive const&, sage::AssetID& t, std::string const& value)
     {
-        t = magic_enum::enum_cast<sage::ResEnum>(value).value();
+        t = magic_enum::enum_cast<sage::AssetID>(value).value();
     }
 } // namespace cereal
 
 namespace sage
 {
 
-    class ResourcePathManager
+    class AssetManager
     {
-        std::unordered_map<ResEnum, std::string> resources;
-
-        ResourcePathManager() = default;
-        ~ResourcePathManager() = default;
-        void addResource(ResEnum res, const std::string& path);
+        static constexpr std::string jsonPath = "resources/asset-paths.json";
+        std::unordered_map<AssetID, std::string> assetMap;
+        AssetManager() = default;
+        ~AssetManager() = default;
+        void addAsset(AssetID asset, const std::string& path);
 
       public:
-        static ResourcePathManager& GetInstance()
+        static AssetManager& GetInstance()
         {
-            static ResourcePathManager instance;
+            static AssetManager instance;
             return instance;
         }
 
         template <class Archive>
         void serialize(Archive& archive)
         {
-            archive(CEREAL_NVP(resources));
+            archive(CEREAL_NVP(assetMap));
         }
 
-        const std::string& GetResource(ResEnum res);
+        const std::string& GetAssetPath(AssetID asset);
         void GenerateBlankJson();
         static void SavePaths();
         static void LoadPaths();
