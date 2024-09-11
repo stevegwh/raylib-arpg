@@ -5,7 +5,7 @@
 
 #include "AssetID.hpp"
 #include "magic_enum/magic_enum.hpp"
-#include "raylib-cereal.hpp"
+// #include "raylib-cereal.hpp"
 #include "raylib.h"
 #include "slib.hpp"
 
@@ -40,10 +40,10 @@ namespace sage
 
         std::unordered_map<std::string, Shader> shaders{};
         std::unordered_map<std::string, std::vector<Material>> modelMaterials{}; // Shared model materials
-        std::unordered_map<AssetID, Image> images{};                             // Image (CPU) data
-        std::unordered_map<AssetID, Texture> nonModelTextures{}; // Textures loaded outside of model loading
-        std::unordered_map<AssetID, ModelCereal> modelCopies{};
-        std::unordered_map<AssetID, std::pair<ModelAnimation*, int>> modelAnimations{};
+        std::unordered_map<std::string, Image> images{};                         // Image (CPU) data
+        std::unordered_map<std::string, Texture> nonModelTextures{}; // Textures loaded outside of model loading
+        std::unordered_map<std::string, ModelCereal> modelCopies{};
+        std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations{};
         std::unordered_map<std::string, char*> vertShaderFileText{};
         std::unordered_map<std::string, char*> fragShaderFileText{};
 
@@ -66,8 +66,12 @@ namespace sage
         ImageSafe GetImage(AssetID id);
         void ImageLoadFromFile(AssetID id);
         void ImageLoadFromFile(AssetID id, Image image);
+        void ImageLoadFromFile(const std::string& path, Image image);
         void ModelLoadFromFile(AssetID id);
         void ModelLoadFromFile(AssetID id, const std::string& materialKey);
+        void ModelLoadFromFile(const std::string& path);
+        void ModelLoadFromFile(const std::string& path, const std::string& materialKey);
+        [[nodiscard]] ModelSafe GetModelCopy(const std::string& id);
         [[nodiscard]] ModelSafe GetModelCopy(AssetID id);
         [[nodiscard]] ModelSafe GetModelDeepCopy(AssetID id) const;
         void ModelAnimationLoadFromFile(AssetID id);
@@ -82,13 +86,13 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            std::vector<AssetID> imageKeys;
+            std::vector<std::string> imageKeys;
             std::vector<Image> imageData;
 
-            std::vector<AssetID> modelKeys;
+            std::vector<std::string> modelKeys;
             std::vector<ModelCereal> modelData;
 
-            std::vector<AssetID> animatedModelKeys;
+            std::vector<std::string> animatedModelKeys;
             std::vector<int> modelAnimCounts;
             std::vector<std::vector<ModelAnimation>> modelAnimationsData;
 
@@ -136,13 +140,13 @@ namespace sage
         template <class Archive>
         void load(Archive& archive)
         {
-            std::vector<AssetID> imageKeys;
+            std::vector<std::string> imageKeys;
             std::vector<Image> imageData;
 
-            std::vector<AssetID> modelKeys;
+            std::vector<std::string> modelKeys;
             std::vector<ModelCereal> modelData;
 
-            std::vector<AssetID> animatedModelKeys;
+            std::vector<std::string> animatedModelKeys;
             std::vector<int> modelAnimCounts;
             std::vector<std::vector<ModelAnimation>> modelAnimationsData;
 
@@ -185,5 +189,4 @@ namespace sage
             }
         }
     };
-
 } // namespace sage

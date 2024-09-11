@@ -48,7 +48,7 @@ namespace sage
         return CollisionLayer::DEFAULT;
     }
 
-    void parseMtlFile(const std::string& mtlPath, std::string& materialName)
+    void parseMtlFile(const std::string& mtlPath, std::string& materialKey)
     {
         if (!FileExists(mtlPath.c_str())) return;
         std::ifstream infile(mtlPath.c_str());
@@ -62,7 +62,7 @@ namespace sage
 
             if (textureNameStart != std::string::npos)
             {
-                materialName = line.substr(textureNameStart);
+                materialKey = line.substr(textureNameStart);
             }
             else
             {
@@ -120,10 +120,11 @@ namespace sage
         infile >> key;
         std::string meshName;
         infile >> meshName;
+        meshName = meshPath + "/" + meshName;
 
         // Strip file extension (Could do this in blender script, instead).
-        size_t lastindex = meshName.find_last_of(".");
-        meshName = meshName.substr(0, lastindex);
+        // size_t lastindex = meshName.find_last_of(".");
+        // meshName = meshName.substr(0, lastindex);
 
         infile >> key;
         float x, y, z;
@@ -182,16 +183,16 @@ namespace sage
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
             std::string filePath = entry.path().string();
-            std::string fileName = entry.path().stem().string();
+            // std::string fileName = entry.path().stem().string();
             std::cout << filePath << std::endl;
 
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
-                std::string materialName = "DEFAULT"; // Load default raylib mat
+                std::string materialKey = "DEFAULT"; // Load default raylib mat
                 size_t lastindex = filePath.find_last_of(".");
                 std::string mtlPath = filePath.substr(0, lastindex) + ".mtl";
-                parseMtlFile(mtlPath, materialName);
-                ResourceManager::GetInstance().ModelLoadFromFile(fileName, materialName, filePath);
+                parseMtlFile(mtlPath, materialKey);
+                ResourceManager::GetInstance().ModelLoadFromFile(filePath, materialKey);
             }
         }
         std::cout << "FINISH: Loading mesh data into resource manager. \n";
@@ -227,8 +228,8 @@ namespace sage
         // ExportImage(heightmap.GetImage(), "heightmap.png");
         // ExportImage(normalMap.GetImage(), "normalmap.png");
 
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::GEN_IMG_HEIGHTMAP, heightMap.GetImage());
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::GEN_IMG_NORMALMAP, normalMap.GetImage());
+        ResourceManager::GetInstance().ImageLoadFromFile("HEIGHT_MAP", heightMap.GetImage());
+        ResourceManager::GetInstance().ImageLoadFromFile("NORMAL_MAP", normalMap.GetImage());
         // Images are nulled at this point
 
         // TODO: Anything from this point onwards (minus saving) isn't a "map loader", it should be a resource

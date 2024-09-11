@@ -195,12 +195,12 @@ namespace sage
         rlmodel.materials[materialIdx].shader = shader;
     }
 
-    void ModelSafe::SetKey(const AssetID newKey)
+    void ModelSafe::SetKey(const std::string& newKey)
     {
         modelKey = newKey;
     }
 
-    AssetID ModelSafe::GetKey() const
+    const std::string& ModelSafe::GetKey() const
     {
         return modelKey;
     }

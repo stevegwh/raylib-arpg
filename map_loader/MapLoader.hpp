@@ -4,9 +4,12 @@
 
 #pragma once
 
-#include "systems/CollisionSystem.hpp"
+#include "AssetID.hpp"
+#include "systems/NavigationGridSystem.hpp"
 
 #include <entt/entt.hpp>
+#include <string>
+#include <unordered_map>
 
 // Takes a gltf or obj file, instantiates it into game components and serializes it as a "bin" file
 
@@ -16,6 +19,7 @@ namespace sage
 
     class MapLoader
     {
+        std::unordered_map<std::string, AssetID> pathIdMap;
 
       public:
         static void ConstructMap(

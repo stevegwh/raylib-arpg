@@ -27,7 +27,7 @@ namespace sage
         // SetConfigFlags(FLAG_MSAA_4X_HINT);
         InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
 
-        AssetManager::GetInstance(); // Init asset paths
+        AssetManager::GetInstance().LoadPaths(); // Init asset paths
         serializer::LoadMap(registry.get());
 
         auto icon = ResourceManager::GetInstance().GetImage(AssetID::IMG_APPLICATIONICON);

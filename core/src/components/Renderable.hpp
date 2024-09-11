@@ -53,7 +53,7 @@ namespace sage
         template <class Archive>
         void load(Archive& archive)
         {
-            AssetID modelKey;
+            std::string modelKey;
             archive(modelKey, name, initialTransform);
             ModelSafe modelSafe(ResourceManager::GetInstance().GetModelCopy(modelKey));
             // Model data must be deserialised from ResourceManager before deserialising models
