@@ -44,11 +44,12 @@ namespace sage
 
     void AssetManager::SavePaths()
     {
+        const std::string& jsonPath = "resources/asset-paths.json";
         std::cout << "START: Saving asset paths to JSON file \n";
         using namespace entt::literals;
-        if (FileExists(jsonPath))
+        if (FileExists(jsonPath.c_str()))
         {
-            auto file = LoadFileText(jsonPath);
+            auto file = LoadFileText(jsonPath.c_str());
             SaveFileText(std::string(std::string(jsonPath) + ".bak").c_str(), file);
             UnloadFileText(file);
         }
@@ -70,9 +71,10 @@ namespace sage
 
     void AssetManager::LoadPaths()
     {
+        const std::string& jsonPath = "resources/asset-paths.json";
         std::cout << "START: Loading asset paths from JSON file \n";
 
-        if (!FileExists(jsonPath))
+        if (!FileExists(jsonPath.c_str()))
         {
             std::cout << "WARNING: No asset path file detected. \n";
             assert(0);
@@ -87,11 +89,6 @@ namespace sage
             storage.close();
         }
         std::cout << "FINISH: Loading asset paths from JSON file \n";
-    }
-
-    AssetManager::AssetManager()
-    {
-        LoadPaths();
     }
 
 }; // namespace sage

@@ -17,9 +17,8 @@ namespace sage
 
     class AssetManager
     {
-        static constexpr const char* jsonPath = "resources/asset-paths.json";
         std::unordered_map<AssetID, std::string> assetMap;
-        AssetManager();
+        AssetManager() = default;
         ~AssetManager() = default;
         void addAsset(AssetID asset, const std::string& path);
 
@@ -38,8 +37,8 @@ namespace sage
 
         const std::string& GetAssetPath(AssetID asset);
         void GenerateBlankJson();
-        static void SavePaths();
-        static void LoadPaths();
+        void SavePaths();
+        void LoadPaths();
     };
 
 }; // namespace sage

@@ -56,7 +56,7 @@ namespace sage
     class ModelSafe
     {
         Model rlmodel{};
-        AssetID modelKey; // The name of the model in the ResourceManager
+        std::string modelKey; // The name/path of the model in the ResourceManager
         bool memorySafe = true;
 
         void UnloadShaderLocs() const;
@@ -76,8 +76,8 @@ namespace sage
         void SetTexture(Texture texture, int materialIdx, MaterialMapIndex mapIdx) const;
         [[nodiscard]] Shader GetShader(int materialIdx) const;
         void SetShader(Shader shader, int materialIdx) const;
-        void SetKey(AssetID newKey);
-        [[nodiscard]] AssetID GetKey() const;
+        void SetKey(const std::string& newKey);
+        [[nodiscard]] const std::string& GetKey() const;
         ModelSafe(const ModelSafe&) = delete;
         ModelSafe& operator=(const ModelSafe&) = delete;
         ModelSafe(ModelSafe&& other) noexcept;
