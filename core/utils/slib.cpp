@@ -143,17 +143,18 @@ namespace sage
         return GetRayCollisionMesh(ray, rlmodel.meshes[meshNum], mat);
     }
 
-    void ModelSafe::UpdateAnimation(ModelAnimation anim, int frame)
+    void ModelSafe::UpdateAnimation(ModelAnimation anim, int frame) const
     {
         UpdateModelAnimation(rlmodel, anim, frame);
     }
 
-    void ModelSafe::Draw(Vector3 position, float scale, Color tint)
+    void ModelSafe::Draw(Vector3 position, float scale, Color tint) const
     {
         DrawModel(rlmodel, position, scale, tint);
     }
 
-    void ModelSafe::Draw(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint)
+    void ModelSafe::Draw(
+        Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) const
     {
         DrawModelEx(rlmodel, position, rotationAxis, rotationAngle, scale, tint);
     }

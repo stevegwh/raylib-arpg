@@ -243,6 +243,7 @@ namespace sage
 
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_BUILDING_PORTAL);
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_BUILDING_WIZARDTOWER1);
+        ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_VFX_SPHERE);
 
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_REGULAR);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_TALK);

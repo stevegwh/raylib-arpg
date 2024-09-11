@@ -24,7 +24,6 @@ namespace sage
     struct ModelCereal
     {
         Model model;
-        // animations
         std::string materialKey;
         template <class Archive>
         void serialize(Archive& archive)

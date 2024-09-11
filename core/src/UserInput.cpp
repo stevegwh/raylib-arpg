@@ -295,7 +295,6 @@ namespace sage
     UserInput::UserInput(KeyMapping* _keyMapping, Settings* _settings)
         : keyMapping(_keyMapping), settings(_settings)
     {
-        // TODO: Settings file not being loaded
         assert(settings != nullptr);
         assert(keyMapping != nullptr);
     }
