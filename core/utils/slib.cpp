@@ -12,6 +12,47 @@
 
 namespace sage
 {
+
+    const Image& ImageSafe::GetImage()
+    {
+        return image;
+    }
+
+    void ImageSafe::SetImage(Image& _image)
+    {
+        image = _image;
+        _image = {};
+    }
+
+    Color ImageSafe::GetColor(int x, int y) const
+    {
+        return GetImageColor(image, x, y);
+    }
+
+    bool ImageSafe::HasLoaded() const
+    {
+        return image.data != nullptr;
+    }
+
+    int ImageSafe::GetWidth() const
+    {
+        return image.width;
+    }
+
+    int ImageSafe::GetHeight() const
+    {
+        return image.height;
+    }
+
+    ImageSafe::~ImageSafe()
+    {
+        UnloadImage(image);
+    }
+
+    ImageSafe::ImageSafe(const std::string& path) : image(LoadImage(path.c_str()))
+    {
+    }
+
     const Model& ModelSafe::GetRlModel() const
     {
         return rlmodel;
@@ -57,46 +98,6 @@ namespace sage
         }
 
         return bb;
-    }
-
-    const Image& ImageSafe::GetImage()
-    {
-        return image;
-    }
-
-    void ImageSafe::SetImage(Image& _image)
-    {
-        image = _image;
-        _image = {};
-    }
-
-    Color ImageSafe::GetColor(int x, int y) const
-    {
-        return GetImageColor(image, x, y);
-    }
-
-    bool ImageSafe::HasLoaded() const
-    {
-        return image.data != nullptr;
-    }
-
-    int ImageSafe::GetWidth() const
-    {
-        return image.width;
-    }
-
-    int ImageSafe::GetHeight() const
-    {
-        return image.height;
-    }
-
-    ImageSafe::~ImageSafe()
-    {
-        UnloadImage(image);
-    }
-
-    ImageSafe::ImageSafe(const std::string& path) : image(LoadImage(path.c_str()))
-    {
     }
 
     RayCollision ModelSafe::GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const
@@ -213,9 +214,8 @@ namespace sage
             {
                 for (int j = 0; j < MAX_MATERIAL_MAPS; j++)
                 {
-                    // NB: Textures are currently shared between meshes
-                    // if (rlmodel.materials[i].maps[j].texture.id != rlGetTextureIdDefault())
-                    //     rlUnloadTexture(rlmodel.materials[i].maps[j].texture.id);
+                    if (rlmodel.materials[i].maps[j].texture.id != rlGetTextureIdDefault())
+                        rlUnloadTexture(rlmodel.materials[i].maps[j].texture.id);
                 }
             }
         }
@@ -225,7 +225,8 @@ namespace sage
     {
         if (!instanced)
         {
-            this->UnloadMaterials();
+            // NB: Textures are currently shared between model copies (deep copies or not)
+            // this->UnloadMaterials();
             UnloadModel(rlmodel);
         }
     }
