@@ -41,8 +41,6 @@ namespace sage
         std::unordered_map<std::string, char*> fragShaderFileText{};
 
         Shader gpuShaderLoad(const char* vs, const char* fs);
-        Image imageLoad(const std::string& path);
-
         static void deepCopyModel(const Model& oldModel, Model& newModel);
         static void deepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
 
@@ -55,6 +53,11 @@ namespace sage
 
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
+        void ImageUnload(const std::string& path);
+        ImageSafe GetImage(const std::string& path);
+        void EmplaceImage(const std::string& path);
+        void EmplaceImage(const std::string& key, Image image);
+        void EmplaceImage(const std::string& key, const std::string& path);
         void EmplaceModel(const std::string& path);
         void EmplaceModel(const std::string& modelKey, const std::string& materialKey, const std::string& path);
         [[nodiscard]] ModelSafe LoadModelCopy(const std::string& path);
@@ -71,6 +74,9 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
+            std::vector<std::string> imageKeys;
+            std::vector<Image> imageData;
+
             std::vector<std::string> modelKeys;
             std::vector<ModelCereal> modelData;
 
@@ -80,6 +86,12 @@ namespace sage
 
             std::vector<std::string> materialKeys;
             std::vector<std::vector<Material>> materialData;
+
+            for (const auto& [imageKey, image] : images)
+            {
+                imageKeys.push_back(imageKey);
+                imageData.push_back(image);
+            }
 
             for (const auto& kv : modelMaterials)
             {
@@ -102,6 +114,8 @@ namespace sage
             }
 
             archive(
+                imageKeys,
+                imageData,
                 modelKeys,
                 modelData,
                 materialKeys,
@@ -114,6 +128,9 @@ namespace sage
         template <class Archive>
         void load(Archive& archive)
         {
+            std::vector<std::string> imageKeys;
+            std::vector<Image> imageData;
+
             std::vector<std::string> modelKeys;
             std::vector<ModelCereal> modelData;
 
@@ -125,6 +142,8 @@ namespace sage
             std::vector<std::vector<Material>> materialData;
 
             archive(
+                imageKeys,
+                imageData,
                 modelKeys,
                 modelData,
                 materialKeys,
@@ -132,6 +151,11 @@ namespace sage
                 animatedModelKeys,
                 modelAnimCounts,
                 modelAnimationsData);
+
+            for (int i = 0; i < imageKeys.size(); ++i)
+            {
+                GetInstance().images.emplace(imageKeys[i], imageData[i]);
+            }
 
             for (int i = 0; i < materialKeys.size(); ++i)
             {

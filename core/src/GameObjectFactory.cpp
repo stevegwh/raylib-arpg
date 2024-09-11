@@ -332,9 +332,9 @@ namespace sage
         transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
-
+        const char* modelPath = "resources/models/obj/Wizard Tower 1.obj";
         auto& renderable = registry->emplace<Renderable>(
-            id, ModelSafe("resources/models/obj/Wizard Tower 1.obj"), modelTransform);
+            id, ResourceManager::GetInstance().LoadModelCopy(modelPath), modelTransform);
         renderable.name = "Wizard Tower";
         data->lightSubSystem->LinkRenderableToLight(id);
 

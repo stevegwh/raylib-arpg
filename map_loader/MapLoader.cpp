@@ -217,19 +217,22 @@ namespace sage
         createFloor(registry, mapBB);
 
         // Generate height/normal maps here.
-        ImageSafe heightmap, normalMap;
+        ImageSafe heightMap, normalMap;
         navigationGridSystem->Init(500, 1.0f);
         navigationGridSystem->InitGridHeightNormals(); // Calculates grid terrain height and gets normals
-        navigationGridSystem->GenerateHeightMap(heightmap);
+        navigationGridSystem->GenerateHeightMap(heightMap);
         navigationGridSystem->GenerateNormalMap(normalMap);
 
-        // Exporting for debug purposes
+        // Uncomment to export for debug purposes
         // ExportImage(heightmap.GetImage(), "heightmap.png");
         // ExportImage(normalMap.GetImage(), "normalmap.png");
 
+        ResourceManager::GetInstance().EmplaceImage("HEIGHT_MAP", heightMap.GetImage());
+        ResourceManager::GetInstance().EmplaceImage("NORMAL_MAP", normalMap.GetImage());
+        // Images are nulled at this point
+
         // TODO: Need a library of enums to modelKeys and modelKey/paths and store them all in a separate bin.
         // "assetlib.bin" or something. For now, we can just hand-load them into the map binary.
-        // TODO: We need to be able to serialize animation data
         ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
         ResourceManager::GetInstance().EmplaceModelAnimation("resources/models/gltf/goblin.glb");
         ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/arissa.glb");
@@ -238,9 +241,24 @@ namespace sage
         ResourceManager::GetInstance().EmplaceModelAnimation("resources/models/gltf/hero2.glb");
 
         ResourceManager::GetInstance().EmplaceModel("resources/models/obj/portal.obj");
+        ResourceManager::GetInstance().EmplaceModel("resources/models/obj/Wizard Tower 1.obj");
+
+        ResourceManager::GetInstance().EmplaceImage("resources/imgCircle16.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/imgCircle8.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/regular.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/talk.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/move.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/denied.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/attack.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/icon.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/imgCircle16.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/imgCircle8.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/spark_flame.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/luos/Noise_Gradients/T_Random_50.png");
+        ResourceManager::GetInstance().EmplaceImage("resources/textures/luos/Noise_Gradients/T_Random_45.png");
 
         // Height map gets saved here.
-        serializer::SaveMap(*registry, heightmap, normalMap);
+        serializer::SaveMap(*registry);
 
         CloseWindow();
         std::cout << "Map saved." << std::endl;

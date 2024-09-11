@@ -106,7 +106,7 @@ namespace sage
 
         // ----------------------------------------------
 
-        void SaveMap(const entt::registry& source, ImageSafe& heightMap, ImageSafe& normalMap)
+        void SaveMap(const entt::registry& source)
         {
             std::cout << "Save called" << std::endl;
             using namespace entt::literals;
@@ -123,7 +123,6 @@ namespace sage
                 // output finishes flushing its contents when it goes out of scope
                 cereal::BinaryOutputArchive output{storage};
 
-                output(heightMap, normalMap);
                 output(ResourceManager::GetInstance());
 
                 const auto view = source.view<sgTransform, Renderable, Collideable>();
@@ -143,7 +142,7 @@ namespace sage
             std::cout << "Save finished" << std::endl;
         }
 
-        void LoadMap(entt::registry* destination, ImageSafe& heightMap, ImageSafe& normalMap)
+        void LoadMap(entt::registry* destination)
         {
             assert(destination != nullptr);
 
@@ -159,7 +158,6 @@ namespace sage
             {
                 cereal::BinaryInputArchive input(storage);
 
-                input(heightMap, normalMap);
                 input(ResourceManager::GetInstance());
                 // Use height/normal map to initiate navigation grid
 
