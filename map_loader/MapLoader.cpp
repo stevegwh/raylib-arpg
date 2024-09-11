@@ -231,6 +231,8 @@ namespace sage
         ResourceManager::GetInstance().EmplaceImage("NORMAL_MAP", normalMap.GetImage());
         // Images are nulled at this point
 
+        // TODO: Anything from this point onwards (minus saving) isn't a "map loader", it should be a resource
+        // library.
         // TODO: Need a library of enums to modelKeys and modelKey/paths and store them all in a separate bin.
         // "assetlib.bin" or something. For now, we can just hand-load them into the map binary.
         ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
@@ -243,8 +245,6 @@ namespace sage
         ResourceManager::GetInstance().EmplaceModel("resources/models/obj/portal.obj");
         ResourceManager::GetInstance().EmplaceModel("resources/models/obj/Wizard Tower 1.obj");
 
-        ResourceManager::GetInstance().EmplaceImage("resources/imgCircle16.png");
-        ResourceManager::GetInstance().EmplaceImage("resources/imgCircle8.png");
         ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/regular.png");
         ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/talk.png");
         ResourceManager::GetInstance().EmplaceImage("resources/textures/cursor/32/move.png");
