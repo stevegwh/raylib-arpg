@@ -10,7 +10,6 @@
 #include "cereal/types/string.hpp"
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
-#include "entt/entity/snapshot.hpp"
 #include "raylib-cereal.hpp"
 #include "raylib.h"
 #include <cereal/archives/json.hpp>

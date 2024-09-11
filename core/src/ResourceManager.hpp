@@ -67,6 +67,8 @@ namespace sage
         void UnloadImages();
         void UnloadShaderFileText();
 
+        std::string GetAssetPath();
+
         void UnloadAll();
         ResourceManager(const ResourceManager&) = delete;
         ResourceManager& operator=(const ResourceManager&) = delete;

@@ -25,6 +25,7 @@ FetchContent_MakeAvailable(entt)
 
 add_subdirectory(vendor/raylib)
 include_directories(vendor)
+include_directories(vendor/magic_enum)
 include_directories(vendor/imgui)
 include_directories(vendor/imgui/backends)
 
