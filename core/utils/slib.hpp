@@ -66,9 +66,9 @@ namespace sage
         [[nodiscard]] const Model& GetRlModel() const;
         [[nodiscard]] BoundingBox CalcLocalBoundingBox() const;
         [[nodiscard]] RayCollision GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const;
-        void UpdateAnimation(ModelAnimation anim, int frame);
-        void Draw(Vector3 position, float scale, Color tint);
-        void Draw(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint);
+        void UpdateAnimation(ModelAnimation anim, int frame) const;
+        void Draw(Vector3 position, float scale, Color tint) const;
+        void Draw(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) const;
         [[nodiscard]] int GetMeshCount() const;
         [[nodiscard]] int GetMaterialCount() const;
         [[nodiscard]] Matrix GetTransform() const;

@@ -57,6 +57,7 @@ namespace sage
     LightningBallVFX::LightningBallVFX(GameData* _gameData, sgTransform* _transform)
         : VisualFX(_gameData, _transform)
     {
+        // TODO: Does not use resource manager
         // Texture/Material
         texture =
             LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_53.png"); // TODO: Is first texture used?
