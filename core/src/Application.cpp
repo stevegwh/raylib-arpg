@@ -26,9 +26,11 @@ namespace sage
         // SetConfigFlags(FLAG_MSAA_4X_HINT);
         InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
 
-        Image icon = LoadImage("resources/icon.png");
-        SetWindowIcon(icon);
-        UnloadImage(icon);
+        serializer::LoadMap(registry.get());
+
+        auto icon = ResourceManager::GetInstance().GetImage("resources/icon.png");
+        SetWindowIcon(icon.GetImage());
+        ResourceManager::GetInstance().ImageUnload("resources/icon.png");
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 

@@ -319,11 +319,11 @@ namespace sage
 
     Cursor::Cursor(entt::registry* _registry, GameData* _gameData) : registry(_registry), gameData(_gameData)
     {
-        regulartex = LoadTexture("resources/textures/cursor/32/regular.png");
-        talktex = LoadTexture("resources/textures/cursor/32/talk.png");
-        movetex = LoadTexture("resources/textures/cursor/32/move.png");
-        invalidmovetex = LoadTexture("resources/textures/cursor/32/denied.png");
-        combattex = LoadTexture("resources/textures/cursor/32/attack.png");
+        regulartex = ResourceManager::GetInstance().TextureLoad("resources/textures/cursor/32/regular.png");
+        talktex = ResourceManager::GetInstance().TextureLoad("resources/textures/cursor/32/talk.png");
+        movetex = ResourceManager::GetInstance().TextureLoad("resources/textures/cursor/32/move.png");
+        invalidmovetex = ResourceManager::GetInstance().TextureLoad("resources/textures/cursor/32/denied.png");
+        combattex = ResourceManager::GetInstance().TextureLoad("resources/textures/cursor/32/attack.png");
         currentTex = &regulartex;
         EnableContextSwitching();
     }

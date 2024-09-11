@@ -3,6 +3,7 @@
 //
 
 #include "FountainPartSys.hpp"
+#include "slib.hpp"
 
 #include "ResourceManager.hpp"
 
@@ -11,16 +12,6 @@ namespace sage
 
     FountainPartSys::FountainPartSys(Camera3D* cam) : ParticleSystem(cam)
     {
-        // TODO: Delete once picture generated
-        Image imgCircle16 = GenImageGradientRadial(16, 16, 0.3f, WHITE, BLACK);
-        ExportImage(imgCircle16, "resources/imgCircle16.png");
-        UnloadImage(imgCircle16);
-
-        Image imgCircle8 = GenImageGradientRadial(8, 8, 0.5f, WHITE, BLACK);
-        ExportImage(imgCircle8, "resources/imgCircle16.png");
-        UnloadImage(imgCircle8);
-        // ----
-
         auto texCircle16 = ResourceManager::GetInstance().TextureLoad("resources/imgCircle16.png");
         auto texCircle8 = ResourceManager::GetInstance().TextureLoad("resources/imgCircle8.png");
 

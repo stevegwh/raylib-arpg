@@ -21,7 +21,6 @@ namespace sage
     void ImageSafe::SetImage(Image& _image)
     {
         image = _image;
-        _image = {};
     }
 
     Color ImageSafe::GetColor(int x, int y) const
@@ -44,12 +43,45 @@ namespace sage
         return image.height;
     }
 
-    ImageSafe::~ImageSafe()
+    ImageSafe::ImageSafe(ImageSafe&& other) noexcept : image(other.image)
     {
-        UnloadImage(image);
+        // Reset the source object's model to prevent double deletion
+        memorySafe = other.memorySafe;
+        other.image = {};
     }
 
-    ImageSafe::ImageSafe(const std::string& path) : image(LoadImage(path.c_str()))
+    ImageSafe& ImageSafe::operator=(ImageSafe&& other) noexcept
+    {
+
+        if (this != &other && memorySafe)
+        {
+            // Clean up existing resources
+            UnloadImage(image);
+
+            // Move resources from other
+            image = other.image;
+            memorySafe = other.memorySafe;
+
+            // Reset the source object's model
+            other.image = {};
+        }
+        return *this;
+    }
+
+    ImageSafe::~ImageSafe()
+    {
+        if (memorySafe)
+        {
+            UnloadImage(image);
+        }
+    }
+
+    ImageSafe::ImageSafe(Image _image, bool _memorySafe) : image(_image), memorySafe(_memorySafe)
+    {
+    }
+
+    ImageSafe::ImageSafe(const std::string& path, bool _memorySafe)
+        : image(LoadImage(path.c_str())), memorySafe(_memorySafe)
     {
     }
 
@@ -179,7 +211,7 @@ namespace sage
 
     ModelSafe& ModelSafe::operator=(ModelSafe&& other) noexcept
     {
-        if (this != &other)
+        if (this != &other && !instanced)
         {
             // Clean up existing resources
             UnloadModel(rlmodel);

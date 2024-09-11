@@ -32,15 +32,6 @@ namespace sage
         return shaders[concat];
     }
 
-    Image ResourceManager::imageLoad(const std::string& path)
-    {
-        if (!images.contains(path))
-        {
-            images[path] = LoadImage(path.c_str());
-        }
-        return images[path];
-    }
-
     void ResourceManager::deepCopyModel(const Model& oldModel, Model& model)
     {
         model.meshCount = oldModel.meshCount;
@@ -240,9 +231,47 @@ namespace sage
     {
         if (!nonModelTextures.contains(path))
         {
-            nonModelTextures[path] = LoadTextureFromImage(imageLoad(path));
+            assert(images.contains(path));
+            nonModelTextures[path] = LoadTextureFromImage(images[path]);
         }
         return nonModelTextures[path];
+    }
+
+    void ResourceManager::ImageUnload(const std::string& path)
+    {
+        if (images.contains(path))
+        {
+            UnloadImage(images.at(path));
+            images.erase(path);
+        }
+    }
+
+    ImageSafe ResourceManager::GetImage(const std::string& path)
+    {
+        assert(images.contains(path));
+        return ImageSafe(images[path], false);
+    }
+
+    void ResourceManager::EmplaceImage(const std::string& path)
+    {
+        EmplaceImage(path, path);
+    }
+
+    void ResourceManager::EmplaceImage(const std::string& key, Image image)
+    {
+        if (!images.contains(key))
+        {
+            images[key] = image;
+            image = {};
+        }
+    }
+
+    void ResourceManager::EmplaceImage(const std::string& key, const std::string& path)
+    {
+        if (!images.contains(key))
+        {
+            images[key] = LoadImage(path.c_str());
+        }
     }
 
     void ResourceManager::EmplaceModel(const std::string& path)

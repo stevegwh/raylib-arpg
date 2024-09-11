@@ -71,9 +71,6 @@ namespace sage
     {
 
         float slices = 500;
-
-        ImageSafe heightMap, normalMap;
-        serializer::LoadMap(registry, heightMap, normalMap);
         data->navigationGridSystem->Init(slices, 1.0f);
 
         // Dependent on only the map/static meshes having been loaded at this point
@@ -81,11 +78,13 @@ namespace sage
         for (auto entity : view)
             data->lightSubSystem->LinkRenderableToLight(entity);
 
+        auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
+        auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
 
         // Clear any CPU resources that are no longer needed
-        ResourceManager::GetInstance().UnloadImages();
-        ResourceManager::GetInstance().UnloadShaderFileText();
+        // ResourceManager::GetInstance().UnloadImages();
+        // ResourceManager::GetInstance().UnloadShaderFileText();
     };
 
 } // namespace sage

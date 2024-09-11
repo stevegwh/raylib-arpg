@@ -8,6 +8,7 @@
 #include "raylib.h"
 
 #include <entt/entt.hpp>
+#include <extras/IconsFontAwesome6.h>
 #include <string>
 
 namespace sage
@@ -15,6 +16,7 @@ namespace sage
     class ImageSafe
     {
         Image image{};
+        bool memorySafe = true;
 
       public:
         const Image& GetImage();
@@ -23,9 +25,15 @@ namespace sage
         [[nodiscard]] bool HasLoaded() const;
         [[nodiscard]] int GetWidth() const;
         [[nodiscard]] int GetHeight() const;
+
+        ImageSafe(const ImageSafe&) = delete;
+        ImageSafe& operator=(const ImageSafe&) = delete;
+        ImageSafe(ImageSafe&& other) noexcept;
+        ImageSafe& operator=(ImageSafe&& other) noexcept;
+
         ~ImageSafe();
-        explicit ImageSafe(const std::string& path);
-        ImageSafe() = default;
+        explicit ImageSafe(Image _image, bool _memorySafe = true);
+        explicit ImageSafe(const std::string& path, bool _memorySafe = true);
 
         template <typename Archive>
         void serialize(Archive& archive)
