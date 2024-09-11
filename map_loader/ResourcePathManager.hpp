@@ -25,9 +25,9 @@ namespace sage
         TEX_NOISE45
     };
 
-    class ResourcePathManager()
+    class ResourcePathManager
     {
-        std::unordered_map<ResEnum, std::string> paths;
+        std::unordered_map<ResEnum, std::string> resources;
 
         ResourcePathManager();
         ~ResourcePathManager() = default;
@@ -41,6 +41,6 @@ namespace sage
 
         void AddResource(ResEnum res, const std::string& path);
         const std::string& GetResource(ResEnum res);
-    }
+    };
 
 }; // namespace sage
