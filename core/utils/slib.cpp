@@ -85,6 +85,10 @@ namespace sage
     {
     }
 
+    ImageSafe::ImageSafe(bool _memorySafe) : memorySafe(_memorySafe)
+    {
+    }
+
     const Model& ModelSafe::GetRlModel() const
     {
         return rlmodel;
@@ -204,21 +208,21 @@ namespace sage
     ModelSafe::ModelSafe(ModelSafe&& other) noexcept : rlmodel(other.rlmodel)
     {
         // Reset the source object's model to prevent double deletion
-        instanced = other.instanced;
+        memorySafe = other.memorySafe;
         modelKey = other.modelKey;
         other.rlmodel = {};
     }
 
     ModelSafe& ModelSafe::operator=(ModelSafe&& other) noexcept
     {
-        if (this != &other && !instanced)
+        if (this != &other && memorySafe)
         {
             // Clean up existing resources
             UnloadModel(rlmodel);
 
             // Move resources from other
             rlmodel = other.rlmodel;
-            instanced = other.instanced;
+            memorySafe = other.memorySafe;
             modelKey = other.modelKey;
 
             // Reset the source object's model
@@ -255,7 +259,7 @@ namespace sage
 
     ModelSafe::~ModelSafe()
     {
-        if (!instanced)
+        if (memorySafe)
         {
             // NB: Textures are currently shared between model copies (deep copies or not)
             // this->UnloadMaterials();
@@ -263,16 +267,16 @@ namespace sage
         }
     }
 
-    ModelSafe::ModelSafe(Model& _model, bool _instanced) : rlmodel(_model)
+    ModelSafe::ModelSafe(Model& _model, bool _memorySafe) : rlmodel(_model)
     {
-        instanced = _instanced;
-        if (!_instanced)
+        memorySafe = _memorySafe;
+        if (_memorySafe)
         {
             _model = {};
         }
     }
 
-    ModelSafe::ModelSafe(const char* path, bool _instanced) : rlmodel(LoadModel(path)), instanced(_instanced)
+    ModelSafe::ModelSafe(const char* path, bool _memorySafe) : rlmodel(LoadModel(path)), memorySafe(_memorySafe)
     {
     }
 

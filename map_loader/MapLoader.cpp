@@ -217,7 +217,7 @@ namespace sage
         createFloor(registry, mapBB);
 
         // Generate height/normal maps here.
-        ImageSafe heightMap, normalMap;
+        ImageSafe heightMap(false), normalMap(false);
         navigationGridSystem->Init(500, 1.0f);
         navigationGridSystem->InitGridHeightNormals(); // Calculates grid terrain height and gets normals
         navigationGridSystem->GenerateHeightMap(heightMap);

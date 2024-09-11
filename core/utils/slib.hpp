@@ -19,7 +19,7 @@ namespace sage
         bool memorySafe = true;
 
       public:
-        const Image& GetImage();
+        [[nodiscard]] const Image& GetImage();
         void SetImage(Image& _image);
         [[nodiscard]] Color GetColor(int x, int y) const;
         [[nodiscard]] bool HasLoaded() const;
@@ -34,6 +34,7 @@ namespace sage
         ~ImageSafe();
         explicit ImageSafe(Image _image, bool _memorySafe = true);
         explicit ImageSafe(const std::string& path, bool _memorySafe = true);
+        explicit ImageSafe(bool _memorySafe = true);
 
         template <typename Archive>
         void serialize(Archive& archive)
@@ -55,7 +56,7 @@ namespace sage
     {
         Model rlmodel{};
         std::string modelKey; // The name of the model in the ResourceManager
-        bool instanced = false;
+        bool memorySafe = true;
 
         void UnloadShaderLocs() const;
         void UnloadMaterials() const;
@@ -80,8 +81,8 @@ namespace sage
         ModelSafe& operator=(const ModelSafe&) = delete;
         ModelSafe(ModelSafe&& other) noexcept;
         ModelSafe& operator=(ModelSafe&& other) noexcept;
-        explicit ModelSafe(const char* path, bool _instanced = false);
-        explicit ModelSafe(Model& _model, bool _instanced = false);
+        explicit ModelSafe(const char* path, bool _memorySafe = true);
+        explicit ModelSafe(Model& _model, bool _memorySafe = true);
         ModelSafe() = default;
         ~ModelSafe();
 
