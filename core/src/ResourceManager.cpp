@@ -331,7 +331,7 @@ namespace sage
     ModelSafe ResourceManager::LoadModelCopy(const std::string& key)
     {
         assert(modelCopies.contains(key));
-        ModelSafe modelsafe(modelCopies.at(key).model, true);
+        ModelSafe modelsafe(modelCopies.at(key).model, false);
         modelsafe.SetKey(key);
         return std::move(modelsafe);
     }
