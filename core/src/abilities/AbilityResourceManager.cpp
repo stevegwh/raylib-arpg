@@ -34,9 +34,7 @@ namespace sage
         // return nullptr;
 
         return std::make_unique<AbilityIndicator>(
-            _gameData->registry,
-            _gameData->navigationGridSystem.get(),
-            "resources/textures/cursor/rainoffire_cursor.png");
+            _gameData->registry, _gameData->navigationGridSystem.get(), AssetID::TEX_RAINOFFIRE_CURSOR);
     }
 
     std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(

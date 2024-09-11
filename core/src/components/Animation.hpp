@@ -33,6 +33,7 @@ namespace sage
 
     // TODO: Use a timer for animation delay
     // TODO: Add queue/priorities for animations
+    // TODO: Separate header/source
     struct Animation
     {
         std::unordered_map<AnimationEnum, int> animationMap;
@@ -46,10 +47,10 @@ namespace sage
         entt::sigh<void(entt::entity)> onAnimationEnd{};
         entt::sigh<void(entt::entity)> onAnimationStart{};
 
-        explicit Animation(const char* _modelPath)
+        explicit Animation(AssetID id)
         {
             animsCount = 0;
-            animations = ResourceManager::GetInstance().ModelAnimationLoad(_modelPath, &animsCount);
+            animations = ResourceManager::GetInstance().GetModelAnimation(id, &animsCount);
             animIndex = 0;
         }
 

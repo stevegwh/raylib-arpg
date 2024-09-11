@@ -24,7 +24,11 @@ namespace sage
         TEX_SPARKFLAME,
         TEX_NOISE50,
         TEX_NOISE45,
-        COUNT // should always be last
+        TEX_RAINOFFIRE_CURSOR,
+        // Generated and set internally
+        GEN_IMG_HEIGHTMAP,
+        GEN_IMG_NORMALMAP,
+        COUNT // Should always be last (Used to generate blank JSON file)
     };
 
 } // namespace sage

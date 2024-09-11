@@ -192,15 +192,14 @@ namespace sage
     TextureTerrainOverlay::TextureTerrainOverlay(
         entt::registry* _registry,
         NavigationGridSystem* _navigationGridSystem,
-        const char* texturePath,
+        const AssetID assetId,
         Color _hint,
         const char* shaderPath)
         : registry(_registry),
           navigationGridSystem(_navigationGridSystem),
-          entity(_registry->create()),
-          texture(LoadTexture(texturePath))
+          texture(ResourceManager::GetInstance().TextureLoad(assetId)),
+          entity(_registry->create())
     {
-        assert(texturePath != nullptr);
         assert(shaderPath != nullptr);
 
         GridSquare minRange{}, maxRange{};
@@ -215,13 +214,13 @@ namespace sage
     TextureTerrainOverlay::TextureTerrainOverlay(
         entt::registry* _registry,
         NavigationGridSystem* _navigationGridSystem,
-        const char* texturePath,
+        const AssetID assetId,
         Color _hint,
         Shader _shader)
         : registry(_registry),
           navigationGridSystem(_navigationGridSystem),
-          entity(_registry->create()),
-          texture(ResourceManager::GetInstance().TextureLoad(texturePath))
+          texture(ResourceManager::GetInstance().TextureLoad(assetId)),
+          entity(_registry->create())
     {
         GridSquare minRange{}, maxRange{};
         auto& r =

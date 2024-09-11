@@ -4,11 +4,8 @@
 
 #pragma once
 
-#include "cereal/cereal.hpp"
-#include "cereal/types/string.hpp"
 #include "raylib-cereal.hpp"
 #include "raylib.h"
-#include "raymath.h"
 #include "ResourceManager.hpp"
 #include <slib.hpp>
 
@@ -16,7 +13,6 @@
 
 #include <functional>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace sage
@@ -50,16 +46,16 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            assert(!model->GetKey().empty());
+            // assert(!model->GetKey().empty());
             archive(model->GetKey(), name, initialTransform);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            std::string modelKey;
+            AssetID modelKey;
             archive(modelKey, name, initialTransform);
-            ModelSafe modelSafe(ResourceManager::GetInstance().LoadModelCopy(modelKey));
+            ModelSafe modelSafe(ResourceManager::GetInstance().GetModelCopy(modelKey));
             // Model data must be deserialised from ResourceManager before deserialising models
             assert(modelSafe.rlmodel.meshes != nullptr);
             modelSafe.rlmodel.transform = initialTransform;

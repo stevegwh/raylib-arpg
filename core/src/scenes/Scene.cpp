@@ -78,8 +78,8 @@ namespace sage
         for (auto entity : view)
             data->lightSubSystem->LinkRenderableToLight(entity);
 
-        auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
-        auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
+        auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);
+        auto normalMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_NORMALMAP);
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
 
         // Clear any CPU resources that are no longer needed
