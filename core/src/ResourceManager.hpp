@@ -86,98 +86,33 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            std::vector<std::string> imageKeys;
-            std::vector<Image> imageData;
-
-            std::vector<std::string> modelKeys;
-            std::vector<ModelCereal> modelData;
-
             std::vector<std::string> animatedModelKeys;
             std::vector<int> modelAnimCounts;
             std::vector<std::vector<ModelAnimation>> modelAnimationsData;
 
-            std::vector<std::string> materialKeys;
-            std::vector<std::vector<Material>> materialData;
-
-            for (const auto& [imageKey, image] : images)
+            for (const auto& [key, p] : modelAnimations)
             {
-                imageKeys.push_back(imageKey);
-                imageData.push_back(image);
+                const auto& [modelAnims, count] = p;
+                animatedModelKeys.push_back(key);
+                modelAnimCounts.push_back(count);
+                modelAnimationsData.emplace_back(modelAnims, modelAnims + count);
             }
 
-            for (const auto& kv : modelMaterials)
-            {
-                materialKeys.push_back(kv.first);
-                materialData.push_back(kv.second);
-            }
-
-            for (const auto& [modelKey, modelCereal] : modelCopies)
-            {
-                modelKeys.push_back(modelKey);
-                modelData.push_back(modelCereal);
-
-                if (modelAnimations.contains(modelKey))
-                {
-                    animatedModelKeys.push_back(modelKey);
-                    const auto& [modelAnims, count] = modelAnimations.at(modelKey);
-                    modelAnimCounts.push_back(count);
-                    modelAnimationsData.emplace_back(modelAnims, modelAnims + count);
-                }
-            }
-
-            archive(
-                imageKeys,
-                imageData,
-                modelKeys,
-                modelData,
-                materialKeys,
-                materialData,
-                animatedModelKeys,
-                modelAnimCounts,
-                modelAnimationsData);
+            archive(images, modelCopies, modelMaterials, animatedModelKeys, modelAnimCounts, modelAnimationsData);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            std::vector<std::string> imageKeys;
-            std::vector<Image> imageData;
-
-            std::vector<std::string> modelKeys;
-            std::vector<ModelCereal> modelData;
-
             std::vector<std::string> animatedModelKeys;
             std::vector<int> modelAnimCounts;
             std::vector<std::vector<ModelAnimation>> modelAnimationsData;
 
-            std::vector<std::string> materialKeys;
-            std::vector<std::vector<Material>> materialData;
+            archive(images, modelCopies, modelMaterials, animatedModelKeys, modelAnimCounts, modelAnimationsData);
 
-            archive(
-                imageKeys,
-                imageData,
-                modelKeys,
-                modelData,
-                materialKeys,
-                materialData,
-                animatedModelKeys,
-                modelAnimCounts,
-                modelAnimationsData);
-
-            for (int i = 0; i < imageKeys.size(); ++i)
+            for (auto& [key, model] : modelCopies)
             {
-                GetInstance().images.emplace(imageKeys[i], imageData[i]);
-            }
-
-            for (int i = 0; i < materialKeys.size(); ++i)
-            {
-                GetInstance().modelMaterials.emplace(materialKeys[i], materialData[i]);
-            }
-
-            for (int i = 0; i < modelKeys.size(); ++i)
-            {
-                modelData[i].model.materials = modelMaterials.at(modelData[i].materialKey).data();
-                GetInstance().modelCopies.emplace(modelKeys[i], modelData[i]);
+                model.model.materials = modelMaterials.at(model.materialKey).data();
             }
 
             for (int i = 0; i < animatedModelKeys.size(); ++i)

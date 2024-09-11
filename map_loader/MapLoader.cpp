@@ -234,8 +234,6 @@ namespace sage
 
         // TODO: Anything from this point onwards (minus saving) isn't a "map loader", it should be a resource
         // library.
-        // TODO: Need a library of enums to modelKeys and modelKey/paths and store them all in a separate bin.
-        // "assetlib.bin" or something. For now, we can just hand-load them into the map binary.
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelAnimationLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_NPC_ARISSA);
