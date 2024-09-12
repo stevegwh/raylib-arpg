@@ -12,20 +12,13 @@
 
 namespace sage
 {
-    void CreatePlayerAutoAttack(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
-    void CreateRainOfFireAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
-    void CreateFloorFireAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
-    void CreateFireballAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
-    void CreateLightningBallAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
-    void CreateWavemobAutoAttackAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
-    void CreateWhirlwindAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity);
+    void CreatePlayerAutoAttack(Ability& abilityComponent);
+    void CreateRainOfFireAbility(Ability& abilityComponent);
+    void CreateFloorFireAbility(Ability& abilityComponent);
+    void CreateFireballAbility(Ability& abilityComponent);
+    void CreateLightningBallAbility(Ability& abilityComponent);
+    void CreateWavemobAutoAttackAbility(Ability& abilityComponenty);
+    void CreateWhirlwindAbility(Ability& abilityComponent);
 
     entt::entity AbilityFactory::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
     {
@@ -54,22 +47,22 @@ namespace sage
         switch (abilityEnum)
         {
         case AbilityEnum::PLAYER_AUTOATTACK:
-            CreatePlayerAutoAttack(registry, caster, gameData, out);
+            CreatePlayerAutoAttack(ability);
             break;
         case AbilityEnum::ENEMY_AUTOATTACK:
-            CreateWavemobAutoAttackAbility(registry, caster, gameData, out);
+            CreateWavemobAutoAttackAbility(ability);
             break;
         case AbilityEnum::FIREBALL:
-            CreateFireballAbility(registry, caster, gameData, out);
+            CreateFireballAbility(ability);
             break;
         case AbilityEnum::LIGHTNINGBALL:
-            CreateLightningBallAbility(registry, caster, gameData, out);
+            CreateLightningBallAbility(ability);
             break;
         case AbilityEnum::RAINFOFIRE:
-            CreateRainOfFireAbility(registry, caster, gameData, out);
+            CreateRainOfFireAbility(ability);
             break;
         case AbilityEnum::WHIRLWIND:
-            CreateWhirlwindAbility(registry, caster, gameData, out);
+            CreateWhirlwindAbility(ability);
             break;
         default:
             break;
@@ -121,10 +114,9 @@ namespace sage
 
     // --------------------------------------------
 
-    void CreatePlayerAutoAttack(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    void CreatePlayerAutoAttack(Ability& abilityComponent)
     {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& ad = abilityComponent.ad;
         ad.base.AddElement(AbilityElement::PHYSICAL);
         ad.base.cooldownDuration = 1;
         ad.base.baseDamage = 10;
@@ -141,10 +133,9 @@ namespace sage
         ad.animationParams.animationDelay = 0;
     }
 
-    void CreateRainOfFireAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    void CreateRainOfFireAbility(Ability& abilityComponent)
     {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 3;
         ad.base.range = 30;
         ad.base.baseDamage = 25;
@@ -166,16 +157,14 @@ namespace sage
         ad.indicator.indicatorKey = "CircularCursor";
     }
 
-    void CreateFloorFireAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    void CreateFloorFireAbility(Ability& abilityComponent)
     {
         // TODO: Implement
     }
 
-    void CreateFireballAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    void CreateFireballAbility(Ability& abilityComponent)
     {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 1;
         ad.base.range = 30;
         ad.base.baseDamage = 50;
@@ -193,10 +182,9 @@ namespace sage
         ad.vfx.name = "Fireball";
     }
 
-    void CreateWavemobAutoAttackAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    void CreateWavemobAutoAttackAbility(Ability& abilityComponent)
     {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 1;
         ad.base.range = 5;
         ad.base.baseDamage = 10;
@@ -210,10 +198,9 @@ namespace sage
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
     }
 
-    void CreateLightningBallAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    void CreateLightningBallAbility(Ability& abilityComponent)
     {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 1;
         ad.base.range = 30;
         ad.base.baseDamage = 50;
@@ -231,10 +218,9 @@ namespace sage
         ad.vfx.name = "LightningBall";
     }
 
-    void CreateWhirlwindAbility(
-        entt::registry* registry, entt::entity caster, GameData* gameData, entt::entity& abilityEntity)
+    void CreateWhirlwindAbility(Ability& abilityComponent)
     {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 0.15;
         ad.base.range = 15;
         ad.base.baseDamage = 10;
