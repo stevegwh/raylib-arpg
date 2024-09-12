@@ -256,6 +256,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_SPARKFLAME);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE50);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE45);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE53);
 
         // Height map gets saved here.
         serializer::SaveMap(*registry);

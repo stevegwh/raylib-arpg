@@ -7,6 +7,7 @@
 #include "VisualFX.hpp"
 
 #include "raylib.h"
+#include "slib.hpp"
 
 #include <memory>
 #include <vector>
@@ -18,17 +19,15 @@ namespace sage
     {
         Shader shader{};
         int secondsLoc;
-        Texture2D texture;
-        Texture2D texture2;
 
         float time = 0.0f;
-        Model model;
+        ModelSafe model;
 
       public:
         void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        ~LightningBallVFX();
+        ~LightningBallVFX() override = default;
         explicit LightningBallVFX(GameData* _gameData, sgTransform* _transform);
     };
 } // namespace sage

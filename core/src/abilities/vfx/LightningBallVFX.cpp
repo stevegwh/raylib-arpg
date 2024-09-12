@@ -25,7 +25,7 @@ namespace sage
     {
         // Draw model (if needed)
         rlDisableBackfaceCulling();
-        DrawModelEx(model, transform->GetWorldPos(), Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
+        model.Draw(transform->GetWorldPos(), Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
         rlEnableBackfaceCulling();
     }
 
@@ -46,33 +46,22 @@ namespace sage
         time = 0;
     }
 
-    LightningBallVFX::~LightningBallVFX()
-    {
-        UnloadShader(shader);
-        UnloadTexture(texture);
-        UnloadTexture(texture2);
-        UnloadModel(model);
-    }
-
     LightningBallVFX::LightningBallVFX(GameData* _gameData, sgTransform* _transform)
         : VisualFX(_gameData, _transform)
     {
-        // TODO: Does not use resource manager
         // Texture/Material
-        texture =
-            LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_53.png"); // TODO: Is first texture used?
-        texture2 = LoadTexture("resources/textures/luos/Noise_Gradients/T_Random_53.png");
+        auto texture = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE53);
+        auto texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE53);
 
-        shader = LoadShader(nullptr, "resources/shaders/custom/lightning.fs");
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/lightning.fs");
         secondsLoc = GetShaderLocation(shader, "seconds");
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
-        model = LoadModel("resources/models/obj/sphere.obj");
-        // slashModel.transform = MatrixRotateY(180);
+        model = ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_VFX_SPHERE);
 
-        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-        // Using MATERIAL_MAP_EMISSION as a spare slot to use for 2nd texture
-        model.materials[0].maps[MATERIAL_MAP_EMISSION].texture = texture2;
+        model.SetTexture(texture, 0, MATERIAL_MAP_DIFFUSE);
+        model.SetTexture(texture2, 0, MATERIAL_MAP_EMISSION);
+        model.SetShader(shader, 0);
+
         shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
-        model.materials[0].shader = shader;
     }
 } // namespace sage
