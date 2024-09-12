@@ -124,18 +124,18 @@ namespace sage
 
                 output(ResourceManager::GetInstance());
 
-                //// TODO: Is below necessary?
-                // const auto view = source.view<sgTransform, Renderable, Collideable>();
-                // for (const auto& ent : view)
-                //{
-                //     const auto& rend = view.get<Renderable>(ent);
-                //     const auto& trans = view.get<sgTransform>(ent);
-                //     const auto& col = view.get<Collideable>(ent);
+                // TODO: Below only necesary for the map
+                const auto view = source.view<sgTransform, Renderable, Collideable>();
+                for (const auto& ent : view)
+                {
+                    const auto& rend = view.get<Renderable>(ent);
+                    const auto& trans = view.get<sgTransform>(ent);
+                    const auto& col = view.get<Collideable>(ent);
 
-                //    entity entity{};
-                //    entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
-                //    output(entity, trans, col, rend);
-                //}
+                    entity entity{};
+                    entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
+                    output(entity, trans, col, rend);
+                }
             }
             storage.close();
             std::cout << "FINISH: Save resource data to file." << std::endl;
