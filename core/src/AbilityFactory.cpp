@@ -20,18 +20,21 @@ namespace sage
     void CreateWavemobAutoAttackAbility(Ability& abilityComponenty);
     void CreateWhirlwindAbility(Ability& abilityComponent);
 
-    entt::entity AbilityFactory::GetAbility(entt::entity entity, AbilityEnum abilityEnum)
+    entt::entity AbilityFactory::GetAbility(entt::entity caster, AbilityEnum abilityEnum)
     {
-        if (!abilityMap.contains(entity))
+        if (!abilityMap.contains(caster))
         {
+            std::cout << "WARNING [AbilityFactory]: Caster is not associated with any ability \n";
             return entt::null;
         }
 
-        if (abilityMap[entity].contains(abilityEnum))
+        if (abilityMap[caster].contains(abilityEnum))
         {
-            return abilityMap[entity][abilityEnum];
+            return abilityMap[caster][abilityEnum];
         }
 
+        std::cout << "WARNING [AbilityFactory]: Caster does not have the following ability registered: "
+                  << magic_enum::enum_name(abilityEnum) << std::endl;
         return entt::null;
     }
 
