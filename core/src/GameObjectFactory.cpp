@@ -218,7 +218,8 @@ namespace sage
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
         // data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id,
         // AbilityEnum::RAINFOFIRE));
-        data->playerAbilitySystem->SetSlot(2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::FIREBALL));
+        data->playerAbilitySystem->SetSlot(
+            2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
         data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         data->signalReflectionManager->CreateHook<entt::entity>(

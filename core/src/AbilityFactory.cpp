@@ -215,15 +215,18 @@ namespace sage
     {
         auto& ad = registry->get<Ability>(abilityEntity).ad;
         ad.base.cooldownDuration = 1;
-        ad.base.range = 5;
-        ad.base.baseDamage = 10;
+        ad.base.range = 30;
+        ad.base.baseDamage = 50;
+        ad.base.radius = 10;
         ad.base.castTime = 0;
-        ad.base.AddElement(AbilityElement::LIGHTNING);
+        ad.base.AddElement(AbilityElement::PHYSICAL);
         ad.base.AddBehaviour(
             AbilityBehaviour::SPAWN_AT_CASTER | AbilityBehaviour::FOLLOW_NONE |
             AbilityBehaviour::MOVEMENT_PROJECTILE | AbilityBehaviour::CAST_INSTANT |
-            AbilityBehaviour::ATTACK_AOE_TARGET);
+            AbilityBehaviour::ATTACK_AOE_POINT);
+
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+        ad.animationParams.animationDelay = 0;
 
         ad.vfx.name = "LightningBall";
     }
