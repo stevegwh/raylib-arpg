@@ -1,4 +1,4 @@
-#include "MapLoader.hpp"
+#include "ResourcePacker.hpp"
 
 #include "components/Collideable.hpp"
 #include "components/Renderable.hpp"
@@ -168,11 +168,14 @@ namespace sage
         if (collideable.collisionLayer == CollisionLayer::FLOOR) floorMeshes.push_back(&collideable);
     }
 
-    void MapLoader::ConstructMap(
-        entt::registry* registry, NavigationGridSystem* navigationGridSystem, const char* path)
+    void ResourcePacker::ConstructMap(
+        entt::registry* registry,
+        NavigationGridSystem* navigationGridSystem,
+        const char* input,
+        const char* output)
     {
-        auto meshPath = std::string(std::string(path) + "/mesh");
-        if (!DirectoryExists(path) || !DirectoryExists(meshPath.c_str()))
+        auto meshPath = std::string(std::string(input) + "/mesh");
+        if (!DirectoryExists(input) || !DirectoryExists(meshPath.c_str()))
         {
             std::cout << "ERROR: MapLoader -> Directory does not exist or path invalid." << std::endl;
             exit(1);
@@ -203,7 +206,7 @@ namespace sage
         std::vector<Collideable*> floorMeshes;
 
         std::cout << "START: Processing txt data into resource manager. \n";
-        for (const auto& entry : fs::directory_iterator(path)) // txt files
+        for (const auto& entry : fs::directory_iterator(input)) // txt files
         {
             std::string filePath = entry.path().string();
             std::string fileName = entry.path().stem().string();
@@ -235,8 +238,24 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("NORMAL_MAP", normalMap.GetImage());
         // Images are nulled at this point
 
-        // TODO: Below are the resources used by the map. I'd probably prefer just reading a JSON file or yaml
-        // where we can list what resources the map uses. Like Model : AssetID, ModelAnimation : AssetID, etc.
+        serializer::SaveCurrentResourceData(*registry, output);
+        std::cout << "FINISH: Constructing map into bin file. \n";
+    }
+
+    /**
+     * output: The path + filename of the resulting binary
+     **/
+    void ResourcePacker::PackAssets(entt::registry* registry, const char* output)
+    {
+
+        // TODO: Check if directory exists and that file extension provided is ".bin".
+
+        ResourceManager::GetInstance().Reset();
+
+        // We pack all resources used by the game here.
+        // These are *all* loaded into memory for the moment.
+        // TODO: Make separate asset libraries, one for "core" and then maybe pack the required models into each
+        // map file?
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelAnimationLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_NPC_ARISSA);
@@ -261,10 +280,6 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE45);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE53);
 
-        // Height map gets saved here.
-        serializer::SaveMap(*registry);
-
-        CloseWindow();
-        std::cout << "FINISH: Constructing map into bin file. \n";
+        serializer::SaveCurrentResourceData(*registry, output);
     }
 }; // namespace sage

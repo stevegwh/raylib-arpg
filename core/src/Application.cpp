@@ -28,7 +28,8 @@ namespace sage
         InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
 
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
-        serializer::LoadMap(registry.get());
+        serializer::LoadResourceData(registry.get(), "resources/assets.bin");
+        serializer::LoadResourceData(registry.get(), "resources/map1.bin");
 
         auto icon = ResourceManager::GetInstance().GetImage(AssetID::IMG_APPLICATIONICON);
         SetWindowIcon(icon.GetImage());
@@ -36,11 +37,7 @@ namespace sage
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 
-        scene = std::make_unique<ExampleScene>(
-            registry.get(),
-            keyMapping.get(),
-            settings.get(),
-            ""); // TODO: Map path is ignored atm (just loads output.bin)
+        scene = std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get());
     }
 
     void Application::handleScreenUpdate() const
@@ -109,7 +106,7 @@ namespace sage
             handleScreenUpdate();
         }
     }
-    bool show_demo_window = true;
+
     void Application::draw()
     {
 

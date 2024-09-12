@@ -166,7 +166,7 @@ namespace sage
 
     EditorScene::EditorScene(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, EditorSettings* _editorSettings)
-        : Scene(_registry, _keyMapping, _settings, _editorSettings->lastOpenedMap),
+        : Scene(_registry, _keyMapping, _settings),
           editorSettings(_editorSettings),
           gui(std::make_unique<editor::EditorGui>(
               _editorSettings, _settings, data->userInput.get(), data->camera.get()))

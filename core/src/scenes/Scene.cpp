@@ -63,17 +63,19 @@ namespace sage
         // ResourceManager::GetInstance().UnloadAll();
     }
 
-    Scene::Scene(
-        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath)
+    Scene::Scene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : registry(_registry),
           lightSubSystem(std::make_unique<LightSubSystem>(_registry)),
           data(std::make_unique<GameData>(_registry, _keyMapping, _settings, lightSubSystem.get()))
     {
 
+        // TODO: This is calculated during the map construction process. Need to find a way of reading that data,
+        // instead of a magic number
         float slices = 500;
         data->navigationGridSystem->Init(slices, 1.0f);
 
-        // Dependent on only the map/static meshes having been loaded at this point
+        // NB: Dependent on only the map/static meshes having been loaded at this point
+        // Maybe time for a tag system
         auto view = registry->view<Renderable>();
         for (auto entity : view)
             data->lightSubSystem->LinkRenderableToLight(entity);

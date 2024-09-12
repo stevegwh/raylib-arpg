@@ -105,17 +105,17 @@ namespace sage
 
         // ----------------------------------------------
 
-        void SaveMap(const entt::registry& source)
+        void SaveCurrentResourceData(const entt::registry& source, const char* path)
         {
-            std::cout << "Save called" << std::endl;
+            std::cout << "START: Save resource data to file." << std::endl;
             using namespace entt::literals;
             // std::stringstream storage;
 
-            std::ofstream storage("resources/output.bin", std::ios::binary);
+            std::ofstream storage(path, std::ios::binary);
             if (!storage.is_open())
             {
-                // Handle file opening error
-                return;
+                std::cerr << "ERROR: Unable to open file for writing." << std::endl;
+                exit(1);
             }
 
             {
@@ -124,41 +124,41 @@ namespace sage
 
                 output(ResourceManager::GetInstance());
 
-                const auto view = source.view<sgTransform, Renderable, Collideable>();
-                for (const auto& ent : view)
-                {
-                    const auto& rend = view.get<Renderable>(ent);
-                    // if (!rend.serializable) continue;
-                    const auto& trans = view.get<sgTransform>(ent);
+                //// TODO: Is below necessary?
+                // const auto view = source.view<sgTransform, Renderable, Collideable>();
+                // for (const auto& ent : view)
+                //{
+                //     const auto& rend = view.get<Renderable>(ent);
+                //     const auto& trans = view.get<sgTransform>(ent);
+                //     const auto& col = view.get<Collideable>(ent);
 
-                    const auto& col = view.get<Collideable>(ent);
-                    entity entity{};
-                    entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
-                    output(entity, trans, col, rend);
-                }
+                //    entity entity{};
+                //    entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
+                //    output(entity, trans, col, rend);
+                //}
             }
             storage.close();
-            std::cout << "Save finished" << std::endl;
+            std::cout << "FINISH: Save resource data to file." << std::endl;
         }
 
-        void LoadMap(entt::registry* destination)
+        void LoadResourceData(entt::registry* destination, const char* path)
         {
             assert(destination != nullptr);
 
-            std::cout << "Load called" << std::endl;
+            std::cout << "START: Loading resource data from file." << std::endl;
+
             using namespace entt::literals;
-            std::ifstream storage("resources/output.bin", std::ios::binary);
+            std::ifstream storage(path, std::ios::binary);
             if (!storage.is_open())
             {
-                std::cerr << "Error: Unable to open file for reading." << std::endl;
-                return;
+                std::cerr << "ERROR: Unable to open file for reading." << std::endl;
+                exit(1);
             }
 
             {
                 cereal::BinaryInputArchive input(storage);
 
                 input(ResourceManager::GetInstance());
-                // Use height/normal map to initiate navigation grid
 
                 while (storage.peek() != EOF)
                 {
@@ -174,27 +174,26 @@ namespace sage
                     }
                     catch (const cereal::Exception& e)
                     {
-                        std::cerr << "Error during deserialization: " << e.what() << std::endl;
+                        std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
                         break;
                     }
                 }
             }
 
             storage.close();
-            std::cout << "Load finished" << std::endl;
+            std::cout << "FINISH: Loading resource data from file." << std::endl;
         }
 
         void SerializeKeyMapping(KeyMapping& keymapping, const char* path)
         {
-            std::cout << "Save called" << std::endl;
+            std::cout << "START: Save resource data to file." << std::endl;
             using namespace entt::literals;
-            // std::stringstream storage;
 
             std::ofstream storage(path);
             if (!storage.is_open())
             {
-                // Handle file opening error
-                return;
+                std::cerr << "ERROR: Unable to open file for writing." << std::endl;
+                exit(1);
             }
 
             {
@@ -203,12 +202,12 @@ namespace sage
                 output(keymapping);
             }
             storage.close();
-            std::cout << "Save finished" << std::endl;
+            std::cout << "FINISH: Save resource data to file." << std::endl;
         }
 
         void DeserializeKeyMapping(KeyMapping& keymapping, const char* path)
         {
-            std::cout << "Load called" << std::endl;
+            std::cout << "START: Loading data from file." << std::endl;
             using namespace entt::literals;
 
             std::ifstream storage(path);
@@ -221,25 +220,25 @@ namespace sage
             else
             {
                 // File doesn't exist, create a new file with the default key mapping
-                std::cout << "Key mapping file not found. Creating a new file with the "
+                std::cout << "INFO: Key mapping file not found. Creating a new file with the "
                              "default key mapping."
                           << std::endl;
                 SerializeKeyMapping(keymapping, path);
             }
-            std::cout << "Load finished" << std::endl;
+            std::cout << "FINISH: Loading data from file." << std::endl;
         }
 
         void SerializeSettings(Settings& settings, const char* path)
         {
-            std::cout << "Save called" << std::endl;
+            std::cout << "START: Saving data to file." << std::endl;
             using namespace entt::literals;
             // std::stringstream storage;
 
             std::ofstream storage(path);
             if (!storage.is_open())
             {
-                // Handle file opening error
-                return;
+                std::cerr << "ERROR: Unable to open file for writing." << std::endl;
+                exit(1);
             }
 
             {
@@ -248,12 +247,12 @@ namespace sage
                 output(settings);
             }
             storage.close();
-            std::cout << "Save finished" << std::endl;
+            std::cout << "FINISH: Saving data to file." << std::endl;
         }
 
         void DeserializeSettings(Settings& settings, const char* path)
         {
-            std::cout << "Load called" << std::endl;
+            std::cout << "START: Loading data from file." << std::endl;
             using namespace entt::literals;
 
             std::ifstream storage(path);
@@ -266,23 +265,24 @@ namespace sage
             else
             {
                 // File doesn't exist, create a new file with the default key mapping
-                std::cout << "Settings file not found. Creating a new file with default settings." << std::endl;
+                std::cout << "INFO: Settings file not found. Creating a new file with default settings."
+                          << std::endl;
                 SerializeSettings(settings, path);
             }
-            std::cout << "Load finished" << std::endl;
+            std::cout << "FINISH: Loading data from file." << std::endl;
         }
 
         void SaveAbilityData(const AbilityData& abilityData, const char* path)
         {
-            std::cout << "Save called" << std::endl;
+            std::cout << "START: Saving data to file." << std::endl;
             using namespace entt::literals;
             // std::stringstream storage;
 
             std::ofstream storage(path);
             if (!storage.is_open())
             {
-                // Handle file opening error
-                return;
+                std::cerr << "ERROR: Unable to open file for writing." << std::endl;
+                exit(1);
             }
 
             {
@@ -291,12 +291,12 @@ namespace sage
                 output(abilityData);
             }
             storage.close();
-            std::cout << "Save finished" << std::endl;
+            std::cout << "FINISH: Saving data to file." << std::endl;
         };
 
         void LoadAbilityData(AbilityData& abilityData, const char* path)
         {
-            std::cout << "Load ability called" << std::endl;
+            std::cout << "START: Loading data from file." << std::endl;
             using namespace entt::literals;
 
             std::ifstream storage(path);
@@ -314,7 +314,7 @@ namespace sage
             //               << std::endl;
             //     SaveAbilityData(abilityData, path);
             // }
-            std::cout << "Load ability finished" << std::endl;
+            std::cout << "FINISH: Loading data from file." << std::endl;
         };
     } // namespace serializer
 } // namespace sage

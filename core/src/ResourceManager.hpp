@@ -49,7 +49,7 @@ namespace sage
         Shader gpuShaderLoad(const char* vs, const char* fs);
         static void deepCopyModel(const Model& oldModel, Model& newModel);
         static void deepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
-
+        void init();
         static const std::string& getAssetPath(AssetID id);
 
       public:
@@ -79,6 +79,7 @@ namespace sage
         void UnloadShaderFileText();
 
         void UnloadAll();
+        void Reset();
         ResourceManager(const ResourceManager&) = delete;
         ResourceManager& operator=(const ResourceManager&) = delete;
 

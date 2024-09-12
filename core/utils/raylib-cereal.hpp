@@ -254,10 +254,9 @@ void load(Archive& archive, Mesh& mesh)
 template <typename Archive>
 void save(Archive& archive, Image const& image)
 {
-
-    unsigned char* _data = static_cast<unsigned char*>(image.data);
+    unsigned char* rlData = static_cast<unsigned char*>(image.data);
     int len = image.format * image.width * image.height;
-    std::vector<unsigned char> data(_data, _data + len);
+    std::vector<unsigned char> data(rlData, rlData + len);
     archive(data, image.format, image.height, image.width, image.mipmaps);
 }
 
@@ -274,7 +273,8 @@ void load(Archive& archive, Image& image)
     }
     else
     {
-        // Handle memory allocation failure
+        std::cout << "ERROR: Could not allocate memory for image. \n";
+        exit(1);
     }
 }
 
