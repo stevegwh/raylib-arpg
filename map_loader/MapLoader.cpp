@@ -50,7 +50,11 @@ namespace sage
 
     void parseMtlFile(const std::string& mtlPath, std::string& materialKey)
     {
-        if (!FileExists(mtlPath.c_str())) return;
+        if (!FileExists(mtlPath.c_str()))
+        {
+            std::cout << "WARNING: MTL file could not be found: " << mtlPath << std::endl;
+            return;
+        }
         std::ifstream infile(mtlPath.c_str());
         std::string line;
         while (std::getline(infile, line))
@@ -67,6 +71,7 @@ namespace sage
             else
             {
                 std::cout << "ERROR: Failed to read material name \n";
+                exit(1);
             }
         }
     }
@@ -120,11 +125,7 @@ namespace sage
         infile >> key;
         std::string meshName;
         infile >> meshName;
-        meshName = meshPath + "/" + meshName;
-
-        // Strip file extension (Could do this in blender script, instead).
-        // size_t lastindex = meshName.find_last_of(".");
-        // meshName = meshName.substr(0, lastindex);
+        meshName = meshPath + "/" + meshName; // Full path is used as key
 
         infile >> key;
         float x, y, z;
@@ -179,6 +180,8 @@ namespace sage
 
         InitWindow(300, 100, "Loading Map!");
 
+        std::cout << "START: Constructing map into bin file. \n";
+
         std::cout << "START: Loading mesh data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
@@ -189,7 +192,7 @@ namespace sage
             if (IsFileExtension(filePath.c_str(), ".obj"))
             {
                 std::string materialKey = "DEFAULT"; // Load default raylib mat
-                size_t lastindex = filePath.find_last_of(".");
+                size_t lastindex = filePath.find_last_of('.');
                 std::string mtlPath = filePath.substr(0, lastindex) + ".mtl";
                 parseMtlFile(mtlPath, materialKey);
                 ResourceManager::GetInstance().ModelLoadFromFile(filePath, materialKey);
@@ -232,8 +235,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("NORMAL_MAP", normalMap.GetImage());
         // Images are nulled at this point
 
-        // TODO: Anything from this point onwards (minus saving) isn't a "map loader", it should be a resource
-        // library.
+        // TODO: Below are the resources used by the map. I'd probably prefer just reading a JSON file or yaml
+        // where we can list what resources the map uses. Like Model : AssetID, ModelAnimation : AssetID, etc.
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelAnimationLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_NPC_ARISSA);
@@ -262,6 +265,6 @@ namespace sage
         serializer::SaveMap(*registry);
 
         CloseWindow();
-        std::cout << "Map saved." << std::endl;
+        std::cout << "FINISH: Constructing map into bin file. \n";
     }
 }; // namespace sage
