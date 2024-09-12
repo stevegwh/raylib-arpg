@@ -28,8 +28,8 @@ namespace sage
         InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
 
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
-        serializer::LoadResourceData(registry.get(), "resources/assets.bin");
-        serializer::LoadResourceData(registry.get(), "resources/map1.bin");
+        serializer::LoadBinFile(registry.get(), "resources/assets.bin");
+        serializer::LoadBinFile(registry.get(), "resources/map1.bin");
 
         auto icon = ResourceManager::GetInstance().GetImage(AssetID::IMG_APPLICATIONICON);
         SetWindowIcon(icon.GetImage());

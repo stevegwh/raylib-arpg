@@ -174,6 +174,9 @@ namespace sage
         const char* input,
         const char* output)
     {
+        registry->clear();
+        ResourceManager::GetInstance().Reset();
+
         auto meshPath = std::string(std::string(input) + "/mesh");
         if (!DirectoryExists(input) || !DirectoryExists(meshPath.c_str()))
         {
@@ -238,7 +241,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("NORMAL_MAP", normalMap.GetImage());
         // Images are nulled at this point
 
-        serializer::SaveCurrentResourceData(*registry, output);
+        serializer::SaveMap(*registry, output);
         std::cout << "FINISH: Constructing map into bin file. \n";
     }
 
@@ -250,7 +253,8 @@ namespace sage
 
         // TODO: Check if directory exists and that file extension provided is ".bin".
 
-        // ResourceManager::GetInstance().Reset();
+        registry->clear();
+        ResourceManager::GetInstance().Reset();
 
         // We pack all resources used by the game here.
         // These are *all* loaded into memory for the moment.

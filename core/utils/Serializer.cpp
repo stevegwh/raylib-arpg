@@ -105,9 +105,9 @@ namespace sage
 
         // ----------------------------------------------
 
-        void SaveCurrentResourceData(const entt::registry& source, const char* path)
+        void SaveMap(const entt::registry& source, const char* path)
         {
-            std::cout << "START: Save resource data to file." << std::endl;
+            std::cout << "START: Saving map data to file." << std::endl;
             using namespace entt::literals;
             // std::stringstream storage;
 
@@ -124,7 +124,6 @@ namespace sage
 
                 output(ResourceManager::GetInstance());
 
-                // TODO: Below only necesary for the map
                 const auto view = source.view<sgTransform, Renderable, Collideable>();
                 for (const auto& ent : view)
                 {
@@ -138,10 +137,32 @@ namespace sage
                 }
             }
             storage.close();
+            std::cout << "FINISH: Saving map data to file." << std::endl;
+        }
+
+        void SaveCurrentResourceData(const entt::registry& source, const char* path)
+        {
+            std::cout << "START: Save resource data to file." << std::endl;
+            using namespace entt::literals;
+            // std::stringstream storage;
+
+            std::ofstream storage(path, std::ios::binary);
+            if (!storage.is_open())
+            {
+                std::cerr << "ERROR: Unable to open file for writing." << std::endl;
+                exit(1);
+            }
+
+            {
+                // output finishes flushing its contents when it goes out of scope
+                cereal::BinaryOutputArchive output{storage};
+                output(ResourceManager::GetInstance());
+            }
+            storage.close();
             std::cout << "FINISH: Save resource data to file." << std::endl;
         }
 
-        void LoadResourceData(entt::registry* destination, const char* path)
+        void LoadBinFile(entt::registry* destination, const char* path)
         {
             assert(destination != nullptr);
 
