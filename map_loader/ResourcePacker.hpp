@@ -9,7 +9,6 @@
 
 #include <entt/entt.hpp>
 #include <string>
-#include <unordered_map>
 
 // Takes a gltf or obj file, instantiates it into game components and serializes it as a "bin" file
 
@@ -17,13 +16,16 @@ namespace sage
 {
     class NavigationGridSystem;
 
-    class MapLoader
+    class ResourcePacker
     {
-        std::unordered_map<std::string, AssetID> pathIdMap;
-
       public:
         static void ConstructMap(
-            entt::registry* registry, NavigationGridSystem* navigationGridSystem, const char* path);
+            entt::registry* registry,
+            NavigationGridSystem* navigationGridSystem,
+            const char* input,
+            const char* output);
+
+        static void PackAssets(entt::registry* registry, const char* output);
     };
 
 } // namespace sage

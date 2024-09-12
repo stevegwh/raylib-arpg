@@ -494,6 +494,20 @@ namespace sage
         fragShaderFileText.clear();
     }
 
+    void ResourceManager::Reset()
+    {
+        UnloadAll();
+        init();
+    }
+
+    void ResourceManager::init()
+    {
+        Shader shader;
+        shader.id = rlGetShaderIdDefault();
+        shader.locs = rlGetShaderLocsDefault();
+        shaders.emplace("DEFAULT", shader);
+    }
+
     ResourceManager::~ResourceManager()
     {
         UnloadAll();
@@ -501,9 +515,6 @@ namespace sage
 
     ResourceManager::ResourceManager()
     {
-        Shader shader;
-        shader.id = rlGetShaderIdDefault();
-        shader.locs = rlGetShaderLocsDefault();
-        shaders.emplace("DEFAULT", shader);
+        init();
     }
 } // namespace sage

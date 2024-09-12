@@ -14,8 +14,6 @@ namespace sage
 {
     struct Settings;
     struct KeyMapping;
-    class SpiralFountainVFX;
-    class Explosion;
 
     class ExampleScene : public Scene
     {
@@ -25,8 +23,7 @@ namespace sage
         void Draw2D() override;
         void Draw3D() override;
         void DrawDebug() override;
-        ~ExampleScene() override;
-        ExampleScene(
-            entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath);
+        ~ExampleScene() override = default;
+        ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };
 } // namespace sage

@@ -12,8 +12,8 @@
 
 namespace sage::serializer
 {
-    void SaveMap(const entt::registry& registry);
-    void LoadMap(entt::registry* destination);
+    void SaveCurrentResourceData(const entt::registry& registry, const char* path);
+    void LoadResourceData(entt::registry* destination, const char* path);
     void SerializeKeyMapping(KeyMapping& keymapping, const char* path);
     void DeserializeKeyMapping(KeyMapping& keymapping, const char* path);
     void SerializeSettings(Settings& settings, const char* path);

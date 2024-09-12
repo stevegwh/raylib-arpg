@@ -34,7 +34,6 @@ namespace sage
 
     void EditorApplication::initEditorScene()
     {
-        // "resources/models/obj/level-basic.obj"
         scene =
             std::make_unique<EditorScene>(registry.get(), keyMapping.get(), settings.get(), editorSettings.get());
         {
@@ -50,8 +49,7 @@ namespace sage
 
     void EditorApplication::initGameScene()
     {
-        scene = std::make_unique<ExampleScene>(
-            registry.get(), keyMapping.get(), settings.get(), editorSettings->lastOpenedMap);
+        scene = std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get());
         {
             entt::sink keyRPressed{scene->data->userInput->keyRPressed};
             keyRPressed.connect<&EditorApplication::enableEditMode>(this);
@@ -63,7 +61,6 @@ namespace sage
     {
         std::cout << "Save called" << std::endl;
         using namespace entt::literals;
-        // std::stringstream storage;
 
         std::ofstream storage(EditorApplication::editorSettingsPath.c_str());
         if (!storage.is_open())

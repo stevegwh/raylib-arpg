@@ -32,7 +32,6 @@ namespace sage
         virtual void Draw2D();
         virtual ~Scene();
         virtual void DrawDebug();
-        explicit Scene(
-            entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath);
+        explicit Scene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };
 } // namespace sage

@@ -69,13 +69,8 @@ namespace sage
         data->actorMovementSystem->DrawDebug();
     }
 
-    ExampleScene::~ExampleScene()
-    {
-    }
-
-    ExampleScene::ExampleScene(
-        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, const std::string& mapPath)
-        : Scene(_registry, _keyMapping, _settings, mapPath)
+    ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
+        : Scene(_registry, _keyMapping, _settings)
     {
         lightSubSystem->lights[0] =
             CreateLight(LIGHT_POINT, {0, 50, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
