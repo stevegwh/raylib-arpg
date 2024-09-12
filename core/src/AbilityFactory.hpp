@@ -27,7 +27,7 @@ namespace sage
         std::unordered_map<entt::entity, std::unordered_map<AbilityEnum, entt::entity>> abilityMap;
 
       public:
-        entt::entity GetAbility(entt::entity entity, AbilityEnum abilityEnum);
+        entt::entity GetAbility(entt::entity caster, AbilityEnum abilityEnum);
         entt::entity RegisterAbility(entt::entity caster, AbilityEnum abilityEnum);
 
         AbilityFactory(entt::registry* _registry, GameData* _gameData);
