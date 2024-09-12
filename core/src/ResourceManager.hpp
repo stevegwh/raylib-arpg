@@ -90,7 +90,7 @@ namespace sage
             std::vector<int> modelAnimCounts;
             std::vector<std::vector<ModelAnimation>> modelAnimationsData;
 
-            for (const auto& [key, p] : modelAnimations)
+            for (const auto& [key, p] : GetInstance().modelAnimations)
             {
                 const auto& [modelAnims, count] = p;
                 animatedModelKeys.push_back(key);
@@ -98,7 +98,13 @@ namespace sage
                 modelAnimationsData.emplace_back(modelAnims, modelAnims + count);
             }
 
-            archive(images, modelCopies, modelMaterials, animatedModelKeys, modelAnimCounts, modelAnimationsData);
+            archive(
+                GetInstance().images,
+                GetInstance().modelCopies,
+                GetInstance().modelMaterials,
+                animatedModelKeys,
+                modelAnimCounts,
+                modelAnimationsData);
         }
 
         template <class Archive>
@@ -108,9 +114,20 @@ namespace sage
             std::vector<int> modelAnimCounts;
             std::vector<std::vector<ModelAnimation>> modelAnimationsData;
 
-            archive(images, modelCopies, modelMaterials, animatedModelKeys, modelAnimCounts, modelAnimationsData);
+            // Copy necessary (I believe) so we can concat multiple calls of "load"
+            std::unordered_map<std::string, Image> _images{};
+            std::unordered_map<std::string, ModelCereal> _modelCopies{};
+            std::unordered_map<std::string, std::vector<Material>> _modelMaterials{};
 
-            for (auto& [key, model] : modelCopies)
+            archive(
+                _images, _modelCopies, _modelMaterials, animatedModelKeys, modelAnimCounts, modelAnimationsData);
+
+            // WARNING: Does *not* account for overlapping keys (does nothing if key exists)
+            images.insert(_images.begin(), _images.end());
+            modelCopies.insert(_modelCopies.begin(), _modelCopies.end());
+            modelMaterials.insert(_modelMaterials.begin(), _modelMaterials.end());
+
+            for (auto& [key, model] : GetInstance().modelCopies)
             {
                 model.model.materials = modelMaterials.at(model.materialKey).data();
             }

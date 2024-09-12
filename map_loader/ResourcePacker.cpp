@@ -250,7 +250,7 @@ namespace sage
 
         // TODO: Check if directory exists and that file extension provided is ".bin".
 
-        ResourceManager::GetInstance().Reset();
+        // ResourceManager::GetInstance().Reset();
 
         // We pack all resources used by the game here.
         // These are *all* loaded into memory for the moment.
