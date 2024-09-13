@@ -25,7 +25,7 @@ namespace sage
             const char* input,
             const char* output);
 
-        static void PackAssets(entt::registry* registry, const char* output);
+        static void PackAssets(entt::registry* registry, const std::string& output);
     };
 
 } // namespace sage
