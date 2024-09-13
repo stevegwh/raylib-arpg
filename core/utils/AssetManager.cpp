@@ -36,25 +36,24 @@ namespace sage
     {
         for (int i = 0; i < magic_enum::enum_underlying(AssetID::COUNT); ++i)
         {
-            auto e = magic_enum::enum_cast<AssetID>(i).value();
-            assetMap.emplace(e, "");
+            auto id = magic_enum::enum_cast<AssetID>(i).value();
+            assetMap.emplace(id, "");
         }
         SavePaths();
     }
 
     void AssetManager::SavePaths()
     {
-        const std::string& jsonPath = "resources/asset-paths.json";
         std::cout << "START: Saving asset paths to JSON file \n";
         using namespace entt::literals;
-        if (FileExists(jsonPath.c_str()))
+        if (FileExists(ASSET_JSON))
         {
-            auto file = LoadFileText(jsonPath.c_str());
-            SaveFileText(std::string(std::string(jsonPath) + ".bak").c_str(), file);
+            auto file = LoadFileText(ASSET_JSON);
+            SaveFileText(std::string(std::string(ASSET_JSON) + ".bak").c_str(), file);
             UnloadFileText(file);
         }
 
-        std::ofstream storage(jsonPath);
+        std::ofstream storage(ASSET_JSON);
         if (!storage.is_open())
         {
             return;
@@ -71,17 +70,21 @@ namespace sage
 
     void AssetManager::LoadPaths()
     {
-        const std::string& jsonPath = "resources/asset-paths.json";
+        if (!assetMap.empty())
+        {
+            std::cout << "AssetManager: Map already loaded. Aborting... \n";
+            return;
+        }
         std::cout << "START: Loading asset paths from JSON file \n";
 
-        if (!FileExists(jsonPath.c_str()))
+        if (!FileExists(ASSET_JSON))
         {
             std::cout << "WARNING: No asset path file detected. \n";
             assert(0);
         }
 
         using namespace entt::literals;
-        std::ifstream storage(jsonPath);
+        std::ifstream storage(ASSET_JSON);
         if (storage.is_open())
         {
             cereal::JSONInputArchive input{storage};

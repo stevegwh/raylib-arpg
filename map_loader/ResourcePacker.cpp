@@ -1,5 +1,6 @@
 #include "ResourcePacker.hpp"
 
+#include "AssetManager.hpp"
 #include "components/Collideable.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
@@ -15,6 +16,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <mach/task.h>
 #include <string>
 #include <unordered_map>
 
@@ -250,43 +252,52 @@ namespace sage
      **/
     void ResourcePacker::PackAssets(entt::registry* registry, const char* output)
     {
-
-        // TODO: Check if directory exists and that file extension provided is ".bin".
+        // if (!DirectoryExists(output)) // strip file name
+        // {
+        //     std::cout << "ResourcePacker: Directory does not exist, cannot save. Aborting... \n";
+        //     return;
+        // }
+        // if (IsFileExtension(output, ".bin"))
+        // {
+        //     std::cout << "ResourcePacker: File extension for output file must be 'bin'. Aborting... \n";
+        //     return;
+        // }
 
         registry->clear();
         ResourceManager::GetInstance().Reset();
 
         // We pack all resources used by the game here.
         // These are *all* loaded into memory for the moment.
-        // Would prefer to somehow load from the json file and just load the paths
-        // Having an extra key enum that states the type? e.g., IMAGE, ANIM, MODEL, TXT.
-        // The asset loader can use the keys and other classes can just ignore them.
-        // On "release" can just pack the json file into memory and load it first to populate paths
-        ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
-        ResourceManager::GetInstance().ModelAnimationLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
-        ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_NPC_ARISSA);
-        ResourceManager::GetInstance().ModelAnimationLoadFromFile(AssetID::MDL_NPC_ARISSA);
-        ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_PLAYER_DEFAULT);
-        ResourceManager::GetInstance().ModelAnimationLoadFromFile(AssetID::MDL_PLAYER_DEFAULT);
+        AssetManager::GetInstance().LoadPaths();
 
-        ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_BUILDING_PORTAL);
-        ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_BUILDING_WIZARDTOWER1);
-        ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_VFX_SPHERE);
+        std::cout << "START: Loading assets into memory \n";
 
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_REGULAR);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_TALK);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_MOVE);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_DENIED);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_ATTACK);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_APPLICATIONICON);
+        for (int i = 0; i < magic_enum::enum_underlying(AssetID::COUNT); ++i)
+        {
+            auto id = magic_enum::enum_cast<AssetID>(i).value();
+            auto name = std::string(magic_enum::enum_name(id));
+            auto tag = name.substr(0, 3);
 
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_RAINOFFIRE_CURSOR);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_IMGCIRCLE16);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_IMGCIRCLE8);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_SPARKFLAME);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_NOISE50);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_NOISE45);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_NOISE53);
+            if (tag == "IMG")
+            {
+                ResourceManager::GetInstance().ImageLoadFromFile(id);
+            }
+            else if (tag == "MDL")
+            {
+                ResourceManager::GetInstance().ModelLoadFromFile(id);
+                ResourceManager::GetInstance().ModelAnimationLoadFromFile(id);
+                // if (IsFileExtension(AssetManager::GetInstance().GetAssetPath(id).c_str(), ".glb") ||
+                //     IsFileExtension(AssetManager::GetInstance().GetAssetPath(id).c_str(), ".gltf"))
+                // {
+                //     ResourceManager::GetInstance().ModelAnimationLoadFromFile(id);
+                // }
+            }
+            // else if (std::find(name.begin(), name.end(), "TXT") != name.end())
+            // {
+            //     // Load text here.
+            // }
+            std::cout << "FINISH: Loading assets into memory \n";
+        }
 
         serializer::SaveCurrentResourceData(*registry, output);
     }
