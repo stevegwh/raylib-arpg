@@ -1,0 +1,90 @@
+{
+    "AssetManager": {
+        "assetMap": [
+            {
+                "key": "IMG_RAINOFFIRE_CURSOR",
+                "value": "resources/textures/cursor/rainoffire_cursor.png"
+            },
+            {
+                "key": "IMG_NOISE45",
+                "value": "resources/textures/luos/Noise_Gradients/T_Random_45.png"
+            },
+            {
+                "key": "IMG_NOISE50",
+                "value": "resources/textures/luos/Noise_Gradients/T_Random_50.png"
+            },
+            {
+                "key": "IMG_NOISE53",
+                "value": "resources/textures/luos/Noise_Gradients/T_Random_53.png"
+            },
+            {
+                "key": "IMG_SPARKFLAME",
+                "value": "resources/textures/spark_flame.png"
+            },
+            {
+                "key": "IMG_IMGCIRCLE8",
+                "value": "resources/imgCircle8.png"
+            },
+            {
+                "key": "IMG_IMGCIRCLE16",
+                "value": "resources/imgCircle16.png"
+            },
+            {
+                "key": "IMG_APPLICATIONICON",
+                "value": "resources/icon.png"
+            },
+            {
+                "key": "IMG_CURSOR_ATTACK",
+                "value": "resources/textures/cursor/32/attack.png"
+            },
+            {
+                "key": "IMG_CURSOR_DENIED",
+                "value": "resources/textures/cursor/32/denied.png"
+            },
+            {
+                "key": "IMG_CURSOR_MOVE",
+                "value": "resources/textures/cursor/32/move.png"
+            },
+            {
+                "key": "IMG_CURSOR_TALK",
+                "value": "resources/textures/cursor/32/talk.png"
+            },
+            {
+                "key": "IMG_CURSOR_REGULAR",
+                "value": "resources/textures/cursor/32/regular.png"
+            },
+            {
+                "key": "MDL_VFX_SPHERE",
+                "value": "resources/models/obj/sphere.obj"
+            },
+            {
+                "key": "MDL_BUILDING_WIZARDTOWER1",
+                "value": "resources/models/obj/Wizard Tower 1.obj"
+            },
+            {
+                "key": "MDL_BUILDING_PORTAL",
+                "value": "resources/models/obj/portal.obj"
+            },
+            {
+                "key": "MDL_ENEMY_GOBLIN",
+                "value": "resources/models/gltf/goblin.glb"
+            },
+            {
+                "key": "MDL_NPC_ARISSA",
+                "value": "resources/models/gltf/arissa.glb"
+            },
+            {
+                "key": "MDL_PLAYER_DEFAULT",
+                "value": "resources/models/gltf/hero2.glb"
+            },
+            {
+                "key": "GEN_IMG_HEIGHTMAP",
+                "value": "HEIGHT_MAP"
+            },
+            {
+                "key": "GEN_IMG_NORMALMAP",
+                "value": "NORMAL_MAP"
+            }
+        ]
+    }
+}
