@@ -277,6 +277,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_DENIED);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_ATTACK);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_APPLICATIONICON);
+
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_RAINOFFIRE_CURSOR);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_IMGCIRCLE16);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_IMGCIRCLE8);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_SPARKFLAME);
