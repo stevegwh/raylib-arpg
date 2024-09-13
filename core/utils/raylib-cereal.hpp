@@ -13,6 +13,7 @@
 #include "rlgl.h"
 #include "utils.h"
 #include <array>
+#include <complex>
 
 namespace cereal
 {
@@ -322,9 +323,15 @@ void load(Archive& archive, MaterialMap& map)
 {
     Image image;
     archive(image, map.color, map.value);
-    if (!image.data)
+    if (!image.data || (image.width == 0 && image.height == 0) || image.format >= PIXELFORMAT_COMPRESSED_DXT1_RGB)
     {
-        UnloadImage(image);
+        map.texture = (Texture2D){rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+
+        if (image.data)
+        {
+            UnloadImage(image);
+        }
+
         return;
     }
     map.texture = LoadTextureFromImage(image);
