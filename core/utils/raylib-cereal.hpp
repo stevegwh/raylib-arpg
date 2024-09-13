@@ -267,6 +267,7 @@ void load(Archive& archive, Image& image)
     archive(data, image.format, image.height, image.width, image.mipmaps);
     int len = data.size();
     image.data = static_cast<unsigned char*>(RL_MALLOC(len * sizeof(unsigned char)));
+    // TODO: Buffer issues in Windows with this. I believe only with grayscale images?
     if (image.data != nullptr)
     {
         std::memcpy(image.data, data.data(), len * sizeof(unsigned char));
