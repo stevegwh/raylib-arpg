@@ -51,7 +51,7 @@ namespace sage
         texture = std::make_unique<TextureTerrainOverlay>(
             _gameData->registry,
             _gameData->navigationGridSystem.get(),
-            AssetID::TEX_RAINOFFIRE_CURSOR,
+            AssetID::IMG_RAINOFFIRE_CURSOR,
             WHITE,
             shader);
     }

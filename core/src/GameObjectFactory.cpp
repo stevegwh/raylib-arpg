@@ -255,8 +255,8 @@ namespace sage
             timer.SetMaxTime(1000000);
             timer.Start();
 
-            Texture texture = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE50);
-            Texture texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE45);
+            Texture texture = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE50);
+            Texture texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE45);
 
             Matrix modelTransform = MatrixRotateX(90 * DEG2RAD);
 

@@ -12,8 +12,8 @@ namespace sage
 
     FountainPartSys::FountainPartSys(Camera3D* cam) : ParticleSystem(cam)
     {
-        auto texCircle16 = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_IMGCIRCLE16);
-        auto texCircle8 = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_IMGCIRCLE8);
+        auto texCircle16 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_IMGCIRCLE16);
+        auto texCircle8 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_IMGCIRCLE8);
 
         EmitterConfig ecfg1;
         ecfg1.size = 0.2f;

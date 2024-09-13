@@ -50,8 +50,8 @@ namespace sage
         : VisualFX(_gameData, _transform)
     {
         // Texture/Material
-        auto texture = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE53);
-        auto texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_NOISE53);
+        auto texture = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE53);
+        auto texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE53);
 
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/lightning.fs");
         secondsLoc = GetShaderLocation(shader, "seconds");

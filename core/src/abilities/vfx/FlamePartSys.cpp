@@ -11,7 +11,7 @@ namespace sage
 
     FlamePartSys::FlamePartSys(Camera3D* cam) : ParticleSystem(cam)
     {
-        texCircle16 = ResourceManager::GetInstance().TextureLoad(AssetID::TEX_SPARKFLAME);
+        texCircle16 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_SPARKFLAME);
 
         EmitterConfig ecfg1;
         ecfg1.size = 1.0f;
