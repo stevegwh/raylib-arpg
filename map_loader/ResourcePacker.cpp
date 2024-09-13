@@ -258,8 +258,10 @@ namespace sage
 
         // We pack all resources used by the game here.
         // These are *all* loaded into memory for the moment.
-        // TODO: Make separate asset libraries, one for "core" and then maybe pack the required models into each
-        // map file?
+        // Would prefer to somehow load from the json file and just load the paths
+        // Having an extra key enum that states the type? e.g., IMAGE, ANIM, MODEL, TXT.
+        // The asset loader can use the keys and other classes can just ignore them.
+        // On "release" can just pack the json file into memory and load it first to populate paths
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelAnimationLoadFromFile(AssetID::MDL_ENEMY_GOBLIN);
         ResourceManager::GetInstance().ModelLoadFromFile(AssetID::MDL_NPC_ARISSA);
@@ -278,13 +280,13 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_CURSOR_ATTACK);
         ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_APPLICATIONICON);
 
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_RAINOFFIRE_CURSOR);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_IMGCIRCLE16);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_IMGCIRCLE8);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_SPARKFLAME);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE50);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE45);
-        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::TEX_NOISE53);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_RAINOFFIRE_CURSOR);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_IMGCIRCLE16);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_IMGCIRCLE8);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_SPARKFLAME);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_NOISE50);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_NOISE45);
+        ResourceManager::GetInstance().ImageLoadFromFile(AssetID::IMG_NOISE53);
 
         serializer::SaveCurrentResourceData(*registry, output);
     }
