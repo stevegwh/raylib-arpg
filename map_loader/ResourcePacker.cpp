@@ -250,18 +250,19 @@ namespace sage
     /**
      * output: The path + filename of the resulting binary
      **/
-    void ResourcePacker::PackAssets(entt::registry* registry, const char* output)
+    void ResourcePacker::PackAssets(entt::registry* registry, const std::string& output)
     {
-        // if (!DirectoryExists(output)) // strip file name
-        // {
-        //     std::cout << "ResourcePacker: Directory does not exist, cannot save. Aborting... \n";
-        //     return;
-        // }
-        // if (IsFileExtension(output, ".bin"))
-        // {
-        //     std::cout << "ResourcePacker: File extension for output file must be 'bin'. Aborting... \n";
-        //     return;
-        // }
+        std::filesystem::path fullpath(output);
+        if (!DirectoryExists(fullpath.remove_filename().c_str()))
+        {
+            std::cout << "ResourcePacker: Directory does not exist, cannot save. Aborting... \n";
+            return;
+        }
+        if (!IsFileExtension(output.c_str(), ".bin"))
+        {
+            std::cout << "ResourcePacker: File extension for output file must be 'bin'. Aborting... \n";
+            return;
+        }
 
         registry->clear();
         ResourceManager::GetInstance().Reset();
@@ -285,12 +286,12 @@ namespace sage
             else if (tag == "MDL")
             {
                 ResourceManager::GetInstance().ModelLoadFromFile(id);
-                ResourceManager::GetInstance().ModelAnimationLoadFromFile(id);
-                // if (IsFileExtension(AssetManager::GetInstance().GetAssetPath(id).c_str(), ".glb") ||
-                //     IsFileExtension(AssetManager::GetInstance().GetAssetPath(id).c_str(), ".gltf"))
-                // {
-                //     ResourceManager::GetInstance().ModelAnimationLoadFromFile(id);
-                // }
+
+                if (IsFileExtension(AssetManager::GetInstance().GetAssetPath(id).c_str(), ".glb") ||
+                    IsFileExtension(AssetManager::GetInstance().GetAssetPath(id).c_str(), ".gltf"))
+                {
+                    ResourceManager::GetInstance().ModelAnimationLoadFromFile(id);
+                }
             }
             // else if (std::find(name.begin(), name.end(), "TXT") != name.end())
             // {
@@ -299,6 +300,6 @@ namespace sage
             std::cout << "FINISH: Loading assets into memory \n";
         }
 
-        serializer::SaveCurrentResourceData(*registry, output);
+        serializer::SaveCurrentResourceData(*registry, output.c_str());
     }
 }; // namespace sage
