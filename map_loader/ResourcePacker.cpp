@@ -252,6 +252,9 @@ namespace sage
      **/
     void ResourcePacker::PackAssets(entt::registry* registry, const std::string& output)
     {
+        registry->clear();
+        ResourceManager::GetInstance().Reset();
+
         std::filesystem::path fullpath(output);
         if (!DirectoryExists(fullpath.remove_filename().c_str()))
         {
@@ -297,9 +300,8 @@ namespace sage
             // {
             //     // Load text here.
             // }
-            std::cout << "FINISH: Loading assets into memory \n";
         }
-
+        std::cout << "FINISH: Loading assets into memory \n";
         serializer::SaveCurrentResourceData(*registry, output.c_str());
     }
 }; // namespace sage

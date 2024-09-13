@@ -305,7 +305,14 @@ template <typename Archive>
 void save(Archive& archive, MaterialMap const& map)
 {
     Image image{};
-    image = LoadImageFromTexture(map.texture);
+    image.format = map.texture.format;
+
+    if (map.texture.format < PIXELFORMAT_COMPRESSED_DXT1_RGB && map.texture.id != rlGetTextureIdDefault() &&
+        map.texture.id != 0)
+    {
+        image = LoadImageFromTexture(map.texture);
+    }
+
     archive(image, map.color, map.value);
     UnloadImage(image);
 };
