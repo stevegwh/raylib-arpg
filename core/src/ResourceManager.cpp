@@ -386,6 +386,12 @@ namespace sage
         {
             int animsCount;
             auto animations = LoadModelAnimations(path.c_str(), &animsCount);
+            if (animations == nullptr)
+            {
+                std::cout << "ResourceManager: Model does not contain animation data, or was unable to be loaded. "
+                             "Aborting... \n";
+                return;
+            }
             modelAnimations[path] = std::make_pair(animations, animsCount);
         }
     }
