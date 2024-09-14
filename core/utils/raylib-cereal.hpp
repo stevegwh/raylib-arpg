@@ -13,7 +13,6 @@
 #include "rlgl.h"
 #include "utils.h"
 #include <array>
-#include <complex>
 
 namespace cereal
 {
@@ -256,7 +255,7 @@ template <typename Archive>
 void save(Archive& archive, Image const& image)
 {
     unsigned char* rlData = static_cast<unsigned char*>(image.data);
-    int len = image.format * image.width * image.height;
+    int len = GetPixelDataSize(image.width, image.height, image.format);
     std::vector<unsigned char> data(rlData, rlData + len);
     archive(data, image.format, image.height, image.width, image.mipmaps);
 }
@@ -266,18 +265,9 @@ void load(Archive& archive, Image& image)
 {
     std::vector<unsigned char> data;
     archive(data, image.format, image.height, image.width, image.mipmaps);
-    int len = data.size();
+    int len = GetPixelDataSize(image.width, image.height, image.format);
     image.data = static_cast<unsigned char*>(RL_MALLOC(len * sizeof(unsigned char)));
-    // TODO: Buffer issues in Windows with this. I believe only with grayscale images?
-    if (image.data != nullptr)
-    {
-        std::memcpy(image.data, data.data(), len * sizeof(unsigned char));
-    }
-    else
-    {
-        std::cout << "ERROR: Could not allocate memory for image. \n";
-        exit(1);
-    }
+    std::memcpy(image.data, data.data(), len * sizeof(unsigned char));
 }
 
 template <typename Archive>
@@ -325,7 +315,7 @@ void load(Archive& archive, MaterialMap& map)
     archive(image, map.color, map.value);
     if (!image.data || (image.width == 0 && image.height == 0) || image.format >= PIXELFORMAT_COMPRESSED_DXT1_RGB)
     {
-        map.texture = (Texture2D){rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+        map.texture = Texture2D{rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 
         if (image.data)
         {
