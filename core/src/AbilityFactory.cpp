@@ -1,7 +1,14 @@
 #include "AbilityFactory.hpp"
 
+#include "abilities/AbilityFunctions.hpp"
 #include "abilities/AbilityIndicator.hpp"
-#include "abilities/AbilityResourceManager.hpp"
+#include "abilities/vfx/FireballVFX.hpp"
+#include "abilities/vfx/FloorFireVFX.hpp"
+#include "abilities/vfx/LightningBallVFX.hpp"
+#include "abilities/vfx/RainOfFireVFX.hpp"
+#include "abilities/vfx/VisualFX.hpp"
+#include "abilities/vfx/WhirlwindVFX.hpp"
+#include "components/Ability.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 #include "Cursor.hpp"
@@ -9,6 +16,10 @@
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/states/AbilityStateMachine.hpp"
 #include <Serializer.hpp>
+
+#include <iostream>
+#include <memory>
+#include <string>
 
 namespace sage
 {
@@ -19,6 +30,8 @@ namespace sage
     void CreateLightningBallAbility(Ability& abilityComponent);
     void CreateWavemobAutoAttackAbility(Ability& abilityComponenty);
     void CreateWhirlwindAbility(Ability& abilityComponent);
+    std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, GameData* _gameData);
+    std::unique_ptr<VisualFX> GetVisualFX(GameData* _gameData, Ability* _ability);
 
     entt::entity AbilityFactory::GetAbility(entt::entity caster, AbilityEnum abilityEnum)
     {
@@ -76,12 +89,11 @@ namespace sage
         ability.cooldownTimer.SetMaxTime(ability.ad.base.cooldownDuration);
         ability.castTimer.SetMaxTime(ability.ad.base.castTime);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(gameData, &ability);
+        ability.vfx = GetVisualFX(gameData, &ability);
 
         if (ability.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
-            ability.abilityIndicator =
-                AbilityResourceManager::GetInstance().GetIndicator(ability.ad.indicator, gameData);
+            ability.abilityIndicator = GetIndicator(ability.ad.indicator, gameData);
         }
 
         return out;
@@ -92,7 +104,60 @@ namespace sage
     {
     }
 
+    // Helper functions
     // --------------------------------------------
+
+    std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, GameData* _gameData)
+    {
+        if (data.indicatorKey == AbilityIndicatorEnum::NONE) return nullptr;
+
+        std::unique_ptr<AbilityIndicator> obj;
+
+        if (data.indicatorKey == AbilityIndicatorEnum::CIRCULAR_MAGIC_CURSOR)
+        {
+            obj = std::make_unique<AbilityIndicator>(
+                _gameData->registry, _gameData->navigationGridSystem.get(), AssetID::IMG_RAINOFFIRE_CURSOR);
+        }
+        else
+        {
+            return nullptr;
+        }
+        return std::move(obj);
+    }
+
+    std::unique_ptr<VisualFX> GetVisualFX(GameData* _gameData, Ability* _ability)
+    {
+        if (_ability->ad.vfx.name == AbilityVFXEnum::NONE) return nullptr;
+
+        std::unique_ptr<VisualFX> obj;
+
+        if (_ability->ad.vfx.name == AbilityVFXEnum::RAINOFFIRE)
+        {
+            obj = std::make_unique<RainOfFireVFX>(_gameData, _ability);
+        }
+        else if (_ability->ad.vfx.name == AbilityVFXEnum::FLOORFIRE)
+        {
+            obj = std::make_unique<FloorFireVFX>(_gameData, _ability);
+        }
+        else if (_ability->ad.vfx.name == AbilityVFXEnum::WHIRLWIND)
+        {
+            obj = std::make_unique<WhirlwindVFX>(_gameData, _ability);
+        }
+        else if (_ability->ad.vfx.name == AbilityVFXEnum::LIGHTNINGBALL)
+        {
+            obj = std::make_unique<LightningBallVFX>(_gameData, _ability);
+        }
+        else if (_ability->ad.vfx.name == AbilityVFXEnum::FIREBALL)
+        {
+            obj = std::make_unique<FireballVFX>(_gameData, _ability);
+        }
+        else
+        {
+            return nullptr;
+        }
+
+        return std::move(obj);
+    }
 
     void createProjectile(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data)
@@ -156,8 +221,8 @@ namespace sage
         ad.animationParams.oneShot = true;
         ad.animationParams.animationDelay = 0;
 
-        ad.vfx.name = "RainOfFire";
-        ad.indicator.indicatorKey = "CircularCursor";
+        ad.vfx.name = AbilityVFXEnum::RAINOFFIRE;
+        ad.indicator.indicatorKey = AbilityIndicatorEnum::CIRCULAR_MAGIC_CURSOR;
     }
 
     void CreateFloorFireAbility(Ability& abilityComponent)
@@ -182,7 +247,7 @@ namespace sage
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animationDelay = 0;
 
-        ad.vfx.name = "Fireball";
+        ad.vfx.name = AbilityVFXEnum::FIREBALL;
     }
 
     void CreateWavemobAutoAttackAbility(Ability& abilityComponent)
@@ -218,7 +283,7 @@ namespace sage
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
         ad.animationParams.animationDelay = 0;
 
-        ad.vfx.name = "LightningBall";
+        ad.vfx.name = AbilityVFXEnum::LIGHTNINGBALL;
     }
 
     void CreateWhirlwindAbility(Ability& abilityComponent)
@@ -239,7 +304,7 @@ namespace sage
         ad.animationParams.oneShot = true;
         ad.animationParams.animationDelay = 0;
 
-        ad.vfx.name = "360SwordSlash";
+        ad.vfx.name = AbilityVFXEnum::WHIRLWIND;
     }
 
 } // namespace sage

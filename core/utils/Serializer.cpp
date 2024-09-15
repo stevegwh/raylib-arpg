@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "abilities/AbilityData.hpp"
-#include "abilities/AbilityResourceManager.hpp"
 #include "components/Collideable.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
@@ -30,6 +29,7 @@ namespace sage
     template <typename Archive>
     void save(Archive& archive, AbilityData::BaseData const& bd)
     {
+        // TODO:
         archive(
             cereal::make_nvp("cooldownDuration", bd.cooldownDuration),
             cereal::make_nvp("baseDamage", bd.baseDamage),
@@ -44,6 +44,7 @@ namespace sage
     template <typename Archive>
     void load(Archive& archive, AbilityData::BaseData& bd)
     {
+        // TODO:
         archive(
             cereal::make_nvp("cooldownDuration", bd.cooldownDuration),
             cereal::make_nvp("baseDamage", bd.baseDamage),
