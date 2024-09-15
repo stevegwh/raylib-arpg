@@ -21,16 +21,14 @@
 
 namespace sage
 {
+
     class PlayerStateController::DefaultState : public StateMachine
     {
 
+        // TODO: Currently, the logic of "what to do when the floor is clicked" is tied to "onAttackCancelled" on
+        // combatable actor, which is weird and confusing.
         void onFloorClick(entt::entity self, entt::entity x)
         {
-            auto& playerState = registry->get<PlayerState>(self);
-            playerState.ChangeState(self, PlayerStateEnum::Default);
-            auto& playerCombatable = registry->get<CombatableActor>(self);
-            playerCombatable.target = entt::null;
-
             gameData->controllableActorSystem->CancelMovement(self); // Flush any previous commands
             gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->collision().point);
         }
@@ -68,11 +66,7 @@ namespace sage
             leftSink.connect<&DefaultState::onEnemyLeftClick>(this);
             entt::sink rightSink{controllable.onEnemyRightClick};
             rightSink.connect<&DefaultState::onEnemyRightClick>(this);
-
-            auto& combatableActor = registry->get<CombatableActor>(entity);
-
-            // Bridge was created in GameObjectFactory to connect this to cursor
-            entt::sink floorClickSink{combatableActor.onAttackCancelled};
+            entt::sink floorClickSink{controllable.onFloorClick};
             floorClickSink.connect<&DefaultState::onFloorClick>(this);
             // ----------------------------
 
@@ -80,7 +74,7 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        virtual ~DefaultState() = default;
+        ~DefaultState() override = default;
 
         DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
@@ -95,7 +89,7 @@ namespace sage
         void Update(entt::entity entity) override;
         void OnStateEnter(entt::entity entity) override;
         void OnStateExit(entt::entity entity) override;
-        virtual ~MovingToTalkToNPCState() = default;
+        ~MovingToTalkToNPCState() override = default;
         MovingToTalkToNPCState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
@@ -105,6 +99,14 @@ namespace sage
 
     class PlayerStateController::MovingToAttackEnemyState : public StateMachine
     {
+
+        void onAttackCancelled(entt::entity self, entt::entity x)
+        {
+            auto& playerCombatable = registry->get<CombatableActor>(self);
+            playerCombatable.target = entt::null;
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::Default);
+        }
 
         void onTargetReached(entt::entity self)
         {
@@ -127,6 +129,10 @@ namespace sage
             auto& combatable = registry->get<CombatableActor>(self);
             assert(combatable.target != entt::null);
 
+            auto& controllable = registry->get<ControllableActor>(self);
+            entt::sink attackCancelSink{controllable.onFloorClick};
+            attackCancelSink.connect<&MovingToAttackEnemyState::onAttackCancelled>(this);
+
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
             Vector3 playerPos = registry->get<sgTransform>(self).GetWorldPos();
@@ -147,9 +153,13 @@ namespace sage
             auto& moveableActor = registry->get<MoveableActor>(self);
             entt::sink sink{moveableActor.onFinishMovement};
             sink.disconnect<&MovingToAttackEnemyState::onTargetReached>(this);
+
+            auto& controllable = registry->get<ControllableActor>(self);
+            entt::sink attackCancelSink{controllable.onFloorClick};
+            attackCancelSink.disconnect<&MovingToAttackEnemyState::onAttackCancelled>(this);
         }
 
-        virtual ~MovingToAttackEnemyState() = default;
+        ~MovingToAttackEnemyState() override = default;
 
         MovingToAttackEnemyState(entt::registry* _registry, GameData* _gameData)
             : StateMachine(_registry, _gameData)
@@ -163,9 +173,14 @@ namespace sage
     {
         int onTargetDeathBridge;
 
+        void onAttackCancelled(entt::entity self, entt::entity x)
+        {
+            // Both outcomes are the same
+            onTargetDeath(self, entt::null);
+        }
+
         void onTargetDeath(entt::entity self, entt::entity target)
         {
-
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = entt::null;
             auto& playerState = registry->get<PlayerState>(self);
@@ -198,8 +213,13 @@ namespace sage
 
             onTargetDeathBridge = gameData->signalReflectionManager->CreateHook<entt::entity>(
                 entity, enemyCombatable.onDeath, combatable.onTargetDeath);
+
             entt::sink sink{combatable.onTargetDeath};
             sink.connect<&CombatState::onTargetDeath>(this);
+
+            auto& controllable = registry->get<ControllableActor>(entity);
+            entt::sink attackCancelSink{controllable.onFloorClick};
+            attackCancelSink.connect<&CombatState::onAttackCancelled>(this);
         }
 
         void OnStateExit(entt::entity entity) override
@@ -212,9 +232,13 @@ namespace sage
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
+
+            auto& controllable = registry->get<ControllableActor>(entity);
+            entt::sink attackCancelSink{controllable.onFloorClick};
+            attackCancelSink.disconnect<&CombatState::onAttackCancelled>(this);
         }
 
-        virtual ~CombatState() = default;
+        ~CombatState() override = default;
         CombatState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }

@@ -168,20 +168,6 @@ namespace sage
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
 
-        // 2 - Stab
-        // 1 - Talk
-
-        // 0 - Walk
-        // 1 - Talk
-        // 2 - Stab
-        // 3 - Run
-        // 4 - Idle
-        // 5 - Whirlwind
-        // 6 - SLash
-        // 7 - Spell 2 hand up
-        // 8 - Spell 2 hand forward
-        // 9 - Roll
-
         animation.animationMap[AnimationEnum::WALK] = 1;
         animation.animationMap[AnimationEnum::TALK] = 2;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 3;
@@ -225,6 +211,8 @@ namespace sage
         data->controllableActorSystem->SetControlledActor(id);
 
         data->signalReflectionManager->CreateHook<entt::entity>(
+            id, data->cursor->onFloorClick, controllable.onFloorClick);
+        data->signalReflectionManager->CreateHook<entt::entity>(
             id, data->cursor->onEnemyLeftClick, controllable.onEnemyLeftClick);
         data->signalReflectionManager->CreateHook<entt::entity>(
             id, data->cursor->onEnemyRightClick, controllable.onEnemyRightClick);
@@ -239,9 +227,6 @@ namespace sage
         data->playerAbilitySystem->SetSlot(
             2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
         data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
-
-        data->signalReflectionManager->CreateHook<entt::entity>(
-            id, data->cursor->onFloorClick, combatable.onAttackCancelled);
 
         // ---
 
