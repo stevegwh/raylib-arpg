@@ -57,7 +57,7 @@ namespace sage
             // ----------------------------
             Vector3 target = {52, 0, -10}; // TODO: Just a random location for now
             auto& animation = registry->get<Animation>(entity);
-            animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+            animation.ChangeAnimationByEnum(AnimationEnum::WALK);
             gameData->actorMovementSystem->PathfindToLocation(entity, target);
         }
 
@@ -132,7 +132,7 @@ namespace sage
             const auto& combatable = registry->get<CombatableActor>(self);
             const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
             auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+            animation.ChangeAnimationByEnum(AnimationEnum::WALK);
             gameData->actorMovementSystem->PathfindToLocation(self, target);
             auto& moveableActor = registry->get<MoveableActor>(self);
             entt::sink sink{moveableActor.onFinishMovement};

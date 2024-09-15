@@ -28,6 +28,6 @@ namespace sage
         void Update(float dt) override;
         void Draw3D() const override;
         ~LightningBallVFX() override = default;
-        explicit LightningBallVFX(GameData* _gameData, sgTransform* _transform);
+        explicit LightningBallVFX(GameData* _gameData, Ability* _ability);
     };
 } // namespace sage

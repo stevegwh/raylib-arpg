@@ -76,7 +76,7 @@ namespace sage
         ability.cooldownTimer.SetMaxTime(ability.ad.base.cooldownDuration);
         ability.castTimer.SetMaxTime(ability.ad.base.castTime);
 
-        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(ability.ad.vfx, out, gameData);
+        ability.vfx = AbilityResourceManager::GetInstance().GetVisualFX(gameData, &ability);
 
         if (ability.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {

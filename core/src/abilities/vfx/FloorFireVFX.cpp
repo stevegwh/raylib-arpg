@@ -4,10 +4,10 @@
 
 #include "FloorFireVFX.hpp"
 
-#include "GameData.hpp"
-
+#include "components/Ability.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
+#include "GameData.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
 
@@ -31,12 +31,13 @@ namespace sage
     void FloorFireVFX::InitSystem()
     {
         active = true;
-        texture->Init(transform->GetWorldPos());
+        auto& transform = gameData->registry->get<sgTransform>(ability->self);
+        texture->Init(transform.GetWorldPos());
         texture->Enable(true);
     }
 
-    FloorFireVFX::FloorFireVFX(GameData* _gameData, sgTransform* _transform)
-        : VisualFX(_gameData, _transform),
+    FloorFireVFX::FloorFireVFX(GameData* _gameData, Ability* _ability)
+        : VisualFX(_gameData, _ability),
           shader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/floorfirefx.fs"))
     {
         secondsLoc = GetShaderLocation(shader, "seconds");

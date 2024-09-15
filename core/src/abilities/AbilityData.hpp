@@ -80,6 +80,14 @@ namespace sage
         INTERRUPTED
     };
 
+    enum class AbilityVFX
+    {
+        RAIN_OF_FIRE,
+        WHIRLWIND,
+        FIREBALL,
+        LIGHTNINGBALL
+    };
+
     // Enable bitwise operations
     template <typename E>
     struct EnableBitMaskOperators
@@ -215,11 +223,13 @@ namespace sage
         struct VisualFXData
         {
             std::string name = "";
+            // TODO: Replace with enums
         };
 
         struct IndicatorData
         {
             std::string indicatorKey = ""; // Key to an indicator/cursor class that has the texture etc.
+            // TODO: Replace with enums
         };
 
         BaseData base{};

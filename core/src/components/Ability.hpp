@@ -10,9 +10,6 @@
 
 namespace sage
 {
-    // class AbilityIndicator;
-    // class VisualFX;
-
     struct Ability
     {
         entt::entity self;
