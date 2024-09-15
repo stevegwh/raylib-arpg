@@ -153,7 +153,7 @@ namespace sage
             processEntityWithCollision(entity, moveableActor, transform, collideable);
         }
 
-        // Process entities without Collideable component
+        // Process entities without Collideable component (e.g., some abilities etc)
         auto partialView = registry->view<MoveableActor, sgTransform>(entt::exclude<Collideable>);
         for (auto [entity, moveableActor, transform] : partialView.each())
         {
@@ -189,7 +189,7 @@ namespace sage
             return;
         }
 
-        handleCollisionAvoidance(entity, transform, moveableActor);
+        handleActorCollisionAvoidance(entity, transform, moveableActor);
         updateActorPosition(entity, transform, moveableActor);
         navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
     }
@@ -283,7 +283,7 @@ namespace sage
         moveableActor.onFinishMovement.publish(entity);
     }
 
-    void ActorMovementSystem::handleCollisionAvoidance(
+    void ActorMovementSystem::handleActorCollisionAvoidance(
         entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor)
     {
         float avoidanceDistance = 10;
@@ -297,7 +297,7 @@ namespace sage
 
         if (hitCell != nullptr && registry->any_of<Collideable>(hitCell->occupant))
         {
-            processCollision(entity, transform, moveableActor, hitCell);
+            processOtherActorCollision(entity, transform, moveableActor, hitCell);
         }
     }
 
@@ -308,7 +308,7 @@ namespace sage
             actorIndex.row, actorIndex.col, {direction.x, direction.z}, distance, moveableActor.debugRay);
     }
 
-    void ActorMovementSystem::processCollision(
+    void ActorMovementSystem::processOtherActorCollision(
         entt::entity entity,
         const sgTransform& transform,
         MoveableActor& moveableActor,

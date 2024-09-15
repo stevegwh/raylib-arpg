@@ -216,8 +216,8 @@ namespace sage
             AbilityBehaviour::ATTACK_AOE_POINT);
         ad.base.AddOptionalBehaviour(AbilityBehaviourOptional::INDICATOR);
 
-        ad.animationParams.animEnum = AnimationEnum::SPIN;
-        ad.animationParams.animSpeed = 1;
+        ad.animationParams.animEnum = AnimationEnum::SPELLCAST_UP;
+        ad.animationParams.animSpeed = 3;
         ad.animationParams.oneShot = true;
         ad.animationParams.animationDelay = 0;
 
@@ -244,8 +244,9 @@ namespace sage
             AbilityBehaviour::MOVEMENT_PROJECTILE | AbilityBehaviour::CAST_INSTANT |
             AbilityBehaviour::ATTACK_AOE_POINT);
 
-        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
+        ad.animationParams.animEnum = AnimationEnum::SPELLCAST_FWD;
         ad.animationParams.animationDelay = 0;
+        ad.animationParams.oneShot = true;
 
         ad.vfx.name = AbilityVFXEnum::FIREBALL;
     }
@@ -280,8 +281,10 @@ namespace sage
             AbilityBehaviour::MOVEMENT_PROJECTILE | AbilityBehaviour::CAST_INSTANT |
             AbilityBehaviour::ATTACK_AOE_POINT);
 
-        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
-        ad.animationParams.animationDelay = 0;
+        ad.animationParams.animEnum = AnimationEnum::SPELLCAST_FWD;
+        ad.animationParams.animationDelay = 1; // Animation delay not a thing
+        ad.animationParams.animSpeed = 4;
+        ad.animationParams.oneShot = true;
 
         ad.vfx.name = AbilityVFXEnum::LIGHTNINGBALL;
     }

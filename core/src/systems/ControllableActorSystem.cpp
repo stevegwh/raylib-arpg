@@ -85,9 +85,8 @@ namespace sage
         : BaseSystem(_registry), gameData(_gameData)
 
     {
-        {
-            entt::sink sink{onControlledActorChange};
-            sink.connect<&Cursor::OnControlledActorChange>(gameData->cursor.get());
-        }
+
+        entt::sink sink{onControlledActorChange};
+        sink.connect<&Cursor::OnControlledActorChange>(gameData->cursor.get());
     }
 } // namespace sage

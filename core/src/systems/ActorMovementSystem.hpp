@@ -46,11 +46,11 @@ namespace sage
         void handleDestinationReached(
             entt::entity entity, MoveableActor& moveableActor, const Collideable& collideable);
         void handleDestinationReachedWithoutCollision(entt::entity entity, MoveableActor& moveableActor);
-        void handleCollisionAvoidance(
+        void handleActorCollisionAvoidance(
             entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor);
         NavigationGridSquare* castCollisionRay(
             const GridSquare& actorIndex, const Vector3& direction, float distance, MoveableActor& moveableActor);
-        void processCollision(
+        void processOtherActorCollision(
             entt::entity entity,
             const sgTransform& transform,
             MoveableActor& moveableActor,
