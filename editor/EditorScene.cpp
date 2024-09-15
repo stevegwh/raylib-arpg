@@ -139,7 +139,7 @@ namespace sage
             mode = "VOID";
         else if (currentEditorMode == SELECT)
             mode = "SELECT";
-        else if (currentEditorMode == MOVE)
+        else if (currentEditorMode == WALK)
             mode = "MOVE";
         else if (currentEditorMode == CREATE)
             mode = "CREATE";

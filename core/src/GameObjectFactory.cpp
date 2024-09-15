@@ -81,9 +81,9 @@ namespace sage
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_ENEMY_GOBLIN);
         animation.animationMap[AnimationEnum::IDLE] = 0;
         animation.animationMap[AnimationEnum::DEATH] = 0;
-        animation.animationMap[AnimationEnum::MOVE] = 3;
+        animation.animationMap[AnimationEnum::WALK] = 3;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
-        animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+        animation.ChangeAnimationByEnum(AnimationEnum::WALK);
 
         // ---
 
@@ -168,11 +168,30 @@ namespace sage
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
 
-        animation.animationMap[AnimationEnum::IDLE] = 2;
-        animation.animationMap[AnimationEnum::MOVE] = 5;
-        animation.animationMap[AnimationEnum::TALK] = 3;
-        animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
-        animation.animationMap[AnimationEnum::SPIN] = 6;
+        // 2 - Stab
+        // 1 - Talk
+
+        // 0 - Walk
+        // 1 - Talk
+        // 2 - Stab
+        // 3 - Run
+        // 4 - Idle
+        // 5 - Whirlwind
+        // 6 - SLash
+        // 7 - Spell 2 hand up
+        // 8 - Spell 2 hand forward
+        // 9 - Roll
+
+        animation.animationMap[AnimationEnum::WALK] = 1;
+        animation.animationMap[AnimationEnum::TALK] = 2;
+        animation.animationMap[AnimationEnum::AUTOATTACK] = 3;
+        animation.animationMap[AnimationEnum::RUN] = 4;
+        animation.animationMap[AnimationEnum::IDLE] = 10;
+        animation.animationMap[AnimationEnum::SPIN] = 5;
+        animation.animationMap[AnimationEnum::SLASH] = 6;
+        animation.animationMap[AnimationEnum::SPELLCAST_UP] = 7;
+        animation.animationMap[AnimationEnum::SPELLCAST_FWD] = 8;
+        animation.animationMap[AnimationEnum::ROLL] = 9;
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         {
@@ -184,22 +203,22 @@ namespace sage
         {
             entt::sink sink{moveableActor.onStartMovement};
             sink.connect<[](Animation& animation, entt::entity entity) {
-                animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+                animation.ChangeAnimationByEnum(AnimationEnum::RUN);
             }>(animation);
         }
         {
             // TODO: Just to test animations on demand
-            entt::sink sink{data->userInput->keyIPressed};
-            sink.connect<[](Animation& animation) {
-                if (animation.animIndex == 0)
-                {
-                    animation.ChangeAnimationByEnum(AnimationEnum::TALK);
-                }
-                else if (animation.animIndex == 2)
-                {
-                    animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-                }
-            }>(animation);
+            // entt::sink sink{data->userInput->keyIPressed};
+            // sink.connect<[](Animation& animation) {
+            //    if (animation.animIndex == 0)
+            //    {
+            //        animation.ChangeAnimationByEnum(AnimationEnum::TALK);
+            //    }
+            //    else if (animation.animIndex == 2)
+            //    {
+            //        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+            //    }
+            //}>(animation);
         }
 
         auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());

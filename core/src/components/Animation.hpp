@@ -18,9 +18,14 @@ namespace sage
         IDLE,
         DEATH,
         AUTOATTACK,
-        MOVE,
+        WALK,
         TALK,
-        SPIN
+        SPIN,
+        SLASH,
+        RUN,
+        SPELLCAST_FWD,
+        SPELLCAST_UP,
+        ROLL
     };
 
     struct AnimationParams

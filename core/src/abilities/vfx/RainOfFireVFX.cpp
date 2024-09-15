@@ -7,8 +7,8 @@
 #include "GameData.hpp"
 
 #include "Camera.hpp"
+#include "components/Ability.hpp"
 #include "components/sgTransform.hpp"
-
 #include "ResourceManager.hpp"
 
 #include "raylib.h"
@@ -89,7 +89,8 @@ namespace sage
         initialHeight = height;
         minHeight = 0.0f;
         impactRadius = 1.0f;
-        target = transform->GetWorldPos();
+        auto& transform = gameData->registry->get<sgTransform>(ability->self);
+        target = transform.GetWorldPos();
         // Base spawn point slightly behind and above the target
         baseSpawnPoint = {target.x + initialOffset, target.y + height, target.z + initialOffset};
 
@@ -111,7 +112,7 @@ namespace sage
         }
     }
 
-    RainOfFireVFX::RainOfFireVFX(GameData* _gameData, sgTransform* _transform) : VisualFX(_gameData, _transform)
+    RainOfFireVFX::RainOfFireVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
     {
     }
 } // namespace sage

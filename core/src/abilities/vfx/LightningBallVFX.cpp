@@ -4,19 +4,17 @@
 
 #include "LightningBallVFX.hpp"
 
-#include "GameData.hpp"
-
 #include "Camera.hpp"
+#include "components/Ability.hpp"
+#include "components/Renderable.hpp"
+#include "components/sgTransform.hpp"
+#include "GameData.hpp"
+#include "ResourceManager.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
-#include "ResourceManager.hpp"
 #include "rlgl.h"
-
 #include <cmath>
-
-#include "components/Renderable.hpp"
-#include "components/sgTransform.hpp"
 #include <iostream>
 
 namespace sage
@@ -25,7 +23,8 @@ namespace sage
     {
         // Draw model (if needed)
         rlDisableBackfaceCulling();
-        model.Draw(transform->GetWorldPos(), Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
+        auto& transform = gameData->registry->get<sgTransform>(ability->self);
+        model.Draw(transform.GetWorldPos(), Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
         rlEnableBackfaceCulling();
     }
 
@@ -46,8 +45,7 @@ namespace sage
         time = 0;
     }
 
-    LightningBallVFX::LightningBallVFX(GameData* _gameData, sgTransform* _transform)
-        : VisualFX(_gameData, _transform)
+    LightningBallVFX::LightningBallVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
     {
         // Texture/Material
         auto texture = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE53);

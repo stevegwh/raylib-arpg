@@ -28,7 +28,7 @@ namespace sage
     {
         IDLE,
         SELECT,
-        MOVE,
+        WALK,
         CREATE
     };
 

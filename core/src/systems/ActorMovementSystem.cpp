@@ -342,6 +342,7 @@ namespace sage
 
     void ActorMovementSystem::updateActorDirection(sgTransform& transform, const MoveableActor& moveableActor)
     {
+        if (moveableActor.path.empty()) return;
         transform.direction =
             Vector3Normalize(Vector3Subtract(moveableActor.path.front(), transform.GetWorldPos()));
     }

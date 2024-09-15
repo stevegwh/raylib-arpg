@@ -37,6 +37,6 @@ namespace sage
         void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        explicit RainOfFireVFX(GameData* _gameData, sgTransform* _transform);
+        explicit RainOfFireVFX(GameData* _gameData, Ability* _ability);
     };
 } // namespace sage

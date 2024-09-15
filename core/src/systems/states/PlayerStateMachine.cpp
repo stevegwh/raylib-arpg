@@ -118,7 +118,7 @@ namespace sage
             gameData->actorMovementSystem->CancelMovement(self); // Flush queue
 
             auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::MOVE);
+            animation.ChangeAnimationByEnum(AnimationEnum::WALK);
 
             auto& moveableActor = registry->get<MoveableActor>(self);
             entt::sink sink{moveableActor.onFinishMovement};

@@ -13,6 +13,7 @@
 
 #include "AbilityFunctions.hpp"
 #include "AbilityIndicator.hpp"
+#include "components/Ability.hpp"
 
 #include "Camera.hpp"
 
@@ -37,32 +38,31 @@ namespace sage
             _gameData->registry, _gameData->navigationGridSystem.get(), AssetID::IMG_RAINOFFIRE_CURSOR);
     }
 
-    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(
-        AbilityData::VisualFXData& data, entt::entity entity, GameData* _gameData)
+    std::unique_ptr<VisualFX> AbilityResourceManager::GetVisualFX(GameData* _gameData, Ability* _ability)
     {
         std::unique_ptr<VisualFX> obj;
 
-        auto& transform = _gameData->registry->get<sgTransform>(entity);
-
-        if (data.name == "RainOfFire")
+        // TODO: Replace "transform" with abilityEntity id and pass "caster" id and full abilityData, also.
+        // TODO: Use magic enum here
+        if (_ability->ad.vfx.name == "RainOfFire")
         {
-            obj = std::make_unique<RainOfFireVFX>(_gameData, &transform);
+            obj = std::make_unique<RainOfFireVFX>(_gameData, _ability);
         }
-        else if (data.name == "FloorFire")
+        else if (_ability->ad.vfx.name == "FloorFire")
         {
-            obj = std::make_unique<FloorFireVFX>(_gameData, &transform);
+            obj = std::make_unique<FloorFireVFX>(_gameData, _ability);
         }
-        else if (data.name == "360SwordSlash")
+        else if (_ability->ad.vfx.name == "360SwordSlash")
         {
-            obj = std::make_unique<WhirlwindVFX>(_gameData, &transform);
+            obj = std::make_unique<WhirlwindVFX>(_gameData, _ability);
         }
-        else if (data.name == "LightningBall")
+        else if (_ability->ad.vfx.name == "LightningBall")
         {
-            obj = std::make_unique<LightningBallVFX>(_gameData, &transform);
+            obj = std::make_unique<LightningBallVFX>(_gameData, _ability);
         }
-        else if (data.name == "Fireball")
+        else if (_ability->ad.vfx.name == "Fireball")
         {
-            obj = std::make_unique<FireballVFX>(_gameData, &transform);
+            obj = std::make_unique<FireballVFX>(_gameData, _ability);
         }
         return std::move(obj);
     }
