@@ -80,12 +80,20 @@ namespace sage
         INTERRUPTED
     };
 
-    enum class AbilityVFX
+    enum class AbilityVFXEnum
     {
-        RAIN_OF_FIRE,
+        NONE,
+        RAINOFFIRE,
         WHIRLWIND,
         FIREBALL,
-        LIGHTNINGBALL
+        LIGHTNINGBALL,
+        FLOORFIRE
+    };
+
+    enum class AbilityIndicatorEnum
+    {
+        NONE,
+        CIRCULAR_MAGIC_CURSOR
     };
 
     // Enable bitwise operations
@@ -222,14 +230,13 @@ namespace sage
 
         struct VisualFXData
         {
-            std::string name = "";
-            // TODO: Replace with enums
+            AbilityVFXEnum name = AbilityVFXEnum::NONE;
         };
 
         struct IndicatorData
         {
-            std::string indicatorKey = ""; // Key to an indicator/cursor class that has the texture etc.
-            // TODO: Replace with enums
+            AbilityIndicatorEnum indicatorKey =
+                AbilityIndicatorEnum::NONE; // Key to an indicator/cursor class that has the texture etc.
         };
 
         BaseData base{};

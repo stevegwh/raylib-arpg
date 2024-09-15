@@ -3,7 +3,6 @@
 #include "abilities/AbilityData.hpp"
 #include "abilities/AbilityFunctions.hpp"
 #include "abilities/AbilityIndicator.hpp"
-#include "abilities/AbilityResourceManager.hpp"
 #include "abilities/vfx/VisualFX.hpp"
 #include "AbilityFactory.hpp"
 #include "components/Animation.hpp"
