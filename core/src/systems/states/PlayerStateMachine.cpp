@@ -33,14 +33,14 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
         }
 
         void onEnemyRightClick(entt::entity self, entt::entity target)
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
-            auto& playerState = registry->get<PlayerState>(self);
-            playerState.ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
         }
 
       public:
