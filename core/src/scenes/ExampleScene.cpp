@@ -39,13 +39,13 @@ namespace sage
         Scene::Update();
         data->actorMovementSystem->Update();
         data->controllableActorSystem->Update();
-        data->animationSystem->Update();
         data->dialogueSystem->Update();
         data->healthBarSystem->Update();
         data->stateMachines->Update();
         data->playerAbilitySystem->Update();
         data->timerSystem->Update();
         data->collisionSystem->Update();
+        data->animationSystem->Update();
     }
 
     void ExampleScene::Draw2D()

@@ -16,19 +16,19 @@ namespace sage
     }
 
     Renderable::Renderable(std::unique_ptr<ModelSafe> _model, Matrix _localTransform)
-        : initialTransform(_localTransform), model(std::move(_model))
+        : model(std::move(_model)), initialTransform(_localTransform)
     {
         model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(Model _model, Matrix _localTransform)
-        : initialTransform(_localTransform), model(std::make_unique<ModelSafe>(_model))
+        : model(std::make_unique<ModelSafe>(_model)), initialTransform(_localTransform)
     {
         model->SetTransform(_localTransform);
     }
 
     Renderable::Renderable(ModelSafe _model, Matrix _localTransform)
-        : initialTransform(_localTransform), model(std::make_unique<ModelSafe>(std::move(_model)))
+        : model(std::make_unique<ModelSafe>(std::move(_model))), initialTransform(_localTransform)
     {
         model->SetTransform(_localTransform);
     }

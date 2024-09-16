@@ -6,172 +6,36 @@
 #include "components/Animation.hpp"
 #include "components/Renderable.hpp"
 
-#include <vector>
-// #include <omp.h>
-#include "rlgl.h"
-
 namespace sage
 {
 
-    void UpdateModelAnimation(Model model, ModelAnimation anim, int frame)
-    {
-        if ((anim.frameCount > 0) && (anim.bones != NULL) && (anim.framePoses != NULL))
-        {
-            if (frame >= anim.frameCount) frame = frame % anim.frameCount;
-
-            // Vector to store which meshes were updated
-            std::vector<bool> meshUpdated(model.meshCount, false);
-
-            //        int num_threads = omp_get_max_threads();
-            //        omp_set_num_threads(num_threads);
-
-            // #pragma omp parallel
-            {
-                // #pragma omp single
-                //             printf("Number of threads: %d\n", omp_get_num_threads());
-
-                // #pragma omp for
-                for (int m = 0; m < model.meshCount; m++)
-                {
-                    // printf("Processing mesh %d on thread %d\n", m,
-                    // omp_get_thread_num());
-
-                    Mesh* mesh = &model.meshes[m];
-
-                    if (mesh->boneIds == NULL || mesh->boneWeights == NULL)
-                    {
-                        // #pragma omp critical
-                        {
-                            TRACELOG(
-                                LOG_WARNING,
-                                "MODEL: UpdateModelAnimation(): Mesh %i has no "
-                                "connection to bones",
-                                m);
-                        }
-                        continue;
-                    }
-
-                    bool updated = false;
-                    Vector3 animVertex = {0};
-                    Vector3 animNormal = {0};
-
-                    Vector3 inTranslation = {0};
-                    Quaternion inRotation = {0};
-
-                    Vector3 outTranslation = {0};
-                    Quaternion outRotation = {0};
-                    Vector3 outScale = {0};
-
-                    int boneId = 0;
-                    int boneCounter = 0;
-                    float boneWeight = 0.0;
-
-                    const int vValues = mesh->vertexCount * 3;
-                    for (int vCounter = 0; vCounter < vValues; vCounter += 3)
-                    {
-                        mesh->animVertices[vCounter] = 0;
-                        mesh->animVertices[vCounter + 1] = 0;
-                        mesh->animVertices[vCounter + 2] = 0;
-
-                        if (mesh->animNormals != NULL)
-                        {
-                            mesh->animNormals[vCounter] = 0;
-                            mesh->animNormals[vCounter + 1] = 0;
-                            mesh->animNormals[vCounter + 2] = 0;
-                        }
-
-                        // Iterates over 4 bones per vertex
-                        for (int j = 0; j < 4; j++, boneCounter++)
-                        {
-                            boneWeight = mesh->boneWeights[boneCounter];
-
-                            if (boneWeight == 0.0f) continue;
-
-                            boneId = mesh->boneIds[boneCounter];
-                            inTranslation = model.bindPose[boneId].translation;
-                            inRotation = model.bindPose[boneId].rotation;
-                            outTranslation = anim.framePoses[frame][boneId].translation;
-                            outRotation = anim.framePoses[frame][boneId].rotation;
-                            outScale = anim.framePoses[frame][boneId].scale;
-
-                            animVertex = {
-                                mesh->vertices[vCounter],
-                                mesh->vertices[vCounter + 1],
-                                mesh->vertices[vCounter + 2]};
-                            animVertex = Vector3Subtract(animVertex, inTranslation);
-                            animVertex = Vector3Multiply(animVertex, outScale);
-                            animVertex = Vector3RotateByQuaternion(
-                                animVertex, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
-                            animVertex = Vector3Add(animVertex, outTranslation);
-                            mesh->animVertices[vCounter] += animVertex.x * boneWeight;
-                            mesh->animVertices[vCounter + 1] += animVertex.y * boneWeight;
-                            mesh->animVertices[vCounter + 2] += animVertex.z * boneWeight;
-                            updated = true;
-
-                            if (mesh->normals != NULL)
-                            {
-                                animNormal = {
-                                    mesh->normals[vCounter],
-                                    mesh->normals[vCounter + 1],
-                                    mesh->normals[vCounter + 2]};
-                                animNormal = Vector3RotateByQuaternion(
-                                    animNormal, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
-                                mesh->animNormals[vCounter] += animNormal.x * boneWeight;
-                                mesh->animNormals[vCounter + 1] += animNormal.y * boneWeight;
-                                mesh->animNormals[vCounter + 2] += animNormal.z * boneWeight;
-                            }
-                        }
-                    }
-
-                    if (updated)
-                    {
-                        meshUpdated[m] = true;
-                    }
-                }
-            }
-
-            // Update vertex buffers sequentially after parallel computation
-            for (int m = 0; m < model.meshCount; m++)
-            {
-                if (meshUpdated[m])
-                {
-                    Mesh* mesh = &model.meshes[m];
-                    rlUpdateVertexBuffer(
-                        mesh->vboId[0], mesh->animVertices, mesh->vertexCount * 3 * sizeof(float), 0);
-                    if (mesh->animNormals != NULL)
-                    {
-                        rlUpdateVertexBuffer(
-                            mesh->vboId[2], mesh->animNormals, mesh->vertexCount * 3 * sizeof(float), 0);
-                    }
-                }
-            }
-        }
-    }
-
     void AnimationSystem::Update() const
     {
-
-        const auto& view = registry->view<Animation, Renderable>();
-        for (auto& entity : view)
+        for (const auto& view = registry->view<Animation, Renderable>(); auto& entity : view)
         {
             auto& animation = registry->get<Animation>(entity);
             auto& renderable = registry->get<Renderable>(entity);
-            const ModelAnimation& anim = animation.animations[animation.animIndex];
+            auto& animData = animation.current;
+            const ModelAnimation& anim = animation.animations[animData.index];
 
-            if (animation.animCurrentFrame == 0 || animation.animCurrentFrame < animation.animLastFrame)
+            if (animData.currentFrame == 0 || animData.currentFrame < animData.lastFrame)
             {
                 animation.onAnimationStart.publish(entity);
             }
 
-            if (animation.animCurrentFrame + animation.animSpeed >= anim.frameCount)
+            bool finalFrame = animData.currentFrame + animData.speed >= anim.frameCount;
+            animData.lastFrame = animData.currentFrame;
+            animData.currentFrame = (animData.currentFrame + animData.speed) % anim.frameCount;
+            renderable.GetModel()->UpdateAnimation(anim, animData.currentFrame);
+
+            if (finalFrame) // Must be at end, as end of death animations can result in entities being destroyed
             {
                 animation.onAnimationEnd.publish(entity);
-                if (animation.oneShot) continue;
+                if (animation.oneShotMode)
+                {
+                    animation.RestoreAfterOneShot();
+                }
             }
-            if (!registry->valid(entity)) continue;
-            animation.animLastFrame = animation.animCurrentFrame;
-            animation.animCurrentFrame = (animation.animCurrentFrame + animation.animSpeed) % anim.frameCount;
-            renderable.GetModel()->UpdateAnimation(anim, animation.animCurrentFrame);
         }
     }
 

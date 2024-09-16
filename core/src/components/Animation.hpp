@@ -9,6 +9,7 @@
 #include "raylib.h"
 #include <entt/entt.hpp>
 
+#include <memory>
 #include <unordered_map>
 
 namespace sage
@@ -40,25 +41,39 @@ namespace sage
     // TODO: Add queue/priorities for animations
     struct Animation
     {
+        struct AnimData
+        {
+            unsigned int index = 0;
+            unsigned int currentFrame = 0;
+            unsigned int lastFrame = 0;
+            int speed = 1;
+        };
+
         std::unordered_map<AnimationEnum, int> animationMap;
         ModelAnimation* animations;
-        unsigned int animIndex = 0;
-        unsigned int animCurrentFrame = 0;
-        unsigned int animLastFrame = 0;
         int animsCount;
-        int animSpeed = 1;
-        bool oneShot = false;
+
+        bool oneShotMode = false;
+        AnimData current{};
+
         entt::sigh<void(entt::entity)> onAnimationEnd{};
         entt::sigh<void(entt::entity)> onAnimationStart{};
 
         void ChangeAnimationByParams(AnimationParams params);
-        void ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed, bool _oneShot = false);
-        void ChangeAnimationByEnum(AnimationEnum animEnum, bool _oneShot = false);
-        void ChangeAnimation(int index, int _animSpeed, bool _oneShot = false);
-        void ChangeAnimation(int index, bool _oneShot = false);
+        void ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed);
+        void ChangeAnimationByEnum(AnimationEnum animEnum);
+        void ChangeAnimation(int index);
+        void ChangeAnimation(int index, int _animSpeed);
+
+        void PlayOneShot(AnimationEnum animEnum, int _animSpeed);
+        void PlayOneShot(int index, int _animSpeed);
+        void RestoreAfterOneShot();
 
         Animation(const Animation&) = delete;
         Animation& operator=(const Animation&) = delete;
         explicit Animation(AssetID id);
+
+      private:
+        AnimData prev{};
     };
 } // namespace sage
