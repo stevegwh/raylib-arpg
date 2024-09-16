@@ -88,21 +88,6 @@ namespace sage
     {
         init();
 
-        testEntity = registry->create();
-        auto& trans = registry->emplace<sgTransform>(testEntity, testEntity);
-        auto caster = scene->data->controllableActorSystem->GetControlledActor();
-        auto& casterBB = registry->get<Collideable>(caster).worldBoundingBox;
-        float heightOffset = Vector3Subtract(casterBB.max, casterBB.min).y;
-        auto& casterTrans = registry->get<sgTransform>(caster);
-        std::cout << casterTrans.GetWorldPos().x << ", " << casterTrans.GetWorldPos().y << ", "
-                  << casterTrans.GetWorldPos().z << std::endl;
-
-        // trans.SetPosition({casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z});
-        trans.SetParent(&casterTrans);
-        // Below does not seem to update world position properly
-        trans.SetLocalPos({0, heightOffset, 0});
-        trans.SetLocalRot(Vector3Zero());
-
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
         {
@@ -133,11 +118,6 @@ namespace sage
         ClearBackground(BLACK);
         BeginMode3D(*scene->data->camera->getRaylibCam());
         scene->Draw3D();
-        auto& trans = registry->get<sgTransform>(testEntity);
-        DrawCube(trans.GetWorldPos(), 2, 2, 2, GREEN);
-        // std::cout << trans.GetWorldPos().x << ", " << trans.GetWorldPos().y << ", " << trans.GetWorldPos().z
-        //           << "\n";
-        DrawCube(Vector3Zero(), 2, 100, 2, RED);
         EndMode3D();
         scene->Draw2D();
         DrawFPS(10, 10);
