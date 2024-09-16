@@ -24,12 +24,8 @@ namespace sage
 
     class PlayerStateController::DefaultState : public StateMachine
     {
-
-        // TODO: Currently, the logic of "what to do when the floor is clicked" is tied to "onAttackCancelled" on
-        // combatable actor, which is weird and confusing.
         void onFloorClick(entt::entity self, entt::entity x)
         {
-            gameData->controllableActorSystem->CancelMovement(self); // Flush any previous commands
             gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->collision().point);
         }
 

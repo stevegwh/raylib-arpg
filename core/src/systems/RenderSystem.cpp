@@ -29,7 +29,7 @@ namespace sage
             renderable.GetModel()->Draw(
                 transform.GetWorldPos(),
                 rotationAxis,
-                transform.GetRotation().y,
+                transform.GetWorldRot().y,
                 transform.GetScale(),
                 renderable.hint);
         };

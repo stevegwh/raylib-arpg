@@ -55,6 +55,26 @@ namespace sage
         }
         onAnyRightClick.publish(m_mouseHitInfo.collidedEntityId);
     }
+    static float timer = 0;
+    void Cursor::onMouseLeftDown()
+    {
+        if (!enabled) return;
+        timer += GetFrameTime();
+
+        if (timer < 0.15) return;
+        timer = 0;
+
+        const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+        if (layer == CollisionLayer::FLOOR)
+        {
+            onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
+        }
+    }
+
+    void Cursor::onMouseRightDown()
+    {
+        if (!enabled) return;
+    }
 
     void Cursor::DisableContextSwitching() // Lock mouse context? Like changing depending
                                            // on collision.
@@ -282,10 +302,19 @@ namespace sage
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             onMouseLeftClick();
+            timer = 0;
         }
         else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
         {
             onMouseRightClick();
+        }
+        else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            onMouseLeftDown();
+        }
+        else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+        {
+            onMouseRightDown();
         }
     }
 

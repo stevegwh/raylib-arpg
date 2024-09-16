@@ -81,6 +81,7 @@ namespace sage
 
         void ChangeAnimation(int index, int _animSpeed, bool _oneShot = false)
         {
+            if (animIndex == index && !_oneShot) return;
             animSpeed = _animSpeed;
             animIndex = index;
             oneShot = _oneShot;

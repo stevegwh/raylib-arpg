@@ -153,6 +153,7 @@ namespace sage
         DrawModel(rlmodel, position, scale, tint);
     }
 
+    // Expects angle in degrees
     void ModelSafe::Draw(
         Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) const
     {

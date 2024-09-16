@@ -100,8 +100,8 @@ namespace sage
             moveableActor.path.emplace_back(n);
         if (!path.empty())
         {
-            transform.direction =
-                Vector3Normalize(Vector3Subtract(moveableActor.path.front(), transform.GetWorldPos()));
+            updateActorDirection(transform, moveableActor);
+            updateActorRotation(entity, transform);
             moveableActor.onStartMovement.publish(entity);
         }
         // TODO: Handle destination being unreachable. (Change animation to IDLE, for a
@@ -144,7 +144,7 @@ namespace sage
 
     void ActorMovementSystem::Update()
     {
-        clearDebugData();
+        // clearDebugData();
 
         // Process entities with all three components
         auto fullView = registry->view<MoveableActor, sgTransform, Collideable>();
@@ -351,7 +351,7 @@ namespace sage
     {
         // Calculate rotation angle based on direction
         float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
-        transform.SetRotation({transform.GetRotation().x, angle, transform.GetRotation().z});
+        transform.SetRotation({transform.GetWorldRot().x, angle, transform.GetWorldRot().z});
     }
 
     void ActorMovementSystem::updateActorWorldPosition(entt::entity entity, sgTransform& transform)

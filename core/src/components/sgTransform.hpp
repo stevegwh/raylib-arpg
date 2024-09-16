@@ -16,12 +16,14 @@ namespace sage
         entt::entity self;
         Vector3 m_positionWorld{};
         Vector3 m_positionLocal{};
-        Vector3 m_rotation{};
+        Vector3 m_rotationWorld{};
+        Vector3 m_rotationLocal{};
         Vector3 m_scale{};
         sgTransform* m_parent = nullptr;
         std::vector<sgTransform*> m_children;
 
-        void updateChildren();
+        void updateChildrenPos();
+        void updateChildrenRot();
 
       public:
         Vector3 direction{};
@@ -32,13 +34,13 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            archive(m_positionWorld, m_rotation, m_scale);
+            archive(m_positionWorld, m_rotationWorld, m_scale);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            archive(m_positionWorld, m_rotation, m_scale);
+            archive(m_positionWorld, m_rotationWorld, m_scale);
         }
 
         entt::sigh<void(entt::entity)> onPositionUpdate{};
@@ -48,16 +50,20 @@ namespace sage
         [[nodiscard]] Vector3 forward() const;
         [[nodiscard]] const Vector3& GetWorldPos() const;
         [[nodiscard]] const Vector3& GetLocalPos() const;
-        [[nodiscard]] const Vector3& GetRotation() const;
+        [[nodiscard]] const Vector3& GetWorldRot() const;
+        [[nodiscard]] const Vector3& GetLocalRot() const;
         [[nodiscard]] const Vector3& GetScale() const;
+        void SetLocalPos(const Vector3& position);
+        void SetLocalRot(const Vector3& rotation);
         void SetPosition(const Vector3& position);
         void SetRotation(const Vector3& rotation);
         void SetScale(const Vector3& scale);
         void SetScale(float scale);
-        sgTransform* GetParent();
-        const std::vector<sgTransform*>& GetChildren();
+
         void SetParent(sgTransform* newParent);
         void AddChild(sgTransform* newChild);
+        sgTransform* GetParent();
+        const std::vector<sgTransform*>& GetChildren();
 
         explicit sgTransform(entt::entity _self);
         sgTransform(const sgTransform&) = delete;
