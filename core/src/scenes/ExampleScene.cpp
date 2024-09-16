@@ -76,8 +76,8 @@ namespace sage
             CreateLight(LIGHT_POINT, {0, 50, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
 
         // std::string mapPath = "resources/models/obj/level-basic.obj";
-        auto player = GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
-        auto knight = GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
+        GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
+        GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
 
         GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
 
