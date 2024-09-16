@@ -49,6 +49,8 @@ namespace sage
         void getMouseRayCollision();
         void onMouseLeftClick();
         void onMouseRightClick();
+        void onMouseLeftDown();
+        void onMouseRightDown();
         void changeCursors(CollisionLayer collisionLayer);
         static void resetHitInfo(CollisionInfo& hitInfo);
         [[nodiscard]] bool findMeshCollision(CollisionInfo& hitInfo);

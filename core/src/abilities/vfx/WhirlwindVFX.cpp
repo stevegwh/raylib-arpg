@@ -4,7 +4,6 @@
 
 #include "WhirlwindVFX.hpp"
 
-#include "Camera.hpp"
 #include "components/Ability.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
@@ -12,10 +11,7 @@
 #include "ResourceManager.hpp"
 
 #include "raylib.h"
-#include "raymath.h"
 #include "rlgl.h"
-#include <cmath>
-#include <iostream>
 
 namespace sage
 {
@@ -24,7 +20,12 @@ namespace sage
         // Draw model (if needed)
         rlDisableBackfaceCulling();
         auto& transform = gameData->registry->get<sgTransform>(ability->self);
-        slashModel.Draw(transform.GetWorldPos(), Vector3{0, 1, 0}, -(time * 1000), Vector3{5.0, 1.0, 5.0}, WHITE);
+        slashModel.Draw(
+            transform.GetWorldPos(),
+            Vector3{0, 1, 0},
+            215 + transform.GetWorldRot().y + -(time * 1000),
+            Vector3{5.0, 1.0, 5.0},
+            WHITE);
         rlEnableBackfaceCulling();
     }
 
@@ -43,7 +44,6 @@ namespace sage
     {
         active = true;
         time = 0;
-        // Rotate model to direction person is facing
     }
 
     WhirlwindVFX::WhirlwindVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)

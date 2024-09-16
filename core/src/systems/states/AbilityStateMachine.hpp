@@ -1,14 +1,10 @@
 #pragma once
 
-#include "abilities/AbilityData.hpp"
 #include "components/Ability.hpp"
 #include "components/States.hpp"
 #include "StateMachine.hpp"
-#include "Timer.hpp"
 
 #include <entt/entt.hpp>
-#include <memory>
-#include <unordered_map>
 
 namespace sage
 {
@@ -36,7 +32,7 @@ namespace sage
         void Update();
         void Draw3D();
 
-        ~AbilityStateController() override;
+        ~AbilityStateController() override = default;
         AbilityStateController(const AbilityStateController&) = delete;
         AbilityStateController& operator=(const AbilityStateController&) = delete;
         AbilityStateController(entt::registry* _registry, GameData* _gameData);

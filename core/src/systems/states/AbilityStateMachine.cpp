@@ -244,11 +244,27 @@ namespace sage
             {
                 auto& casterTrans = registry->get<sgTransform>(ab.caster);
                 auto& casterBB = registry->get<Collideable>(ab.caster).worldBoundingBox;
-                // TODO: Below doesn't work as intended
                 float heightOffset = Vector3Subtract(casterBB.max, casterBB.min).y;
-                Vector3 pos = {casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
-                trans.SetPosition(pos);
-                trans.SetParent(&casterTrans);
+
+                if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_CASTER))
+                {
+                    // TODO: Can this be set in the ability's constructor?
+                    // Then we can just say "if ability doesnt follow caster, then set its position"
+                    if (trans.GetParent() != &casterTrans)
+                    {
+                        trans.SetParent(&casterTrans);
+                        trans.SetLocalPos({0, heightOffset, 0});
+                        trans.SetLocalRot(Vector3Zero());
+                    }
+                }
+                else
+                {
+
+                    Vector3 pos = {casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
+                    trans.SetPosition(pos);
+                    trans.SetRotation(casterTrans.GetWorldRot());
+                }
+
                 ab.vfx->InitSystem();
             }
             else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
@@ -335,15 +351,12 @@ namespace sage
 
     void AbilityStateController::onComponentRemoved(entt::entity addedEntity)
     {
+        // TODO: Could add the check for "FOLLOW_CASTER" here instead.
         auto& ability = registry->get<Ability>(addedEntity);
         entt::sink castSink{ability.startCast};
         castSink.disconnect<&AbilityStateController::startCast>(this);
         entt::sink cancelCastSink{ability.cancelCast};
         cancelCastSink.disconnect<&AbilityStateController::cancelCast>(this);
-    }
-
-    AbilityStateController::~AbilityStateController()
-    {
     }
 
     AbilityStateController::AbilityStateController(entt::registry* _registry, GameData* _gameData)

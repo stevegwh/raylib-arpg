@@ -21,6 +21,8 @@ namespace sage
 {
     class Application
     {
+        entt::entity testEntity;
+
       protected:
         std::unique_ptr<Settings> settings;
         std::unique_ptr<KeyMapping> keyMapping;

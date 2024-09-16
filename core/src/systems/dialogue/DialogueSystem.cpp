@@ -41,7 +41,7 @@ namespace sage
         Vector3 direction = Vector3Subtract(npcTrans.GetWorldPos(), actorTrans.GetWorldPos());
         direction = Vector3Normalize(direction);
         float angle = atan2f(direction.x, direction.z);
-        actorTrans.SetRotation({actorTrans.GetRotation().x, RAD2DEG * angle, actorTrans.GetRotation().z});
+        actorTrans.SetRotation({actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z});
 
         {
             entt::sink sink{gameData->cursor->onAnyLeftClick};
