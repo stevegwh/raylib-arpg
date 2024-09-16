@@ -38,7 +38,6 @@ namespace sage
 
     // TODO: Use a timer for animation delay
     // TODO: Add queue/priorities for animations
-    // TODO: Separate header/source
     struct Animation
     {
         std::unordered_map<AnimationEnum, int> animationMap;
@@ -52,45 +51,14 @@ namespace sage
         entt::sigh<void(entt::entity)> onAnimationEnd{};
         entt::sigh<void(entt::entity)> onAnimationStart{};
 
-        explicit Animation(AssetID id)
-        {
-            animsCount = 0;
-            animations = ResourceManager::GetInstance().GetModelAnimation(id, &animsCount);
-            animIndex = 0;
-        }
+        void ChangeAnimationByParams(AnimationParams params);
+        void ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed, bool _oneShot = false);
+        void ChangeAnimationByEnum(AnimationEnum animEnum, bool _oneShot = false);
+        void ChangeAnimation(int index, int _animSpeed, bool _oneShot = false);
+        void ChangeAnimation(int index, bool _oneShot = false);
 
         Animation(const Animation&) = delete;
         Animation& operator=(const Animation&) = delete;
-
-        bool ChangeAnimationByParams(AnimationParams params)
-        {
-            return ChangeAnimationByEnum(params.animEnum, params.animSpeed, params.oneShot);
-        }
-
-        bool ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed, bool _oneShot = false)
-        {
-            if (!animationMap.contains(animEnum)) return false;
-            ChangeAnimation(animationMap.at(animEnum), _animSpeed, _oneShot);
-            return true;
-        }
-
-        bool ChangeAnimationByEnum(AnimationEnum animEnum, bool _oneShot = false)
-        {
-            return ChangeAnimationByEnum(animEnum, 1, _oneShot);
-        }
-
-        void ChangeAnimation(int index, int _animSpeed, bool _oneShot = false)
-        {
-            if (animIndex == index && !_oneShot) return;
-            animSpeed = _animSpeed;
-            animIndex = index;
-            oneShot = _oneShot;
-            if (oneShot) animCurrentFrame = 0;
-        }
-
-        void ChangeAnimation(int index, bool _oneShot = false)
-        {
-            ChangeAnimation(index, 1, _oneShot);
-        }
+        explicit Animation(AssetID id);
     };
 } // namespace sage
