@@ -21,7 +21,6 @@ namespace sage
 {
     class Application
     {
-        entt::entity testEntity;
 
       protected:
         std::unique_ptr<Settings> settings;
