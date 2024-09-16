@@ -60,7 +60,7 @@ namespace sage
     {
         for (auto* child : m_children)
         {
-            child->SetPosition(Vector3Add(GetWorldPos(), child->GetLocalPos()));
+            child->SetPosition(Vector3Add(m_positionWorld, child->GetLocalPos()));
         }
     }
 
@@ -68,7 +68,7 @@ namespace sage
     {
         for (auto* child : m_children)
         {
-            child->SetRotation(Vector3Add(GetWorldRot(), child->GetLocalRot()));
+            child->SetRotation(Vector3Add(m_rotationWorld, child->GetLocalRot()));
             // TODO: Scale
         }
     }
@@ -76,13 +76,13 @@ namespace sage
     void sgTransform::SetLocalPos(const Vector3& position)
     {
         m_positionLocal = position;
-        SetPosition(Vector3Add(GetWorldPos(), GetLocalPos()));
+        SetPosition(Vector3Add(m_parent->m_positionWorld, m_positionLocal));
     }
 
     void sgTransform::SetLocalRot(const Vector3& rotation)
     {
         m_rotationLocal = rotation;
-        SetRotation(Vector3Add(GetWorldRot(), GetLocalRot()));
+        SetRotation(Vector3Add(m_parent->m_rotationWorld, m_rotationLocal));
     }
 
     void sgTransform::SetPosition(const Vector3& position)
@@ -137,24 +137,28 @@ namespace sage
 
     void sgTransform::SetParent(sgTransform* newParent)
     {
-        assert(newParent != this);
         if (m_parent)
         {
-            auto it = std::find(m_children.begin(), m_children.end(), this);
-            if (it != m_children.end()) m_children.erase(it);
-        }
-
-        if (newParent == nullptr)
-        {
-            m_positionLocal = m_positionWorld;
-            m_rotationLocal = m_rotationWorld;
-            return;
+            // Remove this from old parent's children list
+            auto it = std::find(m_parent->m_children.begin(), m_parent->m_children.end(), this);
+            if (it != m_parent->m_children.end()) m_parent->m_children.erase(it);
         }
 
         m_parent = newParent;
-        m_parent->m_children.push_back(this);
-        m_positionLocal = Vector3Subtract(m_positionWorld, m_parent->GetWorldPos());
-        m_rotationLocal = Vector3Subtract(m_rotationWorld, m_parent->GetWorldRot());
+
+        if (m_parent)
+        {
+            m_parent->m_children.push_back(this);
+            // Recalculate local position based on current world position and new parent
+            m_positionLocal = Vector3Subtract(m_positionWorld, m_parent->GetWorldPos());
+            m_rotationLocal = Vector3Subtract(m_rotationWorld, m_parent->GetWorldRot());
+        }
+        else
+        {
+            // If no parent, local = world
+            m_positionLocal = m_positionWorld;
+            m_rotationLocal = m_rotationWorld;
+        }
     }
 
     void sgTransform::AddChild(sgTransform* newChild)

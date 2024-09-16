@@ -155,8 +155,6 @@ namespace sage
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z});
-        transform.SetScale(1.0f);
-        transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
