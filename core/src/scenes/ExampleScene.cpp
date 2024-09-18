@@ -30,6 +30,7 @@
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 
+#include "components/Spawner.hpp"
 #include "raylib.h"
 
 namespace sage
@@ -75,16 +76,26 @@ namespace sage
         lightSubSystem->lights[0] =
             CreateLight(LIGHT_POINT, {0, 50, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
 
-        // std::string mapPath = "resources/models/obj/level-basic.obj";
-        GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
+        // GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         GameObjectFactory::createKnight(registry, data.get(), {0.0f, 0, 20.0f}, "Knight");
-
         GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
-
         // GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
-
         // TODO: tmp
         // const auto& col = registry->get<Collideable>(knight);
         // data->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true, knight);
+
+        // TODO: Move this to base Scene class, remove Spawners from ECS once finished.
+        for (const auto view = registry->view<Spawner>(); auto& entity : view)
+        {
+            auto& spawner = registry->get<Spawner>(entity);
+            if (spawner.spawnerType == SpawnerType::PLAYER)
+            {
+                GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, "Player");
+            }
+            else if (spawner.spawnerType == SpawnerType::GOBLIN)
+            {
+                GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, "Goblin");
+            }
+        }
     }
 } // namespace sage
