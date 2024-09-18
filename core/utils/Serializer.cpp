@@ -10,8 +10,11 @@
 #include "cereal/types/string.hpp"
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
+#include "GameData.hpp"
 #include "raylib-cereal.hpp"
 #include "raylib.h"
+#include "SpawnerLoader.hpp"
+
 #include <cereal/archives/json.hpp>
 #include <fstream>
 #include <type_traits>
@@ -106,7 +109,7 @@ namespace sage
 
         // ----------------------------------------------
 
-        void SaveMap(const entt::registry& source, const char* path)
+        void SaveMap(entt::registry& source, const char* path)
         {
             std::cout << "START: Saving map data to file." << std::endl;
             using namespace entt::literals;
@@ -122,7 +125,8 @@ namespace sage
             {
                 // output finishes flushing its contents when it goes out of scope
                 cereal::BinaryOutputArchive output{storage};
-
+                SpawnerLoader spawnerLoader(&source);
+                output(spawnerLoader);
                 output(ResourceManager::GetInstance());
 
                 const auto view = source.view<sgTransform, Renderable, Collideable>();
@@ -141,7 +145,53 @@ namespace sage
             std::cout << "FINISH: Saving map data to file." << std::endl;
         }
 
-        void SaveCurrentResourceData(const entt::registry& source, const char* path)
+        void LoadMap(entt::registry* destination, const char* path)
+        {
+            assert(destination != nullptr);
+
+            std::cout << "START: Loading resource data from file." << std::endl;
+
+            using namespace entt::literals;
+            std::ifstream storage(path, std::ios::binary);
+            if (!storage.is_open())
+            {
+                std::cerr << "ERROR: Unable to open file for reading." << std::endl;
+                exit(1);
+            }
+
+            {
+                cereal::BinaryInputArchive input(storage);
+
+                SpawnerLoader spawnerLoader(destination);
+                input(spawnerLoader);
+
+                input(ResourceManager::GetInstance());
+
+                while (storage.peek() != EOF)
+                {
+                    entity entityId{}; // ignore this
+                    auto entt = destination->create();
+                    auto& transform = destination->emplace<sgTransform>(entt, entt);
+                    auto& collideable = destination->emplace<Collideable>(entt);
+                    auto& renderable = destination->emplace<Renderable>(entt);
+
+                    try
+                    {
+                        input(entityId, transform, collideable, renderable);
+                    }
+                    catch (const cereal::Exception& e)
+                    {
+                        std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
+                        break;
+                    }
+                }
+            }
+
+            storage.close();
+            std::cout << "FINISH: Loading resource data from file." << std::endl;
+        }
+
+        void SaveCurrentResourceData(entt::registry& source, const char* path)
         {
             std::cout << "START: Save resource data to file." << std::endl;
             using namespace entt::literals;
@@ -159,6 +209,7 @@ namespace sage
                 cereal::BinaryOutputArchive output{storage};
                 output(ResourceManager::GetInstance());
             }
+
             storage.close();
             std::cout << "FINISH: Save resource data to file." << std::endl;
         }
@@ -182,6 +233,7 @@ namespace sage
 
                 input(ResourceManager::GetInstance());
 
+                // Not necessary for asset bin?
                 while (storage.peek() != EOF)
                 {
                     entity entityId{}; // ignore this

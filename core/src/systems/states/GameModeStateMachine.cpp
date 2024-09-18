@@ -21,8 +21,8 @@ namespace sage
 
         void OnTimerEnd()
         {
-            auto& gameState = registry->get<GameState>(gameEntity);
-            gameState.ChangeState(gameEntity, GameStateEnum::Wave);
+            // auto& gameState = registry->get<GameState>(gameEntity);
+            // gameState.ChangeState(gameEntity, GameStateEnum::Wave);
         }
 
       public:
