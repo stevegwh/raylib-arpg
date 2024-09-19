@@ -68,8 +68,6 @@ namespace sage
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z});
-        transform.SetScale(1.0f);
-        transform.SetRotation({0, 0, 0});
         transform.movementSpeed = 0.05f;
         registry->emplace<MoveableActor>(id);
 
@@ -85,22 +83,15 @@ namespace sage
         animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
         animation.ChangeAnimationByEnum(AnimationEnum::WALK);
 
-        // ---
-
-        // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
         data->abilityRegistry->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
+        registry->emplace<HealthBar>(id);
 
-        auto& healthbar = registry->emplace<HealthBar>(id);
-        // ---
-
-        // Collision
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
-        // ---
 
         data->lightSubSystem->LinkRenderableToLight(id);
         registry->emplace<WavemobState>(id);
@@ -116,10 +107,11 @@ namespace sage
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+
+        // TODO: There should be a "place actor" function that does below automatically (and calls "occupy grid
+        // square").
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z});
-        transform.SetScale(1.0f);
-        transform.SetRotation({0, 0, 0});
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
@@ -132,6 +124,7 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
+        data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialogue = registry->emplace<Dialogue>(id);
         dialogue.sentence = "Hello, this is a test sentence.";
@@ -208,11 +201,11 @@ namespace sage
         auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
         data->controllableActorSystem->SetControlledActor(id);
 
-        data->signalReflectionManager->CreateHook<entt::entity>(
+        data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onFloorClick, controllable.onFloorClick);
-        data->signalReflectionManager->CreateHook<entt::entity>(
+        data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onEnemyLeftClick, controllable.onEnemyLeftClick);
-        data->signalReflectionManager->CreateHook<entt::entity>(
+        data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onEnemyRightClick, controllable.onEnemyRightClick);
 
         // Combat

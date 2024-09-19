@@ -50,7 +50,7 @@ namespace sage
           playerAbilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),
           timerSystem(std::make_unique<TimerSystem>(_registry)),
-          signalReflectionManager(std::make_unique<EntityReflectionSignalRouter>()),
+          reflectionSignalRouter(std::make_unique<EntityReflectionSignalRouter>()),
           lightSubSystem(_lightSubSystem)
     {
     }

@@ -27,6 +27,7 @@
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 
+#include "components/Spawner.hpp"
 #include <GameObjectFactory.hpp>
 
 namespace sage
@@ -76,13 +77,27 @@ namespace sage
 
         // NB: Dependent on only the map/static meshes having been loaded at this point
         // Maybe time for a tag system
-        auto view = registry->view<Renderable>();
-        for (auto entity : view)
+        for (const auto view = registry->view<Renderable>(); auto entity : view)
             data->lightSubSystem->LinkRenderableToLight(entity);
 
         auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);
         auto normalMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_NORMALMAP);
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
+
+        const auto view = registry->view<Spawner>();
+        for (auto& entity : view)
+        {
+            auto& spawner = registry->get<Spawner>(entity);
+            if (spawner.spawnerType == SpawnerType::PLAYER)
+            {
+                GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, "Player");
+            }
+            else if (spawner.spawnerType == SpawnerType::GOBLIN)
+            {
+                GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, "Goblin");
+            }
+        }
+        registry->erase<Spawner>(view.begin(), view.end());
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
