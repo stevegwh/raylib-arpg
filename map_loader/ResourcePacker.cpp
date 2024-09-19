@@ -27,22 +27,28 @@ namespace sage
 
     constexpr float WORLD_SCALE = 5.0f;
 
-    CollisionLayer setCollisionLayer(const std::string& meshName)
+    CollisionLayer setCollisionLayer(const std::string& objectName)
     {
         // TODO: Need a better tagging system for the meshes.
-        if (meshName.find("SM_Bld") != std::string::npos)
+        if (objectName.find("BLD_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
-        if (meshName.find("SM_Env_Mountain") != std::string::npos)
+        if (objectName.find("BG_") != std::string::npos)
         {
-            return CollisionLayer::TERRAIN;
+            return CollisionLayer::BACKGROUND;
         }
-        if (meshName.find("SM_Env") != std::string::npos)
+        if (objectName.find("FLOOR_TILE_") != std::string::npos)
         {
+            // Uses bounding box bounds for height (flat surfaces).
             return CollisionLayer::FLOOR;
         }
-        if (meshName.find("SM_Prop") != std::string::npos)
+        if (objectName.find("FLOOR_TERRAIN_") != std::string::npos)
+        {
+            // Samples mesh for height/normal information
+            return CollisionLayer::TERRAIN;
+        }
+        if (objectName.find("PROP_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
@@ -180,8 +186,10 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(
             entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
 
-        collideable.collisionLayer = setCollisionLayer(meshKey);
-        if (collideable.collisionLayer == CollisionLayer::FLOOR) floorMeshes.push_back(&collideable);
+        collideable.collisionLayer = setCollisionLayer(objectName);
+        if (collideable.collisionLayer == CollisionLayer::FLOOR ||
+            collideable.collisionLayer == CollisionLayer::TERRAIN)
+            floorMeshes.push_back(&collideable);
     }
 
     void ResourcePacker::ConstructMap(
@@ -239,6 +247,9 @@ namespace sage
         navigationGridSystem->InitGridHeightNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);
         navigationGridSystem->GenerateNormalMap(normalMap);
+
+        ExportImage(heightMap.GetImage(), "resources/HeightMap.png");
+        ExportImage(normalMap.GetImage(), "resources/NormalMap.png");
 
         ResourceManager::GetInstance().ImageLoadFromFile("HEIGHT_MAP", heightMap.GetImage());
         ResourceManager::GetInstance().ImageLoadFromFile("NORMAL_MAP", normalMap.GetImage());

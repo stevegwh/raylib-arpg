@@ -358,6 +358,7 @@ namespace sage
 
         auto& renderable = registry->get<Renderable>(entity);
         auto& transform = registry->get<sgTransform>(entity);
+        auto& collideable = registry->get<Collideable>(entity);
 
         int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
         int max_col = std::min(
@@ -370,23 +371,37 @@ namespace sage
         {
             for (int col = min_col; col <= max_col; ++col)
             {
-                Vector3 gridCenter = {
-                    (gridSquares[row][col]->worldPosMin.x + gridSquares[row][col]->worldPosMax.x) * 0.5f,
-                    area.max.y + 1.0f, // Start slightly above the terrain
-                    (gridSquares[row][col]->worldPosMin.z + gridSquares[row][col]->worldPosMax.z) * 0.5f};
-
-                Ray ray = {gridCenter, {0, -1, 0}}; // Cast ray down
-
-                RayCollision collision = renderable.GetModel()->GetRayMeshCollision(ray, 0, transform.GetMatrix());
-
-                if (collision.hit)
+                if (collideable.collisionLayer == CollisionLayer::FLOOR)
                 {
-                    if (gridSquares[row][col]->terrainHeight < collision.point.y)
+                    if (gridSquares[row][col]->terrainHeight < area.max.y)
                     {
-                        gridSquares[row][col]->terrainHeight = collision.point.y;
-                        gridSquares[row][col]->terrainNormal = collision.normal;
+                        gridSquares[row][col]->terrainHeight = area.max.y;
+                        gridSquares[row][col]->terrainNormal = {0, 1, 0};
                         // gridSquares[row][col]->pathfindingCost =
                         // calculateTerrainCost(collision.normal, 45.0f);
+                    }
+                }
+                else if (collideable.collisionLayer == CollisionLayer::TERRAIN)
+                {
+                    Vector3 gridCenter = {
+                        (gridSquares[row][col]->worldPosMin.x + gridSquares[row][col]->worldPosMax.x) * 0.5f,
+                        area.max.y + 1.0f, // Start slightly above the terrain
+                        (gridSquares[row][col]->worldPosMin.z + gridSquares[row][col]->worldPosMax.z) * 0.5f};
+
+                    Ray ray = {gridCenter, {0, -1, 0}}; // Cast ray down
+
+                    RayCollision collision =
+                        renderable.GetModel()->GetRayMeshCollision(ray, 0, transform.GetMatrix());
+
+                    if (collision.hit)
+                    {
+                        if (gridSquares[row][col]->terrainHeight < collision.point.y)
+                        {
+                            gridSquares[row][col]->terrainHeight = collision.point.y;
+                            gridSquares[row][col]->terrainNormal = collision.normal;
+                            // gridSquares[row][col]->pathfindingCost =
+                            // calculateTerrainCost(collision.normal, 45.0f);
+                        }
                     }
                 }
             }
@@ -398,7 +413,7 @@ namespace sage
         int slices = gridSquares.size();
 
         Image normalMap = GenImageColor(slices, slices, BLACK);
-        std::cout << "Generating normal map..." << std::endl;
+        std::cout << "START: Generating normal map..." << std::endl;
         for (int y = 0; y < slices; ++y)
         {
             for (int x = 0; x < slices; ++x)
@@ -415,6 +430,7 @@ namespace sage
             }
         }
         image.SetImage(normalMap);
+        std::cout << "FINISH: Generating normal map..." << std::endl;
     }
 
     float NavigationGridSystem::getMaxHeight(float slices)
@@ -431,7 +447,7 @@ namespace sage
         for (const auto& entity : view)
         {
             const auto& c = registry->get<Collideable>(entity);
-            if (c.collisionLayer != CollisionLayer::FLOOR) continue;
+            if (c.collisionLayer != CollisionLayer::TERRAIN && c.collisionLayer != CollisionLayer::FLOOR) continue;
 
             // Check if either min or max point of the bounding box is inside the defined
             // area
@@ -454,7 +470,7 @@ namespace sage
         float maxHeight = getMaxHeight(slices); // TODO
 
         Image heightMap = GenImageColor(slices, slices, BLACK);
-        std::cout << "Generating height map..." << std::endl;
+        std::cout << "START: Generating height map..." << std::endl;
         for (int y = 0; y < slices; ++y)
         {
             for (int x = 0; x < slices; ++x)
@@ -469,10 +485,12 @@ namespace sage
             }
         }
         image.SetImage(heightMap);
+        std::cout << "FINISH: Generating height map..." << std::endl;
     }
 
     void NavigationGridSystem::loadTerrainNormalMap(const ImageSafe& normalMap)
     {
+        std::cout << "START: Applying terrain normal map to grid. \n";
         for (int j = 0; j < slices; ++j)
         {
             for (int i = 0; i < slices; ++i)
@@ -499,12 +517,12 @@ namespace sage
             }
         }
 
-        std::cout << "Terrain normal map loaded and applied to grid." << std::endl;
+        std::cout << "FINISH: Applying terrain normal map to grid. \n";
     }
 
     void NavigationGridSystem::loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight)
     {
-
+        std::cout << "START: Applying terrain height map to grid. \n";
         int halfSlices = slices / 2;
 
         for (int j = 0; j < slices; ++j)
@@ -532,7 +550,7 @@ namespace sage
             }
         }
 
-        std::cout << "Terrain height map loaded and applied to grid." << std::endl;
+        std::cout << "FINISH: Applying terrain height map to grid. \n";
     }
 
     /**
@@ -1051,17 +1069,18 @@ namespace sage
 
     void NavigationGridSystem::InitGridHeightNormals()
     {
-        std::cout << "Initialising grid height and normals \n";
+        std::cout << "START: Initialising grid height and normals \n";
         const auto& view = registry->view<Collideable, Renderable>();
         for (const auto& entity : view)
         {
             const auto& bb = view.get<Collideable>(entity);
 
-            if (bb.collisionLayer == CollisionLayer::FLOOR)
+            if (bb.collisionLayer == CollisionLayer::TERRAIN || bb.collisionLayer == CollisionLayer::FLOOR)
             {
                 calculateTerrainHeightAndNormals(entity);
             }
         }
+        std::cout << "FINISH: Initialising grid height and normals \n";
     }
 
     /*
@@ -1084,7 +1103,7 @@ namespace sage
         loadTerrainNormalMap(normalMap);
         loadTerrainHeightMap(heightMap, getMaxHeight(slices));
 
-        std::cout << "Populating grid started. \n";
+        std::cout << "START: Populating grid. \n";
         for (const auto& entity : view)
         {
             const auto& bb = view.get<Collideable>(entity);
@@ -1093,12 +1112,13 @@ namespace sage
             {
                 MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
             }
-            else if (bb.collisionLayer == CollisionLayer::FLOOR)
+            else if (bb.collisionLayer == CollisionLayer::TERRAIN)
             {
                 MarkSquareAreaOccupiedIfSteep(bb.worldBoundingBox, true);
+                // TODO: Does not account for FLOOR.
             }
         }
-        std::cout << "Populating grid finished. \n";
+        std::cout << "FINISH: Populating grid. \n";
     }
 
     const std::vector<std::vector<NavigationGridSquare*>>& NavigationGridSystem::GetGridSquares()

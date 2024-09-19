@@ -22,6 +22,7 @@ namespace sage
         ENEMY,
         BOYD,
         TERRAIN,
+        BACKGROUND,
         COUNT // Must always be last
     };
 

@@ -1,13 +1,17 @@
 import bpy
 import os
 
-# Export to blend file location
+# Export to 'output' folder relative to blend file location
 basedir = os.path.dirname(bpy.data.filepath)
 if not basedir:
     raise Exception("Blend file is not saved")
 
-# Create a 'mesh' folder if it doesn't exist
-mesh_folder = os.path.join(basedir, "mesh")
+# Create 'output' folder if it doesn't exist
+output_folder = os.path.join(basedir, "output")
+os.makedirs(output_folder, exist_ok=True)
+
+# Create 'output/meshes' folder if it doesn't exist
+mesh_folder = os.path.join(output_folder, "mesh")
 os.makedirs(mesh_folder, exist_ok=True)
 
 view_layer = bpy.context.view_layer
@@ -41,13 +45,13 @@ for obj in selection:
         unique_meshes[obj.data.name] = mesh_name
         print("Exported mesh:", fn + ".obj")
     
-    # Prepare transform dataa
+    # Prepare transform data
     location = obj.location
     rotation = obj.rotation_euler
     scale = obj.scale
     
     # Export transform data to text file (Converted to "Unity" coords)
-    transform_file = os.path.join(basedir, bpy.path.clean_name(obj.name) + ".txt")
+    transform_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
     with open(transform_file, 'w') as f:
         f.write(f"name: {obj.name}\n")
         f.write(f"mesh: {unique_meshes[obj.data.name]}.obj\n")
