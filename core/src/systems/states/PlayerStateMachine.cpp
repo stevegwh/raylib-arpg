@@ -207,7 +207,7 @@ namespace sage
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
 
-            onTargetDeathBridge = gameData->signalReflectionManager->CreateHook<entt::entity>(
+            onTargetDeathBridge = gameData->reflectionSignalRouter->CreateHook<entt::entity>(
                 entity, enemyCombatable.onDeath, combatable.onTargetDeath);
 
             entt::sink sink{combatable.onTargetDeath};
@@ -222,7 +222,7 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(entity);
 
-            gameData->signalReflectionManager->RemoveHook(onTargetDeathBridge);
+            gameData->reflectionSignalRouter->RemoveHook(onTargetDeathBridge);
             entt::sink sink{combatable.onTargetDeath};
             sink.disconnect<&CombatState::onTargetDeath>(this);
 

@@ -32,6 +32,8 @@ namespace sage
     class EntityReflectionSignalRouter;
     class LightSubSystem;
 
+    // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
+    // TODO: Also, should rename to "GameSystems"
     class GameData
     {
       public:
@@ -55,7 +57,7 @@ namespace sage
         std::unique_ptr<PlayerAbilitySystem> playerAbilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
-        std::unique_ptr<EntityReflectionSignalRouter> signalReflectionManager;
+        std::unique_ptr<EntityReflectionSignalRouter> reflectionSignalRouter;
         LightSubSystem* lightSubSystem; // Owned by scene (TODO: Why?)
 
         GameData(
