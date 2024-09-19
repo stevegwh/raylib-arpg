@@ -97,7 +97,7 @@ namespace sage
                 GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, "Goblin");
             }
         }
-        registry->erase<Spawner>(view.begin(), view.end());
+        // registry->erase<Spawner>(view.begin(), view.end());
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
