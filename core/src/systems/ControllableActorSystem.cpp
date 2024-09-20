@@ -62,7 +62,7 @@ namespace sage
 
     void ControllableActorSystem::MoveToLocation(entt::entity id)
     {
-        gameData->actorMovementSystem->PathfindToLocation(id, {gameData->cursor->collision().point});
+        gameData->actorMovementSystem->PathfindToLocation(id, {gameData->cursor->getFirstCollision().point});
     }
 
     void ControllableActorSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)

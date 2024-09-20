@@ -2156,29 +2156,29 @@ Vector2 GetSplinePointBezierCubic(Vector2 startPos, Vector2 startControlPos, Vec
 // Check if point is inside rectangle
 bool CheckCollisionPointRec(Vector2 point, Rectangle rec)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
-    if ((point.x >= rec.x) && (point.x < (rec.x + rec.width)) && (point.y >= rec.y) && (point.y < (rec.y + rec.height))) collision = true;
+    if ((point.x >= rec.x) && (point.x < (rec.x + rec.width)) && (point.y >= rec.y) && (point.y < (rec.y + rec.height))) getFirstCollision = true;
 
-    return collision;
+    return getFirstCollision;
 }
 
 // Check if point is inside circle
 bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     float distanceSquared = (point.x - center.x)*(point.x - center.x) + (point.y - center.y)*(point.y - center.y);
 
-    if (distanceSquared <= radius*radius) collision = true;
+    if (distanceSquared <= radius*radius) getFirstCollision = true;
 
-    return collision;
+    return getFirstCollision;
 }
 
 // Check if point is inside a triangle defined by three points (p1, p2, p3)
 bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     float alpha = ((p2.y - p3.y)*(point.x - p3.x) + (p3.x - p2.x)*(point.y - p3.y)) /
                   ((p2.y - p3.y)*(p1.x - p3.x) + (p3.x - p2.x)*(p1.y - p3.y));
@@ -2188,13 +2188,13 @@ bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 
 
     float gamma = 1.0f - alpha - beta;
 
-    if ((alpha > 0) && (beta > 0) && (gamma > 0)) collision = true;
+    if ((alpha > 0) && (beta > 0) && (gamma > 0)) getFirstCollision = true;
 
-    return collision;
+    return getFirstCollision;
 }
 
 // Check if point is within a polygon described by array of vertices
-// NOTE: Based on http://jeffreythompson.org/collision-detection/poly-point.php
+// NOTE: Based on http://jeffreythompson.org/getFirstCollision-detection/poly-point.php
 bool CheckCollisionPointPoly(Vector2 point, const Vector2 *points, int pointCount)
 {
     bool inside = false;
@@ -2214,21 +2214,21 @@ bool CheckCollisionPointPoly(Vector2 point, const Vector2 *points, int pointCoun
     return inside;
 }
 
-// Check collision between two rectangles
+// Check getFirstCollision between two rectangles
 bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     if ((rec1.x < (rec2.x + rec2.width) && (rec1.x + rec1.width) > rec2.x) &&
-        (rec1.y < (rec2.y + rec2.height) && (rec1.y + rec1.height) > rec2.y)) collision = true;
+        (rec1.y < (rec2.y + rec2.height) && (rec1.y + rec1.height) > rec2.y)) getFirstCollision = true;
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Check collision between two circles
+// Check getFirstCollision between two circles
 bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     float dx = center2.x - center1.x;      // X distance between centers
     float dy = center2.y - center1.y;      // Y distance between centers
@@ -2236,16 +2236,16 @@ bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, floa
     float distanceSquared = dx*dx + dy*dy; // Distance between centers squared
     float radiusSum = radius1 + radius2;
 
-    collision = (distanceSquared <= (radiusSum*radiusSum));
+    getFirstCollision = (distanceSquared <= (radiusSum*radiusSum));
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Check collision between circle and rectangle
+// Check getFirstCollision between circle and rectangle
 // NOTE: Reviewed version to take into account corner limit case
 bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     float recCenterX = rec.x + rec.width/2.0f;
     float recCenterY = rec.y + rec.height/2.0f;
@@ -2262,21 +2262,21 @@ bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
     float cornerDistanceSq = (dx - rec.width/2.0f)*(dx - rec.width/2.0f) +
                              (dy - rec.height/2.0f)*(dy - rec.height/2.0f);
 
-    collision = (cornerDistanceSq <= (radius*radius));
+    getFirstCollision = (cornerDistanceSq <= (radius*radius));
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Check the collision between two lines defined by two points each, returns collision point by reference
+// Check the getFirstCollision between two lines defined by two points each, returns getFirstCollision point by reference
 bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, Vector2 endPos2, Vector2 *collisionPoint)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     float div = (endPos2.y - startPos2.y)*(endPos1.x - startPos1.x) - (endPos2.x - startPos2.x)*(endPos1.y - startPos1.y);
 
     if (fabsf(div) >= FLT_EPSILON)
     {
-        collision = true;
+        getFirstCollision = true;
 
         float xi = ((startPos2.x - endPos2.x)*(startPos1.x*endPos1.y - startPos1.y*endPos1.x) - (startPos1.x - endPos1.x)*(startPos2.x*endPos2.y - startPos2.y*endPos2.x))/div;
         float yi = ((startPos2.y - endPos2.y)*(startPos1.x*endPos1.y - startPos1.y*endPos1.x) - (startPos1.y - endPos1.y)*(startPos2.x*endPos2.y - startPos2.y*endPos2.x))/div;
@@ -2284,22 +2284,22 @@ bool CheckCollisionLines(Vector2 startPos1, Vector2 endPos1, Vector2 startPos2, 
         if (((fabsf(startPos1.x - endPos1.x) > FLT_EPSILON) && (xi < fminf(startPos1.x, endPos1.x) || (xi > fmaxf(startPos1.x, endPos1.x)))) ||
             ((fabsf(startPos2.x - endPos2.x) > FLT_EPSILON) && (xi < fminf(startPos2.x, endPos2.x) || (xi > fmaxf(startPos2.x, endPos2.x)))) ||
             ((fabsf(startPos1.y - endPos1.y) > FLT_EPSILON) && (yi < fminf(startPos1.y, endPos1.y) || (yi > fmaxf(startPos1.y, endPos1.y)))) ||
-            ((fabsf(startPos2.y - endPos2.y) > FLT_EPSILON) && (yi < fminf(startPos2.y, endPos2.y) || (yi > fmaxf(startPos2.y, endPos2.y))))) collision = false;
+            ((fabsf(startPos2.y - endPos2.y) > FLT_EPSILON) && (yi < fminf(startPos2.y, endPos2.y) || (yi > fmaxf(startPos2.y, endPos2.y))))) getFirstCollision = false;
 
-        if (collision && (collisionPoint != 0))
+        if (getFirstCollision && (collisionPoint != 0))
         {
             collisionPoint->x = xi;
             collisionPoint->y = yi;
         }
     }
 
-    return collision;
+    return getFirstCollision;
 }
 
 // Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
 bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshold)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     float dxc = point.x - p1.x;
     float dyc = point.y - p1.y;
@@ -2309,11 +2309,11 @@ bool CheckCollisionPointLine(Vector2 point, Vector2 p1, Vector2 p2, int threshol
 
     if (fabsf(cross) < (threshold*fmaxf(fabsf(dxl), fabsf(dyl))))
     {
-        if (fabsf(dxl) >= fabsf(dyl)) collision = (dxl > 0)? ((p1.x <= point.x) && (point.x <= p2.x)) : ((p2.x <= point.x) && (point.x <= p1.x));
-        else collision = (dyl > 0)? ((p1.y <= point.y) && (point.y <= p2.y)) : ((p2.y <= point.y) && (point.y <= p1.y));
+        if (fabsf(dxl) >= fabsf(dyl)) getFirstCollision = (dxl > 0)? ((p1.x <= point.x) && (point.x <= p2.x)) : ((p2.x <= point.x) && (point.x <= p1.x));
+        else getFirstCollision = (dyl > 0)? ((p1.y <= point.y) && (point.y <= p2.y)) : ((p2.y <= point.y) && (point.y <= p1.y));
     }
 
-    return collision;
+    return getFirstCollision;
 }
 
 // Check if circle collides with a line created betweeen two points [p1] and [p2]
@@ -2340,7 +2340,7 @@ RLAPI bool CheckCollisionCircleLine(Vector2 center, float radius, Vector2 p1, Ve
     return (distanceSQ <= radius*radius);
 }
 
-// Get collision rectangle for two rectangles collision
+// Get getFirstCollision rectangle for two rectangles getFirstCollision
 Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2)
 {
     Rectangle overlap = { 0 };

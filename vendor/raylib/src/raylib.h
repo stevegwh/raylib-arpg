@@ -1669,12 +1669,12 @@ extern "C"
     RLAPI Vector2 GetSplinePointBezierCubic(
         Vector2 p1, Vector2 c2, Vector2 c3, Vector2 p4, float t); // Get (evaluate) spline point: Cubic Bezier
 
-    // Basic shapes collision detection functions
-    RLAPI bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2); // Check collision between two rectangles
+    // Basic shapes getFirstCollision detection functions
+    RLAPI bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2); // Check getFirstCollision between two rectangles
     RLAPI bool CheckCollisionCircles(
-        Vector2 center1, float radius1, Vector2 center2, float radius2); // Check collision between two circles
+        Vector2 center1, float radius1, Vector2 center2, float radius2); // Check getFirstCollision between two circles
     RLAPI bool CheckCollisionCircleRec(
-        Vector2 center, float radius, Rectangle rec); // Check collision between circle and rectangle
+        Vector2 center, float radius, Rectangle rec); // Check getFirstCollision between circle and rectangle
     RLAPI bool CheckCollisionPointRec(Vector2 point, Rectangle rec); // Check if point is inside rectangle
     RLAPI bool CheckCollisionPointCircle(
         Vector2 point, Vector2 center, float radius); // Check if point is inside circle
@@ -1689,8 +1689,8 @@ extern "C"
         Vector2 endPos1,
         Vector2 startPos2,
         Vector2 endPos2,
-        Vector2* collisionPoint); // Check the collision between two lines defined by two points each, returns
-                                  // collision point by reference
+        Vector2* collisionPoint); // Check the getFirstCollision between two lines defined by two points each, returns
+                                  // getFirstCollision point by reference
     RLAPI bool CheckCollisionPointLine(
         Vector2 point,
         Vector2 p1,
@@ -1703,7 +1703,7 @@ extern "C"
         Vector2 p1,
         Vector2 p2); // Check if circle collides with a line created betweeen two points [p1] and [p2]
     RLAPI Rectangle
-    GetCollisionRec(Rectangle rec1, Rectangle rec2); // Get collision rectangle for two rectangles collision
+    GetCollisionRec(Rectangle rec1, Rectangle rec2); // Get getFirstCollision rectangle for two rectangles getFirstCollision
 
     //------------------------------------------------------------------------------------
     // Texture Loading and Drawing Functions (Module: textures)
@@ -2325,20 +2325,20 @@ extern "C"
 
     // Collision detection functions
     RLAPI bool CheckCollisionSpheres(
-        Vector3 center1, float radius1, Vector3 center2, float radius2); // Check collision between two spheres
+        Vector3 center1, float radius1, Vector3 center2, float radius2); // Check getFirstCollision between two spheres
     RLAPI bool CheckCollisionBoxes(
-        BoundingBox box1, BoundingBox box2); // Check collision between two bounding boxes
+        BoundingBox box1, BoundingBox box2); // Check getFirstCollision between two bounding boxes
     RLAPI bool CheckCollisionBoxSphere(
-        BoundingBox box, Vector3 center, float radius); // Check collision between box and sphere
+        BoundingBox box, Vector3 center, float radius); // Check getFirstCollision between box and sphere
     RLAPI RayCollision
-    GetRayCollisionSphere(Ray ray, Vector3 center, float radius);    // Get collision info between ray and sphere
-    RLAPI RayCollision GetRayCollisionBox(Ray ray, BoundingBox box); // Get collision info between ray and box
+    GetRayCollisionSphere(Ray ray, Vector3 center, float radius);    // Get getFirstCollision info between ray and sphere
+    RLAPI RayCollision GetRayCollisionBox(Ray ray, BoundingBox box); // Get getFirstCollision info between ray and box
     RLAPI RayCollision
-    GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform); // Get collision info between ray and mesh
+    GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform); // Get getFirstCollision info between ray and mesh
     RLAPI RayCollision GetRayCollisionTriangle(
-        Ray ray, Vector3 p1, Vector3 p2, Vector3 p3); // Get collision info between ray and triangle
+        Ray ray, Vector3 p1, Vector3 p2, Vector3 p3); // Get getFirstCollision info between ray and triangle
     RLAPI RayCollision GetRayCollisionQuad(
-        Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4); // Get collision info between ray and quad
+        Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4); // Get getFirstCollision info between ray and quad
 
     //------------------------------------------------------------------------------------
     // Audio Loading and Playing Functions (Module: audio)

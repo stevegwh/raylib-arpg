@@ -26,7 +26,7 @@ namespace sage
     {
         void onFloorClick(entt::entity self, entt::entity x)
         {
-            gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->collision().point);
+            gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
         }
 
         void onEnemyLeftClick(entt::entity self, entt::entity target)

@@ -53,7 +53,7 @@ namespace sage
         void enableCursor(entt::entity abilityEntity)
         {
             auto& ab = registry->get<Ability>(abilityEntity);
-            ab.abilityIndicator->Init(gameData->cursor->terrainCollision().point);
+            ab.abilityIndicator->Init(gameData->cursor->getFirstNaviCollision().point);
             ab.abilityIndicator->Enable(true);
             gameData->cursor->Disable();
             gameData->cursor->Hide();
@@ -86,7 +86,7 @@ namespace sage
         void Update(entt::entity abilityEntity) override
         {
             auto& ab = registry->get<Ability>(abilityEntity);
-            ab.abilityIndicator->Update(gameData->cursor->terrainCollision().point);
+            ab.abilityIndicator->Update(gameData->cursor->getFirstNaviCollision().point);
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
                 onConfirm.publish(abilityEntity);
@@ -216,7 +216,7 @@ namespace sage
         if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
         {
             auto& casterPos = registry->get<sgTransform>(ab.caster).GetWorldPos();
-            auto point = gameData->cursor->terrainCollision().point;
+            auto point = gameData->cursor->getFirstNaviCollision().point;
             if (Vector3Distance(point, casterPos) > ad.base.range)
             {
                 std::cout << "Out of range. \n";
@@ -269,7 +269,7 @@ namespace sage
             }
             else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
             {
-                trans.SetPosition(gameData->cursor->terrainCollision().point);
+                trans.SetPosition(gameData->cursor->getFirstNaviCollision().point);
                 ab.vfx->InitSystem();
             }
         }

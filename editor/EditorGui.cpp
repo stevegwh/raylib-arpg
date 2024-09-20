@@ -98,9 +98,9 @@ namespace sage::editor
     {
         switch (layer)
         {
-        case CollisionLayer::FLOOR:
+        case CollisionLayer::FLOORSIMPLE:
             return "Floor";
-        case CollisionLayer::TERRAIN:
+        case CollisionLayer::FLOORCOMPLEX:
             return "Terrain";
         case CollisionLayer::DEFAULT:
             return "Default";
@@ -118,18 +118,18 @@ namespace sage::editor
         // Draw some debug EditorGui text
         DrawText(TextFormat("Hit Object: %s", cursor->hitObjectName.c_str()), 10, 50, 10, BLACK);
 
-        if (cursor->collision().hit)
+        if (cursor->getFirstCollision().hit)
         {
             int ypos = 70;
 
-            DrawText(TextFormat("Distance: %3.2f", cursor->collision().distance), 10, ypos, 10, BLACK);
+            DrawText(TextFormat("Distance: %3.2f", cursor->getFirstCollision().distance), 10, ypos, 10, BLACK);
 
             DrawText(
                 TextFormat(
                     "Hit Pos: %3.2f %3.2f %3.2f",
-                    cursor->collision().point.x,
-                    cursor->collision().point.y,
-                    cursor->collision().point.z),
+                    cursor->getFirstCollision().point.x,
+                    cursor->getFirstCollision().point.y,
+                    cursor->getFirstCollision().point.z),
                 10,
                 ypos + 15,
                 10,
@@ -138,9 +138,9 @@ namespace sage::editor
             DrawText(
                 TextFormat(
                     "Hit Norm: %3.2f %3.2f %3.2f",
-                    cursor->collision().normal.x,
-                    cursor->collision().normal.y,
-                    cursor->collision().normal.z),
+                    cursor->getFirstCollision().normal.x,
+                    cursor->getFirstCollision().normal.y,
+                    cursor->getFirstCollision().normal.z),
                 10,
                 ypos + 30,
                 10,

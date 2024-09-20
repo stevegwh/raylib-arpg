@@ -291,7 +291,7 @@ namespace sage
         navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
 
         navigationGridSystem->MarkSquaresDebug(moveableActor.debugRay, PURPLE, false);
-        // Looks ahead and checks if collision will occur
+        // Looks ahead and checks if getFirstCollision will occur
         NavigationGridSquare* hitCell =
             castCollisionRay(actorIndex, transform.direction, avoidanceDistance, moveableActor);
 
@@ -408,5 +408,5 @@ namespace sage
 //			}
 //			else
 //			{
-//				std::cout << "No collision with terrain detected \n";
+//				std::cout << "No getFirstCollision with terrain detected \n";
 //			}
