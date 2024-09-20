@@ -35,6 +35,7 @@ namespace sage
         {
             std::vector<Spawner> spawners;
             archive(spawners);
+            assert(!spawners.empty());
             for (const auto& spawner : spawners)
             {
                 const auto entity = registry->create();
