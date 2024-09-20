@@ -56,33 +56,33 @@ namespace sage
         return CollisionLayer::DEFAULT;
     }
 
-    void parseMtlFile(const fs::path& mtlPath, std::string& materialKey)
-    {
-        if (!fs::exists(mtlPath))
-        {
-            std::cout << "WARNING: MTL file could not be found: " << mtlPath << std::endl;
-            return;
-        }
-        std::ifstream infile(mtlPath);
-        std::string line;
-        while (std::getline(infile, line))
-        {
-            if (line.substr(0, 6) != "newmtl") continue;
-
-            infile.close();
-            size_t textureNameStart = line.find_first_not_of(" \t", 6);
-
-            if (textureNameStart != std::string::npos)
-            {
-                materialKey = line.substr(textureNameStart);
-            }
-            else
-            {
-                std::cout << "ERROR: Failed to read material name \n";
-                exit(1);
-            }
-        }
-    }
+    // void parseMtlFile(const fs::path& mtlPath, std::string& materialKey)
+    // {
+    //     if (!fs::exists(mtlPath))
+    //     {
+    //         std::cout << "WARNING: MTL file could not be found: " << mtlPath << std::endl;
+    //         return;
+    //     }
+    //     std::ifstream infile(mtlPath);
+    //     std::string line;
+    //     while (std::getline(infile, line))
+    //     {
+    //         if (line.substr(0, 6) != "newmtl") continue;
+    //
+    //         infile.close();
+    //         size_t textureNameStart = line.find_first_not_of(" \t", 6);
+    //
+    //         if (textureNameStart != std::string::npos)
+    //         {
+    //             materialKey = line.substr(textureNameStart);
+    //         }
+    //         else
+    //         {
+    //             std::cout << "ERROR: Failed to read material name \n";
+    //             exit(1);
+    //         }
+    //     }
+    // }
 
     void createFloor(entt::registry* registry, BoundingBox bb)
     {
@@ -123,29 +123,42 @@ namespace sage
         std::vector<Collideable*>& floorMeshes)
     {
         std::ifstream infile(txtPath);
-        std::string key;
+        std::string line;
+        std::string objectName, meshName;
+        float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
 
-        infile >> key;
-        std::string objectName;
-        infile >> objectName;
+        auto readLine = [&infile](const std::string& key) {
+            std::string line;
+            std::getline(infile, line);
+            if (line.substr(0, key.length()) != key)
+            {
+                throw std::runtime_error("Expected key '" + key + "' not found");
+            }
+            return line.substr(key.length() + 2); // +2 to skip ": "
+        };
 
-        infile >> key;
-        std::string meshName;
-        infile >> meshName;
+        try
+        {
+            objectName = readLine("name");
+            meshName = readLine("mesh");
+
+            std::istringstream locStream(readLine("location"));
+            locStream >> x >> y >> z;
+
+            std::istringstream rotStream(readLine("rotation"));
+            rotStream >> rotx >> roty >> rotz;
+
+            std::istringstream scaleStream(readLine("scale"));
+            scaleStream >> scalex >> scaley >> scalez;
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error parsing file " << txtPath << ": " << e.what() << std::endl;
+            return;
+        }
+
         fs::path fullMeshPath = meshPath / meshName;
-        std::string meshKey = fullMeshPath.generic_string(); // Use generic_string() for forward slashes
-
-        infile >> key;
-        float x, y, z;
-        infile >> x >> y >> z;
-
-        infile >> key;
-        float rotx, roty, rotz;
-        infile >> rotx >> roty >> rotz;
-
-        infile >> key;
-        float scalex, scaley, scalez;
-        infile >> scalex >> scaley >> scalez;
+        std::string meshKey = fullMeshPath.generic_string();
 
         auto entity = registry->create();
 
@@ -218,11 +231,11 @@ namespace sage
         {
             if (entry.path().extension() == ".obj")
             {
-                std::string materialKey = "DEFAULT"; // Load default raylib mat
-                fs::path mtlPath = entry.path();
-                mtlPath.replace_extension(".mtl");
-                parseMtlFile(mtlPath, materialKey);
-                ResourceManager::GetInstance().ModelLoadFromFile(entry.path().generic_string(), materialKey);
+                // std::string materialKey = "DEFAULT"; // Load default raylib mat
+                // fs::path mtlPath = entry.path();
+                // mtlPath.replace_extension(".mtl");
+                // parseMtlFile(mtlPath, materialKey);
+                ResourceManager::GetInstance().ModelLoadFromFile(entry.path().generic_string());
             }
         }
         std::cout << "FINISH: Loading mesh data into resource manager. \n";

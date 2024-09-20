@@ -283,21 +283,10 @@ namespace sage
     void ResourceManager::ModelLoadFromFile(const AssetID id)
     {
         const auto path = getAssetPath(id);
-        ModelLoadFromFile(id, path);
-    }
-
-    void ResourceManager::ModelLoadFromFile(const AssetID id, const std::string& materialKey)
-    {
-        const auto& path = getAssetPath(id);
-        ModelLoadFromFile(path, materialKey);
+        ModelLoadFromFile(path);
     }
 
     void ResourceManager::ModelLoadFromFile(const std::string& path)
-    {
-        ModelLoadFromFile(path, path);
-    }
-
-    void ResourceManager::ModelLoadFromFile(const std::string& path, const std::string& materialKey)
     {
         if (!modelCopies.contains(path))
         {
@@ -307,9 +296,9 @@ namespace sage
             // binary. If the goblin (etc) mesh is archived in the binary, then EmplaceModel will never need to be
             // called at runtime.
             modelCereal.model = LoadModel(path.c_str());
-            modelCereal.materialKey = materialKey;
+            modelCereal.key = path;
 
-            if (!modelMaterials.contains(materialKey))
+            if (!modelMaterials.contains(path))
             {
                 std::vector<Material> materials;
                 materials.reserve(modelCereal.model.materialCount);
@@ -317,7 +306,7 @@ namespace sage
                 {
                     materials.push_back(modelCereal.model.materials[i]);
                 }
-                modelMaterials.emplace(materialKey, std::move(materials));
+                modelMaterials.emplace(path, std::move(materials));
 
                 // Free the original materials array
                 RL_FREE(modelCereal.model.materials);
@@ -333,7 +322,7 @@ namespace sage
             }
 
             // Set the materials pointer to the stored materials
-            modelCereal.model.materials = modelMaterials[materialKey].data();
+            modelCereal.model.materials = modelMaterials[path].data();
 
             modelCopies.emplace(path, std::move(modelCereal));
         }

@@ -24,11 +24,11 @@ namespace sage
     struct ModelCereal
     {
         Model model;
-        std::string materialKey;
+        std::string key;
         template <class Archive>
         void serialize(Archive& archive)
         {
-            archive(model, materialKey);
+            archive(model, key);
         }
     };
 
@@ -67,9 +67,7 @@ namespace sage
         void ImageLoadFromFile(AssetID id, Image image);
         void ImageLoadFromFile(const std::string& path, Image image);
         void ModelLoadFromFile(AssetID id);
-        void ModelLoadFromFile(AssetID id, const std::string& materialKey);
         void ModelLoadFromFile(const std::string& path);
-        void ModelLoadFromFile(const std::string& path, const std::string& materialKey);
         [[nodiscard]] ModelSafe GetModelCopy(const std::string& id);
         [[nodiscard]] ModelSafe GetModelCopy(AssetID id);
         [[nodiscard]] ModelSafe GetModelDeepCopy(AssetID id) const;
@@ -129,7 +127,7 @@ namespace sage
 
             for (auto& [key, model] : GetInstance().modelCopies)
             {
-                model.model.materials = modelMaterials.at(model.materialKey).data();
+                model.model.materials = modelMaterials.at(model.key).data();
             }
 
             for (int i = 0; i < animatedModelKeys.size(); ++i)
