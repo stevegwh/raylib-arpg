@@ -14,14 +14,14 @@ namespace sage
     enum class CollisionLayer
     {
         DEFAULT,
-        FLOOR,
+        FLOORSIMPLE,
         BUILDING,
         NAVIGATION,
         PLAYER,
         NPC,
         ENEMY,
         BOYD,
-        TERRAIN,
+        FLOORCOMPLEX,
         BACKGROUND,
         COUNT // Must always be last
     };

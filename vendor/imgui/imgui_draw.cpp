@@ -2760,7 +2760,7 @@ struct ImFontBuildDstData
     int                 SrcCount;           // Number of source fonts targeting this destination font.
     int                 GlyphsHighest;
     int                 GlyphsCount;
-    ImBitVector         GlyphsSet;          // This is used to resolve collision when multiple sources are merged into a same destination font.
+    ImBitVector         GlyphsSet;          // This is used to resolve getFirstCollision when multiple sources are merged into a same destination font.
 };
 
 static void UnpackBitVectorToFlatIndexList(const ImBitVector* in, ImVector<int>* out)

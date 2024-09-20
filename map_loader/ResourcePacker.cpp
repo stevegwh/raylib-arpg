@@ -30,25 +30,33 @@ namespace sage
     CollisionLayer setCollisionLayer(const std::string& objectName)
     {
         // TODO: Need a better tagging system for the meshes.
-        if (objectName.find("BLD_") != std::string::npos)
+        if (objectName.find("_BLD_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
-        if (objectName.find("BG_") != std::string::npos)
+        else if (objectName.find("_WALL_") != std::string::npos)
+        {
+            return CollisionLayer::BUILDING;
+        }
+        else if (objectName.find("_HOLE_") != std::string::npos)
+        {
+            return CollisionLayer::BUILDING;
+        }
+        if (objectName.find("_BG_") != std::string::npos)
         {
             return CollisionLayer::BACKGROUND;
         }
-        if (objectName.find("FLOOR_TILE_") != std::string::npos)
+        if (objectName.find("_FLOORSIMPLE_") != std::string::npos)
         {
             // Uses bounding box bounds for height (flat surfaces).
-            return CollisionLayer::FLOOR;
+            return CollisionLayer::FLOORSIMPLE;
         }
-        if (objectName.find("FLOOR_TERRAIN_") != std::string::npos)
+        if (objectName.find("_FLOORCOMPLEX_") != std::string::npos)
         {
             // Samples mesh for height/normal information
-            return CollisionLayer::TERRAIN;
+            return CollisionLayer::FLOORCOMPLEX;
         }
-        if (objectName.find("PROP_") != std::string::npos)
+        if (objectName.find("_PROP_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
@@ -88,7 +96,7 @@ namespace sage
     {
         entt::entity floor = registry->create();
         auto& floorCollidable = registry->emplace<Collideable>(floor, bb, MatrixIdentity());
-        floorCollidable.collisionLayer = CollisionLayer::FLOOR;
+        floorCollidable.collisionLayer = CollisionLayer::FLOORSIMPLE;
     }
 
     BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
@@ -200,8 +208,8 @@ namespace sage
             entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
 
         collideable.collisionLayer = setCollisionLayer(objectName);
-        if (collideable.collisionLayer == CollisionLayer::FLOOR ||
-            collideable.collisionLayer == CollisionLayer::TERRAIN)
+        if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE ||
+            collideable.collisionLayer == CollisionLayer::FLOORCOMPLEX)
             floorMeshes.push_back(&collideable);
     }
 

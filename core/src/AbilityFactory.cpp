@@ -165,7 +165,7 @@ namespace sage
         auto& ad = registry->get<Ability>(abilityEntity).ad;
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
         auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
-        auto point = data->cursor->terrainCollision().point;
+        auto point = data->cursor->getFirstNaviCollision().point;
 
         if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
         {
@@ -173,7 +173,7 @@ namespace sage
         }
         else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
         {
-            auto cursorPos = data->cursor->terrainCollision().point;
+            auto cursorPos = data->cursor->getFirstNaviCollision().point;
             projectileTrans.SetPosition(cursorPos);
         }
 

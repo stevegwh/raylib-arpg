@@ -33,7 +33,7 @@ namespace sage
         {
             onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
         }
-        else if (layer == CollisionLayer::FLOOR)
+        else if (layer == CollisionLayer::FLOORSIMPLE)
         {
             onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
         }
@@ -65,7 +65,7 @@ namespace sage
         timer = 0;
 
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
-        if (layer == CollisionLayer::FLOOR)
+        if (layer == CollisionLayer::FLOORSIMPLE)
         {
             onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
         }
@@ -81,7 +81,7 @@ namespace sage
     }
 
     void Cursor::DisableContextSwitching() // Lock mouse context? Like changing depending
-                                           // on collision.
+                                           // on getFirstCollision.
     {
         contextLocked = true;
     }
@@ -115,7 +115,7 @@ namespace sage
     {
         GridSquare clickedSquare{};
         if (gameData->navigationGridSystem->WorldToGridSpace(m_mouseHitInfo.rlCollision.point, clickedSquare))
-        // Out of map bounds (TODO: Potentially pointless, if FLOOR is the same size as
+        // Out of map bounds (TODO: Potentially pointless, if FLOORSIMPLE is the same size as
         // bounds.)
         {
             if (registry->any_of<ControllableActor>(controlledActor))
@@ -148,7 +148,7 @@ namespace sage
     {
         if (contextLocked) return;
 
-        if (layer == CollisionLayer::FLOOR || layer == CollisionLayer::NAVIGATION)
+        if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX)
         {
             if (isValidMove())
             {
@@ -193,9 +193,15 @@ namespace sage
 
     void Cursor::getMouseRayCollision()
     {
+        // TODO: Below needs work. Terrain? Floor?
+        // We want to separate general collisions (with enemies, player etc) with floor collisions.
+        // If the floor type is "FLOORCOMPLEX" (Complex?) then use its mesh as the getFirstCollision point.
+        // If the floor type is "FLOORSIMPLE" (Simple?) then use its bounding box as the getFirstCollision point.
+        // Maybe just call the "t_terrainHitInfo" as navigationHitInfo.
+
         // Reset hit information
         resetHitInfo(m_mouseHitInfo);
-        resetHitInfo(m_terrainHitInfo);
+        resetHitInfo(m_naviHitInfo);
         hitObjectName = "None";
         currentTex = &regulartex;
         currentColor = defaultColor;
@@ -204,16 +210,11 @@ namespace sage
         ray = GetMouseRay(GetMousePosition(), *gameData->camera->getRaylibCam());
         auto collisions = gameData->collisionSystem->GetCollisionsWithRay(ray);
 
-        if (collisions.empty())
-        {
-            return;
-        }
-
         // Replace floor BB hit with mesh hit then re-sort vector
-        // Discards hits with a BB that do not have a mesh collision
+        // Discards hits with a BB that do not have a collision with mesh
         for (auto it = collisions.begin(); it != collisions.end();)
         {
-            if (it->collisionLayer == CollisionLayer::FLOOR)
+            if (it->collisionLayer == CollisionLayer::FLOORCOMPLEX)
             {
                 if (!findMeshCollision(*it))
                 {
@@ -225,24 +226,31 @@ namespace sage
             ++it;
         }
 
+        if (collisions.empty()) // Could put this sooner, but would need to repeat after above
+        {
+            return;
+        }
+
         gameData->collisionSystem->SortCollisionsByDistance(collisions);
 
         m_mouseHitInfo = collisions[0];
 
-        if (m_mouseHitInfo.collisionLayer == CollisionLayer::FLOOR)
+        if (m_mouseHitInfo.collisionLayer == CollisionLayer::FLOORSIMPLE ||
+            m_mouseHitInfo.collisionLayer == CollisionLayer::FLOORCOMPLEX)
         {
-            m_terrainHitInfo = m_mouseHitInfo;
+            m_naviHitInfo = m_mouseHitInfo;
         }
         else
         {
-            // Find first non-floor collision for mouse hit
-            auto terrainIt = std::find_if(collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
-                return coll.collisionLayer == CollisionLayer::FLOOR;
+            // Find first navigation collision (if any)
+            auto navIt = std::find_if(collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
+                return coll.collisionLayer == CollisionLayer::FLOORSIMPLE ||
+                       coll.collisionLayer == CollisionLayer::FLOORCOMPLEX;
             });
 
-            if (terrainIt != collisions.end())
+            if (navIt != collisions.end())
             {
-                m_terrainHitInfo = *terrainIt;
+                m_naviHitInfo = *navIt;
             }
         }
 
@@ -259,7 +267,7 @@ namespace sage
         hitInfo.rlCollision.hit = false;
     }
 
-    // Find the terrain's mesh collision (instead of using its bounding box)
+    // Find the model's mesh collision (instead of using its bounding box)
     bool Cursor::findMeshCollision(CollisionInfo& hitInfo)
     {
         if (registry->any_of<Renderable>(hitInfo.collidedEntityId))
@@ -290,12 +298,12 @@ namespace sage
         return m_mouseHitInfo;
     }
 
-    const RayCollision& Cursor::terrainCollision() const
+    const RayCollision& Cursor::getFirstNaviCollision() const
     {
-        return m_terrainHitInfo.rlCollision;
+        return m_naviHitInfo.rlCollision;
     }
 
-    const RayCollision& Cursor::collision() const
+    const RayCollision& Cursor::getFirstCollision() const
     {
         return m_mouseHitInfo.rlCollision;
     }

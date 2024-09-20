@@ -22,7 +22,7 @@ namespace sage::editor
 
 		int close_title_size_delta_half = (RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT - RAYGUI_WINDOW_CLOSEBUTTON_SIZE) / 2;
 
-		// window movement and resize input and collision check
+		// window movement and resize input and getFirstCollision check
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !moving && !resizing)
 		{
 			Vector2 mouse_position = GetMousePosition();

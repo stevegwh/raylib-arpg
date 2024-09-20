@@ -371,17 +371,17 @@ namespace sage
         {
             for (int col = min_col; col <= max_col; ++col)
             {
-                if (collideable.collisionLayer == CollisionLayer::FLOOR)
+                if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE)
                 {
                     if (gridSquares[row][col]->terrainHeight < area.max.y)
                     {
                         gridSquares[row][col]->terrainHeight = area.max.y;
                         gridSquares[row][col]->terrainNormal = {0, 1, 0};
                         // gridSquares[row][col]->pathfindingCost =
-                        // calculateTerrainCost(collision.normal, 45.0f);
+                        // calculateTerrainCost(getFirstCollision.normal, 45.0f);
                     }
                 }
-                else if (collideable.collisionLayer == CollisionLayer::TERRAIN)
+                else if (collideable.collisionLayer == CollisionLayer::FLOORCOMPLEX)
                 {
                     Vector3 gridCenter = {
                         (gridSquares[row][col]->worldPosMin.x + gridSquares[row][col]->worldPosMax.x) * 0.5f,
@@ -390,17 +390,17 @@ namespace sage
 
                     Ray ray = {gridCenter, {0, -1, 0}}; // Cast ray down
 
-                    RayCollision collision =
+                    RayCollision getFirstCollision =
                         renderable.GetModel()->GetRayMeshCollision(ray, 0, transform.GetMatrix());
 
-                    if (collision.hit)
+                    if (getFirstCollision.hit)
                     {
-                        if (gridSquares[row][col]->terrainHeight < collision.point.y)
+                        if (gridSquares[row][col]->terrainHeight < getFirstCollision.point.y)
                         {
-                            gridSquares[row][col]->terrainHeight = collision.point.y;
-                            gridSquares[row][col]->terrainNormal = collision.normal;
+                            gridSquares[row][col]->terrainHeight = getFirstCollision.point.y;
+                            gridSquares[row][col]->terrainNormal = getFirstCollision.normal;
                             // gridSquares[row][col]->pathfindingCost =
-                            // calculateTerrainCost(collision.normal, 45.0f);
+                            // calculateTerrainCost(getFirstCollision.normal, 45.0f);
                         }
                     }
                 }
@@ -447,7 +447,9 @@ namespace sage
         for (const auto& entity : view)
         {
             const auto& c = registry->get<Collideable>(entity);
-            if (c.collisionLayer != CollisionLayer::TERRAIN && c.collisionLayer != CollisionLayer::FLOOR) continue;
+            if (c.collisionLayer != CollisionLayer::FLOORCOMPLEX &&
+                c.collisionLayer != CollisionLayer::FLOORSIMPLE)
+                continue;
 
             // Check if either min or max point of the bounding box is inside the defined
             // area
@@ -1075,7 +1077,8 @@ namespace sage
         {
             const auto& bb = view.get<Collideable>(entity);
 
-            if (bb.collisionLayer == CollisionLayer::TERRAIN || bb.collisionLayer == CollisionLayer::FLOOR)
+            if (bb.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
+                bb.collisionLayer == CollisionLayer::FLOORSIMPLE)
             {
                 calculateTerrainHeightAndNormals(entity);
             }
@@ -1112,10 +1115,10 @@ namespace sage
             {
                 MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
             }
-            else if (bb.collisionLayer == CollisionLayer::TERRAIN)
+            else if (bb.collisionLayer == CollisionLayer::FLOORCOMPLEX)
             {
                 MarkSquareAreaOccupiedIfSteep(bb.worldBoundingBox, true);
-                // TODO: Does not account for FLOOR.
+                // TODO: Does not account for FLOORSIMPLE.
             }
         }
         std::cout << "FINISH: Populating grid. \n";

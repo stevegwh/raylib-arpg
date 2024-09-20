@@ -28,19 +28,19 @@ namespace sage
         // TODO: Confirm this works
         // (It does not. Set event to update the bb of the selected object)
         auto& selectedObjectTrans = registry->get<sgTransform>(selectedObject);
-        selectedObjectTrans.SetPosition(data->cursor->collision().point);
+        selectedObjectTrans.SetPosition(data->cursor->getFirstCollision().point);
     }
 
     void EditorScene::OnCursorClick()
     {
         if (gui->focused) return;
-        if (data->cursor->collision().hit)
+        if (data->cursor->getFirstCollision().hit)
         {
             switch (registry->get<Collideable>(data->cursor->getMouseHitInfo().collidedEntityId).collisionLayer)
             {
             case CollisionLayer::DEFAULT:
                 break;
-            case CollisionLayer::FLOOR:
+            case CollisionLayer::FLOORSIMPLE:
                 if (currentEditorMode == CREATE)
                 {
                 }

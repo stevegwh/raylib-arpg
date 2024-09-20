@@ -20412,7 +20412,7 @@ void ImGui::UpdateDebugToolFlashStyleColor()
         DebugFlashStyleColorStop();
 }
 
-// Avoid naming collision with imgui_demo.cpp's HelpMarker() for unity builds.
+// Avoid naming getFirstCollision with imgui_demo.cpp's HelpMarker() for unity builds.
 static void MetricsHelpMarker(const char* desc)
 {
     ImGui::TextDisabled("(?)");

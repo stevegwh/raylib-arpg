@@ -25,7 +25,7 @@ namespace sage
         GameData* gameData;
 
         CollisionInfo m_mouseHitInfo{};
-        CollisionInfo m_terrainHitInfo{};
+        CollisionInfo m_naviHitInfo{};
 
         Texture2D* currentTex;
         Texture2D regulartex{};
@@ -58,8 +58,8 @@ namespace sage
       public:
         std::string hitObjectName{};
         [[nodiscard]] const CollisionInfo& getMouseHitInfo() const;
-        [[nodiscard]] const RayCollision& terrainCollision() const;
-        [[nodiscard]] const RayCollision& collision() const;
+        [[nodiscard]] const RayCollision& getFirstNaviCollision() const;
+        [[nodiscard]] const RayCollision& getFirstCollision() const;
 
         entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
         entt::sigh<void(entt::entity)> onNPCClick{};

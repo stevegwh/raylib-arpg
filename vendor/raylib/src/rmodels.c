@@ -4045,12 +4045,12 @@ void DrawBoundingBox(BoundingBox box, Color color)
     DrawCubeWires(center, size.x, size.y, size.z, color);
 }
 
-// Check collision between two spheres
+// Check getFirstCollision between two spheres
 bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, float radius2)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
-    // Simple way to check for collision, just checking distance between two points
+    // Simple way to check for getFirstCollision, just checking distance between two points
     // Unfortunately, sqrtf() is a costly operation, so we avoid it with following solution
     /*
     float dx = center1.x - center2.x;      // X distance between centers
@@ -4059,38 +4059,38 @@ bool CheckCollisionSpheres(Vector3 center1, float radius1, Vector3 center2, floa
 
     float distance = sqrtf(dx*dx + dy*dy + dz*dz);  // Distance between centers
 
-    if (distance <= (radius1 + radius2)) collision = true;
+    if (distance <= (radius1 + radius2)) getFirstCollision = true;
     */
 
     // Check for distances squared to avoid sqrtf()
     if (Vector3DotProduct(Vector3Subtract(center2, center1), Vector3Subtract(center2, center1)) <=
         (radius1 + radius2) * (radius1 + radius2))
-        collision = true;
+        getFirstCollision = true;
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Check collision between two boxes
+// Check getFirstCollision between two boxes
 // NOTE: Boxes are defined by two points minimum and maximum
 bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2)
 {
-    bool collision = true;
+    bool getFirstCollision = true;
 
     if ((box1.max.x >= box2.min.x) && (box1.min.x <= box2.max.x))
     {
-        if ((box1.max.y < box2.min.y) || (box1.min.y > box2.max.y)) collision = false;
-        if ((box1.max.z < box2.min.z) || (box1.min.z > box2.max.z)) collision = false;
+        if ((box1.max.y < box2.min.y) || (box1.min.y > box2.max.y)) getFirstCollision = false;
+        if ((box1.max.z < box2.min.z) || (box1.min.z > box2.max.z)) getFirstCollision = false;
     }
     else
-        collision = false;
+        getFirstCollision = false;
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Check collision between box and sphere
+// Check getFirstCollision between box and sphere
 bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius)
 {
-    bool collision = false;
+    bool getFirstCollision = false;
 
     float dmin = 0;
 
@@ -4109,52 +4109,52 @@ bool CheckCollisionBoxSphere(BoundingBox box, Vector3 center, float radius)
     else if (center.z > box.max.z)
         dmin += powf(center.z - box.max.z, 2);
 
-    if (dmin <= (radius * radius)) collision = true;
+    if (dmin <= (radius * radius)) getFirstCollision = true;
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Get collision info between ray and sphere
+// Get getFirstCollision info between ray and sphere
 RayCollision GetRayCollisionSphere(Ray ray, Vector3 center, float radius)
 {
-    RayCollision collision = {0};
+    RayCollision getFirstCollision = {0};
 
     Vector3 raySpherePos = Vector3Subtract(center, ray.position);
     float vector = Vector3DotProduct(raySpherePos, ray.direction);
     float distance = Vector3Length(raySpherePos);
     float d = radius * radius - (distance * distance - vector * vector);
 
-    collision.hit = d >= 0.0f;
+    getFirstCollision.hit = d >= 0.0f;
 
-    // Check if ray origin is inside the sphere to calculate the correct collision point
+    // Check if ray origin is inside the sphere to calculate the correct getFirstCollision point
     if (distance < radius)
     {
-        collision.distance = vector + sqrtf(d);
+        getFirstCollision.distance = vector + sqrtf(d);
 
-        // Calculate collision point
-        collision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, collision.distance));
+        // Calculate getFirstCollision point
+        getFirstCollision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, getFirstCollision.distance));
 
-        // Calculate collision normal (pointing outwards)
-        collision.normal = Vector3Negate(Vector3Normalize(Vector3Subtract(collision.point, center)));
+        // Calculate getFirstCollision normal (pointing outwards)
+        getFirstCollision.normal = Vector3Negate(Vector3Normalize(Vector3Subtract(getFirstCollision.point, center)));
     }
     else
     {
-        collision.distance = vector - sqrtf(d);
+        getFirstCollision.distance = vector - sqrtf(d);
 
-        // Calculate collision point
-        collision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, collision.distance));
+        // Calculate getFirstCollision point
+        getFirstCollision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, getFirstCollision.distance));
 
-        // Calculate collision normal (pointing inwards)
-        collision.normal = Vector3Normalize(Vector3Subtract(collision.point, center));
+        // Calculate getFirstCollision normal (pointing inwards)
+        getFirstCollision.normal = Vector3Normalize(Vector3Subtract(getFirstCollision.point, center));
     }
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Get collision info between ray and box
+// Get getFirstCollision info between ray and box
 RayCollision GetRayCollisionBox(Ray ray, BoundingBox box)
 {
-    RayCollision collision = {0};
+    RayCollision getFirstCollision = {0};
 
     // Note: If ray.position is inside the box, the distance is negative (as if the ray was reversed)
     // Reversing ray.direction will give use the correct result
@@ -4179,42 +4179,42 @@ RayCollision GetRayCollisionBox(Ray ray, BoundingBox box)
     t[6] = (float)fmax(fmax(fmin(t[0], t[1]), fmin(t[2], t[3])), fmin(t[4], t[5]));
     t[7] = (float)fmin(fmin(fmax(t[0], t[1]), fmax(t[2], t[3])), fmax(t[4], t[5]));
 
-    collision.hit = !((t[7] < 0) || (t[6] > t[7]));
-    collision.distance = t[6];
-    collision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, collision.distance));
+    getFirstCollision.hit = !((t[7] < 0) || (t[6] > t[7]));
+    getFirstCollision.distance = t[6];
+    getFirstCollision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, getFirstCollision.distance));
 
     // Get box center point
-    collision.normal = Vector3Lerp(box.min, box.max, 0.5f);
+    getFirstCollision.normal = Vector3Lerp(box.min, box.max, 0.5f);
     // Get vector center point->hit point
-    collision.normal = Vector3Subtract(collision.point, collision.normal);
+    getFirstCollision.normal = Vector3Subtract(getFirstCollision.point, getFirstCollision.normal);
     // Scale vector to unit cube
     // NOTE: We use an additional .01 to fix numerical errors
-    collision.normal = Vector3Scale(collision.normal, 2.01f);
-    collision.normal = Vector3Divide(collision.normal, Vector3Subtract(box.max, box.min));
+    getFirstCollision.normal = Vector3Scale(getFirstCollision.normal, 2.01f);
+    getFirstCollision.normal = Vector3Divide(getFirstCollision.normal, Vector3Subtract(box.max, box.min));
     // The relevant elements of the vector are now slightly larger than 1.0f (or smaller than -1.0f)
     // and the others are somewhere between -1.0 and 1.0 casting to int is exactly our wanted normal!
-    collision.normal.x = (float)((int)collision.normal.x);
-    collision.normal.y = (float)((int)collision.normal.y);
-    collision.normal.z = (float)((int)collision.normal.z);
+    getFirstCollision.normal.x = (float)((int)getFirstCollision.normal.x);
+    getFirstCollision.normal.y = (float)((int)getFirstCollision.normal.y);
+    getFirstCollision.normal.z = (float)((int)getFirstCollision.normal.z);
 
-    collision.normal = Vector3Normalize(collision.normal);
+    getFirstCollision.normal = Vector3Normalize(getFirstCollision.normal);
 
     if (insideBox)
     {
         // Reset ray.direction
         ray.direction = Vector3Negate(ray.direction);
         // Fix result
-        collision.distance *= -1.0f;
-        collision.normal = Vector3Negate(collision.normal);
+        getFirstCollision.distance *= -1.0f;
+        getFirstCollision.normal = Vector3Negate(getFirstCollision.normal);
     }
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Get collision info between ray and mesh
+// Get getFirstCollision info between ray and mesh
 RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform)
 {
-    RayCollision collision = {0};
+    RayCollision getFirstCollision = {0};
 
     // Check if mesh vertex data on CPU for testing
     if (mesh.vertices != NULL)
@@ -4249,22 +4249,22 @@ RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform)
             if (triHitInfo.hit)
             {
                 // Save the closest hit triangle
-                if ((!collision.hit) || (collision.distance > triHitInfo.distance)) collision = triHitInfo;
+                if ((!getFirstCollision.hit) || (getFirstCollision.distance > triHitInfo.distance)) getFirstCollision = triHitInfo;
             }
         }
     }
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Get collision info between ray and triangle
+// Get getFirstCollision info between ray and triangle
 // NOTE: The points are expected to be in counter-clockwise winding
 // NOTE: Based on https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3)
 {
 #define EPSILON 0.000001f // A small number
 
-    RayCollision collision = {0};
+    RayCollision getFirstCollision = {0};
     Vector3 edge1 = {0};
     Vector3 edge2 = {0};
     Vector3 p, q, tv;
@@ -4281,7 +4281,7 @@ RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3
     det = Vector3DotProduct(edge1, p);
 
     // Avoid culling!
-    if ((det > -EPSILON) && (det < EPSILON)) return collision;
+    if ((det > -EPSILON) && (det < EPSILON)) return getFirstCollision;
 
     invDet = 1.0f / det;
 
@@ -4292,7 +4292,7 @@ RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3
     u = Vector3DotProduct(tv, p) * invDet;
 
     // The intersection lies outside the triangle
-    if ((u < 0.0f) || (u > 1.0f)) return collision;
+    if ((u < 0.0f) || (u > 1.0f)) return getFirstCollision;
 
     // Prepare to test v parameter
     q = Vector3CrossProduct(tv, edge1);
@@ -4301,33 +4301,33 @@ RayCollision GetRayCollisionTriangle(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3
     v = Vector3DotProduct(ray.direction, q) * invDet;
 
     // The intersection lies outside the triangle
-    if ((v < 0.0f) || ((u + v) > 1.0f)) return collision;
+    if ((v < 0.0f) || ((u + v) > 1.0f)) return getFirstCollision;
 
     t = Vector3DotProduct(edge2, q) * invDet;
 
     if (t > EPSILON)
     {
         // Ray hit, get hit point and normal
-        collision.hit = true;
-        collision.distance = t;
-        collision.normal = Vector3Normalize(Vector3CrossProduct(edge1, edge2));
-        collision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
+        getFirstCollision.hit = true;
+        getFirstCollision.distance = t;
+        getFirstCollision.normal = Vector3Normalize(Vector3CrossProduct(edge1, edge2));
+        getFirstCollision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
     }
 
-    return collision;
+    return getFirstCollision;
 }
 
-// Get collision info between ray and quad
+// Get getFirstCollision info between ray and quad
 // NOTE: The points are expected to be in counter-clockwise winding
 RayCollision GetRayCollisionQuad(Ray ray, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
 {
-    RayCollision collision = {0};
+    RayCollision getFirstCollision = {0};
 
-    collision = GetRayCollisionTriangle(ray, p1, p2, p4);
+    getFirstCollision = GetRayCollisionTriangle(ray, p1, p2, p4);
 
-    if (!collision.hit) collision = GetRayCollisionTriangle(ray, p2, p3, p4);
+    if (!getFirstCollision.hit) getFirstCollision = GetRayCollisionTriangle(ray, p2, p3, p4);
 
-    return collision;
+    return getFirstCollision;
 }
 
 //----------------------------------------------------------------------------------

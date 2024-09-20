@@ -373,7 +373,7 @@ struct rAudioProcessor {
     rAudioProcessor *prev;          // Previous audio processor on the list
 };
 
-#define AudioBuffer rAudioBuffer    // HACK: To avoid CoreAudio (macOS) symbol collision
+#define AudioBuffer rAudioBuffer    // HACK: To avoid CoreAudio (macOS) symbol getFirstCollision
 
 // Audio data context
 typedef struct AudioData {
