@@ -55,7 +55,7 @@ namespace sage
         gameData->actorMovementSystem->CancelMovement(entity);
     }
 
-    void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location)
+    void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location) const
     {
         gameData->actorMovementSystem->PathfindToLocation(id, location);
     }

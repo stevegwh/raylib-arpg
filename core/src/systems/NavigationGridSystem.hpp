@@ -47,7 +47,7 @@ namespace sage
         //---------------------------------------------------------
         void loadTerrainNormalMap(const ImageSafe& normalMap);
         //---------------------------------------------------------
-        void loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight);
+        void loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight) const;
         //---------------------------------------------------------
 
       public:
@@ -63,7 +63,7 @@ namespace sage
         //---------------------------------------------------------
         void GenerateHeightMap(ImageSafe& image);
         //---------------------------------------------------------
-        void PopulateGrid(ImageSafe& heightMap, ImageSafe& normalMap);
+        void PopulateGrid(const ImageSafe& heightMap, const ImageSafe& normalMap);
         //---------------------------------------------------------
         bool GetGridRange(Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------
@@ -99,7 +99,7 @@ namespace sage
             const entt::entity& entity,
             const Vector3& startPos,
             const Vector3& finishPos,
-            AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
+            AStarHeuristic heuristicType = AStarHeuristic::DEFAULT) const;
         //---------------------------------------------------------
         [[nodiscard]] std::vector<Vector3> AStarPathfind(
             const entt::entity& entity,
@@ -107,7 +107,7 @@ namespace sage
             const Vector3& finishPos,
             const GridSquare& minRange,
             const GridSquare& maxRange,
-            AStarHeuristic heuristicType = AStarHeuristic::DEFAULT);
+            AStarHeuristic heuristicType = AStarHeuristic::DEFAULT) const;
         //---------------------------------------------------------
         [[nodiscard]] std::vector<Vector3> BFSPathfind(
             const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos);

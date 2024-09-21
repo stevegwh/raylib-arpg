@@ -47,13 +47,13 @@ namespace sage
         entt::entity controlledActor;
 
         void getMouseRayCollision();
-        void onMouseLeftClick();
-        void onMouseRightClick();
-        void onMouseLeftDown();
-        void onMouseRightDown();
+        void onMouseLeftClick() const;
+        void onMouseRightClick() const;
+        void onMouseLeftDown() const;
+        void onMouseRightDown() const;
         void changeCursors(CollisionLayer collisionLayer);
         static void resetHitInfo(CollisionInfo& hitInfo);
-        [[nodiscard]] bool findMeshCollision(CollisionInfo& hitInfo);
+        [[nodiscard]] bool findMeshCollision(CollisionInfo& hitInfo) const;
 
       public:
         std::string hitObjectName{};

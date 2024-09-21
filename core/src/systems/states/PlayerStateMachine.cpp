@@ -24,12 +24,13 @@ namespace sage
 
     class PlayerStateController::DefaultState : public StateMachine
     {
-        void onFloorClick(entt::entity self, entt::entity x)
+        void onFloorClick(entt::entity self, entt::entity x) const
         {
-            gameData->controllableActorSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
+            gameData->controllableActorSystem->PathfindToLocation(
+                self, gameData->cursor->getFirstCollision().point);
         }
 
-        void onEnemyLeftClick(entt::entity self, entt::entity target)
+        void onEnemyLeftClick(entt::entity self, entt::entity target) const
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
@@ -37,7 +38,7 @@ namespace sage
             playerState.ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
         }
 
-        void onEnemyRightClick(entt::entity self, entt::entity target)
+        void onEnemyRightClick(entt::entity self, entt::entity target) const
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;

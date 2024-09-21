@@ -20,52 +20,58 @@ namespace sage
 
     class ActorMovementSystem : public BaseSystem
     {
-      private:
         std::vector<Ray> debugRays;
         std::vector<RayCollision> debugCollisions;
         CollisionSystem* collisionSystem;
         NavigationGridSystem* navigationGridSystem;
 
         void clearDebugData();
-        void processEntityWithCollision(
-            entt::entity entity, MoveableActor& moveableActor, sgTransform& transform, Collideable& collideable);
-        void processEntityWithoutCollision(
-            entt::entity entity, MoveableActor& moveableActor, sgTransform& transform);
-        bool isDestinationOccupied(const MoveableActor& moveableActor, const Collideable& collideable);
-        void recalculatePath(entt::entity entity, MoveableActor& moveableActor, const Collideable& collideable);
-        bool hasReachedNextPoint(const sgTransform& transform, const MoveableActor& moveableActor);
+        void updateActorCollideable(
+            entt::entity entity,
+            MoveableActor& moveableActor,
+            sgTransform& transform,
+            Collideable& collideable) const;
+        void updateActorNonCollideable(entt::entity entity, MoveableActor& moveableActor, sgTransform& transform);
+        [[nodiscard]] bool isDestinationOccupied(
+            const MoveableActor& moveableActor, const Collideable& collideable) const;
+        void recalculatePath(
+            entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const;
+        static bool hasReachedNextPoint(const sgTransform& transform, const MoveableActor& moveableActor);
         void handlePointReached(
             entt::entity entity,
             sgTransform& transform,
             MoveableActor& moveableActor,
-            const Collideable& collideable);
+            const Collideable& collideable) const;
         void handlePointReachedWithoutCollision(
-            entt::entity entity, sgTransform& transform, MoveableActor& moveableActor);
+            entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
         void setPositionToGridCenter(
-            entt::entity entity, sgTransform& transform, const MoveableActor& moveableActor);
+            entt::entity entity, sgTransform& transform, const MoveableActor& moveableActor) const;
         void handleDestinationReached(
-            entt::entity entity, MoveableActor& moveableActor, const Collideable& collideable);
-        void handleDestinationReachedWithoutCollision(entt::entity entity, MoveableActor& moveableActor);
+            entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const;
+        static void handleDestinationReachedWithoutCollision(
+            entt::entity entity, const MoveableActor& moveableActor);
         void handleActorCollisionAvoidance(
-            entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor);
+            entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const;
         NavigationGridSquare* castCollisionRay(
-            const GridSquare& actorIndex, const Vector3& direction, float distance, MoveableActor& moveableActor);
+            const GridSquare& actorIndex,
+            const Vector3& direction,
+            float distance,
+            MoveableActor& moveableActor) const;
         void processOtherActorCollision(
-            entt::entity entity,
+            const entt::entity& entity,
             const sgTransform& transform,
             MoveableActor& moveableActor,
-            NavigationGridSquare* hitCell);
-        void updateActorPosition(entt::entity entity, sgTransform& transform, MoveableActor& moveableActor);
-        void updateActorDirection(sgTransform& transform, const MoveableActor& moveableActor);
-        void updateActorRotation(entt::entity entity, sgTransform& transform);
-        void updateActorWorldPosition(entt::entity entity, sgTransform& transform);
+            const NavigationGridSquare* hitCell) const;
+        void updateActorTransform(entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
+        static void updateActorDirection(sgTransform& transform, const MoveableActor& moveableActor);
+        static void updateActorRotation(entt::entity entity, sgTransform& transform);
+        void updateActorWorldPosition(entt::entity entity, sgTransform& transform) const;
 
       public:
-        bool ReachedDestination(entt::entity entity) const;
+        [[nodiscard]] bool ReachedDestination(entt::entity entity) const;
         void PruneMoveCommands(const entt::entity& entity) const;
-        // TODO: Overload this so you can just update one field at a time if needed
-        void PathfindToLocation(const entt::entity& entity, const Vector3& destination);
-        void MoveToLocation(const entt::entity& entity, Vector3 location);
+        void PathfindToLocation(const entt::entity& entity, const Vector3& destination) const;
+        void MoveToLocation(const entt::entity& entity, Vector3 location) const;
         void CancelMovement(const entt::entity& entity) const;
         void Update() override;
         void DrawDebug() const;
