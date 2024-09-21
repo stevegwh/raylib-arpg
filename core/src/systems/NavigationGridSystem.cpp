@@ -349,29 +349,61 @@ namespace sage
 
     void NavigationGridSystem::calculateTerrainHeightAndNormals(const entt::entity& entity)
     {
-        BoundingBox area = registry->get<Collideable>(entity).worldBoundingBox;
+        const auto& area = registry->get<Collideable>(entity).worldBoundingBox;
+
         GridSquare topLeftIndex{}, bottomRightIndex{};
         if (!WorldToGridSpace(area.min, topLeftIndex) || !WorldToGridSpace(area.max, bottomRightIndex))
         {
             return;
         }
 
-        auto& renderable = registry->get<Renderable>(entity);
-        auto& transform = registry->get<sgTransform>(entity);
-        auto& collideable = registry->get<Collideable>(entity);
+        const auto& renderable = registry->get<Renderable>(entity);
+        const auto& transform = registry->get<sgTransform>(entity);
+        const auto& collideable = registry->get<Collideable>(entity);
 
-        int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
-        int max_col = std::min(
+        const int min_col = std::max(0, std::min(topLeftIndex.col, bottomRightIndex.col));
+        const int max_col = std::min(
             static_cast<int>(gridSquares[0].size()) - 1, std::max(topLeftIndex.col, bottomRightIndex.col));
-        int min_row = std::max(0, std::min(topLeftIndex.row, bottomRightIndex.row));
-        int max_row =
+        const int min_row = std::max(0, std::min(topLeftIndex.row, bottomRightIndex.row));
+        const int max_row =
             std::min(static_cast<int>(gridSquares.size()) - 1, std::max(topLeftIndex.row, bottomRightIndex.row));
 
         for (int row = min_row; row <= max_row; ++row)
         {
             for (int col = min_col; col <= max_col; ++col)
             {
-                if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE)
+                if (collideable.collisionLayer == CollisionLayer::STAIRS)
+                {
+                    // Calculate the relative position of this grid square within the stairs
+                    float relativeX =
+                        (gridSquares[row][col]->worldPosMin.x - area.min.x) / (area.max.x - area.min.x);
+                    float relativeZ =
+                        (gridSquares[row][col]->worldPosMin.z - area.min.z) / (area.max.z - area.min.z);
+
+                    // Calculate the direction vector of the stairs
+                    Vector3 stairDirection = Vector3Normalize(Vector3Subtract(area.max, area.min));
+
+                    // Project the relative position onto the stair direction
+                    float relativePosition = relativeX * stairDirection.x + relativeZ * stairDirection.z;
+
+                    // Interpolate the height based on the relative position
+                    float interpolatedHeight = area.min.y + (area.max.y - area.min.y) * relativePosition;
+
+                    // Update the grid square's height if it's higher than the current height
+                    if (gridSquares[row][col]->terrainHeight < interpolatedHeight)
+                    {
+                        gridSquares[row][col]->terrainHeight = interpolatedHeight;
+
+                        // Calculate the normal for stairs
+                        gridSquares[row][col]->terrainNormal =
+                            Vector3Normalize(Vector3{-stairDirection.x, 1, -stairDirection.z});
+
+                        // You might want to adjust the pathfinding cost for stairs
+                        // float stairSlope = (area.max.y - area.min.y) / (area.max - area.min).Length();
+                        // gridSquares[row][col]->pathfindingCost = calculateStairsCost(stairSlope);
+                    }
+                }
+                else if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE)
                 {
                     if (gridSquares[row][col]->terrainHeight < area.max.y)
                     {
@@ -1069,7 +1101,7 @@ namespace sage
         return tracebackPath(came_from, start, finish);
     }
 
-    void NavigationGridSystem::InitGridHeightNormals()
+    void NavigationGridSystem::InitGridHeightAndNormals()
     {
         std::cout << "START: Initialising grid height and normals \n";
         const auto& view = registry->view<Collideable, Renderable>();
@@ -1078,7 +1110,7 @@ namespace sage
             const auto& bb = view.get<Collideable>(entity);
 
             if (bb.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
-                bb.collisionLayer == CollisionLayer::FLOORSIMPLE)
+                bb.collisionLayer == CollisionLayer::FLOORSIMPLE || bb.collisionLayer == CollisionLayer::STAIRS)
             {
                 calculateTerrainHeightAndNormals(entity);
             }

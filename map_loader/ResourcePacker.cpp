@@ -29,7 +29,6 @@ namespace sage
 
     CollisionLayer setCollisionLayer(const std::string& objectName)
     {
-        // TODO: Need a better tagging system for the meshes.
         if (objectName.find("_BLD_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
@@ -59,6 +58,10 @@ namespace sage
         if (objectName.find("_PROP_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
+        }
+        if (objectName.find("_STAIRS_") != std::string::npos)
+        {
+            return CollisionLayer::STAIRS;
         }
 
         return CollisionLayer::DEFAULT;
@@ -265,7 +268,7 @@ namespace sage
 
         ImageSafe heightMap(false), normalMap(false);
         navigationGridSystem->Init(500, 1.0f);
-        navigationGridSystem->InitGridHeightNormals();
+        navigationGridSystem->InitGridHeightAndNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);
         navigationGridSystem->GenerateNormalMap(normalMap);
 

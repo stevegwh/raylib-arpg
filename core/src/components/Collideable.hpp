@@ -23,6 +23,7 @@ namespace sage
         BOYD,
         FLOORCOMPLEX,
         BACKGROUND,
+        STAIRS,
         COUNT // Must always be last
     };
 
