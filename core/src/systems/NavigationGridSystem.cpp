@@ -841,7 +841,7 @@ namespace sage
             return {};
         }
         GridSquare minRange{}, maxRange{};
-        int bounds = 50;
+        int bounds = 250;
         if (!GetPathfindRange(entity, bounds, minRange, maxRange))
         {
             return {};
@@ -867,15 +867,16 @@ namespace sage
         {
             bool operator()(const std::pair<int, GridSquare>& a, const std::pair<int, GridSquare>& b) const
             {
-                return a.first > b.first; // Min-heap based on distance
+                return a.first > b.first;
             }
         };
         std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
         std::priority_queue<std::pair<int, GridSquare>, std::vector<std::pair<int, GridSquare>>, Compare> frontier;
-        frontier.emplace(0, target);
 
-        GridSquare out{};
-        bool foundValidSquare = false;
+        frontier.emplace(0, currentPos);
+
+        GridSquare bestSquare{};
+        int bestScore = std::numeric_limits<int>::max();
 
         while (!frontier.empty())
         {
@@ -883,31 +884,31 @@ namespace sage
             frontier.pop();
             auto current = currentPair.second;
 
+            // Check if this is a valid and better square
+            if (checkExtents(current, extents))
+            {
+                int score = heuristic(current, target);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestSquare = current;
+                    if (current == target) break; // Found the exact target
+                }
+            }
+
             for (const auto& dir : directions)
             {
                 GridSquare next = {current.row + dir.second, current.col + dir.first};
 
-                if (!checkInside(next, minRange, maxRange)) continue;
+                if (!checkInside(next, minRange, maxRange) || visited[next.row][next.col]) continue;
 
-                if (!checkExtents(next, extents))
-                {
-                    if (!visited[next.row][next.col])
-                    {
-                        frontier.emplace(heuristic(currentPos, next), next);
-                        visited[next.row][next.col] = true;
-                    }
-                }
-                else
-                {
-                    out = next;
-                    foundValidSquare = true;
-                    break;
-                }
+                visited[next.row][next.col] = true;
+                int priority = heuristic(next, target) + heuristic(currentPos, next); // f = g + h
+                frontier.emplace(priority, next);
             }
-            if (foundValidSquare) break;
         }
 
-        return out;
+        return bestSquare;
     }
 
     std::vector<Vector3> NavigationGridSystem::AStarPathfind(

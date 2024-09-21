@@ -66,7 +66,7 @@ namespace sage
         if (!enabled) return;
         timer += GetFrameTime();
 
-        if (timer < 0.5) return;
+        if (timer < 0.25) return;
         timer = 0;
 
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
