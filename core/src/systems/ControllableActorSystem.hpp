@@ -28,7 +28,7 @@ namespace sage
 
       public:
         void MoveToLocation(entt::entity id);
-        void PathfindToLocation(entt::entity id, Vector3 location);
+        void PathfindToLocation(entt::entity id, Vector3 location) const;
         void CancelMovement(entt::entity entity);
         void SetControlledActor(entt::entity id);
         entt::entity GetControlledActor();

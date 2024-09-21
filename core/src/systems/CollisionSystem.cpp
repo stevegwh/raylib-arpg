@@ -143,10 +143,7 @@ namespace sage
         for (auto entity : view)
         {
             auto& c = registry->get<Collideable>(entity);
-            if (c.debugDraw)
-            {
-                DrawBoundingBox(c.worldBoundingBox, YELLOW);
-            }
+            DrawBoundingBox(c.worldBoundingBox, YELLOW);
         }
     }
 
@@ -215,6 +212,8 @@ namespace sage
         // = true;
         matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::BUILDING)] = true;
         matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::FLOORSIMPLE)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::FLOORCOMPLEX)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::STAIRS)] = true;
 
         matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::ENEMY)] = true;
         matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::BUILDING)] = true;

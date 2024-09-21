@@ -24,7 +24,7 @@
 
 namespace sage
 {
-    void Cursor::onMouseLeftClick()
+    void Cursor::onMouseLeftClick() const
     {
         if (!enabled) return;
 
@@ -46,7 +46,7 @@ namespace sage
         onAnyLeftClick.publish(m_mouseHitInfo.collidedEntityId);
     }
 
-    void Cursor::onMouseRightClick()
+    void Cursor::onMouseRightClick() const
     {
         if (!enabled) return;
 
@@ -57,8 +57,11 @@ namespace sage
         }
         onAnyRightClick.publish(m_mouseHitInfo.collidedEntityId);
     }
+
+    // TODO: TMP
     static float timer = 0;
-    void Cursor::onMouseLeftDown()
+
+    void Cursor::onMouseLeftDown() const
     {
         if (!enabled) return;
         timer += GetFrameTime();
@@ -78,7 +81,7 @@ namespace sage
         }
     }
 
-    void Cursor::onMouseRightDown()
+    void Cursor::onMouseRightDown() const
     {
         if (!enabled) return;
     }
@@ -118,7 +121,7 @@ namespace sage
     {
         GridSquare clickedSquare{};
         if (gameData->navigationGridSystem->WorldToGridSpace(m_mouseHitInfo.rlCollision.point, clickedSquare))
-        // Out of map bounds (TODO: Potentially pointless, if FLOORSIMPLE is the same size as
+        // Out of map bounds (TODO: Potentially pointless, if floor is the same size as
         // bounds.)
         {
             if (registry->any_of<ControllableActor>(controlledActor))
@@ -212,7 +215,7 @@ namespace sage
         // Discards hits with a BB that do not have a collision with mesh
         for (auto it = collisions.begin(); it != collisions.end();)
         {
-            if (it->collisionLayer == CollisionLayer::FLOORCOMPLEX)
+            if (it->collisionLayer == CollisionLayer::FLOORCOMPLEX || it->collisionLayer == CollisionLayer::STAIRS)
             {
                 if (!findMeshCollision(*it))
                 {
@@ -220,7 +223,6 @@ namespace sage
                     continue;
                 }
             }
-            // TODO: Stairs
 
             ++it;
         }
@@ -269,7 +271,7 @@ namespace sage
     }
 
     // Find the model's mesh collision (instead of using its bounding box)
-    bool Cursor::findMeshCollision(CollisionInfo& hitInfo)
+    bool Cursor::findMeshCollision(CollisionInfo& hitInfo) const
     {
         if (registry->any_of<Renderable>(hitInfo.collidedEntityId))
         {

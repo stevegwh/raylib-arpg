@@ -103,7 +103,7 @@ namespace sage
 
     void NavigationGridSystem::DrawDebugPathfinding(const GridSquare& minRange, const GridSquare& maxRange) const
     {
-        return;
+        // return;
         for (int i = 0; i < gridSquares.size(); i++)
         {
             for (int j = 0; j < gridSquares.at(0).size(); j++)
@@ -211,7 +211,7 @@ namespace sage
 
     bool NavigationGridSystem::CheckSingleSquareOccupied(Vector3 worldPos) const
     {
-        GridSquare squareIndex;
+        GridSquare squareIndex{};
         if (!WorldToGridSpace(worldPos, squareIndex))
         {
             return false;
@@ -232,7 +232,7 @@ namespace sage
      */
     bool NavigationGridSystem::CheckBoundingBoxAreaUnoccupied(Vector3 worldPos, const BoundingBox& bb) const
     {
-        GridSquare gridPos;
+        GridSquare gridPos{};
         if (!WorldToGridSpace(worldPos, gridPos))
         {
             return false;
@@ -243,9 +243,9 @@ namespace sage
 
     bool NavigationGridSystem::CheckBoundingBoxAreaUnoccupied(GridSquare square, const BoundingBox& bb) const
     {
-        GridSquare extents;
+        GridSquare extents{};
         {
-            GridSquare bb_min;
+            GridSquare bb_min{};
             if (!WorldToGridSpace(bb.min, bb_min) || !WorldToGridSpace(bb.max, extents))
             {
                 return false;
@@ -258,7 +258,7 @@ namespace sage
 
     entt::entity NavigationGridSystem::CheckSingleSquareOccupant(Vector3 worldPos) const
     {
-        GridSquare squareIndex;
+        GridSquare squareIndex{};
         if (!WorldToGridSpace(worldPos, squareIndex))
         {
             return entt::null;
@@ -273,7 +273,7 @@ namespace sage
 
     entt::entity NavigationGridSystem::CheckSquareAreaOccupant(Vector3 worldPos, const BoundingBox& bb) const
     {
-        GridSquare gridPos;
+        GridSquare gridPos{};
         {
             if (!WorldToGridSpace(worldPos, gridPos))
             {
@@ -285,9 +285,9 @@ namespace sage
 
     entt::entity NavigationGridSystem::CheckSquareAreaOccupant(GridSquare square, const BoundingBox& bb) const
     {
-        GridSquare extents;
+        GridSquare extents{};
         {
-            GridSquare bb_min;
+            GridSquare bb_min{};
             WorldToGridSpace(bb.min, bb_min);
             WorldToGridSpace(bb.max, extents);
             extents -= bb_min;
@@ -374,31 +374,20 @@ namespace sage
             {
                 if (collideable.collisionLayer == CollisionLayer::STAIRS)
                 {
-                    // Calculate the relative position of this grid square within the stairs
                     float relativeX =
                         (gridSquares[row][col]->worldPosMin.x - area.min.x) / (area.max.x - area.min.x);
                     float relativeZ =
                         (gridSquares[row][col]->worldPosMin.z - area.min.z) / (area.max.z - area.min.z);
-
-                    // Calculate the direction vector of the stairs
                     Vector3 stairDirection = Vector3Normalize(Vector3Subtract(area.max, area.min));
-
-                    // Project the relative position onto the stair direction
                     float relativePosition = relativeX * stairDirection.x + relativeZ * stairDirection.z;
-
-                    // Interpolate the height based on the relative position
                     float interpolatedHeight = area.min.y + (area.max.y - area.min.y) * relativePosition;
 
-                    // Update the grid square's height if it's higher than the current height
                     if (gridSquares[row][col]->terrainHeight < interpolatedHeight)
                     {
                         gridSquares[row][col]->terrainHeight = interpolatedHeight;
-
-                        // Calculate the normal for stairs
                         gridSquares[row][col]->terrainNormal =
                             Vector3Normalize(Vector3{-stairDirection.x, 1, -stairDirection.z});
 
-                        // You might want to adjust the pathfinding cost for stairs
                         // float stairSlope = (area.max.y - area.min.y) / (area.max - area.min).Length();
                         // gridSquares[row][col]->pathfindingCost = calculateStairsCost(stairSlope);
                     }
@@ -453,9 +442,9 @@ namespace sage
                 auto normal = gridSquares[y][x]->terrainNormal;
 
                 // Map the normal components from [-1, 1] to [0, 255]
-                unsigned char r = static_cast<unsigned char>((normal.x + 1.0f) * 127.5f);
-                unsigned char g = static_cast<unsigned char>((normal.y + 1.0f) * 127.5f);
-                unsigned char b = static_cast<unsigned char>((normal.z + 1.0f) * 127.5f);
+                auto r = static_cast<unsigned char>((normal.x + 1.0f) * 127.5f);
+                auto g = static_cast<unsigned char>((normal.y + 1.0f) * 127.5f);
+                auto b = static_cast<unsigned char>((normal.z + 1.0f) * 127.5f);
 
                 Color pixelColor = {r, g, b, 255};
                 ImageDrawPixel(&normalMap, x, y, pixelColor);
@@ -554,7 +543,7 @@ namespace sage
         std::cout << "FINISH: Applying terrain normal map to grid. \n";
     }
 
-    void NavigationGridSystem::loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight)
+    void NavigationGridSystem::loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight) const
     {
         std::cout << "START: Applying terrain height map to grid. \n";
         int halfSlices = slices / 2;
@@ -596,12 +585,12 @@ namespace sage
      */
     bool NavigationGridSystem::getExtents(Vector3 worldPos, GridSquare& extents) const
     {
-        GridSquare gridPos;
+        GridSquare gridPos{};
         if (!WorldToGridSpace(worldPos, gridPos))
         {
             return false;
         }
-        auto entity = CheckSingleSquareOccupant(worldPos);
+        const auto entity = CheckSingleSquareOccupant(worldPos);
         if (entity == entt::null)
         {
             return false;
@@ -621,9 +610,9 @@ namespace sage
      * @param extents The extents of the entity.
      * @return Whether the extents were successfully retrieved.
      */
-    bool NavigationGridSystem::getExtents(entt::entity entity, GridSquare& extents) const
+    bool NavigationGridSystem::getExtents(const entt::entity entity, GridSquare& extents) const
     {
-        GridSquare bb_min;
+        GridSquare bb_min{};
         auto& bb = registry->get<Collideable>(entity).localBoundingBox;
         if (!WorldToGridSpace(bb.min, bb_min) || !WorldToGridSpace(bb.max, extents))
         {
@@ -649,8 +638,8 @@ namespace sage
         Vector3 topLeft = {center.x - bounds * spacing, center.y, center.z - bounds * spacing};
         Vector3 bottomRight = {center.x + bounds * spacing, center.y, center.z + bounds * spacing};
 
-        GridSquare topLeftIndex;
-        GridSquare bottomRightIndex;
+        GridSquare topLeftIndex{};
+        GridSquare bottomRightIndex{};
 
         bool topLeftValid = WorldToGridSpace(topLeft, topLeftIndex);
         bool bottomRightValid = WorldToGridSpace(bottomRight, bottomRightIndex);
@@ -744,7 +733,7 @@ namespace sage
         };
         std::vector<Vector3> path;
         GridSquare current = {finish.row, finish.col};
-        GridSquare previous;
+        GridSquare previous{};
         std::pair<int, int> currentDir = {0, 0};
 
         path.push_back(combineWorldPosTerrainHeight(current));
@@ -773,21 +762,23 @@ namespace sage
                 }
             }
         }
-        path.push_back(combineWorldPosTerrainHeight(current));
+        // Commented out the first node to stop "stuttering" bug when holding left click
+        // path.push_back(combineWorldPosTerrainHeight(current));
         std::ranges::reverse(path);
         return path;
     }
 
-    bool NavigationGridSystem::checkInside(GridSquare square, GridSquare minRange, GridSquare maxRange)
+    bool NavigationGridSystem::checkInside(
+        const GridSquare square, const GridSquare minRange, const GridSquare maxRange)
     {
         return minRange.row <= square.row && square.row < maxRange.row && minRange.col <= square.col &&
                square.col < maxRange.col;
     }
 
-    bool NavigationGridSystem::checkExtents(GridSquare square, GridSquare extents) const
+    bool NavigationGridSystem::checkExtents(const GridSquare square, const GridSquare extents) const
     {
-        auto min = square - extents;
-        auto max = square + extents;
+        const auto min = square - extents;
+        const auto max = square + extents;
 
         for (int row = min.row; row < max.row; ++row)
         {
@@ -849,15 +840,15 @@ namespace sage
         {
             return {};
         }
-        GridSquare minRange, maxRange;
+        GridSquare minRange{}, maxRange{};
         int bounds = 50;
         if (!GetPathfindRange(entity, bounds, minRange, maxRange))
         {
             return {};
         }
-        GridSquare currentPos;
-        auto& trans = registry->get<sgTransform>(entity);
-        if (!WorldToGridSpace(trans.GetWorldPos(), currentPos))
+        GridSquare currentPos{};
+        if (const auto& trans = registry->get<sgTransform>(entity);
+            !WorldToGridSpace(trans.GetWorldPos(), currentPos))
         {
             return {};
         }
@@ -866,15 +857,15 @@ namespace sage
     }
 
     GridSquare NavigationGridSystem::FindNextBestLocation(
-        GridSquare currentPos,
+        const GridSquare currentPos,
         GridSquare target,
-        GridSquare minRange,
-        GridSquare maxRange,
-        GridSquare extents) const
+        const GridSquare minRange,
+        const GridSquare maxRange,
+        const GridSquare extents) const
     {
         struct Compare
         {
-            bool operator()(const std::pair<int, GridSquare>& a, const std::pair<int, GridSquare>& b)
+            bool operator()(const std::pair<int, GridSquare>& a, const std::pair<int, GridSquare>& b) const
             {
                 return a.first > b.first; // Min-heap based on distance
             }
@@ -923,7 +914,7 @@ namespace sage
         const entt::entity& entity,
         const Vector3& startPos,
         const Vector3& finishPos,
-        AStarHeuristic heuristicType)
+        const AStarHeuristic heuristicType) const
     {
         return AStarPathfind(
             entity,
@@ -940,7 +931,7 @@ namespace sage
         const Vector3& finishPos,
         const GridSquare& minRange,
         const GridSquare& maxRange,
-        AStarHeuristic heuristicType)
+        AStarHeuristic heuristicType) const
     {
         GridSquare startGridSquare{};
         GridSquare finishGridSquare{};
@@ -1122,7 +1113,7 @@ namespace sage
      * This function finds the collisions between buildings in the world and the grid
      * squares and marks them as occupied.
      */
-    void NavigationGridSystem::PopulateGrid(ImageSafe& heightMap, ImageSafe& normalMap)
+    void NavigationGridSystem::PopulateGrid(const ImageSafe& heightMap, const ImageSafe& normalMap)
     {
         // TODO: The below crashes when trying to autogenerate the amount of slices
         for (auto& row : gridSquares)

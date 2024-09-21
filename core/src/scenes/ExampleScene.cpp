@@ -64,9 +64,10 @@ namespace sage
 
     void ExampleScene::DrawDebug()
     {
-        data->collisionSystem->DrawDebug();
+        Scene::DrawDebug();
         data->navigationGridSystem->DrawDebug();
         data->actorMovementSystem->DrawDebug();
+        data->collisionSystem->DrawDebug();
     }
 
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
