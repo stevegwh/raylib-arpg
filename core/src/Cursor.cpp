@@ -33,7 +33,9 @@ namespace sage
         {
             onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
         }
-        else if (layer == CollisionLayer::FLOORSIMPLE)
+        else if (
+            layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
+            layer == CollisionLayer::STAIRS)
         {
             onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
         }
@@ -65,7 +67,8 @@ namespace sage
         timer = 0;
 
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
-        if (layer == CollisionLayer::FLOORSIMPLE)
+        if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
+            layer == CollisionLayer::STAIRS)
         {
             onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
         }
@@ -148,7 +151,8 @@ namespace sage
     {
         if (contextLocked) return;
 
-        if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX)
+        if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
+            layer == CollisionLayer::STAIRS)
         {
             if (isValidMove())
             {
@@ -193,12 +197,6 @@ namespace sage
 
     void Cursor::getMouseRayCollision()
     {
-        // TODO: Below needs work. Terrain? Floor?
-        // We want to separate general collisions (with enemies, player etc) with floor collisions.
-        // If the floor type is "FLOORCOMPLEX" (Complex?) then use its mesh as the getFirstCollision point.
-        // If the floor type is "FLOORSIMPLE" (Simple?) then use its bounding box as the getFirstCollision point.
-        // Maybe just call the "t_terrainHitInfo" as navigationHitInfo.
-
         // Reset hit information
         resetHitInfo(m_mouseHitInfo);
         resetHitInfo(m_naviHitInfo);
@@ -222,6 +220,7 @@ namespace sage
                     continue;
                 }
             }
+            // TODO: Stairs
 
             ++it;
         }
@@ -236,7 +235,8 @@ namespace sage
         m_mouseHitInfo = collisions[0];
 
         if (m_mouseHitInfo.collisionLayer == CollisionLayer::FLOORSIMPLE ||
-            m_mouseHitInfo.collisionLayer == CollisionLayer::FLOORCOMPLEX)
+            m_mouseHitInfo.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
+            m_mouseHitInfo.collisionLayer == CollisionLayer::STAIRS)
         {
             m_naviHitInfo = m_mouseHitInfo;
         }
@@ -245,7 +245,8 @@ namespace sage
             // Find first navigation collision (if any)
             auto navIt = std::find_if(collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
                 return coll.collisionLayer == CollisionLayer::FLOORSIMPLE ||
-                       coll.collisionLayer == CollisionLayer::FLOORCOMPLEX;
+                       coll.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
+                       coll.collisionLayer == CollisionLayer::STAIRS;
             });
 
             if (navIt != collisions.end())

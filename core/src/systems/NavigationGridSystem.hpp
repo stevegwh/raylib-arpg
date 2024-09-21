@@ -57,7 +57,7 @@ namespace sage
         //---------------------------------------------------------
         void Init(int _slices, float _spacing);
         //---------------------------------------------------------
-        void InitGridHeightNormals();
+        void InitGridHeightAndNormals();
         //---------------------------------------------------------
         void GenerateNormalMap(ImageSafe& image);
         //---------------------------------------------------------
