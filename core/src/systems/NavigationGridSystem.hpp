@@ -33,8 +33,6 @@ namespace sage
             const GridSquare& start,
             const GridSquare& finish) const;
         //---------------------------------------------------------
-        static bool checkInside(GridSquare square, GridSquare minRange, GridSquare maxRange);
-        //---------------------------------------------------------
         bool getExtents(entt::entity entity, GridSquare& extents) const;
         //---------------------------------------------------------
         bool checkExtents(GridSquare square, GridSquare extents) const;
@@ -65,12 +63,12 @@ namespace sage
         //---------------------------------------------------------
         void PopulateGrid(const ImageSafe& heightMap, const ImageSafe& normalMap);
         //---------------------------------------------------------
-        bool GetGridRange(Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
+        bool GetPathfindRange(
+            const entt::entity& actorId, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------
         bool GetGridRange(BoundingBox bb, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------
-        bool GetPathfindRange(
-            const entt::entity& actorId, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
+        bool GetGridRange(Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const;
         //---------------------------------------------------------
         bool GridToWorldSpace(GridSquare gridPos, Vector3& out) const;
         //---------------------------------------------------------
@@ -133,6 +131,14 @@ namespace sage
         void MarkSquaresOccupied(const std::vector<GridSquare>& squares, bool occupied = true) const;
         //---------------------------------------------------------
         void MarkSquaresDebug(const std::vector<GridSquare>& squares, Color color, bool occupied = true) const;
+        //---------------------------------------------------------
+        [[nodiscard]] bool CheckWithinGridBounds(Vector3 worldPos) const;
+        //---------------------------------------------------------
+        [[nodiscard]] bool CheckWithinGridBounds(GridSquare square) const;
+        //---------------------------------------------------------
+        [[nodiscard]] bool CheckWithinBounds(Vector3 worldPos, GridSquare minRange, GridSquare maxRange) const;
+        //---------------------------------------------------------
+        [[nodiscard]] static bool CheckWithinBounds(GridSquare square, GridSquare minRange, GridSquare maxRange);
         //---------------------------------------------------------
         [[nodiscard]] bool CheckSingleSquareOccupied(Vector3 worldPos) const;
         //---------------------------------------------------------

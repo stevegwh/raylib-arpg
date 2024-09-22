@@ -621,10 +621,7 @@ namespace sage
 
         extents -= bb_min;
 
-        if (!checkInside(
-                extents,
-                {0, 0},
-                {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
+        if (!CheckWithinGridBounds(extents))
         {
             return false;
         }
@@ -632,20 +629,39 @@ namespace sage
         return true;
     }
 
+    bool NavigationGridSystem::GetPathfindRange(
+        const entt::entity& actorId, int bounds, GridSquare& minRange, GridSquare& maxRange) const
+    {
+        auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
+        return GetGridRange(bb, bounds, minRange, maxRange);
+    }
+
+    bool NavigationGridSystem::GetGridRange(
+        BoundingBox bb, int bounds, GridSquare& minRange, GridSquare& maxRange) const
+    {
+        Vector3 center = {
+            (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f};
+        return GetGridRange(center, bounds, minRange, maxRange);
+    }
+
     bool NavigationGridSystem::GetGridRange(
         Vector3 center, int bounds, GridSquare& minRange, GridSquare& maxRange) const
     {
+        if (!CheckWithinGridBounds(center))
+        {
+            return false;
+        }
+
         Vector3 topLeft = {center.x - bounds * spacing, center.y, center.z - bounds * spacing};
         Vector3 bottomRight = {center.x + bounds * spacing, center.y, center.z + bounds * spacing};
 
         GridSquare topLeftIndex{};
         GridSquare bottomRightIndex{};
 
-        bool topLeftValid = WorldToGridSpace(topLeft, topLeftIndex);
-        bool bottomRightValid = WorldToGridSpace(bottomRight, bottomRightIndex);
+        WorldToGridSpace(topLeft, topLeftIndex);
+        WorldToGridSpace(bottomRight, bottomRightIndex);
 
-        if (!topLeftValid || !bottomRightValid) return false;
-
+        // Clamp to grid
         topLeftIndex.col = std::max(topLeftIndex.col, 0);
         topLeftIndex.row = std::max(topLeftIndex.row, 0);
         bottomRightIndex.col = std::min(bottomRightIndex.col, static_cast<int>(gridSquares.at(0).size() - 1));
@@ -657,25 +673,10 @@ namespace sage
         return true;
     }
 
-    bool NavigationGridSystem::GetGridRange(
-        BoundingBox bb, int bounds, GridSquare& minRange, GridSquare& maxRange) const
-    {
-        Vector3 center = {
-            (bb.min.x + bb.max.x) / 2.0f, (bb.min.y + bb.max.y) / 2.0f, (bb.min.z + bb.max.z) / 2.0f};
-        return GetGridRange(center, bounds, minRange, maxRange);
-    }
-
-    bool NavigationGridSystem::GetPathfindRange(
-        const entt::entity& actorId, int bounds, GridSquare& minRange, GridSquare& maxRange) const
-    {
-        auto bb = registry->get<Collideable>(actorId).worldBoundingBox;
-        return GetGridRange(bb, bounds, minRange, maxRange);
-    }
-
     bool NavigationGridSystem::GridToWorldSpace(GridSquare gridPos, Vector3& out) const
     {
         GridSquare maxRange = {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())};
-        if (!checkInside(gridPos, {0, 0}, maxRange))
+        if (!CheckWithinBounds(gridPos, {0, 0}, maxRange))
         {
             return false;
         }
@@ -768,8 +769,27 @@ namespace sage
         return path;
     }
 
-    bool NavigationGridSystem::checkInside(
-        const GridSquare square, const GridSquare minRange, const GridSquare maxRange)
+    bool NavigationGridSystem::CheckWithinGridBounds(Vector3 worldPos) const
+    {
+        GridSquare tmp{};
+        return WorldToGridSpace(worldPos, tmp);
+    }
+
+    bool NavigationGridSystem::CheckWithinGridBounds(GridSquare square) const
+    {
+        return CheckWithinBounds(
+            square,
+            GridSquare{0, 0},
+            GridSquare{static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())});
+    }
+
+    bool NavigationGridSystem::CheckWithinBounds(Vector3 worldPos, GridSquare minRange, GridSquare maxRange) const
+    {
+        GridSquare tmp{};
+        return WorldToGridSpace(worldPos, tmp, minRange, maxRange);
+    }
+
+    bool NavigationGridSystem::CheckWithinBounds(GridSquare square, GridSquare minRange, GridSquare maxRange)
     {
         return minRange.row <= square.row && square.row < maxRange.row && minRange.col <= square.col &&
                square.col < maxRange.col;
@@ -791,9 +811,7 @@ namespace sage
             }
         }
 
-        GridSquare minRange = {0, 0};
-        GridSquare maxRange = {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())};
-        return checkInside(min, minRange, maxRange) && checkInside(max, minRange, maxRange);
+        return CheckWithinGridBounds(min) && CheckWithinGridBounds(max);
     }
 
     NavigationGridSquare* NavigationGridSystem::CastRay(
@@ -813,10 +831,7 @@ namespace sage
             GridSquare square = {currentRow + (dirRow * i), currentCol + (dirCol * i)};
             debugLines.push_back(square);
 
-            if (!checkInside(
-                    square,
-                    {0, 0},
-                    {static_cast<int>(gridSquares.at(0).size()), static_cast<int>(gridSquares.size())}))
+            if (!CheckWithinGridBounds(square))
             {
                 continue;
             }
@@ -900,7 +915,7 @@ namespace sage
             {
                 GridSquare next = {current.row + dir.second, current.col + dir.first};
 
-                if (!checkInside(next, minRange, maxRange) || visited[next.row][next.col]) continue;
+                if (!CheckWithinBounds(next, minRange, maxRange) || visited[next.row][next.col]) continue;
 
                 visited[next.row][next.col] = true;
                 int priority = heuristic(next, target) + heuristic(currentPos, next); // f = g + h
@@ -979,7 +994,7 @@ namespace sage
                 auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
                 double new_cost = current_cost + next_cost;
 
-                if (checkInside(next, minRange, maxRange) && checkExtents(next, extents) &&
+                if (CheckWithinBounds(next, minRange, maxRange) && checkExtents(next, extents) &&
                     (!visited[next.row][next.col] ||
                      (visited[next.row][next.col] && new_cost < cost_so_far[next.row][next.col])) &&
                     !gridSquares.at(next.row).at(next.col)->occupied)
@@ -1075,7 +1090,7 @@ namespace sage
             {
                 GridSquare next = {current.row + dir.first, current.col + dir.second};
 
-                if (checkInside(next, minRange, maxRange) && !visited[next.row][next.col] &&
+                if (CheckWithinBounds(next, minRange, maxRange) && !visited[next.row][next.col] &&
                     checkExtents(next, extents) && !gridSquares[next.row][next.col]->occupied)
                 {
                     frontier.emplace(next);

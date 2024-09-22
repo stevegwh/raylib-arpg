@@ -27,9 +27,7 @@ namespace sage
         Timer checkTargetPosTimer{};
         // An actor that is the target for pathfinding etc.
         entt::entity targetActor = entt::null;
-
-        // The max range the actor can pathfind at one time.
-        int pathfindingBounds = 100;
+        
         Vector3 targetActorPos{};
         ControllableActor(entt::entity _self, Cursor* _cursor);
     };
