@@ -16,6 +16,8 @@ namespace sage
     struct MoveableActor
     {
         float movementSpeed = 0.35f;
+        // The max range the actor can pathfind at one time.
+        int pathfindingBounds = 150;
 
         // Collision detection
         entt::entity lastHitActor = entt::null;
