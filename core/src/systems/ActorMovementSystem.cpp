@@ -31,10 +31,13 @@ namespace sage
     void ActorMovementSystem::CancelMovement(const entt::entity& entity) const
     {
         PruneMoveCommands(entity);
-        auto& moveableActor = registry->get<MoveableActor>(entity);
-        moveableActor.onMovementCancel.publish(entity);
+        auto& moveable = registry->get<MoveableActor>(entity);
+        moveable.targetActor = entt::null;
+        moveable.lastHitActor = entt::null;
+        moveable.onMovementCancel.publish(entity);
     }
 
+    // Moves to a location without pathfinding
     void ActorMovementSystem::MoveToLocation(const entt::entity& entity, Vector3 location) const
     {
         if (!registry->any_of<MoveableActor>(entity))
@@ -56,47 +59,41 @@ namespace sage
             registry->emplace<MoveableActor>(entity);
         }
 
-        // If location outside of bounds, then return
-        if (GridSquare tmp{}; !navigationGridSystem->WorldToGridSpace(destination, tmp)) return;
-
-        int bounds = 50;
-        if (registry->any_of<ControllableActor>(entity))
-        // TODO: Why is this only for controllable actors? Shouldn't all actors have
-        // pathfinding bounds?
+        if (GridSquare tmp{}; !navigationGridSystem->WorldToGridSpace(destination, tmp))
         {
-            const auto& controllableActor = registry->get<ControllableActor>(entity);
-            bounds = controllableActor.pathfindingBounds;
-        }
-
-        const auto& actorCollideable = registry->get<Collideable>(entity);
-        navigationGridSystem->MarkSquareAreaOccupied(actorCollideable.worldBoundingBox, false);
-        GridSquare minRange{};
-        GridSquare maxRange{};
-        navigationGridSystem->GetPathfindRange(entity, bounds, minRange, maxRange);
-        // If location outside of actor's movement range, then return
-        if (GridSquare tmp{}; !navigationGridSystem->WorldToGridSpace(destination, tmp, minRange, maxRange))
-        {
+            std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
             return;
         }
 
-        navigationGridSystem->DrawDebugPathfinding(minRange, maxRange);
+        const auto& collideable = registry->get<Collideable>(entity);
+        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
+
+        auto& moveable = registry->get<MoveableActor>(entity);
+        GridSquare minRange{};
+        GridSquare maxRange{};
+        navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange);
 
         const auto& actorTrans = registry->get<sgTransform>(entity);
         auto path =
             navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
         PruneMoveCommands(entity);
         auto& transform = registry->get<sgTransform>(entity);
-        auto& moveableActor = registry->get<MoveableActor>(entity);
+
         for (auto n : path)
-            moveableActor.path.emplace_back(n);
+        {
+            moveable.path.emplace_back(n);
+        }
+
         if (!path.empty())
         {
-            updateActorDirection(transform, moveableActor);
+            updateActorDirection(transform, moveable);
             updateActorRotation(entity, transform);
-            moveableActor.onStartMovement.publish(entity);
+            moveable.onStartMovement.publish(entity);
         }
-        // TODO: Handle destination being unreachable. (Change animation to IDLE, for a
-        // start)
+        else
+        {
+            std::cout << "ActorMovementSystem: Destination unreachable \n";
+        }
     }
 
     bool ActorMovementSystem::ReachedDestination(entt::entity entity) const

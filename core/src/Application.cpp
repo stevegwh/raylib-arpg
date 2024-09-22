@@ -33,7 +33,7 @@ namespace sage
 
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
         serializer::LoadBinFile(registry.get(), "resources/assets.bin");
-        serializer::LoadMap(registry.get(), "resources/map2.bin");
+        serializer::LoadMap(registry.get(), "resources/map3.bin");
 
         auto icon = ResourceManager::GetInstance().GetImage(AssetID::IMG_APPLICATIONICON);
         SetWindowIcon(icon.GetImage());
