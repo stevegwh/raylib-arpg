@@ -222,7 +222,7 @@ namespace sage
         GridSquare actorIndex{};
         navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
 
-        navigationGridSystem->MarkSquaresDebug(moveableActor.debugRay, PURPLE, false);
+        // navigationGridSystem->MarkSquaresDebug(moveableActor.debugRay, PURPLE, false);
         // Looks ahead and checks if getFirstCollision will occur
         NavigationGridSquare* hitCell =
             castCollisionRay(actorIndex, transform.direction, avoidanceDistance, moveableActor);

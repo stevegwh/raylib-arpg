@@ -804,14 +804,14 @@ namespace sage
         {
             for (int col = min.col; col < max.col; ++col)
             {
-                if (gridSquares[row][col]->occupied)
+                if (!CheckWithinGridBounds(GridSquare{row, col}) || gridSquares[row][col]->occupied)
                 {
                     return false;
                 }
             }
         }
 
-        return CheckWithinGridBounds(min) && CheckWithinGridBounds(max);
+        return true;
     }
 
     NavigationGridSquare* NavigationGridSystem::CastRay(
