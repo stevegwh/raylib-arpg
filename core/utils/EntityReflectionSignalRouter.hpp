@@ -16,7 +16,7 @@ namespace sage
         class ReflectionSignalBase
         {
           public:
-            virtual ~ReflectionSignalBase(){};
+            virtual ~ReflectionSignalBase() = default;
         };
 
         template <typename... Args>
@@ -55,7 +55,7 @@ namespace sage
 
       public:
         template <typename... Args>
-        int CreateHook(
+        [[nodiscard]] int CreateHook(
             entt::entity entity,
             entt::sigh<void(Args...)>& inSignal,
             entt::sigh<void(entt::entity, Args...)>& outSignal)
@@ -67,6 +67,7 @@ namespace sage
 
         void RemoveHook(int id)
         {
+            // TODO: A bit rubbish that I need to save an id to remove a hook.
             hooks[id].reset();
         }
     };

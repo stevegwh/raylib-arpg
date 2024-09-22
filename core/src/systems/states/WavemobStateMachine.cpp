@@ -8,6 +8,7 @@
 #include "components/CombatableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
+#include "EntityReflectionSignalRouter.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
@@ -81,7 +82,6 @@ namespace sage
 
     class WavemobStateController::TargetOutOfRangeState : public StateMachine
     {
-
         void onTargetReached(entt::entity self)
         {
             auto& state = registry->get<WavemobState>(self);
@@ -92,11 +92,13 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(self);
             auto& trans = registry->get<sgTransform>(self);
-            const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
-            Vector3 direction = Vector3Subtract(target, trans.GetWorldPos());
-            float distance = Vector3Distance(trans.GetWorldPos(), target);
-            Vector3 normDirection = Vector3Normalize(direction);
             auto& collideable = registry->get<Collideable>(self);
+
+            const auto& targetPos = registry->get<sgTransform>(combatable.target).GetWorldPos();
+            Vector3 direction = Vector3Subtract(targetPos, trans.GetWorldPos());
+            float distance = Vector3Distance(trans.GetWorldPos(), targetPos);
+            Vector3 normDirection = Vector3Normalize(direction);
+
             Ray ray;
             ray.position = trans.GetWorldPos();
             ray.direction = Vector3Scale(normDirection, distance);
@@ -104,8 +106,10 @@ namespace sage
             ray.position.y = trans.GetWorldPos().y + height;
             ray.direction.y = trans.GetWorldPos().y + height;
             trans.movementDirectionDebugLine = ray;
+
             auto collisions =
                 gameData->collisionSystem->GetCollisionsWithRay(self, ray, collideable.collisionLayer);
+
             if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
             {
                 // Lost line of sight, out of combat
@@ -114,6 +118,21 @@ namespace sage
                 return true;
             }
             return false;
+        }
+
+        void moveToTarget(entt::entity self, entt::entity target)
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            // moveable.targetActor = target;
+            double timeLapsed = GetTime();
+            if (timeLapsed - moveable.lastTargetPosCheck > moveable.lastTargetPosCheckThreshold)
+            {
+                moveable.lastTargetPosCheck = timeLapsed;
+                const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
+                auto& animation = registry->get<Animation>(self);
+                animation.ChangeAnimationByEnum(AnimationEnum::WALK);
+                gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
+            };
         }
 
       public:
@@ -131,21 +150,32 @@ namespace sage
         {
             auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
+
+            auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
-            const auto& target = registry->get<sgTransform>(combatable.target).GetWorldPos();
-            auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::WALK);
-            gameData->actorMovementSystem->PathfindToLocation(self, target);
-            auto& moveableActor = registry->get<MoveableActor>(self);
-            entt::sink sink{moveableActor.onFinishMovement};
-            sink.connect<&TargetOutOfRangeState::onTargetReached>(this);
+            moveable.targetActor = combatable.target;
+            auto& targetTrans = registry->get<sgTransform>(combatable.target);
+
+            moveable.onTargetPosUpdateHookId = gameData->reflectionSignalRouter->CreateHook<entt::entity>(
+                self, targetTrans.onPositionUpdate, moveable.onTargetPosUpdate);
+
+            entt::sink finishMovementSink{moveable.onFinishMovement};
+            finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this);
+            entt::sink posUpdateSink{moveable.onTargetPosUpdate};
+            posUpdateSink.connect<&TargetOutOfRangeState::moveToTarget>(this);
+
+            moveToTarget(self, combatable.target);
         }
 
         void OnStateExit(entt::entity self) override
         {
-            auto& moveableActor = registry->get<MoveableActor>(self);
-            entt::sink sink{moveableActor.onFinishMovement};
-            sink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
+            auto& moveable = registry->get<MoveableActor>(self);
+            entt::sink finishMovementSink{moveable.onFinishMovement};
+            finishMovementSink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
+            entt::sink posUpdateSink{moveable.onTargetPosUpdate};
+            posUpdateSink.disconnect<&TargetOutOfRangeState::moveToTarget>(this);
+            gameData->reflectionSignalRouter->RemoveHook(moveable.onTargetPosUpdateHookId);
+            moveable.targetActor = entt::null;
         }
 
         ~TargetOutOfRangeState() override = default;
@@ -161,7 +191,6 @@ namespace sage
     {
         void onTargetDeath(entt::entity self, entt::entity target)
         {
-            // This method is declared but not implemented in the original code
         }
 
         bool checkInCombat(entt::entity entity)

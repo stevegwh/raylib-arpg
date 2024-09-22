@@ -68,8 +68,9 @@ namespace sage
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
         transform.SetPosition({position.x, height, position.z});
-        transform.movementSpeed = 0.05f;
-        registry->emplace<MoveableActor>(id);
+
+        auto& moveable = registry->emplace<MoveableActor>(id);
+        moveable.movementSpeed = 0.15f;
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(

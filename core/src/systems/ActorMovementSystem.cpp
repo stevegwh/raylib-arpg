@@ -245,9 +245,11 @@ namespace sage
         MoveableActor& moveableActor,
         const NavigationGridSquare* hitCell) const
     {
+        // If we're supposed to be moving towards this actor, then ignore collision with it.
+        if (hitCell->occupant == moveableActor.targetActor || moveableActor.lastHitActor == entity) return;
+
         auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
-        if (moveableActor.lastHitActor != entity ||
-            !AlmostEquals(hitTransform.GetWorldPos(), moveableActor.hitActorLastPos))
+        if (!AlmostEquals(hitTransform.GetWorldPos(), moveableActor.hitActorLastPos))
         {
             moveableActor.lastHitActor = entity;
             moveableActor.hitActorLastPos = hitTransform.GetWorldPos();
@@ -282,11 +284,11 @@ namespace sage
         GridSquare actorIndex{};
         navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
         auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
-
+        auto& moveable = registry->get<MoveableActor>(entity);
         Vector3 newPos = {
-            transform.GetWorldPos().x + transform.direction.x * transform.movementSpeed,
+            transform.GetWorldPos().x + transform.direction.x * moveable.movementSpeed,
             gridSquare->terrainHeight,
-            transform.GetWorldPos().z + transform.direction.z * transform.movementSpeed};
+            transform.GetWorldPos().z + transform.direction.z * moveable.movementSpeed};
 
         transform.SetPosition(newPos);
     }

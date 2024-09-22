@@ -50,7 +50,8 @@ namespace sage
         entt::sigh<void(AttackData)> onHit{}; // Self, attacker, damage
         entt::sigh<void(entt::entity)> onDeath{};
         entt::sigh<void(entt::entity, entt::entity)> onAttackCancelled{}; // Self, object clicked (can discard)
-        entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{};     // Self, target (that died)
+        int onTargetDeathHookId = -1;
+        entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(const CombatableActor&) = delete;
         CombatableActor& operator=(const CombatableActor&) = delete;
