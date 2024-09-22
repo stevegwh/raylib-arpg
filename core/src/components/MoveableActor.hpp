@@ -17,7 +17,7 @@ namespace sage
     {
         float movementSpeed = 0.35f;
         // The max range the actor can pathfind at one time.
-        int pathfindingBounds = 10;
+        int pathfindingBounds = 50;
 
         // Collision detection
         entt::entity lastHitActor = entt::null;

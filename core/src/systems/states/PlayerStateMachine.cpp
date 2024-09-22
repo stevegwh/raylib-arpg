@@ -44,6 +44,12 @@ namespace sage
             combatable.target = target;
         }
 
+        void onMovementCancel(entt::entity self) const
+        {
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+        }
+
       public:
         void Update(entt::entity entity) override
         {
@@ -59,12 +65,15 @@ namespace sage
             // Below are not disconnected in OnStateExit
             // Bridge was created in GameObjectFactory to connect this to cursor
             auto& controllable = registry->get<ControllableActor>(entity);
+            auto& moveable = registry->get<MoveableActor>(entity);
             entt::sink leftSink{controllable.onEnemyLeftClick};
             leftSink.connect<&DefaultState::onEnemyLeftClick>(this);
             entt::sink rightSink{controllable.onEnemyRightClick};
             rightSink.connect<&DefaultState::onEnemyRightClick>(this);
             entt::sink floorClickSink{controllable.onFloorClick};
             floorClickSink.connect<&DefaultState::onFloorClick>(this);
+            entt::sink movementCancelSink{moveable.onMovementCancel};
+            movementCancelSink.connect<&DefaultState::onMovementCancel>(this);
             // ----------------------------
 
             auto& animation = registry->get<Animation>(entity);

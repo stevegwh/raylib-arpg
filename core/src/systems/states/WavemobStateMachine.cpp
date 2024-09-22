@@ -130,7 +130,7 @@ namespace sage
                 moveable.lastTargetPosCheck = timeLapsed;
                 const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
                 auto& animation = registry->get<Animation>(self);
-                animation.ChangeAnimationByEnum(AnimationEnum::WALK);
+                animation.ChangeAnimationByEnum(AnimationEnum::WALK, 2);
                 gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
             };
         }
