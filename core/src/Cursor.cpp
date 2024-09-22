@@ -58,16 +58,13 @@ namespace sage
         onAnyRightClick.publish(m_mouseHitInfo.collidedEntityId);
     }
 
-    // TODO: TMP
-    static float timer = 0;
-
-    void Cursor::onMouseLeftDown() const
+    void Cursor::onMouseLeftDown()
     {
         if (!enabled) return;
-        timer += GetFrameTime();
+        leftClickTimer += GetFrameTime();
 
-        if (timer < 0.25) return;
-        timer = 0;
+        if (leftClickTimer < 0.25) return;
+        leftClickTimer = 0;
 
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
@@ -317,7 +314,7 @@ namespace sage
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             onMouseLeftClick();
-            timer = 0;
+            leftClickTimer = 0;
         }
         else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
         {

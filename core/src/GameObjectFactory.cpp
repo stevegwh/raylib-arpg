@@ -77,11 +77,11 @@ namespace sage
         renderable.name = name;
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_ENEMY_GOBLIN);
-        animation.animationMap[AnimationEnum::IDLE] = 0;
+        animation.animationMap[AnimationEnum::IDLE] = 1;
         animation.animationMap[AnimationEnum::DEATH] = 0;
-        animation.animationMap[AnimationEnum::WALK] = 3;
-        animation.animationMap[AnimationEnum::AUTOATTACK] = 1;
-        animation.ChangeAnimationByEnum(AnimationEnum::WALK);
+        animation.animationMap[AnimationEnum::WALK] = 4;
+        animation.animationMap[AnimationEnum::AUTOATTACK] = 2;
+        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
