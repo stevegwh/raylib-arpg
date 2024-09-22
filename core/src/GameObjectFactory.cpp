@@ -6,7 +6,7 @@
 #include "ResourceManager.hpp"
 #include "scenes/Scene.hpp"
 
-#include "../utils/EntityReflectionSignalRouter.hpp"
+#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "UserInput.hpp"
 #include <Timer.hpp>
@@ -70,7 +70,7 @@ namespace sage
         transform.SetPosition({position.x, height, position.z});
 
         auto& moveable = registry->emplace<MoveableActor>(id);
-        moveable.movementSpeed = 0.15f;
+        moveable.movementSpeed = 0.3f;
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
@@ -155,7 +155,8 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = "Player";
 
-        auto& moveableActor = registry->emplace<MoveableActor>(id);
+        auto& moveable = registry->emplace<MoveableActor>(id);
+        moveable.movementSpeed = 0.45f;
 
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
@@ -173,13 +174,13 @@ namespace sage
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         {
-            entt::sink sink{moveableActor.onFinishMovement};
+            entt::sink sink{moveable.onFinishMovement};
             sink.connect<[](Animation& animation, entt::entity entity) {
                 animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
             }>(animation);
         }
         {
-            entt::sink sink{moveableActor.onStartMovement};
+            entt::sink sink{moveable.onStartMovement};
             sink.connect<[](Animation& animation, entt::entity entity) {
                 animation.ChangeAnimationByEnum(AnimationEnum::RUN);
             }>(animation);

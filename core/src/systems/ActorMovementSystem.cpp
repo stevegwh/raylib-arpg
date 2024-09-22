@@ -96,6 +96,7 @@ namespace sage
         else
         {
             std::cout << "ActorMovementSystem: Destination unreachable \n";
+            CancelMovement(entity);
         }
     }
 
