@@ -8,6 +8,7 @@
 
 #include "Camera.hpp"
 #include "components/ControllableActor.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
@@ -116,31 +117,28 @@ namespace sage
 
     bool Cursor::isValidMove() const
     {
-        GridSquare clickedSquare{};
-        if (gameData->navigationGridSystem->WorldToGridSpace(m_mouseHitInfo.rlCollision.point, clickedSquare))
-        // Out of map bounds (TODO: Potentially pointless, if floor is the same size as
-        // bounds.)
+        auto mouseHit = m_naviHitInfo.rlCollision.point;
+        if (gameData->navigationGridSystem->CheckWithinGridBounds(mouseHit))
         {
-            if (registry->any_of<ControllableActor>(controlledActor))
+            const auto& actor = registry->get<MoveableActor>(controlledActor);
+            GridSquare minRange{};
+            GridSquare maxRange{};
+            gameData->navigationGridSystem->GetPathfindRange(
+                controlledActor, actor.pathfindingBounds, minRange, maxRange);
+
+            if (!gameData->navigationGridSystem->CheckWithinBounds(mouseHit, minRange, maxRange))
             {
-                const auto& actor = registry->get<ControllableActor>(controlledActor);
-                GridSquare minRange{};
-                GridSquare maxRange{};
-                gameData->navigationGridSystem->GetPathfindRange(
-                    controlledActor, actor.pathfindingBounds, minRange, maxRange);
-                if (!gameData->navigationGridSystem->WorldToGridSpace(
-                        m_mouseHitInfo.rlCollision.point, clickedSquare, minRange, maxRange))
                 // Out of player's movement range
-                {
-                    return false;
-                }
+                return false;
             }
         }
         else
         {
             return false;
         }
-        if (gameData->navigationGridSystem->GetGridSquare(clickedSquare.row, clickedSquare.col)->occupied)
+        GridSquare dest{};
+        gameData->navigationGridSystem->WorldToGridSpace(mouseHit, dest);
+        if (gameData->navigationGridSystem->GetGridSquare(dest.row, dest.col)->occupied)
         {
             return false;
         }

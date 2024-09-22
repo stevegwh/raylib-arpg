@@ -59,7 +59,7 @@ namespace sage
             registry->emplace<MoveableActor>(entity);
         }
 
-        if (GridSquare tmp{}; !navigationGridSystem->WorldToGridSpace(destination, tmp))
+        if (!navigationGridSystem->CheckWithinGridBounds(destination))
         {
             std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
             return;
@@ -71,8 +71,11 @@ namespace sage
         auto& moveable = registry->get<MoveableActor>(entity);
         GridSquare minRange{};
         GridSquare maxRange{};
-        navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange);
-
+        if (!navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange))
+        {
+            std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
+            return;
+        }
         const auto& actorTrans = registry->get<sgTransform>(entity);
         auto path =
             navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
