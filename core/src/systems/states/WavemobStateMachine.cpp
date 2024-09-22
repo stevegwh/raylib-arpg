@@ -55,10 +55,11 @@ namespace sage
             entt::sink deathSink{combatable.onDeath};
             deathSink.connect<&DefaultState::OnDeath>(this);
             // ----------------------------
-            Vector3 target = {52, 0, -10}; // TODO: Just a random location for now
             auto& animation = registry->get<Animation>(entity);
-            animation.ChangeAnimationByEnum(AnimationEnum::WALK);
-            gameData->actorMovementSystem->PathfindToLocation(entity, target);
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+
+            // Vector3 target = {52, 0, -10}; // TODO: Just a random location for now
+            // gameData->actorMovementSystem->PathfindToLocation(entity, target);
         }
 
         void OnStateExit(entt::entity entity) override
@@ -66,7 +67,7 @@ namespace sage
             auto& combatable = registry->get<CombatableActor>(entity);
             entt::sink sink{combatable.onHit};
             sink.disconnect<&DefaultState::OnHit>(this);
-            gameData->actorMovementSystem->CancelMovement(entity);
+            // gameData->actorMovementSystem->CancelMovement(entity);
         }
 
         ~DefaultState() override = default;
@@ -99,8 +100,9 @@ namespace sage
             Ray ray;
             ray.position = trans.GetWorldPos();
             ray.direction = Vector3Scale(normDirection, distance);
-            ray.position.y = 0.5f;
-            ray.direction.y = 0.5f;
+            float height = Vector3Subtract(collideable.localBoundingBox.max, collideable.localBoundingBox.min).y;
+            ray.position.y = trans.GetWorldPos().y + height;
+            ray.direction.y = trans.GetWorldPos().y + height;
             trans.movementDirectionDebugLine = ray;
             auto collisions =
                 gameData->collisionSystem->GetCollisionsWithRay(self, ray, collideable.collisionLayer);

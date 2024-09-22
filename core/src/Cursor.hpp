@@ -21,6 +21,7 @@ namespace sage
 
     class Cursor
     {
+        float leftClickTimer = 0;
         entt::registry* registry;
         GameData* gameData;
 
@@ -49,7 +50,7 @@ namespace sage
         void getMouseRayCollision();
         void onMouseLeftClick() const;
         void onMouseRightClick() const;
-        void onMouseLeftDown() const;
+        void onMouseLeftDown();
         void onMouseRightDown() const;
         void changeCursors(CollisionLayer collisionLayer);
         static void resetHitInfo(CollisionInfo& hitInfo);
