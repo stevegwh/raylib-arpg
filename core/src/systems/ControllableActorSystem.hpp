@@ -21,9 +21,7 @@ namespace sage
     class ControllableActorSystem : public BaseSystem
     {
         GameData* gameData;
-        entt::entity controlledActorId{};
-        // TODO: Right now this system just controls one unit at a time. What if we wanted
-        // more?
+        entt::entity controlledActorId{}; // Currently selected actor?
         void onTargetUpdate(entt::entity target);
 
       public:
@@ -34,7 +32,7 @@ namespace sage
         entt::entity GetControlledActor();
 
         void PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol);
-        bool ReachedDestination(entt::entity entity) const;
+        [[nodiscard]] bool ReachedDestination(entt::entity entity) const;
 
         entt::sigh<void(entt::entity)> onControlledActorChange;
         void Update() const;

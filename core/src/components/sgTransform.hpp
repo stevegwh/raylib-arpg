@@ -27,7 +27,6 @@ namespace sage
 
       public:
         Vector3 direction{};
-        float movementSpeed = 0.35f;
 
         Ray movementDirectionDebugLine{};
 

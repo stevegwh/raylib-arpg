@@ -168,7 +168,6 @@ namespace sage
 
     class PlayerStateController::CombatState : public StateMachine
     {
-        int onTargetDeathBridge;
 
         void onAttackCancelled(entt::entity self, entt::entity x)
         {
@@ -208,7 +207,7 @@ namespace sage
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
 
-            onTargetDeathBridge = gameData->reflectionSignalRouter->CreateHook<entt::entity>(
+            combatable.onTargetDeathHookId = gameData->reflectionSignalRouter->CreateHook<entt::entity>(
                 entity, enemyCombatable.onDeath, combatable.onTargetDeath);
 
             entt::sink sink{combatable.onTargetDeath};
@@ -223,7 +222,7 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(entity);
 
-            gameData->reflectionSignalRouter->RemoveHook(onTargetDeathBridge);
+            gameData->reflectionSignalRouter->RemoveHook(combatable.onTargetDeathHookId);
             entt::sink sink{combatable.onTargetDeath};
             sink.disconnect<&CombatState::onTargetDeath>(this);
 
