@@ -13,91 +13,69 @@
 
 namespace sage
 {
-    void Camera::OnForwardKeyPressed()
+
+    void Camera::onForwardKeyPressed()
     {
         forwardKeyDown = true;
     }
 
-    void Camera::OnLeftKeyPressed()
+    void Camera::onLeftKeyPressed()
     {
         leftKeyDown = true;
     }
 
-    void Camera::OnRightKeyPressed()
+    void Camera::onRightKeyPressed()
     {
         rightKeyDown = true;
     }
 
-    void Camera::OnBackKeyPressed()
+    void Camera::onBackKeyPressed()
     {
         backKeyDown = true;
     }
 
-    void Camera::OnRotateLeftKeyPressed()
+    void Camera::onRotateLeftKeyPressed()
     {
         rotateLeftKeyDown = true;
     }
 
-    void Camera::OnRotateRightKeyPressed()
+    void Camera::onRotateRightKeyPressed()
     {
         rotateRightKeyDown = true;
     }
 
-    void Camera::OnForwardKeyUp()
+    void Camera::onForwardKeyUp()
     {
         forwardKeyDown = false;
     }
 
-    void Camera::OnLeftKeyUp()
+    void Camera::onLeftKeyUp()
     {
         leftKeyDown = false;
     }
 
-    void Camera::OnRightKeyUp()
+    void Camera::onRightKeyUp()
     {
         rightKeyDown = false;
     }
 
-    void Camera::OnBackKeyUp()
+    void Camera::onBackKeyUp()
     {
         backKeyDown = false;
     }
 
-    void Camera::OnRotateLeftKeyUp()
+    void Camera::onRotateLeftKeyUp()
     {
         rotateLeftKeyDown = false;
     }
 
-    void Camera::OnRotateRightKeyUp()
+    void Camera::onRotateRightKeyUp()
     {
         rotateRightKeyDown = false;
     }
 
-    void Camera::LockInput()
+    void Camera::updateTarget()
     {
-        lockInput = true;
-    }
-
-    void Camera::UnlockInput()
-    {
-        lockInput = false;
-    }
-
-    void Camera::CutscenePose(const sgTransform& npcTrans)
-    {
-        rlCamera.position.y = rlCamera.target.y;
-
-        // Calculate the camera's position behind the actor's shoulder
-        Vector3 cameraOffset = {5.0f, 10.0f, 18.0f}; // TODO: Shouldn't be hardcoded
-
-        Vector3 cameraPosition = Vector3Add(npcTrans.GetWorldPos(), cameraOffset);
-
-        // Calculate the camera's target position slightly above the actor's position
-        Vector3 cameraTarget = Vector3Add(npcTrans.GetWorldPos(), {0.0f, 1.0f, 0.0f});
-
-        // Set the camera's position and target
-        rlCamera.position = cameraPosition;
-        rlCamera.target = cameraTarget;
     }
 
     void Camera::handleInput()
@@ -176,6 +154,16 @@ namespace sage
         return &rlCamera;
     }
 
+    void Camera::LockInput()
+    {
+        lockInput = true;
+    }
+
+    void Camera::UnlockInput()
+    {
+        lockInput = false;
+    }
+
     void Camera::ScrollEnable()
     {
         scrollEnabled = true;
@@ -211,6 +199,23 @@ namespace sage
         return rlCamera.position;
     }
 
+    void Camera::CutscenePose(const sgTransform& npcTrans)
+    {
+        rlCamera.position.y = rlCamera.target.y;
+
+        // Calculate the camera's position behind the actor's shoulder
+        Vector3 cameraOffset = {5.0f, 10.0f, 18.0f}; // TODO: Shouldn't be hardcoded
+
+        Vector3 cameraPosition = Vector3Add(npcTrans.GetWorldPos(), cameraOffset);
+
+        // Calculate the camera's target position slightly above the actor's position
+        Vector3 cameraTarget = Vector3Add(npcTrans.GetWorldPos(), {0.0f, 1.0f, 0.0f});
+
+        // Set the camera's position and target
+        rlCamera.position = cameraPosition;
+        rlCamera.target = cameraTarget;
+    }
+
     void Camera::SetCamera(Vector3 _pos, Vector3 _target)
     {
         rlCamera.position = _pos;
@@ -219,11 +224,12 @@ namespace sage
 
     void Camera::Update()
     {
+        updateTarget();
         handleInput();
         UpdateCameraPro(&rlCamera, {0, 0, 0}, {0, 0, 0}, 0);
     }
 
-    Camera::Camera(UserInput* userInput) : rlCamera({0})
+    Camera::Camera(UserInput* userInput, GameData* _gameData) : gameData(_gameData), rlCamera({0})
     {
         rlCamera.position = {20.0f, 40.0f, 20.0f};
         rlCamera.target = {0.0f, 8.0f, 0.0f};
@@ -233,51 +239,51 @@ namespace sage
 
         {
             entt::sink keyWPressed{userInput->keyWPressed};
-            keyWPressed.connect<&Camera::OnForwardKeyPressed>(this);
+            keyWPressed.connect<&Camera::onForwardKeyPressed>(this);
         }
         {
             entt::sink keySPressed{userInput->keySPressed};
-            keySPressed.connect<&Camera::OnBackKeyPressed>(this);
+            keySPressed.connect<&Camera::onBackKeyPressed>(this);
         }
         {
             entt::sink keyAPressed{userInput->keyAPressed};
-            keyAPressed.connect<&Camera::OnLeftKeyPressed>(this);
+            keyAPressed.connect<&Camera::onLeftKeyPressed>(this);
         }
         {
             entt::sink keyDPressed{userInput->keyDPressed};
-            keyDPressed.connect<&Camera::OnRightKeyPressed>(this);
+            keyDPressed.connect<&Camera::onRightKeyPressed>(this);
         }
         {
             entt::sink keyEPressed{userInput->keyEPressed};
-            keyEPressed.connect<&Camera::OnRotateLeftKeyPressed>(this);
+            keyEPressed.connect<&Camera::onRotateLeftKeyPressed>(this);
         }
         {
             entt::sink keyQPressed{userInput->keyQPressed};
-            keyQPressed.connect<&Camera::OnRotateRightKeyPressed>(this);
+            keyQPressed.connect<&Camera::onRotateRightKeyPressed>(this);
         }
         {
             entt::sink keyWUp{userInput->keyWUp};
-            keyWUp.connect<&Camera::OnForwardKeyUp>(this);
+            keyWUp.connect<&Camera::onForwardKeyUp>(this);
         }
         {
             entt::sink keySUp{userInput->keySUp};
-            keySUp.connect<&Camera::OnBackKeyUp>(this);
+            keySUp.connect<&Camera::onBackKeyUp>(this);
         }
         {
             entt::sink keyAUp{userInput->keyAUp};
-            keyAUp.connect<&Camera::OnLeftKeyUp>(this);
+            keyAUp.connect<&Camera::onLeftKeyUp>(this);
         }
         {
             entt::sink keyDUp{userInput->keyDUp};
-            keyDUp.connect<&Camera::OnRightKeyUp>(this);
+            keyDUp.connect<&Camera::onRightKeyUp>(this);
         }
         {
             entt::sink keyEUp{userInput->keyEUp};
-            keyEUp.connect<&Camera::OnRotateLeftKeyUp>(this);
+            keyEUp.connect<&Camera::onRotateLeftKeyUp>(this);
         }
         {
             entt::sink keyQUp{userInput->keyQUp};
-            keyQUp.connect<&Camera::OnRotateRightKeyUp>(this);
+            keyQUp.connect<&Camera::onRotateRightKeyUp>(this);
         }
     }
 } // namespace sage

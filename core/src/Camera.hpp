@@ -8,55 +8,55 @@
 
 namespace sage
 {
+    class GameData;
     class UserInput;
     class sgTransform;
 
     class Camera
     {
+        GameData* gameData;
         Camera3D rlCamera;
         int zoom = 10;
-        void handleInput();
 
-        bool forwardKeyDown;
-        bool backKeyDown;
-        bool leftKeyDown;
-        bool rightKeyDown;
-        bool rotateLeftKeyDown;
-        bool rotateRightKeyDown;
+        bool forwardKeyDown{};
+        bool backKeyDown{};
+        bool leftKeyDown{};
+        bool rightKeyDown{};
+        bool rotateLeftKeyDown{};
+        bool rotateRightKeyDown{};
         bool scrollEnabled = true;
         bool lockInput = false;
 
+        void onForwardKeyPressed();
+        void onLeftKeyPressed();
+        void onRightKeyPressed();
+        void onBackKeyPressed();
+        void onRotateLeftKeyPressed();
+        void onRotateRightKeyPressed();
+        void onForwardKeyUp();
+        void onLeftKeyUp();
+        void onRightKeyUp();
+        void onBackKeyUp();
+        void onRotateLeftKeyUp();
+        void onRotateRightKeyUp();
+
+        void updateTarget();
+        void handleInput();
+
       public:
         Camera3D* getRaylibCam();
-
         void ScrollEnable();
         void ScrollDisable();
         void LockInput();
         void UnlockInput();
-
-        void OnForwardKeyPressed();
-        void OnLeftKeyPressed();
-        void OnRightKeyPressed();
-        void OnBackKeyPressed();
-        void OnRotateLeftKeyPressed();
-        void OnRotateRightKeyPressed();
-
-        void OnForwardKeyUp();
-        void OnLeftKeyUp();
-        void OnRightKeyUp();
-        void OnBackKeyUp();
-        void OnRotateLeftKeyUp();
-        void OnRotateRightKeyUp();
+        [[nodiscard]] Vector3 GetForward();
+        [[nodiscard]] Vector3 GetRight();
+        [[nodiscard]] Vector3 GetBackward();
+        [[nodiscard]] Vector3 GetLeft();
+        [[nodiscard]] Vector3 GetPosition() const;
         void CutscenePose(const sgTransform& location);
-
-        Vector3 GetForward();
-        Vector3 GetRight();
-        Vector3 GetBackward();
-        Vector3 GetLeft();
-        Vector3 GetPosition() const;
-
         void SetCamera(Vector3 _pos, Vector3 _target);
         void Update();
-        explicit Camera(UserInput* userInput);
+        explicit Camera(UserInput* userInput, GameData* _gameData);
     };
 } // namespace sage
