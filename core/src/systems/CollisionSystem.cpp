@@ -51,6 +51,35 @@ namespace sage
         return GetCollisionsWithRay(entt::null, ray, layer);
     }
 
+    std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(
+        const entt::entity& caster, const Ray& ray, CollisionLayer layer)
+    {
+        std::vector<CollisionInfo> collisions;
+
+        auto view = registry->view<Collideable>();
+
+        view.each([&](auto entity, const auto& c) {
+            if (entity == caster) return;
+            if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
+            {
+                auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
+                if (col.hit)
+                {
+                    CollisionInfo info = {
+                        .collidedEntityId = entity,
+                        .collidedBB = c.worldBoundingBox,
+                        .rlCollision = col,
+                        .collisionLayer = c.collisionLayer};
+                    collisions.push_back(info);
+                }
+            }
+        });
+
+        SortCollisionsByDistance(collisions);
+
+        return collisions;
+    }
+
     bool CollisionSystem::GetFirstCollisionWithRay(const Ray& ray, CollisionInfo& info, CollisionLayer layer)
     {
         auto view = registry->view<Collideable>();
@@ -67,6 +96,7 @@ namespace sage
                         .rlCollision = col,
                         .collisionLayer = c.collisionLayer};
                     info = _info;
+                    return true;
                 }
             }
         });
@@ -99,35 +129,6 @@ namespace sage
                             .collisionLayer = c.collisionLayer};
                         collisions.push_back(info);
                     }
-                }
-            }
-        });
-
-        SortCollisionsByDistance(collisions);
-
-        return collisions;
-    }
-
-    std::vector<CollisionInfo> CollisionSystem::GetCollisionsWithRay(
-        const entt::entity& caster, const Ray& ray, CollisionLayer layer)
-    {
-        std::vector<CollisionInfo> collisions;
-
-        auto view = registry->view<Collideable>();
-
-        view.each([&](auto entity, const auto& c) {
-            if (entity == caster) return;
-            if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
-            {
-                auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
-                if (col.hit)
-                {
-                    CollisionInfo info = {
-                        .collidedEntityId = entity,
-                        .collidedBB = c.worldBoundingBox,
-                        .rlCollision = col,
-                        .collisionLayer = c.collisionLayer};
-                    collisions.push_back(info);
                 }
             }
         });
@@ -226,6 +227,9 @@ namespace sage
         matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::ENEMY)] = true;
 
         matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::FLOORSIMPLE)] = true;
+        matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::FLOORCOMPLEX)] =
+            true;
+        matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::STAIRS)] = true;
 
         return matrix;
     }

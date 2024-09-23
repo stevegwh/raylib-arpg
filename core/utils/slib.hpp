@@ -64,6 +64,7 @@ namespace sage
 
       public:
         [[nodiscard]] const Model& GetRlModel() const;
+        [[nodiscard]] const Mesh& GetMesh(int num) const;
         [[nodiscard]] BoundingBox CalcLocalBoundingBox() const;
         [[nodiscard]] RayCollision GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const;
         void UpdateAnimation(ModelAnimation anim, int frame) const;

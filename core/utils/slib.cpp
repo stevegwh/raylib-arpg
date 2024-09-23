@@ -94,6 +94,12 @@ namespace sage
         return rlmodel;
     }
 
+    const Mesh& ModelSafe::GetMesh(int num) const
+    {
+        assert(num < rlmodel.meshCount);
+        return rlmodel.meshes[num];
+    }
+
     BoundingBox ModelSafe::CalcLocalBoundingBox() const
     {
         Mesh mesh = rlmodel.meshes[0];

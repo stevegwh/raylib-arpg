@@ -5,6 +5,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <entt/entt.hpp>
 
 namespace sage
 {
@@ -14,6 +15,7 @@ namespace sage
 
     class Camera
     {
+        entt::registry* registry;
         GameData* gameData;
         Camera3D rlCamera;
         int zoom = 10;
@@ -57,6 +59,6 @@ namespace sage
         void CutscenePose(const sgTransform& location);
         void SetCamera(Vector3 _pos, Vector3 _target);
         void Update();
-        explicit Camera(UserInput* userInput, GameData* _gameData);
+        explicit Camera(entt::registry* _registry, UserInput* userInput, GameData* _gameData);
     };
 } // namespace sage
