@@ -20,6 +20,11 @@ namespace sage
         Camera3D rlCamera;
         int zoom = 10;
 
+        // Easing
+        float currentTargetY{};
+        float currentPositionY{};
+        float easeSpeed = 0.075;
+
         bool forwardKeyDown{};
         bool backKeyDown{};
         bool leftKeyDown{};

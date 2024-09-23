@@ -82,20 +82,21 @@ namespace sage
     void Camera::updateTarget()
     {
         GridSquare square{};
-        float floorHeight = 0;
-
-        if (gameData->navigationGridSystem->WorldToGridSpace(rlCamera.target, square))
-        {
-            // If not out of grid bounds, set height
-            floorHeight = gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->terrainHeight;
-        }
+        gameData->navigationGridSystem->WorldToGridSpace(rlCamera.target, square);
+        float floorHeight = gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->terrainHeight;
 
         const float targetOffsetY = 8.0f; // Offset from the floor
 
-        Vector3 diff = Vector3Subtract(rlCamera.position, rlCamera.target);
-        rlCamera.target = Vector3{rlCamera.target.x, floorHeight + targetOffsetY, rlCamera.target.z};
-        rlCamera.position =
-            Vector3{rlCamera.position.x, floorHeight + targetOffsetY + diff.y, rlCamera.position.z};
+        float idealTargetY = floorHeight + targetOffsetY;
+        float idealPositionY = idealTargetY + (rlCamera.position.y - rlCamera.target.y);
+
+        // Apply easing only to Y-axis
+        currentTargetY = Lerp(currentTargetY, idealTargetY, easeSpeed);
+        currentPositionY = Lerp(currentPositionY, idealPositionY, easeSpeed);
+
+        // Update camera Y positions
+        rlCamera.target.y = currentTargetY;
+        rlCamera.position.y = currentPositionY;
     }
 
     void Camera::handleInput()
@@ -155,6 +156,7 @@ namespace sage
                     up.z *= 2.0f;
                     rlCamera.position = Vector3Subtract(rlCamera.position, up);
                     rlCamera.position = Vector3Add(GetCameraForward(&rlCamera), rlCamera.position);
+                    currentPositionY = rlCamera.position.y; // Update currentPositionY
                 }
             }
             if (mouseScroll.y < 0)
@@ -165,6 +167,7 @@ namespace sage
                 up.z *= 2.0f;
                 rlCamera.position = Vector3Add(up, rlCamera.position);
                 rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
+                currentPositionY = rlCamera.position.y; // Update currentPositionY
             }
         }
     }
@@ -257,6 +260,8 @@ namespace sage
         rlCamera.up = {0.0f, 1.0f, 0.0f};
         rlCamera.fovy = 45.0f;
         rlCamera.projection = CAMERA_PERSPECTIVE;
+        currentPositionY = rlCamera.position.y;
+        currentTargetY = rlCamera.target.y;
 
         {
             entt::sink keyWPressed{userInput->keyWPressed};
