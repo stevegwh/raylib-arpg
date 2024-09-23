@@ -5,11 +5,16 @@
 #include "Camera.hpp"
 
 #include "components/sgTransform.hpp"
+#include "GameData.hpp"
 #include "slib.hpp"
 #include "UserInput.hpp"
 
+#include "components/NavigationGridSquare.hpp"
+#include "components/Renderable.hpp"
 #include "raymath.h"
 #include "rcamera.h"
+#include "systems/CollisionSystem.hpp"
+#include "systems/NavigationGridSystem.hpp"
 
 namespace sage
 {
@@ -76,6 +81,21 @@ namespace sage
 
     void Camera::updateTarget()
     {
+        GridSquare square{};
+        float floorHeight = 0;
+
+        if (gameData->navigationGridSystem->WorldToGridSpace(rlCamera.target, square))
+        {
+            // If not out of grid bounds, set height
+            floorHeight = gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->terrainHeight;
+        }
+
+        const float targetOffsetY = 8.0f; // Offset from the floor
+
+        Vector3 diff = Vector3Subtract(rlCamera.position, rlCamera.target);
+        rlCamera.target = Vector3{rlCamera.target.x, floorHeight + targetOffsetY, rlCamera.target.z};
+        rlCamera.position =
+            Vector3{rlCamera.position.x, floorHeight + targetOffsetY + diff.y, rlCamera.position.z};
     }
 
     void Camera::handleInput()
@@ -229,7 +249,8 @@ namespace sage
         UpdateCameraPro(&rlCamera, {0, 0, 0}, {0, 0, 0}, 0);
     }
 
-    Camera::Camera(UserInput* userInput, GameData* _gameData) : gameData(_gameData), rlCamera({0})
+    Camera::Camera(entt::registry* _registry, UserInput* userInput, GameData* _gameData)
+        : registry(_registry), gameData(_gameData), rlCamera({0})
     {
         rlCamera.position = {20.0f, 40.0f, 20.0f};
         rlCamera.target = {0.0f, 8.0f, 0.0f};

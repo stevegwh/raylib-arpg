@@ -227,7 +227,7 @@ namespace sage
             return;
         }
 
-        gameData->collisionSystem->SortCollisionsByDistance(collisions);
+        CollisionSystem::SortCollisionsByDistance(collisions);
 
         m_mouseHitInfo = collisions[0];
 
