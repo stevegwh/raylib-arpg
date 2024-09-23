@@ -73,8 +73,8 @@ namespace sage
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : Scene(_registry, _keyMapping, _settings)
     {
-        lightSubSystem->lights[0] =
-            CreateLight(LIGHT_POINT, {0, 50, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
+        //        lightSubSystem->lights[0] =
+        //            CreateLight(LIGHT_POINT, {0, 100, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
 
         // GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
         GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");

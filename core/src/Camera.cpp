@@ -241,6 +241,11 @@ namespace sage
         rlCamera.target = _target;
     }
 
+    void Camera::DrawDebug()
+    {
+        DrawCube(getRaylibCam()->target, 2, 2, 2, RED);
+    }
+
     void Camera::Update()
     {
         updateTarget();

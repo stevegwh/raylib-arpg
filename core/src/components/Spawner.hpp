@@ -12,7 +12,8 @@ namespace sage
     enum class SpawnerType
     {
         PLAYER,
-        GOBLIN
+        GOBLIN,
+        LIGHT
     };
 
     struct Spawner
