@@ -82,19 +82,15 @@ namespace sage
     void Camera::updateTarget()
     {
         GridSquare square{};
-        gameData->navigationGridSystem->WorldToGridSpace(rlCamera.target, square);
-        float floorHeight = gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->terrainHeight;
+        if (!gameData->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
 
+        float floorHeight = gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->terrainHeight;
         const float targetOffsetY = 8.0f; // Offset from the floor
 
         float idealTargetY = floorHeight + targetOffsetY;
         float idealPositionY = idealTargetY + (rlCamera.position.y - rlCamera.target.y);
-
-        // Apply easing only to Y-axis
         currentTargetY = Lerp(currentTargetY, idealTargetY, easeSpeed);
         currentPositionY = Lerp(currentPositionY, idealPositionY, easeSpeed);
-
-        // Update camera Y positions
         rlCamera.target.y = currentTargetY;
         rlCamera.position.y = currentPositionY;
     }
