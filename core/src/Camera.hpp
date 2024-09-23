@@ -15,6 +15,15 @@ namespace sage
 
     class Camera
     {
+        struct CameraSave
+        {
+            Camera3D rlCamera{};
+            float currentTargetY{};
+            float currentPositionY{};
+        };
+
+        CameraSave cameraSave;
+
         entt::registry* registry;
         GameData* gameData;
         Camera3D rlCamera;
@@ -56,6 +65,8 @@ namespace sage
         void ScrollDisable();
         void LockInput();
         void UnlockInput();
+        void LoadCamera();
+        void SaveCamera();
         [[nodiscard]] Vector3 GetForward();
         [[nodiscard]] Vector3 GetRight();
         [[nodiscard]] Vector3 GetBackward();

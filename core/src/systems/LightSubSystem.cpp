@@ -3,16 +3,11 @@
 //
 #include "LightSubSystem.hpp"
 
+#include "Camera.hpp"
 #include "components/Renderable.hpp"
 
 namespace sage
 {
-
-    // void LightSubSystem::LinkAllRenderablesToLight()
-    // {
-    //     registry->view<Renderable>().each(
-    //         [&](auto entity, Renderable& renderable) { LinkRenderableToLight(&renderable); });
-    // }
 
     void LightSubSystem::LinkRenderableToLight(entt::entity entity) const
     {
@@ -41,16 +36,27 @@ namespace sage
             std::cout << "Scene: Max light sources reached. Ignoring. \n";
             return;
         }
-        lights[lightCount++] = CreateLight(LIGHT_DIRECTIONAL, pos, Vector3Zero(), PURPLE, shader);
+        unsigned char g = 0.464 * 255.0;
+        unsigned char b = 255.0f * 0.023f;
+        col = Color{255, g, b, 1};
+
+        lights[lightCount++] = CreateLight(LIGHT_POINT, pos, {}, col, shader);
     }
 
-    LightSubSystem::LightSubSystem(entt::registry* _registry) : registry(_registry)
+    void LightSubSystem::Update() const
+    {
+        auto [x, y, z] = camera->GetPosition();
+        const float cameraPos[3] = {x, y, z};
+        SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+    }
+
+    LightSubSystem::LightSubSystem(entt::registry* _registry, Camera* _camera)
+        : registry(_registry), camera(_camera)
     {
         shader = ResourceManager::GetInstance().ShaderLoad(
-            TextFormat("resources/shaders/glsl%i/lighting.vs", 330),
-            TextFormat("resources/shaders/glsl%i/lighting.fs", 330));
+            "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
         // Ambient light level (some basic lighting)
-        float ambientValue[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        float ambientValue[4] = {0.2f, 0.2f, 0.2f, 0.0f};
         int ambientLoc = GetShaderLocation(shader, "ambient");
         SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
