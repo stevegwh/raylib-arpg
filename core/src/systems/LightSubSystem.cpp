@@ -34,13 +34,23 @@ namespace sage
         }
     }
 
+    void LightSubSystem::AddLight(Vector3 pos, Color col)
+    {
+        if (lightCount >= lights.max_size())
+        {
+            std::cout << "Scene: Max light sources reached. Ignoring. \n";
+            return;
+        }
+        lights[lightCount++] = CreateLight(LIGHT_DIRECTIONAL, pos, Vector3Zero(), PURPLE, shader);
+    }
+
     LightSubSystem::LightSubSystem(entt::registry* _registry) : registry(_registry)
     {
         shader = ResourceManager::GetInstance().ShaderLoad(
             TextFormat("resources/shaders/glsl%i/lighting.vs", 330),
             TextFormat("resources/shaders/glsl%i/lighting.fs", 330));
         // Ambient light level (some basic lighting)
-        float ambientValue[4] = {0.05f, 0.05f, 0.05f, 1.0f};
+        float ambientValue[4] = {1.0f, 1.0f, 1.0f, 1.0f};
         int ambientLoc = GetShaderLocation(shader, "ambient");
         SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }

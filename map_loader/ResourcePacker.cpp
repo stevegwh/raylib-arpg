@@ -187,6 +187,10 @@ namespace sage
             {
                 spawner.spawnerType = SpawnerType::PLAYER;
             }
+            else if (objectName.find("Light") != std::string::npos)
+            {
+                spawner.spawnerType = SpawnerType::LIGHT;
+            }
             return;
         }
 

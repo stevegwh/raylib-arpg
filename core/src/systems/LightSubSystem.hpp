@@ -6,6 +6,7 @@
 
 #include "raylib.h"
 #include "rlights.h"
+#include <array>
 #include <entt/entt.hpp>
 
 namespace sage
@@ -13,10 +14,12 @@ namespace sage
     class LightSubSystem
     {
         entt::registry* registry;
+        int lightCount{};
 
       public:
-        Shader shader;
-        Light lights[MAX_LIGHTS]{};
+        Shader shader{};
+        std::array<Light, MAX_LIGHTS> lights{};
+        void AddLight(Vector3 pos, Color col);
         void LinkRenderableToLight(entt::entity entity) const;
         void DrawDebugLights();
         explicit LightSubSystem(entt::registry* _registry);

@@ -63,6 +63,7 @@ namespace sage
         [[nodiscard]] Vector3 GetPosition() const;
         void CutscenePose(const sgTransform& location);
         void SetCamera(Vector3 _pos, Vector3 _target);
+        void DrawDebug();
         void Update();
         explicit Camera(entt::registry* _registry, UserInput* userInput, GameData* _gameData);
     };

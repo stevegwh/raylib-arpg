@@ -56,6 +56,7 @@ namespace sage
     void Scene::DrawDebug()
     {
         data->cursor->DrawDebug();
+        data->camera->DrawDebug();
         lightSubSystem->DrawDebugLights();
     }
 
@@ -75,11 +76,6 @@ namespace sage
         float slices = 500;
         data->navigationGridSystem->Init(slices, 1.0f);
 
-        // NB: Dependent on only the map/static meshes having been loaded at this point
-        // Maybe time for a tag system
-        for (const auto view = registry->view<Renderable>(); auto entity : view)
-            data->lightSubSystem->LinkRenderableToLight(entity);
-
         auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);
         auto normalMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_NORMALMAP);
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
@@ -96,8 +92,18 @@ namespace sage
             {
                 GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, "Goblin");
             }
+            else if (spawner.spawnerType == SpawnerType::LIGHT)
+            {
+                // TODO: Can use rotation to be direction?
+                lightSubSystem->AddLight(spawner.pos, RAYWHITE);
+            }
         }
         // registry->erase<Spawner>(view.begin(), view.end());
+
+        // NB: Dependent on only the map/static meshes having been loaded at this point
+        // Maybe time for a tag system
+        for (const auto view = registry->view<Renderable>(); auto entity : view)
+            data->lightSubSystem->LinkRenderableToLight(entity);
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
