@@ -11,10 +11,12 @@
 
 namespace sage
 {
+    class Camera;
     class LightSubSystem
     {
         entt::registry* registry;
-        int lightCount{};
+        Camera* camera;
+        int lightCount = 0;
 
       public:
         Shader shader{};
@@ -22,6 +24,7 @@ namespace sage
         void AddLight(Vector3 pos, Color col);
         void LinkRenderableToLight(entt::entity entity) const;
         void DrawDebugLights();
-        explicit LightSubSystem(entt::registry* _registry);
+        void Update() const;
+        explicit LightSubSystem(entt::registry* _registry, Camera* _camera);
     };
 } // namespace sage

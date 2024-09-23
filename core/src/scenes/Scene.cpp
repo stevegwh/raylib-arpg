@@ -39,6 +39,7 @@ namespace sage
         data->camera->Update();
         data->userInput->ListenForInput();
         data->cursor->Update();
+        data->lightSubSystem->Update();
     }
 
     void Scene::Draw3D()
@@ -57,7 +58,7 @@ namespace sage
     {
         data->cursor->DrawDebug();
         data->camera->DrawDebug();
-        lightSubSystem->DrawDebugLights();
+        data->lightSubSystem->DrawDebugLights();
     }
 
     Scene::~Scene()
@@ -66,9 +67,7 @@ namespace sage
     }
 
     Scene::Scene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
-        : registry(_registry),
-          lightSubSystem(std::make_unique<LightSubSystem>(_registry)),
-          data(std::make_unique<GameData>(_registry, _keyMapping, _settings, lightSubSystem.get()))
+        : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings))
     {
 
         // TODO: This is calculated during the map construction process. Need to find a way of reading that data,
@@ -94,8 +93,7 @@ namespace sage
             }
             else if (spawner.spawnerType == SpawnerType::LIGHT)
             {
-                // TODO: Can use rotation to be direction?
-                lightSubSystem->AddLight(spawner.pos, RAYWHITE);
+                data->lightSubSystem->AddLight(spawner.pos, RAYWHITE);
             }
         }
         // registry->erase<Spawner>(view.begin(), view.end());

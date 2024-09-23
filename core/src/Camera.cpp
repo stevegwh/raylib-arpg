@@ -79,6 +79,14 @@ namespace sage
         rotateRightKeyDown = false;
     }
 
+    void Camera::SaveCamera()
+    {
+    }
+
+    void Camera::LoadCamera()
+    {
+    }
+
     void Camera::updateTarget()
     {
         GridSquare square{};
@@ -100,6 +108,8 @@ namespace sage
         if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL) || IsKeyDown(KEY_LEFT_ALT) ||
             IsKeyDown(KEY_RIGHT_ALT) || lockInput)
             return;
+
+        updateTarget();
 
         if (backKeyDown)
         {
@@ -220,6 +230,8 @@ namespace sage
 
     void Camera::CutscenePose(const sgTransform& npcTrans)
     {
+        cameraSave = CameraSave{rlCamera, currentTargetY, currentPositionY};
+
         rlCamera.position.y = rlCamera.target.y;
 
         // Calculate the camera's position behind the actor's shoulder
@@ -248,7 +260,6 @@ namespace sage
 
     void Camera::Update()
     {
-        updateTarget();
         handleInput();
         UpdateCameraPro(&rlCamera, {0, 0, 0}, {0, 0, 0}, 0);
     }

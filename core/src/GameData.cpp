@@ -29,13 +29,13 @@
 
 namespace sage
 {
-    GameData::GameData(
-        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, LightSubSystem* _lightSubSystem)
+    GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : registry(_registry),
           settings(_settings),
           userInput(std::make_unique<UserInput>(_keyMapping, _settings)),
           cursor(std::make_unique<Cursor>(_registry, this)),
           camera(std::make_unique<Camera>(_registry, userInput.get(), this)),
+          lightSubSystem(std::make_unique<LightSubSystem>(_registry, camera.get())),
           renderSystem(std::make_unique<RenderSystem>(_registry)),
           collisionSystem(std::make_unique<CollisionSystem>(_registry)),
           navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
@@ -50,8 +50,7 @@ namespace sage
           playerAbilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),
           timerSystem(std::make_unique<TimerSystem>(_registry)),
-          reflectionSignalRouter(std::make_unique<EntityReflectionSignalRouter>()),
-          lightSubSystem(_lightSubSystem)
+          reflectionSignalRouter(std::make_unique<EntityReflectionSignalRouter>())
     {
     }
 } // namespace sage

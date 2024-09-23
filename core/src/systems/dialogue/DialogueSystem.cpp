@@ -48,9 +48,8 @@ namespace sage
             sink.connect<&DialogueSystem::endConversation>(this);
         }
 
-        oldCamPos = gameData->camera->getRaylibCam()->position;
+        oldCamPos = gameData->camera->GetPosition();
         oldCamTarget = gameData->camera->getRaylibCam()->target;
-
         gameData->camera->CutscenePose(npcTrans);
         gameData->camera->LockInput();
 

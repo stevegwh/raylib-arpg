@@ -11,7 +11,6 @@
 namespace sage
 {
     class GameData;
-    class LightSubSystem;
     struct Settings;
     struct KeyMapping;
 
@@ -22,7 +21,6 @@ namespace sage
         entt::registry* registry;
 
       public:
-        std::unique_ptr<LightSubSystem> lightSubSystem;
         std::unique_ptr<GameData> data;
         entt::sigh<void()> sceneLoadingFinished; // Currently unused
         entt::sigh<void()> sceneChange;

@@ -13,6 +13,7 @@ namespace sage
     class Cursor;
     class UserInput;
     class Camera;
+    class LightSubSystem;
     struct Settings;
     struct KeyMapping;
 
@@ -30,7 +31,6 @@ namespace sage
     class CombatSystem;
     class TimerSystem;
     class EntityReflectionSignalRouter;
-    class LightSubSystem;
 
     // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
     // TODO: Also, should rename to "GameSystems"
@@ -43,6 +43,7 @@ namespace sage
         std::unique_ptr<UserInput> userInput;
         std::unique_ptr<Cursor> cursor;
         std::unique_ptr<Camera> camera;
+        std::unique_ptr<LightSubSystem> lightSubSystem;
 
         std::unique_ptr<RenderSystem> renderSystem;
         std::unique_ptr<CollisionSystem> collisionSystem;
@@ -58,12 +59,7 @@ namespace sage
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
         std::unique_ptr<EntityReflectionSignalRouter> reflectionSignalRouter;
-        LightSubSystem* lightSubSystem; // Owned by scene (TODO: Why?)
 
-        GameData(
-            entt::registry* _registry,
-            KeyMapping* _keyMapping,
-            Settings* _settings,
-            LightSubSystem* _lightSubSystem);
+        GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };
 } // namespace sage
