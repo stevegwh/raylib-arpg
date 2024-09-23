@@ -23,7 +23,7 @@ namespace sage
       public:
         CollisionMatrix collisionMatrix;
 
-        void SortCollisionsByDistance(std::vector<CollisionInfo>& collisions);
+        static void SortCollisionsByDistance(std::vector<CollisionInfo>& collisions);
         [[nodiscard]] std::vector<CollisionInfo> GetMeshCollisionsWithRay(
             const entt::entity& caster, const Ray& ray, CollisionLayer layer);
         [[nodiscard]] std::vector<CollisionInfo> GetCollisionsWithRay(

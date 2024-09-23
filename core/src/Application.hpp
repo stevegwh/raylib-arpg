@@ -10,12 +10,8 @@
 #include "Settings.hpp"
 
 #include "entt/entt.hpp"
-#include "raylib.h"
-#include "Settings.hpp"
 
-#include <memory>
 #include <stack>
-#include <unordered_map>
 
 namespace sage
 {

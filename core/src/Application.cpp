@@ -10,10 +10,6 @@
 #include "Camera.hpp"
 #include "GameData.hpp"
 #include "Serializer.hpp"
-#include "systems/ControllableActorSystem.hpp"
-
-#include "components/Collideable.hpp"
-#include "components/sgTransform.hpp"
 
 namespace sage
 {
