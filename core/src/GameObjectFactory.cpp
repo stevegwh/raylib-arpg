@@ -70,7 +70,7 @@ namespace sage
         transform.SetPosition({position.x, height, position.z});
 
         auto& moveable = registry->emplace<MoveableActor>(id);
-        moveable.movementSpeed = 0.3f;
+        moveable.movementSpeed = 0.25f;
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
@@ -156,7 +156,7 @@ namespace sage
         renderable.name = "Player";
 
         auto& moveable = registry->emplace<MoveableActor>(id);
-        moveable.movementSpeed = 0.45f;
+        moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 150;
 
         // Set animation hooks

@@ -56,7 +56,7 @@ namespace sage
         shader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
         // Ambient light level (some basic lighting)
-        float ambientValue[4] = {0.2f, 0.2f, 0.2f, 0.0f};
+        float ambientValue[4] = {0.6f, 0.3f, 0.8f, 1.0f};
         int ambientLoc = GetShaderLocation(shader, "ambient");
         SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
