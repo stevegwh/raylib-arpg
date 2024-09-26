@@ -138,13 +138,45 @@ namespace sage
         return line.substr(key.length() + 2); // +2 to skip ": "
     }
 
-    void HandleSpawner(
-        entt::registry* registry, std::ifstream& infile, const std::string& objectName, const fs::path& meshPath)
+    void HandleLight(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
     {
-        std::string meshName;
+        std::string meshName, objectName;
+        float x, y, z;
+        int r, g, b, s;
+        try
+        {
+            objectName = readLine(infile, "name");
+            meshName = readLine(infile, "mesh");
+
+            std::istringstream locStream(readLine(infile, "location"));
+            locStream >> x >> y >> z;
+
+            std::istringstream rgbStream(readLine(infile, "color"));
+            rgbStream >> r >> g >> b;
+
+            std::istringstream strStream(readLine(infile, "strength"));
+            strStream >> s;
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error parsing spawner data: " << e.what() << std::endl;
+            return;
+        }
+
+        fs::path fullMeshPath = meshPath / meshName;
+        std::string meshKey = fullMeshPath.generic_string();
+
+        auto entity = registry->create();
+        // Emplace lights here
+    }
+
+    void HandleSpawner(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
+    {
+        std::string meshName, objectName;
         float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
         try
         {
+            objectName = readLine(infile, "name");
             meshName = readLine(infile, "mesh");
 
             std::istringstream locStream(readLine(infile, "location"));
@@ -192,14 +224,14 @@ namespace sage
     void HandleMesh(
         entt::registry* registry,
         std::ifstream& infile,
-        const std::string& objectName,
         const fs::path& meshPath,
         std::vector<Collideable*>& floorMeshes)
     {
-        std::string meshName;
+        std::string meshName, objectName;
         float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
         try
         {
+            objectName = readLine(infile, "name");
             meshName = readLine(infile, "mesh");
 
             std::istringstream locStream(readLine(infile, "location"));
@@ -254,12 +286,12 @@ namespace sage
         const fs::path& txtPath,
         std::vector<Collideable*>& floorMeshes)
     {
-        std::string objectName;
+        std::string typeName;
         std::ifstream infile(txtPath);
 
         try
         {
-            objectName = readLine(infile, "name");
+            typeName = readLine(infile, "type");
         }
         catch (const std::exception& e)
         {
@@ -267,13 +299,17 @@ namespace sage
             return;
         }
 
-        if (objectName.find("Spawner") != std::string::npos)
+        if (typeName.find("spawner") != std::string::npos)
         {
-            HandleSpawner(registry, infile, objectName, meshPath);
+            HandleSpawner(registry, infile, meshPath);
+        }
+        else if (typeName.find("light") != std::string::npos)
+        {
+            HandleLight(registry, infile, meshPath);
         }
         else
         {
-            HandleMesh(registry, infile, objectName, meshPath, floorMeshes);
+            HandleMesh(registry, infile, meshPath, floorMeshes);
         }
     }
 
