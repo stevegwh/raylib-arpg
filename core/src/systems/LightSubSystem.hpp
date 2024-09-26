@@ -32,8 +32,9 @@
 
 #pragma once
 
+#include "components/Light.hpp"
+
 #include "raylib.h"
-#include <array>
 #include <entt/entt.hpp>
 
 #define MAX_LIGHTS 10 // Max dynamic lights supported by shader
@@ -41,24 +42,6 @@
 namespace sage
 {
     class Camera;
-
-    struct Light
-    {
-        int type;
-        bool enabled;
-        Vector3 position;
-        Vector3 target;
-        Color color;
-        float attenuation;
-
-        // Shader locations
-        int enabledLoc;
-        int typeLoc;
-        int positionLoc;
-        int targetLoc;
-        int colorLoc;
-        int attenuationLoc;
-    };
 
     enum LightType
     {
@@ -70,23 +53,27 @@ namespace sage
     {
         entt::registry* registry;
         Camera* camera;
+        Shader shader{};
         int lightsCount = 0;
+        // std::vector<Light> lights{};
 
-        Light CreateLight(
+        Light createLight(
             int type,
             Vector3 position,
             Vector3 target,
             Color color,
-            Shader shader);                                 // Create a light and get shader locations
-        void UpdateLightValues(Shader shader, Light light); // Send light properties to shader
-
+            Shader shader); // Create a light and get shader locations
       public:
-        Shader shader{};
-        std::array<Light, MAX_LIGHTS> lights{};
+        // template <typename Archive>
+        // void serialize(Archive& archive)
+        // {
+        //     archive(lights);
+        // }
         void AddLight(Vector3 pos, Color col);
         void LinkRenderableToLight(entt::entity entity) const;
         void DrawDebugLights() const;
         void Update() const;
+        void LinkAllLights();
         explicit LightSubSystem(entt::registry* _registry, Camera* _camera);
     };
 } // namespace sage
