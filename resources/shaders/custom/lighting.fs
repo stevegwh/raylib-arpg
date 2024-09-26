@@ -12,7 +12,7 @@ uniform vec4 colDiffuse;
 // Output fragment color
 out vec4 finalColor;
 
-#define     MAX_LIGHTS              11
+#define     MAX_LIGHTS              25
 #define     LIGHT_DIRECTIONAL       0
 #define     LIGHT_POINT             1
 
@@ -25,6 +25,7 @@ struct Light {
 };
 
 // Input lighting values
+uniform int lightsCount;
 uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 uniform vec3 viewPos;
@@ -42,7 +43,7 @@ void main()
     vec3 viewD = normalize(viewPos - fragPosition);
     vec3 specular = vec3(0.0);
 
-    for (int i = 0; i < MAX_LIGHTS; i++)
+    for (int i = 0; i < lightsCount; i++)
     {
         if (lights[i].enabled == 1)
         {

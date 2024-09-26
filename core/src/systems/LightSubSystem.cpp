@@ -53,6 +53,7 @@ namespace sage
             light.SetShader(shader, lightsCount);
 
             lightsCount++;
+            SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
         }
 
         return light;
@@ -112,9 +113,9 @@ namespace sage
             else
             {
                 std::cout << "Scene: Max light sources reached. Ignoring. \n";
-                return;
             }
         }
+        SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
     }
 
     LightSubSystem::LightSubSystem(entt::registry* _registry, Camera* _camera)
@@ -124,8 +125,10 @@ namespace sage
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
         // Ambient light level (some basic lighting)
         float ambientValue[4] = {0.4f, 0.1f, 0.6f, 1.0f};
-        int ambientLoc = GetShaderLocation(shader, "ambient");
+        ambientLoc = GetShaderLocation(shader, "ambient");
         SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
+        lightsCountLoc = GetShaderLocation(shader, "lightsCount");
+        SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
 
         LinkAllLights();
     }
