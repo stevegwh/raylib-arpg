@@ -303,6 +303,38 @@ namespace sage
         return {vec3.x * value, vec3.y * value, vec3.z * value};
     }
 
+    Transform GetCurrentBoneTransform(Model& model, const char* boneName, ModelAnimation& anim, int frame)
+    {
+        Transform out{};
+        BoneInfo info;
+        int boneId = -1;
+
+        for (int i = 0; i < model.boneCount; ++i)
+        {
+            if (strcmp(model.bones[i].name, boneName) == 0)
+            {
+                info = model.bones[i];
+                boneId = i;
+                break;
+            }
+        }
+
+        if (boneId == -1)
+        {
+            std::cout << "WARNING: Could not find requested bone. \n";
+            assert(0);
+        }
+
+        auto baseT = model.bindPose[boneId];
+        auto animT = anim.framePoses[frame][boneId];
+
+        out.translation = Vector3Add(baseT.translation, animT.translation);
+        out.rotation = QuaternionMultiply(baseT.rotation, animT.rotation);
+        out.scale = Vector3Multiply(baseT.scale, animT.scale);
+
+        return out;
+    }
+
     /**
      * Generates a gradient with transperency (raylib version does not have transparency)
      */

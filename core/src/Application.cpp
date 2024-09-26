@@ -8,8 +8,13 @@
 #include "scenes/ExampleScene.hpp"
 
 #include "Camera.hpp"
+#include "components/Renderable.hpp"
+#include "components/sgTransform.hpp"
+#include "components/Weapon.hpp"
 #include "GameData.hpp"
 #include "Serializer.hpp"
+#include "slib.hpp"
+#include "systems/ControllableActorSystem.hpp"
 
 namespace sage
 {
@@ -102,6 +107,25 @@ namespace sage
             }
 
             scene->Update();
+
+            auto view = registry->view<Weapon>();
+            for (auto entity : view)
+            {
+                auto& weapon = registry->get<Weapon>(entity);
+                auto& playerAnim = registry->get<Animation>(weapon.owner);
+                auto& modelAnim = playerAnim.animations[playerAnim.current.index];
+                auto& playerRend = registry->get<Renderable>(weapon.owner);
+                Model model = playerRend.GetModel()->GetRlModel();
+                auto animTrans = GetCurrentBoneTransform(
+                    model, "mixamorig:RightHandMiddle1", modelAnim, playerAnim.current.index);
+                auto translation = Vector3{
+                    animTrans.translation.x * 0.035f,
+                    animTrans.translation.y * 0.035f,
+                    animTrans.translation.z * 0.035f};
+                auto& weaponTrans = registry->get<sgTransform>(entity);
+                weaponTrans.SetLocalPos(translation);
+            }
+
             draw();
             handleScreenUpdate();
         }
@@ -109,7 +133,6 @@ namespace sage
 
     void Application::draw()
     {
-
         BeginDrawing();
         ClearBackground(BLACK);
         BeginMode3D(*scene->data->camera->getRaylibCam());
