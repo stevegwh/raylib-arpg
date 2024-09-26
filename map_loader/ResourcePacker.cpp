@@ -10,9 +10,11 @@
 #include <ResourceManager.hpp>
 #include <Serializer.hpp>
 
+#include "components/Light.hpp"
 #include "components/Spawner.hpp"
 #include "raylib.h"
 #include "raymath.h"
+#include "systems/LightSubSystem.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -38,11 +40,11 @@ namespace sage
         {
             return CollisionLayer::BUILDING;
         }
-        else if (objectName.find("_WALL_") != std::string::npos)
+        if (objectName.find("_WALL_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
-        else if (objectName.find("_HOLE_") != std::string::npos)
+        if (objectName.find("_HOLE_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
@@ -146,7 +148,6 @@ namespace sage
         try
         {
             objectName = readLine(infile, "name");
-            meshName = readLine(infile, "mesh");
 
             std::istringstream locStream(readLine(infile, "location"));
             locStream >> x >> y >> z;
@@ -160,42 +161,38 @@ namespace sage
         catch (const std::exception& e)
         {
             std::cerr << "Error parsing spawner data: " << e.what() << std::endl;
-            return;
+            assert(0);
         }
 
-        fs::path fullMeshPath = meshPath / meshName;
-        std::string meshKey = fullMeshPath.generic_string();
-
         auto entity = registry->create();
-        // Emplace lights here
+        auto& light = registry->emplace<Light>(entity);
+        light.type = LIGHT_POINT;
+        light.target = Vector3Zero();
+        light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
+        light.color =
+            Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 1};
+        // light.attenuation = s;
     }
 
     void HandleSpawner(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
     {
-        std::string meshName, objectName;
-        float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
+        std::string objectName;
+        float x, y, z, rotx, roty, rotz;
         try
         {
             objectName = readLine(infile, "name");
-            meshName = readLine(infile, "mesh");
 
             std::istringstream locStream(readLine(infile, "location"));
             locStream >> x >> y >> z;
 
             std::istringstream rotStream(readLine(infile, "rotation"));
             rotStream >> rotx >> roty >> rotz;
-
-            std::istringstream scaleStream(readLine(infile, "scale"));
-            scaleStream >> scalex >> scaley >> scalez;
         }
         catch (const std::exception& e)
         {
             std::cerr << "Error parsing spawner data: " << e.what() << std::endl;
-            return;
+            assert(0);
         }
-
-        fs::path fullMeshPath = meshPath / meshName;
-        std::string meshKey = fullMeshPath.generic_string();
 
         auto entity = registry->create();
 
@@ -211,14 +208,6 @@ namespace sage
         {
             spawner.spawnerType = SpawnerType::PLAYER;
         }
-        else if (objectName.find("Light") != std::string::npos)
-        {
-            spawner.spawnerType = SpawnerType::LIGHT;
-        }
-        //        else
-        //        {
-        //            spawner.spawnerType = SpawnerType::UNKNOWN;
-        //        }
     }
 
     void HandleMesh(
@@ -246,7 +235,7 @@ namespace sage
         catch (const std::exception& e)
         {
             std::cerr << "Error parsing mesh data: " << e.what() << std::endl;
-            return;
+            assert(0);
         }
 
         fs::path fullMeshPath = meshPath / meshName;
@@ -296,7 +285,7 @@ namespace sage
         catch (const std::exception& e)
         {
             std::cerr << "Error parsing file " << txtPath << ": " << e.what() << std::endl;
-            return;
+            assert(0);
         }
 
         if (typeName.find("spawner") != std::string::npos)

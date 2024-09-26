@@ -38,7 +38,7 @@
 namespace sage
 {
 
-    Light LightSubSystem::CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader)
+    Light LightSubSystem::createLight(int type, Vector3 position, Vector3 target, Color color, Shader shader)
     {
         Light light = {0};
 
@@ -50,42 +50,12 @@ namespace sage
             light.target = target;
             light.color = color;
 
-            // NOTE: Lighting shader naming must be the provided ones
-            light.enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
-            light.typeLoc = GetShaderLocation(shader, TextFormat("lights[%i].type", lightsCount));
-            light.positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
-            light.targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
-            light.colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
-
-            UpdateLightValues(shader, light);
+            light.SetShader(shader, lightsCount);
 
             lightsCount++;
         }
 
         return light;
-    }
-
-    void LightSubSystem::UpdateLightValues(Shader shader, Light light)
-    {
-        // Send to shader light enabled state and type
-        SetShaderValue(shader, light.enabledLoc, &light.enabled, SHADER_UNIFORM_INT);
-        SetShaderValue(shader, light.typeLoc, &light.type, SHADER_UNIFORM_INT);
-
-        // Send to shader light position values
-        float position[3] = {light.position.x, light.position.y, light.position.z};
-        SetShaderValue(shader, light.positionLoc, position, SHADER_UNIFORM_VEC3);
-
-        // Send to shader light target position values
-        float target[3] = {light.target.x, light.target.y, light.target.z};
-        SetShaderValue(shader, light.targetLoc, target, SHADER_UNIFORM_VEC3);
-
-        // Send to shader light color values
-        float color[4] = {
-            static_cast<float>(light.color.r) / static_cast<float>(255),
-            static_cast<float>(light.color.g) / static_cast<float>(255),
-            static_cast<float>(light.color.b) / static_cast<float>(255),
-            static_cast<float>(light.color.a) / static_cast<float>(255)};
-        SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
     }
 
     void LightSubSystem::LinkRenderableToLight(entt::entity entity) const
@@ -99,28 +69,26 @@ namespace sage
 
     void LightSubSystem::DrawDebugLights() const
     {
-        for (auto& light : lights)
-        {
-            if (light.enabled)
-                DrawSphereEx(light.position, 0.2f, 8, 8, light.color);
-            else
-                DrawSphereWires(light.position, 0.2f, 8, 8, ColorAlpha(light.color, 0.3f));
-        }
+        // for (auto& light : lights)
+        // {
+        //     if (light.enabled)
+        //         DrawSphereEx(light.position, 0.2f, 8, 8, light.color);
+        //     else
+        //         DrawSphereWires(light.position, 0.2f, 8, 8, ColorAlpha(light.color, 0.3f));
+        // }
     }
 
     void LightSubSystem::AddLight(Vector3 pos, Color col)
     {
-        if (lightsCount >= lights.max_size())
+        if (lightsCount >= MAX_LIGHTS)
         {
             std::cout << "Scene: Max light sources reached. Ignoring. \n";
             return;
         }
 
-        unsigned char g = 0.464 * 255.0;
-        unsigned char b = 255.0f * 0.023f;
-        col = Color{255, g, b, 1};
-
-        lights[lightsCount] = CreateLight(LIGHT_POINT, pos, {}, col, shader);
+        auto light = createLight(LIGHT_POINT, pos, {}, col, shader);
+        auto entity = registry->create();
+        registry->emplace<Light>(entity, light);
     }
 
     void LightSubSystem::Update() const
@@ -128,6 +96,25 @@ namespace sage
         auto [x, y, z] = camera->GetPosition();
         const float cameraPos[3] = {x, y, z};
         SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+    }
+
+    void LightSubSystem::LinkAllLights()
+    {
+        for (const auto view = registry->view<Light>(); auto& entity : view)
+        {
+            auto& light = registry->get<Light>(entity);
+            if (lightsCount < MAX_LIGHTS)
+            {
+                light.enabled = true;
+                light.SetShader(shader, lightsCount);
+                lightsCount++;
+            }
+            else
+            {
+                std::cout << "Scene: Max light sources reached. Ignoring. \n";
+                return;
+            }
+        }
     }
 
     LightSubSystem::LightSubSystem(entt::registry* _registry, Camera* _camera)
@@ -139,5 +126,7 @@ namespace sage
         float ambientValue[4] = {0.6f, 0.3f, 0.8f, 1.0f};
         int ambientLoc = GetShaderLocation(shader, "ambient");
         SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
+
+        LinkAllLights();
     }
 } // namespace sage

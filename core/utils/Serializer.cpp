@@ -11,6 +11,7 @@
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
 #include "GameData.hpp"
+#include "LightLoader.hpp"
 #include "raylib-cereal.hpp"
 #include "raylib.h"
 #include "SpawnerLoader.hpp"
@@ -22,6 +23,7 @@
 
 #include "abilities/AbilityData.hpp"
 #include "components/Collideable.hpp"
+#include "components/Light.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 
@@ -125,8 +127,13 @@ namespace sage
             {
                 // output finishes flushing its contents when it goes out of scope
                 cereal::BinaryOutputArchive output{storage};
+
                 SpawnerLoader spawnerLoader(&source);
                 output(spawnerLoader);
+
+                LightLoader lightLoader(&source);
+                output(lightLoader);
+
                 output(ResourceManager::GetInstance());
 
                 const auto view = source.view<sgTransform, Renderable, Collideable>();
@@ -164,6 +171,9 @@ namespace sage
 
                 SpawnerLoader spawnerLoader(destination);
                 input(spawnerLoader);
+
+                LightLoader lightLoader(destination);
+                input(lightLoader);
 
                 input(ResourceManager::GetInstance());
 
