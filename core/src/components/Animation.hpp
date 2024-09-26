@@ -38,7 +38,6 @@ namespace sage
     };
 
     // TODO: Use a timer for animation delay
-    // TODO: Add queue/priorities for animations
     struct Animation
     {
         struct AnimData

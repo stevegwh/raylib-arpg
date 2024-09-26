@@ -31,7 +31,9 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
+#include "components/Weapon.hpp"
 #include "raymath.h"
+
 #include <slib.hpp>
 
 #include <iostream>
@@ -232,6 +234,19 @@ namespace sage
 
         registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
+
+        {
+            auto weaponId = registry->create();
+            auto& weapon = registry->emplace<Weapon>(weaponId);
+            weapon.owner = id;
+            auto& weaponTrans = registry->emplace<sgTransform>(weaponId, weaponId);
+            weaponTrans.SetParent(&transform);
+            auto& weaponRend = registry->emplace<Renderable>(
+                weaponId,
+                ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
+                MatrixScale(3.0f, 3.0f, 3.0f));
+        }
+
         return id;
     }
 

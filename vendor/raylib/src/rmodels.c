@@ -4132,17 +4132,20 @@ RayCollision GetRayCollisionSphere(Ray ray, Vector3 center, float radius)
         getFirstCollision.distance = vector + sqrtf(d);
 
         // Calculate getFirstCollision point
-        getFirstCollision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, getFirstCollision.distance));
+        getFirstCollision.point =
+            Vector3Add(ray.position, Vector3Scale(ray.direction, getFirstCollision.distance));
 
         // Calculate getFirstCollision normal (pointing outwards)
-        getFirstCollision.normal = Vector3Negate(Vector3Normalize(Vector3Subtract(getFirstCollision.point, center)));
+        getFirstCollision.normal =
+            Vector3Negate(Vector3Normalize(Vector3Subtract(getFirstCollision.point, center)));
     }
     else
     {
         getFirstCollision.distance = vector - sqrtf(d);
 
         // Calculate getFirstCollision point
-        getFirstCollision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, getFirstCollision.distance));
+        getFirstCollision.point =
+            Vector3Add(ray.position, Vector3Scale(ray.direction, getFirstCollision.distance));
 
         // Calculate getFirstCollision normal (pointing inwards)
         getFirstCollision.normal = Vector3Normalize(Vector3Subtract(getFirstCollision.point, center));
@@ -4249,7 +4252,8 @@ RayCollision GetRayCollisionMesh(Ray ray, Mesh mesh, Matrix transform)
             if (triHitInfo.hit)
             {
                 // Save the closest hit triangle
-                if ((!getFirstCollision.hit) || (getFirstCollision.distance > triHitInfo.distance)) getFirstCollision = triHitInfo;
+                if ((!getFirstCollision.hit) || (getFirstCollision.distance > triHitInfo.distance))
+                    getFirstCollision = triHitInfo;
             }
         }
     }
