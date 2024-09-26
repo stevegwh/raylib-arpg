@@ -12,7 +12,7 @@ uniform vec4 colDiffuse;
 // Output fragment color
 out vec4 finalColor;
 
-#define     MAX_LIGHTS              10
+#define     MAX_LIGHTS              11
 #define     LIGHT_DIRECTIONAL       0
 #define     LIGHT_POINT             1
 
@@ -30,8 +30,8 @@ uniform vec4 ambient;
 uniform vec3 viewPos;
 
 // Light control parameters (to be replaced with uniforms later)
-const float lightReachMultiplier = 2.0; // Adjusts how far the light reaches
-const float lightPowerMultiplier = 1.3; // Adjusts the intensity of the light
+const float lightReachMultiplier = 0.8; // Adjusts how far the light reaches
+const float lightPowerMultiplier = 1.4; // Adjusts the intensity of the light
 
 void main()
 {

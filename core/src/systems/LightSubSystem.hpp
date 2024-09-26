@@ -37,7 +37,7 @@
 #include "raylib.h"
 #include <entt/entt.hpp>
 
-#define MAX_LIGHTS 10 // Max dynamic lights supported by shader
+#define MAX_LIGHTS 11 // Max dynamic lights supported by shader
 
 namespace sage
 {
