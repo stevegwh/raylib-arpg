@@ -1,38 +1,9 @@
-/**********************************************************************************************
- *
- *   raylib.lights - Some useful functions to deal with lights data
- *
- *   CONFIGURATION:
- *
- *   #define RLIGHTS_IMPLEMENTATION
- *       Generates the implementation of the library into the included file.
- *       If not defined, the library is in header only mode and can be included in other headers
- *       or source files without problems. But only ONE file should hold the implementation.
- *
- *   LICENSE: zlib/libpng
- *
- *   Copyright (c) 2017-2023 Victor Fisac (@victorfisac) and Ramon Santamaria (@raysan5)
- *
- *   This software is provided "as-is", without any express or implied warranty. In no event
- *   will the authors be held liable for any damages arising from the use of this software.
- *
- *   Permission is granted to anyone to use this software for any purpose, including commercial
- *   applications, and to alter it and redistribute it freely, subject to the following restrictions:
- *
- *     1. The origin of this software must not be misrepresented; you must not claim that you
- *     wrote the original software. If you use this software in a product, an acknowledgment
- *     in the product documentation would be appreciated but is not required.
- *
- *     2. Altered source versions must be plainly marked as such, and must not be misrepresented
- *     as being the original software.
- *
- *     3. This notice may not be removed or altered from any source distribution.
- *
- **********************************************************************************************/
+
 
 #include "LightSubSystem.hpp"
 
 #include "Camera.hpp"
+#include "components/Light.hpp"
 #include "components/Renderable.hpp"
 
 namespace sage
@@ -68,38 +39,14 @@ namespace sage
         }
     }
 
-    void LightSubSystem::DrawDebugLights() const
+    void LightSubSystem::UpdateAmbientLight(float r, float g, float b, float a) const
     {
-        // for (auto& light : lights)
-        // {
-        //     if (light.enabled)
-        //         DrawSphereEx(light.position, 0.2f, 8, 8, light.color);
-        //     else
-        //         DrawSphereWires(light.position, 0.2f, 8, 8, ColorAlpha(light.color, 0.3f));
-        // }
+        // Ambient light level (some basic lighting)
+        float ambientValue[4] = {r, g, b, a};
+        SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
 
-    void LightSubSystem::AddLight(Vector3 pos, Color col)
-    {
-        if (lightsCount >= MAX_LIGHTS)
-        {
-            std::cout << "Scene: Max light sources reached. Ignoring. \n";
-            return;
-        }
-
-        auto light = createLight(LIGHT_POINT, pos, {}, col, shader);
-        auto entity = registry->create();
-        registry->emplace<Light>(entity, light);
-    }
-
-    void LightSubSystem::Update() const
-    {
-        auto [x, y, z] = camera->GetPosition();
-        const float cameraPos[3] = {x, y, z};
-        SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
-    }
-
-    void LightSubSystem::LinkAllLights()
+    void LightSubSystem::RefreshLights()
     {
         for (const auto view = registry->view<Light>(); auto& entity : view)
         {
@@ -118,18 +65,34 @@ namespace sage
         SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
     }
 
+    void LightSubSystem::DrawDebugLights() const
+    {
+        for (const auto view = registry->view<Light>(); auto& entity : view)
+        {
+            auto& light = registry->get<Light>(entity);
+            if (light.enabled)
+                DrawSphereEx(light.position, 0.2f, 8, 8, light.color);
+            else
+                DrawSphereWires(light.position, 0.2f, 8, 8, ColorAlpha(light.color, 0.3f));
+        }
+    }
+
+    void LightSubSystem::Update() const
+    {
+        auto [x, y, z] = camera->GetPosition();
+        const float cameraPos[3] = {x, y, z};
+        SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+    }
+
     LightSubSystem::LightSubSystem(entt::registry* _registry, Camera* _camera)
         : registry(_registry), camera(_camera)
     {
         shader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
-        // Ambient light level (some basic lighting)
-        float ambientValue[4] = {0.4f, 0.1f, 0.6f, 1.0f};
         ambientLoc = GetShaderLocation(shader, "ambient");
-        SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
+        UpdateAmbientLight(0.4f, 0.1f, 0.6f, 1.0f);
         lightsCountLoc = GetShaderLocation(shader, "lightsCount");
         SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
-
-        LinkAllLights();
+        RefreshLights();
     }
 } // namespace sage
