@@ -91,10 +91,6 @@ namespace sage
             {
                 GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, "Goblin");
             }
-            else if (spawner.spawnerType == SpawnerType::LIGHT)
-            {
-                data->lightSubSystem->AddLight(spawner.pos, RAYWHITE);
-            }
         }
         // registry->erase<Spawner>(view.begin(), view.end());
 
