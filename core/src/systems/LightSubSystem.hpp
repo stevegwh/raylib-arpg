@@ -37,7 +37,7 @@
 #include "raylib.h"
 #include <entt/entt.hpp>
 
-#define MAX_LIGHTS 11 // Max dynamic lights supported by shader
+#define MAX_LIGHTS 25 // Max dynamic lights supported by shader
 
 namespace sage
 {
@@ -54,6 +54,8 @@ namespace sage
         entt::registry* registry;
         Camera* camera;
         Shader shader{};
+        int ambientLoc;
+        int lightsCountLoc;
         int lightsCount = 0;
         // std::vector<Light> lights{};
 
