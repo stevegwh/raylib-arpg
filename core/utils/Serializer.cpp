@@ -4,30 +4,28 @@
 
 #include "Serializer.hpp"
 
+#include "abilities/AbilityData.hpp"
+#include "AssetSerializer.hpp"
+#include "components/Collideable.hpp"
+#include "components/Light.hpp"
+#include "components/Renderable.hpp"
+#include "components/sgTransform.hpp"
+#include "components/Spawner.hpp"
+#include "GameData.hpp"
+
 #include "cereal/archives/binary.hpp"
 #include "cereal/archives/xml.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
-#include "GameData.hpp"
-#include "LightLoader.hpp"
 #include "raylib-cereal.hpp"
 #include "raylib.h"
-#include "SpawnerLoader.hpp"
 
 #include <cereal/archives/json.hpp>
 #include <fstream>
 #include <type_traits>
 #include <vector>
-
-#include "abilities/AbilityData.hpp"
-#include "components/Collideable.hpp"
-#include "components/Light.hpp"
-#include "components/Renderable.hpp"
-#include "components/sgTransform.hpp"
-
-#include <algorithm>
 
 namespace sage
 {
@@ -128,10 +126,10 @@ namespace sage
                 // output finishes flushing its contents when it goes out of scope
                 cereal::BinaryOutputArchive output{storage};
 
-                SpawnerLoader spawnerLoader(&source);
+                AssetSerializer<Spawner> spawnerLoader(&source);
                 output(spawnerLoader);
 
-                LightLoader lightLoader(&source);
+                AssetSerializer<Light> lightLoader(&source);
                 output(lightLoader);
 
                 output(ResourceManager::GetInstance());
@@ -169,10 +167,10 @@ namespace sage
             {
                 cereal::BinaryInputArchive input(storage);
 
-                SpawnerLoader spawnerLoader(destination);
+                AssetSerializer<Spawner> spawnerLoader(destination);
                 input(spawnerLoader);
 
-                LightLoader lightLoader(destination);
+                AssetSerializer<Light> lightLoader(destination);
                 input(lightLoader);
 
                 input(ResourceManager::GetInstance());
