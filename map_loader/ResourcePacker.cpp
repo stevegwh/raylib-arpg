@@ -10,9 +10,11 @@
 #include <ResourceManager.hpp>
 #include <Serializer.hpp>
 
+#include "components/Light.hpp"
 #include "components/Spawner.hpp"
 #include "raylib.h"
 #include "raymath.h"
+#include "systems/LightSubSystem.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -27,17 +29,22 @@ namespace sage
 
     constexpr float WORLD_SCALE = 5.0f;
 
+    Vector3 scaleFromOrigin(const Vector3& point, float scale)
+    {
+        return Vector3Scale(point, scale);
+    }
+
     CollisionLayer setCollisionLayer(const std::string& objectName)
     {
         if (objectName.find("_BLD_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
-        else if (objectName.find("_WALL_") != std::string::npos)
+        if (objectName.find("_WALL_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
-        else if (objectName.find("_HOLE_") != std::string::npos)
+        if (objectName.find("_HOLE_") != std::string::npos)
         {
             return CollisionLayer::BUILDING;
         }
@@ -122,77 +129,119 @@ namespace sage
         return mapBB;
     }
 
-    Vector3 scaleFromOrigin(const Vector3& point, float scale)
+    std::string readLine(std::ifstream& infile, const std::string& key)
     {
-        return Vector3Scale(point, scale);
+        std::string line;
+        std::getline(infile, line);
+        if (line.substr(0, key.length()) != key)
+        {
+            throw std::runtime_error("Expected key '" + key + "' not found");
+        }
+        return line.substr(key.length() + 2); // +2 to skip ": "
     }
 
-    void processTxtFile(
-        entt::registry* registry,
-        const fs::path& meshPath,
-        const fs::path& txtPath,
-        std::vector<Collideable*>& floorMeshes)
+    void HandleLight(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
     {
-        std::ifstream infile(txtPath);
-        std::string line;
-        std::string objectName, meshName;
-        float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
-
-        auto readLine = [&infile](const std::string& key) {
-            std::string line;
-            std::getline(infile, line);
-            if (line.substr(0, key.length()) != key)
-            {
-                throw std::runtime_error("Expected key '" + key + "' not found");
-            }
-            return line.substr(key.length() + 2); // +2 to skip ": "
-        };
-
+        std::string meshName, objectName;
+        float x, y, z;
+        int r, g, b, s;
         try
         {
-            objectName = readLine("name");
-            meshName = readLine("mesh");
+            objectName = readLine(infile, "name");
 
-            std::istringstream locStream(readLine("location"));
+            std::istringstream locStream(readLine(infile, "location"));
             locStream >> x >> y >> z;
 
-            std::istringstream rotStream(readLine("rotation"));
+            std::istringstream rgbStream(readLine(infile, "color"));
+            rgbStream >> r >> g >> b;
+
+            std::istringstream strStream(readLine(infile, "strength"));
+            strStream >> s;
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error parsing spawner data: " << e.what() << std::endl;
+            assert(0);
+        }
+
+        auto entity = registry->create();
+        auto& light = registry->emplace<Light>(entity);
+        light.type = LIGHT_POINT;
+        light.target = Vector3Zero();
+        light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
+        light.color =
+            Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 1};
+        light.attenuation = s;
+    }
+
+    void HandleSpawner(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
+    {
+        std::string objectName;
+        float x, y, z, rotx, roty, rotz;
+        try
+        {
+            objectName = readLine(infile, "name");
+
+            std::istringstream locStream(readLine(infile, "location"));
+            locStream >> x >> y >> z;
+
+            std::istringstream rotStream(readLine(infile, "rotation"));
+            rotStream >> rotx >> roty >> rotz;
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error parsing spawner data: " << e.what() << std::endl;
+            assert(0);
+        }
+
+        auto entity = registry->create();
+
+        Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
+        auto& spawner = registry->emplace<Spawner>(entity);
+        spawner.pos = {scaledPosition.x, scaledPosition.y, scaledPosition.z};
+        spawner.rot = {rotx, roty, rotz};
+        if (objectName.find("Goblin") != std::string::npos)
+        {
+            spawner.spawnerType = SpawnerType::GOBLIN;
+        }
+        else if (objectName.find("Player") != std::string::npos)
+        {
+            spawner.spawnerType = SpawnerType::PLAYER;
+        }
+    }
+
+    void HandleMesh(
+        entt::registry* registry,
+        std::ifstream& infile,
+        const fs::path& meshPath,
+        std::vector<Collideable*>& floorMeshes)
+    {
+        std::string meshName, objectName;
+        float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
+        try
+        {
+            objectName = readLine(infile, "name");
+            meshName = readLine(infile, "mesh");
+
+            std::istringstream locStream(readLine(infile, "location"));
+            locStream >> x >> y >> z;
+
+            std::istringstream rotStream(readLine(infile, "rotation"));
             rotStream >> rotx >> roty >> rotz;
 
-            std::istringstream scaleStream(readLine("scale"));
+            std::istringstream scaleStream(readLine(infile, "scale"));
             scaleStream >> scalex >> scaley >> scalez;
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Error parsing file " << txtPath << ": " << e.what() << std::endl;
-            return;
+            std::cerr << "Error parsing mesh data: " << e.what() << std::endl;
+            assert(0);
         }
 
         fs::path fullMeshPath = meshPath / meshName;
         std::string meshKey = fullMeshPath.generic_string();
 
         auto entity = registry->create();
-
-        if (objectName.find("Spawner") != std::string::npos)
-        {
-            Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
-            auto& spawner = registry->emplace<Spawner>(entity);
-            spawner.pos = {scaledPosition.x, scaledPosition.y, scaledPosition.z};
-            spawner.rot = {rotx, roty, rotz};
-            if (objectName.find("Goblin") != std::string::npos)
-            {
-                spawner.spawnerType = SpawnerType::GOBLIN;
-            }
-            else if (objectName.find("Player") != std::string::npos)
-            {
-                spawner.spawnerType = SpawnerType::PLAYER;
-            }
-            else if (objectName.find("Light") != std::string::npos)
-            {
-                spawner.spawnerType = SpawnerType::LIGHT;
-            }
-            return;
-        }
 
         auto model = ResourceManager::GetInstance().GetModelCopy(meshKey);
         assert(!meshKey.empty());
@@ -218,6 +267,39 @@ namespace sage
         if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE ||
             collideable.collisionLayer == CollisionLayer::FLOORCOMPLEX)
             floorMeshes.push_back(&collideable);
+    }
+
+    void processTxtFile(
+        entt::registry* registry,
+        const fs::path& meshPath,
+        const fs::path& txtPath,
+        std::vector<Collideable*>& floorMeshes)
+    {
+        std::string typeName;
+        std::ifstream infile(txtPath);
+
+        try
+        {
+            typeName = readLine(infile, "type");
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error parsing file " << txtPath << ": " << e.what() << std::endl;
+            assert(0);
+        }
+
+        if (typeName.find("spawner") != std::string::npos)
+        {
+            HandleSpawner(registry, infile, meshPath);
+        }
+        else if (typeName.find("light") != std::string::npos)
+        {
+            HandleLight(registry, infile, meshPath);
+        }
+        else
+        {
+            HandleMesh(registry, infile, meshPath, floorMeshes);
+        }
     }
 
     void ResourcePacker::ConstructMap(

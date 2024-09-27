@@ -12,7 +12,7 @@ uniform vec4 colDiffuse;
 // Output fragment color
 out vec4 finalColor;
 
-#define     MAX_LIGHTS              10
+#define     MAX_LIGHTS              25
 #define     LIGHT_DIRECTIONAL       0
 #define     LIGHT_POINT             1
 
@@ -22,16 +22,18 @@ struct Light {
     vec3 position;
     vec3 target;
     vec4 color;
+    float attenuation; // Not used, currently
 };
 
 // Input lighting values
+uniform int lightsCount;
 uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 uniform vec3 viewPos;
 
 // Light control parameters (to be replaced with uniforms later)
-const float lightReachMultiplier = 2.0; // Adjusts how far the light reaches
-const float lightPowerMultiplier = 1.3; // Adjusts the intensity of the light
+const float lightReachMultiplier = 0.8; // Adjusts how far the light reaches
+const float lightPowerMultiplier = 1.4; // Adjusts the intensity of the light
 
 void main()
 {
@@ -42,7 +44,7 @@ void main()
     vec3 viewD = normalize(viewPos - fragPosition);
     vec3 specular = vec3(0.0);
 
-    for (int i = 0; i < MAX_LIGHTS; i++)
+    for (int i = 0; i < lightsCount; i++)
     {
         if (lights[i].enabled == 1)
         {
@@ -59,7 +61,6 @@ void main()
                 vec3 lightVector = lights[i].position - fragPosition;
                 light = normalize(lightVector);
                 
-                // Calculate attenuation with adjustable reach and power
                 float distance = length(lightVector);
                 float constant = 1.0;
                 float linear = 0.09 / lightReachMultiplier;
