@@ -22,6 +22,7 @@ struct Light {
     vec3 position;
     vec3 target;
     vec4 color;
+    float attenuation; // Not used, currently
 };
 
 // Input lighting values
@@ -60,7 +61,6 @@ void main()
                 vec3 lightVector = lights[i].position - fragPosition;
                 light = normalize(lightVector);
                 
-                // Calculate attenuation with adjustable reach and power
                 float distance = length(lightVector);
                 float constant = 1.0;
                 float linear = 0.09 / lightReachMultiplier;

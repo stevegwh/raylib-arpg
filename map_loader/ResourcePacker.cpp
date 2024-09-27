@@ -171,7 +171,7 @@ namespace sage
         light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         light.color =
             Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 1};
-        // light.attenuation = s;
+        light.attenuation = s;
     }
 
     void HandleSpawner(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
