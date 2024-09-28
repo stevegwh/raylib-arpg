@@ -23,8 +23,8 @@ namespace sage
 {
     struct ModelCereal
     {
-        Model model;
-        std::string key;
+        Model model{};
+        std::string key{};
         template <class Archive>
         void serialize(Archive& archive)
         {
