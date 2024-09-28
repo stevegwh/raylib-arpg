@@ -243,14 +243,12 @@ namespace sage
             auto& weaponTrans = registry->emplace<sgTransform>(weaponId, weaponId);
             weaponTrans.SetParent(&transform);
             weaponTrans.SetLocalPos(Vector3Zero());
+            // registry->emplace<Renderable>(weaponId,
+            // ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
+            // renderable.initialTransform);
             Model weaponModel =
                 LoadModel(AssetManager::GetInstance().GetAssetPath(AssetID::MDL_WPN_DAGGER01).c_str());
-            auto& weaponRend = registry->emplace<Renderable>(weaponId, weaponModel, MatrixScale(3.0f, 3.0f, 3.0f));
-            auto weaponMesh = weaponModel.meshes[0];
-            weaponMesh.animVertices = static_cast<float*>(RL_MALLOC(weaponMesh.vertexCount * 3 * sizeof(float)));
-            memcpy(weaponMesh.animVertices, weaponMesh.vertices, weaponMesh.vertexCount * 3 * sizeof(float));
-            weaponMesh.animNormals = static_cast<float*>(RL_MALLOC(weaponMesh.vertexCount * 3 * sizeof(float)));
-            memcpy(weaponMesh.animNormals, weaponMesh.normals, weaponMesh.vertexCount * 3 * sizeof(float));
+            registry->emplace<Renderable>(weaponId, weaponModel, renderable.initialTransform);
         }
 
         return id;
