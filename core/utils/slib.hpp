@@ -96,6 +96,8 @@ namespace sage
     Vector2 Vec3ToVec2(const Vector3& vec3);
     Vector3 NegateVector(const Vector3& vec3);
     Vector3 Vector3MultiplyByValue(const Vector3& vec3, float value);
-    Transform GetCurrentBoneTransform(Model& model, const char* boneName, ModelAnimation& anim, int frame);
+    void UpdateWeaponModelAnimation(
+        const char* boneName, Model model, Model weapon, ModelAnimation anim, int frame);
+    Matrix GetCurrentBoneMatrix(Model& model, const char* boneName, ModelAnimation& anim, int frame);
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer);
 } // namespace sage

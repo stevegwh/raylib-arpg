@@ -9,6 +9,7 @@
 namespace sage
 {
 
+    // Not really used
     Light LightSubSystem::createLight(int type, Vector3 position, Vector3 target, Color color, Shader shader)
     {
         Light light = {0};
@@ -90,7 +91,7 @@ namespace sage
         shader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
         ambientLoc = GetShaderLocation(shader, "ambient");
-        UpdateAmbientLight(0.4f, 0.1f, 0.6f, 1.0f);
+        UpdateAmbientLight(0.6f, 0.2f, 0.8f, 1.0f);
         lightsCountLoc = GetShaderLocation(shader, "lightsCount");
         SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
         RefreshLights();

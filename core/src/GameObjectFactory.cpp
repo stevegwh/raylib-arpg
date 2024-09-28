@@ -24,6 +24,7 @@
 #include "components/States.hpp"
 
 #include "AbilityFactory.hpp"
+#include "AssetManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
@@ -241,10 +242,15 @@ namespace sage
             weapon.owner = id;
             auto& weaponTrans = registry->emplace<sgTransform>(weaponId, weaponId);
             weaponTrans.SetParent(&transform);
-            auto& weaponRend = registry->emplace<Renderable>(
-                weaponId,
-                ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
-                MatrixScale(3.0f, 3.0f, 3.0f));
+            weaponTrans.SetLocalPos(Vector3Zero());
+            Model weaponModel =
+                LoadModel(AssetManager::GetInstance().GetAssetPath(AssetID::MDL_WPN_DAGGER01).c_str());
+            auto& weaponRend = registry->emplace<Renderable>(weaponId, weaponModel, MatrixScale(3.0f, 3.0f, 3.0f));
+            auto weaponMesh = weaponModel.meshes[0];
+            weaponMesh.animVertices = static_cast<float*>(RL_MALLOC(weaponMesh.vertexCount * 3 * sizeof(float)));
+            memcpy(weaponMesh.animVertices, weaponMesh.vertices, weaponMesh.vertexCount * 3 * sizeof(float));
+            weaponMesh.animNormals = static_cast<float*>(RL_MALLOC(weaponMesh.vertexCount * 3 * sizeof(float)));
+            memcpy(weaponMesh.animNormals, weaponMesh.normals, weaponMesh.vertexCount * 3 * sizeof(float));
         }
 
         return id;
