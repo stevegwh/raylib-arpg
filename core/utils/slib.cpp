@@ -315,6 +315,74 @@ namespace sage
         return matTransform;
     }
 
+    Matrix* GetBoneMatrices(Model model, ModelAnimation anim, int frame)
+    {
+        auto* boneMatrices = static_cast<Matrix*>(RL_CALLOC(model.boneCount, sizeof(Matrix)));
+        if ((anim.frameCount > 0) && (anim.bones != NULL) && (anim.framePoses != NULL))
+        {
+            if (frame >= anim.frameCount) frame = frame % anim.frameCount;
+
+            if (boneMatrices)
+            {
+                for (int boneId = 0; boneId < model.boneCount; boneId++)
+                {
+                    Vector3 inTranslation = model.bindPose[boneId].translation;
+                    Quaternion inRotation = model.bindPose[boneId].rotation;
+                    Vector3 inScale = model.bindPose[boneId].scale;
+
+                    Vector3 outTranslation = anim.framePoses[frame][boneId].translation;
+                    Quaternion outRotation = anim.framePoses[frame][boneId].rotation;
+                    Vector3 outScale = anim.framePoses[frame][boneId].scale;
+
+                    Vector3 invTranslation =
+                        Vector3RotateByQuaternion(Vector3Negate(inTranslation), QuaternionInvert(inRotation));
+                    Quaternion invRotation = QuaternionInvert(inRotation);
+                    Vector3 invScale = Vector3Divide((Vector3){1.0f, 1.0f, 1.0f}, inScale);
+
+                    Vector3 boneTranslation = Vector3Add(
+                        Vector3RotateByQuaternion(Vector3Multiply(outScale, invTranslation), outRotation),
+                        outTranslation);
+                    Quaternion boneRotation = QuaternionMultiply(outRotation, invRotation);
+                    Vector3 boneScale = Vector3Multiply(outScale, invScale);
+
+                    Matrix boneMatrix = MatrixMultiply(
+                        MatrixMultiply(
+                            QuaternionToMatrix(boneRotation),
+                            MatrixTranslate(boneTranslation.x, boneTranslation.y, boneTranslation.z)),
+                        MatrixScale(boneScale.x, boneScale.y, boneScale.z));
+
+                    boneMatrices[boneId] = boneMatrix;
+                }
+            }
+        }
+        return boneMatrices;
+    }
+
+    Matrix GetBoneWorldTransform(const BoneInfo* bones, const Matrix* boneTransforms, int boneIndex)
+    {
+        int parentIndex = bones[boneIndex].parent;
+        Matrix result = boneTransforms[boneIndex];
+
+        while (parentIndex >= 0)
+        {
+            result = MatrixMultiply(boneTransforms[parentIndex], result);
+            parentIndex = bones[parentIndex].parent;
+        }
+        return result;
+    }
+
+    int GetBoneIdByName(const BoneInfo* bones, int numBones, const char* boneName)
+    {
+        for (int i = 0; i < numBones; ++i)
+        {
+            if (strcmp(bones[i].name, boneName) == 0)
+            {
+                return i; // Found the bone, return its index
+            }
+        }
+        return -1; // Bone not found
+    }
+
     /**
      * Generates a gradient with transperency (raylib version does not have transparency)
      */

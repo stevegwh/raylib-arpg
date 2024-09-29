@@ -165,14 +165,19 @@ namespace sage
 
         std::vector<int> meshMaterials(model.meshMaterial, model.meshMaterial + model.meshCount);
 
-        // auto holder = renderable.GetModel()->GetMesh(2);
-        // auto copy2 = renderable.GetModel()->GetMesh(1);
-        // int matCopy = model.meshMaterial[2];
-        // int matCopy2 = model.meshMaterial[1];
-        // model.meshes[1] = holder;
-        // model.meshes[2] = copy2;
-        // model.meshMaterial[1] = matCopy2;
-        // model.meshMaterial[2] = matCopy;
+        // Below swaps sword and dagger meshes
+        // int holderIdx = 2;
+        // int copyIdx = 3;
+        // auto holder = renderable.GetModel()->GetMesh(holderIdx);
+        // auto copy = renderable.GetModel()->GetMesh(copyIdx);
+        // int matHolder = model.meshMaterial[holderIdx];
+        // int matCopy = model.meshMaterial[copyIdx];
+        // model.meshes[copyIdx] = holder;
+        // model.meshes[holderIdx] = copy;
+        // model.meshMaterial[copyIdx] = matHolder;
+        // model.meshMaterial[holderIdx] = matCopy;
+
+        // -= 2 makes player unarmed
         model.meshCount -= 1;
 
         auto& moveable = registry->emplace<MoveableActor>(id);
@@ -252,6 +257,15 @@ namespace sage
 
         registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
+
+        // auto weaponEntity = registry->create();
+        // auto& weapon = registry->emplace<Weapon>(weaponEntity);
+        // weapon.owner = id;
+        // registry->emplace<Renderable>(
+        //     weaponEntity, LoadModel("resources/models/gltf/sword.glb"), MatrixScale(0.035, 0.035, 0.035));
+        // auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
+        // weaponTrans.SetParent(&transform);
+        // weaponTrans.SetLocalPos(Vector3Zero());
 
         return id;
     }
