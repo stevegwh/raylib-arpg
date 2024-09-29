@@ -158,6 +158,23 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = "Player";
 
+        std::vector<Mesh> meshes(
+            renderable.GetModel()->GetRlModel().meshes,
+            renderable.GetModel()->GetRlModel().meshes + renderable.GetModel()->GetRlModel().meshCount);
+        Model& model = renderable.GetModel()->GetRlModel();
+
+        std::vector<int> meshMaterials(model.meshMaterial, model.meshMaterial + model.meshCount);
+
+        // auto holder = renderable.GetModel()->GetMesh(2);
+        // auto copy2 = renderable.GetModel()->GetMesh(1);
+        // int matCopy = model.meshMaterial[2];
+        // int matCopy2 = model.meshMaterial[1];
+        // model.meshes[1] = holder;
+        // model.meshes[2] = copy2;
+        // model.meshMaterial[1] = matCopy2;
+        // model.meshMaterial[2] = matCopy;
+        model.meshCount -= 1;
+
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 150;
@@ -167,7 +184,7 @@ namespace sage
 
         animation.animationMap[AnimationEnum::WALK] = 1;
         animation.animationMap[AnimationEnum::TALK] = 2;
-        animation.animationMap[AnimationEnum::AUTOATTACK] = 3;
+        animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
         animation.animationMap[AnimationEnum::RUN] = 4;
         animation.animationMap[AnimationEnum::IDLE] = 10;
         animation.animationMap[AnimationEnum::SPIN] = 5;
@@ -235,21 +252,6 @@ namespace sage
 
         registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
-
-        {
-            auto weaponId = registry->create();
-            auto& weapon = registry->emplace<Weapon>(weaponId);
-            weapon.owner = id;
-            auto& weaponTrans = registry->emplace<sgTransform>(weaponId, weaponId);
-            weaponTrans.SetParent(&transform);
-            weaponTrans.SetLocalPos(Vector3Zero());
-            // registry->emplace<Renderable>(weaponId,
-            // ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
-            // renderable.initialTransform);
-            Model weaponModel =
-                LoadModel(AssetManager::GetInstance().GetAssetPath(AssetID::MDL_WPN_DAGGER01).c_str());
-            registry->emplace<Renderable>(weaponId, weaponModel, renderable.initialTransform);
-        }
 
         return id;
     }

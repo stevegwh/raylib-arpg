@@ -89,7 +89,7 @@ namespace sage
     {
     }
 
-    const Model& ModelSafe::GetRlModel() const
+    Model& ModelSafe::GetRlModel()
     {
         return rlmodel;
     }
@@ -303,161 +303,16 @@ namespace sage
         return {vec3.x * value, vec3.y * value, vec3.z * value};
     }
 
-    void UpdateWeaponModelAnimation(
-        const char* boneName, Model model, Model weapon, ModelAnimation anim, int frame)
+    Matrix ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale)
     {
-        // TODO: I think this method would require transforming the weapon using the model's matrix then return it
-        Mesh mesh = weapon.meshes[0];
-        int boneId = -1;
+        Matrix matTranslation = MatrixTranslate(translation.x, translation.y, translation.z);
+        Matrix matRotation = QuaternionToMatrix(rotation);
+        Matrix matScale = MatrixScale(scale.x, scale.y, scale.z);
 
-        for (int i = 0; i < model.boneCount; ++i)
-        {
-            if (strcmp(model.bones[i].name, boneName) == 0)
-            {
-                boneId = model.bones[i].parent;
-                break;
-            }
-        }
+        // Apply transformations in order: Scale -> Rotate -> Translate
+        Matrix matTransform = MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
 
-        if (boneId == -1)
-        {
-            std::cout << "WARNING: Could not find requested bone: " << boneName << "\n";
-            assert(false);
-        }
-
-        bool updated = false; // Flag to check when anim vertex information is updated
-        Vector3 animVertex = {0};
-        Vector3 animNormal = {0};
-
-        Vector3 inTranslation = {0};
-        Quaternion inRotation = {0};
-        // Vector3 inScale = { 0 };
-
-        Vector3 outTranslation = {0};
-        Quaternion outRotation = {0};
-        Vector3 outScale = {0};
-
-        int boneCounter = 0;
-        float boneWeight = 0.0;
-
-        const int vValues = mesh.vertexCount * 3;
-        for (int vCounter = 0; vCounter < vValues; vCounter += 3)
-        {
-            mesh.animVertices[vCounter] = 0;
-            mesh.animVertices[vCounter + 1] = 0;
-            mesh.animVertices[vCounter + 2] = 0;
-
-            if (mesh.animNormals != NULL)
-            {
-                mesh.animNormals[vCounter] = 0;
-                mesh.animNormals[vCounter + 1] = 0;
-                mesh.animNormals[vCounter + 2] = 0;
-            }
-
-            // Iterates over 4 bones per vertex
-            for (int j = 0; j < 4; j++, boneCounter++)
-            {
-
-                // boneId = mesh.boneIds[boneCounter];
-                // int boneIdParent = model.bones[boneId].parent;
-                inTranslation = model.bindPose[boneId].translation;
-                inRotation = model.bindPose[boneId].rotation;
-                // inScale = model.bindPose[boneId].scale;
-                outTranslation = anim.framePoses[frame][boneId].translation;
-                outRotation = anim.framePoses[frame][boneId].rotation;
-                outScale = anim.framePoses[frame][boneId].scale;
-
-                // Vertices processing
-                // NOTE: We use meshes.vertices (default vertex position) to calculate meshes.animVertices
-                // (animated vertex position)
-                animVertex =
-                    (Vector3){mesh.vertices[vCounter], mesh.vertices[vCounter + 1], mesh.vertices[vCounter + 2]};
-                animVertex = Vector3Subtract(animVertex, inTranslation);
-                animVertex = Vector3Multiply(animVertex, outScale);
-                animVertex = Vector3RotateByQuaternion(
-                    animVertex, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
-                animVertex = Vector3Add(animVertex, outTranslation);
-                // animVertex = Vector3Transform(animVertex, model.transform);
-                mesh.animVertices[vCounter] += animVertex.x * boneWeight;
-                mesh.animVertices[vCounter + 1] += animVertex.y * boneWeight;
-                mesh.animVertices[vCounter + 2] += animVertex.z * boneWeight;
-                updated = true;
-
-                // Normals processing
-                // NOTE: We use meshes.baseNormals (default normal) to calculate meshes.normals (animated
-                // normals)
-                if (mesh.normals != NULL)
-                {
-                    animNormal =
-                        (Vector3){mesh.normals[vCounter], mesh.normals[vCounter + 1], mesh.normals[vCounter + 2]};
-                    animNormal = Vector3RotateByQuaternion(
-                        animNormal, QuaternionMultiply(outRotation, QuaternionInvert(inRotation)));
-                    mesh.animNormals[vCounter] += animNormal.x * boneWeight;
-                    mesh.animNormals[vCounter + 1] += animNormal.y * boneWeight;
-                    mesh.animNormals[vCounter + 2] += animNormal.z * boneWeight;
-                }
-            }
-        }
-
-        // Upload new vertex data to GPU for model drawing
-        // NOTE: Only update data when values changed
-        if (updated)
-        {
-            rlUpdateVertexBuffer(
-                mesh.vboId[0],
-                mesh.animVertices,
-                mesh.vertexCount * 3 * sizeof(float),
-                0); // Update vertex position
-            rlUpdateVertexBuffer(
-                mesh.vboId[2],
-                mesh.animNormals,
-                mesh.vertexCount * 3 * sizeof(float),
-                0); // Update vertex normals
-        }
-    }
-
-    Matrix GetCurrentBoneMatrix(Model& model, const char* boneName, ModelAnimation& anim, int frame)
-    {
-        int boneId = -1;
-
-        for (int i = 0; i < model.boneCount; ++i)
-        {
-            if (strcmp(model.bones[i].name, boneName) == 0)
-            {
-                boneId = model.bones[i].parent;
-                break;
-            }
-        }
-
-        if (boneId == -1)
-        {
-            std::cout << "WARNING: Could not find requested bone: " << boneName << "\n";
-            assert(false);
-            return MatrixIdentity();
-        }
-        Vector3 inTranslation = model.bindPose[boneId].translation;
-        Quaternion inRotation = model.bindPose[boneId].rotation;
-        Vector3 inScale = model.bindPose[boneId].scale;
-
-        Vector3 outTranslation = anim.framePoses[frame][boneId].translation;
-        Quaternion outRotation = anim.framePoses[frame][boneId].rotation;
-        Vector3 outScale = anim.framePoses[frame][boneId].scale;
-
-        Vector3 invTranslation =
-            Vector3RotateByQuaternion(Vector3Negate(inTranslation), QuaternionInvert(inRotation));
-        Quaternion invRotation = QuaternionInvert(inRotation);
-        Vector3 invScale = Vector3Divide((Vector3){1.0f, 1.0f, 1.0f}, inScale);
-
-        Vector3 boneTranslation = Vector3Add(
-            Vector3RotateByQuaternion(Vector3Multiply(outScale, invTranslation), outRotation), outTranslation);
-        Quaternion boneRotation = QuaternionMultiply(outRotation, invRotation);
-        Vector3 boneScale = Vector3Multiply(outScale, invScale);
-
-        Matrix boneMatrix = MatrixMultiply(
-            MatrixTranslate(boneTranslation.x, boneTranslation.y, boneTranslation.z),
-            MatrixMultiply(QuaternionToMatrix(boneRotation), MatrixScale(boneScale.x, boneScale.y, boneScale.z)));
-
-        return boneMatrix;
+        return matTransform;
     }
 
     /**

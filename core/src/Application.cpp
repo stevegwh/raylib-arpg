@@ -85,58 +85,6 @@ namespace sage
         }
     }
 
-    // void UpdateWeaponPositions(entt::registry* registry)
-    // {
-    //     for (auto [entity, weapon, weaponTrans, weaponRend] :
-    //          registry->view<Weapon, sgTransform, Renderable>().each())
-    //     {
-    //         auto& playerAnim = registry->get<Animation>(weapon.owner);
-    //         auto& modelAnim = playerAnim.animations[playerAnim.current.index];
-    //         auto& playerRend = registry->get<Renderable>(weapon.owner);
-    //         auto& playerTrans = registry->get<sgTransform>(weapon.owner);
-    //
-    //         Model playerModel = playerRend.GetModel()->GetRlModel();
-    //         Model weaponModel = weaponRend.GetModel()->GetRlModel();
-    //
-    //         UpdateWeaponModelAnimation(
-    //             "mixamorig:RightHandMiddle1",
-    //             playerModel,
-    //             weaponModel,
-    //             playerAnim.animations[playerAnim.current.index],
-    //             playerAnim.current.currentFrame);
-    //     }
-    // }
-
-    void UpdateWeaponPositions(entt::registry* registry)
-    {
-        for (auto [entity, weapon, weaponTrans, weaponRend] :
-             registry->view<Weapon, sgTransform, Renderable>().each())
-        {
-            auto& playerAnim = registry->get<Animation>(weapon.owner);
-            auto& modelAnim = playerAnim.animations[playerAnim.current.index];
-            auto& playerRend = registry->get<Renderable>(weapon.owner);
-            auto& playerTrans = registry->get<sgTransform>(weapon.owner);
-
-            Model playerModel = playerRend.GetModel()->GetRlModel();
-            Model weaponModel = weaponRend.GetModel()->GetRlModel();
-
-            // Get the bone transform in model space
-            auto boneTrans = GetCurrentBoneMatrix(
-                playerModel, "mixamorig:RightHandMiddle1", modelAnim, playerAnim.current.currentFrame);
-            auto mat = MatrixMultiply(boneTrans, playerModel.transform);
-            Vector3 translation;
-            Quaternion rotQuat;
-            Vector3 scale;
-            MatrixDecompose(mat, &translation, &rotQuat, &scale);
-            auto rot = QuaternionToEuler(rotQuat);
-            rot = Vector3MultiplyByValue(rot, RAD2DEG);
-
-            // Set the weapon's transform
-            weaponTrans.SetLocalPos({translation.x, translation.y + 0.5f, translation.z});
-            weaponTrans.SetLocalRot(rot);
-        }
-    }
-
     void Application::Update()
     {
         init();
@@ -159,8 +107,6 @@ namespace sage
             }
 
             scene->Update();
-
-            UpdateWeaponPositions(registry.get());
 
             draw();
             handleScreenUpdate();
