@@ -186,8 +186,8 @@ namespace sage
     {
         auto& ad = abilityComponent.ad;
         ad.base.AddElement(AbilityElement::PHYSICAL);
-        ad.base.cooldownDuration = 1;
-        ad.base.baseDamage = 10;
+        ad.base.cooldownDuration = 0.75;
+        ad.base.baseDamage = 25;
         ad.base.range = 5;
         ad.base.castTime = 0;
         ad.base.AddBehaviour(
@@ -196,8 +196,8 @@ namespace sage
         ad.base.AddOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO);
         ad.base.targetType = AbilityTargetType::TARGET_ENEMY;
 
-        ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
-        ad.animationParams.animSpeed = 4;
+        ad.animationParams.animEnum = AnimationEnum::SLASH;
+        ad.animationParams.animSpeed = 3;
         ad.animationParams.animationDelay = 0;
     }
 

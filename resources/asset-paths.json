@@ -87,7 +87,7 @@
       },
       {
         "key": "MDL_PLAYER_DEFAULT",
-        "value": "resources/models/gltf/hero-updated.glb"
+        "value": "resources/models/gltf/hero-with-weapon.glb"
       },
       {
         "key": "GEN_IMG_HEIGHTMAP",

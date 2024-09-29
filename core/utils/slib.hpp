@@ -56,6 +56,7 @@ namespace sage
     class ModelSafe
     {
         Model rlmodel{};
+        // TODO: Why don't glb ones have their keys set? Because they're deep copies?
         std::string modelKey; // The name/path of the model in the ResourceManager
         bool memorySafe = true;
 
@@ -63,7 +64,8 @@ namespace sage
         void UnloadMaterials() const;
 
       public:
-        [[nodiscard]] const Model& GetRlModel() const;
+        // TODO: return GetRlModel to const
+        [[nodiscard]] Model& GetRlModel();
         [[nodiscard]] const Mesh& GetMesh(int num) const;
         [[nodiscard]] BoundingBox CalcLocalBoundingBox() const;
         [[nodiscard]] RayCollision GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const;
@@ -96,8 +98,6 @@ namespace sage
     Vector2 Vec3ToVec2(const Vector3& vec3);
     Vector3 NegateVector(const Vector3& vec3);
     Vector3 Vector3MultiplyByValue(const Vector3& vec3, float value);
-    void UpdateWeaponModelAnimation(
-        const char* boneName, Model model, Model weapon, ModelAnimation anim, int frame);
-    Matrix GetCurrentBoneMatrix(Model& model, const char* boneName, ModelAnimation& anim, int frame);
+    Matrix ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale);
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer);
 } // namespace sage
