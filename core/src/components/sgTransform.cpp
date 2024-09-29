@@ -76,12 +76,14 @@ namespace sage
     void sgTransform::SetLocalPos(const Vector3& position)
     {
         m_positionLocal = position;
+        if (!m_parent) return;
         SetPosition(Vector3Add(m_parent->m_positionWorld, m_positionLocal));
     }
 
     void sgTransform::SetLocalRot(const Vector3& rotation)
     {
         m_rotationLocal = rotation;
+        if (!m_parent) return;
         SetRotation(Vector3Add(m_parent->m_rotationWorld, m_rotationLocal));
     }
 
