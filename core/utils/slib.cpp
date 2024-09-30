@@ -102,9 +102,9 @@ namespace sage
 
     BoundingBox ModelSafe::CalcLocalBoundingBox() const
     {
-        Mesh mesh = rlmodel.meshes[0];
-        std::vector<float> vertices(mesh.vertexCount * 3);
-        memcpy(&vertices[0], mesh.vertices, sizeof(float) * mesh.vertexCount * 3);
+        assert(rlmodel.meshCount > 0);
+        const Mesh& mesh = rlmodel.meshes[0];
+        std::vector<float> vertices(mesh.vertices, mesh.vertices + mesh.vertexCount * 3);
 
         BoundingBox bb;
         bb.min = {0, 0, 0};
@@ -152,6 +152,7 @@ namespace sage
     void ModelSafe::UpdateAnimation(ModelAnimation anim, int frame) const
     {
         UpdateModelAnimation(rlmodel, anim, frame);
+        UpdateModelAnimationBoneMatrices(rlmodel, anim, frame);
     }
 
     void ModelSafe::Draw(Vector3 position, float scale, Color tint) const
@@ -313,49 +314,6 @@ namespace sage
         Matrix matTransform = MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
 
         return matTransform;
-    }
-
-    Matrix* GetBoneMatrices(Model model, ModelAnimation anim, int frame)
-    {
-        auto* boneMatrices = static_cast<Matrix*>(RL_CALLOC(model.boneCount, sizeof(Matrix)));
-        if ((anim.frameCount > 0) && (anim.bones != NULL) && (anim.framePoses != NULL))
-        {
-            if (frame >= anim.frameCount) frame = frame % anim.frameCount;
-
-            if (boneMatrices)
-            {
-                for (int boneId = 0; boneId < model.boneCount; boneId++)
-                {
-                    Vector3 inTranslation = model.bindPose[boneId].translation;
-                    Quaternion inRotation = model.bindPose[boneId].rotation;
-                    Vector3 inScale = model.bindPose[boneId].scale;
-
-                    Vector3 outTranslation = anim.framePoses[frame][boneId].translation;
-                    Quaternion outRotation = anim.framePoses[frame][boneId].rotation;
-                    Vector3 outScale = anim.framePoses[frame][boneId].scale;
-
-                    Vector3 invTranslation =
-                        Vector3RotateByQuaternion(Vector3Negate(inTranslation), QuaternionInvert(inRotation));
-                    Quaternion invRotation = QuaternionInvert(inRotation);
-                    Vector3 invScale = Vector3Divide((Vector3){1.0f, 1.0f, 1.0f}, inScale);
-
-                    Vector3 boneTranslation = Vector3Add(
-                        Vector3RotateByQuaternion(Vector3Multiply(outScale, invTranslation), outRotation),
-                        outTranslation);
-                    Quaternion boneRotation = QuaternionMultiply(outRotation, invRotation);
-                    Vector3 boneScale = Vector3Multiply(outScale, invScale);
-
-                    Matrix boneMatrix = MatrixMultiply(
-                        MatrixMultiply(
-                            QuaternionToMatrix(boneRotation),
-                            MatrixTranslate(boneTranslation.x, boneTranslation.y, boneTranslation.z)),
-                        MatrixScale(boneScale.x, boneScale.y, boneScale.z));
-
-                    boneMatrices[boneId] = boneMatrix;
-                }
-            }
-        }
-        return boneMatrices;
     }
 
     Matrix GetBoneWorldTransform(const BoneInfo* bones, const Matrix* boneTransforms, int boneIndex)
