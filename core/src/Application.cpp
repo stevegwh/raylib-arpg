@@ -117,8 +117,7 @@ namespace sage
                 auto boneId = GetBoneIdByName(model.bones, model.boneCount, "mixamorig:RightHand");
                 assert(boneId >= 0);
                 auto* matrices = model.meshes[0].boneMatrices;
-
-                // auto mat = GetBoneWorldTransform(model.bones, matrices, boneId);
+                // model.bones[boneId].parent
                 auto mat = matrices[boneId];
                 mat = MatrixMultiply(mat, weaponRend.initialTransform);
                 weaponRend.GetModel()->SetTransform(mat);
