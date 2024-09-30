@@ -174,18 +174,6 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = "Player";
 
-        // ---- TMP
-        std::vector<Mesh> meshes(
-            renderable.GetModel()->GetRlModel().meshes,
-            renderable.GetModel()->GetRlModel().meshes + renderable.GetModel()->GetRlModel().meshCount);
-        Model& model = renderable.GetModel()->GetRlModel();
-
-        std::vector<int> meshMaterials(model.meshMaterial, model.meshMaterial + model.meshCount);
-
-        // -= 2 makes player unarmed
-        model.meshCount -= 2; // TODO: Remove
-        // -----
-
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 150;
@@ -197,7 +185,7 @@ namespace sage
         animation.animationMap[AnimationEnum::TALK] = 2;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
         animation.animationMap[AnimationEnum::RUN] = 4;
-        animation.animationMap[AnimationEnum::IDLE] = 11; // 11 is T-Pose, 10 is ninja idle
+        animation.animationMap[AnimationEnum::IDLE] = 10; // 11 is T-Pose, 10 is ninja idle
         animation.animationMap[AnimationEnum::SPIN] = 5;
         animation.animationMap[AnimationEnum::SLASH] = 6;
         animation.animationMap[AnimationEnum::SPELLCAST_UP] = 7;
@@ -258,11 +246,11 @@ namespace sage
         Matrix weaponMat;
         {
             // Hard coded location of the "socket" for the weapon
+            // TODO: Infer this from a mesh
             auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
             Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
             auto scale = Vector3{1, 1, 1};
             weaponMat = ComposeMatrix(translation, rotation, scale);
-            // weaponMat = MatrixMultiply(weaponMat, MatrixScale(0.035f, 0.035f, 0.035f));
         }
 
         auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
@@ -270,7 +258,9 @@ namespace sage
         weapon.parentBoneName = "mixamorig:RightHand";
         weapon.owner = id;
         registry->emplace<Renderable>(
-            weaponEntity, LoadModel("resources/models/gltf/sword-zero.glb"), renderable.initialTransform);
+            weaponEntity,
+            ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_SWORD01),
+            renderable.initialTransform);
 
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);

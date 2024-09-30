@@ -16,6 +16,7 @@ namespace sage
         MDL_VFX_SPHERE,
         MDL_VFX_FLATTORUS,
         MDL_WPN_DAGGER01,
+        MDL_WPN_SWORD01,
         IMG_CURSOR_REGULAR,
         IMG_CURSOR_TALK,
         IMG_CURSOR_MOVE,
