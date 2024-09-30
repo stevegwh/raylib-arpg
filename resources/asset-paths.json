@@ -70,6 +70,10 @@
         "value": "resources/models/gltf/dagger.glb"
       },
       {
+        "key": "MDL_WPN_SWORD01",
+        "value": "resources/models/gltf/sword.glb"
+      },
+      {
         "key": "MDL_BUILDING_WIZARDTOWER1",
         "value": "resources/models/obj/Wizard Tower 1.obj"
       },
