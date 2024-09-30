@@ -255,13 +255,13 @@ namespace sage
             renderable.GetModel()->SetShader(shader, i);
         }
 
-        // auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
-        // weapon.owner = id;
-        // registry->emplace<Renderable>(
-        //     weaponEntity, LoadModel("resources/models/gltf/dagger.glb"), MatrixScale(0.035, 0.035, 0.035));
-        // auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
-        // weaponTrans.SetParent(&transform);
-        // weaponTrans.SetLocalPos(Vector3Zero());
+        auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
+        weapon.owner = id;
+        registry->emplace<Renderable>(
+            weaponEntity, LoadModel("resources/models/gltf/dagger.glb"), MatrixScale(0.035, 0.035, 0.035));
+        auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
+        weaponTrans.SetParent(&transform);
+        weaponTrans.SetLocalPos(Vector3Zero());
 
         // TODO: Must export the "socket" mesh separately from the model and use that to transform weapons into the
         // correct position
