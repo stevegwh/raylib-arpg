@@ -221,6 +221,7 @@ namespace sage
         {
             if (!vertShaderFileText.contains(vsFileName))
             {
+                assert(FileExists(vsFileName));
                 vertShaderFileText[vsFileName] = LoadFileText(vsFileName);
             }
             vShaderStr = vertShaderFileText[vsFileName];
@@ -230,6 +231,7 @@ namespace sage
         {
             if (!fragShaderFileText.contains(fsFileName))
             {
+                assert(FileExists(fsFileName));
                 fragShaderFileText[fsFileName] = LoadFileText(fsFileName);
             }
             fShaderStr = fragShaderFileText[fsFileName];
@@ -269,6 +271,7 @@ namespace sage
     void ResourceManager::ImageLoadFromFile(const AssetID id)
     {
         const auto& path = getAssetPath(id);
+        assert(FileExists(path.c_str()));
         if (!images.contains(path))
         {
             images[path] = LoadImage(path.c_str());
@@ -278,6 +281,7 @@ namespace sage
     void ResourceManager::ImageLoadFromFile(const AssetID id, Image image)
     {
         const auto& path = getAssetPath(id);
+        assert(FileExists(path.c_str()));
         ImageLoadFromFile(path, image);
     }
 
@@ -285,6 +289,7 @@ namespace sage
     {
         if (!images.contains(path))
         {
+            assert(FileExists(path.c_str()));
             images[path] = image;
             image = {};
         }
@@ -293,6 +298,7 @@ namespace sage
     void ResourceManager::ModelLoadFromFile(const AssetID id)
     {
         const auto path = getAssetPath(id);
+        assert(FileExists(path.c_str()));
         ModelLoadFromFile(path);
     }
 
@@ -300,6 +306,7 @@ namespace sage
     {
         if (!modelCopies.contains(path))
         {
+            assert(FileExists(path.c_str()));
             ModelCereal modelCereal;
             // TODO: We're still loading and allocating a material here, potentially unnecessarily
             // This might not be a big deal, if we limit "EmplaceModel" to only be used when constructing the map
