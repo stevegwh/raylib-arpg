@@ -197,7 +197,7 @@ namespace sage
         animation.animationMap[AnimationEnum::TALK] = 2;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
         animation.animationMap[AnimationEnum::RUN] = 4;
-        animation.animationMap[AnimationEnum::IDLE] = 10; // 11 is T-Pose, 10 is ninja idle
+        animation.animationMap[AnimationEnum::IDLE] = 11; // 11 is T-Pose, 10 is ninja idle
         animation.animationMap[AnimationEnum::SPIN] = 5;
         animation.animationMap[AnimationEnum::SLASH] = 6;
         animation.animationMap[AnimationEnum::SPELLCAST_UP] = 7;
@@ -255,16 +255,24 @@ namespace sage
             renderable.GetModel()->SetShader(shader, i);
         }
 
+        Matrix weaponMat = MatrixScale(0.035f, 0.035f, 0.035f);
+        //        {
+        //            // Hard coded location of the "socket" for the weapon
+        //            auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
+        //            Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
+        //            auto scale = Vector3{1, 1, 1};
+        //            weaponMat = ComposeMatrix(translation, rotation, scale);
+        //            weaponMat = MatrixMultiply(weaponMat, MatrixScale(0.035f, 0.035f, 0.035f));
+        //        }
+
         auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
         weapon.owner = id;
-        registry->emplace<Renderable>(
-            weaponEntity, LoadModel("resources/models/gltf/dagger.glb"), MatrixScale(0.035, 0.035, 0.035));
+        auto& weaponRend =
+            registry->emplace<Renderable>(weaponEntity, LoadModel("resources/models/gltf/sword.glb"), weaponMat);
+
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
         weaponTrans.SetLocalPos(Vector3Zero());
-
-        // TODO: Must export the "socket" mesh separately from the model and use that to transform weapons into the
-        // correct position
 
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
