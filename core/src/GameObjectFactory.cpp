@@ -267,6 +267,7 @@ namespace sage
 
         auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
         weapon.parentSocket = weaponMat;
+        weapon.parentBoneName = "mixamorig:RightHand";
         weapon.owner = id;
         registry->emplace<Renderable>(
             weaponEntity, LoadModel("resources/models/gltf/sword-zero.glb"), renderable.initialTransform);
