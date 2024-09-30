@@ -183,6 +183,16 @@ namespace sage
             mesh.boneWeights = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
             memcpy(mesh.boneWeights, oldMesh.boneWeights, mesh.vertexCount * 4 * sizeof(float));
         }
+        mesh.boneCount = oldMesh.boneCount;
+        if (oldMesh.boneMatrices)
+        {
+            mesh.boneMatrices = static_cast<Matrix*>(RL_CALLOC(mesh.boneCount, sizeof(Matrix)));
+            for (int j = 0; j < mesh.boneCount; j++)
+            {
+                mesh.boneMatrices[j] = MatrixIdentity();
+                // Gets updated per animation, no need to copy info over.
+            }
+        }
 
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
     }

@@ -139,6 +139,18 @@ namespace sage
         return id;
     }
 
+    void AttachWeaponToModel(Model& targetModel)
+    {
+        auto& target = targetModel.meshes[2];
+        Model dagger = LoadModel("resources/models/gltf/sword.glb");
+        auto* boneIds = target.boneIds;
+        auto* boneWeights = target.boneWeights;
+        target = dagger.meshes[0];
+        target.boneIds = boneIds;
+        target.boneWeights = boneWeights;
+        targetModel.materials[targetModel.meshMaterial[2]] = dagger.materials[1];
+    }
+
     entt::entity GameObjectFactory::createPlayer(
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
@@ -177,8 +189,11 @@ namespace sage
         // model.meshMaterial[copyIdx] = matHolder;
         // model.meshMaterial[holderIdx] = matCopy;
 
+        auto& targetModel = renderable.GetModel()->GetRlModel();
+        // AttachWeaponToModel(targetModel);
+
         // -= 2 makes player unarmed
-        model.meshCount -= 1;
+        model.meshCount -= 2;
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
@@ -191,7 +206,7 @@ namespace sage
         animation.animationMap[AnimationEnum::TALK] = 2;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
         animation.animationMap[AnimationEnum::RUN] = 4;
-        animation.animationMap[AnimationEnum::IDLE] = 10;
+        animation.animationMap[AnimationEnum::IDLE] = 11; // 10 is normal
         animation.animationMap[AnimationEnum::SPIN] = 5;
         animation.animationMap[AnimationEnum::SLASH] = 6;
         animation.animationMap[AnimationEnum::SPELLCAST_UP] = 7;
@@ -258,14 +273,14 @@ namespace sage
         registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
 
-        // auto weaponEntity = registry->create();
-        // auto& weapon = registry->emplace<Weapon>(weaponEntity);
-        // weapon.owner = id;
-        // registry->emplace<Renderable>(
-        //     weaponEntity, LoadModel("resources/models/gltf/sword.glb"), MatrixScale(0.035, 0.035, 0.035));
-        // auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
-        // weaponTrans.SetParent(&transform);
-        // weaponTrans.SetLocalPos(Vector3Zero());
+        auto weaponEntity = registry->create();
+        auto& weapon = registry->emplace<Weapon>(weaponEntity);
+        weapon.owner = id;
+        registry->emplace<Renderable>(
+            weaponEntity, LoadModel("resources/models/gltf/dagger.glb"), MatrixScale(0.035, 0.035, 0.035));
+        auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
+        weaponTrans.SetParent(&transform);
+        weaponTrans.SetLocalPos(Vector3Zero());
 
         return id;
     }
