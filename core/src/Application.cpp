@@ -10,7 +10,7 @@
 #include "Camera.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
-#include "components/Weapon.hpp"
+#include "components/WeaponComponent.hpp"
 #include "GameData.hpp"
 #include "Serializer.hpp"
 #include "slib.hpp"
@@ -108,9 +108,9 @@ namespace sage
 
             scene->Update();
 
-            for (auto view = registry->view<Weapon>(); auto entity : view)
+            for (auto view = registry->view<WeaponComponent>(); auto entity : view)
             {
-                auto& weapon = registry->get<Weapon>(entity);
+                auto& weapon = registry->get<WeaponComponent>(entity);
                 auto& weaponRend = registry->get<Renderable>(entity);
                 auto& model = registry->get<Renderable>(weapon.owner).GetModel()->GetRlModel();
                 auto& anim = registry->get<Animation>(weapon.owner);
@@ -140,7 +140,7 @@ namespace sage
         EndMode3D();
         scene->Draw2D();
 
-        for (auto view = registry->view<Weapon>(); auto entity : view)
+        for (auto view = registry->view<WeaponComponent>(); auto entity : view)
         {
             auto& weaponRend = registry->get<Renderable>(entity);
             auto& weaponTrans = registry->get<sgTransform>(entity);
