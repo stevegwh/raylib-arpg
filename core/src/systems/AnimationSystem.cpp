@@ -5,6 +5,7 @@
 #include "AnimationSystem.hpp"
 #include "components/Animation.hpp"
 #include "components/Renderable.hpp"
+#include "components/WeaponComponent.hpp"
 
 namespace sage
 {
@@ -36,6 +37,21 @@ namespace sage
                     animation.RestoreAfterOneShot();
                 }
             }
+        }
+
+        // Update the positions of any weapons in the scene post animation update
+        for (auto view = registry->view<WeaponComponent>(); auto entity : view)
+        {
+            auto& weapon = registry->get<WeaponComponent>(entity);
+            auto& weaponRend = registry->get<Renderable>(entity);
+            auto& model = registry->get<Renderable>(weapon.owner).GetModel()->GetRlModel();
+            auto boneId = GetBoneIdByName(model.bones, model.boneCount, weapon.parentBoneName.c_str());
+            assert(boneId >= 0);
+            auto* matrices = model.meshes[0].boneMatrices;
+            auto mat = matrices[boneId];
+            mat = MatrixMultiply(weapon.parentSocket, mat);
+            mat = MatrixMultiply(mat, weaponRend.initialTransform);
+            weaponRend.GetModel()->SetTransform(mat);
         }
     }
 
