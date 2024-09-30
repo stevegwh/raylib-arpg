@@ -79,6 +79,7 @@ namespace sage
         void SetTexture(Texture texture, int materialIdx, MaterialMapIndex mapIdx) const;
         [[nodiscard]] Shader GetShader(int materialIdx) const;
         void SetShader(Shader shader, int materialIdx) const;
+        void SetShader(Shader shader) const;
         void SetKey(const std::string& newKey);
         [[nodiscard]] const std::string& GetKey() const;
         ModelSafe(const ModelSafe&) = delete;

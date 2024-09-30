@@ -151,7 +151,7 @@ namespace sage
 
     void ModelSafe::UpdateAnimation(ModelAnimation anim, int frame) const
     {
-        UpdateModelAnimation(rlmodel, anim, frame);
+        // UpdateModelAnimation(rlmodel, anim, frame);
         UpdateModelAnimationBoneMatrices(rlmodel, anim, frame);
     }
 
@@ -202,6 +202,14 @@ namespace sage
     {
         assert(materialIdx < rlmodel.materialCount);
         rlmodel.materials[materialIdx].shader = shader;
+    }
+
+    void ModelSafe::SetShader(Shader shader) const
+    {
+        for (int i = 0; i < rlmodel.materialCount; ++i)
+        {
+            rlmodel.materials[i].shader = shader;
+        }
     }
 
     void ModelSafe::SetKey(const std::string& newKey)
