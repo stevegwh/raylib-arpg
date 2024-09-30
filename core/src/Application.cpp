@@ -113,23 +113,12 @@ namespace sage
                 auto& weapon = registry->get<WeaponComponent>(entity);
                 auto& weaponRend = registry->get<Renderable>(entity);
                 auto& model = registry->get<Renderable>(weapon.owner).GetModel()->GetRlModel();
-                auto& anim = registry->get<Animation>(weapon.owner);
                 auto boneId = GetBoneIdByName(model.bones, model.boneCount, "mixamorig:RightHand");
                 assert(boneId >= 0);
                 auto* matrices = model.meshes[0].boneMatrices;
-
                 auto mat = matrices[boneId];
-
-                auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
-                Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
-                auto scale = Vector3{1, 1, 1};
-                auto weaponMat = ComposeMatrix(translation, rotation, scale);
-
-                mat = MatrixMultiply(weaponMat, mat);
-
-                mat = MatrixMultiply(mat, MatrixScale(0.035f, 0.035f, 0.035f));
-                // mat = MatrixMultiply(mat, weaponRend.initialTransform);
-
+                mat = MatrixMultiply(weapon.parentSocket, mat);
+                mat = MatrixMultiply(mat, weaponRend.initialTransform);
                 weaponRend.GetModel()->SetTransform(mat);
             }
 
