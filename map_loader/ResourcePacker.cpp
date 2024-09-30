@@ -137,6 +137,10 @@ namespace sage
         {
             throw std::runtime_error("Expected key '" + key + "' not found");
         }
+
+        // Remove carriage returns from the line
+        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+
         return line.substr(key.length() + 2); // +2 to skip ": "
     }
 
