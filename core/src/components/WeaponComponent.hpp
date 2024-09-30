@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AssetID.hpp"
+#include "raylib.h"
 
 #include <entt/entt.hpp>
 
@@ -13,7 +14,7 @@ namespace sage
     struct WeaponComponent
     {
         entt::entity owner = entt::null;
-        // Should add weapon transform here?
+        Matrix parentSocket{}; // Where the weapon is held by the owner in respect to their local model space
         AssetID equipped{};
         // Would probably have a weapons' database with its model, icon, damage etc.
     };

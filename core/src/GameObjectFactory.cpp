@@ -266,9 +266,10 @@ namespace sage
         }
 
         auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
+        weapon.parentSocket = weaponMat;
         weapon.owner = id;
-        auto& weaponRend = registry->emplace<Renderable>(
-            weaponEntity, LoadModel("resources/models/gltf/sword-zero.glb"), weaponMat);
+        registry->emplace<Renderable>(
+            weaponEntity, LoadModel("resources/models/gltf/sword-zero.glb"), renderable.initialTransform);
 
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
