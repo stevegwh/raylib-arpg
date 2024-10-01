@@ -246,7 +246,7 @@ namespace sage
         Matrix weaponMat;
         {
             // Hard coded location of the "socket" for the weapon
-            // TODO: Infer this from a mesh
+            // TODO: Export sockets as txt and store their transform in weaponSocket
             auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
             Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
             auto scale = Vector3{1, 1, 1};
@@ -259,7 +259,7 @@ namespace sage
         weapon.owner = id;
         registry->emplace<Renderable>(
             weaponEntity,
-            ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_SWORD01),
+            ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
             renderable.initialTransform);
 
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
