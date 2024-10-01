@@ -144,9 +144,9 @@ namespace sage
         return line.substr(key.length() + 2); // +2 to skip ": "
     }
 
-    void HandleLight(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
+    void HandleLight(entt::registry* registry, std::ifstream& infile)
     {
-        std::string meshName, objectName;
+        std::string objectName;
         float x, y, z;
         int r, g, b, s;
         try
@@ -178,7 +178,7 @@ namespace sage
         light.attenuation = s;
     }
 
-    void HandleSpawner(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath)
+    void HandleSpawner(entt::registry* registry, std::ifstream& infile)
     {
         std::string objectName;
         float x, y, z, rotx, roty, rotz;
@@ -294,11 +294,11 @@ namespace sage
 
         if (typeName.find("spawner") != std::string::npos)
         {
-            HandleSpawner(registry, infile, meshPath);
+            HandleSpawner(registry, infile);
         }
         else if (typeName.find("light") != std::string::npos)
         {
-            HandleLight(registry, infile, meshPath);
+            HandleLight(registry, infile);
         }
         else
         {
@@ -415,6 +415,7 @@ namespace sage
                 {
                     ResourceManager::GetInstance().ModelAnimationLoadFromFile(id);
                 }
+                // TODO: See if txt of same name/path exists and parse that for socket data etc
             }
         }
         std::cout << "FINISH: Loading assets into memory \n";
