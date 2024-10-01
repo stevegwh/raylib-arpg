@@ -18,41 +18,30 @@ namespace sage
         Color color;
         float attenuation;
 
-        // Shader locations
-        int enabledLoc;
-        int typeLoc;
-        int positionLoc;
-        int targetLoc;
-        int colorLoc;
-        int attenuationLoc;
-
-        void SetShader(const Shader shader, const int lightsCount)
+        void LinkShader(const Shader shader, const int lightsCount)
         {
             // NOTE: Lighting shader naming must be the provided ones
-            enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
-            typeLoc = GetShaderLocation(shader, TextFormat("lights[%i].type", lightsCount));
-            positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
-            targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
-            colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
-            attenuationLoc = GetShaderLocation(shader, TextFormat("lights[%i].attenuation", lightsCount));
-            UpdateLightValues(shader, *this);
-        }
+            int enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
+            int typeLoc = GetShaderLocation(shader, TextFormat("lights[%i].type", lightsCount));
+            int positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
+            int targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
+            int colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
+            int attenuationLoc = GetShaderLocation(shader, TextFormat("lights[%i].attenuation", lightsCount));
 
-        static void UpdateLightValues(Shader shader, Light light)
-        {
-            float position[3] = {light.position.x, light.position.y, light.position.z};
-            float target[3] = {light.target.x, light.target.y, light.target.z};
-            float color[4] = {
-                static_cast<float>(light.color.r) / static_cast<float>(255),
-                static_cast<float>(light.color.g) / static_cast<float>(255),
-                static_cast<float>(light.color.b) / static_cast<float>(255),
-                static_cast<float>(light.color.a) / static_cast<float>(255)};
-            SetShaderValue(shader, light.enabledLoc, &light.enabled, SHADER_UNIFORM_INT);
-            SetShaderValue(shader, light.typeLoc, &light.type, SHADER_UNIFORM_INT);
-            SetShaderValue(shader, light.positionLoc, position, SHADER_UNIFORM_VEC3);
-            SetShaderValue(shader, light.targetLoc, target, SHADER_UNIFORM_VEC3);
-            SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
-            SetShaderValue(shader, light.attenuationLoc, &light.attenuation, SHADER_UNIFORM_FLOAT);
+            // UpdateLightValues(shader, *this);
+            float _position[3] = {position.x, position.y, position.z};
+            float _target[3] = {target.x, target.y, target.z};
+            float _color[4] = {
+                static_cast<float>(color.r) / static_cast<float>(255),
+                static_cast<float>(color.g) / static_cast<float>(255),
+                static_cast<float>(color.b) / static_cast<float>(255),
+                static_cast<float>(color.a) / static_cast<float>(255)};
+            SetShaderValue(shader, enabledLoc, &enabled, SHADER_UNIFORM_INT);
+            SetShaderValue(shader, typeLoc, &type, SHADER_UNIFORM_INT);
+            SetShaderValue(shader, positionLoc, _position, SHADER_UNIFORM_VEC3);
+            SetShaderValue(shader, targetLoc, _target, SHADER_UNIFORM_VEC3);
+            SetShaderValue(shader, colorLoc, _color, SHADER_UNIFORM_VEC4);
+            SetShaderValue(shader, attenuationLoc, &attenuation, SHADER_UNIFORM_FLOAT);
         }
 
         template <typename Archive>

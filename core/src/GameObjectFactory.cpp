@@ -98,7 +98,9 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::ENEMY;
 
         Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/glsl330/skinning.vs", "resources/shaders/glsl330/skinning.fs");
+            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+
+        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
 
         for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
         {
@@ -144,7 +146,9 @@ namespace sage
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
         Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/glsl330/skinning.vs", "resources/shaders/glsl330/skinning.fs");
+            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+
+        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
 
         for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
         {
@@ -235,8 +239,11 @@ namespace sage
         combatable.actorType = CombatableActorType::PLAYER;
         auto weaponEntity = registry->create();
         combatable.weapon = weaponEntity;
+
         Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/glsl330/skinning.vs", "resources/shaders/glsl330/skinning.fs");
+            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+
+        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
 
         for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
         {
@@ -261,6 +268,7 @@ namespace sage
             weaponEntity,
             ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
             renderable.initialTransform);
+        data->lightSubSystem->LinkRenderableToLight(weaponEntity);
 
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
