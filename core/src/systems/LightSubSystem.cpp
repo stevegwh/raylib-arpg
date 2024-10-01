@@ -6,6 +6,8 @@
 #include "components/Light.hpp"
 #include "components/Renderable.hpp"
 
+#include <algorithm>
+
 namespace sage
 {
     // Not really used
@@ -32,7 +34,14 @@ namespace sage
 
     void LightSubSystem::LinkShaderToLights(Shader& _shader)
     {
-        shaders.push_back(_shader);
+        auto it = std::find_if(shaders.begin(), shaders.end(), [&_shader](const Shader& existingShader) {
+            return existingShader.id == _shader.id;
+        });
+
+        if (it == shaders.end())
+        {
+            shaders.push_back(_shader);
+        }
         UpdateAmbientLight(_shader, 0.6f, 0.2f, 0.8f, 1.0f); // TODO
         RefreshLights(_shader);
     }

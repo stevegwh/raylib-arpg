@@ -324,19 +324,6 @@ namespace sage
         return matTransform;
     }
 
-    Matrix GetBoneWorldTransform(const BoneInfo* bones, const Matrix* boneTransforms, int boneIndex)
-    {
-        int parentIndex = bones[boneIndex].parent;
-        Matrix result = boneTransforms[boneIndex];
-
-        while (parentIndex >= 0)
-        {
-            result = MatrixMultiply(boneTransforms[parentIndex], result);
-            parentIndex = bones[parentIndex].parent;
-        }
-        return result;
-    }
-
     int GetBoneIdByName(const BoneInfo* bones, int numBones, const char* boneName)
     {
         for (int i = 0; i < numBones; ++i)
