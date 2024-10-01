@@ -8,12 +8,11 @@
 
 namespace sage
 {
-
     // Not really used
-    Light LightSubSystem::createLight(int type, Vector3 position, Vector3 target, Color color, Shader shader)
+    Light LightSubSystem::createLight(Shader& _shader, int type, Vector3 position, Vector3 target, Color color)
     {
         Light light = {0};
-
+        auto lightsCountLoc = GetShaderLocation(_shader, "lightsCount");
         if (lightsCount < MAX_LIGHTS)
         {
             light.enabled = true;
@@ -22,13 +21,20 @@ namespace sage
             light.target = target;
             light.color = color;
 
-            light.SetShader(shader, lightsCount);
+            light.LinkShader(_shader, lightsCount);
 
             lightsCount++;
-            SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
+            SetShaderValue(_shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
         }
 
         return light;
+    }
+
+    void LightSubSystem::LinkShaderToLights(Shader& _shader)
+    {
+        shaders.push_back(_shader);
+        UpdateAmbientLight(_shader, 0.6f, 0.2f, 0.8f, 1.0f); // TODO
+        RefreshLights(_shader);
     }
 
     void LightSubSystem::LinkRenderableToLight(entt::entity entity) const
@@ -36,26 +42,29 @@ namespace sage
         auto& renderable = registry->get<Renderable>(entity);
         for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
         {
-            renderable.GetModel()->SetShader(shader, i);
+            renderable.GetModel()->SetShader(defaultShader, i);
         }
     }
 
-    void LightSubSystem::UpdateAmbientLight(float r, float g, float b, float a) const
+    void LightSubSystem::UpdateAmbientLight(Shader& _shader, float r, float g, float b, float a) const
     {
+        auto ambientLoc = GetShaderLocation(_shader, "ambient");
         // Ambient light level (some basic lighting)
         float ambientValue[4] = {r, g, b, a};
-        SetShaderValue(shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
+        SetShaderValue(_shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
 
-    void LightSubSystem::RefreshLights()
+    void LightSubSystem::RefreshLights(Shader& _shader)
     {
+        auto lightsCountLoc = GetShaderLocation(_shader, "lightsCount");
+        SetShaderValue(_shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
         for (const auto view = registry->view<Light>(); auto& entity : view)
         {
             auto& light = registry->get<Light>(entity);
             if (lightsCount < MAX_LIGHTS)
             {
                 light.enabled = true;
-                light.SetShader(shader, lightsCount);
+                light.LinkShader(_shader, lightsCount);
                 lightsCount++;
             }
             else
@@ -63,7 +72,7 @@ namespace sage
                 std::cout << "Scene: Max light sources reached. Ignoring. \n";
             }
         }
-        SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
+        SetShaderValue(_shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
     }
 
     void LightSubSystem::DrawDebugLights() const
@@ -82,18 +91,17 @@ namespace sage
     {
         auto [x, y, z] = camera->GetPosition();
         const float cameraPos[3] = {x, y, z};
-        SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+        for (auto& shader : shaders)
+        {
+            SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+        }
     }
 
     LightSubSystem::LightSubSystem(entt::registry* _registry, Camera* _camera)
         : registry(_registry), camera(_camera)
     {
-        shader = ResourceManager::GetInstance().ShaderLoad(
+        defaultShader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
-        ambientLoc = GetShaderLocation(shader, "ambient");
-        UpdateAmbientLight(0.6f, 0.2f, 0.8f, 1.0f);
-        lightsCountLoc = GetShaderLocation(shader, "lightsCount");
-        SetShaderValue(shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
-        RefreshLights();
+        LinkShaderToLights(defaultShader);
     }
 } // namespace sage
