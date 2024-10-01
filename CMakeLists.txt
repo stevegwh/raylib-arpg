@@ -31,7 +31,7 @@ include_directories(vendor/imgui/backends)
 
 # Option to enable/disable building the editor
 option(BUILD_EDITOR "Build the editor" ON)
-option(BUILD_MAP_LOADER "Build the map loader" ON)
+option(BUILD_RESPACKER "Build the resoource packer" ON)
 # Add the core subdirectory
 add_subdirectory(core)
 
@@ -40,8 +40,8 @@ if (BUILD_EDITOR)
     add_subdirectory(editor)
 endif ()
 # Conditionally add the map loader subdirectory
-if (BUILD_MAP_LOADER)
-    add_subdirectory(map_loader)
+if (BUILD_RESPACKER)
+    add_subdirectory(respacker)
 endif ()
 
 # Add the game executable target
