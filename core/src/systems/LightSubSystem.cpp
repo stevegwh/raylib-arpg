@@ -12,8 +12,6 @@ namespace sage
 {
     void LightSubSystem::updateShaderLights(Shader& _shader)
     {
-        auto lightsCountLoc = GetShaderLocation(_shader, "lightsCount");
-        SetShaderValue(_shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
         lightsCount = 0;
         for (const auto view = registry->view<Light>(); auto& entity : view)
         {
@@ -30,7 +28,11 @@ namespace sage
                 break;
             }
         }
+
+        auto lightsCountLoc = GetShaderLocation(_shader, "lightsCount");
         SetShaderValue(_shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
+        auto gammaLoc = GetShaderLocation(_shader, "gamma");
+        SetShaderValue(_shader, gammaLoc, &gamma, SHADER_UNIFORM_FLOAT);
     }
 
     // Not really used

@@ -23,6 +23,7 @@ namespace sage
         Shader defaultShader{};
         std::vector<Shader> shaders;
         int lightsCount = 0;
+        float gamma = 3.3;
 
         void updateShaderLights(Shader& _shader);
 
