@@ -12,6 +12,7 @@ namespace sage
 {
     void LightSubSystem::updateShaderLights(Shader& _shader)
     {
+        updateAmbientLight(_shader);
         lightsCount = 0;
         for (const auto view = registry->view<Light>(); auto& entity : view)
         {
@@ -33,6 +34,13 @@ namespace sage
         SetShaderValue(_shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
         auto gammaLoc = GetShaderLocation(_shader, "gamma");
         SetShaderValue(_shader, gammaLoc, &gamma, SHADER_UNIFORM_FLOAT);
+    }
+
+    void LightSubSystem::updateAmbientLight(Shader& _shader) const
+    {
+        auto ambientLoc = GetShaderLocation(_shader, "ambient");
+        float ambientValue[4] = {ambient[0], ambient[1], ambient[2], ambient[3]};
+        SetShaderValue(_shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
 
     // Not really used
@@ -71,8 +79,20 @@ namespace sage
         {
             shaders.push_back(_shader);
         }
-        UpdateAmbientLight(_shader, 0.6f, 0.2f, 0.8f, 1.0f); // TODO
+        updateAmbientLight(_shader);
         updateShaderLights(_shader);
+    }
+
+    void LightSubSystem::SetAmbientLight(float r, float g, float b, float a)
+    {
+        ambient = {r, g, b, a};
+        RefreshLights();
+    }
+
+    void LightSubSystem::SetGamma(float g)
+    {
+        gamma = g;
+        RefreshLights();
     }
 
     void LightSubSystem::RefreshLights()
@@ -90,14 +110,6 @@ namespace sage
         {
             renderable.GetModel()->SetShader(defaultShader, i);
         }
-    }
-
-    void LightSubSystem::UpdateAmbientLight(Shader& _shader, float r, float g, float b, float a) const
-    {
-        auto ambientLoc = GetShaderLocation(_shader, "ambient");
-        // Ambient light level (some basic lighting)
-        float ambientValue[4] = {r, g, b, a};
-        SetShaderValue(_shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
 
     void LightSubSystem::DrawDebugLights() const
@@ -127,6 +139,8 @@ namespace sage
     {
         defaultShader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
+
+        SetAmbientLight(0.6f, 0.2f, 0.8f, 1.0f);
         LinkShaderToLights(defaultShader);
     }
 } // namespace sage
