@@ -22,7 +22,7 @@ struct Light {
     vec3 position;
     vec3 target;
     vec4 color;
-    float attenuation; // Not used, currently
+    float attenuation;// Not used, currently
 };
 
 // Input lighting values
@@ -30,13 +30,14 @@ uniform int lightsCount;
 uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 uniform vec3 viewPos;
+uniform float gamma;
 
-// Light control parameters (to be replaced with uniforms later)
-const float lightReachMultiplier = 0.8; // Adjusts how far the light reaches
-const float lightPowerMultiplier = 1.4; // Adjusts the intensity of the light
-
-void main()
+vec4 GetLightingValue()
 {
+    // Light control parameters (to be replaced with uniforms later)
+    const float lightReachMultiplier = 0.8;// Adjusts how far the light reaches
+    const float lightPowerMultiplier = 1.4;// Adjusts the intensity of the light
+
     // Texel color fetching from texture sampler
     vec4 texelColor = texture(texture0, fragTexCoord);
     vec3 lightDot = vec3(0.0);
@@ -60,13 +61,13 @@ void main()
             {
                 vec3 lightVector = lights[i].position - fragPosition;
                 light = normalize(lightVector);
-                
+
                 float distance = length(lightVector);
                 float constant = 1.0;
                 float linear = 0.09 / lightReachMultiplier;
                 float quadratic = 0.032 / (lightReachMultiplier * lightReachMultiplier);
                 attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
-                
+
                 // Apply power multiplier
                 attenuation = pow(attenuation, 1.0 / lightPowerMultiplier);
             }
@@ -75,15 +76,20 @@ void main()
             lightDot += lights[i].color.rgb * NdotL * attenuation * lightPowerMultiplier;
 
             float specCo = 0.0;
-            if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0); // 16 refers to shine
+            if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0);// 16 refers to shine
             specCo *= 0.5;
             specular += specCo * attenuation * lightPowerMultiplier;
         }
     }
 
-    finalColor = (texelColor*((colDiffuse + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
-    finalColor += texelColor*(ambient/10.0)*colDiffuse;
+    vec4 result = (texelColor*((colDiffuse + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
+    result += texelColor*(ambient/10.0)*colDiffuse;
 
     // Gamma correction
-    finalColor = pow(finalColor, vec4(1.0/2.2));
+    return pow(result, vec4(1.0/gamma));
+}
+
+void main()
+{
+    finalColor = GetLightingValue();
 }

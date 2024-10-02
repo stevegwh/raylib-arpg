@@ -20,21 +20,26 @@ namespace sage
     {
         entt::registry* registry;
         Camera* camera;
-        Shader shader{};
-        int ambientLoc;
-        int lightsCountLoc;
+        Shader defaultShader{};
+        std::vector<Shader> shaders;
         int lightsCount = 0;
+        float gamma = 3.3;
+        std::array<float, 4> ambient;
+        void updateShaderLights(Shader& _shader);
+        void updateAmbientLight(Shader& _shader) const;
 
-        Light createLight(
+      public:
+        void CreateLight(
+            Shader& _shader,
             int type,
             Vector3 position,
             Vector3 target,
-            Color color,
-            Shader shader); // Create a light and get shader locations
-      public:
-        void LinkRenderableToLight(entt::entity entity) const;
-        void UpdateAmbientLight(float r, float g, float b, float a) const;
+            Color color); // Create a light and get shader locations
+        void LinkShaderToLights(Shader& _shader);
+        void SetAmbientLight(float r, float g, float b, float a);
+        void SetGamma(float g);
         void RefreshLights();
+        void LinkRenderableToLight(entt::entity entity) const;
         void DrawDebugLights() const;
         void Update() const;
         explicit LightSubSystem(entt::registry* _registry, Camera* _camera);

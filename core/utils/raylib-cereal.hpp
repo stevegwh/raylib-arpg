@@ -157,6 +157,7 @@ void save(Archive& archive, Mesh const& mesh)
     archive(
         mesh.vertexCount,
         mesh.triangleCount,
+        mesh.boneCount,
         vertices,
         texcoords,
         texcoords2,
@@ -184,6 +185,7 @@ void load(Archive& archive, Mesh& mesh)
     archive(
         mesh.vertexCount,
         mesh.triangleCount,
+        mesh.boneCount,
         vertices,
         texcoords,
         texcoords2,
@@ -238,15 +240,17 @@ void load(Archive& archive, Mesh& mesh)
         mesh.animNormals = static_cast<float*>(RL_CALLOC(mesh.vertexCount * 3, sizeof(float)));
         std::memcpy(mesh.animNormals, normals.data(), mesh.vertexCount * 3 * sizeof(float));
 
-        if (!boneIds.empty())
+        mesh.boneIds = static_cast<unsigned char*>(RL_CALLOC(mesh.vertexCount * 4, sizeof(unsigned char)));
+        std::memcpy(mesh.boneIds, boneIds.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
+
+        mesh.boneWeights = static_cast<float*>(RL_CALLOC(mesh.vertexCount * 4, sizeof(float)));
+        std::memcpy(mesh.boneWeights, boneWeights.data(), mesh.vertexCount * 4 * sizeof(float));
+
+        mesh.boneMatrices = static_cast<Matrix*>(RL_CALLOC(mesh.boneCount, sizeof(Matrix)));
+        for (int j = 0; j < mesh.boneCount; j++)
         {
-            mesh.boneIds = static_cast<unsigned char*>(RL_CALLOC(mesh.vertexCount * 4, sizeof(unsigned char)));
-            std::memcpy(mesh.boneIds, boneIds.data(), mesh.vertexCount * 4 * sizeof(unsigned char));
-        }
-        if (!boneWeights.empty())
-        {
-            mesh.boneWeights = static_cast<float*>(RL_CALLOC(mesh.vertexCount * 4, sizeof(float)));
-            std::memcpy(mesh.boneWeights, boneWeights.data(), mesh.vertexCount * 4 * sizeof(float));
+            mesh.boneMatrices[j] = MatrixIdentity();
+            // Gets updated per animation, no need to copy info over.
         }
     }
 };

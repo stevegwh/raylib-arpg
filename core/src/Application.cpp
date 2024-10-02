@@ -9,12 +9,9 @@
 
 #include "Camera.hpp"
 #include "components/Renderable.hpp"
-#include "components/sgTransform.hpp"
-#include "components/Weapon.hpp"
 #include "GameData.hpp"
 #include "Serializer.hpp"
 #include "slib.hpp"
-#include "systems/ControllableActorSystem.hpp"
 
 namespace sage
 {
@@ -108,23 +105,6 @@ namespace sage
 
             scene->Update();
 
-            // for (auto view = registry->view<Weapon>(); auto entity : view)
-            // {
-            //     auto& weapon = registry->get<Weapon>(entity);
-            //     auto& weaponRend = registry->get<Renderable>(entity);
-            //     auto& model = registry->get<Renderable>(weapon.owner).GetModel()->GetRlModel();
-            //     auto& anim = registry->get<Animation>(weapon.owner);
-            //     auto boneId = GetBoneIdByName(model.bones, model.boneCount, "mixamorig:RightHand");
-            //     assert(boneId >= 0);
-            //     auto* matrices =
-            //         GetBoneMatrices(model, anim.animations[anim.current.index], anim.current.currentFrame);
-            //     auto mat = GetBoneWorldTransform(model.bones, matrices, boneId);
-            //     mat = MatrixMultiply(mat, weaponRend.initialTransform);
-            //     weaponRend.GetModel()->SetTransform(mat);
-            //
-            //     RL_FREE(matrices);
-            // }
-
             draw();
             handleScreenUpdate();
         }
@@ -140,13 +120,6 @@ namespace sage
         // scene->DrawDebug();
         EndMode3D();
         scene->Draw2D();
-
-        // for (auto view = registry->view<Weapon>(); auto entity : view)
-        // {
-        //     auto& weaponRend = registry->get<Renderable>(entity);
-        //     auto& weaponTrans = registry->get<sgTransform>(entity);
-        //     weaponRend.GetModel()->Draw(weaponTrans.GetWorldPos(), weaponTrans.GetScale().x, WHITE);
-        // }
 
         DrawFPS(10, 10);
 

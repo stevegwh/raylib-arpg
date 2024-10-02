@@ -44,6 +44,7 @@ namespace sage
         CombatData data;
         CombatableActorType actorType = CombatableActorType::WAVEMOB;
         bool dying = false;
+        entt::entity weapon{};
         entt::entity target{};
         int attackRange = 5; // TODO: each ability has its own range
 

@@ -67,7 +67,11 @@
       },
       {
         "key": "MDL_WPN_DAGGER01",
-        "value": "resources/models/gltf/dagger.glb"
+        "value": "resources/models/weps/dagger.glb"
+      },
+      {
+        "key": "MDL_WPN_SWORD01",
+        "value": "resources/models/weps/sword.glb"
       },
       {
         "key": "MDL_BUILDING_WIZARDTOWER1",
@@ -79,15 +83,15 @@
       },
       {
         "key": "MDL_ENEMY_GOBLIN",
-        "value": "resources/models/gltf/goblin-updated.glb"
+        "value": "resources/models/chars/goblin.glb"
       },
       {
         "key": "MDL_NPC_ARISSA",
-        "value": "resources/models/gltf/arissa.glb"
+        "value": "resources/models/chars/arissa.glb"
       },
       {
         "key": "MDL_PLAYER_DEFAULT",
-        "value": "resources/models/gltf/hero-with-weapon.glb"
+        "value": "resources/models/chars/hero.glb"
       },
       {
         "key": "GEN_IMG_HEIGHTMAP",

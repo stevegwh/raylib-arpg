@@ -79,6 +79,11 @@ namespace sage
         auto normalMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_NORMALMAP);
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
 
+        // NB: Dependent on only the map/static meshes having been loaded at this point
+        // Maybe time for a tag system
+        for (const auto view = registry->view<Renderable>(); auto entity : view)
+            data->lightSubSystem->LinkRenderableToLight(entity);
+
         const auto view = registry->view<Spawner>();
         for (auto& entity : view)
         {
@@ -93,11 +98,6 @@ namespace sage
             }
         }
         // registry->erase<Spawner>(view.begin(), view.end());
-
-        // NB: Dependent on only the map/static meshes having been loaded at this point
-        // Maybe time for a tag system
-        for (const auto view = registry->view<Renderable>(); auto entity : view)
-            data->lightSubSystem->LinkRenderableToLight(entity);
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
