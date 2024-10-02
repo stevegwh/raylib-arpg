@@ -24,17 +24,19 @@ namespace sage
         std::vector<Shader> shaders;
         int lightsCount = 0;
 
-        Light createLight(
+        void updateShaderLights(Shader& _shader);
+
+      public:
+        void CreateLight(
             Shader& _shader,
             int type,
             Vector3 position,
             Vector3 target,
             Color color); // Create a light and get shader locations
-      public:
         void LinkShaderToLights(Shader& _shader);
+        void RefreshLights();
         void LinkRenderableToLight(entt::entity entity) const;
         void UpdateAmbientLight(Shader& _shader, float r, float g, float b, float a) const;
-        void RefreshLights(Shader& _shader);
         void DrawDebugLights() const;
         void Update() const;
         explicit LightSubSystem(entt::registry* _registry, Camera* _camera);
