@@ -183,6 +183,16 @@ namespace sage
             mesh.boneWeights = static_cast<float*>(RL_MALLOC(mesh.vertexCount * 4 * sizeof(float)));
             memcpy(mesh.boneWeights, oldMesh.boneWeights, mesh.vertexCount * 4 * sizeof(float));
         }
+        mesh.boneCount = oldMesh.boneCount;
+        if (oldMesh.boneMatrices)
+        {
+            mesh.boneMatrices = static_cast<Matrix*>(RL_CALLOC(mesh.boneCount, sizeof(Matrix)));
+            for (int j = 0; j < mesh.boneCount; j++)
+            {
+                mesh.boneMatrices[j] = MatrixIdentity();
+                // Gets updated per animation, no need to copy info over.
+            }
+        }
 
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
     }
@@ -211,6 +221,7 @@ namespace sage
         {
             if (!vertShaderFileText.contains(vsFileName))
             {
+                assert(FileExists(vsFileName));
                 vertShaderFileText[vsFileName] = LoadFileText(vsFileName);
             }
             vShaderStr = vertShaderFileText[vsFileName];
@@ -220,6 +231,7 @@ namespace sage
         {
             if (!fragShaderFileText.contains(fsFileName))
             {
+                assert(FileExists(fsFileName));
                 fragShaderFileText[fsFileName] = LoadFileText(fsFileName);
             }
             fShaderStr = fragShaderFileText[fsFileName];
@@ -259,6 +271,7 @@ namespace sage
     void ResourceManager::ImageLoadFromFile(const AssetID id)
     {
         const auto& path = getAssetPath(id);
+        assert(FileExists(path.c_str()));
         if (!images.contains(path))
         {
             images[path] = LoadImage(path.c_str());
@@ -268,6 +281,7 @@ namespace sage
     void ResourceManager::ImageLoadFromFile(const AssetID id, Image image)
     {
         const auto& path = getAssetPath(id);
+        assert(FileExists(path.c_str()));
         ImageLoadFromFile(path, image);
     }
 
@@ -283,6 +297,7 @@ namespace sage
     void ResourceManager::ModelLoadFromFile(const AssetID id)
     {
         const auto path = getAssetPath(id);
+        assert(FileExists(path.c_str()));
         ModelLoadFromFile(path);
     }
 
@@ -290,6 +305,7 @@ namespace sage
     {
         if (!modelCopies.contains(path))
         {
+            assert(FileExists(path.c_str()));
             ModelCereal modelCereal;
             // TODO: We're still loading and allocating a material here, potentially unnecessarily
             // This might not be a big deal, if we limit "EmplaceModel" to only be used when constructing the map

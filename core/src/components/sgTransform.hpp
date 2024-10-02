@@ -53,6 +53,7 @@ namespace sage
         [[nodiscard]] const Vector3& GetLocalRot() const;
         [[nodiscard]] const Vector3& GetScale() const;
         void SetLocalPos(const Vector3& position);
+        void SetLocalRot(const Quaternion& rotation);
         void SetLocalRot(const Vector3& rotation);
         void SetPosition(const Vector3& position);
         void SetRotation(const Vector3& rotation);

@@ -79,6 +79,7 @@ namespace sage
         void SetTexture(Texture texture, int materialIdx, MaterialMapIndex mapIdx) const;
         [[nodiscard]] Shader GetShader(int materialIdx) const;
         void SetShader(Shader shader, int materialIdx) const;
+        void SetShader(Shader shader) const;
         void SetKey(const std::string& newKey);
         [[nodiscard]] const std::string& GetKey() const;
         ModelSafe(const ModelSafe&) = delete;
@@ -98,9 +99,7 @@ namespace sage
     Vector2 Vec3ToVec2(const Vector3& vec3);
     Vector3 NegateVector(const Vector3& vec3);
     Vector3 Vector3MultiplyByValue(const Vector3& vec3, float value);
-    Matrix* GetBoneMatrices(Model model, ModelAnimation anim, int frame);
     Matrix ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale);
-    Matrix GetBoneWorldTransform(const BoneInfo* bones, const Matrix* boneTransforms, int boneIndex);
     int GetBoneIdByName(const BoneInfo* bones, int numBones, const char* boneName);
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer);
 } // namespace sage

@@ -4,6 +4,7 @@
 
 #include "sgTransform.hpp"
 #include "raymath.h"
+#include "slib.hpp"
 
 namespace sage
 {
@@ -78,6 +79,15 @@ namespace sage
         m_positionLocal = position;
         if (!m_parent) return;
         SetPosition(Vector3Add(m_parent->m_positionWorld, m_positionLocal));
+    }
+
+    void sgTransform::SetLocalRot(const Quaternion& rotation)
+    {
+        Vector3 rot = QuaternionToEuler(rotation);
+        rot = Vector3MultiplyByValue(rot, RAD2DEG);
+        m_rotationLocal = rot;
+        if (!m_parent) return;
+        SetRotation(Vector3Add(m_parent->m_rotationWorld, m_rotationLocal));
     }
 
     void sgTransform::SetLocalRot(const Vector3& rotation)

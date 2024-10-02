@@ -32,7 +32,7 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
-#include "components/Weapon.hpp"
+#include "components/WeaponComponent.hpp"
 #include "raymath.h"
 
 #include <slib.hpp>
@@ -97,7 +97,17 @@ namespace sage
         // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
 
-        data->lightSubSystem->LinkRenderableToLight(id);
+        Shader shader = ResourceManager::GetInstance().ShaderLoad(
+            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+
+        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+
+        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
+        {
+            renderable.GetModel()->SetShader(shader, i);
+        }
+
+        // data->lightSubSystem->LinkRenderableToLight(id);
         registry->emplace<WavemobState>(id);
         // Always set state last to ensure everything is initialised properly before.
         return id;
@@ -135,7 +145,17 @@ namespace sage
         dialogue.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
-        data->lightSubSystem->LinkRenderableToLight(id);
+        Shader shader = ResourceManager::GetInstance().ShaderLoad(
+            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+
+        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+
+        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
+        {
+            renderable.GetModel()->SetShader(shader, i);
+        }
+
+        // data->lightSubSystem->LinkRenderableToLight(id);
         return id;
     }
 
@@ -158,28 +178,6 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = "Player";
 
-        std::vector<Mesh> meshes(
-            renderable.GetModel()->GetRlModel().meshes,
-            renderable.GetModel()->GetRlModel().meshes + renderable.GetModel()->GetRlModel().meshCount);
-        Model& model = renderable.GetModel()->GetRlModel();
-
-        std::vector<int> meshMaterials(model.meshMaterial, model.meshMaterial + model.meshCount);
-
-        // Below swaps sword and dagger meshes
-        // int holderIdx = 2;
-        // int copyIdx = 3;
-        // auto holder = renderable.GetModel()->GetMesh(holderIdx);
-        // auto copy = renderable.GetModel()->GetMesh(copyIdx);
-        // int matHolder = model.meshMaterial[holderIdx];
-        // int matCopy = model.meshMaterial[copyIdx];
-        // model.meshes[copyIdx] = holder;
-        // model.meshes[holderIdx] = copy;
-        // model.meshMaterial[copyIdx] = matHolder;
-        // model.meshMaterial[holderIdx] = matCopy;
-
-        // -= 2 makes player unarmed
-        model.meshCount -= 1;
-
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 150;
@@ -191,7 +189,7 @@ namespace sage
         animation.animationMap[AnimationEnum::TALK] = 2;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
         animation.animationMap[AnimationEnum::RUN] = 4;
-        animation.animationMap[AnimationEnum::IDLE] = 10;
+        animation.animationMap[AnimationEnum::IDLE] = 10; // 11 is T-Pose, 10 is ninja idle
         animation.animationMap[AnimationEnum::SPIN] = 5;
         animation.animationMap[AnimationEnum::SLASH] = 6;
         animation.animationMap[AnimationEnum::SPELLCAST_UP] = 7;
@@ -239,6 +237,42 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
+        auto weaponEntity = registry->create();
+        combatable.weapon = weaponEntity;
+
+        Shader shader = ResourceManager::GetInstance().ShaderLoad(
+            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+
+        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+
+        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
+        {
+            renderable.GetModel()->SetShader(shader, i);
+        }
+
+        Matrix weaponMat;
+        {
+            // Hard coded location of the "socket" for the weapon
+            // TODO: Export sockets as txt and store their transform in weaponSocket
+            auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
+            Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
+            auto scale = Vector3{1, 1, 1};
+            weaponMat = ComposeMatrix(translation, rotation, scale);
+        }
+
+        auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
+        weapon.parentSocket = weaponMat;
+        weapon.parentBoneName = "mixamorig:RightHand";
+        weapon.owner = id;
+        registry->emplace<Renderable>(
+            weaponEntity,
+            ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
+            renderable.initialTransform);
+        data->lightSubSystem->LinkRenderableToLight(weaponEntity);
+
+        auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
+        weaponTrans.SetParent(&transform);
+        weaponTrans.SetLocalPos(Vector3Zero());
 
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
@@ -253,19 +287,10 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
-        data->lightSubSystem->LinkRenderableToLight(id);
+        // data->lightSubSystem->LinkRenderableToLight(id);
 
         registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
-
-        // auto weaponEntity = registry->create();
-        // auto& weapon = registry->emplace<Weapon>(weaponEntity);
-        // weapon.owner = id;
-        // registry->emplace<Renderable>(
-        //     weaponEntity, LoadModel("resources/models/gltf/sword.glb"), MatrixScale(0.035, 0.035, 0.035));
-        // auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
-        // weaponTrans.SetParent(&transform);
-        // weaponTrans.SetLocalPos(Vector3Zero());
 
         return id;
     }
