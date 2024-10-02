@@ -30,6 +30,7 @@ uniform int lightsCount;
 uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 uniform vec3 viewPos;
+uniform float gamma;
 
 vec4 GetLightingValue()
 {
@@ -85,7 +86,7 @@ vec4 GetLightingValue()
     result += texelColor*(ambient/10.0)*colDiffuse;
 
     // Gamma correction
-    return pow(result, vec4(1.0/2.2));
+    return pow(result, vec4(1.0/gamma));
 }
 
 void main()

@@ -31,6 +31,7 @@ uniform int lightsCount;
 uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 uniform vec3 viewPos;
+uniform float gamma;
 
 // Light control parameters (to be replaced with uniforms later)
 const float lightReachMultiplier = 0.8;// Adjusts how far the light reaches
@@ -90,5 +91,5 @@ void main()
     finalColor *= fragColor;
 
     // Gamma correction
-    finalColor = pow(finalColor, vec4(1.0/2.2));
+    finalColor = pow(finalColor, vec4(1.0/gamma));
 }

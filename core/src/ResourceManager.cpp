@@ -289,7 +289,6 @@ namespace sage
     {
         if (!images.contains(path))
         {
-            assert(FileExists(path.c_str()));
             images[path] = image;
             image = {};
         }
