@@ -24,8 +24,9 @@ namespace sage
         std::vector<Shader> shaders;
         int lightsCount = 0;
         float gamma = 3.3;
-
+        std::array<float, 4> ambient;
         void updateShaderLights(Shader& _shader);
+        void updateAmbientLight(Shader& _shader) const;
 
       public:
         void CreateLight(
@@ -35,9 +36,10 @@ namespace sage
             Vector3 target,
             Color color); // Create a light and get shader locations
         void LinkShaderToLights(Shader& _shader);
+        void SetAmbientLight(float r, float g, float b, float a);
+        void SetGamma(float g);
         void RefreshLights();
         void LinkRenderableToLight(entt::entity entity) const;
-        void UpdateAmbientLight(Shader& _shader, float r, float g, float b, float a) const;
         void DrawDebugLights() const;
         void Update() const;
         explicit LightSubSystem(entt::registry* _registry, Camera* _camera);
