@@ -7,6 +7,7 @@
 
 #include "Camera.hpp"
 #include "Cursor.hpp"
+#include "GameUiEngine.hpp"
 #include "Settings.hpp"
 #include "UserInput.hpp"
 
@@ -34,6 +35,7 @@ namespace sage
           settings(_settings),
           userInput(std::make_unique<UserInput>(_keyMapping, _settings)),
           cursor(std::make_unique<Cursor>(_registry, this)),
+          uiEngine(std::make_unique<GameUIEngine>(_settings, userInput.get(), cursor.get())),
           camera(std::make_unique<Camera>(_registry, userInput.get(), this)),
           lightSubSystem(std::make_unique<LightSubSystem>(_registry, camera.get())),
           renderSystem(std::make_unique<RenderSystem>(_registry)),

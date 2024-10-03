@@ -12,6 +12,7 @@
 
 // NB: We have to include all the headers required to build GameData
 #include "AbilityFactory.hpp"
+#include "GameUiEngine.hpp"
 #include "Serializer.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
@@ -40,6 +41,7 @@ namespace sage
         data->userInput->ListenForInput();
         data->cursor->Update();
         data->lightSubSystem->Update();
+        data->uiEngine->Update();
     }
 
     void Scene::Draw3D()
@@ -52,6 +54,7 @@ namespace sage
     void Scene::Draw2D()
     {
         data->cursor->Draw2D();
+        data->uiEngine->Draw2D();
     }
 
     void Scene::DrawDebug()

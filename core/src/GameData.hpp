@@ -16,6 +16,7 @@ namespace sage
     class LightSubSystem;
     struct Settings;
     struct KeyMapping;
+    class GameUIEngine;
 
     class RenderSystem;
     class CollisionSystem;
@@ -44,6 +45,7 @@ namespace sage
         std::unique_ptr<Cursor> cursor;
         std::unique_ptr<Camera> camera;
         std::unique_ptr<LightSubSystem> lightSubSystem;
+        std::unique_ptr<GameUIEngine> uiEngine;
 
         std::unique_ptr<RenderSystem> renderSystem;
         std::unique_ptr<CollisionSystem> collisionSystem;
