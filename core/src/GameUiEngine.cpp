@@ -74,12 +74,18 @@ namespace sage
     {
         for (auto& window : windows)
         {
-            DrawTextureNPatch(window.tex, window.nPatchInfo, window.rec, window.pos, 0.0f, WHITE);
+            DrawTextureNPatch(
+                window.tex,
+                window.nPatchInfo,
+                window.rec,
+                {0.0f, 0.0f},
+                0.0f,
+                WHITE); // Use {0.0f, 0.0f} for origin
 
             for (auto& child : window.children)
             {
-                if (child.id < 0) continue;                             // Skip invalid IDs
-                DrawTextureRec(child.tex, child.rec, child.pos, WHITE); // Draw panel background
+                if (child.id < 0) continue;
+                DrawTextureRec(child.tex, child.rec, {0.0f, 0.0f}, WHITE); // Use {0.0f, 0.0f} for origin
             }
         }
 
