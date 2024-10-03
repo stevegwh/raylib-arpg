@@ -16,6 +16,7 @@
 #include "Settings.hpp"
 
 // Systems
+#include "GameUiFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -80,5 +81,7 @@ namespace sage
         GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
         // GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
         // GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
+
+        GameUiFactory::CreateInventoryWindow(data->uiEngine.get(), {300, 200}, 200, 300);
     }
 } // namespace sage
