@@ -21,8 +21,9 @@ namespace sage
     {
         Table table;
         table.parent = this;
-        table.rec = Rectangle{rec.x, rec.y, rec.width, rec.height};
-        table.tex = LoadTexture("resources/textures/panel_background.png"); // Example texture
+        // Table inherits window's dimensions and position
+        table.rec = rec;
+        table.tex = LoadTexture("resources/textures/panel_background.png");
         children.push_back(std::move(table));
         return &children.back();
     }
@@ -40,11 +41,31 @@ namespace sage
     [[nodiscard]] TableRow* Table::CreateTableRow()
     {
         TableRow row;
-        float percent = 100.0f / (children.size() + 1);
-        row.width = FloatConstrained(percent, 0, rec.width);
-        row.height = FloatConstrained(percent, 0, rec.height);
-        children.push_back(std::move(row));
+        row.parent = this;
 
+        float rowHeight = rec.height / (children.size() + 1);
+        // Position the new row below existing rows
+        float yPosition = rec.y + (children.size() * rowHeight);
+
+        row.rec = {
+            rec.x,     // x position same as table
+            yPosition, // y position calculated based on row index
+            rec.width, // full width of table
+            rowHeight  // height divided equally
+        };
+
+        row.width = FloatConstrained(rec.width, 0, rec.width);
+        row.height = FloatConstrained(rowHeight, 0, rec.height);
+
+        // Reposition existing rows for even distribution
+        for (size_t i = 0; i < children.size(); i++)
+        {
+            children[i].rec.y = rec.y + (i * rowHeight);
+            children[i].rec.height = rowHeight;
+            children[i].height = FloatConstrained(rowHeight, 0, rec.height);
+        }
+
+        children.push_back(std::move(row));
         return &children.back();
     }
     void Table::Draw2D()
@@ -55,12 +76,58 @@ namespace sage
         }
     }
 
-    [[nodiscard]] TableCell* TableRow::CreateTableCell(float width)
+    [[nodiscard]] TableCell* TableRow::CreateTableCell(float requestedWidth)
     {
         TableCell cell;
-        float percent = 100.0f / (children.size() + 1);
-        cell.width = FloatConstrained(percent, 0, rec.width);
-        cell.height = FloatConstrained(percent, 0, rec.height);
+        cell.parent = this;
+
+        // Calculate available width in the row
+        float totalRequestedWidth = 0;
+        for (const auto& existingCell : children)
+        {
+            totalRequestedWidth += existingCell.width.GetValue();
+        }
+        totalRequestedWidth += requestedWidth;
+
+        // Adjust requested width if it would exceed row width
+        float scaleFactor = 1.0f;
+        if (totalRequestedWidth > rec.width)
+        {
+            scaleFactor = rec.width / totalRequestedWidth;
+            requestedWidth *= scaleFactor;
+
+            // Also adjust existing cells
+            for (auto& existingCell : children)
+            {
+                float newWidth = existingCell.width.GetValue() * scaleFactor;
+                existingCell.width = FloatConstrained(newWidth, 0, rec.width);
+                existingCell.rec.width = newWidth;
+            }
+        }
+
+        // Calculate x position based on existing cells
+        float xPosition = rec.x;
+        for (const auto& existingCell : children)
+        {
+            xPosition += existingCell.rec.width;
+        }
+
+        // Set up the cell's rectangle
+        cell.rec = {
+            xPosition,      // Position after existing cells
+            rec.y,          // Same y as parent row
+            requestedWidth, // Scaled width
+            rec.height      // Same height as parent row
+        };
+
+        cell.width = FloatConstrained(requestedWidth, 0, rec.width);
+        cell.height = FloatConstrained(rec.height, 0, rec.height);
+
+        // Set default padding and margins
+        cell.paddingLeft = cell.paddingRight = 5; // Add some default padding
+        cell.paddingUp = cell.paddingDown = 5;
+        cell.marginLeft = cell.marginRight = cell.marginUp = cell.marginDown = 0;
+
         children.push_back(std::move(cell));
         return &children.back();
     }
@@ -72,32 +139,58 @@ namespace sage
         }
     }
 
-    TextBox* TableCell::CreateTextbox(const std::string& _content)
+    void TableCell::Draw2D()
     {
-        TextBox textbox;
-        textbox.fontSize = 10; // Default font size
-        textbox.content = _content;
-        children.push_back(textbox);
-        return dynamic_cast<TextBox*>(&children.back());
+        for (auto& c : children)
+        {
+            c->Draw2D();
+        }
     }
 
-    void TextBox::Draw2D()
+    TextBox* TableCell::CreateTextbox(const std::string& _content)
     {
+        auto textbox = std::make_unique<TextBox>();
+        textbox->fontSize = 20; // Increased font size for better visibility
+        textbox->content = _content;
+
+        // Calculate text dimensions
+        Vector2 textSize = MeasureTextEx(GetFontDefault(), _content.c_str(), textbox->fontSize, 1);
+
+        // Center the text in the cell
+        float textX = rec.x + paddingLeft + (rec.width - paddingLeft - paddingRight - textSize.x) / 2;
+        float textY = rec.y + paddingUp + (rec.height - paddingUp - paddingDown - textSize.y) / 2;
+
+        textbox->rec = {textX, textY, textSize.x, textSize.y};
+
+        TextBox* ptr = textbox.get();
+        children.push_back(std::move(textbox));
+        return ptr;
     }
 
     Button* TableCell::CreateButton(Texture _tex)
     {
-        Button button;
-        button.tex = _tex;
-        children.push_back(button);
-        return dynamic_cast<Button*>(&children.back());
-    }
-    void TableCell::Draw2D()
-    {
+        auto button = std::make_unique<Button>();
+        button->tex = _tex;
+
+        // Position the button inside the cell, accounting for padding
+        button->rec = {
+            rec.x + paddingLeft,
+            rec.y + paddingUp,
+            rec.width - (paddingLeft + paddingRight),
+            rec.height - (paddingUp + paddingDown)};
+
+        Button* ptr = button.get();
+        children.push_back(std::move(button));
+        return ptr;
     }
 
     void Button::Draw2D()
     {
+    }
+
+    void TextBox::Draw2D()
+    {
+        DrawText(content.c_str(), rec.x, rec.y, fontSize, BLACK);
     }
 
     void GameUIEngine::Draw2D()
