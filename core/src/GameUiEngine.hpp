@@ -76,7 +76,7 @@ namespace sage
 
     struct UIElement
     {
-        virtual void Draw2D() = 0;
+        virtual void Draw2D(){};
     };
 
     struct TextBox : public UIElement
@@ -113,7 +113,7 @@ namespace sage
         Texture tex;
         TextBox* CreateTextbox(const std::string& _content);
         Button* CreateButton(Texture _tex);
-        std::vector<std::unique_ptr<UIElement>> children;
+        std::vector<UIElement> children;
         void Draw2D();
     };
 
