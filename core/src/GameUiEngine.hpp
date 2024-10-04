@@ -28,7 +28,48 @@ namespace sage
 
       public:
         FloatConstrained(float _value, float _min, float _max) : value(_value), min(_min), max(_max){};
+
         FloatConstrained() = default;
+
+        FloatConstrained(const FloatConstrained& other) : value(other.value), min(other.min), max(other.max)
+        {
+        }
+
+        FloatConstrained(FloatConstrained&& other) noexcept : value(other.value), min(other.min), max(other.max)
+        {
+            other.value = 0;
+            other.min = 0;
+            other.max = 100;
+        }
+
+        FloatConstrained& operator=(const FloatConstrained& other)
+        {
+            if (this != &other)
+            {
+                value = other.value;
+                min = other.min;
+                max = other.max;
+            }
+            return *this;
+        }
+
+        FloatConstrained& operator=(FloatConstrained&& other) noexcept
+        {
+            if (this != &other)
+            {
+                value = other.value;
+                min = other.min;
+                max = other.max;
+
+                // Reset other to default state
+                other.value = 0;
+                other.min = 0;
+                other.max = 100;
+            }
+            return *this;
+        }
+
+        ~FloatConstrained() = default;
 
         [[nodiscard]] float GetValue() const
         {
@@ -70,13 +111,15 @@ namespace sage
         FloatConstrained height;
         Texture tex;
         std::vector<TableCell> children;
-        TableCell* CreateTableCell(float width);
+        TableCell* CreateTableCell(float requestedWidth);
         void Draw2D();
     };
 
     struct UIElement
     {
-        virtual void Draw2D(){};
+        virtual void Draw2D(){
+
+        };
     };
 
     struct TextBox : public UIElement
@@ -113,7 +156,7 @@ namespace sage
         Texture tex;
         TextBox* CreateTextbox(const std::string& _content);
         Button* CreateButton(Texture _tex);
-        std::vector<UIElement> children;
+        std::vector<std::unique_ptr<UIElement>> children;
         void Draw2D();
     };
 
