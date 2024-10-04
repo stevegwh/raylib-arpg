@@ -7,100 +7,101 @@
 namespace sage
 {
 
-    int GameUIEngine::CreateWindow(Vector2 pos, float w, float h)
+    [[nodiscard]] Window* GameUIEngine::CreateWindow(Vector2 pos, float w, float h)
     {
         Window window;
-        window.id = nextId++;
         window.nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window.tex = nPatchTexture;
-        window.pos = pos;
         window.rec = {pos.x, pos.y, w, h};
         windows.push_back(window);
-        return window.id;
+        return &windows.back();
     }
 
-    int GameUIEngine::CreatePanel(Vector2 pos, float w, float h, int parent)
+    [[nodiscard]] Table* Window::CreateTable()
     {
-        Panel panel;
-        panel.id = nextId++;
-        panel.parent = GetWindowById(parent);
-        panel.pos = pos;
-        panel.rec = {panel.parent->pos.x + pos.x, panel.parent->pos.y + pos.y, w, h};
-        panel.tex = LoadTexture("resources/textures/panel_background.png"); // Example texture
-        GetWindowById(parent)->children.push_back(panel);
-        return panel.id;
+        Table table;
+        table.parent = this;
+        table.rec = Rectangle{rec.x, rec.y, rec.width, rec.height};
+        table.tex = LoadTexture("resources/textures/panel_background.png"); // Example texture
+        children.push_back(table);
+        return &children.back();
+    }
+    void Window::Draw2D()
+    {
+        DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
+                          WHITE); // Use {0.0f, 0.0f} for origin
+
+        for (auto& child : children)
+        {
+            child.Draw2D();
+        }
     }
 
-    int GameUIEngine::CreateTextbox(const std::string& content, Vector2 pos, float w, float h, int parent)
+    [[nodiscard]] TableRow* Table::CreateTableRow()
+    {
+        TableRow row;
+        float percent = 100.0f / (children.size() + 1);
+        row.width = FloatConstrained(percent, 0, rec.width);
+        row.height = FloatConstrained(percent, 0, rec.height);
+        children.push_back(row);
+
+        return &children.back();
+    }
+    void Table::Draw2D()
+    {
+        for (auto& row : children)
+        {
+            row.Draw2D();
+        }
+    }
+
+    [[nodiscard]] TableCell* TableRow::CreateTableCell(float width)
+    {
+        TableCell cell;
+        float percent = 100.0f / (children.size() + 1);
+        cell.width = FloatConstrained(percent, 0, rec.width);
+        cell.height = FloatConstrained(percent, 0, rec.height);
+        children.push_back(cell);
+        return &children.back();
+    }
+    void TableRow::Draw2D()
+    {
+        for (auto& cell : children)
+        {
+            cell.Draw2D();
+        }
+    }
+
+    TextBox* TableCell::CreateTextbox(const std::string& _content)
     {
         TextBox textbox;
-        textbox.id = nextId++;
-        textbox.parent = parent;
         textbox.fontSize = 10; // Default font size
-        textbox.pos = pos;
-        textbox.rec = {GetWindowById(parent)->pos.x + pos.x, GetWindowById(parent)->pos.y + pos.y, w, h};
-        textbox.content = content;
-        textboxes.push_back(textbox);
-        return textbox.id;
+        textbox.content = _content;
+        children.push_back(std::make_unique<TextBox>(textbox));
+        return dynamic_cast<TextBox*>(children.back().get());
     }
 
-    int GameUIEngine::CreateButton(Texture tex, Vector2 pos, float w, float h, int parent)
+    void TextBox::Draw2D()
+    {
+    }
+
+    Button* TableCell::CreateButton(Texture _tex)
     {
         Button button;
-        button.id = nextId++;
-        button.parent = parent;
-        button.tex = tex;
-        button.pos = pos;
-        button.w = w;
-        button.h = h;
-        button.rec = {GetWindowById(parent)->pos.x + pos.x, GetWindowById(parent)->pos.y + pos.y, w, h};
-        buttons.push_back(button);
-        return button.id;
+        button.tex = _tex;
+        children.push_back(std::make_unique<Button>(button));
+        return dynamic_cast<Button*>(children.back().get());
     }
 
-    Window* GameUIEngine::GetWindowById(int id)
+    void Button::Draw2D()
     {
-        for (auto& window : windows)
-        {
-            if (window.id == id)
-            {
-                return &window;
-            }
-        }
-        return nullptr; // Return nullptr if window not found
     }
 
     void GameUIEngine::Draw2D()
     {
         for (auto& window : windows)
         {
-            DrawTextureNPatch(
-                window.tex,
-                window.nPatchInfo,
-                window.rec,
-                {0.0f, 0.0f},
-                0.0f,
-                WHITE); // Use {0.0f, 0.0f} for origin
-
-            for (auto& child : window.children)
-            {
-                if (child.id < 0) continue;
-                DrawTextureRec(child.tex, child.rec, {0.0f, 0.0f}, WHITE); // Use {0.0f, 0.0f} for origin
-            }
-        }
-
-        // Draw textboxes on top of panels
-        for (auto& textbox : textboxes)
-        {
-            if (textbox.id < 0) continue; // Skip invalid IDs
-            DrawText(textbox.content.c_str(), textbox.rec.x, textbox.rec.y, textbox.fontSize, BLACK);
-        }
-
-        // Draw buttons on top
-        for (auto& button : buttons)
-        {
-            if (button.id < 0) continue; // Skip invalid IDs
-            DrawTextureRec(button.tex, {0, 0, button.w, button.h}, button.pos, WHITE);
+            window.Draw2D();
         }
     }
 
@@ -114,5 +115,4 @@ namespace sage
     {
         nPatchTexture = LoadTexture("resources/textures/ninepatch_button.png");
     }
-
 } // namespace sage
