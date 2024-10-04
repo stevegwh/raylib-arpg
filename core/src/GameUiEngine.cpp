@@ -13,7 +13,7 @@ namespace sage
         window.nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window.tex = nPatchTexture;
         window.rec = {pos.x, pos.y, w, h};
-        windows.push_back(window);
+        windows.push_back(std::move(window));
         return &windows.back();
     }
 
@@ -23,7 +23,7 @@ namespace sage
         table.parent = this;
         table.rec = Rectangle{rec.x, rec.y, rec.width, rec.height};
         table.tex = LoadTexture("resources/textures/panel_background.png"); // Example texture
-        children.push_back(table);
+        children.push_back(std::move(table));
         return &children.back();
     }
     void Window::Draw2D()
@@ -43,7 +43,7 @@ namespace sage
         float percent = 100.0f / (children.size() + 1);
         row.width = FloatConstrained(percent, 0, rec.width);
         row.height = FloatConstrained(percent, 0, rec.height);
-        children.push_back(row);
+        children.push_back(std::move(row));
 
         return &children.back();
     }
@@ -61,7 +61,7 @@ namespace sage
         float percent = 100.0f / (children.size() + 1);
         cell.width = FloatConstrained(percent, 0, rec.width);
         cell.height = FloatConstrained(percent, 0, rec.height);
-        children.push_back(cell);
+        children.push_back(std::move(cell));
         return &children.back();
     }
     void TableRow::Draw2D()
@@ -77,8 +77,8 @@ namespace sage
         TextBox textbox;
         textbox.fontSize = 10; // Default font size
         textbox.content = _content;
-        children.push_back(std::make_unique<TextBox>(textbox));
-        return dynamic_cast<TextBox*>(children.back().get());
+        children.push_back(textbox);
+        return dynamic_cast<TextBox*>(&children.back());
     }
 
     void TextBox::Draw2D()
@@ -89,8 +89,11 @@ namespace sage
     {
         Button button;
         button.tex = _tex;
-        children.push_back(std::make_unique<Button>(button));
-        return dynamic_cast<Button*>(children.back().get());
+        children.push_back(button);
+        return dynamic_cast<Button*>(&children.back());
+    }
+    void TableCell::Draw2D()
+    {
     }
 
     void Button::Draw2D()
