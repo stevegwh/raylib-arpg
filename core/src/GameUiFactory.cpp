@@ -18,7 +18,7 @@ namespace sage
         auto cell = row->CreateTableCell();
         auto cell2 = row->CreateTableCell();
         auto cell3 = row->CreateTableCell();
-        auto cell0 = row->CreateTableCell();
+        // auto cell0 = row->CreateTableCell();
         cell->CreateTextbox("Number 1!");
         cell->padding.left = 10;
         cell2->CreateTextbox("Number 2!");
