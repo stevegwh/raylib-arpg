@@ -35,7 +35,6 @@ namespace sage
         children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
         UpdateChildren();
-        // TODO: Add padding here
         return row.get();
     }
 
@@ -48,24 +47,13 @@ namespace sage
         return cell.get();
     }
 
-    void TableCell::SetPadding(Padding _padding)
-    {
-        padding = _padding;
-        UpdateChild();
-    }
-
-    const Padding& TableCell::GetPadding() const
-    {
-        return padding;
-    }
-
     TextBox* TableCell::CreateTextbox(const std::string& _content)
     {
-        child = std::make_unique<TextBox>();
-        auto* textbox = dynamic_cast<TextBox*>(child.get());
+        children = std::make_unique<TextBox>();
+        auto* textbox = dynamic_cast<TextBox*>(children.get());
         textbox->fontSize = 42;
         textbox->content = _content;
-        UpdateChild();
+        UpdateChildren();
         return textbox;
     }
 
@@ -80,8 +68,8 @@ namespace sage
             rec.y + padding.up,
             rec.width - (+padding.right),
             rec.height - (padding.up + padding.down)};
-        child = std::move(button);
-        return dynamic_cast<Button*>(child.get());
+        children = std::move(button);
+        return dynamic_cast<Button*>(children.get());
     }
 
     void Table::UpdateChildren()
@@ -96,6 +84,7 @@ namespace sage
             row->rec.y = rec.y + (rowHeight * i);
             if (!row->children.empty()) row->UpdateChildren();
             // TODO: Add margin here
+            // TODO: Add padding here
         }
     }
 
@@ -109,22 +98,24 @@ namespace sage
             cell->rec = rec;
             cell->rec.width = cellWidth;
             cell->rec.x = rec.x + (cellWidth * i);
-            cell->UpdateChild();
+            cell->UpdateChildren();
+            // TODO: Add margin here
+            // TODO: Add padding here
         }
     }
 
-    void TableCell::UpdateChild()
+    void TableCell::UpdateChildren()
     {
-        if (child)
+        if (children)
         {
-            child->parent = this;
-            child->UpdateRec();
+            children->parent = this;
+            children->UpdateRec();
         }
     }
 
     void TextBox::UpdateRec()
     {
-        const int MIN_FONT_SIZE = 4;
+        constexpr int MIN_FONT_SIZE = 4;
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
         Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
         while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
@@ -159,7 +150,7 @@ namespace sage
         std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
         for (int i = 0; i < children.size(); ++i)
         {
-            auto& row = children[i];
+            const auto& row = children[i];
             DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, colors[i]);
             row->Draw2D();
         }
@@ -170,7 +161,7 @@ namespace sage
         std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK};
         for (int i = 0; i < children.size(); ++i)
         {
-            auto& cell = children[i];
+            const auto& cell = children[i];
             Color col = colors[i];
             col.a = 150;
             DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
@@ -180,9 +171,9 @@ namespace sage
 
     void TableCell::Draw2D()
     {
-        if (child)
+        if (children) // single element
         {
-            child->Draw2D();
+            children->Draw2D();
         }
     }
 
