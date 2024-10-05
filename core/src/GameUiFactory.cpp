@@ -13,7 +13,7 @@ namespace sage
         auto window = engine->CreateWindow(pos, 200, 200);
         auto table = window->CreateTable();
         auto row = table->CreateTableRow();
-        auto cell2 = row->CreateTableCell(100);
+        auto cell2 = row->CreateTableCell();
         cell2->CreateTextbox("Hello world!");
     }
 
