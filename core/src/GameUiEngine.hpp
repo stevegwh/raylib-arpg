@@ -11,6 +11,7 @@
 
 namespace sage
 {
+    struct TableCell;
     struct Window;
     struct TableRow;
     struct Table;
@@ -44,6 +45,10 @@ namespace sage
         Margin margin;
         std::vector<ChildName> children;
 
+        virtual void UpdateChildren()
+        {
+        }
+
         virtual void Draw2D(){
 
         };
@@ -58,7 +63,12 @@ namespace sage
 
     struct CellElement
     {
+        TableCell* parent{};
         Rectangle rec{};
+
+        virtual void UpdateRec()
+        {
+        }
 
         virtual void Draw2D(){
 
@@ -79,6 +89,8 @@ namespace sage
         // color?
         std::string content;
         // Text wrap, scroll bar etc?
+
+        void UpdateRec() override;
 
         void Draw2D() override;
         TextBox() = default;
@@ -108,6 +120,7 @@ namespace sage
     struct TableCell : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
         Texture tex{};
+        void UpdateChildren() override;
         TextBox* CreateTextbox(const std::string& _content);
         Button* CreateButton(Texture _tex);
         void Draw2D() override;
@@ -122,6 +135,7 @@ namespace sage
     struct TableRow : public TableElement<TableCell, Table>
     {
         Texture tex{};
+        void UpdateChildren() override;
         TableCell* CreateTableCell(Padding _padding, Margin _margin);
         TableCell* CreateTableCell();
         void Draw2D() override;
@@ -136,6 +150,7 @@ namespace sage
     struct Table : public TableElement<TableRow, Window>
     {
         Texture tex{};
+        void UpdateChildren() override;
         TableRow* CreateTableRow();
         void Draw2D() override;
         Table() = default;
