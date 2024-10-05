@@ -25,7 +25,7 @@ namespace sage
         // Table inherits window's dimensions and position
         table.rec = rec;
         // TODO: Add padding here
-        table.tex = LoadTexture("resources/textures/panel_background.png");
+        // table.tex = LoadTexture("resources/textures/panel_background.png");
         return &children.back();
     }
 
@@ -35,7 +35,16 @@ namespace sage
         auto& row = children.back();
         row.parent = this;
         row.rec = rec;
-        row.rec.height = rec.height / children.size() + 1;
+
+        float rowHeight = rec.height / children.size();
+        for (int i = 0; i < children.size(); ++i)
+        {
+            auto& child = children.at(i);
+            child.rec.height = rowHeight;
+            child.rec.y = rec.y + (rowHeight * i);
+            // TODO: Add margin here
+        }
+
         // TODO: Add padding here
         return &children.back();
     }
@@ -44,10 +53,19 @@ namespace sage
     {
         children.emplace_back();
         auto& cell = children.back();
+        cell.padding = _padding;
+        cell.margin = _margin;
         cell.parent = this;
         cell.rec = rec;
-        cell.rec.width = rec.width / children.size() + 1;
-        // TODO: Add padding here
+
+        float cellWidth = rec.width / children.size();
+        for (int i = 0; i < children.size(); ++i)
+        {
+            auto& child = children.at(i);
+            child.rec.width = cellWidth;
+            child.rec.x = rec.x + (cellWidth * i);
+        }
+
         return &children.back();
     }
 
@@ -59,13 +77,13 @@ namespace sage
     TextBox* TableCell::CreateTextbox(const std::string& _content)
     {
         auto textbox = std::make_unique<TextBox>();
-        textbox->fontSize = 20; // Increased font size for better visibility
+        textbox->fontSize = 10;
         textbox->content = _content;
 
         // Calculate text dimensions
         Vector2 textSize = MeasureTextEx(GetFontDefault(), _content.c_str(), textbox->fontSize, 1);
 
-        textbox->rec = {textSize.x, textSize.y, textSize.x, textSize.y};
+        textbox->rec = {rec.x + padding.left, rec.y + padding.up, textSize.x, textSize.y};
 
         TextBox* ptr = textbox.get();
         children.push_back(std::move(textbox));
@@ -120,6 +138,7 @@ namespace sage
     {
         for (auto& c : children)
         {
+            DrawRectangle(rec.x, rec.y, rec.width, rec.height, BLUE);
             c->Draw2D();
         }
     }
