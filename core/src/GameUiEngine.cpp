@@ -9,47 +9,48 @@ namespace sage
 
     [[nodiscard]] Window* GameUIEngine::CreateWindow(Vector2 pos, float w, float h)
     {
-        windows.emplace_back();
-        auto& window = windows.back();
-        window.nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        window.tex = nPatchTexture;
-        window.rec = {pos.x, pos.y, w, h};
-        return &windows.back();
+        auto window = std::make_unique<Window>();
+        window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        window->tex = nPatchTexture;
+        window->rec = {pos.x, pos.y, w, h};
+        auto ptr = window.get();
+        windows.push_back(std::move(window));
+        return ptr;
     }
 
     [[nodiscard]] Table* Window::CreateTable()
     {
-        children.emplace_back();
-        auto& table = children.back();
-        table.parent = this;
+        auto table = std::make_unique<Table>();
+        table->parent = this;
         // Table inherits window's dimensions and position
-        table.rec = rec;
+        table->rec = rec;
         // TODO: Add padding here
         // table.tex = LoadTexture("resources/textures/panel_background.png");
-        return &children.back();
+        auto ptr = table.get();
+        children.push_back(std::move(table));
+        return ptr;
     }
 
     [[nodiscard]] TableRow* Table::CreateTableRow()
     {
-        children.emplace_back();
-        auto& row = children.back();
-        row.parent = this;
+        auto row = std::make_unique<TableRow>();
+        auto ptr = row.get();
+        children.push_back(std::move(row));
         UpdateChildren();
-
         // TODO: Add padding here
-        return &children.back();
+        return ptr;
     }
 
     [[nodiscard]] TableCell* TableRow::CreateTableCell(Padding _padding, Margin _margin)
     {
-        children.emplace_back();
-        auto& cell = children.back();
-        cell.padding = _padding;
-        cell.margin = _margin;
-        cell.parent = this;
+        auto cell = std::make_unique<TableCell>();
+        cell->padding = _padding;
+        cell->margin = _margin;
+        cell->parent = this;
+        auto ptr = cell.get();
+        children.push_back(std::move(cell));
         UpdateChildren();
-
-        return &children.back();
+        return ptr;
     }
 
     [[nodiscard]] TableCell* TableRow::CreateTableCell()
@@ -63,7 +64,6 @@ namespace sage
         auto* textbox = dynamic_cast<TextBox*>(child.get());
         textbox->fontSize = 10;
         textbox->content = _content;
-        textbox->parent = this;
         UpdateChild();
         return textbox;
     }
@@ -89,10 +89,11 @@ namespace sage
         for (int i = 0; i < children.size(); ++i)
         {
             auto& row = children.at(i);
-            row.rec = rec;
-            row.rec.height = rowHeight;
-            row.rec.y = rec.y + (rowHeight * i);
-            row.UpdateChildren();
+            row->parent = this;
+            row->rec = rec;
+            row->rec.height = rowHeight;
+            row->rec.y = rec.y + (rowHeight * i);
+            if (row->children.size() > 0) row->UpdateChildren();
             // TODO: Add margin here
         }
     }
@@ -103,11 +104,11 @@ namespace sage
         for (int i = 0; i < children.size(); ++i)
         {
             auto& cell = children.at(i);
-            cell.parent = this;
-            cell.rec = rec;
-            cell.rec.width = cellWidth;
-            cell.rec.x = rec.x + (cellWidth * i);
-            cell.UpdateChild();
+            cell->parent = this;
+            cell->rec = rec;
+            cell->rec.width = cellWidth;
+            cell->rec.x = rec.x + (cellWidth * i);
+            cell->UpdateChild();
         }
     }
 
@@ -134,7 +135,7 @@ namespace sage
 
         for (auto& child : children)
         {
-            child.Draw2D();
+            child->Draw2D();
         }
     }
 
@@ -144,8 +145,8 @@ namespace sage
         for (int i = 0; i < children.size(); ++i)
         {
             auto& row = children[i];
-            DrawRectangle(row.rec.x, row.rec.y, row.rec.width, row.rec.height, colors[i]);
-            row.Draw2D();
+            DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, colors[i]);
+            row->Draw2D();
         }
     }
 
@@ -157,8 +158,8 @@ namespace sage
             auto& cell = children[i];
             Color col = colors[i];
             col.a = 150;
-            DrawRectangle(cell.rec.x, cell.rec.y, cell.rec.width, cell.rec.height, col);
-            cell.Draw2D();
+            DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
+            cell->Draw2D();
         }
     }
 
@@ -183,7 +184,7 @@ namespace sage
     {
         for (auto& window : windows)
         {
-            window.Draw2D();
+            window->Draw2D();
         }
     }
 
