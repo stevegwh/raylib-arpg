@@ -13,7 +13,7 @@ namespace sage
     {
 
       public:
-        static void CreateLootWindow(GameUIEngine* engine, Vector2 pos);
+        static void CreateExampleWindow(GameUIEngine* engine, Vector2 pos);
         static void CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h);
     };
 

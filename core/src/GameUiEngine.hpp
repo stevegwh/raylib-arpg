@@ -75,6 +75,7 @@ namespace sage
     struct TextBox final : public CellElement
     {
         float fontSize{};
+        float fontSpacing = 2;
         // font?
         // color?
         std::string content;

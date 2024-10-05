@@ -82,7 +82,7 @@ namespace sage
 
     void Table::UpdateChildren()
     {
-        const float rowHeight = rec.height / children.size();
+        const float rowHeight = std::ceil(rec.height / children.size());
         for (int i = 0; i < children.size(); ++i)
         {
             const auto& row = children.at(i);
@@ -97,7 +97,7 @@ namespace sage
 
     void TableRow::UpdateChildren()
     {
-        const float cellWidth = rec.width / children.size();
+        const float cellWidth = std::ceil(rec.width / children.size());
         for (int i = 0; i < children.size(); ++i)
         {
             const auto& cell = children.at(i);
@@ -122,11 +122,11 @@ namespace sage
     {
         const int MIN_FONT_SIZE = 4;
         float availableWidth = parent->rec.width - (parent->padding.left + parent->padding.right);
-        Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, 1);
+        Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
         while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
         {
             fontSize -= 1;
-            textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, 1);
+            textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
         }
         rec = {parent->rec.x + parent->padding.left, parent->rec.y + parent->padding.up, textSize.x, textSize.y};
     }
@@ -184,7 +184,7 @@ namespace sage
 
     void TextBox::Draw2D()
     {
-        DrawText(content.c_str(), rec.x, rec.y, fontSize, BLACK);
+        DrawTextEx(GetFontDefault(), content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
     }
 
     void GameUIEngine::Draw2D()
