@@ -23,8 +23,9 @@ namespace sage
 
         // cell->padding.left = 10;
         // cell2->CreateTextbox("Number 2!");
-        cell3->padding.left = 10;
+
         cell3->CreateTextbox("Number 3!");
+        cell3->SetPadding({0, 0, 10, 0});
 
         auto row2 = table->CreateTableRow();
         auto cell4 = row2->CreateTableCell();

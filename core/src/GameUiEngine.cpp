@@ -39,20 +39,24 @@ namespace sage
         return row.get();
     }
 
-    [[nodiscard]] TableCell* TableRow::CreateTableCell(Padding _padding, Margin _margin)
+    [[nodiscard]] TableCell* TableRow::CreateTableCell()
     {
         children.push_back(std::make_unique<TableCell>());
         const auto& cell = children.back();
-        cell->padding = _padding;
-        cell->margin = _margin;
         cell->parent = this;
         UpdateChildren();
         return cell.get();
     }
 
-    [[nodiscard]] TableCell* TableRow::CreateTableCell()
+    void TableCell::SetPadding(Padding _padding)
     {
-        return CreateTableCell({}, {});
+        padding = _padding;
+        UpdateChild();
+    }
+
+    const Padding& TableCell::GetPadding() const
+    {
+        return padding;
     }
 
     TextBox* TableCell::CreateTextbox(const std::string& _content)
@@ -121,14 +125,18 @@ namespace sage
     void TextBox::UpdateRec()
     {
         const int MIN_FONT_SIZE = 4;
-        float availableWidth = parent->rec.width - (parent->padding.left + parent->padding.right);
+        float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
         Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
         while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
         {
             fontSize -= 1;
             textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
         }
-        rec = {parent->rec.x + parent->padding.left, parent->rec.y + parent->padding.up, textSize.x, textSize.y};
+        rec = {
+            parent->rec.x + parent->GetPadding().left,
+            parent->rec.y + parent->GetPadding().up,
+            textSize.x,
+            textSize.y};
     }
 
     void Button::UpdateRec()

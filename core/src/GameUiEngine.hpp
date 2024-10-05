@@ -100,12 +100,18 @@ namespace sage
 
     struct TableCell
     {
+      private:
+        Padding padding;
+        Margin margin;
+
+      public:
         TableRow* parent;
         Rectangle rec{};
         std::unique_ptr<CellElement> child;
-        Padding padding;
-        Margin margin;
+
         Texture tex{};
+        void SetPadding(Padding _padding);
+        const Padding& GetPadding() const;
         void UpdateChild();
         TextBox* CreateTextbox(const std::string& _content);
         Button* CreateButton(Texture _tex);
@@ -117,7 +123,6 @@ namespace sage
     {
         Texture tex{};
         void UpdateChildren() override;
-        TableCell* CreateTableCell(Padding _padding, Margin _margin);
         TableCell* CreateTableCell();
         void Draw2D() override;
         ~TableRow() override = default;
