@@ -114,7 +114,7 @@ namespace sage
     {
         if (child)
         {
-            child->parent = this;
+            child->parent = this; // TODO: Necessary or doesn't work. Why?
             child->UpdateRec();
         }
     }
