@@ -9,48 +9,45 @@ namespace sage
 
     [[nodiscard]] Window* GameUIEngine::CreateWindow(Vector2 pos, float w, float h)
     {
-        auto window = std::make_unique<Window>();
+        windows.push_back(std::make_unique<Window>());
+        auto& window = windows.back();
         window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window->tex = nPatchTexture;
         window->rec = {pos.x, pos.y, w, h};
-        const auto ptr = window.get();
-        windows.push_back(std::move(window));
-        return ptr;
+        return window.get();
     }
 
     [[nodiscard]] Table* Window::CreateTable()
     {
-        auto table = std::make_unique<Table>();
+        children.push_back(std::make_unique<Table>());
+        const auto& table = children.back();
         table->parent = this;
         // Table inherits window's dimensions and position
         table->rec = rec;
         // TODO: Add padding here
         // table.tex = LoadTexture("resources/textures/panel_background.png");
-        const auto ptr = table.get();
-        children.push_back(std::move(table));
-        return ptr;
+
+        return table.get();
     }
 
     [[nodiscard]] TableRow* Table::CreateTableRow()
     {
-        auto row = std::make_unique<TableRow>();
-        auto ptr = row.get();
-        children.push_back(std::move(row));
+        children.push_back(std::make_unique<TableRow>());
+        const auto& row = children.back();
         UpdateChildren();
         // TODO: Add padding here
-        return ptr;
+        return row.get();
     }
 
     [[nodiscard]] TableCell* TableRow::CreateTableCell(Padding _padding, Margin _margin)
     {
-        auto cell = std::make_unique<TableCell>();
+        children.push_back(std::make_unique<TableCell>());
+        const auto& cell = children.back();
         cell->padding = _padding;
         cell->margin = _margin;
         cell->parent = this;
-        const auto ptr = cell.get();
-        children.push_back(std::move(cell));
         UpdateChildren();
-        return ptr;
+        return cell.get();
     }
 
     [[nodiscard]] TableCell* TableRow::CreateTableCell()
