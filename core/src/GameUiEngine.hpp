@@ -45,13 +45,8 @@ namespace sage
         Margin margin;
         std::vector<ChildName> children;
 
-        virtual void UpdateChildren()
-        {
-        }
-
-        virtual void Draw2D(){
-
-        };
+        virtual void UpdateChildren() = 0;
+        virtual void Draw2D() = 0;
 
         TableElement() = default;
         TableElement(const TableElement&) = default;
@@ -137,7 +132,7 @@ namespace sage
         ~TableCell() = default;
     };
 
-    struct TableRow : public TableElement<TableCell, Table>
+    struct TableRow : public TableElement<std::unique_ptr<TableCell>, Table>
     {
         Texture tex{};
         void UpdateChildren() override;
@@ -152,7 +147,7 @@ namespace sage
         ~TableRow() override = default;
     };
 
-    struct Table : public TableElement<TableRow, Window>
+    struct Table : public TableElement<std::unique_ptr<TableRow>, Window>
     {
         Texture tex{};
         void UpdateChildren() override;
@@ -173,7 +168,7 @@ namespace sage
         NPatchInfo nPatchInfo;
         entt::sigh<void(int)> onWindowStartHover;
         entt::sigh<void(int)> onWindowEndHover;
-        std::vector<Table> children;
+        std::vector<std::unique_ptr<Table>> children;
 
         Table* CreateTable();
 
@@ -183,7 +178,7 @@ namespace sage
     class GameUIEngine
     {
         Texture nPatchTexture;
-        std::vector<Window> windows;
+        std::vector<std::unique_ptr<Window>> windows;
         int nextId;
 
       public:
