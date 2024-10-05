@@ -64,7 +64,7 @@ namespace sage
         textbox->fontSize = 10;
         textbox->content = _content;
         textbox->parent = this;
-        textbox->UpdateRec();
+        UpdateChild();
         return textbox;
     }
 
@@ -114,7 +114,7 @@ namespace sage
     {
         if (child)
         {
-            child->rec = rec;
+            child->parent = this;
             child->UpdateRec();
         }
     }
@@ -128,8 +128,8 @@ namespace sage
 
     void Window::Draw2D()
     {
-        DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
-                          WHITE); // Use {0.0f, 0.0f} for origin
+        //        DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
+        //                          WHITE); // Use {0.0f, 0.0f} for origin
 
         for (auto& child : children)
         {
@@ -139,8 +139,11 @@ namespace sage
 
     void Table::Draw2D()
     {
-        for (auto& row : children)
+        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
+        for (int i = 0; i < children.size(); ++i)
         {
+            auto& row = children[i];
+            DrawRectangle(row.rec.x, row.rec.y, row.rec.width, row.rec.height, colors[i]);
             row.Draw2D();
         }
     }
@@ -151,7 +154,9 @@ namespace sage
         for (int i = 0; i < children.size(); ++i)
         {
             auto& cell = children[i];
-            DrawRectangle(cell.rec.x, cell.rec.y, cell.rec.width, cell.rec.height, colors[i]);
+            Color col = colors[i];
+            col.a = 150;
+            DrawRectangle(cell.rec.x, cell.rec.y, cell.rec.width, cell.rec.height, col);
             cell.Draw2D();
         }
     }
