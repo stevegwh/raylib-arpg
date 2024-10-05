@@ -13,7 +13,7 @@ namespace sage
         window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window->tex = nPatchTexture;
         window->rec = {pos.x, pos.y, w, h};
-        auto ptr = window.get();
+        const auto ptr = window.get();
         windows.push_back(std::move(window));
         return ptr;
     }
@@ -26,7 +26,7 @@ namespace sage
         table->rec = rec;
         // TODO: Add padding here
         // table.tex = LoadTexture("resources/textures/panel_background.png");
-        auto ptr = table.get();
+        const auto ptr = table.get();
         children.push_back(std::move(table));
         return ptr;
     }
@@ -47,7 +47,7 @@ namespace sage
         cell->padding = _padding;
         cell->margin = _margin;
         cell->parent = this;
-        auto ptr = cell.get();
+        const auto ptr = cell.get();
         children.push_back(std::move(cell));
         UpdateChildren();
         return ptr;
@@ -62,7 +62,7 @@ namespace sage
     {
         child = std::make_unique<TextBox>();
         auto* textbox = dynamic_cast<TextBox*>(child.get());
-        textbox->fontSize = 10;
+        textbox->fontSize = 42;
         textbox->content = _content;
         UpdateChild();
         return textbox;
@@ -85,25 +85,25 @@ namespace sage
 
     void Table::UpdateChildren()
     {
-        float rowHeight = rec.height / children.size();
+        const float rowHeight = rec.height / children.size();
         for (int i = 0; i < children.size(); ++i)
         {
-            auto& row = children.at(i);
+            const auto& row = children.at(i);
             row->parent = this;
             row->rec = rec;
             row->rec.height = rowHeight;
             row->rec.y = rec.y + (rowHeight * i);
-            if (row->children.size() > 0) row->UpdateChildren();
+            if (!row->children.empty()) row->UpdateChildren();
             // TODO: Add margin here
         }
     }
 
     void TableRow::UpdateChildren()
     {
-        float cellWidth = rec.width / children.size();
+        const float cellWidth = rec.width / children.size();
         for (int i = 0; i < children.size(); ++i)
         {
-            auto& cell = children.at(i);
+            const auto& cell = children.at(i);
             cell->parent = this;
             cell->rec = rec;
             cell->rec.width = cellWidth;
@@ -123,8 +123,14 @@ namespace sage
 
     void TextBox::UpdateRec()
     {
-        // Calculate text dimensions
+        const int MIN_FONT_SIZE = 4;
+        float availableWidth = parent->rec.width - (parent->padding.left + parent->padding.right);
         Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, 1);
+        while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
+        {
+            fontSize -= 1;
+            textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, 1);
+        }
         rec = {parent->rec.x + parent->padding.left, parent->rec.y + parent->padding.up, textSize.x, textSize.y};
     }
 
@@ -134,8 +140,8 @@ namespace sage
 
     void Window::Draw2D() const
     {
-        //        DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
-        //                          WHITE); // Use {0.0f, 0.0f} for origin
+        DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
+                          WHITE); // Use {0.0f, 0.0f} for origin
 
         for (auto& child : children)
         {
