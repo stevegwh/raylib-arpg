@@ -103,6 +103,7 @@ namespace sage
         for (int i = 0; i < children.size(); ++i)
         {
             auto& cell = children.at(i);
+            cell.parent = this;
             cell.rec = rec;
             cell.rec.width = cellWidth;
             cell.rec.x = rec.x + (cellWidth * i);
@@ -110,11 +111,11 @@ namespace sage
         }
     }
 
-    void TableCell::UpdateChild() // UpdateChild
+    void TableCell::UpdateChild()
     {
         if (child)
         {
-            child->parent = this; // TODO: Necessary or doesn't work. Why?
+            child->parent = this;
             child->UpdateRec();
         }
     }
