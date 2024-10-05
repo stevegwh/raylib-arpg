@@ -36,17 +36,31 @@ namespace sage
         float right = 0;
     };
 
-    template <typename ChildName, typename ParentName>
+    template <typename Child, typename Parent>
     struct TableElement
     {
-        ParentName* parent;
-        Rectangle rec{};
+      protected:
         Padding padding;
         Margin margin;
-        std::vector<ChildName> children;
+
+      public:
+        Parent* parent;
+        Rectangle rec{};
+        Child children;
 
         virtual void UpdateChildren() = 0;
         virtual void Draw2D() = 0;
+
+        void SetPadding(const Padding& _padding)
+        {
+            padding = _padding;
+            UpdateChildren();
+        }
+
+        [[nodiscard]] const Padding& GetPadding() const
+        {
+            return padding;
+        }
 
         TableElement() = default;
         TableElement(const TableElement&) = default;
@@ -98,41 +112,30 @@ namespace sage
         ~Button() override = default;
     };
 
-    struct TableCell
+    struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
-      private:
-        Padding padding;
-        Margin margin;
-
-      public:
-        TableRow* parent;
-        Rectangle rec{};
-        std::unique_ptr<CellElement> child;
-
         Texture tex{};
-        void SetPadding(Padding _padding);
-        const Padding& GetPadding() const;
-        void UpdateChild();
         TextBox* CreateTextbox(const std::string& _content);
         Button* CreateButton(Texture _tex);
-        void Draw2D();
-        ~TableCell() = default;
+        void UpdateChildren() override;
+        void Draw2D() override;
+        ~TableCell() override = default;
     };
 
-    struct TableRow final : public TableElement<std::unique_ptr<TableCell>, Table>
+    struct TableRow final : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
     {
         Texture tex{};
-        void UpdateChildren() override;
         TableCell* CreateTableCell();
+        void UpdateChildren() override;
         void Draw2D() override;
         ~TableRow() override = default;
     };
 
-    struct Table final : public TableElement<std::unique_ptr<TableRow>, Window>
+    struct Table final : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
     {
         Texture tex{};
-        void UpdateChildren() override;
         TableRow* CreateTableRow();
+        void UpdateChildren() override;
         void Draw2D() override;
         ~Table() override = default;
     };
