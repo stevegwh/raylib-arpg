@@ -16,10 +16,11 @@ namespace sage
         auto row = table->CreateTableRow();
         auto row0 = table->CreateTableRow();
         auto cell = row->CreateTableCell();
+        cell->CreateTextbox("Number 11111111111!");
         auto cell2 = row->CreateTableCell();
         auto cell3 = row->CreateTableCell();
         // auto cell0 = row->CreateTableCell();
-        cell->CreateTextbox("Number 11111111111!");
+
         // cell->padding.left = 10;
         // cell2->CreateTextbox("Number 2!");
         cell3->CreateTextbox("Number 3!");
