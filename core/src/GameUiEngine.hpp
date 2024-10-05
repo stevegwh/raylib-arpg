@@ -117,19 +117,24 @@ namespace sage
         ~Button() override = default;
     };
 
-    struct TableCell : public TableElement<std::unique_ptr<CellElement>, TableRow>
+    struct TableCell
     {
+        TableRow* parent;
+        Rectangle rec{};
+        std::unique_ptr<CellElement> child;
+        Padding padding;
+        Margin margin;
         Texture tex{};
-        void UpdateChildren() override;
+        void UpdateChild();
         TextBox* CreateTextbox(const std::string& _content);
         Button* CreateButton(Texture _tex);
-        void Draw2D() override;
+        void Draw2D();
         TableCell() = default;
         TableCell(const TableCell&) = delete; // Unique_ptr can't be copied
         TableCell(TableCell&&) noexcept = default;
         TableCell& operator=(const TableCell&) = delete;
         TableCell& operator=(TableCell&&) noexcept = default;
-        ~TableCell() override = default;
+        ~TableCell() = default;
     };
 
     struct TableRow : public TableElement<TableCell, Table>
