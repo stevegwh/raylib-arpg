@@ -11,70 +11,139 @@
 
 namespace sage
 {
+    struct Window;
+    struct TableRow;
+    struct Table;
+
     struct Settings;
     class UserInput;
     class Cursor;
 
-    struct Table;
-    struct TableRow;
-    struct TableCell;
-    struct UIElement;
-
-    class FloatConstrained
+    struct Padding
     {
-        float value = 0;
-        float min = 0;
-        float max = 100;
+        float up = 0;
+        float down = 0;
+        float left = 0;
+        float right = 0;
+    };
 
-      public:
-        FloatConstrained(float _value, float _min, float _max) : value(_value), min(_min), max(_max){};
+    struct Margin
+    {
+        float up = 0;
+        float down = 0;
+        float left = 0;
+        float right = 0;
+    };
 
-        FloatConstrained() = default;
+    template <typename ChildName, typename ParentName>
+    struct TableElement
+    {
+        ParentName* parent;
+        Rectangle rec{};
+        Padding padding;
+        Margin margin;
+        std::vector<ChildName> children;
 
-        FloatConstrained(const FloatConstrained& other) : value(other.value), min(other.min), max(other.max)
-        {
-        }
+        virtual void Draw2D(){
 
-        FloatConstrained(FloatConstrained&& other) noexcept : value(other.value), min(other.min), max(other.max)
-        {
-            other.value = 0;
-            other.min = 0;
-            other.max = 100;
-        }
+        };
 
-        FloatConstrained& operator=(const FloatConstrained& other)
-        {
-            if (this != &other)
-            {
-                value = other.value;
-                min = other.min;
-                max = other.max;
-            }
-            return *this;
-        }
+        TableElement() = default;
+        TableElement(const TableElement&) = default;
+        TableElement(TableElement&&) noexcept = default;
+        TableElement& operator=(const TableElement&) = default;
+        TableElement& operator=(TableElement&&) noexcept = default;
+        virtual ~TableElement() = default;
+    };
 
-        FloatConstrained& operator=(FloatConstrained&& other) noexcept
-        {
-            if (this != &other)
-            {
-                value = other.value;
-                min = other.min;
-                max = other.max;
+    struct CellElement
+    {
+        Rectangle rec{};
 
-                // Reset other to default state
-                other.value = 0;
-                other.min = 0;
-                other.max = 100;
-            }
-            return *this;
-        }
+        virtual void Draw2D(){
 
-        ~FloatConstrained() = default;
+        };
 
-        [[nodiscard]] float GetValue() const
-        {
-            return value;
-        }
+        CellElement() = default;
+        CellElement(const CellElement&) = default;
+        CellElement(CellElement&&) noexcept = default;
+        CellElement& operator=(const CellElement&) = default;
+        CellElement& operator=(CellElement&&) noexcept = default;
+        virtual ~CellElement() = default;
+    };
+
+    struct TextBox : public CellElement
+    {
+        float fontSize{};
+        // font?
+        // color?
+        std::string content;
+        // Text wrap, scroll bar etc?
+
+        void Draw2D() override;
+        TextBox() = default;
+        TextBox(const TextBox&) = default;
+        TextBox(TextBox&&) noexcept = default;
+        TextBox& operator=(const TextBox&) = default;
+        TextBox& operator=(TextBox&&) noexcept = default;
+        ~TextBox() override = default;
+    };
+
+    struct Button : public CellElement
+    {
+        Texture tex{};
+        entt::sigh<void(int)> onButtonStartHover;
+        entt::sigh<void(int)> onButtonEndHover;
+        entt::sigh<void(int)> onButtonPress;
+
+        void Draw2D() override;
+        Button() = default;
+        Button(const Button&) = default;
+        Button(Button&&) noexcept = default;
+        Button& operator=(const Button&) = default;
+        Button& operator=(Button&&) noexcept = default;
+        ~Button() override = default;
+    };
+
+    struct TableCell : public TableElement<std::unique_ptr<CellElement>, TableRow>
+    {
+        Texture tex{};
+        TextBox* CreateTextbox(const std::string& _content);
+        Button* CreateButton(Texture _tex);
+        void Draw2D() override;
+        TableCell() = default;
+        TableCell(const TableCell&) = delete; // Unique_ptr can't be copied
+        TableCell(TableCell&&) noexcept = default;
+        TableCell& operator=(const TableCell&) = delete;
+        TableCell& operator=(TableCell&&) noexcept = default;
+        ~TableCell() override = default;
+    };
+
+    struct TableRow : public TableElement<TableCell, Table>
+    {
+        Texture tex{};
+        TableCell* CreateTableCell(Padding _padding, Margin _margin);
+        TableCell* CreateTableCell();
+        void Draw2D() override;
+        TableRow() = default;
+        TableRow(const TableRow&) = default;
+        TableRow(TableRow&&) noexcept = default;
+        TableRow& operator=(const TableRow&) = default;
+        TableRow& operator=(TableRow&&) noexcept = default;
+        ~TableRow() override = default;
+    };
+
+    struct Table : public TableElement<TableRow, Window>
+    {
+        Texture tex{};
+        TableRow* CreateTableRow();
+        void Draw2D() override;
+        Table() = default;
+        Table(const Table&) = default;
+        Table(Table&&) noexcept = default;
+        Table& operator=(const Table&) = default;
+        Table& operator=(Table&&) noexcept = default;
+        ~Table() override = default;
     };
 
     struct Window
@@ -88,75 +157,6 @@ namespace sage
 
         Table* CreateTable();
 
-        void Draw2D();
-    };
-
-    struct Table
-    {
-        Window* parent;
-        Rectangle rec;
-        FloatConstrained width;
-        FloatConstrained height;
-        Texture tex;
-        std::vector<TableRow> children;
-        TableRow* CreateTableRow();
-        void Draw2D();
-    };
-
-    struct TableRow
-    {
-        Table* parent;
-        Rectangle rec;
-        FloatConstrained width;
-        FloatConstrained height;
-        Texture tex;
-        std::vector<TableCell> children;
-        TableCell* CreateTableCell(float requestedWidth);
-        void Draw2D();
-    };
-
-    struct UIElement
-    {
-        virtual void Draw2D(){
-
-        };
-    };
-
-    struct TextBox : public UIElement
-    {
-        float fontSize;
-        Rectangle rec;
-        // font?
-        // color?
-        std::string content;
-        // Text wrap, scroll bar etc?
-
-        void Draw2D() override;
-    };
-
-    struct Button : public UIElement
-    {
-        Texture tex;
-        Rectangle rec;
-        entt::sigh<void(int)> onButtonStartHover;
-        entt::sigh<void(int)> onButtonEndHover;
-        entt::sigh<void(int)> onButtonPress;
-
-        void Draw2D() override;
-    };
-
-    struct TableCell
-    {
-        TableRow* parent;
-        Rectangle rec;
-        FloatConstrained width;
-        FloatConstrained height;
-        float paddingLeft, paddingRight, paddingUp, paddingDown;
-        float marginLeft, marginRight, marginUp, marginDown;
-        Texture tex;
-        TextBox* CreateTextbox(const std::string& _content);
-        Button* CreateButton(Texture _tex);
-        std::vector<std::unique_ptr<UIElement>> children;
         void Draw2D();
     };
 
