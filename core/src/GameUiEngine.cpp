@@ -128,7 +128,11 @@ namespace sage
         rec = {parent->rec.x + parent->padding.left, parent->rec.y + parent->padding.up, textSize.x, textSize.y};
     }
 
-    void Window::Draw2D()
+    void Button::UpdateRec()
+    {
+    }
+
+    void Window::Draw2D() const
     {
         //        DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
         //                          WHITE); // Use {0.0f, 0.0f} for origin

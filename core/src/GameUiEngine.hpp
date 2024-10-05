@@ -61,13 +61,8 @@ namespace sage
         TableCell* parent{};
         Rectangle rec{};
 
-        virtual void UpdateRec()
-        {
-        }
-
-        virtual void Draw2D(){
-
-        };
+        virtual void UpdateRec() = 0;
+        virtual void Draw2D() = 0;
 
         CellElement() = default;
         CellElement(const CellElement&) = default;
@@ -77,7 +72,7 @@ namespace sage
         virtual ~CellElement() = default;
     };
 
-    struct TextBox : public CellElement
+    struct TextBox final : public CellElement
     {
         float fontSize{};
         // font?
@@ -86,29 +81,19 @@ namespace sage
         // Text wrap, scroll bar etc?
 
         void UpdateRec() override;
-
         void Draw2D() override;
-        TextBox() = default;
-        TextBox(const TextBox&) = default;
-        TextBox(TextBox&&) noexcept = default;
-        TextBox& operator=(const TextBox&) = default;
-        TextBox& operator=(TextBox&&) noexcept = default;
         ~TextBox() override = default;
     };
 
-    struct Button : public CellElement
+    struct Button final : public CellElement
     {
         Texture tex{};
         entt::sigh<void(int)> onButtonStartHover;
         entt::sigh<void(int)> onButtonEndHover;
         entt::sigh<void(int)> onButtonPress;
 
+        void UpdateRec() override;
         void Draw2D() override;
-        Button() = default;
-        Button(const Button&) = default;
-        Button(Button&&) noexcept = default;
-        Button& operator=(const Button&) = default;
-        Button& operator=(Button&&) noexcept = default;
         ~Button() override = default;
     };
 
@@ -124,40 +109,25 @@ namespace sage
         TextBox* CreateTextbox(const std::string& _content);
         Button* CreateButton(Texture _tex);
         void Draw2D();
-        TableCell() = default;
-        TableCell(const TableCell&) = delete; // Unique_ptr can't be copied
-        TableCell(TableCell&&) noexcept = default;
-        TableCell& operator=(const TableCell&) = delete;
-        TableCell& operator=(TableCell&&) noexcept = default;
         ~TableCell() = default;
     };
 
-    struct TableRow : public TableElement<std::unique_ptr<TableCell>, Table>
+    struct TableRow final : public TableElement<std::unique_ptr<TableCell>, Table>
     {
         Texture tex{};
         void UpdateChildren() override;
         TableCell* CreateTableCell(Padding _padding, Margin _margin);
         TableCell* CreateTableCell();
         void Draw2D() override;
-        TableRow() = default;
-        TableRow(const TableRow&) = default;
-        TableRow(TableRow&&) noexcept = default;
-        TableRow& operator=(const TableRow&) = default;
-        TableRow& operator=(TableRow&&) noexcept = default;
         ~TableRow() override = default;
     };
 
-    struct Table : public TableElement<std::unique_ptr<TableRow>, Window>
+    struct Table final : public TableElement<std::unique_ptr<TableRow>, Window>
     {
         Texture tex{};
         void UpdateChildren() override;
         TableRow* CreateTableRow();
         void Draw2D() override;
-        Table() = default;
-        Table(const Table&) = default;
-        Table(Table&&) noexcept = default;
-        Table& operator=(const Table&) = default;
-        Table& operator=(Table&&) noexcept = default;
         ~Table() override = default;
     };
 
@@ -172,7 +142,7 @@ namespace sage
 
         Table* CreateTable();
 
-        void Draw2D();
+        void Draw2D() const;
     };
 
     class GameUIEngine
