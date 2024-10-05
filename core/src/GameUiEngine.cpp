@@ -35,15 +35,7 @@ namespace sage
         auto& row = children.back();
         row.parent = this;
         row.rec = rec;
-
-        float rowHeight = rec.height / children.size();
-        for (int i = 0; i < children.size(); ++i)
-        {
-            auto& child = children.at(i);
-            child.rec.height = rowHeight;
-            child.rec.y = rec.y + (rowHeight * i);
-            // TODO: Add margin here
-        }
+        UpdateChildren();
 
         // TODO: Add padding here
         return &children.back();
@@ -58,13 +50,7 @@ namespace sage
         cell.parent = this;
         cell.rec = rec;
 
-        float cellWidth = rec.width / children.size();
-        for (int i = 0; i < children.size(); ++i)
-        {
-            auto& child = children.at(i);
-            child.rec.width = cellWidth;
-            child.rec.x = rec.x + (cellWidth * i);
-        }
+        UpdateChildren();
 
         return &children.back();
     }
@@ -79,12 +65,8 @@ namespace sage
         auto textbox = std::make_unique<TextBox>();
         textbox->fontSize = 10;
         textbox->content = _content;
-
-        // Calculate text dimensions
-        Vector2 textSize = MeasureTextEx(GetFontDefault(), _content.c_str(), textbox->fontSize, 1);
-
-        textbox->rec = {rec.x + padding.left, rec.y + padding.up, textSize.x, textSize.y};
-
+        textbox->parent = this;
+        textbox->UpdateRec();
         TextBox* ptr = textbox.get();
         children.push_back(std::move(textbox));
         return ptr;
@@ -105,6 +87,46 @@ namespace sage
         Button* ptr = button.get();
         children.push_back(std::move(button));
         return ptr;
+    }
+
+    void Table::UpdateChildren()
+    {
+        float rowHeight = rec.height / children.size();
+        for (int i = 0; i < children.size(); ++i)
+        {
+            auto& row = children.at(i);
+            row.rec.height = rowHeight;
+            row.rec.y = rec.y + (rowHeight * i);
+            row.UpdateChildren();
+            // TODO: Add margin here
+        }
+    }
+
+    void TableRow::UpdateChildren()
+    {
+        float cellWidth = rec.width / children.size();
+        for (int i = 0; i < children.size(); ++i)
+        {
+            auto& cell = children.at(i);
+            cell.rec.width = cellWidth;
+            cell.rec.x = rec.x + (cellWidth * i);
+            cell.UpdateChildren();
+        }
+    }
+
+    void TableCell::UpdateChildren()
+    {
+        for (auto& element : children)
+        {
+            element->UpdateRec();
+        }
+    }
+
+    void TextBox::UpdateRec()
+    {
+        // Calculate text dimensions
+        Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, 1);
+        rec = {parent->rec.x + parent->padding.left, rec.y + parent->padding.up, textSize.x, textSize.y};
     }
 
     void Window::Draw2D()
