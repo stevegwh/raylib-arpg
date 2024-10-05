@@ -8,7 +8,7 @@
 namespace sage
 {
 
-    void GameUiFactory::CreateLootWindow(GameUIEngine* engine, Vector2 pos)
+    void GameUiFactory::CreateExampleWindow(GameUIEngine* engine, Vector2 pos)
     {
         auto window = engine->CreateWindow(pos, 500, 200);
         auto table = window->CreateTable();
@@ -23,6 +23,7 @@ namespace sage
 
         // cell->padding.left = 10;
         // cell2->CreateTextbox("Number 2!");
+        cell3->padding.left = 10;
         cell3->CreateTextbox("Number 3!");
 
         auto row2 = table->CreateTableRow();
