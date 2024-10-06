@@ -240,33 +240,41 @@ namespace sage
     {
         if (children.empty()) return;
 
+        // Account for window padding
+        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
+        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
+        float startX = rec.x + GetPadding().left;
+        float startY = rec.y + GetPadding().up;
+
         switch (tableAlignment)
         {
         case WindowTableAlignment::STACK_HORIZONTAL: {
-            const float maxWidth = std::ceil(rec.width / children.size());
+            const float maxWidth = std::ceil(availableWidth / children.size());
             for (int i = 0; i < children.size(); ++i)
             {
                 const auto& table = children.at(i);
                 table->parent = this;
                 table->rec = rec;
                 table->rec.width = maxWidth;
-                table->rec.x = rec.x + (maxWidth * i);
-                table->rec.height = rec.height; // Full height in horizontal mode
+                table->rec.x = startX + (maxWidth * i);
+                table->rec.height = availableHeight;
+                table->rec.y = startY;
                 if (!table->children.empty()) table->UpdateChildren();
             }
             break;
         }
 
         case WindowTableAlignment::STACK_VERTICAL: {
-            const float maxHeight = std::ceil(rec.height / children.size());
+            const float maxHeight = std::ceil(availableHeight / children.size());
             for (int i = 0; i < children.size(); ++i)
             {
                 const auto& table = children.at(i);
                 table->parent = this;
                 table->rec = rec;
                 table->rec.height = maxHeight;
-                table->rec.y = rec.y + (maxHeight * i);
-                table->rec.width = rec.width; // Full width in vertical mode
+                table->rec.y = startY + (maxHeight * i);
+                table->rec.width = availableWidth;
+                table->rec.x = startX;
                 if (!table->children.empty()) table->UpdateChildren();
             }
             break;
@@ -276,7 +284,9 @@ namespace sage
 
     void Table::UpdateChildren()
     {
-        float totalHeight = rec.height;
+        // Account for table padding
+        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
+        float startY = rec.y + GetPadding().up;
         float totalRequestedPercent = 0.0f;
         int autoSizeCount = 0;
 
@@ -289,41 +299,40 @@ namespace sage
             }
             else
             {
-                totalRequestedPercent += row->requestedHeight; // Now 0-100
+                totalRequestedPercent += row->requestedHeight;
             }
         }
 
-        // Ensure we don't exceed 100%
         if (totalRequestedPercent > 100.0f)
         {
-            // You might want to handle this error case differently
             totalRequestedPercent = 100.0f;
         }
 
-        // Calculate what percentage remains for auto-sized rows
         float remainingPercent = 100.0f - totalRequestedPercent;
         float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
 
         // Second pass: Update each row
-        float currentY = rec.y;
+        float currentY = startY;
         for (const auto& row : children)
         {
             row->parent = this;
             row->rec = rec;
 
-            // Calculate height as percentage of total height
             float rowHeight;
             if (row->autoSize)
             {
-                rowHeight = std::ceil(totalHeight * (autoSizePercent / 100.0f));
+                rowHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
             }
             else
             {
-                rowHeight = std::ceil(totalHeight * (row->requestedHeight / 100.0f));
+                rowHeight = std::ceil(availableHeight * (row->requestedHeight / 100.0f));
             }
 
+            // Set row dimensions accounting for table padding
             row->rec.height = rowHeight;
             row->rec.y = currentY;
+            row->rec.x = rec.x + GetPadding().left;
+            row->rec.width = rec.width - (GetPadding().left + GetPadding().right);
 
             if (!row->children.empty())
             {
@@ -336,7 +345,9 @@ namespace sage
 
     void TableRow::UpdateChildren()
     {
-        float totalWidth = rec.width;
+        // Account for row padding
+        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
+        float startX = rec.x + GetPadding().left;
         float totalRequestedPercent = 0.0f;
         int autoSizeCount = 0;
 
@@ -349,41 +360,40 @@ namespace sage
             }
             else
             {
-                totalRequestedPercent += cell->requestedWidth; // Now 0-100
+                totalRequestedPercent += cell->requestedWidth;
             }
         }
 
-        // Ensure we don't exceed 100%
         if (totalRequestedPercent > 100.0f)
         {
-            // You might want to handle this error case differently
             totalRequestedPercent = 100.0f;
         }
 
-        // Calculate what percentage remains for auto-sized cells
         float remainingPercent = 100.0f - totalRequestedPercent;
         float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
 
         // Second pass: Update each cell
-        float currentX = rec.x;
+        float currentX = startX;
         for (const auto& cell : children)
         {
             cell->parent = this;
             cell->rec = rec;
 
-            // Calculate width as percentage of total width
             float cellWidth;
             if (cell->autoSize)
             {
-                cellWidth = std::ceil(totalWidth * (autoSizePercent / 100.0f));
+                cellWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
             }
             else
             {
-                cellWidth = std::ceil(totalWidth * (cell->requestedWidth / 100.0f));
+                cellWidth = std::ceil(availableWidth * (cell->requestedWidth / 100.0f));
             }
 
+            // Set cell dimensions accounting for row padding
             cell->rec.width = cellWidth;
             cell->rec.x = currentX;
+            cell->rec.y = rec.y + GetPadding().up;
+            cell->rec.height = rec.height - (GetPadding().up + GetPadding().down);
 
             cell->UpdateChildren();
 
@@ -475,7 +485,7 @@ namespace sage
     {
         children = std::make_unique<TextBox>();
         auto* textbox = dynamic_cast<TextBox*>(children.get());
-        textbox->fontSize = 42;
+        textbox->fontSize = 16;
         textbox->content = _content;
         UpdateChildren();
         return textbox;
