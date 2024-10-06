@@ -218,8 +218,8 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
-        float xPercent = 0;
-        float yPercent = 0;
+        float xOffsetPercent = 0;
+        float yOffsetPercent = 0;
         float widthPercent = 0;
         float heightPercent = 0;
 
@@ -232,8 +232,8 @@ namespace sage
 
         [[nodiscard]] Dimensions GetDimensions() const;
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
-        [[nodiscard]] Vector2 GetPos() const;
-        void SetPosPercent(float _xPercent, float _yPercent);
+        [[nodiscard]] Vector2 GetOffset() const;
+        void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
         void SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori);
         Table* CreateTable();
         void OnScreenSizeChange();
@@ -250,8 +250,8 @@ namespace sage
       public:
         Window* CreateWindow(
             Image _nPatchTexture,
-            float _xPercent,
-            float _yPercent,
+            float _xOffsetPercent,
+            float _yOffsetPercent,
             float _widthPercent,
             float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
