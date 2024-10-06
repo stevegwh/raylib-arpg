@@ -21,6 +21,12 @@ namespace sage
     class UserInput;
     class Cursor;
 
+    enum class WindowTableAlignment
+    {
+        STACK_VERTICAL,
+        STACK_HORIZONTAL
+    };
+
     enum class HoriAlignment
     {
         LEFT,
@@ -191,6 +197,7 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
+        WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
         Texture mainNPatchTexture; // npatch texture used by elements in window
         entt::sigh<void(int)> onWindowStartHover;
         entt::sigh<void(int)> onWindowEndHover;
@@ -206,7 +213,12 @@ namespace sage
         std::vector<std::unique_ptr<Window>> windows;
 
       public:
-        Window* CreateWindow(Image _nPatchTexture, Vector2 pos, float w, float h);
+        Window* CreateWindow(
+            Image _nPatchTexture,
+            Vector2 pos,
+            float w,
+            float h,
+            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
 
         void Draw2D();
         void Update();
