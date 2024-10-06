@@ -5,6 +5,7 @@
 #include "GameUiEngine.hpp"
 #include "Cursor.hpp"
 #include "Settings.hpp"
+#include <cassert>
 
 namespace sage
 {
@@ -428,8 +429,14 @@ namespace sage
         return row.get();
     }
 
+    /**
+     *
+     * @param requestedHeight The desired height of the cell as a percent (0-100)
+     * @return
+     */
     [[nodiscard]] TableRow* Table::CreateTableRow(float requestedHeight)
     {
+        assert(requestedHeight <= 100 && requestedHeight >= 0);
         children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
         row->autoSize = false;
@@ -447,8 +454,14 @@ namespace sage
         return cell.get();
     }
 
+    /**
+     *
+     * @param requestedWidth The desired width of the cell as a percent (0-100)
+     * @return
+     */
     [[nodiscard]] TableCell* TableRow::CreateTableCell(float requestedWidth)
     {
+        assert(requestedWidth <= 100 && requestedWidth >= 0);
         children.push_back(std::make_unique<TableCell>());
         const auto& cell = children.back();
         cell->parent = this;
