@@ -104,11 +104,11 @@ namespace sage
         {
             children->parent = this;
             children->rec = rec;
-            children->UpdateRec();
+            children->UpdateDimensions();
         }
     }
 
-    void TextBox::UpdateRec()
+    void TextBox::UpdateDimensions()
     {
         constexpr int MIN_FONT_SIZE = 4;
 
@@ -149,7 +149,7 @@ namespace sage
             textSize.y};
     }
 
-    void ImageBox::UpdateRec()
+    void ImageBox::UpdateDimensions()
     {
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
         float availableHeight = parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down);
@@ -212,6 +212,11 @@ namespace sage
 
     void Table::Draw2D()
     {
+        if (tex.id > 0)
+        {
+            DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
+                              WHITE); // Use {0.0f, 0.0f} for origin
+        }
         std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
         for (int i = 0; i < children.size(); ++i)
         {
@@ -223,6 +228,11 @@ namespace sage
 
     void TableRow::Draw2D()
     {
+        if (tex.id > 0)
+        {
+            DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
+                              WHITE); // Use {0.0f, 0.0f} for origin
+        }
         std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK};
         for (int i = 0; i < children.size(); ++i)
         {
@@ -236,6 +246,11 @@ namespace sage
 
     void TableCell::Draw2D()
     {
+        if (tex.id > 0)
+        {
+            DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
+                              WHITE); // Use {0.0f, 0.0f} for origin
+        }
         if (children) // single element
         {
             children->Draw2D();
@@ -266,8 +281,10 @@ namespace sage
     }
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
-        : nextId(1) // Initialize nextId to 1
     {
         nPatchTexture = LoadTexture("resources/textures/ninepatch_button.png");
+        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
+        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
     }
 } // namespace sage
