@@ -19,9 +19,13 @@ namespace sage
         UpdateDimensions();
     }
 
+    // NB: The original position of the window is treated as an offset.
     void Window::SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori)
     {
-        assert(settings);
+        // Store the original offsets
+        float originalXOffset = rec.x;
+        float originalYOffset = rec.y;
+
         float xOffset = 0;
         float yOffset = 0;
 
@@ -57,9 +61,9 @@ namespace sage
             break;
         }
 
-        // Update window position
-        rec.x = xOffset;
-        rec.y = yOffset;
+        // Apply the aligned position plus the original offsets
+        rec.x = xOffset + originalXOffset;
+        rec.y = yOffset + originalYOffset;
 
         // Update child elements to match new window position
         UpdateChildren();
