@@ -64,6 +64,10 @@ namespace sage
         Padding padding;
         Margin margin;
 
+        // Save original width/height request and calculate each time UpdateChildren is called.
+        // This would make it very easy to increase/decrease scale if you increase the screen size (full screen
+        // etc).
+
       public:
         Parent* parent;
         Rectangle rec{};
@@ -146,12 +150,17 @@ namespace sage
 
     struct TextBox final : public CellElement
     {
-        float fontSize{};
+        enum class OverflowBehaviour
+        {
+            SHRINK_TO_FIT,
+            WORD_WRAP
+        };
+        OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
+        float fontSize = 12;
         float fontSpacing = 2;
-        // font?
+        Font font = GetFontDefault();
         // color?
         std::string content;
-        // Text wrap, scroll bar etc?
 
         void UpdateDimensions() override;
         void Draw2D() override;
