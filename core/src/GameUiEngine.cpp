@@ -57,19 +57,13 @@ namespace sage
         return textbox;
     }
 
-    Button* TableCell::CreateButton(Texture _tex)
+    ImageBox* TableCell::CreateImagebox(Image _tex)
     {
-        auto button = std::make_unique<Button>();
-        button->tex = _tex;
-
-        // Position the button inside the cell, accounting for padding
-        button->rec = {
-            rec.x + padding.left,
-            rec.y + padding.up,
-            rec.width - (+padding.right),
-            rec.height - (padding.up + padding.down)};
-        children = std::move(button);
-        return dynamic_cast<Button*>(children.get());
+        children = std::make_unique<ImageBox>();
+        auto* image = dynamic_cast<ImageBox*>(children.get());
+        image->tex = LoadTextureFromImage(_tex);
+        UpdateChildren();
+        return image;
     }
 
     void Table::UpdateChildren()
@@ -109,6 +103,7 @@ namespace sage
         if (children)
         {
             children->parent = this;
+            children->rec = rec;
             children->UpdateRec();
         }
     }
@@ -130,8 +125,25 @@ namespace sage
             textSize.y};
     }
 
-    void Button::UpdateRec()
+    void ImageBox::UpdateRec()
     {
+        rec = Rectangle{
+            parent->rec.x + parent->GetPadding().left,
+            parent->rec.y + parent->GetPadding().up,
+            rec.width - parent->GetPadding().right,
+            rec.height - parent->GetPadding().down};
+
+        float originalRatio = static_cast<float>(tex.width) / tex.height;
+        if (originalRatio > 1.0f) // Wider than tall
+        {
+            tex.width = rec.width;
+            tex.height = rec.width / originalRatio;
+        }
+        else // Taller than wide
+        {
+            tex.height = rec.height;
+            tex.width = rec.height * originalRatio;
+        }
     }
 
     void Window::Draw2D() const
@@ -177,8 +189,9 @@ namespace sage
         }
     }
 
-    void Button::Draw2D()
+    void ImageBox::Draw2D()
     {
+        DrawTexture(tex, rec.x, rec.y, WHITE);
     }
 
     void TextBox::Draw2D()

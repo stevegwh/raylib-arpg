@@ -14,17 +14,20 @@ namespace sage
         auto table = window->CreateTable();
 
         auto row = table->CreateTableRow();
-        auto row0 = table->CreateTableRow();
+        // auto row0 = table->CreateTableRow();
         auto cell = row->CreateTableCell();
         cell->CreateTextbox("Number 11111111111!");
         auto cell2 = row->CreateTableCell();
         auto cell3 = row->CreateTableCell();
+        cell2->CreateImagebox(LoadImage("resources/icon.png"));
+        cell3->CreateImagebox(LoadImage("resources/icon.png"));
+
         // auto cell0 = row->CreateTableCell();
 
         // cell->padding.left = 10;
         // cell2->CreateTextbox("Number 2!");
 
-        cell3->CreateTextbox("Number 3!");
+        // cell3->CreateTextbox("Number 3!");
         cell3->SetPadding({0, 0, 10, 0});
 
         auto row2 = table->CreateTableRow();
