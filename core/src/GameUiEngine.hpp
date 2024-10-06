@@ -100,23 +100,23 @@ namespace sage
         ~TextBox() override = default;
     };
 
-    struct Button final : public CellElement
+    struct ImageBox final : public CellElement
     {
         Texture tex{};
-        entt::sigh<void(int)> onButtonStartHover;
-        entt::sigh<void(int)> onButtonEndHover;
-        entt::sigh<void(int)> onButtonPress;
+        entt::sigh<void()> onStartHover;
+        entt::sigh<void()> onEndHover;
+        entt::sigh<void()> onPress;
 
         void UpdateRec() override;
         void Draw2D() override;
-        ~Button() override = default;
+        ~ImageBox() override = default;
     };
 
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
         Texture tex{};
         TextBox* CreateTextbox(const std::string& _content);
-        Button* CreateButton(Texture _tex);
+        ImageBox* CreateImagebox(Image _tex);
         void UpdateChildren() override;
         void Draw2D() override;
         ~TableCell() override = default;
