@@ -8,6 +8,7 @@
 #include "UserInput.hpp"
 
 #include <cassert>
+#include <sstream>
 
 namespace sage
 {
@@ -165,22 +166,74 @@ namespace sage
         }
     }
 
+    void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
+    {
+        overflowBehaviour = _behaviour;
+        UpdateDimensions();
+    }
+
     void TextBox::UpdateDimensions()
     {
-        // TODO: Content should be a vector to allow for word wrap
-        // Should break into new lines. if new line does not fit and cannot be split then reduce font size
         constexpr int MIN_FONT_SIZE = 4;
-
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
-        Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
-        while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
+
+        if (overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
-            fontSize -= 1;
-            textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
+            Vector2 textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
+            while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
+            {
+                fontSize -= 1;
+                textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
+            }
+        }
+        else if (overflowBehaviour == OverflowBehaviour::WORD_WRAP)
+        {
+            std::string wrappedText;
+            std::string currentLine;
+            std::istringstream words(content);
+            std::string word;
+
+            // Process each word
+            while (words >> word)
+            {
+                // Create temporary line with new word
+                std::string testLine = currentLine;
+                if (!testLine.empty()) testLine += " "; // Add space between words
+                testLine += word;
+
+                // Measure the line with the new word
+                Vector2 lineSize = MeasureTextEx(font, testLine.c_str(), fontSize, fontSpacing);
+
+                if (lineSize.x <= availableWidth)
+                {
+                    // Word fits, add it to current line
+                    currentLine = testLine;
+                }
+                else
+                {
+                    // Word doesn't fit, start new line
+                    if (!wrappedText.empty()) wrappedText += "\n";
+                    wrappedText += currentLine;
+                    currentLine = word;
+                }
+            }
+
+            // Add the last line
+            if (!currentLine.empty())
+            {
+                if (!wrappedText.empty()) wrappedText += "\n";
+                wrappedText += currentLine;
+            }
+
+            // Update the content with wrapped text
+            content = wrappedText;
         }
 
-        float horiOffset = 0; // Left
-        float vertOffset = 0; // Top
+        // Measure final text size
+        Vector2 textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
+
+        float horiOffset = 0;
+        float vertOffset = 0;
         float availableHeight = parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down);
 
         if (vertAlignment == VertAlignment::MIDDLE)
@@ -216,7 +269,6 @@ namespace sage
         float originalRatio = static_cast<float>(tex.width) / tex.height;
         float finalWidth, finalHeight;
 
-        // First attempt at fitting the image
         if (originalRatio > 1.0f) // Wider than tall
         {
             finalWidth = availableWidth;
@@ -539,11 +591,13 @@ namespace sage
         return cell.get();
     }
 
-    TextBox* TableCell::CreateTextbox(const std::string& _content)
+    TextBox* TableCell::CreateTextbox(
+        const std::string& _content, float fontSize, TextBox::OverflowBehaviour overflowBehaviour)
     {
         children = std::make_unique<TextBox>();
         auto* textbox = dynamic_cast<TextBox*>(children.get());
-        textbox->fontSize = 16;
+        textbox->fontSize = fontSize;
+        textbox->overflowBehaviour = overflowBehaviour;
         textbox->content = _content;
         UpdateChildren();
         return textbox;

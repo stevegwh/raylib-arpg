@@ -168,6 +168,7 @@ namespace sage
         // color?
         std::string content;
 
+        void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void UpdateDimensions() override;
         void Draw2D() override;
         ~TextBox() override = default;
@@ -189,7 +190,10 @@ namespace sage
     {
         float requestedWidth{};
         bool autoSize = true;
-        TextBox* CreateTextbox(const std::string& _content);
+        TextBox* CreateTextbox(
+            const std::string& _content,
+            float fontSize = 16,
+            TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         ImageBox* CreateImagebox(Image _tex);
         void UpdateChildren() override;
         void Draw2D() override;
