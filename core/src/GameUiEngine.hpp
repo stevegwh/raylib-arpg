@@ -62,6 +62,9 @@ namespace sage
         Rectangle rec{};
         Child children;
 
+        Texture tex;
+        NPatchInfo nPatchInfo;
+
         virtual void UpdateChildren() = 0;
         virtual void Draw2D() = 0;
 
@@ -105,16 +108,16 @@ namespace sage
         void SetVertAlignment(VertAlignment alignment)
         {
             vertAlignment = alignment;
-            UpdateRec();
+            UpdateDimensions();
         }
 
         void SetHoriAlignment(HoriAlignment alignment)
         {
             horiAlignment = alignment;
-            UpdateRec();
+            UpdateDimensions();
         }
 
-        virtual void UpdateRec() = 0;
+        virtual void UpdateDimensions() = 0;
         virtual void Draw2D() = 0;
 
         CellElement() = default;
@@ -134,7 +137,7 @@ namespace sage
         std::string content;
         // Text wrap, scroll bar etc?
 
-        void UpdateRec() override;
+        void UpdateDimensions() override;
         void Draw2D() override;
         ~TextBox() override = default;
     };
@@ -146,14 +149,13 @@ namespace sage
         entt::sigh<void()> onEndHover;
         entt::sigh<void()> onPress;
 
-        void UpdateRec() override;
+        void UpdateDimensions() override;
         void Draw2D() override;
         ~ImageBox() override = default;
     };
 
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
-        Texture tex{};
         TextBox* CreateTextbox(const std::string& _content);
         ImageBox* CreateImagebox(Image _tex);
         void UpdateChildren() override;
@@ -163,7 +165,6 @@ namespace sage
 
     struct TableRow final : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
     {
-        Texture tex{};
         TableCell* CreateTableCell();
         void UpdateChildren() override;
         void Draw2D() override;
@@ -172,7 +173,6 @@ namespace sage
 
     struct Table final : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
     {
-        Texture tex{};
         TableRow* CreateTableRow();
         void UpdateChildren() override;
         void Draw2D() override;
@@ -196,8 +196,10 @@ namespace sage
     class GameUIEngine
     {
         Texture nPatchTexture;
+        NPatchInfo info1;
+        NPatchInfo info2;
+        NPatchInfo info3;
         std::vector<std::unique_ptr<Window>> windows;
-        int nextId;
 
       public:
         Window* CreateWindow(Vector2 pos, float w, float h);
