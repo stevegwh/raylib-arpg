@@ -24,19 +24,19 @@ namespace sage
         heightPercent = _heightPercent / 100;
     }
 
-    Vector2 Window::GetPos() const
+    Vector2 Window::GetOffset() const
     {
-        return Vector2{settings->screenWidth * xPercent, settings->screenHeight * yPercent};
+        return Vector2{settings->screenWidth * xOffsetPercent, settings->screenHeight * yOffsetPercent};
     }
     /**
      *
-     * @param _xPercent x position in percent of screen (1-100)
-     * @param _yPercent y position in percent of screen (1-100)
+     * @param _xOffsetPercent x position in percent of screen (1-100)
+     * @param _yOffsetPercent y position in percent of screen (1-100)
      */
-    void Window::SetPosPercent(float _xPercent, float _yPercent)
+    void Window::SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent)
     {
-        xPercent = _xPercent / 100;
-        yPercent = _yPercent / 100;
+        xOffsetPercent = _xOffsetPercent / 100;
+        yOffsetPercent = _yOffsetPercent / 100;
     }
 
     void CellElement::SetVertAlignment(VertAlignment alignment)
@@ -270,7 +270,7 @@ namespace sage
 
     void Window::OnScreenSizeChange()
     {
-        rec = {GetPos().x, GetPos().y, GetDimensions().width, GetDimensions().height};
+        rec = {GetOffset().x, GetOffset().y, GetDimensions().width, GetDimensions().height};
         UpdateChildren();
     }
 
@@ -451,21 +451,24 @@ namespace sage
 
     [[nodiscard]] Window* GameUIEngine::CreateWindow(
         Image _nPatchTexture,
-        float _xPercent,
-        float _yPercent,
+        float _xOffsetPercent,
+        float _yOffsetPercent,
         float _widthPercent,
         float _heightPercent,
         WindowTableAlignment _alignment)
     {
         windows.push_back(std::make_unique<Window>());
         auto& window = windows.back();
-        window->SetPosPercent(_xPercent, _yPercent);
+        window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
         window->settings = settings;
         window->mainNPatchTexture = LoadTextureFromImage(_nPatchTexture);
         window->rec = {
-            window->GetPos().x, window->GetPos().y, window->GetDimensions().width, window->GetDimensions().height};
+            window->GetOffset().x,
+            window->GetOffset().y,
+            window->GetDimensions().width,
+            window->GetDimensions().height};
         return window.get();
     }
 
