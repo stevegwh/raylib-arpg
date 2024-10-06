@@ -185,21 +185,41 @@ namespace sage
         tex.height = finalHeight;
     }
 
-    void Window::UpdateChildren() // Can stack tables next to each other
+    void Window::UpdateChildren()
     {
-        // When window is dragged, this should be called
-        // Should set table size. Right now, its just one table per window
-        const float maxWidth = std::ceil(rec.width / children.size());
-        for (int i = 0; i < children.size(); ++i)
+        if (children.empty()) return;
+
+        switch (tableAlignment)
         {
-            const auto& table = children.at(i);
-            table->parent = this;
-            table->rec = rec;
-            table->rec.width = maxWidth;
-            table->rec.x = rec.x + (maxWidth * i);
-            if (!table->children.empty()) table->UpdateChildren();
-            // TODO: Add margin here
-            // TODO: Add padding here
+        case WindowTableAlignment::STACK_HORIZONTAL: {
+            const float maxWidth = std::ceil(rec.width / children.size());
+            for (int i = 0; i < children.size(); ++i)
+            {
+                const auto& table = children.at(i);
+                table->parent = this;
+                table->rec = rec;
+                table->rec.width = maxWidth;
+                table->rec.x = rec.x + (maxWidth * i);
+                table->rec.height = rec.height; // Full height in horizontal mode
+                if (!table->children.empty()) table->UpdateChildren();
+            }
+            break;
+        }
+
+        case WindowTableAlignment::STACK_VERTICAL: {
+            const float maxHeight = std::ceil(rec.height / children.size());
+            for (int i = 0; i < children.size(); ++i)
+            {
+                const auto& table = children.at(i);
+                table->parent = this;
+                table->rec = rec;
+                table->rec.height = maxHeight;
+                table->rec.y = rec.y + (maxHeight * i);
+                table->rec.width = rec.width; // Full width in vertical mode
+                if (!table->children.empty()) table->UpdateChildren();
+            }
+            break;
+        }
         }
     }
 
@@ -245,10 +265,12 @@ namespace sage
         }
     }
 
-    [[nodiscard]] Window* GameUIEngine::CreateWindow(Image _nPatchTexture, Vector2 pos, float w, float h)
+    [[nodiscard]] Window* GameUIEngine::CreateWindow(
+        Image _nPatchTexture, Vector2 pos, float w, float h, WindowTableAlignment _alignment)
     {
         windows.push_back(std::make_unique<Window>());
         auto& window = windows.back();
+        window->tableAlignment = _alignment;
         window->mainNPatchTexture = LoadTextureFromImage(_nPatchTexture);
         window->rec = {pos.x, pos.y, w, h};
         return window.get();
