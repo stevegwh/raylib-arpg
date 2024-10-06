@@ -197,13 +197,14 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
+        const Settings* settings; // for screen width/height
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
         Texture mainNPatchTexture; // npatch texture used by elements in window
         entt::sigh<void(int)> onWindowStartHover;
         entt::sigh<void(int)> onWindowEndHover;
 
+        void SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori);
         Table* CreateTable();
-
         void Draw2D() override;
         void UpdateChildren() override;
     };
@@ -211,6 +212,8 @@ namespace sage
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
+        Cursor* cursor;
+        Settings* settings;
 
       public:
         Window* CreateWindow(

@@ -23,6 +23,7 @@ namespace sage
 
         auto window =
             engine->CreateWindow(nPatchTexture.GetImage(), pos, 500, 200, WindowTableAlignment::STACK_VERTICAL);
+        window->SetWindowScreenAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window->tex = window->mainNPatchTexture;
 
@@ -64,43 +65,43 @@ namespace sage
             cell5->CreateTextbox("Number 5!");
         }
 
-        {
-            auto table = window->CreateTable();
-
-            auto row = table->CreateTableRow();
-            // auto row0 = table->CreateTableRow();
-            auto cell = row->CreateTableCell();
-            cell->CreateTextbox("Number 11111111111!");
-
-            cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-            cell->tex = window->mainNPatchTexture;
-
-            auto cell2 = row->CreateTableCell();
-            auto cell3 = row->CreateTableCell();
-            cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-            cell3->tex = window->mainNPatchTexture;
-            auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
-            cell2->SetPaddingPercent({10, 10, 10, 10});
-            imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-            cell3->CreateImagebox(LoadImage("resources/icon.png"));
-
-            // auto cell0 = row->CreateTableCell();
-
-            // cell->padding.left = 10;
-            // cell2->CreateTextbox("Number 2!");
-
-            // cell3->CreateTextbox("Number 3!");
-            cell3->SetPaddingPercent({0, 0, 5, 0});
-
-            auto row2 = table->CreateTableRow();
-            auto cell4 = row2->CreateTableCell();
-            auto cell5 = row2->CreateTableCell();
-            auto textbox = cell4->CreateTextbox("Number 4!");
-            textbox->SetHoriAlignment(HoriAlignment::LEFT);
-            textbox->SetVertAlignment(VertAlignment::BOTTOM);
-
-            cell5->CreateTextbox("Number 5!");
-        }
+        //        {
+        //            auto table = window->CreateTable();
+        //
+        //            auto row = table->CreateTableRow();
+        //            // auto row0 = table->CreateTableRow();
+        //            auto cell = row->CreateTableCell();
+        //            cell->CreateTextbox("Number 11111111111!");
+        //
+        //            cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        //            cell->tex = window->mainNPatchTexture;
+        //
+        //            auto cell2 = row->CreateTableCell();
+        //            auto cell3 = row->CreateTableCell();
+        //            cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        //            cell3->tex = window->mainNPatchTexture;
+        //            auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
+        //            cell2->SetPaddingPercent({10, 10, 10, 10});
+        //            imagebox->SetHoriAlignment(HoriAlignment::CENTER);
+        //            cell3->CreateImagebox(LoadImage("resources/icon.png"));
+        //
+        //            // auto cell0 = row->CreateTableCell();
+        //
+        //            // cell->padding.left = 10;
+        //            // cell2->CreateTextbox("Number 2!");
+        //
+        //            // cell3->CreateTextbox("Number 3!");
+        //            cell3->SetPaddingPercent({0, 0, 5, 0});
+        //
+        //            auto row2 = table->CreateTableRow();
+        //            auto cell4 = row2->CreateTableCell();
+        //            auto cell5 = row2->CreateTableCell();
+        //            auto textbox = cell4->CreateTextbox("Number 4!");
+        //            textbox->SetHoriAlignment(HoriAlignment::LEFT);
+        //            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+        //
+        //            cell5->CreateTextbox("Number 5!");
+        //        }
     }
 
     void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
