@@ -20,6 +20,19 @@ namespace sage
     class UserInput;
     class Cursor;
 
+    enum class HoriAlignment
+    {
+        LEFT,
+        RIGHT,
+        CENTER
+    };
+
+    enum class VertAlignment
+    {
+        TOP,
+        BOTTOM,
+    };
+
     struct Padding
     {
         float up = 0;
@@ -51,12 +64,23 @@ namespace sage
         virtual void UpdateChildren() = 0;
         virtual void Draw2D() = 0;
 
-        void SetPadding(const Padding& _padding)
+        void SetPaddingPixel(const Padding& _padding)
         {
             padding = _padding;
             UpdateChildren();
         }
 
+        // Set padding in percent of parent
+        void SetPaddingPercent(const Padding& _padding)
+        {
+            padding.up = rec.height * (_padding.up / 100);
+            padding.down = rec.height * (_padding.down / 100);
+            padding.left = rec.width * (_padding.left / 100);
+            padding.right = rec.width * (_padding.right / 100);
+            UpdateChildren();
+        }
+
+        // Returns pixel value of padding
         [[nodiscard]] const Padding& GetPadding() const
         {
             return padding;
