@@ -12,7 +12,6 @@ namespace sage
     void GameUiFactory::CreateExampleWindow(GameUIEngine* engine, Vector2 pos)
     {
         // TODO: textbox word wrap
-        // TODO: be able to scale window and have UI scale accordingly
         // TODO: Have a "CreateTitleBar" with a textbox and a image of a cross for closing
         // When the title bar is clicked, you can have it get the parent's window pos and update it based on mouse
         // location (and call update children)
@@ -25,7 +24,7 @@ namespace sage
 
         auto window =
             engine->CreateWindow(nPatchTexture.GetImage(), 0, 0, 40, 38, WindowTableAlignment::STACK_VERTICAL);
-        window->SetWindowScreenAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window->tex = window->mainNPatchTexture;
         window->SetPaddingPercent({14, 5, 3, 3});
