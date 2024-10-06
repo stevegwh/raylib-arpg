@@ -264,6 +264,11 @@ namespace sage
     ImageSafe ResourceManager::GetImage(const AssetID id)
     {
         const auto& path = getAssetPath(id);
+        return GetImage(path);
+    }
+
+    ImageSafe ResourceManager::GetImage(const std::string& path)
+    {
         assert(images.contains(path));
         return ImageSafe(images[path], false);
     }
@@ -271,6 +276,11 @@ namespace sage
     void ResourceManager::ImageLoadFromFile(const AssetID id)
     {
         const auto& path = getAssetPath(id);
+        ImageLoadFromFile(path);
+    }
+
+    void ResourceManager::ImageLoadFromFile(const std::string& path)
+    {
         assert(FileExists(path.c_str()));
         if (!images.contains(path))
         {
