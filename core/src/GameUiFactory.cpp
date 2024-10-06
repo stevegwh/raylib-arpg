@@ -22,8 +22,8 @@ namespace sage
         //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
         auto window = engine->CreateWindow(nPatchTexture.GetImage(), pos, 500, 200);
-        // window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        // window->tex = window->nPatchTexture;
+        window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        window->tex = window->mainNPatchTexture;
 
         auto table = window->CreateTable();
 
@@ -33,12 +33,12 @@ namespace sage
         cell->CreateTextbox("Number 11111111111!");
 
         cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        cell->tex = window->nPatchTexture;
+        cell->tex = window->mainNPatchTexture;
 
         auto cell2 = row->CreateTableCell();
         auto cell3 = row->CreateTableCell();
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        cell3->tex = window->nPatchTexture;
+        cell3->tex = window->mainNPatchTexture;
         auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
         cell2->SetPaddingPercent({10, 10, 10, 10});
         imagebox->SetHoriAlignment(HoriAlignment::CENTER);

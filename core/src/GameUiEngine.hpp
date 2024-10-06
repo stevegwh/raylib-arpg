@@ -7,6 +7,7 @@
 #include "raylib.h"
 
 #include <entt/entt.hpp>
+#include <optional>
 #include <vector>
 
 namespace sage
@@ -62,11 +63,30 @@ namespace sage
         Rectangle rec{};
         Child children;
 
-        Texture tex;
-        NPatchInfo nPatchInfo;
+        std::optional<Texture> tex{};
+        std::optional<NPatchInfo> nPatchInfo{};
 
         virtual void UpdateChildren() = 0;
-        virtual void Draw2D() = 0;
+        virtual void Draw2D()
+        {
+            if (tex.has_value())
+            {
+                if (nPatchInfo.has_value())
+                {
+                    DrawTextureNPatch(
+                        tex.value(),
+                        nPatchInfo.value(),
+                        rec,
+                        {0.0f, 0.0f},
+                        0.0f,
+                        WHITE); // Use {0.0f, 0.0f} for origin
+                }
+                else
+                {
+                    DrawTexture(tex.value(), rec.x, rec.y, WHITE);
+                }
+            }
+        };
 
         void SetPaddingPixel(const Padding& _padding)
         {
@@ -105,18 +125,8 @@ namespace sage
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
-        void SetVertAlignment(VertAlignment alignment)
-        {
-            vertAlignment = alignment;
-            UpdateDimensions();
-        }
-
-        void SetHoriAlignment(HoriAlignment alignment)
-        {
-            horiAlignment = alignment;
-            UpdateDimensions();
-        }
-
+        void SetVertAlignment(VertAlignment alignment);
+        void SetHoriAlignment(HoriAlignment alignment);
         virtual void UpdateDimensions() = 0;
         virtual void Draw2D() = 0;
 
@@ -179,19 +189,16 @@ namespace sage
         ~Table() override = default;
     };
 
-    struct Window
+    struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
-        Texture nPatchTexture;
-        Rectangle rec;
-        Texture tex;
-        NPatchInfo nPatchInfo;
+        Texture mainNPatchTexture; // npatch texture used by elements in window
         entt::sigh<void(int)> onWindowStartHover;
         entt::sigh<void(int)> onWindowEndHover;
-        std::vector<std::unique_ptr<Table>> children;
 
         Table* CreateTable();
 
-        void Draw2D() const;
+        void Draw2D() override;
+        void UpdateChildren() override;
     };
 
     class GameUIEngine
