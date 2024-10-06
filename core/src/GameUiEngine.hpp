@@ -172,6 +172,8 @@ namespace sage
 
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
+        float requestedWidth{};
+        bool autoSize = true;
         TextBox* CreateTextbox(const std::string& _content);
         ImageBox* CreateImagebox(Image _tex);
         void UpdateChildren() override;
@@ -181,7 +183,10 @@ namespace sage
 
     struct TableRow final : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
     {
+        float requestedHeight{};
+        bool autoSize = true;
         TableCell* CreateTableCell();
+        TableCell* CreateTableCell(float _requestedWidth);
         void UpdateChildren() override;
         void Draw2D() override;
         ~TableRow() override = default;
@@ -190,6 +195,7 @@ namespace sage
     struct Table final : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
     {
         TableRow* CreateTableRow();
+        TableRow* CreateTableRow(float _requestedHeight);
         void UpdateChildren() override;
         void Draw2D() override;
         ~Table() override = default;
