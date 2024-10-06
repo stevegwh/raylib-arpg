@@ -129,6 +129,7 @@ namespace sage
         float originalRatio = static_cast<float>(tex.width) / tex.height;
         float finalWidth, finalHeight;
 
+        // First attempt at fitting the image
         if (originalRatio > 1.0f) // Wider than tall
         {
             finalWidth = availableWidth;
@@ -138,6 +139,19 @@ namespace sage
         {
             finalHeight = availableHeight;
             finalWidth = availableHeight * originalRatio;
+        }
+
+        // Scale down if the image is too big for either dimension
+        if (finalWidth > availableWidth || finalHeight > availableHeight)
+        {
+            float widthRatio = availableWidth / finalWidth;
+            float heightRatio = availableHeight / finalHeight;
+
+            // Use the smaller ratio to ensure both dimensions fit
+            float scaleFactor = std::min(widthRatio, heightRatio);
+
+            finalWidth *= scaleFactor;
+            finalHeight *= scaleFactor;
         }
 
         float horiOffset = 0; // Left
@@ -171,10 +185,22 @@ namespace sage
         tex.height = finalHeight;
     }
 
-    void Window::UpdateChildren()
+    void Window::UpdateChildren() // Can stack tables next to each other
     {
         // When window is dragged, this should be called
         // Should set table size. Right now, its just one table per window
+        const float maxWidth = std::ceil(rec.width / children.size());
+        for (int i = 0; i < children.size(); ++i)
+        {
+            const auto& table = children.at(i);
+            table->parent = this;
+            table->rec = rec;
+            table->rec.width = maxWidth;
+            table->rec.x = rec.x + (maxWidth * i);
+            if (!table->children.empty()) table->UpdateChildren();
+            // TODO: Add margin here
+            // TODO: Add padding here
+        }
     }
 
     void Table::UpdateChildren()
@@ -232,10 +258,7 @@ namespace sage
     {
         children.push_back(std::make_unique<Table>());
         const auto& table = children.back();
-        table->parent = this;
-        // Table inherits window's dimensions and position
-        table->rec = rec;
-
+        UpdateChildren();
         return table.get();
     }
 
