@@ -14,7 +14,7 @@ namespace sage
         // TODO: Have a "CreateTitleBar" with a textbox and a image of a cross for closing
         // When the title bar is clicked, you can have it get the parent's window pos and update it based on mouse
         // location (and call update children)
-        // TODO: Be able to specify a cell's width
+
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().GetImage("resources/textures/ninepatch_button.png");
         //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
@@ -30,9 +30,9 @@ namespace sage
         {
             auto table = window->CreateTable();
 
-            auto row = table->CreateTableRow();
+            auto row = table->CreateTableRow(75);
             // auto row0 = table->CreateTableRow();
-            auto cell = row->CreateTableCell();
+            auto cell = row->CreateTableCell(50);
             cell->CreateTextbox("Number 11111111111!");
 
             cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
