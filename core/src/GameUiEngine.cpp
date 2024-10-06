@@ -5,6 +5,8 @@
 #include "GameUiEngine.hpp"
 #include "Cursor.hpp"
 #include "Settings.hpp"
+#include "UserInput.hpp"
+
 #include <cassert>
 
 namespace sage
@@ -472,6 +474,10 @@ namespace sage
             window->GetOffset().y,
             window->GetDimensions().width,
             window->GetDimensions().height};
+
+        entt::sink sink{userInput->onWindowUpdate};
+        sink.connect<&Window::OnScreenSizeChange>(window.get());
+
         return window.get();
     }
 
@@ -572,14 +578,6 @@ namespace sage
             }
         }
 
-        if (IsKeyDown(KEY_B))
-        {
-            for (auto& window : windows)
-            {
-                window->OnScreenSizeChange();
-            }
-        }
-
         // Get hovered or clicked element and interact with it
         // onMouseUp -> activate, onMouseDown -> add drag timer? then enable drag
 
@@ -587,9 +585,7 @@ namespace sage
     }
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
-        : cursor(_cursor), settings(_settings)
+        : cursor(_cursor), userInput(_userInput), settings(_settings)
     {
-        // TODO: CreateWindow should use a percentage of the screen as its positioning, as opposed to an absolute
-        // pixel value
     }
 } // namespace sage

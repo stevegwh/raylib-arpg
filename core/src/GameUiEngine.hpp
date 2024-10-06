@@ -248,6 +248,7 @@ namespace sage
     {
         std::vector<std::unique_ptr<Window>> windows;
         Cursor* cursor;
+        UserInput* userInput;
         Settings* settings;
 
       public:
