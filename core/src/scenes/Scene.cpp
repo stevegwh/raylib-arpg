@@ -53,8 +53,8 @@ namespace sage
 
     void Scene::Draw2D()
     {
-        data->cursor->Draw2D();
         data->uiEngine->Draw2D();
+        data->cursor->Draw2D();
     }
 
     void Scene::DrawDebug()

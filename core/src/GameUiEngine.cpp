@@ -3,6 +3,7 @@
 //
 
 #include "GameUiEngine.hpp"
+#include "Cursor.hpp"
 #include "Settings.hpp"
 
 namespace sage
@@ -22,7 +23,6 @@ namespace sage
     // NB: The original position of the window is treated as an offset.
     void Window::SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori)
     {
-        // Store the original offsets
         float originalXOffset = rec.x;
         float originalYOffset = rec.y;
 
@@ -61,11 +61,9 @@ namespace sage
             break;
         }
 
-        // Apply the aligned position plus the original offsets
         rec.x = xOffset + originalXOffset;
         rec.y = yOffset + originalYOffset;
 
-        // Update child elements to match new window position
         UpdateChildren();
     }
 
@@ -374,6 +372,20 @@ namespace sage
 
     void GameUIEngine::Update()
     {
+        auto mousePos = GetMousePosition();
+        cursor->EnableContextSwitching();
+        cursor->Enable();
+        for (auto& window : windows)
+        {
+            if (mousePos.x >= window->rec.x && mousePos.x <= window->rec.x + window->rec.width &&
+                mousePos.y >= window->rec.y && mousePos.y <= window->rec.y + window->rec.height)
+            {
+                cursor->DisableContextSwitching();
+                cursor->Disable();
+                break;
+            }
+        }
+
         // Handle input and update UI state here (e.g., button clicks, hover effects)
     }
 
@@ -382,11 +394,5 @@ namespace sage
     {
         // TODO: CreateWindow should use a percentage of the screen as its positioning, as opposed to an absolute
         // pixel value
-        // TODO: Add functions to Window to allow it to be aligned vertically/horizontally
-
-        //        mainNPatchTexture = LoadTexture("resources/textures/ninepatch_button.png");
-        //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
-        //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
     }
 } // namespace sage
