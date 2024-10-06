@@ -21,8 +21,8 @@ namespace sage
         //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
         //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
-        auto window =
-            engine->CreateWindow(nPatchTexture.GetImage(), pos, 500, 200, WindowTableAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindow(
+            nPatchTexture.GetImage(), {300, 0}, 500, 200, WindowTableAlignment::STACK_VERTICAL);
         window->SetWindowScreenAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window->tex = window->mainNPatchTexture;
