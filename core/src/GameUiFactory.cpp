@@ -22,10 +22,11 @@ namespace sage
         //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
         auto window = engine->CreateWindow(
-            nPatchTexture.GetImage(), {300, 0}, 500, 200, WindowTableAlignment::STACK_VERTICAL);
+            nPatchTexture.GetImage(), {300, 0}, 500, 300, WindowTableAlignment::STACK_VERTICAL);
         window->SetWindowScreenAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         window->tex = window->mainNPatchTexture;
+        window->SetPaddingPercent({14, 5, 3, 3});
 
         {
             auto table = window->CreateTable();
@@ -34,6 +35,7 @@ namespace sage
             // auto row0 = table->CreateTableRow();
             auto cell = row->CreateTableCell(50);
             cell->CreateTextbox("Number 11111111111!");
+            cell->SetPaddingPercent({2, 2, 2, 2});
 
             cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
             cell->tex = window->mainNPatchTexture;
