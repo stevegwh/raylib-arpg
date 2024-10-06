@@ -30,6 +30,7 @@ namespace sage
     enum class VertAlignment
     {
         TOP,
+        MIDDLE,
         BOTTOM,
     };
 
@@ -98,6 +99,20 @@ namespace sage
     {
         TableCell* parent{};
         Rectangle rec{};
+        VertAlignment vertAlignment = VertAlignment::TOP;
+        HoriAlignment horiAlignment = HoriAlignment::LEFT;
+
+        void SetVertAlignment(VertAlignment alignment)
+        {
+            vertAlignment = alignment;
+            UpdateRec();
+        }
+
+        void SetHoriAlignment(HoriAlignment alignment)
+        {
+            horiAlignment = alignment;
+            UpdateRec();
+        }
 
         virtual void UpdateRec() = 0;
         virtual void Draw2D() = 0;
