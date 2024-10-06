@@ -218,14 +218,17 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
+        bool hidden = false;
+        const Settings* settings; // for screen width/height
+
         float xOffsetPercent = 0;
         float yOffsetPercent = 0;
         float widthPercent = 0;
         float heightPercent = 0;
-
-        bool hidden = false;
-        const Settings* settings; // for screen width/height
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
+        VertAlignment vertAlignment = VertAlignment::TOP;
+        HoriAlignment horiAlignment = HoriAlignment::LEFT;
+
         Texture mainNPatchTexture; // npatch texture used by elements in window
         entt::sigh<void(int)> onWindowStartHover;
         entt::sigh<void(int)> onWindowEndHover;
@@ -234,7 +237,7 @@ namespace sage
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
         [[nodiscard]] Vector2 GetOffset() const;
         void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
-        void SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori);
+        void SetAlignment(VertAlignment vert, HoriAlignment hori);
         Table* CreateTable();
         void OnScreenSizeChange();
         void Draw2D() override;

@@ -52,10 +52,12 @@ namespace sage
     }
 
     // NB: The original position of the window is treated as an offset.
-    void Window::SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori)
+    void Window::SetAlignment(VertAlignment vert, HoriAlignment hori)
     {
-        float originalXOffset = rec.x;
-        float originalYOffset = rec.y;
+        vertAlignment = vert;
+        horiAlignment = hori;
+        float originalXOffset = GetOffset().x;
+        float originalYOffset = GetOffset().y;
 
         float xOffset = 0;
         float yOffset = 0;
@@ -271,6 +273,7 @@ namespace sage
     void Window::OnScreenSizeChange()
     {
         rec = {GetOffset().x, GetOffset().y, GetDimensions().width, GetDimensions().height};
+        SetAlignment(vertAlignment, horiAlignment);
         UpdateChildren();
     }
 
@@ -566,6 +569,14 @@ namespace sage
                 cursor->DisableContextSwitching();
                 cursor->Disable();
                 break;
+            }
+        }
+
+        if (IsKeyDown(KEY_B))
+        {
+            for (auto& window : windows)
+            {
+                window->OnScreenSizeChange();
             }
         }
 
