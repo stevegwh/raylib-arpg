@@ -4,6 +4,7 @@
 
 #include "GameUiFactory.hpp"
 #include "GameUiEngine.hpp"
+#include "ResourceManager.hpp"
 
 namespace sage
 {
@@ -14,16 +15,30 @@ namespace sage
         // When the title bar is clicked, you can have it get the parent's window pos and update it based on mouse
         // location (and call update children)
         // TODO: Be able to specify a cell's width
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().GetImage("resources/textures/ninepatch_button.png");
+        //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
+        //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
-        auto window = engine->CreateWindow(pos, 500, 200);
+        auto window = engine->CreateWindow(nPatchTexture.GetImage(), pos, 500, 200);
+        // window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        // window->tex = window->nPatchTexture;
+
         auto table = window->CreateTable();
 
         auto row = table->CreateTableRow();
         // auto row0 = table->CreateTableRow();
         auto cell = row->CreateTableCell();
         cell->CreateTextbox("Number 11111111111!");
+
+        cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        cell->tex = window->nPatchTexture;
+
         auto cell2 = row->CreateTableCell();
         auto cell3 = row->CreateTableCell();
+        cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        cell3->tex = window->nPatchTexture;
         auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
         cell2->SetPaddingPercent({10, 10, 10, 10});
         imagebox->SetHoriAlignment(HoriAlignment::CENTER);
@@ -49,6 +64,6 @@ namespace sage
 
     void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        engine->CreateWindow(pos, w, h);
+        // engine->CreateWindow(pos, w, h);
     }
 } // namespace sage

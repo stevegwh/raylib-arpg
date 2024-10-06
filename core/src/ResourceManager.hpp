@@ -63,7 +63,9 @@ namespace sage
         Texture TextureLoad(AssetID id);
         void ImageUnload(AssetID id);
         ImageSafe GetImage(AssetID id);
+        ImageSafe GetImage(const std::string& path);
         void ImageLoadFromFile(AssetID id);
+        void ImageLoadFromFile(const std::string& path);
         void ImageLoadFromFile(AssetID id, Image image);
         void ImageLoadFromFile(const std::string& path, Image image);
         void ModelLoadFromFile(AssetID id);

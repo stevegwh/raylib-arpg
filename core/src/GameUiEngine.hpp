@@ -181,6 +181,7 @@ namespace sage
 
     struct Window
     {
+        Texture nPatchTexture;
         Rectangle rec;
         Texture tex;
         NPatchInfo nPatchInfo;
@@ -195,14 +196,10 @@ namespace sage
 
     class GameUIEngine
     {
-        Texture nPatchTexture;
-        NPatchInfo info1;
-        NPatchInfo info2;
-        NPatchInfo info3;
         std::vector<std::unique_ptr<Window>> windows;
 
       public:
-        Window* CreateWindow(Vector2 pos, float w, float h);
+        Window* CreateWindow(Image _nPatchTexture, Vector2 pos, float w, float h);
 
         void Draw2D();
         void Update();

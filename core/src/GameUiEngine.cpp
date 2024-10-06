@@ -7,12 +7,11 @@
 namespace sage
 {
 
-    [[nodiscard]] Window* GameUIEngine::CreateWindow(Vector2 pos, float w, float h)
+    [[nodiscard]] Window* GameUIEngine::CreateWindow(Image _nPatchTexture, Vector2 pos, float w, float h)
     {
         windows.push_back(std::make_unique<Window>());
         auto& window = windows.back();
-        window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        window->tex = nPatchTexture;
+        window->nPatchTexture = LoadTextureFromImage(_nPatchTexture);
         window->rec = {pos.x, pos.y, w, h};
         return window.get();
     }
@@ -201,8 +200,11 @@ namespace sage
 
     void Window::Draw2D() const
     {
-        DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
-                          WHITE); // Use {0.0f, 0.0f} for origin
+        if (tex.id > 0)
+        {
+            DrawTextureNPatch(tex, nPatchInfo, rec, {0.0f, 0.0f}, 0.0f,
+                              WHITE); // Use {0.0f, 0.0f} for origin
+        }
 
         for (auto& child : children)
         {
@@ -221,7 +223,7 @@ namespace sage
         for (int i = 0; i < children.size(); ++i)
         {
             const auto& row = children[i];
-            DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, colors[i]);
+            // DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, colors[i]);
             row->Draw2D();
         }
     }
@@ -239,7 +241,7 @@ namespace sage
             const auto& cell = children[i];
             Color col = colors[i];
             col.a = 150;
-            DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
+            // DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
             cell->Draw2D();
         }
     }
@@ -282,9 +284,9 @@ namespace sage
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
     {
-        nPatchTexture = LoadTexture("resources/textures/ninepatch_button.png");
-        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
-        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        //        nPatchTexture = LoadTexture("resources/textures/ninepatch_button.png");
+        //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
+        //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
     }
 } // namespace sage
