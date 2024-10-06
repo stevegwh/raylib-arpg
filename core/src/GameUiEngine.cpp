@@ -125,6 +125,7 @@ namespace sage
     {
         for (auto& window : windows)
         {
+            if (window->hidden) continue;
             window->Draw2D();
         }
     }
@@ -373,10 +374,14 @@ namespace sage
     void GameUIEngine::Update()
     {
         auto mousePos = GetMousePosition();
+
+        // if item is being dragged, do not enable below
         cursor->EnableContextSwitching();
         cursor->Enable();
+
         for (auto& window : windows)
         {
+            if (window->hidden) continue;
             if (mousePos.x >= window->rec.x && mousePos.x <= window->rec.x + window->rec.width &&
                 mousePos.y >= window->rec.y && mousePos.y <= window->rec.y + window->rec.height)
             {
@@ -385,6 +390,9 @@ namespace sage
                 break;
             }
         }
+
+        // Get hovered or clicked element and interact with it
+        // onMouseUp -> activate, onMouseDown -> add drag timer? then enable drag
 
         // Handle input and update UI state here (e.g., button clicks, hover effects)
     }

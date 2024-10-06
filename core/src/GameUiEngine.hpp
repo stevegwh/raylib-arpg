@@ -197,6 +197,7 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
+        bool hidden = false;
         const Settings* settings; // for screen width/height
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
         Texture mainNPatchTexture; // npatch texture used by elements in window
