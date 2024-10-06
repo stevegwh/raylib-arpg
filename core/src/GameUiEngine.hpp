@@ -21,6 +21,12 @@ namespace sage
     class UserInput;
     class Cursor;
 
+    struct Dimensions
+    {
+        float width;
+        float height;
+    };
+
     enum class WindowTableAlignment
     {
         STACK_VERTICAL,
@@ -212,6 +218,11 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
+        float xPercent = 0;
+        float yPercent = 0;
+        float widthPercent = 0;
+        float heightPercent = 0;
+
         bool hidden = false;
         const Settings* settings; // for screen width/height
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
@@ -219,8 +230,13 @@ namespace sage
         entt::sigh<void(int)> onWindowStartHover;
         entt::sigh<void(int)> onWindowEndHover;
 
+        [[nodiscard]] Dimensions GetDimensions() const;
+        void SetDimensionsPercent(float _widthPercent, float _heightPercent);
+        [[nodiscard]] Vector2 GetPos() const;
+        void SetPosPercent(float _xPercent, float _yPercent);
         void SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori);
         Table* CreateTable();
+        void OnScreenSizeChange();
         void Draw2D() override;
         void UpdateChildren() override;
     };
@@ -234,9 +250,10 @@ namespace sage
       public:
         Window* CreateWindow(
             Image _nPatchTexture,
-            Vector2 pos,
-            float w,
-            float h,
+            float _xPercent,
+            float _yPercent,
+            float _widthPercent,
+            float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
 
         void Draw2D();
