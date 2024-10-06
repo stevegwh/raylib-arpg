@@ -111,6 +111,7 @@ namespace sage
     void TextBox::UpdateRec()
     {
         constexpr int MIN_FONT_SIZE = 4;
+
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
         Vector2 textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
         while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
@@ -118,32 +119,84 @@ namespace sage
             fontSize -= 1;
             textSize = MeasureTextEx(GetFontDefault(), content.c_str(), fontSize, fontSpacing);
         }
+
+        float horiOffset = 0; // Left
+        float vertOffset = 0; // Top
+        float availableHeight = parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down);
+
+        if (vertAlignment == VertAlignment::MIDDLE)
+        {
+            vertOffset = (availableHeight - textSize.y) / 2;
+        }
+        else if (vertAlignment == VertAlignment::BOTTOM)
+        {
+            vertOffset = availableHeight - textSize.y;
+        }
+
+        if (horiAlignment == HoriAlignment::RIGHT)
+        {
+            horiOffset = availableWidth - textSize.x;
+        }
+        else if (horiAlignment == HoriAlignment::CENTER)
+        {
+            horiOffset = (availableWidth - textSize.x) / 2;
+        }
+
         rec = {
-            parent->rec.x + parent->GetPadding().left,
-            parent->rec.y + parent->GetPadding().up,
+            parent->rec.x + parent->GetPadding().left + horiOffset,
+            parent->rec.y + parent->GetPadding().up + vertOffset,
             textSize.x,
             textSize.y};
     }
 
     void ImageBox::UpdateRec()
     {
-        rec = Rectangle{
-            parent->rec.x + parent->GetPadding().left,
-            parent->rec.y + parent->GetPadding().up,
-            rec.width - parent->GetPadding().right,
-            rec.height - parent->GetPadding().down};
+        float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
+        float availableHeight = parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down);
 
         float originalRatio = static_cast<float>(tex.width) / tex.height;
+        float finalWidth, finalHeight;
+
         if (originalRatio > 1.0f) // Wider than tall
         {
-            tex.width = rec.width;
-            tex.height = rec.width / originalRatio;
+            finalWidth = availableWidth;
+            finalHeight = availableWidth / originalRatio;
         }
         else // Taller than wide
         {
-            tex.height = rec.height;
-            tex.width = rec.height * originalRatio;
+            finalHeight = availableHeight;
+            finalWidth = availableHeight * originalRatio;
         }
+
+        float horiOffset = 0; // Left
+        float vertOffset = 0; // Top
+
+        if (vertAlignment == VertAlignment::MIDDLE)
+        {
+            vertOffset = (availableHeight - finalHeight) / 2;
+        }
+        else if (vertAlignment == VertAlignment::BOTTOM)
+        {
+            vertOffset = availableHeight - finalHeight;
+        }
+
+        if (horiAlignment == HoriAlignment::RIGHT)
+        {
+            horiOffset = availableWidth - finalWidth;
+        }
+        else if (horiAlignment == HoriAlignment::CENTER)
+        {
+            horiOffset = (availableWidth - finalWidth) / 2;
+        }
+
+        rec = Rectangle{
+            parent->rec.x + parent->GetPadding().left + horiOffset,
+            parent->rec.y + parent->GetPadding().up + vertOffset,
+            finalWidth,
+            finalHeight};
+
+        tex.width = finalWidth;
+        tex.height = finalHeight;
     }
 
     void Window::Draw2D() const
