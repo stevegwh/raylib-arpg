@@ -3,6 +3,7 @@
 //
 
 #include "GameUiEngine.hpp"
+#include "Settings.hpp"
 
 namespace sage
 {
@@ -16,6 +17,52 @@ namespace sage
     {
         horiAlignment = alignment;
         UpdateDimensions();
+    }
+
+    void Window::SetWindowScreenAlignment(VertAlignment vert, HoriAlignment hori)
+    {
+        assert(settings);
+        float xOffset = 0;
+        float yOffset = 0;
+
+        // Calculate horizontal position
+        switch (hori)
+        {
+        case HoriAlignment::LEFT:
+            xOffset = 0;
+            break;
+
+        case HoriAlignment::CENTER:
+            xOffset = (settings->screenWidth - rec.width) / 2;
+            break;
+
+        case HoriAlignment::RIGHT:
+            xOffset = settings->screenWidth - rec.width;
+            break;
+        }
+
+        // Calculate vertical position
+        switch (vert)
+        {
+        case VertAlignment::TOP:
+            yOffset = 0;
+            break;
+
+        case VertAlignment::MIDDLE:
+            yOffset = (settings->screenHeight - rec.height) / 2;
+            break;
+
+        case VertAlignment::BOTTOM:
+            yOffset = settings->screenHeight - rec.height;
+            break;
+        }
+
+        // Update window position
+        rec.x = xOffset;
+        rec.y = yOffset;
+
+        // Update child elements to match new window position
+        UpdateChildren();
     }
 
     void Window::Draw2D()
@@ -271,6 +318,7 @@ namespace sage
         windows.push_back(std::make_unique<Window>());
         auto& window = windows.back();
         window->tableAlignment = _alignment;
+        window->settings = settings;
         window->mainNPatchTexture = LoadTextureFromImage(_nPatchTexture);
         window->rec = {pos.x, pos.y, w, h};
         return window.get();
@@ -326,7 +374,12 @@ namespace sage
     }
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
+        : settings(_settings), cursor(_cursor)
     {
+        // TODO: CreateWindow should use a percentage of the screen as its positioning, as opposed to an absolute
+        // pixel value
+        // TODO: Add functions to Window to allow it to be aligned vertically/horizontally
+
         //        mainNPatchTexture = LoadTexture("resources/textures/ninepatch_button.png");
         //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
