@@ -11,7 +11,6 @@ namespace sage
 
     void GameUiFactory::CreateExampleWindow(GameUIEngine* engine, Vector2 pos)
     {
-        // TODO: textbox word wrap
         // TODO: Have a "CreateTitleBar" with a textbox and a image of a cross for closing
         // When the title bar is clicked, you can have it get the parent's window pos and update it based on mouse
         // location (and call update children)
@@ -31,11 +30,13 @@ namespace sage
 
         {
             auto table = window->CreateTable();
-
+            // Number 1111111111111111111111111111111111111111111!
             auto row = table->CreateTableRow(75);
             // auto row0 = table->CreateTableRow();
             auto cell = row->CreateTableCell(50);
-            cell->CreateTextbox("Number 11111111111!");
+            auto textbox = cell->CreateTextbox(
+                "Number 1111111111111111111111111111111111111111111!", 24, TextBox::OverflowBehaviour::WORD_WRAP);
+
             cell->SetPaddingPercent({2, 2, 2, 2});
 
             cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
@@ -61,9 +62,9 @@ namespace sage
             auto row2 = table->CreateTableRow();
             auto cell4 = row2->CreateTableCell();
             auto cell5 = row2->CreateTableCell();
-            auto textbox = cell4->CreateTextbox("Number 4!");
-            textbox->SetHoriAlignment(HoriAlignment::LEFT);
-            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+            auto textbox2 = cell4->CreateTextbox("Number 4!");
+            textbox2->SetHoriAlignment(HoriAlignment::LEFT);
+            textbox2->SetVertAlignment(VertAlignment::BOTTOM);
 
             cell5->CreateTextbox("Number 5!");
         }
