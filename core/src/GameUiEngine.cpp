@@ -9,6 +9,36 @@
 
 namespace sage
 {
+    Dimensions Window::GetDimensions() const
+    {
+        return Dimensions{settings->screenWidth * widthPercent, settings->screenHeight * heightPercent};
+    }
+    /**
+     *
+     * @param _xPercent x position in percent of screen (1-100)
+     * @param _yPercent y position in percent of screen (1-100)
+     */
+    void Window::SetDimensionsPercent(float _widthPercent, float _heightPercent)
+    {
+        widthPercent = _widthPercent / 100;
+        heightPercent = _heightPercent / 100;
+    }
+
+    Vector2 Window::GetPos() const
+    {
+        return Vector2{settings->screenWidth * xPercent, settings->screenHeight * yPercent};
+    }
+    /**
+     *
+     * @param _xPercent x position in percent of screen (1-100)
+     * @param _yPercent y position in percent of screen (1-100)
+     */
+    void Window::SetPosPercent(float _xPercent, float _yPercent)
+    {
+        xPercent = _xPercent / 100;
+        yPercent = _yPercent / 100;
+    }
+
     void CellElement::SetVertAlignment(VertAlignment alignment)
     {
         vertAlignment = alignment;
@@ -133,6 +163,8 @@ namespace sage
 
     void TextBox::UpdateDimensions()
     {
+        // TODO: Content should be a vector to allow for word wrap
+        // Should break into new lines. if new line does not fit and cannot be split then reduce font size
         constexpr int MIN_FONT_SIZE = 4;
 
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
@@ -234,6 +266,12 @@ namespace sage
 
         tex.width = finalWidth;
         tex.height = finalHeight;
+    }
+
+    void Window::OnScreenSizeChange()
+    {
+        rec = {GetPos().x, GetPos().y, GetDimensions().width, GetDimensions().height};
+        UpdateChildren();
     }
 
     void Window::UpdateChildren()
@@ -412,14 +450,22 @@ namespace sage
     }
 
     [[nodiscard]] Window* GameUIEngine::CreateWindow(
-        Image _nPatchTexture, Vector2 pos, float w, float h, WindowTableAlignment _alignment)
+        Image _nPatchTexture,
+        float _xPercent,
+        float _yPercent,
+        float _widthPercent,
+        float _heightPercent,
+        WindowTableAlignment _alignment)
     {
         windows.push_back(std::make_unique<Window>());
         auto& window = windows.back();
+        window->SetPosPercent(_xPercent, _yPercent);
+        window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
         window->settings = settings;
         window->mainNPatchTexture = LoadTextureFromImage(_nPatchTexture);
-        window->rec = {pos.x, pos.y, w, h};
+        window->rec = {
+            window->GetPos().x, window->GetPos().y, window->GetDimensions().width, window->GetDimensions().height};
         return window.get();
     }
 
@@ -527,7 +573,7 @@ namespace sage
     }
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
-        : settings(_settings), cursor(_cursor)
+        : cursor(_cursor), settings(_settings)
     {
         // TODO: CreateWindow should use a percentage of the screen as its positioning, as opposed to an absolute
         // pixel value
