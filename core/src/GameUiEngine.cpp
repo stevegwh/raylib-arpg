@@ -365,9 +365,10 @@ namespace sage
     void TableCell::Draw2D()
     {
         TableElement::Draw2D();
-        if (children) // single element
+        auto& element = children;
+        if (element && !element->beingDragged) // hide if dragged
         {
-            children->Draw2D();
+            element->Draw2D();
         }
     }
 
@@ -556,11 +557,12 @@ namespace sage
 
     void TableCell::UpdateChildren()
     {
-        if (children)
+        auto& element = children;
+        if (element)
         {
-            children->parent = this;
-            children->rec = rec;
-            children->UpdateDimensions();
+            element->parent = this;
+            element->rec = rec;
+            element->UpdateDimensions();
         }
     }
 
@@ -689,6 +691,13 @@ namespace sage
             if (window->hidden) continue;
             window->Draw2D();
         }
+
+        if (draggedElement.has_value())
+        {
+            // TODO: Make dragged element a struct
+            auto mousePos = GetMousePosition();
+            DrawTexture(draggedElement.value(), mousePos.x, mousePos.y, WHITE);
+        }
     }
 
     void GameUIEngine::Update()
@@ -696,8 +705,18 @@ namespace sage
         auto mousePos = GetMousePosition();
 
         // if item is being dragged, do not enable below
-        cursor->EnableContextSwitching();
-        cursor->Enable();
+        if (!draggedElement.has_value())
+        {
+            cursor->EnableContextSwitching();
+            cursor->Enable();
+        }
+        else
+        {
+            if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+            {
+                draggedElement.reset();
+            }
+        }
 
         for (auto& window : windows)
         {
@@ -714,15 +733,18 @@ namespace sage
                     {
                         for (auto& cell : row->children)
                         {
+                            auto& element = cell->children;
                             if (cell->MouseInside(mousePos))
                             {
-                                cell->children->OnMouseStartHover();
+                                element->OnMouseStartHover();
                                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                                 {
-                                    cell->children->OnMouseClick();
+                                    element->OnMouseClick();
                                 }
-                                else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+                                else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !draggedElement.has_value())
                                 {
+                                    // element->beingDragged = true;
+                                    draggedElement = element->tex;
                                     // TODO: Dragging elements
                                     // Start drag timer
                                     // After drag timer finished, start "drag mode"
@@ -730,7 +752,7 @@ namespace sage
                             }
                             else
                             {
-                                if (cell->children->mouseHover)
+                                if (element->mouseHover)
                                 {
                                     cell->children->OnMouseStopHover();
                                 }
@@ -749,8 +771,6 @@ namespace sage
 
         // Get hovered or clicked element and interact with it
         // onMouseUp -> activate, onMouseDown -> add drag timer? then enable drag
-
-        // Handle input and update UI state here (e.g., button clicks, hover effects)
     }
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
