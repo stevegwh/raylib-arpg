@@ -129,8 +129,8 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
-            auto* droppedParent = dynamic_cast<TableCell*>(dropped->parent);
-            auto* thisParent = dynamic_cast<TableCell*>(this->parent);
+            auto* droppedParent = dropped->parent;
+            auto* thisParent = this->parent;
 
             if (!droppedParent || !thisParent) return;
 
@@ -255,6 +255,11 @@ namespace sage
         {
             EndShaderMode();
         }
+    }
+
+    void CloseButton::OnMouseClick()
+    {
+        parentWindow->hidden = true;
     }
 
     Dimensions Window::GetDimensions() const
@@ -643,6 +648,31 @@ namespace sage
         return image;
     }
 
+    TitleBar* TableCell::CreateTitleBar(Window* window, const std::string& _title, float fontSize)
+    {
+        children = std::make_unique<TitleBar>();
+        auto* titleBar = dynamic_cast<TitleBar*>(children.get());
+        titleBar->parentWindow = window;
+        titleBar->draggable = true;
+        titleBar->fontSize = fontSize;
+        titleBar->overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
+        titleBar->content = _title;
+        UpdateChildren();
+        return titleBar;
+    }
+
+    CloseButton* TableCell::CreateCloseButton(Window* _parentWindow, Image _tex)
+    {
+        children = std::make_unique<CloseButton>();
+        auto* closeButton = dynamic_cast<CloseButton*>(children.get());
+        closeButton->parentWindow = _parentWindow;
+        entt::sink sink{_parentWindow->onMouseStopHover};
+        sink.connect<&ImageBox::OnMouseStopHover>(closeButton);
+        closeButton->tex = LoadTextureFromImage(_tex);
+        UpdateChildren();
+        return closeButton;
+    }
+
     TextBox* TableCell::CreateTextbox(
         const std::string& _content, float fontSize, TextBox::OverflowBehaviour overflowBehaviour)
     {
@@ -770,11 +800,11 @@ namespace sage
                 cursor->DisableContextSwitching();
                 cursor->Disable();
 
-                for (auto& table : window->children)
+                for (const auto& table : window->children)
                 {
-                    for (auto& row : table->children)
+                    for (const auto& row : table->children)
                     {
-                        for (auto& cell : row->children)
+                        for (const auto& cell : row->children)
                         {
                             auto& element = cell->children;
                             if (cell->MouseInside(mousePos))
@@ -788,35 +818,39 @@ namespace sage
                                 {
                                     element->OnDragDropHere(draggedElement.value());
                                 }
-                                else if (
-                                    element->draggable && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
-                                    !draggedElement.has_value())
+                                else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
                                 {
-                                    if (draggedElement.has_value()) break;
-                                    // If the cursor changes hover while dragging, don't continue until mouse up
-                                    if (!hoveredDraggableElement.has_value() && draggedTimer > 0) continue;
+                                    // element->OnMouseDown();
 
-                                    if (hoveredDraggableElement.has_value() &&
-                                        hoveredDraggableElement.value() != element.get())
+                                    if (element->draggable && !draggedElement.has_value())
                                     {
-                                        hoveredDraggableElement.reset();
-                                        continue;
-                                    }
+                                        if (draggedElement.has_value()) break;
+                                        // If the cursor changes hover while dragging, don't continue until mouse
+                                        // up
+                                        if (!hoveredDraggableElement.has_value() && draggedTimer > 0) continue;
 
-                                    auto time = GetTime();
-                                    if (draggedTimer == 0)
-                                    {
-                                        // Start drag
-                                        hoveredDraggableElement = reinterpret_cast<CellElement*>(element.get());
-                                        draggedTimer = time;
-                                        continue;
-                                    }
+                                        if (hoveredDraggableElement.has_value() &&
+                                            hoveredDraggableElement.value() != element.get())
+                                        {
+                                            hoveredDraggableElement.reset();
+                                            continue;
+                                        }
 
-                                    if (time > draggedTimer + draggedTimerThreshold)
-                                    {
-                                        draggedElement = reinterpret_cast<CellElement*>(element.get());
-                                        element->beingDragged = true;
-                                        draggedTimer = 0;
+                                        const auto time = GetTime();
+                                        if (draggedTimer == 0)
+                                        {
+                                            // Start drag
+                                            hoveredDraggableElement = element.get();
+                                            draggedTimer = time;
+                                            continue;
+                                        }
+
+                                        if (time > draggedTimer + draggedTimerThreshold)
+                                        {
+                                            draggedElement = element.get();
+                                            element->beingDragged = true;
+                                            draggedTimer = 0;
+                                        }
                                     }
                                 }
                             }
