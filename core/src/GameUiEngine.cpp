@@ -634,10 +634,13 @@ namespace sage
         return textbox;
     }
 
-    ImageBox* TableCell::CreateImagebox(Image _tex)
+    ImageBox* TableCell::CreateImagebox(Window* _parentWindow, Image _tex)
     {
         children = std::make_unique<ImageBox>();
         auto* image = dynamic_cast<ImageBox*>(children.get());
+        image->parentWindow = _parentWindow;
+        entt::sink sink{_parentWindow->onMouseStopHover};
+        sink.connect<&ImageBox::OnMouseStopHover>(image);
         image->tex = LoadTextureFromImage(_tex);
         UpdateChildren();
         return image;
@@ -699,9 +702,9 @@ namespace sage
         for (auto& window : windows)
         {
             if (window->hidden) continue;
-            if (mousePos.x >= window->rec.x && mousePos.x <= window->rec.x + window->rec.width &&
-                mousePos.y >= window->rec.y && mousePos.y <= window->rec.y + window->rec.height)
+            if (window->MouseInside(mousePos))
             {
+                window->onMouseStartHover.publish();
                 cursor->DisableContextSwitching();
                 cursor->Disable();
 
@@ -711,10 +714,8 @@ namespace sage
                     {
                         for (auto& cell : row->children)
                         {
-                            if (mousePos.x >= cell->rec.x && mousePos.x <= cell->rec.x + cell->rec.width &&
-                                mousePos.y >= cell->rec.y && mousePos.y <= cell->rec.y + cell->rec.height)
+                            if (cell->MouseInside(mousePos))
                             {
-                                cell->children->mouseHover = true;
                                 cell->children->OnMouseStartHover();
                                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                                 {
@@ -731,7 +732,6 @@ namespace sage
                             {
                                 if (cell->children->mouseHover)
                                 {
-                                    cell->children->mouseHover = false;
                                     cell->children->OnMouseStopHover();
                                 }
                             }
@@ -743,20 +743,7 @@ namespace sage
             }
             else
             {
-                for (auto& table : window->children)
-                {
-                    for (auto& row : table->children)
-                    {
-                        for (auto& cell : row->children)
-                        {
-                            if (cell->children->mouseHover)
-                            {
-                                cell->children->mouseHover = false;
-                                cell->children->OnMouseStopHover();
-                            }
-                        }
-                    }
-                }
+                window->onMouseStopHover.publish();
             }
         }
 
