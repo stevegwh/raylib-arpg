@@ -7,6 +7,7 @@
 #include "raylib.h"
 
 #include <entt/entt.hpp>
+#include <iostream>
 #include <optional>
 #include <vector>
 
@@ -158,9 +159,17 @@ namespace sage
         entt::sigh<void()> onMouseClicked;
 
         bool draggable = false;
+        bool canReceiveDragDrops = false;
         bool beingDragged = false;
         entt::sigh<void()> onDragStart;
         entt::sigh<void()> onDragEnd;
+
+        virtual void OnDragDropHere(CellElement* droppedElement)
+        {
+            if (!canReceiveDragDrops) return;
+
+            std::cout << "Reached here \n";
+        }
 
         virtual void OnMouseStartHover()
         {
@@ -210,7 +219,7 @@ namespace sage
         ~TextBox() override = default;
     };
 
-    struct ImageBox final : public CellElement
+    struct ImageBox : public CellElement
     {
         std::optional<Shader> shader;
         Window* parentWindow;
@@ -226,6 +235,11 @@ namespace sage
         ~ImageBox() override = default;
     };
 
+    struct AbilitySlot : public ImageBox
+    {
+        void OnDragDropHere(sage::CellElement* droppedElement) override;
+    };
+
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
         float requestedWidth{};
@@ -235,6 +249,7 @@ namespace sage
             float fontSize = 16,
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         ImageBox* CreateImagebox(Window* _parentWindow, Image _tex);
+        AbilitySlot* CreateAbilitySlot(Window* _parentWindow, Image _tex);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;
@@ -301,6 +316,7 @@ namespace sage
         Settings* settings;
 
         std::optional<CellElement*> draggedElement{};
+        std::optional<CellElement*> hoveredDraggableElement{};
         double draggedTimer = 0;
         float draggedTimerThreshold = 0.25f;
 
