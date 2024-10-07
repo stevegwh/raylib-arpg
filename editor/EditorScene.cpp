@@ -148,10 +148,10 @@ namespace sage
         // Do not draw2D the game cursor
     }
 
-    void EditorScene::DrawDebug()
+    void EditorScene::DrawDebug3D()
     {
         DrawGrid(data->navigationGridSystem->slices, data->navigationGridSystem->spacing);
-        Scene::DrawDebug();
+        Scene::DrawDebug3D();
     }
 
     void EditorScene::Update()

@@ -60,7 +60,7 @@ namespace sage
       public:
         void Draw3D() override;
         void Draw2D() override;
-        void DrawDebug() override;
+        void DrawDebug3D() override;
         void Update() override;
         ~EditorScene() override;
         EditorScene(

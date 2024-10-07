@@ -22,11 +22,11 @@ namespace sage
         //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
         auto window =
-            engine->CreateWindow(nPatchTexture.GetImage(), 0, 0, 40, 38, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateWindow(nPatchTexture.GetImage(), 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
-        window->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->tex = window->mainNPatchTexture;
-        window->SetPaddingPercent({14, 5, 3, 3});
+        window->SetPaddingPercent({2, 2, 2, 2});
 
         {
             auto table = window->CreateTable();
@@ -35,7 +35,9 @@ namespace sage
             // auto row0 = table->CreateTableRow();
             auto cell = row->CreateTableCell(50);
             auto textbox = cell->CreateTextbox(
-                "Number 1111111111111111111111111111111111111111111!", 24, TextBox::OverflowBehaviour::WORD_WRAP);
+                "This is a word wrap test with signficantly long words.",
+                24,
+                TextBox::OverflowBehaviour::WORD_WRAP);
 
             cell->SetPaddingPercent({2, 2, 2, 2});
 
@@ -47,6 +49,7 @@ namespace sage
             cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
             cell3->tex = window->mainNPatchTexture;
             auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
+            imagebox->SetGrayscale();
             cell2->SetPaddingPercent({10, 10, 10, 10});
             imagebox->SetHoriAlignment(HoriAlignment::CENTER);
             cell3->CreateImagebox(LoadImage("resources/icon.png"));

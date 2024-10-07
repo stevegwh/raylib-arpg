@@ -83,6 +83,7 @@ namespace sage
         std::optional<NPatchInfo> nPatchInfo{};
 
         virtual void UpdateChildren() = 0;
+        virtual void DrawDebug2D() = 0;
         virtual void Draw2D()
         {
             if (tex.has_value())
@@ -176,11 +177,13 @@ namespace sage
 
     struct ImageBox final : public CellElement
     {
+        std::optional<Shader> shader;
         Texture tex{};
         entt::sigh<void()> onStartHover;
         entt::sigh<void()> onEndHover;
         entt::sigh<void()> onPress;
 
+        void SetGrayscale();
         void UpdateDimensions() override;
         void Draw2D() override;
         ~ImageBox() override = default;
@@ -196,6 +199,7 @@ namespace sage
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         ImageBox* CreateImagebox(Image _tex);
         void UpdateChildren() override;
+        void DrawDebug2D() override;
         void Draw2D() override;
         ~TableCell() override = default;
     };
@@ -207,6 +211,7 @@ namespace sage
         TableCell* CreateTableCell();
         TableCell* CreateTableCell(float _requestedWidth);
         void UpdateChildren() override;
+        void DrawDebug2D() override;
         void Draw2D() override;
         ~TableRow() override = default;
     };
@@ -216,6 +221,7 @@ namespace sage
         TableRow* CreateTableRow();
         TableRow* CreateTableRow(float _requestedHeight);
         void UpdateChildren() override;
+        void DrawDebug2D() override;
         void Draw2D() override;
         ~Table() override = default;
     };
@@ -244,6 +250,7 @@ namespace sage
         void SetAlignment(VertAlignment vert, HoriAlignment hori);
         Table* CreateTable();
         void OnScreenSizeChange();
+        void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
     };
@@ -264,6 +271,7 @@ namespace sage
             float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
 
+        void DrawDebug2D();
         void Draw2D();
         void Update();
 
