@@ -13,36 +13,6 @@
 
 namespace sage
 {
-    Dimensions Window::GetDimensions() const
-    {
-        return Dimensions{settings->screenWidth * widthPercent, settings->screenHeight * heightPercent};
-    }
-    /**
-     *
-     * @param _xPercent x position in percent of screen (1-100)
-     * @param _yPercent y position in percent of screen (1-100)
-     */
-    void Window::SetDimensionsPercent(float _widthPercent, float _heightPercent)
-    {
-        widthPercent = _widthPercent / 100;
-        heightPercent = _heightPercent / 100;
-    }
-
-    Vector2 Window::GetOffset() const
-    {
-        return Vector2{settings->screenWidth * xOffsetPercent, settings->screenHeight * yOffsetPercent};
-    }
-    /**
-     *
-     * @param _xOffsetPercent x position in percent of screen (1-100)
-     * @param _yOffsetPercent y position in percent of screen (1-100)
-     */
-    void Window::SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent)
-    {
-        xOffsetPercent = _xOffsetPercent / 100;
-        yOffsetPercent = _yOffsetPercent / 100;
-    }
-
     void CellElement::SetVertAlignment(VertAlignment alignment)
     {
         vertAlignment = alignment;
@@ -53,55 +23,6 @@ namespace sage
     {
         horiAlignment = alignment;
         UpdateDimensions();
-    }
-
-    // NB: The original position of the window is treated as an offset.
-    void Window::SetAlignment(VertAlignment vert, HoriAlignment hori)
-    {
-        vertAlignment = vert;
-        horiAlignment = hori;
-        float originalXOffset = GetOffset().x;
-        float originalYOffset = GetOffset().y;
-
-        float xOffset = 0;
-        float yOffset = 0;
-
-        // Calculate horizontal position
-        switch (hori)
-        {
-        case HoriAlignment::LEFT:
-            xOffset = 0;
-            break;
-
-        case HoriAlignment::CENTER:
-            xOffset = (settings->screenWidth - rec.width) / 2;
-            break;
-
-        case HoriAlignment::RIGHT:
-            xOffset = settings->screenWidth - rec.width;
-            break;
-        }
-
-        // Calculate vertical position
-        switch (vert)
-        {
-        case VertAlignment::TOP:
-            yOffset = 0;
-            break;
-
-        case VertAlignment::MIDDLE:
-            yOffset = (settings->screenHeight - rec.height) / 2;
-            break;
-
-        case VertAlignment::BOTTOM:
-            yOffset = settings->screenHeight - rec.height;
-            break;
-        }
-
-        rec.x = xOffset + originalXOffset;
-        rec.y = yOffset + originalYOffset;
-
-        UpdateChildren();
     }
 
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
@@ -197,6 +118,11 @@ namespace sage
             parent->rec.y + parent->GetPadding().up + vertOffset,
             textSize.x,
             textSize.y};
+    }
+
+    void TextBox::Draw2D()
+    {
+        DrawTextEx(font, content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
     }
 
     void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
@@ -318,6 +244,100 @@ namespace sage
         tex.height = finalHeight;
     }
 
+    void ImageBox::Draw2D()
+    {
+        if (shader.has_value())
+        {
+            BeginShaderMode(shader.value());
+        }
+        DrawTexture(tex, rec.x, rec.y, WHITE);
+        if (shader.has_value())
+        {
+            EndShaderMode();
+        }
+    }
+
+    Dimensions Window::GetDimensions() const
+    {
+        return Dimensions{settings->screenWidth * widthPercent, settings->screenHeight * heightPercent};
+    }
+
+    /**
+     *
+     * @param _xPercent x position in percent of screen (1-100)
+     * @param _yPercent y position in percent of screen (1-100)
+     */
+    void Window::SetDimensionsPercent(float _widthPercent, float _heightPercent)
+    {
+        widthPercent = _widthPercent / 100;
+        heightPercent = _heightPercent / 100;
+    }
+
+    Vector2 Window::GetOffset() const
+    {
+        return Vector2{settings->screenWidth * xOffsetPercent, settings->screenHeight * yOffsetPercent};
+    }
+
+    /**
+     *
+     * @param _xOffsetPercent x position in percent of screen (1-100)
+     * @param _yOffsetPercent y position in percent of screen (1-100)
+     */
+    void Window::SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent)
+    {
+        xOffsetPercent = _xOffsetPercent / 100;
+        yOffsetPercent = _yOffsetPercent / 100;
+    }
+
+    // NB: The original position of the window is treated as an offset.
+    void Window::SetAlignment(VertAlignment vert, HoriAlignment hori)
+    {
+        vertAlignment = vert;
+        horiAlignment = hori;
+        float originalXOffset = GetOffset().x;
+        float originalYOffset = GetOffset().y;
+
+        float xOffset = 0;
+        float yOffset = 0;
+
+        // Calculate horizontal position
+        switch (hori)
+        {
+        case HoriAlignment::LEFT:
+            xOffset = 0;
+            break;
+
+        case HoriAlignment::CENTER:
+            xOffset = (settings->screenWidth - rec.width) / 2;
+            break;
+
+        case HoriAlignment::RIGHT:
+            xOffset = settings->screenWidth - rec.width;
+            break;
+        }
+
+        // Calculate vertical position
+        switch (vert)
+        {
+        case VertAlignment::TOP:
+            yOffset = 0;
+            break;
+
+        case VertAlignment::MIDDLE:
+            yOffset = (settings->screenHeight - rec.height) / 2;
+            break;
+
+        case VertAlignment::BOTTOM:
+            yOffset = settings->screenHeight - rec.height;
+            break;
+        }
+
+        rec.x = xOffset + originalXOffset;
+        rec.y = yOffset + originalYOffset;
+
+        UpdateChildren();
+    }
+
     void Window::OnScreenSizeChange()
     {
         rec = {GetOffset().x, GetOffset().y, GetDimensions().width, GetDimensions().height};
@@ -333,36 +353,6 @@ namespace sage
         }
     }
 
-    void Table::DrawDebug2D()
-    {
-        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
-        for (int i = 0; i < children.size(); ++i)
-        {
-            const auto& row = children[i];
-            Color col = colors[i];
-            col.a = 150;
-            DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
-            row->DrawDebug2D();
-        }
-    }
-
-    void TableRow::DrawDebug2D()
-    {
-        std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK};
-        for (int i = 0; i < children.size(); ++i)
-        {
-            const auto& cell = children[i];
-            Color col = colors[i];
-            col.a = 100;
-            DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
-            cell->DrawDebug2D();
-        }
-    }
-
-    void TableCell::DrawDebug2D()
-    {
-    }
-
     void Window::Draw2D()
     {
         TableElement::Draw2D();
@@ -372,50 +362,12 @@ namespace sage
         }
     }
 
-    void Table::Draw2D()
+    [[nodiscard]] Table* Window::CreateTable()
     {
-        TableElement::Draw2D();
-        for (const auto& row : children)
-        {
-            row->Draw2D();
-        }
-    }
-
-    void TableRow::Draw2D()
-    {
-        TableElement::Draw2D();
-        for (const auto& cell : children)
-        {
-            cell->Draw2D();
-        }
-    }
-
-    void TableCell::Draw2D()
-    {
-        TableElement::Draw2D();
-        auto& element = children;
-        if (element && !element->beingDragged) // hide if dragged
-        {
-            element->Draw2D();
-        }
-    }
-
-    void ImageBox::Draw2D()
-    {
-        if (shader.has_value())
-        {
-            BeginShaderMode(shader.value());
-        }
-        DrawTexture(tex, rec.x, rec.y, WHITE);
-        if (shader.has_value())
-        {
-            EndShaderMode();
-        }
-    }
-
-    void TextBox::Draw2D()
-    {
-        DrawTextEx(font, content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
+        children.push_back(std::make_unique<Table>());
+        const auto& table = children.back();
+        UpdateChildren();
+        return table.get();
     }
 
     void Window::UpdateChildren()
@@ -461,6 +413,28 @@ namespace sage
             }
             break;
         }
+        }
+    }
+
+    void Table::DrawDebug2D()
+    {
+        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
+        for (int i = 0; i < children.size(); ++i)
+        {
+            const auto& row = children[i];
+            Color col = colors[i];
+            col.a = 150;
+            DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
+            row->DrawDebug2D();
+        }
+    }
+
+    void Table::Draw2D()
+    {
+        TableElement::Draw2D();
+        for (const auto& row : children)
+        {
+            row->Draw2D();
         }
     }
 
@@ -525,6 +499,78 @@ namespace sage
         }
     }
 
+    [[nodiscard]] TableRow* Table::CreateTableRow()
+    {
+        children.push_back(std::make_unique<TableRow>());
+        const auto& row = children.back();
+        UpdateChildren();
+        return row.get();
+    }
+
+    /**
+     *
+     * @param requestedHeight The desired height of the cell as a percent (0-100)
+     * @return
+     */
+    [[nodiscard]] TableRow* Table::CreateTableRow(float requestedHeight)
+    {
+        assert(requestedHeight <= 100 && requestedHeight >= 0);
+        children.push_back(std::make_unique<TableRow>());
+        const auto& row = children.back();
+        row->autoSize = false;
+        row->requestedHeight = requestedHeight;
+        UpdateChildren();
+        return row.get();
+    }
+
+    [[nodiscard]] TableCell* TableRow::CreateTableCell()
+    {
+        children.push_back(std::make_unique<TableCell>());
+        const auto& cell = children.back();
+        cell->parent = this;
+        UpdateChildren();
+        return cell.get();
+    }
+
+    /**
+     *
+     * @param requestedWidth The desired width of the cell as a percent (0-100)
+     * @return
+     */
+    [[nodiscard]] TableCell* TableRow::CreateTableCell(float requestedWidth)
+    {
+        assert(requestedWidth <= 100 && requestedWidth >= 0);
+        children.push_back(std::make_unique<TableCell>());
+        const auto& cell = children.back();
+        cell->parent = this;
+        cell->autoSize = false;
+        cell->requestedWidth = requestedWidth;
+        UpdateChildren();
+        return cell.get();
+    }
+
+    void TableRow::DrawDebug2D()
+    {
+        std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK};
+        for (int i = 0; i < children.size(); ++i)
+        {
+            const auto& cell = children[i];
+            Color col = colors[i];
+            col.a = 100;
+            DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
+            cell->DrawDebug2D();
+        }
+    }
+
+    void TableRow::Draw2D()
+    {
+        TableElement::Draw2D();
+        for (const auto& cell : children)
+        {
+            cell->Draw2D();
+        }
+    }
+
     void TableRow::UpdateChildren()
     {
         // Account for row padding
@@ -583,73 +629,18 @@ namespace sage
         }
     }
 
-    void TableCell::UpdateChildren()
+    AbilitySlot* TableCell::CreateAbilitySlot(Window* _parentWindow, Image _tex)
     {
-        auto& element = children;
-        if (element)
-        {
-            element->parent = this;
-            element->rec = rec;
-            element->UpdateDimensions();
-        }
-    }
-
-    [[nodiscard]] Table* Window::CreateTable()
-    {
-        children.push_back(std::make_unique<Table>());
-        const auto& table = children.back();
+        children = std::make_unique<AbilitySlot>();
+        auto* image = dynamic_cast<AbilitySlot*>(children.get());
+        image->draggable = true;
+        image->canReceiveDragDrops = true;
+        image->parentWindow = _parentWindow;
+        entt::sink sink{_parentWindow->onMouseStopHover};
+        sink.connect<&AbilitySlot::OnMouseStopHover>(image);
+        image->tex = LoadTextureFromImage(_tex);
         UpdateChildren();
-        return table.get();
-    }
-
-    [[nodiscard]] TableRow* Table::CreateTableRow()
-    {
-        children.push_back(std::make_unique<TableRow>());
-        const auto& row = children.back();
-        UpdateChildren();
-        return row.get();
-    }
-
-    /**
-     *
-     * @param requestedHeight The desired height of the cell as a percent (0-100)
-     * @return
-     */
-    [[nodiscard]] TableRow* Table::CreateTableRow(float requestedHeight)
-    {
-        assert(requestedHeight <= 100 && requestedHeight >= 0);
-        children.push_back(std::make_unique<TableRow>());
-        const auto& row = children.back();
-        row->autoSize = false;
-        row->requestedHeight = requestedHeight;
-        UpdateChildren();
-        return row.get();
-    }
-
-    [[nodiscard]] TableCell* TableRow::CreateTableCell()
-    {
-        children.push_back(std::make_unique<TableCell>());
-        const auto& cell = children.back();
-        cell->parent = this;
-        UpdateChildren();
-        return cell.get();
-    }
-
-    /**
-     *
-     * @param requestedWidth The desired width of the cell as a percent (0-100)
-     * @return
-     */
-    [[nodiscard]] TableCell* TableRow::CreateTableCell(float requestedWidth)
-    {
-        assert(requestedWidth <= 100 && requestedWidth >= 0);
-        children.push_back(std::make_unique<TableCell>());
-        const auto& cell = children.back();
-        cell->parent = this;
-        cell->autoSize = false;
-        cell->requestedWidth = requestedWidth;
-        UpdateChildren();
-        return cell.get();
+        return image;
     }
 
     TextBox* TableCell::CreateTextbox(
@@ -677,18 +668,29 @@ namespace sage
         return image;
     }
 
-    AbilitySlot* TableCell::CreateAbilitySlot(Window* _parentWindow, Image _tex)
+    void TableCell::UpdateChildren()
     {
-        children = std::make_unique<AbilitySlot>();
-        auto* image = dynamic_cast<AbilitySlot*>(children.get());
-        image->draggable = true;
-        image->canReceiveDragDrops = true;
-        image->parentWindow = _parentWindow;
-        entt::sink sink{_parentWindow->onMouseStopHover};
-        sink.connect<&AbilitySlot::OnMouseStopHover>(image);
-        image->tex = LoadTextureFromImage(_tex);
-        UpdateChildren();
-        return image;
+        auto& element = children;
+        if (element)
+        {
+            element->parent = this;
+            element->rec = rec;
+            element->UpdateDimensions();
+        }
+    }
+
+    void TableCell::Draw2D()
+    {
+        TableElement::Draw2D();
+        auto& element = children;
+        if (element && !element->beingDragged) // hide if dragged
+        {
+            element->Draw2D();
+        }
+    }
+
+    void TableCell::DrawDebug2D()
+    {
     }
 
     [[nodiscard]] Window* GameUIEngine::CreateWindow(
