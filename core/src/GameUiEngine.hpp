@@ -13,6 +13,10 @@
 
 namespace sage
 {
+    class PlayerAbilitySystem;
+}
+namespace sage
+{
     struct TableCell;
     struct Window;
     struct TableRow;
@@ -39,13 +43,15 @@ namespace sage
         LEFT,
         RIGHT,
         CENTER
+        // FREE? For draggable windows
     };
 
     enum class VertAlignment
     {
         TOP,
         MIDDLE,
-        BOTTOM,
+        BOTTOM
+        // FREE? For draggable windows
     };
 
     struct Padding
@@ -250,7 +256,10 @@ namespace sage
 
     struct AbilitySlot : public ImageBox
     {
-        void OnDragDropHere(sage::CellElement* droppedElement) override;
+        PlayerAbilitySystem* playerAbilitySystem;
+        int slotNumber;
+        void SetAbilityInfo();
+        void OnDragDropHere(CellElement* droppedElement) override;
     };
 
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
@@ -264,7 +273,8 @@ namespace sage
         TitleBar* CreateTitleBar(Window* window, const std::string& _title, float fontSize);
         ImageBox* CreateImagebox(Window* _parentWindow, Image _tex);
         CloseButton* CreateCloseButton(Window* _parentWindow, Image _tex);
-        AbilitySlot* CreateAbilitySlot(Window* _parentWindow, Image _tex);
+        AbilitySlot* CreateAbilitySlot(
+            PlayerAbilitySystem* _playerAbilitySystem, Window* _parentWindow, int _slotNumber);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;

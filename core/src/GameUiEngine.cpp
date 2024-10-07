@@ -6,7 +6,10 @@
 #include "Cursor.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
+#include "systems/PlayerAbilitySystem.hpp"
 #include "UserInput.hpp"
+
+#include "rlgl.h"
 
 #include <cassert>
 #include <sstream>
@@ -125,31 +128,29 @@ namespace sage
         DrawTextEx(font, content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
     }
 
+    void AbilitySlot::SetAbilityInfo()
+    {
+        if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
+        {
+            tex = LoadTexture(ability->iconPath.c_str()); // TODO: Replace with resource manager and asset id
+        }
+        else
+        {
+            tex.id = rlGetTextureIdDefault();
+            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
+            // rlGetDefaultTexture) Set default
+        }
+    }
+
     void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
-            auto* droppedParent = dropped->parent;
-            auto* thisParent = this->parent;
-
-            if (!droppedParent || !thisParent) return;
-
-            auto droppedPtr = std::move(droppedParent->children);
-            auto thisPtr = std::move(thisParent->children);
-
-            // TODO: I feel alignment should be in TableCell so this wouldn't be necessary
-            auto droppedVertAlignment = droppedPtr->vertAlignment;
-            auto droppedHoriAlignment = droppedPtr->horiAlignment;
-            droppedPtr->vertAlignment = this->vertAlignment;
-            droppedPtr->horiAlignment = this->horiAlignment;
-            this->vertAlignment = droppedVertAlignment;
-            this->horiAlignment = droppedHoriAlignment;
-
-            droppedParent->children = std::move(thisPtr);
-            thisParent->children = std::move(droppedPtr);
-
-            droppedParent->UpdateChildren();
-            thisParent->UpdateChildren();
+            playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
+            dropped->SetAbilityInfo();
+            SetAbilityInfo();
+            dropped->UpdateDimensions();
+            UpdateDimensions();
         }
     }
 
@@ -634,18 +635,21 @@ namespace sage
         }
     }
 
-    AbilitySlot* TableCell::CreateAbilitySlot(Window* _parentWindow, Image _tex)
+    AbilitySlot* TableCell::CreateAbilitySlot(
+        PlayerAbilitySystem* _playerAbilitySystem, Window* _parentWindow, int _slotNumber)
     {
         children = std::make_unique<AbilitySlot>();
-        auto* image = dynamic_cast<AbilitySlot*>(children.get());
-        image->draggable = true;
-        image->canReceiveDragDrops = true;
-        image->parentWindow = _parentWindow;
+        auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
+        abilitySlot->playerAbilitySystem = _playerAbilitySystem;
+        abilitySlot->draggable = true;
+        abilitySlot->canReceiveDragDrops = true;
+        abilitySlot->slotNumber = _slotNumber;
+        abilitySlot->parentWindow = _parentWindow;
         entt::sink sink{_parentWindow->onMouseStopHover};
-        sink.connect<&AbilitySlot::OnMouseStopHover>(image);
-        image->tex = LoadTextureFromImage(_tex);
+        sink.connect<&AbilitySlot::OnMouseStopHover>(abilitySlot);
+        abilitySlot->SetAbilityInfo();
         UpdateChildren();
-        return image;
+        return abilitySlot;
     }
 
     TitleBar* TableCell::CreateTitleBar(Window* window, const std::string& _title, float fontSize)
@@ -779,114 +783,116 @@ namespace sage
     {
         auto mousePos = GetMousePosition();
 
-        // if item is being dragged, do not enable below
+        // Reset cursor state if not dragging
         if (!draggedElement.has_value())
         {
             cursor->EnableContextSwitching();
             cursor->Enable();
         }
 
+        // Reset drag timer on mouse release
         if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
         {
             draggedTimer = 0;
         }
 
-        for (auto& window : windows)
+        // Process all windows
+        for (const auto& window : windows)
         {
             if (window->hidden) continue;
-            if (window->MouseInside(mousePos))
-            {
-                window->onMouseStartHover.publish();
-                cursor->DisableContextSwitching();
-                cursor->Disable();
 
-                for (const auto& table : window->children)
-                {
-                    for (const auto& row : table->children)
-                    {
-                        for (const auto& cell : row->children)
-                        {
-                            auto& element = cell->children;
-                            if (cell->MouseInside(mousePos))
-                            {
-                                element->OnMouseStartHover();
-                                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-                                {
-                                    element->OnMouseClick();
-                                }
-                                else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-                                {
-                                    element->OnDragDropHere(draggedElement.value());
-                                }
-                                else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-                                {
-                                    // element->OnMouseDown();
-
-                                    if (element->draggable && !draggedElement.has_value())
-                                    {
-                                        if (draggedElement.has_value()) break;
-                                        // If the cursor changes hover while dragging, don't continue until mouse
-                                        // up
-                                        if (!hoveredDraggableElement.has_value() && draggedTimer > 0) continue;
-
-                                        if (hoveredDraggableElement.has_value() &&
-                                            hoveredDraggableElement.value() != element.get())
-                                        {
-                                            hoveredDraggableElement.reset();
-                                            continue;
-                                        }
-
-                                        const auto time = GetTime();
-                                        if (draggedTimer == 0)
-                                        {
-                                            // Start drag
-                                            hoveredDraggableElement = element.get();
-                                            draggedTimer = time;
-                                            continue;
-                                        }
-
-                                        if (time > draggedTimer + draggedTimerThreshold)
-                                        {
-                                            draggedElement = element.get();
-                                            element->beingDragged = true;
-                                            draggedTimer = 0;
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (element->mouseHover)
-                                {
-                                    cell->children->OnMouseStopHover();
-                                }
-                            }
-                        }
-                    }
-                }
-
-                break;
-            }
-            else
+            // Handle window hover state
+            bool isMouseInWindow = window->MouseInside(mousePos);
+            if (!isMouseInWindow)
             {
                 window->onMouseStopHover.publish();
+                continue;
+            }
+
+            window->onMouseStartHover.publish();
+            cursor->DisableContextSwitching();
+            cursor->Disable();
+
+            // Process all elements in window
+            for (const auto& table : window->children)
+                for (const auto& row : table->children)
+                    for (const auto& cell : row->children)
+                    {
+                        auto& element = cell->children;
+                        bool isMouseInElement = cell->MouseInside(mousePos);
+
+                        // Handle element hover state
+                        if (!isMouseInElement)
+                        {
+                            if (element->mouseHover)
+                            {
+                                cell->children->OnMouseStopHover();
+                            }
+                            continue;
+                        }
+
+                        element->OnMouseStartHover();
+
+                        // Handle mouse interactions
+                        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !draggedElement.has_value())
+                        {
+                            element->OnMouseClick();
+                        }
+                        else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+                        {
+                            element->OnDragDropHere(draggedElement.value());
+                        }
+                        else if (
+                            IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable &&
+                            !draggedElement.has_value())
+                        {
+                            // Skip if already dragging something
+                            if (draggedElement.has_value()) break;
+
+                            // Skip if cursor changed hover while dragging
+                            if (!hoveredDraggableElement.has_value() && draggedTimer > 0) continue;
+
+                            // Reset hover if changed elements
+                            if (hoveredDraggableElement.has_value() &&
+                                hoveredDraggableElement.value() != element.get())
+                            {
+                                hoveredDraggableElement.reset();
+                                break;
+                            }
+
+                            // Handle drag initiation
+                            const auto currentTime = GetTime();
+                            if (draggedTimer == 0)
+                            {
+                                hoveredDraggableElement = element.get();
+                                draggedTimer = currentTime;
+                            }
+                            else if (currentTime > draggedTimer + draggedTimerThreshold)
+                            {
+                                draggedElement = element.get();
+                                element->beingDragged = true;
+                                draggedTimer = 0;
+                            }
+                        }
+                        break; // We've found our element, stop processing
+                    }
+        }
+
+        // Clean up drag states on mouse release
+        if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+        {
+            if (hoveredDraggableElement.has_value())
+            {
+                draggedTimer = 0;
+                hoveredDraggableElement.reset();
+            }
+
+            if (draggedElement.has_value())
+            {
+                draggedElement.value()->beingDragged = false;
+                draggedElement.reset();
             }
         }
-
-        if (hoveredDraggableElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-        {
-            draggedTimer = 0;
-            hoveredDraggableElement.reset();
-        }
-
-        if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-        {
-            draggedElement.value()->beingDragged = false;
-            draggedElement.reset();
-        }
-
-        // Get hovered or clicked element and interact with it
-        // onMouseUp -> activate, onMouseDown -> add drag timer? then enable drag
     }
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
