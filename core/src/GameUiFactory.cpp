@@ -34,7 +34,7 @@ namespace sage
             auto row = table->CreateTableRow(75);
             // auto row0 = table->CreateTableRow();
             auto cell = row->CreateTableCell(50);
-            auto textbox = cell->CreateTextbox(
+            cell->CreateTextbox(
                 "This is a word wrap test with signficantly long words.",
                 24,
                 TextBox::OverflowBehaviour::WORD_WRAP);
@@ -65,11 +65,11 @@ namespace sage
             auto row2 = table->CreateTableRow();
             auto cell4 = row2->CreateTableCell();
             auto cell5 = row2->CreateTableCell();
-            auto textbox2 = cell4->CreateTextbox("Number 4!");
-            textbox2->SetHoriAlignment(HoriAlignment::LEFT);
+            auto textbox2 = cell4->CreateTextbox("Bottom Left Alignment");
             textbox2->SetVertAlignment(VertAlignment::BOTTOM);
+            textbox2->SetHoriAlignment(HoriAlignment::LEFT);
 
-            cell5->CreateTextbox("Number 5!");
+            cell5->CreateTextbox("This is an example of shrinking!", 42);
         }
 
         //        {
