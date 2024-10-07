@@ -22,7 +22,7 @@ namespace sage
         void Update() override;
         void Draw2D() override;
         void Draw3D() override;
-        void DrawDebug() override;
+        void DrawDebug3D() override;
         ~ExampleScene() override = default;
         ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };

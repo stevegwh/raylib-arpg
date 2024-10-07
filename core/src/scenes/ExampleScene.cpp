@@ -63,9 +63,9 @@ namespace sage
         data->stateMachines->Draw3D();
     }
 
-    void ExampleScene::DrawDebug()
+    void ExampleScene::DrawDebug3D()
     {
-        Scene::DrawDebug();
+        Scene::DrawDebug3D();
         data->navigationGridSystem->DrawDebug();
         data->actorMovementSystem->DrawDebug();
         data->collisionSystem->DrawDebug();

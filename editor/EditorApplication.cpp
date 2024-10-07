@@ -151,7 +151,7 @@ namespace sage
         ClearBackground(BLUE);
         BeginMode3D(*scene->data->camera->getRaylibCam());
         scene->Draw3D();
-        scene->DrawDebug();
+        scene->DrawDebug3D();
         EndMode3D();
         scene->Draw2D();
         DrawFPS(10, 10);

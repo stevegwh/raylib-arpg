@@ -4,6 +4,7 @@
 
 #include "GameUiEngine.hpp"
 #include "Cursor.hpp"
+#include "ResourceManager.hpp"
 #include "Settings.hpp"
 #include "UserInput.hpp"
 
@@ -103,69 +104,6 @@ namespace sage
         UpdateChildren();
     }
 
-    void Window::Draw2D()
-    {
-        TableElement::Draw2D();
-        for (auto& child : children)
-        {
-            child->Draw2D();
-        }
-    }
-
-    void Table::Draw2D()
-    {
-        TableElement::Draw2D();
-        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
-        for (int i = 0; i < children.size(); ++i)
-        {
-            const auto& row = children[i];
-            // DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, colors[i]);
-            row->Draw2D();
-        }
-    }
-
-    void TableRow::Draw2D()
-    {
-        TableElement::Draw2D();
-        std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK};
-        for (int i = 0; i < children.size(); ++i)
-        {
-            const auto& cell = children[i];
-            Color col = colors[i];
-            col.a = 150;
-            // DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
-            cell->Draw2D();
-        }
-    }
-
-    void TableCell::Draw2D()
-    {
-        TableElement::Draw2D();
-        if (children) // single element
-        {
-            children->Draw2D();
-        }
-    }
-
-    void ImageBox::Draw2D()
-    {
-        DrawTexture(tex, rec.x, rec.y, WHITE);
-    }
-
-    void TextBox::Draw2D()
-    {
-        DrawTextEx(GetFontDefault(), content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
-    }
-
-    void GameUIEngine::Draw2D()
-    {
-        for (auto& window : windows)
-        {
-            if (window->hidden) continue;
-            window->Draw2D();
-        }
-    }
-
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
         overflowBehaviour = _behaviour;
@@ -261,6 +199,11 @@ namespace sage
             textSize.y};
     }
 
+    void ImageBox::SetGrayscale()
+    {
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
+    }
+
     void ImageBox::UpdateDimensions()
     {
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
@@ -329,6 +272,98 @@ namespace sage
         rec = {GetOffset().x, GetOffset().y, GetDimensions().width, GetDimensions().height};
         SetAlignment(vertAlignment, horiAlignment);
         UpdateChildren();
+    }
+
+    void Window::DrawDebug2D()
+    {
+        for (auto& child : children)
+        {
+            child->DrawDebug2D();
+        }
+    }
+
+    void Table::DrawDebug2D()
+    {
+        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
+        for (int i = 0; i < children.size(); ++i)
+        {
+            const auto& row = children[i];
+            Color col = colors[i];
+            col.a = 150;
+            DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
+            row->DrawDebug2D();
+        }
+    }
+
+    void TableRow::DrawDebug2D()
+    {
+        std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK};
+        for (int i = 0; i < children.size(); ++i)
+        {
+            const auto& cell = children[i];
+            Color col = colors[i];
+            col.a = 100;
+            DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
+            cell->DrawDebug2D();
+        }
+    }
+
+    void TableCell::DrawDebug2D()
+    {
+    }
+
+    void Window::Draw2D()
+    {
+        TableElement::Draw2D();
+        for (auto& child : children)
+        {
+            child->Draw2D();
+        }
+    }
+
+    void Table::Draw2D()
+    {
+        TableElement::Draw2D();
+        for (const auto& row : children)
+        {
+            row->Draw2D();
+        }
+    }
+
+    void TableRow::Draw2D()
+    {
+        TableElement::Draw2D();
+        for (const auto& cell : children)
+        {
+            cell->Draw2D();
+        }
+    }
+
+    void TableCell::Draw2D()
+    {
+        TableElement::Draw2D();
+        if (children) // single element
+        {
+            children->Draw2D();
+        }
+    }
+
+    void ImageBox::Draw2D()
+    {
+        if (shader.has_value())
+        {
+            BeginShaderMode(shader.value());
+        }
+        DrawTexture(tex, rec.x, rec.y, WHITE);
+        if (shader.has_value())
+        {
+            EndShaderMode();
+        }
+    }
+
+    void TextBox::Draw2D()
+    {
+        DrawTextEx(font, content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
     }
 
     void Window::UpdateChildren()
@@ -506,33 +541,6 @@ namespace sage
         }
     }
 
-    [[nodiscard]] Window* GameUIEngine::CreateWindow(
-        Image _nPatchTexture,
-        float _xOffsetPercent,
-        float _yOffsetPercent,
-        float _widthPercent,
-        float _heightPercent,
-        WindowTableAlignment _alignment)
-    {
-        windows.push_back(std::make_unique<Window>());
-        auto& window = windows.back();
-        window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
-        window->SetDimensionsPercent(_widthPercent, _heightPercent);
-        window->tableAlignment = _alignment;
-        window->settings = settings;
-        window->mainNPatchTexture = LoadTextureFromImage(_nPatchTexture);
-        window->rec = {
-            window->GetOffset().x,
-            window->GetOffset().y,
-            window->GetDimensions().width,
-            window->GetDimensions().height};
-
-        entt::sink sink{userInput->onWindowUpdate};
-        sink.connect<&Window::OnScreenSizeChange>(window.get());
-
-        return window.get();
-    }
-
     [[nodiscard]] Table* Window::CreateTable()
     {
         children.push_back(std::make_unique<Table>());
@@ -610,6 +618,51 @@ namespace sage
         image->tex = LoadTextureFromImage(_tex);
         UpdateChildren();
         return image;
+    }
+
+    [[nodiscard]] Window* GameUIEngine::CreateWindow(
+        Image _nPatchTexture,
+        float _xOffsetPercent,
+        float _yOffsetPercent,
+        float _widthPercent,
+        float _heightPercent,
+        WindowTableAlignment _alignment)
+    {
+        windows.push_back(std::make_unique<Window>());
+        auto& window = windows.back();
+        window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
+        window->SetDimensionsPercent(_widthPercent, _heightPercent);
+        window->tableAlignment = _alignment;
+        window->settings = settings;
+        window->mainNPatchTexture = LoadTextureFromImage(_nPatchTexture);
+        window->rec = {
+            window->GetOffset().x,
+            window->GetOffset().y,
+            window->GetDimensions().width,
+            window->GetDimensions().height};
+
+        entt::sink sink{userInput->onWindowUpdate};
+        sink.connect<&Window::OnScreenSizeChange>(window.get());
+
+        return window.get();
+    }
+
+    void GameUIEngine::DrawDebug2D()
+    {
+        for (auto& window : windows)
+        {
+            if (window->hidden) continue;
+            window->DrawDebug2D();
+        }
+    }
+
+    void GameUIEngine::Draw2D()
+    {
+        for (auto& window : windows)
+        {
+            if (window->hidden) continue;
+            window->Draw2D();
+        }
     }
 
     void GameUIEngine::Update()

@@ -44,6 +44,13 @@ namespace sage
         data->uiEngine->Update();
     }
 
+    void Scene::DrawDebug3D()
+    {
+        data->cursor->DrawDebug();
+        data->camera->DrawDebug();
+        data->lightSubSystem->DrawDebugLights();
+    }
+
     void Scene::Draw3D()
     {
         data->renderSystem->Draw();
@@ -51,17 +58,15 @@ namespace sage
         data->cursor->Draw3D();
     };
 
+    void Scene::DrawDebug2D()
+    {
+        data->uiEngine->DrawDebug2D();
+    }
+
     void Scene::Draw2D()
     {
         data->uiEngine->Draw2D();
         data->cursor->Draw2D();
-    }
-
-    void Scene::DrawDebug()
-    {
-        data->cursor->DrawDebug();
-        data->camera->DrawDebug();
-        data->lightSubSystem->DrawDebugLights();
     }
 
     Scene::~Scene()

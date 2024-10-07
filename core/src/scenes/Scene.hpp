@@ -27,9 +27,11 @@ namespace sage
 
         virtual void Update();
         virtual void Draw3D();
+        virtual void DrawDebug3D();
         virtual void Draw2D();
+        virtual void DrawDebug2D();
         virtual ~Scene();
-        virtual void DrawDebug();
+
         explicit Scene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };
 } // namespace sage
