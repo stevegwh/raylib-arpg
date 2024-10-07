@@ -199,6 +199,34 @@ namespace sage
             textSize.y};
     }
 
+    void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
+    {
+        if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
+        {
+            auto* droppedParent = dynamic_cast<TableCell*>(dropped->parent);
+            auto* thisParent = dynamic_cast<TableCell*>(this->parent);
+
+            if (!droppedParent || !thisParent) return;
+
+            auto droppedPtr = std::move(droppedParent->children);
+            auto thisPtr = std::move(thisParent->children);
+
+            // TODO: I feel alignment should be in TableCell so this wouldn't be necessary
+            auto droppedVertAlignment = droppedPtr->vertAlignment;
+            auto droppedHoriAlignment = droppedPtr->horiAlignment;
+            droppedPtr->vertAlignment = this->vertAlignment;
+            droppedPtr->horiAlignment = this->horiAlignment;
+            this->vertAlignment = droppedVertAlignment;
+            this->horiAlignment = droppedHoriAlignment;
+
+            droppedParent->children = std::move(thisPtr);
+            thisParent->children = std::move(droppedPtr);
+
+            droppedParent->UpdateChildren();
+            thisParent->UpdateChildren();
+        }
+    }
+
     void ImageBox::SetGrayscale()
     {
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
@@ -649,6 +677,20 @@ namespace sage
         return image;
     }
 
+    AbilitySlot* TableCell::CreateAbilitySlot(Window* _parentWindow, Image _tex)
+    {
+        children = std::make_unique<AbilitySlot>();
+        auto* image = dynamic_cast<AbilitySlot*>(children.get());
+        image->draggable = true;
+        image->canReceiveDragDrops = true;
+        image->parentWindow = _parentWindow;
+        entt::sink sink{_parentWindow->onMouseStopHover};
+        sink.connect<&AbilitySlot::OnMouseStopHover>(image);
+        image->tex = LoadTextureFromImage(_tex);
+        UpdateChildren();
+        return image;
+    }
+
     [[nodiscard]] Window* GameUIEngine::CreateWindow(
         Image _nPatchTexture,
         float _xOffsetPercent,
@@ -711,14 +753,6 @@ namespace sage
             cursor->EnableContextSwitching();
             cursor->Enable();
         }
-        else
-        {
-            if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-            {
-                draggedElement.value()->beingDragged = false;
-                draggedElement.reset();
-            }
-        }
 
         if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
         {
@@ -748,16 +782,32 @@ namespace sage
                                 {
                                     element->OnMouseClick();
                                 }
+                                else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+                                {
+                                    element->OnDragDropHere(draggedElement.value());
+                                }
                                 else if (
                                     element->draggable && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
                                     !draggedElement.has_value())
                                 {
                                     if (draggedElement.has_value()) break;
+                                    // If the cursor changes hover while dragging, don't continue until mouse up
+                                    if (!hoveredDraggableElement.has_value() && draggedTimer > 0) continue;
+
+                                    if (hoveredDraggableElement.has_value() &&
+                                        hoveredDraggableElement.value() != element.get())
+                                    {
+                                        hoveredDraggableElement.reset();
+                                        continue;
+                                    }
 
                                     auto time = GetTime();
                                     if (draggedTimer == 0)
                                     {
+                                        // Start drag
+                                        hoveredDraggableElement = reinterpret_cast<CellElement*>(element.get());
                                         draggedTimer = time;
+                                        continue;
                                     }
 
                                     if (time > draggedTimer + draggedTimerThreshold)
@@ -785,6 +835,18 @@ namespace sage
             {
                 window->onMouseStopHover.publish();
             }
+        }
+
+        if (hoveredDraggableElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+        {
+            draggedTimer = 0;
+            hoveredDraggableElement.reset();
+        }
+
+        if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+        {
+            draggedElement.value()->beingDragged = false;
+            draggedElement.reset();
         }
 
         // Get hovered or clicked element and interact with it

@@ -45,12 +45,13 @@ namespace sage
         auto cell3 = row->CreateTableCell();
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         cell3->tex = window->mainNPatchTexture;
-        auto imagebox = cell2->CreateImagebox(window, LoadImage("resources/icon.png"));
+        auto imagebox = cell2->CreateAbilitySlot(window, LoadImage("resources/icon.png"));
         imagebox->SetGrayscale();
-        cell2->SetPaddingPercent({10, 10, 10, 10});
+        // cell2->SetPaddingPercent({10, 10, 10, 10});
         imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-        auto image2 = cell3->CreateImagebox(window, LoadImage("resources/icon.png"));
+        auto image2 = cell3->CreateAbilitySlot(window, LoadImage("resources/test.png"));
         image2->SetGrayscale();
+        image2->SetHoriAlignment(HoriAlignment::CENTER);
 
         // auto cell0 = row->CreateTableCell();
 
