@@ -29,12 +29,17 @@ namespace sage
         window->SetPaddingPercent({2, 2, 2, 2});
 
         auto table = window->CreateTable();
-        // Number 1111111111111111111111111111111111111111111!
+
+        auto row0 = table->CreateTableRow();
+        auto cell0 = row0->CreateTableCell(95);
+        cell0->CreateTitleBar(window, "Title Bar", 12);
+        auto cell01 = row0->CreateTableCell();
+        cell01->CreateCloseButton(window, LoadImage("resources/icon.png"));
+
         auto row = table->CreateTableRow(75);
-        // auto row0 = table->CreateTableRow();
         auto cell = row->CreateTableCell(50);
         cell->CreateTextbox(
-            "This is a word wrap test with signficantly long words.", 24, TextBox::OverflowBehaviour::WORD_WRAP);
+            "This is a word wrap test with significantly long words.", 24, TextBox::OverflowBehaviour::WORD_WRAP);
 
         cell->SetPaddingPercent({2, 2, 2, 2});
 

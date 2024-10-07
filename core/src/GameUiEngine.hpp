@@ -199,7 +199,7 @@ namespace sage
         virtual ~CellElement() = default;
     };
 
-    struct TextBox final : public CellElement
+    struct TextBox : public CellElement
     {
         enum class OverflowBehaviour
         {
@@ -235,6 +235,19 @@ namespace sage
         ~ImageBox() override = default;
     };
 
+    struct CloseButton final : public ImageBox
+    {
+        Window* parentWindow;
+        ~CloseButton() override = default;
+        void OnMouseClick() override;
+    };
+
+    struct TitleBar final : public TextBox
+    {
+        Window* parentWindow;
+        ~TitleBar() override = default;
+    };
+
     struct AbilitySlot : public ImageBox
     {
         void OnDragDropHere(sage::CellElement* droppedElement) override;
@@ -248,7 +261,9 @@ namespace sage
             const std::string& _content,
             float fontSize = 16,
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
+        TitleBar* CreateTitleBar(Window* window, const std::string& _title, float fontSize);
         ImageBox* CreateImagebox(Window* _parentWindow, Image _tex);
+        CloseButton* CreateCloseButton(Window* _parentWindow, Image _tex);
         AbilitySlot* CreateAbilitySlot(Window* _parentWindow, Image _tex);
         void UpdateChildren() override;
         void DrawDebug2D() override;
