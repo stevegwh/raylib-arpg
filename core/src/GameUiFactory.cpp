@@ -52,7 +52,8 @@ namespace sage
             imagebox->SetGrayscale();
             cell2->SetPaddingPercent({10, 10, 10, 10});
             imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-            cell3->CreateImagebox(LoadImage("resources/icon.png"));
+            auto image2 = cell3->CreateImagebox(LoadImage("resources/icon.png"));
+            image2->SetGrayscale();
 
             // auto cell0 = row->CreateTableCell();
 

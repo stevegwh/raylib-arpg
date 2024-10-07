@@ -204,6 +204,29 @@ namespace sage
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
     }
 
+    void ImageBox::RemoveShader()
+    {
+        shader.reset();
+    }
+
+    void ImageBox::OnMouseClick()
+    {
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/bloom.fs");
+        CellElement::OnMouseClick();
+    }
+
+    void ImageBox::OnMouseStartHover()
+    {
+        RemoveShader();
+        CellElement::OnMouseStartHover();
+    }
+
+    void ImageBox::OnMouseStopHover()
+    {
+        SetGrayscale();
+        CellElement::OnMouseStopHover();
+    }
+
     void ImageBox::UpdateDimensions()
     {
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
@@ -681,7 +704,59 @@ namespace sage
             {
                 cursor->DisableContextSwitching();
                 cursor->Disable();
+
+                for (auto& table : window->children)
+                {
+                    for (auto& row : table->children)
+                    {
+                        for (auto& cell : row->children)
+                        {
+                            if (mousePos.x >= cell->rec.x && mousePos.x <= cell->rec.x + cell->rec.width &&
+                                mousePos.y >= cell->rec.y && mousePos.y <= cell->rec.y + cell->rec.height)
+                            {
+                                cell->children->mouseHover = true;
+                                cell->children->OnMouseStartHover();
+                                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                                {
+                                    cell->children->OnMouseClick();
+                                }
+                                else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+                                {
+                                    // TODO: Dragging elements
+                                    // Start drag timer
+                                    // After drag timer finished, start "drag mode"
+                                }
+                            }
+                            else
+                            {
+                                if (cell->children->mouseHover)
+                                {
+                                    cell->children->mouseHover = false;
+                                    cell->children->OnMouseStopHover();
+                                }
+                            }
+                        }
+                    }
+                }
+
                 break;
+            }
+            else
+            {
+                for (auto& table : window->children)
+                {
+                    for (auto& row : table->children)
+                    {
+                        for (auto& cell : row->children)
+                        {
+                            if (cell->children->mouseHover)
+                            {
+                                cell->children->mouseHover = false;
+                                cell->children->OnMouseStopHover();
+                            }
+                        }
+                    }
+                }
             }
         }
 

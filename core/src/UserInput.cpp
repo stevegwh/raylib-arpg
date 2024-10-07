@@ -22,6 +22,9 @@ namespace sage
             {
                 settings->ResetToUserDefined();
             }
+
+            // TODO: This is messed up and on Windows is not working, which effects the UI being able to scale back
+            // and forth
             onWindowUpdate.publish(
                 {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
         }

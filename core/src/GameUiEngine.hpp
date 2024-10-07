@@ -141,9 +141,36 @@ namespace sage
         Rectangle rec{};
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
+        bool mouseHover = false;
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);
+
+        entt::sigh<void()> onStartHover;
+        entt::sigh<void()> onEndHover;
+        entt::sigh<void()> onMouseClicked;
+
+        // TODO: Implement dragging
+        bool beingDragged = false;
+        float dragStartTime;
+        entt::sigh<void()> onDragStart;
+        entt::sigh<void()> onDragEnd;
+
+        virtual void OnMouseStartHover()
+        {
+            onStartHover.publish();
+        };
+
+        virtual void OnMouseStopHover()
+        {
+            onEndHover.publish();
+        };
+
+        virtual void OnMouseClick()
+        {
+            onMouseClicked.publish();
+        };
+
         virtual void UpdateDimensions() = 0;
         virtual void Draw2D() = 0;
 
@@ -179,11 +206,13 @@ namespace sage
     {
         std::optional<Shader> shader;
         Texture tex{};
-        entt::sigh<void()> onStartHover;
-        entt::sigh<void()> onEndHover;
-        entt::sigh<void()> onPress;
+
+        void OnMouseStartHover() override;
+        void OnMouseStopHover() override;
+        void OnMouseClick() override;
 
         void SetGrayscale();
+        void RemoveShader();
         void UpdateDimensions() override;
         void Draw2D() override;
         ~ImageBox() override = default;
@@ -240,8 +269,6 @@ namespace sage
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
         Texture mainNPatchTexture; // npatch texture used by elements in window
-        entt::sigh<void(int)> onWindowStartHover;
-        entt::sigh<void(int)> onWindowEndHover;
 
         [[nodiscard]] Dimensions GetDimensions() const;
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
