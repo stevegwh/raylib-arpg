@@ -28,88 +28,46 @@ namespace sage
         window->tex = window->mainNPatchTexture;
         window->SetPaddingPercent({2, 2, 2, 2});
 
-        {
-            auto table = window->CreateTable();
-            // Number 1111111111111111111111111111111111111111111!
-            auto row = table->CreateTableRow(75);
-            // auto row0 = table->CreateTableRow();
-            auto cell = row->CreateTableCell(50);
-            cell->CreateTextbox(
-                "This is a word wrap test with signficantly long words.",
-                24,
-                TextBox::OverflowBehaviour::WORD_WRAP);
+        auto table = window->CreateTable();
+        // Number 1111111111111111111111111111111111111111111!
+        auto row = table->CreateTableRow(75);
+        // auto row0 = table->CreateTableRow();
+        auto cell = row->CreateTableCell(50);
+        cell->CreateTextbox(
+            "This is a word wrap test with signficantly long words.", 24, TextBox::OverflowBehaviour::WORD_WRAP);
 
-            cell->SetPaddingPercent({2, 2, 2, 2});
+        cell->SetPaddingPercent({2, 2, 2, 2});
 
-            cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-            cell->tex = window->mainNPatchTexture;
+        cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        cell->tex = window->mainNPatchTexture;
 
-            auto cell2 = row->CreateTableCell();
-            auto cell3 = row->CreateTableCell();
-            cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-            cell3->tex = window->mainNPatchTexture;
-            auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
-            imagebox->SetGrayscale();
-            cell2->SetPaddingPercent({10, 10, 10, 10});
-            imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-            auto image2 = cell3->CreateImagebox(LoadImage("resources/icon.png"));
-            image2->SetGrayscale();
+        auto cell2 = row->CreateTableCell();
+        auto cell3 = row->CreateTableCell();
+        cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        cell3->tex = window->mainNPatchTexture;
+        auto imagebox = cell2->CreateImagebox(window, LoadImage("resources/icon.png"));
+        imagebox->SetGrayscale();
+        cell2->SetPaddingPercent({10, 10, 10, 10});
+        imagebox->SetHoriAlignment(HoriAlignment::CENTER);
+        auto image2 = cell3->CreateImagebox(window, LoadImage("resources/icon.png"));
+        image2->SetGrayscale();
 
-            // auto cell0 = row->CreateTableCell();
+        // auto cell0 = row->CreateTableCell();
 
-            // cell->padding.left = 10;
-            // cell2->CreateTextbox("Number 2!");
+        // cell->padding.left = 10;
+        // cell2->CreateTextbox("Number 2!");
 
-            // cell3->CreateTextbox("Number 3!");
-            cell3->SetPaddingPercent({0, 0, 5, 0});
+        // cell3->CreateTextbox("Number 3!");
+        cell3->SetPaddingPercent({0, 0, 5, 0});
 
-            auto row2 = table->CreateTableRow();
-            auto cell4 = row2->CreateTableCell();
-            auto cell5 = row2->CreateTableCell();
-            auto textbox2 = cell4->CreateTextbox("Bottom Left Alignment");
-            textbox2->SetVertAlignment(VertAlignment::BOTTOM);
-            textbox2->SetHoriAlignment(HoriAlignment::LEFT);
+        auto row2 = table->CreateTableRow();
+        auto cell4 = row2->CreateTableCell();
+        auto cell5 = row2->CreateTableCell();
+        auto textbox2 = cell4->CreateTextbox("Bottom Left Alignment");
+        textbox2->SetVertAlignment(VertAlignment::BOTTOM);
+        textbox2->SetHoriAlignment(HoriAlignment::LEFT);
 
-            cell5->CreateTextbox("This is an example of shrinking!", 42);
-        }
-
-        //        {
-        //            auto table = window->CreateTable();
-        //
-        //            auto row = table->CreateTableRow();
-        //            // auto row0 = table->CreateTableRow();
-        //            auto cell = row->CreateTableCell();
-        //            cell->CreateTextbox("Number 11111111111!");
-        //
-        //            cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        //            cell->tex = window->mainNPatchTexture;
-        //
-        //            auto cell2 = row->CreateTableCell();
-        //            auto cell3 = row->CreateTableCell();
-        //            cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        //            cell3->tex = window->mainNPatchTexture;
-        //            auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
-        //            cell2->SetPaddingPercent({10, 10, 10, 10});
-        //            imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-        //            cell3->CreateImagebox(LoadImage("resources/icon.png"));
-        //
-        //            // auto cell0 = row->CreateTableCell();
-        //
-        //            // cell->padding.left = 10;
-        //            // cell2->CreateTextbox("Number 2!");
-        //
-        //            // cell3->CreateTextbox("Number 3!");
-        //            cell3->SetPaddingPercent({0, 0, 5, 0});
-        //
-        //            auto row2 = table->CreateTableRow();
-        //            auto cell4 = row2->CreateTableCell();
-        //            auto cell5 = row2->CreateTableCell();
-        //            auto textbox = cell4->CreateTextbox("Number 4!");
-        //            textbox->SetHoriAlignment(HoriAlignment::LEFT);
-        //            textbox->SetVertAlignment(VertAlignment::BOTTOM);
-        //
-        //            cell5->CreateTextbox("Number 5!");
-        //        }
+        cell5->CreateTextbox("This is an example of shrinking!", 42);
     }
 
     void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)

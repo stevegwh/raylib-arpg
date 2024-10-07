@@ -105,6 +105,12 @@ namespace sage
             }
         };
 
+        bool MouseInside(Vector2 mousePos)
+        {
+            return mousePos.x >= rec.x && mousePos.x <= rec.x + rec.width && mousePos.y >= rec.y &&
+                   mousePos.y <= rec.y + rec.height;
+        }
+
         void SetPaddingPixel(const Padding& _padding)
         {
             padding = _padding;
@@ -158,11 +164,13 @@ namespace sage
 
         virtual void OnMouseStartHover()
         {
+            mouseHover = true;
             onStartHover.publish();
         };
 
         virtual void OnMouseStopHover()
         {
+            mouseHover = false;
             onEndHover.publish();
         };
 
@@ -205,6 +213,7 @@ namespace sage
     struct ImageBox final : public CellElement
     {
         std::optional<Shader> shader;
+        Window* parentWindow;
         Texture tex{};
 
         void OnMouseStartHover() override;
@@ -226,7 +235,7 @@ namespace sage
             const std::string& _content,
             float fontSize = 16,
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
-        ImageBox* CreateImagebox(Image _tex);
+        ImageBox* CreateImagebox(Window* _parentWindow, Image _tex);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;
@@ -259,6 +268,9 @@ namespace sage
     {
         bool hidden = false;
         const Settings* settings; // for screen width/height
+
+        entt::sigh<void()> onMouseStartHover;
+        entt::sigh<void()> onMouseStopHover;
 
         float xOffsetPercent = 0;
         float yOffsetPercent = 0;
