@@ -272,7 +272,7 @@ namespace sage
 
     void CreateLightningBallAbility(Ability& abilityComponent)
     {
-        abilityComponent.name = "Lighting Ball";
+        abilityComponent.name = "Lightning Ball";
         abilityComponent.description = "Hits all enemies around the attacker.";
         abilityComponent.iconPath = "resources/icons/abilities/lightning_ball.png";
         auto& ad = abilityComponent.ad;
