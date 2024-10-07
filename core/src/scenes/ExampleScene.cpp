@@ -82,6 +82,7 @@ namespace sage
         // GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
         // GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
 
-        GameUiFactory::CreateExampleWindow(data->uiEngine.get(), {300, 200});
+        // GameUiFactory::CreateExampleWindow(data->uiEngine.get());
+        GameUiFactory::CreateAbilityRow(data->uiEngine.get(), data->playerAbilitySystem.get());
     }
 } // namespace sage

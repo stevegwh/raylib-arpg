@@ -203,6 +203,9 @@ namespace sage
 
     void CreateRainOfFireAbility(Ability& abilityComponent)
     {
+        abilityComponent.name = "Rain of Fire";
+        abilityComponent.description = "Hits all enemies around the attacker.";
+        abilityComponent.iconPath = "resources/icons/abilities/rain_of_fire.png";
         auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 3;
         ad.base.range = 30;
@@ -269,6 +272,9 @@ namespace sage
 
     void CreateLightningBallAbility(Ability& abilityComponent)
     {
+        abilityComponent.name = "Lighting Ball";
+        abilityComponent.description = "Hits all enemies around the attacker.";
+        abilityComponent.iconPath = "resources/icons/abilities/lightning_ball.png";
         auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 1;
         ad.base.range = 30;
@@ -291,6 +297,9 @@ namespace sage
 
     void CreateWhirlwindAbility(Ability& abilityComponent)
     {
+        abilityComponent.name = "Whirlwind";
+        abilityComponent.description = "Hits all enemies around the attacker.";
+        abilityComponent.iconPath = "resources/icons/abilities/whirlwind.png";
         auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 0.15;
         ad.base.range = 15;

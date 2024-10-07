@@ -12,11 +12,15 @@ namespace sage
 {
     struct Ability
     {
-        entt::entity self;
-        entt::entity caster;
+        entt::entity self{};
+        entt::entity caster{};
         AbilityData ad;
         Timer cooldownTimer;
         Timer castTimer;
+
+        std::string name;
+        std::string description;
+        std::string iconPath; // TODO: Replace with AssetID
 
         std::unique_ptr<VisualFX> vfx;
         // TODO: VFX should have before, during and after.
@@ -25,9 +29,9 @@ namespace sage
 
         void ResetCooldown();
         bool IsActive();
-        float GetRemainingCooldownTime() const;
-        float GetCooldownDuration() const;
-        bool CooldownReady() const;
+        [[nodiscard]] float GetRemainingCooldownTime() const;
+        [[nodiscard]] float GetCooldownDuration() const;
+        [[nodiscard]] bool CooldownReady() const;
 
         entt::sigh<void(entt::entity)> startCast;
         entt::sigh<void(entt::entity)> cancelCast;

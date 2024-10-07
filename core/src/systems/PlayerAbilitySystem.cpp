@@ -11,7 +11,7 @@
 
 namespace sage
 {
-    void PlayerAbilitySystem::abilityOnePressed()
+    void PlayerAbilitySystem::AbilityOnePressed()
     {
         std::cout << "Ability 1 pressed \n";
         if (abilitySlots[0] == entt::null)
@@ -29,7 +29,7 @@ namespace sage
         ab.startCast.publish(abilitySlots[0]);
     }
 
-    void PlayerAbilitySystem::abilityTwoPressed()
+    void PlayerAbilitySystem::AbilityTwoPressed()
     {
         std::cout << "Ability 2 pressed \n";
         if (abilitySlots[1] == entt::null)
@@ -47,7 +47,7 @@ namespace sage
         ab.startCast.publish(abilitySlots[1]);
     }
 
-    void PlayerAbilitySystem::abilityThreePressed()
+    void PlayerAbilitySystem::AbilityThreePressed()
     {
         std::cout << "Ability 3 pressed \n";
         if (abilitySlots[2] == entt::null)
@@ -65,7 +65,7 @@ namespace sage
         ab.startCast.publish(abilitySlots[2]);
     }
 
-    void PlayerAbilitySystem::abilityFourPressed()
+    void PlayerAbilitySystem::AbilityFourPressed()
     {
         std::cout << "Ability 4 pressed \n";
 
@@ -91,9 +91,24 @@ namespace sage
         // TODO: Change abilities based on the new actor
     }
 
+    Ability* PlayerAbilitySystem::GetAbility(int slotNumber) const
+    {
+        assert(slotNumber < MAX_ABILITY_NUMBER);
+        if (abilitySlots.at(slotNumber) == entt::null) return nullptr;
+        return &registry->get<Ability>(abilitySlots.at(slotNumber));
+    }
+
+    void PlayerAbilitySystem::SwapAbility(int slot1, int slot2)
+    {
+        auto ability1 = abilitySlots.at(slot1);
+        auto ability2 = abilitySlots.at(slot2);
+        SetSlot(slot1, ability2);
+        SetSlot(slot2, ability1);
+    }
+
     void PlayerAbilitySystem::SetSlot(int slot, entt::entity abilityEntity)
     {
-        assert(slot < 4);
+        assert(slot < MAX_ABILITY_NUMBER);
         assert(abilityEntity != entt::null);
         abilitySlots[slot] = abilityEntity;
     }
@@ -117,19 +132,19 @@ namespace sage
         onActorChanged();
         {
             entt::sink sink{gameData->userInput->keyOnePressed};
-            sink.connect<&PlayerAbilitySystem::abilityOnePressed>(this);
+            sink.connect<&PlayerAbilitySystem::AbilityOnePressed>(this);
         }
         {
             entt::sink sink{gameData->userInput->keyTwoPressed};
-            sink.connect<&PlayerAbilitySystem::abilityTwoPressed>(this);
+            sink.connect<&PlayerAbilitySystem::AbilityTwoPressed>(this);
         }
         {
             entt::sink sink{gameData->userInput->keyThreePressed};
-            sink.connect<&PlayerAbilitySystem::abilityThreePressed>(this);
+            sink.connect<&PlayerAbilitySystem::AbilityThreePressed>(this);
         }
         {
             entt::sink sink{gameData->userInput->keyFourPressed};
-            sink.connect<&PlayerAbilitySystem::abilityFourPressed>(this);
+            sink.connect<&PlayerAbilitySystem::AbilityFourPressed>(this);
         }
 
         {
