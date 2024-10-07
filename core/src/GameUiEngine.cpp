@@ -640,6 +640,7 @@ namespace sage
     {
         children = std::make_unique<ImageBox>();
         auto* image = dynamic_cast<ImageBox*>(children.get());
+        image->draggable = true;
         image->parentWindow = _parentWindow;
         entt::sink sink{_parentWindow->onMouseStopHover};
         sink.connect<&ImageBox::OnMouseStopHover>(image);
@@ -696,7 +697,7 @@ namespace sage
         {
             // TODO: Make dragged element a struct
             auto mousePos = GetMousePosition();
-            DrawTexture(draggedElement.value(), mousePos.x, mousePos.y, WHITE);
+            DrawTexture(draggedElement.value()->tex, mousePos.x, mousePos.y, WHITE);
         }
     }
 
@@ -714,8 +715,14 @@ namespace sage
         {
             if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
             {
+                draggedElement.value()->beingDragged = false;
                 draggedElement.reset();
             }
+        }
+
+        if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+        {
+            draggedTimer = 0;
         }
 
         for (auto& window : windows)
@@ -741,13 +748,24 @@ namespace sage
                                 {
                                     element->OnMouseClick();
                                 }
-                                else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !draggedElement.has_value())
+                                else if (
+                                    element->draggable && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+                                    !draggedElement.has_value())
                                 {
-                                    // element->beingDragged = true;
-                                    draggedElement = element->tex;
-                                    // TODO: Dragging elements
-                                    // Start drag timer
-                                    // After drag timer finished, start "drag mode"
+                                    if (draggedElement.has_value()) break;
+
+                                    auto time = GetTime();
+                                    if (draggedTimer == 0)
+                                    {
+                                        draggedTimer = time;
+                                    }
+
+                                    if (time > draggedTimer + draggedTimerThreshold)
+                                    {
+                                        draggedElement = reinterpret_cast<CellElement*>(element.get());
+                                        element->beingDragged = true;
+                                        draggedTimer = 0;
+                                    }
                                 }
                             }
                             else

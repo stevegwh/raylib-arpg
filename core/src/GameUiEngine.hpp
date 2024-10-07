@@ -157,9 +157,8 @@ namespace sage
         entt::sigh<void()> onEndHover;
         entt::sigh<void()> onMouseClicked;
 
-        // TODO: Implement dragging
+        bool draggable = false;
         bool beingDragged = false;
-        float dragStartTime{};
         entt::sigh<void()> onDragStart;
         entt::sigh<void()> onDragEnd;
 
@@ -301,7 +300,9 @@ namespace sage
         UserInput* userInput;
         Settings* settings;
 
-        std::optional<Texture> draggedElement{};
+        std::optional<CellElement*> draggedElement{};
+        double draggedTimer = 0;
+        float draggedTimerThreshold = 0.25f;
 
       public:
         Window* CreateWindow(
