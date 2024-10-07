@@ -145,6 +145,7 @@ namespace sage
     {
         TableCell* parent{};
         Rectangle rec{};
+        Texture tex{};
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
         bool mouseHover = false;
@@ -158,7 +159,7 @@ namespace sage
 
         // TODO: Implement dragging
         bool beingDragged = false;
-        float dragStartTime;
+        float dragStartTime{};
         entt::sigh<void()> onDragStart;
         entt::sigh<void()> onDragEnd;
 
@@ -214,7 +215,6 @@ namespace sage
     {
         std::optional<Shader> shader;
         Window* parentWindow;
-        Texture tex{};
 
         void OnMouseStartHover() override;
         void OnMouseStopHover() override;
@@ -300,6 +300,8 @@ namespace sage
         Cursor* cursor;
         UserInput* userInput;
         Settings* settings;
+
+        std::optional<Texture> draggedElement{};
 
       public:
         Window* CreateWindow(
