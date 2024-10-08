@@ -164,7 +164,7 @@ namespace sage
     void AbilitySlot::OnMouseContinueHover()
     {
         ImageBox::OnMouseContinueHover();
-        if (GetTime() < hoverTimer + hoverTimerThreshold) return;
+        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
         {
             const Vector2 mousePos = GetMousePosition();
@@ -382,6 +382,18 @@ namespace sage
         // parameters (which we currently ignore). Alternatively, we have a pointer to settings, anyway.
         rec = {GetPosition().x, GetPosition().y, GetDimensions().width, GetDimensions().height};
         UpdateChildren();
+    }
+
+    void Window::OnMouseStartHover()
+    {
+        mouseHover = true;
+        onMouseStartHover.publish();
+    }
+
+    void Window::OnMouseStopHover()
+    {
+        mouseHover = false;
+        onMouseStopHover.publish();
     }
 
     Dimensions Window::GetDimensions() const
@@ -699,6 +711,7 @@ namespace sage
     {
         children = std::make_unique<AbilitySlot>();
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
+        abilitySlot->SetGrayscale();
         abilitySlot->playerAbilitySystem = _playerAbilitySystem;
         abilitySlot->draggable = true;
         abilitySlot->canReceiveDragDrops = true;
@@ -726,6 +739,7 @@ namespace sage
     {
         children = std::make_unique<CloseButton>();
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
+        closeButton->SetGrayscale();
         entt::sink sink{GetWindow()->onMouseStopHover};
         sink.connect<&ImageBox::OnMouseStopHover>(closeButton);
         closeButton->tex = LoadTextureFromImage(_tex);
@@ -882,6 +896,12 @@ namespace sage
         }
     }
 
+    [[nodiscard]] bool MouseInside(Rectangle rec, Vector2 mousePos)
+    {
+        return mousePos.x >= rec.x && mousePos.x <= rec.x + rec.width && mousePos.y >= rec.y &&
+               mousePos.y <= rec.y + rec.height;
+    }
+
     void GameUIEngine::Update()
     {
         pruneWindows();
@@ -918,14 +938,19 @@ namespace sage
             if (window->hidden) continue;
 
             // Handle window hover state
-            bool isMouseInWindow = window->MouseInside(mousePos);
-            if (!isMouseInWindow)
+            if (!MouseInside(window->rec, mousePos))
             {
-                window->onMouseStopHover.publish();
+                if (window->mouseHover)
+                {
+                    window->OnMouseStopHover();
+                }
                 continue;
             }
 
-            window->onMouseStartHover.publish();
+            if (!window->mouseHover)
+            {
+                window->OnMouseStartHover();
+            }
             cursor->DisableContextSwitching();
             cursor->Disable();
 
@@ -935,10 +960,9 @@ namespace sage
                     for (const auto& cell : row->children)
                     {
                         auto& element = cell->children;
-                        bool isMouseInElement = cell->MouseInside(mousePos);
 
                         // Handle element hover state
-                        if (!isMouseInElement)
+                        if (!MouseInside(element->rec, mousePos))
                         {
                             if (element->mouseHover)
                             {
@@ -947,22 +971,22 @@ namespace sage
                             continue;
                         }
 
-                        if (!draggedElement.has_value())
+                        if (!draggedElement.has_value() && !element->mouseHover)
                         {
-                            if (!element->mouseHover)
-                            {
-                                element->OnMouseStartHover();
-                            }
+                            element->OnMouseStartHover();
                         }
 
                         // Handle mouse interactions
                         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !draggedElement.has_value())
                         {
-                            element->OnMouseClick();
+                            // Clicking
                             element->OnMouseStopHover();
+                            element->OnMouseClick();
                         }
                         else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
                         {
+                            // Dropping
+
                             if (std::holds_alternative<CellElement*>(draggedElement.value()))
                             {
                                 const auto draggedCellElement = std::get<CellElement*>(draggedElement.value());
@@ -973,6 +997,8 @@ namespace sage
                             IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable &&
                             !draggedElement.has_value())
                         {
+                            // Dragging
+
                             // Skip if already dragging something
                             if (draggedElement.has_value()) break;
 
@@ -1018,6 +1044,10 @@ namespace sage
 
                                 draggedTimer = 0;
                             }
+                        }
+                        else if (!draggedElement.has_value() && element->mouseHover)
+                        {
+                            element->OnMouseContinueHover();
                         }
 
                         break; // We've found our element, stop processing

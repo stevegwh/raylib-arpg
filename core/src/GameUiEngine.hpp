@@ -104,12 +104,6 @@ namespace sage
                     DrawTexture(tex.value(), rec.x, rec.y, WHITE);
                 }
             }
-        };
-
-        bool MouseInside(Vector2 mousePos) const
-        {
-            return mousePos.x >= rec.x && mousePos.x <= rec.x + rec.width && mousePos.y >= rec.y &&
-                   mousePos.y <= rec.y + rec.height;
         }
 
         void SetPaddingPixel(const Padding& _padding)
@@ -321,6 +315,7 @@ namespace sage
 
         bool hidden = false;
         bool markForRemoval = false;
+        bool mouseHover = false;
 
         GameUIEngine* uiEngine;
         const Settings* settings; // for screen width/height
@@ -329,6 +324,9 @@ namespace sage
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
 
         // Texture mainNPatchTexture; // npatch texture used by elements in window
+
+        virtual void OnMouseStartHover();
+        virtual void OnMouseStopHover();
 
         [[nodiscard]] Dimensions GetDimensions() const;
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
