@@ -822,9 +822,12 @@ namespace sage
 
         if (draggedElement.has_value())
         {
-            // TODO: Make dragged element a struct
-            auto mousePos = GetMousePosition();
-            DrawTexture(draggedElement.value()->tex, mousePos.x, mousePos.y, WHITE);
+            if (std::holds_alternative<CellElement*>(draggedElement.value()))
+            {
+                auto cell = std::get<CellElement*>(draggedElement.value());
+                auto mousePos = GetMousePosition();
+                DrawTexture(cell->tex, mousePos.x, mousePos.y, WHITE);
+            }
         }
     }
 
@@ -837,6 +840,16 @@ namespace sage
         {
             cursor->EnableContextSwitching();
             cursor->Enable();
+        }
+
+        if (draggedElement.has_value())
+        {
+            if (std::holds_alternative<Window*>(draggedElement.value()))
+            {
+                auto window = std::get<Window*>(draggedElement.value());
+                window->SetPosition(mousePos.x, mousePos.y);
+                window->UpdateChildren();
+            }
         }
 
         // Reset drag timer on mouse release
@@ -889,7 +902,10 @@ namespace sage
                         }
                         else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
                         {
-                            element->OnDragDropHere(draggedElement.value());
+                            if (auto draggedCellElement = std::get<CellElement*>(draggedElement.value()))
+                            {
+                                element->OnDragDropHere(draggedCellElement);
+                            }
                         }
                         else if (
                             IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable &&
@@ -918,8 +934,15 @@ namespace sage
                             }
                             else if (currentTime > draggedTimer + draggedTimerThreshold)
                             {
-                                draggedElement = element.get();
-                                element->beingDragged = true;
+                                if (auto titleBar = dynamic_cast<TitleBar*>(element.get()))
+                                {
+                                    draggedElement = titleBar->parentWindow;
+                                }
+                                else
+                                {
+                                    draggedElement = element.get();
+                                    element->beingDragged = true;
+                                }
                                 draggedTimer = 0;
                             }
                         }
@@ -938,7 +961,11 @@ namespace sage
 
             if (draggedElement.has_value())
             {
-                draggedElement.value()->beingDragged = false;
+                if (std::holds_alternative<CellElement*>(draggedElement.value()))
+                {
+                    auto cell = std::get<CellElement*>(draggedElement.value());
+                    cell->beingDragged = false;
+                }
                 draggedElement.reset();
             }
         }

@@ -9,6 +9,7 @@
 #include <entt/entt.hpp>
 #include <iostream>
 #include <optional>
+#include <variant>
 #include <vector>
 
 namespace sage
@@ -349,7 +350,7 @@ namespace sage
         UserInput* userInput;
         Settings* settings;
 
-        std::optional<CellElement*> draggedElement{};
+        std::optional<std::variant<CellElement*, Window*>> draggedElement{};
         std::optional<CellElement*> hoveredDraggableElement{};
         double draggedTimer = 0;
         float draggedTimerThreshold = 0.25f;
