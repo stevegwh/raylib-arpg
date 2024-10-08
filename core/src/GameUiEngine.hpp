@@ -305,35 +305,41 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
-        // TODO: Need FloatingWindow or AlignedWindow which either uses raw pixel location or alignment/position
-        // Have FloatingWindow as the base class and GetPos which returns pixels. In AlignedWindow override GetPos
-        // and convert its stored percent to the offset + alignment?
+        float widthPercent = 0;  // Width as percent of screen space
+        float heightPercent = 0; // Height as percent of screen space
+
         bool hidden = false;
         const Settings* settings; // for screen width/height
-
         entt::sigh<void()> onMouseStartHover;
         entt::sigh<void()> onMouseStopHover;
-
-        float xOffsetPercent = 0;
-        float yOffsetPercent = 0;
-        float widthPercent = 0;
-        float heightPercent = 0;
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
-        VertAlignment vertAlignment = VertAlignment::TOP;
-        HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
-        Texture mainNPatchTexture; // npatch texture used by elements in window
+        // Texture mainNPatchTexture; // npatch texture used by elements in window
 
         [[nodiscard]] Dimensions GetDimensions() const;
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
-        [[nodiscard]] Vector2 GetOffset() const;
-        void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
-        void SetAlignment(VertAlignment vert, HoriAlignment hori);
+        virtual void SetPosition(float x, float y);
+        [[nodiscard]] Vector2 GetPosition() const;
+
         Table* CreateTable();
-        void OnScreenSizeChange();
+        virtual void OnScreenSizeChange();
         void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
+    };
+
+    struct WindowDocked final : public Window
+    {
+        float xOffsetPercent = 0;
+        float yOffsetPercent = 0;
+        VertAlignment vertAlignment = VertAlignment::TOP;
+        HoriAlignment horiAlignment = HoriAlignment::LEFT;
+
+        // void SetPosition(float x, float y) override = delete;
+        [[nodiscard]] Vector2 GetOffset() const;
+        void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
+        void SetAlignment(VertAlignment vert, HoriAlignment hori);
+        void OnScreenSizeChange() override;
     };
 
     class GameUIEngine
@@ -350,7 +356,15 @@ namespace sage
 
       public:
         Window* CreateWindow(
-            Image _nPatchTexture,
+            Texture _nPatchTexture,
+            float x,
+            float y,
+            float _widthPercent,
+            float _heightPercent,
+            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
+
+        WindowDocked* CreateWindowDocked(
+            Texture _nPatchTexture,
             float _xOffsetPercent,
             float _yOffsetPercent,
             float _widthPercent,

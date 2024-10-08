@@ -17,16 +17,15 @@ namespace sage
         // location (and call update children)
 
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        auto nPatchTexture = ResourceManager::GetInstance().GetImage("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
         //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
         auto window =
-            engine->CreateWindow(nPatchTexture.GetImage(), 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->tex = window->mainNPatchTexture;
         window->SetPaddingPercent({2, 2, 2, 2});
 
         auto table = window->CreateTable();
@@ -45,12 +44,12 @@ namespace sage
         cell->SetPaddingPercent({2, 2, 2, 2});
 
         cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        cell->tex = window->mainNPatchTexture;
+        cell->tex = window->tex;
 
         auto cell2 = row->CreateTableCell();
         auto cell3 = row->CreateTableCell();
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        cell3->tex = window->mainNPatchTexture;
+        cell3->tex = window->tex;
         auto imagebox = cell2->CreateImagebox(window, LoadImage("resources/icon.png"));
         imagebox->SetGrayscale();
         // cell2->SetPaddingPercent({10, 10, 10, 10});
@@ -80,48 +79,72 @@ namespace sage
     void GameUiFactory::CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        auto nPatchTexture = ResourceManager::GetInstance().GetImage("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        {
+            // TODO: Bug: Hover does not disappear when you go directly from one image to another
+            // TODO: Bug: Only one image gets scaled down to fit in the row. If you want all images to be the same
+            // scale then it doesn't work as intended
+            auto window =
+                engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
+            window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+            window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+            window->SetPaddingPercent({5, 2, 2, 2});
 
-        // TODO: Bug: Hover does not disappear when you go directly from one image to another
-        // TODO: Bug: Only one image gets scaled down to fit in the row. If you want all images to be the same
-        // scale then it doesn't work as intended
-        auto window =
-            engine->CreateWindow(nPatchTexture.GetImage(), 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
-        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->tex = window->mainNPatchTexture;
-        window->SetPaddingPercent({5, 2, 2, 2});
+            auto table = window->CreateTable();
 
-        auto table = window->CreateTable();
+            auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell();
+            auto slot = cell->CreateAbilitySlot(playerAbilitySystem, window, 0);
+            // cell->SetPaddingPercent({2, 2, 2, 2});
+            auto cell1 = row->CreateTableCell();
+            auto slot1 = cell1->CreateAbilitySlot(playerAbilitySystem, window, 1);
+            // cell1->SetPaddingPercent({2, 2, 2, 2});
+            auto cell2 = row->CreateTableCell();
+            auto slot2 = cell2->CreateAbilitySlot(playerAbilitySystem, window, 2);
+            // cell2->SetPaddingPercent({2, 2, 2, 2});
+            auto cell3 = row->CreateTableCell();
+            auto slot3 = cell3->CreateAbilitySlot(playerAbilitySystem, window, 3);
+            // cell3->SetPaddingPercent({2, 2, 2, 2});
 
-        auto row = table->CreateTableRow();
-        auto cell = row->CreateTableCell();
-        auto slot = cell->CreateAbilitySlot(playerAbilitySystem, window, 0);
-        // cell->SetPaddingPercent({2, 2, 2, 2});
-        auto cell1 = row->CreateTableCell();
-        auto slot1 = cell1->CreateAbilitySlot(playerAbilitySystem, window, 1);
-        // cell1->SetPaddingPercent({2, 2, 2, 2});
-        auto cell2 = row->CreateTableCell();
-        auto slot2 = cell2->CreateAbilitySlot(playerAbilitySystem, window, 2);
-        // cell2->SetPaddingPercent({2, 2, 2, 2});
-        auto cell3 = row->CreateTableCell();
-        auto slot3 = cell3->CreateAbilitySlot(playerAbilitySystem, window, 3);
-        // cell3->SetPaddingPercent({2, 2, 2, 2});
+            {
+                entt::sink sink{slot->onMouseClicked};
+                sink.connect<&PlayerAbilitySystem::AbilityOnePressed>(playerAbilitySystem);
+                entt::sink sink1{slot1->onMouseClicked};
+                sink1.connect<&PlayerAbilitySystem::AbilityTwoPressed>(playerAbilitySystem);
+                entt::sink sink2{slot2->onMouseClicked};
+                sink2.connect<&PlayerAbilitySystem::AbilityThreePressed>(playerAbilitySystem);
+                entt::sink sink3{slot3->onMouseClicked};
+                sink3.connect<&PlayerAbilitySystem::AbilityFourPressed>(playerAbilitySystem);
+            }
+        }
 
         {
-            entt::sink sink{slot->onMouseClicked};
-            sink.connect<&PlayerAbilitySystem::AbilityOnePressed>(playerAbilitySystem);
-            entt::sink sink1{slot1->onMouseClicked};
-            sink1.connect<&PlayerAbilitySystem::AbilityTwoPressed>(playerAbilitySystem);
-            entt::sink sink2{slot2->onMouseClicked};
-            sink2.connect<&PlayerAbilitySystem::AbilityThreePressed>(playerAbilitySystem);
-            entt::sink sink3{slot3->onMouseClicked};
-            sink3.connect<&PlayerAbilitySystem::AbilityFourPressed>(playerAbilitySystem);
+            auto window =
+                engine->CreateWindow(nPatchTexture, 300, 300, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+            window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+            window->SetPaddingPercent({10, 2, 5, 5});
+            auto table = window->CreateTable();
+
+            {
+                auto row = table->CreateTableRow(20);
+                auto cell = row->CreateTableCell(80);
+                auto cell2 = row->CreateTableCell(20);
+                cell->CreateTitleBar(window, "Floating Window", 12);
+                auto closeButton = cell2->CreateCloseButton(window, LoadImage("resources/icon.png"));
+                closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
+                closeButton->SetVertAlignment(VertAlignment::TOP);
+            }
+            {
+                auto row = table->CreateTableRow();
+                row->SetPaddingPixel({15, 0, 0, 0});
+                auto cell = row->CreateTableCell();
+                cell->CreateTextbox("Example text here.", 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            }
         }
     }
 
     void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        // engine->CreateWindow(pos, w, h);
+        // engine->CreateWindowDocked(pos, w, h);
     }
 } // namespace sage

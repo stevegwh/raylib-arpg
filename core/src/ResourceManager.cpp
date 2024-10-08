@@ -243,6 +243,11 @@ namespace sage
     Texture ResourceManager::TextureLoad(const AssetID id)
     {
         const auto& path = getAssetPath(id);
+        return TextureLoad(path);
+    }
+
+    Texture ResourceManager::TextureLoad(const std::string& path)
+    {
         if (!nonModelTextures.contains(path))
         {
             assert(images.contains(path));
