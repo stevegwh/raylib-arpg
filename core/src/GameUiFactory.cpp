@@ -170,6 +170,5 @@ namespace sage
 
     void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        // engine->CreateWindowDocked(pos, w, h);
     }
 } // namespace sage
