@@ -8,6 +8,7 @@
 
 namespace sage
 {
+    struct Ability;
     class GameUIEngine;
     class PlayerAbilitySystem;
 
@@ -17,6 +18,7 @@ namespace sage
       public:
         static void CreateExampleWindow(GameUIEngine* engine);
         static void CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem);
+        static void CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos);
         static void CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h);
     };
 

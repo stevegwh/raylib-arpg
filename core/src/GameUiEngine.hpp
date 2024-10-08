@@ -14,10 +14,9 @@
 
 namespace sage
 {
+    class GameUIEngine;
     class PlayerAbilitySystem;
-}
-namespace sage
-{
+
     struct TableCell;
     struct Window;
     struct TableRow;
@@ -44,7 +43,6 @@ namespace sage
         LEFT,
         RIGHT,
         CENTER
-        // FREE? For draggable windows
     };
 
     enum class VertAlignment
@@ -52,7 +50,6 @@ namespace sage
         TOP,
         MIDDLE,
         BOTTOM
-        // FREE? For draggable windows
     };
 
     struct Padding
@@ -77,10 +74,6 @@ namespace sage
       protected:
         Padding padding;
         Margin margin;
-
-        // Save original width/height request and calculate each time UpdateChildren is called.
-        // This would make it very easy to increase/decrease scale if you increase the screen size (full screen
-        // etc).
 
       public:
         Parent* parent;
@@ -139,6 +132,17 @@ namespace sage
         [[nodiscard]] const Padding& GetPadding() const
         {
             return padding;
+        }
+
+        [[nodiscard]] Window* GetWindow()
+        {
+            TableElement* current = this;
+            while (current->parent != nullptr)
+            {
+                current = reinterpret_cast<TableElement*>(current->parent);
+            }
+
+            return reinterpret_cast<Window*>(current);
         }
 
         TableElement() = default;
@@ -229,7 +233,6 @@ namespace sage
     struct ImageBox : public CellElement
     {
         std::optional<Shader> shader;
-        Window* parentWindow;
 
         void OnMouseStartHover() override;
         void OnMouseStopHover() override;
@@ -244,14 +247,12 @@ namespace sage
 
     struct CloseButton final : public ImageBox
     {
-        Window* parentWindow;
         ~CloseButton() override = default;
         void OnMouseClick() override;
     };
 
     struct TitleBar final : public TextBox
     {
-        Window* parentWindow;
         ~TitleBar() override = default;
     };
 
@@ -261,6 +262,8 @@ namespace sage
         int slotNumber;
         void SetAbilityInfo();
         void OnDragDropHere(CellElement* droppedElement) override;
+        void OnMouseStartHover() override;
+        void OnMouseStopHover() override;
     };
 
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
@@ -271,11 +274,10 @@ namespace sage
             const std::string& _content,
             float fontSize = 16,
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
-        TitleBar* CreateTitleBar(Window* window, const std::string& _title, float fontSize);
-        ImageBox* CreateImagebox(Window* _parentWindow, Image _tex);
-        CloseButton* CreateCloseButton(Window* _parentWindow, Image _tex);
-        AbilitySlot* CreateAbilitySlot(
-            PlayerAbilitySystem* _playerAbilitySystem, Window* _parentWindow, int _slotNumber);
+        TitleBar* CreateTitleBar(const std::string& _title, float fontSize);
+        ImageBox* CreateImagebox(Image _tex);
+        CloseButton* CreateCloseButton(Image _tex);
+        AbilitySlot* CreateAbilitySlot(PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;
@@ -310,6 +312,7 @@ namespace sage
         float heightPercent = 0; // Height as percent of screen space
 
         bool hidden = false;
+        GameUIEngine* uiEngine;
         const Settings* settings; // for screen width/height
         entt::sigh<void()> onMouseStartHover;
         entt::sigh<void()> onMouseStopHover;
