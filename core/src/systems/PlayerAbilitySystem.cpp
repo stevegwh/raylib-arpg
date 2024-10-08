@@ -109,7 +109,6 @@ namespace sage
     void PlayerAbilitySystem::SetSlot(int slot, entt::entity abilityEntity)
     {
         assert(slot < MAX_ABILITY_NUMBER);
-        assert(abilityEntity != entt::null);
         abilitySlots[slot] = abilityEntity;
     }
 
