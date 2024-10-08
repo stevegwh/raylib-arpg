@@ -350,6 +350,7 @@ namespace sage
         UserInput* userInput;
         Settings* settings;
 
+        Vector2 draggedElementOffset{};
         std::optional<std::variant<CellElement*, Window*>> draggedElement{};
         std::optional<CellElement*> hoveredDraggableElement{};
         double draggedTimer = 0;
