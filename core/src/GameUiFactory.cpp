@@ -155,8 +155,12 @@ namespace sage
 
         {
             auto table = window->CreateTable();
+            auto row0 = table->CreateTableRow(10);
+            auto cell0 = row0->CreateTableCell();
+            auto textbox = cell0->CreateTextbox(ability.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
-            row->SetPaddingPixel({15, 0, 0, 0});
+            row->SetPaddingPercent({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(ability.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
         }
