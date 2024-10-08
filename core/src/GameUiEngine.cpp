@@ -826,7 +826,8 @@ namespace sage
             {
                 auto cell = std::get<CellElement*>(draggedElement.value());
                 auto mousePos = GetMousePosition();
-                DrawTexture(cell->tex, mousePos.x, mousePos.y, WHITE);
+                DrawTexture(
+                    cell->tex, mousePos.x - draggedElementOffset.x, mousePos.y - draggedElementOffset.y, WHITE);
             }
         }
     }
@@ -841,13 +842,12 @@ namespace sage
             cursor->EnableContextSwitching();
             cursor->Enable();
         }
-
-        if (draggedElement.has_value())
+        else
         {
             if (std::holds_alternative<Window*>(draggedElement.value()))
             {
                 auto window = std::get<Window*>(draggedElement.value());
-                window->SetPosition(mousePos.x, mousePos.y);
+                window->SetPosition(mousePos.x - draggedElementOffset.x, mousePos.y - draggedElementOffset.y);
                 window->UpdateChildren();
             }
         }
@@ -888,12 +888,15 @@ namespace sage
                         {
                             if (element->mouseHover)
                             {
-                                cell->children->OnMouseStopHover();
+                                element->OnMouseStopHover();
                             }
                             continue;
                         }
 
-                        element->OnMouseStartHover();
+                        if (!draggedElement.has_value())
+                        {
+                            element->OnMouseStartHover();
+                        }
 
                         // Handle mouse interactions
                         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !draggedElement.has_value())
@@ -902,8 +905,9 @@ namespace sage
                         }
                         else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
                         {
-                            if (auto draggedCellElement = std::get<CellElement*>(draggedElement.value()))
+                            if (std::holds_alternative<CellElement*>(draggedElement.value()))
                             {
+                                auto draggedCellElement = std::get<CellElement*>(draggedElement.value());
                                 element->OnDragDropHere(draggedCellElement);
                             }
                         }
@@ -925,7 +929,6 @@ namespace sage
                                 break;
                             }
 
-                            // Handle drag initiation
                             const auto currentTime = GetTime();
                             if (draggedTimer == 0)
                             {
@@ -934,15 +937,27 @@ namespace sage
                             }
                             else if (currentTime > draggedTimer + draggedTimerThreshold)
                             {
+                                // Add a slight offset to make it more obvious the drag has begun
+                                Vector2 offset = {
+                                    static_cast<float>(settings->screenWidth * 0.005),
+                                    static_cast<float>(settings->screenHeight * 0.005)};
+
+                                // Drag start
                                 if (auto titleBar = dynamic_cast<TitleBar*>(element.get()))
                                 {
+
                                     draggedElement = titleBar->parentWindow;
+                                    draggedElementOffset.x = mousePos.x - window->rec.x - offset.x;
+                                    draggedElementOffset.y = mousePos.y - window->rec.y - offset.y;
                                 }
                                 else
                                 {
+                                    draggedElementOffset.x = mousePos.x - element->rec.x - offset.x;
+                                    draggedElementOffset.y = mousePos.y - element->rec.y - offset.y;
                                     draggedElement = element.get();
                                     element->beingDragged = true;
                                 }
+
                                 draggedTimer = 0;
                             }
                         }
@@ -966,6 +981,7 @@ namespace sage
                     auto cell = std::get<CellElement*>(draggedElement.value());
                     cell->beingDragged = false;
                 }
+                draggedElementOffset = {0, 0};
                 draggedElement.reset();
             }
         }
