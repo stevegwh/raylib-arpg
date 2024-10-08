@@ -267,42 +267,30 @@ namespace sage
         parentWindow->hidden = true;
     }
 
-    Dimensions Window::GetDimensions() const
+    void WindowDocked::OnScreenSizeChange()
     {
-        return Dimensions{settings->screenWidth * widthPercent, settings->screenHeight * heightPercent};
+        rec = {GetOffset().x, GetOffset().y, GetDimensions().width, GetDimensions().height};
+        SetAlignment(vertAlignment, horiAlignment);
+        UpdateChildren();
     }
 
-    /**
-     *
-     * @param _xPercent x position in percent of screen (1-100)
-     * @param _yPercent y position in percent of screen (1-100)
-     */
-    void Window::SetDimensionsPercent(float _widthPercent, float _heightPercent)
-    {
-        widthPercent = _widthPercent / 100;
-        heightPercent = _heightPercent / 100;
-    }
-
-    // TODO: Maybe make WindowFixed and WindowFloating and change how it handles position
-    // Essentially, one relies on alignment and offsets and one just uses a raw position
-    Vector2 Window::GetOffset() const
+    Vector2 WindowDocked::GetOffset() const
     {
         return Vector2{settings->screenWidth * xOffsetPercent, settings->screenHeight * yOffsetPercent};
     }
 
     /**
      *
-     * @param _xOffsetPercent x position in percent of screen (1-100)
-     * @param _yOffsetPercent y position in percent of screen (1-100)
+     * @param _xOffsetPercent x offset from docked position in percent of screen (1-100)
+     * @param _yOffsetPercent y offset from docked position in percent of screen (1-100)
      */
-    void Window::SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent)
+    void WindowDocked::SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent)
     {
         xOffsetPercent = _xOffsetPercent / 100;
         yOffsetPercent = _yOffsetPercent / 100;
     }
 
-    // NB: The original position of the window is treated as an offset.
-    void Window::SetAlignment(VertAlignment vert, HoriAlignment hori)
+    void WindowDocked::SetAlignment(VertAlignment vert, HoriAlignment hori)
     {
         vertAlignment = vert;
         horiAlignment = hori;
@@ -352,9 +340,38 @@ namespace sage
 
     void Window::OnScreenSizeChange()
     {
-        rec = {GetOffset().x, GetOffset().y, GetDimensions().width, GetDimensions().height};
-        SetAlignment(vertAlignment, horiAlignment);
+        // TODO: Could do something fancier with changing the x/y based on the new width/height
+        // This would be "easy" to do as OnScreenSizeChange is reacting to an event that passes width/height as the
+        // parameters (which we currently ignore). Alternatively, we have a pointer to settings, anyway.
+        rec = {GetPosition().x, GetPosition().y, GetDimensions().width, GetDimensions().height};
         UpdateChildren();
+    }
+
+    Dimensions Window::GetDimensions() const
+    {
+        return Dimensions{settings->screenWidth * widthPercent, settings->screenHeight * heightPercent};
+    }
+
+    /**
+     *
+     * @param _widthPercent Width as percent of screen (1-100)
+     * @param _heightPercent Height as percent of screen (1-100)
+     */
+    void Window::SetDimensionsPercent(float _widthPercent, float _heightPercent)
+    {
+        widthPercent = _widthPercent / 100;
+        heightPercent = _heightPercent / 100;
+    }
+
+    void Window::SetPosition(float x, float y)
+    {
+        rec.x = x;
+        rec.y = y;
+    }
+
+    Vector2 Window::GetPosition() const
+    {
+        return {rec.x, rec.y};
     }
 
     void Window::DrawDebug2D()
@@ -733,21 +750,47 @@ namespace sage
     {
     }
 
-    [[nodiscard]] Window* GameUIEngine::CreateWindow(
-        Image _nPatchTexture,
-        float _xOffsetPercent,
-        float _yOffsetPercent,
+    Window* GameUIEngine::CreateWindow(
+        Texture _nPatchTexture,
+        float x,
+        float y,
         float _widthPercent,
         float _heightPercent,
         WindowTableAlignment _alignment)
     {
         windows.push_back(std::make_unique<Window>());
         auto& window = windows.back();
+        window->SetPosition(x, y);
+        window->SetDimensionsPercent(_widthPercent, _heightPercent);
+        window->tableAlignment = _alignment;
+        window->settings = settings;
+        window->tex = _nPatchTexture;
+        window->rec = {
+            window->GetPosition().x,
+            window->GetPosition().y,
+            window->GetDimensions().width,
+            window->GetDimensions().height};
+
+        entt::sink sink{userInput->onWindowUpdate};
+        sink.connect<&Window::OnScreenSizeChange>(window.get());
+        return window.get();
+    }
+
+    WindowDocked* GameUIEngine::CreateWindowDocked(
+        Texture _nPatchTexture,
+        float _xOffsetPercent,
+        float _yOffsetPercent,
+        float _widthPercent,
+        float _heightPercent,
+        WindowTableAlignment _alignment)
+    {
+        windows.push_back(std::make_unique<WindowDocked>());
+        auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
         window->settings = settings;
-        window->mainNPatchTexture = LoadTextureFromImage(_nPatchTexture);
+        window->tex = _nPatchTexture;
         window->rec = {
             window->GetOffset().x,
             window->GetOffset().y,
@@ -755,9 +798,9 @@ namespace sage
             window->GetDimensions().height};
 
         entt::sink sink{userInput->onWindowUpdate};
-        sink.connect<&Window::OnScreenSizeChange>(window.get());
+        sink.connect<&WindowDocked::OnScreenSizeChange>(window);
 
-        return window.get();
+        return window;
     }
 
     void GameUIEngine::DrawDebug2D()
