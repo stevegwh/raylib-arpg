@@ -305,6 +305,9 @@ namespace sage
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
     {
+        // TODO: Need FloatingWindow or AlignedWindow which either uses raw pixel location or alignment/position
+        // Have FloatingWindow as the base class and GetPos which returns pixels. In AlignedWindow override GetPos
+        // and convert its stored percent to the offset + alignment?
         bool hidden = false;
         const Settings* settings; // for screen width/height
 

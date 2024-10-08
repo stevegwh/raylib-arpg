@@ -190,6 +190,10 @@ namespace sage
         float originalRatio = static_cast<float>(tex.width) / tex.height;
         float finalWidth, finalHeight;
 
+        // TODO: Should have OverflowBehaviour. I think SHRINK_TO_FIT and SHRINK_ROW_TO_FIT would be good
+        // TODO: Should have ScaleBehaviour? DO_NOT_SCALE, STRETCH_TO_FIT, ZOOM_TO_FIT, STRETCH_MAINTAIN_RATIO.
+        // Need better names...
+
         if (originalRatio > 1.0f) // Wider than tall
         {
             finalWidth = availableWidth;
@@ -279,6 +283,8 @@ namespace sage
         heightPercent = _heightPercent / 100;
     }
 
+    // TODO: Maybe make WindowFixed and WindowFloating and change how it handles position
+    // Essentially, one relies on alignment and offsets and one just uses a raw position
     Vector2 Window::GetOffset() const
     {
         return Vector2{settings->screenWidth * xOffsetPercent, settings->screenHeight * yOffsetPercent};
