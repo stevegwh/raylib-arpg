@@ -157,14 +157,31 @@ namespace sage
 
     void AbilitySlot::OnMouseStartHover()
     {
-        // TODO: Should start a timer before tooltip shows
-        auto& ability = *playerAbilitySystem->GetAbility(slotNumber);
-        // GameUiFactory::CreateAbilityToolTip(uiEngine, ability, {rec.x, rec.y});
+        hoverTimer = GetTime();
         ImageBox::OnMouseStartHover();
+    }
+
+    void AbilitySlot::OnMouseContinueHover()
+    {
+        ImageBox::OnMouseContinueHover();
+        if (GetTime() < hoverTimer + hoverTimerThreshold) return;
+        if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
+        {
+            const Vector2 mousePos = GetMousePosition();
+            const float offsetX = mousePos.x - rec.x;
+            const float offsetY = mousePos.y - rec.y;
+            tooltipWindow = GameUiFactory::CreateAbilityToolTip(
+                parent->GetWindow()->uiEngine, *ability, {rec.x + offsetX, rec.y + offsetY});
+        }
     }
 
     void AbilitySlot::OnMouseStopHover()
     {
+        hoverTimer = 0;
+        if (tooltipWindow.has_value())
+        {
+            tooltipWindow.value()->Remove();
+        }
         ImageBox::OnMouseStopHover();
     }
 
@@ -350,6 +367,12 @@ namespace sage
         rec.y = yOffset + originalYOffset;
 
         UpdateChildren();
+    }
+
+    void Window::Remove()
+    {
+        hidden = true;
+        markForRemoval = true;
     }
 
     void Window::OnScreenSizeChange()
@@ -759,6 +782,22 @@ namespace sage
     {
     }
 
+    void GameUIEngine::pruneWindows()
+    {
+        for (auto it = windows.begin(); it != windows.end();)
+        {
+            auto& window = *it;
+            if (window->markForRemoval)
+            {
+                windows.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
     Window* GameUIEngine::CreateWindow(
         Texture _nPatchTexture,
         float x,
@@ -768,7 +807,8 @@ namespace sage
         WindowTableAlignment _alignment)
     {
         windows.push_back(std::make_unique<Window>());
-        auto& window = windows.back();
+        const auto& window = windows.back();
+        window->uiEngine = this;
         window->SetPosition(x, y);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
@@ -795,6 +835,7 @@ namespace sage
     {
         windows.push_back(std::make_unique<WindowDocked>());
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
+        window->uiEngine = this;
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
@@ -812,18 +853,18 @@ namespace sage
         return window;
     }
 
-    void GameUIEngine::DrawDebug2D()
+    void GameUIEngine::DrawDebug2D() const
     {
-        for (auto& window : windows)
+        for (const auto& window : windows)
         {
             if (window->hidden) continue;
             window->DrawDebug2D();
         }
     }
 
-    void GameUIEngine::Draw2D()
+    void GameUIEngine::Draw2D() const
     {
-        for (auto& window : windows)
+        for (const auto& window : windows)
         {
             if (window->hidden) continue;
             window->Draw2D();
@@ -833,7 +874,7 @@ namespace sage
         {
             if (std::holds_alternative<CellElement*>(draggedElement.value()))
             {
-                auto cell = std::get<CellElement*>(draggedElement.value());
+                const auto cell = std::get<CellElement*>(draggedElement.value());
                 auto mousePos = GetMousePosition();
                 DrawTexture(
                     cell->tex, mousePos.x - draggedElementOffset.x, mousePos.y - draggedElementOffset.y, WHITE);
@@ -843,7 +884,8 @@ namespace sage
 
     void GameUIEngine::Update()
     {
-        auto mousePos = GetMousePosition();
+        pruneWindows();
+        const auto mousePos = GetMousePosition();
 
         // Reset cursor state if not dragging
         if (!draggedElement.has_value())
@@ -867,9 +909,12 @@ namespace sage
             draggedTimer = 0;
         }
 
-        // Process all windows
+        const auto windowCount = windows.size();
         for (const auto& window : windows)
         {
+            // Make sure we do not process newly added windows this cycle
+            if (windows.size() > windowCount) break;
+
             if (window->hidden) continue;
 
             // Handle window hover state
@@ -904,19 +949,23 @@ namespace sage
 
                         if (!draggedElement.has_value())
                         {
-                            element->OnMouseStartHover();
+                            if (!element->mouseHover)
+                            {
+                                element->OnMouseStartHover();
+                            }
                         }
 
                         // Handle mouse interactions
                         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !draggedElement.has_value())
                         {
                             element->OnMouseClick();
+                            element->OnMouseStopHover();
                         }
                         else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
                         {
                             if (std::holds_alternative<CellElement*>(draggedElement.value()))
                             {
-                                auto draggedCellElement = std::get<CellElement*>(draggedElement.value());
+                                const auto draggedCellElement = std::get<CellElement*>(draggedElement.value());
                                 element->OnDragDropHere(draggedCellElement);
                             }
                         }
@@ -947,12 +996,12 @@ namespace sage
                             else if (currentTime > draggedTimer + draggedTimerThreshold)
                             {
                                 // Add a slight offset to make it more obvious the drag has begun
-                                Vector2 offset = {
+                                const Vector2 offset = {
                                     static_cast<float>(settings->screenWidth * 0.005),
                                     static_cast<float>(settings->screenHeight * 0.005)};
 
                                 // Drag start
-                                if (auto titleBar = dynamic_cast<TitleBar*>(element.get()))
+                                if (const auto titleBar = dynamic_cast<TitleBar*>(element.get()))
                                 {
 
                                     draggedElement = titleBar->parent->GetWindow();
@@ -970,6 +1019,7 @@ namespace sage
                                 draggedTimer = 0;
                             }
                         }
+
                         break; // We've found our element, stop processing
                     }
         }

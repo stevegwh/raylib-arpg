@@ -144,8 +144,24 @@ namespace sage
         }
     }
 
-    void GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos)
+    Window* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos)
     {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        auto* window =
+            engine->CreateWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({10, 2, 5, 5});
+
+        {
+            auto table = window->CreateTable();
+            auto row = table->CreateTableRow();
+            row->SetPaddingPixel({15, 0, 0, 0});
+            auto cell = row->CreateTableCell();
+            cell->CreateTextbox(ability.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+        }
+
+        return window;
     }
 
     void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)

@@ -106,7 +106,7 @@ namespace sage
             }
         };
 
-        bool MouseInside(Vector2 mousePos)
+        bool MouseInside(Vector2 mousePos) const
         {
             return mousePos.x >= rec.x && mousePos.x <= rec.x + rec.width && mousePos.y >= rec.y &&
                    mousePos.y <= rec.y + rec.height;
@@ -188,6 +188,10 @@ namespace sage
             onStartHover.publish();
         };
 
+        virtual void OnMouseContinueHover()
+        {
+        }
+
         virtual void OnMouseStopHover()
         {
             mouseHover = false;
@@ -258,11 +262,15 @@ namespace sage
 
     struct AbilitySlot : public ImageBox
     {
+        double hoverTimer = 0;
+        float hoverTimerThreshold = 0.4;
+        std::optional<Window*> tooltipWindow;
         PlayerAbilitySystem* playerAbilitySystem;
         int slotNumber;
         void SetAbilityInfo();
         void OnDragDropHere(CellElement* droppedElement) override;
         void OnMouseStartHover() override;
+        void OnMouseContinueHover() override;
         void OnMouseStopHover() override;
     };
 
@@ -312,6 +320,8 @@ namespace sage
         float heightPercent = 0; // Height as percent of screen space
 
         bool hidden = false;
+        bool markForRemoval = false;
+
         GameUIEngine* uiEngine;
         const Settings* settings; // for screen width/height
         entt::sigh<void()> onMouseStartHover;
@@ -326,6 +336,7 @@ namespace sage
         [[nodiscard]] Vector2 GetPosition() const;
 
         Table* CreateTable();
+        void Remove();
         virtual void OnScreenSizeChange();
         void DrawDebug2D() override;
         void Draw2D() override;
@@ -349,6 +360,7 @@ namespace sage
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
+        std::vector<std::unique_ptr<Window>> delayedWindows;
         Cursor* cursor;
         UserInput* userInput;
         Settings* settings;
@@ -358,6 +370,8 @@ namespace sage
         std::optional<CellElement*> hoveredDraggableElement{};
         double draggedTimer = 0;
         float draggedTimerThreshold = 0.25f;
+
+        void pruneWindows();
 
       public:
         Window* CreateWindow(
@@ -376,8 +390,8 @@ namespace sage
             float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
 
-        void DrawDebug2D();
-        void Draw2D();
+        void DrawDebug2D() const;
+        void Draw2D() const;
         void Update();
 
         GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor);
