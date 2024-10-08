@@ -3,6 +3,7 @@
 //
 
 #include "GameUiFactory.hpp"
+#include "components/Ability.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
@@ -32,9 +33,9 @@ namespace sage
 
         auto row0 = table->CreateTableRow();
         auto cell0 = row0->CreateTableCell(95);
-        cell0->CreateTitleBar(window, "Title Bar", 12);
+        cell0->CreateTitleBar("Title Bar", 12);
         auto cell01 = row0->CreateTableCell();
-        cell01->CreateCloseButton(window, LoadImage("resources/icon.png"));
+        cell01->CreateCloseButton(LoadImage("resources/icon.png"));
 
         auto row = table->CreateTableRow(75);
         auto cell = row->CreateTableCell(50);
@@ -50,11 +51,11 @@ namespace sage
         auto cell3 = row->CreateTableCell();
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         cell3->tex = window->tex;
-        auto imagebox = cell2->CreateImagebox(window, LoadImage("resources/icon.png"));
+        auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
         imagebox->SetGrayscale();
         // cell2->SetPaddingPercent({10, 10, 10, 10});
         // imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-        auto image2 = cell3->CreateImagebox(window, LoadImage("resources/test.png"));
+        auto image2 = cell3->CreateImagebox(LoadImage("resources/test.png"));
         image2->SetGrayscale();
         image2->SetHoriAlignment(HoriAlignment::CENTER);
 
@@ -94,16 +95,16 @@ namespace sage
 
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
-            auto slot = cell->CreateAbilitySlot(playerAbilitySystem, window, 0);
+            auto slot = cell->CreateAbilitySlot(playerAbilitySystem, 0);
             // cell->SetPaddingPercent({2, 2, 2, 2});
             auto cell1 = row->CreateTableCell();
-            auto slot1 = cell1->CreateAbilitySlot(playerAbilitySystem, window, 1);
+            auto slot1 = cell1->CreateAbilitySlot(playerAbilitySystem, 1);
             // cell1->SetPaddingPercent({2, 2, 2, 2});
             auto cell2 = row->CreateTableCell();
-            auto slot2 = cell2->CreateAbilitySlot(playerAbilitySystem, window, 2);
+            auto slot2 = cell2->CreateAbilitySlot(playerAbilitySystem, 2);
             // cell2->SetPaddingPercent({2, 2, 2, 2});
             auto cell3 = row->CreateTableCell();
-            auto slot3 = cell3->CreateAbilitySlot(playerAbilitySystem, window, 3);
+            auto slot3 = cell3->CreateAbilitySlot(playerAbilitySystem, 3);
             // cell3->SetPaddingPercent({2, 2, 2, 2});
 
             {
@@ -129,8 +130,8 @@ namespace sage
                 auto row = table->CreateTableRow(20);
                 auto cell = row->CreateTableCell(80);
                 auto cell2 = row->CreateTableCell(20);
-                cell->CreateTitleBar(window, "Floating Window", 12);
-                auto closeButton = cell2->CreateCloseButton(window, LoadImage("resources/icon.png"));
+                cell->CreateTitleBar("Floating Window", 12);
+                auto closeButton = cell2->CreateCloseButton(LoadImage("resources/icon.png"));
                 closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
                 closeButton->SetVertAlignment(VertAlignment::TOP);
             }
@@ -141,6 +142,10 @@ namespace sage
                 cell->CreateTextbox("Example text here.", 10, TextBox::OverflowBehaviour::WORD_WRAP);
             }
         }
+    }
+
+    void GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos)
+    {
     }
 
     void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)

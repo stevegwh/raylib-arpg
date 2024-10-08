@@ -4,6 +4,7 @@
 
 #include "GameUiEngine.hpp"
 #include "Cursor.hpp"
+#include "GameUiFactory.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
@@ -154,6 +155,19 @@ namespace sage
         }
     }
 
+    void AbilitySlot::OnMouseStartHover()
+    {
+        // TODO: Should start a timer before tooltip shows
+        auto& ability = *playerAbilitySystem->GetAbility(slotNumber);
+        // GameUiFactory::CreateAbilityToolTip(uiEngine, ability, {rec.x, rec.y});
+        ImageBox::OnMouseStartHover();
+    }
+
+    void AbilitySlot::OnMouseStopHover()
+    {
+        ImageBox::OnMouseStopHover();
+    }
+
     void ImageBox::SetGrayscale()
     {
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
@@ -264,7 +278,7 @@ namespace sage
 
     void CloseButton::OnMouseClick()
     {
-        parentWindow->hidden = true;
+        parent->GetWindow()->hidden = true;
     }
 
     void WindowDocked::OnScreenSizeChange()
@@ -658,8 +672,7 @@ namespace sage
         }
     }
 
-    AbilitySlot* TableCell::CreateAbilitySlot(
-        PlayerAbilitySystem* _playerAbilitySystem, Window* _parentWindow, int _slotNumber)
+    AbilitySlot* TableCell::CreateAbilitySlot(PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber)
     {
         children = std::make_unique<AbilitySlot>();
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
@@ -667,19 +680,17 @@ namespace sage
         abilitySlot->draggable = true;
         abilitySlot->canReceiveDragDrops = true;
         abilitySlot->slotNumber = _slotNumber;
-        abilitySlot->parentWindow = _parentWindow;
-        entt::sink sink{_parentWindow->onMouseStopHover};
+        entt::sink sink{GetWindow()->onMouseStopHover};
         sink.connect<&AbilitySlot::OnMouseStopHover>(abilitySlot);
         abilitySlot->SetAbilityInfo();
         UpdateChildren();
         return abilitySlot;
     }
 
-    TitleBar* TableCell::CreateTitleBar(Window* window, const std::string& _title, float fontSize)
+    TitleBar* TableCell::CreateTitleBar(const std::string& _title, float fontSize)
     {
         children = std::make_unique<TitleBar>();
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
-        titleBar->parentWindow = window;
         titleBar->draggable = true;
         titleBar->fontSize = fontSize;
         titleBar->overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
@@ -688,12 +699,11 @@ namespace sage
         return titleBar;
     }
 
-    CloseButton* TableCell::CreateCloseButton(Window* _parentWindow, Image _tex)
+    CloseButton* TableCell::CreateCloseButton(Image _tex)
     {
         children = std::make_unique<CloseButton>();
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
-        closeButton->parentWindow = _parentWindow;
-        entt::sink sink{_parentWindow->onMouseStopHover};
+        entt::sink sink{GetWindow()->onMouseStopHover};
         sink.connect<&ImageBox::OnMouseStopHover>(closeButton);
         closeButton->tex = LoadTextureFromImage(_tex);
         UpdateChildren();
@@ -712,13 +722,12 @@ namespace sage
         return textbox;
     }
 
-    ImageBox* TableCell::CreateImagebox(Window* _parentWindow, Image _tex)
+    ImageBox* TableCell::CreateImagebox(Image _tex)
     {
         children = std::make_unique<ImageBox>();
         auto* image = dynamic_cast<ImageBox*>(children.get());
         image->draggable = true;
-        image->parentWindow = _parentWindow;
-        entt::sink sink{_parentWindow->onMouseStopHover};
+        entt::sink sink{GetWindow()->onMouseStopHover};
         sink.connect<&ImageBox::OnMouseStopHover>(image);
         image->tex = LoadTextureFromImage(_tex);
         UpdateChildren();
@@ -946,7 +955,7 @@ namespace sage
                                 if (auto titleBar = dynamic_cast<TitleBar*>(element.get()))
                                 {
 
-                                    draggedElement = titleBar->parentWindow;
+                                    draggedElement = titleBar->parent->GetWindow();
                                     draggedElementOffset.x = mousePos.x - window->rec.x - offset.x;
                                     draggedElementOffset.y = mousePos.y - window->rec.y - offset.y;
                                 }
