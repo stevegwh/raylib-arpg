@@ -528,10 +528,30 @@ namespace sage
         }
     }
 
+    TableGrid* Window::CreateTableGrid(int rows, int cols, float cellSpacing)
+    {
+        children.push_back(std::make_unique<TableGrid>());
+        const auto& table = dynamic_cast<TableGrid*>(children.back().get());
+        table->parent = this;
+        table->cellSpacing = cellSpacing;
+        // Create rows and cells with initial autoSize = true
+        for (int i = 0; i < rows; ++i)
+        {
+            TableRow* row = table->CreateTableRow();
+            for (int j = 0; j < cols; ++j)
+            {
+                row->CreateTableCell();
+            }
+        }
+        UpdateChildren();
+        return table;
+    }
+
     Table* Window::CreateTable()
     {
         children.push_back(std::make_unique<Table>());
         const auto& table = children.back();
+        table->parent = this;
         UpdateChildren();
         return table.get();
     }
@@ -540,6 +560,7 @@ namespace sage
     {
         children.push_back(std::make_unique<Table>());
         const auto& table = children.back();
+        table->parent = this;
         table->autoSize = false;
         if (tableAlignment == WindowTableAlignment::STACK_VERTICAL)
         {
@@ -675,6 +696,66 @@ namespace sage
         }
     }
 
+    void TableGrid::UpdateChildren()
+    {
+        if (children.empty()) return;
+        // 1. Get number of columns
+        int cols = children[0]->children.size();
+
+        // 2. Calculate available space
+        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
+        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
+
+        // 3. Find the maximum power-of-two cell size that fits
+        int maxCellSize = 1 << static_cast<int>(std::floor(
+                              std::log2(std::min(availableWidth / cols, availableHeight / children.size()))));
+
+        // 4. Calculate actual cell size with spacing
+        float cellSize = (std::min(availableWidth / cols, availableHeight / children.size()) - cellSpacing) /
+                         maxCellSize * maxCellSize;
+
+        // 5. Calculate total grid dimensions
+        float gridWidth = cellSize * cols + cellSpacing * (cols - 1); // Account for spacing between columns
+        float gridHeight =
+            cellSize * children.size() + cellSpacing * (children.size() - 1); // Account for spacing between rows
+
+        // 6. Calculate starting position to center the grid
+        float startX = rec.x + (availableWidth - gridWidth) / 2.0f;
+        float startY = rec.y + (availableHeight - gridHeight) / 2.0f;
+
+        // 7. Apply dimensions to rows and cells
+        float currentY = startY;
+        for (const auto& row : children)
+        {
+            row->rec.height = cellSize;
+            row->rec.y = currentY;
+            row->rec.x = startX;
+            row->rec.width = gridWidth;
+
+            float currentX = row->rec.x;
+            for (const auto& cell : row->children)
+            {
+                cell->rec.width = cellSize;
+                cell->rec.x = currentX;
+                cell->rec.y = currentY;
+                cell->rec.height = cellSize;
+                currentX += cellSize + cellSpacing; // Add spacing after each cell
+            }
+            currentY += cellSize + cellSpacing; // Add spacing after each row
+        }
+
+        for (auto& row : children)
+        {
+            for (auto& cell : row->children)
+            {
+                if (cell->children)
+                {
+                    cell->children->UpdateDimensions();
+                }
+            }
+        }
+    }
+
     void Table::DrawDebug2D()
     {
         std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
@@ -699,11 +780,6 @@ namespace sage
 
     void Table::UpdateChildren()
     {
-        if (grid)
-        {
-            UpdateGrid();
-            return;
-        }
         // Account for table padding
         float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
         float startY = rec.y + GetPadding().up;
@@ -763,87 +839,11 @@ namespace sage
         }
     }
 
-    void Table::CreateGrid(int rows, int cols)
-    {
-        assert(children.empty());
-        // Create rows and cells with initial autoSize = true
-        for (int i = 0; i < rows; ++i)
-        {
-            TableRow* row = CreateTableRow();
-            for (int j = 0; j < cols; ++j)
-            {
-                row->CreateTableCell();
-            }
-        }
-        UpdateGrid();
-        grid = true;
-    }
-
-    void Table::UpdateGrid()
-    {
-        // 1. Get number of columns
-        int cols = children[0]->children.size();
-
-        // 2. Calculate available space
-        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
-        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
-
-        // 3. Find the maximum power-of-two cell size that fits
-        int maxCellSize = 1 << static_cast<int>(std::floor(
-                              std::log2(std::min(availableWidth / cols, availableHeight / children.size()))));
-
-        // 4. Calculate actual cell size with spacing
-        float cellSpacing = 4.0f; // Example spacing value, adjust as needed
-        float cellSize = (std::min(availableWidth / cols, availableHeight / children.size()) - cellSpacing) /
-                         maxCellSize * maxCellSize;
-
-        // 5. Calculate total grid dimensions
-        float gridWidth = cellSize * cols + cellSpacing * (cols - 1); // Account for spacing between columns
-        float gridHeight =
-            cellSize * children.size() + cellSpacing * (children.size() - 1); // Account for spacing between rows
-
-        // 6. Calculate starting position to center the grid
-        float startX = rec.x + (availableWidth - gridWidth) / 2.0f;
-        float startY = rec.y + (availableHeight - gridHeight) / 2.0f;
-
-        // 7. Apply dimensions to rows and cells
-        float currentY = startY;
-        for (const auto& row : children)
-        {
-            row->rec.height = cellSize;
-            row->rec.y = currentY;
-            row->rec.x = startX;
-            row->rec.width = gridWidth;
-
-            float currentX = row->rec.x;
-            for (const auto& cell : row->children)
-            {
-                cell->rec.width = cellSize;
-                cell->rec.x = currentX;
-                cell->rec.y = currentY;
-                cell->rec.height = cellSize;
-                currentX += cellSize + cellSpacing; // Add spacing after each cell
-            }
-            currentY += cellSize + cellSpacing; // Add spacing after each row
-        }
-
-        for (auto& row : children)
-        {
-            for (auto& cell : row->children)
-            {
-                if (cell->children)
-                {
-                    cell->children->UpdateDimensions();
-                }
-            }
-        }
-    }
-
     TableRow* Table::CreateTableRow()
     {
-        assert(!grid);
         children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
+        row->parent = this;
         UpdateChildren();
         return row.get();
     }
@@ -855,10 +855,10 @@ namespace sage
      */
     TableRow* Table::CreateTableRow(float requestedHeight)
     {
-        assert(!grid);
         assert(requestedHeight <= 100 && requestedHeight >= 0);
         children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
+        row->parent = this;
         row->autoSize = false;
         row->requestedHeight = requestedHeight;
         UpdateChildren();
@@ -1028,7 +1028,8 @@ namespace sage
         children = std::make_unique<ImageBox>();
         auto* image = dynamic_cast<ImageBox*>(children.get());
         image->draggable = true;
-        entt::sink sink{GetWindow()->onMouseStopHover};
+        auto window = GetWindow();
+        entt::sink sink{window->onMouseStopHover};
         sink.connect<&ImageBox::OnMouseStopHover>(image);
         image->tex = _tex;
         UpdateChildren();

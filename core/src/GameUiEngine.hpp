@@ -317,20 +317,23 @@ namespace sage
         ~TableRow() override = default;
     };
 
-    struct Table final : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
+    struct Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
     {
-        bool grid = false;
         float requestedHeight{};
         float requestedWidth{};
         bool autoSize = true;
-        void UpdateGrid();
         TableRow* CreateTableRow();
         TableRow* CreateTableRow(float _requestedHeight);
         void UpdateChildren() override;
-        void CreateGrid(int rows, int cols);
         void DrawDebug2D() override;
         void Draw2D() override;
         ~Table() override = default;
+    };
+
+    struct TableGrid final : public Table
+    {
+        float cellSpacing = 0;
+        void UpdateChildren() override;
     };
 
     struct Window : TableElement<std::vector<std::unique_ptr<Table>>, void>
@@ -358,6 +361,7 @@ namespace sage
         virtual void SetPosition(float x, float y);
         [[nodiscard]] Vector2 GetPosition() const;
 
+        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
         Table* CreateTable();
         Table* CreateTable(float requestedWidthOrHeight);
         void Remove();
