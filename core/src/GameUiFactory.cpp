@@ -165,7 +165,7 @@ namespace sage
         auto window =
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({2, 2, 5, 5});
+        window->SetPaddingPercent({2, 2, 4, 4});
 
         {
             auto table = window->CreateTable(10);
@@ -181,21 +181,23 @@ namespace sage
         }
         {
             auto table = window->CreateTable();
-            table->gridSpacing = true;
+            table->CreateGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS);
 
-            for (unsigned int i = 0; i < INVENTORY_MAX_ROWS; ++i)
+            for (auto& row : table->children)
             {
-                auto row = table->CreateTableRow();
-                row->SetPaddingPixel({2, 2, 2, 2});
-                for (unsigned int j = 0; j < INVENTORY_MAX_COLS; ++j)
+                // row->SetPaddingPixel({2, 2, 2, 2});
+                for (auto& cell : row->children)
                 {
-                    auto cell = row->CreateTableCell();
-                    cell->SetPaddingPixel({2, 2, 2, 2});
+                    // cell->SetPaddingPixel({2, 2, 2, 2});
                     auto image = ResourceManager::GetInstance().TextureLoad("resources/test.png");
                     auto imagebox = cell->CreateImagebox(image);
                     imagebox->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                    // imagebox->SetHoriAlignment(HoriAlignment::CENTER);
+                    // imagebox->SetVertAlignment(VertAlignment::MIDDLE);
                 }
             }
+
+            // table->UpdateGrid();
         }
         // window->hidden;
         return window;
