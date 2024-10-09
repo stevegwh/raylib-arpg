@@ -5,8 +5,6 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include <memory>
-#include <vector>
 
 #include "abilities/AbilityData.hpp"
 
@@ -40,7 +38,6 @@ namespace sage
     {
 
       public:
-        // int hp = 100;
         CombatData data;
         CombatableActorType actorType = CombatableActorType::WAVEMOB;
         bool dying = false;

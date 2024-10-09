@@ -9,11 +9,11 @@
 
 namespace sage
 {
+    static constexpr unsigned int INVENTORY_MAX_ROWS = 4;
+    static constexpr unsigned int INVENTORY_MAX_COLS = 4;
     struct InventoryComponent
     {
-        static constexpr int MAX_ROW = 4;
-        static constexpr int MAX_COL = 4;
-        std::array<std::array<entt::entity, MAX_COL>, MAX_ROW> items;
+        std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items; // ItemComponent etc
         void AddItem(entt::entity entity, int slotNumber);
         void RemoveItem(int slotNumber);
         void UseItem(int slotNumber);
