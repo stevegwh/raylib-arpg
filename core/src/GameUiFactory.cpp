@@ -180,8 +180,7 @@ namespace sage
             closeButton->SetVertAlignment(VertAlignment::TOP);
         }
         {
-            auto table = window->CreateTable();
-            table->CreateGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS);
+            auto table = window->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
 
             for (auto& row : table->children)
             {
