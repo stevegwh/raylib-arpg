@@ -168,12 +168,13 @@ namespace sage
         window->SetPaddingPercent({2, 2, 4, 4});
 
         {
-            auto table = window->CreateTable(10);
+            auto table = window->CreateTable(4);
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
             auto titlebar = cell->CreateTitleBar("Inventory", 12);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
+            titlebar->SetVertAlignment(VertAlignment::MIDDLE);
             auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
             auto closeButton = cell2->CreateCloseButton(tex);
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
@@ -181,13 +182,10 @@ namespace sage
         }
         {
             auto table = window->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
-
             for (auto& row : table->children)
             {
-                // row->SetPaddingPixel({2, 2, 2, 2});
                 for (auto& cell : row->children)
                 {
-                    // cell->SetPaddingPixel({2, 2, 2, 2});
                     auto image = ResourceManager::GetInstance().TextureLoad("resources/test.png");
                     auto imagebox = cell->CreateImagebox(image);
                     imagebox->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
@@ -195,8 +193,6 @@ namespace sage
                     // imagebox->SetVertAlignment(VertAlignment::MIDDLE);
                 }
             }
-
-            // table->UpdateGrid();
         }
         // window->hidden;
         return window;
