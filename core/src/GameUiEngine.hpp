@@ -228,26 +228,37 @@ namespace sage
         ~TextBox() override = default;
     };
 
-    struct ImageBox : public CellElement
+    class ImageBox : public CellElement
     {
+      public:
         enum class OverflowBehaviour
         {
             SHRINK_TO_FIT,
             SHRINK_ROW_TO_FIT
         };
-        OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
-        std::optional<Shader> shader;
-
         void OnMouseStartHover() override;
         void OnMouseStopHover() override;
         void OnMouseClick() override;
-
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void SetGrayscale();
         void RemoveShader();
         void UpdateDimensions() override;
         void Draw2D() override;
         ~ImageBox() override = default;
+
+      protected:
+        OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
+        std::optional<Shader> shader;
+
+      private:
+        [[nodiscard]] Dimensions calculateAvailableSpace() const;
+        [[nodiscard]] float calculateAspectRatio() const;
+        [[nodiscard]] Dimensions calculateInitialDimensions(const Dimensions& space) const;
+        [[nodiscard]] Vector2 calculateAlignmentOffset(
+            const Dimensions& dimensions, const Dimensions& space) const;
+        void updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space);
+        void shrinkRowToFit() const;
+        [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
     struct CloseButton final : public ImageBox
