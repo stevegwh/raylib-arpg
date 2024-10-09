@@ -42,7 +42,8 @@ namespace sage
     {
         LEFT,
         RIGHT,
-        CENTER
+        CENTER,
+        WINDOW_CENTER
     };
 
     enum class VertAlignment

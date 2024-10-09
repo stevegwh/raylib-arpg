@@ -116,6 +116,13 @@ namespace sage
         {
             horiOffset = (availableWidth - textSize.x) / 2;
         }
+        else if (horiAlignment == HoriAlignment::WINDOW_CENTER)
+        {
+            auto window = parent->GetWindow();
+            float windowAvailableWidth =
+                window->rec.width - (window->GetPadding().left + window->GetPadding().right);
+            horiOffset = (windowAvailableWidth - textSize.x) / 2;
+        }
 
         rec = {
             parent->rec.x + parent->GetPadding().left + horiOffset,
