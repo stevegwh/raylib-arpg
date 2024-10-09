@@ -319,13 +319,15 @@ namespace sage
 
     struct Table final : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
     {
+        bool grid = false;
         float requestedHeight{};
         float requestedWidth{};
         bool autoSize = true;
-        bool gridSpacing = false; // Aligns row spacing with cell spacing
+        void UpdateGrid();
         TableRow* CreateTableRow();
         TableRow* CreateTableRow(float _requestedHeight);
         void UpdateChildren() override;
+        void CreateGrid(int rows, int cols);
         void DrawDebug2D() override;
         void Draw2D() override;
         ~Table() override = default;
