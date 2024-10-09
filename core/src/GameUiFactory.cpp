@@ -154,6 +154,7 @@ namespace sage
 
     Window* GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
     {
+        // TODO: Add SetPaddingWindowPercent
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
@@ -165,10 +166,10 @@ namespace sage
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({2, 2, 5, 5});
-        auto table = window->CreateTable();
 
         {
-            auto row = table->CreateTableRow(8);
+            auto table = window->CreateTable(10);
+            auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
             auto titlebar = cell->CreateTitleBar("Inventory", 12);
@@ -179,16 +180,17 @@ namespace sage
             closeButton->SetVertAlignment(VertAlignment::TOP);
         }
         {
+            auto table = window->CreateTable();
+            table->gridSpacing = true;
 
             for (unsigned int i = 0; i < INVENTORY_MAX_ROWS; ++i)
             {
                 auto row = table->CreateTableRow();
-                // row->SetPaddingPercent({10, 10, 0, 0});
-
+                row->SetPaddingPixel({2, 2, 2, 2});
                 for (unsigned int j = 0; j < INVENTORY_MAX_COLS; ++j)
                 {
                     auto cell = row->CreateTableCell();
-                    cell->SetPaddingPercent({2, 2, 2, 2});
+                    cell->SetPaddingPixel({2, 2, 2, 2});
                     auto image = ResourceManager::GetInstance().TextureLoad("resources/test.png");
                     auto imagebox = cell->CreateImagebox(image);
                     imagebox->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);

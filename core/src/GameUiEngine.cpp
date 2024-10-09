@@ -528,10 +528,27 @@ namespace sage
         }
     }
 
-    [[nodiscard]] Table* Window::CreateTable()
+    Table* Window::CreateTable()
     {
         children.push_back(std::make_unique<Table>());
         const auto& table = children.back();
+        UpdateChildren();
+        return table.get();
+    }
+
+    Table* Window::CreateTable(float requestedWidthOrHeight)
+    {
+        children.push_back(std::make_unique<Table>());
+        const auto& table = children.back();
+        table->autoSize = false;
+        if (tableAlignment == WindowTableAlignment::STACK_VERTICAL)
+        {
+            table->requestedHeight = requestedWidthOrHeight;
+        }
+        else if (tableAlignment == WindowTableAlignment::STACK_HORIZONTAL)
+        {
+            table->requestedWidth = requestedWidthOrHeight;
+        }
         UpdateChildren();
         return table.get();
     }
@@ -549,33 +566,109 @@ namespace sage
         switch (tableAlignment)
         {
         case WindowTableAlignment::STACK_HORIZONTAL: {
-            const float maxWidth = std::ceil(availableWidth / children.size());
-            for (int i = 0; i < children.size(); ++i)
+            float totalRequestedPercent = 0.0f;
+            int autoSizeCount = 0;
+
+            // First pass: Calculate total of percentage-based widths
+            for (const auto& table : children)
             {
-                const auto& table = children.at(i);
+                if (table->autoSize)
+                {
+                    autoSizeCount++;
+                }
+                else
+                {
+                    totalRequestedPercent += table->requestedWidth;
+                }
+            }
+
+            if (totalRequestedPercent > 100.0f)
+            {
+                totalRequestedPercent = 100.0f;
+            }
+
+            float remainingPercent = 100.0f - totalRequestedPercent;
+            float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+
+            // Second pass: Update each table
+            float currentX = startX;
+            for (const auto& table : children)
+            {
                 table->parent = this;
                 table->rec = rec;
-                table->rec.width = maxWidth;
-                table->rec.x = startX + (maxWidth * i);
+
+                float tableWidth;
+                if (table->autoSize)
+                {
+                    tableWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
+                }
+                else
+                {
+                    tableWidth = std::ceil(availableWidth * (table->requestedWidth / 100.0f));
+                }
+
+                table->rec.width = tableWidth;
+                table->rec.x = currentX;
                 table->rec.height = availableHeight;
                 table->rec.y = startY;
+
                 if (!table->children.empty()) table->UpdateChildren();
+
+                currentX += tableWidth;
             }
             break;
         }
 
         case WindowTableAlignment::STACK_VERTICAL: {
-            const float maxHeight = std::ceil(availableHeight / children.size());
-            for (int i = 0; i < children.size(); ++i)
+            float totalRequestedPercent = 0.0f;
+            int autoSizeCount = 0;
+
+            // First pass: Calculate total of percentage-based heights
+            for (const auto& table : children)
             {
-                const auto& table = children.at(i);
+                if (table->autoSize)
+                {
+                    autoSizeCount++;
+                }
+                else
+                {
+                    totalRequestedPercent += table->requestedHeight;
+                }
+            }
+
+            if (totalRequestedPercent > 100.0f)
+            {
+                totalRequestedPercent = 100.0f;
+            }
+
+            float remainingPercent = 100.0f - totalRequestedPercent;
+            float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+
+            // Second pass: Update each table
+            float currentY = startY;
+            for (const auto& table : children)
+            {
                 table->parent = this;
                 table->rec = rec;
-                table->rec.height = maxHeight;
-                table->rec.y = startY + (maxHeight * i);
+
+                float tableHeight;
+                if (table->autoSize)
+                {
+                    tableHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
+                }
+                else
+                {
+                    tableHeight = std::ceil(availableHeight * (table->requestedHeight / 100.0f));
+                }
+
+                table->rec.height = tableHeight;
+                table->rec.y = currentY;
                 table->rec.width = availableWidth;
                 table->rec.x = startX;
+
                 if (!table->children.empty()) table->UpdateChildren();
+
+                currentY += tableHeight;
             }
             break;
         }
@@ -665,7 +758,7 @@ namespace sage
         }
     }
 
-    [[nodiscard]] TableRow* Table::CreateTableRow()
+    TableRow* Table::CreateTableRow()
     {
         children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
@@ -678,7 +771,7 @@ namespace sage
      * @param requestedHeight The desired height of the cell as a percent (0-100)
      * @return
      */
-    [[nodiscard]] TableRow* Table::CreateTableRow(float requestedHeight)
+    TableRow* Table::CreateTableRow(float requestedHeight)
     {
         assert(requestedHeight <= 100 && requestedHeight >= 0);
         children.push_back(std::make_unique<TableRow>());
@@ -689,7 +782,7 @@ namespace sage
         return row.get();
     }
 
-    [[nodiscard]] TableCell* TableRow::CreateTableCell()
+    TableCell* TableRow::CreateTableCell()
     {
         children.push_back(std::make_unique<TableCell>());
         const auto& cell = children.back();
@@ -703,7 +796,7 @@ namespace sage
      * @param requestedWidth The desired width of the cell as a percent (0-100)
      * @return
      */
-    [[nodiscard]] TableCell* TableRow::CreateTableCell(float requestedWidth)
+    TableCell* TableRow::CreateTableCell(float requestedWidth)
     {
         assert(requestedWidth <= 100 && requestedWidth >= 0);
         children.push_back(std::make_unique<TableCell>());
@@ -987,7 +1080,7 @@ namespace sage
         }
     }
 
-    [[nodiscard]] bool MouseInside(Rectangle rec, Vector2 mousePos)
+    bool MouseInside(Rectangle rec, Vector2 mousePos)
     {
         return mousePos.x >= rec.x && mousePos.x <= rec.x + rec.width && mousePos.y >= rec.y &&
                mousePos.y <= rec.y + rec.height;
