@@ -319,6 +319,10 @@ namespace sage
 
     struct Table final : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
     {
+        float requestedHeight{};
+        float requestedWidth{};
+        bool autoSize = true;
+        bool gridSpacing = false; // Aligns row spacing with cell spacing
         TableRow* CreateTableRow();
         TableRow* CreateTableRow(float _requestedHeight);
         void UpdateChildren() override;
@@ -353,6 +357,7 @@ namespace sage
         [[nodiscard]] Vector2 GetPosition() const;
 
         Table* CreateTable();
+        Table* CreateTable(float requestedWidthOrHeight);
         void Remove();
         virtual void OnScreenSizeChange();
         void DrawDebug2D() override;
