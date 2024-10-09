@@ -186,6 +186,12 @@ namespace sage
         ImageBox::OnMouseStopHover();
     }
 
+    void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
+    {
+        overflowBehaviour = _behaviour;
+        UpdateDimensions();
+    }
+
     void ImageBox::SetGrayscale()
     {
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
@@ -214,71 +220,145 @@ namespace sage
         CellElement::OnMouseStopHover();
     }
 
-    void ImageBox::UpdateDimensions()
+    Dimensions ImageBox::calculateAvailableSpace() const
     {
-        float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
-        float availableHeight = parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down);
+        return {
+            parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right),
+            parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down)};
+    }
 
-        float originalRatio = static_cast<float>(tex.width) / tex.height;
-        float finalWidth, finalHeight;
+    float ImageBox::calculateAspectRatio() const
+    {
+        return static_cast<float>(tex.width) / tex.height;
+    }
 
-        // TODO: Should have OverflowBehaviour. I think SHRINK_TO_FIT and SHRINK_ROW_TO_FIT would be good
-        // TODO: Should have ScaleBehaviour? DO_NOT_SCALE, STRETCH_TO_FIT, ZOOM_TO_FIT, STRETCH_MAINTAIN_RATIO.
-        // Need better names...
+    Dimensions ImageBox::calculateInitialDimensions(const Dimensions& space) const
+    {
+        float originalRatio = calculateAspectRatio();
 
-        if (originalRatio > 1.0f) // Wider than tall
-        {
-            finalWidth = availableWidth;
-            finalHeight = availableWidth / originalRatio;
+        if (originalRatio > 1.0f)
+        { // Wider than tall
+            return {space.width, space.width / originalRatio};
         }
-        else // Taller than wide
-        {
-            finalHeight = availableHeight;
-            finalWidth = availableHeight * originalRatio;
+        else
+        { // Taller than wide
+            return {space.height * originalRatio, space.height};
         }
+    }
 
-        // Scale down if the image is too big for either dimension
-        if (finalWidth > availableWidth || finalHeight > availableHeight)
-        {
-            float widthRatio = availableWidth / finalWidth;
-            float heightRatio = availableHeight / finalHeight;
-
-            // Use the smaller ratio to ensure both dimensions fit
-            float scaleFactor = std::min(widthRatio, heightRatio);
-
-            finalWidth *= scaleFactor;
-            finalHeight *= scaleFactor;
-        }
-
-        float horiOffset = 0; // Left
-        float vertOffset = 0; // Top
+    Vector2 ImageBox::calculateAlignmentOffset(const Dimensions& dimensions, const Dimensions& space) const
+    {
+        float vertOffset = 0;
+        float horiOffset = 0;
 
         if (vertAlignment == VertAlignment::MIDDLE)
         {
-            vertOffset = (availableHeight - finalHeight) / 2;
+            vertOffset = (space.height - dimensions.height) / 2;
         }
         else if (vertAlignment == VertAlignment::BOTTOM)
         {
-            vertOffset = availableHeight - finalHeight;
+            vertOffset = space.height - dimensions.height;
         }
 
         if (horiAlignment == HoriAlignment::RIGHT)
         {
-            horiOffset = availableWidth - finalWidth;
+            horiOffset = space.width - dimensions.width;
         }
         else if (horiAlignment == HoriAlignment::CENTER)
         {
-            horiOffset = (availableWidth - finalWidth) / 2;
+            horiOffset = (space.width - dimensions.width) / 2;
         }
 
-        rec = Rectangle{
-            parent->rec.x + parent->GetPadding().left + horiOffset,
-            parent->rec.y + parent->GetPadding().up + vertOffset,
-            finalWidth,
-            finalHeight};
+        return {horiOffset, vertOffset};
+    }
 
-        tex.width = finalWidth;
-        tex.height = finalHeight;
+    void ImageBox::updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
+    {
+        rec = Rectangle{
+            parent->rec.x + parent->GetPadding().left + offset.x,
+            parent->rec.y + parent->GetPadding().up + offset.y,
+            dimensions.width,
+            dimensions.height};
+
+        tex.width = dimensions.width;
+        tex.height = dimensions.height;
+    }
+
+    void ImageBox::shrinkRowToFit() const
+    {
+        auto& row = parent->parent->children;
+
+        // First pass: calculate the required scale factor for each cell
+        float minScaleFactor = 1.0f;
+
+        for (auto& cell : row)
+        {
+            auto* imageBox = dynamic_cast<ImageBox*>(cell->children.get());
+            if (!imageBox) continue;
+
+            auto space = imageBox->calculateAvailableSpace();
+            auto dimensions = imageBox->calculateInitialDimensions(space);
+
+            // Calculate scale factor needed for this image
+            float widthRatio = space.width / dimensions.width;
+            float heightRatio = space.height / dimensions.height;
+            float scaleFactor = std::min(widthRatio, heightRatio);
+
+            // Keep track of the smallest scale factor needed
+            minScaleFactor = std::min(minScaleFactor, scaleFactor);
+        }
+
+        // Second pass: apply the minimum scale factor to all cells
+        for (auto& cell : row)
+        {
+            auto* imageBox = dynamic_cast<ImageBox*>(cell->children.get());
+            if (!imageBox) continue;
+
+            auto space = imageBox->calculateAvailableSpace();
+            auto dimensions = imageBox->calculateInitialDimensions(space);
+
+            // Apply uniform scaling
+            dimensions.width *= minScaleFactor;
+            dimensions.height *= minScaleFactor;
+
+            auto offset = imageBox->calculateAlignmentOffset(dimensions, space);
+            imageBox->updateRectangle(dimensions, offset, space);
+        }
+    }
+
+    Dimensions ImageBox::handleOverflow(const Dimensions& dimensions, const Dimensions& space) const
+    {
+        if (dimensions.width <= space.width && dimensions.height <= space.height)
+        {
+            return dimensions;
+        }
+
+        if (overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
+        {
+            float widthRatio = space.width / dimensions.width;
+            float heightRatio = space.height / dimensions.height;
+            float scaleFactor = std::min(widthRatio, heightRatio);
+
+            return {dimensions.width * scaleFactor, dimensions.height * scaleFactor};
+        }
+
+        return dimensions; // Return original dimensions if no scaling needed
+    }
+
+    void ImageBox::UpdateDimensions()
+    {
+        if (overflowBehaviour == OverflowBehaviour::SHRINK_ROW_TO_FIT)
+        {
+            shrinkRowToFit();
+            return;
+        }
+        auto space = calculateAvailableSpace();
+
+        auto dimensions = calculateInitialDimensions(space);
+        dimensions = handleOverflow(dimensions, space);
+        auto offset = calculateAlignmentOffset(dimensions, space);
+
+        updateRectangle(dimensions, offset, space);
     }
 
     void ImageBox::Draw2D()

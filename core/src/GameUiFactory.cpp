@@ -14,10 +14,6 @@ namespace sage
 
     void GameUiFactory::CreateExampleWindow(GameUIEngine* engine)
     {
-        // TODO: Have a "CreateTitleBar" with a textbox and a image of a cross for closing
-        // When the title bar is clicked, you can have it get the parent's window pos and update it based on mouse
-        // location (and call update children)
-
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
@@ -89,9 +85,6 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         {
-            // TODO: Bug: Hover does not disappear when you go directly from one image to another
-            // TODO: Bug: Only one image gets scaled down to fit in the row. If you want all images to be the same
-            // scale then it doesn't work as intended
             auto window =
                 engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
             window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
@@ -113,6 +106,14 @@ namespace sage
             auto cell3 = row->CreateTableCell();
             auto slot3 = cell3->CreateAbilitySlot(playerAbilitySystem, 3);
             // cell3->SetPaddingPercent({2, 2, 2, 2});
+
+            // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
+            // Is that desired behaviour? Can look for other imageboxes with SHRINK_ROW_TO_FIT as
+            // overflowBehaviour?
+            slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
 
             {
                 entt::sink sink{slot->onMouseClicked};
@@ -154,7 +155,6 @@ namespace sage
     Window* GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
     {
         // TODO: Set horizontal alignment to WINDOW_CENTER (uses window dimensions to get center pos)
-        // TODO: Create image resize rule to SHRINK_ALL_TO_FIT which shrinks all cells in row
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
@@ -185,14 +185,14 @@ namespace sage
             {
                 auto row = table->CreateTableRow();
                 // row->SetPaddingPercent({10, 10, 0, 0});
+
+                for (unsigned int j = 0; j < INVENTORY_MAX_COLS; ++j)
                 {
-                    for (unsigned int j = 0; j < INVENTORY_MAX_COLS; ++j)
-                    {
-                        auto cell = row->CreateTableCell();
-                        cell->SetPaddingPercent({2, 2, 2, 2});
-                        auto image = ResourceManager::GetInstance().TextureLoad("resources/test.png");
-                        auto imagebox = cell->CreateImagebox(image);
-                    }
+                    auto cell = row->CreateTableCell();
+                    cell->SetPaddingPercent({2, 2, 2, 2});
+                    auto image = ResourceManager::GetInstance().TextureLoad("resources/test.png");
+                    auto imagebox = cell->CreateImagebox(image);
+                    imagebox->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                 }
             }
         }
