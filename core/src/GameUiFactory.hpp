@@ -5,9 +5,11 @@
 #pragma once
 
 #include "raylib.h"
+#include <entt/entt.hpp>
 
 namespace sage
 {
+    class ControllableActorSystem;
     struct Ability;
     struct Window;
     class GameUIEngine;
@@ -20,7 +22,13 @@ namespace sage
         static void CreateExampleWindow(GameUIEngine* engine);
         static void CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem);
         [[nodiscard]] static Window* CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos);
-        static Window* CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h);
+        static Window* CreateInventoryWindow(
+            entt::registry* registry,
+            GameUIEngine* engine,
+            Vector2 pos,
+            float w,
+            float h,
+            ControllableActorSystem* controllableActorSystem);
     };
 
 } // namespace sage

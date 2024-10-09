@@ -5,8 +5,10 @@
 #include "GameUiFactory.hpp"
 #include "components/Ability.hpp"
 #include "components/InventoryComponent.hpp"
+#include "components/ItemComponent.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 
 namespace sage
@@ -152,12 +154,20 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
+    Window* GameUiFactory::CreateInventoryWindow(
+        entt::registry* registry,
+        GameUIEngine* engine,
+        Vector2 pos,
+        float w,
+        float h,
+        ControllableActorSystem* controllableActorSystem)
     {
+        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+
         // TODO: Add SetPaddingWindowPercent
+        // TODO: Change this from an imagebox to a dedicated InventorySlot class
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
         // InventoryComponent
@@ -182,19 +192,29 @@ namespace sage
         }
         {
             auto table = window->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
-            for (auto& row : table->children)
+            for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
             {
-                for (auto& cell : row->children)
+                for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
-                    auto image = ResourceManager::GetInstance().TextureLoad("resources/test.png");
+                    Texture image{};
+                    auto& cell = table->children[row]->children[col];
+                    auto itemId = inventory.GetItem(row, col);
+                    if (itemId != entt::null)
+                    {
+                        auto& itemComponent = registry->get<ItemComponent>(itemId);
+                        image = ResourceManager::GetInstance().TextureLoad(itemComponent.icon);
+                    }
+                    else
+                    {
+                        image.id = rlGetTextureIdDefault();
+                    }
+
                     auto imagebox = cell->CreateImagebox(image);
                     imagebox->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                    // imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-                    // imagebox->SetVertAlignment(VertAlignment::MIDDLE);
                 }
             }
         }
-        // window->hidden;
+        window->hidden = true;
         return window;
     }
 } // namespace sage

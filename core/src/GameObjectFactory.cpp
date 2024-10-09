@@ -32,6 +32,8 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
+#include "components/InventoryComponent.hpp"
+#include "components/ItemComponent.hpp"
 #include "components/WeaponComponent.hpp"
 #include "raymath.h"
 
@@ -286,6 +288,14 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 4.5f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
+
+        auto& inventory = registry->emplace<InventoryComponent>(id);
+        auto itemId = registry->create();
+        auto& item = registry->emplace<ItemComponent>(itemId);
+        item.name = "Test Inventory Item";
+        item.description = "A test inventory item.";
+        item.icon = AssetID::IMG_NOISE50;
+        inventory.AddItem(itemId, 0, 0);
 
         // data->lightSubSystem->LinkRenderableToLight(id);
 
