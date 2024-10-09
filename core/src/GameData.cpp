@@ -36,9 +36,9 @@ namespace sage
           settings(_settings),
           userInput(std::make_unique<UserInput>(_keyMapping, _settings)),
           cursor(std::make_unique<Cursor>(_registry, this)),
-          uiEngine(std::make_unique<GameUIEngine>(_settings, userInput.get(), cursor.get())),
           camera(std::make_unique<Camera>(_registry, userInput.get(), this)),
           lightSubSystem(std::make_unique<LightSubSystem>(_registry, camera.get())),
+          uiEngine(std::make_unique<GameUIEngine>(_settings, userInput.get(), cursor.get())),
           renderSystem(std::make_unique<RenderSystem>(_registry)),
           collisionSystem(std::make_unique<CollisionSystem>(_registry)),
           navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
@@ -57,9 +57,5 @@ namespace sage
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this
-
-        auto* window = GameUiFactory::CreateInventoryWindow(uiEngine.get(), {200, 200}, 20, 40);
-        entt::sink sink{userInput->keyIPressed};
-        sink.connect<[](Window& window) { window.hidden = !window.hidden; }>(*window);
     }
 } // namespace sage

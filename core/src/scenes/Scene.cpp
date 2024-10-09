@@ -13,6 +13,7 @@
 // NB: We have to include all the headers required to build GameData
 #include "AbilityFactory.hpp"
 #include "GameUiEngine.hpp"
+#include "GameUiFactory.hpp"
 #include "Serializer.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
@@ -110,6 +111,11 @@ namespace sage
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
         // ResourceManager::GetInstance().UnloadShaderFileText();
+
+        auto* window = GameUiFactory::CreateInventoryWindow(
+            registry, data->uiEngine.get(), {200, 200}, 20, 40, data->controllableActorSystem.get());
+        entt::sink sink{data->userInput->keyIPressed};
+        sink.connect<[](Window& window) { window.hidden = !window.hidden; }>(*window);
     };
 
 } // namespace sage

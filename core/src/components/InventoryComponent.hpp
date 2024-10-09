@@ -9,14 +9,17 @@
 
 namespace sage
 {
+
     static constexpr unsigned int INVENTORY_MAX_ROWS = 4;
     static constexpr unsigned int INVENTORY_MAX_COLS = 4;
-    struct InventoryComponent
+    class InventoryComponent
     {
-        std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items; // ItemComponent etc
-        void AddItem(entt::entity entity, int slotNumber);
-        void RemoveItem(int slotNumber);
-        void UseItem(int slotNumber);
+        std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items{}; // ItemComponent etc
+      public:
+        void AddItem(entt::entity entity, unsigned int row, unsigned int col);
+        void RemoveItem(unsigned int row, unsigned int col);
+        entt::entity GetItem(unsigned int row, unsigned int col);
+        InventoryComponent();
     };
 
 } // namespace sage
