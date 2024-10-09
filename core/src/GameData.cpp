@@ -14,6 +14,7 @@
 // Systems
 #include "AbilityFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "GameUiFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -54,5 +55,11 @@ namespace sage
           timerSystem(std::make_unique<TimerSystem>(_registry)),
           reflectionSignalRouter(std::make_unique<EntityReflectionSignalRouter>())
     {
+        // TODO: Move GameData out of Scene and into Application
+        // Minus lights and timers, I'm not sure if anything would suffer from this
+
+        auto* window = GameUiFactory::CreateInventoryWindow(uiEngine.get(), {200, 200}, 20, 40);
+        entt::sink sink{userInput->keyIPressed};
+        sink.connect<[](Window& window) { window.hidden = !window.hidden; }>(*window);
     }
 } // namespace sage

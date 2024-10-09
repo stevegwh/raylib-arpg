@@ -24,6 +24,7 @@ namespace sage
         FLOORCOMPLEX,
         BACKGROUND,
         STAIRS,
+        ITEM,
         COUNT // Must always be last
     };
 

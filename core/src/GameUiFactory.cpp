@@ -4,6 +4,7 @@
 
 #include "GameUiFactory.hpp"
 #include "components/Ability.hpp"
+#include "components/InventoryComponent.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
@@ -18,6 +19,9 @@ namespace sage
         // location (and call update children)
 
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
+
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
@@ -35,7 +39,8 @@ namespace sage
         auto cell0 = row0->CreateTableCell(95);
         cell0->CreateTitleBar("Title Bar", 12);
         auto cell01 = row0->CreateTableCell();
-        cell01->CreateCloseButton(LoadImage("resources/icon.png"));
+        auto tex0 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+        cell01->CreateCloseButton(tex0);
 
         auto row = table->CreateTableRow(75);
         auto cell = row->CreateTableCell(50);
@@ -51,11 +56,13 @@ namespace sage
         auto cell3 = row->CreateTableCell();
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         cell3->tex = window->tex;
-        auto imagebox = cell2->CreateImagebox(LoadImage("resources/icon.png"));
+        auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+        auto imagebox = cell2->CreateImagebox(tex);
         imagebox->SetGrayscale();
         // cell2->SetPaddingPercent({10, 10, 10, 10});
         // imagebox->SetHoriAlignment(HoriAlignment::CENTER);
-        auto image2 = cell3->CreateImagebox(LoadImage("resources/test.png"));
+        auto tex2 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+        auto image2 = cell3->CreateImagebox(tex2);
         image2->SetGrayscale();
         image2->SetHoriAlignment(HoriAlignment::CENTER);
 
@@ -118,30 +125,6 @@ namespace sage
                 sink3.connect<&PlayerAbilitySystem::AbilityFourPressed>(playerAbilitySystem);
             }
         }
-
-        {
-            auto window =
-                engine->CreateWindow(nPatchTexture, 300, 300, 15, 10, WindowTableAlignment::STACK_VERTICAL);
-            window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-            window->SetPaddingPercent({10, 2, 5, 5});
-            auto table = window->CreateTable();
-
-            {
-                auto row = table->CreateTableRow(20);
-                auto cell = row->CreateTableCell(80);
-                auto cell2 = row->CreateTableCell(20);
-                cell->CreateTitleBar("Floating Window", 12);
-                auto closeButton = cell2->CreateCloseButton(LoadImage("resources/icon.png"));
-                closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
-                closeButton->SetVertAlignment(VertAlignment::TOP);
-            }
-            {
-                auto row = table->CreateTableRow();
-                row->SetPaddingPixel({15, 0, 0, 0});
-                auto cell = row->CreateTableCell();
-                cell->CreateTextbox("Example text here.", 10, TextBox::OverflowBehaviour::WORD_WRAP);
-            }
-        }
     }
 
     Window* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos)
@@ -168,7 +151,52 @@ namespace sage
         return window;
     }
 
-    void GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
+    Window* GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
     {
+        // TODO: Set horizontal alignment to WINDOW_CENTER (uses window dimensions to get center pos)
+        // TODO: Create image resize rule to SHRINK_ALL_TO_FIT which shrinks all cells in row
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
+        // InventoryComponent
+
+        auto window =
+            engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({2, 2, 5, 5});
+        auto table = window->CreateTable();
+
+        {
+            auto row = table->CreateTableRow(8);
+            auto cell = row->CreateTableCell(80);
+            auto cell2 = row->CreateTableCell(20);
+            auto titlebar = cell->CreateTitleBar("Inventory", 12);
+            titlebar->SetHoriAlignment(HoriAlignment::CENTER);
+            auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+            auto closeButton = cell2->CreateCloseButton(tex);
+            closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
+            closeButton->SetVertAlignment(VertAlignment::TOP);
+        }
+        {
+
+            for (unsigned int i = 0; i < INVENTORY_MAX_ROWS; ++i)
+            {
+                auto row = table->CreateTableRow();
+                // row->SetPaddingPercent({10, 10, 0, 0});
+                {
+                    for (unsigned int j = 0; j < INVENTORY_MAX_COLS; ++j)
+                    {
+                        auto cell = row->CreateTableCell();
+                        cell->SetPaddingPercent({2, 2, 2, 2});
+                        auto image = ResourceManager::GetInstance().TextureLoad("resources/test.png");
+                        auto imagebox = cell->CreateImagebox(image);
+                    }
+                }
+            }
+        }
+        // window->hidden;
+        return window;
     }
 } // namespace sage

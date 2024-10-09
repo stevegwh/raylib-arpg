@@ -230,12 +230,19 @@ namespace sage
 
     struct ImageBox : public CellElement
     {
+        enum class OverflowBehaviour
+        {
+            SHRINK_TO_FIT,
+            SHRINK_ROW_TO_FIT
+        };
+        OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
         std::optional<Shader> shader;
 
         void OnMouseStartHover() override;
         void OnMouseStopHover() override;
         void OnMouseClick() override;
 
+        void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void SetGrayscale();
         void RemoveShader();
         void UpdateDimensions() override;
@@ -277,8 +284,8 @@ namespace sage
             float fontSize = 16,
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         TitleBar* CreateTitleBar(const std::string& _title, float fontSize);
-        ImageBox* CreateImagebox(Image _tex);
-        CloseButton* CreateCloseButton(Image _tex);
+        ImageBox* CreateImagebox(Texture _tex);
+        CloseButton* CreateCloseButton(Texture _tex);
         AbilitySlot* CreateAbilitySlot(PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber);
         void UpdateChildren() override;
         void DrawDebug2D() override;

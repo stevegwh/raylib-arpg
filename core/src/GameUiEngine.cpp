@@ -736,14 +736,14 @@ namespace sage
         return titleBar;
     }
 
-    CloseButton* TableCell::CreateCloseButton(Image _tex)
+    CloseButton* TableCell::CreateCloseButton(Texture _tex)
     {
         children = std::make_unique<CloseButton>();
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
         closeButton->SetGrayscale();
         entt::sink sink{GetWindow()->onMouseStopHover};
         sink.connect<&ImageBox::OnMouseStopHover>(closeButton);
-        closeButton->tex = LoadTextureFromImage(_tex);
+        closeButton->tex = _tex;
         UpdateChildren();
         return closeButton;
     }
@@ -760,14 +760,14 @@ namespace sage
         return textbox;
     }
 
-    ImageBox* TableCell::CreateImagebox(Image _tex)
+    ImageBox* TableCell::CreateImagebox(Texture _tex)
     {
         children = std::make_unique<ImageBox>();
         auto* image = dynamic_cast<ImageBox*>(children.get());
         image->draggable = true;
         entt::sink sink{GetWindow()->onMouseStopHover};
         sink.connect<&ImageBox::OnMouseStopHover>(image);
-        image->tex = LoadTextureFromImage(_tex);
+        image->tex = _tex;
         UpdateChildren();
         return image;
     }

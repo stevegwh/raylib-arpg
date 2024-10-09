@@ -20,7 +20,7 @@ namespace sage
         static void CreateExampleWindow(GameUIEngine* engine);
         static void CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem);
         [[nodiscard]] static Window* CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos);
-        static void CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h);
+        static Window* CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h);
     };
 
 } // namespace sage
