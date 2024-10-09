@@ -154,7 +154,6 @@ namespace sage
 
     Window* GameUiFactory::CreateInventoryWindow(GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        // TODO: Set horizontal alignment to WINDOW_CENTER (uses window dimensions to get center pos)
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
@@ -173,7 +172,7 @@ namespace sage
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
             auto titlebar = cell->CreateTitleBar("Inventory", 12);
-            titlebar->SetHoriAlignment(HoriAlignment::CENTER);
+            titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
             auto closeButton = cell2->CreateCloseButton(tex);
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
