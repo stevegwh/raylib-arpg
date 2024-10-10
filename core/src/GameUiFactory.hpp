@@ -11,6 +11,7 @@ namespace sage
 {
     class ControllableActorSystem;
     struct Ability;
+    struct ItemComponent;
     struct Window;
     class GameUIEngine;
     class PlayerAbilitySystem;
@@ -21,6 +22,7 @@ namespace sage
       public:
         static void CreateExampleWindow(GameUIEngine* engine);
         static void CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem);
+        [[nodiscard]] static Window* CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos);
         [[nodiscard]] static Window* CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos);
         static Window* CreateInventoryWindow(
             entt::registry* registry,

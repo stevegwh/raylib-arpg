@@ -22,6 +22,14 @@ namespace sage
         return items[row][col];
     }
 
+    void InventoryComponent::SwapItems(unsigned int row1, unsigned int col1, unsigned int row2, unsigned int col2)
+    {
+        auto item1 = items[row1][col1];
+        auto item2 = items[row2][col2];
+        items[row1][col1] = item2;
+        items[row2][col2] = item1;
+    }
+
     InventoryComponent::InventoryComponent()
     {
         // I believe this is necessary;

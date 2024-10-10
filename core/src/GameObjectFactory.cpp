@@ -290,12 +290,23 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
         auto& inventory = registry->emplace<InventoryComponent>(id);
-        auto itemId = registry->create();
-        auto& item = registry->emplace<ItemComponent>(itemId);
-        item.name = "Test Inventory Item";
-        item.description = "A test inventory item.";
-        item.icon = AssetID::IMG_NOISE50;
-        inventory.AddItem(itemId, 0, 0);
+
+        {
+            auto itemId = registry->create();
+            auto& item = registry->emplace<ItemComponent>(itemId);
+            item.name = "Dagger";
+            item.description = "A test inventory item.";
+            item.icon = AssetID::IMG_ICON_WEAPON_DAGGER01;
+            inventory.AddItem(itemId, 0, 0);
+        }
+        {
+            auto itemId = registry->create();
+            auto& item = registry->emplace<ItemComponent>(itemId);
+            item.name = "Sword";
+            item.description = "A test inventory item.";
+            item.icon = AssetID::IMG_ICON_WEAPON_SWORD01;
+            inventory.AddItem(itemId, 0, 1);
+        }
 
         // data->lightSubSystem->LinkRenderableToLight(id);
 

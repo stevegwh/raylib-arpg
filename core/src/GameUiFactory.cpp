@@ -88,7 +88,7 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         {
             auto window =
-                engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
+                engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
             window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
             window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
             window->SetPaddingPercent({5, 2, 2, 2});
@@ -128,6 +128,31 @@ namespace sage
                 sink3.connect<&PlayerAbilitySystem::AbilityFourPressed>(playerAbilitySystem);
             }
         }
+    }
+
+    // TODO: Combine with CreateAbilityTooltip
+    Window* GameUiFactory::CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        auto* window =
+            engine->CreateWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({10, 2, 5, 5});
+
+        {
+            auto table = window->CreateTable();
+            auto row0 = table->CreateTableRow(10);
+            auto cell0 = row0->CreateTableCell();
+            auto textbox = cell0->CreateTextbox(item.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+            auto row = table->CreateTableRow();
+            row->SetPaddingPercent({10, 0, 0, 0});
+            auto cell = row->CreateTableCell();
+            cell->CreateTextbox(item.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+        }
+
+        return window;
     }
 
     Window* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos)
@@ -196,21 +221,9 @@ namespace sage
             {
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
-                    Texture image{};
                     auto& cell = table->children[row]->children[col];
-                    auto itemId = inventory.GetItem(row, col);
-                    if (itemId != entt::null)
-                    {
-                        auto& itemComponent = registry->get<ItemComponent>(itemId);
-                        image = ResourceManager::GetInstance().TextureLoad(itemComponent.icon);
-                    }
-                    else
-                    {
-                        image.id = rlGetTextureIdDefault();
-                    }
-
-                    auto imagebox = cell->CreateImagebox(image);
-                    imagebox->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                    auto invSlot = cell->CreateInventorySlot(registry, controllableActorSystem, row, col);
+                    invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                 }
             }
         }
