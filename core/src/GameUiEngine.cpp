@@ -10,7 +10,10 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "UserInput.hpp"
 
+#include "components/InventoryComponent.hpp"
+#include "components/ItemComponent.hpp"
 #include "rlgl.h"
+#include "systems/ControllableActorSystem.hpp"
 
 #include <cassert>
 #include <sstream>
@@ -183,6 +186,70 @@ namespace sage
     }
 
     void AbilitySlot::OnMouseStopHover()
+    {
+        hoverTimer = 0;
+        if (tooltipWindow.has_value())
+        {
+            tooltipWindow.value()->Remove();
+            tooltipWindow.reset();
+        }
+        ImageBox::OnMouseStopHover();
+    }
+
+    void InventorySlot::SetItemInfo()
+    {
+        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+        auto itemId = inventory.GetItem(row, col);
+        if (itemId != entt::null)
+        {
+            auto& item = registry->get<ItemComponent>(itemId);
+            tex = ResourceManager::GetInstance().TextureLoad(item.icon);
+        }
+        else
+        {
+            tex.id = rlGetTextureIdDefault();
+            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
+            // rlGetDefaultTexture) Set default
+        }
+    }
+
+    void InventorySlot::OnDragDropHere(CellElement* droppedElement)
+    {
+        if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
+        {
+            auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+            inventory.SwapItems(row, col, dropped->row, dropped->col);
+            dropped->SetItemInfo();
+            SetItemInfo();
+            dropped->UpdateDimensions();
+            UpdateDimensions();
+        }
+    }
+
+    void InventorySlot::OnMouseStartHover()
+    {
+        hoverTimer = GetTime();
+        ImageBox::OnMouseStartHover();
+    }
+
+    void InventorySlot::OnMouseContinueHover()
+    {
+        ImageBox::OnMouseContinueHover();
+        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
+        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+        auto itemId = inventory.GetItem(row, col);
+        if (itemId != entt::null)
+        {
+            auto& item = registry->get<ItemComponent>(itemId);
+            const Vector2 mousePos = GetMousePosition();
+            const float offsetX = mousePos.x - rec.x;
+            const float offsetY = mousePos.y - rec.y - rec.height / 2;
+            tooltipWindow = GameUiFactory::CreateItemTooltip(
+                parent->GetWindow()->uiEngine, item, {rec.x + offsetX, rec.y + offsetY});
+        }
+    }
+
+    void InventorySlot::OnMouseStopHover()
     {
         hoverTimer = 0;
         if (tooltipWindow.has_value())
@@ -985,6 +1052,27 @@ namespace sage
         abilitySlot->SetAbilityInfo();
         UpdateChildren();
         return abilitySlot;
+    }
+
+    InventorySlot* TableCell::CreateInventorySlot(
+        entt::registry* _registry,
+        ControllableActorSystem* _controllableActorSystem,
+        unsigned int row,
+        unsigned int col)
+    {
+        children = std::make_unique<InventorySlot>();
+        auto* slot = dynamic_cast<InventorySlot*>(children.get());
+        slot->registry = _registry;
+        slot->controllableActorSystem = _controllableActorSystem;
+        slot->draggable = true;
+        slot->canReceiveDragDrops = true;
+        slot->row = row;
+        slot->col = col;
+        entt::sink sink{GetWindow()->onMouseStopHover};
+        sink.connect<&InventorySlot::OnMouseStopHover>(slot);
+        slot->SetItemInfo();
+        UpdateChildren();
+        return slot;
     }
 
     TitleBar* TableCell::CreateTitleBar(const std::string& _title, float fontSize)

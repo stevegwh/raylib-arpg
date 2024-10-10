@@ -11,7 +11,6 @@
 #include "raylib/src/config.h"
 #include "raymath.h"
 #include "rlgl.h"
-#include "utils.h"
 #include <array>
 
 namespace cereal

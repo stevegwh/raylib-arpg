@@ -14,6 +14,10 @@
 
 namespace sage
 {
+    class ControllableActorSystem;
+}
+namespace sage
+{
     class GameUIEngine;
     class PlayerAbilitySystem;
 
@@ -287,6 +291,22 @@ namespace sage
         void OnMouseStopHover() override;
     };
 
+    struct InventorySlot : public ImageBox
+    {
+        entt::registry* registry;
+        ControllableActorSystem* controllableActorSystem;
+        double hoverTimer = 0;
+        float hoverTimerThreshold = 0.4;
+        std::optional<Window*> tooltipWindow;
+        unsigned int row;
+        unsigned int col;
+        void SetItemInfo();
+        void OnDragDropHere(CellElement* droppedElement) override;
+        void OnMouseStartHover() override;
+        void OnMouseContinueHover() override;
+        void OnMouseStopHover() override;
+    };
+
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
         float requestedWidth{};
@@ -299,6 +319,11 @@ namespace sage
         ImageBox* CreateImagebox(Texture _tex);
         CloseButton* CreateCloseButton(Texture _tex);
         AbilitySlot* CreateAbilitySlot(PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber);
+        InventorySlot* CreateInventorySlot(
+            entt::registry* _registry,
+            ControllableActorSystem* _controllableActorSystem,
+            unsigned int row,
+            unsigned int col);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;

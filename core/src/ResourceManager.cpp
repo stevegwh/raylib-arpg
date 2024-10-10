@@ -14,7 +14,6 @@
 #include <cstring>
 #include <sstream>
 #include <unordered_map>
-#include <utils.h>
 
 namespace sage
 {
