@@ -5,6 +5,7 @@
 #pragma once
 
 #include "raylib.h"
+#include "Timer.hpp"
 
 #include <entt/entt.hpp>
 #include <iostream>
@@ -410,21 +411,58 @@ namespace sage
         void OnScreenSizeChange() override;
     };
 
+    class DraggedObject
+    {
+      protected:
+      public:
+        Vector2 mouseOffset{};
+        virtual ~DraggedObject() = default;
+        virtual void Update() = 0;
+        virtual void Draw() = 0;
+        virtual void OnDrop(){};
+    };
+
+    class DraggedWindow : public DraggedObject
+    {
+
+      public:
+        Window* element{};
+        void Update() override;
+        void Draw() override;
+        void OnDrop() override;
+        explicit DraggedWindow(Window* _window);
+    };
+
+    class DraggedCellElement : public DraggedObject
+    {
+
+      public:
+        CellElement* element{};
+        void Update() override;
+        void Draw() override;
+        void OnDrop() override;
+        explicit DraggedCellElement(CellElement* _element);
+        ~DraggedCellElement() override;
+    };
+
     class GameUIEngine
     {
+        Timer dragDelay;
+        static constexpr float delay = 0.25f;
         std::vector<std::unique_ptr<Window>> windows;
         std::vector<std::unique_ptr<Window>> delayedWindows;
         Cursor* cursor;
         UserInput* userInput;
         Settings* settings;
 
-        Vector2 draggedElementOffset{};
-        std::optional<std::variant<CellElement*, Window*>> draggedElement{};
+        std::optional<std::unique_ptr<DraggedObject>> draggedElement;
+
+        // Vector2 draggedElementOffset{};
+        // std::optional<std::variant<CellElement*, Window*>> draggedElement{};
         std::optional<CellElement*> hoveredDraggableElement{};
         double draggedTimer = 0;
         float draggedTimerThreshold = 0.25f;
 
-        void clearCellsHoverState();
         void pruneWindows();
         void processWindows(const Vector2& mousePos);
         void cleanUpDragState();
