@@ -1223,6 +1223,49 @@ namespace sage
         return window;
     }
 
+    void DraggedWindow::Update()
+    {
+        auto mousePos = GetMousePosition();
+        element->SetPosition(mousePos.x - mouseOffset.x, mousePos.y - mouseOffset.y);
+        element->UpdateChildren();
+    }
+
+    void DraggedWindow::Draw()
+    {
+    }
+
+    void DraggedWindow::OnDrop()
+    {
+    }
+
+    DraggedWindow::DraggedWindow(Window* _window) : element(_window)
+    {
+    }
+
+    void DraggedCellElement::Draw()
+    {
+        auto mousePos = GetMousePosition();
+        DrawTexture(element->tex, mousePos.x - mouseOffset.x, mousePos.y - mouseOffset.y, WHITE);
+    }
+
+    void DraggedCellElement::Update()
+    {
+    }
+
+    void DraggedCellElement::OnDrop()
+    {
+    }
+
+    DraggedCellElement::DraggedCellElement(CellElement* _element) : element(_element)
+    {
+        element->beingDragged = true;
+    }
+
+    DraggedCellElement::~DraggedCellElement()
+    {
+        element->beingDragged = false;
+    }
+
     void GameUIEngine::DrawDebug2D() const
     {
         for (const auto& window : windows)
@@ -1242,13 +1285,7 @@ namespace sage
 
         if (draggedElement.has_value())
         {
-            if (std::holds_alternative<CellElement*>(draggedElement.value()))
-            {
-                const auto cell = std::get<CellElement*>(draggedElement.value());
-                auto mousePos = GetMousePosition();
-                DrawTexture(
-                    cell->tex, mousePos.x - draggedElementOffset.x, mousePos.y - draggedElementOffset.y, WHITE);
-            }
+            draggedElement.value()->Draw();
         }
     }
 
@@ -1256,23 +1293,6 @@ namespace sage
     {
         return mousePos.x >= rec.x && mousePos.x <= rec.x + rec.width && mousePos.y >= rec.y &&
                mousePos.y <= rec.y + rec.height;
-    }
-
-    void GameUIEngine::clearCellsHoverState()
-    {
-        for (const auto& window : windows)
-        {
-            if (window->hidden) continue;
-            for (const auto& table : window->children)
-                for (const auto& row : table->children)
-                    for (const auto& cell : row->children)
-                    {
-                        if (const auto& element = cell->children; element->mouseHover)
-                        {
-                            element->OnMouseStopHover();
-                        }
-                    }
-        }
     }
 
     void GameUIEngine::processWindows(const Vector2& mousePos)
@@ -1338,10 +1358,10 @@ namespace sage
                         // Handle mouse interactions
                         if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
                         {
-                            if (std::holds_alternative<CellElement*>(draggedElement.value()))
+                            if (auto draggedCellElement =
+                                    dynamic_cast<DraggedCellElement*>(draggedElement.value().get()))
                             {
-                                const auto draggedCellElement = std::get<CellElement*>(draggedElement.value());
-                                element->OnDragDropHere(draggedCellElement);
+                                element->OnDragDropHere(draggedCellElement->element);
                             }
                             continue;
                         }
@@ -1390,16 +1410,18 @@ namespace sage
 
                                 if (const auto titleBar = dynamic_cast<TitleBar*>(element.get()))
                                 {
-                                    draggedElement = titleBar->parent->GetWindow();
-                                    draggedElementOffset.x = mousePos.x - window->rec.x - offset.x;
-                                    draggedElementOffset.y = mousePos.y - window->rec.y - offset.y;
+                                    draggedElement =
+                                        std::make_unique<DraggedWindow>(titleBar->parent->GetWindow());
+                                    draggedElement.value()->mouseOffset = {
+                                        mousePos.x - window->rec.x - offset.x,
+                                        mousePos.y - window->rec.y - offset.y};
                                 }
                                 else
                                 {
-                                    draggedElementOffset.x = mousePos.x - element->rec.x - offset.x;
-                                    draggedElementOffset.y = mousePos.y - element->rec.y - offset.y;
-                                    draggedElement = element.get();
-                                    element->beingDragged = true;
+                                    draggedElement = std::make_unique<DraggedCellElement>(element.get());
+                                    draggedElement.value()->mouseOffset = {
+                                        mousePos.x - element->rec.x - offset.x,
+                                        mousePos.y - element->rec.y - offset.y};
                                 }
 
                                 draggedTimer = 0;
@@ -1425,12 +1447,6 @@ namespace sage
 
         if (draggedElement.has_value())
         {
-            if (std::holds_alternative<CellElement*>(draggedElement.value()))
-            {
-                auto cell = std::get<CellElement*>(draggedElement.value());
-                cell->beingDragged = false;
-            }
-            draggedElementOffset = {0, 0};
             draggedElement.reset();
         }
     }
@@ -1448,12 +1464,7 @@ namespace sage
         }
         else
         {
-            if (std::holds_alternative<Window*>(draggedElement.value()))
-            {
-                auto window = std::get<Window*>(draggedElement.value());
-                window->SetPosition(mousePos.x - draggedElementOffset.x, mousePos.y - draggedElementOffset.y);
-                window->UpdateChildren();
-            }
+            draggedElement.value()->Update();
         }
 
         // Reset drag timer on mouse release
