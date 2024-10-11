@@ -153,7 +153,7 @@ namespace sage
         }
     }
 
-    void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
+    void AbilitySlot::OnDragDropHere(UIElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
@@ -213,7 +213,7 @@ namespace sage
         }
     }
 
-    void InventorySlot::OnDragDropHere(CellElement* droppedElement)
+    void InventorySlot::OnDragDropHere(UIElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
@@ -1230,6 +1230,11 @@ namespace sage
         element->UpdateChildren();
     }
 
+    UIElement* DraggedWindow::GetElement()
+    {
+        return element;
+    }
+
     void DraggedWindow::Draw()
     {
     }
@@ -1240,6 +1245,11 @@ namespace sage
 
     DraggedWindow::DraggedWindow(Window* _window) : element(_window)
     {
+    }
+
+    UIElement* DraggedCellElement::GetElement()
+    {
+        return element;
     }
 
     void DraggedCellElement::Draw()
@@ -1254,6 +1264,7 @@ namespace sage
 
     void DraggedCellElement::OnDrop()
     {
+        // TODO: Should identify whether it has been dropped on something already
     }
 
     DraggedCellElement::DraggedCellElement(CellElement* _element) : element(_element)
@@ -1321,10 +1332,7 @@ namespace sage
         // Handle mouse interactions
         if (elementDropped)
         {
-            if (auto draggedCellElement = dynamic_cast<DraggedCellElement*>(draggedElement.value().get()))
-            {
-                element->OnDragDropHere(draggedCellElement->element);
-            }
+            element->OnDragDropHere(draggedElement.value()->GetElement());
             return;
         }
 

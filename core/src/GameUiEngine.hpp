@@ -74,8 +74,14 @@ namespace sage
         float right = 0;
     };
 
+    class UIElement
+    {
+      public:
+        virtual ~UIElement() = default;
+    };
+
     template <typename Child, typename Parent>
-    struct TableElement
+    struct TableElement : UIElement
     {
       protected:
         Padding padding;
@@ -153,7 +159,7 @@ namespace sage
         virtual ~TableElement() = default;
     };
 
-    struct CellElement
+    struct CellElement : UIElement
     {
         TableCell* parent{};
         Rectangle rec{};
@@ -175,7 +181,7 @@ namespace sage
         entt::sigh<void()> onDragStart;
         entt::sigh<void()> onDragEnd;
 
-        virtual void OnDragDropHere(CellElement* droppedElement)
+        virtual void OnDragDropHere(UIElement* droppedElement)
         {
             if (!canReceiveDragDrops) return;
 
@@ -286,7 +292,7 @@ namespace sage
         PlayerAbilitySystem* playerAbilitySystem;
         int slotNumber;
         void SetAbilityInfo();
-        void OnDragDropHere(CellElement* droppedElement) override;
+        void OnDragDropHere(UIElement* droppedElement) override;
         void OnMouseStartHover() override;
         void OnMouseContinueHover() override;
         void OnMouseStopHover() override;
@@ -302,7 +308,7 @@ namespace sage
         unsigned int row;
         unsigned int col;
         void SetItemInfo();
-        void OnDragDropHere(CellElement* droppedElement) override;
+        void OnDragDropHere(UIElement* droppedElement) override;
         void OnMouseStartHover() override;
         void OnMouseContinueHover() override;
         void OnMouseStopHover() override;
@@ -416,6 +422,7 @@ namespace sage
       protected:
       public:
         Vector2 mouseOffset{};
+        virtual UIElement* GetElement() = 0;
         virtual ~DraggedObject() = default;
         virtual void Update() = 0;
         virtual void Draw() = 0;
@@ -424,9 +431,10 @@ namespace sage
 
     class DraggedWindow : public DraggedObject
     {
+        Window* element{};
 
       public:
-        Window* element{};
+        UIElement* GetElement() override;
         void Update() override;
         void Draw() override;
         void OnDrop() override;
@@ -435,9 +443,10 @@ namespace sage
 
     class DraggedCellElement : public DraggedObject
     {
+        CellElement* element{};
 
       public:
-        CellElement* element{};
+        UIElement* GetElement() override;
         void Update() override;
         void Draw() override;
         void OnDrop() override;
