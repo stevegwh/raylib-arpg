@@ -1258,34 +1258,26 @@ namespace sage
                mousePos.y <= rec.y + rec.height;
     }
 
-    void GameUIEngine::Update()
+    void GameUIEngine::clearCellsHoverState()
     {
-        pruneWindows();
-        const auto mousePos = GetMousePosition();
-
-        // Reset cursor state if not dragging
-        if (!draggedElement.has_value())
+        for (const auto& window : windows)
         {
-            cursor->EnableContextSwitching();
-            cursor->Enable();
+            if (window->hidden) continue;
+            for (const auto& table : window->children)
+                for (const auto& row : table->children)
+                    for (const auto& cell : row->children)
+                    {
+                        if (const auto& element = cell->children; element->mouseHover)
+                        {
+                            element->OnMouseStopHover();
+                        }
+                    }
         }
-        else
-        {
-            if (std::holds_alternative<Window*>(draggedElement.value()))
-            {
-                auto window = std::get<Window*>(draggedElement.value());
-                window->SetPosition(mousePos.x - draggedElementOffset.x, mousePos.y - draggedElementOffset.y);
-                window->UpdateChildren();
-            }
-        }
+    }
 
-        // Reset drag timer on mouse release
-        if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-        {
-            draggedTimer = 0;
-        }
-
-        bool elementFound = false; // Flag to track if we've found an element under the mouse
+    void GameUIEngine::processWindows(const Vector2& mousePos)
+    {
+        bool elementFound = false;
         const auto windowCount = windows.size();
 
         for (const auto& window : windows)
@@ -1313,7 +1305,6 @@ namespace sage
             cursor->Disable();
 
             // Process all elements in window
-            bool shouldBreak = false; // Flag to handle breaking out of all loops
             for (const auto& table : window->children)
             {
                 for (const auto& row : table->children)
@@ -1321,6 +1312,16 @@ namespace sage
                     for (const auto& cell : row->children)
                     {
                         auto& element = cell->children;
+
+                        if (elementFound)
+                        {
+                            // Already found a hovered element, loop continues to remove hover state
+                            if (element->mouseHover)
+                            {
+                                element->OnMouseStopHover();
+                            }
+                            continue;
+                        }
 
                         // Handle element hover state
                         if (!MouseInside(cell->rec, mousePos))
@@ -1334,32 +1335,35 @@ namespace sage
 
                         elementFound = true; // We found an element under the mouse
 
-                        if (!draggedElement.has_value() && !element->mouseHover)
-                        {
-                            element->OnMouseStartHover();
-                        }
-
                         // Handle mouse interactions
-                        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !draggedElement.has_value())
-                        {
-                            element->OnMouseStopHover();
-                            element->OnMouseClick();
-                        }
-                        else if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+                        if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
                         {
                             if (std::holds_alternative<CellElement*>(draggedElement.value()))
                             {
                                 const auto draggedCellElement = std::get<CellElement*>(draggedElement.value());
                                 element->OnDragDropHere(draggedCellElement);
                             }
+                            continue;
                         }
-                        else if (
-                            IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable &&
-                            !draggedElement.has_value())
+
+                        // No item being dragged
+                        if (!element->mouseHover)
                         {
+                            element->OnMouseStartHover();
+                        }
+
+                        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+                        {
+                            element->OnMouseStopHover();
+                            element->OnMouseClick();
+                        }
+
+                        else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable)
+                        {
+                            // Initiate drag timer
+
                             // Skip if already dragging something
                             if (draggedElement.has_value()) continue;
-
                             // Skip if cursor changed hover while dragging
                             if (!hoveredDraggableElement.has_value() && draggedTimer > 0) continue;
 
@@ -1368,6 +1372,7 @@ namespace sage
                                 hoveredDraggableElement.value() != element.get())
                             {
                                 hoveredDraggableElement.reset();
+                                draggedTimer = 0;
                                 continue;
                             }
 
@@ -1388,8 +1393,6 @@ namespace sage
                                     draggedElement = titleBar->parent->GetWindow();
                                     draggedElementOffset.x = mousePos.x - window->rec.x - offset.x;
                                     draggedElementOffset.y = mousePos.y - window->rec.y - offset.y;
-                                    shouldBreak = true; // Break out after starting window drag
-                                    break;
                                 }
                                 else
                                 {
@@ -1402,55 +1405,69 @@ namespace sage
                                 draggedTimer = 0;
                             }
                         }
-                        else if (!draggedElement.has_value() && element->mouseHover)
+                        else if (element->mouseHover)
                         {
                             element->OnMouseContinueHover();
                         }
                     }
-                    if (shouldBreak) break;
                 }
-                if (shouldBreak) break;
             }
-            if (shouldBreak) break;
+        }
+    }
+
+    void GameUIEngine::cleanUpDragState()
+    {
+        if (hoveredDraggableElement.has_value())
+        {
+            draggedTimer = 0;
+            hoveredDraggableElement.reset();
         }
 
-        // Call OnMouseStopHover for any previously hovered elements if we didn't find an element
-        if (!elementFound)
+        if (draggedElement.has_value())
         {
-            for (const auto& window : windows)
+            if (std::holds_alternative<CellElement*>(draggedElement.value()))
             {
-                if (window->hidden) continue;
-                for (const auto& table : window->children)
-                    for (const auto& row : table->children)
-                        for (const auto& cell : row->children)
-                        {
-                            if (const auto& element = cell->children; element->mouseHover)
-                            {
-                                element->OnMouseStopHover();
-                            }
-                        }
+                auto cell = std::get<CellElement*>(draggedElement.value());
+                cell->beingDragged = false;
+            }
+            draggedElementOffset = {0, 0};
+            draggedElement.reset();
+        }
+    }
+
+    void GameUIEngine::Update()
+    {
+        pruneWindows();
+        const auto mousePos = GetMousePosition();
+
+        // Reset cursor state if not dragging
+        if (!draggedElement.has_value())
+        {
+            cursor->EnableContextSwitching();
+            cursor->Enable();
+        }
+        else
+        {
+            if (std::holds_alternative<Window*>(draggedElement.value()))
+            {
+                auto window = std::get<Window*>(draggedElement.value());
+                window->SetPosition(mousePos.x - draggedElementOffset.x, mousePos.y - draggedElementOffset.y);
+                window->UpdateChildren();
             }
         }
+
+        // Reset drag timer on mouse release
+        if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+        {
+            draggedTimer = 0;
+        }
+
+        processWindows(mousePos);
 
         // Clean up drag states on mouse release
         if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
         {
-            if (hoveredDraggableElement.has_value())
-            {
-                draggedTimer = 0;
-                hoveredDraggableElement.reset();
-            }
-
-            if (draggedElement.has_value())
-            {
-                if (std::holds_alternative<CellElement*>(draggedElement.value()))
-                {
-                    auto cell = std::get<CellElement*>(draggedElement.value());
-                    cell->beingDragged = false;
-                }
-                draggedElementOffset = {0, 0};
-                draggedElement.reset();
-            }
+            cleanUpDragState();
         }
     }
 

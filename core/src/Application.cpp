@@ -121,7 +121,7 @@ namespace sage
         EndMode3D();
 
         scene->Draw2D();
-        scene->DrawDebug2D();
+        // scene->DrawDebug2D();
 
         DrawFPS(10, 10);
 

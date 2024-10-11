@@ -424,7 +424,10 @@ namespace sage
         double draggedTimer = 0;
         float draggedTimerThreshold = 0.25f;
 
+        void clearCellsHoverState();
         void pruneWindows();
+        void processWindows(const Vector2& mousePos);
+        void cleanUpDragState();
 
       public:
         Window* CreateWindow(
