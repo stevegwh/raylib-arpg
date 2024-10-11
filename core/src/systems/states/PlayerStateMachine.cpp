@@ -253,26 +253,20 @@ namespace sage
 
     void PlayerStateController::Update()
     {
-        auto view = registry->view<PlayerState>();
-        for (const auto& entity : view)
+        for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
-            auto state = registry->get<PlayerState>(entity).GetCurrentState();
+            const auto state = registry->get<PlayerState>(entity).GetCurrentState();
             GetSystem(state)->Update(entity);
         }
     }
 
     void PlayerStateController::Draw3D()
     {
-        auto view = registry->view<PlayerState>();
-        for (const auto& entity : view)
+        for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
-            auto state = registry->get<PlayerState>(entity).GetCurrentState();
+            const auto state = registry->get<PlayerState>(entity).GetCurrentState();
             GetSystem(state)->Draw3D(entity);
         }
-    }
-
-    PlayerStateController::~PlayerStateController()
-    {
     }
 
     PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)

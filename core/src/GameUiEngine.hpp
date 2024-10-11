@@ -286,8 +286,9 @@ namespace sage
 
     struct AbilitySlot : public ImageBox
     {
+        // TODO: tooltip timer does not reset on drag
         double hoverTimer = 0;
-        float hoverTimerThreshold = 0.4;
+        float hoverTimerThreshold = 0.8;
         std::optional<Window*> tooltipWindow;
         PlayerAbilitySystem* playerAbilitySystem;
         int slotNumber;
@@ -303,7 +304,7 @@ namespace sage
         entt::registry* registry;
         ControllableActorSystem* controllableActorSystem;
         double hoverTimer = 0;
-        float hoverTimerThreshold = 0.4;
+        float hoverTimerThreshold = 0.8;
         std::optional<Window*> tooltipWindow;
         unsigned int row;
         unsigned int col;
@@ -456,8 +457,8 @@ namespace sage
 
     class GameUIEngine
     {
-        Timer dragDelay;
-        static constexpr float delay = 0.25f;
+        Timer dragTimer;
+        static constexpr float draggedTimerThreshold = 0.25f;
         std::vector<std::unique_ptr<Window>> windows;
         std::vector<std::unique_ptr<Window>> delayedWindows;
         Cursor* cursor;
@@ -465,12 +466,7 @@ namespace sage
         Settings* settings;
 
         std::optional<std::unique_ptr<DraggedObject>> draggedElement;
-
-        // Vector2 draggedElementOffset{};
-        // std::optional<std::variant<CellElement*, Window*>> draggedElement{};
         std::optional<CellElement*> hoveredDraggableElement{};
-        double draggedTimer = 0;
-        float draggedTimerThreshold = 0.25f;
 
         void clearAllHover(unsigned int start, unsigned int end);
         void pruneWindows();

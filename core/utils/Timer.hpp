@@ -4,6 +4,7 @@ class Timer
 {
     bool active = false;
     bool finished = true;
+    bool autoFinish = true; // New boolean to control automatic finishing
     float counter{};
     float maxTime{};
 
@@ -13,29 +14,44 @@ class Timer
         maxTime = _maxTime;
     }
 
-    float GetMaxTime() const
+    void SetAutoFinish(bool _autoFinish)
+    {
+        autoFinish = _autoFinish;
+    }
+
+    [[nodiscard]] bool GetAutoFinish() const
+    {
+        return autoFinish;
+    }
+
+    [[nodiscard]] float GetMaxTime() const
     {
         return maxTime;
     }
 
-    bool IsRunning() const
+    [[nodiscard]] bool IsRunning() const
     {
         return active;
     }
 
-    float GetRemainingTime() const
+    [[nodiscard]] float GetRemainingTime() const
     {
         return maxTime - counter;
     }
 
-    float GetCurrentTime() const
+    [[nodiscard]] float GetCurrentTime() const
     {
         return counter;
     }
 
-    bool HasFinished() const
+    [[nodiscard]] bool HasFinished() const
     {
         return finished;
+    }
+
+    [[nodiscard]] bool HasExceededMaxTime() const
+    {
+        return counter >= maxTime;
     }
 
     void Start()
@@ -71,7 +87,7 @@ class Timer
         if (!active) return;
         if (finished) finished = false; // Reset finished flag when active
         counter += dt;
-        if (counter >= maxTime)
+        if (counter >= maxTime && autoFinish)
         {
             finished = true;
             active = false;
