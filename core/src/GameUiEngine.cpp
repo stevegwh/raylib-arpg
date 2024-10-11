@@ -1349,28 +1349,24 @@ namespace sage
         }
         else if (mouseDownOnDraggableElement)
         {
-            // Initiate drag timer
-
             // Skip if already dragging something
             if (draggedElement.has_value()) return;
-            // Skip if cursor changed hover while dragging
-            if (!hoveredDraggableElement.has_value() && draggedTimer > 0) return;
 
-            // Reset hover if changed elements
-            if (hoveredDraggableElement.has_value() && hoveredDraggableElement.value() != element)
-            {
-                hoveredDraggableElement.reset();
-                draggedTimer = 0;
-                return;
-            }
-
-            const auto currentTime = GetTime();
-            if (draggedTimer == 0)
+            // If we haven't started timing for this element yet
+            if (!hoveredDraggableElement.has_value())
             {
                 hoveredDraggableElement = element;
-                draggedTimer = currentTime;
+                dragTimer.SetMaxTime(draggedTimerThreshold);
+                dragTimer.Start();
             }
-            else if (currentTime > draggedTimer + draggedTimerThreshold)
+            // If the cursor has changed drag target, reset
+            else if (hoveredDraggableElement.value() != element)
+            {
+                hoveredDraggableElement = element;
+                dragTimer.Restart();
+            }
+            // Check if we've held long enough to start dragging
+            else if (dragTimer.HasExceededMaxTime())
             {
                 const Vector2 offset = {
                     static_cast<float>(settings->screenWidth * 0.005),
@@ -1389,12 +1385,18 @@ namespace sage
                         mousePos.x - element->rec.x - offset.x, mousePos.y - element->rec.y - offset.y};
                 }
 
-                draggedTimer = 0;
+                dragTimer.Reset();
             }
         }
         else if (element->mouseHover)
         {
             element->OnMouseContinueHover();
+            // Reset timer if we're not holding the mouse button
+            if (dragTimer.IsRunning())
+            {
+                dragTimer.Reset();
+                hoveredDraggableElement.reset();
+            }
         }
     }
 
@@ -1456,7 +1458,7 @@ namespace sage
     {
         if (hoveredDraggableElement.has_value())
         {
-            draggedTimer = 0;
+            dragTimer.Reset();
             hoveredDraggableElement.reset();
         }
 
@@ -1468,6 +1470,9 @@ namespace sage
 
     void GameUIEngine::Update()
     {
+        const float dt = GetFrameTime();
+        dragTimer.Update(dt);
+
         pruneWindows();
         const auto mousePos = GetMousePosition();
 
@@ -1482,12 +1487,6 @@ namespace sage
             draggedElement.value()->Update();
         }
 
-        // Reset drag timer on mouse release
-        if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-        {
-            draggedTimer = 0;
-        }
-
         processWindows(mousePos);
 
         // Clean up drag states on mouse release
@@ -1500,5 +1499,7 @@ namespace sage
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
         : cursor(_cursor), userInput(_userInput), settings(_settings)
     {
+        dragTimer.SetMaxTime(draggedTimerThreshold);
+        dragTimer.SetAutoFinish(false);
     }
 } // namespace sage
