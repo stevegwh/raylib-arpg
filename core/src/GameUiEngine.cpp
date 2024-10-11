@@ -1275,6 +1275,10 @@ namespace sage
         }
     }
 
+    void GameUIEngine::clearAllHover(unsigned int start, unsigned int end)
+    {
+    }
+
     void GameUIEngine::Draw2D() const
     {
         for (const auto& window : windows)
@@ -1295,11 +1299,101 @@ namespace sage
                mousePos.y <= rec.y + rec.height;
     }
 
+    void GameUIEngine::processCell(
+        CellElement* element, Window* window, bool& elementFound, const Vector2& mousePos)
+    {
+        // Handle element hover state
+        if (!MouseInside(element->parent->rec, mousePos))
+        {
+            if (element->mouseHover)
+            {
+                element->OnMouseStopHover();
+            }
+            return;
+        }
+
+        elementFound = true; // We found an element under the mouse
+
+        bool elementDropped = draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT);
+        bool mouseButtonClicked = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+        auto mouseDownOnDraggableElement = IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable;
+
+        // Handle mouse interactions
+        if (elementDropped)
+        {
+            if (auto draggedCellElement = dynamic_cast<DraggedCellElement*>(draggedElement.value().get()))
+            {
+                element->OnDragDropHere(draggedCellElement->element);
+            }
+            return;
+        }
+
+        // No item being dragged
+        if (!element->mouseHover)
+        {
+            element->OnMouseStartHover();
+        }
+
+        if (mouseButtonClicked)
+        {
+            element->OnMouseStopHover();
+            element->OnMouseClick();
+        }
+        else if (mouseDownOnDraggableElement)
+        {
+            // Initiate drag timer
+
+            // Skip if already dragging something
+            if (draggedElement.has_value()) return;
+            // Skip if cursor changed hover while dragging
+            if (!hoveredDraggableElement.has_value() && draggedTimer > 0) return;
+
+            // Reset hover if changed elements
+            if (hoveredDraggableElement.has_value() && hoveredDraggableElement.value() != element)
+            {
+                hoveredDraggableElement.reset();
+                draggedTimer = 0;
+                return;
+            }
+
+            const auto currentTime = GetTime();
+            if (draggedTimer == 0)
+            {
+                hoveredDraggableElement = element;
+                draggedTimer = currentTime;
+            }
+            else if (currentTime > draggedTimer + draggedTimerThreshold)
+            {
+                const Vector2 offset = {
+                    static_cast<float>(settings->screenWidth * 0.005),
+                    static_cast<float>(settings->screenHeight * 0.005)};
+
+                if (const auto titleBar = dynamic_cast<TitleBar*>(element))
+                {
+                    draggedElement = std::make_unique<DraggedWindow>(titleBar->parent->GetWindow());
+                    draggedElement.value()->mouseOffset = {
+                        mousePos.x - window->rec.x - offset.x, mousePos.y - window->rec.y - offset.y};
+                }
+                else
+                {
+                    draggedElement = std::make_unique<DraggedCellElement>(element);
+                    draggedElement.value()->mouseOffset = {
+                        mousePos.x - element->rec.x - offset.x, mousePos.y - element->rec.y - offset.y};
+                }
+
+                draggedTimer = 0;
+            }
+        }
+        else if (element->mouseHover)
+        {
+            element->OnMouseContinueHover();
+        }
+    }
+
     void GameUIEngine::processWindows(const Vector2& mousePos)
     {
-        bool elementFound = false;
         const auto windowCount = windows.size();
-
+        bool elementFound = false;
         for (const auto& window : windows)
         {
             // Make sure we do not process newly added windows this cycle
@@ -1317,120 +1411,33 @@ namespace sage
                 continue;
             }
 
+            cursor->DisableContextSwitching();
+            cursor->Disable();
+
             if (!window->mouseHover)
             {
                 window->OnMouseStartHover();
             }
-            cursor->DisableContextSwitching();
-            cursor->Disable();
 
-            // Process all elements in window
             for (const auto& table : window->children)
             {
                 for (const auto& row : table->children)
                 {
                     for (const auto& cell : row->children)
                     {
-                        auto& element = cell->children;
+                        auto element = cell->children.get();
 
+                        // Already found a hovered element, loop continues to remove previous hover states
                         if (elementFound)
                         {
-                            // Already found a hovered element, loop continues to remove hover state
                             if (element->mouseHover)
                             {
                                 element->OnMouseStopHover();
                             }
-                            continue;
+                            return;
                         }
 
-                        // Handle element hover state
-                        if (!MouseInside(cell->rec, mousePos))
-                        {
-                            if (element->mouseHover)
-                            {
-                                element->OnMouseStopHover();
-                            }
-                            continue;
-                        }
-
-                        elementFound = true; // We found an element under the mouse
-
-                        // Handle mouse interactions
-                        if (draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-                        {
-                            if (auto draggedCellElement =
-                                    dynamic_cast<DraggedCellElement*>(draggedElement.value().get()))
-                            {
-                                element->OnDragDropHere(draggedCellElement->element);
-                            }
-                            continue;
-                        }
-
-                        // No item being dragged
-                        if (!element->mouseHover)
-                        {
-                            element->OnMouseStartHover();
-                        }
-
-                        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-                        {
-                            element->OnMouseStopHover();
-                            element->OnMouseClick();
-                        }
-
-                        else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable)
-                        {
-                            // Initiate drag timer
-
-                            // Skip if already dragging something
-                            if (draggedElement.has_value()) continue;
-                            // Skip if cursor changed hover while dragging
-                            if (!hoveredDraggableElement.has_value() && draggedTimer > 0) continue;
-
-                            // Reset hover if changed elements
-                            if (hoveredDraggableElement.has_value() &&
-                                hoveredDraggableElement.value() != element.get())
-                            {
-                                hoveredDraggableElement.reset();
-                                draggedTimer = 0;
-                                continue;
-                            }
-
-                            const auto currentTime = GetTime();
-                            if (draggedTimer == 0)
-                            {
-                                hoveredDraggableElement = element.get();
-                                draggedTimer = currentTime;
-                            }
-                            else if (currentTime > draggedTimer + draggedTimerThreshold)
-                            {
-                                const Vector2 offset = {
-                                    static_cast<float>(settings->screenWidth * 0.005),
-                                    static_cast<float>(settings->screenHeight * 0.005)};
-
-                                if (const auto titleBar = dynamic_cast<TitleBar*>(element.get()))
-                                {
-                                    draggedElement =
-                                        std::make_unique<DraggedWindow>(titleBar->parent->GetWindow());
-                                    draggedElement.value()->mouseOffset = {
-                                        mousePos.x - window->rec.x - offset.x,
-                                        mousePos.y - window->rec.y - offset.y};
-                                }
-                                else
-                                {
-                                    draggedElement = std::make_unique<DraggedCellElement>(element.get());
-                                    draggedElement.value()->mouseOffset = {
-                                        mousePos.x - element->rec.x - offset.x,
-                                        mousePos.y - element->rec.y - offset.y};
-                                }
-
-                                draggedTimer = 0;
-                            }
-                        }
-                        else if (element->mouseHover)
-                        {
-                            element->OnMouseContinueHover();
-                        }
+                        processCell(element, window.get(), elementFound, mousePos);
                     }
                 }
             }
