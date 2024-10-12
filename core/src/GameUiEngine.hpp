@@ -75,6 +75,12 @@ namespace sage
     class UIElement
     {
       public:
+        bool mouseHover = false;
+
+        virtual void OnMouseStartHover();
+        virtual void OnMouseContinueHover();
+        virtual void OnMouseStopHover();
+
         virtual ~UIElement() = default;
         std::unique_ptr<UIState> state;
         void ChangeState(std::unique_ptr<UIState> newState);
@@ -167,13 +173,10 @@ namespace sage
         Texture tex{};
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
-        bool mouseHover = false;
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);
 
-        entt::sigh<void()> onStartHover;
-        entt::sigh<void()> onEndHover;
         entt::sigh<void()> onMouseClicked;
 
         bool draggable = false;
@@ -189,22 +192,6 @@ namespace sage
             std::cout << "Reached here \n";
         }
 
-        virtual void OnMouseStartHover()
-        {
-            mouseHover = true;
-            onStartHover.publish();
-        };
-
-        virtual void OnMouseContinueHover()
-        {
-        }
-
-        virtual void OnMouseStopHover()
-        {
-            mouseHover = false;
-            onEndHover.publish();
-        };
-
         virtual void OnMouseClick()
         {
             onMouseClicked.publish();
@@ -214,11 +201,7 @@ namespace sage
         virtual void Draw2D() = 0;
 
         CellElement() = default;
-        CellElement(const CellElement&) = default;
-        CellElement(CellElement&&) noexcept = default;
-        CellElement& operator=(const CellElement&) = default;
-        CellElement& operator=(CellElement&&) noexcept = default;
-        virtual ~CellElement() = default;
+        ~CellElement() override = default;
     };
 
     struct TextBox : public CellElement
@@ -381,19 +364,17 @@ namespace sage
 
         GameUIEngine* uiEngine;
         const Settings* settings; // for screen width/height
-        entt::sigh<void()> onMouseStartHover;
-        entt::sigh<void()> onMouseStopHover;
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
 
         // Texture mainNPatchTexture; // npatch texture used by elements in window
-
-        virtual void OnMouseStartHover();
-        virtual void OnMouseStopHover();
 
         [[nodiscard]] Dimensions GetDimensions() const;
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
         virtual void SetPosition(float x, float y);
         [[nodiscard]] Vector2 GetPosition() const;
+
+        void OnMouseStartHover() override;
+        void OnMouseStopHover() override;
 
         TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
         Table* CreateTable();

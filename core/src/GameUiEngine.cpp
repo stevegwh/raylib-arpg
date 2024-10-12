@@ -20,6 +20,20 @@
 namespace sage
 {
 
+    void UIElement::OnMouseStartHover()
+    {
+        mouseHover = true;
+    };
+
+    void UIElement::OnMouseContinueHover()
+    {
+    }
+
+    void UIElement::OnMouseStopHover()
+    {
+        mouseHover = false;
+    };
+
     void UIElement::ChangeState(std::unique_ptr<UIState> newState)
     {
         state = std::move(newState);
@@ -548,18 +562,6 @@ namespace sage
         UpdateChildren();
     }
 
-    void Window::OnMouseStartHover()
-    {
-        mouseHover = true;
-        onMouseStartHover.publish();
-    }
-
-    void Window::OnMouseStopHover()
-    {
-        mouseHover = false;
-        onMouseStopHover.publish();
-    }
-
     Dimensions Window::GetDimensions() const
     {
         return Dimensions{settings->screenWidth * widthPercent, settings->screenHeight * heightPercent};
@@ -585,6 +587,30 @@ namespace sage
     Vector2 Window::GetPosition() const
     {
         return {rec.x, rec.y};
+    }
+
+    void Window::OnMouseStartHover()
+    {
+        UIElement::OnMouseStartHover();
+    }
+
+    void Window::OnMouseStopHover()
+    {
+        UIElement::OnMouseStopHover();
+        for (auto& table : children)
+        {
+            for (auto& row : table->children)
+            {
+                for (auto& cell : row->children)
+                {
+                    auto& element = cell->children;
+                    if (element->mouseHover)
+                    {
+                        element->OnMouseStopHover();
+                    }
+                }
+            }
+        }
     }
 
     void Window::DrawDebug2D()
@@ -1056,8 +1082,6 @@ namespace sage
         abilitySlot->draggable = true;
         abilitySlot->canReceiveDragDrops = true;
         abilitySlot->slotNumber = _slotNumber;
-        entt::sink sink{GetWindow()->onMouseStopHover};
-        sink.connect<&AbilitySlot::OnMouseStopHover>(abilitySlot);
         abilitySlot->SetAbilityInfo();
         UpdateChildren();
         return abilitySlot;
@@ -1077,8 +1101,6 @@ namespace sage
         slot->canReceiveDragDrops = true;
         slot->row = row;
         slot->col = col;
-        entt::sink sink{GetWindow()->onMouseStopHover};
-        sink.connect<&InventorySlot::OnMouseStopHover>(slot);
         slot->SetItemInfo();
         UpdateChildren();
         return slot;
@@ -1101,8 +1123,6 @@ namespace sage
         children = std::make_unique<CloseButton>();
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
         closeButton->SetGrayscale();
-        entt::sink sink{GetWindow()->onMouseStopHover};
-        sink.connect<&ImageBox::OnMouseStopHover>(closeButton);
         closeButton->tex = _tex;
         UpdateChildren();
         return closeButton;
@@ -1125,9 +1145,6 @@ namespace sage
         children = std::make_unique<ImageBox>();
         auto* image = dynamic_cast<ImageBox*>(children.get());
         image->draggable = true;
-        auto window = GetWindow();
-        entt::sink sink{window->onMouseStopHover};
-        sink.connect<&ImageBox::OnMouseStopHover>(image);
         image->tex = _tex;
         UpdateChildren();
         return image;
@@ -1507,10 +1524,7 @@ namespace sage
             // Handle window hover state
             if (!MouseInside(window->rec, mousePos))
             {
-                if (window->mouseHover)
-                {
-                    window->OnMouseStopHover();
-                }
+                window->OnMouseStopHover();
                 continue;
             }
 
