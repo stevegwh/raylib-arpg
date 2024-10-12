@@ -3,23 +3,112 @@
 //
 
 #include "GameUiEngine.hpp"
+#include "components/InventoryComponent.hpp"
+#include "components/ItemComponent.hpp"
 #include "Cursor.hpp"
 #include "GameUiFactory.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "UserInput.hpp"
 
-#include "components/InventoryComponent.hpp"
-#include "components/ItemComponent.hpp"
 #include "rlgl.h"
-#include "systems/ControllableActorSystem.hpp"
-
 #include <cassert>
 #include <sstream>
 
 namespace sage
 {
+
+    void IdleState::Update()
+    {
+    }
+
+    void IdleState::Draw()
+    {
+    }
+
+    IdleState::~IdleState()
+    {
+    }
+
+    IdleState::IdleState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void HoveredState::Update()
+    {
+    }
+
+    void HoveredState::Draw()
+    {
+    }
+
+    HoveredState::~HoveredState()
+    {
+    }
+
+    HoveredState::HoveredState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void PreDraggingState::Update()
+    {
+    }
+
+    void PreDraggingState::Draw()
+    {
+    }
+
+    PreDraggingState::~PreDraggingState()
+    {
+    }
+
+    PreDraggingState::PreDraggingState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void DraggingState::Update()
+    {
+    }
+
+    void DraggingState::Draw()
+    {
+    }
+
+    DraggingState::~DraggingState()
+    {
+    }
+
+    DraggingState::DraggingState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void DroppingState::Update()
+    {
+    }
+
+    void DroppingState::Draw()
+    {
+    }
+
+    DroppingState::~DroppingState()
+    {
+    }
+
+    DroppingState::DroppingState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void UIElement::ChangeState(std::unique_ptr<UIState> newState)
+    {
+        state = std::move(newState);
+    }
+
+    UIElement::UIElement() : state(std::make_unique<IdleState>(this))
+    {
+    }
+
     void CellElement::SetVertAlignment(VertAlignment alignment)
     {
         vertAlignment = alignment;

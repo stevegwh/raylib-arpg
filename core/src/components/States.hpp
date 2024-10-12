@@ -24,7 +24,7 @@ namespace sage
             currentState = newState;
         }
 
-        StateEnum GetCurrentState() const
+        [[nodiscard]] StateEnum GetCurrentState() const
         {
             return currentState;
         }
@@ -32,7 +32,7 @@ namespace sage
         BaseState(const BaseState&) = delete;
         BaseState& operator=(const BaseState&) = delete;
 
-        BaseState(StateEnum initialState) : currentState(initialState)
+        explicit BaseState(StateEnum initialState) : currentState(initialState)
         {
         }
     };

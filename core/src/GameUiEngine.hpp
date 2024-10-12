@@ -9,14 +9,10 @@
 
 #include <entt/entt.hpp>
 #include <iostream>
+#include <memory>
 #include <optional>
-#include <variant>
 #include <vector>
 
-namespace sage
-{
-    class ControllableActorSystem;
-}
 namespace sage
 {
     class GameUIEngine;
@@ -26,6 +22,8 @@ namespace sage
     struct Window;
     struct TableRow;
     struct Table;
+    class UIState;
+    class ControllableActorSystem;
 
     struct Settings;
     class UserInput;
@@ -78,6 +76,66 @@ namespace sage
     {
       public:
         virtual ~UIElement() = default;
+        std::unique_ptr<UIState> state;
+        void ChangeState(std::unique_ptr<UIState> newState);
+        UIElement();
+    };
+
+    class UIState
+    {
+      protected:
+        UIElement* element{};
+
+      public:
+        virtual void Update() = 0;
+        virtual void Draw() = 0;
+        virtual ~UIState() = default;
+        explicit UIState(UIElement* _element);
+    };
+
+    class IdleState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~IdleState() override;                   // OnExit
+        explicit IdleState(UIElement* _element); // OnEnter
+    };
+
+    class HoveredState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~HoveredState() override;                   // OnExit
+        explicit HoveredState(UIElement* _element); // OnEnter
+    };
+
+    class PreDraggingState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~PreDraggingState() override;                   // OnExit
+        explicit PreDraggingState(UIElement* _element); // OnEnter
+    };
+
+    class DraggingState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~DraggingState() override;                   // OnExit
+        explicit DraggingState(UIElement* _element); // OnEnter
+    };
+
+    class DroppingState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~DroppingState() override;                   // OnExit
+        explicit DroppingState(UIElement* _element); // OnEnter
     };
 
     template <typename Child, typename Parent>
@@ -156,7 +214,7 @@ namespace sage
         TableElement(TableElement&&) noexcept = default;
         TableElement& operator=(const TableElement&) = default;
         TableElement& operator=(TableElement&&) noexcept = default;
-        virtual ~TableElement() = default;
+        ~TableElement() override = default;
     };
 
     struct CellElement : UIElement
