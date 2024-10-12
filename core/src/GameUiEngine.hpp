@@ -8,8 +8,6 @@
 
 #include "raylib.h"
 #include "Timer.hpp"
-
-#include <entt/entt.hpp>
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -22,43 +20,6 @@ namespace sage
     struct Settings;
     class UserInput;
     class Cursor;
-
-    class DraggedObject
-    {
-      protected:
-      public:
-        Vector2 mouseOffset{};
-        virtual UIElement* GetElement() = 0;
-        virtual ~DraggedObject() = default;
-        virtual void Update() = 0;
-        virtual void Draw() = 0;
-        virtual void OnDrop(){};
-    };
-
-    class DraggedWindow : public DraggedObject
-    {
-        Window* element{};
-
-      public:
-        UIElement* GetElement() override;
-        void Update() override;
-        void Draw() override;
-        void OnDrop() override;
-        explicit DraggedWindow(Window* _window);
-    };
-
-    class DraggedCellElement : public DraggedObject
-    {
-        CellElement* element{};
-
-      public:
-        UIElement* GetElement() override;
-        void Update() override;
-        void Draw() override;
-        void OnDrop() override;
-        explicit DraggedCellElement(CellElement* _element);
-        ~DraggedCellElement() override;
-    };
 
     class UIState
     {
@@ -125,20 +86,16 @@ namespace sage
 
     class GameUIEngine
     {
-        Timer dragTimer;
-        static constexpr float draggedTimerThreshold = 0.25f;
         std::vector<std::unique_ptr<Window>> windows;
         std::vector<std::unique_ptr<Window>> delayedWindows;
         UserInput* userInput;
         Settings* settings;
 
-        std::optional<std::unique_ptr<DraggedObject>> draggedElement;
-        std::optional<CellElement*> hoveredDraggableElement{};
+        std::optional<UIElement*> draggedObject;
+        std::optional<CellElement*> hoveredDraggableCellElement;
 
         void pruneWindows();
-        // void processCell(CellElement* cell, Window* window, bool& elementFound, const Vector2& mousePos);
-        void processWindows(const Vector2& mousePos);
-        void cleanUpDragState();
+        void processWindows() const;
 
       public:
         Cursor* cursor;
@@ -168,5 +125,6 @@ namespace sage
         friend class UIState;
         friend class DroppingState;
         friend class DraggingState;
+        friend class HoveredState;
     };
 } // namespace sage
