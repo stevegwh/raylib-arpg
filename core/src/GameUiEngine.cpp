@@ -65,8 +65,12 @@ namespace sage
             element->ChangeState(std::make_unique<IdleState>(element));
             return;
         }
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable)
+        {
+            element->ChangeState(std::make_unique<PreDraggingState>(element));
+            return;
+        }
         element->OnMouseContinueHover();
-        // Determine pre-drag (not sure if needs a new state)
     }
 
     void HoveredState::Draw()
@@ -92,7 +96,12 @@ namespace sage
 
     void PreDraggingState::Update()
     {
+        timer.Update(GetFrameTime());
         // if cursor not within bounds, change
+        if (timer.HasExceededMaxTime())
+        {
+            element->ChangeState(std::make_unique<DraggingState>(element));
+        }
     }
 
     void PreDraggingState::Draw()
@@ -105,20 +114,30 @@ namespace sage
 
     PreDraggingState::PreDraggingState(UIElement* _element) : UIState(_element)
     {
+        timer.SetMaxTime(0.25f); // TODO: Do not use magic number
+        timer.SetAutoFinish(false);
     }
 
     void DraggingState::Enter()
     {
+        element->beingDragged = true;
+        // element->hidden = true;
         // hide element
     }
 
     void DraggingState::Exit()
     {
+        element->beingDragged = false;
+        // element->hidden = false;
     }
 
     void DraggingState::Update()
     {
         // Determine if object is still being dragged
+        if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+        {
+            element->ChangeState(std::make_unique<DroppingState>(element));
+        }
     }
 
     void DraggingState::Draw()
@@ -412,6 +431,7 @@ namespace sage
             // Make sure we do not process newly added windows this cycle
             if (windows.size() > windowCount) break;
             if (window->hidden) continue;
+
             // window->state->Update();
 
             // Handle window hover state

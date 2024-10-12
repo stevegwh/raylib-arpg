@@ -98,6 +98,8 @@ namespace sage
 
     class PreDraggingState : public UIState
     {
+        Timer timer;
+
       public:
         void Enter() override;
         void Exit() override;
