@@ -88,6 +88,8 @@ namespace sage
 
     class HoveredState : public UIState
     {
+        Timer dragTimer;
+
       public:
         void Enter() override;
         void Exit() override;
@@ -95,19 +97,6 @@ namespace sage
         void Draw() override;
         ~HoveredState() override;
         explicit HoveredState(UIElement* _element, GameUIEngine* _engine);
-    };
-
-    class PreDraggingState : public UIState
-    {
-        Timer timer;
-
-      public:
-        void Enter() override;
-        void Exit() override;
-        void Update() override;
-        void Draw() override;
-        ~PreDraggingState() override;                                          // OnExit
-        explicit PreDraggingState(UIElement* _element, GameUIEngine* _engine); // OnEnter
     };
 
     class DraggingState : public UIState
@@ -146,9 +135,8 @@ namespace sage
         std::optional<std::unique_ptr<DraggedObject>> draggedElement;
         std::optional<CellElement*> hoveredDraggableElement{};
 
-        void clearAllHover(unsigned int start, unsigned int end);
         void pruneWindows();
-        void processCell(CellElement* cell, Window* window, bool& elementFound, const Vector2& mousePos);
+        // void processCell(CellElement* cell, Window* window, bool& elementFound, const Vector2& mousePos);
         void processWindows(const Vector2& mousePos);
         void cleanUpDragState();
 
@@ -179,5 +167,6 @@ namespace sage
         GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor);
         friend class UIState;
         friend class DroppingState;
+        friend class DraggingState;
     };
 } // namespace sage

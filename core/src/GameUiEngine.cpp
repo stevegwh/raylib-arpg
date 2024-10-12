@@ -48,9 +48,9 @@ namespace sage
 
     void HoveredState::Enter()
     {
-        engine->cursor->DisableContextSwitching();
-        engine->cursor->Disable();
         element->OnMouseStartHover();
+        dragTimer.SetMaxTime(0.25f); // TODO: Do not use magic number
+        dragTimer.SetAutoFinish(false);
     }
 
     void HoveredState::Exit()
@@ -61,54 +61,29 @@ namespace sage
 
     void HoveredState::Update()
     {
+        engine->cursor->DisableContextSwitching();
+        engine->cursor->Disable();
+        dragTimer.Update(GetFrameTime());
+        element->OnMouseContinueHover();
+
         auto mousePos = GetMousePosition();
         if (!MouseInside(element->rec, mousePos))
         {
             element->ChangeState(std::make_unique<IdleState>(element, engine));
             return;
         }
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable)
-        {
-            element->ChangeState(std::make_unique<PreDraggingState>(element, engine));
-            return;
-        }
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
             element->OnMouseClick();
             element->ChangeState(std::make_unique<IdleState>(element, engine));
-            return;
         }
-        element->OnMouseContinueHover();
-    }
-
-    void HoveredState::Draw()
-    {
-    }
-
-    HoveredState::~HoveredState()
-    {
-    }
-
-    HoveredState::HoveredState(UIElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
-    {
-    }
-
-    void PreDraggingState::Enter()
-    {
-        // start timer
-    }
-
-    void PreDraggingState::Exit()
-    {
-    }
-
-    void PreDraggingState::Update()
-    {
-        timer.Update(GetFrameTime());
-        // if cursor not within bounds, change
-        if (timer.HasExceededMaxTime())
+        else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable && dragTimer.HasExceededMaxTime())
         {
             element->ChangeState(std::make_unique<DraggingState>(element, engine));
+        }
+        else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable && !dragTimer.IsRunning())
+        {
+            dragTimer.Start();
         }
 
         // // Skip if already dragging something
@@ -151,18 +126,16 @@ namespace sage
         // }
     }
 
-    void PreDraggingState::Draw()
+    void HoveredState::Draw()
     {
     }
 
-    PreDraggingState::~PreDraggingState()
+    HoveredState::~HoveredState()
     {
     }
 
-    PreDraggingState::PreDraggingState(UIElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
+    HoveredState::HoveredState(UIElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
     {
-        timer.SetMaxTime(0.25f); // TODO: Do not use magic number
-        timer.SetAutoFinish(false);
     }
 
     void DraggingState::Enter()
@@ -171,6 +144,23 @@ namespace sage
         element->OnMouseStartDrag();
         // element->hidden = true;
         // hide element
+        auto mousePos = GetMousePosition();
+        mouseOffset = {
+            static_cast<float>(engine->settings->screenWidth * 0.005),
+            static_cast<float>(engine->settings->screenHeight * 0.005)};
+
+        // if (const auto titleBar = dynamic_cast<TitleBar*>(element))
+        // {
+        //     engine->draggedElement = std::make_unique<DraggedWindow>(titleBar->parent->GetWindow());
+        //     engine->draggedElement.value()->mouseOffset = {
+        //         mousePos.x - GetWindow()->rec.x - mouseOffset.x, mousePos.y - window->rec.y - mouseOffset.y};
+        // }
+        // else
+        // {
+        //     engine->draggedElement = std::make_unique<DraggedCellElement>(element);
+        //     engine->draggedElement.value()->mouseOffset = {
+        //         mousePos.x - element->rec.x - mouseOffset.x, mousePos.y - element->rec.y - mouseOffset.y};
+        // }
     }
 
     void DraggingState::Exit()
@@ -185,6 +175,7 @@ namespace sage
         if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
         {
             element->ChangeState(std::make_unique<DroppingState>(element, engine));
+            return;
         }
         element->OnMouseContinueDrag(); // Update drag
     }
@@ -371,10 +362,6 @@ namespace sage
         }
     }
 
-    void GameUIEngine::clearAllHover(unsigned int start, unsigned int end)
-    {
-    }
-
     void GameUIEngine::Draw2D() const
     {
         for (const auto& window : windows)
@@ -389,97 +376,97 @@ namespace sage
         }
     }
 
-    void GameUIEngine::processCell(
-        CellElement* element, Window* window, bool& elementFound, const Vector2& mousePos)
-    {
-        element->state->Update();
-
-        // // Handle element hover state
-        // if (!MouseInside(element->parent->rec, mousePos))
-        // {
-        //     if (element->mouseHover)
-        //     {
-        //         element->OnMouseStopHover();
-        //     }
-        //     return;
-        // }
-        //
-        // elementFound = true; // We found an element under the mouse
-        //
-        // bool elementDropped = draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT);
-        // bool mouseButtonClicked = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
-        // auto mouseDownOnDraggableElement = IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable;
-        //
-        // // Handle mouse interactions
-        // if (elementDropped)
-        // {
-        //     element->OnDragDropHere(draggedElement.value()->GetElement());
-        //     return;
-        // }
-        //
-        // // No item being dragged
-        // if (!element->mouseHover)
-        // {
-        //     element->OnMouseStartHover();
-        // }
-        //
-        // if (mouseButtonClicked)
-        // {
-        //     element->OnMouseStopHover();
-        //     element->OnMouseClick();
-        // }
-        // else if (mouseDownOnDraggableElement)
-        // {
-        //     // Skip if already dragging something
-        //     if (draggedElement.has_value()) return;
-        //
-        //     // If we haven't started timing for this element yet
-        //     if (!hoveredDraggableElement.has_value())
-        //     {
-        //         hoveredDraggableElement = element;
-        //         dragTimer.SetMaxTime(draggedTimerThreshold);
-        //         dragTimer.Start();
-        //     }
-        //     // If the cursor has changed drag target, reset
-        //     else if (hoveredDraggableElement.value() != element)
-        //     {
-        //         hoveredDraggableElement = element;
-        //         dragTimer.Restart();
-        //     }
-        //     // Check if we've held long enough to start dragging
-        //     else if (dragTimer.HasExceededMaxTime())
-        //     {
-        //         const Vector2 offset = {
-        //             static_cast<float>(settings->screenWidth * 0.005),
-        //             static_cast<float>(settings->screenHeight * 0.005)};
-        //
-        //         if (const auto titleBar = dynamic_cast<TitleBar*>(element))
-        //         {
-        //             draggedElement = std::make_unique<DraggedWindow>(titleBar->parent->GetWindow());
-        //             draggedElement.value()->mouseOffset = {
-        //                 mousePos.x - window->rec.x - offset.x, mousePos.y - window->rec.y - offset.y};
-        //         }
-        //         else
-        //         {
-        //             draggedElement = std::make_unique<DraggedCellElement>(element);
-        //             draggedElement.value()->mouseOffset = {
-        //                 mousePos.x - element->rec.x - offset.x, mousePos.y - element->rec.y - offset.y};
-        //         }
-        //
-        //         dragTimer.Reset();
-        //     }
-        // }
-        // else if (element->mouseHover)
-        // {
-        //     element->OnMouseContinueHover();
-        //     // Reset timer if we're not holding the mouse button
-        //     if (dragTimer.IsRunning())
-        //     {
-        //         dragTimer.Reset();
-        //         hoveredDraggableElement.reset();
-        //     }
-        // }
-    }
+    // void GameUIEngine::processCell(
+    //     CellElement* element, Window* window, bool& elementFound, const Vector2& mousePos)
+    // {
+    //     // element->state->Update();
+    //
+    //     // // Handle element hover state
+    //     // if (!MouseInside(element->parent->rec, mousePos))
+    //     // {
+    //     //     if (element->mouseHover)
+    //     //     {
+    //     //         element->OnMouseStopHover();
+    //     //     }
+    //     //     return;
+    //     // }
+    //     //
+    //     // elementFound = true; // We found an element under the mouse
+    //     //
+    //     // bool elementDropped = draggedElement.has_value() && IsMouseButtonUp(MOUSE_BUTTON_LEFT);
+    //     // bool mouseButtonClicked = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+    //     // auto mouseDownOnDraggableElement = IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable;
+    //     //
+    //     // // Handle mouse interactions
+    //     // if (elementDropped)
+    //     // {
+    //     //     element->OnDragDropHere(draggedElement.value()->GetElement());
+    //     //     return;
+    //     // }
+    //     //
+    //     // // No item being dragged
+    //     // if (!element->mouseHover)
+    //     // {
+    //     //     element->OnMouseStartHover();
+    //     // }
+    //     //
+    //     // if (mouseButtonClicked)
+    //     // {
+    //     //     element->OnMouseStopHover();
+    //     //     element->OnMouseClick();
+    //     // }
+    //     // else if (mouseDownOnDraggableElement)
+    //     // {
+    //     //     // Skip if already dragging something
+    //     //     if (draggedElement.has_value()) return;
+    //     //
+    //     //     // If we haven't started timing for this element yet
+    //     //     if (!hoveredDraggableElement.has_value())
+    //     //     {
+    //     //         hoveredDraggableElement = element;
+    //     //         dragTimer.SetMaxTime(draggedTimerThreshold);
+    //     //         dragTimer.Start();
+    //     //     }
+    //     //     // If the cursor has changed drag target, reset
+    //     //     else if (hoveredDraggableElement.value() != element)
+    //     //     {
+    //     //         hoveredDraggableElement = element;
+    //     //         dragTimer.Restart();
+    //     //     }
+    //     //     // Check if we've held long enough to start dragging
+    //     //     else if (dragTimer.HasExceededMaxTime())
+    //     //     {
+    //     //         const Vector2 offset = {
+    //     //             static_cast<float>(settings->screenWidth * 0.005),
+    //     //             static_cast<float>(settings->screenHeight * 0.005)};
+    //     //
+    //     //         if (const auto titleBar = dynamic_cast<TitleBar*>(element))
+    //     //         {
+    //     //             draggedElement = std::make_unique<DraggedWindow>(titleBar->parent->GetWindow());
+    //     //             draggedElement.value()->mouseOffset = {
+    //     //                 mousePos.x - window->rec.x - offset.x, mousePos.y - window->rec.y - offset.y};
+    //     //         }
+    //     //         else
+    //     //         {
+    //     //             draggedElement = std::make_unique<DraggedCellElement>(element);
+    //     //             draggedElement.value()->mouseOffset = {
+    //     //                 mousePos.x - element->rec.x - offset.x, mousePos.y - element->rec.y - offset.y};
+    //     //         }
+    //     //
+    //     //         dragTimer.Reset();
+    //     //     }
+    //     // }
+    //     // else if (element->mouseHover)
+    //     // {
+    //     //     element->OnMouseContinueHover();
+    //     //     // Reset timer if we're not holding the mouse button
+    //     //     if (dragTimer.IsRunning())
+    //     //     {
+    //     //         dragTimer.Reset();
+    //     //         hoveredDraggableElement.reset();
+    //     //     }
+    //     // }
+    // }
 
     void GameUIEngine::processWindows(const Vector2& mousePos)
     {
