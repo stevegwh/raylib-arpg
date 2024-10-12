@@ -20,86 +20,6 @@
 namespace sage
 {
 
-    void IdleState::Update()
-    {
-    }
-
-    void IdleState::Draw()
-    {
-    }
-
-    IdleState::~IdleState()
-    {
-    }
-
-    IdleState::IdleState(UIElement* _element) : UIState(_element)
-    {
-    }
-
-    void HoveredState::Update()
-    {
-    }
-
-    void HoveredState::Draw()
-    {
-    }
-
-    HoveredState::~HoveredState()
-    {
-    }
-
-    HoveredState::HoveredState(UIElement* _element) : UIState(_element)
-    {
-    }
-
-    void PreDraggingState::Update()
-    {
-    }
-
-    void PreDraggingState::Draw()
-    {
-    }
-
-    PreDraggingState::~PreDraggingState()
-    {
-    }
-
-    PreDraggingState::PreDraggingState(UIElement* _element) : UIState(_element)
-    {
-    }
-
-    void DraggingState::Update()
-    {
-    }
-
-    void DraggingState::Draw()
-    {
-    }
-
-    DraggingState::~DraggingState()
-    {
-    }
-
-    DraggingState::DraggingState(UIElement* _element) : UIState(_element)
-    {
-    }
-
-    void DroppingState::Update()
-    {
-    }
-
-    void DroppingState::Draw()
-    {
-    }
-
-    DroppingState::~DroppingState()
-    {
-    }
-
-    DroppingState::DroppingState(UIElement* _element) : UIState(_element)
-    {
-    }
-
     void UIElement::ChangeState(std::unique_ptr<UIState> newState)
     {
         state = std::move(newState);
@@ -1239,6 +1159,90 @@ namespace sage
         Color col = BLACK;
         col.a = 50;
         // DrawRectangle(children->rec.x, children->rec.y, children->rec.width, children->rec.height, col);
+    }
+
+    void IdleState::Update()
+    {
+    }
+
+    void IdleState::Draw()
+    {
+    }
+
+    IdleState::~IdleState()
+    {
+    }
+
+    IdleState::IdleState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void HoveredState::Update()
+    {
+    }
+
+    void HoveredState::Draw()
+    {
+    }
+
+    HoveredState::~HoveredState()
+    {
+    }
+
+    HoveredState::HoveredState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void PreDraggingState::Update()
+    {
+    }
+
+    void PreDraggingState::Draw()
+    {
+    }
+
+    PreDraggingState::~PreDraggingState()
+    {
+    }
+
+    PreDraggingState::PreDraggingState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void DraggingState::Update()
+    {
+    }
+
+    void DraggingState::Draw()
+    {
+    }
+
+    DraggingState::~DraggingState()
+    {
+    }
+
+    DraggingState::DraggingState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    void DroppingState::Update()
+    {
+    }
+
+    void DroppingState::Draw()
+    {
+    }
+
+    DroppingState::~DroppingState()
+    {
+    }
+
+    DroppingState::DroppingState(UIElement* _element) : UIState(_element)
+    {
+    }
+
+    UIState::UIState(UIElement* _element) : element(_element)
+    {
     }
 
     void GameUIEngine::pruneWindows()
