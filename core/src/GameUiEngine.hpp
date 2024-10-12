@@ -81,63 +81,6 @@ namespace sage
         UIElement();
     };
 
-    class UIState
-    {
-      protected:
-        UIElement* element{};
-
-      public:
-        virtual void Update() = 0;
-        virtual void Draw() = 0;
-        virtual ~UIState() = default;
-        explicit UIState(UIElement* _element);
-    };
-
-    class IdleState : public UIState
-    {
-      public:
-        void Update() override;
-        void Draw() override;
-        ~IdleState() override;                   // OnExit
-        explicit IdleState(UIElement* _element); // OnEnter
-    };
-
-    class HoveredState : public UIState
-    {
-      public:
-        void Update() override;
-        void Draw() override;
-        ~HoveredState() override;                   // OnExit
-        explicit HoveredState(UIElement* _element); // OnEnter
-    };
-
-    class PreDraggingState : public UIState
-    {
-      public:
-        void Update() override;
-        void Draw() override;
-        ~PreDraggingState() override;                   // OnExit
-        explicit PreDraggingState(UIElement* _element); // OnEnter
-    };
-
-    class DraggingState : public UIState
-    {
-      public:
-        void Update() override;
-        void Draw() override;
-        ~DraggingState() override;                   // OnExit
-        explicit DraggingState(UIElement* _element); // OnEnter
-    };
-
-    class DroppingState : public UIState
-    {
-      public:
-        void Update() override;
-        void Draw() override;
-        ~DroppingState() override;                   // OnExit
-        explicit DroppingState(UIElement* _element); // OnEnter
-    };
-
     template <typename Child, typename Parent>
     struct TableElement : UIElement
     {
@@ -511,6 +454,63 @@ namespace sage
         void OnDrop() override;
         explicit DraggedCellElement(CellElement* _element);
         ~DraggedCellElement() override;
+    };
+
+    class UIState
+    {
+      protected:
+        UIElement* element{};
+
+      public:
+        virtual void Update() = 0;
+        virtual void Draw() = 0;
+        virtual ~UIState() = default;
+        explicit UIState(UIElement* _element);
+    };
+
+    class IdleState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~IdleState() override;                   // OnExit
+        explicit IdleState(UIElement* _element); // OnEnter
+    };
+
+    class HoveredState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~HoveredState() override;                   // OnExit
+        explicit HoveredState(UIElement* _element); // OnEnter
+    };
+
+    class PreDraggingState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~PreDraggingState() override;                   // OnExit
+        explicit PreDraggingState(UIElement* _element); // OnEnter
+    };
+
+    class DraggingState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~DraggingState() override;                   // OnExit
+        explicit DraggingState(UIElement* _element); // OnEnter
+    };
+
+    class DroppingState : public UIState
+    {
+      public:
+        void Update() override;
+        void Draw() override;
+        ~DroppingState() override;                   // OnExit
+        explicit DroppingState(UIElement* _element); // OnEnter
     };
 
     class GameUIEngine
