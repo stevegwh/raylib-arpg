@@ -75,15 +75,28 @@ namespace sage
     class UIElement
     {
       public:
+        entt::sigh<void()> onMouseClicked;
+        std::unique_ptr<UIState> state;
         bool mouseHover = false;
+        bool draggable = false;
+        bool canReceiveDragDrops = false;
+        bool beingDragged = false;
 
         virtual void OnMouseStartHover();
         virtual void OnMouseContinueHover();
         virtual void OnMouseStopHover();
+        virtual void OnDragDropHere(UIElement* droppedElement)
+        {
+            if (!canReceiveDragDrops) return;
 
-        virtual ~UIElement() = default;
-        std::unique_ptr<UIState> state;
+            std::cout << "Reached here \n";
+        }
+        virtual void OnMouseClick()
+        {
+            onMouseClicked.publish();
+        };
         void ChangeState(std::unique_ptr<UIState> newState);
+        virtual ~UIElement() = default;
         UIElement();
     };
 
@@ -176,26 +189,6 @@ namespace sage
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);
-
-        entt::sigh<void()> onMouseClicked;
-
-        bool draggable = false;
-        bool canReceiveDragDrops = false;
-        bool beingDragged = false;
-        entt::sigh<void()> onDragStart;
-        entt::sigh<void()> onDragEnd;
-
-        virtual void OnDragDropHere(UIElement* droppedElement)
-        {
-            if (!canReceiveDragDrops) return;
-
-            std::cout << "Reached here \n";
-        }
-
-        virtual void OnMouseClick()
-        {
-            onMouseClicked.publish();
-        };
 
         virtual void UpdateDimensions() = 0;
         virtual void Draw2D() = 0;
@@ -445,6 +438,8 @@ namespace sage
       public:
         virtual void Update() = 0;
         virtual void Draw() = 0;
+        // virtual void Enter() = 0;
+        // virtual void Exit() = 0;
         virtual ~UIState() = default;
         explicit UIState(UIElement* _element);
     };
