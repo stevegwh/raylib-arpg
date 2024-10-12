@@ -23,7 +23,7 @@ namespace sage
     void UIElement::OnMouseStartHover()
     {
         mouseHover = true;
-    };
+    }
 
     void UIElement::OnMouseContinueHover()
     {
@@ -32,7 +32,18 @@ namespace sage
     void UIElement::OnMouseStopHover()
     {
         mouseHover = false;
-    };
+    }
+
+    // TODO: confusing name.
+    // In this case, "DroppedElement" is the (potential) cell that this element has been dropped onto
+    void UIElement::OnDropped(UIElement* droppedElement)
+    {
+        if (droppedElement && droppedElement->canReceiveDragDrops)
+        {
+            droppedElement->OnDragDropHere(this);
+        }
+        // Not dropped on a cell, what to do?
+    }
 
     void UIElement::ChangeState(std::unique_ptr<UIState> newState)
     {
@@ -48,7 +59,7 @@ namespace sage
         }
     }
 
-    UIElement::UIElement() : state(std::make_unique<IdleState>(this))
+    UIElement::UIElement(GameUIEngine* _engine) : engine(_engine), state(std::make_unique<IdleState>(this, engine))
     {
     }
 
@@ -63,6 +74,8 @@ namespace sage
         horiAlignment = alignment;
         UpdateDimensions();
     }
+
+    CellElement::CellElement(GameUIEngine* _engine) : UIElement(_engine){};
 
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
@@ -171,6 +184,8 @@ namespace sage
         DrawTextEx(font, content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
     }
 
+    TextBox::TextBox(GameUIEngine* _engine) : CellElement(_engine){};
+
     void AbilitySlot::SetAbilityInfo()
     {
         if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
@@ -213,7 +228,7 @@ namespace sage
             const float offsetX = mousePos.x - rec.x;
             const float offsetY = mousePos.y - rec.y - rec.height / 2;
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(
-                parent->GetWindow()->uiEngine, *ability, {rec.x + offsetX, rec.y + offsetY});
+                parent->GetWindow()->engine, *ability, {rec.x + offsetX, rec.y + offsetY});
         }
     }
 
@@ -227,6 +242,8 @@ namespace sage
         }
         ImageBox::OnMouseStopHover();
     }
+
+    AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine){};
 
     void InventorySlot::SetItemInfo()
     {
@@ -276,8 +293,7 @@ namespace sage
             const Vector2 mousePos = GetMousePosition();
             const float offsetX = mousePos.x - rec.x;
             const float offsetY = mousePos.y - rec.y - rec.height / 2;
-            tooltipWindow = GameUiFactory::CreateItemTooltip(
-                parent->GetWindow()->uiEngine, item, {rec.x + offsetX, rec.y + offsetY});
+            tooltipWindow = GameUiFactory::CreateItemTooltip(engine, item, {rec.x + offsetX, rec.y + offsetY});
         }
     }
 
@@ -291,6 +307,8 @@ namespace sage
         }
         ImageBox::OnMouseStopHover();
     }
+
+    InventorySlot::InventorySlot(GameUIEngine* _engine) : ImageBox(_engine){};
 
     void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
@@ -480,10 +498,16 @@ namespace sage
         }
     }
 
+    ImageBox::ImageBox(GameUIEngine* _engine) : CellElement(_engine){};
+
     void CloseButton::OnMouseClick()
     {
         parent->GetWindow()->hidden = true;
     }
+
+    CloseButton::CloseButton(GameUIEngine* _engine) : ImageBox(_engine){};
+
+    TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine){};
 
     void WindowDocked::OnScreenSizeChange()
     {
@@ -556,6 +580,8 @@ namespace sage
         UpdateChildren();
     }
 
+    WindowDocked::WindowDocked(GameUIEngine* _engine) : Window(_engine){};
+
     void Window::Remove()
     {
         hidden = true;
@@ -605,8 +631,8 @@ namespace sage
 
     void Window::OnMouseContinueHover()
     {
-        uiEngine->cursor->DisableContextSwitching();
-        uiEngine->cursor->Disable();
+        engine->cursor->DisableContextSwitching();
+        engine->cursor->Disable();
 
         // bool elementFound = false;
         // auto mousePos = GetMousePosition();
@@ -646,7 +672,7 @@ namespace sage
                 for (auto& cell : row->children)
                 {
                     auto& element = cell->children;
-                    element->ChangeState(std::make_unique<IdleState>(element.get()));
+                    element->ChangeState(std::make_unique<IdleState>(element.get(), engine));
                     // if (element->mouseHover)
                     // {
                     //     element->OnMouseStopHover();
@@ -675,7 +701,7 @@ namespace sage
 
     TableGrid* Window::CreateTableGrid(int rows, int cols, float cellSpacing)
     {
-        children.push_back(std::make_unique<TableGrid>());
+        children.push_back(std::make_unique<TableGrid>(engine));
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
         table->parent = this;
         table->cellSpacing = cellSpacing;
@@ -694,7 +720,7 @@ namespace sage
 
     Table* Window::CreateTable()
     {
-        children.push_back(std::make_unique<Table>());
+        children.push_back(std::make_unique<Table>(engine));
         const auto& table = children.back();
         table->parent = this;
         UpdateChildren();
@@ -703,7 +729,7 @@ namespace sage
 
     Table* Window::CreateTable(float requestedWidthOrHeight)
     {
-        children.push_back(std::make_unique<Table>());
+        children.push_back(std::make_unique<Table>(engine));
         const auto& table = children.back();
         table->parent = this;
         table->autoSize = false;
@@ -841,6 +867,8 @@ namespace sage
         }
     }
 
+    Window::Window(GameUIEngine* _engine) : TableElement(_engine){};
+
     void TableGrid::UpdateChildren()
     {
         if (children.empty()) return;
@@ -900,6 +928,8 @@ namespace sage
             }
         }
     }
+
+    TableGrid::TableGrid(GameUIEngine* _engine) : Table(_engine){};
 
     void Table::DrawDebug2D()
     {
@@ -984,9 +1014,11 @@ namespace sage
         }
     }
 
+    Table::Table(GameUIEngine* _engine) : TableElement(_engine){};
+
     TableRow* Table::CreateTableRow()
     {
-        children.push_back(std::make_unique<TableRow>());
+        children.push_back(std::make_unique<TableRow>(engine));
         const auto& row = children.back();
         row->parent = this;
         UpdateChildren();
@@ -1001,7 +1033,7 @@ namespace sage
     TableRow* Table::CreateTableRow(float requestedHeight)
     {
         assert(requestedHeight <= 100 && requestedHeight >= 0);
-        children.push_back(std::make_unique<TableRow>());
+        children.push_back(std::make_unique<TableRow>(engine));
         const auto& row = children.back();
         row->parent = this;
         row->autoSize = false;
@@ -1012,7 +1044,7 @@ namespace sage
 
     TableCell* TableRow::CreateTableCell()
     {
-        children.push_back(std::make_unique<TableCell>());
+        children.push_back(std::make_unique<TableCell>(engine));
         const auto& cell = children.back();
         cell->parent = this;
         UpdateChildren();
@@ -1027,7 +1059,7 @@ namespace sage
     TableCell* TableRow::CreateTableCell(float requestedWidth)
     {
         assert(requestedWidth <= 100 && requestedWidth >= 0);
-        children.push_back(std::make_unique<TableCell>());
+        children.push_back(std::make_unique<TableCell>(engine));
         const auto& cell = children.back();
         cell->parent = this;
         cell->autoSize = false;
@@ -1116,9 +1148,11 @@ namespace sage
         }
     }
 
+    TableRow::TableRow(GameUIEngine* _engine) : TableElement(_engine){};
+
     AbilitySlot* TableCell::CreateAbilitySlot(PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber)
     {
-        children = std::make_unique<AbilitySlot>();
+        children = std::make_unique<AbilitySlot>(engine);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
         abilitySlot->SetGrayscale();
         abilitySlot->playerAbilitySystem = _playerAbilitySystem;
@@ -1136,7 +1170,7 @@ namespace sage
         unsigned int row,
         unsigned int col)
     {
-        children = std::make_unique<InventorySlot>();
+        children = std::make_unique<InventorySlot>(engine);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
         slot->registry = _registry;
         slot->controllableActorSystem = _controllableActorSystem;
@@ -1151,7 +1185,7 @@ namespace sage
 
     TitleBar* TableCell::CreateTitleBar(const std::string& _title, float fontSize)
     {
-        children = std::make_unique<TitleBar>();
+        children = std::make_unique<TitleBar>(engine);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
         titleBar->draggable = true;
         titleBar->fontSize = fontSize;
@@ -1163,7 +1197,7 @@ namespace sage
 
     CloseButton* TableCell::CreateCloseButton(Texture _tex)
     {
-        children = std::make_unique<CloseButton>();
+        children = std::make_unique<CloseButton>(engine);
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
         closeButton->SetGrayscale();
         closeButton->tex = _tex;
@@ -1174,7 +1208,7 @@ namespace sage
     TextBox* TableCell::CreateTextbox(
         const std::string& _content, float fontSize, TextBox::OverflowBehaviour overflowBehaviour)
     {
-        children = std::make_unique<TextBox>();
+        children = std::make_unique<TextBox>(engine);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
         textbox->fontSize = fontSize;
         textbox->overflowBehaviour = overflowBehaviour;
@@ -1185,7 +1219,7 @@ namespace sage
 
     ImageBox* TableCell::CreateImagebox(Texture _tex)
     {
-        children = std::make_unique<ImageBox>();
+        children = std::make_unique<ImageBox>(engine);
         auto* image = dynamic_cast<ImageBox*>(children.get());
         image->draggable = true;
         image->tex = _tex;
@@ -1220,4 +1254,6 @@ namespace sage
         col.a = 50;
         // DrawRectangle(children->rec.x, children->rec.y, children->rec.width, children->rec.height, col);
     }
+
+    TableCell::TableCell(GameUIEngine* _engine) : TableElement(_engine){};
 } // namespace sage

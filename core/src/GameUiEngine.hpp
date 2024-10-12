@@ -64,6 +64,7 @@ namespace sage
     {
       protected:
         UIElement* element{};
+        GameUIEngine* engine{};
 
       public:
         virtual void Update() = 0;
@@ -71,7 +72,7 @@ namespace sage
         virtual void Enter() = 0;
         virtual void Exit() = 0;
         virtual ~UIState() = default;
-        explicit UIState(UIElement* _element);
+        explicit UIState(UIElement* _element, GameUIEngine* _engine);
     };
 
     class IdleState : public UIState
@@ -81,8 +82,8 @@ namespace sage
         void Exit() override;
         void Update() override;
         void Draw() override;
-        ~IdleState() override;                   // OnExit
-        explicit IdleState(UIElement* _element); // OnEnter
+        ~IdleState() override;                                          // OnExit
+        explicit IdleState(UIElement* _element, GameUIEngine* _engine); // OnEnter
     };
 
     class HoveredState : public UIState
@@ -93,7 +94,7 @@ namespace sage
         void Update() override;
         void Draw() override;
         ~HoveredState() override;
-        explicit HoveredState(UIElement* _element);
+        explicit HoveredState(UIElement* _element, GameUIEngine* _engine);
     };
 
     class PreDraggingState : public UIState
@@ -105,19 +106,21 @@ namespace sage
         void Exit() override;
         void Update() override;
         void Draw() override;
-        ~PreDraggingState() override;                   // OnExit
-        explicit PreDraggingState(UIElement* _element); // OnEnter
+        ~PreDraggingState() override;                                          // OnExit
+        explicit PreDraggingState(UIElement* _element, GameUIEngine* _engine); // OnEnter
     };
 
     class DraggingState : public UIState
     {
       public:
+        Rectangle originalPosition{};
+        Vector2 mouseOffset{};
         void Enter() override;
         void Exit() override;
         void Update() override;
         void Draw() override;
-        ~DraggingState() override;                   // OnExit
-        explicit DraggingState(UIElement* _element); // OnEnter
+        ~DraggingState() override;                                          // OnExit
+        explicit DraggingState(UIElement* _element, GameUIEngine* _engine); // OnEnter
     };
 
     class DroppingState : public UIState
@@ -127,8 +130,8 @@ namespace sage
         void Exit() override;
         void Update() override;
         void Draw() override;
-        ~DroppingState() override;                   // OnExit
-        explicit DroppingState(UIElement* _element); // OnEnter
+        ~DroppingState() override;                                          // OnExit
+        explicit DroppingState(UIElement* _element, GameUIEngine* _engine); // OnEnter
     };
 
     class GameUIEngine
@@ -168,10 +171,13 @@ namespace sage
             float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
 
+        [[nodiscard]] CellElement* GetCellUnderCursor() const;
         void DrawDebug2D() const;
         void Draw2D() const;
         void Update();
 
         GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor);
+        friend class UIState;
+        friend class DroppingState;
     };
 } // namespace sage

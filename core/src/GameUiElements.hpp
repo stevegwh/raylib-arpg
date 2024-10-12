@@ -75,6 +75,7 @@ namespace sage
     class UIElement
     {
       public:
+        GameUIEngine* engine{};
         Rectangle rec{};
         entt::sigh<void()> onMouseClicked;
         std::unique_ptr<UIState> state;
@@ -86,6 +87,9 @@ namespace sage
         virtual void OnMouseStartHover();
         virtual void OnMouseContinueHover();
         virtual void OnMouseStopHover();
+        virtual void OnMouseStartDrag(){};
+        virtual void OnMouseContinueDrag(){};
+        virtual void OnDropped(UIElement* droppedElement);
         virtual void OnDragDropHere(UIElement* droppedElement)
         {
             if (!canReceiveDragDrops) return;
@@ -98,7 +102,7 @@ namespace sage
         };
         void ChangeState(std::unique_ptr<UIState> newState);
         virtual ~UIElement() = default;
-        UIElement();
+        explicit UIElement(GameUIEngine* _engine);
     };
 
     template <typename Child, typename Parent>
@@ -171,7 +175,7 @@ namespace sage
             return reinterpret_cast<Window*>(current);
         }
 
-        TableElement() = default;
+        explicit TableElement(GameUIEngine* _engine) : UIElement(_engine), parent(nullptr){};
         TableElement(const TableElement&) = default;
         TableElement(TableElement&&) noexcept = default;
         TableElement& operator=(const TableElement&) = default;
@@ -192,7 +196,7 @@ namespace sage
         virtual void UpdateDimensions() = 0;
         virtual void Draw2D() = 0;
 
-        CellElement() = default;
+        explicit CellElement(GameUIEngine* _engine);
         ~CellElement() override = default;
     };
 
@@ -210,6 +214,7 @@ namespace sage
         // color?
         std::string content;
 
+        explicit TextBox(GameUIEngine* _engine);
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void UpdateDimensions() override;
         void Draw2D() override;
@@ -232,6 +237,7 @@ namespace sage
         void RemoveShader();
         void UpdateDimensions() override;
         void Draw2D() override;
+        explicit ImageBox(GameUIEngine* _engine);
         ~ImageBox() override = default;
 
       protected:
@@ -253,11 +259,13 @@ namespace sage
     {
         ~CloseButton() override = default;
         void OnMouseClick() override;
+        explicit CloseButton(GameUIEngine* _engine);
     };
 
     struct TitleBar final : public TextBox
     {
         ~TitleBar() override = default;
+        explicit TitleBar(GameUIEngine* _engine);
     };
 
     struct AbilitySlot : public ImageBox
@@ -266,13 +274,14 @@ namespace sage
         double hoverTimer = 0;
         float hoverTimerThreshold = 0.8;
         std::optional<Window*> tooltipWindow;
-        PlayerAbilitySystem* playerAbilitySystem;
-        int slotNumber;
+        PlayerAbilitySystem* playerAbilitySystem{};
+        int slotNumber{};
         void SetAbilityInfo();
         void OnDragDropHere(UIElement* droppedElement) override;
         void OnMouseStartHover() override;
         void OnMouseContinueHover() override;
         void OnMouseStopHover() override;
+        explicit AbilitySlot(GameUIEngine* _engine);
     };
 
     struct InventorySlot : public ImageBox
@@ -289,6 +298,7 @@ namespace sage
         void OnMouseStartHover() override;
         void OnMouseContinueHover() override;
         void OnMouseStopHover() override;
+        explicit InventorySlot(GameUIEngine* _engine);
     };
 
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
@@ -312,6 +322,7 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         ~TableCell() override = default;
+        explicit TableCell(GameUIEngine* _engine);
     };
 
     struct TableRow final : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
@@ -324,6 +335,7 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         ~TableRow() override = default;
+        explicit TableRow(GameUIEngine* _engine);
     };
 
     struct Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
@@ -337,12 +349,14 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         ~Table() override = default;
+        explicit Table(GameUIEngine* _engine);
     };
 
     struct TableGrid final : public Table
     {
         float cellSpacing = 0;
         void UpdateChildren() override;
+        explicit TableGrid(GameUIEngine* _engine);
     };
 
     class Window : public TableElement<std::vector<std::unique_ptr<Table>>, void>
@@ -356,8 +370,7 @@ namespace sage
         bool markForRemoval = false;
         bool mouseHover = false;
 
-        GameUIEngine* uiEngine;
-        const Settings* settings; // for screen width/height
+        const Settings* settings{}; // for screen width/height
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
 
         // Texture mainNPatchTexture; // npatch texture used by elements in window
@@ -379,6 +392,7 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
+        explicit Window(GameUIEngine* _engine);
     };
 
     struct WindowDocked final : public Window
@@ -393,5 +407,6 @@ namespace sage
         void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
         void SetAlignment(VertAlignment vert, HoriAlignment hori);
         void OnScreenSizeChange() override;
+        explicit WindowDocked(GameUIEngine* _engine);
     };
 } // namespace sage
