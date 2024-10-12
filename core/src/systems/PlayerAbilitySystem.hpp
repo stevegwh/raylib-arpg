@@ -21,6 +21,7 @@ namespace sage
         void onActorChanged();
 
       public:
+        void PressAbility(unsigned int slotNumber) const;
         void AbilityOnePressed();
         void AbilityTwoPressed();
         void AbilityThreePressed();

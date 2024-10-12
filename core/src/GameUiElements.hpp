@@ -5,11 +5,9 @@
 #pragma once
 
 #include "raylib.h"
-#include "Timer.hpp"
 
 #include <entt/entt.hpp>
 #include <iostream>
-#include <memory>
 #include <optional>
 #include <vector>
 
@@ -17,14 +15,12 @@ namespace sage
 {
     class GameUIEngine;
     class PlayerAbilitySystem;
-
     struct TableCell;
     class Window;
     struct TableRow;
     struct Table;
     class UIState;
     class ControllableActorSystem;
-
     struct Settings;
     class UserInput;
     class Cursor;
@@ -96,10 +92,12 @@ namespace sage
 
             std::cout << "Reached here \n";
         }
+
         virtual void OnMouseClick()
         {
             onMouseClicked.publish();
-        };
+        }
+
         void ChangeState(std::unique_ptr<UIState> newState);
         virtual ~UIElement() = default;
         explicit UIElement(GameUIEngine* _engine);
@@ -281,6 +279,7 @@ namespace sage
         void OnMouseStartHover() override;
         void OnMouseContinueHover() override;
         void OnMouseStopHover() override;
+        void OnMouseClick() override;
         explicit AbilitySlot(GameUIEngine* _engine);
     };
 
@@ -383,6 +382,7 @@ namespace sage
         void OnMouseStartHover() override;
         void OnMouseContinueHover() override;
         void OnMouseStopHover() override;
+        void OnMouseClick() override;
 
         TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
         Table* CreateTable();

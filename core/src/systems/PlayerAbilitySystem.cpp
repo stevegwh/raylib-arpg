@@ -11,6 +11,24 @@
 
 namespace sage
 {
+    void PlayerAbilitySystem::PressAbility(unsigned int slotNumber) const
+    {
+        std::cout << "Ability " << slotNumber << " pressed \n";
+        if (abilitySlots[slotNumber] == entt::null)
+        {
+            std::cout << "Slot not bound to an ability \n";
+            return;
+        }
+        auto& ab = registry->get<Ability>(abilitySlots[slotNumber]);
+
+        if (!ab.CooldownReady())
+        {
+            std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
+            return;
+        }
+        ab.startCast.publish(abilitySlots[slotNumber]);
+    }
+
     void PlayerAbilitySystem::AbilityOnePressed()
     {
         std::cout << "Ability 1 pressed \n";

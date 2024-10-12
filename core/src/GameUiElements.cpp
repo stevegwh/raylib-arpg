@@ -243,6 +243,12 @@ namespace sage
         ImageBox::OnMouseStopHover();
     }
 
+    void AbilitySlot::OnMouseClick()
+    {
+        playerAbilitySystem->PressAbility(slotNumber);
+        ImageBox::OnMouseClick();
+    }
+
     AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine){};
 
     void InventorySlot::SetItemInfo()
@@ -631,8 +637,6 @@ namespace sage
 
     void Window::OnMouseContinueHover()
     {
-        engine->cursor->DisableContextSwitching();
-        engine->cursor->Disable();
 
         // bool elementFound = false;
         // auto mousePos = GetMousePosition();
@@ -680,6 +684,10 @@ namespace sage
                 }
             }
         }
+    }
+
+    void Window::OnMouseClick()
+    {
     }
 
     void Window::DrawDebug2D()

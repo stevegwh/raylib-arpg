@@ -117,16 +117,16 @@ namespace sage
             slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
             slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
 
-            {
-                entt::sink sink{slot->onMouseClicked};
-                sink.connect<&PlayerAbilitySystem::AbilityOnePressed>(playerAbilitySystem);
-                entt::sink sink1{slot1->onMouseClicked};
-                sink1.connect<&PlayerAbilitySystem::AbilityTwoPressed>(playerAbilitySystem);
-                entt::sink sink2{slot2->onMouseClicked};
-                sink2.connect<&PlayerAbilitySystem::AbilityThreePressed>(playerAbilitySystem);
-                entt::sink sink3{slot3->onMouseClicked};
-                sink3.connect<&PlayerAbilitySystem::AbilityFourPressed>(playerAbilitySystem);
-            }
+            // {
+            //     entt::sink sink{slot->onMouseClicked};
+            //     sink.connect<&PlayerAbilitySystem::AbilityOnePressed>(playerAbilitySystem);
+            //     entt::sink sink1{slot1->onMouseClicked};
+            //     sink1.connect<&PlayerAbilitySystem::AbilityTwoPressed>(playerAbilitySystem);
+            //     entt::sink sink2{slot2->onMouseClicked};
+            //     sink2.connect<&PlayerAbilitySystem::AbilityThreePressed>(playerAbilitySystem);
+            //     entt::sink sink3{slot3->onMouseClicked};
+            //     sink3.connect<&PlayerAbilitySystem::AbilityFourPressed>(playerAbilitySystem);
+            // }
         }
     }
 
