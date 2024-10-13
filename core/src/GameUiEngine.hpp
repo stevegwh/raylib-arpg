@@ -84,7 +84,6 @@ namespace sage
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
-        std::vector<std::unique_ptr<Window>> delayedWindows;
         UserInput* userInput;
 
         std::optional<CellElement*> draggedObject;
