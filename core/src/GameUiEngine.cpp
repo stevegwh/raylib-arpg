@@ -257,7 +257,7 @@ namespace sage
                 for (auto& cell : row->children)
                 {
                     auto element = cell->children.get();
-                    if (MouseInside(element->rec, mousePos))
+                    if (MouseInside(cell->rec, mousePos))
                     {
                         return element;
                     }
