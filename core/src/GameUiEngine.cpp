@@ -306,6 +306,9 @@ namespace sage
                 return;
             }
 
+            cursor->Disable();
+            cursor->DisableContextSwitching();
+
             window->OnMouseStartHover(); // TODO: Need to check if it was already being hovered?
             for (const auto& table : window->children)
             {
@@ -314,26 +317,26 @@ namespace sage
                     for (const auto& cell : row->children)
                     {
                         auto element = cell->children.get();
-                        if (draggedObject.has_value() && draggedObject.value() == element)
-                        {
-                            // Decouple dragged object update from the window
-                            continue;
-                        }
                         element->state->Update();
                     }
                 }
-            }
-            if (draggedObject.has_value())
-            {
-                draggedObject.value()->state->Update();
             }
         }
     }
 
     void GameUIEngine::Update()
     {
-        pruneWindows();
-        processWindows();
+        if (draggedObject.has_value())
+        {
+            draggedObject.value()->state->Update();
+        }
+        else
+        {
+            cursor->Enable();
+            cursor->EnableContextSwitching();
+            pruneWindows();
+            processWindows();
+        }
     }
 
     GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
