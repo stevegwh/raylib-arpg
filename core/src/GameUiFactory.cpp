@@ -35,15 +35,18 @@ namespace sage
 
         auto row0 = table->CreateTableRow();
         auto cell0 = row0->CreateTableCell(95);
-        cell0->CreateTitleBar("Title Bar", 12);
+        cell0->CreateTitleBar(engine, "Title Bar", 12);
         auto cell01 = row0->CreateTableCell();
         auto tex0 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        cell01->CreateCloseButton(tex0);
+        cell01->CreateCloseButton(engine, tex0);
 
         auto row = table->CreateTableRow(75);
         auto cell = row->CreateTableCell(50);
         cell->CreateTextbox(
-            "This is a word wrap test with significantly long words.", 24, TextBox::OverflowBehaviour::WORD_WRAP);
+            engine,
+            "This is a word wrap test with significantly long words.",
+            24,
+            TextBox::OverflowBehaviour::WORD_WRAP);
 
         cell->SetPaddingPercent({2, 2, 2, 2});
 
@@ -55,12 +58,12 @@ namespace sage
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         cell3->tex = window->tex;
         auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        auto imagebox = cell2->CreateImagebox(tex);
+        auto imagebox = cell2->CreateImagebox(engine, tex);
         imagebox->SetGrayscale();
         // cell2->SetPaddingPercent({10, 10, 10, 10});
         // imagebox->SetHoriAlignment(HoriAlignment::CENTER);
         auto tex2 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        auto image2 = cell3->CreateImagebox(tex2);
+        auto image2 = cell3->CreateImagebox(engine, tex2);
         image2->SetGrayscale();
         image2->SetHoriAlignment(HoriAlignment::CENTER);
 
@@ -75,11 +78,11 @@ namespace sage
         auto row2 = table->CreateTableRow();
         auto cell4 = row2->CreateTableCell();
         auto cell5 = row2->CreateTableCell();
-        auto textbox2 = cell4->CreateTextbox("Bottom Left Alignment");
+        auto textbox2 = cell4->CreateTextbox(engine, "Bottom Left Alignment");
         textbox2->SetVertAlignment(VertAlignment::BOTTOM);
         textbox2->SetHoriAlignment(HoriAlignment::LEFT);
 
-        cell5->CreateTextbox("This is an example of shrinking!", 42);
+        cell5->CreateTextbox(engine, "This is an example of shrinking!", 42);
     }
 
     void GameUiFactory::CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem)
@@ -97,16 +100,16 @@ namespace sage
 
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
-            auto slot = cell->CreateAbilitySlot(playerAbilitySystem, 0);
+            auto slot = cell->CreateAbilitySlot(engine, playerAbilitySystem, 0);
             // cell->SetPaddingPercent({2, 2, 2, 2});
             auto cell1 = row->CreateTableCell();
-            auto slot1 = cell1->CreateAbilitySlot(playerAbilitySystem, 1);
+            auto slot1 = cell1->CreateAbilitySlot(engine, playerAbilitySystem, 1);
             // cell1->SetPaddingPercent({2, 2, 2, 2});
             auto cell2 = row->CreateTableCell();
-            auto slot2 = cell2->CreateAbilitySlot(playerAbilitySystem, 2);
+            auto slot2 = cell2->CreateAbilitySlot(engine, playerAbilitySystem, 2);
             // cell2->SetPaddingPercent({2, 2, 2, 2});
             auto cell3 = row->CreateTableCell();
-            auto slot3 = cell3->CreateAbilitySlot(playerAbilitySystem, 3);
+            auto slot3 = cell3->CreateAbilitySlot(engine, playerAbilitySystem, 3);
             // cell3->SetPaddingPercent({2, 2, 2, 2});
 
             // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
@@ -144,12 +147,12 @@ namespace sage
             auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(item.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto textbox = cell0->CreateTextbox(engine, item.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
             row->SetPaddingPercent({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
-            cell->CreateTextbox(item.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            cell->CreateTextbox(engine, item.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
         }
 
         return window;
@@ -168,12 +171,12 @@ namespace sage
             auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(ability.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto textbox = cell0->CreateTextbox(engine, ability.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
             row->SetPaddingPercent({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
-            cell->CreateTextbox(ability.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            cell->CreateTextbox(engine, ability.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
         }
 
         return window;
@@ -207,11 +210,11 @@ namespace sage
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
-            auto titlebar = cell->CreateTitleBar("Inventory", 12);
+            auto titlebar = cell->CreateTitleBar(engine, "Inventory", 12);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             titlebar->SetVertAlignment(VertAlignment::MIDDLE);
             auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-            auto closeButton = cell2->CreateCloseButton(tex);
+            auto closeButton = cell2->CreateCloseButton(engine, tex);
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
             closeButton->SetVertAlignment(VertAlignment::TOP);
         }
@@ -222,7 +225,7 @@ namespace sage
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
                     auto& cell = table->children[row]->children[col];
-                    auto invSlot = cell->CreateInventorySlot(registry, controllableActorSystem, row, col);
+                    auto invSlot = cell->CreateInventorySlot(registry, engine, controllableActorSystem, row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                 }
             }

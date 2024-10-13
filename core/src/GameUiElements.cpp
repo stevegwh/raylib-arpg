@@ -22,44 +22,9 @@ namespace sage
 
     void UIElement::OnMouseStartHover()
     {
-        mouseHover = true;
-    }
-
-    void UIElement::OnMouseContinueHover()
-    {
     }
 
     void UIElement::OnMouseStopHover()
-    {
-        mouseHover = false;
-    }
-
-    // TODO: confusing name.
-    // In this case, "DroppedElement" is the (potential) cell that this element has been dropped onto
-    void UIElement::OnDropped(UIElement* droppedElement)
-    {
-        if (droppedElement && droppedElement->canReceiveDragDrops)
-        {
-            droppedElement->OnDragDropHere(this);
-        }
-        // Not dropped on a cell, what to do?
-    }
-
-    void UIElement::ChangeState(std::unique_ptr<UIState> newState)
-    {
-        if (newState == state) return;
-        if (state)
-        {
-            state->Exit();
-        }
-        state = std::move(newState);
-        if (state)
-        {
-            state->Enter();
-        }
-    }
-
-    UIElement::UIElement(GameUIEngine* _engine) : engine(_engine), state(std::make_unique<IdleState>(this, engine))
     {
     }
 
@@ -75,7 +40,36 @@ namespace sage
         UpdateDimensions();
     }
 
-    CellElement::CellElement(GameUIEngine* _engine) : UIElement(_engine){};
+    void CellElement::MouseHoverUpdate()
+    {
+    }
+
+    // TODO: confusing name.
+    // In this case, "DroppedElement" is the (potential) cell that this element has been dropped onto
+    void CellElement::OnDropped(CellElement* droppedElement)
+    {
+        if (droppedElement && droppedElement->canReceiveDragDrops)
+        {
+            droppedElement->OnDragDropHere(this);
+        }
+        // Not dropped on a cell, what to do?
+    }
+
+    void CellElement::ChangeState(std::unique_ptr<UIState> newState)
+    {
+        if (newState == state) return;
+        if (state)
+        {
+            state->Exit();
+        }
+        state = std::move(newState);
+        if (state)
+        {
+            state->Enter();
+        }
+    }
+
+    CellElement::CellElement(GameUIEngine* _engine) : engine(_engine){};
 
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
@@ -200,7 +194,7 @@ namespace sage
         }
     }
 
-    void AbilitySlot::OnDragDropHere(UIElement* droppedElement)
+    void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
@@ -218,17 +212,19 @@ namespace sage
         ImageBox::OnMouseStartHover();
     }
 
-    void AbilitySlot::OnMouseContinueHover()
+    void AbilitySlot::MouseHoverUpdate()
     {
-        ImageBox::OnMouseContinueHover();
+        ImageBox::MouseHoverUpdate();
+        // TODO: Need a way of determining if being clicked on to be dragged.. (A pre-drag state is probably needed
+        // here)
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
         {
             const Vector2 mousePos = GetMousePosition();
             const float offsetX = mousePos.x - rec.x;
             const float offsetY = mousePos.y - rec.y - rec.height / 2;
-            tooltipWindow = GameUiFactory::CreateAbilityToolTip(
-                parent->GetWindow()->engine, *ability, {rec.x + offsetX, rec.y + offsetY});
+            tooltipWindow =
+                GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x + offsetX, rec.y + offsetY});
         }
     }
 
@@ -268,7 +264,7 @@ namespace sage
         }
     }
 
-    void InventorySlot::OnDragDropHere(UIElement* droppedElement)
+    void InventorySlot::OnDragDropHere(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
@@ -287,9 +283,9 @@ namespace sage
         ImageBox::OnMouseStartHover();
     }
 
-    void InventorySlot::OnMouseContinueHover()
+    void InventorySlot::MouseHoverUpdate()
     {
-        ImageBox::OnMouseContinueHover();
+        ImageBox::MouseHoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
         auto itemId = inventory.GetItem(row, col);
@@ -586,8 +582,6 @@ namespace sage
         UpdateChildren();
     }
 
-    WindowDocked::WindowDocked(GameUIEngine* _engine) : Window(_engine){};
-
     void Window::Remove()
     {
         hidden = true;
@@ -635,37 +629,6 @@ namespace sage
         UIElement::OnMouseStartHover();
     }
 
-    void Window::OnMouseContinueHover()
-    {
-
-        // bool elementFound = false;
-        // auto mousePos = GetMousePosition();
-
-        for (const auto& table : children)
-        {
-            for (const auto& row : table->children)
-            {
-                for (const auto& cell : row->children)
-                {
-                    auto element = cell->children.get();
-                    element->state->Update();
-
-                    // Already found a hovered element, loop continues to remove previous hover states
-                    // if (elementFound)
-                    // {
-                    //     if (element->mouseHover)
-                    //     {
-                    //         element->OnMouseStopHover();
-                    //     }
-                    //     return;
-                    // }
-
-                    // processCell(element, elementFound, mousePos);
-                }
-            }
-        }
-    }
-
     void Window::OnMouseStopHover()
     {
         UIElement::OnMouseStopHover();
@@ -676,18 +639,12 @@ namespace sage
                 for (auto& cell : row->children)
                 {
                     auto& element = cell->children;
-                    element->ChangeState(std::make_unique<IdleState>(element.get(), engine));
-                    // if (element->mouseHover)
-                    // {
-                    //     element->OnMouseStopHover();
-                    // }
+                    // Allow elements being dragged to continue being active outside of window's bounds
+                    if (reinterpret_cast<DraggingState*>(element->state.get())) continue;
+                    element->ChangeState(std::make_unique<IdleState>(element.get(), element->engine));
                 }
             }
         }
-    }
-
-    void Window::OnMouseClick()
-    {
     }
 
     void Window::DrawDebug2D()
@@ -709,7 +666,7 @@ namespace sage
 
     TableGrid* Window::CreateTableGrid(int rows, int cols, float cellSpacing)
     {
-        children.push_back(std::make_unique<TableGrid>(engine));
+        children.push_back(std::make_unique<TableGrid>());
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
         table->parent = this;
         table->cellSpacing = cellSpacing;
@@ -728,7 +685,7 @@ namespace sage
 
     Table* Window::CreateTable()
     {
-        children.push_back(std::make_unique<Table>(engine));
+        children.push_back(std::make_unique<Table>());
         const auto& table = children.back();
         table->parent = this;
         UpdateChildren();
@@ -737,7 +694,7 @@ namespace sage
 
     Table* Window::CreateTable(float requestedWidthOrHeight)
     {
-        children.push_back(std::make_unique<Table>(engine));
+        children.push_back(std::make_unique<Table>());
         const auto& table = children.back();
         table->parent = this;
         table->autoSize = false;
@@ -875,8 +832,6 @@ namespace sage
         }
     }
 
-    Window::Window(GameUIEngine* _engine) : TableElement(_engine){};
-
     void TableGrid::UpdateChildren()
     {
         if (children.empty()) return;
@@ -936,8 +891,6 @@ namespace sage
             }
         }
     }
-
-    TableGrid::TableGrid(GameUIEngine* _engine) : Table(_engine){};
 
     void Table::DrawDebug2D()
     {
@@ -1022,11 +975,9 @@ namespace sage
         }
     }
 
-    Table::Table(GameUIEngine* _engine) : TableElement(_engine){};
-
     TableRow* Table::CreateTableRow()
     {
-        children.push_back(std::make_unique<TableRow>(engine));
+        children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
         row->parent = this;
         UpdateChildren();
@@ -1041,7 +992,7 @@ namespace sage
     TableRow* Table::CreateTableRow(float requestedHeight)
     {
         assert(requestedHeight <= 100 && requestedHeight >= 0);
-        children.push_back(std::make_unique<TableRow>(engine));
+        children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
         row->parent = this;
         row->autoSize = false;
@@ -1052,7 +1003,7 @@ namespace sage
 
     TableCell* TableRow::CreateTableCell()
     {
-        children.push_back(std::make_unique<TableCell>(engine));
+        children.push_back(std::make_unique<TableCell>());
         const auto& cell = children.back();
         cell->parent = this;
         UpdateChildren();
@@ -1067,7 +1018,7 @@ namespace sage
     TableCell* TableRow::CreateTableCell(float requestedWidth)
     {
         assert(requestedWidth <= 100 && requestedWidth >= 0);
-        children.push_back(std::make_unique<TableCell>(engine));
+        children.push_back(std::make_unique<TableCell>());
         const auto& cell = children.back();
         cell->parent = this;
         cell->autoSize = false;
@@ -1156,9 +1107,8 @@ namespace sage
         }
     }
 
-    TableRow::TableRow(GameUIEngine* _engine) : TableElement(_engine){};
-
-    AbilitySlot* TableCell::CreateAbilitySlot(PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber)
+    AbilitySlot* TableCell::CreateAbilitySlot(
+        GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber)
     {
         children = std::make_unique<AbilitySlot>(engine);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
@@ -1174,6 +1124,7 @@ namespace sage
 
     InventorySlot* TableCell::CreateInventorySlot(
         entt::registry* _registry,
+        GameUIEngine* engine,
         ControllableActorSystem* _controllableActorSystem,
         unsigned int row,
         unsigned int col)
@@ -1191,7 +1142,7 @@ namespace sage
         return slot;
     }
 
-    TitleBar* TableCell::CreateTitleBar(const std::string& _title, float fontSize)
+    TitleBar* TableCell::CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize)
     {
         children = std::make_unique<TitleBar>(engine);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
@@ -1203,7 +1154,7 @@ namespace sage
         return titleBar;
     }
 
-    CloseButton* TableCell::CreateCloseButton(Texture _tex)
+    CloseButton* TableCell::CreateCloseButton(GameUIEngine* engine, Texture _tex)
     {
         children = std::make_unique<CloseButton>(engine);
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
@@ -1214,7 +1165,10 @@ namespace sage
     }
 
     TextBox* TableCell::CreateTextbox(
-        const std::string& _content, float fontSize, TextBox::OverflowBehaviour overflowBehaviour)
+        GameUIEngine* engine,
+        const std::string& _content,
+        float fontSize,
+        TextBox::OverflowBehaviour overflowBehaviour)
     {
         children = std::make_unique<TextBox>(engine);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
@@ -1225,7 +1179,7 @@ namespace sage
         return textbox;
     }
 
-    ImageBox* TableCell::CreateImagebox(Texture _tex)
+    ImageBox* TableCell::CreateImagebox(GameUIEngine* engine, Texture _tex)
     {
         children = std::make_unique<ImageBox>(engine);
         auto* image = dynamic_cast<ImageBox*>(children.get());
@@ -1262,6 +1216,4 @@ namespace sage
         col.a = 50;
         // DrawRectangle(children->rec.x, children->rec.y, children->rec.width, children->rec.height, col);
     }
-
-    TableCell::TableCell(GameUIEngine* _engine) : TableElement(_engine){};
 } // namespace sage
