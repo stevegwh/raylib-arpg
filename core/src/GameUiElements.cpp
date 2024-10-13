@@ -59,18 +59,14 @@ namespace sage
     void CellElement::ChangeState(std::unique_ptr<UIState> newState)
     {
         if (newState == state) return;
-        if (state)
-        {
-            state->Exit();
-        }
+
+        state->Exit();
         state = std::move(newState);
-        if (state)
-        {
-            state->Enter();
-        }
+        state->Enter();
     }
 
-    CellElement::CellElement(GameUIEngine* _engine) : engine(_engine){};
+    CellElement::CellElement(GameUIEngine* _engine)
+        : engine(_engine), state(std::make_unique<IdleState>(this, engine)){};
 
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
@@ -681,7 +677,7 @@ namespace sage
                 {
                     auto& element = cell->children;
                     // Allow elements being dragged to continue being active outside of window's bounds
-                    if (reinterpret_cast<DraggingState*>(element->state.get())) continue;
+                    if (dynamic_cast<DraggingState*>(element->state.get())) continue;
                     element->ChangeState(std::make_unique<IdleState>(element.get(), element->engine));
                 }
             }

@@ -81,16 +81,6 @@ namespace sage
         explicit DraggingState(CellElement* _element, GameUIEngine* _engine);
     };
 
-    class DroppingState : public UIState
-    {
-      public:
-        void Enter() override;
-        void Exit() override;
-        void Update() override;
-        ~DroppingState() override = default;
-        explicit DroppingState(CellElement* _element, GameUIEngine* _engine);
-    };
-
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
@@ -132,7 +122,6 @@ namespace sage
 
         GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor);
         friend class UIState;
-        friend class DroppingState;
         friend class PreDraggingState;
         friend class DraggingState;
         friend class HoveredState;
