@@ -180,8 +180,12 @@ namespace sage
             onMouseClicked.publish();
         }
         virtual void MouseHoverUpdate();
-        virtual void OnMouseStartDrag(){};
-        virtual void OnMouseContinueDrag(){};
+        virtual void OnMouseStartDrag()
+        {
+            beingDragged = true;
+        };
+        virtual void MouseDragUpdate(){};
+        virtual void MouseDragDraw(){};
         virtual void OnDropped(CellElement* droppedElement);
         virtual void OnDragDropHere(CellElement* droppedElement)
         {
@@ -262,7 +266,11 @@ namespace sage
 
     struct TitleBar final : public TextBox
     {
+        std::optional<Window*> draggedWindow;
         ~TitleBar() override = default;
+        void OnMouseStartDrag() override;
+        void MouseDragUpdate() override;
+        void OnDropped(CellElement* droppedElement) override;
         explicit TitleBar(GameUIEngine* _engine);
     };
 
@@ -279,6 +287,8 @@ namespace sage
         void OnMouseStartHover() override;
         void MouseHoverUpdate() override;
         void OnMouseStopHover() override;
+        void MouseDragUpdate() override;
+        void MouseDragDraw() override;
         void OnMouseClick() override;
         explicit AbilitySlot(GameUIEngine* _engine);
     };
