@@ -17,14 +17,6 @@ namespace sage
                mousePos.y <= rec.y + rec.height;
     }
 
-    void IdleState::Enter()
-    {
-    }
-
-    void IdleState::Exit()
-    {
-    }
-
     void IdleState::Update()
     {
         auto mousePos = GetMousePosition();
@@ -32,14 +24,6 @@ namespace sage
         {
             element->ChangeState(std::make_unique<HoveredState>(element, engine));
         }
-    }
-
-    void IdleState::Draw()
-    {
-    }
-
-    IdleState::~IdleState()
-    {
     }
 
     IdleState::IdleState(CellElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
@@ -71,8 +55,10 @@ namespace sage
             return;
         }
 
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) // Clicked
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) // Clicked
         {
+            // TODO: This isn't properly clicking the buttons (instead is calling below)
+            // When other else if statement is commented out, it works
             element->OnMouseClick();
             element->ChangeState(std::make_unique<IdleState>(element, engine));
             return;
@@ -86,14 +72,6 @@ namespace sage
         // if mouse down on object, change to predragging
 
         element->MouseHoverUpdate();
-    }
-
-    void HoveredState::Draw()
-    {
-    }
-
-    HoveredState::~HoveredState()
-    {
     }
 
     HoveredState::HoveredState(CellElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
@@ -140,14 +118,6 @@ namespace sage
         }
     }
 
-    void PreDraggingState::Draw()
-    {
-    }
-
-    PreDraggingState::~PreDraggingState()
-    {
-    }
-
     PreDraggingState::PreDraggingState(CellElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
     {
     }
@@ -156,7 +126,7 @@ namespace sage
     {
         std::cout << "Dragging! \n";
         engine->draggedObject = element;
-        element->beingDragged = true;
+        // element->beingDragged = true;
         element->OnMouseStartDrag();
         // element->hidden = true;
         // hide element
@@ -181,7 +151,7 @@ namespace sage
 
     void DraggingState::Exit()
     {
-        element->beingDragged = false;
+        // element->beingDragged = false;
         engine->draggedObject.reset();
         // element->hidden = false;
     }
@@ -194,15 +164,12 @@ namespace sage
             element->ChangeState(std::make_unique<DroppingState>(element, engine));
             return;
         }
-        element->OnMouseContinueDrag(); // Update drag
+        element->MouseDragUpdate(); // Update drag
     }
 
     void DraggingState::Draw()
     {
-    }
-
-    DraggingState::~DraggingState()
-    {
+        element->MouseDragDraw();
     }
 
     DraggingState::DraggingState(CellElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
@@ -221,14 +188,6 @@ namespace sage
     }
 
     void DroppingState::Update()
-    {
-    }
-
-    void DroppingState::Draw()
-    {
-    }
-
-    DroppingState::~DroppingState()
     {
     }
 
@@ -385,7 +344,10 @@ namespace sage
                             // Decouple dragged object update from the window
                             continue;
                         }
-                        element->state->Update();
+                        if (element->state) // TODO: Necessary to stop random crashing. Investigate
+                        {
+                            element->state->Update();
+                        }
                     }
                 }
             }

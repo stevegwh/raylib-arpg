@@ -48,6 +48,7 @@ namespace sage
     // In this case, "DroppedElement" is the (potential) cell that this element has been dropped onto
     void CellElement::OnDropped(CellElement* droppedElement)
     {
+        beingDragged = false;
         if (droppedElement && droppedElement->canReceiveDragDrops)
         {
             droppedElement->OnDragDropHere(this);
@@ -237,6 +238,22 @@ namespace sage
             tooltipWindow.reset();
         }
         ImageBox::OnMouseStopHover();
+    }
+
+    void AbilitySlot::MouseDragUpdate()
+    {
+    }
+
+    void AbilitySlot::MouseDragDraw()
+    {
+        auto mousePos = GetMousePosition();
+        Vector2 mouseOffset = {
+            static_cast<float>(engine->settings->screenWidth * 0.005),
+            static_cast<float>(engine->settings->screenHeight * 0.005)};
+
+        Vector2 pos = {mousePos.x, mousePos.y};
+
+        DrawTexture(tex, pos.x, pos.y, WHITE);
     }
 
     void AbilitySlot::OnMouseClick()
@@ -508,6 +525,30 @@ namespace sage
     }
 
     CloseButton::CloseButton(GameUIEngine* _engine) : ImageBox(_engine){};
+
+    void TitleBar::OnMouseStartDrag()
+    {
+        draggedWindow = parent->GetWindow();
+    }
+
+    void TitleBar::MouseDragUpdate()
+    {
+        // update window pos
+        auto mousePos = GetMousePosition();
+        Vector2 mouseOffset = {
+            static_cast<float>(engine->settings->screenWidth * 0.005),
+            static_cast<float>(engine->settings->screenHeight * 0.005)};
+        Vector2 pos = {
+            mousePos.x - draggedWindow.value()->rec.x - mouseOffset.x,
+            mousePos.y - draggedWindow.value()->rec.y - mouseOffset.y};
+        draggedWindow.value()->SetPosition(pos.x, pos.y);
+        draggedWindow.value()->UpdateChildren();
+    }
+
+    void TitleBar::OnDropped(CellElement* droppedElement)
+    {
+        draggedWindow.reset();
+    }
 
     TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine){};
 
