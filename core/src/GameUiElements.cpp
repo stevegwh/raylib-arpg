@@ -189,9 +189,7 @@ namespace sage
         Vector2 mouseOffset = {
             static_cast<float>(engine->settings->screenWidth * 0.005),
             static_cast<float>(engine->settings->screenHeight * 0.005)};
-        Vector2 pos = {
-            mousePos.x - draggedWindow.value()->rec.x - mouseOffset.x,
-            mousePos.y - draggedWindow.value()->rec.y - mouseOffset.y};
+        Vector2 pos = {mousePos.x, mousePos.y};
         draggedWindow.value()->SetPosition(pos.x, pos.y);
         draggedWindow.value()->UpdateChildren();
     }
