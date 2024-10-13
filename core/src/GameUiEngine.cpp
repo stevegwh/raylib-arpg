@@ -55,15 +55,14 @@ namespace sage
             return;
         }
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) // Clicked
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
-            // TODO: This isn't properly clicking the buttons (instead is calling below)
-            // When other else if statement is commented out, it works
             element->OnMouseClick();
             element->ChangeState(std::make_unique<IdleState>(element, engine));
             return;
         }
-        else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable)
+
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && element->draggable)
         {
             element->ChangeState(std::make_unique<PreDraggingState>(element, engine));
             return;
@@ -94,7 +93,7 @@ namespace sage
     void PreDraggingState::Update()
     {
         dragTimer.Update(GetFrameTime());
-        if (!engine->ObjectBeingDragged() || !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        if (!engine->ObjectBeingDragged() && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             if (dragTimer.HasExceededMaxTime())
             {
@@ -115,6 +114,7 @@ namespace sage
         }
         else
         {
+            element->OnMouseClick();
             element->ChangeState(std::make_unique<IdleState>(element, engine));
         }
     }
@@ -132,9 +132,11 @@ namespace sage
 
     void DraggingState::Exit()
     {
-        engine->draggedObject.reset();
+        std::cout << "Dropped! \n";
+        // TODO: This only gets called when window is being hovered?
         auto cell = engine->GetCellUnderCursor();
         element->OnDropped(cell);
+        engine->draggedObject.reset();
     }
 
     void DraggingState::Update()
@@ -305,10 +307,6 @@ namespace sage
             }
 
             window->OnMouseStartHover(); // TODO: Need to check if it was already being hovered?
-            if (draggedObject.has_value())
-            {
-                draggedObject.value()->state->Update();
-            }
             for (const auto& table : window->children)
             {
                 for (const auto& row : table->children)
@@ -324,6 +322,10 @@ namespace sage
                         element->state->Update();
                     }
                 }
+            }
+            if (draggedObject.has_value())
+            {
+                draggedObject.value()->state->Update();
             }
         }
     }
