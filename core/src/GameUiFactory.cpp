@@ -230,7 +230,7 @@ namespace sage
                 }
             }
         }
-        // window->hidden = true;
+        window->hidden = true;
         return window;
     }
 } // namespace sage

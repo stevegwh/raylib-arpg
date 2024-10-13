@@ -162,6 +162,7 @@ namespace sage
         GameUIEngine* engine{};
         entt::sigh<void()> onMouseClicked;
         std::unique_ptr<UIState> state;
+        Vector2 dragOffset{};
         bool mouseHover = false;
         bool draggable = false;
         bool canReceiveDragDrops = false;
@@ -241,6 +242,8 @@ namespace sage
             SHRINK_TO_FIT,
             SHRINK_ROW_TO_FIT
         };
+        void OnMouseStartDrag() override;
+        void OnDropped(CellElement* droppedElement) override;
         void MouseDragDraw() override;
         void OnMouseStartHover() override;
         void OnMouseStopHover() override;

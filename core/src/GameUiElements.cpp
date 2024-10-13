@@ -180,23 +180,26 @@ namespace sage
     void TitleBar::OnMouseStartDrag()
     {
         draggedWindow = parent->GetWindow();
+        auto mousePos = GetMousePosition();
+        Vector2 offset = {
+            static_cast<float>(engine->settings->screenWidth * 0.005),
+            static_cast<float>(engine->settings->screenHeight * 0.005)};
+        dragOffset = {
+            mousePos.x - draggedWindow.value()->rec.x - offset.x,
+            mousePos.y - draggedWindow.value()->rec.y - offset.y};
     }
 
     void TitleBar::MouseDragUpdate()
     {
-        // update window pos
         auto mousePos = GetMousePosition();
-        Vector2 mouseOffset = {
-            static_cast<float>(engine->settings->screenWidth * 0.005),
-            static_cast<float>(engine->settings->screenHeight * 0.005)};
-        Vector2 pos = {mousePos.x, mousePos.y};
-        draggedWindow.value()->SetPosition(pos.x, pos.y);
+        draggedWindow.value()->SetPosition(mousePos.x - dragOffset.x, mousePos.y - dragOffset.y);
         draggedWindow.value()->UpdateChildren();
     }
 
     void TitleBar::OnDropped(CellElement* droppedElement)
     {
         draggedWindow.reset();
+        dragOffset = {0, 0};
     }
 
     TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine){};
@@ -367,17 +370,26 @@ namespace sage
         return dimensions; // Return original dimensions if no scaling needed
     }
 
+    void ImageBox::OnMouseStartDrag()
+    {
+        auto mousePos = GetMousePosition();
+        Vector2 offset = {
+            static_cast<float>(engine->settings->screenWidth * 0.005),
+            static_cast<float>(engine->settings->screenHeight * 0.005)};
+        dragOffset = {rec.x - mousePos.x + offset.x, rec.y - mousePos.y + offset.y};
+        CellElement::OnMouseStartDrag();
+    }
+
+    void ImageBox::OnDropped(CellElement* droppedElement)
+    {
+        dragOffset = {0, 0};
+        CellElement::OnDropped(droppedElement);
+    }
+
     void ImageBox::MouseDragDraw()
     {
         auto mousePos = GetMousePosition();
-        // TODO
-        Vector2 mouseOffset = {
-            static_cast<float>(engine->settings->screenWidth * 0.005),
-            static_cast<float>(engine->settings->screenHeight * 0.005)};
-
-        Vector2 pos = {mousePos.x, mousePos.y};
-
-        DrawTexture(tex, pos.x, pos.y, WHITE);
+        DrawTexture(tex, mousePos.x + dragOffset.x, mousePos.y + dragOffset.y, WHITE);
     }
 
     void ImageBox::UpdateDimensions()
@@ -420,6 +432,8 @@ namespace sage
         else
         {
             tex.id = rlGetTextureIdDefault();
+            tex.width = 0;
+            tex.height = 0;
             // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
             // rlGetDefaultTexture) Set default
         }
@@ -471,6 +485,8 @@ namespace sage
         else
         {
             tex.id = rlGetTextureIdDefault();
+            tex.width = 0;
+            tex.height = 0;
             // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
             // rlGetDefaultTexture) Set default
         }
