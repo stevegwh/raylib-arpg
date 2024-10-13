@@ -376,8 +376,6 @@ namespace sage
         const Settings* settings{}; // for screen width/height
         WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
 
-        // Texture mainNPatchTexture; // npatch texture used by elements in window
-
         [[nodiscard]] Dimensions GetDimensions() const;
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
         virtual void SetPosition(float x, float y);
