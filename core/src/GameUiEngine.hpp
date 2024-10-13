@@ -21,6 +21,7 @@ namespace sage
     class UserInput;
     class Cursor;
 
+    // TODO: forward declare UIState and hide it in cpp file
     class UIState
     {
       protected:
@@ -44,7 +45,7 @@ namespace sage
         explicit IdleState(CellElement* _element, GameUIEngine* _engine);
     };
 
-    class HoveredState : public UIState
+    class HoverState : public UIState
     {
         Timer dragTimer;
 
@@ -52,11 +53,11 @@ namespace sage
         void Enter() override;
         void Exit() override;
         void Update() override;
-        ~HoveredState() override = default;
-        explicit HoveredState(CellElement* _element, GameUIEngine* _engine);
+        ~HoverState() override = default;
+        explicit HoverState(CellElement* _element, GameUIEngine* _engine);
     };
 
-    class PreDraggingState : public UIState
+    class DragDelayState : public UIState
     {
         Timer dragTimer;
 
@@ -64,11 +65,11 @@ namespace sage
         void Enter() override;
         void Exit() override;
         void Update() override;
-        ~PreDraggingState() override = default;
-        explicit PreDraggingState(CellElement* _element, GameUIEngine* _engine);
+        ~DragDelayState() override = default;
+        explicit DragDelayState(CellElement* _element, GameUIEngine* _engine);
     };
 
-    class DraggingState : public UIState
+    class DragState : public UIState
     {
       public:
         Rectangle originalPosition{};
@@ -77,8 +78,8 @@ namespace sage
         void Exit() override;
         void Update() override;
         void Draw() override;
-        ~DraggingState() override = default;
-        explicit DraggingState(CellElement* _element, GameUIEngine* _engine);
+        ~DragState() override = default;
+        explicit DragState(CellElement* _element, GameUIEngine* _engine);
     };
 
     class GameUIEngine
@@ -121,8 +122,8 @@ namespace sage
 
         GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor);
         friend class UIState;
-        friend class PreDraggingState;
-        friend class DraggingState;
-        friend class HoveredState;
+        friend class DragDelayState;
+        friend class DragState;
+        friend class HoverState;
     };
 } // namespace sage
