@@ -19,7 +19,7 @@ namespace sage
     void IdleState::Update()
     {
         auto mousePos = GetMousePosition();
-        if (MouseInside(element->rec, mousePos))
+        if (MouseInside(element->parent->rec, mousePos))
         {
             element->ChangeState(std::make_unique<HoverState>(element, engine));
         }
@@ -48,7 +48,7 @@ namespace sage
         engine->cursor->Disable();
 
         auto mousePos = GetMousePosition();
-        if (!MouseInside(element->rec, mousePos))
+        if (!MouseInside(element->parent->rec, mousePos))
         {
             element->ChangeState(std::make_unique<IdleState>(element, engine));
             return;
