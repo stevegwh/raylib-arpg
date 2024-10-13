@@ -177,153 +177,31 @@ namespace sage
 
     TextBox::TextBox(GameUIEngine* _engine) : CellElement(_engine){};
 
-    void AbilitySlot::SetAbilityInfo()
+    void TitleBar::OnMouseStartDrag()
     {
-        if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
-        {
-            tex = LoadTexture(ability->iconPath.c_str()); // TODO: Replace with resource manager and asset id
-        }
-        else
-        {
-            tex.id = rlGetTextureIdDefault();
-            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
-            // rlGetDefaultTexture) Set default
-        }
+        draggedWindow = parent->GetWindow();
     }
 
-    void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
+    void TitleBar::MouseDragUpdate()
     {
-        if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
-        {
-            playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
-            dropped->SetAbilityInfo();
-            SetAbilityInfo();
-            dropped->UpdateDimensions();
-            UpdateDimensions();
-        }
-    }
-
-    void AbilitySlot::OnMouseStartHover()
-    {
-        hoverTimer = GetTime();
-        ImageBox::OnMouseStartHover();
-    }
-
-    void AbilitySlot::MouseHoverUpdate()
-    {
-        ImageBox::MouseHoverUpdate();
-        // TODO: Need a way of determining if being clicked on to be dragged.. (A pre-drag state is probably needed
-        // here)
-        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
-        {
-            const Vector2 mousePos = GetMousePosition();
-            const float offsetX = mousePos.x - rec.x;
-            const float offsetY = mousePos.y - rec.y - rec.height / 2;
-            tooltipWindow =
-                GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x + offsetX, rec.y + offsetY});
-        }
-    }
-
-    void AbilitySlot::OnMouseStopHover()
-    {
-        hoverTimer = 0;
-        if (tooltipWindow.has_value())
-        {
-            tooltipWindow.value()->Remove();
-            tooltipWindow.reset();
-        }
-        ImageBox::OnMouseStopHover();
-    }
-
-    void AbilitySlot::MouseDragUpdate()
-    {
-    }
-
-    void AbilitySlot::MouseDragDraw()
-    {
+        // update window pos
         auto mousePos = GetMousePosition();
         Vector2 mouseOffset = {
             static_cast<float>(engine->settings->screenWidth * 0.005),
             static_cast<float>(engine->settings->screenHeight * 0.005)};
-
-        Vector2 pos = {mousePos.x, mousePos.y};
-
-        DrawTexture(tex, pos.x, pos.y, WHITE);
+        Vector2 pos = {
+            mousePos.x - draggedWindow.value()->rec.x - mouseOffset.x,
+            mousePos.y - draggedWindow.value()->rec.y - mouseOffset.y};
+        draggedWindow.value()->SetPosition(pos.x, pos.y);
+        draggedWindow.value()->UpdateChildren();
     }
 
-    void AbilitySlot::OnMouseClick()
+    void TitleBar::OnDropped(CellElement* droppedElement)
     {
-        playerAbilitySystem->PressAbility(slotNumber);
-        ImageBox::OnMouseClick();
+        draggedWindow.reset();
     }
 
-    AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine){};
-
-    void InventorySlot::SetItemInfo()
-    {
-        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
-        auto itemId = inventory.GetItem(row, col);
-        if (itemId != entt::null)
-        {
-            auto& item = registry->get<ItemComponent>(itemId);
-            tex = ResourceManager::GetInstance().TextureLoad(item.icon);
-        }
-        else
-        {
-            tex.id = rlGetTextureIdDefault();
-            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
-            // rlGetDefaultTexture) Set default
-        }
-    }
-
-    void InventorySlot::OnDragDropHere(CellElement* droppedElement)
-    {
-        if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
-        {
-            auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
-            inventory.SwapItems(row, col, dropped->row, dropped->col);
-            dropped->SetItemInfo();
-            SetItemInfo();
-            dropped->UpdateDimensions();
-            UpdateDimensions();
-        }
-    }
-
-    void InventorySlot::OnMouseStartHover()
-    {
-        hoverTimer = GetTime();
-        ImageBox::OnMouseStartHover();
-    }
-
-    void InventorySlot::MouseHoverUpdate()
-    {
-        ImageBox::MouseHoverUpdate();
-        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
-        auto itemId = inventory.GetItem(row, col);
-        if (itemId != entt::null)
-        {
-            auto& item = registry->get<ItemComponent>(itemId);
-            const Vector2 mousePos = GetMousePosition();
-            const float offsetX = mousePos.x - rec.x;
-            const float offsetY = mousePos.y - rec.y - rec.height / 2;
-            tooltipWindow = GameUiFactory::CreateItemTooltip(engine, item, {rec.x + offsetX, rec.y + offsetY});
-        }
-    }
-
-    void InventorySlot::OnMouseStopHover()
-    {
-        hoverTimer = 0;
-        if (tooltipWindow.has_value())
-        {
-            tooltipWindow.value()->Remove();
-            tooltipWindow.reset();
-        }
-        ImageBox::OnMouseStopHover();
-    }
-
-    InventorySlot::InventorySlot(GameUIEngine* _engine) : ImageBox(_engine){};
+    TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine){};
 
     void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
@@ -349,12 +227,19 @@ namespace sage
 
     void ImageBox::OnMouseStartHover()
     {
+        hoverTimer = GetTime();
         RemoveShader();
         CellElement::OnMouseStartHover();
     }
 
     void ImageBox::OnMouseStopHover()
     {
+        hoverTimer = 0;
+        if (tooltipWindow.has_value())
+        {
+            tooltipWindow.value()->Remove();
+            tooltipWindow.reset();
+        }
         SetGrayscale();
         CellElement::OnMouseStopHover();
     }
@@ -484,6 +369,19 @@ namespace sage
         return dimensions; // Return original dimensions if no scaling needed
     }
 
+    void ImageBox::MouseDragDraw()
+    {
+        auto mousePos = GetMousePosition();
+        // TODO
+        Vector2 mouseOffset = {
+            static_cast<float>(engine->settings->screenWidth * 0.005),
+            static_cast<float>(engine->settings->screenHeight * 0.005)};
+
+        Vector2 pos = {mousePos.x, mousePos.y};
+
+        DrawTexture(tex, pos.x, pos.y, WHITE);
+    }
+
     void ImageBox::UpdateDimensions()
     {
         if (overflowBehaviour == OverflowBehaviour::SHRINK_ROW_TO_FIT)
@@ -515,38 +413,108 @@ namespace sage
 
     ImageBox::ImageBox(GameUIEngine* _engine) : CellElement(_engine){};
 
+    void AbilitySlot::SetAbilityInfo()
+    {
+        if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
+        {
+            tex = LoadTexture(ability->iconPath.c_str()); // TODO: Replace with resource manager and asset id
+        }
+        else
+        {
+            tex.id = rlGetTextureIdDefault();
+            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
+            // rlGetDefaultTexture) Set default
+        }
+    }
+
+    void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
+    {
+        if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
+        {
+            playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
+            dropped->SetAbilityInfo();
+            SetAbilityInfo();
+            dropped->UpdateDimensions();
+            UpdateDimensions();
+        }
+    }
+
+    void AbilitySlot::MouseHoverUpdate()
+    {
+        ImageBox::MouseHoverUpdate();
+        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
+        if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
+        {
+            const Vector2 mousePos = GetMousePosition();
+            const float offsetX = mousePos.x - rec.x;
+            const float offsetY = mousePos.y - rec.y - rec.height / 2;
+            tooltipWindow =
+                GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x + offsetX, rec.y + offsetY});
+        }
+    }
+
+    void AbilitySlot::OnMouseClick()
+    {
+        playerAbilitySystem->PressAbility(slotNumber);
+        ImageBox::OnMouseClick();
+    }
+
+    AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine){};
+
+    void InventorySlot::SetItemInfo()
+    {
+        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+        auto itemId = inventory.GetItem(row, col);
+        if (itemId != entt::null)
+        {
+            auto& item = registry->get<ItemComponent>(itemId);
+            tex = ResourceManager::GetInstance().TextureLoad(item.icon);
+        }
+        else
+        {
+            tex.id = rlGetTextureIdDefault();
+            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
+            // rlGetDefaultTexture) Set default
+        }
+    }
+
+    void InventorySlot::OnDragDropHere(CellElement* droppedElement)
+    {
+        if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
+        {
+            auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+            inventory.SwapItems(row, col, dropped->row, dropped->col);
+            dropped->SetItemInfo();
+            SetItemInfo();
+            dropped->UpdateDimensions();
+            UpdateDimensions();
+        }
+    }
+
+    void InventorySlot::MouseHoverUpdate()
+    {
+        ImageBox::MouseHoverUpdate();
+        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
+        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+        auto itemId = inventory.GetItem(row, col);
+        if (itemId != entt::null)
+        {
+            auto& item = registry->get<ItemComponent>(itemId);
+            const Vector2 mousePos = GetMousePosition();
+            const float offsetX = mousePos.x - rec.x;
+            const float offsetY = mousePos.y - rec.y - rec.height / 2;
+            tooltipWindow = GameUiFactory::CreateItemTooltip(engine, item, {rec.x + offsetX, rec.y + offsetY});
+        }
+    }
+
+    InventorySlot::InventorySlot(GameUIEngine* _engine) : ImageBox(_engine){};
+
     void CloseButton::OnMouseClick()
     {
         parent->GetWindow()->hidden = true;
     }
 
     CloseButton::CloseButton(GameUIEngine* _engine) : ImageBox(_engine){};
-
-    void TitleBar::OnMouseStartDrag()
-    {
-        draggedWindow = parent->GetWindow();
-    }
-
-    void TitleBar::MouseDragUpdate()
-    {
-        // update window pos
-        auto mousePos = GetMousePosition();
-        Vector2 mouseOffset = {
-            static_cast<float>(engine->settings->screenWidth * 0.005),
-            static_cast<float>(engine->settings->screenHeight * 0.005)};
-        Vector2 pos = {
-            mousePos.x - draggedWindow.value()->rec.x - mouseOffset.x,
-            mousePos.y - draggedWindow.value()->rec.y - mouseOffset.y};
-        draggedWindow.value()->SetPosition(pos.x, pos.y);
-        draggedWindow.value()->UpdateChildren();
-    }
-
-    void TitleBar::OnDropped(CellElement* droppedElement)
-    {
-        draggedWindow.reset();
-    }
-
-    TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine){};
 
     void WindowDocked::OnScreenSizeChange()
     {

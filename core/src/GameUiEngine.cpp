@@ -292,6 +292,7 @@ namespace sage
 
     void GameUIEngine::processWindows() const
     {
+        int count = 0;
         const auto mousePos = GetMousePosition();
         const auto windowCount = windows.size();
         for (const auto& window : windows)

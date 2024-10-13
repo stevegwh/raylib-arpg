@@ -223,6 +223,16 @@ namespace sage
         ~TextBox() override = default;
     };
 
+    struct TitleBar final : public TextBox
+    {
+        std::optional<Window*> draggedWindow;
+        ~TitleBar() override = default;
+        void OnMouseStartDrag() override;
+        void MouseDragUpdate() override;
+        void OnDropped(CellElement* droppedElement) override;
+        explicit TitleBar(GameUIEngine* _engine);
+    };
+
     class ImageBox : public CellElement
     {
       public:
@@ -231,6 +241,7 @@ namespace sage
             SHRINK_TO_FIT,
             SHRINK_ROW_TO_FIT
         };
+        void MouseDragDraw() override;
         void OnMouseStartHover() override;
         void OnMouseStopHover() override;
         void OnMouseClick() override;
@@ -243,6 +254,9 @@ namespace sage
         ~ImageBox() override = default;
 
       protected:
+        double hoverTimer = 0;
+        float hoverTimerThreshold = 0.8;
+        std::optional<Window*> tooltipWindow;
         OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
         std::optional<Shader> shader;
 
@@ -257,57 +271,34 @@ namespace sage
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
-    struct CloseButton final : public ImageBox
-    {
-        ~CloseButton() override = default;
-        void OnMouseClick() override;
-        explicit CloseButton(GameUIEngine* _engine);
-    };
-
-    struct TitleBar final : public TextBox
-    {
-        std::optional<Window*> draggedWindow;
-        ~TitleBar() override = default;
-        void OnMouseStartDrag() override;
-        void MouseDragUpdate() override;
-        void OnDropped(CellElement* droppedElement) override;
-        explicit TitleBar(GameUIEngine* _engine);
-    };
-
     struct AbilitySlot : public ImageBox
     {
-        // TODO: tooltip timer does not reset on drag
-        double hoverTimer = 0;
-        float hoverTimerThreshold = 0.8;
-        std::optional<Window*> tooltipWindow;
         PlayerAbilitySystem* playerAbilitySystem{};
         int slotNumber{};
         void SetAbilityInfo();
         void OnDragDropHere(CellElement* droppedElement) override;
-        void OnMouseStartHover() override;
         void MouseHoverUpdate() override;
-        void OnMouseStopHover() override;
-        void MouseDragUpdate() override;
-        void MouseDragDraw() override;
         void OnMouseClick() override;
         explicit AbilitySlot(GameUIEngine* _engine);
     };
 
     struct InventorySlot : public ImageBox
     {
-        entt::registry* registry;
-        ControllableActorSystem* controllableActorSystem;
-        double hoverTimer = 0;
-        float hoverTimerThreshold = 0.8;
-        std::optional<Window*> tooltipWindow;
-        unsigned int row;
-        unsigned int col;
+        entt::registry* registry{};
+        ControllableActorSystem* controllableActorSystem{};
+        unsigned int row{};
+        unsigned int col{};
         void SetItemInfo();
         void OnDragDropHere(CellElement* droppedElement) override;
-        void OnMouseStartHover() override;
         void MouseHoverUpdate() override;
-        void OnMouseStopHover() override;
         explicit InventorySlot(GameUIEngine* _engine);
+    };
+
+    struct CloseButton final : public ImageBox
+    {
+        ~CloseButton() override = default;
+        void OnMouseClick() override;
+        explicit CloseButton(GameUIEngine* _engine);
     };
 
     struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
