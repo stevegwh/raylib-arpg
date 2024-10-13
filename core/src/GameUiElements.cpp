@@ -677,7 +677,7 @@ namespace sage
                 {
                     auto& element = cell->children;
                     // Allow elements being dragged to continue being active outside of window's bounds
-                    if (dynamic_cast<DraggingState*>(element->state.get())) continue;
+                    if (element->beingDragged) continue;
                     element->ChangeState(std::make_unique<IdleState>(element.get(), element->engine));
                 }
             }
