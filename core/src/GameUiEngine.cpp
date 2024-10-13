@@ -88,6 +88,7 @@ namespace sage
     void PreDraggingState::Exit()
     {
         engine->hoveredDraggableCellElement.reset();
+        element->OnMouseStopHover();
     }
 
     void PreDraggingState::Update()
@@ -126,34 +127,14 @@ namespace sage
     {
         std::cout << "Dragging! \n";
         engine->draggedObject = element;
-        // element->beingDragged = true;
         element->OnMouseStartDrag();
-        // element->hidden = true;
-        // hide element
-        auto mousePos = GetMousePosition();
-        mouseOffset = {
-            static_cast<float>(engine->settings->screenWidth * 0.005),
-            static_cast<float>(engine->settings->screenHeight * 0.005)};
-
-        // if (const auto titleBar = dynamic_cast<TitleBar*>(element))
-        // {
-        //     engine->draggedElement = std::make_unique<DraggedWindow>(titleBar->parent->GetWindow());
-        //     engine->draggedElement.value()->mouseOffset = {
-        //         mousePos.x - GetWindow()->rec.x - mouseOffset.x, mousePos.y - window->rec.y - mouseOffset.y};
-        // }
-        // else
-        // {
-        //     engine->draggedElement = std::make_unique<DraggedCellElement>(element);
-        //     engine->draggedElement.value()->mouseOffset = {
-        //         mousePos.x - element->rec.x - mouseOffset.x, mousePos.y - element->rec.y - mouseOffset.y};
-        // }
     }
 
     void DraggingState::Exit()
     {
-        // element->beingDragged = false;
         engine->draggedObject.reset();
-        // element->hidden = false;
+        auto cell = engine->GetCellUnderCursor();
+        element->OnDropped(cell);
     }
 
     void DraggingState::Update()
@@ -161,7 +142,8 @@ namespace sage
         // Determine if object is still being dragged
         if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
         {
-            element->ChangeState(std::make_unique<DroppingState>(element, engine));
+            // Drop item
+            element->ChangeState(std::make_unique<IdleState>(element, engine));
             return;
         }
         element->MouseDragUpdate(); // Update drag
@@ -173,26 +155,6 @@ namespace sage
     }
 
     DraggingState::DraggingState(CellElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
-    {
-    }
-
-    void DroppingState::Enter()
-    {
-        auto cell = engine->GetCellUnderCursor();
-        element->OnDropped(cell);
-        element->ChangeState(std::make_unique<IdleState>(element, engine));
-    }
-
-    void DroppingState::Exit()
-    {
-        element->OnMouseStopHover();
-    }
-
-    void DroppingState::Update()
-    {
-    }
-
-    DroppingState::DroppingState(CellElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
     {
     }
 
@@ -343,7 +305,10 @@ namespace sage
             }
 
             window->OnMouseStartHover(); // TODO: Need to check if it was already being hovered?
-
+            if (draggedObject.has_value())
+            {
+                draggedObject.value()->state->Update();
+            }
             for (const auto& table : window->children)
             {
                 for (const auto& row : table->children)
@@ -356,17 +321,10 @@ namespace sage
                             // Decouple dragged object update from the window
                             continue;
                         }
-                        if (element->state) // TODO: Necessary to stop random crashing. Investigate
-                        {
-                            element->state->Update();
-                        }
+                        element->state->Update();
                     }
                 }
             }
-        }
-        if (draggedObject.has_value())
-        {
-            draggedObject.value()->state->Update();
         }
     }
 
