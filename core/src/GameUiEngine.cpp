@@ -185,6 +185,7 @@ namespace sage
 
     void DroppingState::Exit()
     {
+        element->OnMouseStopHover();
     }
 
     void DroppingState::Update()
@@ -275,21 +276,32 @@ namespace sage
 
     CellElement* GameUIEngine::GetCellUnderCursor() const
     {
+        Window* windowUnderCursor = nullptr;
+        auto mousePos = GetMousePosition();
+        for (auto& window : windows)
+        {
+            if (MouseInside(window->rec, mousePos))
+            {
+                windowUnderCursor = window.get();
+            }
+        }
+        if (windowUnderCursor == nullptr) return nullptr;
+        for (auto& table : windowUnderCursor->children)
+        {
+            for (auto& row : table->children)
+            {
+                for (auto& cell : row->children)
+                {
+                    auto element = cell->children.get();
+                    if (MouseInside(element->rec, mousePos))
+                    {
+                        return element;
+                    }
+                }
+            }
+        }
         return nullptr;
     }
-
-    // void DraggedWindow::Update()
-    // {
-    //     auto mousePos = GetMousePosition();
-    //     element->SetPosition(mousePos.x - mouseOffset.x, mousePos.y - mouseOffset.y);
-    //     element->UpdateChildren();
-    // }
-    //
-    // void DraggedCellElement::Draw()
-    // {
-    //     auto mousePos = GetMousePosition();
-    //     DrawTexture(element->tex, mousePos.x - mouseOffset.x, mousePos.y - mouseOffset.y, WHITE);
-    // }
 
     void GameUIEngine::DrawDebug2D() const
     {
