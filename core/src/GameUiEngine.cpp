@@ -31,13 +31,13 @@ namespace sage
 
     void HoverState::Enter()
     {
-        element->OnMouseStartHover();
+        element->OnHoverStart();
     }
 
     void HoverState::Exit()
     {
         // if we swap to predrag then this will be called...
-        element->OnMouseStopHover();
+        element->OnHoverStop();
     }
 
     void HoverState::Update()
@@ -78,7 +78,7 @@ namespace sage
 
     void DragDelayState::Enter()
     {
-        element->OnMouseStartHover();
+        element->OnHoverStart();
         dragTimer.SetMaxTime(0.25f); // TODO: Do not use magic number
         dragTimer.SetAutoFinish(false);
     }
@@ -86,7 +86,7 @@ namespace sage
     void DragDelayState::Exit()
     {
         engine->hoveredDraggableCellElement.reset();
-        element->OnMouseStopHover();
+        element->OnHoverStop();
     }
 
     void DragDelayState::Update()
@@ -299,14 +299,14 @@ namespace sage
 
             if (!MouseInside(window->rec, mousePos))
             {
-                window->OnMouseStopHover();
+                window->OnHoverStop();
                 continue;
             }
 
             cursor->Disable();
             cursor->DisableContextSwitching();
 
-            window->OnMouseStartHover(); // TODO: Need to check if it was already being hovered?
+            window->OnHoverStart(); // TODO: Need to check if it was already being hovered?
             for (const auto& table : window->children)
             {
                 for (const auto& row : table->children)

@@ -21,7 +21,6 @@ namespace sage
     class UserInput;
     class Cursor;
 
-    // TODO: forward declare UIState and hide it in cpp file
     class UIState
     {
       protected:
