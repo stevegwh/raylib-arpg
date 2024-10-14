@@ -238,14 +238,13 @@ namespace sage
 
     void ImageBox::OnClick()
     {
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/bloom.fs");
         CellElement::OnClick();
     }
 
     void ImageBox::OnHoverStart()
     {
         hoverTimer = GetTime();
-        RemoveShader();
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/ui_hover.fs");
         CellElement::OnHoverStart();
     }
 
@@ -257,7 +256,8 @@ namespace sage
             tooltipWindow.value()->Remove();
             tooltipWindow.reset();
         }
-        SetGrayscale();
+        // SetGrayscale();
+        RemoveShader();
         CellElement::OnHoverStop();
     }
 
@@ -1170,7 +1170,7 @@ namespace sage
         children = std::make_unique<AbilitySlot>(engine);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
         abilitySlot->parent = this;
-        abilitySlot->SetGrayscale();
+        // abilitySlot->SetGrayscale();
         abilitySlot->playerAbilitySystem = _playerAbilitySystem;
         abilitySlot->draggable = true;
         abilitySlot->canReceiveDragDrops = true;
@@ -1186,7 +1186,7 @@ namespace sage
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
         slot->registry = engine->registry;
         slot->parent = this;
-        slot->SetGrayscale();
+        // slot->SetGrayscale();
         slot->draggable = true;
         slot->canReceiveDragDrops = true;
         slot->row = row;
@@ -1214,7 +1214,7 @@ namespace sage
         children = std::make_unique<CloseButton>(engine);
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
         closeButton->parent = this;
-        closeButton->SetGrayscale();
+        // closeButton->SetGrayscale();
         closeButton->tex = _tex;
         UpdateChildren();
         return closeButton;

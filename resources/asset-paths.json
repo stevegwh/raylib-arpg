@@ -54,6 +54,10 @@
         "value": "resources/textures/cursor/32/talk.png"
       },
       {
+          "key": "IMG_CURSOR_PICKUP",
+          "value": "resources/textures/cursor/32/pickup.png"
+      },
+      {
         "key": "IMG_CURSOR_REGULAR",
         "value": "resources/textures/cursor/32/regular.png"
       },
@@ -64,6 +68,10 @@
       {
         "key": "IMG_ICON_WEAPON_SWORD01",
         "value": "resources/icons/items/weapons/sword.png"
+      },
+      {
+          "key": "IMG_UI_CLOSE",
+          "value": "resources/icons/ui/close.png"
       },
       {
         "key": "MDL_VFX_SPHERE",

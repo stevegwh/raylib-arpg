@@ -289,7 +289,7 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
-        auto& inventory = registry->emplace<InventoryComponent>(id, data->cursor.get());
+        auto& inventory = registry->emplace<InventoryComponent>(id);
 
         {
             auto itemId = registry->create();

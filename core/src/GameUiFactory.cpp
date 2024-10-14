@@ -202,7 +202,7 @@ namespace sage
             auto titlebar = cell->CreateTitleBar(engine, "Inventory", 12);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             titlebar->SetVertAlignment(VertAlignment::MIDDLE);
-            auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+            auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
             auto closeButton = cell2->CreateCloseButton(engine, tex);
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
             closeButton->SetVertAlignment(VertAlignment::TOP);

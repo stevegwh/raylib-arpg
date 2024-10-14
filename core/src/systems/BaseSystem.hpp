@@ -8,6 +8,7 @@
 
 namespace sage
 {
+    // TODO: Remove?
     class BaseSystem
     {
       protected:
@@ -19,7 +20,7 @@ namespace sage
         explicit BaseSystem(entt::registry* _registry) : registry(_registry)
         {
         }
-        virtual void Update() {};
-        virtual void Draw3D() {};
+        virtual void Update(){};
+        virtual void Draw3D(){};
     };
 } // namespace sage

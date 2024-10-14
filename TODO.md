@@ -1,5 +1,11 @@
 ## To Do
 
+- [ ]  Use new UI framework for dialogue
+- [ ]  Replace the literal model for items with the dota 2 style "boxes"
+- [ ]  Cooldown timers on abilities
+
+----
+
 - [ ] Make terrain texture take into account the cursor's radius for spell casting
 - [ ] Cylinders should be able to be placed on floor.
 - [ ]  Add multiple rotated billboards as part of the particle system to see if that helps the blending from behind
@@ -12,6 +18,8 @@
 
 ----
 
+- [x] Enable user to pickup and drop objects
+- [x] Build UI framework.
 - [x]  Camera "look at" should needs to look at the nearest hit floor object, rather than the world origin.
 - [x]  There is a bug where if an enemy is dying and you hit them then they get back up
 - [x]  Add a top/tailed cylinder and that fire effect with the gradient and you should get a nice shockwave type
