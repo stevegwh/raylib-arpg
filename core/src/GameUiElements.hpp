@@ -176,13 +176,13 @@ namespace sage
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);
-        virtual void OnMouseClick();
-        virtual void MouseHoverUpdate();
-        virtual void OnMouseStartDrag();
-        virtual void MouseDragUpdate(){};
-        virtual void MouseDragDraw(){};
-        virtual void OnDropped(CellElement* droppedElement);
-        virtual void OnDragDropHere(CellElement* droppedElement);
+        virtual void OnClick();
+        virtual void HoverUpdate();
+        virtual void OnDragStart();
+        virtual void DragUpdate(){};
+        virtual void DragDraw(){};
+        virtual void OnDrop(CellElement* droppedElement);
+        virtual void ReceiveDrop(CellElement* droppedElement);
         void ChangeState(std::unique_ptr<UIState> newState);
         virtual void UpdateDimensions() = 0;
         virtual void Draw2D() = 0;
@@ -218,9 +218,9 @@ namespace sage
       public:
         std::optional<Window*> draggedWindow;
         ~TitleBar() override = default;
-        void OnMouseStartDrag() override;
-        void MouseDragUpdate() override;
-        void OnDropped(CellElement* droppedElement) override;
+        void OnDragStart() override;
+        void DragUpdate() override;
+        void OnDrop(CellElement* droppedElement) override;
         explicit TitleBar(GameUIEngine* _engine);
     };
 
@@ -232,12 +232,12 @@ namespace sage
             SHRINK_TO_FIT,
             SHRINK_ROW_TO_FIT
         };
-        void OnMouseStartDrag() override;
-        void OnDropped(CellElement* droppedElement) override;
-        void MouseDragDraw() override;
+        void OnDragStart() override;
+        void OnDrop(CellElement* droppedElement) override;
+        void DragDraw() override;
         void OnHoverStart() override;
         void OnHoverStop() override;
-        void OnMouseClick() override;
+        void OnClick() override;
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void SetGrayscale();
         void RemoveShader();
@@ -271,9 +271,9 @@ namespace sage
 
       public:
         void SetAbilityInfo();
-        void OnDragDropHere(CellElement* droppedElement) override;
-        void MouseHoverUpdate() override;
-        void OnMouseClick() override;
+        void ReceiveDrop(CellElement* droppedElement) override;
+        void HoverUpdate() override;
+        void OnClick() override;
         explicit AbilitySlot(GameUIEngine* _engine);
         friend class TableCell;
     };
@@ -287,8 +287,8 @@ namespace sage
 
       public:
         void SetItemInfo();
-        void OnDragDropHere(CellElement* droppedElement) override;
-        void MouseHoverUpdate() override;
+        void ReceiveDrop(CellElement* droppedElement) override;
+        void HoverUpdate() override;
         explicit InventorySlot(GameUIEngine* _engine);
         friend class TableCell;
     };
@@ -297,7 +297,7 @@ namespace sage
     {
       public:
         ~CloseButton() override = default;
-        void OnMouseClick() override;
+        void OnClick() override;
         explicit CloseButton(GameUIEngine* _engine);
     };
 

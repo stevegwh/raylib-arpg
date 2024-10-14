@@ -40,33 +40,33 @@ namespace sage
         UpdateDimensions();
     }
 
-    void CellElement::OnMouseClick()
+    void CellElement::OnClick()
     {
         onMouseClicked.publish();
     }
 
-    void CellElement::MouseHoverUpdate()
+    void CellElement::HoverUpdate()
     {
     }
 
-    void CellElement::OnMouseStartDrag()
+    void CellElement::OnDragStart()
     {
         beingDragged = true;
     };
 
     // TODO: confusing name.
     // In this case, "DroppedElement" is the (potential) cell that this element has been dropped onto
-    void CellElement::OnDropped(CellElement* droppedElement)
+    void CellElement::OnDrop(CellElement* droppedElement)
     {
         beingDragged = false;
         if (droppedElement && droppedElement->canReceiveDragDrops)
         {
-            droppedElement->OnDragDropHere(this);
+            droppedElement->ReceiveDrop(this);
         }
         // Not dropped on a cell, what to do?
     }
 
-    void CellElement::OnDragDropHere(CellElement* droppedElement)
+    void CellElement::ReceiveDrop(CellElement* droppedElement)
     {
         if (!canReceiveDragDrops) return;
 
@@ -194,7 +194,7 @@ namespace sage
 
     TextBox::TextBox(GameUIEngine* _engine) : CellElement(_engine){};
 
-    void TitleBar::OnMouseStartDrag()
+    void TitleBar::OnDragStart()
     {
         draggedWindow = parent->GetWindow();
         auto mousePos = GetMousePosition();
@@ -206,14 +206,14 @@ namespace sage
             mousePos.y - draggedWindow.value()->rec.y - offset.y};
     }
 
-    void TitleBar::MouseDragUpdate()
+    void TitleBar::DragUpdate()
     {
         auto mousePos = GetMousePosition();
         draggedWindow.value()->SetPosition(mousePos.x - dragOffset.x, mousePos.y - dragOffset.y);
         draggedWindow.value()->UpdateChildren();
     }
 
-    void TitleBar::OnDropped(CellElement* droppedElement)
+    void TitleBar::OnDrop(CellElement* droppedElement)
     {
         draggedWindow.reset();
         dragOffset = {0, 0};
@@ -237,10 +237,10 @@ namespace sage
         shader.reset();
     }
 
-    void ImageBox::OnMouseClick()
+    void ImageBox::OnClick()
     {
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/bloom.fs");
-        CellElement::OnMouseClick();
+        CellElement::OnClick();
     }
 
     void ImageBox::OnHoverStart()
@@ -387,23 +387,23 @@ namespace sage
         return dimensions; // Return original dimensions if no scaling needed
     }
 
-    void ImageBox::OnMouseStartDrag()
+    void ImageBox::OnDragStart()
     {
         auto mousePos = GetMousePosition();
         Vector2 offset = {
             static_cast<float>(engine->settings->screenWidth * 0.005),
             static_cast<float>(engine->settings->screenHeight * 0.005)};
         dragOffset = {rec.x - mousePos.x + offset.x, rec.y - mousePos.y + offset.y};
-        CellElement::OnMouseStartDrag();
+        CellElement::OnDragStart();
     }
 
-    void ImageBox::OnDropped(CellElement* droppedElement)
+    void ImageBox::OnDrop(CellElement* droppedElement)
     {
         dragOffset = {0, 0};
-        CellElement::OnDropped(droppedElement);
+        CellElement::OnDrop(droppedElement);
     }
 
-    void ImageBox::MouseDragDraw()
+    void ImageBox::DragDraw()
     {
         auto mousePos = GetMousePosition();
         DrawTexture(tex, mousePos.x + dragOffset.x, mousePos.y + dragOffset.y, WHITE);
@@ -456,7 +456,7 @@ namespace sage
         }
     }
 
-    void AbilitySlot::OnDragDropHere(CellElement* droppedElement)
+    void AbilitySlot::ReceiveDrop(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
@@ -468,9 +468,9 @@ namespace sage
         }
     }
 
-    void AbilitySlot::MouseHoverUpdate()
+    void AbilitySlot::HoverUpdate()
     {
-        ImageBox::MouseHoverUpdate();
+        ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
         {
@@ -482,10 +482,10 @@ namespace sage
         }
     }
 
-    void AbilitySlot::OnMouseClick()
+    void AbilitySlot::OnClick()
     {
         playerAbilitySystem->PressAbility(slotNumber);
-        ImageBox::OnMouseClick();
+        ImageBox::OnClick();
     }
 
     AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine){};
@@ -509,7 +509,7 @@ namespace sage
         }
     }
 
-    void InventorySlot::OnDragDropHere(CellElement* droppedElement)
+    void InventorySlot::ReceiveDrop(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
@@ -522,9 +522,9 @@ namespace sage
         }
     }
 
-    void InventorySlot::MouseHoverUpdate()
+    void InventorySlot::HoverUpdate()
     {
-        ImageBox::MouseHoverUpdate();
+        ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
         auto itemId = inventory.GetItem(row, col);
@@ -540,7 +540,7 @@ namespace sage
 
     InventorySlot::InventorySlot(GameUIEngine* _engine) : ImageBox(_engine){};
 
-    void CloseButton::OnMouseClick()
+    void CloseButton::OnClick()
     {
         parent->GetWindow()->hidden = true;
     }
