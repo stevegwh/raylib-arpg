@@ -34,6 +34,10 @@ namespace sage
         {
             onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
         }
+        else if (layer == CollisionLayer::ITEM)
+        {
+            onItemClick.publish(m_mouseHitInfo.collidedEntityId);
+        }
         else if (
             layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
             layer == CollisionLayer::STAIRS)

@@ -185,6 +185,10 @@ namespace sage
         // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
         // InventoryComponent
 
+        entt::sink onItemAddedSink{inventory.onItemAdded};
+        entt::sink onItemRemovedSink{inventory.onItemRemoved};
+        entt::sink onInvfullSink{inventory.onInventoryFull};
+
         auto window =
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
@@ -212,6 +216,8 @@ namespace sage
                     auto& cell = table->children[row]->children[col];
                     auto invSlot = cell->CreateInventorySlot(engine, row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                    onItemAddedSink.connect<&InventorySlot::SetItemInfo>(invSlot);
+                    onItemRemovedSink.connect<&InventorySlot::SetItemInfo>(invSlot);
                 }
             }
         }
