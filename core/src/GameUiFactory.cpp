@@ -216,8 +216,8 @@ namespace sage
                     auto& cell = table->children[row]->children[col];
                     auto invSlot = cell->CreateInventorySlot(engine, row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                    onItemAddedSink.connect<&InventorySlot::SetItemInfo>(invSlot);
-                    onItemRemovedSink.connect<&InventorySlot::SetItemInfo>(invSlot);
+                    onItemAddedSink.connect<&InventorySlot::UpdateItemInfo>(invSlot);
+                    onItemRemovedSink.connect<&InventorySlot::UpdateItemInfo>(invSlot);
                 }
             }
         }

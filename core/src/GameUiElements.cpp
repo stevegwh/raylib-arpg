@@ -489,7 +489,7 @@ namespace sage
 
     AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine){};
 
-    void InventorySlot::SetItemInfo()
+    void InventorySlot::UpdateItemInfo()
     {
         auto& inventory =
             registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
@@ -525,7 +525,7 @@ namespace sage
             if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
             {
                 inventory.RemoveItem(row, col);
-                SetItemInfo();
+                UpdateItemInfo();
             }
         }
     }
@@ -537,8 +537,8 @@ namespace sage
             auto& inventory =
                 registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
             inventory.SwapItems(row, col, dropped->row, dropped->col);
-            dropped->SetItemInfo();
-            SetItemInfo();
+            dropped->UpdateItemInfo();
+            UpdateItemInfo();
         }
     }
 
@@ -1191,7 +1191,7 @@ namespace sage
         slot->canReceiveDragDrops = true;
         slot->row = row;
         slot->col = col;
-        slot->SetItemInfo();
+        slot->UpdateItemInfo();
         UpdateChildren();
         return slot;
     }

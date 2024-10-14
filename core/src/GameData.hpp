@@ -23,6 +23,7 @@ namespace sage
     class NavigationGridSystem;
     class ActorMovementSystem;
     class ControllableActorSystem;
+    class InventorySystem;
     class AnimationSystem;
     class DialogueSystem;
     class HealthBarSystem;
@@ -61,6 +62,7 @@ namespace sage
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
         std::unique_ptr<EntityReflectionSignalRouter> reflectionSignalRouter;
+        std::unique_ptr<InventorySystem> inventorySystem;
 
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };
