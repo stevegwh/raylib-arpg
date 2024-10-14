@@ -53,15 +53,13 @@ namespace sage
     {
         beingDragged = true;
     };
-
-    // TODO: confusing name.
-    // In this case, "DroppedElement" is the (potential) cell that this element has been dropped onto
-    void CellElement::OnDrop(CellElement* droppedElement)
+    
+    void CellElement::OnDrop(CellElement* receiver)
     {
         beingDragged = false;
-        if (droppedElement && droppedElement->canReceiveDragDrops)
+        if (receiver && receiver->canReceiveDragDrops)
         {
-            droppedElement->ReceiveDrop(this);
+            receiver->ReceiveDrop(this);
         }
         // Not dropped on a cell, what to do?
     }
@@ -262,6 +260,28 @@ namespace sage
         CellElement::OnHoverStop();
     }
 
+    void ImageBox::OnDragStart()
+    {
+        auto mousePos = GetMousePosition();
+        Vector2 offset = {
+            static_cast<float>(engine->settings->screenWidth * 0.005),
+            static_cast<float>(engine->settings->screenHeight * 0.005)};
+        dragOffset = {rec.x - mousePos.x + offset.x, rec.y - mousePos.y + offset.y};
+        CellElement::OnDragStart();
+    }
+    
+    void ImageBox::DragDraw()
+    {
+        auto mousePos = GetMousePosition();
+        DrawTexture(tex, mousePos.x + dragOffset.x, mousePos.y + dragOffset.y, WHITE);
+    }
+
+    void ImageBox::OnDrop(CellElement* droppedElement)
+    {
+        dragOffset = {0, 0};
+        CellElement::OnDrop(droppedElement);
+    }
+
     Dimensions ImageBox::calculateAvailableSpace() const
     {
         return {
@@ -387,28 +407,7 @@ namespace sage
         return dimensions; // Return original dimensions if no scaling needed
     }
 
-    void ImageBox::OnDragStart()
-    {
-        auto mousePos = GetMousePosition();
-        Vector2 offset = {
-            static_cast<float>(engine->settings->screenWidth * 0.005),
-            static_cast<float>(engine->settings->screenHeight * 0.005)};
-        dragOffset = {rec.x - mousePos.x + offset.x, rec.y - mousePos.y + offset.y};
-        CellElement::OnDragStart();
-    }
-
-    void ImageBox::OnDrop(CellElement* droppedElement)
-    {
-        dragOffset = {0, 0};
-        CellElement::OnDrop(droppedElement);
-    }
-
-    void ImageBox::DragDraw()
-    {
-        auto mousePos = GetMousePosition();
-        DrawTexture(tex, mousePos.x + dragOffset.x, mousePos.y + dragOffset.y, WHITE);
-    }
-
+    
     void ImageBox::UpdateDimensions()
     {
         if (overflowBehaviour == OverflowBehaviour::SHRINK_ROW_TO_FIT)
