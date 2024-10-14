@@ -297,6 +297,7 @@ namespace sage
             item.name = "Dagger";
             item.description = "A test inventory item.";
             item.icon = AssetID::IMG_ICON_WEAPON_DAGGER01;
+            item.model = AssetID::MDL_WPN_DAGGER01;
             inventory.AddItem(itemId, 0, 0);
         }
         {
@@ -305,6 +306,7 @@ namespace sage
             item.name = "Sword";
             item.description = "A test inventory item.";
             item.icon = AssetID::IMG_ICON_WEAPON_SWORD01;
+            item.model = AssetID::MDL_WPN_SWORD01;
             inventory.AddItem(itemId, 0, 1);
         }
 
@@ -414,6 +416,15 @@ namespace sage
     bool GameObjectFactory::spawnInventoryItem(
         entt::registry* registry, GameData* data, entt::entity itemId, Vector3 position)
     {
+        auto& item = registry->get<ItemComponent>(itemId);
+        auto model = ResourceManager::GetInstance().GetModelCopy(item.model);
+        // TODO: Need a way to store the matrix scale? Maybe in the resource packer we should store the transform
+        auto& renderable =
+            registry->emplace<Renderable>(itemId, std::move(model), MatrixScale(0.035, 0.035, 0.035));
+        auto& transform = registry->emplace<sgTransform>(itemId, itemId);
+        transform.SetPosition(position);
+        auto& collideable = registry->emplace<Collideable>(itemId);
+        collideable.collisionLayer = CollisionLayer::ITEM;
         return true;
     }
 
