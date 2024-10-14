@@ -473,11 +473,9 @@ namespace sage
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
         {
-            const Vector2 mousePos = GetMousePosition();
-            const float offsetX = mousePos.x - rec.x;
-            const float offsetY = mousePos.y - rec.y - rec.height / 2;
-            tooltipWindow =
-                GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x + offsetX, rec.y + offsetY});
+            tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
+            tooltipWindow.value()->rec.y = tooltipWindow.value()->rec.y - tooltipWindow.value()->rec.height;
+            tooltipWindow.value()->UpdateChildren();
         }
     }
 
@@ -552,10 +550,8 @@ namespace sage
         if (itemId != entt::null)
         {
             auto& item = registry->get<ItemComponent>(itemId);
-            const Vector2 mousePos = GetMousePosition();
-            const float offsetX = mousePos.x - rec.x;
-            const float offsetY = mousePos.y - rec.y - rec.height / 2;
-            tooltipWindow = GameUiFactory::CreateItemTooltip(engine, item, {rec.x + offsetX, rec.y + offsetY});
+            tooltipWindow =
+                GameUiFactory::CreateItemTooltip(engine, item, {rec.x + rec.width, rec.y - rec.height});
         }
     }
 
