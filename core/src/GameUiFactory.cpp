@@ -86,50 +86,50 @@ namespace sage
         cell5->CreateTextbox(engine, "This is an example of shrinking!", 42);
     }
 
-    void GameUiFactory::CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem)
+    Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        {
-            auto window =
-                engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
-            window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
-            window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-            window->SetPaddingPercent({5, 2, 2, 2});
+        auto window =
+            engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
+        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({5, 2, 2, 2});
 
-            auto table = window->CreateTable();
+        auto table = window->CreateTable();
 
-            auto row = table->CreateTableRow();
-            auto cell = row->CreateTableCell();
-            auto slot = cell->CreateAbilitySlot(engine, playerAbilitySystem, 0);
-            // cell->SetPaddingPercent({2, 2, 2, 2});
-            auto cell1 = row->CreateTableCell();
-            auto slot1 = cell1->CreateAbilitySlot(engine, playerAbilitySystem, 1);
-            // cell1->SetPaddingPercent({2, 2, 2, 2});
-            auto cell2 = row->CreateTableCell();
-            auto slot2 = cell2->CreateAbilitySlot(engine, playerAbilitySystem, 2);
-            // cell2->SetPaddingPercent({2, 2, 2, 2});
-            auto cell3 = row->CreateTableCell();
-            auto slot3 = cell3->CreateAbilitySlot(engine, playerAbilitySystem, 3);
-            // cell3->SetPaddingPercent({2, 2, 2, 2});
+        auto row = table->CreateTableRow();
+        auto cell = row->CreateTableCell();
+        auto slot = cell->CreateAbilitySlot(engine, playerAbilitySystem, 0);
+        // cell->SetPaddingPercent({2, 2, 2, 2});
+        auto cell1 = row->CreateTableCell();
+        auto slot1 = cell1->CreateAbilitySlot(engine, playerAbilitySystem, 1);
+        // cell1->SetPaddingPercent({2, 2, 2, 2});
+        auto cell2 = row->CreateTableCell();
+        auto slot2 = cell2->CreateAbilitySlot(engine, playerAbilitySystem, 2);
+        // cell2->SetPaddingPercent({2, 2, 2, 2});
+        auto cell3 = row->CreateTableCell();
+        auto slot3 = cell3->CreateAbilitySlot(engine, playerAbilitySystem, 3);
+        // cell3->SetPaddingPercent({2, 2, 2, 2});
 
-            // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
-            // Is that desired behaviour? Can look for other imageboxes with SHRINK_ROW_TO_FIT as
-            // overflowBehaviour?
-            slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-            slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-            slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-            slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
+        // Is that desired behaviour? Can look for other imageboxes with SHRINK_ROW_TO_FIT as
+        // overflowBehaviour?
+        slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
 
-            slot->SetVertAlignment(VertAlignment::MIDDLE);
-            slot1->SetVertAlignment(VertAlignment::MIDDLE);
-            slot2->SetVertAlignment(VertAlignment::MIDDLE);
-            slot3->SetVertAlignment(VertAlignment::MIDDLE);
-            slot->SetHoriAlignment(HoriAlignment::CENTER);
-            slot1->SetHoriAlignment(HoriAlignment::CENTER);
-            slot2->SetHoriAlignment(HoriAlignment::CENTER);
-            slot3->SetHoriAlignment(HoriAlignment::CENTER);
-        }
+        slot->SetVertAlignment(VertAlignment::MIDDLE);
+        slot1->SetVertAlignment(VertAlignment::MIDDLE);
+        slot2->SetVertAlignment(VertAlignment::MIDDLE);
+        slot3->SetVertAlignment(VertAlignment::MIDDLE);
+        slot->SetHoriAlignment(HoriAlignment::CENTER);
+        slot1->SetHoriAlignment(HoriAlignment::CENTER);
+        slot2->SetHoriAlignment(HoriAlignment::CENTER);
+        slot3->SetHoriAlignment(HoriAlignment::CENTER);
+
+        return window;
     }
 
     // TODO: Combine with CreateAbilityTooltip

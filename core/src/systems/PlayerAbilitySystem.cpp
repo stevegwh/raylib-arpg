@@ -1,7 +1,5 @@
 #include "PlayerAbilitySystem.hpp"
 
-#include "AbilityFactory.hpp"
-
 #include "components/Ability.hpp"
 #include "GameData.hpp"
 #include "systems/ControllableActorSystem.hpp"
@@ -11,6 +9,7 @@
 
 namespace sage
 {
+
     void PlayerAbilitySystem::PressAbility(unsigned int slotNumber) const
     {
         std::cout << "Ability " << slotNumber << " pressed \n";
@@ -136,7 +135,6 @@ namespace sage
 
     void PlayerAbilitySystem::Draw2D()
     {
-        // Draw GUI here (cooldowns etc)
     }
 
     void PlayerAbilitySystem::Draw3D()
@@ -173,5 +171,6 @@ namespace sage
         abilitySlots[1] = entt::null;
         abilitySlots[2] = entt::null;
         abilitySlots[3] = entt::null;
+        // TODO: Need a way of grabbing the ability row
     }
 } // namespace sage

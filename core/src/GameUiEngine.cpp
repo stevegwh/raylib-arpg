@@ -17,6 +17,11 @@ namespace sage
                mousePos.y <= rec.y + rec.height;
     }
 
+    void IdleState::Enter()
+    {
+        element->OnIdleStart();
+    }
+
     void IdleState::Update()
     {
         auto mousePos = GetMousePosition();
@@ -24,6 +29,11 @@ namespace sage
         {
             element->ChangeState(std::make_unique<HoverState>(element, engine));
         }
+    }
+
+    void IdleState::Exit()
+    {
+        element->OnIdleStop();
     }
 
     IdleState::IdleState(CellElement* _element, GameUIEngine* _engine) : UIState(_element, _engine)
