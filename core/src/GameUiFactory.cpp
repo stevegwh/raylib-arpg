@@ -120,6 +120,15 @@ namespace sage
             slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
             slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
             slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+
+            slot->SetVertAlignment(VertAlignment::MIDDLE);
+            slot1->SetVertAlignment(VertAlignment::MIDDLE);
+            slot2->SetVertAlignment(VertAlignment::MIDDLE);
+            slot3->SetVertAlignment(VertAlignment::MIDDLE);
+            slot->SetHoriAlignment(HoriAlignment::CENTER);
+            slot1->SetHoriAlignment(HoriAlignment::CENTER);
+            slot2->SetHoriAlignment(HoriAlignment::CENTER);
+            slot3->SetHoriAlignment(HoriAlignment::CENTER);
         }
     }
 
@@ -148,7 +157,7 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos)
+    Window* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, const Ability& ability, Vector2 pos)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
