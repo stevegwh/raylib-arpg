@@ -40,7 +40,9 @@ namespace sage
     class IdleState : public UIState
     {
       public:
+        void Enter() override;
         void Update() override;
+        void Exit() override;
         ~IdleState() override = default;
         explicit IdleState(CellElement* _element, GameUIEngine* _engine);
     };

@@ -9,14 +9,13 @@
 namespace sage
 {
     class GameData;
+    static constexpr int MAX_ABILITY_NUMBER = 4;
 
     class PlayerAbilitySystem
     {
-        static constexpr int MAX_ABILITY_NUMBER = 4;
         entt::registry* registry;
         entt::entity controlledActor;
         GameData* gameData;
-
         std::array<entt::entity, MAX_ABILITY_NUMBER> abilitySlots{};
         void onActorChanged();
 

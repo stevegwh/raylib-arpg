@@ -226,6 +226,11 @@ namespace sage
         UpdateDimensions();
     }
 
+    void ImageBox::SetHoverShader()
+    {
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/ui_hover.fs");
+    }
+
     void ImageBox::SetGrayscale()
     {
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
@@ -241,10 +246,15 @@ namespace sage
         CellElement::OnClick();
     }
 
+    void ImageBox::OnIdleStart()
+    {
+        RemoveShader();
+    }
+
     void ImageBox::OnHoverStart()
     {
         hoverTimer = GetTime();
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/ui_hover.fs");
+        SetHoverShader();
         CellElement::OnHoverStart();
     }
 
@@ -469,6 +479,10 @@ namespace sage
 
     void AbilitySlot::HoverUpdate()
     {
+        if (!shader.has_value())
+        {
+            SetHoverShader();
+        }
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
@@ -479,13 +493,32 @@ namespace sage
         }
     }
 
+    void AbilitySlot::Draw2D()
+    {
+        auto ability = playerAbilitySystem->GetAbility(slotNumber);
+        if (!ability) return;
+        if (ability->CooldownReady())
+        {
+            ImageBox::Draw2D();
+        }
+        else
+        {
+            SetGrayscale();
+            ImageBox::Draw2D();
+            RemoveShader();
+        }
+    }
+
     void AbilitySlot::OnClick()
     {
         playerAbilitySystem->PressAbility(slotNumber);
         ImageBox::OnClick();
     }
 
-    AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine){};
+    AbilitySlot::AbilitySlot(GameUIEngine* _engine)
+        : ImageBox(_engine){
+
+          };
 
     void InventorySlot::UpdateItemInfo()
     {
@@ -1166,7 +1199,6 @@ namespace sage
         children = std::make_unique<AbilitySlot>(engine);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
         abilitySlot->parent = this;
-        // abilitySlot->SetGrayscale();
         abilitySlot->playerAbilitySystem = _playerAbilitySystem;
         abilitySlot->draggable = true;
         abilitySlot->canReceiveDragDrops = true;

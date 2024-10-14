@@ -73,6 +73,8 @@ namespace sage
     {
       public:
         Rectangle rec{};
+        virtual void OnIdleStart(){};
+        virtual void OnIdleStop(){};
         virtual void OnHoverStart();
         virtual void OnHoverStop();
         virtual ~UIElement() = default;
@@ -232,6 +234,7 @@ namespace sage
             SHRINK_TO_FIT,
             SHRINK_ROW_TO_FIT
         };
+        void OnIdleStart() override;
         void OnHoverStart() override;
         void OnHoverStop() override;
         void OnClick() override;
@@ -239,6 +242,7 @@ namespace sage
         void DragDraw() override;
         void OnDrop(CellElement* droppedElement) override;
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
+        void SetHoverShader();
         void SetGrayscale();
         void RemoveShader();
         void UpdateDimensions() override;
@@ -273,6 +277,7 @@ namespace sage
         void SetAbilityInfo();
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;
+        void Draw2D() override;
         void OnClick() override;
         explicit AbilitySlot(GameUIEngine* _engine);
         friend class TableCell;
