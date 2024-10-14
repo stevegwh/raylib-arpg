@@ -289,7 +289,7 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
-        auto& inventory = registry->emplace<InventoryComponent>(id);
+        auto& inventory = registry->emplace<InventoryComponent>(id, data->cursor.get());
 
         {
             auto itemId = registry->create();
@@ -423,7 +423,9 @@ namespace sage
             registry->emplace<Renderable>(itemId, std::move(model), MatrixScale(0.035, 0.035, 0.035));
         auto& transform = registry->emplace<sgTransform>(itemId, itemId);
         transform.SetPosition(position);
-        auto& collideable = registry->emplace<Collideable>(itemId);
+
+        auto& collideable = registry->emplace<Collideable>(
+            itemId, createRectangularBoundingBox(2.0, 2.0), transform.GetMatrixNoRot());
         collideable.collisionLayer = CollisionLayer::ITEM;
         return true;
     }

@@ -9,18 +9,27 @@
 
 namespace sage
 {
-
+    class Cursor;
     static constexpr unsigned int INVENTORY_MAX_ROWS = 4;
     static constexpr unsigned int INVENTORY_MAX_COLS = 4;
     class InventoryComponent
     {
+        Cursor* cursor;
+        [[nodiscard]] bool getNextFreeSlot(unsigned int& row, unsigned int& col) const;
         std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items{}; // ItemComponent etc
+
       public:
-        void AddItem(entt::entity entity, unsigned int row, unsigned int col);
+        entt::sigh<void()> onItemAdded;
+        entt::sigh<void()> onItemRemoved;
+        entt::sigh<void()> onInventoryFull;
+        // TODO: Move to InventorySystem?
+        void OnItemClicked(entt::entity entity);
+        [[nodiscard]] bool AddItem(entt::entity entity);
+        bool AddItem(entt::entity entity, unsigned int row, unsigned int col);
         void RemoveItem(unsigned int row, unsigned int col);
         void SwapItems(unsigned int row1, unsigned int col1, unsigned int row2, unsigned int col2);
         entt::entity GetItem(unsigned int row, unsigned int col);
-        InventoryComponent();
+        explicit InventoryComponent(Cursor* _cursor);
     };
 
 } // namespace sage

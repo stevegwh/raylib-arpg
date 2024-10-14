@@ -64,6 +64,7 @@ namespace sage
 
         entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
         entt::sigh<void(entt::entity)> onNPCClick{};
+        entt::sigh<void(entt::entity entity)> onItemClick{};
         entt::sigh<void(entt::entity entity)> onFloorClick{};
         entt::sigh<void(entt::entity entity)> onAnyLeftClick{};
         entt::sigh<void(entt::entity entity)> onAnyRightClick{};

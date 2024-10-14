@@ -10,10 +10,19 @@
 
 namespace sage
 {
+    enum class ItemRarity
+    {
+        COMMON,
+        UNCOMMON,
+        RARE,
+        EPIC,
+        LEGENDARY
+    };
     struct ItemComponent
     {
         std::string name;
         std::string description;
+        ItemRarity rarity = ItemRarity::COMMON;
         AssetID icon;
         AssetID model;
     };

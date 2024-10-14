@@ -501,12 +501,12 @@ namespace sage
         }
         else
         {
+            tex = {};
             tex.id = rlGetTextureIdDefault();
-            tex.width = 0;
-            tex.height = 0;
-            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
-            // rlGetDefaultTexture) Set default
+            //  tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
+            //  rlGetDefaultTexture) Set default
         }
+        UpdateDimensions();
     }
 
     void InventorySlot::OnDrop(CellElement* receiver)
@@ -539,8 +539,6 @@ namespace sage
             inventory.SwapItems(row, col, dropped->row, dropped->col);
             dropped->SetItemInfo();
             SetItemInfo();
-            dropped->UpdateDimensions();
-            UpdateDimensions();
         }
     }
 
@@ -1171,6 +1169,7 @@ namespace sage
     {
         children = std::make_unique<AbilitySlot>(engine);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
+        abilitySlot->parent = this;
         abilitySlot->SetGrayscale();
         abilitySlot->playerAbilitySystem = _playerAbilitySystem;
         abilitySlot->draggable = true;
@@ -1186,6 +1185,8 @@ namespace sage
         children = std::make_unique<InventorySlot>(engine);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
         slot->registry = engine->registry;
+        slot->parent = this;
+        slot->SetGrayscale();
         slot->draggable = true;
         slot->canReceiveDragDrops = true;
         slot->row = row;
@@ -1199,6 +1200,7 @@ namespace sage
     {
         children = std::make_unique<TitleBar>(engine);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
+        titleBar->parent = this;
         titleBar->draggable = true;
         titleBar->fontSize = fontSize;
         titleBar->overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
@@ -1211,6 +1213,7 @@ namespace sage
     {
         children = std::make_unique<CloseButton>(engine);
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
+        closeButton->parent = this;
         closeButton->SetGrayscale();
         closeButton->tex = _tex;
         UpdateChildren();
@@ -1225,6 +1228,7 @@ namespace sage
     {
         children = std::make_unique<TextBox>(engine);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
+        textbox->parent = this;
         textbox->fontSize = fontSize;
         textbox->overflowBehaviour = overflowBehaviour;
         textbox->content = _content;
@@ -1236,6 +1240,7 @@ namespace sage
     {
         children = std::make_unique<ImageBox>(engine);
         auto* image = dynamic_cast<ImageBox*>(children.get());
+        image->parent = this;
         image->draggable = true;
         image->tex = _tex;
         UpdateChildren();
