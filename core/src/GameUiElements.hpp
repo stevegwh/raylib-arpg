@@ -15,12 +15,12 @@
 namespace sage
 {
     class GameUIEngine;
-    class PlayerAbilitySystem;
-    struct TableCell;
     class Window;
-    struct TableRow;
-    struct Table;
+    class Table;
+    class TableRow;
+    class TableCell;
     class UIState;
+    class PlayerAbilitySystem;
     class ControllableActorSystem;
     struct Settings;
     class UserInput;
@@ -73,14 +73,14 @@ namespace sage
     {
       public:
         Rectangle rec{};
-        virtual void OnMouseStartHover();
-        virtual void OnMouseStopHover();
+        virtual void OnHoverStart();
+        virtual void OnHoverStop();
         virtual ~UIElement() = default;
         UIElement() = default;
     };
 
     template <typename Child, typename Parent>
-    struct TableElement : UIElement
+    class TableElement : public UIElement
     {
       protected:
         Padding padding;
@@ -157,21 +157,22 @@ namespace sage
         ~TableElement() override = default;
     };
 
-    struct CellElement : UIElement
+    class CellElement : public UIElement
     {
-        GameUIEngine* engine{};
+      protected:
         entt::sigh<void()> onMouseClicked;
-        std::unique_ptr<UIState> state;
         Vector2 dragOffset{};
-        bool mouseHover = false;
-        bool draggable = false;
-        bool canReceiveDragDrops = false;
-        bool beingDragged = false;
-
-        TableCell* parent{};
-        Texture tex{};
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
+
+      public:
+        GameUIEngine* engine{};
+        TableCell* parent{};
+        std::unique_ptr<UIState> state;
+        Texture tex{};
+        bool canReceiveDragDrops = false;
+        bool draggable = false;
+        bool beingDragged = false;
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);
@@ -201,10 +202,12 @@ namespace sage
 
         explicit CellElement(GameUIEngine* _engine);
         ~CellElement() override = default;
+        friend class TableCell;
     };
 
-    struct TextBox : public CellElement
+    class TextBox : public CellElement
     {
+      public:
         enum class OverflowBehaviour
         {
             SHRINK_TO_FIT,
@@ -224,8 +227,9 @@ namespace sage
         ~TextBox() override = default;
     };
 
-    struct TitleBar final : public TextBox
+    class TitleBar final : public TextBox
     {
+      public:
         std::optional<Window*> draggedWindow;
         ~TitleBar() override = default;
         void OnMouseStartDrag() override;
@@ -245,8 +249,8 @@ namespace sage
         void OnMouseStartDrag() override;
         void OnDropped(CellElement* droppedElement) override;
         void MouseDragDraw() override;
-        void OnMouseStartHover() override;
-        void OnMouseStopHover() override;
+        void OnHoverStart() override;
+        void OnHoverStop() override;
         void OnMouseClick() override;
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void SetGrayscale();
@@ -274,40 +278,49 @@ namespace sage
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
-    struct AbilitySlot : public ImageBox
+    class AbilitySlot : public ImageBox
     {
         PlayerAbilitySystem* playerAbilitySystem{};
         int slotNumber{};
+
+      public:
         void SetAbilityInfo();
         void OnDragDropHere(CellElement* droppedElement) override;
         void MouseHoverUpdate() override;
         void OnMouseClick() override;
         explicit AbilitySlot(GameUIEngine* _engine);
+        friend class TableCell;
     };
 
-    struct InventorySlot : public ImageBox
+    class InventorySlot : public ImageBox
     {
         entt::registry* registry{};
         ControllableActorSystem* controllableActorSystem{};
         unsigned int row{};
         unsigned int col{};
+
+      public:
         void SetItemInfo();
         void OnDragDropHere(CellElement* droppedElement) override;
         void MouseHoverUpdate() override;
         explicit InventorySlot(GameUIEngine* _engine);
+        friend class TableCell;
     };
 
-    struct CloseButton final : public ImageBox
+    class CloseButton final : public ImageBox
     {
+      public:
         ~CloseButton() override = default;
         void OnMouseClick() override;
         explicit CloseButton(GameUIEngine* _engine);
     };
 
-    struct TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
+    class TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
     {
         float requestedWidth{};
         bool autoSize = true;
+
+      public:
         TextBox* CreateTextbox(
             GameUIEngine* engine,
             const std::string& _content,
@@ -329,12 +342,15 @@ namespace sage
         void Draw2D() override;
         ~TableCell() override = default;
         TableCell() = default;
+        friend class TableRow;
     };
 
-    struct TableRow final : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
+    class TableRow final : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
     {
         float requestedHeight{};
         bool autoSize = true;
+
+      public:
         TableCell* CreateTableCell();
         TableCell* CreateTableCell(float _requestedWidth);
         void UpdateChildren() override;
@@ -342,13 +358,16 @@ namespace sage
         void Draw2D() override;
         ~TableRow() override = default;
         TableRow() = default;
+        friend class Table;
     };
 
-    struct Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
+    class Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
     {
         float requestedHeight{};
         float requestedWidth{};
         bool autoSize = true;
+
+      public:
         TableRow* CreateTableRow();
         TableRow* CreateTableRow(float _requestedHeight);
         void UpdateChildren() override;
@@ -356,13 +375,17 @@ namespace sage
         void Draw2D() override;
         ~Table() override = default;
         Table() = default;
+        friend class Window;
     };
 
-    struct TableGrid final : public Table
+    class TableGrid final : public Table
     {
         float cellSpacing = 0;
+
+      public:
         void UpdateChildren() override;
         TableGrid() = default;
+        friend class Window;
     };
 
     class Window : public TableElement<std::vector<std::unique_ptr<Table>>, void>
@@ -384,8 +407,8 @@ namespace sage
         virtual void SetPosition(float x, float y);
         [[nodiscard]] Vector2 GetPosition() const;
 
-        void OnMouseStartHover() override;
-        void OnMouseStopHover() override;
+        void OnHoverStart() override;
+        void OnHoverStop() override;
 
         TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
         Table* CreateTable();
@@ -398,10 +421,12 @@ namespace sage
         Window() = default;
     };
 
-    struct WindowDocked final : public Window
+    class WindowDocked final : public Window
     {
         float xOffsetPercent = 0;
         float yOffsetPercent = 0;
+
+      public:
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 

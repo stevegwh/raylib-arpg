@@ -20,11 +20,11 @@
 namespace sage
 {
 
-    void UIElement::OnMouseStartHover()
+    void UIElement::OnHoverStart()
     {
     }
 
-    void UIElement::OnMouseStopHover()
+    void UIElement::OnHoverStop()
     {
     }
 
@@ -226,14 +226,14 @@ namespace sage
         CellElement::OnMouseClick();
     }
 
-    void ImageBox::OnMouseStartHover()
+    void ImageBox::OnHoverStart()
     {
         hoverTimer = GetTime();
         RemoveShader();
-        CellElement::OnMouseStartHover();
+        CellElement::OnHoverStart();
     }
 
-    void ImageBox::OnMouseStopHover()
+    void ImageBox::OnHoverStop()
     {
         hoverTimer = 0;
         if (tooltipWindow.has_value())
@@ -242,7 +242,7 @@ namespace sage
             tooltipWindow.reset();
         }
         SetGrayscale();
-        CellElement::OnMouseStopHover();
+        CellElement::OnHoverStop();
     }
 
     Dimensions ImageBox::calculateAvailableSpace() const
@@ -643,14 +643,14 @@ namespace sage
         return {rec.x, rec.y};
     }
 
-    void Window::OnMouseStartHover()
+    void Window::OnHoverStart()
     {
-        UIElement::OnMouseStartHover();
+        UIElement::OnHoverStart();
     }
 
-    void Window::OnMouseStopHover()
+    void Window::OnHoverStop()
     {
-        UIElement::OnMouseStopHover();
+        UIElement::OnHoverStop();
         for (auto& table : children)
         {
             for (auto& row : table->children)
