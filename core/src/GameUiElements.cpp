@@ -40,9 +40,19 @@ namespace sage
         UpdateDimensions();
     }
 
+    void CellElement::OnMouseClick()
+    {
+        onMouseClicked.publish();
+    }
+
     void CellElement::MouseHoverUpdate()
     {
     }
+
+    void CellElement::OnMouseStartDrag()
+    {
+        beingDragged = true;
+    };
 
     // TODO: confusing name.
     // In this case, "DroppedElement" is the (potential) cell that this element has been dropped onto
@@ -54,6 +64,13 @@ namespace sage
             droppedElement->OnDragDropHere(this);
         }
         // Not dropped on a cell, what to do?
+    }
+
+    void CellElement::OnDragDropHere(CellElement* droppedElement)
+    {
+        if (!canReceiveDragDrops) return;
+
+        std::cout << "Reached here \n";
     }
 
     void CellElement::ChangeState(std::unique_ptr<UIState> newState)

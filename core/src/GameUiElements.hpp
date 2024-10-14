@@ -176,30 +176,16 @@ namespace sage
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);
-
-        virtual void OnMouseClick()
-        {
-            onMouseClicked.publish();
-        }
+        virtual void OnMouseClick();
         virtual void MouseHoverUpdate();
-        virtual void OnMouseStartDrag()
-        {
-            beingDragged = true;
-        };
+        virtual void OnMouseStartDrag();
         virtual void MouseDragUpdate(){};
         virtual void MouseDragDraw(){};
         virtual void OnDropped(CellElement* droppedElement);
-        virtual void OnDragDropHere(CellElement* droppedElement)
-        {
-            if (!canReceiveDragDrops) return;
-
-            std::cout << "Reached here \n";
-        }
+        virtual void OnDragDropHere(CellElement* droppedElement);
         void ChangeState(std::unique_ptr<UIState> newState);
-
         virtual void UpdateDimensions() = 0;
         virtual void Draw2D() = 0;
-
         explicit CellElement(GameUIEngine* _engine);
         ~CellElement() override = default;
         friend class TableCell;
