@@ -181,7 +181,7 @@ namespace sage
         virtual void OnDragStart();
         virtual void DragUpdate(){};
         virtual void DragDraw(){};
-        virtual void OnDrop(CellElement* droppedElement);
+        virtual void OnDrop(CellElement* receiver);
         virtual void ReceiveDrop(CellElement* droppedElement);
         void ChangeState(std::unique_ptr<UIState> newState);
         virtual void UpdateDimensions() = 0;
@@ -232,12 +232,12 @@ namespace sage
             SHRINK_TO_FIT,
             SHRINK_ROW_TO_FIT
         };
-        void OnDragStart() override;
-        void OnDrop(CellElement* droppedElement) override;
-        void DragDraw() override;
         void OnHoverStart() override;
         void OnHoverStop() override;
         void OnClick() override;
+        void OnDragStart() override;
+        void DragDraw() override;
+        void OnDrop(CellElement* droppedElement) override;
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void SetGrayscale();
         void RemoveShader();
