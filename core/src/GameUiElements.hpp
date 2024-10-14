@@ -285,7 +285,7 @@ namespace sage
         unsigned int col{};
 
       public:
-        void SetItemInfo();
+        void UpdateItemInfo();
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;

@@ -4,8 +4,6 @@
 
 #include "InventoryComponent.hpp"
 
-#include "Cursor.hpp"
-
 namespace sage
 {
 
@@ -24,14 +22,6 @@ namespace sage
             }
         }
         return false;
-    }
-
-    void InventoryComponent::OnItemClicked(entt::entity entity)
-    {
-        if (!AddItem(entity))
-        {
-            onInventoryFull.publish();
-        }
     }
 
     bool InventoryComponent::AddItem(entt::entity entity)
@@ -69,7 +59,7 @@ namespace sage
         items[row2][col2] = item1;
     }
 
-    InventoryComponent::InventoryComponent(Cursor* _cursor) : cursor(_cursor)
+    InventoryComponent::InventoryComponent()
     {
         // I believe this is necessary;
         for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
@@ -79,7 +69,5 @@ namespace sage
                 items[row][col] = entt::null;
             }
         }
-        entt::sink sink{cursor->onItemClick};
-        sink.connect<&InventoryComponent::OnItemClicked>(this);
     }
 } // namespace sage
