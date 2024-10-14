@@ -3,6 +3,7 @@
 - [ ]  Use new UI framework for dialogue
 - [ ]  Replace the literal model for items with the dota 2 style "boxes"
 - [ ]  Cooldown timers on abilities
+- [ ] Improve placement of tooltips and abstract tooltips into a class.
 
 ----
 
