@@ -25,12 +25,7 @@ namespace sage
         [[nodiscard]] static Window* CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos);
         [[nodiscard]] static Window* CreateAbilityToolTip(GameUIEngine* engine, Ability& ability, Vector2 pos);
         static Window* CreateInventoryWindow(
-            entt::registry* registry,
-            GameUIEngine* engine,
-            Vector2 pos,
-            float w,
-            float h,
-            ControllableActorSystem* controllableActorSystem);
+            entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h);
     };
 
 } // namespace sage

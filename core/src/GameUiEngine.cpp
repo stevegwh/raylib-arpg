@@ -4,6 +4,7 @@
 
 #include "GameUiEngine.hpp"
 #include "Cursor.hpp"
+#include "GameData.hpp"
 #include "UserInput.hpp"
 
 #include <sstream>
@@ -44,8 +45,8 @@ namespace sage
     {
         // TODO: The easiest thing would be to have a separate state system for Window that is just hovered or not
         // and disables the cursor
-        engine->cursor->DisableContextSwitching();
-        engine->cursor->Disable();
+        engine->gameData->cursor->DisableContextSwitching();
+        engine->gameData->cursor->Disable();
 
         auto mousePos = GetMousePosition();
         if (!MouseInside(element->parent->rec, mousePos))
@@ -190,7 +191,7 @@ namespace sage
         window->SetPosition(x, y);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
-        window->settings = settings;
+        window->settings = gameData->settings;
         window->tex = _nPatchTexture;
         window->rec = {
             window->GetPosition().x,
@@ -198,7 +199,7 @@ namespace sage
             window->GetDimensions().width,
             window->GetDimensions().height};
 
-        entt::sink sink{userInput->onWindowUpdate};
+        entt::sink sink{gameData->userInput->onWindowUpdate};
         sink.connect<&Window::OnScreenSizeChange>(window.get());
         return window.get();
     }
@@ -216,7 +217,7 @@ namespace sage
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
-        window->settings = settings;
+        window->settings = gameData->settings;
         window->tex = _nPatchTexture;
         window->rec = {
             window->GetOffset().x,
@@ -224,7 +225,7 @@ namespace sage
             window->GetDimensions().width,
             window->GetDimensions().height};
 
-        entt::sink sink{userInput->onWindowUpdate};
+        entt::sink sink{gameData->userInput->onWindowUpdate};
         sink.connect<&WindowDocked::OnScreenSizeChange>(window);
 
         return window;
@@ -303,8 +304,8 @@ namespace sage
                 continue;
             }
 
-            cursor->Disable();
-            cursor->DisableContextSwitching();
+            gameData->cursor->Disable();
+            gameData->cursor->DisableContextSwitching();
 
             window->OnHoverStart(); // TODO: Need to check if it was already being hovered?
             for (const auto& table : window->children)
@@ -329,15 +330,15 @@ namespace sage
         }
         else
         {
-            cursor->Enable();
-            cursor->EnableContextSwitching();
+            gameData->cursor->Enable();
+            gameData->cursor->EnableContextSwitching();
             pruneWindows();
             processWindows();
         }
     }
 
-    GameUIEngine::GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor)
-        : cursor(_cursor), userInput(_userInput), settings(_settings)
+    GameUIEngine::GameUIEngine(entt::registry* _registry, GameData* _gameData)
+        : registry(_registry), gameData(_gameData)
     {
     }
 } // namespace sage

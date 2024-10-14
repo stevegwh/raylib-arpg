@@ -15,6 +15,7 @@ namespace sage
 
     void InventoryComponent::RemoveItem(unsigned int row, unsigned int col)
     {
+        items[row][col] = entt::null;
     }
 
     entt::entity InventoryComponent::GetItem(unsigned int row, unsigned int col)

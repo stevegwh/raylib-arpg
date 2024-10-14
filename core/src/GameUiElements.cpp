@@ -6,6 +6,8 @@
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "Cursor.hpp"
+#include "GameData.hpp"
+#include "GameObjectFactory.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
 #include "ResourceManager.hpp"
@@ -53,7 +55,7 @@ namespace sage
     {
         beingDragged = true;
     };
-    
+
     void CellElement::OnDrop(CellElement* receiver)
     {
         beingDragged = false;
@@ -61,7 +63,6 @@ namespace sage
         {
             receiver->ReceiveDrop(this);
         }
-        // Not dropped on a cell, what to do?
     }
 
     void CellElement::ReceiveDrop(CellElement* droppedElement)
@@ -197,8 +198,8 @@ namespace sage
         draggedWindow = parent->GetWindow();
         auto mousePos = GetMousePosition();
         Vector2 offset = {
-            static_cast<float>(engine->settings->screenWidth * 0.005),
-            static_cast<float>(engine->settings->screenHeight * 0.005)};
+            static_cast<float>(engine->gameData->settings->screenWidth * 0.005),
+            static_cast<float>(engine->gameData->settings->screenHeight * 0.005)};
         dragOffset = {
             mousePos.x - draggedWindow.value()->rec.x - offset.x,
             mousePos.y - draggedWindow.value()->rec.y - offset.y};
@@ -264,12 +265,12 @@ namespace sage
     {
         auto mousePos = GetMousePosition();
         Vector2 offset = {
-            static_cast<float>(engine->settings->screenWidth * 0.005),
-            static_cast<float>(engine->settings->screenHeight * 0.005)};
+            static_cast<float>(engine->gameData->settings->screenWidth * 0.005),
+            static_cast<float>(engine->gameData->settings->screenHeight * 0.005)};
         dragOffset = {rec.x - mousePos.x + offset.x, rec.y - mousePos.y + offset.y};
         CellElement::OnDragStart();
     }
-    
+
     void ImageBox::DragDraw()
     {
         auto mousePos = GetMousePosition();
@@ -407,7 +408,6 @@ namespace sage
         return dimensions; // Return original dimensions if no scaling needed
     }
 
-    
     void ImageBox::UpdateDimensions()
     {
         if (overflowBehaviour == OverflowBehaviour::SHRINK_ROW_TO_FIT)
@@ -491,7 +491,8 @@ namespace sage
 
     void InventorySlot::SetItemInfo()
     {
-        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+        auto& inventory =
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
         auto itemId = inventory.GetItem(row, col);
         if (itemId != entt::null)
         {
@@ -508,11 +509,33 @@ namespace sage
         }
     }
 
+    void InventorySlot::OnDrop(CellElement* receiver)
+    {
+        beingDragged = false;
+        if (receiver && receiver->canReceiveDragDrops)
+        {
+            receiver->ReceiveDrop(this);
+        }
+        else
+        {
+            auto& inventory =
+                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
+            auto itemId = inventory.GetItem(row, col);
+            auto pos = engine->gameData->cursor->getFirstNaviCollision();
+            if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
+            {
+                inventory.RemoveItem(row, col);
+                SetItemInfo();
+            }
+        }
+    }
+
     void InventorySlot::ReceiveDrop(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+            auto& inventory =
+                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
             inventory.SwapItems(row, col, dropped->row, dropped->col);
             dropped->SetItemInfo();
             SetItemInfo();
@@ -525,7 +548,8 @@ namespace sage
     {
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+        auto& inventory =
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
         auto itemId = inventory.GetItem(row, col);
         if (itemId != entt::null)
         {
@@ -1157,17 +1181,11 @@ namespace sage
         return abilitySlot;
     }
 
-    InventorySlot* TableCell::CreateInventorySlot(
-        entt::registry* _registry,
-        GameUIEngine* engine,
-        ControllableActorSystem* _controllableActorSystem,
-        unsigned int row,
-        unsigned int col)
+    InventorySlot* TableCell::CreateInventorySlot(GameUIEngine* engine, unsigned int row, unsigned int col)
     {
         children = std::make_unique<InventorySlot>(engine);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
-        slot->registry = _registry;
-        slot->controllableActorSystem = _controllableActorSystem;
+        slot->registry = engine->registry;
         slot->draggable = true;
         slot->canReceiveDragDrops = true;
         slot->row = row;

@@ -411,4 +411,10 @@ namespace sage
         registry->emplace<TowerState>(id);
     }
 
+    bool GameObjectFactory::spawnInventoryItem(
+        entt::registry* registry, GameData* data, entt::entity itemId, Vector3 position)
+    {
+        return true;
+    }
+
 } // namespace sage
