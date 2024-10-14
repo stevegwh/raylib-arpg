@@ -3,9 +3,11 @@
 //
 
 #include "GameUiFactory.hpp"
+
 #include "components/Ability.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
+#include "GameData.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
 #include "systems/ControllableActorSystem.hpp"
@@ -171,14 +173,10 @@ namespace sage
     }
 
     Window* GameUiFactory::CreateInventoryWindow(
-        entt::registry* registry,
-        GameUIEngine* engine,
-        Vector2 pos,
-        float w,
-        float h,
-        ControllableActorSystem* controllableActorSystem)
+        entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        auto& inventory = registry->get<InventoryComponent>(controllableActorSystem->GetControlledActor());
+        auto& inventory =
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
 
         // TODO: Add SetPaddingWindowPercent
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
@@ -212,7 +210,7 @@ namespace sage
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
                     auto& cell = table->children[row]->children[col];
-                    auto invSlot = cell->CreateInventorySlot(registry, engine, controllableActorSystem, row, col);
+                    auto invSlot = cell->CreateInventorySlot(engine, row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                 }
             }

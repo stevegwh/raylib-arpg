@@ -281,12 +281,12 @@ namespace sage
     class InventorySlot : public ImageBox
     {
         entt::registry* registry{};
-        ControllableActorSystem* controllableActorSystem{};
         unsigned int row{};
         unsigned int col{};
 
       public:
         void SetItemInfo();
+        void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;
         explicit InventorySlot(GameUIEngine* _engine);
@@ -317,12 +317,7 @@ namespace sage
         CloseButton* CreateCloseButton(GameUIEngine* engine, Texture _tex);
         AbilitySlot* CreateAbilitySlot(
             GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber);
-        InventorySlot* CreateInventorySlot(
-            entt::registry* _registry,
-            GameUIEngine* engine,
-            ControllableActorSystem* _controllableActorSystem,
-            unsigned int row,
-            unsigned int col);
+        InventorySlot* CreateInventorySlot(GameUIEngine* engine, unsigned int row, unsigned int col);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;

@@ -22,5 +22,7 @@ namespace sage
             entt::registry* registry, GameData* data, Vector3 position, const char* name);
         static void createPortal(entt::registry* registry, GameData* data, Vector3 position);
         static void createWizardTower(entt::registry* registry, GameData* data, Vector3 position);
+        static bool spawnInventoryItem(
+            entt::registry* registry, GameData* data, entt::entity itemId, Vector3 position);
     };
 } // namespace sage

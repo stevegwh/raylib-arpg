@@ -14,6 +14,7 @@
 
 namespace sage
 {
+    class GameData;
     class GameUIEngine;
     class UIState;
 
@@ -84,8 +85,6 @@ namespace sage
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
-        UserInput* userInput;
-
         std::optional<CellElement*> draggedObject;
         std::optional<CellElement*> hoveredDraggableCellElement;
 
@@ -93,8 +92,8 @@ namespace sage
         void processWindows() const;
 
       public:
-        Cursor* cursor;
-        Settings* settings;
+        entt::registry* registry;
+        GameData* gameData;
 
         Window* CreateWindow(
             Texture _nPatchTexture,
@@ -119,7 +118,7 @@ namespace sage
         void Draw2D() const;
         void Update();
 
-        GameUIEngine(Settings* _settings, UserInput* _userInput, Cursor* _cursor);
+        GameUIEngine(entt::registry* _registry, GameData* _gameData);
         friend class UIState;
         friend class DragDelayState;
         friend class DragState;
