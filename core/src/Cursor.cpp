@@ -180,6 +180,11 @@ namespace sage
                 hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
             }
         }
+        else if (layer == CollisionLayer::ITEM)
+        {
+            currentTex = &pickuptex;
+            hitObjectName = "Item";
+        }
         else if (layer == CollisionLayer::PLAYER)
         {
             currentTex = &regulartex;
@@ -193,7 +198,7 @@ namespace sage
         else if (layer == CollisionLayer::ENEMY)
         {
             currentTex = &combattex;
-            hitObjectName = "NPC";
+            hitObjectName = "Enemy";
         }
     }
 
@@ -367,6 +372,7 @@ namespace sage
         movetex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_CURSOR_MOVE);
         invalidmovetex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_CURSOR_DENIED);
         combattex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_CURSOR_ATTACK);
+        pickuptex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_CURSOR_PICKUP);
         currentTex = &regulartex;
         EnableContextSwitching();
     }

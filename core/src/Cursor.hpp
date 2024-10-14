@@ -34,6 +34,7 @@ namespace sage
         Texture2D movetex{};
         Texture2D invalidmovetex{};
         Texture2D combattex{};
+        Texture2D pickuptex{};
 
         Ray ray{};
         Color defaultColor = WHITE;
