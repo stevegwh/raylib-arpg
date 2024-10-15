@@ -12,7 +12,7 @@ namespace sage
     class ControllableActorSystem;
     struct Ability;
     struct ItemComponent;
-    struct Window;
+    class Window;
     class GameUIEngine;
     class PlayerAbilitySystem;
 
