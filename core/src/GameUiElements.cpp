@@ -458,11 +458,13 @@ namespace sage
         else
         {
             tex.id = rlGetTextureIdDefault();
-            tex.width = 0;
-            tex.height = 0;
+            // Setting to zero will cause errors on Windows.
+            tex.width = 1;
+            tex.height = 1;
             // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
             // rlGetDefaultTexture) Set default
         }
+        UpdateDimensions();
     }
 
     void AbilitySlot::ReceiveDrop(CellElement* droppedElement)
@@ -472,8 +474,6 @@ namespace sage
             playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
             dropped->SetAbilityInfo();
             SetAbilityInfo();
-            dropped->UpdateDimensions();
-            UpdateDimensions();
         }
     }
 
@@ -532,8 +532,9 @@ namespace sage
         }
         else
         {
-            tex = {};
             tex.id = rlGetTextureIdDefault();
+            tex.width = 1;
+            tex.height = 1;
             //  tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
             //  rlGetDefaultTexture) Set default
         }
