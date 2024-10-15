@@ -174,17 +174,19 @@ namespace sage
 
     void GameUIEngine::pruneWindows()
     {
-        for (auto it = windows.begin(); it != windows.end();)
+        std::vector<unsigned int> toRemove;
+        for (unsigned int i = 0; i < windows.size(); ++i)
         {
-            auto& window = *it;
+            auto& window = windows[i];
             if (window->markForRemoval)
             {
-                windows.erase(it);
+                toRemove.push_back(i);
             }
-            else
-            {
-                ++it;
-            }
+        }
+
+        for (auto& i : toRemove)
+        {
+            windows.erase(windows.begin() + i);
         }
     }
 
