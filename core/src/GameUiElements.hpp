@@ -175,6 +175,7 @@ namespace sage
         bool canReceiveDragDrops = false;
         bool draggable = false;
         bool beingDragged = false;
+        bool stateLocked = false;
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);

@@ -74,7 +74,7 @@ namespace sage
 
     void CellElement::ChangeState(std::unique_ptr<UIState> newState)
     {
-        if (newState == state) return;
+        if (newState == state || stateLocked) return;
 
         state->Exit();
         state = std::move(newState);
@@ -454,9 +454,11 @@ namespace sage
         if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
         {
             tex = LoadTexture(ability->iconPath.c_str()); // TODO: Replace with resource manager and asset id
+            stateLocked = false;
         }
         else
         {
+            stateLocked = true;
             tex.id = rlGetTextureIdDefault();
             // Setting to zero will cause errors on Windows.
             tex.width = 1;
@@ -529,9 +531,11 @@ namespace sage
         {
             auto& item = registry->get<ItemComponent>(itemId);
             tex = ResourceManager::GetInstance().TextureLoad(item.icon);
+            stateLocked = false;
         }
         else
         {
+            stateLocked = true;
             tex.id = rlGetTextureIdDefault();
             tex.width = 1;
             tex.height = 1;
