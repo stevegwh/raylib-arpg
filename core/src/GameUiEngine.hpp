@@ -91,12 +91,14 @@ namespace sage
         std::optional<CellElement*> hoveredDraggableCellElement;
 
         void pruneWindows();
-        void processWindows() const;
+        void processWindows();
+
+        [[nodiscard]] bool mouseInNonObscuredWindowRegion(Window* window, Vector2 mousePos) const;
 
       public:
         entt::registry* registry;
         GameData* gameData;
-
+        void BringClickedWindowToFront(Window* clicked);
         Window* CreateWindow(
             Texture _nPatchTexture,
             float x,
@@ -113,8 +115,9 @@ namespace sage
             float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
 
+        [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;
-
+        void PlaceWindow(Window* window, Vector2 requestedPos) const;
         [[nodiscard]] Window* GetWindowCollision(Window* toCheck) const;
         [[nodiscard]] CellElement* GetCellUnderCursor() const;
         void DrawDebug2D() const;
