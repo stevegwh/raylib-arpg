@@ -248,6 +248,19 @@ namespace sage
         return draggedObject.has_value();
     }
 
+    Window* GameUIEngine::GetWindowCollision(Window* toCheck) const
+    {
+        for (auto& window : windows)
+        {
+            if (window.get() == toCheck) continue;
+            if (CheckCollisionRecs(window->rec, toCheck->rec))
+            {
+                return window.get();
+            }
+        }
+        return nullptr;
+    }
+
     CellElement* GameUIEngine::GetCellUnderCursor() const
     {
         Window* windowUnderCursor = nullptr;
