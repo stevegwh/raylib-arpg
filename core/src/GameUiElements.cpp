@@ -193,27 +193,6 @@ namespace sage
 
     TextBox::TextBox(GameUIEngine* _engine) : CellElement(_engine){};
 
-    void TitleBar::bindMoveToScreenBounds(Vector2& move) const
-    {
-        auto& window = draggedWindow.value();
-        if (move.x + window->rec.width > window->settings->screenWidth)
-        {
-            move.x = window->settings->screenWidth - window->rec.width;
-        }
-        if (move.y + window->rec.height > window->settings->screenHeight)
-        {
-            move.y = window->settings->screenHeight - window->rec.height;
-        }
-        if (move.x < 0)
-        {
-            move.x = 0;
-        }
-        if (move.y < 0)
-        {
-            move.y = 0;
-        }
-    }
-
     void TitleBar::OnDragStart()
     {
         draggedWindow = parent->GetWindow();
@@ -232,48 +211,8 @@ namespace sage
         auto& window = draggedWindow.value();
         auto newPos = Vector2Subtract(mousePos, dragOffset);
 
-        bindMoveToScreenBounds(newPos);
         window->SetPosition(newPos.x, newPos.y);
-        window->UpdateChildren();
-        auto collided = engine->GetWindowCollision(window);
-
-        if (collided)
-        {
-            // Determine which side of the collision occurred by comparing the centers
-            float windowCenterX = newPos.x + window->rec.width / 2;
-            float windowCenterY = newPos.y + window->rec.height / 2;
-            float collidedCenterX = collided->rec.x + collided->rec.width / 2;
-            float collidedCenterY = collided->rec.y + collided->rec.height / 2;
-
-            // Handle horizontal collision
-            if (abs(windowCenterX - collidedCenterX) > abs(windowCenterY - collidedCenterY))
-            {
-                if (windowCenterX < collidedCenterX) // Collision from left
-                {
-                    newPos.x = collided->rec.x - window->rec.width;
-                }
-                else // Collision from right
-                {
-                    newPos.x = collided->rec.x + collided->rec.width;
-                }
-            }
-            // Handle vertical collision
-            else
-            {
-                if (windowCenterY < collidedCenterY) // Collision from above
-                {
-                    newPos.y = collided->rec.y - window->rec.height;
-                }
-                else // Collision from below
-                {
-                    newPos.y = collided->rec.y + collided->rec.height;
-                }
-            }
-
-            bindMoveToScreenBounds(newPos);
-        }
-
-        window->SetPosition(newPos.x, newPos.y);
+        window->ClampToScreen();
         window->UpdateChildren();
     }
 
@@ -304,11 +243,6 @@ namespace sage
     void ImageBox::RemoveShader()
     {
         shader.reset();
-    }
-
-    void ImageBox::OnClick()
-    {
-        CellElement::OnClick();
     }
 
     void ImageBox::OnIdleStart()
@@ -579,7 +513,7 @@ namespace sage
     void AbilitySlot::OnClick()
     {
         playerAbilitySystem->PressAbility(slotNumber);
-        ImageBox::OnClick();
+        CellElement::OnClick();
     }
 
     AbilitySlot::AbilitySlot(GameUIEngine* _engine)
@@ -640,6 +574,7 @@ namespace sage
             inventory.SwapItems(row, col, dropped->row, dropped->col);
             dropped->UpdateItemInfo();
             UpdateItemInfo();
+            engine->BringClickedWindowToFront(parent->GetWindow());
         }
     }
 
@@ -778,6 +713,26 @@ namespace sage
     Vector2 Window::GetPosition() const
     {
         return {rec.x, rec.y};
+    }
+
+    void Window::ClampToScreen()
+    {
+        if (rec.x + rec.width > settings->screenWidth)
+        {
+            rec.x = settings->screenWidth - rec.width;
+        }
+        if (rec.y + rec.height > settings->screenHeight)
+        {
+            rec.y = settings->screenHeight - rec.height;
+        }
+        if (rec.x < 0)
+        {
+            rec.x = 0;
+        }
+        if (rec.y < 0)
+        {
+            rec.y = 0;
+        }
     }
 
     void Window::OnHoverStart()
