@@ -218,6 +218,8 @@ namespace sage
 
     class TitleBar final : public TextBox
     {
+        void bindMoveToScreenBounds(Vector2& move) const;
+
       public:
         std::optional<Window*> draggedWindow;
         ~TitleBar() override = default;
