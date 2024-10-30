@@ -7,14 +7,15 @@
 #include "GameData.hpp"
 #include "UserInput.hpp"
 
+#include <ranges>
 #include <sstream>
 
 namespace sage
 {
-    bool MouseInside(Rectangle rec, Vector2 mousePos)
+    bool PointInsideRect(Rectangle rec, Vector2 point)
     {
-        return mousePos.x >= rec.x && mousePos.x <= rec.x + rec.width && mousePos.y >= rec.y &&
-               mousePos.y <= rec.y + rec.height;
+        return point.x >= rec.x && point.x <= rec.x + rec.width && point.y >= rec.y &&
+               point.y <= rec.y + rec.height;
     }
 
     void IdleState::Enter()
@@ -25,7 +26,7 @@ namespace sage
     void IdleState::Update()
     {
         auto mousePos = GetMousePosition();
-        if (MouseInside(element->parent->rec, mousePos))
+        if (PointInsideRect(element->parent->rec, mousePos))
         {
             element->ChangeState(std::make_unique<HoverState>(element, engine));
         }
@@ -59,7 +60,7 @@ namespace sage
         engine->gameData->cursor->Disable();
 
         auto mousePos = GetMousePosition();
-        if (!MouseInside(element->parent->rec, mousePos))
+        if (!PointInsideRect(element->parent->rec, mousePos))
         {
             element->ChangeState(std::make_unique<IdleState>(element, engine));
             return;
@@ -205,11 +206,14 @@ namespace sage
         window->tableAlignment = _alignment;
         window->settings = gameData->settings;
         window->tex = _nPatchTexture;
+        // TODO: Shouldn't SetPosition/SetDimensions already do below?
         window->rec = {
             window->GetPosition().x,
             window->GetPosition().y,
             window->GetDimensions().width,
             window->GetDimensions().height};
+
+        // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
         sink.connect<&Window::OnScreenSizeChange>(window.get());
@@ -243,9 +247,48 @@ namespace sage
         return window;
     }
 
+    void GameUIEngine::PlaceWindow(Window* window, Vector2 requestedPos) const
+    {
+        window->SetPosition(requestedPos.x, requestedPos.y);
+        window->ClampToScreen();
+        window->UpdateChildren();
+
+        auto collision = GetWindowCollision(window);
+
+        if (collision)
+        {
+            window->rec.x = collision->rec.x - window->rec.width;
+            window->ClampToScreen();
+            collision = GetWindowCollision(window);
+            if (collision)
+            {
+                window->rec.x = collision->rec.x + collision->rec.width;
+                window->ClampToScreen();
+                collision = GetWindowCollision(window);
+                if (collision)
+                {
+                    assert(0);
+                }
+            }
+        }
+    }
+
     bool GameUIEngine::ObjectBeingDragged() const
     {
         return draggedObject.has_value();
+    }
+
+    Window* GameUIEngine::GetWindowCollision(Window* toCheck) const
+    {
+        for (auto& window : windows)
+        {
+            if (window.get() == toCheck || window->hidden) continue;
+            if (CheckCollisionRecs(window->rec, toCheck->rec))
+            {
+                return window.get();
+            }
+        }
+        return nullptr;
     }
 
     CellElement* GameUIEngine::GetCellUnderCursor() const
@@ -254,7 +297,8 @@ namespace sage
         auto mousePos = GetMousePosition();
         for (auto& window : windows)
         {
-            if (MouseInside(window->rec, mousePos))
+            if (window->hidden) continue;
+            if (PointInsideRect(window->rec, mousePos) && mouseInNonObscuredWindowRegion(window.get(), mousePos))
             {
                 windowUnderCursor = window.get();
             }
@@ -267,7 +311,7 @@ namespace sage
                 for (auto& cell : row->children)
                 {
                     auto element = cell->children.get();
-                    if (MouseInside(cell->rec, mousePos))
+                    if (PointInsideRect(cell->rec, mousePos))
                     {
                         return element;
                     }
@@ -275,6 +319,33 @@ namespace sage
             }
         }
         return nullptr;
+    }
+
+    Rectangle GameUIEngine::GetOverlap(Rectangle rec1, Rectangle rec2)
+    {
+        float x1 = std::max(rec1.x, rec2.x);
+        float y1 = std::max(rec1.y, rec2.y);
+        float x2 = std::min(rec1.x + rec1.width, rec2.x + rec2.width);
+        float y2 = std::min(rec1.y + rec1.height, rec2.y + rec2.height);
+
+        if (x1 < x2 && y1 < y2)
+        {
+            Rectangle overlap;
+            overlap.x = x1;
+            overlap.y = y1;
+            overlap.width = x2 - x1;
+            overlap.height = y2 - y1;
+            return overlap;
+        }
+        return Rectangle{0, 0, 0, 0};
+    }
+
+    void GameUIEngine::BringClickedWindowToFront(Window* clicked)
+    {
+        auto it = std::find_if(windows.begin(), windows.end(), [clicked](const std::unique_ptr<Window>& ptr) {
+            return ptr.get() == clicked;
+        });
+        std::rotate(it, it + 1, windows.end());
     }
 
     void GameUIEngine::DrawDebug2D() const
@@ -300,20 +371,59 @@ namespace sage
         }
     }
 
-    void GameUIEngine::processWindows() const
+    /**
+     *
+     * @return Whether the window region is not obscured by another window
+     */
+    bool GameUIEngine::mouseInNonObscuredWindowRegion(Window* window, Vector2 mousePos) const
+    {
+        auto collision = GetWindowCollision(window);
+        if (collision)
+        {
+            // check if window is lower
+            auto windowIt =
+                std::find_if(windows.begin(), windows.end(), [window](const std::unique_ptr<Window>& ptr) {
+                    return ptr.get() == window;
+                });
+
+            auto colIt =
+                std::find_if(windows.begin(), windows.end(), [collision](const std::unique_ptr<Window>& ptr) {
+                    return ptr.get() == collision;
+                });
+
+            auto windowDist = std::distance(windows.begin(), windowIt);
+            auto colDist = std::distance(windows.begin(), colIt);
+
+            if (windowDist < colDist)
+            {
+                auto rec = GetOverlap(window->rec, collision->rec);
+                if (PointInsideRect(rec, mousePos))
+                {
+                    // this part of the window is being obscured by another
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void GameUIEngine::processWindows()
     {
         const auto mousePos = GetMousePosition();
-        const auto windowCount = windows.size();
-        for (const auto& window : windows)
+
+        for (auto& window : std::ranges::reverse_view(windows))
         {
-            // Make sure we do not process newly added windows this cycle
-            if (windows.size() > windowCount) break;
             if (window->hidden) continue;
 
-            if (!MouseInside(window->rec, mousePos))
+            if (!PointInsideRect(window->rec, mousePos) || !mouseInNonObscuredWindowRegion(window.get(), mousePos))
             {
                 window->OnHoverStop();
                 continue;
+            }
+
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                BringClickedWindowToFront(window.get());
             }
 
             gameData->cursor->Disable();
