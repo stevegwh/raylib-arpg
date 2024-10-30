@@ -208,8 +208,12 @@ namespace sage
     void TitleBar::DragUpdate()
     {
         auto mousePos = GetMousePosition();
-        draggedWindow.value()->SetPosition(mousePos.x - dragOffset.x, mousePos.y - dragOffset.y);
-        draggedWindow.value()->UpdateChildren();
+        auto& window = draggedWindow.value();
+        auto newPos = Vector2Subtract(mousePos, dragOffset);
+
+        window->SetPosition(newPos.x, newPos.y);
+        window->ClampToScreen();
+        window->UpdateChildren();
     }
 
     void TitleBar::OnDrop(CellElement* droppedElement)
@@ -239,11 +243,6 @@ namespace sage
     void ImageBox::RemoveShader()
     {
         shader.reset();
-    }
-
-    void ImageBox::OnClick()
-    {
-        CellElement::OnClick();
     }
 
     void ImageBox::OnIdleStart()
@@ -514,7 +513,7 @@ namespace sage
     void AbilitySlot::OnClick()
     {
         playerAbilitySystem->PressAbility(slotNumber);
-        ImageBox::OnClick();
+        CellElement::OnClick();
     }
 
     AbilitySlot::AbilitySlot(GameUIEngine* _engine)
@@ -575,6 +574,7 @@ namespace sage
             inventory.SwapItems(row, col, dropped->row, dropped->col);
             dropped->UpdateItemInfo();
             UpdateItemInfo();
+            engine->BringClickedWindowToFront(parent->GetWindow());
         }
     }
 
@@ -713,6 +713,26 @@ namespace sage
     Vector2 Window::GetPosition() const
     {
         return {rec.x, rec.y};
+    }
+
+    void Window::ClampToScreen()
+    {
+        if (rec.x + rec.width > settings->screenWidth)
+        {
+            rec.x = settings->screenWidth - rec.width;
+        }
+        if (rec.y + rec.height > settings->screenHeight)
+        {
+            rec.y = settings->screenHeight - rec.height;
+        }
+        if (rec.x < 0)
+        {
+            rec.x = 0;
+        }
+        if (rec.y < 0)
+        {
+            rec.y = 0;
+        }
     }
 
     void Window::OnHoverStart()

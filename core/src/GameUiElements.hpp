@@ -218,6 +218,7 @@ namespace sage
 
     class TitleBar final : public TextBox
     {
+
       public:
         std::optional<Window*> draggedWindow;
         ~TitleBar() override = default;
@@ -238,7 +239,6 @@ namespace sage
         void OnIdleStart() override;
         void OnHoverStart() override;
         void OnHoverStop() override;
-        void OnClick() override;
         void OnDragStart() override;
         void DragDraw() override;
         void OnDrop(CellElement* droppedElement) override;
@@ -393,7 +393,7 @@ namespace sage
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
         virtual void SetPosition(float x, float y);
         [[nodiscard]] Vector2 GetPosition() const;
-
+        void ClampToScreen();
         void OnHoverStart() override;
         void OnHoverStop() override;
 
