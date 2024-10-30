@@ -12,6 +12,7 @@
 #include "raymath.h"
 #include "rlgl.h"
 #include <array>
+#include <cstring>
 
 namespace cereal
 {
