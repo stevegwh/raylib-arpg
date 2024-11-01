@@ -1,3 +1,8 @@
+## Bugs
+
+- [ ]  Drag timer does not reset when the cursor moves off the "draggable" element, allowing you to initialise the drag
+  timer and then move the mouse elsewhere.
+
 ## To Do
 
 - [ ]  Use new UI framework for dialogue

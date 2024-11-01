@@ -40,8 +40,8 @@ namespace sage
 
       private:
         // Serialized settings (loaded from settings.xml)
-        int screenWidthUser;
-        int screenHeightUser;
+        int screenWidthUser{};
+        int screenHeightUser{};
 
         // Hardcoded defaults
         static constexpr int SCREEN_WIDTH = 1280;

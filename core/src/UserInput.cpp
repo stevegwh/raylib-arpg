@@ -6,27 +6,27 @@
 
 namespace sage
 {
+    void UserInput::toggleFullScreen() const
+    {
+        settings->toggleFullScreenRequested = true;
+
+        if (!IsWindowFullscreen())
+        {
+            const int current_screen = GetCurrentMonitor();
+            settings->screenWidth = static_cast<float>(GetMonitorWidth(current_screen));
+            settings->screenHeight = static_cast<float>(GetMonitorHeight(current_screen));
+        }
+        else if (IsWindowFullscreen())
+        {
+            settings->ResetToUserDefined();
+        }
+    }
+
     void UserInput::ListenForInput() const
     {
         if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
         {
-            settings->toggleFullScreenRequested = true;
-
-            if (!IsWindowFullscreen())
-            {
-                const int current_screen = GetCurrentMonitor();
-                settings->screenWidth = static_cast<float>(GetMonitorWidth(current_screen));
-                settings->screenHeight = static_cast<float>(GetMonitorHeight(current_screen));
-            }
-            else if (IsWindowFullscreen())
-            {
-                settings->ResetToUserDefined();
-            }
-
-            // TODO: This is messed up and on Windows is not working, which effects the UI being able to scale back
-            // and forth
-            onWindowUpdate.publish(
-                {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
+            toggleFullScreen();
         }
 
         if (IsKeyPressed(keyMapping->keyA))
