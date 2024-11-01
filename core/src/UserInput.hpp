@@ -16,6 +16,7 @@ namespace sage
     {
         KeyMapping* keyMapping;
         Settings* settings;
+        void toggleFullScreen() const;
 
       public:
         entt::sigh<void(Vector2)> onWindowUpdate{};

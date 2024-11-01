@@ -12,6 +12,7 @@
 #include "GameData.hpp"
 #include "Serializer.hpp"
 #include "slib.hpp"
+#include "UserInput.hpp"
 
 namespace sage
 {
@@ -79,6 +80,8 @@ namespace sage
             }
 #endif
             settings->toggleFullScreenRequested = false;
+            scene->data->userInput->onWindowUpdate.publish(
+                {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
         }
     }
 
