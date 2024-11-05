@@ -5,6 +5,7 @@
 #pragma once
 
 #include "raylib.h"
+#include "systems/PartySystem.hpp"
 #include "Timer.hpp"
 
 #include <entt/entt.hpp>
@@ -12,6 +13,10 @@
 #include <optional>
 #include <vector>
 
+namespace sage
+{
+    class PartySystem;
+}
 namespace sage
 {
     class GameUIEngine;
@@ -271,13 +276,28 @@ namespace sage
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
+    class PartyMemberPortrait : public ImageBox
+    {
+        PartySystem* partySystem{};
+        unsigned int memberNumber{};
+
+      public:
+        void RetrieveInfo();
+        void ReceiveDrop(CellElement* droppedElement) override;
+        void HoverUpdate() override;
+        void Draw2D() override;
+        void OnClick() override;
+        explicit PartyMemberPortrait(GameUIEngine* _engine);
+        friend class TableCell;
+    };
+
     class AbilitySlot : public ImageBox
     {
         PlayerAbilitySystem* playerAbilitySystem{};
-        int slotNumber{};
+        unsigned int slotNumber{};
 
       public:
-        void SetAbilityInfo();
+        void RetrieveInfo();
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;
         void Draw2D() override;
@@ -293,7 +313,7 @@ namespace sage
         unsigned int col{};
 
       public:
-        void UpdateItemInfo();
+        void RetrieveInfo();
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;
@@ -323,8 +343,10 @@ namespace sage
         TitleBar* CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize);
         ImageBox* CreateImagebox(GameUIEngine* engine, Texture _tex);
         CloseButton* CreateCloseButton(GameUIEngine* engine, Texture _tex);
+        PartyMemberPortrait* CreatePartyMemberPortrait(
+            GameUIEngine* engine, PartySystem* _partySystem, unsigned int _memberNumber);
         AbilitySlot* CreateAbilitySlot(
-            GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber);
+            GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, unsigned int _slotNumber);
         InventorySlot* CreateInventorySlot(GameUIEngine* engine, unsigned int row, unsigned int col);
         void UpdateChildren() override;
         void DrawDebug2D() override;

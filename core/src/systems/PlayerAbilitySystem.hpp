@@ -25,9 +25,9 @@ namespace sage
         void AbilityTwoPressed();
         void AbilityThreePressed();
         void AbilityFourPressed();
-        [[nodiscard]] Ability* GetAbility(int slotNumber) const;
-        void SwapAbility(int slot1, int slot2);
-        void SetSlot(int slot, entt::entity abilityEntity);
+        [[nodiscard]] Ability* GetAbility(unsigned int slotNumber) const;
+        void SwapAbility(unsigned int slot1, unsigned int slot2);
+        void SetSlot(unsigned int slot, entt::entity abilityEntity);
         void Update();
         void Draw2D();
         void Draw3D();

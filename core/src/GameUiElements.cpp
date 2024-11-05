@@ -452,7 +452,29 @@ namespace sage
 
     ImageBox::ImageBox(GameUIEngine* _engine) : CellElement(_engine){};
 
-    void AbilitySlot::SetAbilityInfo()
+    void PartyMemberPortrait::RetrieveInfo()
+    {
+    }
+
+    void PartyMemberPortrait::ReceiveDrop(CellElement* droppedElement)
+    {
+    }
+
+    void PartyMemberPortrait::HoverUpdate()
+    {
+    }
+
+    void PartyMemberPortrait::Draw2D()
+    {
+    }
+
+    void PartyMemberPortrait::OnClick()
+    {
+    }
+
+    PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine) : ImageBox(_engine){};
+
+    void AbilitySlot::RetrieveInfo()
     {
         if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
         {
@@ -477,8 +499,8 @@ namespace sage
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
             playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
-            dropped->SetAbilityInfo();
-            SetAbilityInfo();
+            dropped->RetrieveInfo();
+            RetrieveInfo();
         }
     }
 
@@ -525,10 +547,10 @@ namespace sage
 
           };
 
-    void InventorySlot::UpdateItemInfo()
+    void InventorySlot::RetrieveInfo()
     {
         auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
         auto itemId = inventory.GetItem(row, col);
         if (itemId != entt::null)
         {
@@ -558,13 +580,13 @@ namespace sage
         else
         {
             auto& inventory =
-                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
+                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
             auto itemId = inventory.GetItem(row, col);
             auto pos = engine->gameData->cursor->getFirstNaviCollision();
             if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
             {
                 inventory.RemoveItem(row, col);
-                UpdateItemInfo();
+                RetrieveInfo();
             }
         }
     }
@@ -574,10 +596,10 @@ namespace sage
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
             auto& inventory =
-                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
+                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
             inventory.SwapItems(row, col, dropped->row, dropped->col);
-            dropped->UpdateItemInfo();
-            UpdateItemInfo();
+            dropped->RetrieveInfo();
+            RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
         }
     }
@@ -587,7 +609,7 @@ namespace sage
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
         auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
         auto itemId = inventory.GetItem(row, col);
         if (itemId != entt::null)
         {
@@ -1222,8 +1244,23 @@ namespace sage
         }
     }
 
+    PartyMemberPortrait* TableCell::CreatePartyMemberPortrait(
+        GameUIEngine* engine, PartySystem* _partySystem, unsigned int _memberNumber)
+    {
+        children = std::make_unique<PartyMemberPortrait>(engine);
+        auto* portrait = dynamic_cast<PartyMemberPortrait*>(children.get());
+        portrait->parent = this;
+        portrait->partySystem = _partySystem;
+        portrait->draggable = true;
+        portrait->canReceiveDragDrops = true;
+        portrait->memberNumber = _memberNumber;
+        portrait->RetrieveInfo();
+        UpdateChildren();
+        return portrait;
+    }
+
     AbilitySlot* TableCell::CreateAbilitySlot(
-        GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, int _slotNumber)
+        GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, unsigned int _slotNumber)
     {
         children = std::make_unique<AbilitySlot>(engine);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
@@ -1232,7 +1269,7 @@ namespace sage
         abilitySlot->draggable = true;
         abilitySlot->canReceiveDragDrops = true;
         abilitySlot->slotNumber = _slotNumber;
-        abilitySlot->SetAbilityInfo();
+        abilitySlot->RetrieveInfo();
         UpdateChildren();
         return abilitySlot;
     }
@@ -1248,7 +1285,7 @@ namespace sage
         slot->canReceiveDragDrops = true;
         slot->row = row;
         slot->col = col;
-        slot->UpdateItemInfo();
+        slot->RetrieveInfo();
         UpdateChildren();
         return slot;
     }

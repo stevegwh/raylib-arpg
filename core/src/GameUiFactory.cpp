@@ -11,6 +11,7 @@
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
 #include "systems/ControllableActorSystem.hpp"
+#include "systems/PartySystem.hpp"
 
 namespace sage
 {
@@ -84,6 +85,32 @@ namespace sage
         textbox2->SetHoriAlignment(HoriAlignment::LEFT);
 
         cell5->CreateTextbox(engine, "This is an example of shrinking!", 42);
+    }
+
+    Window* GameUiFactory::CreatePartyPortraitsColumn(
+        GameUIEngine* engine, PartySystem* partySystem, ControllableActorSystem* controllableActorSystem)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        auto window =
+            engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
+        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({5, 2, 2, 2});
+
+        auto table = window->CreateTable();
+
+        auto partySize = partySystem->GetSize();
+        for (unsigned int i = 0; i < partySize; ++i)
+        {
+            auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell();
+            auto slot = cell->CreatePartyMemberPortrait(engine, partySystem, i);
+            slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            slot->SetVertAlignment(VertAlignment::MIDDLE);
+            slot->SetHoriAlignment(HoriAlignment::CENTER);
+        }
+        return window;
     }
 
     Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem)
@@ -185,7 +212,7 @@ namespace sage
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
         auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetControlledActor());
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
 
         // TODO: Add SetPaddingWindowPercent
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
@@ -225,8 +252,8 @@ namespace sage
                     auto& cell = table->children[row]->children[col];
                     auto invSlot = cell->CreateInventorySlot(engine, row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                    onItemAddedSink.connect<&InventorySlot::UpdateItemInfo>(invSlot);
-                    onItemRemovedSink.connect<&InventorySlot::UpdateItemInfo>(invSlot);
+                    onItemAddedSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
+                    onItemRemovedSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
                 }
             }
         }

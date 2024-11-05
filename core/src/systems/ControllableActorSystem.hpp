@@ -4,13 +4,9 @@
 
 #pragma once
 
-#include "components/ControllableActor.hpp"
-
 #include "BaseSystem.hpp"
-
 #include "entt/entt.hpp"
 #include "raylib.h"
-#include "raymath.h"
 
 #include <vector>
 
@@ -21,7 +17,7 @@ namespace sage
     class ControllableActorSystem : public BaseSystem
     {
         GameData* gameData;
-        entt::entity controlledActorId{}; // Currently selected actor?
+        entt::entity selectedActorId{};
         void onTargetUpdate(entt::entity target);
 
       public:
@@ -29,7 +25,7 @@ namespace sage
         void PathfindToLocation(entt::entity id, Vector3 location) const;
         void CancelMovement(entt::entity entity);
         void SetControlledActor(entt::entity id);
-        entt::entity GetControlledActor();
+        entt::entity GetSelectedActor();
 
         void PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol);
         [[nodiscard]] bool ReachedDestination(entt::entity entity) const;

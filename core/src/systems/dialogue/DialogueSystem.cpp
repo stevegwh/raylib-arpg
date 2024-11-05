@@ -135,7 +135,7 @@ namespace sage
         {
             entt::sink sink{gameData->controllableActorSystem->onControlledActorChange};
             sink.connect<&DialogueSystem::changeControlledActor>(this);
-            controlledActor = gameData->controllableActorSystem->GetControlledActor();
+            controlledActor = gameData->controllableActorSystem->GetSelectedActor();
         }
         {
             entt::sink sink{gameData->cursor->onNPCClick};

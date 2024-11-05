@@ -18,7 +18,7 @@ namespace sage
     void InventorySystem::OnItemClicked(entt::entity entity) const
     {
         auto& inventoryComponent =
-            registry->get<InventoryComponent>(gameData->controllableActorSystem->GetControlledActor());
+            registry->get<InventoryComponent>(gameData->controllableActorSystem->GetSelectedActor());
         if (inventoryComponent.AddItem(entity))
         {
             if (registry->any_of<Renderable>(entity))
