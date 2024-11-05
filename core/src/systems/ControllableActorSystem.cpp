@@ -3,10 +3,11 @@
 //
 
 #include "ControllableActorSystem.hpp"
-#include "GameData.hpp"
 
+#include "components/ControllableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
+#include "GameData.hpp"
 #include "systems/ActorMovementSystem.hpp"
 
 namespace sage
@@ -31,12 +32,12 @@ namespace sage
 
     void ControllableActorSystem::onTargetUpdate(entt::entity target)
     {
-        auto& controlledActor = registry->get<ControllableActor>(controlledActorId);
+        auto& controlledActor = registry->get<ControllableActor>(selectedActorId);
         if (controlledActor.checkTargetPosTimer.HasFinished())
         {
             controlledActor.checkTargetPosTimer.Restart();
             auto& targetTrans = registry->get<sgTransform>(target);
-            PathfindToLocation(controlledActorId, targetTrans.GetWorldPos());
+            PathfindToLocation(selectedActorId, targetTrans.GetWorldPos());
         }
     }
 
@@ -73,12 +74,12 @@ namespace sage
     void ControllableActorSystem::SetControlledActor(entt::entity id)
     {
         onControlledActorChange.publish(id);
-        controlledActorId = id;
+        selectedActorId = id;
     }
 
-    entt::entity ControllableActorSystem::GetControlledActor()
+    entt::entity ControllableActorSystem::GetSelectedActor()
     {
-        return controlledActorId;
+        return selectedActorId;
     }
 
     ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, GameData* _gameData)

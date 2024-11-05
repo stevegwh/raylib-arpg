@@ -33,6 +33,7 @@ namespace sage
     class CombatSystem;
     class TimerSystem;
     class EntityReflectionSignalRouter;
+    class PartySystem;
 
     // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
     // TODO: Also, should rename to "GameSystems"
@@ -63,6 +64,7 @@ namespace sage
         std::unique_ptr<TimerSystem> timerSystem;
         std::unique_ptr<EntityReflectionSignalRouter> reflectionSignalRouter;
         std::unique_ptr<InventorySystem> inventorySystem;
+        std::unique_ptr<PartySystem> partySystem;
 
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };

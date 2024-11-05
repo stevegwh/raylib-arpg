@@ -9,6 +9,7 @@
 
 namespace sage
 {
+    class PartySystem;
     class ControllableActorSystem;
     struct Ability;
     struct ItemComponent;
@@ -21,6 +22,8 @@ namespace sage
 
       public:
         static void CreateExampleWindow(GameUIEngine* engine);
+        [[nodiscard]] static Window* CreatePartyPortraitsColumn(
+            GameUIEngine* engine, PartySystem* partySystem, ControllableActorSystem* controllableActorSystem);
         [[nodiscard]] static Window* CreateAbilityRow(
             GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem);
         [[nodiscard]] static Window* CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos);

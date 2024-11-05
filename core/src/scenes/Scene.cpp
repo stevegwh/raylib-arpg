@@ -10,11 +10,12 @@
 
 #include "components/Renderable.hpp"
 
-// NB: We have to include all the headers required to build GameData
 #include "AbilityFactory.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
 #include "Serializer.hpp"
+
+// NB: We have to include all the headers required to build GameData
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -25,6 +26,7 @@
 #include "systems/InventorySystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+#include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
@@ -114,11 +116,14 @@ namespace sage
         // ResourceManager::GetInstance().UnloadShaderFileText();
 
         auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 200}, 20, 40);
-        auto* window2 = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 200}, 20, 40);
+        auto* window2 = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {400, 200}, 20, 40);
         entt::sink sink{data->userInput->keyIPressed};
         sink.connect<[](Window& window) { window.hidden = !window.hidden; }>(*window);
         entt::sink sink2{data->userInput->keyCPressed};
         sink2.connect<[](Window& window2) { window2.hidden = !window2.hidden; }>(*window2);
+
+        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(
+            data->uiEngine.get(), data->partySystem.get(), data->controllableActorSystem.get());
     };
 
 } // namespace sage

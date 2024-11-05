@@ -25,6 +25,7 @@
 #include "systems/InventorySystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+#include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
@@ -55,7 +56,8 @@ namespace sage
           combatSystem(std::make_unique<CombatSystem>(_registry)),
           timerSystem(std::make_unique<TimerSystem>(_registry)),
           reflectionSignalRouter(std::make_unique<EntityReflectionSignalRouter>()),
-          inventorySystem(std::make_unique<InventorySystem>(_registry, this))
+          inventorySystem(std::make_unique<InventorySystem>(_registry, this)),
+          partySystem(std::make_unique<PartySystem>(_registry, this))
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this

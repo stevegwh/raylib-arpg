@@ -104,18 +104,18 @@ namespace sage
 
     void PlayerAbilitySystem::onActorChanged()
     {
-        controlledActor = gameData->controllableActorSystem->GetControlledActor();
+        controlledActor = gameData->controllableActorSystem->GetSelectedActor();
         // TODO: Change abilities based on the new actor
     }
 
-    Ability* PlayerAbilitySystem::GetAbility(int slotNumber) const
+    Ability* PlayerAbilitySystem::GetAbility(unsigned int slotNumber) const
     {
         assert(slotNumber < MAX_ABILITY_NUMBER);
         if (abilitySlots.at(slotNumber) == entt::null) return nullptr;
         return &registry->get<Ability>(abilitySlots.at(slotNumber));
     }
 
-    void PlayerAbilitySystem::SwapAbility(int slot1, int slot2)
+    void PlayerAbilitySystem::SwapAbility(unsigned int slot1, unsigned int slot2)
     {
         auto ability1 = abilitySlots.at(slot1);
         auto ability2 = abilitySlots.at(slot2);
@@ -123,7 +123,7 @@ namespace sage
         SetSlot(slot2, ability1);
     }
 
-    void PlayerAbilitySystem::SetSlot(int slot, entt::entity abilityEntity)
+    void PlayerAbilitySystem::SetSlot(unsigned int slot, entt::entity abilityEntity)
     {
         assert(slot < MAX_ABILITY_NUMBER);
         abilitySlots[slot] = abilityEntity;
