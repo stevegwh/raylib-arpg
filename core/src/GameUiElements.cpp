@@ -92,7 +92,7 @@ namespace sage
 
     void TextBox::UpdateDimensions()
     {
-        constexpr int MIN_FONT_SIZE = 4;
+        constexpr int MIN_FONT_SIZE = 6;
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
 
         if (overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
@@ -188,10 +188,14 @@ namespace sage
 
     void TextBox::Draw2D()
     {
+        BeginShaderMode(sdfShader);
         DrawTextEx(font, content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
+        EndShaderMode();
     }
 
-    TextBox::TextBox(GameUIEngine* _engine) : CellElement(_engine){};
+    TextBox::TextBox(GameUIEngine* _engine)
+        : CellElement(_engine),
+          sdfShader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/sdf.fs")){};
 
     void TitleBar::OnDragStart()
     {
@@ -1282,6 +1286,8 @@ namespace sage
         children = std::make_unique<TextBox>(engine);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
         textbox->parent = this;
+        textbox->font = GetFontDefault();
+        SetTextureFilter(textbox->font.texture, TEXTURE_FILTER_BILINEAR);
         textbox->fontSize = fontSize;
         textbox->overflowBehaviour = overflowBehaviour;
         textbox->content = _content;

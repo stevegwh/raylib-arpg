@@ -196,6 +196,8 @@ namespace sage
 
     class TextBox : public CellElement
     {
+        Shader sdfShader;
+
       public:
         enum class OverflowBehaviour
         {
