@@ -46,7 +46,7 @@ namespace sage
         onItemRemoved.publish();
     }
 
-    entt::entity InventoryComponent::GetItem(unsigned int row, unsigned int col)
+    entt::entity InventoryComponent::GetItem(unsigned int row, unsigned int col) const
     {
         return items[row][col];
     }
