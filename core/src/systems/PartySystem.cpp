@@ -3,18 +3,33 @@
 //
 
 #include "PartySystem.hpp"
+#include "components/PartyMemberComponent.hpp"
+#include <cassert>
 
 namespace sage
 {
 
-    void PartySystem::AddPartyMember(PartyMember member)
+    void PartySystem::AddMember(entt::entity member)
     {
         party.push_back(member);
     }
 
-    void PartySystem::RemovePartyMember(entt::entity entity)
+    void PartySystem::RemoveMember(entt::entity entity)
     {
-        // TODO
+        for (auto it = party.begin(); it != party.end(); ++it)
+        {
+            if (*it == entity)
+            {
+                party.erase(it);
+                return;
+            }
+        }
+    }
+
+    PartyMemberComponent PartySystem::GetMember(unsigned int memberNumber)
+    {
+        assert(memberNumber < party.size());
+        return registry->get<PartyMemberComponent>(party.at(memberNumber));
     }
 
     void PartySystem::SetLeader(entt::entity entity)

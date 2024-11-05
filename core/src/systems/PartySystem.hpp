@@ -11,27 +11,20 @@
 
 namespace sage
 {
-    enum class AssetID;
     class GameData;
-
-    struct PartyMember
-    {
-        const entt::entity entity;
-        entt::entity leader = entt::null;
-        AssetID portraitImage{};
-        explicit PartyMember(entt::entity _entity) : entity(_entity){};
-    };
+    struct PartyMemberComponent;
 
     class PartySystem
     {
         entt::registry* registry;
         GameData* gameData;
-        std::vector<PartyMember> party;
+        std::vector<entt::entity> party;
         entt::entity leader{};
 
       public:
-        void AddPartyMember(PartyMember member);
-        void RemovePartyMember(entt::entity entity);
+        void AddMember(entt::entity member);
+        void RemoveMember(entt::entity entity);
+        PartyMemberComponent GetMember(unsigned int memberNumber);
         void SetLeader(entt::entity entity);
         [[nodiscard]] entt::entity GetLeader() const;
         [[nodiscard]] unsigned int GetSize() const;

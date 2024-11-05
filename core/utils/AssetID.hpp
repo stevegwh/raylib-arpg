@@ -35,6 +35,11 @@ namespace sage
         IMG_NOISE45,
         IMG_NOISE53,
         IMG_RAINOFFIRE_CURSOR,
+        IMG_PORTRAIT_01,
+        IMG_PORTRAIT_02,
+        IMG_PORTRAIT_03,
+        IMG_PORTRAIT_04,
+        IMG_PORTRAIT_05,
         // Generated and set internally
         GEN_IMG_HEIGHTMAP,
         GEN_IMG_NORMALMAP,

@@ -15,6 +15,7 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 
+#include "components/PartyMemberComponent.hpp"
 #include "rlgl.h"
 #include <cassert>
 #include <sstream>
@@ -454,22 +455,17 @@ namespace sage
 
     void PartyMemberPortrait::RetrieveInfo()
     {
+        auto info = partySystem->GetMember(memberNumber);
+        tex = ResourceManager::GetInstance().TextureLoad(info.portraitImage);
     }
 
     void PartyMemberPortrait::ReceiveDrop(CellElement* droppedElement)
     {
     }
 
-    void PartyMemberPortrait::HoverUpdate()
-    {
-    }
-
-    void PartyMemberPortrait::Draw2D()
-    {
-    }
-
     void PartyMemberPortrait::OnClick()
     {
+        // Change selected actor here
     }
 
     PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine) : ImageBox(_engine){};
