@@ -278,14 +278,13 @@ namespace sage
 
     class PartyMemberPortrait : public ImageBox
     {
+        entt::registry* registry;
         PartySystem* partySystem{};
         unsigned int memberNumber{};
 
       public:
         void RetrieveInfo();
         void ReceiveDrop(CellElement* droppedElement) override;
-        void HoverUpdate() override;
-        void Draw2D() override;
         void OnClick() override;
         explicit PartyMemberPortrait(GameUIEngine* _engine);
         friend class TableCell;

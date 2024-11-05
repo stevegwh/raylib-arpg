@@ -5,6 +5,26 @@
         "key": "IMG_RAINOFFIRE_CURSOR",
         "value": "resources/textures/cursor/rainoffire_cursor.png"
       },
+	        {
+        "key": "IMG_PORTRAIT_01",
+        "value": "resources/textures/portraits/01.png"
+      },
+	  {
+        "key": "IMG_PORTRAIT_02",
+        "value": "resources/textures/portraits/02.png"
+      },
+	  {
+        "key": "IMG_PORTRAIT_03",
+        "value": "resources/textures/portraits/03.png"
+      },
+	  {
+        "key": "IMG_PORTRAIT_04",
+        "value": "resources/textures/portraits/04.png"
+      },
+	  {
+        "key": "IMG_PORTRAIT_05",
+        "value": "resources/textures/portraits/05.png"
+      },
       {
         "key": "IMG_NOISE45",
         "value": "resources/textures/luos/Noise_Gradients/T_Random_45.png"

@@ -92,9 +92,8 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto window =
-            engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
-        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 6, 20, WindowTableAlignment::STACK_VERTICAL);
+        window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({5, 2, 2, 2});
 
@@ -107,7 +106,7 @@ namespace sage
             auto cell = row->CreateTableCell();
             auto slot = cell->CreatePartyMemberPortrait(engine, partySystem, i);
             slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-            slot->SetVertAlignment(VertAlignment::MIDDLE);
+            slot->SetVertAlignment(VertAlignment::TOP);
             slot->SetHoriAlignment(HoriAlignment::CENTER);
         }
         return window;

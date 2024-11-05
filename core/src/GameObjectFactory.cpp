@@ -29,11 +29,13 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+#include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
+#include "components/PartyMemberComponent.hpp"
 #include "components/WeaponComponent.hpp"
 #include "raymath.h"
 
@@ -168,6 +170,12 @@ namespace sage
         // bug that, if I don't move before casting a move, the enemies don't register
         // that the player has a getFirstCollision box.
         entt::entity id = registry->create();
+
+        auto& partyComponent = registry->emplace<PartyMemberComponent>(id, id);
+        partyComponent.leader = entt::null;
+        partyComponent.portraitImage = AssetID::IMG_PORTRAIT_01;
+        data->partySystem->AddMember(id);
+        data->partySystem->SetLeader(id);
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
