@@ -311,10 +311,10 @@ namespace sage
     {
         entt::registry* registry{};
         ControllableActorSystem* controllableActorSystem{};
-        unsigned int row{};
-        unsigned int col{};
 
       public:
+        unsigned int row{};
+        unsigned int col{};
         void RetrieveInfo();
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
