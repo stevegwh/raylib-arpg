@@ -235,7 +235,7 @@ namespace sage
         }
 
         auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
-        data->controllableActorSystem->SetControlledActor(id);
+        data->controllableActorSystem->SetSelectedActor(id);
 
         data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onFloorClick, controllable.onFloorClick);

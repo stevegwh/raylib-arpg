@@ -71,10 +71,10 @@ namespace sage
         // actorMovementSystem->PathfindToLocation(id, patrol);
     }
 
-    void ControllableActorSystem::SetControlledActor(entt::entity id)
+    void ControllableActorSystem::SetSelectedActor(entt::entity id)
     {
-        onControlledActorChange.publish(id);
         selectedActorId = id;
+        onSelectedActorChange.publish(id);
     }
 
     entt::entity ControllableActorSystem::GetSelectedActor()
@@ -87,7 +87,7 @@ namespace sage
 
     {
 
-        entt::sink sink{onControlledActorChange};
+        entt::sink sink{onSelectedActorChange};
         sink.connect<&Cursor::OnControlledActorChange>(gameData->cursor.get());
     }
 } // namespace sage

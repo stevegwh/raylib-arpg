@@ -171,7 +171,7 @@ namespace sage
         }
 
         {
-            entt::sink sink{gameData->controllableActorSystem->onControlledActorChange};
+            entt::sink sink{gameData->controllableActorSystem->onSelectedActorChange};
             sink.connect<&PlayerAbilitySystem::onActorChanged>(this);
         }
         onActorChanged();

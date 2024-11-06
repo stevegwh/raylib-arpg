@@ -33,6 +33,7 @@
 #include "systems/TimerSystem.hpp"
 
 #include "components/Spawner.hpp"
+#include <components/PartyMemberComponent.hpp>
 #include <GameObjectFactory.hpp>
 
 namespace sage
@@ -111,7 +112,8 @@ namespace sage
         }
 
         GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
-        // registry->erase<Spawner>(view.begin(), view.end());
+        // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(0).entity);
+        //  registry->erase<Spawner>(view.begin(), view.end());
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
