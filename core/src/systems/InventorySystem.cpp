@@ -19,6 +19,7 @@ namespace sage
     {
         auto& inventoryComponent =
             registry->get<InventoryComponent>(gameData->controllableActorSystem->GetSelectedActor());
+
         if (inventoryComponent.AddItem(entity))
         {
             if (registry->any_of<Renderable>(entity))
