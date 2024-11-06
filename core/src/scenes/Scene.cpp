@@ -109,21 +109,23 @@ namespace sage
                 GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, "Goblin");
             }
         }
+
+        GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
         // registry->erase<Spawner>(view.begin(), view.end());
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
         // ResourceManager::GetInstance().UnloadShaderFileText();
-
+        const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 200}, 20, 40);
+        // TODO: Equipment UI and system
         auto* window2 = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {400, 200}, 20, 40);
         entt::sink sink{data->userInput->keyIPressed};
         sink.connect<[](Window& window) { window.hidden = !window.hidden; }>(*window);
         entt::sink sink2{data->userInput->keyCPressed};
         sink2.connect<[](Window& window2) { window2.hidden = !window2.hidden; }>(*window2);
 
-        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(
-            data->uiEngine.get(), data->partySystem.get(), data->controllableActorSystem.get());
+        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
     };
 
 } // namespace sage

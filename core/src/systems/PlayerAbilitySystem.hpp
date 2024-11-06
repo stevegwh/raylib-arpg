@@ -9,17 +9,15 @@
 namespace sage
 {
     class GameData;
-    static constexpr int MAX_ABILITY_NUMBER = 4;
 
     class PlayerAbilitySystem
     {
         entt::registry* registry;
         entt::entity controlledActor;
         GameData* gameData;
-        std::array<entt::entity, MAX_ABILITY_NUMBER> abilitySlots{};
-        void onActorChanged();
 
       public:
+        void onActorChanged();
         void PressAbility(unsigned int slotNumber) const;
         void AbilityOnePressed();
         void AbilityTwoPressed();
@@ -27,7 +25,7 @@ namespace sage
         void AbilityFourPressed();
         [[nodiscard]] Ability* GetAbility(unsigned int slotNumber) const;
         void SwapAbility(unsigned int slot1, unsigned int slot2);
-        void SetSlot(unsigned int slot, entt::entity abilityEntity);
+        void SetSlot(unsigned int slot, entt::entity abilityEntity) const;
         void Update();
         void Draw2D();
         void Draw3D();

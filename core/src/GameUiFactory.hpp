@@ -22,10 +22,8 @@ namespace sage
 
       public:
         static void CreateExampleWindow(GameUIEngine* engine);
-        [[nodiscard]] static Window* CreatePartyPortraitsColumn(
-            GameUIEngine* engine, PartySystem* partySystem, ControllableActorSystem* controllableActorSystem);
-        [[nodiscard]] static Window* CreateAbilityRow(
-            GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem);
+        [[nodiscard]] static Window* CreatePartyPortraitsColumn(GameUIEngine* engine);
+        [[nodiscard]] static Window* CreateAbilityRow(GameUIEngine* engine);
         [[nodiscard]] static Window* CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos);
         [[nodiscard]] static Window* CreateAbilityToolTip(
             GameUIEngine* engine, const Ability& ability, Vector2 pos);

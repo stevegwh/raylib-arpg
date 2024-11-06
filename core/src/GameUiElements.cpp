@@ -457,6 +457,7 @@ namespace sage
     {
         auto info = partySystem->GetMember(memberNumber);
         tex = ResourceManager::GetInstance().TextureLoad(info.portraitImage);
+        UpdateDimensions();
     }
 
     void PartyMemberPortrait::ReceiveDrop(CellElement* droppedElement)
@@ -465,7 +466,7 @@ namespace sage
 
     void PartyMemberPortrait::OnClick()
     {
-        // Change selected actor here
+        controllableActorSystem->SetControlledActor(partySystem->GetMember(memberNumber).entity);
     }
 
     PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine) : ImageBox(_engine){};
@@ -1241,41 +1242,62 @@ namespace sage
     }
 
     PartyMemberPortrait* TableCell::CreatePartyMemberPortrait(
-        GameUIEngine* engine, PartySystem* _partySystem, unsigned int _memberNumber)
+        GameUIEngine* engine,
+        PartySystem* _partySystem,
+        ControllableActorSystem* _controllableActorSystem,
+        unsigned int _memberNumber)
     {
         children = std::make_unique<PartyMemberPortrait>(engine);
         auto* portrait = dynamic_cast<PartyMemberPortrait*>(children.get());
         portrait->parent = this;
         portrait->partySystem = _partySystem;
+        portrait->controllableActorSystem = _controllableActorSystem;
         portrait->draggable = true;
         portrait->canReceiveDragDrops = true;
         portrait->memberNumber = _memberNumber;
         portrait->RetrieveInfo();
+        {
+            entt::sink sink{_controllableActorSystem->onControlledActorChange};
+            sink.connect<&PartyMemberPortrait::RetrieveInfo>(portrait);
+        }
         UpdateChildren();
         return portrait;
     }
 
     AbilitySlot* TableCell::CreateAbilitySlot(
-        GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, unsigned int _slotNumber)
+        GameUIEngine* engine,
+        PlayerAbilitySystem* _playerAbilitySystem,
+        ControllableActorSystem* _controllableActorSystem,
+        unsigned int _slotNumber)
     {
         children = std::make_unique<AbilitySlot>(engine);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
         abilitySlot->parent = this;
         abilitySlot->playerAbilitySystem = _playerAbilitySystem;
+        abilitySlot->controllableActorSystem = _controllableActorSystem;
         abilitySlot->draggable = true;
         abilitySlot->canReceiveDragDrops = true;
         abilitySlot->slotNumber = _slotNumber;
         abilitySlot->RetrieveInfo();
+        {
+            entt::sink sink{_controllableActorSystem->onControlledActorChange};
+            sink.connect<&AbilitySlot::RetrieveInfo>(abilitySlot);
+        }
         UpdateChildren();
         return abilitySlot;
     }
 
-    InventorySlot* TableCell::CreateInventorySlot(GameUIEngine* engine, unsigned int row, unsigned int col)
+    InventorySlot* TableCell::CreateInventorySlot(
+        GameUIEngine* engine,
+        ControllableActorSystem* _controllableActorSystem,
+        unsigned int row,
+        unsigned int col)
     {
         children = std::make_unique<InventorySlot>(engine);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
         slot->registry = engine->registry;
         slot->parent = this;
+        slot->controllableActorSystem = _controllableActorSystem;
         // slot->SetGrayscale();
         slot->draggable = true;
         slot->canReceiveDragDrops = true;
@@ -1283,6 +1305,10 @@ namespace sage
         slot->col = col;
         slot->RetrieveInfo();
         UpdateChildren();
+        {
+            entt::sink sink{_controllableActorSystem->onControlledActorChange};
+            sink.connect<&InventorySlot::RetrieveInfo>(slot);
+        }
         return slot;
     }
 

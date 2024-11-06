@@ -84,7 +84,5 @@ namespace sage
 
         // TODO: Have a better way of initialising the UI
         // GameUiFactory::CreateExampleWindow(data->uiEngine.get());
-        const auto abilityUi =
-            GameUiFactory::CreateAbilityRow(data->uiEngine.get(), data->playerAbilitySystem.get());
     }
 } // namespace sage

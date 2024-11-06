@@ -413,7 +413,7 @@ namespace sage
 
         for (auto& window : std::ranges::reverse_view(windows))
         {
-            if (window->hidden) continue;
+            if (!window || window->hidden) continue;
 
             if (!PointInsideRect(window->rec, mousePos) || !mouseInNonObscuredWindowRegion(window.get(), mousePos))
             {

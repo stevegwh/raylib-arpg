@@ -278,8 +278,8 @@ namespace sage
 
     class PartyMemberPortrait : public ImageBox
     {
-        entt::registry* registry;
         PartySystem* partySystem{};
+        ControllableActorSystem* controllableActorSystem{};
         unsigned int memberNumber{};
 
       public:
@@ -293,6 +293,7 @@ namespace sage
     class AbilitySlot : public ImageBox
     {
         PlayerAbilitySystem* playerAbilitySystem{};
+        ControllableActorSystem* controllableActorSystem{};
         unsigned int slotNumber{};
 
       public:
@@ -308,6 +309,7 @@ namespace sage
     class InventorySlot : public ImageBox
     {
         entt::registry* registry{};
+        ControllableActorSystem* controllableActorSystem{};
         unsigned int row{};
         unsigned int col{};
 
@@ -343,10 +345,20 @@ namespace sage
         ImageBox* CreateImagebox(GameUIEngine* engine, Texture _tex);
         CloseButton* CreateCloseButton(GameUIEngine* engine, Texture _tex);
         PartyMemberPortrait* CreatePartyMemberPortrait(
-            GameUIEngine* engine, PartySystem* _partySystem, unsigned int _memberNumber);
+            GameUIEngine* engine,
+            PartySystem* _partySystem,
+            ControllableActorSystem* _controllableActorSystem,
+            unsigned int _memberNumber);
         AbilitySlot* CreateAbilitySlot(
-            GameUIEngine* engine, PlayerAbilitySystem* _playerAbilitySystem, unsigned int _slotNumber);
-        InventorySlot* CreateInventorySlot(GameUIEngine* engine, unsigned int row, unsigned int col);
+            GameUIEngine* engine,
+            PlayerAbilitySystem* _playerAbilitySystem,
+            ControllableActorSystem* _controllableActorSystem,
+            unsigned int _slotNumber);
+        InventorySlot* CreateInventorySlot(
+            GameUIEngine* engine,
+            ControllableActorSystem* _controllableActorSystem,
+            unsigned int row,
+            unsigned int col);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;

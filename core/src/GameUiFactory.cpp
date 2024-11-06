@@ -87,8 +87,7 @@ namespace sage
         cell5->CreateTextbox(engine, "This is an example of shrinking!", 42);
     }
 
-    Window* GameUiFactory::CreatePartyPortraitsColumn(
-        GameUIEngine* engine, PartySystem* partySystem, ControllableActorSystem* controllableActorSystem)
+    Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
@@ -99,12 +98,13 @@ namespace sage
 
         auto table = window->CreateTable();
 
-        auto partySize = partySystem->GetSize();
+        auto partySize = engine->gameData->partySystem->GetSize();
         for (unsigned int i = 0; i < partySize; ++i)
         {
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
-            auto slot = cell->CreatePartyMemberPortrait(engine, partySystem, i);
+            auto slot = cell->CreatePartyMemberPortrait(
+                engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
             slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
             slot->SetVertAlignment(VertAlignment::TOP);
             slot->SetHoriAlignment(HoriAlignment::CENTER);
@@ -112,7 +112,7 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine, PlayerAbilitySystem* playerAbilitySystem)
+    Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
@@ -126,16 +126,32 @@ namespace sage
 
         auto row = table->CreateTableRow();
         auto cell = row->CreateTableCell();
-        auto slot = cell->CreateAbilitySlot(engine, playerAbilitySystem, 0);
+        auto slot = cell->CreateAbilitySlot(
+            engine,
+            engine->gameData->playerAbilitySystem.get(),
+            engine->gameData->controllableActorSystem.get(),
+            0);
         // cell->SetPaddingPercent({2, 2, 2, 2});
         auto cell1 = row->CreateTableCell();
-        auto slot1 = cell1->CreateAbilitySlot(engine, playerAbilitySystem, 1);
+        auto slot1 = cell1->CreateAbilitySlot(
+            engine,
+            engine->gameData->playerAbilitySystem.get(),
+            engine->gameData->controllableActorSystem.get(),
+            1);
         // cell1->SetPaddingPercent({2, 2, 2, 2});
         auto cell2 = row->CreateTableCell();
-        auto slot2 = cell2->CreateAbilitySlot(engine, playerAbilitySystem, 2);
+        auto slot2 = cell2->CreateAbilitySlot(
+            engine,
+            engine->gameData->playerAbilitySystem.get(),
+            engine->gameData->controllableActorSystem.get(),
+            2);
         // cell2->SetPaddingPercent({2, 2, 2, 2});
         auto cell3 = row->CreateTableCell();
-        auto slot3 = cell3->CreateAbilitySlot(engine, playerAbilitySystem, 3);
+        auto slot3 = cell3->CreateAbilitySlot(
+            engine,
+            engine->gameData->playerAbilitySystem.get(),
+            engine->gameData->controllableActorSystem.get(),
+            3);
         // cell3->SetPaddingPercent({2, 2, 2, 2});
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
@@ -249,7 +265,8 @@ namespace sage
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
                     auto& cell = table->children[row]->children[col];
-                    auto invSlot = cell->CreateInventorySlot(engine, row, col);
+                    auto invSlot = cell->CreateInventorySlot(
+                        engine, engine->gameData->controllableActorSystem.get(), row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                     onItemAddedSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
                     onItemRemovedSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
