@@ -10,7 +10,7 @@
 
 namespace sage
 {
-
+    static constexpr int MAX_ABILITY_NUMBER = 4;
     enum class CombatableActorType
     {
         PLAYER,
@@ -38,6 +38,8 @@ namespace sage
     {
 
       public:
+        // Abilities are stored how they appear in the UI
+        std::array<entt::entity, MAX_ABILITY_NUMBER> abilities{};
         CombatData data;
         CombatableActorType actorType = CombatableActorType::WAVEMOB;
         bool dying = false;
@@ -53,6 +55,13 @@ namespace sage
 
         CombatableActor(const CombatableActor&) = delete;
         CombatableActor& operator=(const CombatableActor&) = delete;
-        CombatableActor() = default;
+        CombatableActor()
+        {
+            for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)
+            {
+                abilities[i] = entt::null;
+                // TODO: Not sure if this is necessary.
+            }
+        }
     };
 } // namespace sage
