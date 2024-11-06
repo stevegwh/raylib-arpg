@@ -462,6 +462,21 @@ namespace sage
 
     void PartyMemberPortrait::ReceiveDrop(CellElement* droppedElement)
     {
+        if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
+        {
+            auto& inventory =
+                engine->registry->get<InventoryComponent>(partySystem->GetMember(memberNumber).entity);
+            if (const auto& itemId = inventory.GetItem(dropped->row, dropped->col); inventory.AddItem(itemId))
+            {
+                auto& droppedInv =
+                    engine->registry->get<InventoryComponent>(controllableActorSystem->GetSelectedActor());
+                droppedInv.RemoveItem(dropped->row, dropped->col);
+            }
+            else
+            {
+                // inventory full
+            }
+        }
     }
 
     void PartyMemberPortrait::OnClick()
@@ -555,7 +570,6 @@ namespace sage
 
     void InventorySlot::RetrieveInfo()
     {
-        // TODO: Bug: Retrieve info isn't consistently being called when an item is being picked up?
         auto& inventory =
             registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
         auto itemId = inventory.GetItem(row, col);
