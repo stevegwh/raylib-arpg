@@ -466,7 +466,16 @@ namespace sage
 
     void PartyMemberPortrait::OnClick()
     {
-        controllableActorSystem->SetControlledActor(partySystem->GetMember(memberNumber).entity);
+        controllableActorSystem->SetSelectedActor(partySystem->GetMember(memberNumber).entity);
+    }
+
+    void PartyMemberPortrait::Draw2D()
+    {
+        if (controllableActorSystem->GetSelectedActor() == partySystem->GetMember(memberNumber).entity)
+        {
+            SetGrayscale();
+        }
+        ImageBox::Draw2D();
     }
 
     PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine) : ImageBox(_engine){};
@@ -1257,7 +1266,7 @@ namespace sage
         portrait->memberNumber = _memberNumber;
         portrait->RetrieveInfo();
         {
-            entt::sink sink{_controllableActorSystem->onControlledActorChange};
+            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
             sink.connect<&PartyMemberPortrait::RetrieveInfo>(portrait);
         }
         UpdateChildren();
@@ -1280,7 +1289,7 @@ namespace sage
         abilitySlot->slotNumber = _slotNumber;
         abilitySlot->RetrieveInfo();
         {
-            entt::sink sink{_controllableActorSystem->onControlledActorChange};
+            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
             sink.connect<&AbilitySlot::RetrieveInfo>(abilitySlot);
         }
         UpdateChildren();
@@ -1306,7 +1315,7 @@ namespace sage
         slot->RetrieveInfo();
         UpdateChildren();
         {
-            entt::sink sink{_controllableActorSystem->onControlledActorChange};
+            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
             sink.connect<&InventorySlot::RetrieveInfo>(slot);
         }
         return slot;

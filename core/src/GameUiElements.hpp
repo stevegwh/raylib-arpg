@@ -286,6 +286,7 @@ namespace sage
         void RetrieveInfo();
         void ReceiveDrop(CellElement* droppedElement) override;
         void OnClick() override;
+        void Draw2D() override;
         explicit PartyMemberPortrait(GameUIEngine* _engine);
         friend class TableCell;
     };

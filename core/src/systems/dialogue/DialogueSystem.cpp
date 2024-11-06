@@ -133,7 +133,7 @@ namespace sage
           window(std::make_unique<DialogueWindow>(gameData->settings))
     {
         {
-            entt::sink sink{gameData->controllableActorSystem->onControlledActorChange};
+            entt::sink sink{gameData->controllableActorSystem->onSelectedActorChange};
             sink.connect<&DialogueSystem::changeControlledActor>(this);
             controlledActor = gameData->controllableActorSystem->GetSelectedActor();
         }
