@@ -82,6 +82,18 @@
         "value": "resources/textures/cursor/32/regular.png"
       },
       {
+        "key": "IMG_ABILITY_RAINOFFIRE",
+        "value": "resources/icons/abilities/rain_of_fire.png"
+      },
+            {
+        "key": "IMG_ABILITY_WHIRLWIND",
+        "value": "resources/icons/abilities/whirlwind.png"
+      },
+            {
+        "key": "IMG_ABILITY_LIGHTINGBALL",
+        "value": "resources/icons/abilities/lightning_ball.png"
+      },
+      {
         "key": "IMG_ICON_WEAPON_DAGGER01",
         "value": "resources/icons/items/weapons/dagger.png"
       },

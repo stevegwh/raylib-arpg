@@ -13,11 +13,9 @@ namespace sage
     class PlayerAbilitySystem
     {
         entt::registry* registry;
-        entt::entity controlledActor;
         GameData* gameData;
 
       public:
-        void onActorChanged();
         void PressAbility(unsigned int slotNumber) const;
         void AbilityOnePressed();
         void AbilityTwoPressed();

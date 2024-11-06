@@ -285,9 +285,6 @@ namespace sage
         weaponTrans.SetLocalPos(Vector3Zero());
 
         // Initialise starting abilities
-        // TODO: Currently the below is dependent on this current player being the "controlledActor". Really, this
-        // process should just init the CombatData.abilities array directly.
-        data->playerAbilitySystem->onActorChanged();
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
         data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
         data->playerAbilitySystem->SetSlot(
