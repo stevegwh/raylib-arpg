@@ -555,6 +555,7 @@ namespace sage
 
     void InventorySlot::RetrieveInfo()
     {
+        // TODO: Bug: Retrieve info isn't consistently being called when an item is being picked up?
         auto& inventory =
             registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
         auto itemId = inventory.GetItem(row, col);
