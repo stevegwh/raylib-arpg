@@ -484,7 +484,7 @@ namespace sage
     {
         if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
         {
-            tex = LoadTexture(ability->iconPath.c_str()); // TODO: Replace with resource manager and asset id
+            tex = ResourceManager::GetInstance().TextureLoad(ability->icon);
             stateLocked = false;
         }
         else

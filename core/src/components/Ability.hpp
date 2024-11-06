@@ -20,7 +20,8 @@ namespace sage
 
         std::string name;
         std::string description;
-        std::string iconPath; // TODO: Replace with AssetID
+        AssetID icon{};
+        std::string iconPath; // Use AssetID where possible
 
         std::unique_ptr<VisualFX> vfx;
         // TODO: VFX should have before, during and after.
