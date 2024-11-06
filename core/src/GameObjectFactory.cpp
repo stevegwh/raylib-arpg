@@ -171,12 +171,6 @@ namespace sage
         // that the player has a getFirstCollision box.
         entt::entity id = registry->create();
 
-        auto& partyComponent = registry->emplace<PartyMemberComponent>(id, id);
-        partyComponent.leader = entt::null;
-        partyComponent.portraitImage = AssetID::IMG_PORTRAIT_01;
-        data->partySystem->AddMember(id);
-        data->partySystem->SetLeader(id);
-
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
@@ -243,6 +237,12 @@ namespace sage
             id, data->cursor->onEnemyLeftClick, controllable.onEnemyLeftClick);
         data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onEnemyRightClick, controllable.onEnemyRightClick);
+
+        auto& partyComponent = registry->emplace<PartyMemberComponent>(id, id);
+        partyComponent.leader = entt::null;
+        partyComponent.portraitImage = AssetID::IMG_PORTRAIT_01;
+        data->partySystem->AddMember(id);
+        data->partySystem->SetLeader(id);
 
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);

@@ -46,8 +46,6 @@ namespace sage
         bool hideCursor = false;
         bool enabled = true;
 
-        entt::entity controlledActor;
-
         void getMouseRayCollision();
         void onMouseLeftClick() const;
         void onMouseRightClick() const;
@@ -76,14 +74,13 @@ namespace sage
         void DrawDebug();
         void Draw3D();
         void Draw2D();
-        void OnControlledActorChange(entt::entity entity);
         void DisableContextSwitching();
         void EnableContextSwitching();
         void Enable();
         void Disable();
         void Hide();
         void Show();
-        bool isValidMove() const;
+        [[nodiscard]] bool isValidMove() const;
 
         Cursor(entt::registry* registry, GameData* _gameData);
     };
