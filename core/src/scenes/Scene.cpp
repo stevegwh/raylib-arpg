@@ -112,7 +112,9 @@ namespace sage
         }
 
         GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
-        // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(0).entity);
+        GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
+        // TODO: When I change below, the inventory updates correctly for picking up items for that char (but not
+        // the others) data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);
         //  registry->erase<Spawner>(view.begin(), view.end());
 
         // Clear any CPU resources that are no longer needed

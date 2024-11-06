@@ -24,7 +24,7 @@ namespace sage
 {
     void DialogueSystem::changeControlledActor(entt::entity entity)
     {
-        controlledActor = entity;
+        selectedActor = entity;
     }
 
     void DialogueSystem::startConversation(entt::entity entity)
@@ -36,7 +36,7 @@ namespace sage
         registry->get<Animation>(clickedNPC).ChangeAnimation(1); // TODO: Change to an enum
 
         // Rotate to look at NPC
-        auto& actorTrans = registry->get<sgTransform>(controlledActor);
+        auto& actorTrans = registry->get<sgTransform>(selectedActor);
         auto& npcTrans = registry->get<sgTransform>(clickedNPC);
         Vector3 direction = Vector3Subtract(npcTrans.GetWorldPos(), actorTrans.GetWorldPos());
         direction = Vector3Normalize(direction);
@@ -59,7 +59,7 @@ namespace sage
         active = true;
 
         {
-            auto& moveableActor = registry->get<MoveableActor>(controlledActor);
+            auto& moveableActor = registry->get<MoveableActor>(selectedActor);
             entt::sink sink{moveableActor.onFinishMovement};
             sink.disconnect<&DialogueSystem::startConversation>(this);
             entt::sink sink2{moveableActor.onMovementCancel};
@@ -90,7 +90,7 @@ namespace sage
 
     void DialogueSystem::cancelConversation(entt::entity entity)
     {
-        auto& moveableActor = registry->get<MoveableActor>(controlledActor);
+        auto& moveableActor = registry->get<MoveableActor>(selectedActor);
         entt::sink sink{moveableActor.onFinishMovement};
         sink.disconnect<&DialogueSystem::startConversation>(this);
         entt::sink sink2{moveableActor.onMovementCancel};
@@ -103,11 +103,11 @@ namespace sage
         if (clickedNPC != entt::null) return;
         clickedNPC = _clickedNPC;
         const auto& npc = registry->get<Dialogue>(_clickedNPC);
-        const auto& actorCol = registry->get<Collideable>(controlledActor);
+        const auto& actorCol = registry->get<Collideable>(selectedActor);
         const auto& npcCol = registry->get<Collideable>(_clickedNPC);
-        gameData->controllableActorSystem->PathfindToLocation(controlledActor, npc.conversationPos);
+        gameData->controllableActorSystem->PathfindToLocation(selectedActor, npc.conversationPos);
         {
-            auto& moveableActor = registry->get<MoveableActor>(controlledActor);
+            auto& moveableActor = registry->get<MoveableActor>(selectedActor);
             entt::sink sink{moveableActor.onFinishMovement};
             sink.connect<&DialogueSystem::startConversation>(this);
             entt::sink sink2{moveableActor.onMovementCancel};
@@ -135,7 +135,7 @@ namespace sage
         {
             entt::sink sink{gameData->controllableActorSystem->onSelectedActorChange};
             sink.connect<&DialogueSystem::changeControlledActor>(this);
-            controlledActor = gameData->controllableActorSystem->GetSelectedActor();
+            selectedActor = gameData->controllableActorSystem->GetSelectedActor();
         }
         {
             entt::sink sink{gameData->cursor->onNPCClick};

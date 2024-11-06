@@ -16,7 +16,7 @@ namespace sage
     {
         GameData* gameData;
         bool active = false;
-        entt::entity controlledActor;
+        entt::entity selectedActor;
         entt::entity clickedNPC;
 
         Vector3 oldCamPos;

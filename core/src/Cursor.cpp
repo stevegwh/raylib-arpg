@@ -13,6 +13,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "systems/CollisionSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
 #include <algorithm>
@@ -124,11 +125,12 @@ namespace sage
         auto mouseHit = m_naviHitInfo.rlCollision.point;
         if (gameData->navigationGridSystem->CheckWithinGridBounds(mouseHit))
         {
-            const auto& actor = registry->get<MoveableActor>(controlledActor);
+            const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+            const auto& actor = registry->get<MoveableActor>(selectedActor);
             GridSquare minRange{};
             GridSquare maxRange{};
             gameData->navigationGridSystem->GetPathfindRange(
-                controlledActor, actor.pathfindingBounds, minRange, maxRange);
+                selectedActor, actor.pathfindingBounds, minRange, maxRange);
 
             if (!gameData->navigationGridSystem->CheckWithinBounds(mouseHit, minRange, maxRange))
             {
@@ -293,11 +295,6 @@ namespace sage
             }
         }
         return false;
-    }
-
-    void Cursor::OnControlledActorChange(entt::entity entity)
-    {
-        controlledActor = entity;
     }
 
     const CollisionInfo& Cursor::getMouseHitInfo() const

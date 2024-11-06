@@ -17,10 +17,10 @@ namespace sage
         auto view = registry->view<ControllableActor>();
         for (auto& entity : view)
         {
-            auto& controlledActor = registry->get<ControllableActor>(entity);
-            if (controlledActor.targetActor != entt::null)
+            auto& selectedActor = registry->get<ControllableActor>(entity);
+            if (selectedActor.targetActor != entt::null)
             {
-                controlledActor.checkTargetPosTimer.Update(GetFrameTime());
+                selectedActor.checkTargetPosTimer.Update(GetFrameTime());
             }
         }
     }
@@ -32,10 +32,10 @@ namespace sage
 
     void ControllableActorSystem::onTargetUpdate(entt::entity target)
     {
-        auto& controlledActor = registry->get<ControllableActor>(selectedActorId);
-        if (controlledActor.checkTargetPosTimer.HasFinished())
+        auto& selectedActor = registry->get<ControllableActor>(selectedActorId);
+        if (selectedActor.checkTargetPosTimer.HasFinished())
         {
-            controlledActor.checkTargetPosTimer.Restart();
+            selectedActor.checkTargetPosTimer.Restart();
             auto& targetTrans = registry->get<sgTransform>(target);
             PathfindToLocation(selectedActorId, targetTrans.GetWorldPos());
         }
@@ -43,10 +43,10 @@ namespace sage
 
     void ControllableActorSystem::CancelMovement(entt::entity entity)
     {
-        auto& controlledActor = registry->get<ControllableActor>(entity);
-        if (controlledActor.targetActor != entt::null && registry->valid(controlledActor.targetActor))
+        auto& selectedActor = registry->get<ControllableActor>(entity);
+        if (selectedActor.targetActor != entt::null && registry->valid(selectedActor.targetActor))
         {
-            auto& target = registry->get<sgTransform>(controlledActor.targetActor);
+            auto& target = registry->get<sgTransform>(selectedActor.targetActor);
             {
                 entt::sink sink{target.onPositionUpdate};
                 sink.disconnect<&ControllableActorSystem::onTargetUpdate>(this);
@@ -86,8 +86,5 @@ namespace sage
         : BaseSystem(_registry), gameData(_gameData)
 
     {
-
-        entt::sink sink{onSelectedActorChange};
-        sink.connect<&Cursor::OnControlledActorChange>(gameData->cursor.get());
     }
 } // namespace sage

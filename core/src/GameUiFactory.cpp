@@ -11,7 +11,7 @@
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/PartySystem.hpp"
+#include "systems/InventorySystem.hpp"
 
 namespace sage
 {
@@ -91,15 +91,16 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 6, 20, WindowTableAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 6, 30, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({5, 2, 2, 2});
+        window->SetPaddingPercent({5, 5, 2, 2});
 
         auto table = window->CreateTable();
 
         auto partySize = engine->gameData->partySystem->GetSize();
-        for (unsigned int i = 0; i < partySize; ++i)
+
+        for (int i = partySize - 1; i >= 0; --i)
         {
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
@@ -236,14 +237,12 @@ namespace sage
         // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
         // InventoryComponent
 
-        entt::sink onItemAddedSink{inventory.onItemAdded};
-        entt::sink onItemRemovedSink{inventory.onItemRemoved};
-        entt::sink onInvfullSink{inventory.onInventoryFull};
-
         auto window =
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({2, 2, 4, 4});
+
+        entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
 
         {
             auto table = window->CreateTable(4);
@@ -268,8 +267,7 @@ namespace sage
                     auto invSlot = cell->CreateInventorySlot(
                         engine, engine->gameData->controllableActorSystem.get(), row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                    onItemAddedSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
-                    onItemRemovedSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
+                    inventoryUpdateSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
                 }
             }
         }
