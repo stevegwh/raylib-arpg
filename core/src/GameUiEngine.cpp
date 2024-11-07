@@ -165,20 +165,50 @@ namespace sage
 
     void GameUIEngine::pruneWindows()
     {
-        std::vector<unsigned int> toRemove;
-        for (unsigned int i = 0; i < windows.size(); ++i)
         {
-            auto& window = windows[i];
-            if (window->markForRemoval)
+            std::vector<unsigned int> toRemove;
+            for (unsigned int i = 0; i < windows.size(); ++i)
             {
-                toRemove.push_back(i);
+                auto& window = windows[i];
+                if (window->markForRemoval)
+                {
+                    toRemove.push_back(i);
+                }
+            }
+
+            for (auto& i : toRemove)
+            {
+                windows.erase(windows.begin() + i);
             }
         }
 
-        for (auto& i : toRemove)
         {
-            windows.erase(windows.begin() + i);
+            std::vector<unsigned int> toRemove;
+            for (unsigned int i = 0; i < tooltips.size(); ++i)
+            {
+                auto& window = tooltips[i];
+                if (window->markForRemoval)
+                {
+                    toRemove.push_back(i);
+                }
+            }
+
+            for (auto& i : toRemove)
+            {
+                tooltips.erase(tooltips.begin() + i);
+            }
         }
+    }
+
+    Window* GameUIEngine::CreateTooltipWindow(
+        Texture _nPatchTexture,
+        float x,
+        float y,
+        float _widthPercent,
+        float _heightPercent,
+        WindowTableAlignment _alignment)
+    {
+        return CreateWindow(_nPatchTexture, x, y, _widthPercent, _heightPercent, _alignment, true);
     }
 
     Window* GameUIEngine::CreateWindow(
@@ -187,10 +217,12 @@ namespace sage
         float y,
         float _widthPercent,
         float _heightPercent,
-        WindowTableAlignment _alignment)
+        WindowTableAlignment _alignment,
+        bool tooltip)
     {
-        windows.push_back(std::make_unique<Window>());
-        const auto& window = windows.back();
+        std::vector<std::unique_ptr<Window>>& windowVec = tooltip ? tooltips : windows;
+        windowVec.push_back(std::make_unique<Window>());
+        const auto& window = windowVec.back();
         window->SetPosition(x, y);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
@@ -352,6 +384,11 @@ namespace sage
         for (const auto& window : windows)
         {
             if (window->hidden) continue;
+            window->Draw2D();
+        }
+
+        for (const auto& window : tooltips)
+        {
             window->Draw2D();
         }
 

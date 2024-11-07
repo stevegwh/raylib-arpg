@@ -87,6 +87,7 @@ namespace sage
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
+        std::vector<std::unique_ptr<Window>> tooltips;
         std::optional<CellElement*> draggedObject;
         std::optional<CellElement*> hoveredDraggableCellElement;
 
@@ -99,13 +100,21 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
-        Window* CreateWindow(
+        Window* CreateTooltipWindow(
             Texture _nPatchTexture,
             float x,
             float y,
             float _widthPercent,
             float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
+        Window* CreateWindow(
+            Texture _nPatchTexture,
+            float x,
+            float y,
+            float _widthPercent,
+            float _heightPercent,
+            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL,
+            bool tooltip = false);
 
         WindowDocked* CreateWindowDocked(
             Texture _nPatchTexture,
