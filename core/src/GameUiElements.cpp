@@ -465,13 +465,14 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto& inventory =
-                engine->registry->get<InventoryComponent>(partySystem->GetMember(memberNumber).entity);
-            if (const auto& itemId = inventory.GetItem(dropped->row, dropped->col); inventory.AddItem(itemId))
+            auto receiver = partySystem->GetMember(memberNumber).entity;
+            auto sender = controllableActorSystem->GetSelectedActor();
+            if (receiver == sender) return;
+            auto& receiverInv = engine->registry->get<InventoryComponent>(receiver);
+            auto& senderInv = engine->registry->get<InventoryComponent>(sender);
+            if (const auto& itemId = senderInv.GetItem(dropped->row, dropped->col); receiverInv.AddItem(itemId))
             {
-                auto& droppedInv =
-                    engine->registry->get<InventoryComponent>(controllableActorSystem->GetSelectedActor());
-                droppedInv.RemoveItem(dropped->row, dropped->col);
+                senderInv.RemoveItem(dropped->row, dropped->col);
             }
             else
             {
