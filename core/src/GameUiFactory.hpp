@@ -16,6 +16,7 @@ namespace sage
     class Window;
     class GameUIEngine;
     class PlayerAbilitySystem;
+    struct CombatableActor;
 
     class GameUiFactory
     {
@@ -24,6 +25,8 @@ namespace sage
         static void CreateExampleWindow(GameUIEngine* engine);
         [[nodiscard]] static Window* CreatePartyPortraitsColumn(GameUIEngine* engine);
         [[nodiscard]] static Window* CreateAbilityRow(GameUIEngine* engine);
+        [[nodiscard]] static Window* CreateCombatableTooltip(
+            GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos);
         [[nodiscard]] static Window* CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos);
         [[nodiscard]] static Window* CreateAbilityToolTip(
             GameUIEngine* engine, const Ability& ability, Vector2 pos);

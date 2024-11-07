@@ -5,6 +5,7 @@
 #include "GameUiFactory.hpp"
 
 #include "components/Ability.hpp"
+#include "components/CombatableActor.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "GameData.hpp"
@@ -12,6 +13,8 @@
 #include "ResourceManager.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/InventorySystem.hpp"
+#include <format>
+#include <sstream>
 
 namespace sage
 {
@@ -171,6 +174,35 @@ namespace sage
         slot1->SetHoriAlignment(HoriAlignment::CENTER);
         slot2->SetHoriAlignment(HoriAlignment::CENTER);
         slot3->SetHoriAlignment(HoriAlignment::CENTER);
+
+        return window;
+    }
+
+    Window* GameUiFactory::CreateCombatableTooltip(
+        GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        auto* window =
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({10, 2, 5, 5});
+
+        {
+            auto table = window->CreateTable();
+            auto row0 = table->CreateTableRow(10);
+            auto cell0 = row0->CreateTableCell();
+            auto textbox = cell0->CreateTextbox(engine, name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+            auto row = table->CreateTableRow();
+            row->SetPaddingPercent({10, 0, 0, 0});
+            auto cell = row->CreateTableCell();
+            cell->CreateTextbox(
+                engine,
+                std::format("HP: {}/{}", combatInfo.data.hp, combatInfo.data.maxHp),
+                10,
+                TextBox::OverflowBehaviour::WORD_WRAP);
+        }
 
         return window;
     }

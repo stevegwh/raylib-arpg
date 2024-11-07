@@ -9,15 +9,18 @@
 #include "raylib.h"
 #include <entt/entt.hpp>
 
+#include <optional>
+
 namespace sage
 {
-    class GameData;
-    enum class CursorState
+    struct HoverInfo
     {
-        DEFAULT,
-        NPC_HOVER,
-        BUILDING_HOVER
+        entt::entity target = entt::null;
+        double beginHoverTime = 0.0;
+        const float hoverTimeThreshold = 0.25f;
     };
+
+    class GameData;
 
     class Cursor
     {
@@ -27,6 +30,7 @@ namespace sage
 
         CollisionInfo m_mouseHitInfo{};
         CollisionInfo m_naviHitInfo{};
+        std::optional<HoverInfo> m_hoverInfo{};
 
         Texture2D* currentTex;
         Texture2D regulartex{};
@@ -47,6 +51,8 @@ namespace sage
         bool enabled = true;
 
         void getMouseRayCollision();
+        void checkMouseHover();
+        void onMouseHover() const;
         void onMouseLeftClick() const;
         void onMouseRightClick() const;
         void onMouseLeftDown();
@@ -69,6 +75,10 @@ namespace sage
         entt::sigh<void(entt::entity entity)> onAnyRightClick{};
         entt::sigh<void(entt::entity)> onEnemyLeftClick{};
         entt::sigh<void(entt::entity)> onEnemyRightClick{};
+
+        entt::sigh<void(entt::entity entity)> onCombatableHover{};
+        entt::sigh<void(entt::entity entity)> onNPCHover{};
+        entt::sigh<void(entt::entity entity)> onItemHover{};
 
         void Update();
         void DrawDebug();
