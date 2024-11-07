@@ -95,7 +95,7 @@ namespace sage
         friend class ResourceManager;
         friend class TextureTerrainOverlay;
     };
-
+    bool PointInsideRect(Rectangle rec, Vector2 point);
     Vector2 Vec3ToVec2(const Vector3& vec3);
     Vector3 NegateVector(const Vector3& vec3);
     Vector3 Vector3MultiplyByValue(const Vector3& vec3, float value);
