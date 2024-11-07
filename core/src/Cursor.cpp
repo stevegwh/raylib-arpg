@@ -7,11 +7,13 @@
 #include "GameData.hpp"
 
 #include "Camera.hpp"
-#include "components/ControllableActor.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/ItemComponent.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
+#include "GameUiFactory.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
@@ -26,6 +28,51 @@
 
 namespace sage
 {
+    void Cursor::checkMouseHover()
+    {
+        const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+        if ((layer != CollisionLayer::NPC && layer != CollisionLayer::ENEMY && layer != CollisionLayer::ITEM) ||
+            !m_mouseHitInfo.rlCollision.hit)
+        {
+            m_hoverInfo.reset();
+            return;
+        }
+        if (!m_hoverInfo.has_value() || m_mouseHitInfo.collidedEntityId != m_hoverInfo->target)
+        {
+            HoverInfo newInfo;
+            newInfo.target = m_mouseHitInfo.collidedEntityId;
+            newInfo.beginHoverTime = GetTime();
+            m_hoverInfo.emplace(newInfo);
+        }
+    }
+
+    void Cursor::onMouseHover() const
+    {
+        if (!enabled) return;
+
+        const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+        if (layer == CollisionLayer::NPC)
+        {
+            onNPCHover.publish(m_mouseHitInfo.collidedEntityId);
+        }
+        else if (layer == CollisionLayer::ITEM)
+        {
+            onItemHover.publish(m_mouseHitInfo.collidedEntityId);
+            auto& item = registry->get<ItemComponent>(m_mouseHitInfo.collidedEntityId);
+            Vector2 pos = GetWorldToScreen(m_mouseHitInfo.rlCollision.point, *gameData->camera->getRaylibCam());
+            GameUiFactory::CreateItemTooltip(gameData->uiEngine.get(), item, pos);
+        }
+        else if (layer == CollisionLayer::ENEMY || layer == CollisionLayer::PLAYER)
+        {
+            onCombatableHover.publish(m_mouseHitInfo.collidedEntityId);
+            auto& renderable = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId);
+            auto& combatable = registry->get<CombatableActor>(m_mouseHitInfo.collidedEntityId);
+            Vector2 pos = GetWorldToScreen(m_mouseHitInfo.rlCollision.point, *gameData->camera->getRaylibCam());
+            // Create a name tooltip
+            GameUiFactory::CreateCombatableTooltip(gameData->uiEngine.get(), renderable.name, combatable, pos);
+        }
+    }
+
     void Cursor::onMouseLeftClick() const
     {
         if (!enabled) return;
@@ -315,6 +362,7 @@ namespace sage
     void Cursor::Update()
     {
         getMouseRayCollision();
+        checkMouseHover();
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             onMouseLeftClick();
@@ -331,6 +379,12 @@ namespace sage
         else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         {
             onMouseRightDown();
+        }
+        else if (
+            m_hoverInfo.has_value() &&
+            GetTime() >= m_hoverInfo.value().beginHoverTime + m_hoverInfo.value().hoverTimeThreshold)
+        {
+            onMouseHover();
         }
     }
 
