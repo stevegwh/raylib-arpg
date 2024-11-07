@@ -181,7 +181,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto* window =
-            engine->CreateWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({10, 2, 5, 5});
 
@@ -205,7 +205,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto* window =
-            engine->CreateWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({10, 2, 5, 5});
 
