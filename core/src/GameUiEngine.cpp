@@ -362,9 +362,10 @@ namespace sage
 
     void GameUIEngine::BringClickedWindowToFront(Window* clicked)
     {
-        const auto it = std::find_if(windows.begin(), windows.end(), [clicked](const std::unique_ptr<Window>& ptr) {
-            return ptr.get() == clicked;
-        });
+        const auto it =
+            std::find_if(windows.begin(), windows.end(), [clicked](const std::unique_ptr<Window>& ptr) {
+                return ptr.get() == clicked;
+            });
         std::rotate(it, it + 1, windows.end());
     }
 

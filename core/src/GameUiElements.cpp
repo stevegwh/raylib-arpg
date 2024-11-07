@@ -17,7 +17,9 @@
 #include "systems/PlayerAbilitySystem.hpp"
 
 #include "components/PartyMemberComponent.hpp"
+#include "components/sgTransform.hpp"
 #include "rlgl.h"
+
 #include <cassert>
 #include <sstream>
 
@@ -603,6 +605,7 @@ namespace sage
         }
         else
         {
+            // TODO: Dropping an item should have a range
             auto* inventoryWindow = parent->GetWindow();
             if (!PointInsideRect(inventoryWindow->rec, GetMousePosition()))
             {
@@ -610,10 +613,17 @@ namespace sage
                     engine->gameData->controllableActorSystem->GetSelectedActor());
                 auto itemId = inventory.GetItem(row, col);
                 auto pos = engine->gameData->cursor->getFirstNaviCollision();
-                if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
+                if (pos.hit)
                 {
-                    inventory.RemoveItem(row, col);
-                    RetrieveInfo();
+                    if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
+                    {
+                        inventory.RemoveItem(row, col);
+                        RetrieveInfo();
+                    }
+                }
+                else
+                {
+                    // TODO: Report to the user that you can't drop it here.
                 }
             }
         }
