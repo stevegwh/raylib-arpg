@@ -12,6 +12,7 @@
 #include "GameUiFactory.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
+#include "slib.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 
@@ -594,20 +595,26 @@ namespace sage
     void InventorySlot::OnDrop(CellElement* receiver)
     {
         beingDragged = false;
+
         if (receiver && receiver->canReceiveDragDrops)
         {
             receiver->ReceiveDrop(this);
         }
         else
         {
-            auto& inventory =
-                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-            auto itemId = inventory.GetItem(row, col);
-            auto pos = engine->gameData->cursor->getFirstNaviCollision();
-            if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
+            auto* inventoryWindow = parent->GetWindow();
+            // TODO: Should have a function that checks if mouse is within any window
+            if (!PointInsideRect(inventoryWindow->rec, GetMousePosition()))
             {
-                inventory.RemoveItem(row, col);
-                RetrieveInfo();
+                auto& inventory = registry->get<InventoryComponent>(
+                    engine->gameData->controllableActorSystem->GetSelectedActor());
+                auto itemId = inventory.GetItem(row, col);
+                auto pos = engine->gameData->cursor->getFirstNaviCollision();
+                if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
+                {
+                    inventory.RemoveItem(row, col);
+                    RetrieveInfo();
+                }
             }
         }
     }

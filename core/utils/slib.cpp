@@ -297,6 +297,12 @@ namespace sage
     {
     }
 
+    bool PointInsideRect(Rectangle rec, Vector2 point)
+    {
+        return point.x >= rec.x && point.x <= rec.x + rec.width && point.y >= rec.y &&
+               point.y <= rec.y + rec.height;
+    }
+
     Vector2 Vec3ToVec2(const Vector3& vec3)
     {
         return {vec3.x, vec3.z};

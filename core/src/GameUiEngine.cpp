@@ -5,6 +5,7 @@
 #include "GameUiEngine.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
+#include "slib.hpp"
 #include "UserInput.hpp"
 
 #include <ranges>
@@ -12,11 +13,6 @@
 
 namespace sage
 {
-    bool PointInsideRect(Rectangle rec, Vector2 point)
-    {
-        return point.x >= rec.x && point.x <= rec.x + rec.width && point.y >= rec.y &&
-               point.y <= rec.y + rec.height;
-    }
 
     void IdleState::Enter()
     {
