@@ -203,12 +203,7 @@ namespace sage
     {
         draggedWindow = parent->GetWindow();
         auto mousePos = GetMousePosition();
-        Vector2 offset = {
-            static_cast<float>(engine->gameData->settings->screenWidth * 0.005),
-            static_cast<float>(engine->gameData->settings->screenHeight * 0.005)};
-        dragOffset = {
-            mousePos.x - draggedWindow.value()->rec.x - offset.x,
-            mousePos.y - draggedWindow.value()->rec.y - offset.y};
+        dragOffset = {mousePos.x - draggedWindow.value()->rec.x, mousePos.y - draggedWindow.value()->rec.y};
     }
 
     void TitleBar::DragUpdate()
@@ -228,7 +223,12 @@ namespace sage
         dragOffset = {0, 0};
     }
 
-    TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine){};
+    TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine)
+    {
+        draggable = true;
+        dragDelayTime = 0.0f;
+        dragOffset = {0, 0};
+    };
 
     void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
@@ -604,7 +604,6 @@ namespace sage
         else
         {
             auto* inventoryWindow = parent->GetWindow();
-            // TODO: Should have a function that checks if mouse is within any window
             if (!PointInsideRect(inventoryWindow->rec, GetMousePosition()))
             {
                 auto& inventory = registry->get<InventoryComponent>(
@@ -1349,7 +1348,6 @@ namespace sage
         children = std::make_unique<TitleBar>(engine);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
         titleBar->parent = this;
-        titleBar->draggable = true;
         titleBar->fontSize = fontSize;
         titleBar->overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
         titleBar->content = _title;

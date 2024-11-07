@@ -50,8 +50,6 @@ namespace sage
 
     void HoverState::Update()
     {
-        // TODO: The easiest thing would be to have a separate state system for Window that is just hovered or not
-        // and disables the cursor
         engine->gameData->cursor->DisableContextSwitching();
         engine->gameData->cursor->Disable();
 
@@ -75,8 +73,6 @@ namespace sage
             return;
         }
 
-        // if mouse down on object, change to predragging
-
         element->HoverUpdate();
     }
 
@@ -87,7 +83,7 @@ namespace sage
     void DragDelayState::Enter()
     {
         element->OnHoverStart();
-        dragTimer.SetMaxTime(0.25f); // TODO: Do not use magic number
+        dragTimer.SetMaxTime(element->dragDelayTime);
         dragTimer.SetAutoFinish(false);
     }
 
@@ -131,14 +127,12 @@ namespace sage
 
     void DragState::Enter()
     {
-        std::cout << "Dragging! \n";
         engine->draggedObject = element;
         element->OnDragStart();
     }
 
     void DragState::Exit()
     {
-        std::cout << "Dropped! \n";
         auto cell = engine->GetCellUnderCursor();
         element->OnDrop(cell);
         engine->draggedObject.reset();
