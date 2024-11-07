@@ -201,24 +201,24 @@ namespace sage
     }
 
     Window* GameUIEngine::CreateTooltipWindow(
-        Texture _nPatchTexture,
-        float x,
-        float y,
-        float _widthPercent,
-        float _heightPercent,
-        WindowTableAlignment _alignment)
+        const Texture& _nPatchTexture,
+        const float x,
+        const float y,
+        const float _widthPercent,
+        const float _heightPercent,
+        const WindowTableAlignment _alignment)
     {
         return CreateWindow(_nPatchTexture, x, y, _widthPercent, _heightPercent, _alignment, true);
     }
 
     Window* GameUIEngine::CreateWindow(
         Texture _nPatchTexture,
-        float x,
-        float y,
-        float _widthPercent,
-        float _heightPercent,
-        WindowTableAlignment _alignment,
-        bool tooltip)
+        const float x,
+        const float y,
+        const float _widthPercent,
+        const float _heightPercent,
+        const WindowTableAlignment _alignment,
+        const bool tooltip)
     {
         std::vector<std::unique_ptr<Window>>& windowVec = tooltip ? tooltips : windows;
         windowVec.push_back(std::make_unique<Window>());
@@ -244,11 +244,11 @@ namespace sage
 
     WindowDocked* GameUIEngine::CreateWindowDocked(
         Texture _nPatchTexture,
-        float _xOffsetPercent,
-        float _yOffsetPercent,
-        float _widthPercent,
-        float _heightPercent,
-        WindowTableAlignment _alignment)
+        const float _xOffsetPercent,
+        const float _yOffsetPercent,
+        const float _widthPercent,
+        const float _heightPercent,
+        const WindowTableAlignment _alignment)
     {
         windows.push_back(std::make_unique<WindowDocked>());
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
@@ -275,9 +275,7 @@ namespace sage
         window->ClampToScreen();
         window->UpdateChildren();
 
-        auto collision = GetWindowCollision(window);
-
-        if (collision)
+        if (auto collision = GetWindowCollision(window))
         {
             window->rec.x = collision->rec.x - window->rec.width;
             window->ClampToScreen();
@@ -316,7 +314,7 @@ namespace sage
     CellElement* GameUIEngine::GetCellUnderCursor() const
     {
         Window* windowUnderCursor = nullptr;
-        auto mousePos = GetMousePosition();
+        const auto mousePos = GetMousePosition();
         for (auto& window : windows)
         {
             if (window->hidden) continue;
@@ -326,13 +324,13 @@ namespace sage
             }
         }
         if (windowUnderCursor == nullptr) return nullptr;
-        for (auto& table : windowUnderCursor->children)
+        for (const auto& table : windowUnderCursor->children)
         {
-            for (auto& row : table->children)
+            for (const auto& row : table->children)
             {
-                for (auto& cell : row->children)
+                for (const auto& cell : row->children)
                 {
-                    auto element = cell->children.get();
+                    const auto element = cell->children.get();
                     if (PointInsideRect(cell->rec, mousePos))
                     {
                         return element;
@@ -364,7 +362,7 @@ namespace sage
 
     void GameUIEngine::BringClickedWindowToFront(Window* clicked)
     {
-        auto it = std::find_if(windows.begin(), windows.end(), [clicked](const std::unique_ptr<Window>& ptr) {
+        const auto it = std::find_if(windows.begin(), windows.end(), [clicked](const std::unique_ptr<Window>& ptr) {
             return ptr.get() == clicked;
         });
         std::rotate(it, it + 1, windows.end());
@@ -404,8 +402,7 @@ namespace sage
      */
     bool GameUIEngine::mouseInNonObscuredWindowRegion(Window* window, Vector2 mousePos) const
     {
-        auto collision = GetWindowCollision(window);
-        if (collision)
+        if (auto collision = GetWindowCollision(window))
         {
             // check if window is lower
             auto windowIt =
@@ -413,15 +410,14 @@ namespace sage
                     return ptr.get() == window;
                 });
 
-            auto colIt =
+            const auto colIt =
                 std::find_if(windows.begin(), windows.end(), [collision](const std::unique_ptr<Window>& ptr) {
                     return ptr.get() == collision;
                 });
 
-            auto windowDist = std::distance(windows.begin(), windowIt);
-            auto colDist = std::distance(windows.begin(), colIt);
+            const auto windowDist = std::distance(windows.begin(), windowIt);
 
-            if (windowDist < colDist)
+            if (auto colDist = std::distance(windows.begin(), colIt); windowDist < colDist)
             {
                 auto rec = GetOverlap(window->rec, collision->rec);
                 if (PointInsideRect(rec, mousePos))

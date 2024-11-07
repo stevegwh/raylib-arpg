@@ -101,7 +101,7 @@ namespace sage
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
         Window* CreateTooltipWindow(
-            Texture _nPatchTexture,
+            const Texture& _nPatchTexture,
             float x,
             float y,
             float _widthPercent,
