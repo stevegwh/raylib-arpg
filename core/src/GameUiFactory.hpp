@@ -25,6 +25,7 @@ namespace sage
         static void CreateExampleWindow(GameUIEngine* engine);
         static Window* CreatePartyPortraitsColumn(GameUIEngine* engine);
         static Window* CreateAbilityRow(GameUIEngine* engine);
+        static Window* CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos);
         static Window* CreateCombatableTooltip(
             GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos);
         static Window* CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos);

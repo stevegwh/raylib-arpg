@@ -66,11 +66,6 @@ namespace sage
         else if (layer == CollisionLayer::ENEMY || layer == CollisionLayer::PLAYER)
         {
             onCombatableHover.publish(m_mouseHitInfo.collidedEntityId);
-            auto& renderable = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId);
-            auto& combatable = registry->get<CombatableActor>(m_mouseHitInfo.collidedEntityId);
-            Vector2 pos = GetWorldToScreen(m_mouseHitInfo.rlCollision.point, *gameData->camera->getRaylibCam());
-            // Create a name tooltip
-            GameUiFactory::CreateCombatableTooltip(gameData->uiEngine.get(), renderable.name, combatable, pos);
         }
     }
 

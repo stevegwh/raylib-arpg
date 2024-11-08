@@ -93,6 +93,10 @@ namespace sage
 
         void pruneWindows();
         void processWindows();
+        void onWorldItemHover(entt::entity entity) const;
+        void onWorldCombatableHover(entt::entity entity) const;
+        void onNPCHover(entt::entity entity);
+        void onStopWorldHover() const;
 
         [[nodiscard]] bool mouseInNonObscuredWindowRegion(Window* window, Vector2 mousePos) const;
 
