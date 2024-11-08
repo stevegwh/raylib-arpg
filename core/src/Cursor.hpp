@@ -17,7 +17,7 @@ namespace sage
     {
         entt::entity target = entt::null;
         double beginHoverTime = 0.0;
-        const float hoverTimeThreshold = 0.25f;
+        const float hoverTimeThreshold = 0.75f;
     };
 
     class GameData;

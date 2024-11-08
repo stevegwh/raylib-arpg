@@ -3,9 +3,16 @@
 //
 
 #include "GameUiEngine.hpp"
+
+#include "Camera.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/ItemComponent.hpp"
+#include "components/Renderable.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
+#include "GameUiFactory.hpp"
 #include "slib.hpp"
+#include "systems/InventorySystem.hpp"
 #include "UserInput.hpp"
 
 #include <ranges>
@@ -462,6 +469,42 @@ namespace sage
         }
     }
 
+    void GameUIEngine::onWorldItemHover(entt::entity entity) const
+    {
+        if (!gameData->inventorySystem->CheckWorldItemRange()) return;
+        auto& item = registry->get<ItemComponent>(entity);
+        Vector2 pos = GetWorldToScreen(
+            gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
+        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.name, pos);
+    }
+
+    void GameUIEngine::onWorldCombatableHover(entt::entity entity) const
+    {
+        auto& renderable = registry->get<Renderable>(entity);
+        auto& combatable = registry->get<CombatableActor>(entity);
+        Vector2 pos = GetWorldToScreen(
+            gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
+        // Create a name tooltip
+        GameUiFactory::CreateCombatableTooltip(gameData->uiEngine.get(), renderable.name, combatable, pos);
+    }
+
+    void GameUIEngine::onNPCHover(entt::entity entity)
+    {
+        auto& renderable = registry->get<Renderable>(entity);
+        Vector2 pos = GetWorldToScreen(
+            gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
+        // Create a name tooltip
+        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), renderable.name, pos);
+    }
+
+    void GameUIEngine::onStopWorldHover() const
+    {
+        if (tooltipWindow)
+        {
+            tooltipWindow->markForRemoval = true;
+        }
+    }
+
     void GameUIEngine::Update()
     {
         if (draggedObject.has_value())
@@ -480,5 +523,13 @@ namespace sage
     GameUIEngine::GameUIEngine(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
+        entt::sink sink{_gameData->cursor->onCombatableHover};
+        sink.connect<&GameUIEngine::onWorldCombatableHover>(this);
+        entt::sink sink2{_gameData->cursor->onItemHover};
+        sink2.connect<&GameUIEngine::onWorldItemHover>(this);
+        entt::sink sink3{_gameData->cursor->onStopHover};
+        sink3.connect<&GameUIEngine::onStopWorldHover>(this);
+        entt::sink sink4{_gameData->cursor->onNPCHover};
+        sink4.connect<&GameUIEngine::onNPCHover>(this);
     }
 } // namespace sage

@@ -178,6 +178,26 @@ namespace sage
         return window;
     }
 
+    Window* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        auto* window =
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({10, 2, 5, 5});
+
+        {
+            auto table = window->CreateTable();
+            auto row0 = table->CreateTableRow(10);
+            auto cell0 = row0->CreateTableCell();
+            auto textbox = cell0->CreateTextbox(engine, name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+        }
+
+        return window;
+    }
+
     Window* GameUiFactory::CreateCombatableTooltip(
         GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos)
     {
