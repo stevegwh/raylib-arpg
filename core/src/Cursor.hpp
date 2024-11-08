@@ -79,11 +79,12 @@ namespace sage
         entt::sigh<void(entt::entity entity)> onCombatableHover{};
         entt::sigh<void(entt::entity entity)> onNPCHover{};
         entt::sigh<void(entt::entity entity)> onItemHover{};
+        entt::sigh<void()> onStopHover{};
 
         void Update();
-        void DrawDebug();
+        void DrawDebug() const;
         void Draw3D();
-        void Draw2D();
+        void Draw2D() const;
         void DisableContextSwitching();
         void EnableContextSwitching();
         void Enable();

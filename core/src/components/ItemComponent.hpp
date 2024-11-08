@@ -20,6 +20,7 @@ namespace sage
     };
     struct ItemComponent
     {
+        static constexpr float MAX_ITEM_DROP_RANGE = 40.0f;
         std::string name;
         std::string description;
         ItemRarity rarity = ItemRarity::COMMON;

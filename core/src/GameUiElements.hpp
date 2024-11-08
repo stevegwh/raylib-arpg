@@ -312,6 +312,7 @@ namespace sage
     {
         entt::registry* registry{};
         ControllableActorSystem* controllableActorSystem{};
+        void dropItemInWorld();
 
       public:
         unsigned int row{};

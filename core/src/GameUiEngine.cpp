@@ -182,21 +182,9 @@ namespace sage
             }
         }
 
+        if (tooltipWindow && tooltipWindow->markForRemoval)
         {
-            std::vector<unsigned int> toRemove;
-            for (unsigned int i = 0; i < tooltips.size(); ++i)
-            {
-                auto& window = tooltips[i];
-                if (window->markForRemoval)
-                {
-                    toRemove.push_back(i);
-                }
-            }
-
-            for (auto& i : toRemove)
-            {
-                tooltips.erase(tooltips.begin() + i);
-            }
+            tooltipWindow.reset();
         }
     }
 
@@ -220,9 +208,9 @@ namespace sage
         const WindowTableAlignment _alignment,
         const bool tooltip)
     {
-        std::vector<std::unique_ptr<Window>>& windowVec = tooltip ? tooltips : windows;
-        windowVec.push_back(std::make_unique<Window>());
-        const auto& window = windowVec.back();
+
+        auto window = std::make_unique<Window>();
+
         window->SetPosition(x, y);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
@@ -239,7 +227,13 @@ namespace sage
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
         sink.connect<&Window::OnScreenSizeChange>(window.get());
-        return window.get();
+        if (tooltip)
+        {
+            tooltipWindow = std::move(window);
+            return tooltipWindow.get();
+        }
+        windows.push_back(std::move(window));
+        return windows.back().get();
     }
 
     WindowDocked* GameUIEngine::CreateWindowDocked(
@@ -386,9 +380,9 @@ namespace sage
             window->Draw2D();
         }
 
-        for (const auto& window : tooltips)
+        if (tooltipWindow)
         {
-            window->Draw2D();
+            tooltipWindow->Draw2D();
         }
 
         if (draggedObject.has_value())
@@ -460,7 +454,7 @@ namespace sage
                 {
                     for (const auto& cell : row->children)
                     {
-                        auto element = cell->children.get();
+                        const auto element = cell->children.get();
                         element->state->Update();
                     }
                 }
