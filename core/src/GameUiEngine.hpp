@@ -87,7 +87,7 @@ namespace sage
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
-        std::vector<std::unique_ptr<Window>> tooltips;
+        std::unique_ptr<Window> tooltipWindow;
         std::optional<CellElement*> draggedObject;
         std::optional<CellElement*> hoveredDraggableCellElement;
 

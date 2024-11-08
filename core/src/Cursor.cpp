@@ -34,6 +34,10 @@ namespace sage
         if ((layer != CollisionLayer::NPC && layer != CollisionLayer::ENEMY && layer != CollisionLayer::ITEM) ||
             !m_mouseHitInfo.rlCollision.hit)
         {
+            if (m_hoverInfo.has_value())
+            {
+                onStopHover.publish();
+            }
             m_hoverInfo.reset();
             return;
         }
@@ -58,9 +62,6 @@ namespace sage
         else if (layer == CollisionLayer::ITEM)
         {
             onItemHover.publish(m_mouseHitInfo.collidedEntityId);
-            auto& item = registry->get<ItemComponent>(m_mouseHitInfo.collidedEntityId);
-            Vector2 pos = GetWorldToScreen(m_mouseHitInfo.rlCollision.point, *gameData->camera->getRaylibCam());
-            GameUiFactory::CreateItemTooltip(gameData->uiEngine.get(), item, pos);
         }
         else if (layer == CollisionLayer::ENEMY || layer == CollisionLayer::PLAYER)
         {
@@ -298,7 +299,7 @@ namespace sage
         else
         {
             // Find first navigation collision (if any)
-            auto navIt = std::find_if(collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
+            const auto navIt = std::find_if(collisions.begin(), collisions.end(), [](const CollisionInfo& coll) {
                 return coll.collisionLayer == CollisionLayer::FLOORSIMPLE ||
                        coll.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
                        coll.collisionLayer == CollisionLayer::STAIRS;
@@ -312,7 +313,7 @@ namespace sage
 
         onCollisionHit.publish(m_mouseHitInfo.collidedEntityId);
 
-        auto layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
+        const auto layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         changeCursors(layer);
     }
 
@@ -328,13 +329,14 @@ namespace sage
     {
         if (registry->any_of<Renderable>(hitInfo.collidedEntityId))
         {
-            auto& renderable = registry->get<Renderable>(hitInfo.collidedEntityId);
-            auto& transform = registry->get<sgTransform>(hitInfo.collidedEntityId);
+            const auto& renderable = registry->get<Renderable>(hitInfo.collidedEntityId);
+            const auto& transform = registry->get<sgTransform>(hitInfo.collidedEntityId);
 
             for (int i = 0; i < renderable.GetModel()->GetMeshCount(); ++i)
             {
-                auto meshCollision = renderable.GetModel()->GetRayMeshCollision(ray, i, transform.GetMatrix());
-                if (meshCollision.hit)
+                if (const auto meshCollision =
+                        renderable.GetModel()->GetRayMeshCollision(ray, i, transform.GetMatrix());
+                    meshCollision.hit)
                 {
                     hitInfo.rlCollision = meshCollision;
                     return true;
@@ -363,6 +365,7 @@ namespace sage
     {
         getMouseRayCollision();
         checkMouseHover();
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             onMouseLeftClick();
@@ -388,7 +391,7 @@ namespace sage
         }
     }
 
-    void Cursor::DrawDebug()
+    void Cursor::DrawDebug() const
     {
         if (!m_mouseHitInfo.rlCollision.hit) return;
         if (contextLocked) return;
@@ -404,7 +407,7 @@ namespace sage
     {
     }
 
-    void Cursor::Draw2D()
+    void Cursor::Draw2D() const
     {
         if (hideCursor) return;
         Vector2 pos = GetMousePosition();

@@ -9,17 +9,22 @@
 namespace sage
 {
     class GameData;
+    class Window;
 
     class InventorySystem
     {
         entt::registry* registry;
         GameData* gameData;
+        Window* tooltipWindow;
+        void onWorldItemStopHover() const;
+        void onWorldItemHovered(entt::entity entity);
+        void onWorldItemClicked(entt::entity entity) const;
+        [[nodiscard]] bool checkWorldItemRange() const;
         void inventoryUpdated() const;
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
 
       public:
-        void OnItemClicked(entt::entity entity) const;
         entt::sigh<void()> onInventoryUpdated;
         InventorySystem(entt::registry* _registry, GameData* _gameData);
     };

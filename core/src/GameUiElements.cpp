@@ -595,6 +595,32 @@ namespace sage
         UpdateDimensions();
     }
 
+    void InventorySlot::dropItemInWorld()
+    {
+        auto& inventory =
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
+        const auto itemId = inventory.GetItem(row, col);
+        const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
+        const auto playerPos =
+            registry->get<sgTransform>(engine->gameData->controllableActorSystem->GetSelectedActor())
+                .GetWorldPos();
+        const auto dist = Vector3Distance(playerPos, cursorPos.point);
+
+        if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
+        {
+            if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, cursorPos.point))
+            {
+                inventory.RemoveItem(row, col);
+                RetrieveInfo();
+            }
+        }
+        else
+        {
+            // TODO: Report to the user that you can't drop it here.
+            std::cout << "Out of range \n";
+        }
+    }
+
     void InventorySlot::OnDrop(CellElement* receiver)
     {
         beingDragged = false;
@@ -605,26 +631,10 @@ namespace sage
         }
         else
         {
-            // TODO: Dropping an item should have a range
-            auto* inventoryWindow = parent->GetWindow();
-            if (!PointInsideRect(inventoryWindow->rec, GetMousePosition()))
+            if (const auto* inventoryWindow = parent->GetWindow();
+                !PointInsideRect(inventoryWindow->rec, GetMousePosition()))
             {
-                auto& inventory = registry->get<InventoryComponent>(
-                    engine->gameData->controllableActorSystem->GetSelectedActor());
-                auto itemId = inventory.GetItem(row, col);
-                auto pos = engine->gameData->cursor->getFirstNaviCollision();
-                if (pos.hit)
-                {
-                    if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, pos.point))
-                    {
-                        inventory.RemoveItem(row, col);
-                        RetrieveInfo();
-                    }
-                }
-                else
-                {
-                    // TODO: Report to the user that you can't drop it here.
-                }
+                dropItemInWorld();
             }
         }
     }
