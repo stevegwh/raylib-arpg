@@ -18,6 +18,7 @@ namespace sage
     struct KeyMapping;
     class GameUIEngine;
 
+    class EquipmentSystem;
     class RenderSystem;
     class CollisionSystem;
     class NavigationGridSystem;
@@ -65,6 +66,7 @@ namespace sage
         std::unique_ptr<EntityReflectionSignalRouter> reflectionSignalRouter;
         std::unique_ptr<InventorySystem> inventorySystem;
         std::unique_ptr<PartySystem> partySystem;
+        std::unique_ptr<EquipmentSystem> equipmentSystem;
 
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };

@@ -308,6 +308,23 @@ namespace sage
         friend class TableCell;
     };
 
+    class EquipmentSlot : public ImageBox
+    {
+        entt::registry* registry{};
+        ControllableActorSystem* controllableActorSystem{};
+        void dropItemInWorld();
+
+      public:
+        unsigned int row{};
+        unsigned int col{};
+        void RetrieveInfo();
+        void OnDrop(CellElement* receiver) override;
+        void ReceiveDrop(CellElement* droppedElement) override;
+        void HoverUpdate() override;
+        explicit EquipmentSlot(GameUIEngine* _engine);
+        friend class TableCell;
+    };
+
     class InventorySlot : public ImageBox
     {
         entt::registry* registry{};
@@ -357,6 +374,11 @@ namespace sage
             PlayerAbilitySystem* _playerAbilitySystem,
             ControllableActorSystem* _controllableActorSystem,
             unsigned int _slotNumber);
+        EquipmentSlot* CreateEquipmentSlot(
+            GameUIEngine* engine,
+            ControllableActorSystem* _controllableActorSystem,
+            unsigned int row,
+            unsigned int col);
         InventorySlot* CreateInventorySlot(
             GameUIEngine* engine,
             ControllableActorSystem* _controllableActorSystem,

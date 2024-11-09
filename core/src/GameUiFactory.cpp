@@ -6,12 +6,14 @@
 
 #include "components/Ability.hpp"
 #include "components/CombatableActor.hpp"
+#include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "GameData.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
 #include "systems/ControllableActorSystem.hpp"
+#include "systems/EquipmentSystem.hpp"
 #include "systems/InventorySystem.hpp"
 #include <format>
 #include <sstream>
@@ -320,6 +322,59 @@ namespace sage
                         engine, engine->gameData->controllableActorSystem.get(), row, col);
                     invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                     inventoryUpdateSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
+                }
+            }
+        }
+        window->hidden = true;
+        return window;
+    }
+
+    Window* GameUiFactory::CreateCharacterWindow(
+        entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
+    {
+        auto& equipment =
+            registry->get<EquipmentComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
+
+        // TODO: Add SetPaddingWindowPercent
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
+        // InventoryComponent
+
+        auto window =
+            engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({2, 2, 4, 4});
+
+        entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
+
+        {
+            auto table = window->CreateTable(4);
+            auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell(80);
+            auto cell2 = row->CreateTableCell(20);
+            auto titlebar = cell->CreateTitleBar(engine, "Character", 12);
+            titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
+            titlebar->SetVertAlignment(VertAlignment::MIDDLE);
+            auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
+            auto closeButton = cell2->CreateCloseButton(engine, tex);
+            closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
+            closeButton->SetVertAlignment(VertAlignment::TOP);
+        }
+        {
+            int maxRows = 4;
+            int maxCols = 3;
+            auto table = window->CreateTableGrid(maxRows, maxCols, 4);
+            for (unsigned int row = 0; row < maxRows; ++row)
+            {
+                for (unsigned int col = 0; col < maxCols; ++col)
+                {
+                    auto& cell = table->children[row]->children[col];
+                    auto invSlot = cell->CreateEquipmentSlot(
+                        engine, engine->gameData->controllableActorSystem.get(), row, col);
+                    invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                    equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(invSlot);
                 }
             }
         }
