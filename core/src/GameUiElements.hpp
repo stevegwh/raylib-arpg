@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "components/EquipmentComponent.hpp"
 #include "raylib.h"
 #include "systems/PartySystem.hpp"
 #include "Timer.hpp"
@@ -15,10 +16,8 @@
 
 namespace sage
 {
+    enum class EquipmentType;
     class PartySystem;
-}
-namespace sage
-{
     class GameUIEngine;
     class Window;
     class Table;
@@ -311,17 +310,16 @@ namespace sage
     class EquipmentSlot : public ImageBox
     {
         entt::registry* registry{};
+        EquipmentType itemType;
         ControllableActorSystem* controllableActorSystem{};
         void dropItemInWorld();
 
       public:
-        unsigned int row{};
-        unsigned int col{};
         void RetrieveInfo();
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;
-        explicit EquipmentSlot(GameUIEngine* _engine);
+        explicit EquipmentSlot(GameUIEngine* _engine, EquipmentType _itemType);
         friend class TableCell;
     };
 
@@ -375,10 +373,7 @@ namespace sage
             ControllableActorSystem* _controllableActorSystem,
             unsigned int _slotNumber);
         EquipmentSlot* CreateEquipmentSlot(
-            GameUIEngine* engine,
-            ControllableActorSystem* _controllableActorSystem,
-            unsigned int row,
-            unsigned int col);
+            GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentType _itemType);
         InventorySlot* CreateInventorySlot(
             GameUIEngine* engine,
             ControllableActorSystem* _controllableActorSystem,

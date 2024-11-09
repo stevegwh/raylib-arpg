@@ -16,9 +16,11 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 
+#include "components/EquipmentComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
 #include "components/sgTransform.hpp"
 #include "rlgl.h"
+#include "systems/EquipmentSystem.hpp"
 
 #include <cassert>
 #include <sstream>
@@ -574,9 +576,9 @@ namespace sage
 
     void EquipmentSlot::RetrieveInfo()
     {
-        auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-        auto itemId = inventory.GetItem(row, col);
+        entt::entity itemId = engine->gameData->equipmentSystem->GetItem(
+            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
+
         if (itemId != entt::null)
         {
             auto& item = registry->get<ItemComponent>(itemId);
@@ -597,9 +599,8 @@ namespace sage
 
     void EquipmentSlot::dropItemInWorld()
     {
-        auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-        const auto itemId = inventory.GetItem(row, col);
+        const auto itemId = engine->gameData->equipmentSystem->GetItem(
+            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
         const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
         const auto playerPos =
             registry->get<sgTransform>(engine->gameData->controllableActorSystem->GetSelectedActor())
@@ -610,7 +611,8 @@ namespace sage
         {
             if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, cursorPos.point))
             {
-                inventory.RemoveItem(row, col);
+                engine->gameData->equipmentSystem->UnequipItem(
+                    engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
                 RetrieveInfo();
             }
         }
@@ -631,8 +633,8 @@ namespace sage
         }
         else
         {
-            if (const auto* inventoryWindow = parent->GetWindow();
-                !PointInsideRect(inventoryWindow->rec, GetMousePosition()))
+            if (const auto* characterWindow = parent->GetWindow();
+                !PointInsideRect(characterWindow->rec, GetMousePosition()))
             {
                 dropItemInWorld();
             }
@@ -643,22 +645,26 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto& inventory =
-                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-            inventory.SwapItems(row, col, dropped->row, dropped->col);
+            auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
+            auto& inventory = registry->get<InventoryComponent>(actor);
+            auto itemId = inventory.GetItem(dropped->row, dropped->col);
+            // TODO: Must check if the item type matches the equipment slot (helm etc)
+            engine->gameData->equipmentSystem->EquipItem(actor, itemId, itemType);
+            inventory.RemoveItem(dropped->row, dropped->col);
             dropped->RetrieveInfo();
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
         }
+        // TODO: Should allow swapping items such as single handed weapons or rings
+        // have a EquipmentSlot -> EquipmentSlot branch
     }
 
     void EquipmentSlot::HoverUpdate()
     {
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-        auto itemId = inventory.GetItem(row, col);
+        entt::entity itemId = engine->gameData->equipmentSystem->GetItem(
+            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
         if (itemId != entt::null)
         {
             auto& item = registry->get<ItemComponent>(itemId);
@@ -667,13 +673,12 @@ namespace sage
         }
     }
 
-    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine) : ImageBox(_engine){};
-
-    // ---
+    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentType _itemType)
+        : ImageBox(_engine), itemType(_itemType){};
 
     void InventorySlot::RetrieveInfo()
     {
-        auto& inventory =
+        const auto& inventory =
             registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
         auto itemId = inventory.GetItem(row, col);
         if (itemId != entt::null)
@@ -1438,11 +1443,23 @@ namespace sage
     }
 
     EquipmentSlot* TableCell::CreateEquipmentSlot(
-        GameUIEngine* engine,
-        ControllableActorSystem* _controllableActorSystem,
-        unsigned int row,
-        unsigned int col)
+        GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentType _itemType)
     {
+        children = std::make_unique<EquipmentSlot>(engine, _itemType);
+        auto* slot = dynamic_cast<EquipmentSlot*>(children.get());
+        slot->registry = engine->registry;
+        slot->parent = this;
+        slot->controllableActorSystem = _controllableActorSystem;
+        // slot->SetGrayscale();
+        slot->draggable = true;
+        slot->canReceiveDragDrops = true;
+        slot->RetrieveInfo();
+        UpdateChildren();
+        {
+            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
+            sink.connect<&EquipmentSlot::RetrieveInfo>(slot);
+        }
+        return slot;
     }
 
     InventorySlot* TableCell::CreateInventorySlot(

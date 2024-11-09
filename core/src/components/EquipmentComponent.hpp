@@ -8,11 +8,22 @@
 
 namespace sage
 {
+    enum class EquipmentType
+    {
+        HELM,
+        BOOTS,
+        CHEST,
+        ARMS,
+        LEGS,
+        BELT,
+        LEFTHAND,
+        RIGHTHAND
+    };
 
     struct EquipmentComponent
     {
         entt::entity helm = entt::null;
-        entt::entity torso = entt::null;
+        entt::entity chest = entt::null;
         entt::entity legs = entt::null;
         entt::entity arms = entt::null;
         entt::entity boots = entt::null;
