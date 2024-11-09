@@ -572,6 +572,105 @@ namespace sage
 
           };
 
+    void EquipmentSlot::RetrieveInfo()
+    {
+        auto& inventory =
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
+        auto itemId = inventory.GetItem(row, col);
+        if (itemId != entt::null)
+        {
+            auto& item = registry->get<ItemComponent>(itemId);
+            tex = ResourceManager::GetInstance().TextureLoad(item.icon);
+            stateLocked = false;
+        }
+        else
+        {
+            stateLocked = true;
+            tex.id = rlGetTextureIdDefault();
+            tex.width = 1;
+            tex.height = 1;
+            //  tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
+            //  rlGetDefaultTexture) Set default
+        }
+        UpdateDimensions();
+    }
+
+    void EquipmentSlot::dropItemInWorld()
+    {
+        auto& inventory =
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
+        const auto itemId = inventory.GetItem(row, col);
+        const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
+        const auto playerPos =
+            registry->get<sgTransform>(engine->gameData->controllableActorSystem->GetSelectedActor())
+                .GetWorldPos();
+        const auto dist = Vector3Distance(playerPos, cursorPos.point);
+
+        if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
+        {
+            if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, cursorPos.point))
+            {
+                inventory.RemoveItem(row, col);
+                RetrieveInfo();
+            }
+        }
+        else
+        {
+            // TODO: Report to the user that you can't drop it here.
+            std::cout << "Out of range \n";
+        }
+    }
+
+    void EquipmentSlot::OnDrop(CellElement* receiver)
+    {
+        beingDragged = false;
+
+        if (receiver && receiver->canReceiveDragDrops)
+        {
+            receiver->ReceiveDrop(this);
+        }
+        else
+        {
+            if (const auto* inventoryWindow = parent->GetWindow();
+                !PointInsideRect(inventoryWindow->rec, GetMousePosition()))
+            {
+                dropItemInWorld();
+            }
+        }
+    }
+
+    void EquipmentSlot::ReceiveDrop(CellElement* droppedElement)
+    {
+        if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
+        {
+            auto& inventory =
+                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
+            inventory.SwapItems(row, col, dropped->row, dropped->col);
+            dropped->RetrieveInfo();
+            RetrieveInfo();
+            engine->BringClickedWindowToFront(parent->GetWindow());
+        }
+    }
+
+    void EquipmentSlot::HoverUpdate()
+    {
+        ImageBox::HoverUpdate();
+        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
+        auto& inventory =
+            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
+        auto itemId = inventory.GetItem(row, col);
+        if (itemId != entt::null)
+        {
+            auto& item = registry->get<ItemComponent>(itemId);
+            tooltipWindow =
+                GameUiFactory::CreateItemTooltip(engine, item, {rec.x + rec.width, rec.y - rec.height});
+        }
+    }
+
+    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine) : ImageBox(_engine){};
+
+    // ---
+
     void InventorySlot::RetrieveInfo()
     {
         auto& inventory =
@@ -1336,6 +1435,14 @@ namespace sage
         }
         UpdateChildren();
         return abilitySlot;
+    }
+
+    EquipmentSlot* TableCell::CreateEquipmentSlot(
+        GameUIEngine* engine,
+        ControllableActorSystem* _controllableActorSystem,
+        unsigned int row,
+        unsigned int col)
+    {
     }
 
     InventorySlot* TableCell::CreateInventorySlot(

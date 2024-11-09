@@ -22,6 +22,7 @@
 #include "systems/CombatSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/dialogue/DialogueSystem.hpp"
+#include "systems/EquipmentSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/InventorySystem.hpp"
 #include "systems/LightSubSystem.hpp"
@@ -123,7 +124,7 @@ namespace sage
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 200}, 20, 40);
         // TODO: Equipment UI and system
-        auto* window2 = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {400, 200}, 20, 40);
+        auto* window2 = GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {400, 200}, 20, 40);
         entt::sink sink{data->userInput->keyIPressed};
         sink.connect<[](Window& window) { window.hidden = !window.hidden; }>(*window);
         entt::sink sink2{data->userInput->keyCPressed};
