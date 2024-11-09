@@ -17,7 +17,10 @@ namespace sage
         LEGS,
         BELT,
         LEFTHAND,
-        RIGHTHAND
+        RIGHTHAND,
+        AMULET,
+        RING1,
+        RING2
     };
 
     struct EquipmentComponent
@@ -30,6 +33,9 @@ namespace sage
         entt::entity belt = entt::null;
         entt::entity leftHand = entt::null;
         entt::entity rightHand = entt::null;
+        entt::entity amulet = entt::null;
+        entt::entity ring1 = entt::null;
+        entt::entity ring2 = entt::null;
     };
 
 } // namespace sage

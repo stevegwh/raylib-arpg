@@ -332,15 +332,9 @@ namespace sage
     Window* GameUiFactory::CreateCharacterWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        auto& equipment =
-            registry->get<EquipmentComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-
-        // TODO: Add SetPaddingWindowPercent
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
-        // InventoryComponent
 
         auto window =
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
@@ -363,20 +357,49 @@ namespace sage
             closeButton->SetVertAlignment(VertAlignment::TOP);
         }
         {
-            int maxRows = 4;
+            int maxRows = 5;
             int maxCols = 3;
             auto table = window->CreateTableGrid(maxRows, maxCols, 4);
+
+            auto createEquipSlot = [&engine, &table, &equipmentUpdateSink](
+                                       unsigned int row, unsigned int col, EquipmentType itemType) {
+                auto& cell = table->children[row]->children[col];
+                auto equipSlot =
+                    cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
+                equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot);
+            };
+
+            auto createSpacerSlot = [&engine, &table](unsigned int row, unsigned int col) {
+                auto& cell = table->children[row]->children[col];
+                auto slot =
+                    cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/test.png"));
+                // slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            };
+
             for (unsigned int row = 0; row < maxRows; ++row)
             {
                 for (unsigned int col = 0; col < maxCols; ++col)
                 {
-                    auto& cell = table->children[row]->children[col];
-                    auto invSlot = cell->CreateEquipmentSlot(
-                        engine, engine->gameData->controllableActorSystem.get(), row, col);
-                    invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                    equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(invSlot);
+                    createSpacerSlot(row, col);
                 }
             }
+
+            createEquipSlot(0, 1, EquipmentType::HELM);
+
+            createEquipSlot(1, 0, EquipmentType::ARMS);
+            createEquipSlot(1, 1, EquipmentType::CHEST);
+            createEquipSlot(1, 2, EquipmentType::AMULET);
+
+            createEquipSlot(2, 0, EquipmentType::LEGS);
+            createEquipSlot(2, 1, EquipmentType::BELT);
+            createEquipSlot(2, 2, EquipmentType::RING1);
+
+            createEquipSlot(3, 1, EquipmentType::BOOTS);
+            createEquipSlot(3, 2, EquipmentType::RING2);
+
+            createEquipSlot(4, 0, EquipmentType::LEFTHAND);
+            createEquipSlot(4, 2, EquipmentType::RIGHTHAND);
         }
         window->hidden = true;
         return window;
