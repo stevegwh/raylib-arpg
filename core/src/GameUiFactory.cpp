@@ -94,12 +94,13 @@ namespace sage
 
     Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 6, 30, WindowTableAlignment::STACK_VERTICAL);
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 8, 30, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({5, 5, 2, 2});
+        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({8, 8, 8, 8});
+        // window->SetPaddingPercent({5, 5, 2, 2});
 
         auto table = window->CreateTable();
 
@@ -109,6 +110,7 @@ namespace sage
         {
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
+            cell->SetPaddingPixel({0, 5, 0, 0});
             auto slot = cell->CreatePartyMemberPortrait(
                 engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
             slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
@@ -120,13 +122,15 @@ namespace sage
 
     Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+
         auto window =
             engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({5, 2, 2, 2});
+        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({8, 8, 8, 8});
 
         auto table = window->CreateTable();
 
@@ -285,16 +289,18 @@ namespace sage
             registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
 
         // TODO: Add SetPaddingWindowPercent
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+
         // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
         // InventoryComponent
 
         auto window =
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({2, 2, 4, 4});
+        window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({4, 4, 8, 8});
 
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
 
@@ -333,13 +339,15 @@ namespace sage
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
         auto window =
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({2, 2, 4, 4});
+
+        // window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        window->SetPaddingPercent({4, 4, 8, 8});
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
