@@ -45,6 +45,8 @@ namespace sage
         static constexpr unsigned int BELT = 1u << 19;
         static constexpr unsigned int BOOTS = 1u << 20;
         static constexpr unsigned int RING = 1u << 21;
+        static constexpr unsigned int LEGS = 1u << 22;
+        static constexpr unsigned int ARMS = 1u << 23;
 
         // Weapon properties (offset by 24 bits)
         static constexpr unsigned int TWO_HANDED = 1u << 24;
@@ -55,6 +57,8 @@ namespace sage
         static constexpr unsigned int WEAPON_TYPE_MASK = 0x0000FF00;
         static constexpr unsigned int ARMOR_TYPE_MASK = 0x00FF0000;
         static constexpr unsigned int WEAPON_PROPS_MASK = 0xFF000000;
+
+        static constexpr unsigned int RIGHT_HAND_RESTRICTED_FLAGS = MAIN_HAND_ONLY | TWO_HANDED | BOW | CROSSBOW;
     } // namespace ItemFlags
 
     // Damage type?
@@ -72,6 +76,14 @@ namespace sage
         [[nodiscard]] bool HasFlag(unsigned int flag) const
         {
             return (flags & flag) == flag;
+        }
+        [[nodiscard]] bool HasAnyFlag(unsigned int flagSet) const
+        {
+            return (flags & flagSet) != 0;
+        }
+        [[nodiscard]] bool HasAllFlags(unsigned int flagSet) const
+        {
+            return (flags & flagSet) == flagSet;
         }
         void AddFlag(unsigned int flag)
         {
