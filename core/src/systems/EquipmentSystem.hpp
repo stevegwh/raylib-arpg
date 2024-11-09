@@ -9,17 +9,7 @@
 namespace sage
 {
     class GameData;
-
-    enum class EquipmentItem
-    {
-        HEAD,
-        BOOTS,
-        CHEST,
-        ARMS,
-        LEGS,
-        LEFTWEP,
-        RIGHTWEP
-    };
+    enum class EquipmentType;
 
     class EquipmentSystem
     {
@@ -28,7 +18,9 @@ namespace sage
 
       public:
         entt::sigh<void(entt::entity)> onEquipmentUpdated;
-        entt::entity EquipItem(entt::entity owner, entt::entity item, EquipmentItem itemType);
+        [[nodiscard]] entt::entity GetItem(entt::entity owner, EquipmentType itemType) const;
+        void EquipItem(entt::entity owner, entt::entity item, EquipmentType itemType);
+        void UnequipItem(entt::entity owner, EquipmentType itemType) const;
         EquipmentSystem(entt::registry* _registry, GameData* _gameData);
     };
 
