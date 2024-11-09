@@ -12,6 +12,7 @@
 #include "slib.hpp"
 #include "systems/LightSubSystem.hpp"
 
+#include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/sgTransform.hpp"
 #include "raylib.h"
@@ -20,9 +21,16 @@
 namespace sage
 {
 
-    void EquipmentSystem::instantiateWeapon(entt::entity owner, entt::entity itemId)
+    void EquipmentSystem::instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType)
     {
         auto weaponEntity = registry->create();
+
+        if (worldModels[itemType] != entt::null)
+        {
+            registry->destroy(worldModels[itemType]);
+        }
+        worldModels[itemType] = weaponEntity;
+
         Matrix weaponMat;
         {
             // Hard coded location of the "socket" for the weapon
@@ -62,14 +70,25 @@ namespace sage
         equipment.slots[itemType] = item;
         if (itemType == EquipmentSlotName::LEFTHAND)
         {
-            instantiateWeapon(owner, item);
+            instantiateWeapon(owner, item, itemType);
         }
         onEquipmentUpdated.publish(owner);
     }
 
-    void EquipmentSystem::UnequipItem(entt::entity owner, EquipmentSlotName itemType) const
+    void EquipmentSystem::UnequipItem(entt::entity owner, EquipmentSlotName itemType)
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
+        if (equipment.slots[itemType] != entt::null)
+        {
+            auto& inventory = registry->get<InventoryComponent>(owner);
+            if (!inventory.AddItem(equipment.slots[itemType]))
+            {
+                // TODO: handle inventory full.
+                return;
+            }
+
+            registry->destroy(worldModels[itemType]);
+        }
         equipment.slots[itemType] = entt::null;
         onEquipmentUpdated.publish(owner);
     }
