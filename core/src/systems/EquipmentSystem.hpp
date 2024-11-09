@@ -16,7 +16,7 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
 
-        void instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType);
+        void instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const;
 
       public:
         entt::sigh<void(entt::entity)> onEquipmentUpdated;
