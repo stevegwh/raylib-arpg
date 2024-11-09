@@ -44,6 +44,18 @@ namespace sage
         {
             return equipment.rightHand;
         }
+        if (itemType == EquipmentType::AMULET)
+        {
+            return equipment.amulet;
+        }
+        if (itemType == EquipmentType::RING1)
+        {
+            return equipment.ring1;
+        }
+        if (itemType == EquipmentType::RING2)
+        {
+            return equipment.ring2;
+        }
         return entt::null;
     }
 
@@ -82,6 +94,19 @@ namespace sage
         {
             equipment.rightHand = item;
         }
+        else if (itemType == EquipmentType::AMULET)
+        {
+            equipment.amulet = item;
+        }
+        else if (itemType == EquipmentType::RING1)
+        {
+            equipment.ring1 = item;
+        }
+        else if (itemType == EquipmentType::RING2)
+        {
+            equipment.ring2 = item;
+        }
+
         onEquipmentUpdated.publish(owner);
     }
 
@@ -119,6 +144,18 @@ namespace sage
         else if (itemType == EquipmentType::RIGHTHAND)
         {
             equipment.rightHand = entt::null;
+        }
+        else if (itemType == EquipmentType::AMULET)
+        {
+            equipment.amulet = entt::null;
+        }
+        else if (itemType == EquipmentType::RING1)
+        {
+            equipment.ring1 = entt::null;
+        }
+        else if (itemType == EquipmentType::RING2)
+        {
+            equipment.ring2 = entt::null;
         }
         onEquipmentUpdated.publish(owner);
     }

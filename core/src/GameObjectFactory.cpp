@@ -33,6 +33,7 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
 
+#include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
@@ -298,6 +299,7 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
         auto& inventory = registry->emplace<InventoryComponent>(id);
+        auto& equipment = registry->emplace<EquipmentComponent>(id);
 
         {
             auto itemId = registry->create();
