@@ -16,13 +16,15 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
 
-        void instantiateWeapon(entt::entity owner, entt::entity itemId);
+        std::unordered_map<EquipmentSlotName, entt::entity> worldModels;
+
+        void instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType);
 
       public:
         entt::sigh<void(entt::entity)> onEquipmentUpdated;
         [[nodiscard]] entt::entity GetItem(entt::entity owner, EquipmentSlotName itemType) const;
         void EquipItem(entt::entity owner, entt::entity item, EquipmentSlotName itemType);
-        void UnequipItem(entt::entity owner, EquipmentSlotName itemType) const;
+        void UnequipItem(entt::entity owner, EquipmentSlotName itemType);
         [[nodiscard]] bool SwapItems(
             entt::entity owner,
             entt::entity item1,

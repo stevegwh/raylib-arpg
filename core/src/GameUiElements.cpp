@@ -693,7 +693,11 @@ namespace sage
             const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
             auto& inventory = registry->get<InventoryComponent>(actor);
             const auto itemId = inventory.GetItem(dropped->row, dropped->col);
-            if (auto& item = registry->get<ItemComponent>(itemId); !validateDrop(item)) return;
+
+            auto& item = registry->get<ItemComponent>(itemId);
+            if (!validateDrop(item)) return;
+
+            engine->gameData->equipmentSystem->UnequipItem(actor, itemType);
             engine->gameData->equipmentSystem->EquipItem(actor, itemId, itemType);
             inventory.RemoveItem(dropped->row, dropped->col);
             dropped->RetrieveInfo();

@@ -114,6 +114,7 @@ namespace sage
             auto slot = cell->CreatePartyMemberPortrait(
                 engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
             slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            // TODO: SHRINK_ROW_TO_FIT doesn't work on columns :)
             slot->SetVertAlignment(VertAlignment::TOP);
             slot->SetHoriAlignment(HoriAlignment::CENTER);
         }
