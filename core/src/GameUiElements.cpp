@@ -574,6 +574,60 @@ namespace sage
 
           };
 
+    bool EquipmentSlot::validateDrop(ItemComponent& item) const
+    {
+        if (item.HasFlag(ItemFlags::WEAPON))
+        {
+            if (itemType == EquipmentSlotName::LEFTHAND)
+            {
+                return true;
+            }
+            if (itemType == EquipmentSlotName::RIGHTHAND &&
+                !item.HasAnyFlag(ItemFlags::RIGHT_HAND_RESTRICTED_FLAGS))
+            {
+                return true;
+            }
+        }
+        else if (item.HasFlag(ItemFlags::ARMOR))
+        {
+            if (itemType == EquipmentSlotName::HELM && item.HasFlag(ItemFlags::HELMET))
+            {
+                return true;
+            }
+            if (itemType == EquipmentSlotName::AMULET && item.HasFlag(ItemFlags::AMULET))
+            {
+                return true;
+            }
+            if (itemType == EquipmentSlotName::CHEST && item.HasFlag(ItemFlags::CHEST))
+            {
+                return true;
+            }
+            if (itemType == EquipmentSlotName::BELT && item.HasFlag(ItemFlags::BELT))
+            {
+                return true;
+            }
+            if (itemType == EquipmentSlotName::ARMS && item.HasFlag(ItemFlags::ARMS))
+            {
+                return true;
+            }
+            if (itemType == EquipmentSlotName::LEGS && item.HasFlag(ItemFlags::LEGS))
+            {
+                return true;
+            }
+            if (itemType == EquipmentSlotName::BOOTS && item.HasFlag(ItemFlags::BOOTS))
+            {
+                return true;
+            }
+            if ((itemType == EquipmentSlotName::RING1 || itemType == EquipmentSlotName::RING2) &&
+                item.HasFlag(ItemFlags::RING))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void EquipmentSlot::RetrieveInfo()
     {
         entt::entity itemId = engine->gameData->equipmentSystem->GetItem(
@@ -645,10 +699,10 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
+            const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
             auto& inventory = registry->get<InventoryComponent>(actor);
-            auto itemId = inventory.GetItem(dropped->row, dropped->col);
-            // TODO: Must check if the item type matches the equipment slot (helm etc)
+            const auto itemId = inventory.GetItem(dropped->row, dropped->col);
+            if (auto& item = registry->get<ItemComponent>(itemId); !validateDrop(item)) return;
             engine->gameData->equipmentSystem->EquipItem(actor, itemId, itemType);
             inventory.RemoveItem(dropped->row, dropped->col);
             dropped->RetrieveInfo();

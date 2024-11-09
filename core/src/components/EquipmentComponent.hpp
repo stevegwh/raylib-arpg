@@ -5,6 +5,7 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <unordered_map>
 
 namespace sage
 {
@@ -25,17 +26,22 @@ namespace sage
 
     struct EquipmentComponent
     {
-        entt::entity helm = entt::null;
-        entt::entity chest = entt::null;
-        entt::entity legs = entt::null;
-        entt::entity arms = entt::null;
-        entt::entity boots = entt::null;
-        entt::entity belt = entt::null;
-        entt::entity leftHand = entt::null;
-        entt::entity rightHand = entt::null;
-        entt::entity amulet = entt::null;
-        entt::entity ring1 = entt::null;
-        entt::entity ring2 = entt::null;
+        std::unordered_map<EquipmentSlotName, entt::entity> slots;
+
+        EquipmentComponent()
+        {
+            slots[EquipmentSlotName::HELM] = entt::null;
+            slots[EquipmentSlotName::BOOTS] = entt::null;
+            slots[EquipmentSlotName::CHEST] = entt::null;
+            slots[EquipmentSlotName::ARMS] = entt::null;
+            slots[EquipmentSlotName::LEGS] = entt::null;
+            slots[EquipmentSlotName::BELT] = entt::null;
+            slots[EquipmentSlotName::LEFTHAND] = entt::null;
+            slots[EquipmentSlotName::RIGHTHAND] = entt::null;
+            slots[EquipmentSlotName::AMULET] = entt::null;
+            slots[EquipmentSlotName::RING1] = entt::null;
+            slots[EquipmentSlotName::RING2] = entt::null;
+        }
     };
 
 } // namespace sage

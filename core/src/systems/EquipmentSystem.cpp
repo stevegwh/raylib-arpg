@@ -52,153 +52,25 @@ namespace sage
     entt::entity EquipmentSystem::GetItem(entt::entity owner, EquipmentSlotName itemType) const
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
-        if (itemType == EquipmentSlotName::HELM)
-        {
-            return equipment.helm;
-        }
-        if (itemType == EquipmentSlotName::ARMS)
-        {
-            return equipment.arms;
-        }
-        if (itemType == EquipmentSlotName::LEGS)
-        {
-            return equipment.legs;
-        }
-        if (itemType == EquipmentSlotName::BOOTS)
-        {
-            return equipment.boots;
-        }
-        if (itemType == EquipmentSlotName::CHEST)
-        {
-            return equipment.chest;
-        }
-        if (itemType == EquipmentSlotName::BELT)
-        {
-            return equipment.belt;
-        }
-        if (itemType == EquipmentSlotName::LEFTHAND)
-        {
-            return equipment.leftHand;
-        }
-        if (itemType == EquipmentSlotName::RIGHTHAND)
-        {
-            return equipment.rightHand;
-        }
-        if (itemType == EquipmentSlotName::AMULET)
-        {
-            return equipment.amulet;
-        }
-        if (itemType == EquipmentSlotName::RING1)
-        {
-            return equipment.ring1;
-        }
-        if (itemType == EquipmentSlotName::RING2)
-        {
-            return equipment.ring2;
-        }
-        return entt::null;
+        if (!equipment.slots.contains(itemType)) return entt::null;
+        return equipment.slots[itemType];
     }
 
     void EquipmentSystem::EquipItem(entt::entity owner, entt::entity item, EquipmentSlotName itemType)
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
-        if (itemType == EquipmentSlotName::HELM)
+        equipment.slots[itemType] = item;
+        if (itemType == EquipmentSlotName::LEFTHAND)
         {
-            equipment.helm = item;
-        }
-        else if (itemType == EquipmentSlotName::ARMS)
-        {
-            equipment.arms = item;
-        }
-        else if (itemType == EquipmentSlotName::LEGS)
-        {
-            equipment.legs = item;
-        }
-        else if (itemType == EquipmentSlotName::BOOTS)
-        {
-            equipment.boots = item;
-        }
-        else if (itemType == EquipmentSlotName::CHEST)
-        {
-            equipment.chest = item;
-        }
-        else if (itemType == EquipmentSlotName::BELT)
-        {
-            equipment.belt = item;
-        }
-        else if (itemType == EquipmentSlotName::LEFTHAND)
-        {
-            equipment.leftHand = item;
             instantiateWeapon(owner, item);
         }
-        else if (itemType == EquipmentSlotName::RIGHTHAND)
-        {
-            equipment.rightHand = item;
-            instantiateWeapon(owner, item);
-        }
-        else if (itemType == EquipmentSlotName::AMULET)
-        {
-            equipment.amulet = item;
-        }
-        else if (itemType == EquipmentSlotName::RING1)
-        {
-            equipment.ring1 = item;
-        }
-        else if (itemType == EquipmentSlotName::RING2)
-        {
-            equipment.ring2 = item;
-        }
-
         onEquipmentUpdated.publish(owner);
     }
 
     void EquipmentSystem::UnequipItem(entt::entity owner, EquipmentSlotName itemType) const
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
-        if (itemType == EquipmentSlotName::HELM)
-        {
-            equipment.helm = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::ARMS)
-        {
-            equipment.arms = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::LEGS)
-        {
-            equipment.legs = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::BOOTS)
-        {
-            equipment.boots = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::CHEST)
-        {
-            equipment.chest = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::BELT)
-        {
-            equipment.belt = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::LEFTHAND)
-        {
-            equipment.leftHand = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::RIGHTHAND)
-        {
-            equipment.rightHand = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::AMULET)
-        {
-            equipment.amulet = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::RING1)
-        {
-            equipment.ring1 = entt::null;
-        }
-        else if (itemType == EquipmentSlotName::RING2)
-        {
-            equipment.ring2 = entt::null;
-        }
+        equipment.slots[itemType] = entt::null;
         onEquipmentUpdated.publish(owner);
     }
 

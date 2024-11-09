@@ -16,6 +16,7 @@
 
 namespace sage
 {
+    struct ItemComponent;
     enum class EquipmentSlotName;
     class PartySystem;
     class GameUIEngine;
@@ -313,6 +314,7 @@ namespace sage
         EquipmentSlotName itemType;
         ControllableActorSystem* controllableActorSystem{};
         void dropItemInWorld();
+        [[nodiscard]] bool validateDrop(ItemComponent& item) const;
 
       public:
         void RetrieveInfo();
