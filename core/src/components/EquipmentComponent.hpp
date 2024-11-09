@@ -27,6 +27,7 @@ namespace sage
     struct EquipmentComponent
     {
         std::unordered_map<EquipmentSlotName, entt::entity> slots;
+        std::unordered_map<EquipmentSlotName, entt::entity> worldModels;
 
         EquipmentComponent()
         {

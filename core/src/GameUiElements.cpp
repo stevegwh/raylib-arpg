@@ -656,7 +656,7 @@ namespace sage
         {
             if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, cursorPos.point))
             {
-                engine->gameData->equipmentSystem->UnequipItem(
+                engine->gameData->equipmentSystem->DestroyItem(
                     engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
                 RetrieveInfo();
             }
@@ -693,13 +693,11 @@ namespace sage
             const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
             auto& inventory = registry->get<InventoryComponent>(actor);
             const auto itemId = inventory.GetItem(dropped->row, dropped->col);
-
             auto& item = registry->get<ItemComponent>(itemId);
             if (!validateDrop(item)) return;
-
-            engine->gameData->equipmentSystem->UnequipItem(actor, itemType);
-            engine->gameData->equipmentSystem->EquipItem(actor, itemId, itemType);
             inventory.RemoveItem(dropped->row, dropped->col);
+            engine->gameData->equipmentSystem->MoveItemToInventory(actor, itemType);
+            engine->gameData->equipmentSystem->EquipItem(actor, itemId, itemType);
             dropped->RetrieveInfo();
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
@@ -799,6 +797,23 @@ namespace sage
                 registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
             inventory.SwapItems(row, col, dropped->row, dropped->col);
             dropped->RetrieveInfo();
+            RetrieveInfo();
+            engine->BringClickedWindowToFront(parent->GetWindow());
+        }
+        else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
+        {
+            auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
+            auto& inventory = registry->get<InventoryComponent>(actor);
+            auto droppedItemId = engine->gameData->equipmentSystem->GetItem(actor, droppedE->itemType);
+            engine->gameData->equipmentSystem->DestroyItem(actor, droppedE->itemType);
+
+            if (auto inventoryItemId = inventory.GetItem(row, col); inventoryItemId != entt::null)
+            {
+                engine->gameData->equipmentSystem->EquipItem(actor, inventoryItemId, droppedE->itemType);
+            }
+
+            inventory.AddItem(droppedItemId, row, col);
+            droppedE->RetrieveInfo();
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
         }

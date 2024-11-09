@@ -311,12 +311,12 @@ namespace sage
     class EquipmentSlot : public ImageBox
     {
         entt::registry* registry{};
-        EquipmentSlotName itemType;
         ControllableActorSystem* controllableActorSystem{};
         void dropItemInWorld();
         [[nodiscard]] bool validateDrop(ItemComponent& item) const;
 
       public:
+        EquipmentSlotName itemType;
         void RetrieveInfo();
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
