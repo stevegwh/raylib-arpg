@@ -7,6 +7,7 @@
 #include "components/EquipmentComponent.hpp"
 #include "components/Renderable.hpp"
 #include "components/WeaponComponent.hpp"
+#include "ControllableActorSystem.hpp"
 #include "GameData.hpp"
 #include "ResourceManager.hpp"
 #include "slib.hpp"
@@ -24,12 +25,13 @@ namespace sage
     void EquipmentSystem::instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType)
     {
         auto weaponEntity = registry->create();
+        auto& equipment = registry->get<EquipmentComponent>(owner);
 
-        if (worldModels[itemType] != entt::null)
+        if (equipment.worldModels.contains(itemType) && registry->valid(equipment.worldModels[itemType]))
         {
-            registry->destroy(worldModels[itemType]);
+            registry->destroy(equipment.worldModels[itemType]);
         }
-        worldModels[itemType] = weaponEntity;
+        equipment.worldModels[itemType] = weaponEntity;
 
         Matrix weaponMat;
         {
@@ -75,7 +77,7 @@ namespace sage
         onEquipmentUpdated.publish(owner);
     }
 
-    void EquipmentSystem::UnequipItem(entt::entity owner, EquipmentSlotName itemType)
+    void EquipmentSystem::MoveItemToInventory(entt::entity owner, EquipmentSlotName itemType)
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
         if (equipment.slots[itemType] != entt::null)
@@ -86,8 +88,20 @@ namespace sage
                 // TODO: handle inventory full.
                 return;
             }
+            registry->destroy(equipment.worldModels[itemType]);
+            equipment.worldModels[itemType] = entt::null;
+        }
+        equipment.slots[itemType] = entt::null;
+        onEquipmentUpdated.publish(owner);
+    }
 
-            registry->destroy(worldModels[itemType]);
+    void EquipmentSystem::DestroyItem(entt::entity owner, EquipmentSlotName itemType)
+    {
+        auto& equipment = registry->get<EquipmentComponent>(owner);
+        if (equipment.slots[itemType] != entt::null)
+        {
+            registry->destroy(equipment.worldModels[itemType]);
+            equipment.worldModels[itemType] = entt::null;
         }
         equipment.slots[itemType] = entt::null;
         onEquipmentUpdated.publish(owner);
