@@ -332,7 +332,7 @@ namespace sage
     Window* GameUiFactory::CreateCharacterWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
 
@@ -372,8 +372,8 @@ namespace sage
 
             auto createSpacerSlot = [&engine, &table](unsigned int row, unsigned int col) {
                 auto& cell = table->children[row]->children[col];
-                auto slot =
-                    cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/test.png"));
+                auto slot = cell->CreateImagebox(
+                    engine, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
                 // slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
             };
 
