@@ -483,6 +483,24 @@ namespace sage
                 // inventory full
             }
         }
+        else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
+        {
+            auto receiver = partySystem->GetMember(memberNumber).entity;
+            auto sender = controllableActorSystem->GetSelectedActor();
+            auto& inventory = engine->registry->get<InventoryComponent>(receiver);
+            auto droppedItemId = engine->gameData->equipmentSystem->GetItem(sender, droppedE->itemType);
+
+            if (inventory.AddItem(droppedItemId))
+            {
+                engine->gameData->equipmentSystem->DestroyItem(sender, droppedE->itemType);
+                droppedE->RetrieveInfo();
+                RetrieveInfo();
+            }
+            else
+            {
+                // inventory full
+            }
+        }
     }
 
     void PartyMemberPortrait::OnClick()

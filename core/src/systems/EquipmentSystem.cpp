@@ -22,7 +22,7 @@
 namespace sage
 {
 
-    void EquipmentSystem::instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType)
+    void EquipmentSystem::instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const
     {
         auto weaponEntity = registry->create();
         auto& equipment = registry->get<EquipmentComponent>(owner);
