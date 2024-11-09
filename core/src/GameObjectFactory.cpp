@@ -259,31 +259,6 @@ namespace sage
             renderable.GetModel()->SetShader(shader, i);
         }
 
-        // auto weaponEntity = registry->create();
-        // Matrix weaponMat;
-        // {
-        //     // Hard coded location of the "socket" for the weapon
-        //     // TODO: Export sockets as txt and store their transform in weaponSocket
-        //     auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
-        //     Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
-        //     auto scale = Vector3{1, 1, 1};
-        //     weaponMat = ComposeMatrix(translation, rotation, scale);
-        // }
-        //
-        // auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
-        // weapon.parentSocket = weaponMat;
-        // weapon.parentBoneName = "mixamorig:RightHand";
-        // weapon.owner = id;
-        // registry->emplace<Renderable>(
-        //     weaponEntity,
-        //     ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
-        //     renderable.initialTransform);
-        // data->lightSubSystem->LinkRenderableToLight(weaponEntity);
-        //
-        // auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
-        // weaponTrans.SetParent(&transform);
-        // weaponTrans.SetLocalPos(Vector3Zero());
-
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
         data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
@@ -298,7 +273,7 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
         auto& inventory = registry->emplace<InventoryComponent>(id);
-        auto& equipment = registry->emplace<EquipmentComponent>(id);
+        registry->emplace<EquipmentComponent>(id);
 
         {
             auto itemId = registry->create();

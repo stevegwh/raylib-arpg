@@ -511,12 +511,7 @@ namespace sage
         else
         {
             stateLocked = true;
-            tex.id = rlGetTextureIdDefault();
-            // Setting to zero will cause errors on Windows.
-            tex.width = 1;
-            tex.height = 1;
-            // tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
-            // rlGetDefaultTexture) Set default
+            tex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
         }
         UpdateDimensions();
     }
@@ -642,11 +637,7 @@ namespace sage
         else
         {
             stateLocked = true;
-            tex.id = rlGetTextureIdDefault();
-            tex.width = 1;
-            tex.height = 1;
-            //  tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
-            //  rlGetDefaultTexture) Set default
+            tex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
         }
         UpdateDimensions();
     }
@@ -747,11 +738,7 @@ namespace sage
         else
         {
             stateLocked = true;
-            tex.id = rlGetTextureIdDefault();
-            tex.width = 1;
-            tex.height = 1;
-            //  tex = LoadTexture("resources/icons/abilities/default.png"); // TODO: Replace with AssetID (or use
-            //  rlGetDefaultTexture) Set default
+            tex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
         }
         UpdateDimensions();
     }
