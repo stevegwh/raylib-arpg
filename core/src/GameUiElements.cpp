@@ -655,6 +655,9 @@ namespace sage
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
         }
+        else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
+        {
+        }
         // TODO: Should allow swapping items such as single handed weapons or rings
         // have a EquipmentSlot -> EquipmentSlot branch
     }
@@ -673,7 +676,7 @@ namespace sage
         }
     }
 
-    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentType _itemType)
+    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType)
         : ImageBox(_engine), itemType(_itemType){};
 
     void InventorySlot::RetrieveInfo()
@@ -1443,7 +1446,7 @@ namespace sage
     }
 
     EquipmentSlot* TableCell::CreateEquipmentSlot(
-        GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentType _itemType)
+        GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentSlotName _itemType)
     {
         children = std::make_unique<EquipmentSlot>(engine, _itemType);
         auto* slot = dynamic_cast<EquipmentSlot*>(children.get());
