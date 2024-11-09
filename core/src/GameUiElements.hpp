@@ -16,7 +16,7 @@
 
 namespace sage
 {
-    enum class EquipmentType;
+    enum class EquipmentSlotName;
     class PartySystem;
     class GameUIEngine;
     class Window;
@@ -310,7 +310,7 @@ namespace sage
     class EquipmentSlot : public ImageBox
     {
         entt::registry* registry{};
-        EquipmentType itemType;
+        EquipmentSlotName itemType;
         ControllableActorSystem* controllableActorSystem{};
         void dropItemInWorld();
 
@@ -319,7 +319,7 @@ namespace sage
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;
-        explicit EquipmentSlot(GameUIEngine* _engine, EquipmentType _itemType);
+        explicit EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType);
         friend class TableCell;
     };
 
@@ -373,7 +373,7 @@ namespace sage
             ControllableActorSystem* _controllableActorSystem,
             unsigned int _slotNumber);
         EquipmentSlot* CreateEquipmentSlot(
-            GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentType _itemType);
+            GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentSlotName _itemType);
         InventorySlot* CreateInventorySlot(
             GameUIEngine* engine,
             ControllableActorSystem* _controllableActorSystem,

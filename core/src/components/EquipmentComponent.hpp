@@ -8,7 +8,7 @@
 
 namespace sage
 {
-    enum class EquipmentType
+    enum class EquipmentSlotName
     {
         HELM,
         BOOTS,

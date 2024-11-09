@@ -248,8 +248,6 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
-        auto weaponEntity = registry->create();
-        combatable.weapon = weaponEntity;
 
         Shader shader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
@@ -261,29 +259,30 @@ namespace sage
             renderable.GetModel()->SetShader(shader, i);
         }
 
-        Matrix weaponMat;
-        {
-            // Hard coded location of the "socket" for the weapon
-            // TODO: Export sockets as txt and store their transform in weaponSocket
-            auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
-            Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
-            auto scale = Vector3{1, 1, 1};
-            weaponMat = ComposeMatrix(translation, rotation, scale);
-        }
-
-        auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
-        weapon.parentSocket = weaponMat;
-        weapon.parentBoneName = "mixamorig:RightHand";
-        weapon.owner = id;
-        registry->emplace<Renderable>(
-            weaponEntity,
-            ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
-            renderable.initialTransform);
-        data->lightSubSystem->LinkRenderableToLight(weaponEntity);
-
-        auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
-        weaponTrans.SetParent(&transform);
-        weaponTrans.SetLocalPos(Vector3Zero());
+        // auto weaponEntity = registry->create();
+        // Matrix weaponMat;
+        // {
+        //     // Hard coded location of the "socket" for the weapon
+        //     // TODO: Export sockets as txt and store their transform in weaponSocket
+        //     auto translation = Vector3{-86.803f, 159.62f, 6.0585f};
+        //     Quaternion rotation{0.021f, -0.090f, 0.059f, 0.994f};
+        //     auto scale = Vector3{1, 1, 1};
+        //     weaponMat = ComposeMatrix(translation, rotation, scale);
+        // }
+        //
+        // auto& weapon = registry->emplace<WeaponComponent>(weaponEntity);
+        // weapon.parentSocket = weaponMat;
+        // weapon.parentBoneName = "mixamorig:RightHand";
+        // weapon.owner = id;
+        // registry->emplace<Renderable>(
+        //     weaponEntity,
+        //     ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_WPN_DAGGER01),
+        //     renderable.initialTransform);
+        // data->lightSubSystem->LinkRenderableToLight(weaponEntity);
+        //
+        // auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
+        // weaponTrans.SetParent(&transform);
+        // weaponTrans.SetLocalPos(Vector3Zero());
 
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
@@ -308,6 +307,7 @@ namespace sage
             item.description = "A test inventory item.";
             item.icon = AssetID::IMG_ICON_WEAPON_DAGGER01;
             item.model = AssetID::MDL_WPN_DAGGER01;
+            item.AddFlag(ItemFlags::WEAPON | ItemFlags::DAGGER);
             inventory.AddItem(itemId, 0, 0);
         }
         {
@@ -317,6 +317,7 @@ namespace sage
             item.description = "A test inventory item.";
             item.icon = AssetID::IMG_ICON_WEAPON_SWORD01;
             item.model = AssetID::MDL_WPN_SWORD01;
+            item.AddFlag(ItemFlags::WEAPON | ItemFlags::SWORD | ItemFlags::MAIN_HAND_ONLY);
             inventory.AddItem(itemId, 0, 1);
         }
 

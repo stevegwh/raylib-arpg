@@ -177,16 +177,15 @@ namespace sage
                 behaviour = static_cast<AbilityBehaviour>(
                     static_cast<unsigned int>(behaviour) & ~static_cast<unsigned int>(b));
             }
-            bool HasBehaviour(AbilityBehaviour b) const
+            [[nodiscard]] bool HasBehaviour(AbilityBehaviour b) const
             {
                 return (static_cast<unsigned int>(behaviour) & static_cast<unsigned int>(b)) != 0;
             }
-            bool HasAllBehaviours(AbilityBehaviour b) const
+            [[nodiscard]] bool HasAllBehaviours(AbilityBehaviour b) const
             {
                 return (static_cast<unsigned int>(behaviour) & static_cast<unsigned int>(b)) ==
                        static_cast<unsigned int>(b);
             }
-
             // Helper functions for optional behaviour flags
             void AddOptionalBehaviour(AbilityBehaviourOptional b)
             {
@@ -197,11 +196,11 @@ namespace sage
                 optional = static_cast<AbilityBehaviourOptional>(
                     static_cast<unsigned int>(optional) & ~static_cast<unsigned int>(b));
             }
-            bool HasOptionalBehaviour(AbilityBehaviourOptional b) const
+            [[nodiscard]] bool HasOptionalBehaviour(AbilityBehaviourOptional b) const
             {
                 return (static_cast<unsigned int>(optional) & static_cast<unsigned int>(b)) != 0;
             }
-            bool HasAllOptionalBehaviours(AbilityBehaviourOptional b) const
+            [[nodiscard]] bool HasAllOptionalBehaviours(AbilityBehaviourOptional b) const
             {
                 return (static_cast<unsigned int>(optional) & static_cast<unsigned int>(b)) ==
                        static_cast<unsigned int>(b);
@@ -217,11 +216,11 @@ namespace sage
                 elements = static_cast<AbilityElement>(
                     static_cast<unsigned int>(elements) & ~static_cast<unsigned int>(e));
             }
-            bool HasElement(AbilityElement e) const
+            [[nodiscard]] bool HasElement(AbilityElement e) const
             {
                 return (static_cast<unsigned int>(elements) & static_cast<unsigned int>(e)) != 0;
             }
-            bool HasAllElements(AbilityElement e) const
+            [[nodiscard]] bool HasAllElements(AbilityElement e) const
             {
                 return (static_cast<unsigned int>(elements) & static_cast<unsigned int>(e)) ==
                        static_cast<unsigned int>(e);

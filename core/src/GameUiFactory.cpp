@@ -362,7 +362,7 @@ namespace sage
             auto table = window->CreateTableGrid(maxRows, maxCols, 4);
 
             auto createEquipSlot = [&engine, &table, &equipmentUpdateSink](
-                                       unsigned int row, unsigned int col, EquipmentType itemType) {
+                                       unsigned int row, unsigned int col, EquipmentSlotName itemType) {
                 auto& cell = table->children[row]->children[col];
                 auto equipSlot =
                     cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
@@ -385,21 +385,21 @@ namespace sage
                 }
             }
 
-            createEquipSlot(0, 1, EquipmentType::HELM);
+            createEquipSlot(0, 1, EquipmentSlotName::HELM);
 
-            createEquipSlot(1, 0, EquipmentType::ARMS);
-            createEquipSlot(1, 1, EquipmentType::CHEST);
-            createEquipSlot(1, 2, EquipmentType::AMULET);
+            createEquipSlot(1, 0, EquipmentSlotName::ARMS);
+            createEquipSlot(1, 1, EquipmentSlotName::CHEST);
+            createEquipSlot(1, 2, EquipmentSlotName::AMULET);
 
-            createEquipSlot(2, 0, EquipmentType::LEGS);
-            createEquipSlot(2, 1, EquipmentType::BELT);
-            createEquipSlot(2, 2, EquipmentType::RING1);
+            createEquipSlot(2, 0, EquipmentSlotName::LEGS);
+            createEquipSlot(2, 1, EquipmentSlotName::BELT);
+            createEquipSlot(2, 2, EquipmentSlotName::RING1);
 
-            createEquipSlot(3, 1, EquipmentType::BOOTS);
-            createEquipSlot(3, 2, EquipmentType::RING2);
+            createEquipSlot(3, 1, EquipmentSlotName::BOOTS);
+            createEquipSlot(3, 2, EquipmentSlotName::RING2);
 
-            createEquipSlot(4, 0, EquipmentType::LEFTHAND);
-            createEquipSlot(4, 2, EquipmentType::RIGHTHAND);
+            createEquipSlot(4, 0, EquipmentSlotName::LEFTHAND);
+            createEquipSlot(4, 2, EquipmentSlotName::RIGHTHAND);
         }
         window->hidden = true;
         return window;
