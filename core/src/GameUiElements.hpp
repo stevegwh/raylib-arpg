@@ -265,6 +265,7 @@ namespace sage
         std::optional<Window*> tooltipWindow;
         OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
         std::optional<Shader> shader;
+        virtual void updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space);
 
       private:
         [[nodiscard]] Dimensions calculateAvailableSpace() const;
@@ -272,7 +273,6 @@ namespace sage
         [[nodiscard]] Dimensions calculateInitialDimensions(const Dimensions& space) const;
         [[nodiscard]] Vector2 calculateAlignmentOffset(
             const Dimensions& dimensions, const Dimensions& space) const;
-        void updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space);
         void shrinkRowToFit() const;
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
@@ -311,12 +311,18 @@ namespace sage
     class EquipmentSlot : public ImageBox
     {
         entt::registry* registry{};
+        Texture emptyTex;
         ControllableActorSystem* controllableActorSystem{};
         void dropItemInWorld();
         [[nodiscard]] bool validateDrop(ItemComponent& item) const;
 
+      protected:
+        void updateRectangle(
+            const Dimensions& dimensions, const Vector2& offset, const Dimensions& space) override;
+
       public:
         EquipmentSlotName itemType;
+        void Draw2D() override;
         void RetrieveInfo();
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
@@ -328,12 +334,18 @@ namespace sage
     class InventorySlot : public ImageBox
     {
         entt::registry* registry{};
+        Texture emptyTex;
         ControllableActorSystem* controllableActorSystem{};
         void dropItemInWorld();
+
+      protected:
+        void updateRectangle(
+            const Dimensions& dimensions, const Vector2& offset, const Dimensions& space) override;
 
       public:
         unsigned int row{};
         unsigned int col{};
+        void Draw2D() override;
         void RetrieveInfo();
         void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
