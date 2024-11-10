@@ -722,9 +722,12 @@ namespace sage
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
+            const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
+            if (!engine->gameData->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
+            {
+                // handle swap fail?
+            }
         }
-        // TODO: Should allow swapping items such as single handed weapons or rings
-        // have a EquipmentSlot -> EquipmentSlot branch
     }
 
     void EquipmentSlot::HoverUpdate()

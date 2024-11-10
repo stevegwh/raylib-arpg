@@ -22,7 +22,8 @@
 namespace sage
 {
 
-    void EquipmentSystem::instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const
+    void EquipmentSystem::instantiateWeapon(
+        entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const
     {
         auto weaponEntity = registry->create();
         auto& equipment = registry->get<EquipmentComponent>(owner);
@@ -66,7 +67,7 @@ namespace sage
         return equipment.slots[itemType];
     }
 
-    void EquipmentSystem::EquipItem(entt::entity owner, entt::entity item, EquipmentSlotName itemType)
+    void EquipmentSystem::EquipItem(entt::entity owner, entt::entity item, EquipmentSlotName itemType) const
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
         equipment.slots[itemType] = item;
@@ -77,7 +78,7 @@ namespace sage
         onEquipmentUpdated.publish(owner);
     }
 
-    void EquipmentSystem::MoveItemToInventory(entt::entity owner, EquipmentSlotName itemType)
+    void EquipmentSystem::MoveItemToInventory(entt::entity owner, EquipmentSlotName itemType) const
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
         if (equipment.slots[itemType] != entt::null)
@@ -95,33 +96,68 @@ namespace sage
         onEquipmentUpdated.publish(owner);
     }
 
-    void EquipmentSystem::DestroyItem(entt::entity owner, EquipmentSlotName itemType)
+    void EquipmentSystem::DestroyItem(entt::entity owner, EquipmentSlotName itemType) const
     {
         auto& equipment = registry->get<EquipmentComponent>(owner);
         if (equipment.slots[itemType] != entt::null)
         {
-            registry->destroy(equipment.worldModels[itemType]);
-            equipment.worldModels[itemType] = entt::null;
+            if (equipment.worldModels.contains(itemType) && equipment.worldModels[itemType] != entt::null)
+            {
+                registry->destroy(equipment.worldModels[itemType]);
+                equipment.worldModels[itemType] = entt::null;
+            }
+            equipment.slots[itemType] = entt::null;
+            onEquipmentUpdated.publish(owner);
         }
-        equipment.slots[itemType] = entt::null;
-        onEquipmentUpdated.publish(owner);
     }
 
-    bool EquipmentSystem::SwapItems(
-        entt::entity owner,
-        entt::entity item1,
-        EquipmentSlotName itemType1,
-        entt::entity item2,
-        EquipmentSlotName itemType2)
+    bool EquipmentSystem::SwapItems(entt::entity owner, EquipmentSlotName itemType1, EquipmentSlotName itemType2)
     {
-        if ((itemType1 == EquipmentSlotName::RING1 || itemType1 == EquipmentSlotName::RING2) &&
-            (itemType2 == EquipmentSlotName::RING1 || itemType2 == EquipmentSlotName::RING2))
+        bool bothRings = (itemType1 == EquipmentSlotName::RING1 || itemType1 == EquipmentSlotName::RING2) &&
+                         (itemType2 == EquipmentSlotName::RING1 || itemType2 == EquipmentSlotName::RING2);
+
+        bool bothHands = (itemType1 == EquipmentSlotName::LEFTHAND || itemType1 == EquipmentSlotName::RIGHTHAND) &&
+                         (itemType2 == EquipmentSlotName::LEFTHAND || itemType2 == EquipmentSlotName::RIGHTHAND);
+
+        if (!bothRings && !bothHands)
         {
+            return false;
         }
-        if ((itemType1 == EquipmentSlotName::LEFTHAND || itemType1 == EquipmentSlotName::RIGHTHAND) &&
-            (itemType2 == EquipmentSlotName::LEFTHAND || itemType2 == EquipmentSlotName::RIGHTHAND))
+
+        auto& equipment = registry->get<EquipmentComponent>(owner);
+
+        entt::entity item1 = entt::null;
+        entt::entity item2 = entt::null;
+
+        if (equipment.slots.contains(itemType1) && equipment.slots[itemType1] != entt::null)
         {
+            item1 = equipment.slots[itemType1];
         }
+
+        if (equipment.slots.contains(itemType2) && equipment.slots[itemType2] != entt::null)
+        {
+            item2 = equipment.slots[itemType2];
+        }
+
+        if (item1 != entt::null)
+        {
+            DestroyItem(owner, itemType1);
+        }
+        if (item2 != entt::null)
+        {
+            DestroyItem(owner, itemType2);
+        }
+
+        if (item1 != entt::null)
+        {
+            EquipItem(owner, item1, itemType2);
+        }
+        if (item2 != entt::null)
+        {
+            EquipItem(owner, item2, itemType1);
+        }
+
+        return true;
     }
 
     EquipmentSystem::EquipmentSystem(entt::registry* _registry, GameData* _gameData)
