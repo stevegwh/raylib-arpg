@@ -6,6 +6,7 @@
 
 #include "components/EquipmentComponent.hpp"
 #include "raylib.h"
+#include "systems/dialogue/DialogueSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "Timer.hpp"
 
@@ -224,6 +225,15 @@ namespace sage
         ~TextBox() override = default;
     };
 
+    class DialogueOption : public TextBox
+    {
+        DialogueSystem* dialog;
+
+      public:
+        virtual void RetrieveInfo();
+        DialogueOption(GameUIEngine* _engine, DialogueSystem* _diaglogueSystem)
+    };
+
     class TitleBar final : public TextBox
     {
 
@@ -307,6 +317,9 @@ namespace sage
         explicit AbilitySlot(GameUIEngine* _engine);
         friend class TableCell;
     };
+
+    // TODO: DialogOption : Textbox
+    // TODO: Make a common base between InventorySlot and EquipmentSlot
 
     class EquipmentSlot : public ImageBox
     {
