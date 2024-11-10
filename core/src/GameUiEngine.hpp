@@ -74,8 +74,6 @@ namespace sage
     class DragState : public UIState
     {
       public:
-        Rectangle originalPosition{};
-        Vector2 mouseOffset{};
         void Enter() override;
         void Exit() override;
         void Update() override;

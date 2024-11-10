@@ -181,7 +181,7 @@ namespace sage
         bool draggable = false;
         bool beingDragged = false;
         bool stateLocked = false;
-        float dragDelayTime = 0.25;
+        float dragDelayTime = 0.1;
 
         void SetVertAlignment(VertAlignment alignment);
         void SetHoriAlignment(HoriAlignment alignment);
