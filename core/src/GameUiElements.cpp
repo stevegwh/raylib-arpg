@@ -283,22 +283,17 @@ namespace sage
     void ImageBox::OnDragStart()
     {
         auto mousePos = GetMousePosition();
-        Vector2 offset = {
-            static_cast<float>(engine->gameData->settings->screenWidth * 0.005),
-            static_cast<float>(engine->gameData->settings->screenHeight * 0.005)};
-        dragOffset = {rec.x - mousePos.x + offset.x, rec.y - mousePos.y + offset.y};
         CellElement::OnDragStart();
     }
 
     void ImageBox::DragDraw()
     {
         auto mousePos = GetMousePosition();
-        DrawTexture(tex, mousePos.x + dragOffset.x, mousePos.y + dragOffset.y, WHITE);
+        DrawTexture(tex, mousePos.x - rec.width / 2, mousePos.y - rec.height / 2, WHITE);
     }
 
     void ImageBox::OnDrop(CellElement* droppedElement)
     {
-        dragOffset = {0, 0};
         CellElement::OnDrop(droppedElement);
     }
 
