@@ -440,6 +440,7 @@ namespace sage
 
     void ImageBox::Draw2D()
     {
+        if (beingDragged) return;
         if (shader.has_value())
         {
             BeginShaderMode(shader.value());
@@ -636,6 +637,20 @@ namespace sage
         return false;
     }
 
+    void EquipmentSlot::updateRectangle(
+        const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
+    {
+        ImageBox::updateRectangle(dimensions, offset, space);
+        emptyTex.width = dimensions.width;
+        emptyTex.height = dimensions.height;
+    }
+
+    void EquipmentSlot::Draw2D()
+    {
+        DrawTexture(emptyTex, rec.x, rec.y, WHITE);
+        ImageBox::Draw2D();
+    }
+
     void EquipmentSlot::RetrieveInfo()
     {
         entt::entity itemId = engine->gameData->equipmentSystem->GetItem(
@@ -650,7 +665,7 @@ namespace sage
         else
         {
             stateLocked = true;
-            tex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
+            tex = emptyTex;
         }
         UpdateDimensions();
     }
@@ -740,7 +755,17 @@ namespace sage
     }
 
     EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType)
-        : ImageBox(_engine), itemType(_itemType){};
+        : ImageBox(_engine), itemType(_itemType)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
+    };
+
+    void InventorySlot::Draw2D()
+    {
+        ImageBox::Draw2D();
+        DrawTexture(emptyTex, rec.x, rec.y, WHITE);
+    }
 
     void InventorySlot::RetrieveInfo()
     {
@@ -756,7 +781,7 @@ namespace sage
         else
         {
             stateLocked = true;
-            tex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
+            tex = emptyTex;
         }
         UpdateDimensions();
     }
@@ -785,6 +810,14 @@ namespace sage
             // TODO: Report to the user that you can't drop it here.
             std::cout << "Out of range \n";
         }
+    }
+
+    void InventorySlot::updateRectangle(
+        const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
+    {
+        ImageBox::updateRectangle(dimensions, offset, space);
+        emptyTex.width = dimensions.width;
+        emptyTex.height = dimensions.height;
     }
 
     void InventorySlot::OnDrop(CellElement* receiver)
@@ -850,7 +883,11 @@ namespace sage
         }
     }
 
-    InventorySlot::InventorySlot(GameUIEngine* _engine) : ImageBox(_engine){};
+    InventorySlot::InventorySlot(GameUIEngine* _engine) : ImageBox(_engine)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
+    };
 
     void CloseButton::OnClick()
     {
@@ -1633,7 +1670,7 @@ namespace sage
     {
         TableElement::Draw2D();
         auto& element = children;
-        if (element && !element->beingDragged) // hide if dragged
+        if (element) // hide if dragged
         {
             element->Draw2D();
         }
