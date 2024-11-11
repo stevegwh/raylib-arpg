@@ -618,10 +618,110 @@ namespace sage
         CellElement::OnClick();
     }
 
-    AbilitySlot::AbilitySlot(GameUIEngine* _engine)
-        : ImageBox(_engine){
+    AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine)
+    {
+    }
 
-          };
+    void ItemSlot::dropItemInWorld()
+    {
+        const auto itemId = getItemId();
+        const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
+        const auto playerPos =
+            engine->registry->get<sgTransform>(engine->gameData->controllableActorSystem->GetSelectedActor())
+                .GetWorldPos();
+        const auto dist = Vector3Distance(playerPos, cursorPos.point);
+
+        if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
+        {
+            if (GameObjectFactory::spawnInventoryItem(engine->registry, engine->gameData, itemId, cursorPos.point))
+            {
+                onItemDroppedToWorld();
+                RetrieveInfo();
+            }
+        }
+        else
+        {
+            // TODO: Report to the user that you can't drop it here.
+            std::cout << "Out of range \n";
+        }
+    }
+
+    void ItemSlot::updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
+    {
+        ImageBox::updateRectangle(dimensions, offset, space);
+        emptyTex.width = dimensions.width;
+        emptyTex.height = dimensions.height;
+    }
+
+    void ItemSlot::HoverUpdate()
+    {
+        ImageBox::HoverUpdate();
+        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
+        auto& inventory = engine->registry->get<InventoryComponent>(
+            engine->gameData->controllableActorSystem->GetSelectedActor());
+        auto itemId = getItemId();
+        if (itemId != entt::null)
+        {
+            auto& item = engine->registry->get<ItemComponent>(itemId);
+            tooltipWindow =
+                GameUiFactory::CreateItemTooltip(engine, item, {rec.x + rec.width, rec.y - rec.height});
+        }
+    }
+
+    void ItemSlot::RetrieveInfo()
+    {
+        const auto& inventory = engine->registry->get<InventoryComponent>(
+            engine->gameData->controllableActorSystem->GetSelectedActor());
+        auto itemId = getItemId();
+        if (itemId != entt::null)
+        {
+            auto& item = engine->registry->get<ItemComponent>(itemId);
+            tex = ResourceManager::GetInstance().TextureLoad(item.icon);
+            stateLocked = false;
+        }
+        else
+        {
+            stateLocked = true;
+            tex = emptyTex;
+        }
+        UpdateDimensions();
+    }
+
+    void ItemSlot::Draw2D()
+    {
+        DrawTexture(emptyTex, rec.x, rec.y, WHITE);
+        ImageBox::Draw2D();
+    }
+
+    void ItemSlot::OnDrop(CellElement* receiver)
+    {
+        beingDragged = false;
+
+        if (receiver && receiver->canReceiveDragDrops)
+        {
+            receiver->ReceiveDrop(this);
+        }
+        else
+        {
+            if (const auto* characterWindow = parent->GetWindow();
+                !PointInsideRect(characterWindow->rec, GetMousePosition()))
+            {
+                dropItemInWorld();
+            }
+        }
+    }
+
+    ItemSlot::ItemSlot(sage::GameUIEngine* _engine) : ImageBox(_engine)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
+    }
+
+    void EquipmentSlot::onItemDroppedToWorld()
+    {
+        engine->gameData->equipmentSystem->DestroyItem(
+            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
+    }
 
     bool EquipmentSlot::validateDrop(ItemComponent& item) const
     {
@@ -677,81 +777,10 @@ namespace sage
         return false;
     }
 
-    void EquipmentSlot::updateRectangle(
-        const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
+    entt::entity EquipmentSlot::getItemId()
     {
-        ImageBox::updateRectangle(dimensions, offset, space);
-        emptyTex.width = dimensions.width;
-        emptyTex.height = dimensions.height;
-    }
-
-    void EquipmentSlot::Draw2D()
-    {
-        DrawTexture(emptyTex, rec.x, rec.y, WHITE);
-        ImageBox::Draw2D();
-    }
-
-    void EquipmentSlot::RetrieveInfo()
-    {
-        entt::entity itemId = engine->gameData->equipmentSystem->GetItem(
+        return engine->gameData->equipmentSystem->GetItem(
             engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
-
-        if (itemId != entt::null)
-        {
-            auto& item = registry->get<ItemComponent>(itemId);
-            tex = ResourceManager::GetInstance().TextureLoad(item.icon);
-            stateLocked = false;
-        }
-        else
-        {
-            stateLocked = true;
-            tex = emptyTex;
-        }
-        UpdateDimensions();
-    }
-
-    void EquipmentSlot::dropItemInWorld()
-    {
-        const auto itemId = engine->gameData->equipmentSystem->GetItem(
-            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
-        const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
-        const auto playerPos =
-            registry->get<sgTransform>(engine->gameData->controllableActorSystem->GetSelectedActor())
-                .GetWorldPos();
-        const auto dist = Vector3Distance(playerPos, cursorPos.point);
-
-        if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
-        {
-            if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, cursorPos.point))
-            {
-                engine->gameData->equipmentSystem->DestroyItem(
-                    engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
-                RetrieveInfo();
-            }
-        }
-        else
-        {
-            // TODO: Report to the user that you can't drop it here.
-            std::cout << "Out of range \n";
-        }
-    }
-
-    void EquipmentSlot::OnDrop(CellElement* receiver)
-    {
-        beingDragged = false;
-
-        if (receiver && receiver->canReceiveDragDrops)
-        {
-            receiver->ReceiveDrop(this);
-        }
-        else
-        {
-            if (const auto* characterWindow = parent->GetWindow();
-                !PointInsideRect(characterWindow->rec, GetMousePosition()))
-            {
-                dropItemInWorld();
-            }
-        }
     }
 
     void EquipmentSlot::ReceiveDrop(CellElement* droppedElement)
@@ -759,9 +788,9 @@ namespace sage
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
             const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
-            auto& inventory = registry->get<InventoryComponent>(actor);
+            auto& inventory = engine->registry->get<InventoryComponent>(actor);
             const auto itemId = inventory.GetItem(dropped->row, dropped->col);
-            auto& item = registry->get<ItemComponent>(itemId);
+            auto& item = engine->registry->get<ItemComponent>(itemId);
             if (!validateDrop(item)) return;
             inventory.RemoveItem(dropped->row, dropped->col);
             engine->gameData->equipmentSystem->MoveItemToInventory(actor, itemType);
@@ -780,110 +809,33 @@ namespace sage
         }
     }
 
-    void EquipmentSlot::HoverUpdate()
-    {
-        ImageBox::HoverUpdate();
-        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        entt::entity itemId = engine->gameData->equipmentSystem->GetItem(
-            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
-        if (itemId != entt::null)
-        {
-            auto& item = registry->get<ItemComponent>(itemId);
-            tooltipWindow =
-                GameUiFactory::CreateItemTooltip(engine, item, {rec.x + rec.width, rec.y - rec.height});
-        }
-    }
-
     EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType)
-        : ImageBox(_engine), itemType(_itemType)
+        : ItemSlot(_engine), itemType(_itemType)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
         emptyTex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
-    };
-
-    void InventorySlot::Draw2D()
-    {
-        ImageBox::Draw2D();
-        DrawTexture(emptyTex, rec.x, rec.y, WHITE);
     }
 
-    void InventorySlot::RetrieveInfo()
+    void InventorySlot::onItemDroppedToWorld()
     {
-        const auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-        auto itemId = inventory.GetItem(row, col);
-        if (itemId != entt::null)
-        {
-            auto& item = registry->get<ItemComponent>(itemId);
-            tex = ResourceManager::GetInstance().TextureLoad(item.icon);
-            stateLocked = false;
-        }
-        else
-        {
-            stateLocked = true;
-            tex = emptyTex;
-        }
-        UpdateDimensions();
+        auto& inventory = engine->registry->get<InventoryComponent>(
+            engine->gameData->controllableActorSystem->GetSelectedActor());
+        inventory.RemoveItem(row, col);
     }
 
-    void InventorySlot::dropItemInWorld()
+    entt::entity InventorySlot::getItemId()
     {
-        auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-        const auto itemId = inventory.GetItem(row, col);
-        const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
-        const auto playerPos =
-            registry->get<sgTransform>(engine->gameData->controllableActorSystem->GetSelectedActor())
-                .GetWorldPos();
-        const auto dist = Vector3Distance(playerPos, cursorPos.point);
-
-        if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
-        {
-            if (GameObjectFactory::spawnInventoryItem(registry, engine->gameData, itemId, cursorPos.point))
-            {
-                inventory.RemoveItem(row, col);
-                RetrieveInfo();
-            }
-        }
-        else
-        {
-            // TODO: Report to the user that you can't drop it here.
-            std::cout << "Out of range \n";
-        }
-    }
-
-    void InventorySlot::updateRectangle(
-        const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
-    {
-        ImageBox::updateRectangle(dimensions, offset, space);
-        emptyTex.width = dimensions.width;
-        emptyTex.height = dimensions.height;
-    }
-
-    void InventorySlot::OnDrop(CellElement* receiver)
-    {
-        beingDragged = false;
-
-        if (receiver && receiver->canReceiveDragDrops)
-        {
-            receiver->ReceiveDrop(this);
-        }
-        else
-        {
-            if (const auto* inventoryWindow = parent->GetWindow();
-                !PointInsideRect(inventoryWindow->rec, GetMousePosition()))
-            {
-                dropItemInWorld();
-            }
-        }
+        auto& inventory = engine->registry->get<InventoryComponent>(
+            engine->gameData->controllableActorSystem->GetSelectedActor());
+        return inventory.GetItem(row, col);
     }
 
     void InventorySlot::ReceiveDrop(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto& inventory =
-                registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
+            auto& inventory = engine->registry->get<InventoryComponent>(
+                engine->gameData->controllableActorSystem->GetSelectedActor());
             inventory.SwapItems(row, col, dropped->row, dropped->col);
             dropped->RetrieveInfo();
             RetrieveInfo();
@@ -892,7 +844,7 @@ namespace sage
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
             auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
-            auto& inventory = registry->get<InventoryComponent>(actor);
+            auto& inventory = engine->registry->get<InventoryComponent>(actor);
             auto droppedItemId = engine->gameData->equipmentSystem->GetItem(actor, droppedE->itemType);
             engine->gameData->equipmentSystem->DestroyItem(actor, droppedE->itemType);
 
@@ -908,26 +860,7 @@ namespace sage
         }
     }
 
-    void InventorySlot::HoverUpdate()
-    {
-        ImageBox::HoverUpdate();
-        if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-        auto itemId = inventory.GetItem(row, col);
-        if (itemId != entt::null)
-        {
-            auto& item = registry->get<ItemComponent>(itemId);
-            tooltipWindow =
-                GameUiFactory::CreateItemTooltip(engine, item, {rec.x + rec.width, rec.y - rec.height});
-        }
-    }
-
-    InventorySlot::InventorySlot(GameUIEngine* _engine) : ImageBox(_engine)
-    {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
-        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
-    };
+    InventorySlot::InventorySlot(GameUIEngine* _engine) : ItemSlot(_engine){};
 
     void CloseButton::OnClick()
     {
@@ -1603,7 +1536,6 @@ namespace sage
     {
         children = std::make_unique<EquipmentSlot>(engine, _itemType);
         auto* slot = dynamic_cast<EquipmentSlot*>(children.get());
-        slot->registry = engine->registry;
         slot->parent = this;
         slot->controllableActorSystem = _controllableActorSystem;
         // slot->SetGrayscale();
@@ -1626,7 +1558,6 @@ namespace sage
     {
         children = std::make_unique<InventorySlot>(engine);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
-        slot->registry = engine->registry;
         slot->parent = this;
         slot->controllableActorSystem = _controllableActorSystem;
         // slot->SetGrayscale();
@@ -1717,7 +1648,7 @@ namespace sage
 
     void TableCell::DrawDebug2D()
     {
-        Color col = BLACK;
+        auto col = BLACK;
         col.a = 50;
         // DrawRectangle(children->rec.x, children->rec.y, children->rec.width, children->rec.height, col);
     }

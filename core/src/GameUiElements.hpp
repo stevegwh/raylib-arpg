@@ -321,51 +321,54 @@ namespace sage
         friend class TableCell;
     };
 
-    // TODO: DialogOption : Textbox
-    // TODO: Make a common base between InventorySlot and EquipmentSlot
-
-    class EquipmentSlot : public ImageBox
+    class ItemSlot : public ImageBox
     {
-        entt::registry* registry{};
-        Texture emptyTex;
-        ControllableActorSystem* controllableActorSystem{};
-        void dropItemInWorld();
-        [[nodiscard]] bool validateDrop(ItemComponent& item) const;
-
       protected:
+        Texture emptyTex{};
+        void dropItemInWorld();
+        virtual void onItemDroppedToWorld() = 0;
         void updateRectangle(
             const Dimensions& dimensions, const Vector2& offset, const Dimensions& space) override;
 
+        [[nodiscard]] virtual entt::entity getItemId() = 0;
+
+      public:
+        void Draw2D() override;
+        virtual void RetrieveInfo();
+        void OnDrop(CellElement* receiver) override;
+        void HoverUpdate() override;
+        explicit ItemSlot(GameUIEngine* _engine);
+        friend class TableCell;
+    };
+
+    class EquipmentSlot : public ItemSlot
+    {
+        ControllableActorSystem* controllableActorSystem{};
+        [[nodiscard]] bool validateDrop(ItemComponent& item) const;
+
+      protected:
+        void onItemDroppedToWorld() override;
+        [[nodiscard]] entt::entity getItemId() override;
+
       public:
         EquipmentSlotName itemType;
-        void Draw2D() override;
-        void RetrieveInfo();
-        void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
-        void HoverUpdate() override;
         explicit EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType);
         friend class TableCell;
     };
 
-    class InventorySlot : public ImageBox
+    class InventorySlot : public ItemSlot
     {
-        entt::registry* registry{};
-        Texture emptyTex;
         ControllableActorSystem* controllableActorSystem{};
-        void dropItemInWorld();
 
       protected:
-        void updateRectangle(
-            const Dimensions& dimensions, const Vector2& offset, const Dimensions& space) override;
+        void onItemDroppedToWorld() override;
+        [[nodiscard]] entt::entity getItemId() override;
 
       public:
         unsigned int row{};
         unsigned int col{};
-        void Draw2D() override;
-        void RetrieveInfo();
-        void OnDrop(CellElement* receiver) override;
         void ReceiveDrop(CellElement* droppedElement) override;
-        void HoverUpdate() override;
         explicit InventorySlot(GameUIEngine* _engine);
         friend class TableCell;
     };
