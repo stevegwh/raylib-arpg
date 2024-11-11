@@ -16,7 +16,7 @@
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/ControllableActor.hpp"
-#include "components/Dialogue.hpp"
+#include "components/DialogComponent.hpp"
 #include "components/HealthBar.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/Renderable.hpp"
@@ -145,7 +145,7 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::NPC;
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
-        auto& dialogue = registry->emplace<Dialogue>(id);
+        auto& dialogue = registry->emplace<DialogComponent>(id);
         dialogue.sentence = "Hello, this is a test sentence.";
         dialogue.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));

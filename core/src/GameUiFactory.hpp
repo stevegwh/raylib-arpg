@@ -17,6 +17,7 @@ namespace sage
     class GameUIEngine;
     class PlayerAbilitySystem;
     struct CombatableActor;
+    struct DialogComponent;
 
     class GameUiFactory
     {
@@ -34,6 +35,7 @@ namespace sage
             GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos);
         static Window* CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos);
         static Window* CreateAbilityToolTip(GameUIEngine* engine, const Ability& ability, Vector2 pos);
+        static Window* CreateDialogWindow(GameUIEngine* engine, DialogComponent& dialog, Vector2 pos);
     };
 
 } // namespace sage
