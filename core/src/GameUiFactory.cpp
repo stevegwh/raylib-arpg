@@ -233,8 +233,7 @@ namespace sage
 
         return window;
     }
-
-    // TODO: Combine with CreateAbilityTooltip
+    
     Window* GameUiFactory::CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");

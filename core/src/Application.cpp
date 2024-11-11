@@ -27,7 +27,7 @@ namespace sage
         serializer::DeserializeKeyMapping(_keyMapping, "resources/keybinding.xml");
         keyMapping = std::make_unique<KeyMapping>(_keyMapping);
 
-        // SetConfigFlags(FLAG_MSAA_4X_HINT);
+        SetConfigFlags(FLAG_MSAA_4X_HINT);
         InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
 
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
