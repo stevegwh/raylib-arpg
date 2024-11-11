@@ -95,9 +95,8 @@ namespace sage
         return font;
     }
 
-    void TextBox::SetFont(Font _font, float _baseFontSize)
+    void TextBox::UpdateFontScaling()
     {
-        font = _font;
         auto screenWidth = engine->gameData->settings->screenWidth;
         auto screenHeight = engine->gameData->settings->screenHeight; // Fixed typo: was screenWidth
 
@@ -125,9 +124,16 @@ namespace sage
         float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
 
         // Apply scaling to base font size
-        fontSize = _baseFontSize * scaleFactor;
+        fontSize = baseFontSize * scaleFactor;
 
         fontSize = std::clamp(fontSize, minFontSize, maxFontSize);
+    }
+
+    void TextBox::SetFont(Font _font, float _baseFontSize)
+    {
+        baseFontSize = _baseFontSize;
+        font = _font;
+        UpdateFontScaling();
     }
 
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
@@ -138,7 +144,7 @@ namespace sage
 
     void TextBox::UpdateDimensions()
     {
-        // TODO: make this work with font scaling
+        UpdateFontScaling();
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
 
         if (overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
@@ -1364,17 +1370,17 @@ namespace sage
 
     /**
      *
-     * @param requestedHeight The desired height of the cell as a percent (0-100)
+     * @param _requestedHeight The desired height of the cell as a percent (0-100)
      * @return
      */
-    TableRow* Table::CreateTableRow(float requestedHeight)
+    TableRow* Table::CreateTableRow(float _requestedHeight)
     {
-        assert(requestedHeight <= 100 && requestedHeight >= 0);
+        assert(_requestedHeight <= 100 && _requestedHeight >= 0);
         children.push_back(std::make_unique<TableRow>());
         const auto& row = children.back();
         row->parent = this;
         row->autoSize = false;
-        row->requestedHeight = requestedHeight;
+        row->requestedHeight = _requestedHeight;
         UpdateChildren();
         return row.get();
     }

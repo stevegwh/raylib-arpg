@@ -204,10 +204,11 @@ namespace sage
     class TextBox : public CellElement
     {
         Shader sdfShader;
+        float baseFontSize = 12;
         float fontSize = 12;
         float fontSpacing = 2;
         Font font = GetFontDefault();
-        const float minFontSize = 8.0f;
+        const float minFontSize = 12.0f;
         const float maxFontSize = 72.0f;
 
       public:
@@ -222,6 +223,7 @@ namespace sage
         [[nodiscard]] Font GetFont() const;
         void SetFont(Font _font, float _fontSize);
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
+        void UpdateFontScaling();
         void UpdateDimensions() override;
         void Draw2D() override;
         ~TextBox() override = default;
