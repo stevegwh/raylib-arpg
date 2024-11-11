@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "DialogueWindow.hpp"
+#include "raylib.h"
 #include "systems/BaseSystem.hpp"
 
 #include "entt/entt.hpp"
@@ -12,16 +12,17 @@
 namespace sage
 {
     class GameData;
+    class Window;
     class DialogueSystem : public BaseSystem
     {
         GameData* gameData;
+        std::unique_ptr<Window> window;
         bool active = false;
         entt::entity selectedActor;
         entt::entity clickedNPC;
 
-        Vector3 oldCamPos;
-        Vector3 oldCamTarget;
-        std::unique_ptr<DialogueWindow> window;
+        Vector3 oldCamPos{};
+        Vector3 oldCamTarget{};
 
         void NPCClicked(entt::entity _clickedNPC);
         void changeControlledActor(entt::entity entity);
@@ -33,8 +34,6 @@ namespace sage
         entt::sigh<void()> onConversationStart;
         entt::sigh<void()> onConversationEnd;
 
-        void Update();
-        void Draw2D();
         explicit DialogueSystem(entt::registry* registry, GameData* _gameData);
     };
 } // namespace sage

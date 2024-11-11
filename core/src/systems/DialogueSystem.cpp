@@ -10,9 +10,10 @@
 
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
-#include "components/Dialogue.hpp"
+#include "components/DialogComponent.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
+#include "GameUiElements.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
 #include "raylib.h"
@@ -31,7 +32,7 @@ namespace sage
     {
         onConversationStart.publish();
 
-        const auto& npcDiag = registry->get<Dialogue>(clickedNPC);
+        const auto& npcDiag = registry->get<DialogComponent>(clickedNPC);
         std::cout << npcDiag.sentence << std::endl;
         registry->get<Animation>(clickedNPC).ChangeAnimation(1); // TODO: Change to an enum
 
@@ -102,7 +103,7 @@ namespace sage
     {
         if (clickedNPC != entt::null) return;
         clickedNPC = _clickedNPC;
-        const auto& npc = registry->get<Dialogue>(_clickedNPC);
+        const auto& npc = registry->get<DialogComponent>(_clickedNPC);
         const auto& actorCol = registry->get<Collideable>(selectedActor);
         const auto& npcCol = registry->get<Collideable>(_clickedNPC);
         gameData->controllableActorSystem->PathfindToLocation(selectedActor, npc.conversationPos);
@@ -115,22 +116,8 @@ namespace sage
         }
     }
 
-    void DialogueSystem::Update()
-    {
-        if (!active) return;
-    }
-
-    void DialogueSystem::Draw2D()
-    {
-        if (!active) return;
-        window->Draw();
-    }
-
     DialogueSystem::DialogueSystem(entt::registry* registry, GameData* _gameData)
-        : BaseSystem(registry),
-          clickedNPC(entt::null),
-          gameData(_gameData),
-          window(std::make_unique<DialogueWindow>(gameData->settings))
+        : BaseSystem(registry), clickedNPC(entt::null), gameData(_gameData)
     {
         {
             entt::sink sink{gameData->controllableActorSystem->onSelectedActorChange};

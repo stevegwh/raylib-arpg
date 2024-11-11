@@ -6,7 +6,7 @@
 
 #include "components/EquipmentComponent.hpp"
 #include "raylib.h"
-#include "systems/dialogue/DialogueSystem.hpp"
+#include "systems/DialogueSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "Timer.hpp"
 

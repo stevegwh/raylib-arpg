@@ -6,6 +6,7 @@
 
 #include "components/Ability.hpp"
 #include "components/CombatableActor.hpp"
+#include "components/DialogComponent.hpp"
 #include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
@@ -233,7 +234,7 @@ namespace sage
 
         return window;
     }
-    
+
     Window* GameUiFactory::CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
@@ -411,5 +412,9 @@ namespace sage
         }
         window->hidden = true;
         return window;
+    }
+
+    Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, DialogComponent& dialog, Vector2 pos)
+    {
     }
 } // namespace sage

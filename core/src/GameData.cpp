@@ -20,7 +20,7 @@
 #include "systems/CollisionSystem.hpp"
 #include "systems/CombatSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/dialogue/DialogueSystem.hpp"
+#include "systems/DialogueSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/InventorySystem.hpp"
