@@ -204,6 +204,11 @@ namespace sage
     class TextBox : public CellElement
     {
         Shader sdfShader;
+        float fontSize = 12;
+        float fontSpacing = 2;
+        Font font = GetFontDefault();
+        const float minFontSize = 8.0f;
+        const float maxFontSize = 72.0f;
 
       public:
         enum class OverflowBehaviour
@@ -212,27 +217,25 @@ namespace sage
             WORD_WRAP
         };
         OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
-        float fontSize = 12;
-        float fontSpacing = 2;
-        Font font = GetFontDefault();
         // color?
         std::string content;
-
-        explicit TextBox(GameUIEngine* _engine);
+        [[nodiscard]] Font GetFont() const;
+        void SetFont(Font _font, float _fontSize);
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void UpdateDimensions() override;
         void Draw2D() override;
         ~TextBox() override = default;
+        explicit TextBox(GameUIEngine* _engine);
     };
 
-    class DialogueOption : public TextBox
-    {
-        DialogueSystem* dialog;
-
-      public:
-        virtual void RetrieveInfo();
-        DialogueOption(GameUIEngine* _engine, DialogueSystem* _diaglogueSystem)
-    };
+    // class DialogueOption : public TextBox
+    // {
+    //     DialogueSystem* dialog;
+    //
+    //   public:
+    //     virtual void RetrieveInfo();
+    //     DialogueOption(GameUIEngine* _engine, DialogueSystem* _diaglogueSystem);
+    // };
 
     class TitleBar final : public TextBox
     {

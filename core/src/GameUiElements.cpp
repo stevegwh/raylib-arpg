@@ -90,6 +90,46 @@ namespace sage
     CellElement::CellElement(GameUIEngine* _engine)
         : engine(_engine), state(std::make_unique<IdleState>(this, engine)){};
 
+    Font TextBox::GetFont() const
+    {
+        return font;
+    }
+
+    void TextBox::SetFont(Font _font, float _baseFontSize)
+    {
+        font = _font;
+        auto screenWidth = engine->gameData->settings->screenWidth;
+        auto screenHeight = engine->gameData->settings->screenHeight; // Fixed typo: was screenWidth
+
+        // Reference resolution (what you're designing for)
+        const float baseWidth = 1440.0f; // Example: designing for 1080p
+        const float baseHeight = 900.0f;
+
+        // Calculate scaling factor based on screen dimensions
+        // You can use either width, height, or both depending on your needs
+        float scaleWidth = screenWidth / baseWidth;
+        float scaleHeight = screenHeight / baseHeight;
+
+        // Choose scaling method:
+
+        // Option 1: Scale based on width only
+        // float scaleFactor = scaleWidth;
+
+        // Option 2: Scale based on height only
+        // float scaleFactor = scaleHeight;
+
+        // Option 3: Scale based on smallest ratio to prevent overlarge fonts
+        // float scaleFactor = std::min(scaleWidth, scaleHeight);
+
+        // Option 4: Scale based on average of both dimensions
+        float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
+
+        // Apply scaling to base font size
+        fontSize = _baseFontSize * scaleFactor;
+
+        fontSize = std::clamp(fontSize, minFontSize, maxFontSize);
+    }
+
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
         overflowBehaviour = _behaviour;
@@ -98,13 +138,13 @@ namespace sage
 
     void TextBox::UpdateDimensions()
     {
-        constexpr int MIN_FONT_SIZE = 6;
+        // TODO: make this work with font scaling
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
 
         if (overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
             Vector2 textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
-            while (textSize.x > availableWidth && fontSize > MIN_FONT_SIZE)
+            while (textSize.x > availableWidth && fontSize > minFontSize)
             {
                 fontSize -= 1;
                 textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
@@ -1608,7 +1648,7 @@ namespace sage
         children = std::make_unique<TitleBar>(engine);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
         titleBar->parent = this;
-        titleBar->fontSize = fontSize;
+        titleBar->SetFont(GetFontDefault(), fontSize);
         titleBar->overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
         titleBar->content = _title;
         UpdateChildren();
@@ -1635,9 +1675,8 @@ namespace sage
         children = std::make_unique<TextBox>(engine);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
         textbox->parent = this;
-        textbox->font = GetFontDefault();
-        SetTextureFilter(textbox->font.texture, TEXTURE_FILTER_BILINEAR);
-        textbox->fontSize = fontSize;
+        textbox->SetFont(GetFontDefault(), fontSize);
+        SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
         textbox->overflowBehaviour = overflowBehaviour;
         textbox->content = _content;
         UpdateChildren();

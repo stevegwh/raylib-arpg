@@ -42,7 +42,7 @@ namespace sage
 
         auto row0 = table->CreateTableRow();
         auto cell0 = row0->CreateTableCell(95);
-        cell0->CreateTitleBar(engine, "Title Bar", 12);
+        cell0->CreateTitleBar(engine, "Title Bar", 24);
         auto cell01 = row0->CreateTableCell();
         auto tex0 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
         cell01->CreateCloseButton(engine, tex0);
@@ -198,7 +198,7 @@ namespace sage
             auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
         }
 
@@ -219,7 +219,7 @@ namespace sage
             auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
             row->SetPaddingPercent({10, 0, 0, 0});
@@ -227,7 +227,7 @@ namespace sage
             cell->CreateTextbox(
                 engine,
                 std::format("HP: {}/{}", combatInfo.data.hp, combatInfo.data.maxHp),
-                10,
+                11,
                 TextBox::OverflowBehaviour::WORD_WRAP);
         }
 
@@ -248,12 +248,12 @@ namespace sage
             auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, item.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto textbox = cell0->CreateTextbox(engine, item.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
             row->SetPaddingPercent({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
-            cell->CreateTextbox(engine, item.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            cell->CreateTextbox(engine, item.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
         }
 
         return window;
@@ -272,12 +272,12 @@ namespace sage
             auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, ability.name, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto textbox = cell0->CreateTextbox(engine, ability.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
             row->SetPaddingPercent({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
-            cell->CreateTextbox(engine, ability.description, 10, TextBox::OverflowBehaviour::WORD_WRAP);
+            cell->CreateTextbox(engine, ability.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
         }
 
         return window;
@@ -310,7 +310,7 @@ namespace sage
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
-            auto titlebar = cell->CreateTitleBar(engine, "Inventory", 12);
+            auto titlebar = cell->CreateTitleBar(engine, "Inventory", 15);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             titlebar->SetVertAlignment(VertAlignment::MIDDLE);
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
@@ -357,7 +357,7 @@ namespace sage
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
-            auto titlebar = cell->CreateTitleBar(engine, "Character", 12);
+            auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             titlebar->SetVertAlignment(VertAlignment::MIDDLE);
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
