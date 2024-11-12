@@ -262,7 +262,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({10, 2, 10, 5});
+        window->SetPadding({16, 2, 10, 6});
 
         {
             auto table = window->CreateTable();
@@ -349,7 +349,7 @@ namespace sage
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {
-            auto table = window->CreateTable(6);
+            auto table = window->CreateTable(4);
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);

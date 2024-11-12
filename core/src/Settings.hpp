@@ -10,8 +10,8 @@ namespace sage
 {
     struct Settings
     {
-        static constexpr float TARGET_SCREEN_WIDTH = 1440.0f; // Should likely target 1080p.
-        static constexpr float TARGET_SCREEN_HEIGHT = 900.0f;
+        static constexpr float TARGET_SCREEN_WIDTH = 1920.0f;
+        static constexpr float TARGET_SCREEN_HEIGHT = 1080.0f;
 
         // Current settings
         int screenWidth = 1280;
@@ -28,7 +28,7 @@ namespace sage
             // Choose scaling method:
 
             // Option 1: Scale based on width only
-            // float scaleFactor = scaleWidth;
+            float scaleFactor = scaleWidth;
 
             // Option 2: Scale based on height only
             // float scaleFactor = scaleHeight;
@@ -37,7 +37,7 @@ namespace sage
             // float scaleFactor = std::min(scaleWidth, scaleHeight);
 
             // Option 4: Scale based on average of both dimensions
-            float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
+            // float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
             return scaleFactor;
         }
 
