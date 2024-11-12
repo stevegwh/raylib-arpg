@@ -212,11 +212,11 @@ namespace sage
     class TextBox : public CellElement
     {
         Shader sdfShader;
-        float baseFontSize = 12;
-        float fontSize = 12;
+        float baseFontSize = 14;
+        float fontSize = 14;
         float fontSpacing = 2;
         Font font = GetFontDefault();
-        const float minFontSize = 12.0f;
+        const float minFontSize = 14.0f;
         const float maxFontSize = 72.0f;
 
       public:
