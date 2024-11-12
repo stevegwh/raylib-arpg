@@ -414,9 +414,9 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+        const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        auto window =
+        const auto window =
             engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 25, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         // window->SetOffsetPercent(0, -10);
@@ -424,12 +424,24 @@ namespace sage
         window->SetPadding({32, 32, 16, 16});
 
         const auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
-        auto table = window->CreateTable();
-        auto row = table->CreateTableRow();
-        auto cell = row->CreateTableCell();
-        cell->SetPadding({10, 10, 5, 5});
-        auto textbox = cell->CreateTextbox(engine, dialogComponent.sentence);
+        const auto table = window->CreateTable();
+
+        const auto descriptionRow = table->CreateTableRow();
+        const auto descriptionCell = descriptionRow->CreateTableCell();
+        descriptionCell->SetPadding({10, 10, 5, 5});
+        const auto textbox =
+            descriptionCell->CreateTextbox(engine, dialogComponent.conversation->GetCurrentNode()->content);
         textbox->SetOverflowBehaviour(TextBox::OverflowBehaviour::WORD_WRAP);
+
+        for (auto& o : dialogComponent.conversation->GetCurrentNode()->options)
+        {
+
+            const auto optionRow = table->CreateTableRow();
+            const auto optionCell = optionRow->CreateTableCell();
+            optionCell->SetPadding({10, 10, 5, 5});
+            const auto option = optionCell->CreateDialogOption(engine, o);
+            option->SetOverflowBehaviour(TextBox::OverflowBehaviour::WORD_WRAP);
+        }
 
         return window;
     }

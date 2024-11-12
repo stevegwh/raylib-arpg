@@ -6,8 +6,10 @@
 
 #include "Settings.hpp"
 
+#include "components/DialogComponent.hpp"
 #include "raylib.h"
 #include "Timer.hpp"
+
 #include <entt/entt.hpp>
 #include <optional>
 #include <vector>
@@ -212,6 +214,7 @@ namespace sage
 
     class TextBox : public CellElement
     {
+      protected:
         Shader sdfShader;
         float baseFontSize = 14;
         float fontSize = 14;
@@ -239,14 +242,14 @@ namespace sage
         explicit TextBox(GameUIEngine* _engine);
     };
 
-    // class DialogueOption : public TextBox
-    // {
-    //     DialogueSystem* dialog;
-    //
-    //   public:
-    //     virtual void RetrieveInfo();
-    //     DialogueOption(GameUIEngine* _engine, DialogueSystem* _diaglogueSystem);
-    // };
+    class DialogOption : public TextBox
+    {
+        dialog::Option option;
+
+      public:
+        void OnClick() override;
+        DialogOption(GameUIEngine* _engine, dialog::Option _option);
+    };
 
     class TitleBar final : public TextBox
     {
@@ -403,6 +406,11 @@ namespace sage
             const std::string& _content,
             float fontSize = 16,
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
+        DialogOption* CreateDialogOption(
+            GameUIEngine* engine,
+            const dialog::Option&,
+            float fontSize = 16,
+            TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         TitleBar* CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize);
         ImageBox* CreateImagebox(GameUIEngine* engine, Texture _tex);
         CloseButton* CreateCloseButton(GameUIEngine* engine, Texture _tex);
@@ -525,7 +533,7 @@ namespace sage
         void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
         void SetAlignment(VertAlignment vert, HoriAlignment hori);
         void OnScreenSizeChange() override;
-        WindowDocked(Settings* _settings) : Window(_settings){};
+        explicit WindowDocked(Settings* _settings) : Window(_settings){};
     };
 
     class UIState

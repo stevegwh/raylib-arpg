@@ -147,18 +147,17 @@ namespace sage
       public:
         void Update(entt::entity self) override
         {
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-            {
-                auto& playerState = registry->get<PlayerState>(self);
-                playerState.ChangeState(self, PlayerStateEnum::Default);
-            }
+            // if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+            // {
+            //     auto& playerState = registry->get<PlayerState>(self);
+            //     playerState.ChangeState(self, PlayerStateEnum::Default);
+            // }
         }
 
         void OnStateEnter(entt::entity self) override
         {
             auto& playerDiag = registry->get<DialogComponent>(self);
             const auto& npcDiag = registry->get<DialogComponent>(playerDiag.dialogTarget);
-            std::cout << npcDiag.sentence << std::endl;
             registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::TALK);
 
             // Rotate to look at NPC
