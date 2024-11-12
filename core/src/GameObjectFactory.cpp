@@ -146,9 +146,36 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::NPC;
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
-        auto& dialogue = registry->emplace<DialogComponent>(id);
-        dialogue.sentence = "Hello, this is a test sentence.";
-        dialogue.conversationPos =
+        auto& dialog = registry->emplace<DialogComponent>(id);
+
+        std::vector<std::unique_ptr<dialog::ConversationNode>> nodes;
+        {
+            auto node = std::make_unique<dialog::ConversationNode>();
+            node->content = "Hello there, this is a test sentence! \n";
+            node->index = 0;
+            dialog::Option option1;
+            option1.description = "Erm... I have no idea what you're talking about? \n";
+            option1.nextIndex = 1;
+            dialog::Option option2;
+            option2.description = "Right... thanks! \n";
+            option2.nextIndex = 1;
+            node->options.push_back(option1);
+            node->options.push_back(option2);
+            nodes.push_back(std::move(node));
+        }
+        {
+            auto node = std::make_unique<dialog::ConversationNode>();
+            node->content = "Hahaha! \n";
+            node->index = 0;
+            dialog::Option option1;
+            option1.description = "Take your leave \n";
+            node->options.push_back(option1);
+            nodes.push_back(std::move(node));
+        }
+
+        dialog.conversation = std::make_unique<dialog::Conversation>(nodes);
+
+        dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
         Shader shader = ResourceManager::GetInstance().ShaderLoad(

@@ -28,6 +28,7 @@
 #include <cassert>
 #include <ranges>
 #include <sstream>
+#include <utility>
 
 namespace sage
 {
@@ -225,7 +226,20 @@ namespace sage
 
     TextBox::TextBox(GameUIEngine* _engine)
         : CellElement(_engine),
-          sdfShader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/sdf.fs")){};
+          sdfShader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/sdf.fs"))
+    {
+    }
+
+    void DialogOption::OnClick()
+    {
+        content = "WOOOOO! \n";
+    }
+
+    DialogOption::DialogOption(GameUIEngine* _engine, dialog::Option _option)
+        : TextBox(_engine), option(std::move(_option))
+    {
+        content = option.description;
+    }
 
     void TitleBar::OnDragStart()
     {
@@ -1625,6 +1639,22 @@ namespace sage
         SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
         textbox->overflowBehaviour = overflowBehaviour;
         textbox->content = _content;
+        UpdateChildren();
+        return textbox;
+    }
+
+    DialogOption* TableCell::CreateDialogOption(
+        GameUIEngine* engine,
+        const dialog::Option& option,
+        float fontSize,
+        TextBox::OverflowBehaviour overflowBehaviour)
+    {
+        children = std::make_unique<DialogOption>(engine, option);
+        auto* textbox = dynamic_cast<DialogOption*>(children.get());
+        textbox->parent = this;
+        textbox->SetFont(GetFontDefault(), fontSize);
+        SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
+        textbox->overflowBehaviour = overflowBehaviour;
         UpdateChildren();
         return textbox;
     }
