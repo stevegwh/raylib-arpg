@@ -33,9 +33,9 @@
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 
+#include "components/PartyMemberComponent.hpp"
 #include "components/Spawner.hpp"
-#include <components/PartyMemberComponent.hpp>
-#include <GameObjectFactory.hpp>
+#include "GameObjectFactory.hpp"
 
 namespace sage
 {
@@ -114,8 +114,7 @@ namespace sage
 
         // GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
         // GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
-        // TODO: When I change below, the inventory updates correctly for picking up items for that char (but not
-        // the others) data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);
+        // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);
         //  registry->erase<Spawner>(view.begin(), view.end());
 
         // Clear any CPU resources that are no longer needed
@@ -123,12 +122,11 @@ namespace sage
         // ResourceManager::GetInstance().UnloadShaderFileText();
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 200}, 20, 40);
-        // TODO: Equipment UI and system
         auto* window2 = GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {600, 200}, 20, 40);
         entt::sink sink{data->userInput->keyIPressed};
-        sink.connect<[](Window& window) { window.hidden = !window.hidden; }>(*window);
+        sink.connect<&Window::ToggleHide>(*window);
         entt::sink sink2{data->userInput->keyCPressed};
-        sink2.connect<[](Window& window2) { window2.hidden = !window2.hidden; }>(*window2);
+        sink2.connect<&Window::ToggleHide>(*window2);
 
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
     };

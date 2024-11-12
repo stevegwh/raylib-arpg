@@ -328,7 +328,7 @@ namespace sage
                 }
             }
         }
-        window->hidden = true;
+        window->Hide();
         return window;
     }
 
@@ -406,7 +406,7 @@ namespace sage
             createEquipSlot(4, 0, EquipmentSlotName::LEFTHAND);
             createEquipSlot(4, 2, EquipmentSlotName::RIGHTHAND);
         }
-        window->hidden = true;
+        window->Hide();
         return window;
     }
 
