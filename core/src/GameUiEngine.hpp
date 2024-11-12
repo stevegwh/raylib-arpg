@@ -245,8 +245,12 @@ namespace sage
     class DialogOption : public TextBox
     {
         const dialog::Option& option;
+        bool drawHighlight = false;
 
       public:
+        void OnHoverStart() override;
+        void OnHoverStop() override;
+        void Draw2D() override;
         void OnClick() override;
         DialogOption(GameUIEngine* _engine, const dialog::Option& _option);
     };
@@ -631,6 +635,13 @@ namespace sage
             float _heightPercent,
             WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL,
             bool tooltip = false);
+
+        WindowDocked* CreateWindowDocked(
+            float _xOffsetPercent,
+            float _yOffsetPercent,
+            float _widthPercent,
+            float _heightPercent,
+            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
 
         WindowDocked* CreateWindowDocked(
             Texture _nPatchTexture,

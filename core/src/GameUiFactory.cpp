@@ -97,10 +97,10 @@ namespace sage
     Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
-        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 8, 30, WindowTableAlignment::STACK_VERTICAL);
+        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+        auto window = engine->CreateWindowDocked(0, 0, 8, 30, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({12, 12, 16, 16});
 
         auto table = window->CreateTable();
