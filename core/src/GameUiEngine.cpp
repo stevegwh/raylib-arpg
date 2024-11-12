@@ -230,6 +230,29 @@ namespace sage
     {
     }
 
+    void DialogOption::OnHoverStart()
+    {
+        drawHighlight = true;
+        TextBox::OnHoverStart();
+    }
+
+    void DialogOption::OnHoverStop()
+    {
+        drawHighlight = false;
+        TextBox::OnHoverStop();
+    }
+
+    void DialogOption::Draw2D()
+    {
+        TextBox::Draw2D();
+        if (drawHighlight)
+        {
+            float offset = 10 * parent->GetWindow()->settings->GetScreenScaleFactor();
+            DrawRectangleLines(
+                rec.x - offset, rec.y - offset, rec.width + offset * 2, rec.height + offset * 2, BLACK);
+        }
+    }
+
     void DialogOption::OnClick()
     {
         auto* conversation = option.parent->parent;
@@ -1933,19 +1956,17 @@ namespace sage
     }
 
     WindowDocked* GameUIEngine::CreateWindowDocked(
-        Texture _nPatchTexture,
-        const float _xOffsetPercent,
-        const float _yOffsetPercent,
-        const float _widthPercent,
-        const float _heightPercent,
-        const WindowTableAlignment _alignment)
+        float _xOffsetPercent,
+        float _yOffsetPercent,
+        float _widthPercent,
+        float _heightPercent,
+        WindowTableAlignment _alignment)
     {
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
-        window->tex = _nPatchTexture;
         window->rec = {
             window->GetOffset().x,
             window->GetOffset().y,
@@ -1955,6 +1976,20 @@ namespace sage
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&WindowDocked::OnScreenSizeChange>(window);
 
+        return window;
+    }
+
+    WindowDocked* GameUIEngine::CreateWindowDocked(
+        Texture _nPatchTexture,
+        const float _xOffsetPercent,
+        const float _yOffsetPercent,
+        const float _widthPercent,
+        const float _heightPercent,
+        const WindowTableAlignment _alignment)
+    {
+        auto* window =
+            CreateWindowDocked(_xOffsetPercent, _yOffsetPercent, _widthPercent, _heightPercent, _alignment);
+        window->tex = _nPatchTexture;
         return window;
     }
 
