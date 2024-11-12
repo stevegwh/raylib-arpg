@@ -4,10 +4,8 @@
 
 #pragma once
 
-#include "components/EquipmentComponent.hpp"
 #include "raylib.h"
-#include "systems/DialogSystem.hpp"
-#include "systems/PartySystem.hpp"
+#include "Settings.hpp"
 #include "Timer.hpp"
 
 #include <entt/entt.hpp>
@@ -18,6 +16,7 @@
 namespace sage
 {
     struct ItemComponent;
+    class EquipmentComponent;
     enum class EquipmentSlotName;
     class PartySystem;
     class GameUIEngine;
@@ -28,7 +27,6 @@ namespace sage
     class UIState;
     class PlayerAbilitySystem;
     class ControllableActorSystem;
-    struct Settings;
     class UserInput;
     class Cursor;
 
@@ -95,7 +93,7 @@ namespace sage
         Margin margin;
 
       public:
-        Parent* parent;
+        Parent* parent{};
         Child children;
 
         std::optional<Texture> tex{};
@@ -124,19 +122,29 @@ namespace sage
             }
         }
 
-        void SetPaddingPixel(const Padding& _padding)
+        // Sets padding by pixel value (screen scaling is applied)
+        void SetPadding(const Padding& _padding)
         {
             padding = _padding;
+            auto* window = GetWindow();
+            float scaleFactor = window->settings->GetScreenScaleFactor();
+            padding.up *= scaleFactor;
+            padding.down *= scaleFactor;
+            padding.left *= scaleFactor;
+            padding.right *= scaleFactor;
             UpdateChildren();
         }
 
-        // Set padding in percent of parent
+        // Set padding in percent of screen
         void SetPaddingPercent(const Padding& _padding)
         {
-            padding.up = rec.height * (_padding.up / 100);
-            padding.down = rec.height * (_padding.down / 100);
-            padding.left = rec.width * (_padding.left / 100);
-            padding.right = rec.width * (_padding.right / 100);
+            auto* window = GetWindow();
+            float screenWidth = window->settings->screenWidth;
+            float screenHeight = window->settings->screenHeight;
+            padding.up = screenHeight * (_padding.up / 100);
+            padding.down = screenHeight * (_padding.down / 100);
+            padding.left = screenWidth * (_padding.left / 100);
+            padding.right = screenWidth * (_padding.right / 100);
             UpdateChildren();
         }
 
@@ -495,7 +503,7 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
-        Window() = default;
+        Window(Settings* _settings) : settings(_settings){};
     };
 
     class WindowDocked final : public Window
@@ -512,6 +520,6 @@ namespace sage
         void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
         void SetAlignment(VertAlignment vert, HoriAlignment hori);
         void OnScreenSizeChange() override;
-        WindowDocked() = default;
+        WindowDocked(Settings* _settings) : Window(_settings){};
     };
 } // namespace sage

@@ -3,24 +3,23 @@
 //
 
 #include "GameUiElements.hpp"
+#include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
+#include "components/PartyMemberComponent.hpp"
+#include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
 #include "ResourceManager.hpp"
-#include "Settings.hpp"
+#include "rlgl.h"
 #include "slib.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/PlayerAbilitySystem.hpp"
-
-#include "components/EquipmentComponent.hpp"
-#include "components/PartyMemberComponent.hpp"
-#include "components/sgTransform.hpp"
-#include "rlgl.h"
 #include "systems/EquipmentSystem.hpp"
+#include "systems/PartySystem.hpp"
+#include "systems/PlayerAbilitySystem.hpp"
 
 #include <cassert>
 #include <sstream>
@@ -97,35 +96,8 @@ namespace sage
 
     void TextBox::UpdateFontScaling()
     {
-        auto screenWidth = engine->gameData->settings->screenWidth;
-        auto screenHeight = engine->gameData->settings->screenHeight; // Fixed typo: was screenWidth
-
-        // Reference resolution (what you're designing for)
-        const float baseWidth = 1440.0f; // Example: designing for 1080p
-        const float baseHeight = 900.0f;
-
-        // Calculate scaling factor based on screen dimensions
-        // You can use either width, height, or both depending on your needs
-        float scaleWidth = screenWidth / baseWidth;
-        float scaleHeight = screenHeight / baseHeight;
-
-        // Choose scaling method:
-
-        // Option 1: Scale based on width only
-        // float scaleFactor = scaleWidth;
-
-        // Option 2: Scale based on height only
-        // float scaleFactor = scaleHeight;
-
-        // Option 3: Scale based on smallest ratio to prevent overlarge fonts
-        // float scaleFactor = std::min(scaleWidth, scaleHeight);
-
-        // Option 4: Scale based on average of both dimensions
-        float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
-
-        // Apply scaling to base font size
+        float scaleFactor = engine->gameData->settings->GetScreenScaleFactor();
         fontSize = baseFontSize * scaleFactor;
-
         fontSize = std::clamp(fontSize, minFontSize, maxFontSize);
     }
 
@@ -980,6 +952,9 @@ namespace sage
 
     void Window::SetPosition(float x, float y)
     {
+        //        float scaleFactor = settings->GetScreenScaleFactor();
+        //        rec.x = x * scaleFactor;
+        //        rec.y = y * scaleFactor;
         rec.x = x;
         rec.y = y;
     }

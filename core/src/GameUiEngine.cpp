@@ -216,12 +216,11 @@ namespace sage
         const bool tooltip)
     {
 
-        auto window = std::make_unique<Window>();
+        auto window = std::make_unique<Window>(gameData->settings);
 
         window->SetPosition(x, y);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
-        window->settings = gameData->settings;
         window->tex = _nPatchTexture;
         // TODO: Shouldn't SetPosition/SetDimensions already do below?
         window->rec = {
@@ -251,12 +250,11 @@ namespace sage
         const float _heightPercent,
         const WindowTableAlignment _alignment)
     {
-        windows.push_back(std::make_unique<WindowDocked>());
+        windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tableAlignment = _alignment;
-        window->settings = gameData->settings;
         window->tex = _nPatchTexture;
         window->rec = {
             window->GetOffset().x,
