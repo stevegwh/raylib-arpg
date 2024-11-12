@@ -12,12 +12,16 @@
 #include "EntityReflectionSignalRouter.hpp"
 
 #include "AbilityFactory.hpp"
+#include "Camera.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
 #include <cassert>
 
+#include "components/DialogComponent.hpp"
 #include "raylib.h"
+#include "systems/DialogSystem.hpp"
+#include "systems/PartySystem.hpp"
 
 namespace sage
 {
@@ -28,6 +32,15 @@ namespace sage
         {
             gameData->controllableActorSystem->PathfindToLocation(
                 self, gameData->cursor->getFirstCollision().point);
+        }
+
+        void onNPCLeftClick(entt::entity self, entt::entity target) const
+        {
+            if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
+            auto& playerDiag = registry->get<DialogComponent>(self);
+            playerDiag.dialogTarget = target;
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::MovingToTalkToNPC);
         }
 
         void onEnemyLeftClick(entt::entity self, entt::entity target) const
@@ -70,6 +83,8 @@ namespace sage
             leftSink.connect<&DefaultState::onEnemyLeftClick>(this);
             entt::sink rightSink{controllable.onEnemyRightClick};
             rightSink.connect<&DefaultState::onEnemyRightClick>(this);
+            entt::sink npcSink{controllable.onNPCLeftClick};
+            npcSink.connect<&DefaultState::onNPCLeftClick>(this);
             entt::sink floorClickSink{controllable.onFloorClick};
             floorClickSink.connect<&DefaultState::onFloorClick>(this);
             entt::sink movementCancelSink{moveable.onMovementCancel};
@@ -87,16 +102,87 @@ namespace sage
         }
     };
 
+    // ----------------------------
+
     class PlayerStateController::MovingToTalkToNPCState : public StateMachine
     {
-        void onTargetReached(entt::entity self);
+        void onTargetReached(entt::entity self)
+        {
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::InDialog);
+        }
 
       public:
-        void Update(entt::entity entity) override;
-        void OnStateEnter(entt::entity entity) override;
-        void OnStateExit(entt::entity entity) override;
+        void Update(entt::entity self) override
+        {
+        }
+        void OnStateEnter(entt::entity self) override
+        {
+            const auto& playerDiag = registry->get<DialogComponent>(self);
+            const auto& npc = registry->get<DialogComponent>(playerDiag.dialogTarget);
+            gameData->controllableActorSystem->PathfindToLocation(self, npc.conversationPos);
+            auto& moveable = registry->get<MoveableActor>(self);
+            // TODO: Difference between onDestinationReached and onFinishMovement?
+            entt::sink sink{moveable.onDestinationReached};
+            sink.connect<&MovingToTalkToNPCState::onTargetReached>(this);
+        }
+        void OnStateExit(entt::entity self) override
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            // TODO: Difference between onDestinationReached and onFinishMovement?
+            entt::sink sink{moveable.onDestinationReached};
+            sink.disconnect<&MovingToTalkToNPCState::onTargetReached>(this);
+        }
         ~MovingToTalkToNPCState() override = default;
         MovingToTalkToNPCState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
+        {
+        }
+    };
+
+    // ----------------------------
+
+    class PlayerStateController::InDialogState : public StateMachine
+    {
+
+      public:
+        void Update(entt::entity self) override
+        {
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+            {
+                auto& playerState = registry->get<PlayerState>(self);
+                playerState.ChangeState(self, PlayerStateEnum::Default);
+            }
+        }
+
+        void OnStateEnter(entt::entity self) override
+        {
+            auto& playerDiag = registry->get<DialogComponent>(self);
+            const auto& npcDiag = registry->get<DialogComponent>(playerDiag.dialogTarget);
+            std::cout << npcDiag.sentence << std::endl;
+            registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::TALK);
+
+            // Rotate to look at NPC
+            auto& actorTrans = registry->get<sgTransform>(self);
+            auto& npcTrans = registry->get<sgTransform>(playerDiag.dialogTarget);
+            Vector3 direction = Vector3Subtract(npcTrans.GetWorldPos(), actorTrans.GetWorldPos());
+            direction = Vector3Normalize(direction);
+            float angle = atan2f(direction.x, direction.z);
+            actorTrans.SetRotation({actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z});
+
+            gameData->dialogueSystem->StartConversation(npcTrans);
+        }
+
+        void OnStateExit(entt::entity self) override
+        {
+            auto& playerDiag = registry->get<DialogComponent>(self);
+            gameData->dialogueSystem->EndConversation();
+            registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::IDLE);
+            playerDiag.dialogTarget = entt::null;
+        }
+
+        ~InDialogState() override = default;
+
+        InDialogState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
@@ -277,5 +363,8 @@ namespace sage
         states[PlayerStateEnum::MovingToAttackEnemy] =
             std::make_unique<MovingToAttackEnemyState>(_registry, _gameData);
         states[PlayerStateEnum::Combat] = std::make_unique<CombatState>(_registry, _gameData);
+        states[PlayerStateEnum::MovingToTalkToNPC] =
+            std::make_unique<MovingToTalkToNPCState>(_registry, _gameData);
+        states[PlayerStateEnum::InDialog] = std::make_unique<InDialogState>(_registry, _gameData);
     }
 } // namespace sage

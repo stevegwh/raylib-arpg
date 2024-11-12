@@ -51,7 +51,6 @@ namespace sage
 
     void ExampleScene::Draw2D()
     {
-        data->dialogueSystem->Draw2D();
         Scene::Draw2D();
     }
 

@@ -32,17 +32,6 @@ namespace sage
         return registry->get<PartyMemberComponent>(party.at(memberNumber));
     }
 
-    void PartySystem::SetLeader(entt::entity entity)
-    {
-        leader = entity;
-        // TODO: publish event? should react to event?
-    }
-
-    entt::entity PartySystem::GetLeader() const
-    {
-        return leader;
-    }
-
     unsigned int PartySystem::GetSize() const
     {
         return party.size();

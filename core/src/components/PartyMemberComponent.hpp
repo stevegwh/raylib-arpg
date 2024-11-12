@@ -12,7 +12,6 @@ namespace sage
     struct PartyMemberComponent
     {
         const entt::entity entity;
-        entt::entity leader = entt::null;
         AssetID portraitImage{};
         explicit PartyMemberComponent(entt::entity _entity) : entity(_entity){};
     };
