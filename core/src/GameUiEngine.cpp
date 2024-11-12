@@ -232,7 +232,7 @@ namespace sage
         // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        sink.connect<&Window::OnScreenSizeChange>(window.get());
+        window->windowUpdateCnx = sink.connect<&Window::OnScreenSizeChange>(window.get());
         if (tooltip)
         {
             tooltipWindow = std::move(window);
@@ -263,7 +263,7 @@ namespace sage
             window->GetDimensions().height};
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        sink.connect<&WindowDocked::OnScreenSizeChange>(window);
+        window->windowUpdateCnx = sink.connect<&WindowDocked::OnScreenSizeChange>(window);
 
         return window;
     }

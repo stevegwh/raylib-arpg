@@ -238,7 +238,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({10, 2, 5, 5});
+        window->SetPadding({10, 2, 10, 5});
 
         {
             auto table = window->CreateTable();
@@ -247,7 +247,7 @@ namespace sage
             auto textbox = cell0->CreateTextbox(engine, item.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
-            row->SetPaddingPercent({10, 0, 0, 0});
+            row->SetPadding({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(engine, item.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
         }
@@ -421,7 +421,7 @@ namespace sage
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         // window->SetOffsetPercent(0, -10);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
-        window->SetPaddingPercent({8, 8, 8, 8});
+        window->SetPadding({32, 32, 16, 16});
 
         const auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
         auto table = window->CreateTable();
