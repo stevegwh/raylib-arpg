@@ -923,10 +923,12 @@ namespace sage
     {
         hidden = true;
         markForRemoval = true;
+        windowUpdateCnx.release();
     }
 
     void Window::OnScreenSizeChange()
     {
+        if (markForRemoval) return;
         // TODO: Could do something fancier with changing the x/y based on the new width/height
         // This would be "easy" to do as OnScreenSizeChange is reacting to an event that passes width/height as the
         // parameters (which we currently ignore). Alternatively, we have a pointer to settings, anyway.

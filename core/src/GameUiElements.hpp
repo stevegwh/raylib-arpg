@@ -477,6 +477,7 @@ namespace sage
     {
 
       public:
+        entt::connection windowUpdateCnx{};
         float widthPercent = 0;  // Width as percent of screen space
         float heightPercent = 0; // Height as percent of screen space
 
