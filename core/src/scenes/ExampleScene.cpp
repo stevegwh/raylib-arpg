@@ -40,7 +40,7 @@ namespace sage
         Scene::Update();
         data->actorMovementSystem->Update();
         data->controllableActorSystem->Update();
-        data->dialogueSystem->Update();
+        data->dialogSystem->Update();
         data->healthBarSystem->Update();
         data->stateMachines->Update();
         data->playerAbilitySystem->Update();
