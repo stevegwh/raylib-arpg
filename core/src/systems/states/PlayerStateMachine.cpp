@@ -169,7 +169,7 @@ namespace sage
             float angle = atan2f(direction.x, direction.z);
             actorTrans.SetRotation({actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z});
 
-            gameData->dialogSystem->StartConversation(npcTrans);
+            gameData->dialogSystem->StartConversation(npcTrans, playerDiag.dialogTarget);
         }
 
         void OnStateExit(entt::entity self) override

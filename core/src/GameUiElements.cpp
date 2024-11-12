@@ -896,6 +896,7 @@ namespace sage
     {
         xOffsetPercent = _xOffsetPercent / 100;
         yOffsetPercent = _yOffsetPercent / 100;
+        UpdateChildren();
     }
 
     void WindowDocked::SetAlignment(VertAlignment vert, HoriAlignment hori)
