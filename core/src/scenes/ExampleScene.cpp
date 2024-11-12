@@ -22,7 +22,7 @@
 #include "systems/CollisionSystem.hpp"
 #include "systems/CombatSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/DialogueSystem.hpp"
+#include "systems/DialogSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"

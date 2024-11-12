@@ -13,7 +13,7 @@ namespace sage
 {
     class GameData;
     class Window;
-    class DialogueSystem : public BaseSystem
+    class DialogSystem : public BaseSystem
     {
         GameData* gameData;
         std::unique_ptr<Window> window;
@@ -34,6 +34,6 @@ namespace sage
         entt::sigh<void()> onConversationStart;
         entt::sigh<void()> onConversationEnd;
 
-        explicit DialogueSystem(entt::registry* registry, GameData* _gameData);
+        explicit DialogSystem(entt::registry* registry, GameData* _gameData);
     };
 } // namespace sage

@@ -6,7 +6,7 @@
 
 #include "components/EquipmentComponent.hpp"
 #include "raylib.h"
-#include "systems/DialogueSystem.hpp"
+#include "systems/DialogSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "Timer.hpp"
 
@@ -221,7 +221,7 @@ namespace sage
         // color?
         std::string content;
         [[nodiscard]] Font GetFont() const;
-        void SetFont(Font _font, float _fontSize);
+        void SetFont(const Font& _font, float _baseFontSize);
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void UpdateFontScaling();
         void UpdateDimensions() override;

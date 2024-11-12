@@ -129,7 +129,7 @@ namespace sage
         fontSize = std::clamp(fontSize, minFontSize, maxFontSize);
     }
 
-    void TextBox::SetFont(Font _font, float _baseFontSize)
+    void TextBox::SetFont(const Font& _font, float _baseFontSize)
     {
         baseFontSize = _baseFontSize;
         font = _font;
