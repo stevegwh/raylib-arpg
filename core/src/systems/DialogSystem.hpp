@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "raylib.h"
 #include "systems/BaseSystem.hpp"
 
 #include "entt/entt.hpp"
+#include "raylib.h"
 
 namespace sage
 {
@@ -19,14 +19,8 @@ namespace sage
     {
         GameData* gameData;
         Window* dialogWindow{};
-
         Vector3 oldCamPos{};
         Vector3 oldCamTarget{};
-
-        // void NPCClicked(entt::entity _clickedNPC);
-        // void cancelConversation(entt::entity entity);
-        // void startConversation(entt::entity actor);
-        // void endConversation(entt::entity actor);
 
       public:
         void StartConversation(const sgTransform& cutscenePose, entt::entity npc);

@@ -14,7 +14,6 @@
 // Systems
 #include "AbilityFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
-#include "GameUiFactory.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
