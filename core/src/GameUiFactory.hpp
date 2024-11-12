@@ -9,6 +9,10 @@
 
 namespace sage
 {
+    namespace dialog
+    {
+        class Conversation;
+    }
     class PartySystem;
     class ControllableActorSystem;
     struct Ability;

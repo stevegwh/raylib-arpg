@@ -37,8 +37,10 @@ namespace sage
         void onNPCLeftClick(entt::entity self, entt::entity target) const
         {
             if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
-            auto& playerDiag = registry->get<DialogComponent>(self);
-            playerDiag.dialogTarget = target;
+            if (!registry->any_of<DialogComponent>(target)) return;
+
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.targetActor = target;
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::MovingToTalkToNPC);
         }
@@ -118,10 +120,11 @@ namespace sage
         }
         void OnStateEnter(entt::entity self) override
         {
-            const auto& playerDiag = registry->get<DialogComponent>(self);
-            const auto& npc = registry->get<DialogComponent>(playerDiag.dialogTarget);
-            gameData->controllableActorSystem->PathfindToLocation(self, npc.conversationPos);
             auto& moveable = registry->get<MoveableActor>(self);
+            auto& playerDiag = registry->get<DialogComponent>(self);
+            playerDiag.dialogTarget = moveable.targetActor;
+            const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
+            gameData->controllableActorSystem->PathfindToLocation(self, pos);
             // TODO: Difference between onDestinationReached and onFinishMovement?
             entt::sink sink{moveable.onDestinationReached};
             sink.connect<&MovingToTalkToNPCState::onTargetReached>(this);
@@ -157,15 +160,15 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             auto& playerDiag = registry->get<DialogComponent>(self);
-            const auto& npcDiag = registry->get<DialogComponent>(playerDiag.dialogTarget);
+            registry->get<Animation>(self).ChangeAnimationByEnum(AnimationEnum::TALK);
             registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::TALK);
 
             // Rotate to look at NPC
             auto& actorTrans = registry->get<sgTransform>(self);
-            auto& npcTrans = registry->get<sgTransform>(playerDiag.dialogTarget);
+            const auto& npcTrans = registry->get<sgTransform>(playerDiag.dialogTarget);
             Vector3 direction = Vector3Subtract(npcTrans.GetWorldPos(), actorTrans.GetWorldPos());
             direction = Vector3Normalize(direction);
-            float angle = atan2f(direction.x, direction.z);
+            const float angle = atan2f(direction.x, direction.z);
             actorTrans.SetRotation({actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z});
 
             gameData->dialogSystem->StartConversation(npcTrans, playerDiag.dialogTarget);
@@ -174,7 +177,6 @@ namespace sage
         void OnStateExit(entt::entity self) override
         {
             auto& playerDiag = registry->get<DialogComponent>(self);
-            gameData->dialogSystem->EndConversation();
             registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::IDLE);
             playerDiag.dialogTarget = entt::null;
         }

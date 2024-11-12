@@ -244,11 +244,11 @@ namespace sage
 
     class DialogOption : public TextBox
     {
-        dialog::Option option;
+        const dialog::Option& option;
 
       public:
         void OnClick() override;
-        DialogOption(GameUIEngine* _engine, dialog::Option _option);
+        DialogOption(GameUIEngine* _engine, const dialog::Option& _option);
     };
 
     class TitleBar final : public TextBox
