@@ -11,6 +11,10 @@
 
 namespace sage
 {
+    namespace dialog
+    {
+        class Conversation;
+    }
     class GameData;
     class sgTransform;
     class Window;
@@ -21,6 +25,7 @@ namespace sage
         Window* dialogWindow{};
         Vector3 oldCamPos{};
         Vector3 oldCamTarget{};
+        void progressConversation(dialog::Conversation* conversation);
 
       public:
         void StartConversation(const sgTransform& cutscenePose, entt::entity npc);

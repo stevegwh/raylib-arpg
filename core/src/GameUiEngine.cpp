@@ -232,11 +232,19 @@ namespace sage
 
     void DialogOption::OnClick()
     {
-        content = "WOOOOO! \n";
+        auto* conversation = option.parent->parent;
+        if (option.nextIndex.has_value())
+        {
+            conversation->SelectOption(option.nextIndex.value());
+        }
+        else
+        {
+            conversation->EndConversation();
+        }
     }
 
-    DialogOption::DialogOption(GameUIEngine* _engine, dialog::Option _option)
-        : TextBox(_engine), option(std::move(_option))
+    DialogOption::DialogOption(GameUIEngine* _engine, const dialog::Option& _option)
+        : TextBox(_engine), option(_option)
     {
         content = option.description;
     }

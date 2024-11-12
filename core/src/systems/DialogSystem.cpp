@@ -17,6 +17,12 @@
 namespace sage
 {
 
+    void DialogSystem::progressConversation(dialog::Conversation* conversation)
+    {
+        dialogWindow->Remove();
+        dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), conversation->owner);
+    }
+
     void DialogSystem::StartConversation(const sgTransform& cutscenePose, entt::entity npc)
     {
         oldCamPos = gameData->camera->GetPosition();
@@ -24,6 +30,16 @@ namespace sage
         gameData->camera->CutscenePose(cutscenePose);
         gameData->camera->LockInput();
         gameData->cursor->DisableContextSwitching();
+
+        auto& dialogComponent = registry->get<DialogComponent>(npc);
+        {
+            entt::sink sink{dialogComponent.conversation->onConversationProgress};
+            sink.connect<&DialogSystem::progressConversation>(this);
+        }
+        {
+            entt::sink sink{dialogComponent.conversation->onConversationEnd};
+            sink.connect<&DialogSystem::EndConversation>(this);
+        }
 
         dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), npc);
     }
