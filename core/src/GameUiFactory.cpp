@@ -16,8 +16,9 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/InventorySystem.hpp"
+#include "systems/PartySystem.hpp"
+
 #include <format>
-#include <sstream>
 
 namespace sage
 {
@@ -100,18 +101,16 @@ namespace sage
         auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 8, 30, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({8, 8, 8, 8});
-        // window->SetPaddingPercent({5, 5, 2, 2});
+        window->SetPadding({12, 12, 16, 16});
 
         auto table = window->CreateTable();
 
         auto partySize = engine->gameData->partySystem->GetSize();
-
-        for (int i = partySize - 1; i >= 0; --i)
+        for (int i = partySize - 1; i >= 0; --i) // Do not change "i" to unsigned int.
         {
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
-            cell->SetPaddingPixel({0, 5, 0, 0});
+            cell->SetPadding({0, 5, 0, 0});
             auto slot = cell->CreatePartyMemberPortrait(
                 engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
             slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
@@ -132,7 +131,7 @@ namespace sage
             engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({8, 8, 8, 8});
+        window->SetPadding({16, 16, 12, 12});
 
         auto table = window->CreateTable();
 
@@ -143,28 +142,24 @@ namespace sage
             engine->gameData->playerAbilitySystem.get(),
             engine->gameData->controllableActorSystem.get(),
             0);
-        // cell->SetPaddingPercent({2, 2, 2, 2});
         auto cell1 = row->CreateTableCell();
         auto slot1 = cell1->CreateAbilitySlot(
             engine,
             engine->gameData->playerAbilitySystem.get(),
             engine->gameData->controllableActorSystem.get(),
             1);
-        // cell1->SetPaddingPercent({2, 2, 2, 2});
         auto cell2 = row->CreateTableCell();
         auto slot2 = cell2->CreateAbilitySlot(
             engine,
             engine->gameData->playerAbilitySystem.get(),
             engine->gameData->controllableActorSystem.get(),
             2);
-        // cell2->SetPaddingPercent({2, 2, 2, 2});
         auto cell3 = row->CreateTableCell();
         auto slot3 = cell3->CreateAbilitySlot(
             engine,
             engine->gameData->playerAbilitySystem.get(),
             engine->gameData->controllableActorSystem.get(),
             3);
-        // cell3->SetPaddingPercent({2, 2, 2, 2});
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
         // Is that desired behaviour? Can look for other imageboxes with SHRINK_ROW_TO_FIT as
@@ -174,14 +169,15 @@ namespace sage
         slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
         slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
 
-        slot->SetVertAlignment(VertAlignment::MIDDLE);
-        slot1->SetVertAlignment(VertAlignment::MIDDLE);
-        slot2->SetVertAlignment(VertAlignment::MIDDLE);
-        slot3->SetVertAlignment(VertAlignment::MIDDLE);
-        slot->SetHoriAlignment(HoriAlignment::CENTER);
-        slot1->SetHoriAlignment(HoriAlignment::CENTER);
-        slot2->SetHoriAlignment(HoriAlignment::CENTER);
-        slot3->SetHoriAlignment(HoriAlignment::CENTER);
+        // TODO: Below seems to do nothing?
+        //        slot->SetVertAlignment(VertAlignment::MIDDLE);
+        //        slot1->SetVertAlignment(VertAlignment::MIDDLE);
+        //        slot2->SetVertAlignment(VertAlignment::MIDDLE);
+        //        slot3->SetVertAlignment(VertAlignment::MIDDLE);
+        //        slot->SetHoriAlignment(HoriAlignment::CENTER);
+        //        slot1->SetHoriAlignment(HoriAlignment::CENTER);
+        //        slot2->SetHoriAlignment(HoriAlignment::CENTER);
+        //        slot3->SetHoriAlignment(HoriAlignment::CENTER);
 
         return window;
     }
@@ -193,7 +189,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({10, 2, 5, 5});
+        window->SetPadding({10, 2, 5, 5});
 
         {
             auto table = window->CreateTable();
@@ -214,7 +210,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({10, 2, 5, 5});
+        window->SetPadding({10, 2, 5, 5});
 
         {
             auto table = window->CreateTable();
@@ -242,7 +238,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({10, 2, 5, 5});
+        window->SetPadding({10, 2, 5, 5});
 
         {
             auto table = window->CreateTable();
@@ -266,7 +262,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({10, 2, 5, 5});
+        window->SetPadding({10, 2, 10, 5});
 
         {
             auto table = window->CreateTable();
@@ -275,7 +271,7 @@ namespace sage
             auto textbox = cell0->CreateTextbox(engine, ability.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
-            row->SetPaddingPercent({10, 0, 0, 0});
+            row->SetPadding({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(engine, ability.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
         }
@@ -301,7 +297,7 @@ namespace sage
         auto window =
             engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({4, 4, 8, 8});
+        window->SetPadding({14, 14, 14, 14});
 
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
 
@@ -312,7 +308,7 @@ namespace sage
             auto cell2 = row->CreateTableCell(20);
             auto titlebar = cell->CreateTitleBar(engine, "Inventory", 15);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-            titlebar->SetVertAlignment(VertAlignment::MIDDLE);
+            titlebar->SetVertAlignment(VertAlignment::TOP);
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
             auto closeButton = cell2->CreateCloseButton(engine, tex);
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
@@ -348,18 +344,18 @@ namespace sage
 
         // window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({4, 4, 8, 8});
+        window->SetPadding({14, 14, 14, 14});
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {
-            auto table = window->CreateTable(4);
+            auto table = window->CreateTable(6);
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
             auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-            titlebar->SetVertAlignment(VertAlignment::MIDDLE);
+            titlebar->SetVertAlignment(VertAlignment::TOP);
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
             auto closeButton = cell2->CreateCloseButton(engine, tex);
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
@@ -431,7 +427,7 @@ namespace sage
         auto table = window->CreateTable();
         auto row = table->CreateTableRow();
         auto cell = row->CreateTableCell();
-        cell->SetPaddingPixel({10, 10, 5, 5});
+        cell->SetPadding({10, 10, 5, 5});
         auto textbox = cell->CreateTextbox(engine, dialogComponent.sentence);
         textbox->SetOverflowBehaviour(TextBox::OverflowBehaviour::WORD_WRAP);
 

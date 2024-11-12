@@ -10,10 +10,36 @@ namespace sage
 {
     struct Settings
     {
+        static constexpr float TARGET_SCREEN_WIDTH = 1440.0f; // Should likely target 1080p.
+        static constexpr float TARGET_SCREEN_HEIGHT = 900.0f;
+
         // Current settings
         int screenWidth = 1280;
         int screenHeight = 720;
         bool toggleFullScreenRequested = false;
+
+        float GetScreenScaleFactor() const
+        {
+            // Calculate scaling factor based on screen dimensions
+            // You can use either width, height, or both depending on your needs
+            float scaleWidth = screenWidth / TARGET_SCREEN_WIDTH;
+            float scaleHeight = screenHeight / TARGET_SCREEN_HEIGHT;
+
+            // Choose scaling method:
+
+            // Option 1: Scale based on width only
+            // float scaleFactor = scaleWidth;
+
+            // Option 2: Scale based on height only
+            // float scaleFactor = scaleHeight;
+
+            // Option 3: Scale based on smallest ratio to prevent overlarge fonts
+            // float scaleFactor = std::min(scaleWidth, scaleHeight);
+
+            // Option 4: Scale based on average of both dimensions
+            float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
+            return scaleFactor;
+        }
 
         void ResetToUserDefined()
         {
