@@ -55,7 +55,7 @@ namespace sage
 
       public:
         template <typename... Args>
-        [[nodiscard]] int CreateHook(
+        int CreateHook(
             entt::entity entity,
             entt::sigh<void(Args...)>& inSignal,
             entt::sigh<void(entt::entity, Args...)>& outSignal)

@@ -15,6 +15,7 @@ namespace sage
         class DefaultState;
         class MovingToAttackEnemyState;
         class MovingToTalkToNPCState;
+        class InDialogState;
         class CombatState;
 
       public:

@@ -12,28 +12,23 @@
 namespace sage
 {
     class GameData;
-    class Window;
+    class sgTransform;
+
     class DialogSystem : public BaseSystem
     {
         GameData* gameData;
-        std::unique_ptr<Window> window;
-        bool active = false;
-        entt::entity selectedActor;
-        entt::entity clickedNPC;
 
         Vector3 oldCamPos{};
         Vector3 oldCamTarget{};
 
-        void NPCClicked(entt::entity _clickedNPC);
-        void changeControlledActor(entt::entity entity);
-        void cancelConversation(entt::entity entity);
-        void startConversation(entt::entity actor);
-        void endConversation(entt::entity actor);
+        // void NPCClicked(entt::entity _clickedNPC);
+        // void cancelConversation(entt::entity entity);
+        // void startConversation(entt::entity actor);
+        // void endConversation(entt::entity actor);
 
       public:
-        entt::sigh<void()> onConversationStart;
-        entt::sigh<void()> onConversationEnd;
-
+        void StartConversation(const sgTransform& cutscenePose);
+        void EndConversation();
         explicit DialogSystem(entt::registry* registry, GameData* _gameData);
     };
 } // namespace sage

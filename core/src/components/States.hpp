@@ -42,6 +42,7 @@ namespace sage
         Default,
         MovingToAttackEnemy,
         MovingToTalkToNPC,
+        InDialog,
         Combat
     };
 

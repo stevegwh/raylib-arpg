@@ -138,7 +138,8 @@ namespace sage
         renderable.name = name;
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
-        animation.ChangeAnimation(0);
+        animation.animationMap[AnimationEnum::IDLE] = 0;
+        animation.animationMap[AnimationEnum::TALK] = 1;
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
@@ -232,18 +233,22 @@ namespace sage
         auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
         data->controllableActorSystem->SetSelectedActor(id);
 
+        // Below forward the cursor's events with the subscriber's entity ID injected into it (so we know which
+        // entity is reacting to the click).
         data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onFloorClick, controllable.onFloorClick);
         data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onEnemyLeftClick, controllable.onEnemyLeftClick);
         data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onEnemyRightClick, controllable.onEnemyRightClick);
+        data->reflectionSignalRouter->CreateHook<entt::entity>(
+            id, data->cursor->onNPCClick, controllable.onNPCLeftClick);
 
         auto& partyComponent = registry->emplace<PartyMemberComponent>(id, id);
-        partyComponent.leader = entt::null;
         partyComponent.portraitImage = AssetID::IMG_PORTRAIT_01;
         data->partySystem->AddMember(id);
-        data->partySystem->SetLeader(id);
+
+        auto& dialogComponent = registry->emplace<DialogComponent>(id);
 
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
