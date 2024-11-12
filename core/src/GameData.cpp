@@ -20,7 +20,7 @@
 #include "systems/CollisionSystem.hpp"
 #include "systems/CombatSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/DialogueSystem.hpp"
+#include "systems/DialogSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/InventorySystem.hpp"
@@ -49,7 +49,7 @@ namespace sage
               std::make_unique<ActorMovementSystem>(_registry, collisionSystem.get(), navigationGridSystem.get())),
           controllableActorSystem(std::make_unique<ControllableActorSystem>(_registry, this)),
           animationSystem(std::make_unique<AnimationSystem>(_registry)),
-          dialogueSystem(std::make_unique<DialogueSystem>(_registry, this)),
+          dialogueSystem(std::make_unique<DialogSystem>(_registry, this)),
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
           abilityRegistry(std::make_unique<AbilityFactory>(_registry, this)),

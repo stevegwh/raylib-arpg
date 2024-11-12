@@ -26,7 +26,7 @@ namespace sage
     class ControllableActorSystem;
     class InventorySystem;
     class AnimationSystem;
-    class DialogueSystem;
+    class DialogSystem;
     class HealthBarSystem;
     class StateMachines;
     class AbilityFactory;
@@ -56,7 +56,7 @@ namespace sage
         std::unique_ptr<ActorMovementSystem> actorMovementSystem;
         std::unique_ptr<ControllableActorSystem> controllableActorSystem;
         std::unique_ptr<AnimationSystem> animationSystem;
-        std::unique_ptr<DialogueSystem> dialogueSystem;
+        std::unique_ptr<DialogSystem> dialogueSystem;
         std::unique_ptr<HealthBarSystem> healthBarSystem;
         std::unique_ptr<StateMachines> stateMachines;
         std::unique_ptr<AbilityFactory> abilityRegistry;

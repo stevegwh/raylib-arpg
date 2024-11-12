@@ -2,7 +2,7 @@
 // Created by steve on 11/05/2024.
 //
 
-#include "DialogueSystem.hpp"
+#include "DialogSystem.hpp"
 
 #include "Camera.hpp"
 #include "Cursor.hpp"
@@ -23,12 +23,12 @@
 
 namespace sage
 {
-    void DialogueSystem::changeControlledActor(entt::entity entity)
+    void DialogSystem::changeControlledActor(entt::entity entity)
     {
         selectedActor = entity;
     }
 
-    void DialogueSystem::startConversation(entt::entity entity)
+    void DialogSystem::startConversation(entt::entity entity)
     {
         onConversationStart.publish();
 
@@ -46,7 +46,7 @@ namespace sage
 
         {
             entt::sink sink{gameData->cursor->onAnyLeftClick};
-            sink.connect<&DialogueSystem::endConversation>(this);
+            sink.connect<&DialogSystem::endConversation>(this);
         }
 
         oldCamPos = gameData->camera->GetPosition();
@@ -62,18 +62,18 @@ namespace sage
         {
             auto& moveableActor = registry->get<MoveableActor>(selectedActor);
             entt::sink sink{moveableActor.onFinishMovement};
-            sink.disconnect<&DialogueSystem::startConversation>(this);
+            sink.disconnect<&DialogSystem::startConversation>(this);
             entt::sink sink2{moveableActor.onMovementCancel};
-            sink2.disconnect<&DialogueSystem::cancelConversation>(this);
+            sink2.disconnect<&DialogSystem::cancelConversation>(this);
         }
     }
 
-    void DialogueSystem::endConversation(entt::entity actor)
+    void DialogSystem::endConversation(entt::entity actor)
     {
         onConversationEnd.publish();
         {
             entt::sink sink{gameData->cursor->onAnyLeftClick};
-            sink.disconnect<&DialogueSystem::endConversation>(this);
+            sink.disconnect<&DialogSystem::endConversation>(this);
         }
 
         gameData->camera->UnlockInput();
@@ -89,44 +89,44 @@ namespace sage
         oldCamTarget = {};
     }
 
-    void DialogueSystem::cancelConversation(entt::entity entity)
+    // TODO: This can/should be part of player state (in dialog etc)
+
+    void DialogSystem::cancelConversation(entt::entity entity)
     {
         auto& moveableActor = registry->get<MoveableActor>(selectedActor);
         entt::sink sink{moveableActor.onFinishMovement};
-        sink.disconnect<&DialogueSystem::startConversation>(this);
+        sink.disconnect<&DialogSystem::startConversation>(this);
         entt::sink sink2{moveableActor.onMovementCancel};
-        sink2.disconnect<&DialogueSystem::cancelConversation>(this);
+        sink2.disconnect<&DialogSystem::cancelConversation>(this);
         clickedNPC = entt::null;
     }
 
-    void DialogueSystem::NPCClicked(entt::entity _clickedNPC)
+    void DialogSystem::NPCClicked(entt::entity _clickedNPC)
     {
         if (clickedNPC != entt::null) return;
         clickedNPC = _clickedNPC;
         const auto& npc = registry->get<DialogComponent>(_clickedNPC);
-        const auto& actorCol = registry->get<Collideable>(selectedActor);
-        const auto& npcCol = registry->get<Collideable>(_clickedNPC);
         gameData->controllableActorSystem->PathfindToLocation(selectedActor, npc.conversationPos);
         {
             auto& moveableActor = registry->get<MoveableActor>(selectedActor);
             entt::sink sink{moveableActor.onFinishMovement};
-            sink.connect<&DialogueSystem::startConversation>(this);
+            sink.connect<&DialogSystem::startConversation>(this);
             entt::sink sink2{moveableActor.onMovementCancel};
-            sink2.connect<&DialogueSystem::cancelConversation>(this);
+            sink2.connect<&DialogSystem::cancelConversation>(this);
         }
     }
 
-    DialogueSystem::DialogueSystem(entt::registry* registry, GameData* _gameData)
+    DialogSystem::DialogSystem(entt::registry* registry, GameData* _gameData)
         : BaseSystem(registry), clickedNPC(entt::null), gameData(_gameData)
     {
         {
             entt::sink sink{gameData->controllableActorSystem->onSelectedActorChange};
-            sink.connect<&DialogueSystem::changeControlledActor>(this);
+            sink.connect<&DialogSystem::changeControlledActor>(this);
             selectedActor = gameData->controllableActorSystem->GetSelectedActor();
         }
         {
             entt::sink sink{gameData->cursor->onNPCClick};
-            sink.connect<&DialogueSystem::NPCClicked>(this);
+            sink.connect<&DialogSystem::NPCClicked>(this);
         }
     }
 } // namespace sage
