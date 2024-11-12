@@ -414,7 +414,27 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, DialogComponent& dialog, Vector2 pos)
+    Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, entt::entity npc)
     {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+
+        auto window =
+            engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 25, WindowTableAlignment::STACK_VERTICAL);
+        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        // window->SetOffsetPercent(0, -10);
+        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+        window->SetPaddingPercent({8, 8, 8, 8});
+
+        const auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
+        auto table = window->CreateTable();
+        auto row = table->CreateTableRow();
+        auto cell = row->CreateTableCell();
+        cell->SetPaddingPixel({10, 10, 5, 5});
+        auto textbox = cell->CreateTextbox(engine, dialogComponent.sentence);
+        textbox->SetOverflowBehaviour(TextBox::OverflowBehaviour::WORD_WRAP);
+
+        return window;
     }
 } // namespace sage

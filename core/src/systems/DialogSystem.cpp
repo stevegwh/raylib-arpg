@@ -15,10 +15,8 @@
 #include "components/sgTransform.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
-#include "raylib.h"
-#include "raymath.h"
-
-#include <iostream>
+#include "GameUiElements.hpp"
+#include "GameUiFactory.hpp"
 
 namespace sage
 {
@@ -110,13 +108,15 @@ namespace sage
     //     }
     // }
 
-    void DialogSystem::StartConversation(const sgTransform& cutscenePose)
+    void DialogSystem::StartConversation(const sgTransform& cutscenePose, entt::entity npc)
     {
         oldCamPos = gameData->camera->GetPosition();
         oldCamTarget = gameData->camera->getRaylibCam()->target;
         gameData->camera->CutscenePose(cutscenePose);
         gameData->camera->LockInput();
         gameData->cursor->DisableContextSwitching();
+
+        dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), npc);
     }
 
     void DialogSystem::EndConversation()
@@ -126,6 +126,7 @@ namespace sage
         gameData->camera->SetCamera(oldCamPos, oldCamTarget);
         oldCamPos = {};
         oldCamTarget = {};
+        dialogWindow->markForRemoval = true;
     }
 
     DialogSystem::DialogSystem(entt::registry* registry, GameData* _gameData)

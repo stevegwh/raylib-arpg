@@ -13,10 +13,12 @@ namespace sage
 {
     class GameData;
     class sgTransform;
+    class Window;
 
     class DialogSystem : public BaseSystem
     {
         GameData* gameData;
+        Window* dialogWindow{};
 
         Vector3 oldCamPos{};
         Vector3 oldCamTarget{};
@@ -27,7 +29,7 @@ namespace sage
         // void endConversation(entt::entity actor);
 
       public:
-        void StartConversation(const sgTransform& cutscenePose);
+        void StartConversation(const sgTransform& cutscenePose, entt::entity npc);
         void EndConversation();
         explicit DialogSystem(entt::registry* registry, GameData* _gameData);
     };
