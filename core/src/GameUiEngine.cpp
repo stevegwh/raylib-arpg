@@ -970,6 +970,24 @@ namespace sage
         UpdateChildren();
     }
 
+    Panel* Window::CreatePanel()
+    {
+        children.push_back(std::make_unique<Panel>());
+        const auto& panel = children.back();
+        panel->parent = this;
+        UpdateChildren();
+        return panel.get();
+    }
+
+    Panel* Window::CreatePanel(float _requestedHeight)
+    {
+        auto panel = CreatePanel();
+        panel->requestedHeight = _requestedHeight;
+        panel->autoSize = false;
+        UpdateChildren();
+        return panel;
+    }
+
     void Window::ToggleHide()
     {
         hidden = !hidden;
@@ -1070,16 +1088,19 @@ namespace sage
     void Window::OnHoverStop()
     {
         UIElement::OnHoverStop();
-        for (auto& table : children)
+        for (auto& panel : children)
         {
-            for (auto& row : table->children)
+            for (auto& table : panel->children)
             {
-                for (auto& cell : row->children)
+                for (auto& row : table->children)
                 {
-                    auto& element = cell->children;
-                    // Allow elements being dragged to continue being active outside of window's bounds
-                    if (element->beingDragged) continue;
-                    element->ChangeState(std::make_unique<IdleState>(element.get(), element->engine));
+                    for (auto& cell : row->children)
+                    {
+                        auto& element = cell->children;
+                        // Allow elements being dragged to continue being active outside of window's bounds
+                        if (element->beingDragged) continue;
+                        element->ChangeState(std::make_unique<IdleState>(element.get(), element->engine));
+                    }
                 }
             }
         }
@@ -1087,9 +1108,14 @@ namespace sage
 
     void Window::DrawDebug2D()
     {
-        for (auto& child : children)
+        std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK};
+        for (int i = 0; i < children.size(); ++i)
         {
-            child->DrawDebug2D();
+            const auto& panel = children[i];
+            Color col = colors[i];
+            col.a = 150;
+            DrawRectangle(panel->rec.x, panel->rec.y, panel->rec.width, panel->rec.height, col);
+            // panel->DrawDebug2D();
         }
     }
 
@@ -1102,7 +1128,87 @@ namespace sage
         }
     }
 
-    TableGrid* Window::CreateTableGrid(int rows, int cols, float cellSpacing)
+    // In Window class - always stacks panels vertically
+    void Window::UpdateChildren()
+    {
+        if (children.empty()) return;
+
+        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
+        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
+        float startX = rec.x + GetPadding().left;
+        float startY = rec.y + GetPadding().up;
+
+        float totalRequestedPercent = 0.0f;
+        int autoSizeCount = 0;
+
+        // First pass: Calculate total of percentage-based heights
+        for (const auto& panel : children)
+        {
+            if (panel->autoSize)
+            {
+                autoSizeCount++;
+            }
+            else
+            {
+                totalRequestedPercent += panel->requestedHeight;
+            }
+        }
+
+        totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
+        float remainingPercent = 100.0f - totalRequestedPercent;
+        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+
+        // Second pass: Update each panel
+        float currentY = startY;
+        for (const auto& panel : children)
+        {
+            panel->parent = this;
+            panel->rec = rec;
+
+            float panelHeight;
+            if (panel->autoSize)
+            {
+                panelHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
+            }
+            else
+            {
+                panelHeight = std::ceil(availableHeight * (panel->requestedHeight / 100.0f));
+            }
+
+            panel->rec.height = panelHeight;
+            panel->rec.y = currentY;
+            panel->rec.width = availableWidth;
+            panel->rec.x = startX;
+
+            if (!panel->children.empty()) panel->UpdateChildren();
+
+            currentY += panelHeight;
+        }
+    }
+
+    void Panel::DrawDebug2D()
+    {
+        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
+        for (int i = 0; i < children.size(); ++i)
+        {
+            const auto& table = children[i];
+            Color col = colors[i];
+            col.a = 150;
+            DrawRectangle(table->rec.x, table->rec.y, table->rec.width, table->rec.height, col);
+            table->DrawDebug2D();
+        }
+    }
+
+    void Panel::Draw2D()
+    {
+        TableElement::Draw2D();
+        for (const auto& table : children)
+        {
+            table->Draw2D();
+        }
+    }
+
+    TableGrid* Panel::CreateTableGrid(int rows, int cols, float cellSpacing)
     {
         children.push_back(std::make_unique<TableGrid>());
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
@@ -1121,7 +1227,7 @@ namespace sage
         return table;
     }
 
-    Table* Window::CreateTable()
+    Table* Panel::CreateTable()
     {
         children.push_back(std::make_unique<Table>());
         const auto& table = children.back();
@@ -1130,143 +1236,69 @@ namespace sage
         return table.get();
     }
 
-    Table* Window::CreateTable(float requestedWidthOrHeight)
+    Table* Panel::CreateTable(float _requestedWidth)
     {
-        children.push_back(std::make_unique<Table>());
-        const auto& table = children.back();
-        table->parent = this;
+        auto table = CreateTable();
         table->autoSize = false;
-        if (tableAlignment == WindowTableAlignment::STACK_VERTICAL)
-        {
-            table->requestedHeight = requestedWidthOrHeight;
-        }
-        else if (tableAlignment == WindowTableAlignment::STACK_HORIZONTAL)
-        {
-            table->requestedWidth = requestedWidthOrHeight;
-        }
+        table->requestedWidth = _requestedWidth;
         UpdateChildren();
-        return table.get();
+        return table;
     }
 
-    void Window::UpdateChildren()
+    void Panel::UpdateChildren()
     {
         if (children.empty()) return;
 
-        // Account for window padding
         float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
         float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
         float startX = rec.x + GetPadding().left;
         float startY = rec.y + GetPadding().up;
 
-        switch (tableAlignment)
+        float totalRequestedPercent = 0.0f;
+        int autoSizeCount = 0;
+
+        // First pass: Calculate total of percentage-based widths
+        for (const auto& table : children)
         {
-        case WindowTableAlignment::STACK_HORIZONTAL: {
-            float totalRequestedPercent = 0.0f;
-            int autoSizeCount = 0;
-
-            // First pass: Calculate total of percentage-based widths
-            for (const auto& table : children)
+            if (table->autoSize)
             {
-                if (table->autoSize)
-                {
-                    autoSizeCount++;
-                }
-                else
-                {
-                    totalRequestedPercent += table->requestedWidth;
-                }
+                autoSizeCount++;
             }
-
-            if (totalRequestedPercent > 100.0f)
+            else
             {
-                totalRequestedPercent = 100.0f;
+                totalRequestedPercent += table->requestedWidth;
             }
-
-            float remainingPercent = 100.0f - totalRequestedPercent;
-            float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
-
-            // Second pass: Update each table
-            float currentX = startX;
-            for (const auto& table : children)
-            {
-                table->parent = this;
-                table->rec = rec;
-
-                float tableWidth;
-                if (table->autoSize)
-                {
-                    tableWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
-                }
-                else
-                {
-                    tableWidth = std::ceil(availableWidth * (table->requestedWidth / 100.0f));
-                }
-
-                table->rec.width = tableWidth;
-                table->rec.x = currentX;
-                table->rec.height = availableHeight;
-                table->rec.y = startY;
-
-                if (!table->children.empty()) table->UpdateChildren();
-
-                currentX += tableWidth;
-            }
-            break;
         }
 
-        case WindowTableAlignment::STACK_VERTICAL: {
-            float totalRequestedPercent = 0.0f;
-            int autoSizeCount = 0;
+        totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
+        float remainingPercent = 100.0f - totalRequestedPercent;
+        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
 
-            // First pass: Calculate total of percentage-based heights
-            for (const auto& table : children)
+        // Second pass: Update each table
+        float currentX = startX;
+        for (const auto& table : children)
+        {
+            table->parent = this;
+            table->rec = rec;
+
+            float tableWidth;
+            if (table->autoSize)
             {
-                if (table->autoSize)
-                {
-                    autoSizeCount++;
-                }
-                else
-                {
-                    totalRequestedPercent += table->requestedHeight;
-                }
+                tableWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
+            }
+            else
+            {
+                tableWidth = std::ceil(availableWidth * (table->requestedWidth / 100.0f));
             }
 
-            if (totalRequestedPercent > 100.0f)
-            {
-                totalRequestedPercent = 100.0f;
-            }
+            table->rec.width = tableWidth;
+            table->rec.x = currentX;
+            table->rec.height = availableHeight;
+            table->rec.y = startY;
 
-            float remainingPercent = 100.0f - totalRequestedPercent;
-            float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+            if (!table->children.empty()) table->UpdateChildren();
 
-            // Second pass: Update each table
-            float currentY = startY;
-            for (const auto& table : children)
-            {
-                table->parent = this;
-                table->rec = rec;
-
-                float tableHeight;
-                if (table->autoSize)
-                {
-                    tableHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
-                }
-                else
-                {
-                    tableHeight = std::ceil(availableHeight * (table->requestedHeight / 100.0f));
-                }
-
-                table->rec.height = tableHeight;
-                table->rec.y = currentY;
-                table->rec.width = availableWidth;
-                table->rec.x = startX;
-
-                if (!table->children.empty()) table->UpdateChildren();
-
-                currentY += tableHeight;
-            }
-            break;
-        }
+            currentX += tableWidth;
         }
     }
 
@@ -1332,15 +1364,15 @@ namespace sage
 
     void Table::DrawDebug2D()
     {
-        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
-        for (int i = 0; i < children.size(); ++i)
-        {
-            const auto& row = children[i];
-            Color col = colors[i];
-            col.a = 150;
-            // DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
-            row->DrawDebug2D();
-        }
+        // std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
+        // for (int i = 0; i < children.size(); ++i)
+        // {
+        //     const auto& row = children[i];
+        //     Color col = colors[i];
+        //     col.a = 150;
+        //     // DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
+        //     row->DrawDebug2D();
+        // }
     }
 
     void Table::Draw2D()
@@ -1914,7 +1946,7 @@ namespace sage
         const float y,
         const float _widthPercent,
         const float _heightPercent,
-        const WindowTableAlignment _alignment)
+        const PanelAlignment _alignment)
     {
         return CreateWindow(_nPatchTexture, x, y, _widthPercent, _heightPercent, _alignment, true);
     }
@@ -1925,7 +1957,7 @@ namespace sage
         const float y,
         const float _widthPercent,
         const float _heightPercent,
-        const WindowTableAlignment _alignment,
+        const PanelAlignment _alignment,
         const bool tooltip)
     {
 
@@ -1933,7 +1965,6 @@ namespace sage
 
         window->SetPosition(x, y);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
-        window->tableAlignment = _alignment;
         window->tex = _nPatchTexture;
         // TODO: Shouldn't SetPosition/SetDimensions already do below?
         window->rec = {
@@ -1960,13 +1991,12 @@ namespace sage
         float _yOffsetPercent,
         float _widthPercent,
         float _heightPercent,
-        WindowTableAlignment _alignment)
+        PanelAlignment _alignment)
     {
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
-        window->tableAlignment = _alignment;
         window->rec = {
             window->GetOffset().x,
             window->GetOffset().y,
@@ -1985,7 +2015,7 @@ namespace sage
         const float _yOffsetPercent,
         const float _widthPercent,
         const float _heightPercent,
-        const WindowTableAlignment _alignment)
+        const PanelAlignment _alignment)
     {
         auto* window =
             CreateWindowDocked(_xOffsetPercent, _yOffsetPercent, _widthPercent, _heightPercent, _alignment);
@@ -2048,16 +2078,19 @@ namespace sage
             }
         }
         if (windowUnderCursor == nullptr) return nullptr;
-        for (const auto& table : windowUnderCursor->children)
+        for (const auto& panel : windowUnderCursor->children)
         {
-            for (const auto& row : table->children)
+            for (const auto& table : panel->children)
             {
-                for (const auto& cell : row->children)
+                for (const auto& row : table->children)
                 {
-                    const auto element = cell->children.get();
-                    if (PointInsideRect(cell->rec, mousePos))
+                    for (const auto& cell : row->children)
                     {
-                        return element;
+                        const auto element = cell->children.get();
+                        if (PointInsideRect(cell->rec, mousePos))
+                        {
+                            return element;
+                        }
                     }
                 }
             }
@@ -2178,14 +2211,17 @@ namespace sage
             gameData->cursor->DisableContextSwitching();
 
             window->OnHoverStart(); // TODO: Need to check if it was already being hovered?
-            for (const auto& table : window->children)
+            for (const auto& panel : window->children)
             {
-                for (const auto& row : table->children)
+                for (const auto& table : panel->children)
                 {
-                    for (const auto& cell : row->children)
+                    for (const auto& row : table->children)
                     {
-                        const auto element = cell->children.get();
-                        element->state->Update();
+                        for (const auto& cell : row->children)
+                        {
+                            const auto element = cell->children.get();
+                            element->state->Update();
+                        }
                     }
                 }
             }

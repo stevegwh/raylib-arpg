@@ -26,6 +26,7 @@ namespace sage
     enum class EquipmentSlotName;
     class PartySystem;
     class Window;
+    class Panel;
     class Table;
     class TableRow;
     class TableCell;
@@ -39,7 +40,7 @@ namespace sage
         float height;
     };
 
-    enum class WindowTableAlignment
+    enum class PanelAlignment
     {
         STACK_VERTICAL,
         STACK_HORIZONTAL
@@ -459,9 +460,8 @@ namespace sage
         friend class Table;
     };
 
-    class Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, Window>
+    class Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, Panel>
     {
-        float requestedHeight{};
         float requestedWidth{};
         bool autoSize = true;
 
@@ -473,7 +473,7 @@ namespace sage
         void Draw2D() override;
         ~Table() override = default;
         Table() = default;
-        friend class Window;
+        friend class Panel;
     };
 
     class TableGrid final : public Table
@@ -483,10 +483,26 @@ namespace sage
       public:
         void UpdateChildren() override;
         TableGrid() = default;
+        friend class Panel;
+    };
+
+    // TODO: Make it so that panels you can stack vertically and tables are stacked horizontally
+    class Panel : public TableElement<std::vector<std::unique_ptr<Table>>, Window>
+    {
+        float requestedHeight{};
+        bool autoSize = true;
+
+      public:
+        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
+        Table* CreateTable();
+        Table* CreateTable(float _requestedWidth);
+        void DrawDebug2D() override;
+        void Draw2D() override;
+        void UpdateChildren() override;
         friend class Window;
     };
 
-    class Window : public TableElement<std::vector<std::unique_ptr<Table>>, void>
+    class Window : public TableElement<std::vector<std::unique_ptr<Panel>>, void>
     {
         bool hidden = false;
         bool markForRemoval = false;
@@ -497,7 +513,6 @@ namespace sage
         float heightPercent = 0; // Height as percent of screen space
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
-        WindowTableAlignment tableAlignment = WindowTableAlignment::STACK_HORIZONTAL;
 
         [[nodiscard]] Dimensions GetDimensions() const;
         void SetDimensionsPercent(float _widthPercent, float _heightPercent);
@@ -506,10 +521,8 @@ namespace sage
         void ClampToScreen();
         void OnHoverStart() override;
         void OnHoverStop() override;
-
-        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
-        Table* CreateTable();
-        Table* CreateTable(float requestedWidthOrHeight);
+        Panel* CreatePanel();
+        Panel* CreatePanel(float _requestedHeight);
         void ToggleHide();
         void Show();
         void Hide();
@@ -626,14 +639,14 @@ namespace sage
             float y,
             float _widthPercent,
             float _heightPercent,
-            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
+            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL);
         Window* CreateWindow(
             Texture _nPatchTexture,
             float x,
             float y,
             float _widthPercent,
             float _heightPercent,
-            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL,
+            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL,
             bool tooltip = false);
 
         WindowDocked* CreateWindowDocked(
@@ -641,7 +654,7 @@ namespace sage
             float _yOffsetPercent,
             float _widthPercent,
             float _heightPercent,
-            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
+            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL);
 
         WindowDocked* CreateWindowDocked(
             Texture _nPatchTexture,
@@ -649,7 +662,7 @@ namespace sage
             float _yOffsetPercent,
             float _widthPercent,
             float _heightPercent,
-            WindowTableAlignment _alignment = WindowTableAlignment::STACK_HORIZONTAL);
+            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL);
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;

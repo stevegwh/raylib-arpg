@@ -34,13 +34,12 @@ namespace sage
         //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
         //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
-        auto window =
-            engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20, WindowTableAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20, PanelAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({2, 2, 2, 2});
-
-        auto table = window->CreateTable();
+        auto panel = window->CreatePanel();
+        auto table = panel->CreateTable();
 
         auto row0 = table->CreateTableRow();
         auto cell0 = row0->CreateTableCell(95);
@@ -98,12 +97,12 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
-        auto window = engine->CreateWindowDocked(0, 0, 8, 30, WindowTableAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindowDocked(0, 0, 8, 30, PanelAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
         // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({12, 12, 16, 16});
-
-        auto table = window->CreateTable();
+        auto panel = window->CreatePanel();
+        auto table = panel->CreateTable();
 
         auto partySize = engine->gameData->partySystem->GetSize();
         for (int i = partySize - 1; i >= 0; --i) // Do not change "i" to unsigned int.
@@ -127,13 +126,12 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        auto window =
-            engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, WindowTableAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, PanelAlignment::STACK_VERTICAL);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({16, 16, 12, 12});
-
-        auto table = window->CreateTable();
+        auto panel = window->CreatePanel();
+        auto table = panel->CreateTable();
 
         auto row = table->CreateTableRow();
         auto cell = row->CreateTableCell();
@@ -187,12 +185,12 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({10, 2, 5, 5});
-
+        auto panel = window->CreatePanel();
         {
-            auto table = window->CreateTable();
+            auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
@@ -208,12 +206,12 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({10, 2, 5, 5});
-
+        auto panel = window->CreatePanel();
         {
-            auto table = window->CreateTable();
+            auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
@@ -236,12 +234,12 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({10, 2, 10, 5});
-
+        auto panel = window->CreatePanel();
         {
-            auto table = window->CreateTable();
+            auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, item.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
@@ -260,12 +258,12 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({16, 2, 10, 6});
-
+        auto panel = window->CreatePanel();
         {
-            auto table = window->CreateTable();
+            auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, ability.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
@@ -290,15 +288,14 @@ namespace sage
         // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
         // InventoryComponent
 
-        auto window =
-            engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({14, 14, 14, 14});
 
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
-
+        auto panel = window->CreatePanel(4);
         {
-            auto table = window->CreateTable(4);
+            auto table = panel->CreateTable();
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
@@ -310,8 +307,10 @@ namespace sage
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
             closeButton->SetVertAlignment(VertAlignment::TOP);
         }
+
+        auto panel1 = window->CreatePanel();
         {
-            auto table = window->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
+            auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
             for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
             {
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
@@ -335,28 +334,27 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        auto window =
-            engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_HORIZONTAL);
+        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, PanelAlignment::STACK_HORIZONTAL);
         window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({14, 14, 14, 14});
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
-        // TODO: Find a way to stack tables both vertically or horizontally in the same window (and reenable the
-        // tilebar below)
-        // {
-        //     auto table = window->CreateTable(4);
-        //     auto row = table->CreateTableRow();
-        //     auto cell = row->CreateTableCell(80);
-        //     auto cell2 = row->CreateTableCell(20);
-        //     auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
-        //     titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-        //     titlebar->SetVertAlignment(VertAlignment::TOP);
-        //     auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-        //     auto closeButton = cell2->CreateCloseButton(engine, tex);
-        //     closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
-        //     closeButton->SetVertAlignment(VertAlignment::TOP);
-        // }
+        auto panel1 = window->CreatePanel(4);
+
+        {
+            auto table = panel1->CreateTable();
+            auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell(80);
+            auto cell2 = row->CreateTableCell(20);
+            auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
+            titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
+            titlebar->SetVertAlignment(VertAlignment::TOP);
+            auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
+            auto closeButton = cell2->CreateCloseButton(engine, tex);
+            closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
+            closeButton->SetVertAlignment(VertAlignment::TOP);
+        }
 
         int maxRows = 6;
         int maxCols = 1;
@@ -375,9 +373,10 @@ namespace sage
             cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
         };
 
-        {
+        auto panel2 = window->CreatePanel();
 
-            auto table = window->CreateTableGrid(maxRows, maxCols, 4);
+        {
+            auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
 
             for (unsigned int row = 0; row < maxRows; ++row)
             {
@@ -397,7 +396,7 @@ namespace sage
 
         {
             // Character model
-            auto table = window->CreateTable();
+            auto table = panel2->CreateTable();
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
             ResourceManager::GetInstance().ImageLoadFromFile("resources/chartest.png");
@@ -410,7 +409,7 @@ namespace sage
         }
 
         {
-            auto table = window->CreateTableGrid(maxRows, maxCols, 4);
+            auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
 
             for (unsigned int row = 0; row < maxRows; ++row)
             {
@@ -437,14 +436,15 @@ namespace sage
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
         const auto window =
-            engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 25, WindowTableAlignment::STACK_VERTICAL);
+            engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 25, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         // window->SetOffsetPercent(0, -10);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->SetPadding({32, 32, 16, 16});
+        auto panel = window->CreatePanel();
 
         auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
-        const auto table = window->CreateTable();
+        const auto table = panel->CreateTable();
         const auto descriptionRow = table->CreateTableRow();
         const auto descriptionCell = descriptionRow->CreateTableCell();
         descriptionCell->SetPadding({10, 10, 5, 5});
