@@ -519,7 +519,38 @@ namespace sage
         }
     }
 
-    ImageBox::ImageBox(GameUIEngine* _engine) : CellElement(_engine){};
+    ImageBox::ImageBox(GameUIEngine* _engine) : CellElement(_engine)
+    {
+    }
+
+    void EquipmentCharacterPreview::RetrieveInfo()
+    {
+        UpdateDimensions();
+        engine->gameData->equipmentSystem->GenerateRenderTexture(
+            engine->gameData->controllableActorSystem->GetSelectedActor(), parent->rec.width, parent->rec.height);
+    }
+
+    void EquipmentCharacterPreview::Draw2D()
+    {
+        auto renderTexture =
+            engine->registry
+                ->get<EquipmentComponent>(engine->gameData->controllableActorSystem->GetSelectedActor())
+                .renderTexture;
+        DrawTextureRec(
+            renderTexture.texture,
+            {0,
+             0,
+             static_cast<float>(renderTexture.texture.width),
+             static_cast<float>(-renderTexture.texture.height)},
+            {rec.x, rec.y},
+            WHITE);
+
+        //        DrawTextureEx(renderTexture.texture, {rec.x, rec.y}, 0, 0.75f, WHITE);
+    }
+
+    EquipmentCharacterPreview::EquipmentCharacterPreview(GameUIEngine* _engine) : ImageBox(_engine)
+    {
+    }
 
     void PartyMemberPortrait::RetrieveInfo()
     {
@@ -1725,6 +1756,22 @@ namespace sage
         image->draggable = true;
         image->tex = _tex;
         UpdateChildren();
+        return image;
+    }
+
+    EquipmentCharacterPreview* TableCell::CreateEquipmentCharacterPreview(GameUIEngine* engine)
+    {
+        children = std::make_unique<EquipmentCharacterPreview>(engine);
+        auto* image = dynamic_cast<EquipmentCharacterPreview*>(children.get());
+        image->parent = this;
+        image->draggable = false;
+
+        {
+            entt::sink sink{engine->gameData->equipmentSystem->onEquipmentUpdated};
+            sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(image);
+        }
+        UpdateChildren();
+        image->RetrieveInfo();
         return image;
     }
 

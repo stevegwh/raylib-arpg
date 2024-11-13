@@ -24,8 +24,18 @@
 namespace sage
 {
 
-    void EquipmentSystem::generateRenderTexture(entt::entity entity) const
+    void EquipmentSystem::initRenderTextureScene()
     {
+        if (renderTextureSceneInitialised) return;
+        renderTextureSceneInitialised = true;
+        auto shader = ResourceManager::GetInstance().ShaderLoad(
+            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+        gameData->lightSubSystem->CreateLight(shader, LightType::LIGHT_POINT, {0, -996, 15}, {0, -996, 0}, WHITE);
+    }
+
+    void EquipmentSystem::GenerateRenderTexture(entt::entity entity, float width, float height)
+    {
+        initRenderTextureScene();
         auto& equipment = registry->get<EquipmentComponent>(entity);
 
         auto& transform = registry->get<sgTransform>(entity);
@@ -38,10 +48,14 @@ namespace sage
         transform.SetPosition({0, -1000, 0});
         gameData->camera->SetCamera({0, -996, 10}, {0, -996, 0});
 
+        UnloadTexture(equipment.renderTexture.texture);
+        equipment.renderTexture = LoadRenderTexture(width, height);
+
         BeginTextureMode(equipment.renderTexture);
-        ClearBackground(BLANK);
+        ClearBackground(BLACK);
         BeginMode3D(*gameData->camera->getRaylibCam());
         renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
+        // Need weapon model
         EndMode3D();
         EndTextureMode();
 
@@ -102,7 +116,6 @@ namespace sage
         {
             instantiateWeapon(owner, item, itemType);
         }
-        generateRenderTexture(owner);
         onEquipmentUpdated.publish(owner);
     }
 
@@ -121,7 +134,6 @@ namespace sage
             equipment.worldModels[itemType] = entt::null;
         }
         equipment.slots[itemType] = entt::null;
-        generateRenderTexture(owner);
         onEquipmentUpdated.publish(owner);
     }
 
@@ -136,7 +148,6 @@ namespace sage
                 equipment.worldModels[itemType] = entt::null;
             }
             equipment.slots[itemType] = entt::null;
-            generateRenderTexture(owner);
             onEquipmentUpdated.publish(owner);
         }
     }
@@ -192,7 +203,6 @@ namespace sage
 
     void EquipmentSystem::onComponentAdded(entt::entity addedEntity)
     {
-        generateRenderTexture(addedEntity);
     }
 
     void EquipmentSystem::onComponentRemoved(entt::entity removedEntity)

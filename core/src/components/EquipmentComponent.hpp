@@ -45,9 +45,6 @@ namespace sage
             slots[EquipmentSlotName::AMULET] = entt::null;
             slots[EquipmentSlotName::RING1] = entt::null;
             slots[EquipmentSlotName::RING2] = entt::null;
-            float width = 200;
-            float height = 400;
-            renderTexture = LoadRenderTexture(width, height);
         }
     };
 
