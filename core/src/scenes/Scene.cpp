@@ -15,6 +15,7 @@
 #include "UserInput.hpp"
 
 // NB: We have to include all the headers required to build GameData
+#include "components/EquipmentComponent.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -68,6 +69,9 @@ namespace sage
     {
         data->uiEngine->Draw2D();
         data->cursor->Draw2D();
+        auto renderTexture =
+            registry->get<EquipmentComponent>(data->controllableActorSystem->GetSelectedActor()).renderTexture;
+        DrawTextureRec(renderTexture.texture, {0, 0, 200, -400}, {800, 100}, WHITE);
     }
 
     Scene::~Scene()

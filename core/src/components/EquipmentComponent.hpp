@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "raylib.h"
+
 #include <entt/entt.hpp>
 #include <unordered_map>
 
@@ -26,6 +28,7 @@ namespace sage
 
     struct EquipmentComponent
     {
+        RenderTexture renderTexture{};
         std::unordered_map<EquipmentSlotName, entt::entity> slots;
         std::unordered_map<EquipmentSlotName, entt::entity> worldModels;
 
@@ -42,6 +45,9 @@ namespace sage
             slots[EquipmentSlotName::AMULET] = entt::null;
             slots[EquipmentSlotName::RING1] = entt::null;
             slots[EquipmentSlotName::RING2] = entt::null;
+            float width = 200;
+            float height = 400;
+            renderTexture = LoadRenderTexture(width, height);
         }
     };
 

@@ -4,6 +4,7 @@
 
 #include "EquipmentSystem.hpp"
 
+#include "Camera.hpp"
 #include "components/EquipmentComponent.hpp"
 #include "components/Renderable.hpp"
 #include "components/WeaponComponent.hpp"
@@ -13,6 +14,7 @@
 #include "slib.hpp"
 #include "systems/LightSubSystem.hpp"
 
+#include "components/Animation.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/sgTransform.hpp"
@@ -21,6 +23,31 @@
 
 namespace sage
 {
+
+    void EquipmentSystem::generateRenderTexture(entt::entity entity) const
+    {
+        auto& equipment = registry->get<EquipmentComponent>(entity);
+
+        auto& transform = registry->get<sgTransform>(entity);
+        auto& renderable = registry->get<Renderable>(entity);
+        auto& animation = registry->get<Animation>(entity);
+        auto oldPos = transform.GetWorldPos();
+        auto cameraPos = gameData->camera->GetPosition();
+        auto cameraTarget = gameData->camera->getRaylibCam()->target;
+
+        transform.SetPosition({0, -1000, 0});
+        gameData->camera->SetCamera({0, -996, 10}, {0, -996, 0});
+
+        BeginTextureMode(equipment.renderTexture);
+        ClearBackground(BLANK);
+        BeginMode3D(*gameData->camera->getRaylibCam());
+        renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
+        EndMode3D();
+        EndTextureMode();
+
+        transform.SetPosition(oldPos);
+        gameData->camera->SetCamera(cameraPos, cameraTarget);
+    }
 
     void EquipmentSystem::instantiateWeapon(
         entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const
@@ -75,6 +102,7 @@ namespace sage
         {
             instantiateWeapon(owner, item, itemType);
         }
+        generateRenderTexture(owner);
         onEquipmentUpdated.publish(owner);
     }
 
@@ -93,6 +121,7 @@ namespace sage
             equipment.worldModels[itemType] = entt::null;
         }
         equipment.slots[itemType] = entt::null;
+        generateRenderTexture(owner);
         onEquipmentUpdated.publish(owner);
     }
 
@@ -107,6 +136,7 @@ namespace sage
                 equipment.worldModels[itemType] = entt::null;
             }
             equipment.slots[itemType] = entt::null;
+            generateRenderTexture(owner);
             onEquipmentUpdated.publish(owner);
         }
     }
@@ -160,8 +190,19 @@ namespace sage
         return true;
     }
 
+    void EquipmentSystem::onComponentAdded(entt::entity addedEntity)
+    {
+        generateRenderTexture(addedEntity);
+    }
+
+    void EquipmentSystem::onComponentRemoved(entt::entity removedEntity)
+    {
+    }
+
     EquipmentSystem::EquipmentSystem(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
+        registry->on_construct<EquipmentComponent>().connect<&EquipmentSystem::onComponentAdded>(this);
+        registry->on_destroy<EquipmentComponent>().connect<&EquipmentSystem::onComponentRemoved>(this);
     }
 } // namespace sage
