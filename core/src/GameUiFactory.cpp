@@ -282,10 +282,6 @@ namespace sage
     Window* GameUiFactory::CreateInventoryWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        auto& inventory =
-            registry->get<InventoryComponent>(engine->gameData->controllableActorSystem->GetSelectedActor());
-
-        // TODO: Add SetPaddingWindowPercent
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
@@ -340,71 +336,95 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
         auto window =
-            engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_VERTICAL);
-
-        // window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+            engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, WindowTableAlignment::STACK_HORIZONTAL);
         window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({14, 14, 14, 14});
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
+        // TODO: Find a way to stack tables both vertically or horizontally in the same window (and reenable the
+        // tilebar below)
+        // {
+        //     auto table = window->CreateTable(4);
+        //     auto row = table->CreateTableRow();
+        //     auto cell = row->CreateTableCell(80);
+        //     auto cell2 = row->CreateTableCell(20);
+        //     auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
+        //     titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
+        //     titlebar->SetVertAlignment(VertAlignment::TOP);
+        //     auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
+        //     auto closeButton = cell2->CreateCloseButton(engine, tex);
+        //     closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
+        //     closeButton->SetVertAlignment(VertAlignment::TOP);
+        // }
+
+        int maxRows = 6;
+        int maxCols = 1;
+
+        auto createEquipSlot = [&engine, &equipmentUpdateSink](
+                                   Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
+            auto& cell = table->children[row]->children[col];
+            auto equipSlot =
+                cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
+            equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot);
+        };
+
+        auto createSpacerSlot = [&engine](Table* table, unsigned int row, unsigned int col) {
+            auto& cell = table->children[row]->children[col];
+            cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
+        };
+
         {
-            auto table = window->CreateTable(4);
-            auto row = table->CreateTableRow();
-            auto cell = row->CreateTableCell(80);
-            auto cell2 = row->CreateTableCell(20);
-            auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
-            titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-            titlebar->SetVertAlignment(VertAlignment::TOP);
-            auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            auto closeButton = cell2->CreateCloseButton(engine, tex);
-            closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
-            closeButton->SetVertAlignment(VertAlignment::TOP);
-        }
-        {
-            int maxRows = 5;
-            int maxCols = 3;
+
             auto table = window->CreateTableGrid(maxRows, maxCols, 4);
-
-            auto createEquipSlot = [&engine, &table, &equipmentUpdateSink](
-                                       unsigned int row, unsigned int col, EquipmentSlotName itemType) {
-                auto& cell = table->children[row]->children[col];
-                auto equipSlot =
-                    cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
-                equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot);
-            };
-
-            auto createSpacerSlot = [&engine, &table](unsigned int row, unsigned int col) {
-                auto& cell = table->children[row]->children[col];
-                auto slot = cell->CreateImagebox(
-                    engine, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
-                // slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-            };
 
             for (unsigned int row = 0; row < maxRows; ++row)
             {
                 for (unsigned int col = 0; col < maxCols; ++col)
                 {
-                    createSpacerSlot(row, col);
+                    createSpacerSlot(table, row, col);
                 }
             }
 
-            createEquipSlot(0, 1, EquipmentSlotName::HELM);
+            createEquipSlot(table, 0, 0, EquipmentSlotName::HELM);
+            createEquipSlot(table, 1, 0, EquipmentSlotName::ARMS);
+            createEquipSlot(table, 2, 0, EquipmentSlotName::CHEST);
+            createEquipSlot(table, 3, 0, EquipmentSlotName::AMULET);
+            createEquipSlot(table, 4, 0, EquipmentSlotName::LEGS);
+            createEquipSlot(table, 5, 0, EquipmentSlotName::LEFTHAND);
+        }
 
-            createEquipSlot(1, 0, EquipmentSlotName::ARMS);
-            createEquipSlot(1, 1, EquipmentSlotName::CHEST);
-            createEquipSlot(1, 2, EquipmentSlotName::AMULET);
+        {
+            // Character model
+            auto table = window->CreateTable();
+            auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell();
+            ResourceManager::GetInstance().ImageLoadFromFile("resources/chartest.png");
+            auto img =
+                cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/chartest.png"));
+            img->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_TO_FIT);
+            img->SetVertAlignment(VertAlignment::MIDDLE);
+            img->SetHoriAlignment(HoriAlignment::CENTER);
+            img->draggable = false;
+        }
 
-            createEquipSlot(2, 0, EquipmentSlotName::LEGS);
-            createEquipSlot(2, 1, EquipmentSlotName::BELT);
-            createEquipSlot(2, 2, EquipmentSlotName::RING1);
+        {
+            auto table = window->CreateTableGrid(maxRows, maxCols, 4);
 
-            createEquipSlot(3, 1, EquipmentSlotName::BOOTS);
-            createEquipSlot(3, 2, EquipmentSlotName::RING2);
+            for (unsigned int row = 0; row < maxRows; ++row)
+            {
+                for (unsigned int col = 0; col < maxCols; ++col)
+                {
+                    createSpacerSlot(table, row, col);
+                }
+            }
 
-            createEquipSlot(4, 0, EquipmentSlotName::LEFTHAND);
-            createEquipSlot(4, 2, EquipmentSlotName::RIGHTHAND);
+            createEquipSlot(table, 0, 0, EquipmentSlotName::BELT);
+            createEquipSlot(table, 1, 0, EquipmentSlotName::BOOTS);
+            createEquipSlot(table, 2, 0, EquipmentSlotName::RING2);
+            createEquipSlot(table, 3, 0, EquipmentSlotName::RING1);
+            createEquipSlot(table, 5, 0, EquipmentSlotName::RIGHTHAND);
         }
         window->Hide();
         return window;

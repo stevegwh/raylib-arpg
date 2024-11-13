@@ -520,7 +520,7 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
-        Window(Settings* _settings) : settings(_settings){};
+        explicit Window(Settings* _settings) : settings(_settings){};
     };
 
     class WindowDocked final : public Window

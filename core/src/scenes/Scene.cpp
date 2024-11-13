@@ -121,8 +121,8 @@ namespace sage
         // ResourceManager::GetInstance().UnloadImages();
         // ResourceManager::GetInstance().UnloadShaderFileText();
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
-        auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 200}, 20, 40);
-        auto* window2 = GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {600, 200}, 20, 40);
+        auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 100}, 30, 60);
+        auto* window2 = GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 100}, 30, 60);
         entt::sink sink{data->userInput->keyIPressed};
         sink.connect<&Window::ToggleHide>(*window);
         entt::sink sink2{data->userInput->keyCPressed};
