@@ -108,7 +108,7 @@ namespace sage
 
     class PlayerStateController::MovingToTalkToNPCState : public StateMachine
     {
-        void onTargetReached(entt::entity self)
+        void onTargetReached(entt::entity self) const
         {
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::InDialog);
@@ -193,7 +193,7 @@ namespace sage
     class PlayerStateController::MovingToAttackEnemyState : public StateMachine
     {
 
-        void onAttackCancelled(entt::entity self, entt::entity x)
+        void onAttackCancelled(entt::entity self, entt::entity) const
         {
             auto& playerCombatable = registry->get<CombatableActor>(self);
             playerCombatable.target = entt::null;
@@ -201,7 +201,7 @@ namespace sage
             playerState.ChangeState(self, PlayerStateEnum::Default);
         }
 
-        void onTargetReached(entt::entity self)
+        void onTargetReached(entt::entity self) const
         {
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::Combat);
@@ -231,7 +231,6 @@ namespace sage
             Vector3 playerPos = registry->get<sgTransform>(self).GetWorldPos();
             Vector3 enemyPos = enemyTrans.GetWorldPos();
             Vector3 direction = Vector3Subtract(enemyPos, playerPos);
-            float length = Vector3Length(direction);
             direction = Vector3Scale(Vector3Normalize(direction), combatable.attackRange);
 
             Vector3 targetPos = Vector3Subtract(enemyPos, direction);

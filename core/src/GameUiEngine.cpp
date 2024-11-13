@@ -28,7 +28,6 @@
 #include <cassert>
 #include <ranges>
 #include <sstream>
-#include <utility>
 
 namespace sage
 {
@@ -351,7 +350,6 @@ namespace sage
 
     void ImageBox::OnDragStart()
     {
-        auto mousePos = GetMousePosition();
         CellElement::OnDragStart();
     }
 
@@ -686,8 +684,6 @@ namespace sage
     {
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        auto& inventory = engine->registry->get<InventoryComponent>(
-            engine->gameData->controllableActorSystem->GetSelectedActor());
         auto itemId = getItemId();
         if (itemId != entt::null)
         {
@@ -699,8 +695,6 @@ namespace sage
 
     void ItemSlot::RetrieveInfo()
     {
-        const auto& inventory = engine->registry->get<InventoryComponent>(
-            engine->gameData->controllableActorSystem->GetSelectedActor());
         auto itemId = getItemId();
         if (itemId != entt::null)
         {
@@ -752,7 +746,7 @@ namespace sage
             engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
     }
 
-    bool EquipmentSlot::validateDrop(ItemComponent& item) const
+    bool EquipmentSlot::validateDrop(const ItemComponent& item) const
     {
         if (item.HasFlag(ItemFlags::WEAPON))
         {
@@ -946,6 +940,7 @@ namespace sage
         case HoriAlignment::RIGHT:
             xOffset = settings->screenWidth - rec.width;
             break;
+        default:;
         }
 
         // Calculate vertical position
@@ -1306,7 +1301,7 @@ namespace sage
     {
         if (children.empty()) return;
         // 1. Get number of columns
-        int cols = children[0]->children.size();
+        unsigned int cols = children[0]->children.size();
 
         // 2. Calculate available space
         float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
@@ -1678,7 +1673,7 @@ namespace sage
         return titleBar;
     }
 
-    CloseButton* TableCell::CreateCloseButton(GameUIEngine* engine, Texture _tex)
+    CloseButton* TableCell::CreateCloseButton(GameUIEngine* engine, const Texture& _tex)
     {
         children = std::make_unique<CloseButton>(engine);
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
@@ -1722,7 +1717,7 @@ namespace sage
         return textbox;
     }
 
-    ImageBox* TableCell::CreateImagebox(GameUIEngine* engine, Texture _tex)
+    ImageBox* TableCell::CreateImagebox(GameUIEngine* engine, const Texture& _tex)
     {
         children = std::make_unique<ImageBox>(engine);
         auto* image = dynamic_cast<ImageBox*>(children.get());
@@ -1735,8 +1730,7 @@ namespace sage
 
     void TableCell::UpdateChildren()
     {
-        auto& element = children;
-        if (element)
+        if (auto& element = children)
         {
             element->parent = this;
             element->rec = rec;
@@ -1747,8 +1741,7 @@ namespace sage
     void TableCell::Draw2D()
     {
         TableElement::Draw2D();
-        auto& element = children;
-        if (element) // hide if dragged
+        if (auto& element = children) // hide if dragged
         {
             element->Draw2D();
         }
@@ -2052,7 +2045,7 @@ namespace sage
         return draggedObject.has_value();
     }
 
-    Window* GameUIEngine::GetWindowCollision(Window* toCheck) const
+    Window* GameUIEngine::GetWindowCollision(const Window* toCheck) const
     {
         for (auto& window : windows)
         {
@@ -2119,10 +2112,8 @@ namespace sage
 
     void GameUIEngine::BringClickedWindowToFront(Window* clicked)
     {
-        const auto it =
-            std::find_if(windows.begin(), windows.end(), [clicked](const std::unique_ptr<Window>& ptr) {
-                return ptr.get() == clicked;
-            });
+        const auto it = std::ranges::find_if(
+            windows, [clicked](const std::unique_ptr<Window>& ptr) { return ptr.get() == clicked; });
         std::rotate(it, it + 1, windows.end());
     }
 
@@ -2163,15 +2154,11 @@ namespace sage
         if (auto collision = GetWindowCollision(window))
         {
             // check if window is lower
-            auto windowIt =
-                std::find_if(windows.begin(), windows.end(), [window](const std::unique_ptr<Window>& ptr) {
-                    return ptr.get() == window;
-                });
+            auto windowIt = std::ranges::find_if(
+                windows, [window](const std::unique_ptr<Window>& ptr) { return ptr.get() == window; });
 
-            const auto colIt =
-                std::find_if(windows.begin(), windows.end(), [collision](const std::unique_ptr<Window>& ptr) {
-                    return ptr.get() == collision;
-                });
+            const auto colIt = std::ranges::find_if(
+                windows, [collision](const std::unique_ptr<Window>& ptr) { return ptr.get() == collision; });
 
             const auto windowDist = std::distance(windows.begin(), windowIt);
 
@@ -2247,7 +2234,7 @@ namespace sage
         GameUiFactory::CreateCombatableTooltip(gameData->uiEngine.get(), renderable.name, combatable, pos);
     }
 
-    void GameUIEngine::onNPCHover(entt::entity entity)
+    void GameUIEngine::onNPCHover(entt::entity entity) const
     {
         auto& renderable = registry->get<Renderable>(entity);
         Vector2 pos = GetWorldToScreen(

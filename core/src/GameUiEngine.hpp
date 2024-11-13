@@ -363,7 +363,7 @@ namespace sage
     class EquipmentSlot : public ItemSlot
     {
         ControllableActorSystem* controllableActorSystem{};
-        [[nodiscard]] bool validateDrop(ItemComponent& item) const;
+        [[nodiscard]] bool validateDrop(const ItemComponent& item) const;
 
       protected:
         void onItemDroppedToWorld() override;
@@ -417,8 +417,8 @@ namespace sage
             float fontSize = 16,
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         TitleBar* CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize);
-        ImageBox* CreateImagebox(GameUIEngine* engine, Texture _tex);
-        CloseButton* CreateCloseButton(GameUIEngine* engine, Texture _tex);
+        ImageBox* CreateImagebox(GameUIEngine* engine, const Texture& _tex);
+        CloseButton* CreateCloseButton(GameUIEngine* engine, const Texture& _tex);
         PartyMemberPortrait* CreatePartyMemberPortrait(
             GameUIEngine* engine,
             PartySystem* _partySystem,
@@ -624,7 +624,7 @@ namespace sage
         void processWindows();
         void onWorldItemHover(entt::entity entity) const;
         void onWorldCombatableHover(entt::entity entity) const;
-        void onNPCHover(entt::entity entity);
+        void onNPCHover(entt::entity entity) const;
         void onStopWorldHover() const;
 
         [[nodiscard]] bool mouseInNonObscuredWindowRegion(Window* window, Vector2 mousePos) const;
@@ -667,7 +667,7 @@ namespace sage
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;
         void PlaceWindow(Window* window, Vector2 requestedPos) const;
-        [[nodiscard]] Window* GetWindowCollision(Window* toCheck) const;
+        [[nodiscard]] Window* GetWindowCollision(const Window* toCheck) const;
         [[nodiscard]] CellElement* GetCellUnderCursor() const;
         void DrawDebug2D() const;
         void Draw2D() const;

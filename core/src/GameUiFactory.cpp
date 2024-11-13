@@ -188,8 +188,8 @@ namespace sage
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({10, 2, 5, 5});
-        auto panel = window->CreatePanel();
         {
+            auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
@@ -237,8 +237,8 @@ namespace sage
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({10, 2, 10, 5});
-        auto panel = window->CreatePanel();
         {
+            auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
@@ -261,8 +261,8 @@ namespace sage
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({16, 2, 10, 6});
-        auto panel = window->CreatePanel();
         {
+            auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
@@ -293,8 +293,8 @@ namespace sage
         window->SetPadding({14, 14, 14, 14});
 
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
-        auto panel = window->CreatePanel(4);
         {
+            auto panel = window->CreatePanel(4);
             auto table = panel->CreateTable();
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
@@ -308,8 +308,8 @@ namespace sage
             closeButton->SetVertAlignment(VertAlignment::TOP);
         }
 
-        auto panel1 = window->CreatePanel();
         {
+            auto panel1 = window->CreatePanel();
             auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
             for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
             {
@@ -340,9 +340,8 @@ namespace sage
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
-        auto panel1 = window->CreatePanel(4);
-
         {
+            auto panel1 = window->CreatePanel(4);
             auto table = panel1->CreateTable();
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
@@ -359,16 +358,17 @@ namespace sage
         int maxRows = 6;
         int maxCols = 1;
 
-        auto createEquipSlot = [&engine, &equipmentUpdateSink](
-                                   Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
-            auto& cell = table->children[row]->children[col];
-            auto equipSlot =
-                cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
-            equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-            equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot);
-        };
+        auto createEquipSlot =
+            [&engine, &equipmentUpdateSink](
+                const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
+                auto& cell = table->children[row]->children[col];
+                auto equipSlot =
+                    cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
+                equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot);
+            };
 
-        auto createSpacerSlot = [&engine](Table* table, unsigned int row, unsigned int col) {
+        auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
             auto& cell = table->children[row]->children[col];
             cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
         };
