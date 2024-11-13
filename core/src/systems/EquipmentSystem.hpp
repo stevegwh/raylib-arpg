@@ -17,13 +17,15 @@ namespace sage
     {
         entt::registry* registry;
         GameData* gameData;
+        bool renderTextureSceneInitialised = false;
 
-        void generateRenderTexture(entt::entity entity) const;
+        void initRenderTextureScene();
         void instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const;
         void onComponentAdded(entt::entity addedEntity);
         void onComponentRemoved(entt::entity removedEntity);
 
       public:
+        void GenerateRenderTexture(entt::entity entity, float width, float height);
         entt::sigh<void(entt::entity)> onEquipmentUpdated;
         [[nodiscard]] entt::entity GetItem(entt::entity owner, EquipmentSlotName itemType) const;
         void EquipItem(entt::entity owner, entt::entity item, EquipmentSlotName itemType) const;

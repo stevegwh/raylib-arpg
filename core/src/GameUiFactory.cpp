@@ -395,15 +395,12 @@ namespace sage
 
         {
             // Character model
-            auto table = panel2->CreateTable();
+            auto table = panel2->CreateTable(60);
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
             ResourceManager::GetInstance().ImageLoadFromFile("resources/chartest.png");
-            auto img =
-                cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/chartest.png"));
+            auto img = cell->CreateEquipmentCharacterPreview(engine);
             img->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_TO_FIT);
-            img->SetVertAlignment(VertAlignment::MIDDLE);
-            img->SetHoriAlignment(HoriAlignment::CENTER);
             img->draggable = false;
         }
 

@@ -309,6 +309,14 @@ namespace sage
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
+    class EquipmentCharacterPreview : public ImageBox
+    {
+      public:
+        void RetrieveInfo();
+        void Draw2D();
+        explicit EquipmentCharacterPreview(GameUIEngine* _engine);
+    };
+
     class PartyMemberPortrait : public ImageBox
     {
         PartySystem* partySystem{};
@@ -418,6 +426,7 @@ namespace sage
             TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         TitleBar* CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize);
         ImageBox* CreateImagebox(GameUIEngine* engine, const Texture& _tex);
+        EquipmentCharacterPreview* CreateEquipmentCharacterPreview(GameUIEngine* engine);
         CloseButton* CreateCloseButton(GameUIEngine* engine, const Texture& _tex);
         PartyMemberPortrait* CreatePartyMemberPortrait(
             GameUIEngine* engine,
