@@ -377,7 +377,6 @@ namespace sage
 
         {
             auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
-
             for (unsigned int row = 0; row < maxRows; ++row)
             {
                 for (unsigned int col = 0; col < maxCols; ++col)

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "raylib.h"
+
 #include <entt/entt.hpp>
 
 namespace sage
@@ -16,7 +18,10 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
 
+        void generateRenderTexture(entt::entity entity) const;
         void instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const;
+        void onComponentAdded(entt::entity addedEntity);
+        void onComponentRemoved(entt::entity removedEntity);
 
       public:
         entt::sigh<void(entt::entity)> onEquipmentUpdated;
