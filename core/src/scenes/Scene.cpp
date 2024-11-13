@@ -1,19 +1,18 @@
 #include "Scene.hpp"
 
-#include "GameData.hpp"
-
-#include "../../utils/EntityReflectionSignalRouter.hpp"
-
-#include "Camera.hpp"
-#include "Cursor.hpp"
-#include "UserInput.hpp"
-
-#include "components/Renderable.hpp"
-
 #include "AbilityFactory.hpp"
+#include "Camera.hpp"
+#include "components/PartyMemberComponent.hpp"
+#include "components/Renderable.hpp"
+#include "components/Spawner.hpp"
+#include "Cursor.hpp"
+#include "EntityReflectionSignalRouter.hpp"
+#include "GameData.hpp"
+#include "GameObjectFactory.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
 #include "Serializer.hpp"
+#include "UserInput.hpp"
 
 // NB: We have to include all the headers required to build GameData
 #include "systems/ActorMovementSystem.hpp"
@@ -32,10 +31,6 @@
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
-
-#include "components/PartyMemberComponent.hpp"
-#include "components/Spawner.hpp"
-#include "GameObjectFactory.hpp"
 
 namespace sage
 {

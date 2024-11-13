@@ -17,7 +17,7 @@
 namespace sage
 {
 
-    void DialogSystem::progressConversation(dialog::Conversation* conversation)
+    void DialogSystem::progressConversation(const dialog::Conversation* conversation)
     {
         dialogWindow->Remove();
         dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), conversation->owner);
