@@ -523,11 +523,24 @@ namespace sage
     {
     }
 
+    void EquipmentCharacterPreview::UpdateDimensions()
+    {
+        ImageBox::UpdateDimensions();
+        auto& renderTexture =
+            engine->registry
+                ->get<EquipmentComponent>(engine->gameData->controllableActorSystem->GetSelectedActor())
+                .renderTexture;
+        renderTexture.texture.width = parent->rec.width;
+        renderTexture.texture.height = parent->rec.height;
+    }
+
     void EquipmentCharacterPreview::RetrieveInfo()
     {
-        UpdateDimensions();
         engine->gameData->equipmentSystem->GenerateRenderTexture(
-            engine->gameData->controllableActorSystem->GetSelectedActor(), parent->rec.width, parent->rec.height);
+            engine->gameData->controllableActorSystem->GetSelectedActor(),
+            parent->rec.width * 4,
+            parent->rec.height * 4);
+        UpdateDimensions();
     }
 
     void EquipmentCharacterPreview::Draw2D()

@@ -29,8 +29,8 @@ namespace sage
         void updateAmbientLight(Shader& _shader) const;
 
       public:
-        void CreateLight(
-            Shader& _shader,
+        void RemoveLight(entt::entity light);
+        entt::entity CreateLight(
             int type,
             Vector3 position,
             Vector3 target,

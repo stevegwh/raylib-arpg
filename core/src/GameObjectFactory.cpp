@@ -219,6 +219,7 @@ namespace sage
         animation.animationMap[AnimationEnum::TALK] = 2;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
         animation.animationMap[AnimationEnum::RUN] = 4;
+        animation.animationMap[AnimationEnum::IDLE2] = 0;
         animation.animationMap[AnimationEnum::IDLE] = 10; // 11 is T-Pose, 10 is ninja idle
         animation.animationMap[AnimationEnum::SPIN] = 5;
         animation.animationMap[AnimationEnum::SLASH] = 6;

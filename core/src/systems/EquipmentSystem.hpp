@@ -17,9 +17,10 @@ namespace sage
     {
         entt::registry* registry;
         GameData* gameData;
-        bool renderTextureSceneInitialised = false;
 
-        void initRenderTextureScene();
+        // TODO: Make this an independent class
+        entt::entity renderTextureSceneLight = entt::null;
+        void updateCharacterPreviewPose(entt::entity entity);
         void instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const;
         void onComponentAdded(entt::entity addedEntity);
         void onComponentRemoved(entt::entity removedEntity);
