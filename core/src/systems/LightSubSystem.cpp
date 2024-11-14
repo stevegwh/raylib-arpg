@@ -43,30 +43,27 @@ namespace sage
         SetShaderValue(_shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
 
-    // Not really used
-    void LightSubSystem::CreateLight(Shader& _shader, int type, Vector3 position, Vector3 target, Color color)
+    void LightSubSystem::RemoveLight(entt::entity light)
     {
+        registry->destroy(light);
+        RefreshLights();
+    }
 
-        auto lightsCountLoc = GetShaderLocation(_shader, "lightsCount");
+    entt::entity LightSubSystem::CreateLight(int type, Vector3 position, Vector3 target, Color color)
+    {
         if (lightsCount < MAX_LIGHTS)
         {
             auto entity = registry->create();
             auto& light = registry->emplace<Light>(entity);
-            // light.enabled = true;
             light.type = type;
             light.position = position;
             light.target = target;
             light.color = color;
-
-            light.LinkShader(_shader, lightsCount);
-
-            lightsCount++;
-            SetShaderValue(_shader, lightsCountLoc, &lightsCount, SHADER_UNIFORM_INT);
+            RefreshLights();
+            return entity;
         }
-        else
-        {
-            std::cout << "Scene: Max light sources reached. Ignoring. \n";
-        }
+        std::cout << "Scene: Max light sources reached. Ignoring. \n";
+        return entt::null;
     }
 
     void LightSubSystem::LinkShaderToLights(Shader& _shader)

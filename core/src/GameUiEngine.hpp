@@ -311,7 +311,9 @@ namespace sage
 
     class EquipmentCharacterPreview : public ImageBox
     {
+
       public:
+        void UpdateDimensions() override;
         void RetrieveInfo();
         void Draw2D();
         explicit EquipmentCharacterPreview(GameUIEngine* _engine);

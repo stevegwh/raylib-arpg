@@ -17,6 +17,7 @@ namespace sage
     enum class AnimationEnum
     {
         IDLE,
+        IDLE2,
         DEATH,
         AUTOATTACK,
         WALK,
