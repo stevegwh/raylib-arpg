@@ -208,7 +208,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({10, 2, 5, 5});
+        window->SetPadding({16, 2, 10, 6});
         auto panel = window->CreatePanel();
         {
             auto table = panel->CreateTable();
@@ -217,7 +217,7 @@ namespace sage
             auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow();
-            row->SetPaddingPercent({10, 0, 0, 0});
+            row->SetPadding({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(
                 engine,
@@ -236,7 +236,7 @@ namespace sage
         auto* window =
             engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({10, 2, 10, 5});
+        window->SetPadding({16, 2, 10, 6});
         {
             auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
