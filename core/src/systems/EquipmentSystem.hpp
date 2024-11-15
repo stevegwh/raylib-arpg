@@ -13,6 +13,7 @@ namespace sage
     class GameData;
     enum class EquipmentSlotName;
 
+    // Depends on Animation being initialised
     class EquipmentSystem
     {
         entt::registry* registry;
@@ -21,6 +22,7 @@ namespace sage
         // TODO: Make this an independent class
         entt::entity renderTextureSceneLight = entt::null;
         void updateCharacterPreviewPose(entt::entity entity);
+        void updateCharacterWeaponPosition(entt::entity owner) const;
         void instantiateWeapon(entt::entity owner, entt::entity itemId, EquipmentSlotName itemType) const;
         void onComponentAdded(entt::entity addedEntity);
         void onComponentRemoved(entt::entity removedEntity);

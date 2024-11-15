@@ -25,88 +25,36 @@
 namespace sage
 {
 
-    void EquipmentSystem::updateCharacterPreviewPose(entt::entity entity)
+    void EquipmentSystem::updateCharacterWeaponPosition(entt::entity owner) const
     {
+        const auto& equipment = registry->get<EquipmentComponent>(owner);
+        for (auto [k, entity] : equipment.worldModels)
         {
-            auto& animation = registry->get<Animation>(entity);
-            auto& renderable = registry->get<Renderable>(entity);
-            auto& animData = animation.current;
-            const ModelAnimation& anim = animation.animations[animData.index];
-            animData.currentFrame = anim.frameCount;
-            renderable.GetModel()->UpdateAnimation(anim, animData.currentFrame);
-        }
-
-        {
-            auto& equipment = registry->get<EquipmentComponent>(entity);
-            for (auto [k, entity] : equipment.worldModels)
+            if (registry->valid(entity) && registry->any_of<WeaponComponent>(entity))
             {
-                if (registry->valid(entity) && registry->any_of<WeaponComponent>(entity))
-                {
-                    auto& weapon = registry->get<WeaponComponent>(entity);
-                    auto& weaponRend = registry->get<Renderable>(entity);
-                    auto& model = registry->get<Renderable>(weapon.owner).GetModel()->GetRlModel();
-                    auto boneId = GetBoneIdByName(model.bones, model.boneCount, weapon.parentBoneName.c_str());
-                    assert(boneId >= 0);
-                    auto* matrices = model.meshes[0].boneMatrices;
-                    auto mat = matrices[boneId];
-                    mat = MatrixMultiply(weapon.parentSocket, mat);
-                    mat = MatrixMultiply(mat, weaponRend.initialTransform);
-                    weaponRend.GetModel()->SetTransform(mat);
-                }
+                auto& weapon = registry->get<WeaponComponent>(entity);
+                auto& weaponRend = registry->get<Renderable>(entity);
+                auto& model = registry->get<Renderable>(weapon.owner).GetModel()->GetRlModel();
+                auto boneId = GetBoneIdByName(model.bones, model.boneCount, weapon.parentBoneName.c_str());
+                assert(boneId >= 0);
+                auto* matrices = model.meshes[0].boneMatrices;
+                auto mat = matrices[boneId];
+                mat = MatrixMultiply(weapon.parentSocket, mat);
+                mat = MatrixMultiply(mat, weaponRend.initialTransform);
+                weaponRend.GetModel()->SetTransform(mat);
             }
         }
     }
 
-    void EquipmentSystem::GenerateRenderTexture(entt::entity entity, float width, float height)
+    void EquipmentSystem::updateCharacterPreviewPose(entt::entity entity)
     {
-        auto light =
-            gameData->lightSubSystem->CreateLight(LightType::LIGHT_POINT, {0, -996, 15}, {0, -996, 0}, WHITE);
-        auto& equipment = registry->get<EquipmentComponent>(entity);
-
-        auto& transform = registry->get<sgTransform>(entity);
-        auto& renderable = registry->get<Renderable>(entity);
         auto& animation = registry->get<Animation>(entity);
-
-        auto current = animation.current;
-        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-        updateCharacterPreviewPose(entity);
-        // TODO: Should probably update the weapons again after taking the "photo"
-
-        auto oldPos = transform.GetWorldPos();
-        auto cameraPos = gameData->camera->GetPosition();
-        auto cameraTarget = gameData->camera->getRaylibCam()->target;
-
-        transform.SetPosition({0, -999, 0});
-        gameData->camera->SetCamera({6, -996, 8}, {-0.5, -996, 0});
-
-        UnloadTexture(equipment.renderTexture.texture);
-        equipment.renderTexture = LoadRenderTexture(width, height);
-
-        BeginTextureMode(equipment.renderTexture);
-        ClearBackground(BLACK);
-        BeginMode3D(*gameData->camera->getRaylibCam());
-        renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
-
-        if (equipment.worldModels.contains(EquipmentSlotName::LEFTHAND))
-        {
-            if (registry->valid(equipment.worldModels[EquipmentSlotName::LEFTHAND]))
-            {
-                auto& leftHandRenderable =
-                    registry->get<Renderable>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
-                auto& leftHandTrans =
-                    registry->get<sgTransform>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
-                leftHandRenderable.GetModel()->Draw(
-                    leftHandTrans.GetWorldPos(), leftHandTrans.GetScale().x, WHITE);
-            }
-        }
-
-        EndMode3D();
-        EndTextureMode();
-
-        animation.current = current;
-        transform.SetPosition(oldPos);
-        gameData->camera->SetCamera(cameraPos, cameraTarget);
-        gameData->lightSubSystem->RemoveLight(light);
+        auto& renderable = registry->get<Renderable>(entity);
+        auto& animData = animation.current;
+        const ModelAnimation& anim = animation.animations[animData.index];
+        animData.currentFrame = anim.frameCount;
+        renderable.GetModel()->UpdateAnimation(anim, animData.currentFrame);
+        animation.onAnimationUpdated.publish(entity);
     }
 
     void EquipmentSystem::instantiateWeapon(
@@ -145,6 +93,63 @@ namespace sage
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
         weaponTrans.SetLocalPos(Vector3Zero());
+
+        auto& animation = registry->get<Animation>(owner);
+        entt::sink sink{animation.onAnimationUpdated};
+        sink.connect<&EquipmentSystem::updateCharacterWeaponPosition>(this);
+    }
+
+    void EquipmentSystem::GenerateRenderTexture(entt::entity entity, float width, float height)
+    {
+        auto light =
+            gameData->lightSubSystem->CreateLight(LightType::LIGHT_POINT, {0, -996, 15}, {0, -996, 0}, WHITE);
+        auto& equipment = registry->get<EquipmentComponent>(entity);
+
+        auto& transform = registry->get<sgTransform>(entity);
+        auto& renderable = registry->get<Renderable>(entity);
+        auto& animation = registry->get<Animation>(entity);
+
+        // TODO: Should probably update the weapons again after taking the "photo"
+
+        auto oldPos = transform.GetWorldPos();
+        auto cameraPos = gameData->camera->GetPosition();
+        auto cameraTarget = gameData->camera->getRaylibCam()->target;
+
+        transform.SetPosition({0, -999, 0});
+        gameData->camera->SetCamera({6, -996, 8}, {-0.5, -996, 0});
+
+        auto current = animation.current;
+        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+        updateCharacterPreviewPose(entity);
+
+        UnloadTexture(equipment.renderTexture.texture);
+        equipment.renderTexture = LoadRenderTexture(width, height);
+
+        BeginTextureMode(equipment.renderTexture);
+        ClearBackground(BLACK);
+        BeginMode3D(*gameData->camera->getRaylibCam());
+        renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
+
+        if (equipment.worldModels.contains(EquipmentSlotName::LEFTHAND))
+        {
+            if (registry->valid(equipment.worldModels[EquipmentSlotName::LEFTHAND]))
+            {
+                auto& leftHandRenderable =
+                    registry->get<Renderable>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
+                auto& leftHandTrans =
+                    registry->get<sgTransform>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
+                leftHandRenderable.GetModel()->Draw(
+                    leftHandTrans.GetWorldPos(), leftHandTrans.GetScale().x, WHITE);
+            }
+        }
+
+        EndMode3D();
+        EndTextureMode();
+
+        animation.current = current;
+        transform.SetPosition(oldPos);
+        gameData->camera->SetCamera(cameraPos, cameraTarget);
+        gameData->lightSubSystem->RemoveLight(light);
     }
 
     entt::entity EquipmentSystem::GetItem(entt::entity owner, EquipmentSlotName itemType) const
