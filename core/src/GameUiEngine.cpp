@@ -1056,7 +1056,6 @@ namespace sage
     {
         hidden = true;
         markForRemoval = true;
-        windowUpdateCnx.release();
     }
 
     void Window::OnScreenSizeChange()
@@ -1223,6 +1222,11 @@ namespace sage
 
             currentY += panelHeight;
         }
+    }
+
+    Window::~Window()
+    {
+        windowUpdateCnx.release();
     }
 
     void Panel::DrawDebug2D()
