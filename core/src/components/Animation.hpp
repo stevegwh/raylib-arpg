@@ -58,6 +58,7 @@ namespace sage
 
         entt::sigh<void(entt::entity)> onAnimationEnd{};
         entt::sigh<void(entt::entity)> onAnimationStart{};
+        entt::sigh<void(entt::entity)> onAnimationUpdated{};
 
         void ChangeAnimationByParams(AnimationParams params);
         void ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed);
