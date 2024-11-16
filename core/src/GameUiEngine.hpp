@@ -115,7 +115,9 @@ namespace sage
                 }
                 else
                 {
-                    DrawTexture(tex.value(), rec.x, rec.y, WHITE);
+                    // TODO: Copy Window's desktop image for scaling (scale to fit, stretch, etc).
+                    // DrawTexture(tex.value(), rec.x, rec.y, WHITE);
+                    DrawTextureRec(tex.value(), rec, {rec.x, rec.y}, WHITE);
                 }
             }
         }
@@ -491,7 +493,6 @@ namespace sage
         friend class Panel;
     };
 
-    // TODO: Make it so that panels you can stack vertically and tables are stacked horizontally
     class Panel : public TableElement<std::vector<std::unique_ptr<Table>>, Window>
     {
         float requestedHeight{};
@@ -538,7 +539,7 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
-        ~Window();
+        ~Window() override;
         explicit Window(Settings* _settings) : settings(_settings){};
     };
 

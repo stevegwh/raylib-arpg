@@ -1160,7 +1160,7 @@ namespace sage
     void Window::Draw2D()
     {
         TableElement::Draw2D();
-        for (auto& child : children)
+        for (const auto& child : children)
         {
             child->Draw2D();
         }

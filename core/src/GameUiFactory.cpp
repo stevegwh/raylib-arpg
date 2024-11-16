@@ -331,7 +331,7 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/dirt4.png");
 
         auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h);
-        window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({14, 14, 14, 14});
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
