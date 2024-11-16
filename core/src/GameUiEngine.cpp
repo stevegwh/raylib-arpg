@@ -2002,10 +2002,9 @@ namespace sage
         const float x,
         const float y,
         const float _widthPercent,
-        const float _heightPercent,
-        const PanelAlignment _alignment)
+        const float _heightPercent)
     {
-        return CreateWindow(_nPatchTexture, x, y, _widthPercent, _heightPercent, _alignment, true);
+        return CreateWindow(_nPatchTexture, x, y, _widthPercent, _heightPercent, true);
     }
 
     Window* GameUIEngine::CreateWindow(
@@ -2014,12 +2013,10 @@ namespace sage
         const float y,
         const float _widthPercent,
         const float _heightPercent,
-        const PanelAlignment _alignment,
         const bool tooltip)
     {
 
         auto window = std::make_unique<Window>(gameData->settings);
-
         window->SetPosition(x, y);
         window->SetDimensionsPercent(_widthPercent, _heightPercent);
         window->tex = _nPatchTexture;
@@ -2044,11 +2041,7 @@ namespace sage
     }
 
     WindowDocked* GameUIEngine::CreateWindowDocked(
-        float _xOffsetPercent,
-        float _yOffsetPercent,
-        float _widthPercent,
-        float _heightPercent,
-        PanelAlignment _alignment)
+        float _xOffsetPercent, float _yOffsetPercent, float _widthPercent, float _heightPercent)
     {
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
@@ -2071,11 +2064,9 @@ namespace sage
         const float _xOffsetPercent,
         const float _yOffsetPercent,
         const float _widthPercent,
-        const float _heightPercent,
-        const PanelAlignment _alignment)
+        const float _heightPercent)
     {
-        auto* window =
-            CreateWindowDocked(_xOffsetPercent, _yOffsetPercent, _widthPercent, _heightPercent, _alignment);
+        auto* window = CreateWindowDocked(_xOffsetPercent, _yOffsetPercent, _widthPercent, _heightPercent);
         window->tex = _nPatchTexture;
         return window;
     }
