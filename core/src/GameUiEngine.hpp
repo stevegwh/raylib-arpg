@@ -40,12 +40,6 @@ namespace sage
         float height;
     };
 
-    enum class PanelAlignment
-    {
-        STACK_VERTICAL,
-        STACK_HORIZONTAL
-    };
-
     enum class HoriAlignment
     {
         LEFT,
@@ -646,35 +640,24 @@ namespace sage
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
         Window* CreateTooltipWindow(
-            const Texture& _nPatchTexture,
-            float x,
-            float y,
-            float _widthPercent,
-            float _heightPercent,
-            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL);
+            const Texture& _nPatchTexture, float x, float y, float _widthPercent, float _heightPercent);
         Window* CreateWindow(
             Texture _nPatchTexture,
             float x,
             float y,
             float _widthPercent,
             float _heightPercent,
-            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL,
             bool tooltip = false);
 
         WindowDocked* CreateWindowDocked(
-            float _xOffsetPercent,
-            float _yOffsetPercent,
-            float _widthPercent,
-            float _heightPercent,
-            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL);
+            float _xOffsetPercent, float _yOffsetPercent, float _widthPercent, float _heightPercent);
 
         WindowDocked* CreateWindowDocked(
             Texture _nPatchTexture,
             float _xOffsetPercent,
             float _yOffsetPercent,
             float _widthPercent,
-            float _heightPercent,
-            PanelAlignment _alignment = PanelAlignment::STACK_HORIZONTAL);
+            float _heightPercent);
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;

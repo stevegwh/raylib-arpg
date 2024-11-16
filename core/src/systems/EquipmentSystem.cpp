@@ -126,7 +126,7 @@ namespace sage
         equipment.renderTexture = LoadRenderTexture(width, height);
 
         BeginTextureMode(equipment.renderTexture);
-        ClearBackground(BLACK);
+        ClearBackground(BLANK);
         BeginMode3D(*gameData->camera->getRaylibCam());
         renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 

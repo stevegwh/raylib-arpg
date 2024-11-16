@@ -34,7 +34,7 @@ namespace sage
         //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
         //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
-        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20, PanelAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 20);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({2, 2, 2, 2});
@@ -97,7 +97,7 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
-        auto window = engine->CreateWindowDocked(0, 0, 8, 30, PanelAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindowDocked(0, 0, 8, 30);
         window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
         // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({12, 12, 16, 16});
@@ -126,7 +126,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5, PanelAlignment::STACK_VERTICAL);
+        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 25, 12.5);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({16, 16, 12, 12});
@@ -184,8 +184,7 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({10, 2, 5, 5});
         {
@@ -205,8 +204,7 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({16, 2, 10, 6});
         auto panel = window->CreatePanel();
@@ -233,8 +231,7 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({16, 2, 10, 6});
         {
@@ -257,8 +254,7 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto* window =
-            engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10, PanelAlignment::STACK_VERTICAL);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, 15, 10);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPadding({16, 2, 10, 6});
         {
@@ -281,15 +277,15 @@ namespace sage
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/dirt4.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/dirt4.png");
 
         // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
         // InventoryComponent
 
-        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, PanelAlignment::STACK_VERTICAL);
-        window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h);
+        window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({14, 14, 14, 14});
 
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
@@ -331,11 +327,11 @@ namespace sage
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/dirt4.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/dirt4.png");
 
-        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h, PanelAlignment::STACK_HORIZONTAL);
-        window->nPatchInfo = {Rectangle{3.0f, 665.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h);
+        window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({14, 14, 14, 14});
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
@@ -431,8 +427,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        const auto window =
-            engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 25, PanelAlignment::STACK_VERTICAL);
+        const auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, 40, 25);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         // window->SetOffsetPercent(0, -10);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
