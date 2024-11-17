@@ -292,14 +292,13 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
         auto window =
             engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 2);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({28, 14, 18, 18});
-
+        window->SetPadding({28, 0, 24, 24});
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
         {
             auto panel = window->CreatePanel(4);
@@ -339,12 +338,13 @@ namespace sage
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/dirt4.png");
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/dirt4.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
-        auto window = engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, w, h);
+        auto window =
+            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2.5, 424 * 2);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({14, 14, 14, 14});
+        window->SetPadding({28, 0, 24, 24});
 
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 

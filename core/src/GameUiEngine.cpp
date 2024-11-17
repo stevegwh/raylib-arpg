@@ -785,10 +785,10 @@ namespace sage
         }
     }
 
-    ItemSlot::ItemSlot(sage::GameUIEngine* _engine) : ImageBox(_engine)
+    ItemSlot::ItemSlot(GameUIEngine* _engine) : ImageBox(_engine)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
-        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
+        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
     }
 
     void EquipmentSlot::onItemDroppedToWorld()
@@ -886,8 +886,6 @@ namespace sage
     EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType)
         : ItemSlot(_engine), itemType(_itemType)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
-        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
     }
 
     void InventorySlot::onItemDroppedToWorld()
@@ -934,7 +932,9 @@ namespace sage
         }
     }
 
-    InventorySlot::InventorySlot(GameUIEngine* _engine) : ItemSlot(_engine){};
+    InventorySlot::InventorySlot(GameUIEngine* _engine) : ItemSlot(_engine)
+    {
+    }
 
     void CloseButton::OnClick()
     {
