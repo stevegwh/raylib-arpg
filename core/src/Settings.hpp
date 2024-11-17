@@ -18,7 +18,7 @@ namespace sage
         int screenHeight = 720;
         bool toggleFullScreenRequested = false;
 
-        float GetScreenScaleFactor() const
+        [[nodiscard]] float GetScreenScaleFactor() const
         {
             // Calculate scaling factor based on screen dimensions
             // You can use either width, height, or both depending on your needs
@@ -39,6 +39,11 @@ namespace sage
             // Option 4: Scale based on average of both dimensions
             // float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
             return scaleFactor;
+        }
+
+        [[nodiscard]] float ScaleValue(const float toScale) const
+        {
+            return toScale * GetScreenScaleFactor();
         }
 
         void ResetToUserDefined()

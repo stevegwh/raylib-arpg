@@ -311,7 +311,7 @@ namespace sage
       public:
         void UpdateDimensions() override;
         void RetrieveInfo();
-        void Draw2D();
+        void Draw2D() override;
         explicit EquipmentCharacterPreview(GameUIEngine* _engine);
     };
 
@@ -515,13 +515,15 @@ namespace sage
 
       public:
         entt::connection windowUpdateCnx{};
-        float widthPercent = 0;  // Width as percent of screen space
-        float heightPercent = 0; // Height as percent of screen space
+        // float widthPercent = 0;  // Width as percent of screen space
+        // float heightPercent = 0; // Height as percent of screen space
+        float referenceWidth = 0;  // Width before screen scaling (Screen width: 1920)
+        float referenceHeight = 0; // Height before screen scaling (Screen height: 1080)
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
 
         [[nodiscard]] Dimensions GetDimensions() const;
-        void SetDimensionsPercent(float _widthPercent, float _heightPercent);
+        void SetDimensions(float _width, float _height);
         virtual void SetPosition(float x, float y);
         [[nodiscard]] Vector2 GetPosition() const;
         void ClampToScreen();
@@ -640,25 +642,15 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
-        Window* CreateTooltipWindow(
-            const Texture& _nPatchTexture, float x, float y, float _widthPercent, float _heightPercent);
+        Window* CreateTooltipWindow(const Texture& _nPatchTexture, float x, float y, float _width, float _height);
         Window* CreateWindow(
-            Texture _nPatchTexture,
-            float x,
-            float y,
-            float _widthPercent,
-            float _heightPercent,
-            bool tooltip = false);
+            Texture _nPatchTexture, float x, float y, float _width, float _height, bool tooltip = false);
 
         WindowDocked* CreateWindowDocked(
-            float _xOffsetPercent, float _yOffsetPercent, float _widthPercent, float _heightPercent);
+            float _xOffsetPercent, float _yOffsetPercent, float _width, float _height);
 
         WindowDocked* CreateWindowDocked(
-            Texture _nPatchTexture,
-            float _xOffsetPercent,
-            float _yOffsetPercent,
-            float _widthPercent,
-            float _heightPercent);
+            Texture _nPatchTexture, float _xOffsetPercent, float _yOffsetPercent, float _width, float _height);
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;

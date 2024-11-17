@@ -910,12 +910,12 @@ namespace sage
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
-            auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
+            const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(actor);
-            auto droppedItemId = engine->gameData->equipmentSystem->GetItem(actor, droppedE->itemType);
+            const auto droppedItemId = engine->gameData->equipmentSystem->GetItem(actor, droppedE->itemType);
             engine->gameData->equipmentSystem->DestroyItem(actor, droppedE->itemType);
 
-            if (auto inventoryItemId = inventory.GetItem(row, col); inventoryItemId != entt::null)
+            if (const auto inventoryItemId = inventory.GetItem(row, col); inventoryItemId != entt::null)
             {
                 engine->gameData->equipmentSystem->EquipItem(actor, inventoryItemId, droppedE->itemType);
             }
@@ -1070,18 +1070,15 @@ namespace sage
 
     Dimensions Window::GetDimensions() const
     {
-        return Dimensions{settings->screenWidth * widthPercent, settings->screenHeight * heightPercent};
+        return Dimensions{settings->ScaleValue(referenceWidth), settings->ScaleValue(referenceHeight)};
     }
 
-    /**
-     *
-     * @param _widthPercent Width as percent of screen (1-100)
-     * @param _heightPercent Height as percent of screen (1-100)
-     */
-    void Window::SetDimensionsPercent(float _widthPercent, float _heightPercent)
+    void Window::SetDimensions(float _width, float _height)
     {
-        widthPercent = _widthPercent / 100;
-        heightPercent = _heightPercent / 100;
+        referenceWidth = _width;
+        referenceHeight = _height;
+
+        // TODO: clamp to bounds?
     }
 
     void Window::SetPosition(float x, float y)
@@ -1998,27 +1995,23 @@ namespace sage
     }
 
     Window* GameUIEngine::CreateTooltipWindow(
-        const Texture& _nPatchTexture,
-        const float x,
-        const float y,
-        const float _widthPercent,
-        const float _heightPercent)
+        const Texture& _nPatchTexture, const float x, const float y, const float _width, const float _height)
     {
-        return CreateWindow(_nPatchTexture, x, y, _widthPercent, _heightPercent, true);
+        return CreateWindow(_nPatchTexture, x, y, _width, _height, true);
     }
 
     Window* GameUIEngine::CreateWindow(
         Texture _nPatchTexture,
         const float x,
         const float y,
-        const float _widthPercent,
-        const float _heightPercent,
+        const float _width,
+        const float _height,
         const bool tooltip)
     {
 
         auto window = std::make_unique<Window>(gameData->settings);
         window->SetPosition(x, y);
-        window->SetDimensionsPercent(_widthPercent, _heightPercent);
+        window->SetDimensions(_width, _height);
         window->tex = _nPatchTexture;
         // TODO: Shouldn't SetPosition/SetDimensions already do below?
         window->rec = {
@@ -2041,12 +2034,12 @@ namespace sage
     }
 
     WindowDocked* GameUIEngine::CreateWindowDocked(
-        float _xOffsetPercent, float _yOffsetPercent, float _widthPercent, float _heightPercent)
+        float _xOffsetPercent, float _yOffsetPercent, float _width, float _height)
     {
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
-        window->SetDimensionsPercent(_widthPercent, _heightPercent);
+        window->SetDimensions(_width, _height);
         window->rec = {
             window->GetOffset().x,
             window->GetOffset().y,
@@ -2063,10 +2056,10 @@ namespace sage
         Texture _nPatchTexture,
         const float _xOffsetPercent,
         const float _yOffsetPercent,
-        const float _widthPercent,
-        const float _heightPercent)
+        const float _width,
+        const float _height)
     {
-        auto* window = CreateWindowDocked(_xOffsetPercent, _yOffsetPercent, _widthPercent, _heightPercent);
+        auto* window = CreateWindowDocked(_xOffsetPercent, _yOffsetPercent, _width, _height);
         window->tex = _nPatchTexture;
         return window;
     }
