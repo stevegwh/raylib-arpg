@@ -231,11 +231,11 @@ namespace sage
     {
       protected:
         Shader sdfShader;
-        float baseFontSize = 16;
-        float fontSize = 16;
+        float baseFontSize = 18;
+        float fontSize = 18;
         float fontSpacing = 1.5;
         Font font = GetFontDefault();
-        const float minFontSize = 16.0f;
+        const float minFontSize = 18.0f;
         const float maxFontSize = 72.0f;
 
       public:

@@ -294,7 +294,7 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
         auto window =
-            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 2);
+            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 1.5, 424 * 1.5);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({20, 0, 14, 14});
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
@@ -341,7 +341,7 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
         auto window =
-            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2.5, 424 * 2);
+            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 1.5);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({20, 20, 14, 14});
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
