@@ -2335,29 +2335,32 @@ namespace sage
 
     void GameUIEngine::onWorldItemHover(entt::entity entity) const
     {
-        if (!gameData->inventorySystem->CheckWorldItemRange()) return;
+        if (!gameData->inventorySystem->CheckWorldItemRange() || tooltipWindow) return;
         auto& item = registry->get<ItemComponent>(entity);
         Vector2 pos = GetWorldToScreen(
             gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
+        pos.x += 20; // TODO: magic number
         GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.name, pos);
     }
 
     void GameUIEngine::onWorldCombatableHover(entt::entity entity) const
     {
+        if (tooltipWindow) return;
         auto& renderable = registry->get<Renderable>(entity);
         auto& combatable = registry->get<CombatableActor>(entity);
         Vector2 pos = GetWorldToScreen(
             gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
-        // Create a name tooltip
+        pos.x += 20; // TODO: magic number
         GameUiFactory::CreateCombatableTooltip(gameData->uiEngine.get(), renderable.name, combatable, pos);
     }
 
     void GameUIEngine::onNPCHover(entt::entity entity) const
     {
+        if (tooltipWindow) return;
         auto& renderable = registry->get<Renderable>(entity);
         Vector2 pos = GetWorldToScreen(
             gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
-        // Create a name tooltip
+        pos.x += 20; // TODO: magic number
         GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), renderable.name, pos);
     }
 

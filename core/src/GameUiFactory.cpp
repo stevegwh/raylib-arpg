@@ -192,7 +192,7 @@ namespace sage
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({10, 2, 5, 5});
+        window->SetPadding({16, 2, 10, 6});
         {
             auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
@@ -347,16 +347,16 @@ namespace sage
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {
-            auto panel1 = window->CreatePanel(4);
-            auto table = panel1->CreateTable();
-            auto row = table->CreateTableRow();
-            auto cell = row->CreateTableCell(80);
-            auto cell2 = row->CreateTableCell(20);
-            auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
+            const auto panel1 = window->CreatePanel(4);
+            const auto table = panel1->CreateTable();
+            const auto row = table->CreateTableRow();
+            const auto cell = row->CreateTableCell(80);
+            const auto cell2 = row->CreateTableCell(20);
+            const auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
             titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             titlebar->SetVertAlignment(VertAlignment::TOP);
-            auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            auto closeButton = cell2->CreateCloseButton(engine, tex);
+            const auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
+            const auto closeButton = cell2->CreateCloseButton(engine, tex);
             closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
             closeButton->SetVertAlignment(VertAlignment::TOP);
         }
