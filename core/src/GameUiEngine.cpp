@@ -939,25 +939,8 @@ namespace sage
 
     void WindowDocked::ScaleContents()
     {
-        rec = {GetOffset().x, GetOffset().y, settings->ScaleValue(baseWidth), settings->ScaleValue(baseHeight)};
+        rec = {0, 0, settings->ScaleValue(baseWidth), settings->ScaleValue(baseHeight)};
         SetAlignment(vertAlignment, horiAlignment);
-        UpdateChildren();
-    }
-
-    Vector2 WindowDocked::GetOffset() const
-    {
-        return Vector2{settings->screenWidth * xOffsetPercent, settings->screenHeight * yOffsetPercent};
-    }
-
-    /**
-     *
-     * @param _xOffsetPercent x offset from docked position in percent of screen (1-100)
-     * @param _yOffsetPercent y offset from docked position in percent of screen (1-100)
-     */
-    void WindowDocked::SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent)
-    {
-        xOffsetPercent = _xOffsetPercent / 100;
-        yOffsetPercent = _yOffsetPercent / 100;
         UpdateChildren();
     }
 
@@ -965,8 +948,6 @@ namespace sage
     {
         vertAlignment = vert;
         horiAlignment = hori;
-        float originalXOffset = GetOffset().x;
-        float originalYOffset = GetOffset().y;
 
         float xOffset = 0;
         float yOffset = 0;
@@ -1004,10 +985,14 @@ namespace sage
             break;
         }
 
-        rec.x = xOffset + originalXOffset;
-        rec.y = yOffset + originalYOffset;
+        rec.x = xOffset + settings->ScaleValue(baseXOffset);
+        rec.y = yOffset + settings->ScaleValue(baseYOffset);
 
         UpdateChildren();
+    }
+
+    WindowDocked::WindowDocked(Settings* _settings) : Window(_settings)
+    {
     }
 
     Panel* Window::CreatePanel()
@@ -2008,17 +1993,14 @@ namespace sage
         return windows.back().get();
     }
 
-    WindowDocked* GameUIEngine::CreateWindowDocked(
-        float _xOffsetPercent, float _yOffsetPercent, float _width, float _height)
+    WindowDocked* GameUIEngine::CreateWindowDocked(float _xOffset, float _yOffset, float _width, float _height)
     {
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
-
         window->baseWidth = _width;
         window->baseHeight = _height;
-        window->rec.x = window->GetOffset().x;
-        window->rec.y = window->GetOffset().y;
+        window->baseXOffset = _xOffset;
+        window->baseYOffset = _yOffset;
         window->ScaleContents();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
@@ -2029,12 +2011,12 @@ namespace sage
 
     WindowDocked* GameUIEngine::CreateWindowDocked(
         Texture _nPatchTexture,
-        const float _xOffsetPercent,
-        const float _yOffsetPercent,
+        const float _xOffset,
+        const float _yOffset,
         const float _width,
         const float _height)
     {
-        auto* window = CreateWindowDocked(_xOffsetPercent, _yOffsetPercent, _width, _height);
+        auto* window = CreateWindowDocked(_xOffset, _yOffset, _width, _height);
         window->tex = _nPatchTexture;
         return window;
     }
