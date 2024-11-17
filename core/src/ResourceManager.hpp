@@ -37,6 +37,7 @@ namespace sage
         ResourceManager();
         ~ResourceManager();
 
+        std::unordered_map<std::string, Font> fonts{};
         std::unordered_map<std::string, Shader> shaders{};
         std::unordered_map<std::string, std::vector<Material>> modelMaterials{}; // Shared model materials
         std::unordered_map<std::string, Image> images{};                         // Image (CPU) data
@@ -62,9 +63,11 @@ namespace sage
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(AssetID id);
         Texture TextureLoad(const std::string& path);
+        Font FontLoad(const std::string& path);
         void ImageUnload(AssetID id);
         ImageSafe GetImage(AssetID id);
         ImageSafe GetImage(const std::string& path);
+        void FontLoadFromFile(const std::string& path);
         void ImageLoadFromFile(AssetID id);
         void ImageLoadFromFile(const std::string& path);
         void ImageLoadFromFile(AssetID id, Image image);

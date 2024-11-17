@@ -116,6 +116,9 @@ namespace sage
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
         // ResourceManager::GetInstance().UnloadShaderFileText();
+
+        ResourceManager::GetInstance().FontLoadFromFile(
+            "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto w = data->settings->TARGET_SCREEN_WIDTH * 0.3;
         auto h = data->settings->TARGET_SCREEN_HEIGHT * 0.6;

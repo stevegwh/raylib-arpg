@@ -1768,7 +1768,8 @@ namespace sage
         children = std::make_unique<TitleBar>(engine);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
         titleBar->parent = this;
-        Font _font = LoadFont("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+        Font _font =
+            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
         titleBar->SetFont(_font, fontSize);
         titleBar->overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
         titleBar->content = _title;
@@ -1796,7 +1797,8 @@ namespace sage
         children = std::make_unique<TextBox>(engine);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
         textbox->parent = this;
-        Font _font = LoadFont("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+        Font _font =
+            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
 
         textbox->SetFont(_font, fontSize);
         // textbox->SetFont(GetFontDefault(), fontSize);
@@ -1816,7 +1818,8 @@ namespace sage
         children = std::make_unique<DialogOption>(engine, option);
         auto* textbox = dynamic_cast<DialogOption*>(children.get());
         textbox->parent = this;
-        Font _font = LoadFont("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+        Font _font =
+            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
         textbox->SetFont(_font, fontSize);
         SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
         textbox->overflowBehaviour = overflowBehaviour;
