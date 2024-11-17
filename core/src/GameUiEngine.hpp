@@ -510,13 +510,14 @@ namespace sage
 
     class Window : public TableElement<std::vector<std::unique_ptr<Panel>>, void>
     {
+      protected:
         bool hidden = false;
         bool markForRemoval = false;
+        float baseWidth = 0;  // Width before screen scaling (Screen width: 1920)
+        float baseHeight = 0; // Height before screen scaling (Screen height: 1080)
 
       public:
         entt::connection windowUpdateCnx{};
-        float baseWidth = 0;  // Width before screen scaling (Screen width: 1920)
-        float baseHeight = 0; // Height before screen scaling (Screen height: 1080)
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
 
@@ -536,23 +537,25 @@ namespace sage
         void Draw2D() override;
         void UpdateChildren() override;
         ~Window() override;
-        explicit Window(Settings* _settings) : settings(_settings){};
+        explicit Window(Settings* _settings) : settings(_settings)
+        {
+        }
+        friend class GameUIEngine;
     };
 
     class WindowDocked final : public Window
     {
-        float xOffsetPercent = 0;
-        float yOffsetPercent = 0;
+        float baseXOffset = 0;
+        float baseYOffset = 0;
 
       public:
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
-        [[nodiscard]] Vector2 GetOffset() const;
-        void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
         void SetAlignment(VertAlignment vert, HoriAlignment hori);
         void ScaleContents() override;
-        explicit WindowDocked(Settings* _settings) : Window(_settings){};
+        explicit WindowDocked(Settings* _settings);
+        friend class GameUIEngine;
     };
 
     class UIState
@@ -639,11 +642,10 @@ namespace sage
         Window* CreateWindow(
             Texture _nPatchTexture, float x, float y, float _width, float _height, bool tooltip = false);
 
-        WindowDocked* CreateWindowDocked(
-            float _xOffsetPercent, float _yOffsetPercent, float _width, float _height);
+        WindowDocked* CreateWindowDocked(float _xOffset, float _yOffset, float _width, float _height);
 
         WindowDocked* CreateWindowDocked(
-            Texture _nPatchTexture, float _xOffsetPercent, float _yOffsetPercent, float _width, float _height);
+            Texture _nPatchTexture, float _xOffset, float _yOffset, float _width, float _height);
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;
