@@ -338,6 +338,7 @@ namespace sage
         PartySystem* partySystem{};
         ControllableActorSystem* controllableActorSystem{};
         unsigned int memberNumber{};
+        Texture portraitBgTex{};
 
       public:
         void RetrieveInfo();
@@ -367,13 +368,14 @@ namespace sage
     class ItemSlot : public ImageBox
     {
       protected:
-        Texture emptyTex{};
+        Texture backgroundTex{};
         void dropItemInWorld();
         virtual void onItemDroppedToWorld() = 0;
         void updateRectangle(
             const Dimensions& dimensions, const Vector2& offset, const Dimensions& space) override;
 
         [[nodiscard]] virtual entt::entity getItemId() = 0;
+        [[nodiscard]] virtual Texture getEmptyTex();
 
       public:
         void Draw2D() override;
@@ -390,6 +392,7 @@ namespace sage
         [[nodiscard]] bool validateDrop(const ItemComponent& item) const;
 
       protected:
+        Texture getEmptyTex() override;
         void onItemDroppedToWorld() override;
         [[nodiscard]] entt::entity getItemId() override;
 

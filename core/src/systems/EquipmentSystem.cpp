@@ -116,12 +116,13 @@ namespace sage
         auto cameraTarget = gameData->camera->getRaylibCam()->target;
 
         transform.SetPosition({0, -999, 0});
-        gameData->camera->SetCamera({6, -996, 8}, {-0.5, -996, 0});
+        gameData->camera->SetCamera({6, -996, 12}, {0, -996, 0});
 
         auto current = animation.current;
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         updateCharacterPreviewPose(entity);
 
+        // TODO: inefficient
         UnloadTexture(equipment.renderTexture.texture);
         equipment.renderTexture = LoadRenderTexture(width, height);
 

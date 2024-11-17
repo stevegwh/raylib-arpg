@@ -98,7 +98,6 @@ namespace sage
     Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
-        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.08;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.3;
         auto window = engine->CreateWindowDocked(0, 0, w, h);
@@ -168,19 +167,19 @@ namespace sage
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
         // Is that desired behaviour? Can look for other imageboxes with SHRINK_ROW_TO_FIT as
         // overflowBehaviour?
+        slot->SetVertAlignment(VertAlignment::MIDDLE);
+        slot1->SetVertAlignment(VertAlignment::MIDDLE);
+        slot2->SetVertAlignment(VertAlignment::BOTTOM);
+        slot3->SetVertAlignment(VertAlignment::MIDDLE);
+        // slot->SetHoriAlignment(HoriAlignment::CENTER);
+        // slot1->SetHoriAlignment(HoriAlignment::CENTER);
+        // slot2->SetHoriAlignment(HoriAlignment::CENTER);
+        // slot3->SetHoriAlignment(HoriAlignment::CENTER);
+
         slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
         slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
         slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
         slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-
-        slot->SetVertAlignment(VertAlignment::MIDDLE);
-        slot1->SetVertAlignment(VertAlignment::MIDDLE);
-        slot2->SetVertAlignment(VertAlignment::MIDDLE);
-        slot3->SetVertAlignment(VertAlignment::MIDDLE);
-        slot->SetHoriAlignment(HoriAlignment::CENTER);
-        slot1->SetHoriAlignment(HoriAlignment::CENTER);
-        slot2->SetHoriAlignment(HoriAlignment::CENTER);
-        slot3->SetHoriAlignment(HoriAlignment::CENTER);
 
         return window;
     }
@@ -406,7 +405,6 @@ namespace sage
             table->SetPadding({24, 24, 24, 24});
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
-            ResourceManager::GetInstance().ImageLoadFromFile("resources/chartest.png");
             auto img = cell->CreateEquipmentCharacterPreview(engine);
             img->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_TO_FIT);
             img->draggable = false;
