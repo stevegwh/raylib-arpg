@@ -44,13 +44,13 @@ namespace sage
     void CellElement::SetVertAlignment(VertAlignment alignment)
     {
         vertAlignment = alignment;
-        UpdateDimensions();
+        parent->UpdateChildren();
     }
 
     void CellElement::SetHoriAlignment(HoriAlignment alignment)
     {
         horiAlignment = alignment;
-        UpdateDimensions();
+        parent->UpdateChildren();
     }
 
     void CellElement::OnClick()

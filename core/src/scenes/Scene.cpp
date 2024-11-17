@@ -119,8 +119,8 @@ namespace sage
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto w = data->settings->TARGET_SCREEN_WIDTH * 0.3;
         auto h = data->settings->TARGET_SCREEN_HEIGHT * 0.6;
-        auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 100}, w, h);
-        auto* window2 = GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 100}, w, h);
+        auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
+        auto* window2 = GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
         entt::sink sink{data->userInput->keyIPressed};
         sink.connect<&Window::ToggleHide>(*window);
         entt::sink sink2{data->userInput->keyCPressed};

@@ -173,15 +173,14 @@ namespace sage
         slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
         slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
 
-        // TODO: Below seems to do nothing?
-        //        slot->SetVertAlignment(VertAlignment::MIDDLE);
-        //        slot1->SetVertAlignment(VertAlignment::MIDDLE);
-        //        slot2->SetVertAlignment(VertAlignment::MIDDLE);
-        //        slot3->SetVertAlignment(VertAlignment::MIDDLE);
-        //        slot->SetHoriAlignment(HoriAlignment::CENTER);
-        //        slot1->SetHoriAlignment(HoriAlignment::CENTER);
-        //        slot2->SetHoriAlignment(HoriAlignment::CENTER);
-        //        slot3->SetHoriAlignment(HoriAlignment::CENTER);
+        slot->SetVertAlignment(VertAlignment::MIDDLE);
+        slot1->SetVertAlignment(VertAlignment::MIDDLE);
+        slot2->SetVertAlignment(VertAlignment::MIDDLE);
+        slot3->SetVertAlignment(VertAlignment::MIDDLE);
+        slot->SetHoriAlignment(HoriAlignment::CENTER);
+        slot1->SetHoriAlignment(HoriAlignment::CENTER);
+        slot2->SetHoriAlignment(HoriAlignment::CENTER);
+        slot3->SetHoriAlignment(HoriAlignment::CENTER);
 
         return window;
     }
@@ -298,7 +297,7 @@ namespace sage
         auto window =
             engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 2);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({28, 0, 24, 24});
+        window->SetPadding({20, 0, 14, 14});
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
         {
             auto panel = window->CreatePanel(4);
@@ -317,6 +316,7 @@ namespace sage
 
         {
             auto panel1 = window->CreatePanel();
+            panel1->SetPadding({20, 0, 0, 0});
             auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
             for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
             {
@@ -344,8 +344,7 @@ namespace sage
         auto window =
             engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2.5, 424 * 2);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({28, 0, 24, 24});
-
+        window->SetPadding({20, 20, 14, 14});
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {
@@ -382,7 +381,7 @@ namespace sage
         };
 
         auto panel2 = window->CreatePanel();
-
+        panel2->SetPadding({28, 0, 24, 24});
         {
             auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
             for (unsigned int row = 0; row < maxRows; ++row)
@@ -404,6 +403,7 @@ namespace sage
         {
             // Character model
             auto table = panel2->CreateTable(60);
+            table->SetPadding({24, 24, 24, 24});
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
             ResourceManager::GetInstance().ImageLoadFromFile("resources/chartest.png");

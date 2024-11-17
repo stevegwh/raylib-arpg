@@ -150,12 +150,6 @@ namespace sage
         void SetPadding(const Padding& _padding)
         {
             padding = _padding;
-            auto* window = GetWindow();
-            const float scaleFactor = window->settings->GetScreenScaleFactor();
-            padding.up *= scaleFactor;
-            padding.down *= scaleFactor;
-            padding.left *= scaleFactor;
-            padding.right *= scaleFactor;
             UpdateChildren();
         }
 
