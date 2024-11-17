@@ -36,7 +36,7 @@ namespace sage
 
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.4;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.2;
-        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, w, h);
+        auto window = engine->CreateWindowDocked(nPatchTexture, TextureStretchMode::SCALE, 0, 0, w, h);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         window->SetPaddingPercent({2, 2, 2, 2});
@@ -132,7 +132,7 @@ namespace sage
 
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.25;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.125;
-        auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, w, h);
+        auto window = engine->CreateWindowDocked(nPatchTexture, TextureStretchMode::NONE, 0, 0, w, h);
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({16, 16, 12, 12});
@@ -295,12 +295,10 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
-        // Can populate inventory with ControllableActorSystem where you get the actor's id and get its
-        // InventoryComponent
-
-        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h);
+        auto window =
+            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 2);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({14, 14, 14, 14});
+        window->SetPadding({28, 14, 18, 18});
 
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
         {
@@ -344,7 +342,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/dirt4.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/dirt4.png");
 
-        auto window = engine->CreateWindow(nPatchTexture, pos.x, pos.y, w, h);
+        auto window = engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, w, h);
         // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetPadding({14, 14, 14, 14});
 
@@ -443,7 +441,7 @@ namespace sage
 
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.4;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.25;
-        const auto window = engine->CreateWindowDocked(nPatchTexture, 0, 0, w, h);
+        const auto window = engine->CreateWindowDocked(nPatchTexture, TextureStretchMode::NONE, 0, 0, w, h);
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
         window->SetPadding({32, 32, 16, 16});

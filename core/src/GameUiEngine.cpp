@@ -92,6 +92,12 @@ namespace sage
         state->Enter();
     }
 
+    void CellElement::UpdateDimensions()
+    {
+        tex.width = parent->rec.width;
+        tex.height = parent->rec.height;
+    }
+
     CellElement::CellElement(GameUIEngine* _engine)
         : engine(_engine), state(std::make_unique<IdleState>(this, engine)){};
 
@@ -1056,6 +1062,8 @@ namespace sage
             settings->ScaleValue(rec.y),
             settings->ScaleValue(baseWidth),
             settings->ScaleValue(baseHeight)};
+
+        UpdateTextureDimensions();
         UpdateChildren();
     }
 
@@ -1179,6 +1187,8 @@ namespace sage
             panel->rec.width = availableWidth;
             panel->rec.x = startX;
 
+            UpdateTextureDimensions();
+
             if (!panel->children.empty()) panel->UpdateChildren();
 
             currentY += panelHeight;
@@ -1299,6 +1309,8 @@ namespace sage
             table->rec.x = currentX;
             table->rec.height = availableHeight;
             table->rec.y = startY;
+
+            UpdateTextureDimensions();
 
             if (!table->children.empty()) table->UpdateChildren();
 
@@ -1440,6 +1452,8 @@ namespace sage
             row->rec.x = rec.x + GetPadding().left;
             row->rec.width = rec.width - (GetPadding().left + GetPadding().right);
 
+            UpdateTextureDimensions();
+
             if (!row->children.empty())
             {
                 row->UpdateChildren();
@@ -1574,6 +1588,8 @@ namespace sage
             cell->rec.x = currentX;
             cell->rec.y = rec.y + GetPadding().up;
             cell->rec.height = rec.height - (GetPadding().up + GetPadding().down);
+
+            UpdateTextureDimensions();
 
             cell->UpdateChildren();
 
@@ -1961,11 +1977,12 @@ namespace sage
     Window* GameUIEngine::CreateTooltipWindow(
         const Texture& _nPatchTexture, const float x, const float y, const float _width, const float _height)
     {
-        return CreateWindow(_nPatchTexture, x, y, _width, _height, true);
+        return CreateWindow(_nPatchTexture, TextureStretchMode::NONE, x, y, _width, _height, true);
     }
 
     Window* GameUIEngine::CreateWindow(
         Texture _nPatchTexture,
+        TextureStretchMode _textureStretchMode,
         const float x,
         const float y,
         const float _width,
@@ -1977,8 +1994,9 @@ namespace sage
         window->baseHeight = _height;
         window->rec.x = x;
         window->rec.y = y;
-        window->ScaleContents();
         window->tex = _nPatchTexture;
+        window->textureStretchMode = _textureStretchMode;
+        window->ScaleContents();
 
         // PlaceWindow(window.get(), window->GetPosition());
 
@@ -2011,13 +2029,25 @@ namespace sage
 
     WindowDocked* GameUIEngine::CreateWindowDocked(
         Texture _nPatchTexture,
+        TextureStretchMode _textureStretchMode,
         const float _xOffset,
         const float _yOffset,
         const float _width,
         const float _height)
     {
-        auto* window = CreateWindowDocked(_xOffset, _yOffset, _width, _height);
+        windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
+        auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
+        window->baseWidth = _width;
+        window->baseHeight = _height;
+        window->baseXOffset = _xOffset;
+        window->baseYOffset = _yOffset;
         window->tex = _nPatchTexture;
+        window->textureStretchMode = _textureStretchMode;
+        window->ScaleContents();
+
+        entt::sink sink{gameData->userInput->onWindowUpdate};
+        window->windowUpdateCnx = sink.connect<&WindowDocked::ScaleContents>(window);
+
         return window;
     }
 
