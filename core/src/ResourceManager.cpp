@@ -255,6 +255,13 @@ namespace sage
         return nonModelTextures[path];
     }
 
+    Font ResourceManager::FontLoad(const std::string& path)
+    {
+        // TODO: asset id
+        assert(fonts.contains(path));
+        return fonts[path];
+    }
+
     void ResourceManager::ImageUnload(const AssetID id)
     {
         const auto& path = getAssetPath(id);
@@ -275,6 +282,15 @@ namespace sage
     {
         assert(images.contains(path));
         return ImageSafe(images[path], false);
+    }
+
+    void ResourceManager::FontLoadFromFile(const std::string& path)
+    {
+        assert(FileExists(path.c_str()));
+        if (!fonts.contains(path))
+        {
+            fonts[path] = LoadFont(path.c_str());
+        }
     }
 
     void ResourceManager::ImageLoadFromFile(const AssetID id)
