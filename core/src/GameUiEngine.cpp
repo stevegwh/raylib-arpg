@@ -322,7 +322,7 @@ namespace sage
 
     void ImageBox::SetGrayscale()
     {
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/outline.fs");
     }
 
     void ImageBox::RemoveShader()
@@ -570,6 +570,8 @@ namespace sage
 
     EquipmentCharacterPreview::EquipmentCharacterPreview(GameUIEngine* _engine) : ImageBox(_engine)
     {
+        entt::sink sink{_engine->gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
     }
 
     void PartyMemberPortrait::RetrieveInfo()
@@ -627,11 +629,20 @@ namespace sage
         if (controllableActorSystem->GetSelectedActor() == partySystem->GetMember(memberNumber).entity)
         {
             SetGrayscale();
+            // Change portrait bg to selected one (static?)
         }
+        portraitBgTex.width = tex.width;
+        portraitBgTex.height = tex.height;
+
         ImageBox::Draw2D();
+        DrawTexture(portraitBgTex, rec.x, rec.y, WHITE);
     }
 
-    PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine) : ImageBox(_engine){};
+    PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine) : ImageBox(_engine)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/avatar_border_set.png");
+        portraitBgTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/avatar_border_set.png");
+    }
 
     void AbilitySlot::RetrieveInfo()
     {
@@ -700,6 +711,12 @@ namespace sage
     {
     }
 
+    Texture ItemSlot::getEmptyTex()
+    {
+        return backgroundTex; // TODO: Replace with a better solution (drawing two background textures with this
+                              // solution).
+    }
+
     void ItemSlot::dropItemInWorld()
     {
         const auto itemId = getItemId();
@@ -727,8 +744,8 @@ namespace sage
     void ItemSlot::updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
     {
         ImageBox::updateRectangle(dimensions, offset, space);
-        emptyTex.width = dimensions.width;
-        emptyTex.height = dimensions.height;
+        backgroundTex.width = dimensions.width;
+        backgroundTex.height = dimensions.height;
     }
 
     void ItemSlot::HoverUpdate()
@@ -756,14 +773,14 @@ namespace sage
         else
         {
             stateLocked = true;
-            tex = emptyTex;
+            tex = getEmptyTex();
         }
         UpdateDimensions();
     }
 
     void ItemSlot::Draw2D()
     {
-        DrawTexture(emptyTex, rec.x, rec.y, WHITE);
+        DrawTexture(backgroundTex, rec.x, rec.y, WHITE);
         ImageBox::Draw2D();
     }
 
@@ -788,7 +805,56 @@ namespace sage
     ItemSlot::ItemSlot(GameUIEngine* _engine) : ImageBox(_engine)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
-        emptyTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
+        backgroundTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
+    }
+
+    Texture EquipmentSlot::getEmptyTex()
+    {
+        if (itemType == EquipmentSlotName::HELM)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/helm.png");
+        }
+        if (itemType == EquipmentSlotName::ARMS)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/arms.png");
+        }
+        if (itemType == EquipmentSlotName::CHEST)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/chest.png");
+        }
+        if (itemType == EquipmentSlotName::BELT)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/belt.png");
+        }
+        if (itemType == EquipmentSlotName::BOOTS)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/boots.png");
+        }
+        if (itemType == EquipmentSlotName::LEGS)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/legs.png");
+        }
+        if (itemType == EquipmentSlotName::LEFTHAND)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/mainhand.png");
+        }
+        if (itemType == EquipmentSlotName::RIGHTHAND)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/offhand.png");
+        }
+        if (itemType == EquipmentSlotName::RING1)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/ring.png");
+        }
+        if (itemType == EquipmentSlotName::RING2)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/ring.png");
+        }
+        if (itemType == EquipmentSlotName::AMULET)
+        {
+            return ResourceManager::GetInstance().TextureLoad("resources/textures/ui/amulet.png");
+        }
+        return backgroundTex;
     }
 
     void EquipmentSlot::onItemDroppedToWorld()
@@ -886,6 +952,17 @@ namespace sage
     EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType)
         : ItemSlot(_engine), itemType(_itemType)
     {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/amulet.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/helm.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/arms.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/chest.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/belt.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/boots.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/legs.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/mainhand.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/offhand.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
     }
 
     void InventorySlot::onItemDroppedToWorld()
