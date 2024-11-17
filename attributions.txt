@@ -1,1 +1,9 @@
+Attributions
+--------------------
 Nature by 3Donimus [CC-BY] via Poly Pizza
+Moderna Graphical Interface, Jorge Avila. https://opengameart.org/content/moderna-graphical-interface. CC-BY 3.0.
+RPG GUI construction kit v1.0, Lamoot. https://opengameart.org/content/rpg-gui-construction-kit-v10. CC-BY 3.0.
+RPG UI, System G6. https://opengameart.org/content/rpg-ui-1. CC0 (Public Domain).
+RPG User Interface. KodiakGraphics. https://opengameart.org/content/rpg-user-interface. CC0 (Public Domain).
+Cormorant font. https://fonts.google.com/specimen/Cormorant/license
+Libre Baskerville font. https://fonts.google.com/specimen/Libre+Baskerville
