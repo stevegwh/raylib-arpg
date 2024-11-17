@@ -515,17 +515,12 @@ namespace sage
 
       public:
         entt::connection windowUpdateCnx{};
-        // float widthPercent = 0;  // Width as percent of screen space
-        // float heightPercent = 0; // Height as percent of screen space
-        float referenceWidth = 0;  // Width before screen scaling (Screen width: 1920)
-        float referenceHeight = 0; // Height before screen scaling (Screen height: 1080)
+        float baseWidth = 0;  // Width before screen scaling (Screen width: 1920)
+        float baseHeight = 0; // Height before screen scaling (Screen height: 1080)
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
 
-        [[nodiscard]] Dimensions GetDimensions() const;
-        void SetDimensions(float _width, float _height);
-        virtual void SetPosition(float x, float y);
-        [[nodiscard]] Vector2 GetPosition() const;
+        virtual void ScaleContents();
         void ClampToScreen();
         void OnHoverStart() override;
         void OnHoverStop() override;
@@ -537,7 +532,6 @@ namespace sage
         [[nodiscard]] bool IsHidden() const;
         [[nodiscard]] bool IsMarkedForRemoval() const;
         void Remove();
-        virtual void OnScreenSizeChange();
         void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
@@ -554,11 +548,10 @@ namespace sage
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
-        // void SetPosition(float x, float y) override = delete;
         [[nodiscard]] Vector2 GetOffset() const;
         void SetOffsetPercent(float _xOffsetPercent, float _yOffsetPercent);
         void SetAlignment(VertAlignment vert, HoriAlignment hori);
-        void OnScreenSizeChange() override;
+        void ScaleContents() override;
         explicit WindowDocked(Settings* _settings) : Window(_settings){};
     };
 

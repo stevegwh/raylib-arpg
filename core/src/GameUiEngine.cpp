@@ -284,7 +284,8 @@ namespace sage
         auto& window = draggedWindow.value();
         auto newPos = Vector2Subtract(mousePos, dragOffset);
 
-        window->SetPosition(newPos.x, newPos.y);
+        window->rec.x = newPos.x;
+        window->rec.y = newPos.y;
         window->ClampToScreen();
         window->UpdateChildren();
     }
@@ -936,9 +937,9 @@ namespace sage
 
     CloseButton::CloseButton(GameUIEngine* _engine) : ImageBox(_engine){};
 
-    void WindowDocked::OnScreenSizeChange()
+    void WindowDocked::ScaleContents()
     {
-        rec = {GetOffset().x, GetOffset().y, GetDimensions().width, GetDimensions().height};
+        rec = {GetOffset().x, GetOffset().y, settings->ScaleValue(baseWidth), settings->ScaleValue(baseHeight)};
         SetAlignment(vertAlignment, horiAlignment);
         UpdateChildren();
     }
@@ -1058,41 +1059,19 @@ namespace sage
         markForRemoval = true;
     }
 
-    void Window::OnScreenSizeChange()
+    void Window::ScaleContents()
     {
         if (markForRemoval) return;
-        // TODO: Could do something fancier with changing the x/y based on the new width/height
-        // This would be "easy" to do as OnScreenSizeChange is reacting to an event that passes width/height as the
-        // parameters (which we currently ignore). Alternatively, we have a pointer to settings, anyway.
-        rec = {GetPosition().x, GetPosition().y, GetDimensions().width, GetDimensions().height};
+
+        rec.x /= settings->GetScreenScaleFactor();
+        rec.y /= settings->GetScreenScaleFactor();
+
+        rec = {
+            settings->ScaleValue(rec.x),
+            settings->ScaleValue(rec.y),
+            settings->ScaleValue(baseWidth),
+            settings->ScaleValue(baseHeight)};
         UpdateChildren();
-    }
-
-    Dimensions Window::GetDimensions() const
-    {
-        return Dimensions{settings->ScaleValue(referenceWidth), settings->ScaleValue(referenceHeight)};
-    }
-
-    void Window::SetDimensions(float _width, float _height)
-    {
-        referenceWidth = _width;
-        referenceHeight = _height;
-
-        // TODO: clamp to bounds?
-    }
-
-    void Window::SetPosition(float x, float y)
-    {
-        //        float scaleFactor = settings->GetScreenScaleFactor();
-        //        rec.x = x * scaleFactor;
-        //        rec.y = y * scaleFactor;
-        rec.x = x;
-        rec.y = y;
-    }
-
-    Vector2 Window::GetPosition() const
-    {
-        return {rec.x, rec.y};
     }
 
     void Window::ClampToScreen()
@@ -2008,22 +1987,18 @@ namespace sage
         const float _height,
         const bool tooltip)
     {
-
         auto window = std::make_unique<Window>(gameData->settings);
-        window->SetPosition(x, y);
-        window->SetDimensions(_width, _height);
+        window->baseWidth = _width;
+        window->baseHeight = _height;
+        window->rec.x = x;
+        window->rec.y = y;
+        window->ScaleContents();
         window->tex = _nPatchTexture;
-        // TODO: Shouldn't SetPosition/SetDimensions already do below?
-        window->rec = {
-            window->GetPosition().x,
-            window->GetPosition().y,
-            window->GetDimensions().width,
-            window->GetDimensions().height};
 
         // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&Window::OnScreenSizeChange>(window.get());
+        window->windowUpdateCnx = sink.connect<&Window::ScaleContents>(window.get());
         if (tooltip)
         {
             tooltipWindow = std::move(window);
@@ -2039,15 +2014,15 @@ namespace sage
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->SetOffsetPercent(_xOffsetPercent, _yOffsetPercent);
-        window->SetDimensions(_width, _height);
-        window->rec = {
-            window->GetOffset().x,
-            window->GetOffset().y,
-            window->GetDimensions().width,
-            window->GetDimensions().height};
+
+        window->baseWidth = _width;
+        window->baseHeight = _height;
+        window->rec.x = window->GetOffset().x;
+        window->rec.y = window->GetOffset().y;
+        window->ScaleContents();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&WindowDocked::OnScreenSizeChange>(window);
+        window->windowUpdateCnx = sink.connect<&WindowDocked::ScaleContents>(window);
 
         return window;
     }
@@ -2066,7 +2041,8 @@ namespace sage
 
     void GameUIEngine::PlaceWindow(Window* window, Vector2 requestedPos) const
     {
-        window->SetPosition(requestedPos.x, requestedPos.y);
+        window->rec.x = requestedPos.x;
+        window->rec.y = requestedPos.y;
         window->ClampToScreen();
         window->UpdateChildren();
 
