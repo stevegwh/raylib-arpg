@@ -104,6 +104,13 @@ namespace sage
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
+        void SetTexture(const Texture& _tex, TextureStretchMode _stretchMode)
+        {
+            tex = _tex;
+            textureStretchMode = _stretchMode;
+            UpdateTextureDimensions();
+        }
+
         void UpdateTextureDimensions()
         {
             if (!tex.has_value()) return;

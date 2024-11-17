@@ -9,8 +9,8 @@
 
 namespace sage
 {
-    static constexpr unsigned int INVENTORY_MAX_ROWS = 6;
-    static constexpr unsigned int INVENTORY_MAX_COLS = 6;
+    static constexpr unsigned int INVENTORY_MAX_ROWS = 7;
+    static constexpr unsigned int INVENTORY_MAX_COLS = 5;
     class InventoryComponent
     {
         [[nodiscard]] bool getNextFreeSlot(unsigned int& row, unsigned int& col) const;
