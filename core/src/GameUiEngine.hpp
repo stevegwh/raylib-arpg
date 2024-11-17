@@ -34,10 +34,16 @@ namespace sage
     class PlayerAbilitySystem;
     class ControllableActorSystem;
 
+    enum class TextureStretchMode
+    {
+        NONE,
+        SCALE,
+    };
+
     struct Dimensions
     {
-        float width;
-        float height;
+        float width = 0;
+        float height = 0;
     };
 
     enum class HoriAlignment
@@ -89,6 +95,7 @@ namespace sage
       protected:
         Padding padding;
         Margin margin;
+        TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
       public:
         Parent* parent{};
@@ -96,6 +103,16 @@ namespace sage
 
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
+
+        void UpdateTextureDimensions()
+        {
+            if (!tex.has_value()) return;
+            if (textureStretchMode == TextureStretchMode::SCALE)
+            {
+                tex->width = rec.width;
+                tex->height = rec.height;
+            }
+        }
 
         virtual void UpdateChildren() = 0;
         virtual void DrawDebug2D() = 0;
@@ -117,7 +134,7 @@ namespace sage
                 {
                     // TODO: Copy Window's desktop image for scaling (scale to fit, stretch, etc).
                     // DrawTexture(tex.value(), rec.x, rec.y, WHITE);
-                    DrawTextureRec(tex.value(), rec, {rec.x, rec.y}, WHITE);
+                    DrawTexture(tex.value(), rec.x, rec.y, WHITE);
                 }
             }
         }
@@ -202,7 +219,7 @@ namespace sage
         virtual void OnDrop(CellElement* receiver);
         virtual void ReceiveDrop(CellElement* droppedElement);
         void ChangeState(std::unique_ptr<UIState> newState);
-        virtual void UpdateDimensions() = 0;
+        virtual void UpdateDimensions();
         virtual void Draw2D() = 0;
         explicit CellElement(GameUIEngine* _engine);
         ~CellElement() override = default;
@@ -640,12 +657,23 @@ namespace sage
         void BringClickedWindowToFront(Window* clicked);
         Window* CreateTooltipWindow(const Texture& _nPatchTexture, float x, float y, float _width, float _height);
         Window* CreateWindow(
-            Texture _nPatchTexture, float x, float y, float _width, float _height, bool tooltip = false);
+            Texture _nPatchTexture,
+            TextureStretchMode _textureStretchMode,
+            float x,
+            float y,
+            float _width,
+            float _height,
+            bool tooltip = false);
 
         WindowDocked* CreateWindowDocked(float _xOffset, float _yOffset, float _width, float _height);
 
         WindowDocked* CreateWindowDocked(
-            Texture _nPatchTexture, float _xOffset, float _yOffset, float _width, float _height);
+            Texture _nPatchTexture,
+            TextureStretchMode _textureStretchMode,
+            float _xOffset,
+            float _yOffset,
+            float _width,
+            float _height);
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;
