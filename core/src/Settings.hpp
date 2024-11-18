@@ -20,7 +20,6 @@ namespace sage
 
         static float GetScreenScaleFactor(float width, float height)
         {
-            // Assuming 1920x1080 is your target resolution
             const float TARGET_WIDTH = 1920.0f;
             const float TARGET_HEIGHT = 1080.0f;
 

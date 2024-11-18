@@ -104,6 +104,13 @@ namespace sage
         // Margin margin;
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
+        // Sets padding by pixel value (screen scaling is applied)
+        void setPadding(const Padding& _padding)
+        {
+            ogDimensions.padding = _padding;
+            padding = _padding;
+        }
+
       public:
         Parent* parent{};
         Child children;
@@ -153,28 +160,6 @@ namespace sage
             }
         }
 
-        // Sets padding by pixel value (screen scaling is applied)
-        void SetPadding(const Padding& _padding)
-        {
-            ogDimensions.padding = _padding;
-            padding = _padding;
-            UpdateChildren();
-        }
-
-        // Set padding in percent of screen
-        void SetPaddingPercent(const Padding& _padding)
-        {
-            auto* window = GetWindow();
-            float screenWidth = window->settings->screenWidth;
-            float screenHeight = window->settings->screenHeight;
-            padding.up = screenHeight * (_padding.up / 100);
-            padding.down = screenHeight * (_padding.down / 100);
-            padding.left = screenWidth * (_padding.left / 100);
-            padding.right = screenWidth * (_padding.right / 100);
-            ogDimensions.padding = padding;
-            UpdateChildren();
-        }
-
         // Returns pixel value of padding
         [[nodiscard]] const Padding& GetPadding() const
         {
@@ -183,6 +168,7 @@ namespace sage
 
         [[nodiscard]] Window* GetWindow()
         {
+
             TableElement* current = this;
             while (current->parent != nullptr)
             {
@@ -192,7 +178,18 @@ namespace sage
             return reinterpret_cast<Window*>(current);
         }
 
-        TableElement() = default;
+        TableElement(Parent* _parent, float x, float y, float width, float height, Padding _padding)
+            : parent(_parent), padding(_padding)
+        {
+            rec = {x, y, width, height};
+            ogDimensions = {rec, padding};
+        }
+
+        TableElement(Parent* _parent, Padding _padding) : parent(_parent), padding(_padding)
+        {
+            ogDimensions = {rec, padding};
+        }
+
         TableElement(const TableElement&) = default;
         TableElement(TableElement&&) noexcept = default;
         TableElement& operator=(const TableElement&) = default;
@@ -240,11 +237,11 @@ namespace sage
     {
       protected:
         Shader sdfShader;
-        float baseFontSize = 18;
-        float fontSize = 18;
+        float baseFontSize = 16;
+        float fontSize = 16;
         float fontSpacing = 1.5;
         Font font = GetFontDefault();
-        const float minFontSize = 18.0f;
+        const float minFontSize = 16.0f;
         const float maxFontSize = 72.0f;
 
       public:
@@ -477,7 +474,7 @@ namespace sage
         void DrawDebug2D() override;
         void Draw2D() override;
         ~TableCell() override = default;
-        TableCell() = default;
+        explicit TableCell(TableRow* _parent, Padding _padding = {0, 0, 0, 0});
         friend class TableRow;
     };
 
@@ -487,13 +484,13 @@ namespace sage
         bool autoSize = true;
 
       public:
-        TableCell* CreateTableCell();
-        TableCell* CreateTableCell(float _requestedWidth);
+        TableCell* CreateTableCell(Padding _padding = {0, 0, 0, 0});
+        TableCell* CreateTableCell(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;
         ~TableRow() override = default;
-        TableRow() = default;
+        explicit TableRow(Table* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Table;
     };
 
@@ -503,13 +500,13 @@ namespace sage
         bool autoSize = true;
 
       public:
-        TableRow* CreateTableRow();
-        TableRow* CreateTableRow(float _requestedHeight);
+        TableRow* CreateTableRow(Padding _padding = {0, 0, 0, 0});
+        TableRow* CreateTableRow(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;
         ~Table() override = default;
-        Table() = default;
+        explicit Table(Panel* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Panel;
     };
 
@@ -519,7 +516,7 @@ namespace sage
 
       public:
         void UpdateChildren() override;
-        TableGrid() = default;
+        explicit TableGrid(Panel* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Panel;
     };
 
@@ -530,11 +527,12 @@ namespace sage
 
       public:
         TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
-        Table* CreateTable();
-        Table* CreateTable(float _requestedWidth);
+        Table* CreateTable(Padding _padding = {0, 0, 0, 0});
+        Table* CreateTable(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void DrawDebug2D() override;
         void Draw2D() override;
         void UpdateChildren() override;
+        explicit Panel(Window* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Window;
     };
 
@@ -554,8 +552,8 @@ namespace sage
         void ClampToScreen();
         void OnHoverStart() override;
         void OnHoverStop() override;
-        Panel* CreatePanel();
-        Panel* CreatePanel(float _requestedHeight);
+        Panel* CreatePanel(Padding _padding = {0, 0, 0, 0});
+        Panel* CreatePanel(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void ToggleHide();
         void Show();
         void Hide();
@@ -566,9 +564,8 @@ namespace sage
         void Draw2D() override;
         void UpdateChildren() override;
         ~Window() override;
-        explicit Window(Settings* _settings) : settings(_settings)
-        {
-        }
+        explicit Window(Settings* _settings, Padding _padding = {0, 0, 0, 0});
+        Window(Settings* _settings, float x, float y, float width, float height, Padding _padding = {0, 0, 0, 0});
         friend class GameUIEngine;
     };
 
@@ -576,14 +573,17 @@ namespace sage
     {
         float baseXOffset = 0;
         float baseYOffset = 0;
-
-      public:
+        void SetAlignment(VertAlignment vert, HoriAlignment hori);
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
-        void SetAlignment(VertAlignment vert, HoriAlignment hori);
+      public:
         void ScaleContents() override;
-        explicit WindowDocked(Settings* _settings);
+        WindowDocked(
+            Settings* _settings,
+            VertAlignment _vertAlignment,
+            HoriAlignment _horiAlignment,
+            Padding _padding = {0, 0, 0, 0});
         friend class GameUIEngine;
     };
 
@@ -667,7 +667,14 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
-        Window* CreateTooltipWindow(const Texture& _nPatchTexture, float x, float y, float _width, float _height);
+        Window* CreateTooltipWindow(
+            const Texture& _nPatchTexture,
+            float x,
+            float y,
+            float _width,
+            float _height,
+            Padding _padding = {0, 0, 0, 0});
+
         Window* CreateWindow(
             Texture _nPatchTexture,
             TextureStretchMode _textureStretchMode,
@@ -675,9 +682,17 @@ namespace sage
             float y,
             float _width,
             float _height,
+            Padding _padding = {0, 0, 0, 0},
             bool tooltip = false);
 
-        WindowDocked* CreateWindowDocked(float _xOffset, float _yOffset, float _width, float _height);
+        WindowDocked* CreateWindowDocked(
+            float _xOffset,
+            float _yOffset,
+            float _width,
+            float _height,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT,
+            Padding _padding = {0, 0, 0, 0});
 
         WindowDocked* CreateWindowDocked(
             Texture _nPatchTexture,
@@ -685,7 +700,10 @@ namespace sage
             float _xOffset,
             float _yOffset,
             float _width,
-            float _height);
+            float _height,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT,
+            Padding _padding = {0, 0, 0, 0});
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;

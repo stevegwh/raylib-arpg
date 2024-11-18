@@ -1075,25 +1075,27 @@ namespace sage
         rec.x = xOffset + settings->ScaleValue(baseXOffset);
         rec.y = yOffset + settings->ScaleValue(baseYOffset);
 
-        UpdateChildren();
+        // UpdateChildren()
     }
 
-    WindowDocked::WindowDocked(Settings* _settings) : Window(_settings)
+    WindowDocked::WindowDocked(
+        Settings* _settings, VertAlignment _vertAlignment, HoriAlignment _horiAlignment, Padding _padding)
+        : Window(_settings, _padding)
     {
+        SetAlignment(_vertAlignment, _horiAlignment);
     }
 
-    Panel* Window::CreatePanel()
+    Panel* Window::CreatePanel(Padding _padding)
     {
-        children.push_back(std::make_unique<Panel>());
+        children.push_back(std::make_unique<Panel>(this, _padding));
         const auto& panel = children.back();
-        panel->parent = this;
         UpdateChildren();
         return panel.get();
     }
 
-    Panel* Window::CreatePanel(float _requestedHeight)
+    Panel* Window::CreatePanel(float _requestedHeight, Padding _padding)
     {
-        auto panel = CreatePanel();
+        auto panel = CreatePanel(_padding);
         panel->requestedHeight = _requestedHeight;
         panel->autoSize = false;
         UpdateChildren();
@@ -1292,6 +1294,15 @@ namespace sage
         windowUpdateCnx.release();
     }
 
+    Window::Window(Settings* _settings, Padding _padding) : TableElement(nullptr, _padding), settings(_settings)
+    {
+    }
+
+    Window::Window(Settings* _settings, float x, float y, float width, float height, Padding _padding)
+        : TableElement(nullptr, x, y, width, height, _padding), settings(_settings)
+    {
+    }
+
     void Panel::DrawDebug2D()
     {
         std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
@@ -1316,9 +1327,8 @@ namespace sage
 
     TableGrid* Panel::CreateTableGrid(int rows, int cols, float cellSpacing)
     {
-        children.push_back(std::make_unique<TableGrid>());
+        children.push_back(std::make_unique<TableGrid>(this));
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
-        table->parent = this;
         table->cellSpacing = cellSpacing;
         // Create rows and cells with initial autoSize = true
         for (int i = 0; i < rows; ++i)
@@ -1333,18 +1343,17 @@ namespace sage
         return table;
     }
 
-    Table* Panel::CreateTable()
+    Table* Panel::CreateTable(Padding _padding)
     {
-        children.push_back(std::make_unique<Table>());
+        children.push_back(std::make_unique<Table>(this, _padding));
         const auto& table = children.back();
-        table->parent = this;
         UpdateChildren();
         return table.get();
     }
 
-    Table* Panel::CreateTable(float _requestedWidth)
+    Table* Panel::CreateTable(float _requestedWidth, Padding _padding)
     {
-        auto table = CreateTable();
+        auto table = CreateTable(_padding);
         table->autoSize = false;
         table->requestedWidth = _requestedWidth;
         UpdateChildren();
@@ -1410,6 +1419,10 @@ namespace sage
         }
     }
 
+    Panel::Panel(Window* _parent, Padding _padding) : TableElement(_parent, _padding)
+    {
+    }
+
     void TableGrid::UpdateChildren()
     {
         if (children.empty()) return;
@@ -1468,6 +1481,10 @@ namespace sage
                 }
             }
         }
+    }
+
+    TableGrid::TableGrid(Panel* _parent, Padding _padding) : Table(_parent, _padding)
+    {
     }
 
     void Table::DrawDebug2D()
@@ -1555,11 +1572,14 @@ namespace sage
         }
     }
 
-    TableRow* Table::CreateTableRow()
+    Table::Table(Panel* _parent, Padding _padding) : TableElement(_parent, _padding)
     {
-        children.push_back(std::make_unique<TableRow>());
+    }
+
+    TableRow* Table::CreateTableRow(Padding _padding)
+    {
+        children.push_back(std::make_unique<TableRow>(this, _padding));
         const auto& row = children.back();
-        row->parent = this;
         UpdateChildren();
         return row.get();
     }
@@ -1569,23 +1589,21 @@ namespace sage
      * @param _requestedHeight The desired height of the cell as a percent (0-100)
      * @return
      */
-    TableRow* Table::CreateTableRow(float _requestedHeight)
+    TableRow* Table::CreateTableRow(float _requestedHeight, Padding _padding)
     {
         assert(_requestedHeight <= 100 && _requestedHeight >= 0);
-        children.push_back(std::make_unique<TableRow>());
+        children.push_back(std::make_unique<TableRow>(this, _padding));
         const auto& row = children.back();
-        row->parent = this;
         row->autoSize = false;
         row->requestedHeight = _requestedHeight;
         UpdateChildren();
         return row.get();
     }
 
-    TableCell* TableRow::CreateTableCell()
+    TableCell* TableRow::CreateTableCell(Padding _padding)
     {
-        children.push_back(std::make_unique<TableCell>());
+        children.push_back(std::make_unique<TableCell>(this, _padding));
         const auto& cell = children.back();
-        cell->parent = this;
         UpdateChildren();
         return cell.get();
     }
@@ -1595,12 +1613,11 @@ namespace sage
      * @param requestedWidth The desired width of the cell as a percent (0-100)
      * @return
      */
-    TableCell* TableRow::CreateTableCell(float requestedWidth)
+    TableCell* TableRow::CreateTableCell(float requestedWidth, Padding _padding)
     {
         assert(requestedWidth <= 100 && requestedWidth >= 0);
-        children.push_back(std::make_unique<TableCell>());
+        children.push_back(std::make_unique<TableCell>(this, _padding));
         const auto& cell = children.back();
-        cell->parent = this;
         cell->autoSize = false;
         cell->requestedWidth = requestedWidth;
         UpdateChildren();
@@ -1687,6 +1704,10 @@ namespace sage
 
             currentX += cellWidth;
         }
+    }
+
+    TableRow::TableRow(Table* _parent, Padding _padding) : TableElement(_parent, _padding)
+    {
     }
 
     PartyMemberPortrait* TableCell::CreatePartyMemberPortrait(
@@ -1894,6 +1915,10 @@ namespace sage
         col.a = 50;
         // DrawRectangle(children->rec.x, children->rec.y, children->rec.width, children->rec.height, col);
     }
+
+    TableCell::TableCell(TableRow* _parent, Padding _padding) : TableElement(_parent, _padding)
+    {
+    }
 #pragma endregion
 
 #pragma region UIStates
@@ -2075,9 +2100,14 @@ namespace sage
     }
 
     Window* GameUIEngine::CreateTooltipWindow(
-        const Texture& _nPatchTexture, const float x, const float y, const float _width, const float _height)
+        const Texture& _nPatchTexture,
+        const float x,
+        const float y,
+        const float _width,
+        const float _height,
+        Padding _padding)
     {
-        return CreateWindow(_nPatchTexture, TextureStretchMode::NONE, x, y, _width, _height, true);
+        return CreateWindow(_nPatchTexture, TextureStretchMode::NONE, x, y, _width, _height, _padding, true);
     }
 
     Window* GameUIEngine::CreateWindow(
@@ -2087,15 +2117,18 @@ namespace sage
         const float y,
         const float _width,
         const float _height,
+        Padding _padding,
         const bool tooltip)
     {
-        auto window = std::make_unique<Window>(gameData->settings);
+        auto window = std::make_unique<Window>(gameData->settings, x, y, _width, _height, _padding);
+        // TODO: Below unnecessary?
         window->ogDimensions.rec.x = x;
         window->ogDimensions.rec.y = y;
         window->ogDimensions.rec.width = _width;
         window->ogDimensions.rec.height = _height;
         window->rec.x = x;
         window->rec.y = y;
+        // ---
         window->tex = _nPatchTexture;
         window->textureStretchMode = _textureStretchMode;
         window->ScaleContents();
@@ -2113,9 +2146,17 @@ namespace sage
         return windows.back().get();
     }
 
-    WindowDocked* GameUIEngine::CreateWindowDocked(float _xOffset, float _yOffset, float _width, float _height)
+    WindowDocked* GameUIEngine::CreateWindowDocked(
+        float _xOffset,
+        float _yOffset,
+        float _width,
+        float _height,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment,
+        Padding _padding)
     {
-        windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
+        windows.push_back(
+            std::make_unique<WindowDocked>(gameData->settings, _vertAlignment, _horiAlignment, _padding));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->ogDimensions.rec.width = _width;
         window->ogDimensions.rec.height = _height;
@@ -2135,9 +2176,13 @@ namespace sage
         const float _xOffset,
         const float _yOffset,
         const float _width,
-        const float _height)
+        const float _height,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment,
+        Padding _padding)
     {
-        windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
+        windows.push_back(
+            std::make_unique<WindowDocked>(gameData->settings, _vertAlignment, _horiAlignment, _padding));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
         window->ogDimensions.rec.width = _width;
         window->ogDimensions.rec.height = _height;
