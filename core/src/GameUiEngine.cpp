@@ -1361,6 +1361,33 @@ namespace sage
     {
     }
 
+    void TooltipWindow::ScaleContents()
+    {
+        // Tooltips original position is scaled to the screen already
+        if (markForRemoval) return;
+
+        rec.width = ogDimensions.rec.width;
+        rec.height = ogDimensions.rec.height;
+        padding = ogDimensions.padding;
+
+        rec = {rec.x, rec.y, settings->ScaleValue(rec.width), settings->ScaleValue(rec.height)};
+
+        padding = {
+            settings->ScaleValue(padding.up),
+            settings->ScaleValue(padding.down),
+            settings->ScaleValue(padding.left),
+            settings->ScaleValue(padding.right)};
+
+        UpdateTextureDimensions();
+        UpdateChildren();
+    }
+
+    TooltipWindow::TooltipWindow(
+        Settings* _settings, float x, float y, float width, float height, Padding _padding)
+        : Window(_settings, x, y, width, height, _padding)
+    {
+    }
+
     void Panel::DrawDebug2D()
     {
         std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
@@ -2068,15 +2095,26 @@ namespace sage
         }
     }
 
-    Window* GameUIEngine::CreateTooltipWindow(
+    TooltipWindow* GameUIEngine::CreateTooltipWindow(
         const Texture& _nPatchTexture,
+        TextureStretchMode _textureStretchMode,
         const float x,
         const float y,
         const float _width,
         const float _height,
         Padding _padding)
     {
-        return CreateWindow(_nPatchTexture, TextureStretchMode::NONE, x, y, _width, _height, _padding, true);
+        auto window = std::make_unique<TooltipWindow>(gameData->settings, x, y, _width, _height, _padding);
+        window->tex = _nPatchTexture;
+        window->textureStretchMode = _textureStretchMode;
+        window->ScaleContents();
+        // PlaceWindow(window.get(), window->GetPosition());
+
+        entt::sink sink{gameData->userInput->onWindowUpdate};
+        window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window.get());
+
+        tooltipWindow = std::move(window);
+        return tooltipWindow.get();
     }
 
     Window* GameUIEngine::CreateWindow(
@@ -2086,31 +2124,16 @@ namespace sage
         const float y,
         const float _width,
         const float _height,
-        Padding _padding,
-        const bool tooltip)
+        Padding _padding)
     {
         auto window = std::make_unique<Window>(gameData->settings, x, y, _width, _height, _padding);
-        // TODO: Below unnecessary?
-        window->ogDimensions.rec.x = x;
-        window->ogDimensions.rec.y = y;
-        window->ogDimensions.rec.width = _width;
-        window->ogDimensions.rec.height = _height;
-        window->rec.x = x;
-        window->rec.y = y;
-        // ---
         window->tex = _nPatchTexture;
         window->textureStretchMode = _textureStretchMode;
         window->ScaleContents();
-
         // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window.get());
-        if (tooltip)
-        {
-            tooltipWindow = std::move(window);
-            return tooltipWindow.get();
-        }
         windows.push_back(std::move(window));
         return windows.back().get();
     }
@@ -2373,7 +2396,9 @@ namespace sage
         auto& item = registry->get<ItemComponent>(entity);
         Vector2 pos = GetWorldToScreen(
             gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
-        pos.x += 20; // TODO: magic number
+        // TODO: You're passing an already scaled value, hence why it's acting weird.
+
+        // pos.x += 20; // TODO: magic number
         GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.name, pos);
     }
 
