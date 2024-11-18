@@ -17,6 +17,7 @@
 
 namespace sage
 {
+    class TooltipWindow;
     class GameData;
     class GameUIEngine;
     struct Settings;
@@ -354,7 +355,7 @@ namespace sage
       protected:
         double hoverTimer = 0;
         float hoverTimerThreshold = 0.8;
-        std::optional<Window*> tooltipWindow;
+        std::optional<TooltipWindow*> tooltipWindow;
         OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
         std::optional<Shader> shader;
         virtual void updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space);
@@ -566,6 +567,7 @@ namespace sage
         bool markForRemoval = false;
 
       public:
+        entt::sigh<void()> onHide;
         entt::connection windowUpdateCnx{};
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
@@ -594,10 +596,19 @@ namespace sage
 
     class TooltipWindow final : public Window
     {
+        entt::connection parentWindowHideCnx;
+
       public:
         void ScaleContents() override;
+        ~TooltipWindow() override;
         TooltipWindow(
-            Settings* _settings, float x, float y, float width, float height, Padding _padding = {0, 0, 0, 0});
+            Settings* _settings,
+            Window* parentWindow,
+            float x,
+            float y,
+            float width,
+            float height,
+            Padding _padding = {0, 0, 0, 0});
         friend class GameUIEngine;
     };
 
@@ -700,6 +711,7 @@ namespace sage
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
         TooltipWindow* CreateTooltipWindow(
+            Window* parentWindow,
             const Texture& _nPatchTexture,
             TextureStretchMode _textureStretchMode,
             float x,

@@ -13,7 +13,6 @@
 #include "GameData.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
-#include "systems/ControllableActorSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/InventorySystem.hpp"
 #include "systems/PartySystem.hpp"
@@ -149,14 +148,14 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
+    TooltipWindow* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto* window = engine->CreateTooltipWindow(
-            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+            nullptr, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();
@@ -172,7 +171,7 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateCombatableTooltip(
+    TooltipWindow* GameUiFactory::CreateCombatableTooltip(
         GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
@@ -180,7 +179,7 @@ namespace sage
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto* window = engine->CreateTooltipWindow(
-            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+            nullptr, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
         {
@@ -201,14 +200,15 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateItemTooltip(GameUIEngine* engine, ItemComponent& item, Vector2 pos)
+    TooltipWindow* GameUiFactory::CreateItemTooltip(
+        GameUIEngine* engine, ItemComponent& item, Window* parentWindow, Vector2 pos)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto* window = engine->CreateTooltipWindow(
-            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+            parentWindow, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
         {
@@ -229,14 +229,14 @@ namespace sage
         return window;
     }
 
-    Window* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, const Ability& ability, Vector2 pos)
+    TooltipWindow* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, const Ability& ability, Vector2 pos)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.10;
         auto* window = engine->CreateTooltipWindow(
-            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+            nullptr, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();
