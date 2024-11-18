@@ -109,7 +109,7 @@ namespace sage
             auto cell = row->CreateTableCell({0, 5, 0, 0});
             auto slot = cell->CreatePartyMemberPortrait(
                 engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
-            slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+            // slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
             // TODO: SHRINK_ROW_TO_FIT doesn't work on columns :)
             // slot->SetVertAlignment(VertAlignment::TOP);
             // slot->SetHoriAlignment(HoriAlignment::CENTER);
@@ -177,10 +177,10 @@ namespace sage
         // slot2->SetHoriAlignment(HoriAlignment::CENTER);
         // slot3->SetHoriAlignment(HoriAlignment::CENTER);
 
-        slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-        slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-        slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-        slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        // slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        // slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        // slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+        // slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
 
         return window;
     }
@@ -202,7 +202,6 @@ namespace sage
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
             auto textbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(textbox), name);
-            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
         }
 
         return window;
@@ -226,7 +225,6 @@ namespace sage
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(headerTextbox), name);
-            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
@@ -255,7 +253,6 @@ namespace sage
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(headerTextbox), item.name);
-            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
@@ -282,7 +279,6 @@ namespace sage
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(headerTextbox), ability.name);
-            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
@@ -312,13 +308,10 @@ namespace sage
             auto titleBar = std::make_unique<TitleBar>(
                 engine, cell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::WINDOW_CENTER);
             cell->CreateTitleBar(std::move(titleBar), "Inventory");
-            // titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-            // titlebar->SetVertAlignment(VertAlignment::TOP);
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
-            auto closeButton = cell2->CreateCloseButton(std::move(closeBtn));
-            // closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
-            // closeButton->SetVertAlignment(VertAlignment::TOP);
+            auto closeBtn =
+                std::make_unique<CloseButton>(engine, cell2, tex, VertAlignment::TOP, HoriAlignment::RIGHT);
+            cell2->CreateCloseButton(std::move(closeBtn));
         }
 
         {
@@ -332,7 +325,7 @@ namespace sage
                     auto& cell = table->children[row]->children[col];
                     auto invSlot = cell->CreateInventorySlot(
                         engine, engine->gameData->controllableActorSystem.get(), row, col);
-                    invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                    // invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                     inventoryUpdateSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
                 }
             }
@@ -361,14 +354,11 @@ namespace sage
             auto titleText = std::make_unique<TitleBar>(
                 engine, cell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::WINDOW_CENTER);
             cell->CreateTitleBar(std::move(titleText), "Character");
-            // titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-            // titlebar->SetVertAlignment(VertAlignment::TOP);
 
             const auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
-            const auto closeButton = cell2->CreateCloseButton(std::move(closeBtn));
-            // closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
-            // closeButton->SetVertAlignment(VertAlignment::TOP);
+            auto closeBtn =
+                std::make_unique<CloseButton>(engine, cell2, tex, VertAlignment::TOP, HoriAlignment::RIGHT);
+            cell2->CreateCloseButton(std::move(closeBtn));
         }
 
         int maxRows = 6;
@@ -380,7 +370,7 @@ namespace sage
                 auto& cell = table->children[row]->children[col];
                 auto equipSlot =
                     cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
-                equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
+                // equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
                 equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot);
             };
 
@@ -417,7 +407,6 @@ namespace sage
             auto cell = row->CreateTableCell();
             auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
             auto img = cell->CreateEquipmentCharacterPreview(std::move(preview));
-            img->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_TO_FIT);
             img->draggable = false;
         }
 

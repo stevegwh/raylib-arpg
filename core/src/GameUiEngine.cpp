@@ -88,10 +88,10 @@ namespace sage
 
     CellElement::CellElement(
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : engine(_engine),
-          parent(_parent),
-          vertAlignment(_vertAlignment),
+        : vertAlignment(_vertAlignment),
           horiAlignment(_horiAlignment),
+          parent(_parent),
+          engine(_engine),
           state(std::make_unique<IdleState>(this, engine))
     {
     }
@@ -116,7 +116,7 @@ namespace sage
     {
         float scaleFactor = engine->gameData->settings->GetCurrentScaleFactor();
         fontInfo.fontSize = fontInfo.baseFontSize * scaleFactor;
-        fontInfo.fontSize = std::clamp(fontInfo.fontSize, fontInfo.minFontSize, fontInfo.maxFontSize);
+        fontInfo.fontSize = std::clamp(fontInfo.fontSize, FontInfo::minFontSize, FontInfo::maxFontSize);
     }
 
     void TextBox::UpdateDimensions()
@@ -128,7 +128,7 @@ namespace sage
         {
             Vector2 textSize =
                 MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
-            while (textSize.x > availableWidth && fontInfo.fontSize > fontInfo.minFontSize)
+            while (textSize.x > availableWidth && fontInfo.fontSize > FontInfo::minFontSize)
             {
                 fontInfo.fontSize -= 1;
                 textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
@@ -279,7 +279,7 @@ namespace sage
         GameUIEngine* _engine,
         TableCell* _parent,
         const dialog::Option& _option,
-        FontInfo _fontInfo,
+        const FontInfo& _fontInfo,
         VertAlignment _vertAlignment,
         HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment), option(_option)
@@ -315,7 +315,7 @@ namespace sage
     TitleBar::TitleBar(
         GameUIEngine* _engine,
         TableCell* _parent,
-        FontInfo _fontInfo,
+        const FontInfo& _fontInfo,
         VertAlignment _vertAlignment,
         HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment)
@@ -325,11 +325,11 @@ namespace sage
         dragOffset = {0, 0};
     }
 
-    void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
-    {
-        overflowBehaviour = _behaviour;
-        UpdateDimensions();
-    }
+    // void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
+    // {
+    //     overflowBehaviour = _behaviour;
+    //     UpdateDimensions();
+    // }
 
     void ImageBox::SetHoverShader()
     {
@@ -545,17 +545,22 @@ namespace sage
     ImageBox::ImageBox(
         GameUIEngine* _engine,
         TableCell* _parent,
-        Texture _tex,
+        const Texture& _tex,
+        OverflowBehaviour _behaviour,
         VertAlignment _vertAlignment,
         HoriAlignment _horiAlignment)
-        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment)
+        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment), overflowBehaviour(_behaviour)
     {
         tex = _tex;
     }
 
     ImageBox::ImageBox(
-        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment)
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        OverflowBehaviour _behaviour,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment), overflowBehaviour(_behaviour)
     {
     }
 
@@ -599,13 +604,13 @@ namespace sage
 
     EquipmentCharacterPreview::EquipmentCharacterPreview(
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
+        : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
     {
         entt::sink sink{_engine->gameData->controllableActorSystem->onSelectedActorChange};
         sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
 
         entt::sink sink2{engine->gameData->equipmentSystem->onEquipmentUpdated};
-        sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
+        sink2.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
     }
 
     void PartyMemberPortrait::RetrieveInfo()
@@ -674,7 +679,7 @@ namespace sage
 
     PartyMemberPortrait::PartyMemberPortrait(
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
+        : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/avatar_border_set.png");
         portraitBgTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/avatar_border_set.png");
@@ -749,7 +754,7 @@ namespace sage
 
     AbilitySlot::AbilitySlot(
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
+        : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment)
     {
         entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
         sink.connect<&AbilitySlot::RetrieveInfo>(this);
@@ -848,7 +853,7 @@ namespace sage
 
     ItemSlot::ItemSlot(
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
+        : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         backgroundTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
@@ -1077,10 +1082,10 @@ namespace sage
     CloseButton::CloseButton(
         GameUIEngine* _engine,
         TableCell* _parent,
-        Texture _tex,
+        const Texture& _tex,
         VertAlignment _vertAlignment,
         HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, _tex, _vertAlignment, _horiAlignment)
+        : ImageBox(_engine, _parent, _tex, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
     {
     }
 
@@ -1647,6 +1652,7 @@ namespace sage
     /**
      *
      * @param _requestedHeight The desired height of the cell as a percent (0-100)
+     * @param _padding
      * @return
      */
     TableRow* Table::CreateTableRow(float _requestedHeight, Padding _padding)
@@ -1671,6 +1677,7 @@ namespace sage
     /**
      *
      * @param requestedWidth The desired width of the cell as a percent (0-100)
+     * @param _padding
      * @return
      */
     TableCell* TableRow::CreateTableCell(float requestedWidth, Padding _padding)
