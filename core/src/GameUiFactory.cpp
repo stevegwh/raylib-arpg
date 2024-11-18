@@ -281,7 +281,6 @@ namespace sage
         }
 
         {
-            // TODO: The tooltips are messed up cus youre setting rec to ogDimensions
             auto panel1 = window->CreatePanel({20, 0, 0, 0});
             auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
             for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
