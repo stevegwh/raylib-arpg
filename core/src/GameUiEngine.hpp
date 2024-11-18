@@ -93,8 +93,15 @@ namespace sage
     class TableElement : public UIElement
     {
       protected:
+        struct OriginalDimensions
+        {
+            Rectangle rec{};
+            Padding padding{};
+        };
+
+        OriginalDimensions ogDimensions{};
         Padding padding;
-        Margin margin;
+        // Margin margin;
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
       public:
@@ -149,6 +156,7 @@ namespace sage
         // Sets padding by pixel value (screen scaling is applied)
         void SetPadding(const Padding& _padding)
         {
+            ogDimensions.padding = _padding;
             padding = _padding;
             UpdateChildren();
         }
@@ -163,6 +171,7 @@ namespace sage
             padding.down = screenHeight * (_padding.down / 100);
             padding.left = screenWidth * (_padding.left / 100);
             padding.right = screenWidth * (_padding.right / 100);
+            ogDimensions.padding = padding;
             UpdateChildren();
         }
 
@@ -534,14 +543,13 @@ namespace sage
       protected:
         bool hidden = false;
         bool markForRemoval = false;
-        float baseWidth = 0;  // Width before screen scaling (Screen width: 1920)
-        float baseHeight = 0; // Height before screen scaling (Screen height: 1080)
 
       public:
         entt::connection windowUpdateCnx{};
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
 
+        void OnWindowUpdate(Vector2 prev, Vector2 current);
         virtual void ScaleContents();
         void ClampToScreen();
         void OnHoverStart() override;

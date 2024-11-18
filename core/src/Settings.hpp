@@ -18,32 +18,27 @@ namespace sage
         int screenHeight = 720;
         bool toggleFullScreenRequested = false;
 
-        [[nodiscard]] float GetScreenScaleFactor() const
+        static float GetScreenScaleFactor(float width, float height)
         {
-            // Calculate scaling factor based on screen dimensions
-            // You can use either width, height, or both depending on your needs
-            float scaleWidth = screenWidth / TARGET_SCREEN_WIDTH;
-            float scaleHeight = screenHeight / TARGET_SCREEN_HEIGHT;
+            // Assuming 1920x1080 is your target resolution
+            const float TARGET_WIDTH = 1920.0f;
+            const float TARGET_HEIGHT = 1080.0f;
 
-            // Choose scaling method:
+            float scaleX = width / TARGET_WIDTH;
+            float scaleY = height / TARGET_HEIGHT;
 
-            // Option 1: Scale based on width only
-            float scaleFactor = scaleWidth;
+            // Use the smaller scale factor to maintain aspect ratio
+            return std::min(scaleX, scaleY);
+        }
 
-            // Option 2: Scale based on height only
-            // float scaleFactor = scaleHeight;
-
-            // Option 3: Scale based on smallest ratio to prevent overlarge fonts
-            // float scaleFactor = std::min(scaleWidth, scaleHeight);
-
-            // Option 4: Scale based on average of both dimensions
-            // float scaleFactor = (scaleWidth + scaleHeight) * 0.5f;
-            return scaleFactor;
+        [[nodiscard]] float GetCurrentScaleFactor() const
+        {
+            return GetScreenScaleFactor(screenWidth, screenHeight);
         }
 
         [[nodiscard]] float ScaleValue(const float toScale) const
         {
-            return toScale * GetScreenScaleFactor();
+            return toScale * GetCurrentScaleFactor();
         }
 
         void ResetToUserDefined()

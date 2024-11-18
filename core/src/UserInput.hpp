@@ -19,7 +19,7 @@ namespace sage
         void toggleFullScreen() const;
 
       public:
-        entt::sigh<void(Vector2)> onWindowUpdate{};
+        entt::sigh<void(Vector2, Vector2)> onWindowUpdate{}; // Old, New
 
         entt::sigh<void()> keyAPressed{};
         entt::sigh<void()> keyAUp{};

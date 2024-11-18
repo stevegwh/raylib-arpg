@@ -47,6 +47,8 @@ namespace sage
     {
         if (settings->toggleFullScreenRequested)
         {
+            int prevWidth = settings->screenWidth;
+            int prevHeight = settings->screenHeight;
 #ifdef __APPLE__
             if (!IsWindowFullscreen())
             {
@@ -81,6 +83,7 @@ namespace sage
 #endif
             settings->toggleFullScreenRequested = false;
             scene->data->userInput->onWindowUpdate.publish(
+                {static_cast<float>(prevWidth), static_cast<float>(prevHeight)},
                 {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
         }
     }
