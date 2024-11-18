@@ -297,7 +297,7 @@ namespace sage
             GameUIEngine* _engine,
             TableCell* _parent,
             const dialog::Option& _option,
-            FontInfo _fontInfo,
+            const FontInfo& _fontInfo,
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
@@ -314,7 +314,7 @@ namespace sage
         TitleBar(
             GameUIEngine* _engine,
             TableCell* _parent,
-            FontInfo _fontInfo,
+            const FontInfo& _fontInfo,
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
@@ -333,7 +333,7 @@ namespace sage
         void OnDragStart() override;
         void DragDraw() override;
         void OnDrop(CellElement* droppedElement) override;
-        void SetOverflowBehaviour(OverflowBehaviour _behaviour);
+        // void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void SetHoverShader();
         void SetGrayscale();
         void RemoveShader();
@@ -342,12 +342,14 @@ namespace sage
         ImageBox(
             GameUIEngine* _engine,
             TableCell* _parent,
-            Texture _tex,
+            const Texture& _tex,
+            OverflowBehaviour _behaviour = OverflowBehaviour::SHRINK_TO_FIT,
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         ImageBox(
             GameUIEngine* _engine,
             TableCell* _parent,
+            OverflowBehaviour _behaviour = OverflowBehaviour::SHRINK_TO_FIT,
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         ~ImageBox() override = default;
@@ -499,7 +501,7 @@ namespace sage
         CloseButton(
             GameUIEngine* _engine,
             TableCell* _parent,
-            Texture _tex,
+            const Texture& _tex,
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
