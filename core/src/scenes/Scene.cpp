@@ -119,17 +119,32 @@ namespace sage
 
         ResourceManager::GetInstance().FontLoadFromFile(
             "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/equipment.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/hammer.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/inventory.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/spellbook.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
+
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto w = data->settings->TARGET_SCREEN_WIDTH * 0.3;
         auto h = data->settings->TARGET_SCREEN_HEIGHT * 0.6;
-        auto* window = GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
-        auto* window2 = GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
+        auto* inventoryWindow =
+            GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
+        auto* equipmentWindow =
+            GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
         entt::sink sink{data->userInput->keyIPressed};
-        sink.connect<&Window::ToggleHide>(*window);
+        sink.connect<&Window::ToggleHide>(*inventoryWindow);
         entt::sink sink2{data->userInput->keyCPressed};
-        sink2.connect<&Window::ToggleHide>(*window2);
+        sink2.connect<&Window::ToggleHide>(*equipmentWindow);
 
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
+        GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
     };
 
 } // namespace sage

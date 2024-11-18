@@ -42,6 +42,8 @@ namespace sage
             GameUIEngine* engine, ItemComponent& item, Window* parentWindow, Vector2 pos);
         static TooltipWindow* CreateAbilityToolTip(GameUIEngine* engine, const Ability& ability, Vector2 pos);
         static Window* CreateDialogWindow(GameUIEngine* engine, entt::entity npc);
+        static Window* CreateGameWindowButtons(
+            GameUIEngine* engine, Window* inventoryWindow, Window* equipmentWindow);
     };
 
 } // namespace sage

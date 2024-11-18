@@ -10,7 +10,7 @@
 
 namespace sage
 {
-    static constexpr int MAX_ABILITY_NUMBER = 4;
+    static constexpr int MAX_ABILITY_NUMBER = 18;
     enum class CombatableActorType
     {
         PLAYER,
