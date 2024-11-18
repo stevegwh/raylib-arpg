@@ -96,6 +96,17 @@ namespace sage
     {
     }
 
+    const std::string& TextBox::GetContent() const
+    {
+        return content;
+    }
+
+    void TextBox::SetContent(const std::string& _content)
+    {
+        content = _content;
+        parent->UpdateChildren(); // Trigger scaling etc.
+    }
+
     Font TextBox::GetFont() const
     {
         return fontInfo.font;
@@ -225,6 +236,7 @@ namespace sage
           fontInfo(_fontInfo)
     {
         UpdateFontScaling();
+        SetTextureFilter(GetFont().texture, TEXTURE_FILTER_BILINEAR);
     }
 
     void DialogOption::OnHoverStart()
@@ -1839,7 +1851,7 @@ namespace sage
     {
         children = std::move(_titleBar);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
-        titleBar->content = _title;
+        titleBar->SetContent(_title);
         UpdateChildren();
         return titleBar;
     }
@@ -1856,8 +1868,7 @@ namespace sage
     {
         children = std::move(_textBox);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
-        SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
-        textbox->content = _content;
+        textbox->SetContent(_content);
         UpdateChildren();
         return textbox;
     }
@@ -1866,7 +1877,6 @@ namespace sage
     {
         children = std::move(_dialogOption);
         auto* textbox = dynamic_cast<DialogOption*>(children.get());
-        SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
         UpdateChildren();
         return textbox;
     }

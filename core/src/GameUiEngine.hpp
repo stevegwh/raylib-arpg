@@ -262,10 +262,8 @@ namespace sage
             {
             }
         };
-
-        // color?
-        std::string content;
-        // SetContent?
+        [[nodiscard]] const std::string& GetContent() const;
+        void SetContent(const std::string& _content);
         [[nodiscard]] Font GetFont() const;
         void UpdateFontScaling();
         void UpdateDimensions() override;
@@ -282,6 +280,7 @@ namespace sage
       protected:
         Shader sdfShader;
         FontInfo fontInfo;
+        std::string content;
     };
 
     class DialogOption : public TextBox
