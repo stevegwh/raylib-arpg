@@ -41,18 +41,6 @@ namespace sage
     {
     }
 
-    void CellElement::SetVertAlignment(VertAlignment alignment)
-    {
-        vertAlignment = alignment;
-        parent->UpdateChildren();
-    }
-
-    void CellElement::SetHoriAlignment(HoriAlignment alignment)
-    {
-        horiAlignment = alignment;
-        parent->UpdateChildren();
-    }
-
     void CellElement::OnClick()
     {
         onMouseClicked.publish();
@@ -98,33 +86,31 @@ namespace sage
         tex.height = parent->rec.height;
     }
 
-    CellElement::CellElement(GameUIEngine* _engine)
-        : engine(_engine), state(std::make_unique<IdleState>(this, engine))
+    CellElement::CellElement(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : engine(_engine),
+          parent(_parent),
+          vertAlignment(_vertAlignment),
+          horiAlignment(_horiAlignment),
+          state(std::make_unique<IdleState>(this, engine))
     {
     }
 
     Font TextBox::GetFont() const
     {
-        return font;
+        return fontInfo.font;
     }
 
     void TextBox::UpdateFontScaling()
     {
         float scaleFactor = engine->gameData->settings->GetCurrentScaleFactor();
-        fontSize = baseFontSize * scaleFactor;
-        fontSize = std::clamp(fontSize, minFontSize, maxFontSize);
-    }
-
-    void TextBox::SetFont(const Font& _font, float _baseFontSize)
-    {
-        baseFontSize = _baseFontSize;
-        font = _font;
-        UpdateFontScaling();
+        fontInfo.fontSize = fontInfo.baseFontSize * scaleFactor;
+        fontInfo.fontSize = std::clamp(fontInfo.fontSize, fontInfo.minFontSize, fontInfo.maxFontSize);
     }
 
     void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
-        overflowBehaviour = _behaviour;
+        fontInfo.overflowBehaviour = _behaviour;
         UpdateDimensions();
     }
 
@@ -133,16 +119,17 @@ namespace sage
         UpdateFontScaling();
         float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
 
-        if (overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
+        if (fontInfo.overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
-            Vector2 textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
-            while (textSize.x > availableWidth && fontSize > minFontSize)
+            Vector2 textSize =
+                MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+            while (textSize.x > availableWidth && fontInfo.fontSize > fontInfo.minFontSize)
             {
-                fontSize -= 1;
-                textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
+                fontInfo.fontSize -= 1;
+                textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
             }
         }
-        else if (overflowBehaviour == OverflowBehaviour::WORD_WRAP)
+        else if (fontInfo.overflowBehaviour == OverflowBehaviour::WORD_WRAP)
         {
             std::string wrappedText;
             std::string currentLine;
@@ -158,7 +145,8 @@ namespace sage
                 testLine += word;
 
                 // Measure the line with the new word
-                Vector2 lineSize = MeasureTextEx(font, testLine.c_str(), fontSize, fontSpacing);
+                Vector2 lineSize =
+                    MeasureTextEx(fontInfo.font, testLine.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
 
                 if (lineSize.x <= availableWidth)
                 {
@@ -186,7 +174,7 @@ namespace sage
         }
 
         // Measure final text size
-        Vector2 textSize = MeasureTextEx(font, content.c_str(), fontSize, fontSpacing);
+        Vector2 textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
 
         float horiOffset = 0;
         float vertOffset = 0;
@@ -227,14 +215,22 @@ namespace sage
     void TextBox::Draw2D()
     {
         BeginShaderMode(sdfShader);
-        DrawTextEx(font, content.c_str(), Vector2{rec.x, rec.y}, fontSize, fontSpacing, BLACK);
+        DrawTextEx(
+            fontInfo.font, content.c_str(), Vector2{rec.x, rec.y}, fontInfo.fontSize, fontInfo.fontSpacing, BLACK);
         EndShaderMode();
     }
 
-    TextBox::TextBox(GameUIEngine* _engine)
-        : CellElement(_engine),
-          sdfShader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/sdf.fs"))
+    TextBox::TextBox(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        FontInfo _fontInfo,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment),
+          sdfShader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/sdf.fs")),
+          fontInfo(_fontInfo)
     {
+        UpdateFontScaling();
     }
 
     void DialogOption::OnHoverStart()
@@ -273,8 +269,14 @@ namespace sage
         }
     }
 
-    DialogOption::DialogOption(GameUIEngine* _engine, const dialog::Option& _option)
-        : TextBox(_engine), option(_option)
+    DialogOption::DialogOption(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        const dialog::Option& _option,
+        FontInfo _fontInfo,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment), option(_option)
     {
         content = option.description;
     }
@@ -304,7 +306,13 @@ namespace sage
         dragOffset = {0, 0};
     }
 
-    TitleBar::TitleBar(GameUIEngine* _engine) : TextBox(_engine)
+    TitleBar::TitleBar(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        FontInfo _fontInfo,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment)
     {
         draggable = true;
         dragDelayTime = 0.0f;
@@ -528,7 +536,20 @@ namespace sage
         }
     }
 
-    ImageBox::ImageBox(GameUIEngine* _engine) : CellElement(_engine)
+    ImageBox::ImageBox(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        Texture _tex,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment)
+    {
+        tex = _tex;
+    }
+
+    ImageBox::ImageBox(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment)
     {
     }
 
@@ -570,9 +591,14 @@ namespace sage
         //        DrawTextureEx(renderTexture.texture, {rec.x, rec.y}, 0, 0.75f, WHITE);
     }
 
-    EquipmentCharacterPreview::EquipmentCharacterPreview(GameUIEngine* _engine) : ImageBox(_engine)
+    EquipmentCharacterPreview::EquipmentCharacterPreview(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
     {
         entt::sink sink{_engine->gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
+
+        entt::sink sink2{engine->gameData->equipmentSystem->onEquipmentUpdated};
         sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
     }
 
@@ -640,10 +666,16 @@ namespace sage
         DrawTexture(portraitBgTex, rec.x, rec.y, WHITE);
     }
 
-    PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine) : ImageBox(_engine)
+    PartyMemberPortrait::PartyMemberPortrait(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/avatar_border_set.png");
         portraitBgTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/avatar_border_set.png");
+        {
+            entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
+            sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
+        }
     }
 
     void AbilitySlot::RetrieveInfo()
@@ -709,8 +741,12 @@ namespace sage
         CellElement::OnClick();
     }
 
-    AbilitySlot::AbilitySlot(GameUIEngine* _engine) : ImageBox(_engine)
+    AbilitySlot::AbilitySlot(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
     {
+        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&AbilitySlot::RetrieveInfo>(this);
     }
 
     Texture ItemSlot::getEmptyTex()
@@ -804,7 +840,9 @@ namespace sage
         }
     }
 
-    ItemSlot::ItemSlot(GameUIEngine* _engine) : ImageBox(_engine)
+    ItemSlot::ItemSlot(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : ImageBox(_engine, _parent, _vertAlignment, _horiAlignment)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         backgroundTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
@@ -951,8 +989,13 @@ namespace sage
         }
     }
 
-    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType)
-        : ItemSlot(_engine), itemType(_itemType)
+    EquipmentSlot::EquipmentSlot(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        EquipmentSlotName _itemType,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : ItemSlot(_engine, _parent, _vertAlignment, _horiAlignment), itemType(_itemType)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/amulet.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/helm.png");
@@ -965,6 +1008,9 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/offhand.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
+
+        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&EquipmentSlot::RetrieveInfo>(this);
     }
 
     void InventorySlot::onItemDroppedToWorld()
@@ -1011,7 +1057,9 @@ namespace sage
         }
     }
 
-    InventorySlot::InventorySlot(GameUIEngine* _engine) : ItemSlot(_engine)
+    InventorySlot::InventorySlot(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : ItemSlot(_engine, _parent, _vertAlignment, _horiAlignment)
     {
     }
 
@@ -1020,7 +1068,13 @@ namespace sage
         parent->GetWindow()->Hide();
     }
 
-    CloseButton::CloseButton(GameUIEngine* _engine) : ImageBox(_engine)
+    CloseButton::CloseButton(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        Texture _tex,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : ImageBox(_engine, _parent, _tex, _vertAlignment, _horiAlignment)
     {
     }
 
@@ -1716,7 +1770,7 @@ namespace sage
         ControllableActorSystem* _controllableActorSystem,
         unsigned int _memberNumber)
     {
-        children = std::make_unique<PartyMemberPortrait>(engine);
+        children = std::make_unique<PartyMemberPortrait>(engine, this);
         auto* portrait = dynamic_cast<PartyMemberPortrait*>(children.get());
         portrait->parent = this;
         portrait->partySystem = _partySystem;
@@ -1725,10 +1779,6 @@ namespace sage
         portrait->canReceiveDragDrops = true;
         portrait->memberNumber = _memberNumber;
         portrait->RetrieveInfo();
-        {
-            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
-            sink.connect<&PartyMemberPortrait::RetrieveInfo>(portrait);
-        }
         UpdateChildren();
         return portrait;
     }
@@ -1739,7 +1789,7 @@ namespace sage
         ControllableActorSystem* _controllableActorSystem,
         unsigned int _slotNumber)
     {
-        children = std::make_unique<AbilitySlot>(engine);
+        children = std::make_unique<AbilitySlot>(engine, this);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
         abilitySlot->parent = this;
         abilitySlot->playerAbilitySystem = _playerAbilitySystem;
@@ -1748,10 +1798,6 @@ namespace sage
         abilitySlot->canReceiveDragDrops = true;
         abilitySlot->slotNumber = _slotNumber;
         abilitySlot->RetrieveInfo();
-        {
-            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
-            sink.connect<&AbilitySlot::RetrieveInfo>(abilitySlot);
-        }
         UpdateChildren();
         return abilitySlot;
     }
@@ -1759,7 +1805,7 @@ namespace sage
     EquipmentSlot* TableCell::CreateEquipmentSlot(
         GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentSlotName _itemType)
     {
-        children = std::make_unique<EquipmentSlot>(engine, _itemType);
+        children = std::make_unique<EquipmentSlot>(engine, this, _itemType);
         auto* slot = dynamic_cast<EquipmentSlot*>(children.get());
         slot->parent = this;
         slot->controllableActorSystem = _controllableActorSystem;
@@ -1768,10 +1814,6 @@ namespace sage
         slot->canReceiveDragDrops = true;
         slot->RetrieveInfo();
         UpdateChildren();
-        {
-            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
-            sink.connect<&EquipmentSlot::RetrieveInfo>(slot);
-        }
         return slot;
     }
 
@@ -1781,7 +1823,7 @@ namespace sage
         unsigned int row,
         unsigned int col)
     {
-        children = std::make_unique<InventorySlot>(engine);
+        children = std::make_unique<InventorySlot>(engine, this);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
         slot->parent = this;
         slot->controllableActorSystem = _controllableActorSystem;
@@ -1801,25 +1843,21 @@ namespace sage
 
     TitleBar* TableCell::CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize)
     {
-        children = std::make_unique<TitleBar>(engine);
-        auto* titleBar = dynamic_cast<TitleBar*>(children.get());
-        titleBar->parent = this;
-        Font _font =
+        TextBox::FontInfo _fontInfo{};
+        _fontInfo.fontSize = fontSize;
+        _fontInfo.font =
             ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-        titleBar->SetFont(_font, fontSize);
-        titleBar->overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
+        children = std::make_unique<TitleBar>(engine, this, _fontInfo);
+        auto* titleBar = dynamic_cast<TitleBar*>(children.get());
         titleBar->content = _title;
         UpdateChildren();
         return titleBar;
     }
 
-    CloseButton* TableCell::CreateCloseButton(GameUIEngine* engine, const Texture& _tex)
+    CloseButton* TableCell::CreateCloseButton(std::unique_ptr<CloseButton> _closeButton)
     {
-        children = std::make_unique<CloseButton>(engine);
+        children = std::move(_closeButton);
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
-        closeButton->parent = this;
-        // closeButton->SetGrayscale();
-        closeButton->tex = _tex;
         UpdateChildren();
         return closeButton;
     }
@@ -1828,18 +1866,19 @@ namespace sage
         GameUIEngine* engine,
         const std::string& _content,
         float fontSize,
-        TextBox::OverflowBehaviour overflowBehaviour)
+        TextBox::OverflowBehaviour _overflowBehaviour)
     {
-        children = std::make_unique<TextBox>(engine);
-        auto* textbox = dynamic_cast<TextBox*>(children.get());
-        textbox->parent = this;
-        Font _font =
+        TextBox::FontInfo _fontInfo{};
+        _fontInfo.fontSize = fontSize;
+        _fontInfo.font =
             ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+        _fontInfo.overflowBehaviour = _overflowBehaviour;
+        children = std::make_unique<TextBox>(engine, this, _fontInfo);
+        auto* textbox = dynamic_cast<TextBox*>(children.get());
 
-        textbox->SetFont(_font, fontSize);
+        // textbox->SetFont(_font, fontSize);
         // textbox->SetFont(GetFontDefault(), fontSize);
         SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
-        textbox->overflowBehaviour = overflowBehaviour;
         textbox->content = _content;
         UpdateChildren();
         return textbox;
@@ -1849,42 +1888,35 @@ namespace sage
         GameUIEngine* engine,
         const dialog::Option& option,
         float fontSize,
-        TextBox::OverflowBehaviour overflowBehaviour)
+        TextBox::OverflowBehaviour _overflowBehaviour)
     {
-        children = std::make_unique<DialogOption>(engine, option);
-        auto* textbox = dynamic_cast<DialogOption*>(children.get());
-        textbox->parent = this;
-        Font _font =
+        TextBox::FontInfo _fontInfo{};
+        _fontInfo.fontSize = fontSize;
+        _fontInfo.font =
             ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-        textbox->SetFont(_font, fontSize);
+        _fontInfo.overflowBehaviour = _overflowBehaviour;
+
+        children = std::make_unique<DialogOption>(engine, this, option, _fontInfo);
+        auto* textbox = dynamic_cast<DialogOption*>(children.get());
         SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
-        textbox->overflowBehaviour = overflowBehaviour;
         UpdateChildren();
         return textbox;
     }
 
-    ImageBox* TableCell::CreateImagebox(GameUIEngine* engine, const Texture& _tex)
+    ImageBox* TableCell::CreateImagebox(std::unique_ptr<ImageBox> _imageBox)
     {
-        children = std::make_unique<ImageBox>(engine);
+        children = std::move(_imageBox);
         auto* image = dynamic_cast<ImageBox*>(children.get());
-        image->parent = this;
-        image->draggable = true;
-        image->tex = _tex;
         UpdateChildren();
         return image;
     }
 
-    EquipmentCharacterPreview* TableCell::CreateEquipmentCharacterPreview(GameUIEngine* engine)
+    EquipmentCharacterPreview* TableCell::CreateEquipmentCharacterPreview(
+        std::unique_ptr<EquipmentCharacterPreview> _preview)
     {
-        children = std::make_unique<EquipmentCharacterPreview>(engine);
+        children = std::move(_preview);
         auto* image = dynamic_cast<EquipmentCharacterPreview*>(children.get());
-        image->parent = this;
         image->draggable = false;
-
-        {
-            entt::sink sink{engine->gameData->equipmentSystem->onEquipmentUpdated};
-            sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(image);
-        }
         UpdateChildren();
         image->RetrieveInfo();
         return image;
