@@ -105,13 +105,6 @@ namespace sage
         Padding padding;
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
-        // Sets padding by pixel value (screen scaling is applied)
-        void setPadding(const Padding& _padding)
-        {
-            ogDimensions.padding = _padding;
-            padding = _padding;
-        }
-
       public:
         Parent* parent{};
         Child children;
@@ -370,6 +363,15 @@ namespace sage
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
+    class GameWindowButton : public ImageBox
+    {
+        Window* toOpen{};
+
+      public:
+        void OnClick() override;
+        GameWindowButton(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex, Window* _toOpen);
+    };
+
     class EquipmentCharacterPreview : public ImageBox
     {
 
@@ -490,7 +492,7 @@ namespace sage
             std::unique_ptr<EquipmentCharacterPreview> _preview);
         CloseButton* CreateCloseButton(std::unique_ptr<CloseButton> _closeButton);
         PartyMemberPortrait* CreatePartyMemberPortrait(std::unique_ptr<PartyMemberPortrait> _portrait);
-
+        GameWindowButton* CreateGameWindowButton(std::unique_ptr<GameWindowButton> _button);
         AbilitySlot* CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot);
         EquipmentSlot* CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot);
         InventorySlot* CreateInventorySlot(std::unique_ptr<InventorySlot> _slot);

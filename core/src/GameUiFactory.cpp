@@ -93,7 +93,6 @@ namespace sage
 
     Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.08;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.3;
         auto window =
@@ -114,12 +113,10 @@ namespace sage
 
     Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.25;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.125;
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.65;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
         auto window = engine->CreateWindowDocked(
             nPatchTexture,
             TextureStretchMode::NONE,
@@ -129,19 +126,16 @@ namespace sage
             h,
             VertAlignment::BOTTOM,
             HoriAlignment::CENTER,
-            {16, 16, 12, 12});
+            {10, 8, 12, 12});
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
         auto row = table->CreateTableRow();
-        auto cell = row->CreateTableCell();
-        cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, 0));
-        auto cell1 = row->CreateTableCell();
-        cell1->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell1, 1));
-        auto cell2 = row->CreateTableCell();
-        cell2->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell2, 2));
-        auto cell3 = row->CreateTableCell();
-        cell3->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell3, 3));
+        for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)
+        {
+            auto cell = row->CreateTableCell();
+            cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
+        }
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
 
@@ -150,7 +144,6 @@ namespace sage
 
     TooltipWindow* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
@@ -174,7 +167,6 @@ namespace sage
     TooltipWindow* GameUiFactory::CreateCombatableTooltip(
         GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
@@ -203,7 +195,6 @@ namespace sage
     TooltipWindow* GameUiFactory::CreateItemTooltip(
         GameUIEngine* engine, ItemComponent& item, Window* parentWindow, Vector2 pos)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
@@ -231,7 +222,6 @@ namespace sage
 
     TooltipWindow* GameUiFactory::CreateAbilityToolTip(GameUIEngine* engine, const Ability& ability, Vector2 pos)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.10;
@@ -259,9 +249,6 @@ namespace sage
     Window* GameUiFactory::CreateInventoryWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
         auto window = engine->CreateWindow(
@@ -301,8 +288,7 @@ namespace sage
     Window* GameUiFactory::CreateCharacterWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
+
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
         auto window = engine->CreateWindow(
@@ -394,8 +380,6 @@ namespace sage
 
     Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, entt::entity npc)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
         float w = Settings::TARGET_SCREEN_WIDTH * 0.4;
@@ -432,6 +416,35 @@ namespace sage
             auto option = std::make_unique<DialogOption>(engine, optionCell, o, _fontInfo);
             optionCell->CreateDialogOption(std::move(option));
         }
+        return window;
+    }
+
+    Window* GameUiFactory::CreateGameWindowButtons(
+        sage::GameUIEngine* engine, Window* inventoryWindow, Window* equipmentWindow)
+    {
+        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.075;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
+        auto window =
+            engine->CreateWindowDocked(0, 0, w, h, VertAlignment::BOTTOM, HoriAlignment::LEFT, {16, 16, 12, 12});
+        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        auto panel = window->CreatePanel();
+        auto table = panel->CreateTable();
+        auto row = table->CreateTableRow();
+        auto cell = row->CreateTableCell();
+        cell->CreateGameWindowButton(std::make_unique<GameWindowButton>(
+            engine,
+            cell,
+            ResourceManager::GetInstance().TextureLoad("resources/icons/ui/inventory.png"),
+            inventoryWindow));
+        auto cell1 = row->CreateTableCell();
+        cell1->CreateGameWindowButton(std::make_unique<GameWindowButton>(
+            engine,
+            cell1,
+            ResourceManager::GetInstance().TextureLoad("resources/icons/ui/equipment.png"),
+            equipmentWindow));
+
         return window;
     }
 } // namespace sage

@@ -553,6 +553,17 @@ namespace sage
     {
     }
 
+    void GameWindowButton::OnClick()
+    {
+        toOpen->ToggleHide();
+    }
+
+    GameWindowButton::GameWindowButton(
+        GameUIEngine* _engine, TableCell* _parent, const Texture& _tex, Window* _toOpen)
+        : ImageBox(_engine, _parent, _tex), toOpen(_toOpen)
+    {
+    }
+
     void EquipmentCharacterPreview::UpdateDimensions()
     {
         ImageBox::UpdateDimensions();
@@ -755,6 +766,8 @@ namespace sage
               HoriAlignment::CENTER),
           slotNumber(_slotNumber)
     {
+        draggable = true;
+        canReceiveDragDrops = true;
         entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
         sink.connect<&AbilitySlot::RetrieveInfo>(this);
     }
@@ -1820,6 +1833,14 @@ namespace sage
         portrait->RetrieveInfo();
         UpdateChildren();
         return portrait;
+    }
+
+    GameWindowButton* TableCell::CreateGameWindowButton(std::unique_ptr<GameWindowButton> _button)
+    {
+        children = std::move(_button);
+        auto* button = dynamic_cast<GameWindowButton*>(children.get());
+        UpdateChildren();
+        return button;
     }
 
     AbilitySlot* TableCell::CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot)
