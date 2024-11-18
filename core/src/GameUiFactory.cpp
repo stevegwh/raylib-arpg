@@ -55,7 +55,8 @@ namespace sage
         cell0->CreateTitleBar(engine, "Title Bar", 24);
         auto cell01 = row0->CreateTableCell();
         auto tex0 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        cell01->CreateCloseButton(engine, tex0);
+        auto closeBtn = std::make_unique<CloseButton>(engine, cell01, tex0);
+        cell01->CreateCloseButton(std::move(closeBtn));
 
         auto row = table->CreateTableRow(75);
         auto cell = row->CreateTableCell(50, {2, 2, 2, 2});
@@ -73,21 +74,20 @@ namespace sage
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         cell3->tex = window->tex;
         auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        auto imagebox = cell2->CreateImagebox(engine, tex);
+        auto imgBox = std::make_unique<ImageBox>(engine, cell3, tex);
+        auto imagebox = cell2->CreateImagebox(std::move(imgBox));
         imagebox->SetGrayscale();
-        // cell2->SetPaddingPercent({10, 10, 10, 10});
-        // imagebox->SetHoriAlignment(HoriAlignment::CENTER);
         auto tex2 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        auto image2 = cell3->CreateImagebox(engine, tex2);
+        auto imgBox2 = std::make_unique<ImageBox>(engine, cell3, tex2, VertAlignment::TOP, HoriAlignment::CENTER);
+        auto image2 = cell3->CreateImagebox(std::move(imgBox2));
         image2->SetGrayscale();
-        image2->SetHoriAlignment(HoriAlignment::CENTER);
 
         auto row2 = table->CreateTableRow();
         auto cell4 = row2->CreateTableCell();
         auto cell5 = row2->CreateTableCell();
         auto textbox2 = cell4->CreateTextbox(engine, "Bottom Left Alignment");
-        textbox2->SetVertAlignment(VertAlignment::BOTTOM);
-        textbox2->SetHoriAlignment(HoriAlignment::LEFT);
+        // textbox2->SetVertAlignment(VertAlignment::BOTTOM);
+        // textbox2->SetHoriAlignment(HoriAlignment::LEFT);
 
         cell5->CreateTextbox(engine, "This is an example of shrinking!", 42);
     }
@@ -111,8 +111,8 @@ namespace sage
                 engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
             slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
             // TODO: SHRINK_ROW_TO_FIT doesn't work on columns :)
-            slot->SetVertAlignment(VertAlignment::TOP);
-            slot->SetHoriAlignment(HoriAlignment::CENTER);
+            // slot->SetVertAlignment(VertAlignment::TOP);
+            // slot->SetHoriAlignment(HoriAlignment::CENTER);
         }
         return window;
     }
@@ -168,10 +168,10 @@ namespace sage
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
         // Is that desired behaviour? Can look for other imageboxes with SHRINK_ROW_TO_FIT as
         // overflowBehaviour?
-        slot->SetVertAlignment(VertAlignment::MIDDLE);
-        slot1->SetVertAlignment(VertAlignment::MIDDLE);
-        slot2->SetVertAlignment(VertAlignment::BOTTOM);
-        slot3->SetVertAlignment(VertAlignment::MIDDLE);
+        // slot->SetVertAlignment(VertAlignment::MIDDLE);
+        // slot1->SetVertAlignment(VertAlignment::MIDDLE);
+        // slot2->SetVertAlignment(VertAlignment::BOTTOM);
+        // slot3->SetVertAlignment(VertAlignment::MIDDLE);
         // slot->SetHoriAlignment(HoriAlignment::CENTER);
         // slot1->SetHoriAlignment(HoriAlignment::CENTER);
         // slot2->SetHoriAlignment(HoriAlignment::CENTER);
@@ -199,7 +199,7 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
-            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
         }
 
         return window;
@@ -220,7 +220,7 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
-            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(
@@ -247,7 +247,7 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, item.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
-            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(engine, item.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
@@ -270,7 +270,7 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, ability.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
-            textbox->SetVertAlignment(VertAlignment::BOTTOM);
+            // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(engine, ability.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
@@ -297,12 +297,13 @@ namespace sage
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
             auto titlebar = cell->CreateTitleBar(engine, "Inventory", 15);
-            titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-            titlebar->SetVertAlignment(VertAlignment::TOP);
+            // titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
+            // titlebar->SetVertAlignment(VertAlignment::TOP);
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            auto closeButton = cell2->CreateCloseButton(engine, tex);
-            closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
-            closeButton->SetVertAlignment(VertAlignment::TOP);
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+            auto closeButton = cell2->CreateCloseButton(std::move(closeBtn));
+            // closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
+            // closeButton->SetVertAlignment(VertAlignment::TOP);
         }
 
         {
@@ -343,12 +344,13 @@ namespace sage
             const auto cell = row->CreateTableCell(80);
             const auto cell2 = row->CreateTableCell(20);
             const auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
-            titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
-            titlebar->SetVertAlignment(VertAlignment::TOP);
+            // titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
+            // titlebar->SetVertAlignment(VertAlignment::TOP);
             const auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            const auto closeButton = cell2->CreateCloseButton(engine, tex);
-            closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
-            closeButton->SetVertAlignment(VertAlignment::TOP);
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+            const auto closeButton = cell2->CreateCloseButton(std::move(closeBtn));
+            // closeButton->SetHoriAlignment(HoriAlignment::RIGHT);
+            // closeButton->SetVertAlignment(VertAlignment::TOP);
         }
 
         int maxRows = 6;
@@ -366,7 +368,9 @@ namespace sage
 
         auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
             auto& cell = table->children[row]->children[col];
-            cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
+            auto imgBox = std::make_unique<ImageBox>(
+                engine, cell.get(), ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
+            cell->CreateImagebox(std::move(imgBox));
         };
 
         auto panel2 = window->CreatePanel({28, 0, 24, 24});
@@ -393,7 +397,8 @@ namespace sage
             auto table = panel2->CreateTable(60, {24, 24, 24, 24});
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
-            auto img = cell->CreateEquipmentCharacterPreview(engine);
+            auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
+            auto img = cell->CreateEquipmentCharacterPreview(std::move(preview));
             img->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_TO_FIT);
             img->draggable = false;
         }

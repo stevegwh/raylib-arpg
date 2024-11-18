@@ -101,7 +101,6 @@ namespace sage
 
         OriginalDimensions ogDimensions{};
         Padding padding;
-        // Margin margin;
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
         // Sets padding by pixel value (screen scaling is applied)
@@ -179,13 +178,13 @@ namespace sage
         }
 
         TableElement(Parent* _parent, float x, float y, float width, float height, Padding _padding)
-            : parent(_parent), padding(_padding)
+            : padding(_padding), parent(_parent)
         {
             rec = {x, y, width, height};
             ogDimensions = {rec, padding};
         }
 
-        TableElement(Parent* _parent, Padding _padding) : parent(_parent), padding(_padding)
+        TableElement(Parent* _parent, Padding _padding) : padding(_padding), parent(_parent)
         {
             ogDimensions = {rec, padding};
         }
@@ -206,8 +205,9 @@ namespace sage
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
       public:
-        GameUIEngine* engine{};
         TableCell* parent{};
+        GameUIEngine* engine{};
+
         std::unique_ptr<UIState> state;
         Texture tex{};
         bool canReceiveDragDrops = false;
@@ -216,8 +216,6 @@ namespace sage
         bool stateLocked = false;
         float dragDelayTime = 0.1;
 
-        void SetVertAlignment(VertAlignment alignment);
-        void SetHoriAlignment(HoriAlignment alignment);
         virtual void OnClick();
         virtual void HoverUpdate();
         virtual void OnDragStart();
@@ -228,39 +226,62 @@ namespace sage
         void ChangeState(std::unique_ptr<UIState> newState);
         virtual void UpdateDimensions();
         virtual void Draw2D() = 0;
-        explicit CellElement(GameUIEngine* _engine);
+        explicit CellElement(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         ~CellElement() override = default;
         friend class TableCell;
     };
 
     class TextBox : public CellElement
     {
-      protected:
-        Shader sdfShader;
-        float baseFontSize = 16;
-        float fontSize = 16;
-        float fontSpacing = 1.5;
-        Font font = GetFontDefault();
-        const float minFontSize = 16.0f;
-        const float maxFontSize = 72.0f;
-
       public:
         enum class OverflowBehaviour
         {
             SHRINK_TO_FIT,
             WORD_WRAP
         };
-        OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
+
+        struct FontInfo
+        {
+            float baseFontSize;
+            float fontSize;
+            float fontSpacing;
+            Font font;
+            static constexpr float minFontSize = 16.0f;
+            static constexpr float maxFontSize = 72.0f;
+            OverflowBehaviour overflowBehaviour;
+            FontInfo()
+                : baseFontSize(16),
+                  fontSize(16),
+                  fontSpacing(1.5),
+                  font(GetFontDefault()),
+                  overflowBehaviour(OverflowBehaviour::SHRINK_TO_FIT)
+            {
+            }
+        };
+
         // color?
         std::string content;
         [[nodiscard]] Font GetFont() const;
-        void SetFont(const Font& _font, float _baseFontSize);
         void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void UpdateFontScaling();
         void UpdateDimensions() override;
         void Draw2D() override;
         ~TextBox() override = default;
-        explicit TextBox(GameUIEngine* _engine);
+
+        TextBox(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            FontInfo _fontInfo = FontInfo(),
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+
+      protected:
+        Shader sdfShader;
+        FontInfo fontInfo;
     };
 
     class DialogOption : public TextBox
@@ -273,7 +294,13 @@ namespace sage
         void OnHoverStop() override;
         void Draw2D() override;
         void OnClick() override;
-        DialogOption(GameUIEngine* _engine, const dialog::Option& _option);
+        DialogOption(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            const dialog::Option& _option,
+            FontInfo _fontInfo,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
 
     class TitleBar final : public TextBox
@@ -285,7 +312,12 @@ namespace sage
         void OnDragStart() override;
         void DragUpdate() override;
         void OnDrop(CellElement* droppedElement) override;
-        explicit TitleBar(GameUIEngine* _engine);
+        TitleBar(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            FontInfo _fontInfo,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
 
     class ImageBox : public CellElement
@@ -308,7 +340,17 @@ namespace sage
         void RemoveShader();
         void UpdateDimensions() override;
         void Draw2D() override;
-        explicit ImageBox(GameUIEngine* _engine);
+        ImageBox(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            Texture _tex,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        ImageBox(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         ~ImageBox() override = default;
 
       protected:
@@ -336,7 +378,11 @@ namespace sage
         void UpdateDimensions() override;
         void RetrieveInfo();
         void Draw2D() override;
-        explicit EquipmentCharacterPreview(GameUIEngine* _engine);
+        EquipmentCharacterPreview(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
 
     class PartyMemberPortrait : public ImageBox
@@ -351,7 +397,11 @@ namespace sage
         void ReceiveDrop(CellElement* droppedElement) override;
         void OnClick() override;
         void Draw2D() override;
-        explicit PartyMemberPortrait(GameUIEngine* _engine);
+        PartyMemberPortrait(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         friend class TableCell;
     };
 
@@ -367,7 +417,11 @@ namespace sage
         void HoverUpdate() override;
         void Draw2D() override;
         void OnClick() override;
-        explicit AbilitySlot(GameUIEngine* _engine);
+        AbilitySlot(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         friend class TableCell;
     };
 
@@ -388,7 +442,11 @@ namespace sage
         virtual void RetrieveInfo();
         void OnDrop(CellElement* receiver) override;
         void HoverUpdate() override;
-        explicit ItemSlot(GameUIEngine* _engine);
+        ItemSlot(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         friend class TableCell;
     };
 
@@ -405,7 +463,12 @@ namespace sage
       public:
         EquipmentSlotName itemType;
         void ReceiveDrop(CellElement* droppedElement) override;
-        explicit EquipmentSlot(GameUIEngine* _engine, EquipmentSlotName _itemType);
+        EquipmentSlot(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            EquipmentSlotName _itemType,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         friend class TableCell;
     };
 
@@ -421,7 +484,11 @@ namespace sage
         unsigned int row{};
         unsigned int col{};
         void ReceiveDrop(CellElement* droppedElement) override;
-        explicit InventorySlot(GameUIEngine* _engine);
+        InventorySlot(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
         friend class TableCell;
     };
 
@@ -430,7 +497,12 @@ namespace sage
       public:
         ~CloseButton() override = default;
         void OnClick() override;
-        explicit CloseButton(GameUIEngine* _engine);
+        CloseButton(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            Texture _tex,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
 
     class TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
@@ -443,16 +515,17 @@ namespace sage
             GameUIEngine* engine,
             const std::string& _content,
             float fontSize = 16,
-            TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
+            TextBox::OverflowBehaviour _overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         DialogOption* CreateDialogOption(
             GameUIEngine* engine,
             const dialog::Option&,
             float fontSize = 16,
-            TextBox::OverflowBehaviour overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
+            TextBox::OverflowBehaviour _overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
         TitleBar* CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize);
-        ImageBox* CreateImagebox(GameUIEngine* engine, const Texture& _tex);
-        EquipmentCharacterPreview* CreateEquipmentCharacterPreview(GameUIEngine* engine);
-        CloseButton* CreateCloseButton(GameUIEngine* engine, const Texture& _tex);
+        ImageBox* CreateImagebox(std::unique_ptr<ImageBox> _imageBox);
+        EquipmentCharacterPreview* CreateEquipmentCharacterPreview(
+            std::unique_ptr<EquipmentCharacterPreview> _preview);
+        CloseButton* CreateCloseButton(std::unique_ptr<CloseButton> _closeButton);
         PartyMemberPortrait* CreatePartyMemberPortrait(
             GameUIEngine* engine,
             PartySystem* _partySystem,
