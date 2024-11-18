@@ -312,24 +312,13 @@ namespace sage
         dragOffset = {0, 0};
     }
 
-    TitleBar::TitleBar(
-        GameUIEngine* _engine,
-        TableCell* _parent,
-        const FontInfo& _fontInfo,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment)
-        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment)
+    TitleBar::TitleBar(GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo)
+        : TextBox(_engine, _parent, _fontInfo, VertAlignment::TOP, HoriAlignment::WINDOW_CENTER)
     {
         draggable = true;
         dragDelayTime = 0.0f;
         dragOffset = {0, 0};
     }
-
-    // void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
-    // {
-    //     overflowBehaviour = _behaviour;
-    //     UpdateDimensions();
-    // }
 
     void ImageBox::SetHoverShader()
     {
@@ -615,7 +604,7 @@ namespace sage
 
     void PartyMemberPortrait::RetrieveInfo()
     {
-        auto info = partySystem->GetMember(memberNumber);
+        auto info = engine->gameData->partySystem->GetMember(memberNumber);
         tex = ResourceManager::GetInstance().TextureLoad(info.portraitImage);
         UpdateDimensions();
     }
@@ -624,8 +613,8 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto receiver = partySystem->GetMember(memberNumber).entity;
-            auto sender = controllableActorSystem->GetSelectedActor();
+            auto receiver = engine->gameData->partySystem->GetMember(memberNumber).entity;
+            auto sender = engine->gameData->controllableActorSystem->GetSelectedActor();
             if (receiver == sender) return;
             auto& receiverInv = engine->registry->get<InventoryComponent>(receiver);
             auto& senderInv = engine->registry->get<InventoryComponent>(sender);
@@ -640,8 +629,8 @@ namespace sage
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
-            auto receiver = partySystem->GetMember(memberNumber).entity;
-            auto sender = controllableActorSystem->GetSelectedActor();
+            auto receiver = engine->gameData->partySystem->GetMember(memberNumber).entity;
+            auto sender = engine->gameData->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(receiver);
             auto droppedItemId = engine->gameData->equipmentSystem->GetItem(sender, droppedE->itemType);
 
@@ -660,12 +649,14 @@ namespace sage
 
     void PartyMemberPortrait::OnClick()
     {
-        controllableActorSystem->SetSelectedActor(partySystem->GetMember(memberNumber).entity);
+        engine->gameData->controllableActorSystem->SetSelectedActor(
+            engine->gameData->partySystem->GetMember(memberNumber).entity);
     }
 
     void PartyMemberPortrait::Draw2D()
     {
-        if (controllableActorSystem->GetSelectedActor() == partySystem->GetMember(memberNumber).entity)
+        if (engine->gameData->controllableActorSystem->GetSelectedActor() ==
+            engine->gameData->partySystem->GetMember(memberNumber).entity)
         {
             SetGrayscale();
             // Change portrait bg to selected one (static?)
@@ -677,21 +668,24 @@ namespace sage
         DrawTexture(portraitBgTex, rec.x, rec.y, WHITE);
     }
 
-    PartyMemberPortrait::PartyMemberPortrait(
-        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment)
+    PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber)
+        : ImageBox(
+              _engine,
+              _parent,
+              OverflowBehaviour::SHRINK_ROW_TO_FIT,
+              VertAlignment::MIDDLE,
+              HoriAlignment::CENTER),
+          memberNumber(_memberNumber)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/avatar_border_set.png");
         portraitBgTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/avatar_border_set.png");
-        {
-            entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
-            sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
-        }
+        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
     }
 
     void AbilitySlot::RetrieveInfo()
     {
-        if (const Ability* ability = playerAbilitySystem->GetAbility(slotNumber))
+        if (const Ability* ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber))
         {
             tex = ResourceManager::GetInstance().TextureLoad(ability->icon);
             stateLocked = false;
@@ -708,7 +702,7 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
-            playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
+            engine->gameData->playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
             dropped->RetrieveInfo();
             RetrieveInfo();
         }
@@ -722,7 +716,7 @@ namespace sage
         }
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        if (auto* ability = playerAbilitySystem->GetAbility(slotNumber))
+        if (auto* ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber))
         {
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
             tooltipWindow.value()->rec.y = tooltipWindow.value()->rec.y - tooltipWindow.value()->rec.height;
@@ -732,7 +726,7 @@ namespace sage
 
     void AbilitySlot::Draw2D()
     {
-        auto ability = playerAbilitySystem->GetAbility(slotNumber);
+        auto ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber);
         if (!ability) return;
         if (ability->CooldownReady())
         {
@@ -748,13 +742,18 @@ namespace sage
 
     void AbilitySlot::OnClick()
     {
-        playerAbilitySystem->PressAbility(slotNumber);
+        engine->gameData->playerAbilitySystem->PressAbility(slotNumber);
         CellElement::OnClick();
     }
 
-    AbilitySlot::AbilitySlot(
-        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment)
+    AbilitySlot::AbilitySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _slotNumber)
+        : ImageBox(
+              _engine,
+              _parent,
+              OverflowBehaviour::SHRINK_ROW_TO_FIT,
+              VertAlignment::MIDDLE,
+              HoriAlignment::CENTER),
+          slotNumber(_slotNumber)
     {
         entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
         sink.connect<&AbilitySlot::RetrieveInfo>(this);
@@ -855,6 +854,8 @@ namespace sage
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment)
     {
+        draggable = true;
+        canReceiveDragDrops = true;
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         backgroundTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
     }
@@ -1000,13 +1001,8 @@ namespace sage
         }
     }
 
-    EquipmentSlot::EquipmentSlot(
-        GameUIEngine* _engine,
-        TableCell* _parent,
-        EquipmentSlotName _itemType,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment)
-        : ItemSlot(_engine, _parent, _vertAlignment, _horiAlignment), itemType(_itemType)
+    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, TableCell* _parent, EquipmentSlotName _itemType)
+        : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), itemType(_itemType)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/amulet.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/helm.png");
@@ -1068,10 +1064,11 @@ namespace sage
         }
     }
 
-    InventorySlot::InventorySlot(
-        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
-        : ItemSlot(_engine, _parent, _vertAlignment, _horiAlignment)
+    InventorySlot::InventorySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _row, unsigned int _col)
+        : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), row(_row), col(_col)
     {
+        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&InventorySlot::RetrieveInfo>(this);
     }
 
     void CloseButton::OnClick()
@@ -1079,13 +1076,9 @@ namespace sage
         parent->GetWindow()->Hide();
     }
 
-    CloseButton::CloseButton(
-        GameUIEngine* _engine,
-        TableCell* _parent,
-        const Texture& _tex,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment)
-        : ImageBox(_engine, _parent, _tex, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
+    CloseButton::CloseButton(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex)
+        : ImageBox(
+              _engine, _parent, _tex, OverflowBehaviour::SHRINK_TO_FIT, VertAlignment::TOP, HoriAlignment::RIGHT)
     {
     }
 
@@ -1777,80 +1770,39 @@ namespace sage
     {
     }
 
-    PartyMemberPortrait* TableCell::CreatePartyMemberPortrait(
-        GameUIEngine* engine,
-        PartySystem* _partySystem,
-        ControllableActorSystem* _controllableActorSystem,
-        unsigned int _memberNumber)
+    PartyMemberPortrait* TableCell::CreatePartyMemberPortrait(std::unique_ptr<PartyMemberPortrait> _portrait)
     {
-        children = std::make_unique<PartyMemberPortrait>(engine, this);
+        children = std::move(_portrait);
         auto* portrait = dynamic_cast<PartyMemberPortrait*>(children.get());
-        portrait->parent = this;
-        portrait->partySystem = _partySystem;
-        portrait->controllableActorSystem = _controllableActorSystem;
-        portrait->draggable = true;
-        portrait->canReceiveDragDrops = true;
-        portrait->memberNumber = _memberNumber;
         portrait->RetrieveInfo();
         UpdateChildren();
         return portrait;
     }
 
-    AbilitySlot* TableCell::CreateAbilitySlot(
-        GameUIEngine* engine,
-        PlayerAbilitySystem* _playerAbilitySystem,
-        ControllableActorSystem* _controllableActorSystem,
-        unsigned int _slotNumber)
+    AbilitySlot* TableCell::CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot)
     {
-        children = std::make_unique<AbilitySlot>(engine, this);
+        children = std::move(_slot);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
-        abilitySlot->parent = this;
-        abilitySlot->playerAbilitySystem = _playerAbilitySystem;
-        abilitySlot->controllableActorSystem = _controllableActorSystem;
-        abilitySlot->draggable = true;
-        abilitySlot->canReceiveDragDrops = true;
-        abilitySlot->slotNumber = _slotNumber;
         abilitySlot->RetrieveInfo();
         UpdateChildren();
         return abilitySlot;
     }
 
-    EquipmentSlot* TableCell::CreateEquipmentSlot(
-        GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentSlotName _itemType)
+    EquipmentSlot* TableCell::CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot)
     {
-        children = std::make_unique<EquipmentSlot>(engine, this, _itemType);
+        children = std::move(_slot);
         auto* slot = dynamic_cast<EquipmentSlot*>(children.get());
-        slot->parent = this;
-        slot->controllableActorSystem = _controllableActorSystem;
-        // slot->SetGrayscale();
-        slot->draggable = true;
-        slot->canReceiveDragDrops = true;
         slot->RetrieveInfo();
         UpdateChildren();
         return slot;
     }
 
-    InventorySlot* TableCell::CreateInventorySlot(
-        GameUIEngine* engine,
-        ControllableActorSystem* _controllableActorSystem,
-        unsigned int row,
-        unsigned int col)
+    InventorySlot* TableCell::CreateInventorySlot(std::unique_ptr<InventorySlot> _slot)
     {
-        children = std::make_unique<InventorySlot>(engine, this);
+        children = std::move(_slot);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
-        slot->parent = this;
-        slot->controllableActorSystem = _controllableActorSystem;
-        // slot->SetGrayscale();
-        slot->draggable = true;
-        slot->canReceiveDragDrops = true;
-        slot->row = row;
-        slot->col = col;
         slot->RetrieveInfo();
         UpdateChildren();
-        {
-            entt::sink sink{_controllableActorSystem->onSelectedActorChange};
-            sink.connect<&InventorySlot::RetrieveInfo>(slot);
-        }
         return slot;
     }
 
