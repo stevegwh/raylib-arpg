@@ -25,71 +25,71 @@ namespace sage
 
     void GameUiFactory::CreateExampleWindow(GameUIEngine* engine)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
-
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
-        //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.4;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.2;
-        auto window = engine->CreateWindowDocked(
-            nPatchTexture,
-            TextureStretchMode::SCALE,
-            0,
-            0,
-            w,
-            h,
-            VertAlignment::BOTTOM,
-            HoriAlignment::CENTER,
-            {2, 2, 2, 2});
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        auto panel = window->CreatePanel();
-        auto table = panel->CreateTable();
-
-        auto row0 = table->CreateTableRow();
-        auto cell0 = row0->CreateTableCell(95);
-        cell0->CreateTitleBar(engine, "Title Bar", 24);
-        auto cell01 = row0->CreateTableCell();
-        auto tex0 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        auto closeBtn = std::make_unique<CloseButton>(engine, cell01, tex0);
-        cell01->CreateCloseButton(std::move(closeBtn));
-
-        auto row = table->CreateTableRow(75);
-        auto cell = row->CreateTableCell(50, {2, 2, 2, 2});
-        cell->CreateTextbox(
-            engine,
-            "This is a word wrap test with significantly long words.",
-            24,
-            TextBox::OverflowBehaviour::WORD_WRAP);
-
-        cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        cell->tex = window->tex;
-
-        auto cell2 = row->CreateTableCell();
-        auto cell3 = row->CreateTableCell({0, 0, 5, 0});
-        cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
-        cell3->tex = window->tex;
-        auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        auto imgBox = std::make_unique<ImageBox>(engine, cell3, tex);
-        auto imagebox = cell2->CreateImagebox(std::move(imgBox));
-        imagebox->SetGrayscale();
-        auto tex2 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
-        auto imgBox2 = std::make_unique<ImageBox>(engine, cell3, tex2, VertAlignment::TOP, HoriAlignment::CENTER);
-        auto image2 = cell3->CreateImagebox(std::move(imgBox2));
-        image2->SetGrayscale();
-
-        auto row2 = table->CreateTableRow();
-        auto cell4 = row2->CreateTableCell();
-        auto cell5 = row2->CreateTableCell();
-        auto textbox2 = cell4->CreateTextbox(engine, "Bottom Left Alignment");
-        // textbox2->SetVertAlignment(VertAlignment::BOTTOM);
-        // textbox2->SetHoriAlignment(HoriAlignment::LEFT);
-
-        cell5->CreateTextbox(engine, "This is an example of shrinking!", 42);
+        // ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        // ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
+        // ResourceManager::GetInstance().ImageLoadFromFile("resources/test.png");
+        //
+        // auto nPatchTexture =
+        // ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
+        // //        info1 = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        // //        info2 = {Rectangle{0.0f, 128.0f, 64.0f, 64.0f}, 16, 16, 16, 16, NPATCH_NINE_PATCH};
+        // //        info3 = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        //
+        // auto w = Settings::TARGET_SCREEN_WIDTH * 0.4;
+        // auto h = Settings::TARGET_SCREEN_HEIGHT * 0.2;
+        // auto window = engine->CreateWindowDocked(
+        //     nPatchTexture,
+        //     TextureStretchMode::SCALE,
+        //     0,
+        //     0,
+        //     w,
+        //     h,
+        //     VertAlignment::BOTTOM,
+        //     HoriAlignment::CENTER,
+        //     {2, 2, 2, 2});
+        // window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+        // auto panel = window->CreatePanel();
+        // auto table = panel->CreateTable();
+        //
+        // auto row0 = table->CreateTableRow();
+        // auto cell0 = row0->CreateTableCell(95);
+        // cell0->CreateTitleBar(engine, "Title Bar", 24);
+        // auto cell01 = row0->CreateTableCell();
+        // auto tex0 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+        // auto closeBtn = std::make_unique<CloseButton>(engine, cell01, tex0);
+        // cell01->CreateCloseButton(std::move(closeBtn));
+        //
+        // auto row = table->CreateTableRow(75);
+        // auto cell = row->CreateTableCell(50, {2, 2, 2, 2});
+        // cell->CreateTextbox(
+        //     engine,
+        //     "This is a word wrap test with significantly long words.",
+        //     24,
+        //     TextBox::OverflowBehaviour::WORD_WRAP);
+        //
+        // cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        // cell->tex = window->tex;
+        //
+        // auto cell2 = row->CreateTableCell();
+        // auto cell3 = row->CreateTableCell({0, 0, 5, 0});
+        // cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
+        // cell3->tex = window->tex;
+        // auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+        // auto imgBox = std::make_unique<ImageBox>(engine, cell3, tex);
+        // auto imagebox = cell2->CreateImagebox(std::move(imgBox));
+        // imagebox->SetGrayscale();
+        // auto tex2 = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
+        // auto imgBox2 = std::make_unique<ImageBox>(engine, cell3, tex2, VertAlignment::TOP,
+        // HoriAlignment::CENTER); auto image2 = cell3->CreateImagebox(std::move(imgBox2)); image2->SetGrayscale();
+        //
+        // auto row2 = table->CreateTableRow();
+        // auto cell4 = row2->CreateTableCell();
+        // auto cell5 = row2->CreateTableCell();
+        // auto textbox2 = cell4->CreateTextbox(engine, "Bottom Left Alignment");
+        // // textbox2->SetVertAlignment(VertAlignment::BOTTOM);
+        // // textbox2->SetHoriAlignment(HoriAlignment::LEFT);
+        //
+        // cell5->CreateTextbox(engine, "This is an example of shrinking!", 42);
     }
 
     Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
@@ -198,7 +198,10 @@ namespace sage
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
+            TextBox::FontInfo _fontInfo{};
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            auto textbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
+            cell0->CreateTextbox(std::move(textbox), name);
             // textbox->SetVertAlignment(VertAlignment::BOTTOM);
         }
 
@@ -219,15 +222,16 @@ namespace sage
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
+            TextBox::FontInfo _fontInfo{};
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
+            cell0->CreateTextbox(std::move(headerTextbox), name);
             // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
+            auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
             cell->CreateTextbox(
-                engine,
-                std::format("HP: {}/{}", combatInfo.data.hp, combatInfo.data.maxHp),
-                11,
-                TextBox::OverflowBehaviour::WORD_WRAP);
+                std::move(bodyTextbox), std::format("HP: {}/{}", combatInfo.data.hp, combatInfo.data.maxHp));
         }
 
         return window;
@@ -241,16 +245,21 @@ namespace sage
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
+
         {
             auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, item.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
+            TextBox::FontInfo _fontInfo{};
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
+            cell0->CreateTextbox(std::move(headerTextbox), item.name);
             // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
-            cell->CreateTextbox(engine, item.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
+            cell->CreateTextbox(std::move(bodyTextbox), item.description);
         }
 
         return window;
@@ -269,11 +278,15 @@ namespace sage
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
-            auto textbox = cell0->CreateTextbox(engine, ability.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
+            TextBox::FontInfo _fontInfo{};
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
+            cell0->CreateTextbox(std::move(headerTextbox), ability.name);
             // textbox->SetVertAlignment(VertAlignment::BOTTOM);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
-            cell->CreateTextbox(engine, ability.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
+            auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
+            cell->CreateTextbox(std::move(bodyTextbox), ability.description);
         }
 
         return window;
@@ -296,7 +309,9 @@ namespace sage
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
-            auto titlebar = cell->CreateTitleBar(engine, "Inventory", 15);
+            auto titleBar = std::make_unique<TitleBar>(
+                engine, cell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::WINDOW_CENTER);
+            cell->CreateTitleBar(std::move(titleBar), "Inventory");
             // titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             // titlebar->SetVertAlignment(VertAlignment::TOP);
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
@@ -343,9 +358,12 @@ namespace sage
             const auto row = table->CreateTableRow();
             const auto cell = row->CreateTableCell(80);
             const auto cell2 = row->CreateTableCell(20);
-            const auto titlebar = cell->CreateTitleBar(engine, "Character", 15);
+            auto titleText = std::make_unique<TitleBar>(
+                engine, cell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::WINDOW_CENTER);
+            cell->CreateTitleBar(std::move(titleText), "Character");
             // titlebar->SetHoriAlignment(HoriAlignment::WINDOW_CENTER);
             // titlebar->SetVertAlignment(VertAlignment::TOP);
+
             const auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
             auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             const auto closeButton = cell2->CreateCloseButton(std::move(closeBtn));
@@ -426,6 +444,9 @@ namespace sage
 
     Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, entt::entity npc)
     {
+        Font font =
+            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+
         ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
@@ -450,16 +471,20 @@ namespace sage
         const auto descriptionRow = table->CreateTableRow();
         const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 5, 5});
 
-        const auto textbox =
-            descriptionCell->CreateTextbox(engine, dialogComponent.conversation->GetCurrentNode()->content);
-        textbox->SetOverflowBehaviour(TextBox::OverflowBehaviour::WORD_WRAP);
+        TextBox::FontInfo _fontInfo;
+        _fontInfo.font = font;
+        _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+
+        auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
+        descriptionCell->CreateTextbox(
+            std::move(textbox), dialogComponent.conversation->GetCurrentNode()->content);
 
         for (auto& o : dialogComponent.conversation->GetCurrentNode()->options)
         {
             const auto optionRow = table->CreateTableRow();
             const auto optionCell = optionRow->CreateTableCell({10, 10, 5, 5});
-            const auto option = optionCell->CreateDialogOption(engine, o);
-            option->SetOverflowBehaviour(TextBox::OverflowBehaviour::WORD_WRAP);
+            auto option = std::make_unique<DialogOption>(engine, optionCell, o, _fontInfo);
+            optionCell->CreateDialogOption(std::move(option));
         }
         return window;
     }
