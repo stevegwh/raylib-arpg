@@ -36,10 +36,17 @@ namespace sage
 
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.4;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.2;
-        auto window = engine->CreateWindowDocked(nPatchTexture, TextureStretchMode::SCALE, 0, 0, w, h);
-        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+        auto window = engine->CreateWindowDocked(
+            nPatchTexture,
+            TextureStretchMode::SCALE,
+            0,
+            0,
+            w,
+            h,
+            VertAlignment::BOTTOM,
+            HoriAlignment::CENTER,
+            {2, 2, 2, 2});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPaddingPercent({2, 2, 2, 2});
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
 
@@ -51,20 +58,18 @@ namespace sage
         cell01->CreateCloseButton(engine, tex0);
 
         auto row = table->CreateTableRow(75);
-        auto cell = row->CreateTableCell(50);
+        auto cell = row->CreateTableCell(50, {2, 2, 2, 2});
         cell->CreateTextbox(
             engine,
             "This is a word wrap test with significantly long words.",
             24,
             TextBox::OverflowBehaviour::WORD_WRAP);
 
-        cell->SetPaddingPercent({2, 2, 2, 2});
-
         cell->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         cell->tex = window->tex;
 
         auto cell2 = row->CreateTableCell();
-        auto cell3 = row->CreateTableCell();
+        auto cell3 = row->CreateTableCell({0, 0, 5, 0});
         cell3->nPatchInfo = {Rectangle{0.0f, 0.0f, 64.0f, 64.0f}, 12, 40, 12, 12, NPATCH_NINE_PATCH};
         cell3->tex = window->tex;
         auto tex = ResourceManager::GetInstance().TextureLoad("resources/icon.png");
@@ -76,14 +81,6 @@ namespace sage
         auto image2 = cell3->CreateImagebox(engine, tex2);
         image2->SetGrayscale();
         image2->SetHoriAlignment(HoriAlignment::CENTER);
-
-        // auto cell0 = row->CreateTableCell();
-
-        // cell->padding.left = 10;
-        // cell2->CreateTextbox("Number 2!");
-
-        // cell3->CreateTextbox("Number 3!");
-        cell3->SetPaddingPercent({0, 0, 5, 0});
 
         auto row2 = table->CreateTableRow();
         auto cell4 = row2->CreateTableCell();
@@ -100,10 +97,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.08;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.3;
-        auto window = engine->CreateWindowDocked(0, 0, w, h);
-        window->SetAlignment(VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({12, 12, 16, 16});
+        auto window =
+            engine->CreateWindowDocked(0, 0, w, h, VertAlignment::MIDDLE, HoriAlignment::LEFT, {12, 12, 16, 16});
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
 
@@ -111,8 +106,7 @@ namespace sage
         for (int i = partySize - 1; i >= 0; --i) // Do not change "i" to unsigned int.
         {
             auto row = table->CreateTableRow();
-            auto cell = row->CreateTableCell();
-            cell->SetPadding({0, 5, 0, 0});
+            auto cell = row->CreateTableCell({0, 5, 0, 0});
             auto slot = cell->CreatePartyMemberPortrait(
                 engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
             slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
@@ -131,10 +125,17 @@ namespace sage
 
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.25;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.125;
-        auto window = engine->CreateWindowDocked(nPatchTexture, TextureStretchMode::NONE, 0, 0, w, h);
-        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
+        auto window = engine->CreateWindowDocked(
+            nPatchTexture,
+            TextureStretchMode::NONE,
+            0,
+            0,
+            w,
+            h,
+            VertAlignment::BOTTOM,
+            HoriAlignment::CENTER,
+            {16, 16, 12, 12});
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({16, 16, 12, 12});
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
 
@@ -190,9 +191,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({16, 2, 10, 6});
         {
             auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
@@ -212,9 +212,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({16, 2, 10, 6});
         auto panel = window->CreatePanel();
         {
             auto table = panel->CreateTable();
@@ -222,8 +221,7 @@ namespace sage
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
-            auto row = table->CreateTableRow();
-            row->SetPadding({10, 0, 0, 0});
+            auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(
                 engine,
@@ -241,9 +239,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({16, 2, 10, 6});
         {
             auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
@@ -251,8 +248,7 @@ namespace sage
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, item.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
-            auto row = table->CreateTableRow();
-            row->SetPadding({10, 0, 0, 0});
+            auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(engine, item.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
         }
@@ -266,9 +262,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.10;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h);
+        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        window->SetPadding({16, 2, 10, 6});
         {
             auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
@@ -276,8 +271,7 @@ namespace sage
             auto cell0 = row0->CreateTableCell();
             auto textbox = cell0->CreateTextbox(engine, ability.name, 11, TextBox::OverflowBehaviour::WORD_WRAP);
             textbox->SetVertAlignment(VertAlignment::BOTTOM);
-            auto row = table->CreateTableRow();
-            row->SetPadding({10, 0, 0, 0});
+            auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             cell->CreateTextbox(engine, ability.description, 11, TextBox::OverflowBehaviour::WORD_WRAP);
         }
@@ -293,10 +287,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
-        auto window =
-            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 1.5, 424 * 1.5);
-        // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({20, 0, 14, 14});
+        auto window = engine->CreateWindow(
+            nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 1.5, 424 * 1.5, {20, 0, 14, 14});
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
         {
             auto panel = window->CreatePanel(4);
@@ -314,8 +306,8 @@ namespace sage
         }
 
         {
-            auto panel1 = window->CreatePanel();
-            panel1->SetPadding({20, 0, 0, 0});
+            // TODO: The tooltips are messed up cus youre setting rec to ogDimensions
+            auto panel1 = window->CreatePanel({20, 0, 0, 0});
             auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
             for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
             {
@@ -340,10 +332,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
 
-        auto window =
-            engine->CreateWindow(nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 1.5);
-        // window->nPatchInfo = {Rectangle{0.0f, 0, 512.0f, 512.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetPadding({20, 20, 14, 14});
+        auto window = engine->CreateWindow(
+            nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 1.5, {20, 20, 14, 14});
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {
@@ -379,8 +369,7 @@ namespace sage
             cell->CreateImagebox(engine, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
         };
 
-        auto panel2 = window->CreatePanel();
-        panel2->SetPadding({28, 0, 24, 24});
+        auto panel2 = window->CreatePanel({28, 0, 24, 24});
         {
             auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
             for (unsigned int row = 0; row < maxRows; ++row)
@@ -401,8 +390,7 @@ namespace sage
 
         {
             // Character model
-            auto table = panel2->CreateTable(60);
-            table->SetPadding({24, 24, 24, 24});
+            auto table = panel2->CreateTable(60, {24, 24, 24, 24});
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
             auto img = cell->CreateEquipmentCharacterPreview(engine);
@@ -437,19 +425,25 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.4;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.25;
-        const auto window = engine->CreateWindowDocked(nPatchTexture, TextureStretchMode::NONE, 0, 0, w, h);
+        float w = Settings::TARGET_SCREEN_WIDTH * 0.4;
+        float h = Settings::TARGET_SCREEN_HEIGHT * 0.25;
+        const auto window = engine->CreateWindowDocked(
+            nPatchTexture,
+            TextureStretchMode::NONE,
+            0,
+            0,
+            w,
+            h,
+            VertAlignment::BOTTOM,
+            HoriAlignment::CENTER,
+            {32, 32, 16, 16});
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        window->SetAlignment(VertAlignment::BOTTOM, HoriAlignment::CENTER);
-        window->SetPadding({32, 32, 16, 16});
         auto panel = window->CreatePanel();
 
         auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
         const auto table = panel->CreateTable();
         const auto descriptionRow = table->CreateTableRow();
-        const auto descriptionCell = descriptionRow->CreateTableCell();
-        descriptionCell->SetPadding({10, 10, 5, 5});
+        const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 5, 5});
 
         const auto textbox =
             descriptionCell->CreateTextbox(engine, dialogComponent.conversation->GetCurrentNode()->content);
@@ -458,8 +452,7 @@ namespace sage
         for (auto& o : dialogComponent.conversation->GetCurrentNode()->options)
         {
             const auto optionRow = table->CreateTableRow();
-            const auto optionCell = optionRow->CreateTableCell();
-            optionCell->SetPadding({10, 10, 5, 5});
+            const auto optionCell = optionRow->CreateTableCell({10, 10, 5, 5});
             const auto option = optionCell->CreateDialogOption(engine, o);
             option->SetOverflowBehaviour(TextBox::OverflowBehaviour::WORD_WRAP);
         }
