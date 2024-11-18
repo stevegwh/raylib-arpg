@@ -804,8 +804,8 @@ namespace sage
         if (itemId != entt::null)
         {
             auto& item = engine->registry->get<ItemComponent>(itemId);
-            tooltipWindow =
-                GameUiFactory::CreateItemTooltip(engine, item, {rec.x + rec.width, rec.y - rec.height});
+            tooltipWindow = GameUiFactory::CreateItemTooltip(
+                engine, item, parent->GetWindow(), {rec.x + rec.width, rec.y - rec.height});
         }
     }
 
@@ -1163,6 +1163,10 @@ namespace sage
     void Window::ToggleHide()
     {
         hidden = !hidden;
+        if (hidden)
+        {
+            onHide.publish();
+        }
     }
 
     void Window::Show()
@@ -1173,6 +1177,7 @@ namespace sage
     void Window::Hide()
     {
         hidden = true;
+        onHide.publish();
     }
 
     bool Window::IsHidden() const
@@ -1189,6 +1194,7 @@ namespace sage
     {
         hidden = true;
         markForRemoval = true;
+        onHide.publish();
     }
 
     void Window::OnWindowUpdate(Vector2 prev, Vector2 current)
@@ -1382,10 +1388,20 @@ namespace sage
         UpdateChildren();
     }
 
+    TooltipWindow::~TooltipWindow()
+    {
+        parentWindowHideCnx.release();
+    }
+
     TooltipWindow::TooltipWindow(
-        Settings* _settings, float x, float y, float width, float height, Padding _padding)
+        Settings* _settings, Window* parentWindow, float x, float y, float width, float height, Padding _padding)
         : Window(_settings, x, y, width, height, _padding)
     {
+        if (parentWindow)
+        {
+            entt::sink sink{parentWindow->onHide};
+            parentWindowHideCnx = sink.connect<&TooltipWindow::Remove>(this);
+        }
     }
 
     void Panel::DrawDebug2D()
@@ -2096,6 +2112,7 @@ namespace sage
     }
 
     TooltipWindow* GameUIEngine::CreateTooltipWindow(
+        Window* parentWindow,
         const Texture& _nPatchTexture,
         TextureStretchMode _textureStretchMode,
         const float x,
@@ -2104,7 +2121,8 @@ namespace sage
         const float _height,
         Padding _padding)
     {
-        auto window = std::make_unique<TooltipWindow>(gameData->settings, x, y, _width, _height, _padding);
+        auto window =
+            std::make_unique<TooltipWindow>(gameData->settings, parentWindow, x, y, _width, _height, _padding);
         window->tex = _nPatchTexture;
         window->textureStretchMode = _textureStretchMode;
         window->ScaleContents();
