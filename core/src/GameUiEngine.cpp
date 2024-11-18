@@ -65,7 +65,7 @@ namespace sage
     void CellElement::OnDragStart()
     {
         beingDragged = true;
-    };
+    }
 
     void CellElement::OnDrop(CellElement* receiver)
     {
@@ -99,7 +99,9 @@ namespace sage
     }
 
     CellElement::CellElement(GameUIEngine* _engine)
-        : engine(_engine), state(std::make_unique<IdleState>(this, engine)){};
+        : engine(_engine), state(std::make_unique<IdleState>(this, engine))
+    {
+    }
 
     Font TextBox::GetFont() const
     {
@@ -108,7 +110,7 @@ namespace sage
 
     void TextBox::UpdateFontScaling()
     {
-        float scaleFactor = engine->gameData->settings->GetScreenScaleFactor();
+        float scaleFactor = engine->gameData->settings->GetCurrentScaleFactor();
         fontSize = baseFontSize * scaleFactor;
         fontSize = std::clamp(fontSize, minFontSize, maxFontSize);
     }
@@ -252,7 +254,7 @@ namespace sage
         TextBox::Draw2D();
         if (drawHighlight)
         {
-            float offset = 10 * parent->GetWindow()->settings->GetScreenScaleFactor();
+            float offset = 10 * parent->GetWindow()->settings->GetCurrentScaleFactor();
             DrawRectangleLines(
                 rec.x - offset, rec.y - offset, rec.width + offset * 2, rec.height + offset * 2, BLACK);
         }
@@ -307,7 +309,7 @@ namespace sage
         draggable = true;
         dragDelayTime = 0.0f;
         dragOffset = {0, 0};
-    };
+    }
 
     void ImageBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
     {
@@ -1018,11 +1020,13 @@ namespace sage
         parent->GetWindow()->Hide();
     }
 
-    CloseButton::CloseButton(GameUIEngine* _engine) : ImageBox(_engine){};
+    CloseButton::CloseButton(GameUIEngine* _engine) : ImageBox(_engine)
+    {
+    }
 
     void WindowDocked::ScaleContents()
     {
-        rec = {0, 0, settings->ScaleValue(baseWidth), settings->ScaleValue(baseHeight)};
+        rec = {0, 0, settings->ScaleValue(ogDimensions.rec.width), settings->ScaleValue(ogDimensions.rec.height)};
         SetAlignment(vertAlignment, horiAlignment);
         UpdateChildren();
     }
@@ -1127,18 +1131,29 @@ namespace sage
         markForRemoval = true;
     }
 
+    void Window::OnWindowUpdate(Vector2 prev, Vector2 current)
+    {
+        ScaleContents();
+    }
+
     void Window::ScaleContents()
     {
         if (markForRemoval) return;
 
-        rec.x /= settings->GetScreenScaleFactor();
-        rec.y /= settings->GetScreenScaleFactor();
+        rec = ogDimensions.rec;
+        padding = ogDimensions.padding;
 
         rec = {
             settings->ScaleValue(rec.x),
             settings->ScaleValue(rec.y),
-            settings->ScaleValue(baseWidth),
-            settings->ScaleValue(baseHeight)};
+            settings->ScaleValue(rec.width),
+            settings->ScaleValue(rec.height)};
+
+        padding = {
+            settings->ScaleValue(padding.up),
+            settings->ScaleValue(padding.down),
+            settings->ScaleValue(padding.left),
+            settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
         UpdateChildren();
@@ -2075,8 +2090,10 @@ namespace sage
         const bool tooltip)
     {
         auto window = std::make_unique<Window>(gameData->settings);
-        window->baseWidth = _width;
-        window->baseHeight = _height;
+        window->ogDimensions.rec.x = x;
+        window->ogDimensions.rec.y = y;
+        window->ogDimensions.rec.width = _width;
+        window->ogDimensions.rec.height = _height;
         window->rec.x = x;
         window->rec.y = y;
         window->tex = _nPatchTexture;
@@ -2086,7 +2103,7 @@ namespace sage
         // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&Window::ScaleContents>(window.get());
+        window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window.get());
         if (tooltip)
         {
             tooltipWindow = std::move(window);
@@ -2100,14 +2117,14 @@ namespace sage
     {
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->baseWidth = _width;
-        window->baseHeight = _height;
+        window->ogDimensions.rec.width = _width;
+        window->ogDimensions.rec.height = _height;
         window->baseXOffset = _xOffset;
         window->baseYOffset = _yOffset;
         window->ScaleContents();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&WindowDocked::ScaleContents>(window);
+        window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);
 
         return window;
     }
@@ -2122,8 +2139,8 @@ namespace sage
     {
         windows.push_back(std::make_unique<WindowDocked>(gameData->settings));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->baseWidth = _width;
-        window->baseHeight = _height;
+        window->ogDimensions.rec.width = _width;
+        window->ogDimensions.rec.height = _height;
         window->baseXOffset = _xOffset;
         window->baseYOffset = _yOffset;
         window->tex = _nPatchTexture;
@@ -2131,7 +2148,7 @@ namespace sage
         window->ScaleContents();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&WindowDocked::ScaleContents>(window);
+        window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);
 
         return window;
     }
