@@ -265,8 +265,8 @@ namespace sage
 
         // color?
         std::string content;
+        // SetContent?
         [[nodiscard]] Font GetFont() const;
-        void SetOverflowBehaviour(OverflowBehaviour _behaviour);
         void UpdateFontScaling();
         void UpdateDimensions() override;
         void Draw2D() override;
@@ -511,17 +511,9 @@ namespace sage
         bool autoSize = true;
 
       public:
-        TextBox* CreateTextbox(
-            GameUIEngine* engine,
-            const std::string& _content,
-            float fontSize = 16,
-            TextBox::OverflowBehaviour _overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
-        DialogOption* CreateDialogOption(
-            GameUIEngine* engine,
-            const dialog::Option&,
-            float fontSize = 16,
-            TextBox::OverflowBehaviour _overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT);
-        TitleBar* CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize);
+        TextBox* CreateTextbox(std::unique_ptr<TextBox> _textBox, const std::string& _content);
+        DialogOption* CreateDialogOption(std::unique_ptr<DialogOption> _dialogOption);
+        TitleBar* CreateTitleBar(std::unique_ptr<TitleBar> _titleBar, const std::string& _title);
         ImageBox* CreateImagebox(std::unique_ptr<ImageBox> _imageBox);
         EquipmentCharacterPreview* CreateEquipmentCharacterPreview(
             std::unique_ptr<EquipmentCharacterPreview> _preview);

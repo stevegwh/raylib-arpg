@@ -108,12 +108,6 @@ namespace sage
         fontInfo.fontSize = std::clamp(fontInfo.fontSize, fontInfo.minFontSize, fontInfo.maxFontSize);
     }
 
-    void TextBox::SetOverflowBehaviour(OverflowBehaviour _behaviour)
-    {
-        fontInfo.overflowBehaviour = _behaviour;
-        UpdateDimensions();
-    }
-
     void TextBox::UpdateDimensions()
     {
         UpdateFontScaling();
@@ -1841,13 +1835,9 @@ namespace sage
         return slot;
     }
 
-    TitleBar* TableCell::CreateTitleBar(GameUIEngine* engine, const std::string& _title, float fontSize)
+    TitleBar* TableCell::CreateTitleBar(std::unique_ptr<TitleBar> _titleBar, const std::string& _title)
     {
-        TextBox::FontInfo _fontInfo{};
-        _fontInfo.fontSize = fontSize;
-        _fontInfo.font =
-            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-        children = std::make_unique<TitleBar>(engine, this, _fontInfo);
+        children = std::move(_titleBar);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
         titleBar->content = _title;
         UpdateChildren();
@@ -1862,41 +1852,19 @@ namespace sage
         return closeButton;
     }
 
-    TextBox* TableCell::CreateTextbox(
-        GameUIEngine* engine,
-        const std::string& _content,
-        float fontSize,
-        TextBox::OverflowBehaviour _overflowBehaviour)
+    TextBox* TableCell::CreateTextbox(std::unique_ptr<TextBox> _textBox, const std::string& _content)
     {
-        TextBox::FontInfo _fontInfo{};
-        _fontInfo.fontSize = fontSize;
-        _fontInfo.font =
-            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-        _fontInfo.overflowBehaviour = _overflowBehaviour;
-        children = std::make_unique<TextBox>(engine, this, _fontInfo);
+        children = std::move(_textBox);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
-
-        // textbox->SetFont(_font, fontSize);
-        // textbox->SetFont(GetFontDefault(), fontSize);
         SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
         textbox->content = _content;
         UpdateChildren();
         return textbox;
     }
 
-    DialogOption* TableCell::CreateDialogOption(
-        GameUIEngine* engine,
-        const dialog::Option& option,
-        float fontSize,
-        TextBox::OverflowBehaviour _overflowBehaviour)
+    DialogOption* TableCell::CreateDialogOption(std::unique_ptr<DialogOption> _dialogOption)
     {
-        TextBox::FontInfo _fontInfo{};
-        _fontInfo.fontSize = fontSize;
-        _fontInfo.font =
-            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-        _fontInfo.overflowBehaviour = _overflowBehaviour;
-
-        children = std::make_unique<DialogOption>(engine, this, option, _fontInfo);
+        children = std::move(_dialogOption);
         auto* textbox = dynamic_cast<DialogOption*>(children.get());
         SetTextureFilter(textbox->GetFont().texture, TEXTURE_FILTER_BILINEAR);
         UpdateChildren();
