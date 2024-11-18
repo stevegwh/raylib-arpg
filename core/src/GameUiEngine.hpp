@@ -8,6 +8,7 @@
 
 #include "components/DialogComponent.hpp"
 #include "raylib.h"
+#include "ResourceManager.hpp"
 #include "Timer.hpp"
 
 #include <entt/entt.hpp>
@@ -257,7 +258,8 @@ namespace sage
                 : baseFontSize(16),
                   fontSize(16),
                   fontSpacing(1.5),
-                  font(GetFontDefault()),
+                  font(ResourceManager::GetInstance().FontLoad(
+                      "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
                   overflowBehaviour(OverflowBehaviour::SHRINK_TO_FIT)
             {
             }
@@ -487,6 +489,7 @@ namespace sage
             std::unique_ptr<EquipmentCharacterPreview> _preview);
         CloseButton* CreateCloseButton(std::unique_ptr<CloseButton> _closeButton);
         PartyMemberPortrait* CreatePartyMemberPortrait(std::unique_ptr<PartyMemberPortrait> _portrait);
+
         AbilitySlot* CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot);
         EquipmentSlot* CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot);
         InventorySlot* CreateInventorySlot(std::unique_ptr<InventorySlot> _slot);
@@ -589,6 +592,15 @@ namespace sage
         friend class GameUIEngine;
     };
 
+    class TooltipWindow final : public Window
+    {
+      public:
+        void ScaleContents() override;
+        TooltipWindow(
+            Settings* _settings, float x, float y, float width, float height, Padding _padding = {0, 0, 0, 0});
+        friend class GameUIEngine;
+    };
+
     class WindowDocked final : public Window
     {
         float baseXOffset = 0;
@@ -670,7 +682,7 @@ namespace sage
     class GameUIEngine
     {
         std::vector<std::unique_ptr<Window>> windows;
-        std::unique_ptr<Window> tooltipWindow;
+        std::unique_ptr<TooltipWindow> tooltipWindow;
         std::optional<CellElement*> draggedObject;
         std::optional<CellElement*> hoveredDraggableCellElement;
 
@@ -687,8 +699,9 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
-        Window* CreateTooltipWindow(
+        TooltipWindow* CreateTooltipWindow(
             const Texture& _nPatchTexture,
+            TextureStretchMode _textureStretchMode,
             float x,
             float y,
             float _width,
@@ -702,8 +715,7 @@ namespace sage
             float y,
             float _width,
             float _height,
-            Padding _padding = {0, 0, 0, 0},
-            bool tooltip = false);
+            Padding _padding = {0, 0, 0, 0});
 
         WindowDocked* CreateWindowDocked(
             float _xOffset,

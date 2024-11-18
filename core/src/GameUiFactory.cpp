@@ -155,7 +155,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(
+            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();
@@ -178,7 +179,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(
+            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
         {
@@ -205,7 +207,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(
+            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
         {
@@ -232,7 +235,8 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.10;
-        auto* window = engine->CreateTooltipWindow(nPatchTexture, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(
+            nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();
@@ -391,9 +395,6 @@ namespace sage
 
     Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, entt::entity npc)
     {
-        Font font =
-            ResourceManager::GetInstance().FontLoad("resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-
         ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
@@ -419,7 +420,6 @@ namespace sage
         const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 5, 5});
 
         TextBox::FontInfo _fontInfo;
-        _fontInfo.font = font;
         _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
 
         auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
