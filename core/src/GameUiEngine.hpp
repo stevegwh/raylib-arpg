@@ -311,12 +311,7 @@ namespace sage
         void OnDragStart() override;
         void DragUpdate() override;
         void OnDrop(CellElement* droppedElement) override;
-        TitleBar(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            const FontInfo& _fontInfo,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        TitleBar(GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo);
     };
 
     class ImageBox : public CellElement
@@ -388,8 +383,6 @@ namespace sage
 
     class PartyMemberPortrait : public ImageBox
     {
-        PartySystem* partySystem{};
-        ControllableActorSystem* controllableActorSystem{};
         unsigned int memberNumber{};
         Texture portraitBgTex{};
 
@@ -398,18 +391,12 @@ namespace sage
         void ReceiveDrop(CellElement* droppedElement) override;
         void OnClick() override;
         void Draw2D() override;
-        PartyMemberPortrait(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        PartyMemberPortrait(GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber);
         friend class TableCell;
     };
 
     class AbilitySlot : public ImageBox
     {
-        PlayerAbilitySystem* playerAbilitySystem{};
-        ControllableActorSystem* controllableActorSystem{};
         unsigned int slotNumber{};
 
       public:
@@ -418,11 +405,7 @@ namespace sage
         void HoverUpdate() override;
         void Draw2D() override;
         void OnClick() override;
-        AbilitySlot(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        AbilitySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _slotNumber);
         friend class TableCell;
     };
 
@@ -453,7 +436,6 @@ namespace sage
 
     class EquipmentSlot : public ItemSlot
     {
-        ControllableActorSystem* controllableActorSystem{};
         [[nodiscard]] bool validateDrop(const ItemComponent& item) const;
 
       protected:
@@ -464,18 +446,12 @@ namespace sage
       public:
         EquipmentSlotName itemType;
         void ReceiveDrop(CellElement* droppedElement) override;
-        EquipmentSlot(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            EquipmentSlotName _itemType,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        EquipmentSlot(GameUIEngine* _engine, TableCell* _parent, EquipmentSlotName _itemType);
         friend class TableCell;
     };
 
     class InventorySlot : public ItemSlot
     {
-        ControllableActorSystem* controllableActorSystem{};
 
       protected:
         void onItemDroppedToWorld() override;
@@ -485,11 +461,7 @@ namespace sage
         unsigned int row{};
         unsigned int col{};
         void ReceiveDrop(CellElement* droppedElement) override;
-        InventorySlot(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        InventorySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _row, unsigned int _col);
         friend class TableCell;
     };
 
@@ -498,12 +470,7 @@ namespace sage
       public:
         ~CloseButton() override = default;
         void OnClick() override;
-        CloseButton(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            const Texture& _tex,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        CloseButton(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex);
     };
 
     class TableCell final : public TableElement<std::unique_ptr<CellElement>, TableRow>
@@ -519,23 +486,10 @@ namespace sage
         EquipmentCharacterPreview* CreateEquipmentCharacterPreview(
             std::unique_ptr<EquipmentCharacterPreview> _preview);
         CloseButton* CreateCloseButton(std::unique_ptr<CloseButton> _closeButton);
-        PartyMemberPortrait* CreatePartyMemberPortrait(
-            GameUIEngine* engine,
-            PartySystem* _partySystem,
-            ControllableActorSystem* _controllableActorSystem,
-            unsigned int _memberNumber);
-        AbilitySlot* CreateAbilitySlot(
-            GameUIEngine* engine,
-            PlayerAbilitySystem* _playerAbilitySystem,
-            ControllableActorSystem* _controllableActorSystem,
-            unsigned int _slotNumber);
-        EquipmentSlot* CreateEquipmentSlot(
-            GameUIEngine* engine, ControllableActorSystem* _controllableActorSystem, EquipmentSlotName _itemType);
-        InventorySlot* CreateInventorySlot(
-            GameUIEngine* engine,
-            ControllableActorSystem* _controllableActorSystem,
-            unsigned int row,
-            unsigned int col);
+        PartyMemberPortrait* CreatePartyMemberPortrait(std::unique_ptr<PartyMemberPortrait> _portrait);
+        AbilitySlot* CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot);
+        EquipmentSlot* CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot);
+        InventorySlot* CreateInventorySlot(std::unique_ptr<InventorySlot> _slot);
         void UpdateChildren() override;
         void DrawDebug2D() override;
         void Draw2D() override;

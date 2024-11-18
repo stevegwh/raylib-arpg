@@ -107,12 +107,8 @@ namespace sage
         {
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell({0, 5, 0, 0});
-            auto slot = cell->CreatePartyMemberPortrait(
-                engine, engine->gameData->partySystem.get(), engine->gameData->controllableActorSystem.get(), i);
-            // slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-            // TODO: SHRINK_ROW_TO_FIT doesn't work on columns :)
-            // slot->SetVertAlignment(VertAlignment::TOP);
-            // slot->SetHoriAlignment(HoriAlignment::CENTER);
+            auto portrait = std::make_unique<PartyMemberPortrait>(engine, cell, i);
+            cell->CreatePartyMemberPortrait(std::move(portrait));
         }
         return window;
     }
@@ -138,49 +134,17 @@ namespace sage
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
-
         auto row = table->CreateTableRow();
         auto cell = row->CreateTableCell();
-        auto slot = cell->CreateAbilitySlot(
-            engine,
-            engine->gameData->playerAbilitySystem.get(),
-            engine->gameData->controllableActorSystem.get(),
-            0);
+        cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, 0));
         auto cell1 = row->CreateTableCell();
-        auto slot1 = cell1->CreateAbilitySlot(
-            engine,
-            engine->gameData->playerAbilitySystem.get(),
-            engine->gameData->controllableActorSystem.get(),
-            1);
+        cell1->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell1, 1));
         auto cell2 = row->CreateTableCell();
-        auto slot2 = cell2->CreateAbilitySlot(
-            engine,
-            engine->gameData->playerAbilitySystem.get(),
-            engine->gameData->controllableActorSystem.get(),
-            2);
+        cell2->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell2, 2));
         auto cell3 = row->CreateTableCell();
-        auto slot3 = cell3->CreateAbilitySlot(
-            engine,
-            engine->gameData->playerAbilitySystem.get(),
-            engine->gameData->controllableActorSystem.get(),
-            3);
+        cell3->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell3, 3));
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
-        // Is that desired behaviour? Can look for other imageboxes with SHRINK_ROW_TO_FIT as
-        // overflowBehaviour?
-        // slot->SetVertAlignment(VertAlignment::MIDDLE);
-        // slot1->SetVertAlignment(VertAlignment::MIDDLE);
-        // slot2->SetVertAlignment(VertAlignment::BOTTOM);
-        // slot3->SetVertAlignment(VertAlignment::MIDDLE);
-        // slot->SetHoriAlignment(HoriAlignment::CENTER);
-        // slot1->SetHoriAlignment(HoriAlignment::CENTER);
-        // slot2->SetHoriAlignment(HoriAlignment::CENTER);
-        // slot3->SetHoriAlignment(HoriAlignment::CENTER);
-
-        // slot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-        // slot1->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-        // slot2->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-        // slot3->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
 
         return window;
     }
@@ -305,12 +269,10 @@ namespace sage
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell(80);
             auto cell2 = row->CreateTableCell(20);
-            auto titleBar = std::make_unique<TitleBar>(
-                engine, cell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::WINDOW_CENTER);
+            auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleBar), "Inventory");
             auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            auto closeBtn =
-                std::make_unique<CloseButton>(engine, cell2, tex, VertAlignment::TOP, HoriAlignment::RIGHT);
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             cell2->CreateCloseButton(std::move(closeBtn));
         }
 
@@ -323,10 +285,9 @@ namespace sage
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
                     auto& cell = table->children[row]->children[col];
-                    auto invSlot = cell->CreateInventorySlot(
-                        engine, engine->gameData->controllableActorSystem.get(), row, col);
-                    // invSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                    inventoryUpdateSink.connect<&InventorySlot::RetrieveInfo>(invSlot);
+                    auto invSlot = std::make_unique<InventorySlot>(engine, cell.get(), row, col);
+                    inventoryUpdateSink.connect<&InventorySlot::RetrieveInfo>(invSlot.get());
+                    cell->CreateInventorySlot(std::move(invSlot));
                 }
             }
         }
@@ -351,13 +312,11 @@ namespace sage
             const auto row = table->CreateTableRow();
             const auto cell = row->CreateTableCell(80);
             const auto cell2 = row->CreateTableCell(20);
-            auto titleText = std::make_unique<TitleBar>(
-                engine, cell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::WINDOW_CENTER);
+            auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleText), "Character");
 
             const auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
-            auto closeBtn =
-                std::make_unique<CloseButton>(engine, cell2, tex, VertAlignment::TOP, HoriAlignment::RIGHT);
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             cell2->CreateCloseButton(std::move(closeBtn));
         }
 
@@ -368,10 +327,9 @@ namespace sage
             [&engine, &equipmentUpdateSink](
                 const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
                 auto& cell = table->children[row]->children[col];
-                auto equipSlot =
-                    cell->CreateEquipmentSlot(engine, engine->gameData->controllableActorSystem.get(), itemType);
-                // equipSlot->SetOverflowBehaviour(ImageBox::OverflowBehaviour::SHRINK_ROW_TO_FIT);
-                equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot);
+                auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell.get(), itemType);
+                equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot.get());
+                cell->CreateEquipmentSlot(std::move(equipSlot));
             };
 
         auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
