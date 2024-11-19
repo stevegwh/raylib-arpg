@@ -264,9 +264,16 @@ namespace sage
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
-
-        auto window = engine->CreateWindow(
-            nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 1.5, 424 * 1.5, {20, 0, 14, 14});
+        auto _window = std::make_unique<Window>(
+            engine->gameData->settings,
+            nPatchTexture,
+            TextureStretchMode::SCALE,
+            pos.x,
+            pos.y,
+            274 * 1.5,
+            424 * 1.5,
+            Padding{20, 0, 14, 14});
+        auto window = engine->CreateWindow(std::move(_window));
         entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
         {
             auto panel = window->CreatePanel(4);
@@ -304,9 +311,16 @@ namespace sage
     {
 
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
-
-        auto window = engine->CreateWindow(
-            nPatchTexture, TextureStretchMode::SCALE, pos.x, pos.y, 274 * 2, 424 * 1.5, {20, 20, 14, 14});
+        auto _window = std::make_unique<Window>(
+            engine->gameData->settings,
+            nPatchTexture,
+            TextureStretchMode::SCALE,
+            pos.x,
+            pos.y,
+            274 * 2,
+            424 * 1.5,
+            Padding{20, 20, 14, 14});
+        auto window = engine->CreateWindow(std::move(_window));
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {

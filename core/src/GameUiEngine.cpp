@@ -1679,6 +1679,21 @@ namespace sage
     {
     }
 
+    Window::Window(
+        Settings* _settings,
+        const Texture& _tex,
+        TextureStretchMode _stretchMode,
+        float x,
+        float y,
+        float width,
+        float height,
+        Padding _padding)
+        : TableElement(nullptr, x, y, width, height, _padding), settings(_settings)
+    {
+        tex = _tex;
+        textureStretchMode = _stretchMode;
+    }
+
     Window::Window(Settings* _settings, float x, float y, float width, float height, Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding), settings(_settings)
     {
@@ -2214,34 +2229,21 @@ namespace sage
         window->tex = _nPatchTexture;
         window->textureStretchMode = _textureStretchMode;
         window->ScaleContents();
-        // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window.get());
-
         tooltipWindow = std::move(window);
         return tooltipWindow.get();
     }
 
-    Window* GameUIEngine::CreateWindow(
-        Texture _nPatchTexture,
-        TextureStretchMode _textureStretchMode,
-        const float x,
-        const float y,
-        const float _width,
-        const float _height,
-        Padding _padding)
+    Window* GameUIEngine::CreateWindow(std::unique_ptr<Window> _window)
     {
-        auto window = std::make_unique<Window>(gameData->settings, x, y, _width, _height, _padding);
-        window->tex = _nPatchTexture;
-        window->textureStretchMode = _textureStretchMode;
+        windows.push_back(std::move(_window));
+        auto* window = windows.back().get();
         window->ScaleContents();
-        // PlaceWindow(window.get(), window->GetPosition());
-
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window.get());
-        windows.push_back(std::move(window));
-        return windows.back().get();
+        window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window);
+        return window;
     }
 
     WindowDocked* GameUIEngine::CreateWindowDocked(std::unique_ptr<WindowDocked> _windowDocked)

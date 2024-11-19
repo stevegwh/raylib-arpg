@@ -587,6 +587,15 @@ namespace sage
         void InitLayout() override;
         ~Window() override;
         explicit Window(Settings* _settings, Padding _padding = {0, 0, 0, 0});
+        Window(
+            Settings* _settings,
+            const Texture& _tex,
+            TextureStretchMode _stretchMode,
+            float x,
+            float y,
+            float width,
+            float height,
+            Padding _padding = {0, 0, 0, 0});
         Window(Settings* _settings, float x, float y, float width, float height, Padding _padding = {0, 0, 0, 0});
         friend class GameUIEngine;
     };
@@ -734,15 +743,7 @@ namespace sage
             float _height,
             Padding _padding = {0, 0, 0, 0});
 
-        Window* CreateWindow(
-            Texture _nPatchTexture,
-            TextureStretchMode _textureStretchMode,
-            float x,
-            float y,
-            float _width,
-            float _height,
-            Padding _padding = {0, 0, 0, 0});
-
+        Window* CreateWindow(std::unique_ptr<Window> _window);
         WindowDocked* CreateWindowDocked(std::unique_ptr<WindowDocked> _windowDocked);
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
