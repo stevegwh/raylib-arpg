@@ -93,6 +93,7 @@ namespace sage
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
         weaponTrans.SetLocalPos(Vector3Zero());
+        weaponTrans.SetLocalRot({0, 0, 0, 0});
 
         auto& animation = registry->get<Animation>(owner);
         entt::sink sink{animation.onAnimationUpdated};
