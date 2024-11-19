@@ -161,8 +161,17 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(
-            nullptr, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto tooltip = std::make_unique<TooltipWindow>(
+            engine->gameData->settings,
+            nullptr,
+            nPatchTexture,
+            TextureStretchMode::NONE,
+            pos.x,
+            pos.y,
+            w,
+            h,
+            Padding{16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(std::move(tooltip));
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();
@@ -184,8 +193,17 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(
-            nullptr, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto tooltip = std::make_unique<TooltipWindow>(
+            engine->gameData->settings,
+            nullptr,
+            nPatchTexture,
+            TextureStretchMode::NONE,
+            pos.x,
+            pos.y,
+            w,
+            h,
+            Padding{16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(std::move(tooltip));
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
         {
@@ -212,8 +230,17 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
-        auto* window = engine->CreateTooltipWindow(
-            parentWindow, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto tooltip = std::make_unique<TooltipWindow>(
+            engine->gameData->settings,
+            parentWindow,
+            nPatchTexture,
+            TextureStretchMode::NONE,
+            pos.x,
+            pos.y,
+            w,
+            h,
+            Padding{16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(std::move(tooltip));
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
         {
@@ -239,8 +266,18 @@ namespace sage
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.10;
-        auto* window = engine->CreateTooltipWindow(
-            nullptr, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, {16, 2, 10, 6});
+        auto tooltip = std::make_unique<TooltipWindow>(
+            engine->gameData->settings,
+            nullptr,
+            nPatchTexture,
+            TextureStretchMode::NONE,
+            pos.x,
+            pos.y,
+            w,
+            h,
+            Padding{16, 2, 10, 6});
+        auto* window = engine->CreateTooltipWindow(std::move(tooltip));
+
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();

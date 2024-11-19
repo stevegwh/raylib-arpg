@@ -610,6 +610,8 @@ namespace sage
         TooltipWindow(
             Settings* _settings,
             Window* parentWindow,
+            const Texture& _tex,
+            TextureStretchMode _stretchMode,
             float x,
             float y,
             float width,
@@ -733,16 +735,7 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
-        TooltipWindow* CreateTooltipWindow(
-            Window* parentWindow,
-            const Texture& _nPatchTexture,
-            TextureStretchMode _textureStretchMode,
-            float x,
-            float y,
-            float _width,
-            float _height,
-            Padding _padding = {0, 0, 0, 0});
-
+        TooltipWindow* CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow);
         Window* CreateWindow(std::unique_ptr<Window> _window);
         WindowDocked* CreateWindowDocked(std::unique_ptr<WindowDocked> _windowDocked);
 
