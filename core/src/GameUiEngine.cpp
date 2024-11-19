@@ -606,9 +606,12 @@ namespace sage
         auto& window = draggedWindow.value();
         auto newPos = Vector2Subtract(mousePos, dragOffset);
 
+        // TODO: Currently does not work.
         window->SetPos(newPos.x, newPos.y);
         window->ClampToScreen();
+        // window->ResetAll();
         window->InitLayout();
+        // window->ScaleContents();
     }
 
     void TitleBar::OnDrop(CellElement* droppedElement)
@@ -1795,10 +1798,6 @@ namespace sage
         // Tooltips original position is scaled to the screen already
         if (markForRemoval) return;
 
-        rec.width = ogDimensions.rec.width;
-        rec.height = ogDimensions.rec.height;
-        padding = ogDimensions.padding;
-
         rec = {rec.x, rec.y, settings->ScaleValue(rec.width), settings->ScaleValue(rec.height)};
 
         padding = {
@@ -1808,7 +1807,6 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
-        InitLayout();
     }
 
     TooltipWindow::~TooltipWindow()
@@ -2318,12 +2316,10 @@ namespace sage
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
-
-        tooltipWindow->ScaleContents();
-
         entt::sink sink{gameData->userInput->onWindowUpdate};
         tooltipWindow->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(tooltipWindow.get());
         tooltipWindow->InitLayout();
+        // tooltipWindow->ScaleContents(); // TODO: Maybe not needed
         return tooltipWindow.get();
     }
 
