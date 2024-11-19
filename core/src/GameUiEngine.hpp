@@ -116,16 +116,36 @@ namespace sage
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
+        virtual void ScaleContents(Settings* _settings)
+        {
+            rec = ogDimensions.rec;
+            padding = ogDimensions.padding;
+
+            rec = {
+                _settings->ScaleValue(rec.x),
+                _settings->ScaleValue(rec.y),
+                _settings->ScaleValue(rec.width),
+                _settings->ScaleValue(rec.height)};
+
+            padding = {
+                _settings->ScaleValue(padding.up),
+                _settings->ScaleValue(padding.down),
+                _settings->ScaleValue(padding.left),
+                _settings->ScaleValue(padding.right)};
+
+            UpdateTextureDimensions();
+        }
+
         void SetPos(float x, float y)
         {
             rec = {x, y, rec.width, rec.height};
-            InitLayout();
+            // InitLayout();
         }
 
         void SetDimensions(float w, float h)
         {
             rec = {rec.x, rec.y, w, h};
-            InitLayout();
+            // InitLayout();
         }
 
         void SetTexture(const Texture& _tex, TextureStretchMode _stretchMode)
@@ -585,7 +605,7 @@ namespace sage
         entt::sigh<void()> onHide;
         entt::connection windowUpdateCnx{};
         bool mouseHover = false;
-        const Settings* settings{}; // for screen width/height
+        Settings* settings{}; // for screen width/height
 
         void FinalizeLayout();
         void OnWindowUpdate(Vector2 prev, Vector2 current);
