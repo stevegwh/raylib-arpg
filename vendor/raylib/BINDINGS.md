@@ -31,7 +31,7 @@ Some people ported raylib to other languages in the form of bindings or wrappers
 | [raylib-go](https://github.com/gen2brain/raylib-go)                                      | **5.0**          | [Go](https://golang.org)                                             | Zlib                 |
 | [raylib-guile](https://github.com/petelliott/raylib-guile)                               | **auto**         | [Guile](https://www.gnu.org/software/guile)                          | Zlib                 |
 | [gforth-raylib](https://github.com/ArnautDaniel/gforth-raylib)                           | 3.5              | [Gforth](https://gforth.org)                                         | **???**              |
-| [h-raylib](https://github.com/Anut-py/h-raylib)                                          | **5.1-dev**      | [Haskell](https://haskell.org)                                       | Apache-2.0           |
+| [h-raylib](https://github.com/Anut-py/h-raylib)                                          | **5.5-dev**      | [Haskell](https://haskell.org)                                       | Apache-2.0           |
 | [raylib-hx](https://github.com/foreignsasquatch/raylib-hx)                               | 4.2              | [Haxe](https://haxe.org)                                             | Zlib                 |
 | [hb-raylib](https://github.com/MarcosLeonardoMendezGerencir/hb-raylib)                   | 3.5              | [Harbour](https://harbour.github.io)                                 | MIT                  |
 | [jaylib](https://github.com/janet-lang/jaylib)                                           | **5.0**          | [Janet](https://janet-lang.org)                                      | MIT                  |
@@ -81,13 +81,13 @@ Some people ported raylib to other languages in the form of bindings or wrappers
 | [raylib-bqn](https://github.com/Brian-ED/raylib-bqn)                                     | **5.0**          | [BQN](https://mlochbaum.github.io/BQN)                               | MIT                  |
 | [rayjs](https://github.com/mode777/rayjs)                                                | 4.6-dev          | [QuickJS](https://bellard.org/quickjs)                               | MIT                  |
 | [raylib-raku](https://github.com/vushu/raylib-raku)                                      | **auto**         | [Raku](https://www.raku.org)                                         | Artistic License 2.0 |
-| [Raylib.lean](https://github.com/KislyjKisel/Raylib.lean)                                | 4.5              | [Lean4](https://lean-lang.org)                                       | BSD-3-Clause         |
+| [Raylib.lean](https://github.com/KislyjKisel/Raylib.lean)                                | **5.5-dev**      | [Lean4](https://lean-lang.org)                                       | BSD-3-Clause         |
 | [raylib-cobol](https://codeberg.org/glowiak/raylib-cobol)                                | **auto**         | [COBOL](https://gnucobol.sourceforge.io)                             | Public domain        |
 | [raylib-apl](https://github.com/Brian-ED/raylib-apl)                                     | **5.0**          | [Dyalog APL](https://www.dyalog.com/)                                | MIT                  |
 
 ### Utility Wrapers
 
-These are utility wrappers for specific languages, they are not required to use raylib in the language but may adapt the raylib API to be more inline with the language's pardigm.
+These are utility wrappers for specific languages, they are not required to use raylib in the language but may adapt the raylib API to be more inline with the language's paradigm.
 | Name                                                 | raylib Version | Language                                     | License |
 | ---------------------------------------------------- | :------------: | :------------------------------------------: | :-----: |
 | [raylib-cpp](https://github.com/robloach/raylib-cpp) | **5.0**        | [C++](https://en.wikipedia.org/wiki/C%2B%2B) | Zlib    |
