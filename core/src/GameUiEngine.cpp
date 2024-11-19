@@ -1414,22 +1414,20 @@ namespace sage
 
     void WindowDocked::ScaleContents()
     {
-        assert(finalized);
+        // assert(finalized);
         rec = {0, 0, settings->ScaleValue(ogDimensions.rec.width), settings->ScaleValue(ogDimensions.rec.height)};
-        SetAlignment(vertAlignment, horiAlignment);
+        setAlignment();
         InitLayout();
     }
 
-    void WindowDocked::SetAlignment(VertAlignment vert, HoriAlignment hori)
+    void WindowDocked::setAlignment()
     {
-        vertAlignment = vert;
-        horiAlignment = hori;
 
         float xOffset = 0;
         float yOffset = 0;
 
         // Calculate horizontal position
-        switch (hori)
+        switch (horiAlignment)
         {
         case HoriAlignment::LEFT:
             xOffset = 0;
@@ -1446,7 +1444,7 @@ namespace sage
         }
 
         // Calculate vertical position
-        switch (vert)
+        switch (vertAlignment)
         {
         case VertAlignment::TOP:
             yOffset = 0;
@@ -1468,10 +1466,51 @@ namespace sage
     }
 
     WindowDocked::WindowDocked(
-        Settings* _settings, VertAlignment _vertAlignment, HoriAlignment _horiAlignment, Padding _padding)
-        : Window(_settings, _padding)
+        Settings* _settings,
+        float _xOffset,
+        float _yOffset,
+        float _width,
+        float _height,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment,
+        Padding _padding)
+        : Window(_settings, _padding),
+          vertAlignment(_vertAlignment),
+          horiAlignment(_horiAlignment),
+          baseXOffset(_xOffset),
+          baseYOffset(_yOffset)
     {
-        SetAlignment(_vertAlignment, _horiAlignment);
+        rec.width = _width;
+        rec.height = _height;
+        setAlignment();
+        ogDimensions.rec = rec;
+        ogDimensions.padding = padding;
+    }
+
+    WindowDocked::WindowDocked(
+        Settings* _settings,
+        Texture _tex,
+        TextureStretchMode _textureStretchMode,
+        float _xOffset,
+        float _yOffset,
+        float _width,
+        float _height,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment,
+        Padding _padding)
+        : Window(_settings, _padding),
+          vertAlignment(_vertAlignment),
+          horiAlignment(_horiAlignment),
+          baseXOffset(_xOffset),
+          baseYOffset(_yOffset)
+    {
+        tex = _tex;
+        textureStretchMode = _textureStretchMode;
+        rec.width = _width;
+        rec.height = _height;
+        setAlignment();
+        ogDimensions.rec = rec;
+        ogDimensions.padding = padding;
     }
 
     Panel* Window::CreatePanel(Padding _padding)
@@ -2205,50 +2244,10 @@ namespace sage
         return windows.back().get();
     }
 
-    WindowDocked* GameUIEngine::CreateWindowDocked(
-        float _xOffset,
-        float _yOffset,
-        float _width,
-        float _height,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment,
-        Padding _padding)
+    WindowDocked* GameUIEngine::CreateWindowDocked(std::unique_ptr<WindowDocked> _windowDocked)
     {
-        windows.push_back(
-            std::make_unique<WindowDocked>(gameData->settings, _vertAlignment, _horiAlignment, _padding));
+        windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->ogDimensions.rec.width = _width;
-        window->ogDimensions.rec.height = _height;
-        window->baseXOffset = _xOffset;
-        window->baseYOffset = _yOffset;
-        window->ScaleContents();
-
-        entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);
-
-        return window;
-    }
-
-    WindowDocked* GameUIEngine::CreateWindowDocked(
-        Texture _nPatchTexture,
-        TextureStretchMode _textureStretchMode,
-        const float _xOffset,
-        const float _yOffset,
-        const float _width,
-        const float _height,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment,
-        Padding _padding)
-    {
-        windows.push_back(
-            std::make_unique<WindowDocked>(gameData->settings, _vertAlignment, _horiAlignment, _padding));
-        auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->ogDimensions.rec.width = _width;
-        window->ogDimensions.rec.height = _height;
-        window->baseXOffset = _xOffset;
-        window->baseYOffset = _yOffset;
-        window->tex = _nPatchTexture;
-        window->textureStretchMode = _textureStretchMode;
         window->ScaleContents();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};

@@ -613,7 +613,7 @@ namespace sage
     {
         float baseXOffset = 0;
         float baseYOffset = 0;
-        void SetAlignment(VertAlignment vert, HoriAlignment hori);
+        void setAlignment();
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
@@ -621,9 +621,26 @@ namespace sage
         void ScaleContents() override;
         WindowDocked(
             Settings* _settings,
+            float _xOffset,
+            float _yOffset,
+            float _width,
+            float _height,
             VertAlignment _vertAlignment,
             HoriAlignment _horiAlignment,
             Padding _padding = {0, 0, 0, 0});
+
+        WindowDocked(
+            Settings* _settings,
+            Texture _tex,
+            TextureStretchMode _textureStretchMode,
+            float _xOffset,
+            float _yOffset,
+            float _width,
+            float _height,
+            VertAlignment _vertAlignment,
+            HoriAlignment _horiAlignment,
+            Padding _padding = {0, 0, 0, 0});
+
         friend class GameUIEngine;
     };
 
@@ -726,25 +743,7 @@ namespace sage
             float _height,
             Padding _padding = {0, 0, 0, 0});
 
-        WindowDocked* CreateWindowDocked(
-            float _xOffset,
-            float _yOffset,
-            float _width,
-            float _height,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT,
-            Padding _padding = {0, 0, 0, 0});
-
-        WindowDocked* CreateWindowDocked(
-            Texture _nPatchTexture,
-            TextureStretchMode _textureStretchMode,
-            float _xOffset,
-            float _yOffset,
-            float _width,
-            float _height,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT,
-            Padding _padding = {0, 0, 0, 0});
+        WindowDocked* CreateWindowDocked(std::unique_ptr<WindowDocked> _windowDocked);
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;

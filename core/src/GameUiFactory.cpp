@@ -95,8 +95,16 @@ namespace sage
     {
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.08;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.3;
-        auto window =
-            engine->CreateWindowDocked(0, 0, w, h, VertAlignment::MIDDLE, HoriAlignment::LEFT, {12, 12, 16, 16});
+        auto _windowDocked = std::make_unique<WindowDocked>(
+            engine->gameData->settings,
+            0,
+            0,
+            w,
+            h,
+            VertAlignment::MIDDLE,
+            HoriAlignment::LEFT,
+            Padding{12, 12, 16, 16});
+        auto* window = engine->CreateWindowDocked(std::move(_windowDocked));
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
 
@@ -117,7 +125,8 @@ namespace sage
 
         auto w = 1024; // Absolute value of the image
         auto h = 156;
-        auto window = engine->CreateWindowDocked(
+        auto _windowDocked = std::make_unique<WindowDocked>(
+            engine->gameData->settings,
             nPatchTexture,
             TextureStretchMode::SCALE,
             0,
@@ -126,7 +135,8 @@ namespace sage
             h,
             VertAlignment::BOTTOM,
             HoriAlignment::CENTER,
-            {0, 0, 0, 0});
+            Padding{0, 0, 0, 0});
+        auto window = engine->CreateWindowDocked(std::move(_windowDocked));
         // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable(16);
@@ -388,7 +398,8 @@ namespace sage
 
         float w = Settings::TARGET_SCREEN_WIDTH * 0.4;
         float h = Settings::TARGET_SCREEN_HEIGHT * 0.25;
-        const auto window = engine->CreateWindowDocked(
+        auto _windowDocked = std::make_unique<WindowDocked>(
+            engine->gameData->settings,
             nPatchTexture,
             TextureStretchMode::NONE,
             0,
@@ -397,7 +408,8 @@ namespace sage
             h,
             VertAlignment::BOTTOM,
             HoriAlignment::CENTER,
-            {32, 32, 16, 16});
+            Padding{32, 32, 16, 16});
+        auto window = engine->CreateWindowDocked(std::move(_windowDocked));
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
 
@@ -424,14 +436,21 @@ namespace sage
     }
 
     Window* GameUiFactory::CreateGameWindowButtons(
-        sage::GameUIEngine* engine, Window* inventoryWindow, Window* equipmentWindow)
+        GameUIEngine* engine, Window* inventoryWindow, Window* equipmentWindow)
     {
-        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
-
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.075;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
-        auto window =
-            engine->CreateWindowDocked(0, 0, w, h, VertAlignment::BOTTOM, HoriAlignment::LEFT, {16, 16, 12, 12});
+        auto _windowDocked = std::make_unique<WindowDocked>(
+            engine->gameData->settings,
+            0,
+            0,
+            w,
+            h,
+            VertAlignment::BOTTOM,
+            HoriAlignment::LEFT,
+            Padding{16, 16, 12, 12});
+
+        auto window = engine->CreateWindowDocked(std::move(_windowDocked));
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
