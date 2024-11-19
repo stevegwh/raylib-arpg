@@ -1292,8 +1292,8 @@ namespace sage
             const auto& panel = children[i];
             Color col = colors[i];
             col.a = 150;
-            DrawRectangle(panel->rec.x, panel->rec.y, panel->rec.width, panel->rec.height, col);
-            // panel->DrawDebug2D();
+            // DrawRectangle(panel->rec.x, panel->rec.y, panel->rec.width, panel->rec.height, col);
+            panel->DrawDebug2D();
         }
     }
 
@@ -1310,7 +1310,9 @@ namespace sage
     void Window::UpdateChildren()
     {
         if (children.empty()) return;
-
+        // TODO: Run "autosize" as a function during the creation of the windows then store the final dimensions in
+        // ogDimensions. Beyond that, you can scale up using this function. This will make it easier to create
+        // things pixel perfect.
         float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
         float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
         float startX = rec.x + GetPadding().left;
@@ -1425,7 +1427,7 @@ namespace sage
             const auto& table = children[i];
             Color col = colors[i];
             col.a = 150;
-            DrawRectangle(table->rec.x, table->rec.y, table->rec.width, table->rec.height, col);
+            // DrawRectangle(table->rec.x, table->rec.y, table->rec.width, table->rec.height, col);
             table->DrawDebug2D();
         }
     }
@@ -1603,15 +1605,15 @@ namespace sage
 
     void Table::DrawDebug2D()
     {
-        // std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
-        // for (int i = 0; i < children.size(); ++i)
-        // {
-        //     const auto& row = children[i];
-        //     Color col = colors[i];
-        //     col.a = 150;
-        //     // DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
-        //     row->DrawDebug2D();
-        // }
+        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
+        for (int i = 0; i < children.size(); ++i)
+        {
+            const auto& row = children[i];
+            Color col = colors[i % colors.size()];
+            col.a = 150;
+            DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
+            row->DrawDebug2D();
+        }
     }
 
     void Table::Draw2D()
@@ -1711,6 +1713,8 @@ namespace sage
         const auto& row = children.back();
         row->autoSize = false;
         row->requestedHeight = _requestedHeight;
+        // TODO: Calculate the _requestedHeight etc as a pixel value and save as ogDimensions. Do not use
+        // requestedHeight etc after initialisation, use the original pixel values.
         UpdateChildren();
         return row.get();
     }
@@ -1736,6 +1740,8 @@ namespace sage
         const auto& cell = children.back();
         cell->autoSize = false;
         cell->requestedWidth = requestedWidth;
+        // TODO: Calculate the requestedWidth etc as a pixel value and save as ogDimensions. Do not use
+        // requestedWidth etc after initialisation, use the original pixel values.
         UpdateChildren();
         return cell.get();
     }
@@ -1746,7 +1752,7 @@ namespace sage
         for (int i = 0; i < children.size(); ++i)
         {
             const auto& cell = children[i];
-            Color col = colors[i];
+            Color col = colors[i % colors.size()];
             col.a = 100;
             DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
             cell->DrawDebug2D();

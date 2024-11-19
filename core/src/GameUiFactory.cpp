@@ -113,27 +113,31 @@ namespace sage
 
     Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine)
     {
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_hud.png");
 
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.65;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
+        auto w = 1024; // Absolute value of the image
+        auto h = 156;
         auto window = engine->CreateWindowDocked(
             nPatchTexture,
-            TextureStretchMode::NONE,
+            TextureStretchMode::SCALE,
             0,
             0,
             w,
             h,
             VertAlignment::BOTTOM,
             HoriAlignment::CENTER,
-            {10, 8, 12, 12});
-        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+            {0, 0, 0, 0});
+        // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
-        auto table = panel->CreateTable();
-        auto row = table->CreateTableRow();
+        auto table = panel->CreateTable(16);
+        auto abilityTable = panel->CreateTable({16, 16, 0, 0});
+        panel->CreateTable(16);
+
+        auto experienceBar = abilityTable->CreateTableRow(30);
+        auto abilityRow = abilityTable->CreateTableRow(70, {8, 6, 0, 0});
         for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)
         {
-            auto cell = row->CreateTableCell();
+            auto cell = abilityRow->CreateTableCell();
             cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
         }
 
