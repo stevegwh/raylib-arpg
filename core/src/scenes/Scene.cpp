@@ -130,6 +130,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_hud.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
 
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto w = data->settings->TARGET_SCREEN_WIDTH * 0.3;
@@ -143,7 +145,7 @@ namespace sage
         entt::sink sink2{data->userInput->keyCPressed};
         sink2.connect<&Window::ToggleHide>(*equipmentWindow);
 
-        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
+        // auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
     };
 

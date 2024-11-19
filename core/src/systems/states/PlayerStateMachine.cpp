@@ -108,6 +108,15 @@ namespace sage
 
     class PlayerStateController::MovingToTalkToNPCState : public StateMachine
     {
+
+        void onMovementCancelled(entt::entity self) const
+        {
+            auto& dialogComponent = registry->get<DialogComponent>(self);
+            dialogComponent.dialogTarget = entt::null;
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::Default);
+        }
+
         void onTargetReached(entt::entity self) const
         {
             auto& playerState = registry->get<PlayerState>(self);
@@ -118,6 +127,7 @@ namespace sage
         void Update(entt::entity self) override
         {
         }
+
         void OnStateEnter(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
@@ -125,18 +135,25 @@ namespace sage
             playerDiag.dialogTarget = moveable.targetActor;
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
             gameData->controllableActorSystem->PathfindToLocation(self, pos);
-            // TODO: Difference between onDestinationReached and onFinishMovement?
-            entt::sink sink{moveable.onDestinationReached};
+
+            entt::sink sink{moveable.onFinishMovement};
             sink.connect<&MovingToTalkToNPCState::onTargetReached>(this);
+
+            entt::sink sink2{moveable.onMovementCancel};
+            sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this);
         }
+
         void OnStateExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            // TODO: Difference between onDestinationReached and onFinishMovement?
-            entt::sink sink{moveable.onDestinationReached};
+            entt::sink sink{moveable.onFinishMovement};
             sink.disconnect<&MovingToTalkToNPCState::onTargetReached>(this);
+            entt::sink sink2{moveable.onMovementCancel};
+            sink2.disconnect<&MovingToTalkToNPCState::onMovementCancelled>(this);
         }
+
         ~MovingToTalkToNPCState() override = default;
+
         MovingToTalkToNPCState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
@@ -210,8 +227,6 @@ namespace sage
       public:
         void OnStateEnter(entt::entity self) override
         {
-            gameData->actorMovementSystem->CancelMovement(self); // Flush queue
-
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::WALK);
 
@@ -240,8 +255,6 @@ namespace sage
 
         void OnStateExit(entt::entity self) override
         {
-            gameData->controllableActorSystem->CancelMovement(self);
-
             auto& moveableActor = registry->get<MoveableActor>(self);
             entt::sink sink{moveableActor.onFinishMovement};
             sink.disconnect<&MovingToAttackEnemyState::onTargetReached>(this);
