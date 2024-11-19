@@ -59,6 +59,8 @@ namespace sage
             registry->emplace<MoveableActor>(entity);
         }
 
+        CancelMovement(entity); // Cancel previous commands
+
         if (!navigationGridSystem->CheckWithinGridBounds(destination))
         {
             std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
