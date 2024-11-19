@@ -32,6 +32,326 @@
 namespace sage
 {
 
+#pragma region init
+    void TableGrid::InitLayout()
+    {
+        assert(!GetWindow()->finalized);
+        if (children.empty()) return;
+        // 1. Get number of columns
+        unsigned int cols = children[0]->children.size();
+
+        // 2. Calculate available space
+        float availableWidth = rec.width - (padding.left + padding.right);
+        float availableHeight = rec.height - (padding.up + padding.down);
+
+        // 3. Find the maximum power-of-two cell size that fits
+        int maxCellSize = 1 << static_cast<int>(std::floor(
+                              std::log2(std::min(availableWidth / cols, availableHeight / children.size()))));
+
+        // 4. Calculate actual cell size with spacing
+        float cellSize = (std::min(availableWidth / cols, availableHeight / children.size()) - cellSpacing) /
+                         maxCellSize * maxCellSize;
+
+        // 5. Calculate total grid dimensions
+        float gridWidth = cellSize * cols + cellSpacing * (cols - 1); // Account for spacing between columns
+        float gridHeight =
+            cellSize * children.size() + cellSpacing * (children.size() - 1); // Account for spacing between rows
+
+        // 6. Calculate starting position to center the grid
+        float startX = rec.x + (availableWidth - gridWidth) / 2.0f;
+        float startY = rec.y + (availableHeight - gridHeight) / 2.0f;
+
+        // 7. Apply dimensions to rows and cells
+        float currentY = startY;
+        for (const auto& row : children)
+        {
+            row->rec.height = cellSize;
+            row->rec.y = currentY;
+            row->rec.x = startX;
+            row->rec.width = gridWidth;
+
+            float currentX = row->rec.x;
+            for (const auto& cell : row->children)
+            {
+                cell->rec.width = cellSize;
+                cell->rec.x = currentX;
+                cell->rec.y = currentY;
+                cell->rec.height = cellSize;
+                currentX += cellSize + cellSpacing; // Add spacing after each cell
+            }
+            currentY += cellSize + cellSpacing; // Add spacing after each row
+        }
+
+        for (auto& row : children)
+        {
+            for (auto& cell : row->children)
+            {
+                if (cell->children)
+                {
+                    cell->children->UpdateDimensions();
+                }
+            }
+        }
+    }
+
+    void TableRow::InitLayout()
+    {
+        assert(!GetWindow()->finalized);
+        // Account for row padding
+        float availableWidth = rec.width - (padding.left + padding.right);
+        float startX = rec.x + padding.left;
+        float totalRequestedPercent = 0.0f;
+        int autoSizeCount = 0;
+
+        // First pass: Calculate total of percentage-based widths
+        for (const auto& cell : children)
+        {
+            if (cell->autoSize)
+            {
+                autoSizeCount++;
+            }
+            else
+            {
+                totalRequestedPercent += cell->requestedWidth;
+            }
+        }
+
+        if (totalRequestedPercent > 100.0f)
+        {
+            totalRequestedPercent = 100.0f;
+        }
+
+        float remainingPercent = 100.0f - totalRequestedPercent;
+        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+
+        // Second pass: Update each cell
+        float currentX = startX;
+        for (const auto& cell : children)
+        {
+            cell->parent = this;
+            cell->rec = rec;
+
+            float cellWidth;
+            if (cell->autoSize)
+            {
+                cellWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
+            }
+            else
+            {
+                cellWidth = std::ceil(availableWidth * (cell->requestedWidth / 100.0f));
+            }
+
+            // Set cell dimensions accounting for row padding
+            cell->rec.width = cellWidth;
+            cell->rec.x = currentX;
+            cell->rec.y = rec.y + padding.up;
+            cell->rec.height = rec.height - (padding.up + padding.down);
+
+            UpdateTextureDimensions();
+
+            cell->InitLayout();
+
+            cell->ogDimensions.rec = rec;
+            cell->ogDimensions.padding = padding;
+
+            currentX += cellWidth;
+        }
+    }
+
+    // In Window class - always stacks panels vertically
+    void Window::InitLayout()
+    {
+        assert(!finalized);
+        if (children.empty()) return;
+        float availableWidth = rec.width - (padding.left + padding.right);
+        float availableHeight = rec.height - (padding.up + padding.down);
+        float startX = rec.x + padding.left;
+        float startY = rec.y + padding.up;
+
+        float totalRequestedPercent = 0.0f;
+        int autoSizeCount = 0;
+
+        // First pass: Calculate total of percentage-based heights
+        for (const auto& panel : children)
+        {
+            if (panel->autoSize)
+            {
+                autoSizeCount++;
+            }
+            else
+            {
+                totalRequestedPercent += panel->requestedHeight;
+            }
+        }
+
+        totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
+        float remainingPercent = 100.0f - totalRequestedPercent;
+        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+
+        // Second pass: Update each panel
+        float currentY = startY;
+        for (const auto& panel : children)
+        {
+            panel->parent = this;
+            panel->rec = rec;
+
+            float panelHeight;
+            if (panel->autoSize)
+            {
+                panelHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
+            }
+            else
+            {
+                panelHeight = std::ceil(availableHeight * (panel->requestedHeight / 100.0f));
+            }
+
+            panel->rec.height = panelHeight;
+            panel->rec.y = currentY;
+            panel->rec.width = availableWidth;
+            panel->rec.x = startX;
+
+            UpdateTextureDimensions();
+
+            if (!panel->children.empty()) panel->InitLayout();
+
+            panel->ogDimensions.rec = rec;
+            panel->ogDimensions.padding = padding;
+
+            currentY += panelHeight;
+        }
+    }
+
+    void Panel::InitLayout()
+    {
+        if (children.empty()) return;
+
+        float availableWidth = rec.width - (padding.left + padding.right);
+        float availableHeight = rec.height - (padding.up + padding.down);
+        float startX = rec.x + padding.left;
+        float startY = rec.y + padding.up;
+
+        float totalRequestedPercent = 0.0f;
+        int autoSizeCount = 0;
+
+        // First pass: Calculate total of percentage-based widths
+        for (const auto& table : children)
+        {
+            if (table->autoSize)
+            {
+                autoSizeCount++;
+            }
+            else
+            {
+                totalRequestedPercent += table->requestedWidth;
+            }
+        }
+
+        totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
+        float remainingPercent = 100.0f - totalRequestedPercent;
+        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+
+        // Second pass: Update each table
+        float currentX = startX;
+        for (const auto& table : children)
+        {
+            table->parent = this;
+            table->rec = rec;
+
+            float tableWidth;
+            if (table->autoSize)
+            {
+                tableWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
+            }
+            else
+            {
+                tableWidth = std::ceil(availableWidth * (table->requestedWidth / 100.0f));
+            }
+
+            table->rec.width = tableWidth;
+            table->rec.x = currentX;
+            table->rec.height = availableHeight;
+            table->rec.y = startY;
+
+            UpdateTextureDimensions();
+
+            if (!table->children.empty()) table->InitLayout();
+
+            table->ogDimensions.rec = rec;
+            table->ogDimensions.padding = padding;
+
+            currentX += tableWidth;
+        }
+    }
+
+    void Table::InitLayout()
+    {
+        assert(!GetWindow()->finalized);
+        // Account for table padding
+        float availableHeight = rec.height - (padding.up + padding.down);
+        float startY = rec.y + padding.up;
+        float totalRequestedPercent = 0.0f;
+        int autoSizeCount = 0;
+
+        // First pass: Calculate total of percentage-based heights
+        for (const auto& row : children)
+        {
+            if (row->autoSize)
+            {
+                autoSizeCount++;
+            }
+            else
+            {
+                totalRequestedPercent += row->requestedHeight;
+            }
+        }
+
+        if (totalRequestedPercent > 100.0f)
+        {
+            totalRequestedPercent = 100.0f;
+        }
+
+        float remainingPercent = 100.0f - totalRequestedPercent;
+        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+
+        // Second pass: Update each row
+        float currentY = startY;
+        for (const auto& row : children)
+        {
+            row->parent = this;
+            row->rec = rec;
+
+            float rowHeight;
+            if (row->autoSize)
+            {
+                rowHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
+            }
+            else
+            {
+                rowHeight = std::ceil(availableHeight * (row->requestedHeight / 100.0f));
+            }
+
+            // Set row dimensions accounting for table padding
+            row->rec.height = rowHeight;
+            row->rec.y = currentY;
+            row->rec.x = rec.x + padding.left;
+            row->rec.width = rec.width - (padding.left + padding.right);
+
+            UpdateTextureDimensions();
+
+            if (!row->children.empty())
+            {
+                row->InitLayout();
+            }
+
+            row->ogDimensions.rec = rec;
+            row->ogDimensions.padding = padding;
+
+            currentY += rowHeight;
+        }
+    }
+
+#pragma endregion
+
 #pragma region UIElements
     void UIElement::OnHoverStart()
     {
@@ -67,8 +387,6 @@ namespace sage
     void CellElement::ReceiveDrop(CellElement* droppedElement)
     {
         if (!canReceiveDragDrops) return;
-
-        std::cout << "Reached here \n";
     }
 
     void CellElement::ChangeState(std::unique_ptr<UIState> newState)
@@ -104,7 +422,7 @@ namespace sage
     void TextBox::SetContent(const std::string& _content)
     {
         content = _content;
-        parent->UpdateChildren(); // Trigger scaling etc.
+        UpdateDimensions();
     }
 
     Font TextBox::GetFont() const
@@ -122,7 +440,7 @@ namespace sage
     void TextBox::UpdateDimensions()
     {
         UpdateFontScaling();
-        float availableWidth = parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right);
+        float availableWidth = parent->rec.width - (parent->padding.left + parent->padding.right);
 
         if (fontInfo.overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
@@ -183,7 +501,7 @@ namespace sage
 
         float horiOffset = 0;
         float vertOffset = 0;
-        float availableHeight = parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down);
+        float availableHeight = parent->rec.height - (parent->padding.up + parent->padding.down);
 
         if (vertAlignment == VertAlignment::MIDDLE)
         {
@@ -205,14 +523,13 @@ namespace sage
         else if (horiAlignment == HoriAlignment::WINDOW_CENTER)
         {
             auto window = parent->GetWindow();
-            float windowAvailableWidth =
-                window->rec.width - (window->GetPadding().left + window->GetPadding().right);
+            float windowAvailableWidth = window->rec.width - (window->padding.left + window->padding.right);
             horiOffset = (windowAvailableWidth - textSize.x) / 2;
         }
 
         rec = {
-            parent->rec.x + parent->GetPadding().left + horiOffset,
-            parent->rec.y + parent->GetPadding().up + vertOffset,
+            parent->rec.x + parent->padding.left + horiOffset,
+            parent->rec.y + parent->padding.up + vertOffset,
             textSize.x,
             textSize.y};
     }
@@ -303,7 +620,7 @@ namespace sage
         window->rec.x = newPos.x;
         window->rec.y = newPos.y;
         window->ClampToScreen();
-        window->UpdateChildren();
+        window->InitLayout();
     }
 
     void TitleBar::OnDrop(CellElement* droppedElement)
@@ -379,8 +696,8 @@ namespace sage
     Dimensions ImageBox::calculateAvailableSpace() const
     {
         return {
-            parent->rec.width - (parent->GetPadding().left + parent->GetPadding().right),
-            parent->rec.height - (parent->GetPadding().up + parent->GetPadding().down)};
+            parent->rec.width - (parent->padding.left + parent->padding.right),
+            parent->rec.height - (parent->padding.up + parent->padding.down)};
     }
 
     float ImageBox::calculateAspectRatio() const
@@ -431,8 +748,8 @@ namespace sage
     void ImageBox::updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
     {
         rec = Rectangle{
-            parent->rec.x + parent->GetPadding().left + offset.x,
-            parent->rec.y + parent->GetPadding().up + offset.y,
+            parent->rec.x + parent->padding.left + offset.x,
+            parent->rec.y + parent->padding.up + offset.y,
             dimensions.width,
             dimensions.height};
 
@@ -731,7 +1048,7 @@ namespace sage
         {
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
             tooltipWindow.value()->rec.y = tooltipWindow.value()->rec.y - tooltipWindow.value()->rec.height;
-            tooltipWindow.value()->UpdateChildren();
+            tooltipWindow.value()->InitLayout();
         }
     }
 
@@ -1097,9 +1414,10 @@ namespace sage
 
     void WindowDocked::ScaleContents()
     {
+        assert(finalized);
         rec = {0, 0, settings->ScaleValue(ogDimensions.rec.width), settings->ScaleValue(ogDimensions.rec.height)};
         SetAlignment(vertAlignment, horiAlignment);
-        UpdateChildren();
+        InitLayout();
     }
 
     void WindowDocked::SetAlignment(VertAlignment vert, HoriAlignment hori)
@@ -1160,7 +1478,7 @@ namespace sage
     {
         children.push_back(std::make_unique<Panel>(this, _padding));
         const auto& panel = children.back();
-        UpdateChildren();
+        InitLayout();
         return panel.get();
     }
 
@@ -1169,7 +1487,7 @@ namespace sage
         auto panel = CreatePanel(_padding);
         panel->requestedHeight = _requestedHeight;
         panel->autoSize = false;
-        UpdateChildren();
+        InitLayout();
         return panel;
     }
 
@@ -1210,6 +1528,13 @@ namespace sage
         onHide.publish();
     }
 
+    void Window::FinalizeLayout()
+    {
+        InitLayout();
+        finalized = true;
+        ScaleContents();
+    }
+
     void Window::OnWindowUpdate(Vector2 prev, Vector2 current)
     {
         ScaleContents();
@@ -1235,7 +1560,7 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
-        UpdateChildren();
+        InitLayout();
     }
 
     void Window::ClampToScreen()
@@ -1306,68 +1631,6 @@ namespace sage
         }
     }
 
-    // In Window class - always stacks panels vertically
-    void Window::UpdateChildren()
-    {
-        if (children.empty()) return;
-        // TODO: Run "autosize" as a function during the creation of the windows then store the final dimensions in
-        // ogDimensions. Beyond that, you can scale up using this function. This will make it easier to create
-        // things pixel perfect.
-        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
-        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
-        float startX = rec.x + GetPadding().left;
-        float startY = rec.y + GetPadding().up;
-
-        float totalRequestedPercent = 0.0f;
-        int autoSizeCount = 0;
-
-        // First pass: Calculate total of percentage-based heights
-        for (const auto& panel : children)
-        {
-            if (panel->autoSize)
-            {
-                autoSizeCount++;
-            }
-            else
-            {
-                totalRequestedPercent += panel->requestedHeight;
-            }
-        }
-
-        totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
-
-        // Second pass: Update each panel
-        float currentY = startY;
-        for (const auto& panel : children)
-        {
-            panel->parent = this;
-            panel->rec = rec;
-
-            float panelHeight;
-            if (panel->autoSize)
-            {
-                panelHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
-            }
-            else
-            {
-                panelHeight = std::ceil(availableHeight * (panel->requestedHeight / 100.0f));
-            }
-
-            panel->rec.height = panelHeight;
-            panel->rec.y = currentY;
-            panel->rec.width = availableWidth;
-            panel->rec.x = startX;
-
-            UpdateTextureDimensions();
-
-            if (!panel->children.empty()) panel->UpdateChildren();
-
-            currentY += panelHeight;
-        }
-    }
-
     Window::~Window()
     {
         windowUpdateCnx.release();
@@ -1400,7 +1663,7 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
-        UpdateChildren();
+        InitLayout();
     }
 
     TooltipWindow::~TooltipWindow()
@@ -1455,7 +1718,7 @@ namespace sage
                 row->CreateTableCell();
             }
         }
-        UpdateChildren();
+        InitLayout();
         return table;
     }
 
@@ -1463,7 +1726,7 @@ namespace sage
     {
         children.push_back(std::make_unique<Table>(this, _padding));
         const auto& table = children.back();
-        UpdateChildren();
+        InitLayout();
         return table.get();
     }
 
@@ -1472,131 +1735,12 @@ namespace sage
         auto table = CreateTable(_padding);
         table->autoSize = false;
         table->requestedWidth = _requestedWidth;
-        UpdateChildren();
+        InitLayout();
         return table;
-    }
-
-    void Panel::UpdateChildren()
-    {
-        if (children.empty()) return;
-
-        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
-        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
-        float startX = rec.x + GetPadding().left;
-        float startY = rec.y + GetPadding().up;
-
-        float totalRequestedPercent = 0.0f;
-        int autoSizeCount = 0;
-
-        // First pass: Calculate total of percentage-based widths
-        for (const auto& table : children)
-        {
-            if (table->autoSize)
-            {
-                autoSizeCount++;
-            }
-            else
-            {
-                totalRequestedPercent += table->requestedWidth;
-            }
-        }
-
-        totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
-
-        // Second pass: Update each table
-        float currentX = startX;
-        for (const auto& table : children)
-        {
-            table->parent = this;
-            table->rec = rec;
-
-            float tableWidth;
-            if (table->autoSize)
-            {
-                tableWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
-            }
-            else
-            {
-                tableWidth = std::ceil(availableWidth * (table->requestedWidth / 100.0f));
-            }
-
-            table->rec.width = tableWidth;
-            table->rec.x = currentX;
-            table->rec.height = availableHeight;
-            table->rec.y = startY;
-
-            UpdateTextureDimensions();
-
-            if (!table->children.empty()) table->UpdateChildren();
-
-            currentX += tableWidth;
-        }
     }
 
     Panel::Panel(Window* _parent, Padding _padding) : TableElement(_parent, _padding)
     {
-    }
-
-    void TableGrid::UpdateChildren()
-    {
-        if (children.empty()) return;
-        // 1. Get number of columns
-        unsigned int cols = children[0]->children.size();
-
-        // 2. Calculate available space
-        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
-        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
-
-        // 3. Find the maximum power-of-two cell size that fits
-        int maxCellSize = 1 << static_cast<int>(std::floor(
-                              std::log2(std::min(availableWidth / cols, availableHeight / children.size()))));
-
-        // 4. Calculate actual cell size with spacing
-        float cellSize = (std::min(availableWidth / cols, availableHeight / children.size()) - cellSpacing) /
-                         maxCellSize * maxCellSize;
-
-        // 5. Calculate total grid dimensions
-        float gridWidth = cellSize * cols + cellSpacing * (cols - 1); // Account for spacing between columns
-        float gridHeight =
-            cellSize * children.size() + cellSpacing * (children.size() - 1); // Account for spacing between rows
-
-        // 6. Calculate starting position to center the grid
-        float startX = rec.x + (availableWidth - gridWidth) / 2.0f;
-        float startY = rec.y + (availableHeight - gridHeight) / 2.0f;
-
-        // 7. Apply dimensions to rows and cells
-        float currentY = startY;
-        for (const auto& row : children)
-        {
-            row->rec.height = cellSize;
-            row->rec.y = currentY;
-            row->rec.x = startX;
-            row->rec.width = gridWidth;
-
-            float currentX = row->rec.x;
-            for (const auto& cell : row->children)
-            {
-                cell->rec.width = cellSize;
-                cell->rec.x = currentX;
-                cell->rec.y = currentY;
-                cell->rec.height = cellSize;
-                currentX += cellSize + cellSpacing; // Add spacing after each cell
-            }
-            currentY += cellSize + cellSpacing; // Add spacing after each row
-        }
-
-        for (auto& row : children)
-        {
-            for (auto& cell : row->children)
-            {
-                if (cell->children)
-                {
-                    cell->children->UpdateDimensions();
-                }
-            }
-        }
     }
 
     TableGrid::TableGrid(Panel* _parent, Padding _padding) : Table(_parent, _padding)
@@ -1625,69 +1769,6 @@ namespace sage
         }
     }
 
-    void Table::UpdateChildren()
-    {
-        // Account for table padding
-        float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
-        float startY = rec.y + GetPadding().up;
-        float totalRequestedPercent = 0.0f;
-        int autoSizeCount = 0;
-
-        // First pass: Calculate total of percentage-based heights
-        for (const auto& row : children)
-        {
-            if (row->autoSize)
-            {
-                autoSizeCount++;
-            }
-            else
-            {
-                totalRequestedPercent += row->requestedHeight;
-            }
-        }
-
-        if (totalRequestedPercent > 100.0f)
-        {
-            totalRequestedPercent = 100.0f;
-        }
-
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
-
-        // Second pass: Update each row
-        float currentY = startY;
-        for (const auto& row : children)
-        {
-            row->parent = this;
-            row->rec = rec;
-
-            float rowHeight;
-            if (row->autoSize)
-            {
-                rowHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
-            }
-            else
-            {
-                rowHeight = std::ceil(availableHeight * (row->requestedHeight / 100.0f));
-            }
-
-            // Set row dimensions accounting for table padding
-            row->rec.height = rowHeight;
-            row->rec.y = currentY;
-            row->rec.x = rec.x + GetPadding().left;
-            row->rec.width = rec.width - (GetPadding().left + GetPadding().right);
-
-            UpdateTextureDimensions();
-
-            if (!row->children.empty())
-            {
-                row->UpdateChildren();
-            }
-
-            currentY += rowHeight;
-        }
-    }
-
     Table::Table(Panel* _parent, Padding _padding) : TableElement(_parent, _padding)
     {
     }
@@ -1696,7 +1777,7 @@ namespace sage
     {
         children.push_back(std::make_unique<TableRow>(this, _padding));
         const auto& row = children.back();
-        UpdateChildren();
+        InitLayout();
         return row.get();
     }
 
@@ -1715,7 +1796,7 @@ namespace sage
         row->requestedHeight = _requestedHeight;
         // TODO: Calculate the _requestedHeight etc as a pixel value and save as ogDimensions. Do not use
         // requestedHeight etc after initialisation, use the original pixel values.
-        UpdateChildren();
+        InitLayout();
         return row.get();
     }
 
@@ -1723,7 +1804,7 @@ namespace sage
     {
         children.push_back(std::make_unique<TableCell>(this, _padding));
         const auto& cell = children.back();
-        UpdateChildren();
+        InitLayout();
         return cell.get();
     }
 
@@ -1742,7 +1823,7 @@ namespace sage
         cell->requestedWidth = requestedWidth;
         // TODO: Calculate the requestedWidth etc as a pixel value and save as ogDimensions. Do not use
         // requestedWidth etc after initialisation, use the original pixel values.
-        UpdateChildren();
+        InitLayout();
         return cell.get();
     }
 
@@ -1768,66 +1849,6 @@ namespace sage
         }
     }
 
-    void TableRow::UpdateChildren()
-    {
-        // Account for row padding
-        float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
-        float startX = rec.x + GetPadding().left;
-        float totalRequestedPercent = 0.0f;
-        int autoSizeCount = 0;
-
-        // First pass: Calculate total of percentage-based widths
-        for (const auto& cell : children)
-        {
-            if (cell->autoSize)
-            {
-                autoSizeCount++;
-            }
-            else
-            {
-                totalRequestedPercent += cell->requestedWidth;
-            }
-        }
-
-        if (totalRequestedPercent > 100.0f)
-        {
-            totalRequestedPercent = 100.0f;
-        }
-
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
-
-        // Second pass: Update each cell
-        float currentX = startX;
-        for (const auto& cell : children)
-        {
-            cell->parent = this;
-            cell->rec = rec;
-
-            float cellWidth;
-            if (cell->autoSize)
-            {
-                cellWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
-            }
-            else
-            {
-                cellWidth = std::ceil(availableWidth * (cell->requestedWidth / 100.0f));
-            }
-
-            // Set cell dimensions accounting for row padding
-            cell->rec.width = cellWidth;
-            cell->rec.x = currentX;
-            cell->rec.y = rec.y + GetPadding().up;
-            cell->rec.height = rec.height - (GetPadding().up + GetPadding().down);
-
-            UpdateTextureDimensions();
-
-            cell->UpdateChildren();
-
-            currentX += cellWidth;
-        }
-    }
-
     TableRow::TableRow(Table* _parent, Padding _padding) : TableElement(_parent, _padding)
     {
     }
@@ -1837,7 +1858,7 @@ namespace sage
         children = std::move(_portrait);
         auto* portrait = dynamic_cast<PartyMemberPortrait*>(children.get());
         portrait->RetrieveInfo();
-        UpdateChildren();
+        InitLayout();
         return portrait;
     }
 
@@ -1845,7 +1866,7 @@ namespace sage
     {
         children = std::move(_button);
         auto* button = dynamic_cast<GameWindowButton*>(children.get());
-        UpdateChildren();
+        InitLayout();
         return button;
     }
 
@@ -1854,7 +1875,7 @@ namespace sage
         children = std::move(_slot);
         auto* abilitySlot = dynamic_cast<AbilitySlot*>(children.get());
         abilitySlot->RetrieveInfo();
-        UpdateChildren();
+        InitLayout();
         return abilitySlot;
     }
 
@@ -1863,7 +1884,7 @@ namespace sage
         children = std::move(_slot);
         auto* slot = dynamic_cast<EquipmentSlot*>(children.get());
         slot->RetrieveInfo();
-        UpdateChildren();
+        InitLayout();
         return slot;
     }
 
@@ -1872,7 +1893,7 @@ namespace sage
         children = std::move(_slot);
         auto* slot = dynamic_cast<InventorySlot*>(children.get());
         slot->RetrieveInfo();
-        UpdateChildren();
+        InitLayout();
         return slot;
     }
 
@@ -1881,7 +1902,7 @@ namespace sage
         children = std::move(_titleBar);
         auto* titleBar = dynamic_cast<TitleBar*>(children.get());
         titleBar->SetContent(_title);
-        UpdateChildren();
+        InitLayout();
         return titleBar;
     }
 
@@ -1889,7 +1910,7 @@ namespace sage
     {
         children = std::move(_closeButton);
         auto* closeButton = dynamic_cast<CloseButton*>(children.get());
-        UpdateChildren();
+        InitLayout();
         return closeButton;
     }
 
@@ -1898,7 +1919,7 @@ namespace sage
         children = std::move(_textBox);
         auto* textbox = dynamic_cast<TextBox*>(children.get());
         textbox->SetContent(_content);
-        UpdateChildren();
+        InitLayout();
         return textbox;
     }
 
@@ -1906,7 +1927,7 @@ namespace sage
     {
         children = std::move(_dialogOption);
         auto* textbox = dynamic_cast<DialogOption*>(children.get());
-        UpdateChildren();
+        InitLayout();
         return textbox;
     }
 
@@ -1914,7 +1935,7 @@ namespace sage
     {
         children = std::move(_imageBox);
         auto* image = dynamic_cast<ImageBox*>(children.get());
-        UpdateChildren();
+        InitLayout();
         return image;
     }
 
@@ -1924,13 +1945,14 @@ namespace sage
         children = std::move(_preview);
         auto* image = dynamic_cast<EquipmentCharacterPreview*>(children.get());
         image->draggable = false;
-        UpdateChildren();
+        InitLayout();
         image->RetrieveInfo();
         return image;
     }
 
-    void TableCell::UpdateChildren()
+    void TableCell::InitLayout()
     {
+        assert(!GetWindow()->finalized);
         if (auto& element = children)
         {
             element->parent = this;
@@ -2240,7 +2262,7 @@ namespace sage
         window->rec.x = requestedPos.x;
         window->rec.y = requestedPos.y;
         window->ClampToScreen();
-        window->UpdateChildren();
+        window->InitLayout();
 
         if (auto collision = GetWindowCollision(window))
         {
