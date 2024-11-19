@@ -100,12 +100,11 @@ namespace sage
             Rectangle rec{};
             Padding padding{};
         };
-
         OriginalDimensions ogDimensions{};
-        Padding padding;
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
       public:
+        Padding padding;
         Parent* parent{};
         Child children;
 
@@ -129,7 +128,7 @@ namespace sage
             }
         }
 
-        virtual void UpdateChildren() = 0;
+        virtual void InitLayout() = 0;
         virtual void DrawDebug2D() = 0;
         virtual void Draw2D()
         {
@@ -152,12 +151,6 @@ namespace sage
                     DrawTexture(tex.value(), rec.x, rec.y, WHITE);
                 }
             }
-        }
-
-        // Returns pixel value of padding
-        [[nodiscard]] const Padding& GetPadding() const
-        {
-            return padding;
         }
 
         [[nodiscard]] Window* GetWindow()
@@ -496,7 +489,7 @@ namespace sage
         AbilitySlot* CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot);
         EquipmentSlot* CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot);
         InventorySlot* CreateInventorySlot(std::unique_ptr<InventorySlot> _slot);
-        void UpdateChildren() override;
+        void InitLayout() override;
         void DrawDebug2D() override;
         void Draw2D() override;
         ~TableCell() override = default;
@@ -512,7 +505,7 @@ namespace sage
       public:
         TableCell* CreateTableCell(Padding _padding = {0, 0, 0, 0});
         TableCell* CreateTableCell(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
-        void UpdateChildren() override;
+        void InitLayout() override;
         void DrawDebug2D() override;
         void Draw2D() override;
         ~TableRow() override = default;
@@ -528,7 +521,7 @@ namespace sage
       public:
         TableRow* CreateTableRow(Padding _padding = {0, 0, 0, 0});
         TableRow* CreateTableRow(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
-        void UpdateChildren() override;
+        void InitLayout() override;
         void DrawDebug2D() override;
         void Draw2D() override;
         ~Table() override = default;
@@ -541,7 +534,7 @@ namespace sage
         float cellSpacing = 0;
 
       public:
-        void UpdateChildren() override;
+        void InitLayout() override;
         explicit TableGrid(Panel* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Panel;
     };
@@ -557,25 +550,27 @@ namespace sage
         Table* CreateTable(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void DrawDebug2D() override;
         void Draw2D() override;
-        void UpdateChildren() override;
+        void InitLayout() override;
         explicit Panel(Window* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Window;
     };
 
     class Window : public TableElement<std::vector<std::unique_ptr<Panel>>, void>
     {
+        virtual void ScaleContents();
+
       protected:
         bool hidden = false;
         bool markForRemoval = false;
 
       public:
+        bool finalized = false;
         entt::sigh<void()> onHide;
         entt::connection windowUpdateCnx{};
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
-
+        void FinalizeLayout();
         void OnWindowUpdate(Vector2 prev, Vector2 current);
-        virtual void ScaleContents();
         void ClampToScreen();
         void OnHoverStart() override;
         void OnHoverStop() override;
@@ -589,7 +584,7 @@ namespace sage
         void Remove();
         void DrawDebug2D() override;
         void Draw2D() override;
-        void UpdateChildren() override;
+        void InitLayout() override;
         ~Window() override;
         explicit Window(Settings* _settings, Padding _padding = {0, 0, 0, 0});
         Window(Settings* _settings, float x, float y, float width, float height, Padding _padding = {0, 0, 0, 0});
