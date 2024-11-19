@@ -36,7 +36,7 @@ namespace sage
 
     void TableGrid::InitLayout()
     {
-        assert(!GetWindow()->finalized);
+        // assert(!GetWindow()->finalized);
         if (children.empty()) return;
         // 1. Get number of columns
         unsigned int cols = children[0]->children.size();
@@ -93,7 +93,7 @@ namespace sage
 
     void TableRow::InitLayout()
     {
-        assert(!GetWindow()->finalized);
+        // assert(!GetWindow()->finalized);
         // Account for row padding
         float availableWidth = rec.width - (padding.left + padding.right);
         float startX = rec.x + padding.left;
@@ -158,7 +158,7 @@ namespace sage
     // In Window class - always stacks panels vertically
     void Window::InitLayout()
     {
-        assert(!finalized);
+        // assert(!finalized);
         if (children.empty()) return;
         float availableWidth = rec.width - (padding.left + padding.right);
         float availableHeight = rec.height - (padding.up + padding.down);
@@ -282,7 +282,7 @@ namespace sage
 
     void Table::InitLayout()
     {
-        assert(!GetWindow()->finalized);
+        // assert(!GetWindow()->finalized);
         // Account for table padding
         float availableHeight = rec.height - (padding.up + padding.down);
         float startY = rec.y + padding.up;
@@ -1046,6 +1046,7 @@ namespace sage
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
             const auto _rec = tooltipWindow.value()->GetRec();
             tooltipWindow.value()->SetPos(_rec.x, _rec.y - _rec.height);
+            tooltipWindow.value()->InitLayout();
         }
     }
 
@@ -1412,9 +1413,43 @@ namespace sage
     void WindowDocked::ScaleContents()
     {
         // assert(finalized);
-        rec = {0, 0, settings->ScaleValue(ogDimensions.rec.width), settings->ScaleValue(ogDimensions.rec.height)};
+
+        rec = ogDimensions.rec;
+        padding = ogDimensions.padding;
+
+        rec = {
+            settings->ScaleValue(rec.x),
+            settings->ScaleValue(rec.y),
+            settings->ScaleValue(rec.width),
+            settings->ScaleValue(rec.height)};
+
+        padding = {
+            settings->ScaleValue(padding.up),
+            settings->ScaleValue(padding.down),
+            settings->ScaleValue(padding.left),
+            settings->ScaleValue(padding.right)};
+
         setAlignment();
+        UpdateTextureDimensions();
         InitLayout();
+        //
+        // for (auto& panel : children)
+        // {
+        //     panel->ScaleContents(settings);
+        //     for (auto& table : panel->children)
+        //     {
+        //         table->ScaleContents(settings);
+        //         for (auto& row : table->children)
+        //         {
+        //             row->ScaleContents(settings);
+        //             for (auto& cell : row->children)
+        //             {
+        //                 cell->ScaleContents(settings);
+        //                 cell->children->UpdateDimensions();
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     void WindowDocked::setAlignment()
@@ -1578,6 +1613,7 @@ namespace sage
 
     void Window::ScaleContents()
     {
+        // assert(finalized);
         if (markForRemoval) return;
 
         rec = ogDimensions.rec;
@@ -1596,6 +1632,7 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
+
         InitLayout();
     }
 
@@ -1714,6 +1751,7 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
+        InitLayout();
     }
 
     TooltipWindow::~TooltipWindow()
@@ -2012,7 +2050,7 @@ namespace sage
 
     void TableCell::InitLayout()
     {
-        assert(!GetWindow()->finalized);
+        // assert(!GetWindow()->finalized);
         if (auto& element = children)
         {
             element->parent = this;
@@ -2236,9 +2274,10 @@ namespace sage
     {
         windows.push_back(std::move(_window));
         auto* window = windows.back().get();
-        window->ScaleContents();
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window);
+        window->InitLayout();
+        // window->ScaleContents();
         return window;
     }
 
@@ -2246,11 +2285,10 @@ namespace sage
     {
         windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->ScaleContents();
-
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);
-
+        window->InitLayout();
+        // window->ScaleContents();
         return window;
     }
 
@@ -2460,8 +2498,6 @@ namespace sage
         auto& item = registry->get<ItemComponent>(entity);
         Vector2 pos = GetWorldToScreen(
             gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
-        // TODO: You're passing an already scaled value, hence why it's acting weird.
-
         // pos.x += 20; // TODO: magic number
         GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.name, pos);
     }
