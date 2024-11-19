@@ -395,7 +395,7 @@ namespace sage
             cell->CreateImagebox(std::move(imgBox));
         };
 
-        auto panel2 = window->CreatePanel({28, 0, 24, 24});
+        auto panel2 = window->CreatePanel({32, 0, 24, 24});
         {
             auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
             for (unsigned int row = 0; row < maxRows; ++row)

@@ -211,9 +211,6 @@ namespace sage
 
             if (!panel->children.empty()) panel->InitLayout();
 
-            panel->ogDimensions.rec = rec;
-            panel->ogDimensions.padding = padding;
-
             currentY += panelHeight;
         }
     }
@@ -272,9 +269,6 @@ namespace sage
             UpdateTextureDimensions();
 
             if (!table->children.empty()) table->InitLayout();
-
-            table->ogDimensions.rec = rec;
-            table->ogDimensions.padding = padding;
 
             currentX += tableWidth;
         }
@@ -339,9 +333,6 @@ namespace sage
             {
                 row->InitLayout();
             }
-
-            row->ogDimensions.rec = rec;
-            row->ogDimensions.padding = padding;
 
             currentY += rowHeight;
         }
@@ -1412,10 +1403,7 @@ namespace sage
 
     void WindowDocked::ScaleContents()
     {
-        // assert(finalized);
-
-        rec = ogDimensions.rec;
-        padding = ogDimensions.padding;
+        ResetAll();
 
         rec = {
             settings->ScaleValue(rec.x),
@@ -1431,25 +1419,24 @@ namespace sage
 
         setAlignment();
         UpdateTextureDimensions();
-        InitLayout();
-        //
-        // for (auto& panel : children)
-        // {
-        //     panel->ScaleContents(settings);
-        //     for (auto& table : panel->children)
-        //     {
-        //         table->ScaleContents(settings);
-        //         for (auto& row : table->children)
-        //         {
-        //             row->ScaleContents(settings);
-        //             for (auto& cell : row->children)
-        //             {
-        //                 cell->ScaleContents(settings);
-        //                 cell->children->UpdateDimensions();
-        //             }
-        //         }
-        //     }
-        // }
+
+        for (auto& panel : children)
+        {
+            panel->ScaleContents(settings);
+            for (auto& table : panel->children)
+            {
+                table->ScaleContents(settings);
+                for (auto& row : table->children)
+                {
+                    row->ScaleContents(settings);
+                    for (auto& cell : row->children)
+                    {
+                        cell->ScaleContents(settings);
+                        cell->children->UpdateDimensions();
+                    }
+                }
+            }
+        }
     }
 
     void WindowDocked::setAlignment()
@@ -1493,8 +1480,6 @@ namespace sage
 
         rec.x = xOffset + settings->ScaleValue(baseXOffset);
         rec.y = yOffset + settings->ScaleValue(baseYOffset);
-
-        // UpdateChildren()
     }
 
     WindowDocked::WindowDocked(
@@ -1601,8 +1586,30 @@ namespace sage
 
     void Window::FinalizeLayout()
     {
-        InitLayout();
-        finalized = true;
+        ogDimensions.rec = rec;
+        ogDimensions.padding = padding;
+        for (auto& panel : children)
+        {
+            panel->ogDimensions.rec = panel->rec;
+            panel->ogDimensions.padding = panel->padding;
+
+            for (auto& table : panel->children)
+            {
+                table->ogDimensions.rec = table->rec;
+                table->ogDimensions.padding = table->padding;
+                for (auto& row : table->children)
+                {
+                    row->ogDimensions.rec = row->rec;
+                    row->ogDimensions.padding = row->padding;
+                    for (auto& cell : row->children)
+                    {
+                        cell->ogDimensions.rec = cell->rec;
+                        cell->ogDimensions.padding = cell->padding;
+                    }
+                }
+            }
+        }
+
         ScaleContents();
     }
 
@@ -1611,13 +1618,45 @@ namespace sage
         ScaleContents();
     }
 
+    void Window::ResetAll()
+    {
+        rec = ogDimensions.rec;
+        padding = ogDimensions.padding;
+
+        for (auto& panel : children)
+        {
+            panel->SetPos(panel->ogDimensions.rec.x, panel->ogDimensions.rec.y);
+            panel->SetDimensions(panel->ogDimensions.rec.width, panel->ogDimensions.rec.height);
+            panel->padding = panel->ogDimensions.padding;
+
+            for (auto& table : panel->children)
+            {
+                table->SetPos(table->ogDimensions.rec.x, table->ogDimensions.rec.y);
+                table->SetDimensions(table->ogDimensions.rec.width, table->ogDimensions.rec.height);
+                table->padding = table->ogDimensions.padding;
+                for (auto& row : table->children)
+                {
+                    row->SetPos(panel->ogDimensions.rec.x, row->ogDimensions.rec.y);
+                    row->SetDimensions(row->ogDimensions.rec.width, row->ogDimensions.rec.height);
+                    row->padding = row->ogDimensions.padding;
+                    for (auto& cell : row->children)
+                    {
+                        cell->SetPos(cell->ogDimensions.rec.x, cell->ogDimensions.rec.y);
+                        cell->SetDimensions(cell->ogDimensions.rec.width, cell->ogDimensions.rec.height);
+                        cell->padding = cell->ogDimensions.padding;
+                        cell->children->UpdateDimensions();
+                    }
+                }
+            }
+        }
+    }
+
     void Window::ScaleContents()
     {
         // assert(finalized);
         if (markForRemoval) return;
 
-        rec = ogDimensions.rec;
-        padding = ogDimensions.padding;
+        ResetAll();
 
         rec = {
             settings->ScaleValue(rec.x),
@@ -1633,7 +1672,25 @@ namespace sage
 
         UpdateTextureDimensions();
 
-        InitLayout();
+        for (auto& panel : children)
+        {
+            panel->ScaleContents(settings);
+            for (auto& table : panel->children)
+            {
+                table->ScaleContents(settings);
+                for (auto& row : table->children)
+                {
+                    row->ScaleContents(settings);
+                    for (auto& cell : row->children)
+                    {
+                        cell->ScaleContents(settings);
+                        cell->children->UpdateDimensions();
+                    }
+                }
+            }
+        }
+
+        // InitLayout();
     }
 
     void Window::ClampToScreen()
@@ -2277,7 +2334,6 @@ namespace sage
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window);
         window->InitLayout();
-        // window->ScaleContents();
         return window;
     }
 
@@ -2288,7 +2344,6 @@ namespace sage
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);
         window->InitLayout();
-        // window->ScaleContents();
         return window;
     }
 
