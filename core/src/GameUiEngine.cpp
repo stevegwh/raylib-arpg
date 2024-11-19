@@ -33,6 +33,7 @@ namespace sage
 {
 
 #pragma region init
+
     void TableGrid::InitLayout()
     {
         assert(!GetWindow()->finalized);
@@ -65,18 +66,14 @@ namespace sage
         float currentY = startY;
         for (const auto& row : children)
         {
-            row->rec.height = cellSize;
-            row->rec.y = currentY;
-            row->rec.x = startX;
-            row->rec.width = gridWidth;
+            row->SetPos(startX, currentY);
+            row->SetDimensions(gridWidth, cellSize);
 
-            float currentX = row->rec.x;
+            float currentX = row->GetRec().x;
             for (const auto& cell : row->children)
             {
-                cell->rec.width = cellSize;
-                cell->rec.x = currentX;
-                cell->rec.y = currentY;
-                cell->rec.height = cellSize;
+                cell->SetPos(currentX, currentY);
+                cell->SetDimensions(cellSize, cellSize);
                 currentX += cellSize + cellSpacing; // Add spacing after each cell
             }
             currentY += cellSize + cellSpacing; // Add spacing after each row
@@ -400,8 +397,8 @@ namespace sage
 
     void CellElement::UpdateDimensions()
     {
-        tex.width = parent->rec.width;
-        tex.height = parent->rec.height;
+        tex.width = parent->GetRec().width;
+        tex.height = parent->GetRec().height;
     }
 
     CellElement::CellElement(
@@ -440,7 +437,7 @@ namespace sage
     void TextBox::UpdateDimensions()
     {
         UpdateFontScaling();
-        float availableWidth = parent->rec.width - (parent->padding.left + parent->padding.right);
+        float availableWidth = parent->GetRec().width - (parent->padding.left + parent->padding.right);
 
         if (fontInfo.overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
@@ -501,7 +498,7 @@ namespace sage
 
         float horiOffset = 0;
         float vertOffset = 0;
-        float availableHeight = parent->rec.height - (parent->padding.up + parent->padding.down);
+        float availableHeight = parent->GetRec().height - (parent->padding.up + parent->padding.down);
 
         if (vertAlignment == VertAlignment::MIDDLE)
         {
@@ -523,13 +520,13 @@ namespace sage
         else if (horiAlignment == HoriAlignment::WINDOW_CENTER)
         {
             auto window = parent->GetWindow();
-            float windowAvailableWidth = window->rec.width - (window->padding.left + window->padding.right);
+            float windowAvailableWidth = window->GetRec().width - (window->padding.left + window->padding.right);
             horiOffset = (windowAvailableWidth - textSize.x) / 2;
         }
 
         rec = {
-            parent->rec.x + parent->padding.left + horiOffset,
-            parent->rec.y + parent->padding.up + vertOffset,
+            parent->GetRec().x + parent->padding.left + horiOffset,
+            parent->GetRec().y + parent->padding.up + vertOffset,
             textSize.x,
             textSize.y};
     }
@@ -608,7 +605,8 @@ namespace sage
     {
         draggedWindow = parent->GetWindow();
         auto mousePos = GetMousePosition();
-        dragOffset = {mousePos.x - draggedWindow.value()->rec.x, mousePos.y - draggedWindow.value()->rec.y};
+        dragOffset = {
+            mousePos.x - draggedWindow.value()->GetRec().x, mousePos.y - draggedWindow.value()->GetRec().y};
     }
 
     void TitleBar::DragUpdate()
@@ -617,8 +615,7 @@ namespace sage
         auto& window = draggedWindow.value();
         auto newPos = Vector2Subtract(mousePos, dragOffset);
 
-        window->rec.x = newPos.x;
-        window->rec.y = newPos.y;
+        window->SetPos(newPos.x, newPos.y);
         window->ClampToScreen();
         window->InitLayout();
     }
@@ -696,8 +693,8 @@ namespace sage
     Dimensions ImageBox::calculateAvailableSpace() const
     {
         return {
-            parent->rec.width - (parent->padding.left + parent->padding.right),
-            parent->rec.height - (parent->padding.up + parent->padding.down)};
+            parent->GetRec().width - (parent->padding.left + parent->padding.right),
+            parent->GetRec().height - (parent->padding.up + parent->padding.down)};
     }
 
     float ImageBox::calculateAspectRatio() const
@@ -748,8 +745,8 @@ namespace sage
     void ImageBox::updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space)
     {
         rec = Rectangle{
-            parent->rec.x + parent->padding.left + offset.x,
-            parent->rec.y + parent->padding.up + offset.y,
+            parent->GetRec().x + parent->padding.left + offset.x,
+            parent->GetRec().y + parent->padding.up + offset.y,
             dimensions.width,
             dimensions.height};
 
@@ -888,16 +885,16 @@ namespace sage
             engine->registry
                 ->get<EquipmentComponent>(engine->gameData->controllableActorSystem->GetSelectedActor())
                 .renderTexture;
-        renderTexture.texture.width = parent->rec.width;
-        renderTexture.texture.height = parent->rec.height;
+        renderTexture.texture.width = parent->GetRec().width;
+        renderTexture.texture.height = parent->GetRec().height;
     }
 
     void EquipmentCharacterPreview::RetrieveInfo()
     {
         engine->gameData->equipmentSystem->GenerateRenderTexture(
             engine->gameData->controllableActorSystem->GetSelectedActor(),
-            parent->rec.width * 4,
-            parent->rec.height * 4);
+            parent->GetRec().width * 4,
+            parent->GetRec().height * 4);
         UpdateDimensions();
     }
 
@@ -1047,8 +1044,8 @@ namespace sage
         if (auto* ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber))
         {
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
-            tooltipWindow.value()->rec.y = tooltipWindow.value()->rec.y - tooltipWindow.value()->rec.height;
-            tooltipWindow.value()->InitLayout();
+            const auto _rec = tooltipWindow.value()->GetRec();
+            tooltipWindow.value()->SetPos(_rec.x, _rec.y - _rec.height);
         }
     }
 
@@ -1173,7 +1170,7 @@ namespace sage
         else
         {
             if (const auto* characterWindow = parent->GetWindow();
-                !PointInsideRect(characterWindow->rec, GetMousePosition()))
+                !PointInsideRect(characterWindow->GetRec(), GetMousePosition()))
             {
                 dropItemInWorld();
             }
@@ -1717,7 +1714,6 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
-        InitLayout();
     }
 
     TooltipWindow::~TooltipWindow()
@@ -2056,7 +2052,7 @@ namespace sage
     void IdleState::Update()
     {
         auto mousePos = GetMousePosition();
-        if (PointInsideRect(element->parent->rec, mousePos))
+        if (PointInsideRect(element->parent->GetRec(), mousePos))
         {
             element->ChangeState(std::make_unique<HoverState>(element, engine));
         }
@@ -2088,7 +2084,7 @@ namespace sage
         engine->gameData->cursor->Disable();
 
         auto mousePos = GetMousePosition();
-        if (!PointInsideRect(element->parent->rec, mousePos))
+        if (!PointInsideRect(element->parent->GetRec(), mousePos))
         {
             element->ChangeState(std::make_unique<IdleState>(element, engine));
             return;
@@ -2227,13 +2223,12 @@ namespace sage
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
-        // tooltipWindow->tex = _nPatchTexture;
-        // tooltipWindow->textureStretchMode = _textureStretchMode;
+
         tooltipWindow->ScaleContents();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
         tooltipWindow->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(tooltipWindow.get());
-
+        tooltipWindow->InitLayout();
         return tooltipWindow.get();
     }
 
@@ -2324,7 +2319,7 @@ namespace sage
                     for (const auto& cell : row->children)
                     {
                         const auto element = cell->children.get();
-                        if (PointInsideRect(cell->rec, mousePos))
+                        if (PointInsideRect(cell->GetRec(), mousePos))
                         {
                             return element;
                         }

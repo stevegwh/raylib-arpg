@@ -81,8 +81,14 @@ namespace sage
 
     class UIElement
     {
-      public:
+      protected:
         Rectangle rec{};
+
+      public:
+        [[nodiscard]] const Rectangle& GetRec() const
+        {
+            return rec;
+        }
         virtual void OnIdleStart(){};
         virtual void OnIdleStop(){};
         virtual void OnHoverStart();
@@ -107,9 +113,20 @@ namespace sage
         Padding padding;
         Parent* parent{};
         Child children;
-
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
+
+        void SetPos(float x, float y)
+        {
+            rec = {x, y, rec.width, rec.height};
+            InitLayout();
+        }
+
+        void SetDimensions(float w, float h)
+        {
+            rec = {rec.x, rec.y, w, h};
+            InitLayout();
+        }
 
         void SetTexture(const Texture& _tex, TextureStretchMode _stretchMode)
         {
@@ -569,6 +586,7 @@ namespace sage
         entt::connection windowUpdateCnx{};
         bool mouseHover = false;
         const Settings* settings{}; // for screen width/height
+
         void FinalizeLayout();
         void OnWindowUpdate(Vector2 prev, Vector2 current);
         void ClampToScreen();
