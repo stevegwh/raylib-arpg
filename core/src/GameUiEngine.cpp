@@ -104,7 +104,7 @@ namespace sage
     void TextBox::SetContent(const std::string& _content)
     {
         content = _content;
-        parent->UpdateChildren(); // Trigger scaling etc.
+        UpdateDimensions();
     }
 
     Font TextBox::GetFont() const
@@ -303,7 +303,6 @@ namespace sage
         window->rec.x = newPos.x;
         window->rec.y = newPos.y;
         window->ClampToScreen();
-        window->UpdateChildren();
     }
 
     void TitleBar::OnDrop(CellElement* droppedElement)
@@ -1095,11 +1094,11 @@ namespace sage
     {
     }
 
-    void WindowDocked::ScaleContents()
+    void WindowDocked::ScaleContents(Settings* _settings)
     {
-        rec = {0, 0, settings->ScaleValue(ogDimensions.rec.width), settings->ScaleValue(ogDimensions.rec.height)};
+        assert(finalized);
         SetAlignment(vertAlignment, horiAlignment);
-        UpdateChildren();
+        scaleAllChildren();
     }
 
     void WindowDocked::SetAlignment(VertAlignment vert, HoriAlignment hori)
@@ -1110,42 +1109,82 @@ namespace sage
         float xOffset = 0;
         float yOffset = 0;
 
-        // Calculate horizontal position
-        switch (hori)
+        if (finalized)
         {
-        case HoriAlignment::LEFT:
-            xOffset = 0;
-            break;
+            // Calculate horizontal position
+            switch (hori)
+            {
+            case HoriAlignment::LEFT:
+                xOffset = 0;
+                break;
 
-        case HoriAlignment::CENTER:
-            xOffset = (settings->screenWidth - rec.width) / 2;
-            break;
+            case HoriAlignment::CENTER:
+                xOffset = (settings->screenWidth - rec.width) / 2;
+                break;
 
-        case HoriAlignment::RIGHT:
-            xOffset = settings->screenWidth - rec.width;
-            break;
-        default:;
+            case HoriAlignment::RIGHT:
+                xOffset = settings->screenWidth - rec.width;
+                break;
+            default:;
+            }
+
+            // Calculate vertical position
+            switch (vert)
+            {
+            case VertAlignment::TOP:
+                yOffset = 0;
+                break;
+
+            case VertAlignment::MIDDLE:
+                yOffset = (settings->screenHeight - rec.height) / 2;
+                break;
+
+            case VertAlignment::BOTTOM:
+                yOffset = settings->screenHeight - rec.height;
+                break;
+            }
+
+            rec.x = xOffset + settings->ScaleValue(baseXOffset);
+            rec.y = yOffset + settings->ScaleValue(baseYOffset);
         }
-
-        // Calculate vertical position
-        switch (vert)
+        else
         {
-        case VertAlignment::TOP:
-            yOffset = 0;
-            break;
+            // Calculate horizontal position
+            switch (hori)
+            {
+            case HoriAlignment::LEFT:
+                xOffset = 0;
+                break;
 
-        case VertAlignment::MIDDLE:
-            yOffset = (settings->screenHeight - rec.height) / 2;
-            break;
+            case HoriAlignment::CENTER:
+                xOffset = (Settings::TARGET_SCREEN_WIDTH - rec.width) / 2;
+                break;
 
-        case VertAlignment::BOTTOM:
-            yOffset = settings->screenHeight - rec.height;
-            break;
+            case HoriAlignment::RIGHT:
+                xOffset = Settings::TARGET_SCREEN_WIDTH - rec.width;
+                break;
+            default:;
+            }
+
+            // Calculate vertical position
+            switch (vert)
+            {
+            case VertAlignment::TOP:
+                yOffset = 0;
+                break;
+
+            case VertAlignment::MIDDLE:
+                yOffset = (Settings::TARGET_SCREEN_HEIGHT - rec.height) / 2;
+                break;
+
+            case VertAlignment::BOTTOM:
+                yOffset = Settings::TARGET_SCREEN_HEIGHT - rec.height;
+                break;
+            }
+
+            rec.x = xOffset + baseXOffset;
+            rec.y = yOffset + baseYOffset;
         }
-
-        rec.x = xOffset + settings->ScaleValue(baseXOffset);
-        rec.y = yOffset + settings->ScaleValue(baseYOffset);
-
         // UpdateChildren()
     }
 
@@ -1210,13 +1249,51 @@ namespace sage
         onHide.publish();
     }
 
-    void Window::OnWindowUpdate(Vector2 prev, Vector2 current)
+    void Window::scaleAllChildren()
     {
-        ScaleContents();
+        for (auto& panel : children)
+        {
+            panel->ScaleContents(settings);
+            for (auto& table : panel->children)
+            {
+                table->ScaleContents(settings);
+                for (auto& row : table->children)
+                {
+                    row->ScaleContents(settings);
+                    for (auto& cell : row->children)
+                    {
+                        cell->ScaleContents(settings);
+                    }
+                }
+            }
+        }
+
+        for (auto& panel : children)
+        {
+            for (auto& table : panel->children)
+            {
+                for (auto& row : table->children)
+                {
+                    for (auto& cell : row->children)
+                    {
+                        if (cell->children)
+                        {
+                            cell->children->UpdateDimensions();
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    void Window::ScaleContents()
+    void Window::OnWindowUpdate(Vector2 prev, Vector2 current)
     {
+        ScaleContents(settings);
+    }
+
+    void Window::ScaleContents(Settings* _settings)
+    {
+        assert(finalized); // Scaling should take place after window layout is finalized
         if (markForRemoval) return;
 
         rec = ogDimensions.rec;
@@ -1235,7 +1312,9 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
-        UpdateChildren();
+        // UpdateChildren();
+
+        scaleAllChildren();
     }
 
     void Window::ClampToScreen()
@@ -1309,10 +1388,9 @@ namespace sage
     // In Window class - always stacks panels vertically
     void Window::UpdateChildren()
     {
+        assert(!finalized);
         if (children.empty()) return;
-        // TODO: Run "autosize" as a function during the creation of the windows then store the final dimensions in
-        // ogDimensions. Beyond that, you can scale up using this function. This will make it easier to create
-        // things pixel perfect.
+
         float availableWidth = rec.width - (GetPadding().left + GetPadding().right);
         float availableHeight = rec.height - (GetPadding().up + GetPadding().down);
         float startX = rec.x + GetPadding().left;
@@ -1364,6 +1442,9 @@ namespace sage
 
             if (!panel->children.empty()) panel->UpdateChildren();
 
+            panel->ogDimensions.rec = rec;
+            panel->ogDimensions.padding = padding;
+
             currentY += panelHeight;
         }
     }
@@ -1382,9 +1463,10 @@ namespace sage
     {
     }
 
-    void TooltipWindow::ScaleContents()
+    void TooltipWindow::ScaleContents(Settings* _settings)
     {
         // Tooltips original position is scaled to the screen already
+        assert(finalized);
         if (markForRemoval) return;
 
         rec.width = ogDimensions.rec.width;
@@ -1400,7 +1482,8 @@ namespace sage
             settings->ScaleValue(padding.right)};
 
         UpdateTextureDimensions();
-        UpdateChildren();
+        // UpdateChildren();
+        scaleAllChildren();
     }
 
     TooltipWindow::~TooltipWindow()
@@ -1531,6 +1614,8 @@ namespace sage
 
             if (!table->children.empty()) table->UpdateChildren();
 
+            table->ogDimensions.rec = rec;
+            table->ogDimensions.padding = padding;
             currentX += tableWidth;
         }
     }
@@ -1683,7 +1768,8 @@ namespace sage
             {
                 row->UpdateChildren();
             }
-
+            row->ogDimensions.rec = rec;
+            row->ogDimensions.padding = padding;
             currentY += rowHeight;
         }
     }
@@ -1824,6 +1910,9 @@ namespace sage
 
             cell->UpdateChildren();
 
+            cell->ogDimensions.rec = rec;
+            cell->ogDimensions.padding = padding;
+
             currentX += cellWidth;
         }
     }
@@ -1933,7 +2022,7 @@ namespace sage
     {
         if (auto& element = children)
         {
-            element->parent = this;
+            // element->parent = this;
             element->rec = rec;
             element->UpdateDimensions();
         }
@@ -2152,7 +2241,7 @@ namespace sage
             std::make_unique<TooltipWindow>(gameData->settings, parentWindow, x, y, _width, _height, _padding);
         window->tex = _nPatchTexture;
         window->textureStretchMode = _textureStretchMode;
-        window->ScaleContents();
+        window->ScaleContents(gameData->settings);
         // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
@@ -2174,7 +2263,6 @@ namespace sage
         auto window = std::make_unique<Window>(gameData->settings, x, y, _width, _height, _padding);
         window->tex = _nPatchTexture;
         window->textureStretchMode = _textureStretchMode;
-        window->ScaleContents();
         // PlaceWindow(window.get(), window->GetPosition());
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
@@ -2199,7 +2287,9 @@ namespace sage
         window->ogDimensions.rec.height = _height;
         window->baseXOffset = _xOffset;
         window->baseYOffset = _yOffset;
-        window->ScaleContents();
+        window->rec = {0, 0, window->ogDimensions.rec.width, window->ogDimensions.rec.height};
+        window->SetAlignment(window->vertAlignment, window->horiAlignment);
+        window->UpdateChildren();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);
@@ -2227,7 +2317,10 @@ namespace sage
         window->baseYOffset = _yOffset;
         window->tex = _nPatchTexture;
         window->textureStretchMode = _textureStretchMode;
-        window->ScaleContents();
+
+        window->rec = {0, 0, window->ogDimensions.rec.width, window->ogDimensions.rec.height};
+        window->SetAlignment(window->vertAlignment, window->horiAlignment);
+        window->UpdateChildren();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
         window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);

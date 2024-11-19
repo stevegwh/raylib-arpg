@@ -108,6 +108,7 @@ namespace sage
             auto portrait = std::make_unique<PartyMemberPortrait>(engine, cell, i);
             cell->CreatePartyMemberPortrait(std::move(portrait));
         }
+        window->FinalizeLayout();
         return window;
     }
 
@@ -142,7 +143,7 @@ namespace sage
         }
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
-
+        window->FinalizeLayout();
         return window;
     }
 
@@ -164,7 +165,7 @@ namespace sage
             auto textbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(textbox), name);
         }
-
+        window->FinalizeLayout();
         return window;
     }
 
@@ -192,7 +193,7 @@ namespace sage
             cell->CreateTextbox(
                 std::move(bodyTextbox), std::format("HP: {}/{}", combatInfo.data.hp, combatInfo.data.maxHp));
         }
-
+        window->FinalizeLayout();
         return window;
     }
 
@@ -220,7 +221,7 @@ namespace sage
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
             cell->CreateTextbox(std::move(bodyTextbox), item.description);
         }
-
+        window->FinalizeLayout();
         return window;
     }
 
@@ -246,7 +247,7 @@ namespace sage
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
             cell->CreateTextbox(std::move(bodyTextbox), ability.description);
         }
-
+        window->FinalizeLayout();
         return window;
     }
 
@@ -285,6 +286,7 @@ namespace sage
                 }
             }
         }
+        window->FinalizeLayout();
         window->Hide();
         return window;
     }
@@ -378,6 +380,7 @@ namespace sage
             createEquipSlot(table, 3, 0, EquipmentSlotName::RING1);
             createEquipSlot(table, 5, 0, EquipmentSlotName::RIGHTHAND);
         }
+        window->FinalizeLayout();
         window->Hide();
         return window;
     }
@@ -420,6 +423,7 @@ namespace sage
             auto option = std::make_unique<DialogOption>(engine, optionCell, o, _fontInfo);
             optionCell->CreateDialogOption(std::move(option));
         }
+        window->FinalizeLayout();
         return window;
     }
 
@@ -448,7 +452,7 @@ namespace sage
             cell1,
             ResourceManager::GetInstance().TextureLoad("resources/icons/ui/equipment.png"),
             equipmentWindow));
-
+        window->FinalizeLayout();
         return window;
     }
 } // namespace sage

@@ -109,6 +109,24 @@ namespace sage
         Parent* parent{};
         Child children;
 
+        virtual void ScaleContents(Settings* _settings)
+        {
+            rec = ogDimensions.rec;
+            padding = ogDimensions.padding;
+
+            rec = {
+                _settings->ScaleValue(rec.x),
+                _settings->ScaleValue(rec.y),
+                _settings->ScaleValue(rec.width),
+                _settings->ScaleValue(rec.height)};
+
+            padding = {
+                _settings->ScaleValue(padding.up),
+                _settings->ScaleValue(padding.down),
+                _settings->ScaleValue(padding.left),
+                _settings->ScaleValue(padding.right)};
+        }
+
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
@@ -565,17 +583,24 @@ namespace sage
     class Window : public TableElement<std::vector<std::unique_ptr<Panel>>, void>
     {
       protected:
+        bool finalized = false;
         bool hidden = false;
         bool markForRemoval = false;
+        void scaleAllChildren();
 
       public:
         entt::sigh<void()> onHide;
         entt::connection windowUpdateCnx{};
         bool mouseHover = false;
-        const Settings* settings{}; // for screen width/height
-
+        Settings* settings{}; // for screen width/height
+        void FinalizeLayout()
+        {
+            UpdateChildren();
+            finalized = true;
+            ScaleContents(settings);
+        }
         void OnWindowUpdate(Vector2 prev, Vector2 current);
-        virtual void ScaleContents();
+        void ScaleContents(Settings* _settings) override;
         void ClampToScreen();
         void OnHoverStart() override;
         void OnHoverStop() override;
@@ -601,7 +626,7 @@ namespace sage
         entt::connection parentWindowHideCnx;
 
       public:
-        void ScaleContents() override;
+        void ScaleContents(Settings* _settings) override;
         ~TooltipWindow() override;
         TooltipWindow(
             Settings* _settings,
@@ -623,7 +648,7 @@ namespace sage
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
       public:
-        void ScaleContents() override;
+        void ScaleContents(Settings* _settings) override;
         WindowDocked(
             Settings* _settings,
             VertAlignment _vertAlignment,
