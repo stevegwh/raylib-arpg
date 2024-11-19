@@ -1726,7 +1726,15 @@ namespace sage
     }
 
     TooltipWindow::TooltipWindow(
-        Settings* _settings, Window* parentWindow, float x, float y, float width, float height, Padding _padding)
+        Settings* _settings,
+        Window* parentWindow,
+        const Texture& _tex,
+        TextureStretchMode _stretchMode,
+        float x,
+        float y,
+        float width,
+        float height,
+        Padding _padding)
         : Window(_settings, x, y, width, height, _padding)
     {
         if (parentWindow)
@@ -1734,6 +1742,8 @@ namespace sage
             entt::sink sink{parentWindow->onHide};
             parentWindowHideCnx = sink.connect<&TooltipWindow::Remove>(this);
         }
+        tex = _tex;
+        textureStretchMode = _stretchMode;
     }
 
     void Panel::DrawDebug2D()
@@ -2214,25 +2224,16 @@ namespace sage
         }
     }
 
-    TooltipWindow* GameUIEngine::CreateTooltipWindow(
-        Window* parentWindow,
-        const Texture& _nPatchTexture,
-        TextureStretchMode _textureStretchMode,
-        const float x,
-        const float y,
-        const float _width,
-        const float _height,
-        Padding _padding)
+    TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
-        auto window =
-            std::make_unique<TooltipWindow>(gameData->settings, parentWindow, x, y, _width, _height, _padding);
-        window->tex = _nPatchTexture;
-        window->textureStretchMode = _textureStretchMode;
-        window->ScaleContents();
+        tooltipWindow = std::move(_tooltipWindow);
+        // tooltipWindow->tex = _nPatchTexture;
+        // tooltipWindow->textureStretchMode = _textureStretchMode;
+        tooltipWindow->ScaleContents();
 
         entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window.get());
-        tooltipWindow = std::move(window);
+        tooltipWindow->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(tooltipWindow.get());
+
         return tooltipWindow.get();
     }
 
