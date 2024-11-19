@@ -110,9 +110,6 @@ namespace sage
 
         virtual void ScaleContents(Settings* _settings)
         {
-            //            rec = ogDimensions.rec;
-            //            padding = ogDimensions.padding;
-
             rec = {
                 _settings->ScaleValue(rec.x),
                 _settings->ScaleValue(rec.y),
@@ -130,14 +127,13 @@ namespace sage
 
         void SetPos(float x, float y)
         {
+            // TODO: Override this for the base Window and update ogDimensions.rec.x/y with the unscaled number?
             rec = {x, y, rec.width, rec.height};
-            // InitLayout();
         }
 
         void SetDimensions(float w, float h)
         {
             rec = {rec.x, rec.y, w, h};
-            // InitLayout();
         }
 
         void SetTexture(const Texture& _tex, TextureStretchMode _stretchMode)
@@ -627,6 +623,8 @@ namespace sage
             float height,
             Padding _padding = {0, 0, 0, 0});
         Window(Settings* _settings, float x, float y, float width, float height, Padding _padding = {0, 0, 0, 0});
+
+        friend class TitleBar;
         friend class GameUIEngine;
     };
 
