@@ -152,7 +152,7 @@ namespace sage
     void ModelSafe::UpdateAnimation(ModelAnimation anim, int frame) const
     {
         // UpdateModelAnimation(rlmodel, anim, frame);
-        UpdateModelAnimationBoneMatrices(rlmodel, anim, frame);
+        UpdateModelAnimationBones(rlmodel, anim, frame);
     }
 
     void ModelSafe::Draw(Vector3 position, float scale, Color tint) const
