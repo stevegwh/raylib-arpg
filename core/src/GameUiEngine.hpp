@@ -71,20 +71,11 @@ namespace sage
         float right = 0;
     };
 
-    struct Margin
-    {
-        float up = 0;
-        float down = 0;
-        float left = 0;
-        float right = 0;
-    };
-
     class UIElement
     {
       protected:
-        Rectangle rec{};
-
       public:
+        Rectangle rec{};
         [[nodiscard]] const Rectangle& GetRec() const
         {
             return rec;
@@ -106,11 +97,12 @@ namespace sage
             Rectangle rec{};
             Padding padding{};
         };
-        OriginalDimensions ogDimensions{};
+
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
       public:
         Padding padding;
+        OriginalDimensions ogDimensions{};
         Parent* parent{};
         Child children;
         std::optional<Texture> tex{};
@@ -118,8 +110,8 @@ namespace sage
 
         virtual void ScaleContents(Settings* _settings)
         {
-            rec = ogDimensions.rec;
-            padding = ogDimensions.padding;
+            //            rec = ogDimensions.rec;
+            //            padding = ogDimensions.padding;
 
             rec = {
                 _settings->ScaleValue(rec.x),
@@ -599,9 +591,9 @@ namespace sage
       protected:
         bool hidden = false;
         bool markForRemoval = false;
+        void ResetAll();
 
       public:
-        bool finalized = false;
         entt::sigh<void()> onHide;
         entt::connection windowUpdateCnx{};
         bool mouseHover = false;
