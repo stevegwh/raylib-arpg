@@ -160,8 +160,8 @@ namespace sage
     TooltipWindow* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.1;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.05;
         auto tooltip = std::make_unique<TooltipWindow>(
             engine->gameData->settings,
             nullptr,
@@ -192,8 +192,8 @@ namespace sage
         GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos)
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.1;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.05;
         auto tooltip = std::make_unique<TooltipWindow>(
             engine->gameData->settings,
             nullptr,
