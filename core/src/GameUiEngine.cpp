@@ -1727,9 +1727,9 @@ namespace sage
         {
             rec.x = settings->screenWidth - rec.width;
         }
-        if (rec.y + rec.height > settings->screenHeight)
+        if (rec.y + rec.height > settings->screenHeight + rec.height / 2)
         {
-            rec.y = settings->screenHeight - rec.height;
+            rec.y = settings->screenHeight - rec.height / 2;
         }
         if (rec.x < 0)
         {
