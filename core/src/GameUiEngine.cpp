@@ -2574,7 +2574,7 @@ namespace sage
         auto& item = registry->get<ItemComponent>(entity);
         Vector2 pos = GetWorldToScreen(
             gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
-        // pos.x += 20; // TODO: magic number
+        pos.x += gameData->settings->ScaleValueWidth(20); // TODO: magic number
         GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.name, pos);
     }
 
@@ -2585,7 +2585,7 @@ namespace sage
         auto& combatable = registry->get<CombatableActor>(entity);
         Vector2 pos = GetWorldToScreen(
             gameData->cursor->getMouseHitInfo().rlCollision.point, *gameData->camera->getRaylibCam());
-        pos.x += 20; // TODO: magic number
+        pos.x += gameData->settings->ScaleValueWidth(20); // TODO: magic number
         GameUiFactory::CreateCombatableTooltip(gameData->uiEngine.get(), renderable.name, combatable, pos);
     }
 
