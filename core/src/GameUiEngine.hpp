@@ -589,7 +589,7 @@ namespace sage
       protected:
         bool hidden = false;
         bool markForRemoval = false;
-        void ResetAll();
+        void resetAll();
 
       public:
         entt::sigh<void()> onHide;

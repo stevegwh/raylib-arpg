@@ -606,12 +606,8 @@ namespace sage
         const auto& window = draggedWindow.value();
         const auto newPos = Vector2Subtract(mousePos, dragOffset);
 
-        // TODO: Currently does not work.
         window->SetPos(newPos.x, newPos.y);
-        window->ClampToScreen();
-        // window->ResetAll();
-        window->InitLayout();
-        // window->ScaleContents();
+        // window->ClampToScreen();
     }
 
     void TitleBar::OnDrop(CellElement* droppedElement)
@@ -1406,7 +1402,7 @@ namespace sage
 
     void WindowDocked::ScaleContents()
     {
-        ResetAll();
+        resetAll();
         setAlignment();
 
         rec = {
@@ -1535,9 +1531,31 @@ namespace sage
 
     void Window::SetPos(float x, float y)
     {
+        auto old = Vector2{rec.x, rec.y};
         rec = {x, y, rec.width, rec.height};
-        unscaledDimensions.rec.x = x;
-        unscaledDimensions.rec.y = y;
+        ClampToScreen();
+        auto diff = Vector2Subtract(Vector2{rec.x, rec.y}, Vector2{old.x, old.y});
+        for (auto& panel : children)
+        {
+            panel->rec.x += diff.x;
+            panel->rec.y += diff.y;
+            for (auto& table : panel->children)
+            {
+                table->rec.x += diff.x;
+                table->rec.y += diff.y;
+                for (auto& row : table->children)
+                {
+                    row->rec.x += diff.x;
+                    row->rec.y += diff.y;
+                    for (auto& cell : row->children)
+                    {
+                        cell->rec.x += diff.x;
+                        cell->rec.y += diff.y;
+                        cell->children->UpdateDimensions();
+                    }
+                }
+            }
+        }
     }
 
     Panel* Window::CreatePanel(Padding _padding)
@@ -1627,7 +1645,7 @@ namespace sage
         ScaleContents();
     }
 
-    void Window::ResetAll()
+    void Window::resetAll()
     {
         rec = unscaledDimensions.rec;
         padding = unscaledDimensions.padding;
@@ -1666,7 +1684,7 @@ namespace sage
         // assert(finalized);
         if (markForRemoval) return;
 
-        ResetAll();
+        resetAll();
 
         rec = {
             settings->ScaleValueWidth(rec.x),
