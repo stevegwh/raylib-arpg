@@ -12,6 +12,7 @@
 #include "GameData.hpp"
 #include "Serializer.hpp"
 #include "slib.hpp"
+#include "systems/RenderSystem.hpp"
 #include "UserInput.hpp"
 
 namespace sage
@@ -27,7 +28,7 @@ namespace sage
         serializer::DeserializeKeyMapping(_keyMapping, "resources/keybinding.xml");
         keyMapping = std::make_unique<KeyMapping>(_keyMapping);
 
-        SetConfigFlags(FLAG_MSAA_4X_HINT);
+        // SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_INTERLACED_HINT);
         InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
 
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
@@ -120,6 +121,8 @@ namespace sage
 
     void Application::draw()
     {
+
+        BeginTextureMode(scene->data->renderSystem->renderTexture);
         BeginDrawing();
         ClearBackground(BLACK);
 
@@ -130,6 +133,20 @@ namespace sage
 
         scene->Draw2D();
         // scene->DrawDebug2D();
+        EndDrawing();
+        EndTextureMode();
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawTexturePro(
+            scene->data->renderSystem->renderTexture.texture,
+            Rectangle{
+                0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
+            Rectangle{
+                0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
+            Vector2{0, 0},
+            0,
+            WHITE);
 
         DrawFPS(10, 10);
 
@@ -144,7 +161,6 @@ namespace sage
                 30,
                 WHITE);
         }
-
         EndDrawing();
     };
 

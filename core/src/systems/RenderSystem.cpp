@@ -7,7 +7,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 
-#include "raylib.h"
+#include "Settings.hpp"
 
 namespace sage
 {
@@ -51,5 +51,6 @@ namespace sage
 
     RenderSystem::RenderSystem(entt::registry* _registry) : BaseSystem(_registry)
     {
+        renderTexture = LoadRenderTexture(Settings::TARGET_SCREEN_WIDTH, Settings::TARGET_SCREEN_HEIGHT);
     }
 } // namespace sage
