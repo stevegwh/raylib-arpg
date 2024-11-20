@@ -92,17 +92,18 @@ namespace sage
     class TableElement : public UIElement
     {
       protected:
-        struct OriginalDimensions
+        struct UnscaledDimensions
         {
             Rectangle rec{};
             Padding padding{};
+            Vector2 scalePosOffset{}; // The offset between the old and new screen size
         };
 
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
 
       public:
         Padding padding;
-        OriginalDimensions ogDimensions{};
+        UnscaledDimensions unscaledDimensions{};
         Parent* parent{};
         Child children;
         std::optional<Texture> tex{};
@@ -110,24 +111,25 @@ namespace sage
 
         virtual void ScaleContents(Settings* _settings)
         {
+            auto posScaled = _settings->ScalePos({rec.x, rec.y});
+
             rec = {
-                _settings->ScaleValue(rec.x),
-                _settings->ScaleValue(rec.y),
-                _settings->ScaleValue(rec.width),
-                _settings->ScaleValue(rec.height)};
+                posScaled.x,
+                posScaled.y,
+                _settings->ScaleValueMaintainRatio(rec.width),
+                _settings->ScaleValueMaintainRatio(rec.height)};
 
             padding = {
-                _settings->ScaleValue(padding.up),
-                _settings->ScaleValue(padding.down),
-                _settings->ScaleValue(padding.left),
-                _settings->ScaleValue(padding.right)};
+                _settings->ScaleValueMaintainRatio(padding.up),
+                _settings->ScaleValueMaintainRatio(padding.down),
+                _settings->ScaleValueMaintainRatio(padding.left),
+                _settings->ScaleValueMaintainRatio(padding.right)};
 
             UpdateTextureDimensions();
         }
 
-        void SetPos(float x, float y)
+        virtual void SetPos(float x, float y)
         {
-            // TODO: Override this for the base Window and update ogDimensions.rec.x/y with the unscaled number?
             rec = {x, y, rec.width, rec.height};
         }
 
@@ -194,12 +196,12 @@ namespace sage
             : padding(_padding), parent(_parent)
         {
             rec = {x, y, width, height};
-            ogDimensions = {rec, padding};
+            unscaledDimensions = {rec, padding};
         }
 
         TableElement(Parent* _parent, Padding _padding) : padding(_padding), parent(_parent)
         {
-            ogDimensions = {rec, padding};
+            unscaledDimensions = {rec, padding};
         }
 
         TableElement(const TableElement&) = default;
@@ -595,6 +597,7 @@ namespace sage
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height
 
+        void SetPos(float x, float y) override;
         void FinalizeLayout();
         void OnWindowUpdate(Vector2 prev, Vector2 current);
         void ClampToScreen();

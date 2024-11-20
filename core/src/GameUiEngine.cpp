@@ -148,8 +148,8 @@ namespace sage
 
             cell->InitLayout();
 
-            cell->ogDimensions.rec = rec;
-            cell->ogDimensions.padding = padding;
+            cell->unscaledDimensions.rec = rec;
+            cell->unscaledDimensions.padding = padding;
 
             currentX += cellWidth;
         }
@@ -602,9 +602,9 @@ namespace sage
 
     void TitleBar::DragUpdate()
     {
-        auto mousePos = GetMousePosition();
-        auto& window = draggedWindow.value();
-        auto newPos = Vector2Subtract(mousePos, dragOffset);
+        const auto mousePos = GetMousePosition();
+        const auto& window = draggedWindow.value();
+        const auto newPos = Vector2Subtract(mousePos, dragOffset);
 
         // TODO: Currently does not work.
         window->SetPos(newPos.x, newPos.y);
@@ -1046,7 +1046,7 @@ namespace sage
 
     void AbilitySlot::Draw2D()
     {
-        auto ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber);
+        const auto ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber);
         if (!ability) return;
         if (ability->CooldownReady())
         {
@@ -1407,20 +1407,20 @@ namespace sage
     void WindowDocked::ScaleContents()
     {
         ResetAll();
+        setAlignment();
 
         rec = {
-            settings->ScaleValue(rec.x),
-            settings->ScaleValue(rec.y),
-            settings->ScaleValue(rec.width),
-            settings->ScaleValue(rec.height)};
+            settings->ScaleValueWidth(rec.x),
+            settings->ScaleValueHeight(rec.y),
+            settings->ScaleValueWidth(rec.width),
+            settings->ScaleValueHeight(rec.height)};
 
         padding = {
-            settings->ScaleValue(padding.up),
-            settings->ScaleValue(padding.down),
-            settings->ScaleValue(padding.left),
-            settings->ScaleValue(padding.right)};
+            settings->ScaleValueHeight(padding.up),
+            settings->ScaleValueHeight(padding.down),
+            settings->ScaleValueWidth(padding.left),
+            settings->ScaleValueWidth(padding.right)};
 
-        setAlignment();
         UpdateTextureDimensions();
 
         for (auto& panel : children)
@@ -1456,11 +1456,11 @@ namespace sage
             break;
 
         case HoriAlignment::CENTER:
-            xOffset = (settings->screenWidth - rec.width) / 2;
+            xOffset = (Settings::TARGET_SCREEN_WIDTH - rec.width) / 2;
             break;
 
         case HoriAlignment::RIGHT:
-            xOffset = settings->screenWidth - rec.width;
+            xOffset = Settings::TARGET_SCREEN_WIDTH - rec.width;
             break;
         default:;
         }
@@ -1473,16 +1473,16 @@ namespace sage
             break;
 
         case VertAlignment::MIDDLE:
-            yOffset = (settings->screenHeight - rec.height) / 2;
+            yOffset = (Settings::TARGET_SCREEN_HEIGHT - rec.height) / 2;
             break;
 
         case VertAlignment::BOTTOM:
-            yOffset = settings->screenHeight - rec.height;
+            yOffset = Settings::TARGET_SCREEN_HEIGHT - rec.height;
             break;
         }
 
-        rec.x = xOffset + settings->ScaleValue(baseXOffset);
-        rec.y = yOffset + settings->ScaleValue(baseYOffset);
+        rec.x = xOffset + baseXOffset;
+        rec.y = yOffset + baseYOffset;
     }
 
     WindowDocked::WindowDocked(
@@ -1503,8 +1503,8 @@ namespace sage
         rec.width = _width;
         rec.height = _height;
         setAlignment();
-        ogDimensions.rec = rec;
-        ogDimensions.padding = padding;
+        unscaledDimensions.rec = rec;
+        unscaledDimensions.padding = padding;
     }
 
     WindowDocked::WindowDocked(
@@ -1529,8 +1529,15 @@ namespace sage
         rec.width = _width;
         rec.height = _height;
         setAlignment();
-        ogDimensions.rec = rec;
-        ogDimensions.padding = padding;
+        unscaledDimensions.rec = rec;
+        unscaledDimensions.padding = padding;
+    }
+
+    void Window::SetPos(float x, float y)
+    {
+        rec = {x, y, rec.width, rec.height};
+        unscaledDimensions.rec.x = x;
+        unscaledDimensions.rec.y = y;
     }
 
     Panel* Window::CreatePanel(Padding _padding)
@@ -1589,30 +1596,29 @@ namespace sage
 
     void Window::FinalizeLayout()
     {
-        ogDimensions.rec = rec;
-        ogDimensions.padding = padding;
+        unscaledDimensions.rec = rec;
+        unscaledDimensions.padding = padding;
         for (auto& panel : children)
         {
-            panel->ogDimensions.rec = panel->rec;
-            panel->ogDimensions.padding = panel->padding;
+            panel->unscaledDimensions.rec = panel->rec;
+            panel->unscaledDimensions.padding = panel->padding;
 
             for (auto& table : panel->children)
             {
-                table->ogDimensions.rec = table->rec;
-                table->ogDimensions.padding = table->padding;
+                table->unscaledDimensions.rec = table->rec;
+                table->unscaledDimensions.padding = table->padding;
                 for (auto& row : table->children)
                 {
-                    row->ogDimensions.rec = row->rec;
-                    row->ogDimensions.padding = row->padding;
+                    row->unscaledDimensions.rec = row->rec;
+                    row->unscaledDimensions.padding = row->padding;
                     for (auto& cell : row->children)
                     {
-                        cell->ogDimensions.rec = cell->rec;
-                        cell->ogDimensions.padding = cell->padding;
+                        cell->unscaledDimensions.rec = cell->rec;
+                        cell->unscaledDimensions.padding = cell->padding;
                     }
                 }
             }
         }
-
         ScaleContents();
     }
 
@@ -1623,30 +1629,31 @@ namespace sage
 
     void Window::ResetAll()
     {
-        rec = ogDimensions.rec;
-        padding = ogDimensions.padding;
+        rec = unscaledDimensions.rec;
+        padding = unscaledDimensions.padding;
 
         for (auto& panel : children)
         {
-            panel->SetPos(panel->ogDimensions.rec.x, panel->ogDimensions.rec.y);
-            panel->SetDimensions(panel->ogDimensions.rec.width, panel->ogDimensions.rec.height);
-            panel->padding = panel->ogDimensions.padding;
+            panel->SetPos(panel->unscaledDimensions.rec.x, panel->unscaledDimensions.rec.y);
+            panel->SetDimensions(panel->unscaledDimensions.rec.width, panel->unscaledDimensions.rec.height);
+            panel->padding = panel->unscaledDimensions.padding;
 
             for (auto& table : panel->children)
             {
-                table->SetPos(table->ogDimensions.rec.x, table->ogDimensions.rec.y);
-                table->SetDimensions(table->ogDimensions.rec.width, table->ogDimensions.rec.height);
-                table->padding = table->ogDimensions.padding;
+                table->SetPos(table->unscaledDimensions.rec.x, table->unscaledDimensions.rec.y);
+                table->SetDimensions(table->unscaledDimensions.rec.width, table->unscaledDimensions.rec.height);
+                table->padding = table->unscaledDimensions.padding;
                 for (auto& row : table->children)
                 {
-                    row->SetPos(panel->ogDimensions.rec.x, row->ogDimensions.rec.y);
-                    row->SetDimensions(row->ogDimensions.rec.width, row->ogDimensions.rec.height);
-                    row->padding = row->ogDimensions.padding;
+                    row->SetPos(panel->unscaledDimensions.rec.x, row->unscaledDimensions.rec.y);
+                    row->SetDimensions(row->unscaledDimensions.rec.width, row->unscaledDimensions.rec.height);
+                    row->padding = row->unscaledDimensions.padding;
                     for (auto& cell : row->children)
                     {
-                        cell->SetPos(cell->ogDimensions.rec.x, cell->ogDimensions.rec.y);
-                        cell->SetDimensions(cell->ogDimensions.rec.width, cell->ogDimensions.rec.height);
-                        cell->padding = cell->ogDimensions.padding;
+                        cell->SetPos(cell->unscaledDimensions.rec.x, cell->unscaledDimensions.rec.y);
+                        cell->SetDimensions(
+                            cell->unscaledDimensions.rec.width, cell->unscaledDimensions.rec.height);
+                        cell->padding = cell->unscaledDimensions.padding;
                         cell->children->UpdateDimensions();
                     }
                 }
@@ -1662,16 +1669,16 @@ namespace sage
         ResetAll();
 
         rec = {
-            settings->ScaleValue(rec.x),
-            settings->ScaleValue(rec.y),
-            settings->ScaleValue(rec.width),
-            settings->ScaleValue(rec.height)};
+            settings->ScaleValueWidth(rec.x),
+            settings->ScaleValueHeight(rec.y),
+            settings->ScaleValueWidth(rec.width),
+            settings->ScaleValueHeight(rec.height)};
 
         padding = {
-            settings->ScaleValue(padding.up),
-            settings->ScaleValue(padding.down),
-            settings->ScaleValue(padding.left),
-            settings->ScaleValue(padding.right)};
+            settings->ScaleValueHeight(padding.up),
+            settings->ScaleValueHeight(padding.down),
+            settings->ScaleValueWidth(padding.left),
+            settings->ScaleValueWidth(padding.right)};
 
         UpdateTextureDimensions();
 
@@ -1798,13 +1805,17 @@ namespace sage
         // Tooltips original position is scaled to the screen already
         if (markForRemoval) return;
 
-        rec = {rec.x, rec.y, settings->ScaleValue(rec.width), settings->ScaleValue(rec.height)};
+        rec = {
+            rec.x,
+            rec.y,
+            settings->ScaleValueMaintainRatio(rec.width),
+            settings->ScaleValueMaintainRatio(rec.height)};
 
         padding = {
-            settings->ScaleValue(padding.up),
-            settings->ScaleValue(padding.down),
-            settings->ScaleValue(padding.left),
-            settings->ScaleValue(padding.right)};
+            settings->ScaleValueMaintainRatio(padding.up),
+            settings->ScaleValueMaintainRatio(padding.down),
+            settings->ScaleValueMaintainRatio(padding.left),
+            settings->ScaleValueMaintainRatio(padding.right)};
 
         UpdateTextureDimensions();
     }
@@ -1947,8 +1958,6 @@ namespace sage
         const auto& row = children.back();
         row->autoSize = false;
         row->requestedHeight = _requestedHeight;
-        // TODO: Calculate the _requestedHeight etc as a pixel value and save as ogDimensions. Do not use
-        // requestedHeight etc after initialisation, use the original pixel values.
         InitLayout();
         return row.get();
     }
@@ -1974,8 +1983,6 @@ namespace sage
         const auto& cell = children.back();
         cell->autoSize = false;
         cell->requestedWidth = requestedWidth;
-        // TODO: Calculate the requestedWidth etc as a pixel value and save as ogDimensions. Do not use
-        // requestedWidth etc after initialisation, use the original pixel values.
         InitLayout();
         return cell.get();
     }

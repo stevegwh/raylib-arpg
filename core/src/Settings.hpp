@@ -5,6 +5,8 @@
 #pragma once
 
 #include "cereal/cereal.hpp"
+#include "raylib.h"
+#include "raymath.h"
 
 namespace sage
 {
@@ -20,11 +22,9 @@ namespace sage
 
         static float GetScreenScaleFactor(float width, float height)
         {
-            const float TARGET_WIDTH = 1920.0f;
-            const float TARGET_HEIGHT = 1080.0f;
 
-            float scaleX = width / TARGET_WIDTH;
-            float scaleY = height / TARGET_HEIGHT;
+            float scaleX = width / TARGET_SCREEN_WIDTH;
+            float scaleY = height / TARGET_SCREEN_HEIGHT;
 
             // Use the smaller scale factor to maintain aspect ratio
             return std::min(scaleX, scaleY);
@@ -35,9 +35,28 @@ namespace sage
             return GetScreenScaleFactor(screenWidth, screenHeight);
         }
 
-        [[nodiscard]] float ScaleValue(const float toScale) const
+        [[nodiscard]] float ScaleValueMaintainRatio(const float toScale) const
         {
             return toScale * GetCurrentScaleFactor();
+        }
+
+        [[nodiscard]] float ScaleValueHeight(const float toScale) const
+        {
+            float scaleY = screenHeight / TARGET_SCREEN_HEIGHT;
+            return toScale * scaleY;
+        }
+
+        [[nodiscard]] float ScaleValueWidth(const float toScale) const
+        {
+            float scaleX = screenWidth / TARGET_SCREEN_WIDTH;
+            return toScale * scaleX;
+        }
+
+        [[nodiscard]] Vector2 ScalePos(Vector2 toScale) const
+        {
+            float scaleX = screenWidth / TARGET_SCREEN_WIDTH;
+            float scaleY = screenHeight / TARGET_SCREEN_HEIGHT;
+            return {toScale.x * scaleX, toScale.y * scaleY};
         }
 
         void ResetToUserDefined()
@@ -69,7 +88,7 @@ namespace sage
         int screenHeightUser{};
 
         // Hardcoded defaults
-        static constexpr int SCREEN_WIDTH = 1280;
-        static constexpr int SCREEN_HEIGHT = 720;
+        static constexpr int SCREEN_WIDTH = 1920;
+        static constexpr int SCREEN_HEIGHT = 1080;
     };
 } // namespace sage

@@ -54,6 +54,8 @@ namespace sage
             {
                 int monitor = GetCurrentMonitor();
                 SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+                settings->screenWidth = GetMonitorWidth(monitor);
+                settings->screenHeight = GetMonitorHeight(monitor);
 
                 ToggleFullscreen();
             }
