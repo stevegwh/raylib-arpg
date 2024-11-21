@@ -144,13 +144,13 @@ namespace sage
         ClearBackground(BLACK);
         DrawFPS(10, 10);
 
-        BeginShaderMode(ResourceManager::GetInstance().ShaderLoad(nullptr, nullptr));
+        // BeginShaderMode(ResourceManager::GetInstance().ShaderLoad(nullptr, nullptr));
         DrawTextureRec(
             renderTexture.texture,
             {0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
             {0, 0},
             WHITE);
-        EndShaderMode();
+        // EndShaderMode();
 
         DrawTextureRec(
             renderTexture2d.texture,
