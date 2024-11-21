@@ -12,20 +12,54 @@ namespace sage
 {
     struct Settings
     {
-        static constexpr float TARGET_SCREEN_WIDTH = 1920.0f;
-        static constexpr float TARGET_SCREEN_HEIGHT = 1080.0f;
-
+      private:
         // Current settings
         int screenWidth = 1280;
         int screenHeight = 720;
         int viewportWidth = 1920;
         int viewportHeight = 1080;
+
+      public:
+        static constexpr float TARGET_SCREEN_WIDTH = 1920.0f;
+        static constexpr float TARGET_SCREEN_HEIGHT = 1080.0f;
+
         bool toggleFullScreenRequested = false;
+
+        void SetScreenSize(int w, int h)
+        {
+            screenWidth = w;
+            screenHeight = h;
+            UpdateViewport();
+        }
+
+        [[nodiscard]] Vector2 GetScreenSize() const
+        {
+            return {static_cast<float>(screenWidth), static_cast<float>(screenHeight)};
+        }
+
+        [[nodiscard]] Vector2 GetViewPort() const
+        {
+            return {static_cast<float>(viewportWidth), static_cast<float>(viewportHeight)};
+        }
 
         void UpdateViewport()
         {
-            float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
+            float aspectRatio = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
             static constexpr float targetAspectRatio = 16.0f / 9.0f;
+
+            // Calculate viewport dimensions while maintaining aspect ratio
+            if (aspectRatio > targetAspectRatio)
+            {
+                // Screen is wider than target ratio - fit to height
+                viewportHeight = screenHeight;
+                viewportWidth = static_cast<int>(screenHeight * targetAspectRatio);
+            }
+            else
+            {
+                // Screen is taller than target ratio - fit to width
+                viewportWidth = screenWidth;
+                viewportHeight = static_cast<int>(screenWidth / targetAspectRatio);
+            }
         }
 
         static float GetScreenScaleFactor(float width, float height)
@@ -40,7 +74,7 @@ namespace sage
 
         [[nodiscard]] float GetCurrentScaleFactor() const
         {
-            return GetScreenScaleFactor(screenWidth, screenHeight);
+            return GetScreenScaleFactor(viewportWidth, viewportHeight);
         }
 
         [[nodiscard]] float ScaleValueMaintainRatio(const float toScale) const
@@ -50,49 +84,15 @@ namespace sage
 
         [[nodiscard]] float ScaleValueHeight(const float toScale) const
         {
-            float scaleY = screenHeight / TARGET_SCREEN_HEIGHT;
+            float scaleY = viewportHeight / TARGET_SCREEN_HEIGHT;
             return toScale * scaleY;
         }
 
         [[nodiscard]] float ScaleValueWidth(const float toScale) const
         {
-            float scaleX = screenWidth / TARGET_SCREEN_WIDTH;
+            float scaleX = viewportWidth / TARGET_SCREEN_WIDTH;
             return toScale * scaleX;
         }
-
-        // [[nodiscard]] float ScaleValueWidth(const float toScale) const
-        // {
-        //     float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
-        //     float targetAspectRatio = 16.0f / 9.0f;
-        //
-        //     if (std::abs(aspectRatio - targetAspectRatio) < 0.01f)
-        //     {
-        //         return toScale * (screenWidth / TARGET_SCREEN_WIDTH);
-        //     }
-        //
-        //     // Calculate scaling based on screen height
-        //     float virtualWidth = screenHeight * targetAspectRatio;
-        //     float scaleX = virtualWidth / TARGET_SCREEN_WIDTH;
-        //
-        //     return toScale * scaleX;
-        // }
-        //
-        // [[nodiscard]] float ScaleValueHeight(const float toScale) const
-        // {
-        //     float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
-        //     float targetAspectRatio = 16.0f / 9.0f;
-        //
-        //     if (std::abs(aspectRatio - targetAspectRatio) < 0.01f)
-        //     {
-        //         return toScale * (screenHeight / TARGET_SCREEN_HEIGHT);
-        //     }
-        //
-        //     // Scale based on screen height
-        //     float virtualHeight = screenHeight;
-        //     float scaleY = virtualHeight / TARGET_SCREEN_HEIGHT;
-        //
-        //     return toScale * scaleY;
-        // }
 
         [[nodiscard]] Vector2 ScalePos(Vector2 toScale) const
         {
@@ -103,6 +103,7 @@ namespace sage
         {
             screenWidth = screenWidthUser;
             screenHeight = screenHeightUser;
+            UpdateViewport();
         }
 
         void ResetToDefaults()
