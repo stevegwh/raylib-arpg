@@ -12,13 +12,13 @@ namespace sage
 
     FountainPartSys::FountainPartSys(Camera3D* cam) : ParticleSystem(cam)
     {
-        auto texCircle16 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_IMGCIRCLE16);
-        auto texCircle8 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_IMGCIRCLE8);
+        auto texCircle16 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_SPARKFLAME);
+        auto texCircle8 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_SPARKFLAME);
 
         EmitterConfig ecfg1;
-        ecfg1.size = 0.2f;
+        ecfg1.size = 1.2f;
         ecfg1.direction = Vector3{0, 1, 0};
-        ecfg1.velocity = FloatRange{0.7, 0.73};
+        ecfg1.velocity = FloatRange{1.7, 2.73};
         ecfg1.directionAngle = FloatRange{-6, 6};
         ecfg1.velocityAngle = FloatRange{0, 0};
         ecfg1.offset = FloatRange{0, 0};
@@ -39,7 +39,7 @@ namespace sage
         Register(std::move(emitterFountain1));
 
         ecfg1.directionAngle = FloatRange{-1.5, 1.5};
-        ecfg1.velocity = FloatRange{0.8, 0.85};
+        ecfg1.velocity = FloatRange{1.8, 2.85};
         ecfg1.texture = texCircle8;
         auto emitterFountain2 = std::make_unique<Emitter>(ecfg1);
         Register(std::move(emitterFountain2));

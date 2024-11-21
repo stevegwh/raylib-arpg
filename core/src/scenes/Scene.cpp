@@ -35,6 +35,8 @@
 #include "systems/TimerSystem.hpp"
 #include "systems/UberShaderSystem.hpp"
 
+#include "abilities/vfx/SpiralFountainVFX.hpp"
+
 namespace sage
 {
 
@@ -46,6 +48,7 @@ namespace sage
         data->cursor->Update();
         data->lightSubSystem->Update();
         data->uiEngine->Update();
+        spiral->Update(GetFrameTime());
     }
 
     void Scene::DrawDebug3D()
@@ -58,8 +61,8 @@ namespace sage
     void Scene::Draw3D()
     {
         data->renderSystem->Draw();
-        // If we hit something, draw the cursor at the hit point
         data->cursor->Draw3D();
+        spiral->Draw3D();
     };
 
     void Scene::DrawDebug2D()
@@ -148,6 +151,9 @@ namespace sage
 
         // auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
+
+        spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
+        spiral->InitSystem();
     };
 
 } // namespace sage

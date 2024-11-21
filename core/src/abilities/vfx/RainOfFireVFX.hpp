@@ -24,6 +24,7 @@ namespace sage
 
     class RainOfFireVFX : public VisualFX
     {
+        Shader shader;
         Vector3 target{};
         Vector3 baseSpawnPoint{};
         float initialHeight{};
