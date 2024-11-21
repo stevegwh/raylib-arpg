@@ -13,8 +13,7 @@ namespace sage
         if (!IsWindowFullscreen())
         {
             const int current_screen = GetCurrentMonitor();
-            settings->screenWidth = static_cast<float>(GetMonitorWidth(current_screen));
-            settings->screenHeight = static_cast<float>(GetMonitorHeight(current_screen));
+            settings->SetScreenSize(GetMonitorWidth(current_screen), GetMonitorHeight(current_screen));
         }
         else if (IsWindowFullscreen())
         {

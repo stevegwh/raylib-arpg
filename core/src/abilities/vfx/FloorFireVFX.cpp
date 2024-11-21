@@ -44,9 +44,7 @@ namespace sage
 
         // Screen size likely not used
         screenSizeLoc = GetShaderLocation(shader, "screenSize");
-        screenSize = {
-            static_cast<float>(gameData->settings->screenWidth),
-            static_cast<float>(gameData->settings->screenHeight)};
+        screenSize = gameData->settings->GetScreenSize();
         SetShaderValue(shader, screenSizeLoc, &screenSize, SHADER_UNIFORM_VEC2);
 
         texture = std::make_unique<TextureTerrainOverlay>(

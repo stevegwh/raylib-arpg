@@ -28,7 +28,11 @@ namespace sage
         keyMapping = std::make_unique<KeyMapping>(_keyMapping);
 
         SetConfigFlags(FLAG_MSAA_4X_HINT);
-        InitWindow(_settings.screenWidth, _settings.screenHeight, "Baldur's Raylib");
+        InitWindow(
+            static_cast<int>(_settings.GetScreenSize().x),
+            static_cast<int>(_settings.GetScreenSize().y),
+            "Baldur's Raylib");
+        _settings.UpdateViewport();
 
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
         serializer::LoadBinFile(registry.get(), "resources/assets.bin");
@@ -41,23 +45,22 @@ namespace sage
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 
         scene = std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get());
-        renderTexture = LoadRenderTexture(settings->screenWidth, settings->screenHeight);
-        renderTexture2d = LoadRenderTexture(settings->screenWidth, settings->screenHeight);
+        const auto viewport = settings->GetViewPort();
+        renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+        renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
     }
 
     void Application::handleScreenUpdate()
     {
         if (settings->toggleFullScreenRequested)
         {
-            int prevWidth = settings->screenWidth;
-            int prevHeight = settings->screenHeight;
+            const auto prev = settings->GetViewPort();
 #ifdef __APPLE__
             if (!IsWindowFullscreen())
             {
-                int monitor = GetCurrentMonitor();
+                const int monitor = GetCurrentMonitor();
                 SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-                settings->screenWidth = GetMonitorWidth(monitor);
-                settings->screenHeight = GetMonitorHeight(monitor);
+                settings->SetScreenSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
 
                 ToggleFullscreen();
             }
@@ -65,7 +68,8 @@ namespace sage
             {
                 ToggleFullscreen();
                 settings->ResetToUserDefined();
-                SetWindowSize(settings->screenWidth, settings->screenHeight);
+                const auto screen = settings->GetScreenSize();
+                SetWindowSize(static_cast<int>(screen.x), static_cast<int>(screen.y));
             }
 #else
             bool maximized = GetScreenWidth() == GetMonitorWidth(GetCurrentMonitor()) &&
@@ -81,16 +85,15 @@ namespace sage
             else
             {
                 ToggleBorderlessWindowed();
-                settings->ResetToUserDefined();
-                SetWindowSize(settings->screenWidth, settings->screenHeight);
+                const auto screen = settings->GetScreenSize();
+                SetWindowSize(static_cast<int>(screen.x), static_cast<int>(screen.y));
             }
 #endif
             settings->toggleFullScreenRequested = false;
-            scene->data->userInput->onWindowUpdate.publish(
-                {static_cast<float>(prevWidth), static_cast<float>(prevHeight)},
-                {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
-
-            renderTexture = LoadRenderTexture(settings->screenWidth, settings->screenHeight);
+            const auto viewport = settings->GetViewPort();
+            scene->data->userInput->onWindowUpdate.publish(prev, viewport);
+            renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+            renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
         }
     }
 
@@ -144,31 +147,21 @@ namespace sage
         ClearBackground(BLACK);
         DrawFPS(10, 10);
 
+        auto letterbox = Vector2Subtract(settings->GetScreenSize(), settings->GetViewPort());
+
         // BeginShaderMode(ResourceManager::GetInstance().ShaderLoad(nullptr, nullptr));
-        DrawTextureRec(
-            renderTexture.texture,
-            {0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
-            {0, 0},
-            WHITE);
+        const auto [width, height] = settings->GetViewPort();
+        DrawTextureRec(renderTexture.texture, {0, 0, width, -height}, {0, letterbox.y / 2}, WHITE);
         // EndShaderMode();
 
-        DrawTextureRec(
-            renderTexture2d.texture,
-            {0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
-            {0, 0},
-            WHITE);
+        DrawTextureRec(renderTexture2d.texture, {0, 0, width, -height}, {0, letterbox.y / 2}, WHITE);
 
         if (exitWindowRequested)
         {
 
-            DrawRectangle(0, 100, settings->screenWidth, 200, BLACK);
+            DrawRectangle(0, letterbox.y / 2 + 100, width, 200, BLACK);
             auto textSize = MeasureText("Are you sure you want to exit program? [Y/N]", 30);
-            DrawText(
-                "Are you sure you want to exit program? [Y/N]",
-                (settings->screenWidth - textSize) / 2,
-                180,
-                30,
-                WHITE);
+            DrawText("Are you sure you want to exit program? [Y/N]", (width - textSize) / 2, 180, 30, WHITE);
         }
         EndDrawing();
     };

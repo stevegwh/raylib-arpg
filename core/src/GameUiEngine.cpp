@@ -1723,13 +1723,14 @@ namespace sage
 
     void Window::ClampToScreen()
     {
-        if (rec.x + rec.width > settings->screenWidth)
+        const auto viewport = settings->GetViewPort();
+        if (rec.x + rec.width > viewport.x)
         {
-            rec.x = settings->screenWidth - rec.width;
+            rec.x = viewport.x - rec.width;
         }
-        if (rec.y + rec.height > settings->screenHeight + rec.height / 2)
+        if (rec.y + rec.height > viewport.y + rec.height / 2)
         {
-            rec.y = settings->screenHeight - rec.height / 2;
+            rec.y = viewport.y - rec.height / 2;
         }
         if (rec.x < 0)
         {
