@@ -102,15 +102,18 @@ namespace sage
         // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
 
-        Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+        registry->emplace<RenderableLit>(id);
+        registry->emplace<RenderableSkinned>(id);
 
-        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
-
-        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
-        {
-            renderable.GetModel()->SetShader(shader, i);
-        }
+        // Shader shader = ResourceManager::GetInstance().ShaderLoad(
+        //     "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+        //
+        // data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+        //
+        // for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
+        // {
+        //     renderable.GetModel()->SetShader(shader, i);
+        // }
 
         // data->lightSubSystem->LinkRenderableToLight(id);
         registry->emplace<WavemobState>(id);
@@ -175,15 +178,18 @@ namespace sage
             dialog.conversation->AddNode(std::move(node));
         }
 
-        Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+        registry->emplace<RenderableLit>(id);
+        registry->emplace<RenderableSkinned>(id);
 
-        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+        // Shader shader = ResourceManager::GetInstance().ShaderLoad(
+        //     "resources/shaders/glsl330/skinning.vs", "resources/shaders/glsl330/skinning.fs");
 
-        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
-        {
-            renderable.GetModel()->SetShader(shader, i);
-        }
+        // data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+        //
+        // for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
+        // {
+        //     renderable.GetModel()->SetShader(shader, i);
+        // }
 
         // data->lightSubSystem->LinkRenderableToLight(id);
         return id;
@@ -207,6 +213,8 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = "Player";
+        registry->emplace<RenderableLit>(id);
+        registry->emplace<RenderableSkinned>(id);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
@@ -279,15 +287,15 @@ namespace sage
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
 
-        Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
-
-        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
-
-        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
-        {
-            renderable.GetModel()->SetShader(shader, i);
-        }
+        // Shader shader = ResourceManager::GetInstance().ShaderLoad(
+        //     "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
+        //
+        // data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+        //
+        // for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
+        // {
+        //     renderable.GetModel()->SetShader(shader, i);
+        // }
 
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
@@ -437,6 +445,7 @@ namespace sage
         // TODO: Need a way to store the matrix scale? Maybe in the resource packer we should store the transform
         auto& renderable =
             registry->emplace<Renderable>(itemId, std::move(model), MatrixScale(0.035, 0.035, 0.035));
+        registry->emplace<RenderableLit>(itemId);
         auto& transform = registry->emplace<sgTransform>(itemId, itemId);
         transform.SetPosition(position);
 

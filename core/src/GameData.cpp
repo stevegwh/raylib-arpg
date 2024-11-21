@@ -41,7 +41,7 @@ namespace sage
           camera(std::make_unique<Camera>(_registry, userInput.get(), this)),
           lightSubSystem(std::make_unique<LightSubSystem>(_registry, camera.get())),
           uiEngine(std::make_unique<GameUIEngine>(_registry, this)),
-          renderSystem(std::make_unique<RenderSystem>(_registry)),
+          renderSystem(std::make_unique<RenderSystem>(_registry, lightSubSystem.get())),
           collisionSystem(std::make_unique<CollisionSystem>(_registry)),
           navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
           actorMovementSystem(

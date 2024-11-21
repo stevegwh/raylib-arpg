@@ -23,6 +23,13 @@ namespace sage
     {
     };
 
+    struct RenderableLit
+    {
+    };
+    struct RenderableSkinned
+    {
+    };
+
     class Renderable
     {
         std::unique_ptr<ModelSafe> model;

@@ -5,6 +5,7 @@
 #include "Camera.hpp"
 #include "components/Light.hpp"
 #include "components/Renderable.hpp"
+#include "components/sgTransform.hpp"
 
 #include <algorithm>
 
@@ -100,6 +101,11 @@ namespace sage
         }
     }
 
+    Shader LightSubSystem::GetDefaultShader()
+    {
+        return defaultShader;
+    }
+
     void LightSubSystem::LinkRenderableToLight(entt::entity entity) const
     {
         auto& renderable = registry->get<Renderable>(entity);
@@ -128,6 +134,26 @@ namespace sage
         for (auto& shader : shaders)
         {
             SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+        }
+    }
+
+    void LightSubSystem::Draw3D() const
+    {
+        for (auto view = registry->view<Renderable, sgTransform, RenderableLit>(); auto entity : view)
+        {
+            auto& renderable = registry->get<Renderable>(entity);
+            if (!renderable.active) return;
+            LinkRenderableToLight(entity);
+            auto& transform = registry->get<sgTransform>(entity);
+            if (renderable.reqShaderUpdate) renderable.reqShaderUpdate(entity);
+
+            Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
+            renderable.GetModel()->Draw(
+                transform.GetWorldPos(),
+                rotationAxis,
+                transform.GetWorldRot().y,
+                transform.GetScale(),
+                renderable.hint);
         }
     }
 

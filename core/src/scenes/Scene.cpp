@@ -55,6 +55,7 @@ namespace sage
 
     void Scene::Draw3D()
     {
+        data->lightSubSystem->Draw3D();
         data->renderSystem->Draw();
         // If we hit something, draw the cursor at the hit point
         data->cursor->Draw3D();
@@ -92,7 +93,7 @@ namespace sage
         // NB: Dependent on only the map/static meshes having been loaded at this point
         // Maybe time for a tag system
         for (const auto view = registry->view<Renderable>(); auto entity : view)
-            data->lightSubSystem->LinkRenderableToLight(entity);
+            registry->emplace<RenderableLit>(entity);
 
         const auto view = registry->view<Spawner>();
         for (auto& entity : view)
