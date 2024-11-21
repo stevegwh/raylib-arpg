@@ -147,8 +147,6 @@ namespace sage
         BeginDrawing();
 
         ClearBackground(BLACK);
-        DrawFPS(10, 10);
-
         auto letterbox = Vector2Subtract(settings->GetScreenSize(), settings->GetViewPort());
 
         // BeginShaderMode(ResourceManager::GetInstance().ShaderLoad(nullptr, nullptr));
@@ -165,6 +163,7 @@ namespace sage
             auto textSize = MeasureText("Are you sure you want to exit program? [Y/N]", 30);
             DrawText("Are you sure you want to exit program? [Y/N]", (width - textSize) / 2, 180, 30, WHITE);
         }
+        DrawFPS(10, 10);
         EndDrawing();
     };
 
