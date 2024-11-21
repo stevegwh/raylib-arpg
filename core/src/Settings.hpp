@@ -18,7 +18,15 @@ namespace sage
         // Current settings
         int screenWidth = 1280;
         int screenHeight = 720;
+        int viewportWidth = 1920;
+        int viewportHeight = 1080;
         bool toggleFullScreenRequested = false;
+
+        void UpdateViewport()
+        {
+            float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
+            static constexpr float targetAspectRatio = 16.0f / 9.0f;
+        }
 
         static float GetScreenScaleFactor(float width, float height)
         {
@@ -40,39 +48,51 @@ namespace sage
             return toScale * GetCurrentScaleFactor();
         }
 
+        [[nodiscard]] float ScaleValueHeight(const float toScale) const
+        {
+            float scaleY = screenHeight / TARGET_SCREEN_HEIGHT;
+            return toScale * scaleY;
+        }
+
         [[nodiscard]] float ScaleValueWidth(const float toScale) const
         {
-            float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
-            float targetAspectRatio = 16.0f / 9.0f;
-
-            if (std::abs(aspectRatio - targetAspectRatio) < 0.01f)
-            {
-                return toScale * (screenWidth / TARGET_SCREEN_WIDTH);
-            }
-
-            // Calculate scaling based on screen height
-            float virtualWidth = screenHeight * targetAspectRatio;
-            float scaleX = virtualWidth / TARGET_SCREEN_WIDTH;
-
+            float scaleX = screenWidth / TARGET_SCREEN_WIDTH;
             return toScale * scaleX;
         }
 
-        [[nodiscard]] float ScaleValueHeight(const float toScale) const
-        {
-            float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
-            float targetAspectRatio = 16.0f / 9.0f;
-
-            if (std::abs(aspectRatio - targetAspectRatio) < 0.01f)
-            {
-                return toScale * (screenHeight / TARGET_SCREEN_HEIGHT);
-            }
-
-            // Scale based on screen height
-            float virtualHeight = screenHeight;
-            float scaleY = virtualHeight / TARGET_SCREEN_HEIGHT;
-
-            return toScale * scaleY;
-        }
+        // [[nodiscard]] float ScaleValueWidth(const float toScale) const
+        // {
+        //     float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
+        //     float targetAspectRatio = 16.0f / 9.0f;
+        //
+        //     if (std::abs(aspectRatio - targetAspectRatio) < 0.01f)
+        //     {
+        //         return toScale * (screenWidth / TARGET_SCREEN_WIDTH);
+        //     }
+        //
+        //     // Calculate scaling based on screen height
+        //     float virtualWidth = screenHeight * targetAspectRatio;
+        //     float scaleX = virtualWidth / TARGET_SCREEN_WIDTH;
+        //
+        //     return toScale * scaleX;
+        // }
+        //
+        // [[nodiscard]] float ScaleValueHeight(const float toScale) const
+        // {
+        //     float aspectRatio = static_cast<float>(screenWidth) / screenHeight;
+        //     float targetAspectRatio = 16.0f / 9.0f;
+        //
+        //     if (std::abs(aspectRatio - targetAspectRatio) < 0.01f)
+        //     {
+        //         return toScale * (screenHeight / TARGET_SCREEN_HEIGHT);
+        //     }
+        //
+        //     // Scale based on screen height
+        //     float virtualHeight = screenHeight;
+        //     float scaleY = virtualHeight / TARGET_SCREEN_HEIGHT;
+        //
+        //     return toScale * scaleY;
+        // }
 
         [[nodiscard]] Vector2 ScalePos(Vector2 toScale) const
         {
