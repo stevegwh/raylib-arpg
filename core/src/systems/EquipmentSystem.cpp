@@ -19,6 +19,7 @@
 #include "systems/AnimationSystem.hpp"
 #include "systems/LightSubSystem.hpp"
 
+#include "components/UberShaderComponent.hpp"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -88,7 +89,7 @@ namespace sage
         auto& item = registry->get<ItemComponent>(itemId);
         registry->emplace<Renderable>(
             weaponEntity, ResourceManager::GetInstance().GetModelCopy(item.model), renderable.initialTransform);
-        gameData->lightSubSystem->LinkRenderableToLight(weaponEntity);
+        registry->emplace<UberShaderComponent>(weaponEntity, UberShaderComponent::Lit);
 
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
@@ -130,6 +131,10 @@ namespace sage
         BeginTextureMode(equipment.renderTexture);
         ClearBackground(BLANK);
         BeginMode3D(*gameData->camera->getRaylibCam());
+        auto& uber = registry->get<UberShaderComponent>(entity);
+        uber.ClearFlag(UberShaderComponent::Lit);
+        uber.SetShaderLocs();
+        uber.SetFlag(UberShaderComponent::Lit);
         renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 
         if (equipment.worldModels.contains(EquipmentSlotName::LEFTHAND))
@@ -140,6 +145,11 @@ namespace sage
                     registry->get<Renderable>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
                 auto& leftHandTrans =
                     registry->get<sgTransform>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
+                auto& weaponUber =
+                    registry->get<UberShaderComponent>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
+                weaponUber.ClearFlag(UberShaderComponent::Lit);
+                weaponUber.SetShaderLocs();
+                weaponUber.SetFlag(UberShaderComponent::Lit);
                 leftHandRenderable.GetModel()->Draw(
                     leftHandTrans.GetWorldPos(), leftHandTrans.GetScale().x, WHITE);
             }
