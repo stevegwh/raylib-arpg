@@ -34,8 +34,8 @@ uniform bool lit;
 
 void main()
 {
-	vec4 skinnedPosition;
-	vec3 skinnedNormal;
+	vec4 pos = vec4(vertexPosition, 1.0);
+	vec3 normal = vertexNormal;
 	
 	if (skinned)
 	{
@@ -44,13 +44,13 @@ void main()
 		int boneIndex2 = int(vertexBoneIds.z);
 		int boneIndex3 = int(vertexBoneIds.w);
 		
-		skinnedPosition =
+		pos =
 			vertexBoneWeights.x * (boneMatrices[boneIndex0] * vec4(vertexPosition, 1.0f)) +
 			vertexBoneWeights.y * (boneMatrices[boneIndex1] * vec4(vertexPosition, 1.0f)) + 
 			vertexBoneWeights.z * (boneMatrices[boneIndex2] * vec4(vertexPosition, 1.0f)) + 
 			vertexBoneWeights.w * (boneMatrices[boneIndex3] * vec4(vertexPosition, 1.0f));
 			
-		skinnedNormal =
+		normal =
 			vertexBoneWeights.x * (mat3(boneMatrices[boneIndex0]) * vertexNormal) +
 			vertexBoneWeights.y * (mat3(boneMatrices[boneIndex1]) * vertexNormal) +
 			vertexBoneWeights.z * (mat3(boneMatrices[boneIndex2]) * vertexNormal) +
@@ -64,5 +64,5 @@ void main()
     fragNormal = normalize(vec3(matNormal*vec4(vertexNormal, 1.0)));
 
     // Calculate final vertex position
-    gl_Position = mvp * (skinned ? skinnedPosition : vec4(vertexPosition, 1.0));
+    gl_Position = mvp * pos;
 }

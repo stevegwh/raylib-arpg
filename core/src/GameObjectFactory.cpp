@@ -283,7 +283,7 @@ namespace sage
             "resources/shaders/custom/ubershader.vs", "resources/shaders/custom/ubershader.fs");
         auto litLoc = GetShaderLocation(shader, "lit");
         int valueT = 1;
-        int valueF = 0;
+        int valueF = 1;
         SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
         auto skinnedLoc = GetShaderLocation(shader, "skinned");
         SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_INT);
