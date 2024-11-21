@@ -22,7 +22,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(entt)
 
-
+set(PLATFORM "Desktop" CACHE STRING "" FORCE)
 add_subdirectory(vendor/raylib)
 include_directories(vendor)
 include_directories(vendor/magic_enum)
