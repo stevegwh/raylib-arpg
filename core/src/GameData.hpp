@@ -35,6 +35,7 @@ namespace sage
     class TimerSystem;
     class EntityReflectionSignalRouter;
     class PartySystem;
+    class UberShaderSystem;
 
     // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
     // TODO: Also, should rename to "GameSystems"
@@ -67,6 +68,7 @@ namespace sage
         std::unique_ptr<InventorySystem> inventorySystem;
         std::unique_ptr<PartySystem> partySystem;
         std::unique_ptr<EquipmentSystem> equipmentSystem;
+        std::unique_ptr<UberShaderSystem> uberShaderSystem;
 
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };

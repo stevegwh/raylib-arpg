@@ -16,6 +16,7 @@
 
 // NB: We have to include all the headers required to build GameData
 #include "components/EquipmentComponent.hpp"
+#include "components/UberShaderComponent.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -32,6 +33,7 @@
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
+#include "systems/UberShaderSystem.hpp"
 
 namespace sage
 {
@@ -89,10 +91,9 @@ namespace sage
         auto normalMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_NORMALMAP);
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
 
-        // NB: Dependent on only the map/static meshes having been loaded at this point
-        // Maybe time for a tag system
+        // NB: Dependent on *only* the map/static meshes having been loaded at this point
         for (const auto view = registry->view<Renderable>(); auto entity : view)
-            data->lightSubSystem->LinkRenderableToLight(entity);
+            registry->emplace<UberShaderComponent>(entity, UberShaderComponent::Flags::Lit);
 
         const auto view = registry->view<Spawner>();
         for (auto& entity : view)

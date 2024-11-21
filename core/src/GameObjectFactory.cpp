@@ -37,6 +37,7 @@
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
+#include "components/UberShaderComponent.hpp"
 #include "components/WeaponComponent.hpp"
 #include "raymath.h"
 
@@ -84,6 +85,8 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_ENEMY_GOBLIN), modelTransform);
         renderable.name = name;
+        registry->emplace<UberShaderComponent>(
+            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_ENEMY_GOBLIN);
         animation.animationMap[AnimationEnum::IDLE] = 1;
@@ -101,16 +104,6 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
-
-        Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
-
-        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
-
-        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
-        {
-            renderable.GetModel()->SetShader(shader, i);
-        }
 
         // data->lightSubSystem->LinkRenderableToLight(id);
         registry->emplace<WavemobState>(id);
@@ -136,6 +129,8 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
+        registry->emplace<UberShaderComponent>(
+            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -175,17 +170,6 @@ namespace sage
             dialog.conversation->AddNode(std::move(node));
         }
 
-        Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/custom/litskinning.vs", "resources/shaders/custom/litskinning.fs");
-
-        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
-
-        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
-        {
-            renderable.GetModel()->SetShader(shader, i);
-        }
-
-        // data->lightSubSystem->LinkRenderableToLight(id);
         return id;
     }
 
@@ -207,6 +191,8 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = "Player";
+        registry->emplace<UberShaderComponent>(
+            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
@@ -278,22 +264,6 @@ namespace sage
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
-
-        Shader shader = ResourceManager::GetInstance().ShaderLoad(
-            "resources/shaders/custom/ubershader.vs", "resources/shaders/custom/ubershader.fs");
-        auto litLoc = GetShaderLocation(shader, "lit");
-        int valueT = 1;
-        int valueF = 1;
-        SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
-        auto skinnedLoc = GetShaderLocation(shader, "skinned");
-        SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_INT);
-
-        data->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
-
-        for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
-        {
-            renderable.GetModel()->SetShader(shader, i);
-        }
 
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));

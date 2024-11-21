@@ -7,6 +7,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 
+#include "components/UberShaderComponent.hpp"
 #include "raylib.h"
 
 namespace sage
@@ -38,6 +39,11 @@ namespace sage
         {
             auto& r = normalView.get<Renderable>(entity);
             const auto& t = normalView.get<sgTransform>(entity);
+            if (registry->any_of<UberShaderComponent>(entity))
+            {
+                auto& uber = registry->get<UberShaderComponent>(entity);
+                uber.SetShaderLocs();
+            }
             renderEntity(r, t, entity);
         }
 
