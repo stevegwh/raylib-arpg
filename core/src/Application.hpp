@@ -18,6 +18,7 @@ namespace sage
     class Application
     {
         RenderTexture renderTexture;
+        RenderTexture renderTexture2d;
 
       protected:
         std::unique_ptr<Settings> settings;

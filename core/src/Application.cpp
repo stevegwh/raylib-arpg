@@ -42,6 +42,7 @@ namespace sage
 
         scene = std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get());
         renderTexture = LoadRenderTexture(settings->screenWidth, settings->screenHeight);
+        renderTexture2d = LoadRenderTexture(settings->screenWidth, settings->screenHeight);
     }
 
     void Application::handleScreenUpdate()
@@ -126,12 +127,14 @@ namespace sage
 
         BeginTextureMode(renderTexture);
         ClearBackground(BLACK);
-
         BeginMode3D(*scene->data->camera->getRaylibCam());
         scene->Draw3D();
         // scene->DrawDebug3D();
         EndMode3D();
+        EndTextureMode();
 
+        BeginTextureMode(renderTexture2d);
+        ClearBackground(BLANK);
         scene->Draw2D();
         // scene->DrawDebug2D();
         EndTextureMode();
@@ -141,8 +144,16 @@ namespace sage
         ClearBackground(BLACK);
         DrawFPS(10, 10);
 
+        BeginShaderMode(ResourceManager::GetInstance().ShaderLoad(nullptr, nullptr));
         DrawTextureRec(
             renderTexture.texture,
+            {0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
+            {0, 0},
+            WHITE);
+        EndShaderMode();
+
+        DrawTextureRec(
+            renderTexture2d.texture,
             {0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
             {0, 0},
             WHITE);
