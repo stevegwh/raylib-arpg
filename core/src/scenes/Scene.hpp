@@ -13,9 +13,12 @@ namespace sage
     class GameData;
     struct Settings;
     struct KeyMapping;
+    class SpiralFountainVFX;
 
     class Scene
     {
+
+        std::unique_ptr<SpiralFountainVFX> spiral;
 
       protected:
         entt::registry* registry;

@@ -22,6 +22,8 @@ namespace sage
         fountain->Draw(shader);
     }
 
+    float pos = 1;
+
     void SpiralFountainVFX::Update(float dt)
     {
         spiralAngle += spiralSpeed * dt;
@@ -35,8 +37,9 @@ namespace sage
             cosf(spiralAngle) * spiralRadius,
             spiralRadius / 2, // This makes the spiral move upwards as it expands
             sinf(spiralAngle) * spiralRadius};
-        auto& transform = gameData->registry->get<sgTransform>(ability->self);
-        fountain->SetOrigin(transform.GetWorldPos());
+        //        auto& transform = gameData->registry->get<sgTransform>(ability->self);
+        //        fountain->SetOrigin(transform.GetWorldPos());
+        fountain->SetOrigin({spiralPos});
         fountain->Update(dt);
     }
 
@@ -47,7 +50,7 @@ namespace sage
 
     SpiralFountainVFX::SpiralFountainVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
     {
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs");
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
         fountain = std::make_unique<FountainPartSys>(_gameData->camera->getRaylibCam());
     }
 } // namespace sage

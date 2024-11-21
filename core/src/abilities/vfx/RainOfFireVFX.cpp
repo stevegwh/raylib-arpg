@@ -27,7 +27,7 @@ namespace sage
     {
         for (const auto& fireball : fireballs)
         {
-            fireball.flameEffect->DrawOldestFirst();
+            fireball.flameEffect->DrawOldestFirst(shader);
         }
     }
 
@@ -114,5 +114,6 @@ namespace sage
 
     RainOfFireVFX::RainOfFireVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
     {
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }
 } // namespace sage
