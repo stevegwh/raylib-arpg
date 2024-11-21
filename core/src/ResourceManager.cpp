@@ -10,6 +10,9 @@
 #include "raylib/src/config.h"
 #include "raymath.h"
 #include "rlgl.h"
+#define STB_INCLUDE_IMPLEMENTATION
+#define STB_INCLUDE_LINE_NONE
+#include <stb_include.h>
 
 #include <cstring>
 #include <sstream>
@@ -216,12 +219,19 @@ namespace sage
         char* vShaderStr = nullptr;
         char* fShaderStr = nullptr;
 
+        const char* SHADER_INCLUDE_PATH = "resources/shaders/custom/include";
+
         if (vsFileName != nullptr)
         {
             if (!vertShaderFileText.contains(vsFileName))
             {
                 assert(FileExists(vsFileName));
-                vertShaderFileText[vsFileName] = LoadFileText(vsFileName);
+                // Load and preprocess vertex shader with stb_include
+                char* vertexSource = LoadFileText(vsFileName);
+                char* preprocessed =
+                    stb_include_string(vertexSource, nullptr, (char*)SHADER_INCLUDE_PATH, nullptr, nullptr);
+                free(vertexSource);
+                vertShaderFileText[vsFileName] = preprocessed;
             }
             vShaderStr = vertShaderFileText[vsFileName];
         }
@@ -231,7 +241,12 @@ namespace sage
             if (!fragShaderFileText.contains(fsFileName))
             {
                 assert(FileExists(fsFileName));
-                fragShaderFileText[fsFileName] = LoadFileText(fsFileName);
+                // Load and preprocess fragment shader with stb_include
+                char* fragmentSource = LoadFileText(fsFileName);
+                char* preprocessed =
+                    stb_include_string(fragmentSource, nullptr, (char*)SHADER_INCLUDE_PATH, nullptr, nullptr);
+                free(fragmentSource);
+                fragShaderFileText[fsFileName] = preprocessed;
             }
             fShaderStr = fragShaderFileText[fsFileName];
         }
