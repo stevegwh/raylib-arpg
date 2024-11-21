@@ -41,9 +41,10 @@ namespace sage
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 
         scene = std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get());
+        renderTexture = LoadRenderTexture(settings->screenWidth, settings->screenHeight);
     }
 
-    void Application::handleScreenUpdate() const
+    void Application::handleScreenUpdate()
     {
         if (settings->toggleFullScreenRequested)
         {
@@ -87,6 +88,8 @@ namespace sage
             scene->data->userInput->onWindowUpdate.publish(
                 {static_cast<float>(prevWidth), static_cast<float>(prevHeight)},
                 {static_cast<float>(settings->screenWidth), static_cast<float>(settings->screenHeight)});
+
+            renderTexture = LoadRenderTexture(settings->screenWidth, settings->screenHeight);
         }
     }
 
@@ -120,7 +123,8 @@ namespace sage
 
     void Application::draw()
     {
-        BeginDrawing();
+
+        BeginTextureMode(renderTexture);
         ClearBackground(BLACK);
 
         BeginMode3D(*scene->data->camera->getRaylibCam());
@@ -130,11 +134,22 @@ namespace sage
 
         scene->Draw2D();
         // scene->DrawDebug2D();
+        EndTextureMode();
 
+        BeginDrawing();
+
+        ClearBackground(BLACK);
         DrawFPS(10, 10);
+
+        DrawTextureRec(
+            renderTexture.texture,
+            {0, 0, static_cast<float>(settings->screenWidth), static_cast<float>(-settings->screenHeight)},
+            {0, 0},
+            WHITE);
 
         if (exitWindowRequested)
         {
+
             DrawRectangle(0, 100, settings->screenWidth, 200, BLACK);
             auto textSize = MeasureText("Are you sure you want to exit program? [Y/N]", 30);
             DrawText(
@@ -144,7 +159,6 @@ namespace sage
                 30,
                 WHITE);
         }
-
         EndDrawing();
     };
 
