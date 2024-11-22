@@ -22,6 +22,7 @@ namespace sage
         ModelSafe model;
 
       public:
+        const ModelSafe& GetModel();
         void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;

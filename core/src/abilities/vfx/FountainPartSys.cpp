@@ -12,11 +12,12 @@ namespace sage
 
     FountainPartSys::FountainPartSys(Camera3D* cam) : ParticleSystem(cam)
     {
-        auto texCircle16 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_SPARKFLAME);
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/fire.png");
+        auto texCircle16 = ResourceManager::GetInstance().TextureLoad("resources/textures/fire.png");
         auto texCircle8 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_SPARKFLAME);
 
         EmitterConfig ecfg1;
-        ecfg1.size = 1.2f;
+        ecfg1.size = 8.0f;
         ecfg1.direction = Vector3{0, 1, 0};
         ecfg1.velocity = FloatRange{1.7, 2.73};
         ecfg1.directionAngle = FloatRange{-6, 6};
@@ -30,7 +31,7 @@ namespace sage
         ecfg1.externalAcceleration = Vector3{0, -0.30, 0};
         ecfg1.startColor = Color{0, 100, 150, 255};
         ecfg1.endColor = Color{0, 0, 255, 125};
-        ecfg1.age = FloatRange{0, 6};
+        ecfg1.age = FloatRange{1, 6};
         ecfg1.blendMode = BLEND_ADDITIVE;
         ecfg1.texture = texCircle16;
         ecfg1.particle_Deactivator = Particle_DeactivatorAge;
@@ -38,11 +39,11 @@ namespace sage
         auto emitterFountain1 = std::make_unique<Emitter>(ecfg1);
         Register(std::move(emitterFountain1));
 
-        ecfg1.directionAngle = FloatRange{-1.5, 1.5};
-        ecfg1.velocity = FloatRange{1.8, 2.85};
-        ecfg1.texture = texCircle8;
-        auto emitterFountain2 = std::make_unique<Emitter>(ecfg1);
-        Register(std::move(emitterFountain2));
+        //        ecfg1.directionAngle = FloatRange{-1.5, 1.5};
+        //        ecfg1.velocity = FloatRange{1.8, 2.85};
+        //        ecfg1.texture = texCircle8;
+        //        auto emitterFountain2 = std::make_unique<Emitter>(ecfg1);
+        //        Register(std::move(emitterFountain2));
 
         Start();
     }

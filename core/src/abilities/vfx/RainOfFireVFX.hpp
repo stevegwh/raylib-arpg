@@ -6,6 +6,7 @@
 
 #include "VisualFX.hpp"
 
+#include "FireballVFX.hpp"
 #include "FlamePartSys.hpp"
 
 #include "raylib.h"
@@ -17,6 +18,7 @@ namespace sage
 {
     struct Fireball
     {
+        std::unique_ptr<FireballVFX> fireball;
         Vector3 position;
         Vector3 velocity;
         std::unique_ptr<FlamePartSys> flameEffect;

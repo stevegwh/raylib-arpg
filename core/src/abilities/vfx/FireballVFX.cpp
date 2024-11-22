@@ -19,6 +19,11 @@
 
 namespace sage
 {
+    const ModelSafe& FireballVFX::GetModel()
+    {
+        return model;
+    }
+
     void FireballVFX::Draw3D() const
     {
         rlDisableBackfaceCulling();

@@ -12,10 +12,10 @@ namespace sage
 {
     // Needed forward declarations.
     //----------------------------------------------------------------------------------
-    typedef struct Particle Particle;
-    typedef struct EmitterConfig EmitterConfig;
-    typedef struct Emitter Emitter;
-    typedef struct ParticleSystem ParticleSystem;
+    struct Particle;
+    struct EmitterConfig;
+    struct Emitter;
+    struct ParticleSystem;
 
     bool Particle_DeactivatorAge(Particle* p);
 
@@ -103,8 +103,10 @@ namespace sage
         void Update(float dt);
         void Draw(Camera3D* camera) const;
         void Draw(Camera3D* camera, const Shader& shader) const;
-        void DrawOldestFirst(Camera3D* const camera) const;
-        void DrawOldestFirst(Camera3D* const camera, const Shader& shader) const;
+        void DrawNearestFirst(Camera3D* camera) const;
+        void DrawNearestFirst(Camera3D* camera, const Shader& shader) const;
+        void DrawOldestFirst(Camera3D* camera) const;
+        void DrawOldestFirst(Camera3D* camera, const Shader& shader) const;
     };
 
     // ParticleSystem type.
@@ -135,6 +137,8 @@ namespace sage
         void Burst();
         void Draw(const Shader& shader) const;
         void Draw() const;
+        void DrawNearestFirst() const;
+        void DrawNearestFirst(const Shader& shader) const;
         void DrawOldestFirst() const;
         void DrawOldestFirst(const Shader& shader) const;
     };
