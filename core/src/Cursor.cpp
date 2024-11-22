@@ -14,6 +14,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "GameUiFactory.hpp"
+#include "Settings.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
@@ -256,8 +257,9 @@ namespace sage
         currentTex = &regulartex;
         currentColor = defaultColor;
 
+        auto viewport = gameData->settings->GetViewPort();
         // Get ray and test against objects
-        ray = GetMouseRay(GetMousePosition(), *gameData->camera->getRaylibCam());
+        ray = GetScreenToWorldRayEx(GetMousePosition(), *gameData->camera->getRaylibCam(), viewport.x, viewport.y);
         auto collisions = gameData->collisionSystem->GetCollisionsWithRay(ray);
 
         // Replace floor BB hit with mesh hit then re-sort vector
