@@ -28,6 +28,7 @@ namespace sage
         void onComponentRemoved(entt::entity removedEntity);
 
       public:
+        void GeneratePortraitRenderTexture(entt::entity entity, float width, float height);
         void GenerateRenderTexture(entt::entity entity, float width, float height);
         entt::sigh<void(entt::entity)> onEquipmentUpdated;
         [[nodiscard]] entt::entity GetItem(entt::entity owner, EquipmentSlotName itemType) const;

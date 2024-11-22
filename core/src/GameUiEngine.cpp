@@ -920,7 +920,9 @@ namespace sage
     void PartyMemberPortrait::RetrieveInfo()
     {
         auto info = engine->gameData->partySystem->GetMember(memberNumber);
-        tex = ResourceManager::GetInstance().TextureLoad(info.portraitImage);
+        engine->gameData->equipmentSystem->GeneratePortraitRenderTexture(
+            engine->gameData->controllableActorSystem->GetSelectedActor(), 100, 200);
+        tex = info.portraitImg.texture;
         UpdateDimensions();
     }
 
@@ -979,7 +981,13 @@ namespace sage
         portraitBgTex.width = tex.width;
         portraitBgTex.height = tex.height;
 
-        ImageBox::Draw2D();
+        auto info = engine->gameData->partySystem->GetMember(memberNumber);
+        // ImageBox::Draw2D();
+        DrawTextureRec(
+            info.portraitImg.texture,
+            {0, 0, static_cast<float>(tex.width - 5), static_cast<float>(-tex.height + 5)},
+            {rec.x, rec.y},
+            WHITE);
         DrawTexture(portraitBgTex, rec.x, rec.y, WHITE);
     }
 
