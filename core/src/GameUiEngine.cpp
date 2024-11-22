@@ -919,9 +919,11 @@ namespace sage
 
     void PartyMemberPortrait::RetrieveInfo()
     {
-        auto info = engine->gameData->partySystem->GetMember(memberNumber);
         engine->gameData->equipmentSystem->GeneratePortraitRenderTexture(
-            engine->gameData->controllableActorSystem->GetSelectedActor(), 100, 200);
+            engine->gameData->controllableActorSystem->GetSelectedActor(),
+            parent->GetRec().width * 4,
+            parent->GetRec().height * 4);
+        auto& info = engine->gameData->partySystem->GetMember(memberNumber);
         tex = info.portraitImg.texture;
         UpdateDimensions();
     }
@@ -978,17 +980,16 @@ namespace sage
             SetGrayscale();
             // Change portrait bg to selected one (static?)
         }
-        portraitBgTex.width = tex.width;
-        portraitBgTex.height = tex.height;
+        portraitBgTex.width = tex.width + engine->gameData->settings->ScaleValueWidth(10);
+        portraitBgTex.height = tex.height + engine->gameData->settings->ScaleValueHeight(10);
 
-        auto info = engine->gameData->partySystem->GetMember(memberNumber);
-        // ImageBox::Draw2D();
         DrawTextureRec(
-            info.portraitImg.texture,
-            {0, 0, static_cast<float>(tex.width - 5), static_cast<float>(-tex.height + 5)},
-            {rec.x, rec.y},
+            tex, {0, 0, static_cast<float>(tex.width), static_cast<float>(-tex.height)}, {rec.x, rec.y}, WHITE);
+        DrawTexture(
+            portraitBgTex,
+            rec.x - engine->gameData->settings->ScaleValueWidth(5),
+            rec.y - engine->gameData->settings->ScaleValueHeight(5),
             WHITE);
-        DrawTexture(portraitBgTex, rec.x, rec.y, WHITE);
     }
 
     PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber)
@@ -1439,7 +1440,10 @@ namespace sage
                     for (auto& cell : row->children)
                     {
                         cell->ScaleContents(settings);
-                        cell->children->UpdateDimensions();
+                        if (cell->children)
+                        {
+                            cell->children->UpdateDimensions();
+                        }
                     }
                 }
             }
@@ -1680,7 +1684,10 @@ namespace sage
                         cell->SetDimensions(
                             cell->unscaledDimensions.rec.width, cell->unscaledDimensions.rec.height);
                         cell->padding = cell->unscaledDimensions.padding;
-                        cell->children->UpdateDimensions();
+                        if (cell->children)
+                        {
+                            cell->children->UpdateDimensions();
+                        }
                     }
                 }
             }
@@ -1767,6 +1774,7 @@ namespace sage
                     for (auto& cell : row->children)
                     {
                         auto& element = cell->children;
+                        if (!element) continue;
                         // Allow elements being dragged to continue being active outside of window's bounds
                         if (element->beingDragged) continue;
                         element->ChangeState(std::make_unique<IdleState>(element.get(), element->engine));
@@ -1895,9 +1903,9 @@ namespace sage
         }
     }
 
-    TableGrid* Panel::CreateTableGrid(int rows, int cols, float cellSpacing)
+    TableGrid* Panel::CreateTableGrid(int rows, int cols, float cellSpacing, Padding _padding)
     {
-        children.push_back(std::make_unique<TableGrid>(this));
+        children.push_back(std::make_unique<TableGrid>(this, _padding));
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
         table->cellSpacing = cellSpacing;
         // Create rows and cells with initial autoSize = true

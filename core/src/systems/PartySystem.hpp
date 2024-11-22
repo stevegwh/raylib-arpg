@@ -23,7 +23,7 @@ namespace sage
       public:
         void AddMember(entt::entity member);
         void RemoveMember(entt::entity entity);
-        PartyMemberComponent GetMember(unsigned int memberNumber);
+        PartyMemberComponent& GetMember(unsigned int memberNumber) const;
         [[nodiscard]] unsigned int GetSize() const;
         PartySystem(entt::registry* _registry, GameData* _gameData);
     };

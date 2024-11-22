@@ -26,7 +26,7 @@ namespace sage
         }
     }
 
-    PartyMemberComponent PartySystem::GetMember(unsigned int memberNumber)
+    PartyMemberComponent& PartySystem::GetMember(unsigned int memberNumber) const
     {
         assert(memberNumber < party.size());
         return registry->get<PartyMemberComponent>(party.at(memberNumber));

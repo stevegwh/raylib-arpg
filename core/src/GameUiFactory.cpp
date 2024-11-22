@@ -93,8 +93,8 @@ namespace sage
 
     Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
     {
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.08;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.3;
+        auto w = 132 * 1.2;
+        auto h = 166 * 1.2;
         auto _windowDocked = std::make_unique<WindowDocked>(
             engine->gameData->settings,
             0,
@@ -107,7 +107,6 @@ namespace sage
         auto* window = engine->CreateWindowDocked(std::move(_windowDocked));
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
-
         auto partySize = engine->gameData->partySystem->GetSize();
         for (int i = partySize - 1; i >= 0; --i) // Do not change "i" to unsigned int.
         {
@@ -143,7 +142,7 @@ namespace sage
         auto table = panel->CreateTable(16);
         auto abilityTable = panel->CreateTable({16, 16, 0, 0});
         panel->CreateTable(16);
-
+        // TODO: Create a function to fill the row with X amount of icons of a certain width
         auto experienceBar = abilityTable->CreateTableRow(30);
         auto abilityRow = abilityTable->CreateTableRow(70, {8, 6, 0, 0});
         for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)

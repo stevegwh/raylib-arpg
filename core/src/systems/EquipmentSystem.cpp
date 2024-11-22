@@ -106,6 +106,9 @@ namespace sage
     void EquipmentSystem::GeneratePortraitRenderTexture(entt::entity entity, float width, float height)
     {
         auto& info = registry->get<PartyMemberComponent>(entity);
+        // TODO: inefficient
+        UnloadTexture(info.portraitImg.texture);
+        info.portraitImg = LoadRenderTexture(width, height);
 
         auto& transform = registry->get<sgTransform>(entity);
         auto& renderable = registry->get<Renderable>(entity);
@@ -120,29 +123,22 @@ namespace sage
         transform.SetPosition({0, -999, 0});
 
         auto current = animation.current;
+        animation.ChangeAnimationByEnum(AnimationEnum::IDLE2);
+        updateCharacterPreviewPose(entity);
+        gameData->camera->SetCamera({-1.5, -992.5, 1.5}, {0.5, -992.5, 0});
 
-        // TODO: inefficient
-        UnloadTexture(info.portraitImg.texture);
         info.portraitImg = LoadRenderTexture(width, height);
+        BeginTextureMode(info.portraitImg);
+        ClearBackground(BLACK);
+        BeginMode3D(*gameData->camera->getRaylibCam());
+        auto& uber = registry->get<UberShaderComponent>(entity);
+        uber.ClearFlag(UberShaderComponent::Lit);
+        uber.SetShaderLocs();
+        uber.SetFlag(UberShaderComponent::Lit);
+        renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 
-        {
-            animation.ChangeAnimationByEnum(AnimationEnum::IDLE2);
-            updateCharacterPreviewPose(entity);
-            gameData->camera->SetCamera({-0.85, -992.5, 3.25}, {0.5, -992.25, 0});
-
-            info.portraitImg = LoadRenderTexture(width, height);
-            BeginTextureMode(info.portraitImg);
-            ClearBackground(BLACK);
-            BeginMode3D(*gameData->camera->getRaylibCam());
-            auto& uber = registry->get<UberShaderComponent>(entity);
-            uber.ClearFlag(UberShaderComponent::Lit);
-            uber.SetShaderLocs();
-            uber.SetFlag(UberShaderComponent::Lit);
-            renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
-
-            EndMode3D();
-            EndTextureMode();
-        }
+        EndMode3D();
+        EndTextureMode();
 
         animation.current = current;
         transform.SetPosition(oldPos);
@@ -151,12 +147,7 @@ namespace sage
 
     void EquipmentSystem::GenerateRenderTexture(entt::entity entity, float width, float height)
     {
-        auto& info = registry->get<PartyMemberComponent>(entity);
-
-        auto light =
-            gameData->lightSubSystem->CreateLight(LightType::LIGHT_POINT, {0, -996, 15}, {0, -996, 0}, WHITE);
         auto& equipment = registry->get<EquipmentComponent>(entity);
-
         auto& transform = registry->get<sgTransform>(entity);
         auto& renderable = registry->get<Renderable>(entity);
         auto& animation = registry->get<Animation>(entity);
@@ -178,61 +169,39 @@ namespace sage
         UnloadTexture(equipment.renderTexture.texture);
         equipment.renderTexture = LoadRenderTexture(width, height);
 
-        {
-            BeginTextureMode(equipment.renderTexture);
-            ClearBackground(BLANK);
-            BeginMode3D(*gameData->camera->getRaylibCam());
-            auto& uber = registry->get<UberShaderComponent>(entity);
-            uber.ClearFlag(UberShaderComponent::Lit);
-            uber.SetShaderLocs();
-            uber.SetFlag(UberShaderComponent::Lit);
-            renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
+        BeginTextureMode(equipment.renderTexture);
+        ClearBackground(BLANK);
+        BeginMode3D(*gameData->camera->getRaylibCam());
+        auto& uber = registry->get<UberShaderComponent>(entity);
+        uber.ClearFlag(UberShaderComponent::Lit);
+        uber.SetShaderLocs();
+        uber.SetFlag(UberShaderComponent::Lit);
+        renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 
-            if (equipment.worldModels.contains(EquipmentSlotName::LEFTHAND))
+        if (equipment.worldModels.contains(EquipmentSlotName::LEFTHAND))
+        {
+            if (registry->valid(equipment.worldModels[EquipmentSlotName::LEFTHAND]))
             {
-                if (registry->valid(equipment.worldModels[EquipmentSlotName::LEFTHAND]))
-                {
-                    auto& leftHandRenderable =
-                        registry->get<Renderable>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
-                    auto& leftHandTrans =
-                        registry->get<sgTransform>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
-                    auto& weaponUber =
-                        registry->get<UberShaderComponent>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
-                    weaponUber.ClearFlag(UberShaderComponent::Lit);
-                    weaponUber.SetShaderLocs();
-                    weaponUber.SetFlag(UberShaderComponent::Lit);
-                    leftHandRenderable.GetModel()->Draw(
-                        leftHandTrans.GetWorldPos(), leftHandTrans.GetScale().x, WHITE);
-                }
+                auto& leftHandRenderable =
+                    registry->get<Renderable>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
+                auto& leftHandTrans =
+                    registry->get<sgTransform>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
+                auto& weaponUber =
+                    registry->get<UberShaderComponent>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
+                weaponUber.ClearFlag(UberShaderComponent::Lit);
+                weaponUber.SetShaderLocs();
+                weaponUber.SetFlag(UberShaderComponent::Lit);
+                leftHandRenderable.GetModel()->Draw(
+                    leftHandTrans.GetWorldPos(), leftHandTrans.GetScale().x, WHITE);
             }
-
-            EndMode3D();
-            EndTextureMode();
         }
 
-        {
-            animation.ChangeAnimationByEnum(AnimationEnum::IDLE2);
-            updateCharacterPreviewPose(entity);
-            gameData->camera->SetCamera({-0.85, -992.5, 3.25}, {0.5, -992.25, 0});
-
-            info.portraitImg = LoadRenderTexture(100, 200);
-            BeginTextureMode(info.portraitImg);
-            ClearBackground(BLACK);
-            BeginMode3D(*gameData->camera->getRaylibCam());
-            auto& uber = registry->get<UberShaderComponent>(entity);
-            uber.ClearFlag(UberShaderComponent::Lit);
-            uber.SetShaderLocs();
-            uber.SetFlag(UberShaderComponent::Lit);
-            renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
-
-            EndMode3D();
-            EndTextureMode();
-        }
+        EndMode3D();
+        EndTextureMode();
 
         animation.current = current;
         transform.SetPosition(oldPos);
         gameData->camera->SetCamera(cameraPos, cameraTarget);
-        gameData->lightSubSystem->RemoveLight(light);
     }
 
     entt::entity EquipmentSystem::GetItem(entt::entity owner, EquipmentSlotName itemType) const
