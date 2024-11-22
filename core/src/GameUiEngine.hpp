@@ -572,7 +572,7 @@ namespace sage
         bool autoSize = true;
 
       public:
-        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0);
+        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0, Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void DrawDebug2D() override;
