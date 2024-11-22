@@ -55,6 +55,7 @@ namespace sage
         if (settings->toggleFullScreenRequested)
         {
             const auto prev = settings->GetViewPort();
+
 #ifdef __APPLE__
             if (!IsWindowFullscreen())
             {
@@ -76,15 +77,15 @@ namespace sage
                              GetScreenHeight() == GetMonitorHeight(GetCurrentMonitor());
             if (!maximized)
             {
-
                 int monitor = GetCurrentMonitor();
                 SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-
+                settings->SetScreenSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
                 ToggleBorderlessWindowed();
             }
             else
             {
                 ToggleBorderlessWindowed();
+                settings->ResetToUserDefined();
                 const auto screen = settings->GetScreenSize();
                 SetWindowSize(static_cast<int>(screen.x), static_cast<int>(screen.y));
             }
