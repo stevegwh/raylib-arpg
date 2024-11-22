@@ -14,6 +14,8 @@ namespace sage
     class GameData;
     struct PartyMemberComponent;
 
+    static constexpr unsigned int PARTY_MEMBER_MAX = 4;
+
     class PartySystem
     {
         entt::registry* registry;
@@ -23,7 +25,7 @@ namespace sage
       public:
         void AddMember(entt::entity member);
         void RemoveMember(entt::entity entity);
-        PartyMemberComponent& GetMember(unsigned int memberNumber) const;
+        [[nodiscard]] entt::entity GetMember(unsigned int memberNumber) const;
         [[nodiscard]] unsigned int GetSize() const;
         PartySystem(entt::registry* _registry, GameData* _gameData);
     };

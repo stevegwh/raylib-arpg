@@ -93,22 +93,15 @@ namespace sage
 
     Window* GameUiFactory::CreatePartyPortraitsColumn(GameUIEngine* engine)
     {
-        auto w = 132 * 1.2;
-        auto h = 166 * 1.2;
+        auto w = 132;
+        auto h = 166 * PARTY_MEMBER_MAX;
         auto _windowDocked = std::make_unique<WindowDocked>(
-            engine->gameData->settings,
-            0,
-            0,
-            w,
-            h,
-            VertAlignment::MIDDLE,
-            HoriAlignment::LEFT,
-            Padding{12, 12, 16, 16});
+            engine->gameData->settings, 16, 16, w, h, VertAlignment::TOP, HoriAlignment::LEFT);
         auto* window = engine->CreateWindowDocked(std::move(_windowDocked));
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
-        auto partySize = engine->gameData->partySystem->GetSize();
-        for (int i = partySize - 1; i >= 0; --i) // Do not change "i" to unsigned int.
+
+        for (int i = 0; i < PARTY_MEMBER_MAX; ++i)
         {
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell({0, 5, 0, 0});
