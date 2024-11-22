@@ -164,7 +164,7 @@ namespace sage
             auto textSize = MeasureText("Are you sure you want to exit program? [Y/N]", 30);
             DrawText("Are you sure you want to exit program? [Y/N]", (width - textSize) / 2, 180, 30, WHITE);
         }
-        DrawFPS(10, 10);
+        DrawFPS(settings->GetScreenSize().x - settings->ScaleValueWidth(120), 10);
         EndDrawing();
     };
 

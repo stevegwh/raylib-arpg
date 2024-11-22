@@ -919,11 +919,13 @@ namespace sage
 
     void PartyMemberPortrait::RetrieveInfo()
     {
+        const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
+        if (entity == entt::null) return;
+        const auto& info = engine->registry->get<PartyMemberComponent>(entity);
+
         engine->gameData->equipmentSystem->GeneratePortraitRenderTexture(
-            engine->gameData->controllableActorSystem->GetSelectedActor(),
-            parent->GetRec().width * 4,
-            parent->GetRec().height * 4);
-        auto& info = engine->gameData->partySystem->GetMember(memberNumber);
+            entity, parent->GetRec().width * 4, parent->GetRec().height * 4);
+
         tex = info.portraitImg.texture;
         UpdateDimensions();
     }
@@ -932,8 +934,8 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto receiver = engine->gameData->partySystem->GetMember(memberNumber).entity;
-            auto sender = engine->gameData->controllableActorSystem->GetSelectedActor();
+            const auto receiver = engine->gameData->partySystem->GetMember(memberNumber);
+            const auto sender = engine->gameData->controllableActorSystem->GetSelectedActor();
             if (receiver == sender) return;
             auto& receiverInv = engine->registry->get<InventoryComponent>(receiver);
             auto& senderInv = engine->registry->get<InventoryComponent>(sender);
@@ -948,7 +950,7 @@ namespace sage
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
-            auto receiver = engine->gameData->partySystem->GetMember(memberNumber).entity;
+            const auto receiver = engine->gameData->partySystem->GetMember(memberNumber);
             auto sender = engine->gameData->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(receiver);
             auto droppedItemId = engine->gameData->equipmentSystem->GetItem(sender, droppedE->itemType);
@@ -968,14 +970,15 @@ namespace sage
 
     void PartyMemberPortrait::OnClick()
     {
-        engine->gameData->controllableActorSystem->SetSelectedActor(
-            engine->gameData->partySystem->GetMember(memberNumber).entity);
+        const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
+        engine->gameData->controllableActorSystem->SetSelectedActor(entity);
     }
 
     void PartyMemberPortrait::Draw2D()
     {
-        if (engine->gameData->controllableActorSystem->GetSelectedActor() ==
-            engine->gameData->partySystem->GetMember(memberNumber).entity)
+        const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
+        if (entity == entt::null) return;
+        if (engine->gameData->controllableActorSystem->GetSelectedActor() == entity)
         {
             SetGrayscale();
             // Change portrait bg to selected one (static?)

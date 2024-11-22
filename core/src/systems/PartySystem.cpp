@@ -11,6 +11,7 @@ namespace sage
 
     void PartySystem::AddMember(entt::entity member)
     {
+        assert(party.size() < PARTY_MEMBER_MAX);
         party.push_back(member);
     }
 
@@ -26,10 +27,13 @@ namespace sage
         }
     }
 
-    PartyMemberComponent& PartySystem::GetMember(unsigned int memberNumber) const
+    entt::entity PartySystem::GetMember(unsigned int memberNumber) const
     {
-        assert(memberNumber < party.size());
-        return registry->get<PartyMemberComponent>(party.at(memberNumber));
+        if (memberNumber < party.size())
+        {
+            return party.at(memberNumber);
+        }
+        return entt::null;
     }
 
     unsigned int PartySystem::GetSize() const
