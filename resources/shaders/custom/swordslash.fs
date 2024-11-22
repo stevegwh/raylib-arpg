@@ -30,7 +30,7 @@ void main()
     vec2 uv = fragTexCoord;
     //uv.x += seconds * 2;
     float grad = mix(0.0, 2.0, fragTexCoord.x - 0.5);
-    
+
     vec4 d = texture(texture1, fragTexCoord) * 0.1;
     vec4 n = texture(texture0, uv.xy + d.rg);
     n += grad;

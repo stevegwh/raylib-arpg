@@ -236,9 +236,8 @@ namespace sage
         }
     }
 
-    void Emitter::DrawOldestFirst(Camera3D* const camera) const
+    void Emitter::DrawNearestFirst(Camera3D* const camera) const
     {
-        // Create a vector of pointers to active particles
         std::vector<Particle*> activeParticles;
         for (size_t i = 0; i < config.capacity; i++)
         {
@@ -248,7 +247,41 @@ namespace sage
             }
         }
 
-        // Sort particles by age, oldest first
+        std::sort(activeParticles.begin(), activeParticles.end(), [&camera](const Particle* a, const Particle* b) {
+            return Vector3Distance(a->position, camera->position) < Vector3Distance(b->position, camera->position);
+        });
+
+        BeginBlendMode(config.blendMode);
+        for (const auto& p : activeParticles)
+        {
+            DrawBillboard(
+                *camera,
+                config.texture,
+                p->position,
+                p->size,
+                LinearFade(config.startColor, config.endColor, p->age / p->ttl));
+        }
+        EndBlendMode();
+    }
+
+    void Emitter::DrawNearestFirst(Camera3D* const camera, const Shader& shader) const
+    {
+        BeginShaderMode(shader);
+        DrawNearestFirst(camera);
+        EndShaderMode();
+    }
+
+    void Emitter::DrawOldestFirst(Camera3D* const camera) const
+    {
+        std::vector<Particle*> activeParticles;
+        for (size_t i = 0; i < config.capacity; i++)
+        {
+            if (particles[i]->active)
+            {
+                activeParticles.push_back(particles[i].get());
+            }
+        }
+
         std::sort(activeParticles.begin(), activeParticles.end(), [](const Particle* a, const Particle* b) {
             return a->age < b->age;
         });
@@ -400,17 +433,77 @@ namespace sage
     // ParticleSystem_Draw runs Emitter_Draw on all registered Emitters.
     void ParticleSystem::Draw() const
     {
-        for (auto& emitter : emitters)
+        std::vector<Emitter*> activeEmitters;
+        for (const auto& emitter : emitters)
         {
-            emitter->Draw(camera);
+            if (emitter->isEmitting)
+            {
+                activeEmitters.push_back(emitter.get());
+            }
+        }
+
+        std::sort(activeEmitters.begin(), activeEmitters.end(), [this](const Emitter* a, const Emitter* b) {
+            return Vector3Distance(a->config.origin, camera->position) <
+                   Vector3Distance(b->config.origin, camera->position);
+        });
+
+        {
+            for (auto& emitter : activeEmitters)
+            {
+                emitter->Draw(camera);
+            }
+        }
+    }
+    void ParticleSystem::Draw(const Shader& shader) const
+    {
+        std::vector<Emitter*> activeEmitters;
+        for (const auto& emitter : emitters)
+        {
+            if (emitter->isEmitting)
+            {
+                activeEmitters.push_back(emitter.get());
+            }
+        }
+
+        std::sort(activeEmitters.begin(), activeEmitters.end(), [this](const Emitter* a, const Emitter* b) {
+            return Vector3Distance(a->config.origin, camera->position) <
+                   Vector3Distance(b->config.origin, camera->position);
+        });
+
+        for (auto& emitter : activeEmitters)
+        {
+            emitter->Draw(camera, shader);
         }
     }
 
-    void ParticleSystem::Draw(const Shader& shader) const
+    void ParticleSystem::DrawNearestFirst() const
     {
+
         for (auto& emitter : emitters)
         {
-            emitter->Draw(camera, shader);
+            emitter->DrawNearestFirst(camera);
+        }
+    }
+
+    void ParticleSystem::DrawNearestFirst(const Shader& shader) const
+    {
+        std::vector<Emitter*> activeEmitters;
+        for (const auto& emitter : emitters)
+        {
+            if (emitter->isEmitting)
+            {
+                activeEmitters.push_back(emitter.get());
+            }
+        }
+
+        std::sort(activeEmitters.begin(), activeEmitters.end(), [this](const Emitter* a, const Emitter* b) {
+            return Vector3Distance(a->config.origin, camera->position) <
+                   Vector3Distance(b->config.origin, camera->position);
+        });
+
+        for (auto& emitter : activeEmitters)
+        {
+            emitter->DrawNearestFirst(camera, shader);
         }
     }
 
@@ -424,7 +517,21 @@ namespace sage
 
     void ParticleSystem::DrawOldestFirst(const Shader& shader) const
     {
-        for (auto& emitter : emitters)
+        std::vector<Emitter*> activeEmitters;
+        for (const auto& emitter : emitters)
+        {
+            if (emitter->isEmitting)
+            {
+                activeEmitters.push_back(emitter.get());
+            }
+        }
+
+        std::sort(activeEmitters.begin(), activeEmitters.end(), [this](const Emitter* a, const Emitter* b) {
+            return Vector3Distance(a->config.origin, camera->position) <
+                   Vector3Distance(b->config.origin, camera->position);
+        });
+
+        for (auto& emitter : activeEmitters)
         {
             emitter->DrawOldestFirst(camera, shader);
         }

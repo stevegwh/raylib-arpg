@@ -149,7 +149,7 @@ namespace sage
         entt::sink sink2{data->userInput->keyCPressed};
         sink2.connect<&Window::ToggleHide>(*equipmentWindow);
 
-        // auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
+        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
 
         spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);

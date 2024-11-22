@@ -25,8 +25,13 @@ namespace sage
 
     void RainOfFireVFX::Draw3D() const
     {
+
         for (const auto& fireball : fireballs)
         {
+            rlDisableBackfaceCulling();
+            // TODO: Fireball is not centred
+            fireball.fireball->GetModel().Draw(fireball.position, Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
+            rlEnableBackfaceCulling();
             fireball.flameEffect->DrawOldestFirst(shader);
         }
     }
@@ -35,6 +40,7 @@ namespace sage
     {
         for (auto& fireball : fireballs)
         {
+            // fireball.fireball->Update(dt);
             Vector3 previousPosition = fireball.position;
             fireball.position = Vector3Add(fireball.position, Vector3Scale(fireball.velocity, dt));
 
@@ -70,22 +76,28 @@ namespace sage
 
         // Calculate the velocity vector towards the landing point
         Vector3 direction = Vector3Normalize(Vector3Subtract(randomGroundPoint, aerialSpawn));
-        float speed = GetRandomValue(4, 8);
+        float speed = GetRandomValue(25, 30);
         fireball.velocity = {direction.x * speed, direction.y * speed, direction.z * speed};
+
+        if (!fireball.fireball)
+        {
+            fireball.fireball = std::make_unique<FireballVFX>(gameData, ability);
+            fireball.fireball->InitSystem();
+        }
 
         if (!fireball.flameEffect)
         {
             fireball.flameEffect = std::make_unique<FlamePartSys>(gameData->camera->getRaylibCam());
             fireball.flameEffect->SetOrigin(fireball.position);
-            fireball.flameEffect->SetDirection(fireball.velocity);
+            fireball.flameEffect->SetDirection(direction);
         }
     }
 
     void RainOfFireVFX::InitSystem()
     {
         active = true;
-        const int numFireballs = 20; // Total number of fireballs
-        const float height = 15.0f;  // Base height above the target
+        const int numFireballs = 1; // Total number of fireballs
+        const float height = 15.0f; // Base height above the target
         initialHeight = height;
         minHeight = 0.0f;
         impactRadius = 1.0f;
