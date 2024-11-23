@@ -631,7 +631,7 @@ namespace sage
 
     void ImageBox::SetGrayscale()
     {
-        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/outline.fs");
+        shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/grayscale.fs");
     }
 
     void ImageBox::RemoveShader()
@@ -786,8 +786,84 @@ namespace sage
         }
     }
 
+    void ImageBox::shrinkColToFit() const
+    {
+        // Navigate up to get the Table
+        auto* tableCell = parent;
+        auto* tableRow = tableCell->parent;
+        auto* table = tableRow->parent;
+        auto& allRows = table->children;
+
+        size_t myColIndex = findMyColumnIndex();
+
+        // First pass: calculate the required scale factor for each cell in this column
+        float minScaleFactor = 1.0f;
+
+        for (auto& row : allRows)
+        {
+            // Skip if the row doesn't have enough cells
+            if (row->children.size() <= myColIndex) continue;
+
+            auto* cellInColumn = row->children[myColIndex].get();
+            auto* imageBox = dynamic_cast<ImageBox*>(cellInColumn->children.get());
+            if (!imageBox) continue;
+
+            auto space = imageBox->calculateAvailableSpace();
+            auto dimensions = imageBox->calculateInitialDimensions(space);
+
+            // Calculate scale factor needed for this image
+            float widthRatio = space.width / dimensions.width;
+            float heightRatio = space.height / dimensions.height;
+            float scaleFactor = std::min(widthRatio, heightRatio);
+
+            // Keep track of the smallest scale factor needed
+            minScaleFactor = std::min(minScaleFactor, scaleFactor);
+        }
+
+        // Second pass: apply the minimum scale factor to all cells in this column
+        for (auto& row : allRows)
+        {
+            // Skip if the row doesn't have enough cells
+            if (row->children.size() <= myColIndex) continue;
+
+            auto* cellInColumn = row->children[myColIndex].get();
+            auto* imageBox = dynamic_cast<ImageBox*>(cellInColumn->children.get());
+            if (!imageBox) continue;
+
+            auto space = imageBox->calculateAvailableSpace();
+            auto dimensions = imageBox->calculateInitialDimensions(space);
+
+            // Apply uniform scaling
+            dimensions.width *= minScaleFactor;
+            dimensions.height *= minScaleFactor;
+
+            auto offset = imageBox->calculateAlignmentOffset(dimensions, space);
+            imageBox->updateRectangle(dimensions, offset, space);
+        }
+    }
+
+    // Helper function to find the column index of the current ImageBox
+    size_t ImageBox::findMyColumnIndex() const
+    {
+        auto* myCell = parent;
+        auto* myRow = myCell->parent;
+
+        // Find this cell's index in its row
+        size_t colIndex = 0;
+        for (size_t i = 0; i < myRow->children.size(); ++i)
+        {
+            if (myRow->children[i].get() == myCell)
+            {
+                colIndex = i;
+                break;
+            }
+        }
+        return colIndex;
+    }
+
     Dimensions ImageBox::handleOverflow(const Dimensions& dimensions, const Dimensions& space) const
     {
+        if (overflowBehaviour == OverflowBehaviour::ALLOW_OVERFLOW) return dimensions;
         if (dimensions.width <= space.width && dimensions.height <= space.height)
         {
             return dimensions;
@@ -810,6 +886,11 @@ namespace sage
         if (overflowBehaviour == OverflowBehaviour::SHRINK_ROW_TO_FIT)
         {
             shrinkRowToFit();
+            return;
+        }
+        if (overflowBehaviour == OverflowBehaviour::SHRINK_COL_TO_FIT)
+        {
+            shrinkColToFit();
             return;
         }
         auto space = calculateAvailableSpace();
@@ -917,16 +998,28 @@ namespace sage
         sink2.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
     }
 
+    void PartyMemberPortrait::UpdateDimensions()
+    {
+        ImageBox::UpdateDimensions();
+        portraitBgTex.width = tex.width + engine->gameData->settings->ScaleValueWidth(10);
+        portraitBgTex.height = tex.height + engine->gameData->settings->ScaleValueHeight(10);
+    }
+
     void PartyMemberPortrait::RetrieveInfo()
     {
         const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
-        if (entity == entt::null) return;
-        const auto& info = engine->registry->get<PartyMemberComponent>(entity);
+        // This causes issues as you are depending on the rectangle size for the tex size and vice versa
+        // You should pass a blank texture with the correct dimensions
+        if (entity != entt::null)
+        {
+            const auto& info = engine->registry->get<PartyMemberComponent>(entity);
 
-        engine->gameData->equipmentSystem->GeneratePortraitRenderTexture(
-            entity, parent->GetRec().width * 4, parent->GetRec().height * 4);
+            engine->gameData->equipmentSystem->GeneratePortraitRenderTexture(
+                entity, tex.width * 4, tex.height * 4);
 
-        tex = info.portraitImg.texture;
+            tex.id = info.portraitImg.texture.id;
+        }
+
         UpdateDimensions();
     }
 
@@ -980,32 +1073,41 @@ namespace sage
         if (entity == entt::null) return;
         if (engine->gameData->controllableActorSystem->GetSelectedActor() == entity)
         {
-            SetGrayscale();
-            // Change portrait bg to selected one (static?)
+            SetHoverShader();
         }
-        portraitBgTex.width = tex.width + engine->gameData->settings->ScaleValueWidth(10);
-        portraitBgTex.height = tex.height + engine->gameData->settings->ScaleValueHeight(10);
 
         DrawTextureRec(
             tex, {0, 0, static_cast<float>(tex.width), static_cast<float>(-tex.height)}, {rec.x, rec.y}, WHITE);
+
+        if (shader.has_value())
+        {
+            BeginShaderMode(shader.value());
+        }
         DrawTexture(
             portraitBgTex,
             rec.x - engine->gameData->settings->ScaleValueWidth(5),
             rec.y - engine->gameData->settings->ScaleValueHeight(5),
             WHITE);
+        if (shader.has_value())
+        {
+            EndShaderMode();
+        }
     }
 
-    PartyMemberPortrait::PartyMemberPortrait(GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber)
+    PartyMemberPortrait::PartyMemberPortrait(
+        GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber, int _width, int _height)
         : ImageBox(
-              _engine,
-              _parent,
-              OverflowBehaviour::SHRINK_ROW_TO_FIT,
-              VertAlignment::MIDDLE,
-              HoriAlignment::CENTER),
-          memberNumber(_memberNumber)
+              _engine, _parent, OverflowBehaviour::ALLOW_OVERFLOW, VertAlignment::MIDDLE, HoriAlignment::CENTER),
+          memberNumber(_memberNumber),
+          width(_width),
+          height(_height)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/avatar_border_set.png");
         portraitBgTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/avatar_border_set.png");
+        portraitBgTex.width = width;
+        portraitBgTex.height = height;
+        tex.width = width;
+        tex.height = height;
         entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
         sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
     }
