@@ -1008,8 +1008,6 @@ namespace sage
     void PartyMemberPortrait::RetrieveInfo()
     {
         const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
-        // This causes issues as you are depending on the rectangle size for the tex size and vice versa
-        // You should pass a blank texture with the correct dimensions
         if (entity != entt::null)
         {
             const auto& info = engine->registry->get<PartyMemberComponent>(entity);
@@ -1019,7 +1017,6 @@ namespace sage
 
             tex.id = info.portraitImg.texture.id;
         }
-
         UpdateDimensions();
     }
 
@@ -1108,6 +1105,7 @@ namespace sage
         portraitBgTex.height = height;
         tex.width = width;
         tex.height = height;
+        canReceiveDragDrops = true;
         entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
         sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
     }
