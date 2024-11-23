@@ -335,8 +335,10 @@ namespace sage
       public:
         enum class OverflowBehaviour
         {
+            ALLOW_OVERFLOW,
             SHRINK_TO_FIT,
-            SHRINK_ROW_TO_FIT
+            SHRINK_ROW_TO_FIT,
+            SHRINK_COL_TO_FIT
         };
         void OnIdleStart() override;
         void OnHoverStart() override;
@@ -369,7 +371,7 @@ namespace sage
         double hoverTimer = 0;
         float hoverTimerThreshold = 0.8;
         std::optional<TooltipWindow*> tooltipWindow;
-        OverflowBehaviour overflowBehaviour = OverflowBehaviour::SHRINK_TO_FIT;
+        OverflowBehaviour overflowBehaviour;
         std::optional<Shader> shader;
         virtual void updateRectangle(const Dimensions& dimensions, const Vector2& offset, const Dimensions& space);
 
@@ -380,6 +382,8 @@ namespace sage
         [[nodiscard]] Vector2 calculateAlignmentOffset(
             const Dimensions& dimensions, const Dimensions& space) const;
         void shrinkRowToFit() const;
+        void shrinkColToFit() const;
+        size_t findMyColumnIndex() const;
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
@@ -410,13 +414,17 @@ namespace sage
     {
         unsigned int memberNumber{};
         Texture portraitBgTex{};
+        int width;
+        int height;
 
       public:
+        void UpdateDimensions() override;
         void RetrieveInfo();
         void ReceiveDrop(CellElement* droppedElement) override;
         void OnClick() override;
         void Draw2D() override;
-        PartyMemberPortrait(GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber);
+        PartyMemberPortrait(
+            GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber, int _width, int _height);
         friend class TableCell;
     };
 
