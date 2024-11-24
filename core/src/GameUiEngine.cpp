@@ -629,7 +629,13 @@ namespace sage
     {
         auto& combatable =
             engine->registry->get<CombatableActor>(engine->gameData->controllableActorSystem->GetSelectedActor());
-        if (statisticType == StatisticType::STRENGTH)
+        if (statisticType == StatisticType::NAME)
+        {
+            auto& renderable =
+                engine->registry->get<Renderable>(engine->gameData->controllableActorSystem->GetSelectedActor());
+            SetContent(std::format("{}", renderable.name));
+        }
+        else if (statisticType == StatisticType::STRENGTH)
         {
             SetContent(std::format("Strength: {}", combatable.baseStatistics.strength));
         }
@@ -664,6 +670,11 @@ namespace sage
 
         entt::sink sink2{engine->gameData->equipmentSystem->onEquipmentUpdated};
         sink2.connect<&CharacterStatText::RetrieveInfo>(this);
+
+        if (_statisticType == StatisticType::NAME)
+        {
+            horiAlignment = HoriAlignment::CENTER;
+        }
 
         RetrieveInfo();
     }

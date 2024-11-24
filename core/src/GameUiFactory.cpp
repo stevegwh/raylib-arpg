@@ -354,16 +354,18 @@ namespace sage
             pos.y,
             274 * 3,
             424 * 1.5,
-            Padding{20, 20, 14, 0});
+            Padding{20, 20, 14, 14});
         auto window = engine->CreateWindow(std::move(_window));
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {
-            const auto panel1 = window->CreatePanel(4);
+            // TODO: Having the concept of "margins" would make it so much easier to create consistent layouts
+            // where you don't have to request different heights and add padding to make things line up
+            const auto panel1 = window->CreatePanel(10);
             const auto table = panel1->CreateTable();
             const auto row = table->CreateTableRow();
             const auto cell = row->CreateTableCell(80);
-            const auto cell2 = row->CreateTableCell(20);
+            const auto cell2 = row->CreateTableCell(20, {0, 18 * 2, 18, 18});
             auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleText), "Character");
 
@@ -391,7 +393,10 @@ namespace sage
             cell->CreateImagebox(std::move(imgBox));
         };
 
-        auto panel2 = window->CreatePanel({24, 0, 24, 24});
+        auto panel2 = window->CreatePanel({0, 0, 4, 0});
+        panel2->SetTexture(
+            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/inventory-bg.png"),
+            TextureStretchMode::STRETCH);
         {
             auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
             for (unsigned int row = 0; row < maxRows; ++row)
@@ -440,11 +445,12 @@ namespace sage
 
         {
             // Character statistics
-            auto table = panel2->CreateTable(40, {50, 250, 36, 0});
+            auto table = panel2->CreateTable(40, {50, 250, 48, 48});
             //            ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
             table->SetTexture(
-                ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_dialogue.png"),
+                ResourceManager::GetInstance().TextureLoad("resources/textures/ui/scroll-bg.png"),
                 TextureStretchMode::STRETCH);
+
             for (int i = 0; i < magic_enum::enum_underlying(CharacterStatText::StatisticType::COUNT); ++i)
             {
                 auto row = table->CreateTableRow();
@@ -456,7 +462,7 @@ namespace sage
         }
 
         window->FinalizeLayout();
-        window->Hide();
+        // window->Hide();
         return window;
     }
 
