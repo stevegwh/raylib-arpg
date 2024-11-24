@@ -23,13 +23,6 @@ namespace sage
         entt::sigh<void(entt::entity, entt::entity)> onFloorClick{};      // Self, object clicked (can discard)
         entt::sigh<void(entt::entity, entt::entity)> onNPCLeftClick{};
 
-        // TODO: Remove this or move it from controllable actor
-        // Timer to check if the target has moved.
-        Timer checkTargetPosTimer{};
-        // An actor that is the target for pathfinding etc.
-        entt::entity targetActor = entt::null;
-
-        Vector3 targetActorPos{};
         ControllableActor(entt::entity _self, Cursor* _cursor);
     };
 } // namespace sage

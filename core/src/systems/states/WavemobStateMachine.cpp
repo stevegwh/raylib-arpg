@@ -124,15 +124,13 @@ namespace sage
         {
             auto& moveable = registry->get<MoveableActor>(self);
             // moveable.targetActor = target;
-            double timeLapsed = GetTime();
-            if (timeLapsed - moveable.lastTargetPosCheck > moveable.lastTargetPosCheckThreshold)
+            if (moveable.followTarget->ShouldCheckTargetPos())
             {
-                moveable.lastTargetPosCheck = timeLapsed;
                 const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
                 auto& animation = registry->get<Animation>(self);
                 animation.ChangeAnimationByEnum(AnimationEnum::WALK, 2);
                 gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
-            };
+            }
         }
 
       public:
@@ -148,20 +146,17 @@ namespace sage
 
         void OnStateEnter(entt::entity self) override
         {
-            auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            const auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
 
             auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
-            moveable.targetActor = combatable.target;
-            auto& targetTrans = registry->get<sgTransform>(combatable.target);
-
-            moveable.onTargetPosUpdateHookId = gameData->reflectionSignalRouter->CreateHook<entt::entity>(
-                self, targetTrans.onPositionUpdate, moveable.onTargetPosUpdate);
+            moveable.followTarget.emplace(
+                FollowTarget(registry, gameData->reflectionSignalRouter.get(), self, combatable.target));
 
             entt::sink finishMovementSink{moveable.onFinishMovement};
             finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this);
-            entt::sink posUpdateSink{moveable.onTargetPosUpdate};
+            entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
             posUpdateSink.connect<&TargetOutOfRangeState::moveToTarget>(this);
 
             moveToTarget(self, combatable.target);
@@ -172,10 +167,9 @@ namespace sage
             auto& moveable = registry->get<MoveableActor>(self);
             entt::sink finishMovementSink{moveable.onFinishMovement};
             finishMovementSink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
-            entt::sink posUpdateSink{moveable.onTargetPosUpdate};
+            entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
             posUpdateSink.disconnect<&TargetOutOfRangeState::moveToTarget>(this);
-            gameData->reflectionSignalRouter->RemoveHook(moveable.onTargetPosUpdateHookId);
-            moveable.targetActor = entt::null;
+            moveable.followTarget.reset();
         }
 
         ~TargetOutOfRangeState() override = default;

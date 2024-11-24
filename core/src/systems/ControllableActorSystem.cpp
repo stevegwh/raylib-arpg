@@ -14,15 +14,6 @@ namespace sage
 {
     void ControllableActorSystem::Update() const
     {
-        auto view = registry->view<ControllableActor>();
-        for (auto& entity : view)
-        {
-            auto& selectedActor = registry->get<ControllableActor>(entity);
-            if (selectedActor.targetActor != entt::null)
-            {
-                selectedActor.checkTargetPosTimer.Update(GetFrameTime());
-            }
-        }
     }
 
     bool ControllableActorSystem::ReachedDestination(entt::entity entity) const
@@ -30,29 +21,8 @@ namespace sage
         return gameData->actorMovementSystem->ReachedDestination(entity);
     }
 
-    void ControllableActorSystem::onTargetUpdate(entt::entity target)
-    {
-        auto& selectedActor = registry->get<ControllableActor>(selectedActorId);
-        if (selectedActor.checkTargetPosTimer.HasFinished())
-        {
-            selectedActor.checkTargetPosTimer.Restart();
-            auto& targetTrans = registry->get<sgTransform>(target);
-            PathfindToLocation(selectedActorId, targetTrans.GetWorldPos());
-        }
-    }
-
     void ControllableActorSystem::CancelMovement(entt::entity entity)
     {
-        auto& selectedActor = registry->get<ControllableActor>(entity);
-        if (selectedActor.targetActor != entt::null && registry->valid(selectedActor.targetActor))
-        {
-            auto& target = registry->get<sgTransform>(selectedActor.targetActor);
-            {
-                entt::sink sink{target.onPositionUpdate};
-                sink.disconnect<&ControllableActorSystem::onTargetUpdate>(this);
-            }
-        }
-
         gameData->actorMovementSystem->CancelMovement(entity);
     }
 
