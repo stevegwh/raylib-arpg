@@ -39,7 +39,10 @@ namespace sage
     enum class TextureStretchMode
     {
         NONE,
-        SCALE,
+        STRETCH, // maximises or minimises image to fit, ignores aspect ratio, whole image is kept
+        FILL,    // maximises or minimises image to fit, maintains aspect ratio (parts that fall outside of aspect
+                 // ratio are clipped)
+        TILE     // Repeats image if not big enough to fill rec
     };
 
     struct Dimensions
@@ -148,11 +151,24 @@ namespace sage
         void UpdateTextureDimensions()
         {
             if (!tex.has_value()) return;
-            if (textureStretchMode == TextureStretchMode::SCALE)
+            if (textureStretchMode == TextureStretchMode::STRETCH)
             {
                 tex->width = rec.width;
                 tex->height = rec.height;
             }
+            else if (textureStretchMode == TextureStretchMode::FILL)
+            {
+                if (tex->width > tex->height)
+                {
+                    tex->width = rec.width;
+                }
+                else
+                {
+                    tex->height = rec.height;
+                }
+            }
+
+            // TILE not needed to update here
         }
 
         virtual void InitLayout() = 0;
@@ -173,9 +189,21 @@ namespace sage
                 }
                 else
                 {
-                    // TODO: Copy Window's desktop image for scaling (scale to fit, stretch, etc).
-                    // DrawTexture(tex.value(), rec.x, rec.y, WHITE);
-                    DrawTexture(tex.value(), rec.x, rec.y, WHITE);
+                    if (textureStretchMode == TextureStretchMode::STRETCH ||
+                        textureStretchMode == TextureStretchMode::NONE)
+                    {
+                        DrawTexture(tex.value(), rec.x, rec.y, WHITE);
+                    }
+                    else if (
+                        textureStretchMode == TextureStretchMode::FILL ||
+                        textureStretchMode == TextureStretchMode::TILE)
+                    {
+                        DrawTextureRec(
+                            tex.value(),
+                            {0, 0, static_cast<float>(rec.width), static_cast<float>(rec.height)},
+                            {rec.x, rec.y},
+                            WHITE);
+                    }
                 }
             }
         }
