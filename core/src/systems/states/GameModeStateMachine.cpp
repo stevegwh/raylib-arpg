@@ -17,7 +17,6 @@ namespace sage
     class GameModeStateController::DefaultState : public StateMachine
     {
         entt::entity gameEntity;
-        Timer timer{};
 
         void OnTimerEnd()
         {
@@ -28,11 +27,6 @@ namespace sage
       public:
         void Update(entt::entity entity) override
         {
-            timer.Update(GetFrameTime());
-            if (timer.HasFinished())
-            {
-                OnTimerEnd();
-            }
         }
 
         void Draw3D(entt::entity entity) override
@@ -41,18 +35,15 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
-            timer.Start();
         }
 
         void OnStateExit(entt::entity entity) override
         {
-            timer.Stop();
         }
 
         DefaultState(entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
             : StateMachine(_registry, _gameData), gameEntity(_gameEntity)
         {
-            timer.SetMaxTime(2.0f);
         }
     };
 
@@ -99,6 +90,42 @@ namespace sage
 
     // ----------------------------
 
+    class GameModeStateController::CombatState : public StateMachine
+    {
+
+      public:
+        void Update(entt::entity entity) override
+        {
+        }
+
+        void Draw3D(entt::entity entity) override
+        {
+        }
+
+        void OnStateEnter(entt::entity entity) override
+        {
+            // Create waves here (enemies etc)
+            std::cout << "Combat state entered! \n";
+        }
+
+        void OnStateExit(entt::entity entity) override
+        {
+        }
+
+        CombatState(entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
+            : StateMachine(_registry, _gameData)
+        {
+        }
+    };
+
+    // ----------------------------
+
+    void GameModeStateController::StartCombat()
+    {
+        auto& gameState = registry->get<GameState>(gameEntity);
+        gameState.ChangeState(gameEntity, GameStateEnum::Combat);
+    }
+
     void GameModeStateController::Update()
     {
         const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
@@ -116,6 +143,7 @@ namespace sage
     {
         states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _gameData, gameEntity);
         states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _gameData, gameEntity);
+        states[GameStateEnum::Combat] = std::make_unique<CombatState>(registry, _gameData, gameEntity);
         registry->emplace<GameState>(gameEntity);
     }
 } // namespace sage

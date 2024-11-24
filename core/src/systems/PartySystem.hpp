@@ -21,12 +21,15 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         std::vector<entt::entity> party;
+        std::vector<std::vector<entt::entity>> groups;
 
       public:
         void AddMember(entt::entity member);
         void RemoveMember(entt::entity entity);
         [[nodiscard]] entt::entity GetMember(unsigned int memberNumber) const;
         [[nodiscard]] unsigned int GetSize() const;
+        [[nodiscard]] bool CheckSameGroup(entt::entity a, entt::entity b) const;
+        [[nodiscard]] std::vector<entt::entity> GetGroup(entt::entity entity) const;
         PartySystem(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

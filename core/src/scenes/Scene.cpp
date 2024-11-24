@@ -114,9 +114,10 @@ namespace sage
             }
         }
 
-        GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
-        GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
+        auto p2 = GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
+        auto p3 = GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
         data->controllableActorSystem->SetSelectedActor(firstPlayer);
+
         // GameObjectFactory::createPlayer(registry, data.get(), {25, 0, 10}, "Player 3");
         // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);
         //  registry->erase<Spawner>(view.begin(), view.end());
