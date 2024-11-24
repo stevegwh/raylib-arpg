@@ -141,7 +141,7 @@ namespace sage
         debugCollisions.erase(debugCollisions.begin(), debugCollisions.end());
     }
 
-    bool ActorMovementSystem::isNextNodeOccupied(
+    bool ActorMovementSystem::isNextPointOccupied(
         const MoveableActor& moveableActor, const Collideable& collideable) const
     {
         return !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
@@ -168,29 +168,14 @@ namespace sage
     }
 
     void ActorMovementSystem::handlePointReached(
-        entt::entity entity,
-        sgTransform& transform,
-        MoveableActor& moveableActor,
-        const Collideable& collideable) const
+        entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const
     {
         setPositionToGridCenter(transform, moveableActor);
         moveableActor.path.pop_front();
 
         if (moveableActor.path.empty())
         {
-            handleDestinationReached(entity, moveableActor, collideable);
-        }
-    }
-
-    void ActorMovementSystem::handlePointReachedWithoutCollision(
-        const entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const
-    {
-        setPositionToGridCenter(transform, moveableActor);
-        moveableActor.path.pop_front();
-
-        if (moveableActor.path.empty())
-        {
-            handleDestinationReachedWithoutCollision(entity, moveableActor);
+            handleDestinationReached(entity, moveableActor);
         }
     }
 
@@ -205,13 +190,6 @@ namespace sage
     }
 
     void ActorMovementSystem::handleDestinationReached(
-        const entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const
-    {
-        moveableActor.onDestinationReached.publish(entity);
-        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
-    }
-
-    void ActorMovementSystem::handleDestinationReachedWithoutCollision(
         const entt::entity entity, const MoveableActor& moveableActor)
     {
         moveableActor.onDestinationReached.publish(entity);
@@ -305,7 +283,7 @@ namespace sage
         updateActorWorldPosition(entity, transform);
     }
 
-    void ActorMovementSystem::updateActorCollideable(
+    void ActorMovementSystem::updateActor(
         entt::entity entity, MoveableActor& moveableActor, sgTransform& transform, Collideable& collideable) const
     {
         if (moveableActor.path.empty())
@@ -313,9 +291,9 @@ namespace sage
             return;
         }
 
-        if (isNextNodeOccupied(moveableActor, collideable))
+        if (isNextPointOccupied(moveableActor, collideable))
         {
-
+            // TODO
             return;
         }
 
@@ -327,16 +305,15 @@ namespace sage
 
         if (hasReachedNextPoint(transform, moveableActor))
         {
-            handlePointReached(entity, transform, moveableActor, collideable);
+            handlePointReached(entity, transform, moveableActor);
             return;
         }
 
         checkCollisionWithOtherMoveable(entity, transform, moveableActor);
         updateActorTransform(entity, transform, moveableActor);
-        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
     }
 
-    void ActorMovementSystem::updateActorNonCollideable(
+    void ActorMovementSystem::updateActor(
         const entt::entity entity, MoveableActor& moveableActor, sgTransform& transform) const
     {
         if (moveableActor.path.empty())
@@ -346,7 +323,7 @@ namespace sage
 
         if (hasReachedNextPoint(transform, moveableActor))
         {
-            handlePointReachedWithoutCollision(entity, transform, moveableActor);
+            handlePointReached(entity, transform, moveableActor);
             return;
         }
 
@@ -356,8 +333,7 @@ namespace sage
     void ActorMovementSystem::Update()
     {
         // clearDebugData();
-
-        // Process entities with all three components
+        
         auto fullView = registry->view<MoveableActor, sgTransform, Collideable>();
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {
@@ -367,7 +343,7 @@ namespace sage
                 // Check if follow target has updated its position
                 moveableActor.followTarget->checkTargetPos();
             }
-            updateActorCollideable(entity, moveableActor, transform, collideable);
+            updateActor(entity, moveableActor, transform, collideable);
             navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
         }
 
@@ -375,7 +351,7 @@ namespace sage
         auto partialView = registry->view<MoveableActor, sgTransform>(entt::exclude<Collideable>);
         for (auto [entity, moveableActor, transform] : partialView.each())
         {
-            updateActorNonCollideable(entity, moveableActor, transform);
+            updateActor(entity, moveableActor, transform);
         }
     }
 

@@ -177,9 +177,6 @@ namespace sage
     entt::entity GameObjectFactory::createPlayer(
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
-        // TODO: On load, the actor's getFirstCollision box doesn't seem to be correct. Causes a
-        // bug that, if I don't move before casting a move, the enemies don't register
-        // that the player has a getFirstCollision box.
         entt::entity id = registry->create();
 
         auto& transform = registry->emplace<sgTransform>(id, id);

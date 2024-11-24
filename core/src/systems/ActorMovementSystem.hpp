@@ -26,32 +26,22 @@ namespace sage
         NavigationGridSystem* navigationGridSystem;
 
         void clearDebugData();
-        void updateActorCollideable(
+        void updateActor(
             entt::entity entity,
             MoveableActor& moveableActor,
             sgTransform& transform,
             Collideable& collideable) const;
-        void updateActorNonCollideable(
-            entt::entity entity, MoveableActor& moveableActor, sgTransform& transform) const;
-        [[nodiscard]] bool isNextNodeOccupied(
+        void updateActor(entt::entity entity, MoveableActor& moveableActor, sgTransform& transform) const;
+        [[nodiscard]] bool isNextPointOccupied(
             const MoveableActor& moveableActor, const Collideable& collideable) const;
         [[nodiscard]] bool isDestinationOccupied(
             const MoveableActor& moveableActor, const Collideable& collideable) const;
         void recalculatePath(
             entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const;
         static bool hasReachedNextPoint(const sgTransform& transform, const MoveableActor& moveableActor);
-        void handlePointReached(
-            entt::entity entity,
-            sgTransform& transform,
-            MoveableActor& moveableActor,
-            const Collideable& collideable) const;
-        void handlePointReachedWithoutCollision(
-            entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
+        void handlePointReached(entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
         void setPositionToGridCenter(sgTransform& transform, const MoveableActor& moveableActor) const;
-        void handleDestinationReached(
-            entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const;
-        static void handleDestinationReachedWithoutCollision(
-            entt::entity entity, const MoveableActor& moveableActor);
+        static void handleDestinationReached(entt::entity entity, const MoveableActor& moveableActor);
         void checkCollisionWithOtherMoveable(
             entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const;
         NavigationGridSquare* castCollisionRay(
