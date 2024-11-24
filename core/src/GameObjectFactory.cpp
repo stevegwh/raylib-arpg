@@ -190,7 +190,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
-        renderable.name = "Player";
+        renderable.name = name;
         registry->emplace<UberShaderComponent>(
             id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 

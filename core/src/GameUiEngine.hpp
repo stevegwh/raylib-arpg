@@ -189,6 +189,7 @@ namespace sage
                 }
                 else
                 {
+
                     if (textureStretchMode == TextureStretchMode::STRETCH ||
                         textureStretchMode == TextureStretchMode::NONE)
                     {
@@ -365,6 +366,7 @@ namespace sage
       public:
         enum class StatisticType
         {
+            NAME,
             STRENGTH,
             AGILITY,
             INTELLIGENCE,

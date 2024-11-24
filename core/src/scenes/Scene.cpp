@@ -98,13 +98,15 @@ namespace sage
         for (const auto view = registry->view<Renderable>(); auto entity : view)
             registry->emplace<UberShaderComponent>(entity, UberShaderComponent::Flags::Lit);
 
+        entt::entity firstPlayer = entt::null;
+
         const auto view = registry->view<Spawner>();
         for (auto& entity : view)
         {
             auto& spawner = registry->get<Spawner>(entity);
             if (spawner.spawnerType == SpawnerType::PLAYER)
             {
-                GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, "Player");
+                firstPlayer = GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, "Player");
             }
             else if (spawner.spawnerType == SpawnerType::GOBLIN)
             {
@@ -114,6 +116,7 @@ namespace sage
 
         GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
         GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
+        data->controllableActorSystem->SetSelectedActor(firstPlayer);
         // GameObjectFactory::createPlayer(registry, data.get(), {25, 0, 10}, "Player 3");
         // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);
         //  registry->erase<Spawner>(view.begin(), view.end());
@@ -137,6 +140,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_hud.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/inventory-bg.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/scroll-bg.png");
 
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
         auto w = data->settings->TARGET_SCREEN_WIDTH * 0.3;
