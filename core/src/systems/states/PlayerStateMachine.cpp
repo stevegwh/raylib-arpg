@@ -125,6 +125,8 @@ namespace sage
             auto& dialogComponent = registry->get<DialogComponent>(self);
             dialogComponent.dialogTarget = entt::null;
             auto& playerState = registry->get<PlayerState>(self);
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.followTarget.reset();
             playerState.ChangeState(self, PlayerStateEnum::Default);
         }
 

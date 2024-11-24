@@ -6,19 +6,24 @@
 
 #include "EntityReflectionSignalRouter.hpp"
 #include "sgTransform.hpp"
+#include "slib.hpp"
 
 namespace sage
 {
 
-    bool FollowTarget::ShouldCheckTargetPos()
+    void FollowTarget::checkTargetPos()
     {
-        double timeLapsed = GetTime();
-        if (timeLapsed - lastCheckTime > timerThreshold)
+        if (const double timeLapsed = GetTime(); timeLapsed - lastCheckTime > timerThreshold)
         {
+            const auto& targetTrans = registry->get<sgTransform>(targetActor);
+            if (const auto targetCurrentPos = targetTrans.GetWorldPos();
+                !AlmostEquals(targetCurrentPos, targetPrevPos))
+            {
+                targetPrevPos = targetCurrentPos;
+                onTargetPosUpdate.publish(self, targetActor);
+            }
             lastCheckTime = timeLapsed;
-            return true;
         }
-        return false;
     }
 
     FollowTarget::~FollowTarget()
@@ -29,12 +34,15 @@ namespace sage
     FollowTarget::FollowTarget(
         entt::registry* _registry,
         EntityReflectionSignalRouter* _reflectionSignalRouter,
-        const entt::entity self,
+        const entt::entity _self,
         const entt::entity _targetActor)
-        : reflectionSignalRouter(_reflectionSignalRouter), targetActor(_targetActor)
+        : registry(_registry),
+          self(_self),
+          reflectionSignalRouter(_reflectionSignalRouter),
+          targetActor(_targetActor)
     {
         auto& targetTrans = _registry->get<sgTransform>(_targetActor);
         onTargetPosUpdateHookId = reflectionSignalRouter->CreateHook<entt::entity>(
-            self, targetTrans.onPositionUpdate, onTargetPosUpdate);
+            _self, targetTrans.onPositionUpdate, onTargetPosUpdate);
     };
 } // namespace sage

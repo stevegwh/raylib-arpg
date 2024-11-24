@@ -1,21 +1,14 @@
 #include "ActorMovementSystem.hpp"
 #include "CollisionSystem.hpp"
-#include "components/ControllableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/sgTransform.hpp"
 #include "NavigationGridSystem.hpp"
+#include "slib.hpp"
 #include <Serializer.hpp>
 
 #include <ranges>
 #include <tuple>
-
-bool AlmostEquals(Vector3 a, Vector3 b)
-{
-    const std::tuple aInt = {static_cast<int>(a.x), static_cast<int>(a.z)};
-    const std::tuple bInt = {static_cast<int>(b.x), static_cast<int>(b.z)};
-    return aInt == bInt;
-}
 
 namespace sage
 {
@@ -30,7 +23,7 @@ namespace sage
     {
         PruneMoveCommands(entity);
         auto& moveable = registry->get<MoveableActor>(entity);
-        moveable.followTarget.reset();
+        // moveable.followTarget.reset();
         moveable.onMovementCancel.publish(entity);
     }
 
@@ -56,7 +49,7 @@ namespace sage
             registry->emplace<MoveableActor>(entity);
         }
 
-        CancelMovement(entity); // Cancel previous commands
+        CancelMovement(entity);
 
         if (!navigationGridSystem->CheckWithinGridBounds(destination))
         {
@@ -95,7 +88,8 @@ namespace sage
         else
         {
             std::cout << "ActorMovementSystem: Destination unreachable \n";
-            CancelMovement(entity);
+            // TODO: Maybe have "OnFail" options? One can cancel movement, one can continue to retry etc.
+            // CancelMovement(entity);
         }
     }
 
@@ -363,6 +357,11 @@ namespace sage
         auto fullView = registry->view<MoveableActor, sgTransform, Collideable>();
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {
+            if (moveableActor.followTarget.has_value())
+            {
+                // Check if follow target has updated its position
+                moveableActor.followTarget->checkTargetPos();
+            }
             updateActorCollideable(entity, moveableActor, transform, collideable);
         }
 

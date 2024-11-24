@@ -58,9 +58,6 @@ namespace sage
             // ----------------------------
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-
-            // Vector3 target = {52, 0, -10}; // TODO: Just a random location for now
-            // gameData->actorMovementSystem->PathfindToLocation(entity, target);
         }
 
         void OnStateExit(entt::entity entity) override
@@ -120,17 +117,12 @@ namespace sage
             return false;
         }
 
-        void moveToTarget(entt::entity self, entt::entity target)
+        void onTargetPosUpdate(entt::entity self, entt::entity target) const
         {
-            auto& moveable = registry->get<MoveableActor>(self);
-            // moveable.targetActor = target;
-            if (moveable.followTarget->ShouldCheckTargetPos())
-            {
-                const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
-                auto& animation = registry->get<Animation>(self);
-                animation.ChangeAnimationByEnum(AnimationEnum::WALK, 2);
-                gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
-            }
+            const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::WALK, 2);
+            gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
         }
 
       public:
@@ -157,9 +149,9 @@ namespace sage
             entt::sink finishMovementSink{moveable.onFinishMovement};
             finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this);
             entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
-            posUpdateSink.connect<&TargetOutOfRangeState::moveToTarget>(this);
+            posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
 
-            moveToTarget(self, combatable.target);
+            onTargetPosUpdate(self, combatable.target);
         }
 
         void OnStateExit(entt::entity self) override
@@ -168,7 +160,7 @@ namespace sage
             entt::sink finishMovementSink{moveable.onFinishMovement};
             finishMovementSink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
             entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
-            posUpdateSink.disconnect<&TargetOutOfRangeState::moveToTarget>(this);
+            posUpdateSink.disconnect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
             moveable.followTarget.reset();
         }
 

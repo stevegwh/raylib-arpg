@@ -19,24 +19,27 @@ namespace sage
 
     class FollowTarget
     {
+        entt::registry* registry;
+        entt::entity self{};
         EntityReflectionSignalRouter* reflectionSignalRouter;
         int onTargetPosUpdateHookId{};
 
+        Vector3 targetPrevPos{};
         double lastCheckTime{};
-        float timerThreshold = 1.0;
-
+        float timerThreshold = 0.25;
+        void checkTargetPos(); // Called from ActorMovementSystem
       public:
         const entt::entity targetActor = entt::null;
         entt::sigh<void(entt::entity, entt::entity)> onTargetPosUpdate{}; // Self, target
-
-        [[nodiscard]] bool ShouldCheckTargetPos();
 
         ~FollowTarget();
         explicit FollowTarget(
             entt::registry* _registry,
             EntityReflectionSignalRouter* _reflectionSignalRouter,
-            entt::entity self,
+            entt::entity _self,
             entt::entity _targetActor);
+
+        friend class ActorMovementSystem;
     };
 
     struct MoveableActorCollision
