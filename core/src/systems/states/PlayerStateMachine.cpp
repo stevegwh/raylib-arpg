@@ -50,7 +50,8 @@ namespace sage
             if (!registry->any_of<DialogComponent>(target)) return;
 
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.targetActor = target;
+            moveable.followTarget.emplace(
+                FollowTarget(registry, gameData->reflectionSignalRouter.get(), self, target));
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::MovingToTalkToNPC);
         }
@@ -142,7 +143,7 @@ namespace sage
         {
             auto& moveable = registry->get<MoveableActor>(self);
             auto& playerDiag = registry->get<DialogComponent>(self);
-            playerDiag.dialogTarget = moveable.targetActor;
+            playerDiag.dialogTarget = moveable.followTarget->targetActor;
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
             gameData->controllableActorSystem->PathfindToLocation(self, pos);
 

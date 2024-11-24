@@ -31,7 +31,10 @@ namespace sage
             MoveableActor& moveableActor,
             sgTransform& transform,
             Collideable& collideable) const;
-        void updateActorNonCollideable(entt::entity entity, MoveableActor& moveableActor, sgTransform& transform);
+        void updateActorNonCollideable(
+            entt::entity entity, MoveableActor& moveableActor, sgTransform& transform) const;
+        [[nodiscard]] bool isNextNodeOccupied(
+            const MoveableActor& moveableActor, const Collideable& collideable) const;
         [[nodiscard]] bool isDestinationOccupied(
             const MoveableActor& moveableActor, const Collideable& collideable) const;
         void recalculatePath(
@@ -44,20 +47,19 @@ namespace sage
             const Collideable& collideable) const;
         void handlePointReachedWithoutCollision(
             entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
-        void setPositionToGridCenter(
-            entt::entity entity, sgTransform& transform, const MoveableActor& moveableActor) const;
+        void setPositionToGridCenter(sgTransform& transform, const MoveableActor& moveableActor) const;
         void handleDestinationReached(
             entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const;
         static void handleDestinationReachedWithoutCollision(
             entt::entity entity, const MoveableActor& moveableActor);
-        void handleActorCollisionAvoidance(
+        void checkCollisionWithOtherMoveable(
             entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const;
         NavigationGridSquare* castCollisionRay(
             const GridSquare& actorIndex,
             const Vector3& direction,
             float distance,
             MoveableActor& moveableActor) const;
-        void processOtherActorCollision(
+        void handleCollisionWithOtherMoveable(
             const entt::entity& entity,
             const sgTransform& transform,
             MoveableActor& moveableActor,
