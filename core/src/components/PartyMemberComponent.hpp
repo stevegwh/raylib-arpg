@@ -13,6 +13,7 @@ namespace sage
 {
     struct PartyMemberComponent
     {
+        bool mainCharacter = false;
         const entt::entity entity;
         RenderTexture portraitImg{};
         AssetID portraitImage{};

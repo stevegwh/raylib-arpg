@@ -57,7 +57,8 @@ namespace sage
     enum class GameStateEnum
     {
         Default,
-        Wave
+        Wave, // TODO: Can remove this now
+        Combat
     };
 
     class GameState : public BaseState<GameState, GameStateEnum>

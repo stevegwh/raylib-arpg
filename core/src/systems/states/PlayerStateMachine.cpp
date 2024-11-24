@@ -2,26 +2,25 @@
 
 #include "GameData.hpp"
 
+#include "AbilityFactory.hpp"
+#include "Camera.hpp"
 #include "components/Ability.hpp"
 #include "components/Animation.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/ControllableActor.hpp"
+#include "components/DialogComponent.hpp"
 #include "components/MoveableActor.hpp"
+#include "components/PartyMemberComponent.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
-
-#include "AbilityFactory.hpp"
-#include "Camera.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
-
-#include <cassert>
-
-#include "components/DialogComponent.hpp"
-#include "raylib.h"
 #include "systems/DialogSystem.hpp"
 #include "systems/PartySystem.hpp"
+
+#include "raylib.h"
+#include <cassert>
 
 namespace sage
 {
@@ -30,8 +29,19 @@ namespace sage
     {
         void onFloorClick(entt::entity self, entt::entity x) const
         {
+            auto selected = gameData->controllableActorSystem->GetSelectedActor();
+            if (self != selected) return;
             gameData->controllableActorSystem->PathfindToLocation(
                 self, gameData->cursor->getFirstCollision().point);
+            auto group = gameData->partySystem->GetGroup(self);
+            for (const auto& entity : group)
+            {
+                // TODO: Do not try to send them to the exact same location, have an offset from this point
+                // (PartySystem should calculate it)
+                // TODO: If the leader changes destination, the followers should also
+                gameData->controllableActorSystem->PathfindToLocation(
+                    entity, gameData->cursor->getFirstCollision().point);
+            }
         }
 
         void onNPCLeftClick(entt::entity self, entt::entity target) const

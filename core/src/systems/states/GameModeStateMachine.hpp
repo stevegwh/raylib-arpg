@@ -23,10 +23,12 @@ namespace sage
 
         class DefaultState;
         class WaveState;
+        class CombatState;
 
       public:
         void Update();
         void Draw3D();
+        void StartCombat();
 
         GameModeStateController(entt::registry* _registry, GameData* gameData);
 

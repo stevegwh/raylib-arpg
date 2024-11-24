@@ -462,7 +462,7 @@ namespace sage
         }
 
         window->FinalizeLayout();
-        // window->Hide();
+        window->Hide();
         return window;
     }
 
