@@ -80,7 +80,7 @@ namespace sage
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.25f;
-        moveable.onDestinationUnreachable = OnDestinationUnreachable::WAIT;
+        moveable.destUnreachableBehaviour = DestinationUnreachableBehaviour::WAIT;
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
@@ -215,8 +215,16 @@ namespace sage
         animation.animationMap[AnimationEnum::ROLL] = 9;
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
+        // N.B. Do not remove "entity" from below (needed to match signature)
         {
-            entt::sink sink{moveable.onFinishMovement};
+            entt::sink sink{moveable.onMovementCancel};
+            sink.connect<[](Animation& animation, entt::entity entity) {
+                animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+            }>(animation);
+        }
+
+        {
+            entt::sink sink{moveable.onDestinationReached};
             sink.connect<[](Animation& animation, entt::entity entity) {
                 animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
             }>(animation);

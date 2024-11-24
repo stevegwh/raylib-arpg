@@ -23,7 +23,6 @@ namespace sage
     {
         PruneMoveCommands(entity);
         auto& moveable = registry->get<MoveableActor>(entity);
-        // moveable.followTarget.reset();
         moveable.onMovementCancel.publish(entity);
     }
 
@@ -44,15 +43,16 @@ namespace sage
 
     void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination) const
     {
-        if (!registry->any_of<MoveableActor>(entity))
-        {
-            registry->emplace<MoveableActor>(entity);
-        }
-
-        CancelMovement(entity);
+        auto& moveable = registry->get<MoveableActor>(entity);
 
         if (!navigationGridSystem->CheckWithinGridBounds(destination))
         {
+            // TODO: move to a "OnMoveFailed" function.
+            // Movement fails should probably just be an event that is reacted to
+            if (moveable.destUnreachableBehaviour == DestinationUnreachableBehaviour::CANCEL)
+            {
+                CancelMovement(entity);
+            }
             std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
             return;
         }
@@ -60,7 +60,6 @@ namespace sage
         const auto& collideable = registry->get<Collideable>(entity);
         navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
 
-        auto& moveable = registry->get<MoveableActor>(entity);
         GridSquare minRange{};
         GridSquare maxRange{};
         if (!navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange))
@@ -69,15 +68,22 @@ namespace sage
             return;
         }
         const auto& actorTrans = registry->get<sgTransform>(entity);
-        auto path =
+
+        const auto path =
             navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
-        PruneMoveCommands(entity);
-        auto& transform = registry->get<sgTransform>(entity);
+
+        if (moveable.isMoving()) // Was previously moving
+        {
+            PruneMoveCommands(entity);
+            moveable.onPathChanged.publish(entity);
+        }
 
         for (auto n : path)
         {
             moveable.path.emplace_back(n);
         }
+
+        auto& transform = registry->get<sgTransform>(entity);
 
         if (!path.empty())
         {
@@ -88,7 +94,7 @@ namespace sage
         else
         {
             std::cout << "ActorMovementSystem: Destination unreachable \n";
-            if (moveable.onDestinationUnreachable == OnDestinationUnreachable::CANCEL)
+            if (moveable.destUnreachableBehaviour == DestinationUnreachableBehaviour::CANCEL)
             {
                 CancelMovement(entity);
             }
@@ -202,7 +208,6 @@ namespace sage
         const entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const
     {
         moveableActor.onDestinationReached.publish(entity);
-        moveableActor.onFinishMovement.publish(entity);
         navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
     }
 
@@ -210,7 +215,6 @@ namespace sage
         const entt::entity entity, const MoveableActor& moveableActor)
     {
         moveableActor.onDestinationReached.publish(entity);
-        moveableActor.onFinishMovement.publish(entity);
     }
 
     void ActorMovementSystem::checkCollisionWithOtherMoveable(
@@ -309,8 +313,6 @@ namespace sage
             return;
         }
 
-        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
-
         if (isNextNodeOccupied(moveableActor, collideable))
         {
 
@@ -359,12 +361,14 @@ namespace sage
         auto fullView = registry->view<MoveableActor, sgTransform, Collideable>();
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {
+            navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
             if (moveableActor.followTarget.has_value())
             {
                 // Check if follow target has updated its position
                 moveableActor.followTarget->checkTargetPos();
             }
             updateActorCollideable(entity, moveableActor, transform, collideable);
+            navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
         }
 
         // Process entities without Collideable component (e.g., some abilities etc)

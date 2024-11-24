@@ -47,16 +47,16 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnStateEnter(entt::entity self) override
         {
-            auto& combatable = registry->get<CombatableActor>(entity);
+            auto& combatable = registry->get<CombatableActor>(self);
             entt::sink sink{combatable.onHit};
             sink.connect<&DefaultState::OnHit>(this);
-            // Persistent connection
+            // Persistent connections
             entt::sink deathSink{combatable.onDeath};
             deathSink.connect<&DefaultState::OnDeath>(this);
             // ----------------------------
-            auto& animation = registry->get<Animation>(entity);
+            auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
@@ -146,7 +146,7 @@ namespace sage
             moveable.followTarget.emplace(
                 FollowTarget(registry, gameData->reflectionSignalRouter.get(), self, combatable.target));
 
-            entt::sink finishMovementSink{moveable.onFinishMovement};
+            entt::sink finishMovementSink{moveable.onDestinationReached};
             finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this);
             entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
             posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
@@ -157,7 +157,7 @@ namespace sage
         void OnStateExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            entt::sink finishMovementSink{moveable.onFinishMovement};
+            entt::sink finishMovementSink{moveable.onDestinationReached};
             finishMovementSink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
             entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
             posUpdateSink.disconnect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
