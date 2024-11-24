@@ -9,7 +9,6 @@
 #include "raylib.h"
 
 #include <entt/entt.hpp>
-#include <extras/IconsFontAwesome6.h>
 #include <string>
 
 namespace sage
@@ -95,6 +94,7 @@ namespace sage
         friend class ResourceManager;
         friend class TextureTerrainOverlay;
     };
+    bool AlmostEquals(Vector3 a, Vector3 b);
     bool PointInsideRect(Rectangle rec, Vector2 point);
     Vector2 Vec3ToVec2(const Vector3& vec3);
     Vector3 NegateVector(const Vector3& vec3);

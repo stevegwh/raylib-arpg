@@ -297,6 +297,13 @@ namespace sage
     {
     }
 
+    bool AlmostEquals(Vector3 a, Vector3 b)
+    {
+        const std::tuple aInt = {static_cast<int>(a.x), static_cast<int>(a.z)};
+        const std::tuple bInt = {static_cast<int>(b.x), static_cast<int>(b.z)};
+        return aInt == bInt;
+    }
+
     bool PointInsideRect(Rectangle rec, Vector2 point)
     {
         return point.x >= rec.x && point.x <= rec.x + rec.width && point.y >= rec.y &&
