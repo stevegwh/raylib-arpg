@@ -231,6 +231,7 @@ namespace sage
         bool stateLocked = false;
         float dragDelayTime = 0.1;
 
+        virtual void RetrieveInfo(){};
         virtual void OnClick();
         virtual void HoverUpdate();
         virtual void OnDragStart();
@@ -330,6 +331,27 @@ namespace sage
         TitleBar(GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo);
     };
 
+    class CharacterStatText final : public TextBox
+    {
+
+      public:
+        enum class StatisticType
+        {
+            STRENGTH,
+            AGILITY,
+            INTELLIGENCE,
+            CONSTITUTION,
+            WITS,
+            MEMORY,
+            COUNT // must be last
+        };
+        StatisticType statisticType;
+        void RetrieveInfo() override;
+        ~CharacterStatText() override = default;
+        CharacterStatText(
+            GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo, StatisticType _statisticType);
+    };
+
     class ImageBox : public CellElement
     {
       public:
@@ -383,7 +405,7 @@ namespace sage
             const Dimensions& dimensions, const Dimensions& space) const;
         void shrinkRowToFit() const;
         void shrinkColToFit() const;
-        size_t findMyColumnIndex() const;
+        [[nodiscard]] size_t findMyColumnIndex() const;
         [[nodiscard]] Dimensions handleOverflow(const Dimensions& dimensions, const Dimensions& space) const;
     };
 
@@ -401,7 +423,7 @@ namespace sage
 
       public:
         void UpdateDimensions() override;
-        void RetrieveInfo();
+        void RetrieveInfo() override;
         void Draw2D() override;
         EquipmentCharacterPreview(
             GameUIEngine* _engine,
@@ -419,7 +441,7 @@ namespace sage
 
       public:
         void UpdateDimensions() override;
-        void RetrieveInfo();
+        void RetrieveInfo() override;
         void ReceiveDrop(CellElement* droppedElement) override;
         void OnClick() override;
         void Draw2D() override;
@@ -433,7 +455,7 @@ namespace sage
         unsigned int slotNumber{};
 
       public:
-        void RetrieveInfo();
+        void RetrieveInfo() override;
         void ReceiveDrop(CellElement* droppedElement) override;
         void HoverUpdate() override;
         void Draw2D() override;
@@ -456,7 +478,7 @@ namespace sage
 
       public:
         void Draw2D() override;
-        virtual void RetrieveInfo();
+        void RetrieveInfo() override;
         void OnDrop(CellElement* receiver) override;
         void HoverUpdate() override;
         ItemSlot(
@@ -515,6 +537,7 @@ namespace sage
         TextBox* CreateTextbox(std::unique_ptr<TextBox> _textBox, const std::string& _content);
         DialogOption* CreateDialogOption(std::unique_ptr<DialogOption> _dialogOption);
         TitleBar* CreateTitleBar(std::unique_ptr<TitleBar> _titleBar, const std::string& _title);
+        CharacterStatText* CreateCharacterStatText(std::unique_ptr<CharacterStatText> _statText);
         ImageBox* CreateImagebox(std::unique_ptr<ImageBox> _imageBox);
         EquipmentCharacterPreview* CreateEquipmentCharacterPreview(
             std::unique_ptr<EquipmentCharacterPreview> _preview);
