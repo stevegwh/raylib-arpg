@@ -31,6 +31,7 @@ namespace sage
         {
             auto selected = gameData->controllableActorSystem->GetSelectedActor();
             if (self != selected) return;
+            gameData->controllableActorSystem->CancelMovement(self);
             gameData->controllableActorSystem->PathfindToLocation(
                 self, gameData->cursor->getFirstCollision().point);
             auto group = gameData->partySystem->GetGroup(self);
@@ -149,7 +150,7 @@ namespace sage
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
             gameData->controllableActorSystem->PathfindToLocation(self, pos);
 
-            entt::sink sink{moveable.onFinishMovement};
+            entt::sink sink{moveable.onDestinationReached};
             sink.connect<&MovingToTalkToNPCState::onTargetReached>(this);
 
             entt::sink sink2{moveable.onMovementCancel};
@@ -159,7 +160,7 @@ namespace sage
         void OnStateExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            entt::sink sink{moveable.onFinishMovement};
+            entt::sink sink{moveable.onDestinationReached};
             sink.disconnect<&MovingToTalkToNPCState::onTargetReached>(this);
             entt::sink sink2{moveable.onMovementCancel};
             sink2.disconnect<&MovingToTalkToNPCState::onMovementCancelled>(this);
@@ -244,7 +245,7 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::WALK);
 
             auto& moveableActor = registry->get<MoveableActor>(self);
-            entt::sink sink{moveableActor.onFinishMovement};
+            entt::sink sink{moveableActor.onDestinationReached};
             sink.connect<&MovingToAttackEnemyState::onTargetReached>(this);
 
             auto& combatable = registry->get<CombatableActor>(self);
@@ -269,7 +270,7 @@ namespace sage
         void OnStateExit(entt::entity self) override
         {
             auto& moveableActor = registry->get<MoveableActor>(self);
-            entt::sink sink{moveableActor.onFinishMovement};
+            entt::sink sink{moveableActor.onDestinationReached};
             sink.disconnect<&MovingToAttackEnemyState::onTargetReached>(this);
 
             auto& controllable = registry->get<ControllableActor>(self);
