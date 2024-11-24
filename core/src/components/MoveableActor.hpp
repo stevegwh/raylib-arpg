@@ -48,8 +48,15 @@ namespace sage
         Vector3 hitLastPos{};
     };
 
+    enum class OnDestinationUnreachable
+    {
+        CANCEL,
+        WAIT // Retry
+    };
+
     struct MoveableActor
     {
+        OnDestinationUnreachable onDestinationUnreachable;
         float movementSpeed = 0.35f;
         // The max range the actor can pathfind at one time.
         int pathfindingBounds = 50;

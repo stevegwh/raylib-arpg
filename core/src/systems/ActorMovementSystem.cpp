@@ -88,8 +88,10 @@ namespace sage
         else
         {
             std::cout << "ActorMovementSystem: Destination unreachable \n";
-            // TODO: Maybe have "OnFail" options? One can cancel movement, one can continue to retry etc.
-            // CancelMovement(entity);
+            if (moveable.onDestinationUnreachable == OnDestinationUnreachable::CANCEL)
+            {
+                CancelMovement(entity);
+            }
         }
     }
 

@@ -80,6 +80,7 @@ namespace sage
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.25f;
+        moveable.onDestinationUnreachable = OnDestinationUnreachable::WAIT;
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
