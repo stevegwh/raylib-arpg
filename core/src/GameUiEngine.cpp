@@ -26,6 +26,7 @@
 #include "UserInput.hpp"
 
 #include <cassert>
+#include <format>
 #include <ranges>
 #include <sstream>
 
@@ -622,6 +623,49 @@ namespace sage
         draggable = true;
         dragDelayTime = 0.0f;
         dragOffset = {0, 0};
+    }
+
+    void CharacterStatText::RetrieveInfo()
+    {
+        auto& combatable =
+            engine->registry->get<CombatableActor>(engine->gameData->controllableActorSystem->GetSelectedActor());
+        if (statisticType == StatisticType::STRENGTH)
+        {
+            SetContent(std::format("Strength: {}", combatable.baseStatistics.strength));
+        }
+        else if (statisticType == StatisticType::AGILITY)
+        {
+            SetContent(std::format("Agility: {}", combatable.baseStatistics.agility));
+        }
+        else if (statisticType == StatisticType::INTELLIGENCE)
+        {
+            SetContent(std::format("Intelligence: {}", combatable.baseStatistics.intelligence));
+        }
+        else if (statisticType == StatisticType::CONSTITUTION)
+        {
+            SetContent(std::format("Constitution: {}", combatable.baseStatistics.constitution));
+        }
+        else if (statisticType == StatisticType::WITS)
+        {
+            SetContent(std::format("Wits: {}", combatable.baseStatistics.wits));
+        }
+        else if (statisticType == StatisticType::MEMORY)
+        {
+            SetContent(std::format("Memory: {}", combatable.baseStatistics.memory));
+        }
+    }
+
+    CharacterStatText::CharacterStatText(
+        GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo, StatisticType _statisticType)
+        : TextBox(_engine, _parent, _fontInfo), statisticType(_statisticType)
+    {
+        entt::sink sink{_engine->gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&CharacterStatText::RetrieveInfo>(this);
+
+        entt::sink sink2{engine->gameData->equipmentSystem->onEquipmentUpdated};
+        sink2.connect<&CharacterStatText::RetrieveInfo>(this);
+
+        RetrieveInfo();
     }
 
     void ImageBox::SetHoverShader()
@@ -1666,7 +1710,10 @@ namespace sage
                     {
                         cell->rec.x += diff.x;
                         cell->rec.y += diff.y;
-                        cell->children->UpdateDimensions();
+                        if (cell->children)
+                        {
+                            cell->children->UpdateDimensions();
+                        }
                     }
                 }
             }
@@ -1830,7 +1877,10 @@ namespace sage
                     for (auto& cell : row->children)
                     {
                         cell->ScaleContents(settings);
-                        cell->children->UpdateDimensions();
+                        if (cell->children)
+                        {
+                            cell->children->UpdateDimensions();
+                        }
                     }
                 }
             }
@@ -2202,6 +2252,14 @@ namespace sage
         titleBar->SetContent(_title);
         InitLayout();
         return titleBar;
+    }
+
+    CharacterStatText* TableCell::CreateCharacterStatText(std::unique_ptr<CharacterStatText> _statText)
+    {
+        children = std::move(_statText);
+        auto* charStatText = dynamic_cast<CharacterStatText*>(children.get());
+        InitLayout();
+        return charStatText;
     }
 
     CloseButton* TableCell::CreateCloseButton(std::unique_ptr<CloseButton> _closeButton)
@@ -2680,7 +2738,10 @@ namespace sage
                         for (const auto& cell : row->children)
                         {
                             const auto element = cell->children.get();
-                            element->state->Update();
+                            if (element)
+                            {
+                                element->state->Update();
+                            }
                         }
                     }
                 }

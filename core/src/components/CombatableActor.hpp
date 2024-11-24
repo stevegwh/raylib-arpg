@@ -19,16 +19,27 @@ namespace sage
 
     struct AttackData
     {
-        const entt::entity attacker;
-        const entt::entity hit;
-        const int damage;
+        const entt::entity attacker{};
+        const entt::entity hit{};
+        const int damage{};
         const AbilityElement elements = AbilityElement::PHYSICAL;
     };
 
+    struct CharacterStatistics
+    {
+        int agility = 5;
+        int strength = 5;
+        int intelligence = 5;
+        int constitution = 5;
+        int wits = 5;
+        int memory = 5;
+    };
+
+    // BaseStatistics + Weapon stats etc?
     struct CombatData
     {
         int hp = 100;
-        int maxHp = 100;
+        int maxHp = 100; // Move to baseStatistics
         CombatData(const CombatData&) = delete;
         CombatData& operator=(const CombatData&) = delete;
         CombatData() = default;
@@ -40,6 +51,7 @@ namespace sage
       public:
         // Abilities are stored how they appear in the UI
         std::array<entt::entity, MAX_ABILITY_NUMBER> abilities{};
+        CharacterStatistics baseStatistics;
         CombatData data;
         CombatableActorType actorType = CombatableActorType::WAVEMOB;
         bool dying = false;

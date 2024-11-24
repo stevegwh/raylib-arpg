@@ -17,6 +17,7 @@
 #include "systems/InventorySystem.hpp"
 #include "systems/PartySystem.hpp"
 
+#include "magic_enum.hpp"
 #include <format>
 
 namespace sage
@@ -351,7 +352,7 @@ namespace sage
             TextureStretchMode::SCALE,
             pos.x,
             pos.y,
-            274 * 2,
+            274 * 3,
             424 * 1.5,
             Padding{20, 20, 14, 14});
         auto window = engine->CreateWindow(std::move(_window));
@@ -390,7 +391,7 @@ namespace sage
             cell->CreateImagebox(std::move(imgBox));
         };
 
-        auto panel2 = window->CreatePanel({32, 0, 24, 24});
+        auto panel2 = window->CreatePanel({0, 0, 24, 24});
         {
             auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
             for (unsigned int row = 0; row < maxRows; ++row)
@@ -411,7 +412,7 @@ namespace sage
 
         {
             // Character model
-            auto table = panel2->CreateTable(60, {24, 24, 24, 24});
+            auto table = panel2->CreateTable(40, {0, 0, 24, 24});
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
             auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
@@ -436,6 +437,20 @@ namespace sage
             createEquipSlot(table, 3, 0, EquipmentSlotName::RING1);
             createEquipSlot(table, 5, 0, EquipmentSlotName::RIGHTHAND);
         }
+
+        {
+            // Character statistics
+            auto table = panel2->CreateTable(40, {50, 250, 24, 10});
+            for (int i = 0; i < magic_enum::enum_underlying(CharacterStatText::StatisticType::COUNT); ++i)
+            {
+                auto row = table->CreateTableRow();
+                auto cell = row->CreateTableCell();
+                auto id = magic_enum::enum_cast<CharacterStatText::StatisticType>(i).value();
+                auto stat = std::make_unique<CharacterStatText>(engine, cell, TextBox::FontInfo{}, id);
+                cell->CreateCharacterStatText(std::move(stat));
+            }
+        }
+
         window->FinalizeLayout();
         window->Hide();
         return window;
