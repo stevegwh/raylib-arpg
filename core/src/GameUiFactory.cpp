@@ -125,7 +125,7 @@ namespace sage
         auto _windowDocked = std::make_unique<WindowDocked>(
             engine->gameData->settings,
             nPatchTexture,
-            TextureStretchMode::SCALE,
+            TextureStretchMode::STRETCH,
             0,
             0,
             w,
@@ -301,7 +301,7 @@ namespace sage
         auto _window = std::make_unique<Window>(
             engine->gameData->settings,
             nPatchTexture,
-            TextureStretchMode::SCALE,
+            TextureStretchMode::STRETCH,
             pos.x,
             pos.y,
             274 * 1.5,
@@ -349,12 +349,12 @@ namespace sage
         auto _window = std::make_unique<Window>(
             engine->gameData->settings,
             nPatchTexture,
-            TextureStretchMode::SCALE,
+            TextureStretchMode::STRETCH,
             pos.x,
             pos.y,
             274 * 3,
             424 * 1.5,
-            Padding{20, 20, 14, 14});
+            Padding{20, 20, 14, 0});
         auto window = engine->CreateWindow(std::move(_window));
         entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
@@ -391,7 +391,7 @@ namespace sage
             cell->CreateImagebox(std::move(imgBox));
         };
 
-        auto panel2 = window->CreatePanel({0, 0, 24, 24});
+        auto panel2 = window->CreatePanel({24, 0, 24, 24});
         {
             auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
             for (unsigned int row = 0; row < maxRows; ++row)
@@ -440,7 +440,11 @@ namespace sage
 
         {
             // Character statistics
-            auto table = panel2->CreateTable(40, {50, 250, 24, 10});
+            auto table = panel2->CreateTable(40, {50, 250, 36, 0});
+            //            ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
+            table->SetTexture(
+                ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_dialogue.png"),
+                TextureStretchMode::STRETCH);
             for (int i = 0; i < magic_enum::enum_underlying(CharacterStatText::StatisticType::COUNT); ++i)
             {
                 auto row = table->CreateTableRow();
