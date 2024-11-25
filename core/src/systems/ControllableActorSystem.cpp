@@ -7,6 +7,7 @@
 #include "AssetID.hpp"
 #include "components/Collideable.hpp"
 #include "components/ControllableActor.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "GameData.hpp"
 #include "ResourceManager.hpp"

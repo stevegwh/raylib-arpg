@@ -88,7 +88,7 @@ namespace sage
         {
             auto& oldState = registry->get<StateName>(entity);
             StateEnum oldStateEnum = registry->get<StateName>(entity).GetCurrentState();
-            if (GetSystem(oldStateEnum)->StateLocked(entity))
+            if (GetSystem(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
             {
                 return;
             }
