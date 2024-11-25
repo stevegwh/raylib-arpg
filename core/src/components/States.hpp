@@ -56,6 +56,7 @@ namespace sage
         MovingToTalkToNPC,
         InDialog,
         FollowingLeader,
+        WaitingForLeader,
         Combat
     };
 
