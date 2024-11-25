@@ -51,6 +51,7 @@ namespace sage
     enum class PlayerStateEnum
     {
         Default,
+        MovingToLocation,
         MovingToAttackEnemy,
         MovingToTalkToNPC,
         InDialog,
