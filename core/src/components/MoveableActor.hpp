@@ -15,31 +15,37 @@
 
 namespace sage
 {
-    class EntityReflectionSignalRouter;
+
+    // Params we can use to transition from one state to another
+    struct FollowTargetParams
+    {
+        entt::registry* const registry;
+        const entt::entity self;
+        const entt::entity targetActor;
+        FollowTargetParams(entt::registry* _registry, entt::entity _self, entt::entity _targetActor)
+            : registry(_registry), self(_self), targetActor(_targetActor)
+        {
+        }
+    };
 
     class FollowTarget
     {
         entt::registry* registry;
         entt::entity self{};
-        EntityReflectionSignalRouter* reflectionSignalRouter;
-        int onTargetPosUpdateHookId{};
+        entt::connection onTargetPosUpdateCnx{};
 
         Vector3 targetPrevPos{};
-        double lastCheckTime{};
+        double timeStarted{};
         float timerThreshold = 0.25;
-        void checkTargetPos(); // Called from ActorMovementSystem
+        void checkTargetPos();
+
       public:
         const entt::entity targetActor = entt::null;
-        entt::sigh<void(entt::entity, entt::entity)> onTargetPosUpdate{}; // Self, target
+        entt::sigh<void(entt::entity, entt::entity)> onPositionUpdate{}; // Self, target
 
         ~FollowTarget();
-        explicit FollowTarget(
-            entt::registry* _registry,
-            EntityReflectionSignalRouter* _reflectionSignalRouter,
-            entt::entity _self,
-            entt::entity _targetActor);
-
-        friend class ActorMovementSystem;
+        FollowTarget(entt::registry* _registry, entt::entity _self, entt::entity _targetActor);
+        explicit FollowTarget(const FollowTargetParams& params);
     };
 
     struct MoveableActorCollision

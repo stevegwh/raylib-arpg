@@ -1,10 +1,10 @@
 #include "ControllableActor.hpp"
 
-#include "Cursor.hpp"
+#include "TextureTerrainOverlay.hpp"
 
 namespace sage
 {
-    ControllableActor::ControllableActor(entt::entity _self, Cursor* _cursor) : self(_self)
+    ControllableActor::ControllableActor(entt::entity _self) : self(_self)
     {
     }
 } // namespace sage

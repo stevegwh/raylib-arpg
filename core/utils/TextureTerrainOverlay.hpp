@@ -5,7 +5,6 @@
 #include "systems/NavigationGridSystem.hpp"
 #include <entt/entt.hpp>
 
-// TODO: This causes a "bad access" error RenderSystem->Draw 75% of times (but sometimes not). Race condition?
 namespace sage
 {
     class TextureTerrainOverlay
@@ -18,6 +17,7 @@ namespace sage
         bool initialised = false;
         bool m_active = false;
         Vector3 meshOffset{};
+        float radius{};
 
         void updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange) const;
         Model generateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange);
@@ -29,11 +29,19 @@ namespace sage
         static void generateIndices(Mesh& mesh, int maxRow, int maxCol);
 
       public:
+        void SetHint(Color col);
+        void SetShader(Shader shader);
         void Enable(bool enable);
-        void Init(Vector3 mouseRayHit);
+        void Init(Vector3 startPos, float _radius = 10);
         [[nodiscard]] bool IsActive() const;
-        void Update(Vector3 mouseRayHit);
+        void Update(Vector3 pos);
         ~TextureTerrainOverlay();
+        TextureTerrainOverlay(
+            entt::registry* _registry,
+            NavigationGridSystem* _navigationGridSystem,
+            Texture tex,
+            Color _hint,
+            const char* shaderPath);
         TextureTerrainOverlay(
             entt::registry* _registry,
             NavigationGridSystem* _navigationGridSystem,

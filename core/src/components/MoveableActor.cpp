@@ -13,36 +13,40 @@ namespace sage
 
     void FollowTarget::checkTargetPos()
     {
-        if (const double timeLapsed = GetTime(); timeLapsed - lastCheckTime > timerThreshold)
+        // Reacts to the target transform's position update, but does fire each time for performance reasons.
+        auto current = GetTime();
+        if (current > timeStarted + timerThreshold)
         {
             const auto& targetTrans = registry->get<sgTransform>(targetActor);
             if (const auto targetCurrentPos = targetTrans.GetWorldPos();
                 !AlmostEquals(targetCurrentPos, targetPrevPos))
             {
                 targetPrevPos = targetCurrentPos;
-                onTargetPosUpdate.publish(self, targetActor);
+                onPositionUpdate.publish(self, targetActor);
             }
-            lastCheckTime = timeLapsed;
+            timeStarted = current;
         }
     }
 
     FollowTarget::~FollowTarget()
     {
-        reflectionSignalRouter->RemoveHook(onTargetPosUpdateHookId);
+        onTargetPosUpdateCnx.release();
     }
 
     FollowTarget::FollowTarget(
-        entt::registry* _registry,
-        EntityReflectionSignalRouter* _reflectionSignalRouter,
-        const entt::entity _self,
-        const entt::entity _targetActor)
-        : registry(_registry),
-          self(_self),
-          reflectionSignalRouter(_reflectionSignalRouter),
-          targetActor(_targetActor)
+        entt::registry* _registry, const entt::entity _self, const entt::entity _targetActor)
+        : registry(_registry), self(_self), targetActor(_targetActor), timeStarted(GetTime())
     {
         auto& targetTrans = _registry->get<sgTransform>(_targetActor);
-        onTargetPosUpdateHookId = reflectionSignalRouter->CreateHook<entt::entity>(
-            _self, targetTrans.onPositionUpdate, onTargetPosUpdate);
-    };
+        entt::sink sink{targetTrans.onPositionUpdate};
+        onTargetPosUpdateCnx = sink.connect<&FollowTarget::checkTargetPos>(this);
+    }
+
+    FollowTarget::FollowTarget(const FollowTargetParams& params)
+        : registry(params.registry), self(params.self), targetActor(params.targetActor)
+    {
+        auto& targetTrans = params.registry->get<sgTransform>(params.targetActor);
+        entt::sink sink{targetTrans.onPositionUpdate};
+        onTargetPosUpdateCnx = sink.connect<&FollowTarget::checkTargetPos>(this);
+    }
 } // namespace sage

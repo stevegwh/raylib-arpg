@@ -46,10 +46,10 @@ namespace sage
             return false;
         }
         virtual ~StateMachine() = default;
-        virtual void OnStateEnter(entt::entity entity) {};
-        virtual void OnStateExit(entt::entity entity) {};
-        virtual void Update(entt::entity entity) {};
-        virtual void Draw3D(entt::entity entity) {};
+        virtual void OnStateEnter(entt::entity entity){};
+        virtual void OnStateExit(entt::entity entity){};
+        virtual void Update(entt::entity entity){};
+        virtual void Draw3D(entt::entity entity){};
     };
 
     template <typename Derived, typename StateName, typename StateEnum>

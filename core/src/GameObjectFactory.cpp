@@ -196,6 +196,13 @@ namespace sage
         moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 50;
 
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 4.5f); // Manually set bounding box dimensions
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
+        collideable.collisionLayer = CollisionLayer::PLAYER;
+
+        auto& controllable = registry->emplace<ControllableActor>(id, id);
+        data->controllableActorSystem->SetSelectedActor(id);
+
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
 
@@ -247,9 +254,6 @@ namespace sage
             //}>(animation);
         }
 
-        auto& controllable = registry->emplace<ControllableActor>(id, id, data->cursor.get());
-        data->controllableActorSystem->SetSelectedActor(id);
-
         // Below forward the cursor's events with the subscriber's entity ID injected into it (so we know which
         // entity is reacting to the click).
         data->reflectionSignalRouter->CreateHook<entt::entity>(
@@ -279,10 +283,6 @@ namespace sage
         data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         // ---
-
-        BoundingBox bb = createRectangularBoundingBox(3.0f, 4.5f); // Manually set bounding box dimensions
-        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
-        collideable.collisionLayer = CollisionLayer::PLAYER;
 
         auto& inventory = registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);

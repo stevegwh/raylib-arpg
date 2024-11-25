@@ -4,46 +4,46 @@
 
 #include "ControllableActorSystem.hpp"
 
+#include "AssetID.hpp"
+#include "components/Collideable.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "Cursor.hpp"
 #include "GameData.hpp"
+#include "ResourceManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
+#include "TextureTerrainOverlay.hpp"
 
+#include <memory>
+
+// TODO: Maybe combine this with PartySystem
 namespace sage
 {
     void ControllableActorSystem::Update() const
     {
-    }
-
-    bool ControllableActorSystem::ReachedDestination(entt::entity entity) const
-    {
-        return gameData->actorMovementSystem->ReachedDestination(entity);
-    }
-
-    void ControllableActorSystem::CancelMovement(entt::entity entity)
-    {
-        gameData->actorMovementSystem->CancelMovement(entity);
-    }
-
-    void ControllableActorSystem::PathfindToLocation(entt::entity id, Vector3 location) const
-    {
-        gameData->actorMovementSystem->PathfindToLocation(id, location);
-    }
-
-    void ControllableActorSystem::MoveToLocation(entt::entity id)
-    {
-        gameData->actorMovementSystem->PathfindToLocation(id, {gameData->cursor->getFirstCollision().point});
-    }
-
-    void ControllableActorSystem::PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol)
-    {
-        // actorMovementSystem->PathfindToLocation(id, patrol);
+        for (auto view = registry->view<ControllableActor, sgTransform, Collideable>(); auto entity : view)
+        {
+            auto& controllable = registry->get<ControllableActor>(entity);
+            auto& trans = registry->get<sgTransform>(entity);
+            auto& collideable = registry->get<Collideable>(entity);
+            auto pos = trans.GetWorldPos();
+            controllable.selectedIndicator->Update(pos);
+        }
     }
 
     void ControllableActorSystem::SetSelectedActor(entt::entity id)
     {
+        if (selectedActorId != entt::null)
+        {
+            auto& old = registry->get<ControllableActor>(selectedActorId);
+            old.selectedIndicator->SetShader(
+                ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
+            old.selectedIndicator->SetHint(inactiveCol);
+        }
         selectedActorId = id;
+        auto& current = registry->get<ControllableActor>(selectedActorId);
+        current.selectedIndicator->SetHint(activeCol);
+        current.selectedIndicator->SetShader(
+            ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
         onSelectedActorChange.publish(id);
     }
 
@@ -52,9 +52,35 @@ namespace sage
         return selectedActorId;
     }
 
+    void ControllableActorSystem::onComponentAdded(entt::entity addedEntity)
+    {
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/particles/circle_03.png");
+        auto& controllable = registry->get<ControllableActor>(addedEntity);
+        controllable.selectedIndicator = std::make_unique<TextureTerrainOverlay>(
+            registry,
+            gameData->navigationGridSystem.get(),
+            ResourceManager::GetInstance().TextureLoad("resources/textures/particles/circle_03.png"),
+            inactiveCol,
+            "resources/shaders/glsl330/base.fs");
+        auto& trans = registry->get<sgTransform>(addedEntity);
+
+        auto& collideable = registry->get<Collideable>(addedEntity);
+        auto r = (collideable.localBoundingBox.max.x - collideable.localBoundingBox.min.x) * 0.5f;
+        r += (collideable.localBoundingBox.max.z - collideable.localBoundingBox.min.z) * 0.5f;
+
+        // TODO: This is currently not centered correctly
+        controllable.selectedIndicator->Init(trans.GetWorldPos(), r);
+        controllable.selectedIndicator->Enable(true);
+    }
+
+    void ControllableActorSystem::onComponentRemoved(entt::entity removedEntity)
+    {
+    }
+
     ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, GameData* _gameData)
         : BaseSystem(_registry), gameData(_gameData)
-
     {
+        registry->on_construct<ControllableActor>().connect<&ControllableActorSystem::onComponentAdded>(this);
+        registry->on_destroy<ControllableActor>().connect<&ControllableActorSystem::onComponentRemoved>(this);
     }
 } // namespace sage
