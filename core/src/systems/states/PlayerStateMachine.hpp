@@ -19,6 +19,7 @@ namespace sage
         class InDialogState;
         class CombatState;
         class FollowingLeaderState;
+        class WaitingForLeaderState;
 
       public:
         void Update();

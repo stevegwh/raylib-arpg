@@ -27,7 +27,6 @@
 
 namespace sage
 {
-
     class PlayerStateController::DefaultState : public StateMachine
     {
         void onFloorClick(const entt::entity self, entt::entity x) const
@@ -75,7 +74,6 @@ namespace sage
             // Below are not disconnected in OnStateExit
             // Bridge was created in GameObjectFactory to connect controllable to cursor
             auto& controllable = registry->get<ControllableActor>(entity);
-            auto& moveable = registry->get<MoveableActor>(entity);
             entt::sink leftSink{controllable.onEnemyLeftClick};
             leftSink.connect<&DefaultState::onEnemyLeftClick>(this);
             entt::sink npcSink{controllable.onNPCLeftClick};
@@ -133,6 +131,22 @@ namespace sage
                 auto& state = registry->get<PlayerState>(self);
                 state.ChangeState(self, PlayerStateEnum::Default);
             }
+
+            const auto& moveable = registry->get<MoveableActor>(self);
+            const auto& transform = registry->get<sgTransform>(self);
+            const auto& followTrans = registry->get<sgTransform>(moveable.followTarget->targetActor);
+            const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget->targetActor);
+
+            // If we are closer to our destination than the leader is, then wait.
+            if (followMoveable.isMoving() &&
+                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) >
+                    Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
+            {
+                registry->emplace_or_replace<FollowTargetParams>(
+                    self, registry, self, moveable.followTarget->targetActor);
+                auto& state = registry->get<PlayerState>(self);
+                state.ChangeState(self, PlayerStateEnum::WaitingForLeader);
+            }
         }
 
         void OnStateEnter(const entt::entity self) override
@@ -152,10 +166,13 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
 
             auto& state = registry->get<PlayerState>(self);
-            entt::sink sink1{moveable.onDestinationReached};
+            entt::sink sink1{targetMoveable.onDestinationReached};
             state.currentStateConnections.push_back(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
             entt::sink sink2{moveable.followTarget->onPositionUpdate};
             state.currentStateConnections.push_back(sink2.connect<&FollowingLeaderState::onTargetPosUpdate>(this));
+            entt::sink sink3{moveable.onMovementCancel};
+            state.currentStateConnections.push_back(
+                sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
         }
 
         void OnStateExit(const entt::entity self) override
@@ -171,6 +188,73 @@ namespace sage
         ~FollowingLeaderState() override = default;
 
         FollowingLeaderState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
+        {
+        }
+    };
+    // ----------------------------
+
+    class PlayerStateController::WaitingForLeaderState final : public StateMachine
+    {
+
+        void onMovementCancelled(const entt::entity self) const
+        {
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::Default);
+        }
+
+      public:
+        void Update(const entt::entity self) override
+        {
+            if (self == gameData->controllableActorSystem->GetSelectedActor())
+            {
+                auto& state = registry->get<PlayerState>(self);
+                state.ChangeState(self, PlayerStateEnum::Default);
+            }
+
+            const auto& moveable = registry->get<MoveableActor>(self);
+            const auto& transform = registry->get<sgTransform>(self);
+            const auto& followTrans = registry->get<sgTransform>(moveable.followTarget->targetActor);
+            const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget->targetActor);
+
+            // Follow target is now closer to its destination than we are, so we can proceed.
+            if (followMoveable.isMoving() &&
+                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) <
+                    Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
+            {
+                registry->emplace_or_replace<FollowTargetParams>(
+                    self, registry, self, moveable.followTarget->targetActor);
+                auto& state = registry->get<PlayerState>(self);
+                state.ChangeState(self, PlayerStateEnum::FollowingLeader);
+            }
+        }
+
+        void OnStateEnter(const entt::entity self) override
+        {
+#ifdef SAGE_DEBUG
+            std::cout << std::format("Object {}: Entered WaitingForLeaderState. \n", static_cast<int>(self));
+#endif
+            const auto& followTargetParams = registry->get<FollowTargetParams>(self);
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.followTarget.emplace(followTargetParams);
+            registry->erase<FollowTargetParams>(self);
+            auto& state = registry->get<PlayerState>(self);
+            entt::sink sink{moveable.onMovementCancel};
+            state.currentStateConnections.push_back(
+                sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
+        }
+
+        void OnStateExit(const entt::entity self) override
+        {
+#ifdef SAGE_DEBUG
+            std::cout << std::format("Object {}: Exited WaitingForLeaderState. \n", static_cast<int>(self));
+#endif
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.followTarget.reset();
+        }
+
+        ~WaitingForLeaderState() override = default;
+
+        WaitingForLeaderState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
@@ -244,7 +328,7 @@ namespace sage
     class PlayerStateController::MovingToTalkToNPCState : public StateMachine
     {
 
-        void onMovementCancelled(entt::entity self) const
+        void onMovementCancelled(const entt::entity self) const
         {
             auto& dialogComponent = registry->get<DialogComponent>(self);
             dialogComponent.dialogTarget = entt::null;
@@ -254,7 +338,7 @@ namespace sage
             playerState.ChangeState(self, PlayerStateEnum::Default);
         }
 
-        void onTargetReached(entt::entity self) const
+        void onTargetReached(const entt::entity self) const
         {
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::InDialog);
@@ -529,5 +613,6 @@ namespace sage
         states[PlayerStateEnum::InDialog] = std::make_unique<InDialogState>(_registry, _gameData);
         states[PlayerStateEnum::FollowingLeader] = std::make_unique<FollowingLeaderState>(_registry, _gameData);
         states[PlayerStateEnum::MovingToLocation] = std::make_unique<MovingToLocationState>(_registry, _gameData);
+        states[PlayerStateEnum::WaitingForLeader] = std::make_unique<WaitingForLeaderState>(_registry, _gameData);
     }
 } // namespace sage
