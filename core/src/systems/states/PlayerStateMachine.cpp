@@ -94,7 +94,7 @@ namespace sage
         void OnStateEnter(entt::entity entity) override
         {
             // Below are not disconnected in OnStateExit
-            // Bridge was created in GameObjectFactory to connect this to cursor
+            // Bridge was created in GameObjectFactory to connect controllable to cursor
             auto& controllable = registry->get<ControllableActor>(entity);
             auto& moveable = registry->get<MoveableActor>(entity);
             entt::sink leftSink{controllable.onEnemyLeftClick};
@@ -111,10 +111,6 @@ namespace sage
 
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-
-            // tmp
-            moveable.followTarget.reset();
-            gameData->actorMovementSystem->CancelMovement(entity);
         }
 
         ~DefaultState() override = default;
@@ -164,29 +160,18 @@ namespace sage
             auto& targetMoveable = registry->get<MoveableActor>(target);
             const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
             gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
-            {
-                entt::sink sink{targetMoveable.onDestinationReached};
-                sink.connect<&FollowingLeaderState::onTargetReached>(this);
-            }
-            {
-                entt::sink sink{moveable.followTarget->onPositionUpdate};
-                sink.connect<&FollowingLeaderState::onTargetPosUpdate>(this);
-            }
+
+            auto& state = registry->get<PlayerState>(self);
+            entt::sink sink1{targetMoveable.onDestinationReached};
+            state.currentStateConnections.push_back(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
+            entt::sink sink2{moveable.followTarget->onPositionUpdate};
+            state.currentStateConnections.push_back(sink2.connect<&FollowingLeaderState::onTargetPosUpdate>(this));
         }
 
         void OnStateExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
             auto target = moveable.followTarget->targetActor;
-            auto& targetMoveable = registry->get<MoveableActor>(target);
-            {
-                entt::sink sink{targetMoveable.onDestinationReached};
-                sink.disconnect<&FollowingLeaderState::onTargetReached>(this);
-            }
-            {
-                entt::sink sink{moveable.followTarget->onPositionUpdate};
-                sink.disconnect<&FollowingLeaderState::onTargetPosUpdate>(this);
-            }
             moveable.followTarget.reset();
             gameData->actorMovementSystem->CancelMovement(self);
         }
@@ -232,20 +217,16 @@ namespace sage
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
             gameData->actorMovementSystem->PathfindToLocation(self, pos);
 
+            auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveable.onDestinationReached};
-            sink.connect<&MovingToTalkToNPCState::onTargetReached>(this);
-
+            state.currentStateConnections.push_back(sink.connect<&MovingToTalkToNPCState::onTargetReached>(this));
             entt::sink sink2{moveable.onMovementCancel};
-            sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this);
+            state.currentStateConnections.push_back(
+                sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this));
         }
 
         void OnStateExit(entt::entity self) override
         {
-            auto& moveable = registry->get<MoveableActor>(self);
-            entt::sink sink{moveable.onDestinationReached};
-            sink.disconnect<&MovingToTalkToNPCState::onTargetReached>(this);
-            entt::sink sink2{moveable.onMovementCancel};
-            sink2.disconnect<&MovingToTalkToNPCState::onMovementCancelled>(this);
         }
 
         ~MovingToTalkToNPCState() override = default;
@@ -327,15 +308,19 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::WALK);
 
             auto& moveableActor = registry->get<MoveableActor>(self);
+
+            auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveableActor.onDestinationReached};
-            sink.connect<&MovingToAttackEnemyState::onTargetReached>(this);
+            state.currentStateConnections.push_back(
+                sink.connect<&MovingToAttackEnemyState::onTargetReached>(this));
 
             auto& combatable = registry->get<CombatableActor>(self);
             assert(combatable.target != entt::null);
 
             auto& controllable = registry->get<ControllableActor>(self);
             entt::sink attackCancelSink{controllable.onFloorClick};
-            attackCancelSink.connect<&MovingToAttackEnemyState::onAttackCancelled>(this);
+            state.currentStateConnections.push_back(
+                attackCancelSink.connect<&MovingToAttackEnemyState::onAttackCancelled>(this));
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
@@ -351,13 +336,6 @@ namespace sage
 
         void OnStateExit(entt::entity self) override
         {
-            auto& moveableActor = registry->get<MoveableActor>(self);
-            entt::sink sink{moveableActor.onDestinationReached};
-            sink.disconnect<&MovingToAttackEnemyState::onTargetReached>(this);
-
-            auto& controllable = registry->get<ControllableActor>(self);
-            entt::sink attackCancelSink{controllable.onFloorClick};
-            attackCancelSink.disconnect<&MovingToAttackEnemyState::onAttackCancelled>(this);
         }
 
         ~MovingToAttackEnemyState() override = default;
@@ -414,28 +392,22 @@ namespace sage
             combatable.onTargetDeathHookId = gameData->reflectionSignalRouter->CreateHook<entt::entity>(
                 entity, enemyCombatable.onDeath, combatable.onTargetDeath);
 
+            auto& state = registry->get<PlayerState>(entity);
             entt::sink sink{combatable.onTargetDeath};
-            sink.connect<&CombatState::onTargetDeath>(this);
+            state.currentStateConnections.push_back(sink.connect<&CombatState::onTargetDeath>(this));
 
             auto& controllable = registry->get<ControllableActor>(entity);
             entt::sink attackCancelSink{controllable.onFloorClick};
-            attackCancelSink.connect<&CombatState::onAttackCancelled>(this);
+            state.currentStateConnections.push_back(
+                attackCancelSink.connect<&CombatState::onAttackCancelled>(this));
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
-
             gameData->reflectionSignalRouter->RemoveHook(combatable.onTargetDeathHookId);
-            entt::sink sink{combatable.onTargetDeath};
-            sink.disconnect<&CombatState::onTargetDeath>(this);
-
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
-
-            auto& controllable = registry->get<ControllableActor>(entity);
-            entt::sink attackCancelSink{controllable.onFloorClick};
-            attackCancelSink.disconnect<&CombatState::onAttackCancelled>(this);
         }
 
         ~CombatState() override = default;

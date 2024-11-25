@@ -49,9 +49,10 @@ namespace sage
 
         void OnStateEnter(entt::entity self) override
         {
+            auto& state = registry->get<WavemobState>(self);
             auto& combatable = registry->get<CombatableActor>(self);
             entt::sink sink{combatable.onHit};
-            sink.connect<&DefaultState::OnHit>(this);
+            state.currentStateConnections.push_back(sink.connect<&DefaultState::OnHit>(this));
             // Persistent connections
             entt::sink deathSink{combatable.onDeath};
             deathSink.connect<&DefaultState::OnDeath>(this);
@@ -62,10 +63,6 @@ namespace sage
 
         void OnStateExit(entt::entity entity) override
         {
-            auto& combatable = registry->get<CombatableActor>(entity);
-            entt::sink sink{combatable.onHit};
-            sink.disconnect<&DefaultState::OnHit>(this);
-            // gameData->actorMovementSystem->CancelMovement(entity);
         }
 
         ~DefaultState() override = default;
@@ -145,10 +142,14 @@ namespace sage
             const auto& combatable = registry->get<CombatableActor>(self);
             moveable.followTarget.emplace(registry, self, combatable.target);
 
+            auto& state = registry->get<WavemobState>(self);
+
             entt::sink finishMovementSink{moveable.onDestinationReached};
-            finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this);
+            state.currentStateConnections.push_back(
+                finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this));
             entt::sink posUpdateSink{moveable.followTarget->onPositionUpdate};
-            posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
+            state.currentStateConnections.push_back(
+                posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this));
 
             onTargetPosUpdate(self, combatable.target);
         }
@@ -156,10 +157,6 @@ namespace sage
         void OnStateExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            entt::sink finishMovementSink{moveable.onDestinationReached};
-            finishMovementSink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
-            entt::sink posUpdateSink{moveable.followTarget->onPositionUpdate};
-            posUpdateSink.disconnect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
             moveable.followTarget.reset();
         }
 
@@ -252,10 +249,9 @@ namespace sage
             gameData->navigationGridSystem->MarkSquareAreaOccupied(bb, false);
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
-            {
-                entt::sink sink{animation.onAnimationEnd};
-                sink.connect<&DyingState::destroyEntity>(this);
-            }
+            auto& state = registry->get<WavemobState>(self);
+            entt::sink sink{animation.onAnimationEnd};
+            state.currentStateConnections.push_back(sink.connect<&DyingState::destroyEntity>(this));
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
