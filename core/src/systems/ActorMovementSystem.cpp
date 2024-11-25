@@ -292,6 +292,7 @@ namespace sage
             return;
         }
 
+        // TODO: This should be managed in PlayerStateMachine
         if (moveableActor.followTarget.has_value())
         {
             // If we are closer to our destination than the leader is, then wait.

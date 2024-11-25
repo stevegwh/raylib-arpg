@@ -1,6 +1,7 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <vector>
 
 namespace sage
 {
@@ -12,9 +13,19 @@ namespace sage
       public:
         // self, new state
         entt::sigh<void(entt::entity, StateEnum)> onStateChanged;
+        std::vector<entt::connection> currentStateConnections;
+
+        void RemoveAllConnections()
+        {
+            for (auto& connection : currentStateConnections)
+            {
+                connection.release();
+            }
+        }
 
         void ChangeState(entt::entity self, StateEnum newState)
         {
+            RemoveAllConnections();
             onStateChanged.publish(self, newState);
             currentState = newState;
         }
