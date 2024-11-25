@@ -13,6 +13,7 @@ namespace sage
         : public StateMachineController<PlayerStateController, PlayerState, PlayerStateEnum>
     {
         class DefaultState;
+        class MovingToLocationState;
         class MovingToAttackEnemyState;
         class MovingToTalkToNPCState;
         class InDialogState;
