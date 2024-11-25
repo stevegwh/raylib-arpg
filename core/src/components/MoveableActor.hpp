@@ -72,6 +72,7 @@ namespace sage
         {
             return !path.empty();
         }
+
         std::vector<GridSquare> debugRay;
 
         entt::sigh<void(entt::entity)> onStartMovement{};

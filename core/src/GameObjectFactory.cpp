@@ -194,7 +194,7 @@ namespace sage
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
-        moveable.pathfindingBounds = 150;
+        moveable.pathfindingBounds = 50;
 
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
