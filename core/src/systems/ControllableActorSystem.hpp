@@ -8,28 +8,22 @@
 #include "entt/entt.hpp"
 #include "raylib.h"
 
-#include <vector>
-
 namespace sage
 {
     class GameData;
 
     class ControllableActorSystem : public BaseSystem
     {
+        static constexpr Color activeCol = {0, 255, 0, 255};
+        static constexpr Color inactiveCol = {0, 255, 0, 75};
         GameData* gameData;
-        entt::entity selectedActorId{};
-        void onTargetUpdate(entt::entity target);
+        entt::entity selectedActorId = entt::null;
+        void onComponentAdded(entt::entity addedEntity);
+        void onComponentRemoved(entt::entity removedEntity);
 
       public:
-        void MoveToLocation(entt::entity id);
-        void PathfindToLocation(entt::entity id, Vector3 location) const;
-        void CancelMovement(entt::entity entity);
         void SetSelectedActor(entt::entity id);
         entt::entity GetSelectedActor();
-
-        void PatrolLocations(entt::entity id, const std::vector<Vector3>& patrol);
-        [[nodiscard]] bool ReachedDestination(entt::entity entity) const;
-
         entt::sigh<void(entt::entity)> onSelectedActorChange;
         void Update() const;
         ControllableActorSystem(entt::registry* _registry, GameData* _gameData);

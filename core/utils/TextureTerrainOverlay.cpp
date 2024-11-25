@@ -118,6 +118,18 @@ namespace sage
         return model;
     }
 
+    void TextureTerrainOverlay::SetHint(Color col)
+    {
+        auto& renderable = registry->get<Renderable>(entity);
+        renderable.hint = col;
+    }
+
+    void TextureTerrainOverlay::SetShader(Shader shader)
+    {
+        auto& renderable = registry->get<Renderable>(entity);
+        renderable.GetModel()->SetShader(shader);
+    }
+
     void TextureTerrainOverlay::Enable(bool enable)
     {
         assert(initialised);
@@ -126,18 +138,19 @@ namespace sage
         renderable.active = enable;
     }
 
-    void TextureTerrainOverlay::Init(Vector3 mouseRayHit) // TODO: Should take radius as a parameter
+    void TextureTerrainOverlay::Init(Vector3 startPos, float _radius)
     {
         if (initialised)
         {
-            Update(mouseRayHit);
+            Update(startPos);
             return;
         };
         initialised = true;
+        radius = _radius; // Should be in constructor
 
-        navigationGridSystem->WorldToGridSpace(mouseRayHit, lastHit);
+        navigationGridSystem->WorldToGridSpace(startPos, lastHit);
         GridSquare minRange{}, maxRange{};
-        navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
+        navigationGridSystem->GetGridRange(startPos, static_cast<int>(radius), minRange, maxRange);
         auto& renderable = registry->get<Renderable>(entity);
         renderable.GetModel()->rlmodel = generateTerrainPolygon(minRange, maxRange);
 
@@ -154,7 +167,7 @@ namespace sage
         Vector3 meshCenter = {(meshMin.x + meshMax.x) * 0.5f, 0, (meshMin.z + meshMax.z) * 0.5f};
 
         // Calculate the offset to center the mesh on the mouse position
-        meshOffset = {mouseRayHit.x - meshCenter.x, 0, mouseRayHit.z - meshCenter.z};
+        meshOffset = {startPos.x - meshCenter.x, 0, startPos.z - meshCenter.z};
 
         auto& trans = registry->get<sgTransform>(entity);
         trans.SetPosition(meshOffset);
@@ -166,16 +179,16 @@ namespace sage
         return m_active;
     }
 
-    void TextureTerrainOverlay::Update(Vector3 mouseRayHit)
+    void TextureTerrainOverlay::Update(Vector3 pos)
     {
         if (!m_active) return;
-        GridSquare mousePosGrid{};
-        navigationGridSystem->WorldToGridSpace(mouseRayHit, mousePosGrid);
-        if (lastHit == mousePosGrid) return;
+        GridSquare gridPos{};
+        navigationGridSystem->WorldToGridSpace(pos, gridPos);
+        if (lastHit == gridPos) return;
 
-        lastHit = mousePosGrid;
+        lastHit = gridPos;
         GridSquare minRange{}, maxRange{};
-        navigationGridSystem->GetGridRange(mouseRayHit, 10, minRange, maxRange);
+        navigationGridSystem->GetGridRange(pos, static_cast<int>(radius), minRange, maxRange);
 
         updateTerrainPolygon(minRange, maxRange);
 
@@ -187,6 +200,30 @@ namespace sage
     {
         UnloadTexture(texture);
         registry->remove<TextureTerrainOverlay>(entity);
+    }
+
+    TextureTerrainOverlay::TextureTerrainOverlay(
+        entt::registry* _registry,
+        NavigationGridSystem* _navigationGridSystem,
+        Texture tex,
+        Color _hint,
+        const char* shaderPath)
+        : registry(_registry),
+          navigationGridSystem(_navigationGridSystem),
+          texture(tex),
+          entity(_registry->create())
+    {
+        assert(shaderPath != nullptr);
+
+        GridSquare minRange{}, maxRange{};
+        auto& r =
+            registry->emplace<Renderable>(entity, generateTerrainPolygon(minRange, maxRange), MatrixIdentity());
+        r.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
+        r.active = false;
+        r.name = "TextureTerrainOverlay";
+        r.hint = _hint;
+        registry->emplace<sgTransform>(entity, entity);
+        registry->emplace<RenderableDeferred>(entity);
     }
 
     TextureTerrainOverlay::TextureTerrainOverlay(

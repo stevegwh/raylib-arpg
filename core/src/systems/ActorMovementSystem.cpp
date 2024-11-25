@@ -292,6 +292,19 @@ namespace sage
             return;
         }
 
+        if (moveableActor.followTarget.has_value())
+        {
+            // If we are closer to our destination than the leader is, then wait.
+            auto& followTrans = registry->get<sgTransform>(moveableActor.followTarget->targetActor);
+            auto& followMoveable = registry->get<MoveableActor>(moveableActor.followTarget->targetActor);
+            if (followMoveable.isMoving() &&
+                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) >
+                    Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
+            {
+                return;
+            }
+        }
+
         if (isNextPointOccupied(moveableActor, collideable))
         {
             // TODO
@@ -342,11 +355,6 @@ namespace sage
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {
             navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
-            if (moveableActor.followTarget.has_value())
-            {
-                // Check if follow target has updated its position
-                moveableActor.followTarget->checkTargetPos();
-            }
             updateActor(entity, moveableActor, transform, collideable);
             navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
         }

@@ -67,8 +67,13 @@ namespace sage
 
         void RemoveHook(int id)
         {
-            // TODO: A bit rubbish that I need to save an id to remove a hook.
-            hooks[id].reset();
+            if (hooks.size() > id)
+            {
+                if (hooks[id])
+                {
+                    hooks[id].reset();
+                }
+            }
         }
     };
 

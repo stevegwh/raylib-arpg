@@ -17,6 +17,7 @@ namespace sage
         class MovingToTalkToNPCState;
         class InDialogState;
         class CombatState;
+        class FollowingLeaderState;
 
       public:
         void Update();

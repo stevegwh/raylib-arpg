@@ -31,17 +31,19 @@ namespace sage
         {
             auto selected = gameData->controllableActorSystem->GetSelectedActor();
             if (self != selected) return;
-            gameData->controllableActorSystem->CancelMovement(self);
-            gameData->controllableActorSystem->PathfindToLocation(
-                self, gameData->cursor->getFirstCollision().point);
+            gameData->actorMovementSystem->CancelMovement(self);
+            gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
+
+            auto target = self;
             auto group = gameData->partySystem->GetGroup(self);
             for (const auto& entity : group)
             {
-                // TODO: Do not try to send them to the exact same location, have an offset from this point
-                // (PartySystem should calculate it)
-                // TODO: If the leader changes destination, the followers should also
-                gameData->controllableActorSystem->PathfindToLocation(
-                    entity, gameData->cursor->getFirstCollision().point);
+                if (entity == self) continue;
+                gameData->actorMovementSystem->CancelMovement(entity);
+
+                registry->emplace<FollowTargetParams>(entity, registry, entity, target);
+                auto& playerState = registry->get<PlayerState>(entity);
+                playerState.ChangeState(entity, PlayerStateEnum::FollowingLeader);
             }
         }
 
@@ -51,14 +53,14 @@ namespace sage
             if (!registry->any_of<DialogComponent>(target)) return;
 
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(
-                FollowTarget(registry, gameData->reflectionSignalRouter.get(), self, target));
+            moveable.followTarget.emplace(registry, self, target);
             auto& playerState = registry->get<PlayerState>(self);
             playerState.ChangeState(self, PlayerStateEnum::MovingToTalkToNPC);
         }
 
         void onEnemyLeftClick(entt::entity self, entt::entity target) const
         {
+            if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
             auto& playerState = registry->get<PlayerState>(self);
@@ -67,12 +69,14 @@ namespace sage
 
         void onEnemyRightClick(entt::entity self, entt::entity target) const
         {
+            if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
         }
 
         void onMovementCancel(entt::entity self) const
         {
+            if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
@@ -107,11 +111,89 @@ namespace sage
 
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
+
+            // tmp
+            moveable.followTarget.reset();
+            gameData->actorMovementSystem->CancelMovement(entity);
         }
 
         ~DefaultState() override = default;
 
         DefaultState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
+        {
+        }
+    };
+
+    // ----------------------------
+
+    class PlayerStateController::FollowingLeaderState : public StateMachine
+    {
+
+        void onMovementCancelled(entt::entity self) const
+        {
+            //            auto& playerState = registry->get<PlayerState>(self);
+            //            playerState.ChangeState(self, PlayerStateEnum::Default);
+        }
+
+        void onTargetPosUpdate(entt::entity self, entt::entity target)
+        {
+            const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
+            gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
+        }
+
+        void onTargetReached(entt::entity self) const
+        {
+            auto& playerState = registry->get<PlayerState>(self);
+            playerState.ChangeState(self, PlayerStateEnum::Default);
+        }
+
+      public:
+        void Update(entt::entity self) override
+        {
+        }
+
+        void OnStateEnter(entt::entity self) override
+        {
+            const auto& followTargetParams = registry->get<FollowTargetParams>(self);
+
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.followTarget.emplace(followTargetParams);
+            registry->erase<FollowTargetParams>(self);
+
+            auto target = moveable.followTarget->targetActor;
+            auto& targetMoveable = registry->get<MoveableActor>(target);
+            const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
+            gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
+            {
+                entt::sink sink{targetMoveable.onDestinationReached};
+                sink.connect<&FollowingLeaderState::onTargetReached>(this);
+            }
+            {
+                entt::sink sink{moveable.followTarget->onPositionUpdate};
+                sink.connect<&FollowingLeaderState::onTargetPosUpdate>(this);
+            }
+        }
+
+        void OnStateExit(entt::entity self) override
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            auto target = moveable.followTarget->targetActor;
+            auto& targetMoveable = registry->get<MoveableActor>(target);
+            {
+                entt::sink sink{targetMoveable.onDestinationReached};
+                sink.disconnect<&FollowingLeaderState::onTargetReached>(this);
+            }
+            {
+                entt::sink sink{moveable.followTarget->onPositionUpdate};
+                sink.disconnect<&FollowingLeaderState::onTargetPosUpdate>(this);
+            }
+            moveable.followTarget.reset();
+            gameData->actorMovementSystem->CancelMovement(self);
+        }
+
+        ~FollowingLeaderState() override = default;
+
+        FollowingLeaderState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
@@ -148,7 +230,7 @@ namespace sage
             auto& playerDiag = registry->get<DialogComponent>(self);
             playerDiag.dialogTarget = moveable.followTarget->targetActor;
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
-            gameData->controllableActorSystem->PathfindToLocation(self, pos);
+            gameData->actorMovementSystem->PathfindToLocation(self, pos);
 
             entt::sink sink{moveable.onDestinationReached};
             sink.connect<&MovingToTalkToNPCState::onTargetReached>(this);
@@ -264,7 +346,7 @@ namespace sage
 
             Vector3 targetPos = Vector3Subtract(enemyPos, direction);
 
-            gameData->controllableActorSystem->PathfindToLocation(self, targetPos);
+            gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
         }
 
         void OnStateExit(entt::entity self) override
@@ -393,5 +475,6 @@ namespace sage
         states[PlayerStateEnum::MovingToTalkToNPC] =
             std::make_unique<MovingToTalkToNPCState>(_registry, _gameData);
         states[PlayerStateEnum::InDialog] = std::make_unique<InDialogState>(_registry, _gameData);
+        states[PlayerStateEnum::FollowingLeader] = std::make_unique<FollowingLeaderState>(_registry, _gameData);
     }
 } // namespace sage

@@ -143,12 +143,11 @@ namespace sage
 
             auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
-            moveable.followTarget.emplace(
-                FollowTarget(registry, gameData->reflectionSignalRouter.get(), self, combatable.target));
+            moveable.followTarget.emplace(registry, self, combatable.target);
 
             entt::sink finishMovementSink{moveable.onDestinationReached};
             finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this);
-            entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
+            entt::sink posUpdateSink{moveable.followTarget->onPositionUpdate};
             posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
 
             onTargetPosUpdate(self, combatable.target);
@@ -159,7 +158,7 @@ namespace sage
             auto& moveable = registry->get<MoveableActor>(self);
             entt::sink finishMovementSink{moveable.onDestinationReached};
             finishMovementSink.disconnect<&TargetOutOfRangeState::onTargetReached>(this);
-            entt::sink posUpdateSink{moveable.followTarget->onTargetPosUpdate};
+            entt::sink posUpdateSink{moveable.followTarget->onPositionUpdate};
             posUpdateSink.disconnect<&TargetOutOfRangeState::onTargetPosUpdate>(this);
             moveable.followTarget.reset();
         }

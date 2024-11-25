@@ -43,6 +43,7 @@ namespace sage
         MovingToAttackEnemy,
         MovingToTalkToNPC,
         InDialog,
+        FollowingLeader,
         Combat
     };
 
