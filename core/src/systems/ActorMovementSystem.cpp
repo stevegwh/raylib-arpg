@@ -26,7 +26,9 @@ namespace sage
         moveable.onMovementCancel.publish(entity);
     }
 
-    // Moves to a location without pathfinding
+    // TODO: If an object has a collideable, this is completely pointless, as it will inevitably use pathfinding if
+    // it encounters any issues or collides with something. It would need to be updated differently, maybe the same
+    // as the "non collideable" update. Moves to a location without pathfinding
     void ActorMovementSystem::MoveToLocation(const entt::entity& entity, Vector3 location) const
     {
         if (!registry->any_of<MoveableActor>(entity))
@@ -165,7 +167,10 @@ namespace sage
 
     bool ActorMovementSystem::hasReachedNextPoint(const sgTransform& transform, const MoveableActor& moveableActor)
     {
-        return Vector3Distance(moveableActor.path.front(), transform.GetWorldPos()) < 1.0f; // Destination reached
+        // I do not believe that height should matter for this (could be very wrong)
+        return Vector2Distance(
+                   {moveableActor.path.front().x, moveableActor.path.front().z},
+                   {transform.GetWorldPos().x, transform.GetWorldPos().z}) < 1.0f;
     }
 
     void ActorMovementSystem::handlePointReached(
@@ -209,7 +214,9 @@ namespace sage
             castCollisionRay(actorIndex, transform.direction, avoidanceDistance, moveableActor);
 
         if (hitCell != nullptr && registry->any_of<Collideable>(hitCell->occupant) &&
-            hitCell->occupant != moveableActor.followTarget->targetActor && moveableActor.hitEntityId != entity)
+            (!moveableActor.followTarget.has_value() ||
+             hitCell->occupant != moveableActor.followTarget->targetActor) &&
+            moveableActor.hitEntityId != entity)
         {
             auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
 
