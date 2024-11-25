@@ -99,6 +99,8 @@ namespace sage
                 CancelMovement(entity);
             }
         }
+
+        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
     }
 
     bool ActorMovementSystem::ReachedDestination(entt::entity entity) const
@@ -159,12 +161,11 @@ namespace sage
         const entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const
     {
         PathfindToLocation(entity, moveableActor.path.back());
-        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
     }
 
     bool ActorMovementSystem::hasReachedNextPoint(const sgTransform& transform, const MoveableActor& moveableActor)
     {
-        return Vector3Distance(moveableActor.path.front(), transform.GetWorldPos()) < 0.5f; // Destination reached
+        return Vector3Distance(moveableActor.path.front(), transform.GetWorldPos()) < 1.0f; // Destination reached
     }
 
     void ActorMovementSystem::handlePointReached(
@@ -195,7 +196,7 @@ namespace sage
         moveableActor.onDestinationReached.publish(entity);
     }
 
-    void ActorMovementSystem::checkCollisionWithOtherMoveable(
+    bool ActorMovementSystem::checkCollisionWithOtherMoveable(
         const entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const
     {
         float avoidanceDistance = 10;
@@ -207,10 +208,30 @@ namespace sage
         NavigationGridSquare* hitCell =
             castCollisionRay(actorIndex, transform.direction, avoidanceDistance, moveableActor);
 
-        if (hitCell != nullptr && registry->any_of<Collideable>(hitCell->occupant))
+        if (hitCell != nullptr && registry->any_of<Collideable>(hitCell->occupant) &&
+            hitCell->occupant != moveableActor.followTarget->targetActor && moveableActor.hitEntityId != entity)
         {
-            handleCollisionWithOtherMoveable(entity, transform, moveableActor, hitCell);
+            auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
+
+            // If we hit another moveable and they haven't "collided" with us, then wait?
+
+            if (!AlmostEquals(hitTransform.GetWorldPos(), moveableActor.hitLastPos))
+            {
+                moveableActor.hitEntityId = entity;
+                moveableActor.hitLastPos = hitTransform.GetWorldPos();
+
+                auto& hitCol = registry->get<Collideable>(hitCell->occupant);
+
+                if (Vector3Distance(hitTransform.GetWorldPos(), transform.GetWorldPos()) <
+                    Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
+                {
+                    PathfindToLocation(entity, moveableActor.path.back());
+                    hitCol.debugDraw = true;
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     NavigationGridSquare* ActorMovementSystem::castCollisionRay(
@@ -218,33 +239,6 @@ namespace sage
     {
         return navigationGridSystem->CastRay(
             actorIndex.row, actorIndex.col, {direction.x, direction.z}, distance, moveableActor.debugRay);
-    }
-
-    void ActorMovementSystem::handleCollisionWithOtherMoveable(
-        const entt::entity& entity,
-        const sgTransform& transform,
-        MoveableActor& moveableActor,
-        const NavigationGridSquare* hitCell) const
-    {
-        // If we're supposed to be moving towards this actor, then ignore collision with it.
-        if (hitCell->occupant == moveableActor.followTarget->targetActor || moveableActor.hitEntityId == entity)
-            return;
-
-        auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
-        if (!AlmostEquals(hitTransform.GetWorldPos(), moveableActor.hitLastPos))
-        {
-            moveableActor.hitEntityId = entity;
-            moveableActor.hitLastPos = hitTransform.GetWorldPos();
-
-            auto& hitCol = registry->get<Collideable>(hitCell->occupant);
-
-            if (Vector3Distance(hitTransform.GetWorldPos(), transform.GetWorldPos()) <
-                Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
-            {
-                PathfindToLocation(entity, moveableActor.path.back());
-                hitCol.debugDraw = true;
-            }
-        }
     }
 
     void ActorMovementSystem::updateActorDirection(sgTransform& transform, const MoveableActor& moveableActor)
@@ -294,6 +288,7 @@ namespace sage
         if (isNextPointOccupied(moveableActor, collideable))
         {
             // TODO
+            recalculatePath(entity, moveableActor, collideable);
             return;
         }
 
@@ -309,8 +304,10 @@ namespace sage
             return;
         }
 
-        checkCollisionWithOtherMoveable(entity, transform, moveableActor);
-        updateActorTransform(entity, transform, moveableActor);
+        if (!checkCollisionWithOtherMoveable(entity, transform, moveableActor))
+        {
+            updateActorTransform(entity, transform, moveableActor);
+        }
     }
 
     void ActorMovementSystem::updateActor(
@@ -333,7 +330,7 @@ namespace sage
     void ActorMovementSystem::Update()
     {
         // clearDebugData();
-        
+
         auto fullView = registry->view<MoveableActor, sgTransform, Collideable>();
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {

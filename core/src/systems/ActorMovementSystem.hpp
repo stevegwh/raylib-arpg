@@ -42,18 +42,13 @@ namespace sage
         void handlePointReached(entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
         void setPositionToGridCenter(sgTransform& transform, const MoveableActor& moveableActor) const;
         static void handleDestinationReached(entt::entity entity, const MoveableActor& moveableActor);
-        void checkCollisionWithOtherMoveable(
+        [[nodiscard]] bool checkCollisionWithOtherMoveable(
             entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const;
         NavigationGridSquare* castCollisionRay(
             const GridSquare& actorIndex,
             const Vector3& direction,
             float distance,
             MoveableActor& moveableActor) const;
-        void handleCollisionWithOtherMoveable(
-            const entt::entity& entity,
-            const sgTransform& transform,
-            MoveableActor& moveableActor,
-            const NavigationGridSquare* hitCell) const;
         void updateActorTransform(entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
         static void updateActorDirection(sgTransform& transform, const MoveableActor& moveableActor);
         static void updateActorRotation(entt::entity entity, sgTransform& transform);
