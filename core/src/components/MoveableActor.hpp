@@ -19,9 +19,9 @@ namespace sage
     // Params we can use to transition from one state to another
     struct FollowTargetParams
     {
-        entt::registry* const registry;
-        const entt::entity self;
-        const entt::entity targetActor;
+        entt::registry* registry;
+        entt::entity self;
+        entt::entity targetActor;
         FollowTargetParams(entt::registry* _registry, entt::entity _self, entt::entity _targetActor)
             : registry(_registry), self(_self), targetActor(_targetActor)
         {

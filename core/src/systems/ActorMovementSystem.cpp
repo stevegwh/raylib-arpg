@@ -293,7 +293,8 @@ namespace sage
         }
 
         // TODO: This should be managed in PlayerStateMachine
-        if (moveableActor.followTarget.has_value())
+        if (moveableActor.followTarget.has_value() &&
+            registry->all_of<sgTransform, MoveableActor>(moveableActor.followTarget->targetActor))
         {
             // If we are closer to our destination than the leader is, then wait.
             auto& followTrans = registry->get<sgTransform>(moveableActor.followTarget->targetActor);

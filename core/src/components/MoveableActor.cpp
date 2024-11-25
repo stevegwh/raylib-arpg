@@ -35,7 +35,7 @@ namespace sage
 
     FollowTarget::FollowTarget(
         entt::registry* _registry, const entt::entity _self, const entt::entity _targetActor)
-        : registry(_registry), self(_self), targetActor(_targetActor), timeStarted(GetTime())
+        : registry(_registry), self(_self), timeStarted(GetTime()), targetActor(_targetActor)
     {
         auto& targetTrans = _registry->get<sgTransform>(_targetActor);
         entt::sink sink{targetTrans.onPositionUpdate};
