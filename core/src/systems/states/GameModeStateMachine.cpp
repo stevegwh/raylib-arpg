@@ -16,13 +16,8 @@ namespace sage
 {
     class GameModeStateController::DefaultState : public StateMachine
     {
+        GameModeStateController* stateController;
         entt::entity gameEntity;
-
-        void OnTimerEnd()
-        {
-            // auto& gameState = registry->get<GameState>(gameEntity);
-            // gameState.ChangeState(gameEntity, GameStateEnum::Wave);
-        }
 
       public:
         void Update(entt::entity entity) override
@@ -41,8 +36,12 @@ namespace sage
         {
         }
 
-        DefaultState(entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
-            : StateMachine(_registry, _gameData), gameEntity(_gameEntity)
+        DefaultState(
+            entt::registry* _registry,
+            GameData* _gameData,
+            entt::entity _gameEntity,
+            GameModeStateController* _stateController)
+            : StateMachine(_registry, _gameData), gameEntity(_gameEntity), stateController(_stateController)
         {
         }
     };
@@ -51,13 +50,9 @@ namespace sage
 
     class GameModeStateController::WaveState : public StateMachine
     {
-
+        GameModeStateController* stateController;
         void initWave()
         {
-            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 10.0f}, "Enemy");
-            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 20.0f}, "Enemy");
-            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 30.0f}, "Enemy");
-            GameObjectFactory::createEnemy(registry, gameData, {52.0f, 0, 40.0f}, "Enemy");
         }
 
       public:
@@ -80,8 +75,12 @@ namespace sage
         {
         }
 
-        WaveState(entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
-            : StateMachine(_registry, _gameData)
+        WaveState(
+            entt::registry* _registry,
+            GameData* _gameData,
+            entt::entity _gameEntity,
+            GameModeStateController* _stateController)
+            : StateMachine(_registry, _gameData), stateController(_stateController)
         {
             // Preload model(s)
             // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
@@ -92,6 +91,7 @@ namespace sage
 
     class GameModeStateController::CombatState : public StateMachine
     {
+        GameModeStateController* stateController;
 
       public:
         void Update(entt::entity entity) override
@@ -112,8 +112,12 @@ namespace sage
         {
         }
 
-        CombatState(entt::registry* _registry, GameData* _gameData, entt::entity _gameEntity)
-            : StateMachine(_registry, _gameData)
+        CombatState(
+            entt::registry* _registry,
+            GameData* _gameData,
+            entt::entity _gameEntity,
+            GameModeStateController* _stateController)
+            : StateMachine(_registry, _gameData), stateController(_stateController)
         {
         }
     };
@@ -122,8 +126,7 @@ namespace sage
 
     void GameModeStateController::StartCombat()
     {
-        auto& gameState = registry->get<GameState>(gameEntity);
-        gameState.ChangeState(gameEntity, GameStateEnum::Combat);
+        ChangeState(gameEntity, GameStateEnum::Combat);
     }
 
     void GameModeStateController::Update()
@@ -141,9 +144,9 @@ namespace sage
     GameModeStateController::GameModeStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry), gameEntity(_registry->create())
     {
-        states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _gameData, gameEntity);
-        states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _gameData, gameEntity);
-        states[GameStateEnum::Combat] = std::make_unique<CombatState>(registry, _gameData, gameEntity);
+        states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _gameData, gameEntity, this);
+        states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _gameData, gameEntity, this);
+        states[GameStateEnum::Combat] = std::make_unique<CombatState>(registry, _gameData, gameEntity, this);
         registry->emplace<GameState>(gameEntity);
     }
 } // namespace sage

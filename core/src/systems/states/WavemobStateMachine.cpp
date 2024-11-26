@@ -19,12 +19,12 @@ namespace sage
 {
     class WavemobStateController::DefaultState : public StateMachine
     {
+        WavemobStateController* stateController;
 
       public:
         void OnDeath(entt::entity entity)
         {
-            auto& state = registry->get<WavemobState>(entity);
-            state.ChangeState(entity, WavemobStateEnum::Dying);
+            stateController->ChangeState(entity, WavemobStateEnum::Dying);
         }
 
         void OnHit(AttackData attackData)
@@ -35,7 +35,7 @@ namespace sage
             auto& state = registry->get<WavemobState>(attackData.hit);
             if (state.GetCurrentState() != WavemobStateEnum::Dying)
             {
-                state.ChangeState(attackData.hit, WavemobStateEnum::Combat);
+                stateController->ChangeState(attackData.hit, WavemobStateEnum::Combat);
             }
         }
 
@@ -67,7 +67,8 @@ namespace sage
 
         ~DefaultState() override = default;
 
-        DefaultState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
+        DefaultState(entt::registry* registry, GameData* _gameData, WavemobStateController* _stateController)
+            : StateMachine(registry, _gameData), stateController(_stateController)
         {
         }
     };
@@ -76,10 +77,11 @@ namespace sage
 
     class WavemobStateController::TargetOutOfRangeState : public StateMachine
     {
+        WavemobStateController* stateController;
+
         void onTargetReached(entt::entity self)
         {
-            auto& state = registry->get<WavemobState>(self);
-            state.ChangeState(self, WavemobStateEnum::Combat);
+            stateController->ChangeState(self, WavemobStateEnum::Combat);
         }
 
         bool isTargetOutOfSight(entt::entity self)
@@ -125,11 +127,10 @@ namespace sage
       public:
         void Update(entt::entity entity) override
         {
-            auto& combatable = registry->get<CombatableActor>(entity);
+            const auto& combatable = registry->get<CombatableActor>(entity);
             if (combatable.target == entt::null || isTargetOutOfSight(entity))
             {
-                auto& state = registry->get<WavemobState>(entity);
-                state.ChangeState(entity, WavemobStateEnum::Default);
+                stateController->ChangeState(entity, WavemobStateEnum::Default);
             }
         }
 
@@ -160,7 +161,9 @@ namespace sage
 
         ~TargetOutOfRangeState() override = default;
 
-        TargetOutOfRangeState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
+        TargetOutOfRangeState(
+            entt::registry* registry, GameData* _gameData, WavemobStateController* _stateController)
+            : StateMachine(registry, _gameData), stateController(_stateController)
         {
         }
     };
@@ -169,6 +172,8 @@ namespace sage
 
     class WavemobStateController::CombatState : public StateMachine
     {
+        WavemobStateController* stateController;
+
         void onTargetDeath(entt::entity self, entt::entity target)
         {
         }
@@ -186,7 +191,7 @@ namespace sage
             auto& state = registry->get<WavemobState>(self);
             if (!checkInCombat(self))
             {
-                state.ChangeState(self, WavemobStateEnum::Default);
+                stateController->ChangeState(self, WavemobStateEnum::Default);
                 return;
             }
             auto& actorTrans = registry->get<sgTransform>(self);
@@ -196,7 +201,7 @@ namespace sage
             // find the "next best square" from current position
             if (distance >= 8.0f)
             {
-                state.ChangeState(self, WavemobStateEnum::TargetOutOfRange);
+                stateController->ChangeState(self, WavemobStateEnum::TargetOutOfRange);
                 return;
             }
         }
@@ -215,7 +220,8 @@ namespace sage
 
         ~CombatState() override = default;
 
-        CombatState(entt::registry* registry, GameData* _gameData) : StateMachine(registry, _gameData)
+        CombatState(entt::registry* registry, GameData* _gameData, WavemobStateController* _stateController)
+            : StateMachine(registry, _gameData), stateController(_stateController)
         {
         }
     };
@@ -224,6 +230,7 @@ namespace sage
 
     class WavemobStateController::DyingState : public StateMachine
     {
+        WavemobStateController* stateController;
 
         void destroyEntity(entt::entity self)
         {
@@ -264,7 +271,8 @@ namespace sage
 
         ~DyingState() override = default;
 
-        DyingState(entt::registry* registry, GameData* gameData) : StateMachine(registry, gameData)
+        DyingState(entt::registry* registry, GameData* gameData, WavemobStateController* _stateController)
+            : StateMachine(registry, gameData), stateController(_stateController)
         {
         }
     };
@@ -273,20 +281,18 @@ namespace sage
 
     void WavemobStateController::Update()
     {
-        auto view = registry->view<WavemobState>();
-        for (const auto& entity : view)
+        for (const auto view = registry->view<WavemobState>(); const auto& entity : view)
         {
-            auto state = registry->get<WavemobState>(entity).GetCurrentState();
+            const auto state = registry->get<WavemobState>(entity).GetCurrentState();
             GetSystem(state)->Update(entity);
         }
     }
 
     void WavemobStateController::Draw3D()
     {
-        auto view = registry->view<WavemobState>();
-        for (const auto& entity : view)
+        for (const auto view = registry->view<WavemobState>(); const auto& entity : view)
         {
-            auto state = registry->get<WavemobState>(entity).GetCurrentState();
+            const auto state = registry->get<WavemobState>(entity).GetCurrentState();
             GetSystem(state)->Draw3D(entity);
         }
     }
@@ -294,9 +300,10 @@ namespace sage
     WavemobStateController::WavemobStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry)
     {
-        states[WavemobStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData);
-        states[WavemobStateEnum::TargetOutOfRange] = std::make_unique<TargetOutOfRangeState>(_registry, _gameData);
-        states[WavemobStateEnum::Combat] = std::make_unique<CombatState>(_registry, _gameData);
-        states[WavemobStateEnum::Dying] = std::make_unique<DyingState>(_registry, _gameData);
+        states[WavemobStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData, this);
+        states[WavemobStateEnum::TargetOutOfRange] =
+            std::make_unique<TargetOutOfRangeState>(_registry, _gameData, this);
+        states[WavemobStateEnum::Combat] = std::make_unique<CombatState>(_registry, _gameData, this);
+        states[WavemobStateEnum::Dying] = std::make_unique<DyingState>(_registry, _gameData, this);
     }
 } // namespace sage
