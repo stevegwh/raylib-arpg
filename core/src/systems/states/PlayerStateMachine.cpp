@@ -104,8 +104,14 @@ namespace sage
 
         void onDestinationUnreachable(const entt::entity self, const Vector3 requestedPos) const
         {
-            stateController->ChangeState<DestinationUnreachableState, Vector3, PlayerStateEnum>(
-                self, PlayerStateEnum::DestinationUnreachable, requestedPos, PlayerStateEnum::FollowingLeader);
+            auto& moveable = registry->get<MoveableActor>(self);
+            // You try to go here and back but without re-setting followTarget
+            stateController->ChangeState<DestinationUnreachableState, entt::entity, Vector3, PlayerStateEnum>(
+                self,
+                PlayerStateEnum::DestinationUnreachable,
+                moveable.followTarget->targetActor,
+                requestedPos,
+                PlayerStateEnum::FollowingLeader);
         }
 
         void onMovementCancelled(const entt::entity self) const
@@ -147,13 +153,15 @@ namespace sage
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE >
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
+                auto followTarget = moveable.followTarget->targetActor;
                 stateController->ChangeState<WaitingForLeaderState, entt::entity>(
-                    self, PlayerStateEnum::WaitingForLeader, moveable.followTarget->targetActor);
+                    self, PlayerStateEnum::WaitingForLeader, followTarget);
             }
         }
 
         void OnStateEnter(const entt::entity self, entt::entity followTarget)
         {
+            assert(followTarget != entt::null);
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.emplace(registry, self, followTarget);
 
@@ -170,10 +178,6 @@ namespace sage
             entt::sink sink4{moveable.onDestinationUnreachable};
             state.AddConnection(sink4.connect<&FollowingLeaderState::onDestinationUnreachable>(this));
             onTargetPathChanged(self, target);
-        }
-
-        void OnStateEnter(const entt::entity self) override
-        {
         }
 
         void OnStateExit(const entt::entity self) override
@@ -219,8 +223,9 @@ namespace sage
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE <
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
+                auto followTarget = moveable.followTarget->targetActor;
                 stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                    self, PlayerStateEnum::FollowingLeader, moveable.followTarget->targetActor);
+                    self, PlayerStateEnum::FollowingLeader, followTarget);
             }
         }
 
@@ -366,6 +371,7 @@ namespace sage
         PlayerStateController* stateController;
         struct StateData
         {
+            entt::entity followTarget{}; // optional
             Vector3 originalDestination{};
             PlayerStateEnum previousState{};
             double timeStart{};
@@ -381,14 +387,33 @@ namespace sage
                 data[entity].timeStart = GetTime();
                 if (gameData->actorMovementSystem->TryPathfindToLocation(entity, data[entity].originalDestination))
                 {
-                    stateController->ChangeState(entity, data[entity].previousState);
+                    if (data[entity].previousState == PlayerStateEnum::FollowingLeader)
+                    {
+                        stateController->ChangeState<FollowingLeaderState, entt::entity>(
+                            entity, data[entity].previousState, data[entity].followTarget);
+                    }
+                    else
+                    {
+                        stateController->ChangeState(entity, data[entity].previousState);
+                    }
                 }
             }
         }
 
+        void OnStateEnter(
+            entt::entity entity,
+            entt::entity followTarget,
+            Vector3 originalDestination,
+            PlayerStateEnum previousState)
+        {
+            assert(previousState == PlayerStateEnum::FollowingLeader);
+            data[entity] = {followTarget, originalDestination, previousState, GetTime(), 0.5f};
+        }
+
         void OnStateEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
         {
-            data[entity] = {originalDestination, previousState, GetTime(), 0.5f};
+            assert(previousState != PlayerStateEnum::FollowingLeader);
+            data[entity] = {entt::null, originalDestination, previousState, GetTime(), 0.5f};
         }
 
         void OnStateExit(entt::entity self) override
