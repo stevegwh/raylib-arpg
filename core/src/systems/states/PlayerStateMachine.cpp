@@ -141,18 +141,15 @@ namespace sage
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE >
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
-                registry->emplace_or_replace<FollowTargetParams>(self, moveable.followTarget->targetActor);
-                stateController->ChangeState(self, PlayerStateEnum::WaitingForLeader);
+                stateController->ChangeState<WaitingForLeaderState, entt::entity>(
+                    self, PlayerStateEnum::WaitingForLeader, moveable.followTarget->targetActor);
             }
         }
 
-        void OnStateEnter(const entt::entity self) override
+        void OnStateEnter(const entt::entity self, entt::entity followTarget)
         {
-            const auto& followTargetParams = registry->get<FollowTargetParams>(self);
-
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(registry, self, followTargetParams.targetActor);
-            registry->erase<FollowTargetParams>(self);
+            moveable.followTarget.emplace(registry, self, followTarget);
 
             const auto target = moveable.followTarget->targetActor;
             auto& targetMoveable = registry->get<MoveableActor>(target);
@@ -166,6 +163,10 @@ namespace sage
             state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
 
             onTargetPosUpdate(self, target);
+        }
+
+        void OnStateEnter(const entt::entity self) override
+        {
         }
 
         void OnStateExit(const entt::entity self) override
@@ -211,20 +212,22 @@ namespace sage
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE <
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
-                registry->emplace_or_replace<FollowTargetParams>(self, moveable.followTarget->targetActor);
-                stateController->ChangeState(self, PlayerStateEnum::FollowingLeader);
+                stateController->ChangeState<FollowingLeaderState, entt::entity>(
+                    self, PlayerStateEnum::FollowingLeader, moveable.followTarget->targetActor);
             }
+        }
+
+        void OnStateEnter(const entt::entity self, entt::entity followTarget)
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.followTarget.emplace(registry, self, followTarget);
+            auto& state = registry->get<PlayerState>(self);
+            entt::sink sink{moveable.onMovementCancel};
+            state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
         }
 
         void OnStateEnter(const entt::entity self) override
         {
-            const auto& followTargetParams = registry->get<FollowTargetParams>(self);
-            auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(registry, self, followTargetParams.targetActor);
-            registry->erase<FollowTargetParams>(self);
-            auto& state = registry->get<PlayerState>(self);
-            entt::sink sink{moveable.onMovementCancel};
-            state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
         }
 
         void OnStateExit(const entt::entity self) override
@@ -268,15 +271,12 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
 
             auto target = self;
-            auto group = gameData->partySystem->GetGroup(self);
-            for (const auto& entity : group)
+            for (const auto group = gameData->partySystem->GetGroup(self); const auto& entity : group)
             {
                 if (entity == self) continue;
-                registry->emplace_or_replace<FollowTargetParams>(entity, target);
                 gameData->actorMovementSystem->CancelMovement(entity);
-                // TODO: We need to be able to call FollowingLeaderState::OnStateEnter(entity, target); directly.
-                // Rather than storing a component and retrieving it later (way, way too messy).
-                stateController->ChangeState(entity, PlayerStateEnum::FollowingLeader);
+                stateController->ChangeState<FollowingLeaderState, entt::entity>(
+                    entity, PlayerStateEnum::FollowingLeader, target);
             }
 
             auto& moveable = registry->get<MoveableActor>(self);
@@ -302,7 +302,7 @@ namespace sage
 
     // ----------------------------
 
-    class PlayerStateController::MovingToTalkToNPCState : public StateMachine
+    class PlayerStateController::MovingToTalkToNPCState final : public StateMachine
     {
         PlayerStateController* stateController;
         void onMovementCancelled(const entt::entity self) const
@@ -385,11 +385,6 @@ namespace sage
       public:
         void Update(entt::entity self) override
         {
-            // if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-            // {
-            //     auto& playerState = registry->get<PlayerState>(self);
-            //     playerState.ChangeState(self, PlayerStateEnum::Default);
-            // }
         }
 
         void OnStateEnter(entt::entity self) override
