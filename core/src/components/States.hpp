@@ -12,9 +12,6 @@ namespace sage
         std::vector<entt::connection> currentStateConnections;
 
       public:
-        // self, new state
-        entt::sigh<void(entt::entity, StateEnum)> onStateChanged;
-
         void AddConnection(entt::connection newConnection)
         {
             currentStateConnections.push_back(newConnection);
@@ -26,13 +23,6 @@ namespace sage
             {
                 connection.release();
             }
-        }
-
-        void ChangeState(entt::entity self, StateEnum newState)
-        {
-            // RemoveAllConnections();
-            onStateChanged.publish(self, newState);
-            // currentState = newState;
         }
 
         void SetState(StateEnum newState)
