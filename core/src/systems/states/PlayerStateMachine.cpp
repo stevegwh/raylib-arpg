@@ -172,12 +172,11 @@ namespace sage
 
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink1{targetMoveable.onDestinationReached};
-            state.currentStateConnections.push_back(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
+            state.AddConnection(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
             entt::sink sink2{moveable.followTarget->onPathChanged};
-            state.currentStateConnections.push_back(sink2.connect<&FollowingLeaderState::onTargetPosUpdate>(this));
+            state.AddConnection(sink2.connect<&FollowingLeaderState::onTargetPosUpdate>(this));
             entt::sink sink3{moveable.onMovementCancel};
-            state.currentStateConnections.push_back(
-                sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
+            state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
 
             onTargetPosUpdate(self, target);
         }
@@ -246,8 +245,7 @@ namespace sage
             registry->erase<FollowTargetParams>(self);
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveable.onMovementCancel};
-            state.currentStateConnections.push_back(
-                sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
+            state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
         }
 
         void OnStateExit(const entt::entity self) override
@@ -310,10 +308,9 @@ namespace sage
             auto& moveable = registry->get<MoveableActor>(self);
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveable.onDestinationReached};
-            state.currentStateConnections.push_back(sink.connect<&MovingToLocationState::onTargetReached>(this));
+            state.AddConnection(sink.connect<&MovingToLocationState::onTargetReached>(this));
             entt::sink sink2{moveable.onMovementCancel};
-            state.currentStateConnections.push_back(
-                sink2.connect<&MovingToLocationState::onMovementCancelled>(this));
+            state.AddConnection(sink2.connect<&MovingToLocationState::onMovementCancelled>(this));
         }
 
         void OnStateExit(entt::entity self) override
@@ -369,10 +366,9 @@ namespace sage
 
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveable.onDestinationReached};
-            state.currentStateConnections.push_back(sink.connect<&MovingToTalkToNPCState::onTargetReached>(this));
+            state.AddConnection(sink.connect<&MovingToTalkToNPCState::onTargetReached>(this));
             entt::sink sink2{moveable.onMovementCancel};
-            state.currentStateConnections.push_back(
-                sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this));
+            state.AddConnection(sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this));
         }
 
         void OnStateExit(entt::entity self) override
@@ -501,16 +497,14 @@ namespace sage
 
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveableActor.onDestinationReached};
-            state.currentStateConnections.push_back(
-                sink.connect<&MovingToAttackEnemyState::onTargetReached>(this));
+            state.AddConnection(sink.connect<&MovingToAttackEnemyState::onTargetReached>(this));
 
             auto& combatable = registry->get<CombatableActor>(self);
             assert(combatable.target != entt::null);
 
             auto& controllable = registry->get<ControllableActor>(self);
             entt::sink attackCancelSink{controllable.onFloorClick};
-            state.currentStateConnections.push_back(
-                attackCancelSink.connect<&MovingToAttackEnemyState::onAttackCancelled>(this));
+            state.AddConnection(attackCancelSink.connect<&MovingToAttackEnemyState::onAttackCancelled>(this));
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
@@ -590,12 +584,11 @@ namespace sage
 
             auto& state = registry->get<PlayerState>(entity);
             entt::sink sink{combatable.onTargetDeath};
-            state.currentStateConnections.push_back(sink.connect<&CombatState::onTargetDeath>(this));
+            state.AddConnection(sink.connect<&CombatState::onTargetDeath>(this));
 
             auto& controllable = registry->get<ControllableActor>(entity);
             entt::sink attackCancelSink{controllable.onFloorClick};
-            state.currentStateConnections.push_back(
-                attackCancelSink.connect<&CombatState::onAttackCancelled>(this));
+            state.AddConnection(attackCancelSink.connect<&CombatState::onAttackCancelled>(this));
         }
 
         void OnStateExit(entt::entity entity) override

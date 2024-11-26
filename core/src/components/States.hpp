@@ -9,11 +9,16 @@ namespace sage
     class BaseState
     {
         StateEnum currentState;
+        std::vector<entt::connection> currentStateConnections;
 
       public:
         // self, new state
         entt::sigh<void(entt::entity, StateEnum)> onStateChanged;
-        std::vector<entt::connection> currentStateConnections;
+
+        void AddConnection(entt::connection newConnection)
+        {
+            currentStateConnections.push_back(newConnection);
+        }
 
         void RemoveAllConnections()
         {
@@ -57,6 +62,7 @@ namespace sage
         InDialog,
         FollowingLeader,
         WaitingForLeader,
+        DestinationUnreachable,
         Combat
     };
 
