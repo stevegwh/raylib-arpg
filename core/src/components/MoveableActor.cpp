@@ -11,21 +11,10 @@
 namespace sage
 {
 
-    void FollowTarget::checkTargetPos()
+    void FollowTarget::changePath() const
     {
-        // Reacts to the target transform's position update, but does fire each time for performance reasons.
-        auto current = GetTime();
-        if (current > timeStarted + timerThreshold)
-        {
-            const auto& targetTrans = registry->get<sgTransform>(targetActor);
-            if (const auto targetCurrentPos = targetTrans.GetWorldPos();
-                !AlmostEquals(targetCurrentPos, targetPrevPos))
-            {
-                targetPrevPos = targetCurrentPos;
-                onPositionUpdate.publish(self, targetActor);
-            }
-            timeStarted = current;
-        }
+        // TODO: Should replace with a hook
+        onPathChanged.publish(self, targetActor);
     }
 
     FollowTarget::~FollowTarget()
@@ -39,14 +28,14 @@ namespace sage
     {
         auto& targetTrans = _registry->get<sgTransform>(_targetActor);
         entt::sink sink{targetTrans.onPositionUpdate};
-        onTargetPosUpdateCnx = sink.connect<&FollowTarget::checkTargetPos>(this);
+        onTargetPosUpdateCnx = sink.connect<&FollowTarget::changePath>(this);
     }
 
     FollowTarget::FollowTarget(const FollowTargetParams& params)
         : registry(params.registry), self(params.self), targetActor(params.targetActor)
     {
-        auto& targetTrans = params.registry->get<sgTransform>(params.targetActor);
-        entt::sink sink{targetTrans.onPositionUpdate};
-        onTargetPosUpdateCnx = sink.connect<&FollowTarget::checkTargetPos>(this);
+        auto& targetMoveable = params.registry->get<MoveableActor>(params.targetActor);
+        entt::sink sink{targetMoveable.onPathChanged};
+        onTargetPosUpdateCnx = sink.connect<&FollowTarget::changePath>(this);
     }
 } // namespace sage

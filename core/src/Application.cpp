@@ -135,7 +135,7 @@ namespace sage
         ClearBackground(BLANK);
         BeginMode3D(*scene->data->camera->getRaylibCam());
         scene->Draw3D();
-        // scene->DrawDebug3D();
+        scene->DrawDebug3D();
         EndMode3D();
         EndTextureMode();
 

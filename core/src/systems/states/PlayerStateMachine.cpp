@@ -102,6 +102,8 @@ namespace sage
 
     // ----------------------------
 
+    static constexpr int FOLLOW_DISTANCE = 15;
+
     class PlayerStateController::FollowingLeaderState final : public StateMachine
     {
 
@@ -113,8 +115,13 @@ namespace sage
 
         void onTargetPosUpdate(const entt::entity self, const entt::entity target) const
         {
-            const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
-            gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
+            const auto& trans = registry->get<sgTransform>(self);
+            const auto& targetTrans = registry->get<sgTransform>(target);
+            const auto& targetMoveable = registry->get<MoveableActor>(target);
+            auto dest = targetMoveable.IsMoving() ? targetMoveable.GetDestination() : targetTrans.GetWorldPos();
+            const auto dir = Vector3Normalize(Vector3Subtract(dest, trans.GetWorldPos()));
+            dest = Vector3Subtract(dest, Vector3MultiplyByValue(dir, FOLLOW_DISTANCE));
+            gameData->actorMovementSystem->PathfindToLocation(self, dest);
         }
 
         void onTargetReached(const entt::entity self) const
@@ -138,8 +145,8 @@ namespace sage
             const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget->targetActor);
 
             // If we are closer to our destination than the leader is, then wait.
-            if (followMoveable.isMoving() &&
-                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) >
+            if (followMoveable.IsMoving() &&
+                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE >
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
                 registry->emplace_or_replace<FollowTargetParams>(
@@ -162,17 +169,17 @@ namespace sage
 
             const auto target = moveable.followTarget->targetActor;
             auto& targetMoveable = registry->get<MoveableActor>(target);
-            const auto& targetPos = registry->get<sgTransform>(target).GetWorldPos();
-            gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
 
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink1{targetMoveable.onDestinationReached};
             state.currentStateConnections.push_back(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
-            entt::sink sink2{moveable.followTarget->onPositionUpdate};
+            entt::sink sink2{moveable.followTarget->onPathChanged};
             state.currentStateConnections.push_back(sink2.connect<&FollowingLeaderState::onTargetPosUpdate>(this));
             entt::sink sink3{moveable.onMovementCancel};
             state.currentStateConnections.push_back(
                 sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
+
+            onTargetPosUpdate(self, target);
         }
 
         void OnStateExit(const entt::entity self) override
@@ -217,8 +224,8 @@ namespace sage
             const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget->targetActor);
 
             // Follow target is now closer to its destination than we are, so we can proceed.
-            if (followMoveable.isMoving() &&
-                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) <
+            if (followMoveable.IsMoving() &&
+                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE <
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
                 registry->emplace_or_replace<FollowTargetParams>(
