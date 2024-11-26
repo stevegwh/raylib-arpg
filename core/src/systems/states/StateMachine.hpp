@@ -52,7 +52,7 @@ namespace sage
         virtual void Draw3D(entt::entity entity){};
     };
 
-    template <typename Derived, typename StateName, typename StateEnum>
+    template <typename StateName, typename StateEnum>
     class StateMachineController
     {
       protected:

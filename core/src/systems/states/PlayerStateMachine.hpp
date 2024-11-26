@@ -9,8 +9,7 @@ namespace sage
 {
     class GameData;
 
-    class PlayerStateController final
-        : public StateMachineController<PlayerStateController, PlayerState, PlayerStateEnum>
+    class PlayerStateController final : public StateMachineController<PlayerState, PlayerStateEnum>
     {
         class DefaultState;
         class MovingToLocationState;

@@ -30,12 +30,4 @@ namespace sage
         entt::sink sink{targetTrans.onPositionUpdate};
         onTargetPosUpdateCnx = sink.connect<&FollowTarget::changePath>(this);
     }
-
-    FollowTarget::FollowTarget(const FollowTargetParams& params)
-        : registry(params.registry), self(params.self), targetActor(params.targetActor)
-    {
-        auto& targetMoveable = params.registry->get<MoveableActor>(params.targetActor);
-        entt::sink sink{targetMoveable.onPathChanged};
-        onTargetPosUpdateCnx = sink.connect<&FollowTarget::changePath>(this);
-    }
 } // namespace sage

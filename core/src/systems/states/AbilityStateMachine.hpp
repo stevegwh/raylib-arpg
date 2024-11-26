@@ -11,7 +11,7 @@ namespace sage
     class GameData;
     class VisualFX;
 
-    class AbilityStateController : StateMachineController<AbilityStateController, AbilityState, AbilityStateEnum>
+    class AbilityStateController : StateMachineController<AbilityState, AbilityStateEnum>
     {
         class IdleState;
         class AwaitingExecutionState;
