@@ -30,9 +30,9 @@ namespace sage
 
         void ChangeState(entt::entity self, StateEnum newState)
         {
-            RemoveAllConnections();
+            // RemoveAllConnections();
             onStateChanged.publish(self, newState);
-            currentState = newState;
+            // currentState = newState;
         }
 
         void SetState(StateEnum newState)
@@ -101,20 +101,6 @@ namespace sage
     {
       public:
         WavemobState() : BaseState(WavemobStateEnum::Default)
-        {
-        }
-    };
-
-    enum class TowerStateEnum
-    {
-        Default,
-        Combat
-    };
-
-    class TowerState : public BaseState<TowerState, TowerStateEnum>
-    {
-      public:
-        TowerState() : BaseState(TowerStateEnum::Default)
         {
         }
     };
