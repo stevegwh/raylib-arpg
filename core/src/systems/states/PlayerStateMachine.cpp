@@ -149,8 +149,7 @@ namespace sage
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE >
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
-                registry->emplace_or_replace<FollowTargetParams>(
-                    self, registry, self, moveable.followTarget->targetActor);
+                registry->emplace_or_replace<FollowTargetParams>(self, moveable.followTarget->targetActor);
                 auto& state = registry->get<PlayerState>(self);
                 state.ChangeState(self, PlayerStateEnum::WaitingForLeader);
             }
@@ -164,7 +163,7 @@ namespace sage
             const auto& followTargetParams = registry->get<FollowTargetParams>(self);
 
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(followTargetParams);
+            moveable.followTarget.emplace(registry, self, followTargetParams.targetActor);
             registry->erase<FollowTargetParams>(self);
 
             const auto target = moveable.followTarget->targetActor;
@@ -227,8 +226,7 @@ namespace sage
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE <
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
-                registry->emplace_or_replace<FollowTargetParams>(
-                    self, registry, self, moveable.followTarget->targetActor);
+                registry->emplace_or_replace<FollowTargetParams>(self, moveable.followTarget->targetActor);
                 auto& state = registry->get<PlayerState>(self);
                 state.ChangeState(self, PlayerStateEnum::FollowingLeader);
             }
@@ -241,7 +239,7 @@ namespace sage
 #endif
             const auto& followTargetParams = registry->get<FollowTargetParams>(self);
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(followTargetParams);
+            moveable.followTarget.emplace(registry, self, followTargetParams.targetActor);
             registry->erase<FollowTargetParams>(self);
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveable.onMovementCancel};
@@ -299,9 +297,11 @@ namespace sage
             for (const auto& entity : group)
             {
                 if (entity == self) continue;
-                registry->emplace_or_replace<FollowTargetParams>(entity, registry, entity, target);
+                registry->emplace_or_replace<FollowTargetParams>(entity, target);
                 gameData->actorMovementSystem->CancelMovement(entity);
                 auto& playerState = registry->get<PlayerState>(entity);
+                // TODO: We need to be able to call FollowingLeaderState::OnStateEnter(entity, target); directly.
+                // Rather than storing a component and retrieving it later (way, way too messy).
                 playerState.ChangeState(entity, PlayerStateEnum::FollowingLeader);
             }
 

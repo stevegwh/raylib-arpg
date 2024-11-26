@@ -16,8 +16,7 @@ namespace sage
 {
     class GameData;
 
-    class GameModeStateController
-        : public StateMachineController<GameModeStateController, GameState, GameStateEnum>
+    class GameModeStateController : public StateMachineController<GameState, GameStateEnum>
     {
         entt::entity gameEntity;
 

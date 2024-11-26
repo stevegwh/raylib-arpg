@@ -10,8 +10,7 @@ namespace sage
 {
     class GameData;
 
-    class WavemobStateController
-        : public StateMachineController<WavemobStateController, WavemobState, WavemobStateEnum>
+    class WavemobStateController : public StateMachineController<WavemobState, WavemobStateEnum>
     {
         class DefaultState;
         class TargetOutOfRangeState;

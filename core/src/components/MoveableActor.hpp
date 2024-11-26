@@ -19,11 +19,8 @@ namespace sage
     // Params we can use to transition from one state to another
     struct FollowTargetParams
     {
-        entt::registry* registry;
-        entt::entity self;
         entt::entity targetActor;
-        FollowTargetParams(entt::registry* _registry, entt::entity _self, entt::entity _targetActor)
-            : registry(_registry), self(_self), targetActor(_targetActor)
+        FollowTargetParams(entt::entity _targetActor) : targetActor(_targetActor)
         {
         }
     };
@@ -45,7 +42,6 @@ namespace sage
 
         ~FollowTarget();
         FollowTarget(entt::registry* _registry, entt::entity _self, entt::entity _targetActor);
-        explicit FollowTarget(const FollowTargetParams& params);
     };
 
     struct MoveableActorCollision
