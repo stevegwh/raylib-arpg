@@ -16,14 +16,14 @@
 namespace sage
 {
 
-    // Params we can use to transition from one state to another
-    struct FollowTargetParams
-    {
-        entt::entity targetActor;
-        FollowTargetParams(entt::entity _targetActor) : targetActor(_targetActor)
-        {
-        }
-    };
+    // // Params we can use to transition from one state to another
+    // struct FollowTargetParams
+    // {
+    //     entt::entity targetActor;
+    //     FollowTargetParams(entt::entity _targetActor) : targetActor(_targetActor)
+    //     {
+    //     }
+    // };
 
     class FollowTarget
     {

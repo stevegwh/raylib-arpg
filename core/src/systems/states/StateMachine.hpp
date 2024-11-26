@@ -67,21 +67,31 @@ namespace sage
 
         void OnComponentRemoved(entt::entity entity)
         {
-            auto& state = registry->get<StateName>(entity);
-            entt::sink sink{state.onStateChanged};
-            sink.template disconnect<&StateMachineController::ChangeState>(this);
-
-            // TODO: Below seems like a bad idea
-            // GetSystem(state.GetCurrentState())->OnStateExit(entity); // Might not be a good idea if destroyed
         }
 
         void OnComponentAdded(entt::entity entity)
         {
             auto& state = registry->get<StateName>(entity);
-            entt::sink sink{state.onStateChanged};
-            sink.template connect<&StateMachineController::ChangeState>(this);
-
             GetSystem(state.GetCurrentState())->OnStateEnter(entity);
+        }
+
+        // NB: Passes all arguments by value
+        template <typename NewStateClass, typename... StateEnterArgs>
+        void ChangeState(entt::entity entity, StateEnum newState, StateEnterArgs... args)
+        // template <typename... StateEnterArgs>
+        // void ChangeState(entt::entity entity, StateEnum newState, const StateEnterArgs&... args)
+        {
+            auto& oldState = registry->get<StateName>(entity);
+            StateEnum oldStateEnum = registry->get<StateName>(entity).GetCurrentState();
+            if (GetSystem(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
+            {
+                return;
+            }
+            oldState.RemoveAllConnections();
+            GetSystem(oldStateEnum)->OnStateExit(entity);
+            oldState.SetState(newState);
+            static_cast<NewStateClass*>(GetSystem(newState))
+                ->OnStateEnter(entity, args...); // Allows for calls to overloaded but non-virtual functions
         }
 
         void ChangeState(entt::entity entity, StateEnum newState)
