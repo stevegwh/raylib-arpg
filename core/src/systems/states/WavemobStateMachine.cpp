@@ -52,7 +52,7 @@ namespace sage
             auto& state = registry->get<WavemobState>(self);
             auto& combatable = registry->get<CombatableActor>(self);
             entt::sink sink{combatable.onHit};
-            state.currentStateConnections.push_back(sink.connect<&DefaultState::OnHit>(this));
+            state.AddConnection(sink.connect<&DefaultState::OnHit>(this));
             // Persistent connections
             entt::sink deathSink{combatable.onDeath};
             deathSink.connect<&DefaultState::OnDeath>(this);
@@ -145,11 +145,9 @@ namespace sage
             auto& state = registry->get<WavemobState>(self);
 
             entt::sink finishMovementSink{moveable.onDestinationReached};
-            state.currentStateConnections.push_back(
-                finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this));
+            state.AddConnection(finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this));
             entt::sink posUpdateSink{moveable.followTarget->onPathChanged};
-            state.currentStateConnections.push_back(
-                posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this));
+            state.AddConnection(posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this));
 
             onTargetPosUpdate(self, combatable.target);
         }
@@ -251,7 +249,7 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             auto& state = registry->get<WavemobState>(self);
             entt::sink sink{animation.onAnimationEnd};
-            state.currentStateConnections.push_back(sink.connect<&DyingState::destroyEntity>(this));
+            state.AddConnection(sink.connect<&DyingState::destroyEntity>(this));
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
