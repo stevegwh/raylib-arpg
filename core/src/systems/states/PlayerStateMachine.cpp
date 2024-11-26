@@ -391,6 +391,34 @@ namespace sage
 
     // ----------------------------
 
+    class PlayerStateController::DestinationUnreachableState : public StateMachine
+    {
+
+      public:
+        void OnStateEnter(entt::entity self) override
+        {
+#ifdef SAGE_DEBUG
+            std::cout << std::format("Object {}: Entered DestinationUnreachableState. \n", static_cast<int>(self));
+#endif
+        }
+
+        void OnStateExit(entt::entity self) override
+        {
+#ifdef SAGE_DEBUG
+            std::cout << std::format("Object {}: Exited DestinationUnreachableState. \n", static_cast<int>(self));
+#endif
+        }
+
+        ~DestinationUnreachableState() override = default;
+
+        DestinationUnreachableState(entt::registry* _registry, GameData* _gameData)
+            : StateMachine(_registry, _gameData)
+        {
+        }
+    };
+
+    // ----------------------------
+
     class PlayerStateController::InDialogState : public StateMachine
     {
 
@@ -621,5 +649,7 @@ namespace sage
         states[PlayerStateEnum::FollowingLeader] = std::make_unique<FollowingLeaderState>(_registry, _gameData);
         states[PlayerStateEnum::MovingToLocation] = std::make_unique<MovingToLocationState>(_registry, _gameData);
         states[PlayerStateEnum::WaitingForLeader] = std::make_unique<WaitingForLeaderState>(_registry, _gameData);
+        states[PlayerStateEnum::DestinationUnreachable] =
+            std::make_unique<DestinationUnreachableState>(_registry, _gameData);
     }
 } // namespace sage

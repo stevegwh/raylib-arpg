@@ -49,12 +49,7 @@ namespace sage
 
         if (!navigationGridSystem->CheckWithinGridBounds(destination))
         {
-            // TODO: move to a "OnMoveFailed" function.
-            // Movement fails should probably just be an event that is reacted to
-            if (moveable.destUnreachableBehaviour == DestinationUnreachableBehaviour::CANCEL)
-            {
-                CancelMovement(entity);
-            }
+            moveable.onDestinationUnreachable.publish(entity);
             std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
             return;
         }
@@ -96,10 +91,7 @@ namespace sage
         else
         {
             std::cout << "ActorMovementSystem: Destination unreachable \n";
-            if (moveable.destUnreachableBehaviour == DestinationUnreachableBehaviour::CANCEL)
-            {
-                CancelMovement(entity);
-            }
+            moveable.onDestinationUnreachable.publish(entity);
         }
 
         navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
@@ -118,13 +110,9 @@ namespace sage
         {
             auto& actor = registry->get<MoveableActor>(entity);
             if (actor.path.empty()) continue;
-            auto& transform = registry->get<sgTransform>(entity);
-            if (!actor.path.empty())
+            for (auto p : actor.path)
             {
-                for (auto p : actor.path)
-                {
-                    DrawCube({p.x, p.y + 1, p.z}, 1, 1, 1, GREEN);
-                }
+                DrawCube({p.x, p.y + 1, p.z}, 1, 1, 1, GREEN);
             }
         }
 
@@ -214,10 +202,8 @@ namespace sage
 
         // Going same direction, ignore.
         auto dot = Vector3DotProduct(transform.direction, hitTransform.direction);
-
         if (dot >= 0)
         {
-
             return false;
         }
 
@@ -226,9 +212,6 @@ namespace sage
              hitCell->occupant != moveableActor.followTarget->targetActor) &&
             moveableActor.hitEntityId != entity)
         {
-
-            // If we hit another moveable and they haven't "collided" with us, then wait?
-
             if (!AlmostEquals(hitTransform.GetWorldPos(), moveableActor.hitLastPos))
             {
                 moveableActor.hitEntityId = hitCell->occupant;
@@ -239,7 +222,7 @@ namespace sage
                 if (Vector3Distance(hitTransform.GetWorldPos(), transform.GetWorldPos()) <
                     Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
                 {
-                    std::cout << "Collided with a moving object, rerouting \n";
+                    // std::cout << "Collided with a moving object, rerouting \n";
                     PathfindToLocation(entity, moveableActor.GetDestination());
                     hitCol.debugDraw = true;
                     return true;
@@ -302,7 +285,7 @@ namespace sage
 
         if (isNextPointOccupied(moveableActor, collideable))
         {
-            std::cout << "Next point occupied, rerouting \n";
+            // std::cout << "Next point occupied, rerouting \n";
             recalculatePath(entity, moveableActor, collideable);
             return;
         }
@@ -315,6 +298,7 @@ namespace sage
 
         if (!checkCollisionWithOtherMoveable(entity, transform, moveableActor))
         {
+            // TODO: Distance of the ray cast should be from the current pos to the next node
             updateActorTransform(entity, transform, moveableActor);
         }
     }
