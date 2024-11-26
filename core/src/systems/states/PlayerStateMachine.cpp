@@ -44,9 +44,13 @@ namespace sage
             if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
             if (!registry->any_of<DialogComponent>(target)) return;
 
-            auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(registry, self, target);
-            stateController->ChangeState(self, PlayerStateEnum::MovingToTalkToNPC);
+            if (registry->any_of<MoveableActor>(target)) // Not all NPCs move
+            {
+                auto& moveable = registry->get<MoveableActor>(self);
+                moveable.followTarget.emplace(registry, self, target);
+            }
+            stateController->ChangeState<MovingToTalkToNPCState, entt::entity>(
+                self, PlayerStateEnum::MovingToTalkToNPC, target);
         }
 
         void onEnemyLeftClick(entt::entity self, entt::entity target) const
@@ -336,11 +340,11 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity self) override
+        void OnStateEnter(entt::entity self, entt::entity target)
         {
             auto& moveable = registry->get<MoveableActor>(self);
             auto& playerDiag = registry->get<DialogComponent>(self);
-            playerDiag.dialogTarget = moveable.followTarget->targetActor;
+            playerDiag.dialogTarget = target;
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
             gameData->actorMovementSystem->PathfindToLocation(self, pos);
 
