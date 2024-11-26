@@ -15,16 +15,6 @@
 
 namespace sage
 {
-
-    // // Params we can use to transition from one state to another
-    // struct FollowTargetParams
-    // {
-    //     entt::entity targetActor;
-    //     FollowTargetParams(entt::entity _targetActor) : targetActor(_targetActor)
-    //     {
-    //     }
-    // };
-
     class FollowTarget
     {
         entt::registry* registry;
@@ -78,7 +68,7 @@ namespace sage
 
         entt::sigh<void(entt::entity)> onStartMovement{};
         entt::sigh<void(entt::entity)> onDestinationReached{};
-        entt::sigh<void(entt::entity)> onDestinationUnreachable{};
+        entt::sigh<void(entt::entity, Vector3)> onDestinationUnreachable{}; // self, original dest
         entt::sigh<void(entt::entity)> onPathChanged{};    // Was previously moving, now moving somewhere else
         entt::sigh<void(entt::entity)> onMovementCancel{}; // Was previously moving, now cancelled
     };

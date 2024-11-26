@@ -25,7 +25,6 @@
 #include <cassert>
 #include <format>
 
-// #define SAGE_DEBUG
 static constexpr int FOLLOW_DISTANCE = 15;
 
 namespace sage
@@ -102,12 +101,19 @@ namespace sage
     class PlayerStateController::FollowingLeaderState final : public StateMachine
     {
         PlayerStateController* stateController;
+
+        void onDestinationUnreachable(const entt::entity self, const Vector3 requestedPos) const
+        {
+            stateController->ChangeState<DestinationUnreachableState, Vector3, PlayerStateEnum>(
+                self, PlayerStateEnum::DestinationUnreachable, requestedPos, PlayerStateEnum::FollowingLeader);
+        }
+
         void onMovementCancelled(const entt::entity self) const
         {
             stateController->ChangeState(self, PlayerStateEnum::Default);
         }
 
-        void onTargetPosUpdate(const entt::entity self, const entt::entity target) const
+        void onTargetPathChanged(const entt::entity self, const entt::entity target) const
         {
             const auto& trans = registry->get<sgTransform>(self);
             const auto& targetTrans = registry->get<sgTransform>(target);
@@ -158,11 +164,12 @@ namespace sage
             entt::sink sink1{targetMoveable.onDestinationReached};
             state.AddConnection(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
             entt::sink sink2{moveable.followTarget->onPathChanged};
-            state.AddConnection(sink2.connect<&FollowingLeaderState::onTargetPosUpdate>(this));
+            state.AddConnection(sink2.connect<&FollowingLeaderState::onTargetPathChanged>(this));
             entt::sink sink3{moveable.onMovementCancel};
             state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
-
-            onTargetPosUpdate(self, target);
+            entt::sink sink4{moveable.onDestinationUnreachable};
+            state.AddConnection(sink4.connect<&FollowingLeaderState::onDestinationUnreachable>(this));
+            onTargetPathChanged(self, target);
         }
 
         void OnStateEnter(const entt::entity self) override
@@ -357,14 +364,36 @@ namespace sage
     class PlayerStateController::DestinationUnreachableState : public StateMachine
     {
         PlayerStateController* stateController;
+        struct StateData
+        {
+            Vector3 originalDestination{};
+            PlayerStateEnum previousState{};
+            double timeStart{};
+            float threshold{};
+        };
+        std::unordered_map<entt::entity, StateData> data;
 
       public:
-        void OnStateEnter(entt::entity self) override
+        void Update(entt::entity entity) override
         {
+            if (GetTime() >= data[entity].timeStart + data[entity].threshold)
+            {
+                data[entity].timeStart = GetTime();
+                if (gameData->actorMovementSystem->TryPathfindToLocation(entity, data[entity].originalDestination))
+                {
+                    stateController->ChangeState(entity, data[entity].previousState);
+                }
+            }
+        }
+
+        void OnStateEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
+        {
+            data[entity] = {originalDestination, previousState, GetTime(), 0.5f};
         }
 
         void OnStateExit(entt::entity self) override
         {
+            data.erase(self);
         }
 
         ~DestinationUnreachableState() override = default;
@@ -383,10 +412,6 @@ namespace sage
         PlayerStateController* stateController;
 
       public:
-        void Update(entt::entity self) override
-        {
-        }
-
         void OnStateEnter(entt::entity self) override
         {
             auto& playerDiag = registry->get<DialogComponent>(self);

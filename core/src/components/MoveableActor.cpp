@@ -26,8 +26,8 @@ namespace sage
         entt::registry* _registry, const entt::entity _self, const entt::entity _targetActor)
         : registry(_registry), self(_self), timeStarted(GetTime()), targetActor(_targetActor)
     {
-        auto& targetTrans = _registry->get<sgTransform>(_targetActor);
-        entt::sink sink{targetTrans.onPositionUpdate};
+        auto& moveable = _registry->get<MoveableActor>(_targetActor);
+        entt::sink sink{moveable.onPathChanged};
         onTargetPosUpdateCnx = sink.connect<&FollowTarget::changePath>(this);
     }
 } // namespace sage
