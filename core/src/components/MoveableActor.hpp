@@ -37,11 +37,11 @@ namespace sage
         Vector3 targetPrevPos{};
         double timeStarted{};
         float timerThreshold = 0.25;
-        void checkTargetPos();
+        void changePath() const;
 
       public:
         const entt::entity targetActor = entt::null;
-        entt::sigh<void(entt::entity, entt::entity)> onPositionUpdate{}; // Self, target
+        entt::sigh<void(entt::entity, entt::entity)> onPathChanged{}; // Self, target
 
         ~FollowTarget();
         FollowTarget(entt::registry* _registry, entt::entity _self, entt::entity _targetActor);
@@ -74,9 +74,15 @@ namespace sage
         std::optional<FollowTarget> followTarget;
 
         std::deque<Vector3> path{};
-        [[nodiscard]] bool isMoving() const
+        [[nodiscard]] bool IsMoving() const
         {
             return !path.empty();
+        }
+
+        [[nodiscard]] Vector3 GetDestination() const
+        {
+            assert(IsMoving()); // Check this independently before calling this function.
+            return path.back();
         }
 
         std::vector<GridSquare> debugRay;

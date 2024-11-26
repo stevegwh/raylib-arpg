@@ -74,7 +74,7 @@ namespace sage
         const auto path =
             navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
 
-        if (moveable.isMoving()) // Was previously moving
+        if (moveable.IsMoving()) // Was previously moving
         {
             PruneMoveCommands(entity);
             moveable.onPathChanged.publish(entity);
@@ -152,17 +152,10 @@ namespace sage
             moveableActor.path.front(), collideable.worldBoundingBox);
     }
 
-    bool ActorMovementSystem::isDestinationOccupied(
-        const MoveableActor& moveableActor, const Collideable& collideable) const
-    {
-        return !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
-            moveableActor.path.back(), collideable.worldBoundingBox);
-    }
-
     void ActorMovementSystem::recalculatePath(
         const entt::entity entity, const MoveableActor& moveableActor, const Collideable& collideable) const
     {
-        PathfindToLocation(entity, moveableActor.path.back());
+        PathfindToLocation(entity, moveableActor.GetDestination());
     }
 
     bool ActorMovementSystem::hasReachedNextPoint(const sgTransform& transform, const MoveableActor& moveableActor)
@@ -170,7 +163,7 @@ namespace sage
         // I do not believe that height should matter for this (could be very wrong)
         return Vector2Distance(
                    {moveableActor.path.front().x, moveableActor.path.front().z},
-                   {transform.GetWorldPos().x, transform.GetWorldPos().z}) < 1.0f;
+                   {transform.GetWorldPos().x, transform.GetWorldPos().z}) < 0.5f;
     }
 
     void ActorMovementSystem::handlePointReached(
@@ -204,7 +197,7 @@ namespace sage
     bool ActorMovementSystem::checkCollisionWithOtherMoveable(
         const entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const
     {
-        float avoidanceDistance = 10;
+        constexpr float avoidanceDistance = 10;
         GridSquare actorIndex{};
         navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
 
@@ -213,18 +206,32 @@ namespace sage
         NavigationGridSquare* hitCell =
             castCollisionRay(actorIndex, transform.direction, avoidanceDistance, moveableActor);
 
-        if (hitCell != nullptr && registry->any_of<Collideable>(hitCell->occupant) &&
+        // If we haven't hit anything, or the object is static, then we don't need to worry about it.
+        if (hitCell == nullptr || !registry->any_of<MoveableActor>(hitCell->occupant)) return false;
+
+        const auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
+        const auto& hitMoveable = registry->get<MoveableActor>(hitCell->occupant);
+
+        // Going same direction, ignore.
+        auto dot = Vector3DotProduct(transform.direction, hitTransform.direction);
+
+        if (dot >= 0)
+        {
+
+            return false;
+        }
+
+        if (registry->any_of<Collideable>(hitCell->occupant) &&
             (!moveableActor.followTarget.has_value() ||
              hitCell->occupant != moveableActor.followTarget->targetActor) &&
             moveableActor.hitEntityId != entity)
         {
-            auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
 
             // If we hit another moveable and they haven't "collided" with us, then wait?
 
             if (!AlmostEquals(hitTransform.GetWorldPos(), moveableActor.hitLastPos))
             {
-                moveableActor.hitEntityId = entity;
+                moveableActor.hitEntityId = hitCell->occupant;
                 moveableActor.hitLastPos = hitTransform.GetWorldPos();
 
                 auto& hitCol = registry->get<Collideable>(hitCell->occupant);
@@ -232,7 +239,8 @@ namespace sage
                 if (Vector3Distance(hitTransform.GetWorldPos(), transform.GetWorldPos()) <
                     Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
                 {
-                    PathfindToLocation(entity, moveableActor.path.back());
+                    std::cout << "Collided with a moving object, rerouting \n";
+                    PathfindToLocation(entity, moveableActor.GetDestination());
                     hitCol.debugDraw = true;
                     return true;
                 }
@@ -292,30 +300,9 @@ namespace sage
             return;
         }
 
-        // // TODO: This should be managed in PlayerStateMachine
-        // if (moveableActor.followTarget.has_value() &&
-        //     registry->all_of<sgTransform, MoveableActor>(moveableActor.followTarget->targetActor))
-        // {
-        //     // If we are closer to our destination than the leader is, then wait.
-        //     auto& followTrans = registry->get<sgTransform>(moveableActor.followTarget->targetActor);
-        //     auto& followMoveable = registry->get<MoveableActor>(moveableActor.followTarget->targetActor);
-        //     if (followMoveable.isMoving() &&
-        //         Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) >
-        //             Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
-        //     {
-        //         return;
-        //     }
-        // }
-
         if (isNextPointOccupied(moveableActor, collideable))
         {
-            // TODO
-            recalculatePath(entity, moveableActor, collideable);
-            return;
-        }
-
-        if (isDestinationOccupied(moveableActor, collideable))
-        {
+            std::cout << "Next point occupied, rerouting \n";
             recalculatePath(entity, moveableActor, collideable);
             return;
         }
