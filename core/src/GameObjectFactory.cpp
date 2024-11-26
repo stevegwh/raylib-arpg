@@ -406,8 +406,6 @@ namespace sage
         BoundingBox bb = renderable.GetModel()->CalcLocalBoundingBox();
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::BUILDING;
-
-        registry->emplace<TowerState>(id);
     }
 
     bool GameObjectFactory::spawnInventoryItem(

@@ -92,6 +92,7 @@ namespace sage
             {
                 return;
             }
+            oldState.RemoveAllConnections();
             GetSystem(oldStateEnum)->OnStateExit(entity);
             oldState.SetState(newState);
             GetSystem(newState)->OnStateEnter(entity);
