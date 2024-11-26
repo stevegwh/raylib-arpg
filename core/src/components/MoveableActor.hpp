@@ -54,15 +54,8 @@ namespace sage
         Vector3 hitLastPos{};
     };
 
-    enum class DestinationUnreachableBehaviour
-    {
-        CANCEL,
-        WAIT // Retry
-    };
-
     struct MoveableActor
     {
-        DestinationUnreachableBehaviour destUnreachableBehaviour;
         float movementSpeed = 0.35f;
         // The max range the actor can pathfind at one time.
         int pathfindingBounds = 50;
@@ -88,8 +81,8 @@ namespace sage
         std::vector<GridSquare> debugRay;
 
         entt::sigh<void(entt::entity)> onStartMovement{};
-        // entt::sigh<void(entt::entity)> onFinishMovement{};
         entt::sigh<void(entt::entity)> onDestinationReached{};
+        entt::sigh<void(entt::entity)> onDestinationUnreachable{};
         entt::sigh<void(entt::entity)> onPathChanged{};    // Was previously moving, now moving somewhere else
         entt::sigh<void(entt::entity)> onMovementCancel{}; // Was previously moving, now cancelled
     };

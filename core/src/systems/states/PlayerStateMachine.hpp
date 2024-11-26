@@ -20,6 +20,7 @@ namespace sage
         class CombatState;
         class FollowingLeaderState;
         class WaitingForLeaderState;
+        class DestinationUnreachableState;
 
       public:
         void Update();
