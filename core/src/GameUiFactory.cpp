@@ -136,16 +136,15 @@ namespace sage
         auto window = engine->CreateWindowDocked(std::move(_windowDocked));
         // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
-        auto table = panel->CreateTable(16);
-        auto abilityTable = panel->CreateTable({16, 16, 0, 0});
-        panel->CreateTable(16);
-        // TODO: Create a function to fill the row with X amount of icons of a certain width
-        auto experienceBar = abilityTable->CreateTableRow(30);
-        auto abilityRow = abilityTable->CreateTableRow(70, {8, 6, 0, 0});
-        for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)
+        auto table = panel->CreateTable(15.5);
+        auto abilityTable = panel->CreateTable({16, 0, 0, 0});
+        panel->CreateTable(15.5);
+        auto experienceBar = abilityTable->CreateTableRow(24);
+        auto abilityRow = abilityTable->CreateTableRowGrid(MAX_ABILITY_NUMBER, 4, {4, 4, 0, 0});
+        for (unsigned int i = 0; i < abilityRow->children.size(); ++i)
         {
-            auto cell = abilityRow->CreateTableCell();
-            cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
+            auto& cell = abilityRow->children[i];
+            cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell.get(), i));
         }
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.

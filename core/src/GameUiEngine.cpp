@@ -35,6 +35,49 @@ namespace sage
 
 #pragma region init
 
+    void TableRowGrid::InitLayout()
+    {
+        // If no children (cells), return early
+        if (children.empty()) return;
+
+        // 1. Get number of columns (number of cells in this row)
+        unsigned int cols = children.size();
+
+        // 2. Calculate available space
+        float availableWidth = rec.width - (padding.left + padding.right);
+        float availableHeight = rec.height - (padding.up + padding.down);
+
+        // 3. Find the maximum power-of-two cell size that fits
+        int maxCellSize =
+            1 << static_cast<int>(std::floor(std::log2(std::min(availableWidth / cols, availableHeight))));
+
+        // 4. Calculate actual cell size with spacing
+        float cellSize =
+            (std::min(availableWidth / cols, availableHeight) - cellSpacing) / maxCellSize * maxCellSize;
+
+        // 5. Calculate total grid width
+        float gridWidth = cellSize * cols + cellSpacing * (cols - 1); // Account for spacing between columns
+
+        // 6. Calculate starting position to center the row
+        float startX = rec.x + (availableWidth - gridWidth) / 2.0f;
+        float startY = rec.y + (availableHeight - cellSize) / 2.0f;
+
+        // 7. Apply dimensions to cells
+        float currentX = startX;
+        for (const auto& cell : children)
+        {
+            cell->SetPos(currentX, startY);
+            cell->SetDimensions(cellSize, cellSize);
+            currentX += cellSize + cellSpacing; // Add spacing after each cell
+
+            // Update dimensions of cell's children if any
+            if (cell->children)
+            {
+                cell->children->UpdateDimensions();
+            }
+        }
+    }
+
     void TableGrid::InitLayout()
     {
         // assert(!GetWindow()->finalized);
@@ -1175,7 +1218,7 @@ namespace sage
         else
         {
             stateLocked = true;
-            tex = ResourceManager::GetInstance().TextureLoad("resources/icons/ui/empty.png");
+            tex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
         }
         UpdateDimensions();
     }
@@ -1210,7 +1253,11 @@ namespace sage
     void AbilitySlot::Draw2D()
     {
         const auto ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber);
-        if (!ability) return;
+        if (!ability)
+        {
+            ImageBox::Draw2D();
+            return;
+        }
         if (ability->CooldownReady())
         {
             ImageBox::Draw2D();
@@ -2136,6 +2183,20 @@ namespace sage
     {
     }
 
+    TableRowGrid* Table::CreateTableRowGrid(int cols, float cellSpacing, Padding _padding)
+    {
+        children.push_back(std::make_unique<TableRowGrid>(this, _padding));
+        const auto& rowGrid = dynamic_cast<TableRowGrid*>(children.back().get());
+        rowGrid->cellSpacing = cellSpacing;
+        // Create rows and cells with initial autoSize = true
+        for (int j = 0; j < cols; ++j)
+        {
+            rowGrid->CreateTableCell();
+        }
+        InitLayout();
+        return rowGrid;
+    }
+
     TableRow* Table::CreateTableRow(Padding _padding)
     {
         children.push_back(std::make_unique<TableRow>(this, _padding));
@@ -2209,6 +2270,10 @@ namespace sage
     }
 
     TableRow::TableRow(Table* _parent, Padding _padding) : TableElement(_parent, _padding)
+    {
+    }
+
+    TableRowGrid::TableRowGrid(Table* _parent, Padding _padding) : TableRow(_parent, _padding)
     {
     }
 

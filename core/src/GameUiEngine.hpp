@@ -585,7 +585,7 @@ namespace sage
         friend class TableRow;
     };
 
-    class TableRow final : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
+    class TableRow : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table>
     {
         float requestedHeight{};
         bool autoSize = true;
@@ -601,12 +601,23 @@ namespace sage
         friend class Table;
     };
 
+    class TableRowGrid final : public TableRow
+    {
+        float cellSpacing = 0;
+
+      public:
+        void InitLayout() override;
+        explicit TableRowGrid(Table* _parent, Padding _padding = {0, 0, 0, 0});
+        friend class Table;
+    };
+
     class Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, Panel>
     {
         float requestedWidth{};
         bool autoSize = true;
 
       public:
+        TableRowGrid* CreateTableRowGrid(int cols, float cellSpacing, Padding _padding);
         TableRow* CreateTableRow(Padding _padding = {0, 0, 0, 0});
         TableRow* CreateTableRow(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void InitLayout() override;
