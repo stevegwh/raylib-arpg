@@ -58,21 +58,21 @@ namespace sage
         if (!navigationGridSystem->CheckWithinGridBounds(destination))
         {
             moveable.onDestinationUnreachable.publish(entity, destination);
-            // std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
+            std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
             return;
         }
         GridSquare minRange{};
         GridSquare maxRange{};
         if (!navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange))
         {
-            // std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
+            std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
             moveable.onDestinationUnreachable.publish(entity, destination);
             return;
         }
         const auto& collideable = registry->get<Collideable>(entity);
         navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
-        const auto& actorTrans = registry->get<sgTransform>(entity);
 
+        const auto& actorTrans = registry->get<sgTransform>(entity);
         const auto path =
             navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
 
@@ -97,7 +97,7 @@ namespace sage
         }
         else
         {
-            // std::cout << "ActorMovementSystem: Destination unreachable \n";
+            std::cout << "ActorMovementSystem: Destination unreachable \n";
             moveable.onDestinationUnreachable.publish(entity, destination);
         }
 
@@ -229,7 +229,7 @@ namespace sage
                 if (Vector3Distance(hitTransform.GetWorldPos(), transform.GetWorldPos()) <
                     Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
                 {
-                    // std::cout << "Collided with a moving object, rerouting \n";
+                    std::cout << "Collided with a moving object, rerouting \n";
                     PathfindToLocation(entity, moveableActor.GetDestination());
                     hitCol.debugDraw = true;
                     return true;
@@ -292,7 +292,7 @@ namespace sage
 
         if (isNextPointOccupied(moveableActor, collideable))
         {
-            // std::cout << "Next point occupied, rerouting \n";
+            std::cout << "Next point occupied, rerouting \n";
             recalculatePath(entity, moveableActor, collideable);
             return;
         }
@@ -369,13 +369,13 @@ namespace sage
 //				//{
 //				//	auto& name =
 // registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
-//				//	// std::cout << "Hit with object: " << name << std::endl;
+//				//	std::cout << "Hit with object: " << name << std::endl;
 //				//}
 //				//else
 //				//{
 //				//	auto text = TextFormat("Likely hit floor, with entity ID: %d",
 // collisions.at(0).collidedEntityId);
-//				//	// std::cout << text << std::endl;
+//				//	std::cout << text << std::endl;
 //				//}
 //
 //
@@ -387,5 +387,5 @@ namespace sage
 //			}
 //			else
 //			{
-//				// std::cout << "No getFirstCollision with terrain detected \n";
+//				std::cout << "No getFirstCollision with terrain detected \n";
 //			}
