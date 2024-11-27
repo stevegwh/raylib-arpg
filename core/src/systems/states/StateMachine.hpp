@@ -109,6 +109,7 @@ namespace sage
             {
                 return;
             }
+            std::cout << "---------\n";
             std::cout << std::format(
                 "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
             std::cout << std::format(
