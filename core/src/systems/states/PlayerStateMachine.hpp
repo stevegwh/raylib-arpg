@@ -17,6 +17,7 @@ namespace sage
         class MovingToTalkToNPCState;
         class InDialogState;
         class CombatState;
+        // TODO: I think having a separate system for Followers/Party Members would be a good idea
         class FollowingLeaderState;
         class WaitingForLeaderState;
         class DestinationUnreachableState;
