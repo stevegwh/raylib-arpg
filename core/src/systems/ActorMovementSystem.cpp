@@ -14,7 +14,7 @@
 
 namespace sage
 {
-    static bool hasPrintedLine = false;
+    bool hasPrintedLine = false;
 
     void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity) const
     {
@@ -66,16 +66,29 @@ namespace sage
                 "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
             return;
         }
+
         GridSquare minRange{};
         GridSquare maxRange{};
         if (!navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange))
         {
+            // This will very rarely happen. Only triggers if the entity's current position is outside of grid
+            // bounds.
             hasPrintedLine = true;
             std::cout << std::format(
-                "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
+                "Entity {}: Current position out of grid bounds \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
             return;
         }
+
+        if (!navigationGridSystem->CheckWithinBounds(destination, minRange, maxRange))
+        {
+            hasPrintedLine = true;
+            std::cout << std::format(
+                "Entity {}: Requested destination is outside of pathfinding range \n", static_cast<int>(entity));
+            moveable.onDestinationUnreachable.publish(entity, destination);
+            return;
+        }
+
         const auto& collideable = registry->get<Collideable>(entity);
         navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
 

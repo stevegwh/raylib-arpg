@@ -109,7 +109,6 @@ namespace sage
         void onDestinationUnreachable(const entt::entity self, const Vector3 requestedPos) const
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            // You try to go here and back but without re-setting followTarget
             stateController->ChangeState<DestinationUnreachableState, entt::entity, Vector3, PlayerStateEnum>(
                 self,
                 PlayerStateEnum::DestinationUnreachable,
@@ -181,6 +180,8 @@ namespace sage
             state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
             entt::sink sink4{moveable.onDestinationUnreachable};
             state.AddConnection(sink4.connect<&FollowingLeaderState::onDestinationUnreachable>(this));
+            entt::sink sink5{gameData->controllableActorSystem->onSelectedActorChange};
+            state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
             onTargetPathChanged(self, target);
         }
 
@@ -240,6 +241,8 @@ namespace sage
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveable.onMovementCancel};
             state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
+            entt::sink sink2{gameData->controllableActorSystem->onSelectedActorChange};
+            state.AddConnection(sink2.connect<&WaitingForLeaderState::onMovementCancelled>(this));
         }
 
         void OnStateEnter(const entt::entity self) override
@@ -380,14 +383,28 @@ namespace sage
             PlayerStateEnum previousState{};
             double timeStart{};
             float threshold{};
+            unsigned int tryCount{};
+            unsigned int maxTries{};
         };
         std::unordered_map<entt::entity, StateData> data;
 
       public:
         void Update(entt::entity entity) override
         {
+            // TODO: This works fine when it's just a question of waiting for something to get out of the way. But,
+            // if the leader is too far ahead of you and clicks on a destination that is outside of the follower's
+            // pathfinding bounds then this will just time out. If it's outside of the pathfinding bounds, we can
+            // pathfind to the leader's last known location and add the leader's path to the end?
+            if (data[entity].tryCount >= data[entity].maxTries)
+            {
+                auto& moveable = registry->get<MoveableActor>(entity);
+                moveable.followTarget.reset();
+                stateController->ChangeState(entity, PlayerStateEnum::Default);
+            }
+
             if (GetTime() >= data[entity].timeStart + data[entity].threshold)
             {
+                ++data[entity].tryCount;
                 data[entity].timeStart = GetTime();
                 if (gameData->actorMovementSystem->TryPathfindToLocation(entity, data[entity].originalDestination))
                 {
@@ -411,13 +428,13 @@ namespace sage
             PlayerStateEnum previousState)
         {
             assert(previousState == PlayerStateEnum::FollowingLeader);
-            data[entity] = {followTarget, originalDestination, previousState, GetTime(), 0.5f};
+            data[entity] = {followTarget, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
         }
 
         void OnStateEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
         {
             assert(previousState != PlayerStateEnum::FollowingLeader);
-            data[entity] = {entt::null, originalDestination, previousState, GetTime(), 0.5f};
+            data[entity] = {entt::null, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
         }
 
         void OnStateExit(entt::entity self) override
