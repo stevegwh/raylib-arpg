@@ -373,6 +373,7 @@ namespace sage
 
     // ----------------------------
 
+    // TODO: This is just for actor's following the player. Rename it to show that
     class PlayerStateController::DestinationUnreachableState : public StateMachine
     {
         PlayerStateController* stateController;
@@ -391,31 +392,43 @@ namespace sage
       public:
         void Update(entt::entity entity) override
         {
-            // TODO: This works fine when it's just a question of waiting for something to get out of the way. But,
-            // if the leader is too far ahead of you and clicks on a destination that is outside of the follower's
-            // pathfinding bounds then this will just time out. If it's outside of the pathfinding bounds, we can
-            // pathfind to the leader's last known location and add the leader's path to the end?
-            if (data[entity].tryCount >= data[entity].maxTries)
+            auto& moveable = registry->get<MoveableActor>(entity);
+            if (moveable.IsMoving()) return;
+
+            auto& _data = data[entity];
+
+            if (_data.tryCount >= _data.maxTries)
             {
                 auto& moveable = registry->get<MoveableActor>(entity);
                 moveable.followTarget.reset();
+                // TODO: BUG: This makes them pathfind to Vector3Zero.
                 stateController->ChangeState(entity, PlayerStateEnum::Default);
             }
 
             if (GetTime() >= data[entity].timeStart + data[entity].threshold)
             {
-                ++data[entity].tryCount;
-                data[entity].timeStart = GetTime();
-                if (gameData->actorMovementSystem->TryPathfindToLocation(entity, data[entity].originalDestination))
+                ++_data.tryCount;
+                _data.timeStart = GetTime();
+                if (gameData->actorMovementSystem->TryPathfindToLocation(entity, _data.originalDestination))
                 {
-                    if (data[entity].previousState == PlayerStateEnum::FollowingLeader)
+                    if (_data.previousState == PlayerStateEnum::FollowingLeader)
                     {
                         stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                            entity, data[entity].previousState, data[entity].followTarget);
+                            entity, _data.previousState, _data.followTarget);
                     }
                     else
                     {
-                        stateController->ChangeState(entity, data[entity].previousState);
+                        stateController->ChangeState(entity, _data.previousState);
+                    }
+                }
+                else
+                {
+                    // If the leader is too far, we could maybe follow a party member who is closer to the
+                    // destination and also moving
+                    auto leaderPos = registry->get<sgTransform>(_data.followTarget).GetWorldPos();
+                    if (gameData->actorMovementSystem->TryPathfindToLocation(entity, leaderPos))
+                    {
+                        _data.tryCount = 0;
                     }
                 }
             }
@@ -429,12 +442,6 @@ namespace sage
         {
             assert(previousState == PlayerStateEnum::FollowingLeader);
             data[entity] = {followTarget, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
-        }
-
-        void OnStateEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
-        {
-            assert(previousState != PlayerStateEnum::FollowingLeader);
-            data[entity] = {entt::null, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
         }
 
         void OnStateExit(entt::entity self) override
