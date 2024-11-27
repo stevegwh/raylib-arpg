@@ -8,11 +8,14 @@
 
 #include <Serializer.hpp>
 
+#include <format>
 #include <ranges>
 #include <tuple>
 
 namespace sage
 {
+    static bool hasPrintedLine = false;
+
     void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity) const
     {
         auto& actor = registry->get<MoveableActor>(entity);
@@ -58,14 +61,18 @@ namespace sage
         if (!navigationGridSystem->CheckWithinGridBounds(destination))
         {
             moveable.onDestinationUnreachable.publish(entity, destination);
-            std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
+            hasPrintedLine = true;
+            std::cout << std::format(
+                "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
             return;
         }
         GridSquare minRange{};
         GridSquare maxRange{};
         if (!navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange))
         {
-            std::cout << "ActorMovementSystem: Requested destination out of grid bounds. \n";
+            hasPrintedLine = true;
+            std::cout << std::format(
+                "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
             return;
         }
@@ -97,7 +104,8 @@ namespace sage
         }
         else
         {
-            std::cout << "ActorMovementSystem: Destination unreachable \n";
+            hasPrintedLine = true;
+            std::cout << std::format("Entity {}: Destination unreachable \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
         }
 
@@ -229,7 +237,9 @@ namespace sage
                 if (Vector3Distance(hitTransform.GetWorldPos(), transform.GetWorldPos()) <
                     Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
                 {
-                    std::cout << "Collided with a moving object, rerouting \n";
+                    hasPrintedLine = true;
+                    std::cout << std::format(
+                        "Entity {}: Collided with a moving object, rerouting \n", static_cast<int>(entity));
                     PathfindToLocation(entity, moveableActor.GetDestination());
                     hitCol.debugDraw = true;
                     return true;
@@ -292,7 +302,8 @@ namespace sage
 
         if (isNextPointOccupied(moveableActor, collideable))
         {
-            std::cout << "Next point occupied, rerouting \n";
+            hasPrintedLine = true;
+            std::cout << std::format("Entity {}: Next point occupied, rerouting \n", static_cast<int>(entity));
             recalculatePath(entity, moveableActor, collideable);
             return;
         }
@@ -334,9 +345,14 @@ namespace sage
         auto fullView = registry->view<MoveableActor, sgTransform, Collideable>();
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {
+            hasPrintedLine = false;
             navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
             updateActor(entity, moveableActor, transform, collideable);
             navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
+            if (hasPrintedLine)
+            {
+                std::cout << "---------\n";
+            }
         }
 
         // Process entities without Collideable component (e.g., some abilities etc)
