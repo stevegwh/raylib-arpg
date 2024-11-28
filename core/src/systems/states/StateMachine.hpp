@@ -96,10 +96,11 @@ namespace sage
             {
                 return;
             }
-            // std::cout << std::format(
-            //     "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
-            // std::cout << std::format(
-            //     "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
+            std::cout << "------------- \n";
+            std::cout << std::format(
+                "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
+            std::cout << std::format(
+                "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
             oldState.RemoveAllConnections();
             GetSystem(oldStateEnum)->OnStateExit(entity);
             oldState.SetState(newState);
@@ -115,10 +116,11 @@ namespace sage
             {
                 return;
             }
-            // std::cout << std::format(
-            //     "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
-            // std::cout << std::format(
-            //     "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
+            std::cout << "------------- \n";
+            std::cout << std::format(
+                "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
+            std::cout << std::format(
+                "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
             oldState.RemoveAllConnections();
             GetSystem(oldStateEnum)->OnStateExit(entity);
             oldState.SetState(newState);

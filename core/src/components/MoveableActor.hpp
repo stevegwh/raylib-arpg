@@ -18,17 +18,23 @@ namespace sage
     class FollowTarget
     {
         entt::registry* registry;
-        entt::entity self{};
-        entt::connection onTargetPosUpdateCnx{};
+        entt::entity self{}; // The actor following
+        entt::connection onTargetDestinationReachedCnx{};
+        entt::connection onTargetMovementCancelledCnx{};
+        entt::connection onTargetPathChangedCnx{};
 
         Vector3 targetPrevPos{};
         double timeStarted{};
         float timerThreshold = 0.25;
-        void changePath() const;
+        void targetReachedDestination() const;
+        void targetPathChanged() const;
+        void targetMovementCancelled() const;
 
       public:
         const entt::entity targetActor = entt::null;
-        entt::sigh<void(entt::entity, entt::entity)> onPathChanged{}; // Self, target
+        entt::sigh<void(entt::entity, entt::entity)> onTargetDestinationReached{}; // Self, target
+        entt::sigh<void(entt::entity, entt::entity)> onTargetMovementCancelled{};  // Self, target
+        entt::sigh<void(entt::entity, entt::entity)> onTargetPathChanged{};        // Self, target
 
         ~FollowTarget();
         FollowTarget(entt::registry* _registry, entt::entity _self, entt::entity _targetActor);
