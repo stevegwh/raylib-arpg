@@ -5,7 +5,6 @@
 #include "AbilityFactory.hpp"
 #include "components/Ability.hpp"
 #include "components/Animation.hpp"
-#include "components/DialogComponent.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
@@ -144,8 +143,11 @@ namespace sage
             state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
             entt::sink sink4{moveable.onDestinationUnreachable};
             state.AddConnection(sink4.connect<&FollowingLeaderState::onDestinationUnreachable>(this));
-            entt::sink sink5{gameData->controllableActorSystem->onSelectedActorChange};
-            state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
+
+            // TODO: Needs to be forwarded!
+            //            entt::sink sink5{gameData->controllableActorSystem->onSelectedActorChange};
+            //            state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
+
             onTargetPathChanged(self, target);
         }
 
