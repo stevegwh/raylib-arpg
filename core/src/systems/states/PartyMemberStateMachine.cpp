@@ -14,6 +14,7 @@
 
 #include "raylib.h"
 #include "StateMachines.hpp"
+#include "systems/PartySystem.hpp"
 
 #include <cassert>
 #include <format>
