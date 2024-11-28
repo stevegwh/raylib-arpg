@@ -19,6 +19,9 @@ namespace sage
         class CombatState;
         class DestinationUnreachableState;
 
+        void onComponentAdded(entt::entity entity);
+        void onComponentRemoved(entt::entity entity);
+
       public:
         void Update();
         void Draw3D();

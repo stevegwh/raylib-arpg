@@ -7,9 +7,10 @@
 #include "AssetID.hpp"
 #include "components/Collideable.hpp"
 #include "components/ControllableActor.hpp"
-#include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
+#include "Cursor.hpp"
+#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "PartySystem.hpp"
 #include "ResourceManager.hpp"
@@ -53,7 +54,6 @@ namespace sage
         {
             registry->erase<PartyMemberState>(id);
         }
-        registry->emplace_or_replace<PlayerState>(id);
         for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
         {
             if (entity == id) continue;
@@ -64,10 +64,25 @@ namespace sage
             registry->emplace_or_replace<PartyMemberState>(entity);
         }
 
+        registry->emplace<PlayerState>(id);
+        auto& controllable = registry->get<ControllableActor>(id);
+        controllable.ReleaseAllHooks(gameData->reflectionSignalRouter.get());
+
+        // Below forwards the cursor's events with the subscriber's entity ID injected into it (so we know which
+        // entity is reacting to the click).
+        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
+            id, gameData->cursor->onFloorClick, controllable.onFloorClick));
+        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
+            id, gameData->cursor->onEnemyLeftClick, controllable.onEnemyLeftClick));
+        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
+            id, gameData->cursor->onEnemyRightClick, controllable.onEnemyRightClick));
+        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
+            id, gameData->cursor->onNPCClick, controllable.onNPCLeftClick));
+
         onSelectedActorChange.publish(id);
     }
 
-    entt::entity ControllableActorSystem::GetSelectedActor()
+    entt::entity ControllableActorSystem::GetSelectedActor() const
     {
         return selectedActorId;
     }

@@ -23,7 +23,7 @@ namespace sage
 
       public:
         void SetSelectedActor(entt::entity id);
-        entt::entity GetSelectedActor();
+        entt::entity GetSelectedActor() const;
         entt::sigh<void(entt::entity)> onSelectedActorChange;
         void Update() const;
         ControllableActorSystem(entt::registry* _registry, GameData* _gameData);
