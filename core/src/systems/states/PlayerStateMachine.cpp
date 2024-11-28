@@ -34,6 +34,12 @@ namespace sage
 
         void onFloorClick(const entt::entity self, entt::entity x) const
         {
+            auto& state = registry->get<PlayerState>(self);
+            // Change back to default then back again
+            if (state.GetCurrentState() == PlayerStateEnum::MovingToLocation)
+            {
+                stateController->ChangeState(self, PlayerStateEnum::Default);
+            }
             stateController->ChangeState(self, PlayerStateEnum::MovingToLocation);
         }
 
