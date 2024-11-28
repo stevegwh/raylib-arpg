@@ -199,9 +199,6 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
 
-        auto& controllable = registry->emplace<ControllableActor>(id, id);
-        data->controllableActorSystem->SetSelectedActor(id);
-
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
 
@@ -253,6 +250,13 @@ namespace sage
             //}>(animation);
         }
 
+        auto& partyComponent = registry->emplace<PartyMemberComponent>(id, id);
+        partyComponent.portraitImage = AssetID::IMG_PORTRAIT_01;
+        data->partySystem->AddMember(id);
+
+        auto& controllable = registry->emplace<ControllableActor>(id, id);
+        data->controllableActorSystem->SetSelectedActor(id);
+
         // Below forward the cursor's events with the subscriber's entity ID injected into it (so we know which
         // entity is reacting to the click).
         data->reflectionSignalRouter->CreateHook<entt::entity>(
@@ -263,10 +267,6 @@ namespace sage
             id, data->cursor->onEnemyRightClick, controllable.onEnemyRightClick);
         data->reflectionSignalRouter->CreateHook<entt::entity>(
             id, data->cursor->onNPCClick, controllable.onNPCLeftClick);
-
-        auto& partyComponent = registry->emplace<PartyMemberComponent>(id, id);
-        partyComponent.portraitImage = AssetID::IMG_PORTRAIT_01;
-        data->partySystem->AddMember(id);
 
         auto& dialogComponent = registry->emplace<DialogComponent>(id);
 
@@ -307,9 +307,6 @@ namespace sage
             inventory.AddItem(itemId, 0, 1);
         }
 
-        // data->lightSubSystem->LinkRenderableToLight(id);
-
-        registry->emplace<PlayerState>(id);
         // Always set state last to ensure everything is initialised properly before.
 
         return id;

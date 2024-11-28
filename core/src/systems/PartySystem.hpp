@@ -24,6 +24,7 @@ namespace sage
         std::vector<std::vector<entt::entity>> groups;
 
       public:
+        void SetLeader(entt::entity leader) const;
         void AddMember(entt::entity member);
         void RemoveMember(entt::entity entity);
         [[nodiscard]] entt::entity GetMember(unsigned int memberNumber) const;

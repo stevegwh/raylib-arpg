@@ -10,14 +10,13 @@
 #include "components/ControllableActor.hpp"
 #include "components/DialogComponent.hpp"
 #include "components/MoveableActor.hpp"
-#include "components/PartyMemberComponent.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "PartyMemberStateMachine.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
-#include "systems/PartySystem.hpp"
 
 #include "raylib.h"
 #include "StateMachines.hpp"
@@ -102,172 +101,10 @@ namespace sage
 
     // ----------------------------
 
-    class PlayerStateController::FollowingLeaderState final : public StateMachine
-    {
-        PlayerStateController* stateController;
-
-        void onDestinationUnreachable(const entt::entity self, const Vector3 requestedPos) const
-        {
-            auto& moveable = registry->get<MoveableActor>(self);
-            stateController->ChangeState<DestinationUnreachableState, entt::entity, Vector3, PlayerStateEnum>(
-                self,
-                PlayerStateEnum::DestinationUnreachable,
-                moveable.followTarget->targetActor,
-                requestedPos,
-                PlayerStateEnum::FollowingLeader);
-        }
-
-        void onMovementCancelled(const entt::entity self) const
-        {
-            stateController->ChangeState(self, PlayerStateEnum::Default);
-        }
-
-        void onTargetPathChanged(const entt::entity self, const entt::entity target) const
-        {
-            const auto& trans = registry->get<sgTransform>(self);
-            const auto& targetTrans = registry->get<sgTransform>(target);
-            const auto& targetMoveable = registry->get<MoveableActor>(target);
-            auto dest = targetMoveable.IsMoving() ? targetMoveable.GetDestination() : targetTrans.GetWorldPos();
-            const auto dir = Vector3Normalize(Vector3Subtract(dest, trans.GetWorldPos()));
-            dest = Vector3Subtract(dest, Vector3MultiplyByValue(dir, FOLLOW_DISTANCE));
-            gameData->actorMovementSystem->PathfindToLocation(self, dest);
-        }
-
-        void onTargetReached(const entt::entity self) const
-        {
-            stateController->ChangeState(self, PlayerStateEnum::Default);
-        }
-
-      public:
-        void Update(const entt::entity self) override
-        {
-            if (self == gameData->controllableActorSystem->GetSelectedActor())
-            {
-                stateController->ChangeState(self, PlayerStateEnum::Default);
-            }
-
-            const auto& moveable = registry->get<MoveableActor>(self);
-            const auto& transform = registry->get<sgTransform>(self);
-            const auto& followTrans = registry->get<sgTransform>(moveable.followTarget->targetActor);
-            const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget->targetActor);
-
-            // If we are closer to our destination than the leader is, then wait.
-            if (followMoveable.IsMoving() &&
-                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE >
-                    Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
-            {
-                auto followTarget = moveable.followTarget->targetActor;
-                stateController->ChangeState<WaitingForLeaderState, entt::entity>(
-                    self, PlayerStateEnum::WaitingForLeader, followTarget);
-            }
-        }
-
-        void OnStateEnter(const entt::entity self, entt::entity followTarget)
-        {
-            assert(followTarget != entt::null);
-            auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(registry, self, followTarget);
-
-            const auto target = moveable.followTarget->targetActor;
-            auto& targetMoveable = registry->get<MoveableActor>(target);
-
-            auto& state = registry->get<PlayerState>(self);
-            entt::sink sink1{targetMoveable.onDestinationReached};
-            state.AddConnection(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
-            entt::sink sink2{moveable.followTarget->onPathChanged};
-            state.AddConnection(sink2.connect<&FollowingLeaderState::onTargetPathChanged>(this));
-            entt::sink sink3{moveable.onMovementCancel};
-            state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
-            entt::sink sink4{moveable.onDestinationUnreachable};
-            state.AddConnection(sink4.connect<&FollowingLeaderState::onDestinationUnreachable>(this));
-            entt::sink sink5{gameData->controllableActorSystem->onSelectedActorChange};
-            state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
-            onTargetPathChanged(self, target);
-        }
-
-        void OnStateExit(const entt::entity self) override
-        {
-            auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.reset();
-            gameData->actorMovementSystem->CancelMovement(self);
-        }
-
-        ~FollowingLeaderState() override = default;
-
-        FollowingLeaderState(
-            entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
-        {
-        }
-    };
-    // ----------------------------
-
-    class PlayerStateController::WaitingForLeaderState final : public StateMachine
-    {
-        PlayerStateController* stateController;
-        void onMovementCancelled(const entt::entity self) const
-        {
-            stateController->ChangeState(self, PlayerStateEnum::Default);
-        }
-
-      public:
-        void Update(const entt::entity self) override
-        {
-            if (self == gameData->controllableActorSystem->GetSelectedActor())
-            {
-                stateController->ChangeState(self, PlayerStateEnum::Default);
-            }
-
-            const auto& moveable = registry->get<MoveableActor>(self);
-            const auto& transform = registry->get<sgTransform>(self);
-            const auto& followTrans = registry->get<sgTransform>(moveable.followTarget->targetActor);
-            const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget->targetActor);
-
-            // Follow target is now closer to its destination than we are, so we can proceed.
-            if (followMoveable.IsMoving() &&
-                Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE <
-                    Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
-            {
-                auto followTarget = moveable.followTarget->targetActor;
-                stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                    self, PlayerStateEnum::FollowingLeader, followTarget);
-            }
-        }
-
-        void OnStateEnter(const entt::entity self, entt::entity followTarget)
-        {
-            auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(registry, self, followTarget);
-            auto& state = registry->get<PlayerState>(self);
-            entt::sink sink{moveable.onMovementCancel};
-            state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
-            entt::sink sink2{gameData->controllableActorSystem->onSelectedActorChange};
-            state.AddConnection(sink2.connect<&WaitingForLeaderState::onMovementCancelled>(this));
-        }
-
-        void OnStateEnter(const entt::entity self) override
-        {
-        }
-
-        void OnStateExit(const entt::entity self) override
-        {
-            auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.reset();
-        }
-
-        ~WaitingForLeaderState() override = default;
-
-        WaitingForLeaderState(
-            entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
-        {
-        }
-    };
-    // ----------------------------
-
     class PlayerStateController::MovingToLocationState : public StateMachine
     {
         PlayerStateController* stateController;
+
         void onMovementCancelled(entt::entity self) const
         {
             stateController->ChangeState(self, PlayerStateEnum::Default);
@@ -288,16 +125,6 @@ namespace sage
 
             gameData->actorMovementSystem->CancelMovement(self);
             gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
-
-            auto target = self;
-            for (const auto group = gameData->partySystem->GetGroup(self); const auto& entity : group)
-            {
-                if (entity == self) continue;
-                gameData->actorMovementSystem->CancelMovement(entity);
-                stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                    entity, PlayerStateEnum::FollowingLeader, target);
-            }
-
             auto& moveable = registry->get<MoveableActor>(self);
             auto& state = registry->get<PlayerState>(self);
             entt::sink sink{moveable.onDestinationReached};
@@ -379,7 +206,6 @@ namespace sage
         PlayerStateController* stateController;
         struct StateData
         {
-            entt::entity followTarget{}; // optional
             Vector3 originalDestination{};
             PlayerStateEnum previousState{};
             double timeStart{};
@@ -392,56 +218,11 @@ namespace sage
       public:
         void Update(entt::entity entity) override
         {
-            auto& moveable = registry->get<MoveableActor>(entity);
-            if (moveable.IsMoving()) return;
-
-            auto& _data = data[entity];
-
-            if (_data.tryCount >= _data.maxTries)
-            {
-                auto& moveable = registry->get<MoveableActor>(entity);
-                moveable.followTarget.reset();
-                // TODO: BUG: This makes them pathfind to Vector3Zero.
-                stateController->ChangeState(entity, PlayerStateEnum::Default);
-            }
-
-            if (GetTime() >= data[entity].timeStart + data[entity].threshold)
-            {
-                ++_data.tryCount;
-                _data.timeStart = GetTime();
-                if (gameData->actorMovementSystem->TryPathfindToLocation(entity, _data.originalDestination))
-                {
-                    if (_data.previousState == PlayerStateEnum::FollowingLeader)
-                    {
-                        stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                            entity, _data.previousState, _data.followTarget);
-                    }
-                    else
-                    {
-                        stateController->ChangeState(entity, _data.previousState);
-                    }
-                }
-                else
-                {
-                    // If the leader is too far, we could maybe follow a party member who is closer to the
-                    // destination and also moving
-                    auto leaderPos = registry->get<sgTransform>(_data.followTarget).GetWorldPos();
-                    if (gameData->actorMovementSystem->TryPathfindToLocation(entity, leaderPos))
-                    {
-                        _data.tryCount = 0;
-                    }
-                }
-            }
         }
 
-        void OnStateEnter(
-            entt::entity entity,
-            entt::entity followTarget,
-            Vector3 originalDestination,
-            PlayerStateEnum previousState)
+        void OnStateEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
         {
-            assert(previousState == PlayerStateEnum::FollowingLeader);
-            data[entity] = {followTarget, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
+            data[entity] = {originalDestination, previousState, GetTime(), 1.5f, 0, 4};
         }
 
         void OnStateExit(entt::entity self) override
@@ -633,6 +414,7 @@ namespace sage
     {
         for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
+            assert(!registry->any_of<PartyMemberState>(entity));
             const auto state = registry->get<PlayerState>(entity).GetCurrentState();
             GetSystem(state)->Update(entity);
         }
@@ -642,6 +424,7 @@ namespace sage
     {
         for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
+            assert(!registry->any_of<PartyMemberState>(entity));
             const auto state = registry->get<PlayerState>(entity).GetCurrentState();
             GetSystem(state)->Draw3D(entity);
         }
@@ -658,12 +441,8 @@ namespace sage
         states[PlayerStateEnum::MovingToTalkToNPC] =
             std::make_unique<MovingToTalkToNPCState>(_registry, _gameData, this);
         states[PlayerStateEnum::InDialog] = std::make_unique<InDialogState>(_registry, _gameData, this);
-        states[PlayerStateEnum::FollowingLeader] =
-            std::make_unique<FollowingLeaderState>(_registry, _gameData, this);
         states[PlayerStateEnum::MovingToLocation] =
             std::make_unique<MovingToLocationState>(_registry, _gameData, this);
-        states[PlayerStateEnum::WaitingForLeader] =
-            std::make_unique<WaitingForLeaderState>(_registry, _gameData, this);
         states[PlayerStateEnum::DestinationUnreachable] =
             std::make_unique<DestinationUnreachableState>(_registry, _gameData, this);
     }

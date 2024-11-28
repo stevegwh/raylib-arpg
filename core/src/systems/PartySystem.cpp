@@ -3,11 +3,21 @@
 //
 
 #include "PartySystem.hpp"
+
 #include "components/PartyMemberComponent.hpp"
+#include "components/States.hpp"
+#include "ControllableActorSystem.hpp"
+#include "GameData.hpp"
+
 #include <cassert>
 
 namespace sage
 {
+
+    void PartySystem::SetLeader(entt::entity leader) const
+    {
+        // Combine with ControllableActorSystem and put function here
+    }
 
     void PartySystem::AddMember(entt::entity member)
     {
@@ -71,5 +81,8 @@ namespace sage
         : registry(_registry), gameData(_gameData)
     {
         groups.resize(1);
+
+        entt::sink sink{gameData->controllableActorSystem->onSelectedActorChange};
+        sink.connect<&PartySystem::SetLeader>(this);
     }
 } // namespace sage

@@ -62,8 +62,8 @@ namespace sage
         {
             moveable.onDestinationUnreachable.publish(entity, destination);
             hasPrintedLine = true;
-            std::cout << std::format(
-                "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
+            // std::cout << std::format(
+            // "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
             return;
         }
 
@@ -74,8 +74,8 @@ namespace sage
             // This will very rarely happen. Only triggers if the entity's current position is outside of grid
             // bounds.
             hasPrintedLine = true;
-            std::cout << std::format(
-                "Entity {}: Current position out of grid bounds \n", static_cast<int>(entity));
+            // std::cout << std::format(
+            // "Entity {}: Current position out of grid bounds \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
             return;
         }
@@ -83,8 +83,8 @@ namespace sage
         if (!navigationGridSystem->CheckWithinBounds(destination, minRange, maxRange))
         {
             hasPrintedLine = true;
-            std::cout << std::format(
-                "Entity {}: Requested destination is outside of pathfinding range \n", static_cast<int>(entity));
+            // std::cout << std::format(
+            // "Entity {}: Requested destination is outside of pathfinding range \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
             return;
         }
@@ -118,7 +118,7 @@ namespace sage
         else
         {
             hasPrintedLine = true;
-            std::cout << std::format("Entity {}: Destination unreachable \n", static_cast<int>(entity));
+            // std::cout << std::format(// "Entity {}: Destination unreachable \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
         }
 
@@ -226,7 +226,6 @@ namespace sage
         if (hitCell == nullptr || !registry->any_of<MoveableActor>(hitCell->occupant)) return false;
 
         const auto& hitTransform = registry->get<sgTransform>(hitCell->occupant);
-        const auto& hitMoveable = registry->get<MoveableActor>(hitCell->occupant);
 
         // Going same direction, ignore.
         auto dot = Vector3DotProduct(transform.direction, hitTransform.direction);
@@ -251,8 +250,8 @@ namespace sage
                     Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
                 {
                     hasPrintedLine = true;
-                    std::cout << std::format(
-                        "Entity {}: Collided with a moving object, rerouting \n", static_cast<int>(entity));
+                    // std::cout << std::format(
+                    // "Entity {}: Collided with a moving object, rerouting \n", static_cast<int>(entity));
                     PathfindToLocation(entity, moveableActor.GetDestination());
                     hitCol.debugDraw = true;
                     return true;
@@ -316,7 +315,8 @@ namespace sage
         if (isNextPointOccupied(moveableActor, collideable))
         {
             hasPrintedLine = true;
-            std::cout << std::format("Entity {}: Next point occupied, rerouting \n", static_cast<int>(entity));
+            // std::cout << std::format(// "Entity {}: Next point occupied, rerouting \n",
+            // static_cast<int>(entity));
             recalculatePath(entity, moveableActor, collideable);
             return;
         }
@@ -364,7 +364,7 @@ namespace sage
             navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
             if (hasPrintedLine)
             {
-                std::cout << "---------\n";
+                // std::cout << "---------\n";
             }
         }
 
@@ -398,13 +398,13 @@ namespace sage
 //				//{
 //				//	auto& name =
 // registry->get<Renderable>(collisions.at(0).collidedEntityId).name;
-//				//	std::cout << "Hit with object: " << name << std::endl;
+//				//	// std::cout << "Hit with object: " << name << std::endl;
 //				//}
 //				//else
 //				//{
 //				//	auto text = TextFormat("Likely hit floor, with entity ID: %d",
 // collisions.at(0).collidedEntityId);
-//				//	std::cout << text << std::endl;
+//				//	// std::cout << text << std::endl;
 //				//}
 //
 //
@@ -416,5 +416,5 @@ namespace sage
 //			}
 //			else
 //			{
-//				std::cout << "No getFirstCollision with terrain detected \n";
+//				// std::cout << "No getFirstCollision with terrain detected \n";
 //			}

@@ -35,10 +35,34 @@ namespace sage
             return currentState;
         }
 
-        BaseState(const BaseState&) = delete;
-        BaseState& operator=(const BaseState&) = delete;
+        ~BaseState()
+        {
+            RemoveAllConnections();
+        }
+
+        // BaseState(const BaseState&) = delete;
+        // BaseState& operator=(const BaseState&) = delete;
 
         explicit BaseState(StateEnum initialState) : currentState(initialState)
+        {
+        }
+    };
+
+    enum class PartyMemberStateEnum
+    {
+        Default,
+        FollowingLeader,
+        WaitingForLeader,
+        DestinationUnreachable
+    };
+
+    class PartyMemberState : public BaseState<PartyMemberState, PartyMemberStateEnum>
+    {
+      public:
+        std::vector<int> hooks;
+        entt::sigh<void(entt::entity, entt::entity)> onLeaderMove; // self, leader
+
+        PartyMemberState() : BaseState(PartyMemberStateEnum::Default)
         {
         }
     };
@@ -50,8 +74,6 @@ namespace sage
         MovingToAttackEnemy,
         MovingToTalkToNPC,
         InDialog,
-        FollowingLeader,
-        WaitingForLeader,
         DestinationUnreachable,
         Combat
     };
