@@ -34,13 +34,11 @@ namespace sage
 
         void onFloorClick(const entt::entity self, entt::entity x) const
         {
-            if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
             stateController->ChangeState(self, PlayerStateEnum::MovingToLocation);
         }
 
         void onNPCLeftClick(entt::entity self, entt::entity target) const
         {
-            if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
             if (!registry->any_of<DialogComponent>(target)) return;
 
             if (registry->any_of<MoveableActor>(target)) // Not all NPCs move
@@ -54,7 +52,6 @@ namespace sage
 
         void onEnemyLeftClick(entt::entity self, entt::entity target) const
         {
-            if (self != gameData->controllableActorSystem->GetSelectedActor()) return;
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = target;
             stateController->ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
@@ -71,6 +68,7 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
+            // TODO: This needs to happen each time the selected actor is changed
 
             // Below are not disconnected in OnStateExit
             // Bridge was created in GameObjectFactory to connect controllable to cursor
@@ -200,7 +198,6 @@ namespace sage
 
     // ----------------------------
 
-    // TODO: This is just for actor's following the player. Rename it to show that
     class PlayerStateController::DestinationUnreachableState : public StateMachine
     {
         PlayerStateController* stateController;
