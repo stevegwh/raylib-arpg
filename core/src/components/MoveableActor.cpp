@@ -10,16 +10,29 @@
 
 namespace sage
 {
-
-    void FollowTarget::changePath() const
+    void FollowTarget::targetReachedDestination() const
     {
-        // TODO: Should replace with a hook
-        onPathChanged.publish(self, targetActor);
+        // TODO: Replace with a hook?
+        onTargetDestinationReached.publish(self, targetActor);
+    }
+
+    void FollowTarget::targetPathChanged() const
+    {
+        // TODO: Replace with a hook?
+        onTargetPathChanged.publish(self, targetActor);
+    }
+
+    void FollowTarget::targetMovementCancelled() const
+    {
+        // TODO: Replace with a hook?
+        onTargetMovementCancelled.publish(self, targetActor);
     }
 
     FollowTarget::~FollowTarget()
     {
-        onTargetPosUpdateCnx.release();
+        onTargetPathChangedCnx.release();
+        onTargetDestinationReachedCnx.release();
+        onTargetMovementCancelledCnx.release();
     }
 
     FollowTarget::FollowTarget(
@@ -28,6 +41,10 @@ namespace sage
     {
         auto& moveable = _registry->get<MoveableActor>(_targetActor);
         entt::sink sink{moveable.onPathChanged};
-        onTargetPosUpdateCnx = sink.connect<&FollowTarget::changePath>(this);
+        onTargetPathChangedCnx = sink.connect<&FollowTarget::targetPathChanged>(this);
+        entt::sink sink2{moveable.onMovementCancel};
+        onTargetMovementCancelledCnx = sink2.connect<&FollowTarget::targetMovementCancelled>(this);
+        entt::sink sink3{moveable.onDestinationReached};
+        onTargetDestinationReachedCnx = sink3.connect<&FollowTarget::targetReachedDestination>(this);
     }
 } // namespace sage

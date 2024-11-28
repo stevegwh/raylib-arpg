@@ -147,7 +147,7 @@ namespace sage
 
             entt::sink finishMovementSink{moveable.onDestinationReached};
             state.AddConnection(finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this));
-            entt::sink posUpdateSink{moveable.followTarget->onPathChanged};
+            entt::sink posUpdateSink{moveable.followTarget->onTargetPathChanged};
             state.AddConnection(posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this));
 
             onTargetPosUpdate(self, combatable.target);

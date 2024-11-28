@@ -102,11 +102,6 @@ namespace sage
       public:
         void Update(const entt::entity self) override
         {
-            if (self == gameData->controllableActorSystem->GetSelectedActor())
-            {
-                stateController->ChangeState(self, PartyMemberStateEnum::Default);
-            }
-
             const auto& moveable = registry->get<MoveableActor>(self);
             const auto& transform = registry->get<sgTransform>(self);
             const auto& followTrans = registry->get<sgTransform>(moveable.followTarget->targetActor);
@@ -134,20 +129,16 @@ namespace sage
 
             auto& state = registry->get<PartyMemberState>(self);
 
-            // TODO: Needs to be forwarded
-            // entt::sink sink1{targetMoveable.onDestinationReached};
-            // state.AddConnection(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
-
-            entt::sink sink2{moveable.followTarget->onPathChanged};
+            entt::sink sink1{moveable.onDestinationReached};
+            state.AddConnection(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
+            entt::sink sink2{moveable.followTarget->onTargetPathChanged};
             state.AddConnection(sink2.connect<&FollowingLeaderState::onTargetPathChanged>(this));
             entt::sink sink3{moveable.onMovementCancel};
             state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
             entt::sink sink4{moveable.onDestinationUnreachable};
             state.AddConnection(sink4.connect<&FollowingLeaderState::onDestinationUnreachable>(this));
-
-            // TODO: Needs to be forwarded!
-            //            entt::sink sink5{gameData->controllableActorSystem->onSelectedActorChange};
-            //            state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
+            // entt::sink sink5{moveable.followTarget->onTargetMovementCancelled};
+            // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
 
             onTargetPathChanged(self, target);
         }
@@ -347,18 +338,18 @@ namespace sage
         state.hooks.push_back(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
             entity, leaderMoveable.onStartMovement, state.onLeaderMove));
         entt::sink sink{state.onLeaderMove};
-        state.AddConnection(
-            sink.connect<&DefaultState::onLeaderMove>(GetSystem<DefaultState>(PartyMemberStateEnum::Default)));
+        sink.connect<&DefaultState::onLeaderMove>(GetSystem<DefaultState>(PartyMemberStateEnum::Default));
     }
 
     void PartyMemberStateController::onComponentRemoved(entt::entity entity)
     {
-        // Delete hook
-        const auto& state = registry->get<PartyMemberState>(entity);
+        auto& state = registry->get<PartyMemberState>(entity);
         for (const auto id : state.hooks)
         {
             gameData->reflectionSignalRouter->RemoveHook(id);
         }
+        entt::sink sink{state.onLeaderMove};
+        sink.disconnect<&DefaultState::onLeaderMove>(GetSystem<DefaultState>(PartyMemberStateEnum::Default));
     }
 
     PartyMemberStateController::PartyMemberStateController(entt::registry* _registry, GameData* _gameData)
