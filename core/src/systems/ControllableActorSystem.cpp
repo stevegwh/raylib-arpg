@@ -45,26 +45,12 @@ namespace sage
             old.selectedIndicator->SetHint(inactiveCol);
         }
         selectedActorId = id;
+
         auto& current = registry->get<ControllableActor>(selectedActorId);
         current.selectedIndicator->SetHint(activeCol);
         current.selectedIndicator->SetShader(
             ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
 
-        if (registry->any_of<PartyMemberState>(id))
-        {
-            registry->erase<PartyMemberState>(id);
-        }
-        for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
-        {
-            if (entity == id) continue;
-            if (registry->any_of<PlayerState>(entity))
-            {
-                registry->erase<PlayerState>(entity);
-            }
-            registry->emplace_or_replace<PartyMemberState>(entity);
-        }
-
-        registry->emplace<PlayerState>(id);
         auto& controllable = registry->get<ControllableActor>(id);
         controllable.ReleaseAllHooks(gameData->reflectionSignalRouter.get());
 
@@ -78,6 +64,26 @@ namespace sage
             id, gameData->cursor->onEnemyRightClick, controllable.onEnemyRightClick));
         controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
             id, gameData->cursor->onNPCClick, controllable.onNPCLeftClick));
+
+        for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
+        {
+            if (registry->any_of<PlayerState>(entity))
+            {
+                registry->erase<PlayerState>(entity);
+            }
+            if (registry->any_of<PartyMemberState>(entity))
+            {
+                registry->erase<PartyMemberState>(entity);
+            }
+        }
+        registry->emplace<PlayerState>(id);
+        for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
+        {
+            if (entity != id)
+            {
+                registry->emplace<PartyMemberState>(entity);
+            }
+        }
 
         onSelectedActorChange.publish(id);
     }
