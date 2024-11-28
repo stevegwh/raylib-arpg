@@ -9,7 +9,9 @@
 #include "components/ControllableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
+#include "components/States.hpp"
 #include "GameData.hpp"
+#include "PartySystem.hpp"
 #include "ResourceManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "TextureTerrainOverlay.hpp"
@@ -33,6 +35,7 @@ namespace sage
 
     void ControllableActorSystem::SetSelectedActor(entt::entity id)
     {
+        if (id == selectedActorId) return;
         if (selectedActorId != entt::null)
         {
             auto& old = registry->get<ControllableActor>(selectedActorId);
@@ -45,6 +48,22 @@ namespace sage
         current.selectedIndicator->SetHint(activeCol);
         current.selectedIndicator->SetShader(
             ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
+
+        if (registry->any_of<PartyMemberState>(id))
+        {
+            registry->erase<PartyMemberState>(id);
+        }
+        registry->emplace_or_replace<PlayerState>(id);
+        for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
+        {
+            if (entity == id) continue;
+            if (registry->any_of<PlayerState>(entity))
+            {
+                registry->erase<PlayerState>(entity);
+            }
+            registry->emplace_or_replace<PartyMemberState>(entity);
+        }
+
         onSelectedActorChange.publish(id);
     }
 

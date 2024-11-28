@@ -2,6 +2,7 @@
 
 #include "AbilityStateMachine.hpp"
 #include "GameModeStateMachine.hpp"
+#include "PartyMemberStateMachine.hpp"
 #include "PlayerStateMachine.hpp"
 #include "WavemobStateMachine.hpp"
 
@@ -20,9 +21,10 @@ namespace sage
         std::unique_ptr<GameModeStateController> gameModeStateMachine;
         std::unique_ptr<WavemobStateController> wavemobStatemachine;
         std::unique_ptr<PlayerStateController> playerStateMachine;
+        std::unique_ptr<PartyMemberStateController> partyMemberStateMachine;
         std::unique_ptr<AbilityStateController> abilityStateMachine;
-        void Update();
-        void Draw3D();
+        void Update() const;
+        void Draw3D() const;
         StateMachines(entt::registry* _registry, GameData* _gameData);
     };
 } // namespace sage

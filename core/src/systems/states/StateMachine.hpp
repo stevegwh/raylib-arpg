@@ -63,6 +63,12 @@ namespace sage
 
         std::unordered_map<StateEnum, std::unique_ptr<StateMachine>> states;
 
+        template <typename StateMachineDowncast>
+        StateMachineDowncast* GetSystem(StateEnum state)
+        {
+            return dynamic_cast<StateMachineDowncast*>(states[state].get());
+        }
+
         StateMachine* GetSystem(StateEnum state)
         {
             return states[state].get();
@@ -90,10 +96,10 @@ namespace sage
             {
                 return;
             }
-            std::cout << std::format(
-                "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
-            std::cout << std::format(
-                "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
+            // std::cout << std::format(
+            //     "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
+            // std::cout << std::format(
+            //     "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
             oldState.RemoveAllConnections();
             GetSystem(oldStateEnum)->OnStateExit(entity);
             oldState.SetState(newState);
@@ -109,11 +115,10 @@ namespace sage
             {
                 return;
             }
-            std::cout << "---------\n";
-            std::cout << std::format(
-                "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
-            std::cout << std::format(
-                "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
+            // std::cout << std::format(
+            //     "Entity {}, Exiting: {} \n", static_cast<int>(entity), magic_enum::enum_name(oldStateEnum));
+            // std::cout << std::format(
+            //     "Entity {}, Entering: {} \n", static_cast<int>(entity), magic_enum::enum_name(newState));
             oldState.RemoveAllConnections();
             GetSystem(oldStateEnum)->OnStateExit(entity);
             oldState.SetState(newState);
