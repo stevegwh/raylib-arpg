@@ -68,19 +68,6 @@ namespace sage
 
         void OnStateEnter(entt::entity entity) override
         {
-            // TODO: This needs to happen each time the selected actor is changed
-
-            // Below are not disconnected in OnStateExit
-            // Bridge was created in GameObjectFactory to connect controllable to cursor
-            auto& controllable = registry->get<ControllableActor>(entity);
-            entt::sink leftSink{controllable.onEnemyLeftClick};
-            leftSink.connect<&DefaultState::onEnemyLeftClick>(this);
-            entt::sink npcSink{controllable.onNPCLeftClick};
-            npcSink.connect<&DefaultState::onNPCLeftClick>(this);
-            entt::sink floorClickSink{controllable.onFloorClick};
-            floorClickSink.connect<&DefaultState::onFloorClick>(this);
-            // ----------------------------
-
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
@@ -95,6 +82,8 @@ namespace sage
             : StateMachine(_registry, _gameData), stateController(_stateController)
         {
         }
+
+        friend class PlayerStateController;
     };
 
     // ----------------------------
@@ -427,10 +416,33 @@ namespace sage
         }
     }
 
+    void PlayerStateController::onComponentAdded(entt::entity entity)
+    {
+        // Bridge was created in ControllableActorSystem to connect controllable to cursor
+        auto& controllable = registry->get<ControllableActor>(entity);
+        entt::sink leftSink{controllable.onEnemyLeftClick};
+        leftSink.connect<&DefaultState::onEnemyLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+        entt::sink npcSink{controllable.onNPCLeftClick};
+        npcSink.connect<&DefaultState::onNPCLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+        entt::sink floorClickSink{controllable.onFloorClick};
+        floorClickSink.connect<&DefaultState::onFloorClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+        // ----------------------------
+    }
+
+    void PlayerStateController::onComponentRemoved(entt::entity entity)
+    {
+        auto& controllable = registry->get<ControllableActor>(entity);
+        entt::sink leftSink{controllable.onEnemyLeftClick};
+        leftSink.disconnect<&DefaultState::onEnemyLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+        entt::sink npcSink{controllable.onNPCLeftClick};
+        npcSink.disconnect<&DefaultState::onNPCLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+        entt::sink floorClickSink{controllable.onFloorClick};
+        floorClickSink.disconnect<&DefaultState::onFloorClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+    }
+
     PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)
         : StateMachineController(_registry)
     {
-
         states[PlayerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData, this);
         states[PlayerStateEnum::MovingToAttackEnemy] =
             std::make_unique<MovingToAttackEnemyState>(_registry, _gameData, this);
@@ -442,5 +454,8 @@ namespace sage
             std::make_unique<MovingToLocationState>(_registry, _gameData, this);
         states[PlayerStateEnum::DestinationUnreachable] =
             std::make_unique<DestinationUnreachableState>(_registry, _gameData, this);
+
+        registry->on_construct<PlayerState>().connect<&PlayerStateController::onComponentAdded>(this);
+        registry->on_destroy<PlayerState>().connect<&PlayerStateController::onComponentRemoved>(this);
     }
 } // namespace sage

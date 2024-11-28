@@ -4,19 +4,22 @@
 
 #pragma once
 
-#include "raylib.h"
 #include <entt/entt.hpp>
-#include <memory>
+#include <vector>
 
 namespace sage
 {
+    class EntityReflectionSignalRouter;
     class TextureTerrainOverlay;
 
     class ControllableActor
     {
         entt::entity self;
+        std::vector<int> hooks;
 
       public:
+        void AddHook(int id);
+        void ReleaseAllHooks(EntityReflectionSignalRouter* router);
         std::unique_ptr<TextureTerrainOverlay>
             selectedIndicator; // Initialised by ControllableActorSystem on creation
         entt::sigh<void(entt::entity, entt::entity)> onEnemyLeftClick{};  // Self, Clicked enemy
@@ -24,6 +27,6 @@ namespace sage
         entt::sigh<void(entt::entity, entt::entity)> onFloorClick{};      // Self, object clicked (can discard)
         entt::sigh<void(entt::entity, entt::entity)> onNPCLeftClick{};
 
-        ControllableActor(entt::entity _self);
+        explicit ControllableActor(entt::entity _self);
     };
 } // namespace sage
