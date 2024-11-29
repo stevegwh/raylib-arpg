@@ -613,10 +613,10 @@ namespace sage
 
     void DialogOption::OnClick()
     {
-        auto* conversation = option.parent->parent;
-        if (option.nextIndex.has_value())
+        auto* conversation = option->parent->parent;
+        if (option->nextIndex.has_value())
         {
-            conversation->SelectOption(option.nextIndex.value());
+            conversation->SelectOption(option);
         }
         else
         {
@@ -627,13 +627,13 @@ namespace sage
     DialogOption::DialogOption(
         GameUIEngine* _engine,
         TableCell* _parent,
-        const dialog::Option& _option,
+        dialog::Option* _option,
         const FontInfo& _fontInfo,
         VertAlignment _vertAlignment,
         HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment), option(_option)
     {
-        content = option.description;
+        content = option->description;
     }
 
     void TitleBar::OnDragStart()

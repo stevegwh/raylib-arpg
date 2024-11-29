@@ -111,7 +111,7 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createQuestNPC(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, const char* name, entt::entity questId)
     {
         entt::entity id = registry->create();
 
@@ -142,7 +142,7 @@ namespace sage
 
         auto& dialog = registry->emplace<DialogComponent>(id);
         // TODO: Move to dialog factory
-        dialog.conversation = std::make_unique<dialog::Conversation>(id);
+        dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
         dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
@@ -150,35 +150,38 @@ namespace sage
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hello there, by speaking to me, you will complete a quest! \n";
             node->index = 0;
-            dialog::Option option1(node.get());
-            option1.description = "Oh, cool! \n";
-            option1.nextIndex = 1;
-            dialog::Option option2(node.get());
-            option2.description = "I don't want to complete the quest. \n";
-            option2.nextIndex = 1;
-            node->options.push_back(option1);
-            node->options.push_back(option2);
+            auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId, false);
+            option1->description = "Oh, cool! \n";
+            option1->nextIndex = 1;
+            auto option2 = std::make_unique<dialog::Option>(node.get());
+            option2->description = "I don't want to complete the quest. \n";
+            option2->nextIndex = 1;
+            node->options.push_back(std::move(option1));
+            node->options.push_back(std::move(option2));
             dialog.conversation->AddNode(std::move(node));
         }
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hahaha! \n";
             node->index = 0;
-            dialog::Option option1(node.get());
-            option1.description = "Take your leave \n";
-            node->options.push_back(option1);
+            auto option1 = std::make_unique<dialog::Option>(node.get());
+            option1->description = "Take your leave \n";
+            node->options.push_back(std::move(option1));
             dialog.conversation->AddNode(std::move(node));
         }
         // -------------------------------
 
-        auto& questTask = registry->emplace<QuestTaskComponent>(id);
-        questTask.taskType = QuestTaskComponent::TaskEnum::TALK; // TODO: Move to constructor
+        auto taskType = std::make_unique<TalkQuest>(registry, questId);
+        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry, std::move(taskType));
+        auto& quest = registry->get<Quest>(questId);
+        entt::sink sink{taskComponent.onTaskCompleted};
+        sink.connect<&Quest::IsComplete>(quest);
 
         return id;
     }
 
     entt::entity GameObjectFactory::createKnight(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, const char* name, entt::entity questId)
     {
         entt::entity id = registry->create();
 
@@ -209,36 +212,34 @@ namespace sage
 
         auto& dialog = registry->emplace<DialogComponent>(id);
         // TODO: Move to dialog factory
-        dialog.conversation = std::make_unique<dialog::Conversation>(id);
+        dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
         dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->content = "Hello there, this is a test sentence! \n";
+            node->content = "Hello there, talk to my friend! \n";
             node->index = 0;
-            dialog::Option option1(node.get());
-            option1.description = "Erm... I have no idea what you're talking about? \n";
-            option1.nextIndex = 1;
-            dialog::Option option2(node.get());
-            option2.description = "Right... thanks! \n";
-            option2.nextIndex = 1;
-            node->options.push_back(option1);
-            node->options.push_back(option2);
+            auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId, true);
+            option1->description = "Ok, sure. \n";
+            option1->nextIndex = 1;
+            auto option2 = std::make_unique<dialog::Option>(node.get());
+            option2->description = "No, thank you! \n";
+            option2->nextIndex = 1;
+            node->options.push_back(std::move(option1));
+            node->options.push_back(std::move(option2));
             dialog.conversation->AddNode(std::move(node));
         }
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->content = "Hahaha! \n";
+            node->content = "Ok! \n";
             node->index = 0;
-            dialog::Option option1(node.get());
-            option1.description = "Take your leave \n";
-            node->options.push_back(option1);
+            auto option1 = std::make_unique<dialog::Option>(node.get());
+            option1->description = "Take your leave \n";
+            node->options.push_back(std::move(option1));
             dialog.conversation->AddNode(std::move(node));
         }
         // -------------------------------
-
-        auto& questGiver = registry->emplace<QuestGiverComponent>(id);
 
         return id;
     }
@@ -368,8 +369,6 @@ namespace sage
             inventory.AddItem(itemId, 0, 1);
         }
         // ----------
-
-        auto& quest = registry->emplace<QuestReceiverComponent>(id);
 
         return id;
     }

@@ -331,7 +331,7 @@ namespace sage
 
     class DialogOption : public TextBox
     {
-        const dialog::Option& option;
+        dialog::Option* option;
         bool drawHighlight = false;
 
       public:
@@ -342,7 +342,7 @@ namespace sage
         DialogOption(
             GameUIEngine* _engine,
             TableCell* _parent,
-            const dialog::Option& _option,
+            dialog::Option* _option,
             const FontInfo& _fontInfo,
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);

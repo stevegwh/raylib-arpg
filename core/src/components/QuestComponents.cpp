@@ -4,30 +4,32 @@
 
 #include "QuestComponents.hpp"
 
+#include <iostream>
 #include <utility>
 
 namespace sage
 {
 
-    void BaseQuestComponent::AddQuest(entt::entity questId)
+    bool Quest::HasStarted() const
     {
-        if (!HasQuest(questId))
-        {
-            quests.push_back(questId);
-        }
+        return started;
     }
 
-    bool BaseQuestComponent::HasQuest(entt::entity questId)
+    void Quest::AddTask(entt::entity taskId)
     {
-        for (const auto& entity : quests)
-        {
-            if (questId == entity) return true;
-        }
-        return false;
+        tasks.push_back(taskId);
+    }
+
+    void Quest::StartQuest()
+    {
+        std::cout << "Quest started! \n";
+        started = true;
+        onQuestStart.publish(questId);
     }
 
     bool Quest::IsComplete()
     {
+        std::cout << "Quest complete! \n";
         if (completed)
         {
             return completed;
@@ -38,20 +40,11 @@ namespace sage
             if (!subQuest.IsComplete()) return false;
         }
         completed = true;
+        onQuestCompleted.publish(questId);
         return true;
     }
 
-    entt::entity Quest::GetQuestGiver() const
-    {
-        return questGiver;
-    }
-
-    Quest::Quest(
-        entt::registry* _registry,
-        entt::entity _questID,
-        entt::entity _questGiver,
-        std::vector<entt::entity> _tasks)
-        : registry(_registry), questId(_questID), questGiver(_questGiver), tasks(std::move(_tasks))
+    Quest::Quest(entt::registry* _registry, entt::entity _questID) : registry(_registry), questId(_questID)
     {
     }
 } // namespace sage

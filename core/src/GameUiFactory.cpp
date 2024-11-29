@@ -512,11 +512,11 @@ namespace sage
         descriptionCell->CreateTextbox(
             std::move(textbox), dialogComponent.conversation->GetCurrentNode()->content);
 
-        for (auto& o : dialogComponent.conversation->GetCurrentNode()->options)
+        for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
         {
             const auto optionRow = table->CreateTableRow();
             const auto optionCell = optionRow->CreateTableCell({10, 10, 5, 5});
-            auto option = std::make_unique<DialogOption>(engine, optionCell, o, _fontInfo);
+            auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), _fontInfo);
             optionCell->CreateDialogOption(std::move(option));
         }
         window->FinalizeLayout();
