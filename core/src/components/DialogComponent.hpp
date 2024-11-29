@@ -84,7 +84,6 @@ namespace sage
     {
         entt::entity dialogTarget; // Who are you talking with
         Vector3 conversationPos;   // Where the other person stands
-        // std::string sentence;      // tmp
         std::unique_ptr<dialog::Conversation> conversation;
 
         ~DialogComponent()
