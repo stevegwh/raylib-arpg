@@ -2,7 +2,6 @@
 
 #include "BaseSystem.hpp"
 
-#include <PriorityQueue.hpp>
 #include <slib.hpp>
 
 #include "entt/entt.hpp"

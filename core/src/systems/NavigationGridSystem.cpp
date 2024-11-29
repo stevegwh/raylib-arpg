@@ -964,21 +964,31 @@ namespace sage
                 FindNextBestLocation(startGridSquare, finishGridSquare, minRange, maxRange, extents);
         }
 
+        struct Compare
+        {
+            bool operator()(const std::pair<int, GridSquare>& a, const std::pair<int, GridSquare>& b) const
+            {
+                return a.first > b.first;
+            }
+        };
+
         std::vector<std::vector<bool>> visited(maxRange.row, std::vector<bool>(maxRange.col, false));
         std::vector<std::vector<GridSquare>> came_from(
             maxRange.row, std::vector<GridSquare>(maxRange.col, {-1, -1}));
         std::vector<std::vector<double>> cost_so_far(maxRange.row, std::vector<double>(maxRange.col, 0.0));
 
-        PriorityQueue<GridSquare, double> frontier;
+        std::priority_queue<std::pair<int, GridSquare>, std::vector<std::pair<int, GridSquare>>, Compare> frontier;
 
-        frontier.put(startGridSquare, 0);
+        frontier.emplace(0, startGridSquare);
         visited[startGridSquare.row][startGridSquare.col] = true;
 
         bool pathFound = false;
 
         while (!frontier.empty())
         {
-            auto current = frontier.get();
+            auto currentPair = frontier.top();
+            frontier.pop();
+            auto current = currentPair.second;
 
             if (current.row == finishGridSquare.row && current.col == finishGridSquare.col)
             {
@@ -1002,7 +1012,7 @@ namespace sage
                     cost_so_far[next.row][next.col] = new_cost;
                     double heuristic_cost = heuristic(next, finishGridSquare);
                     double priority = new_cost + heuristic_cost;
-                    frontier.put(next, priority);
+                    frontier.emplace(priority, next);
                     came_from[next.row][next.col] = current;
                     visited[next.row][next.col] = true;
                 }

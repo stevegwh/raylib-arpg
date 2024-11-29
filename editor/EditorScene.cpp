@@ -9,8 +9,8 @@
 #include "EditorSettings.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
+#include "LightManager.hpp"
 #include "systems/CollisionSystem.hpp"
-#include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "windows/FloatingWindow.hpp"
 

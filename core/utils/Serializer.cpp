@@ -7,11 +7,11 @@
 #include "abilities/AbilityData.hpp"
 #include "AssetSerializer.hpp"
 #include "components/Collideable.hpp"
-#include "components/Light.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/Spawner.hpp"
 #include "GameData.hpp"
+#include "Light.hpp"
 
 #include "cereal/archives/binary.hpp"
 #include "cereal/archives/xml.hpp"

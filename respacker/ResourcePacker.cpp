@@ -10,11 +10,11 @@
 #include <ResourceManager.hpp>
 #include <Serializer.hpp>
 
-#include "components/Light.hpp"
 #include "components/Spawner.hpp"
+#include "Light.hpp"
+#include "LightManager.hpp"
 #include "raylib.h"
 #include "raymath.h"
-#include "systems/LightSubSystem.hpp"
 
 #include <filesystem>
 #include <fstream>

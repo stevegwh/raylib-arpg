@@ -17,6 +17,7 @@
 // NB: We have to include all the headers required to build GameData
 #include "components/EquipmentComponent.hpp"
 #include "components/UberShaderComponent.hpp"
+#include "LightManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -26,7 +27,6 @@
 #include "systems/EquipmentSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/InventorySystem.hpp"
-#include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"

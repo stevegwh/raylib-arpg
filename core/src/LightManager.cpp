@@ -1,16 +1,16 @@
 
 
-#include "LightSubSystem.hpp"
+#include "LightManager.hpp"
 
 #include "Camera.hpp"
-#include "components/Light.hpp"
 #include "components/Renderable.hpp"
+#include "Light.hpp"
 
 #include <algorithm>
 
 namespace sage
 {
-    void LightSubSystem::updateShaderLights(Shader& _shader)
+    void LightManager::updateShaderLights(Shader& _shader)
     {
         updateAmbientLight(_shader);
         lightsCount = 0;
@@ -36,20 +36,20 @@ namespace sage
         SetShaderValue(_shader, gammaLoc, &gamma, SHADER_UNIFORM_FLOAT);
     }
 
-    void LightSubSystem::updateAmbientLight(Shader& _shader) const
+    void LightManager::updateAmbientLight(Shader& _shader) const
     {
         auto ambientLoc = GetShaderLocation(_shader, "ambient");
         float ambientValue[4] = {ambient[0], ambient[1], ambient[2], ambient[3]};
         SetShaderValue(_shader, ambientLoc, ambientValue, SHADER_UNIFORM_VEC4);
     }
 
-    void LightSubSystem::RemoveLight(entt::entity light)
+    void LightManager::RemoveLight(entt::entity light)
     {
         registry->destroy(light);
         RefreshLights();
     }
 
-    entt::entity LightSubSystem::CreateLight(int type, Vector3 position, Vector3 target, Color color)
+    entt::entity LightManager::CreateLight(int type, Vector3 position, Vector3 target, Color color)
     {
         if (lightsCount < MAX_LIGHTS)
         {
@@ -66,7 +66,7 @@ namespace sage
         return entt::null;
     }
 
-    void LightSubSystem::LinkShaderToLights(Shader& _shader)
+    void LightManager::LinkShaderToLights(Shader& _shader)
     {
         auto it = std::find_if(shaders.begin(), shaders.end(), [&_shader](const Shader& existingShader) {
             return existingShader.id == _shader.id;
@@ -80,19 +80,19 @@ namespace sage
         updateShaderLights(_shader);
     }
 
-    void LightSubSystem::SetAmbientLight(float r, float g, float b, float a)
+    void LightManager::SetAmbientLight(float r, float g, float b, float a)
     {
         ambient = {r, g, b, a};
         RefreshLights();
     }
 
-    void LightSubSystem::SetGamma(float g)
+    void LightManager::SetGamma(float g)
     {
         gamma = g;
         RefreshLights();
     }
 
-    void LightSubSystem::RefreshLights()
+    void LightManager::RefreshLights()
     {
         for (auto& _shader : shaders)
         {
@@ -100,7 +100,7 @@ namespace sage
         }
     }
 
-    void LightSubSystem::LinkRenderableToLight(entt::entity entity) const
+    void LightManager::LinkRenderableToLight(entt::entity entity) const
     {
         auto& renderable = registry->get<Renderable>(entity);
         for (int i = 0; i < renderable.GetModel()->GetMaterialCount(); ++i)
@@ -109,7 +109,7 @@ namespace sage
         }
     }
 
-    void LightSubSystem::DrawDebugLights() const
+    void LightManager::DrawDebugLights() const
     {
         for (const auto view = registry->view<Light>(); auto& entity : view)
         {
@@ -121,7 +121,7 @@ namespace sage
         }
     }
 
-    void LightSubSystem::Update() const
+    void LightManager::Update() const
     {
         auto [x, y, z] = camera->GetPosition();
         const float cameraPos[3] = {x, y, z};
@@ -131,8 +131,7 @@ namespace sage
         }
     }
 
-    LightSubSystem::LightSubSystem(entt::registry* _registry, Camera* _camera)
-        : registry(_registry), camera(_camera)
+    LightManager::LightManager(entt::registry* _registry, Camera* _camera) : registry(_registry), camera(_camera)
     {
         defaultShader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
