@@ -75,14 +75,13 @@ namespace sage
         : Scene(_registry, _keyMapping, _settings)
     {
 
-        auto knightId = GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
-        auto talkTaskEntity =
-            GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
-
         auto questEntity = registry->create();
-        auto& task = registry->get<QuestTaskComponent>(talkTaskEntity);
-        std::vector<entt::entity> tasks;
-        tasks.push_back(talkTaskEntity);
-        auto& quest = registry->emplace<Quest>(questEntity, registry, questEntity, knightId, tasks);
+        auto& quest = registry->emplace<Quest>(questEntity, registry, questEntity);
+
+        auto knightId =
+            GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight", questEntity);
+
+        auto talkTaskEntity =
+            GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC", questEntity);
     }
 } // namespace sage

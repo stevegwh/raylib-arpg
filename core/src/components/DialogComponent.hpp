@@ -10,35 +10,40 @@
 
 #include <cassert>
 #include <entt/entt.hpp>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <vector>
 
 namespace sage
 {
+    class Quest;
 
     namespace dialog
     {
         struct ConversationNode;
         class Conversation;
 
-        struct Option
+        class Option
         {
+          public:
             ConversationNode* parent;
             std::string description;
             std::optional<unsigned int> nextIndex;
-            explicit Option(ConversationNode* _parent) : parent(_parent)
-            {
-            }
+            virtual void OnSelected();
+            virtual ~Option() = default;
+            explicit Option(ConversationNode* _parent);
         };
 
-        struct QuestOption : public Option
+        class QuestOption : public Option
         {
-            entt::entity questId{};
+            bool questStart;
 
-            QuestOption(ConversationNode* _parent, entt::entity _questId) : Option(_parent), questId(_questId)
-            {
-            }
+          public:
+            entt::entity questId{};
+            void OnSelected() override;
+
+            QuestOption(ConversationNode* _parent, entt::entity _questId, bool _questStart);
         };
 
         struct ConversationNode
@@ -46,10 +51,8 @@ namespace sage
             Conversation* parent;
             unsigned int index = 0;
             std::string content;
-            std::vector<Option> options;
-            explicit ConversationNode(Conversation* _parent) : parent(_parent)
-            {
-            }
+            std::vector<std::unique_ptr<Option>> options;
+            explicit ConversationNode(Conversation* _parent);
         };
 
         class Conversation
@@ -59,20 +62,20 @@ namespace sage
             std::vector<std::unique_ptr<ConversationNode>> nodes;
 
           public:
+            entt::registry* registry;
             const entt::entity owner;
             entt::sigh<void(Conversation*)> onConversationProgress;
             entt::sigh<void()> onConversationEnd;
-            entt::sigh<void()> onQuestAccepted; // TODO: Need to pass information about the quest to the manager
 
             [[nodiscard]] ConversationNode* GetCurrentNode() const
             {
                 return nodes.at(current).get();
             }
 
-            void SelectOption(const unsigned int index)
+            void SelectOption(Option* option)
             {
-                assert(GetCurrentNode()->options[index].nextIndex.has_value());
-                current = GetCurrentNode()->options[index].nextIndex.value();
+                option->OnSelected();
+                current = option->nextIndex.value();
                 onConversationProgress.publish(this);
             }
 
@@ -87,7 +90,8 @@ namespace sage
                 nodes.push_back(std::move(node));
             }
 
-            explicit Conversation(entt::entity _owner) : owner(_owner)
+            explicit Conversation(entt::registry* _registry, entt::entity _owner)
+                : registry(_registry), owner(_owner)
             {
             }
         };

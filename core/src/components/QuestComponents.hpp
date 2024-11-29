@@ -5,6 +5,7 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <iostream>
 
 #include <vector>
 
@@ -12,49 +13,90 @@ namespace sage
 {
     class Quest;
 
-    //    FETCH, // Fetch something
-    //    KILL,  // Kill something
-    //    TALK,  // Talk to someone
-    //    GO     // Go to a specific location
+    class QuestTaskType
+    {
+      protected:
+        entt::registry* registry;
+        // entt::entity questId;
+        entt::entity questTarget;
+
+        explicit QuestTaskType(entt::registry* _registry, entt::entity _questTarget)
+            : registry(_registry), questTarget(_questTarget)
+        {
+        }
+
+      public:
+        [[nodiscard]] virtual bool CheckComplete()
+        {
+            return false;
+        };
+        virtual ~QuestTaskType() = default;
+    };
+
+    struct FetchQuest : public QuestTaskType
+    {
+        // Get what?
+        [[nodiscard]] bool CheckComplete() override
+        {
+            return false;
+        }
+
+        explicit FetchQuest(entt::registry* _registry, entt::entity _questTarget)
+            : QuestTaskType(_registry, _questTarget)
+        {
+        }
+    };
+
+    struct TalkQuest : public QuestTaskType
+    {
+        // With who?
+        [[nodiscard]] bool CheckComplete() override
+        {
+            return false;
+        }
+
+        explicit TalkQuest(entt::registry* _registry, entt::entity _questTarget)
+            : QuestTaskType(_registry, _questTarget)
+        {
+        }
+    };
+
+    struct KillQuest : public QuestTaskType
+    {
+        // Kill who?
+        [[nodiscard]] bool CheckComplete() override
+        {
+            return false;
+        }
+
+        explicit KillQuest(entt::registry* _registry, entt::entity _questTarget)
+            : QuestTaskType(_registry, _questTarget)
+        {
+        }
+    };
 
     // Attach this to entities that are part of a quest
     struct QuestTaskComponent
     {
-        enum class TaskEnum
-        {
-            FETCH,
-            KILL,
-            GO,
-            TALK
-        };
-        TaskEnum taskType;
+        std::unique_ptr<QuestTaskType> taskType;
         bool completed = false;
-        [[nodiscard]] bool IsComplete()
+        entt::sigh<void(QuestTaskComponent*)> onTaskCompleted;
+
+        void MarkComplete()
         {
-            return completed;
+            std::cout << "Task complete! \n";
+            completed = true;
+            onTaskCompleted.publish(this);
         }
-    };
 
-    class BaseQuestComponent
-    {
-        std::vector<entt::entity> quests;
-
-      public:
-        void AddQuest(entt::entity questId);
-        [[nodiscard]] bool HasQuest(entt::entity questId);
-    };
-
-    class QuestGiverComponent : public BaseQuestComponent
-    {
-
-      public:
-    };
-
-    // Attach this to entities who can receive quests
-    class QuestReceiverComponent : public BaseQuestComponent
-    {
-
-      public:
+        [[nodiscard]] bool IsComplete() const
+        {
+            return completed || taskType->CheckComplete();
+        }
+        explicit QuestTaskComponent(entt::registry* _registry, std::unique_ptr<QuestTaskType> _taskType)
+            : taskType(std::move(_taskType))
+        {
+        }
     };
 
     struct QuestRewards
@@ -65,23 +107,24 @@ namespace sage
     class Quest
     {
         entt::registry* registry{};
+        bool started = false;
         bool completed = false;
         entt::entity questId{};
-        entt::entity questGiver = entt::null;
         int experience{};
         std::string journalExplanation;
         std::vector<QuestRewards> rewards;
         std::vector<entt::entity> tasks;
 
       public:
+        void StartQuest();
+        void AddTask(entt::entity taskId);
         [[nodiscard]] bool IsComplete();
-        [[nodiscard]] entt::entity GetQuestGiver() const;
+        [[nodiscard]] bool HasStarted() const;
 
-        explicit Quest(
-            entt::registry* _registry,
-            entt::entity _questId,
-            entt::entity _questGiver,
-            std::vector<entt::entity> _tasks);
+        entt::sigh<void(entt::entity)> onQuestStart;
+        entt::sigh<void(entt::entity)> onQuestCompleted;
+
+        explicit Quest(entt::registry* _registry, entt::entity _questId);
     };
 
 } // namespace sage
