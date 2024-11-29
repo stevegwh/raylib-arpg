@@ -17,6 +17,7 @@
 
 // Systems
 #include "GameUiFactory.hpp"
+#include "LightManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -24,7 +25,6 @@
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
-#include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"

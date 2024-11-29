@@ -1,7 +1,7 @@
 #pragma once
 
+#include "entt/entt.hpp"
 #include "raylib.h"
-#include <entt/entt.hpp>
 
 #define MAX_LIGHTS 25 // Max dynamic lights supported by shader
 
@@ -16,7 +16,7 @@ namespace sage
         LIGHT_POINT
     };
 
-    class LightSubSystem
+    class LightManager
     {
         entt::registry* registry;
         Camera* camera;
@@ -42,6 +42,6 @@ namespace sage
         void LinkRenderableToLight(entt::entity entity) const;
         void DrawDebugLights() const;
         void Update() const;
-        explicit LightSubSystem(entt::registry* _registry, Camera* _camera);
+        explicit LightManager(entt::registry* _registry, Camera* _camera);
     };
 } // namespace sage

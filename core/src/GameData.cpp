@@ -14,6 +14,7 @@
 // Systems
 #include "AbilityFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "LightManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -23,7 +24,6 @@
 #include "systems/EquipmentSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/InventorySystem.hpp"
-#include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
@@ -40,7 +40,7 @@ namespace sage
           userInput(std::make_unique<UserInput>(_keyMapping, _settings)),
           cursor(std::make_unique<Cursor>(_registry, this)),
           camera(std::make_unique<Camera>(_registry, userInput.get(), this)),
-          lightSubSystem(std::make_unique<LightSubSystem>(_registry, camera.get())),
+          lightSubSystem(std::make_unique<LightManager>(_registry, camera.get())),
           uiEngine(std::make_unique<GameUIEngine>(_registry, this)),
           renderSystem(std::make_unique<RenderSystem>(_registry)),
           collisionSystem(std::make_unique<CollisionSystem>(_registry)),

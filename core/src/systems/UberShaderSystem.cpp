@@ -6,8 +6,8 @@
 #include "components/Renderable.hpp"
 #include "components/UberShaderComponent.hpp"
 #include "GameData.hpp"
+#include "LightManager.hpp"
 #include "ResourceManager.hpp"
-#include "systems/LightSubSystem.hpp"
 
 namespace sage
 {

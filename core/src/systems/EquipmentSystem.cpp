@@ -14,11 +14,11 @@
 #include "components/WeaponComponent.hpp"
 #include "ControllableActorSystem.hpp"
 #include "GameData.hpp"
+#include "LightManager.hpp"
 #include "PartySystem.hpp"
 #include "ResourceManager.hpp"
 #include "slib.hpp"
 #include "systems/AnimationSystem.hpp"
-#include "systems/LightSubSystem.hpp"
 
 #include "components/PartyMemberComponent.hpp"
 #include "components/UberShaderComponent.hpp"

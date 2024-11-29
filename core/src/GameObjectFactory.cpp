@@ -25,9 +25,9 @@
 
 #include "AbilityFactory.hpp"
 #include "AssetManager.hpp"
+#include "LightManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/LightSubSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
