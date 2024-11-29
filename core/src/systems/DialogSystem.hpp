@@ -6,15 +6,12 @@
 
 #include "systems/BaseSystem.hpp"
 
+#include "components/DialogComponent.hpp"
 #include "entt/entt.hpp"
 #include "raylib.h"
 
 namespace sage
 {
-    namespace dialog
-    {
-        class Conversation;
-    }
     class GameData;
     class sgTransform;
     class Window;
@@ -30,6 +27,7 @@ namespace sage
       public:
         void StartConversation(const sgTransform& cutscenePose, entt::entity npc);
         void EndConversation();
+        dialog::Conversation* GetConversation(entt::entity owner, ConversationID conversationId);
         explicit DialogSystem(entt::registry* registry, GameData* _gameData);
     };
 } // namespace sage

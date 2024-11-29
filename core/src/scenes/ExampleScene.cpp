@@ -16,6 +16,7 @@
 #include "Settings.hpp"
 
 // Systems
+#include "components/QuestComponents.hpp"
 #include "GameUiFactory.hpp"
 #include "LightManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
@@ -73,15 +74,15 @@ namespace sage
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : Scene(_registry, _keyMapping, _settings)
     {
-        //        lightSubSystem->lights[0] =
-        //            CreateLight(LIGHT_POINT, {0, 100, 0}, Vector3Zero(), RAYWHITE, lightSubSystem->shader);
 
-        // GameObjectFactory::createPlayer(registry, data.get(), {30.0f, 0, 20.0f}, "Player");
-        GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
-        // GameObjectFactory::createPortal(registry, data.get(), Vector3{52, 0, -10});
-        // GameObjectFactory::createWizardTower(registry, data.get(), Vector3{52, 0, -30});
+        auto knightId = GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
+        auto talkTaskEntity =
+            GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
 
-        // TODO: Have a better way of initialising the UI
-        // GameUiFactory::CreateExampleWindow(data->uiEngine.get());
+        auto questEntity = registry->create();
+        auto& task = registry->get<QuestTaskComponent>(talkTaskEntity);
+        std::vector<entt::entity> tasks;
+        tasks.push_back(talkTaskEntity);
+        auto& quest = registry->emplace<Quest>(questEntity, registry, questEntity, knightId, tasks);
     }
 } // namespace sage

@@ -5,6 +5,9 @@
 #pragma once
 
 #include "raylib.h"
+
+#include "common_types.hpp"
+
 #include <cassert>
 #include <entt/entt.hpp>
 #include <memory>
@@ -29,6 +32,15 @@ namespace sage
             }
         };
 
+        struct QuestOption : public Option
+        {
+            entt::entity questId{};
+
+            QuestOption(ConversationNode* _parent, entt::entity _questId) : Option(_parent), questId(_questId)
+            {
+            }
+        };
+
         struct ConversationNode
         {
             Conversation* parent;
@@ -42,6 +54,7 @@ namespace sage
 
         class Conversation
         {
+            ConversationID conversationId{};
             unsigned int current = 0;
             std::vector<std::unique_ptr<ConversationNode>> nodes;
 
@@ -49,6 +62,7 @@ namespace sage
             const entt::entity owner;
             entt::sigh<void(Conversation*)> onConversationProgress;
             entt::sigh<void()> onConversationEnd;
+            entt::sigh<void()> onQuestAccepted; // TODO: Need to pass information about the quest to the manager
 
             [[nodiscard]] ConversationNode* GetCurrentNode() const
             {
@@ -85,10 +99,5 @@ namespace sage
         entt::entity dialogTarget; // Who are you talking with
         Vector3 conversationPos;   // Where the other person stands
         std::unique_ptr<dialog::Conversation> conversation;
-
-        ~DialogComponent()
-        {
-            std::cout << "Blah \n";
-        }
     };
 } // namespace sage

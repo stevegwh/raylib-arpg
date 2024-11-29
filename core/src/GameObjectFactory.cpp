@@ -11,35 +11,34 @@
 #include "UserInput.hpp"
 #include <Timer.hpp>
 
+#include "AbilityFactory.hpp"
+#include "AssetManager.hpp"
 #include "components/Ability.hpp"
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/DialogComponent.hpp"
+#include "components/EquipmentComponent.hpp"
 #include "components/HealthBar.hpp"
+#include "components/InventoryComponent.hpp"
+#include "components/ItemComponent.hpp"
 #include "components/MoveableActor.hpp"
+#include "components/PartyMemberComponent.hpp"
+#include "components/QuestComponents.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
-
-#include "AbilityFactory.hpp"
-#include "AssetManager.hpp"
+#include "components/UberShaderComponent.hpp"
+#include "components/WeaponComponent.hpp"
 #include "LightManager.hpp"
+#include "raymath.h"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
-
-#include "components/EquipmentComponent.hpp"
-#include "components/InventoryComponent.hpp"
-#include "components/ItemComponent.hpp"
-#include "components/PartyMemberComponent.hpp"
-#include "components/UberShaderComponent.hpp"
-#include "components/WeaponComponent.hpp"
-#include "raymath.h"
 
 #include <slib.hpp>
 
@@ -111,6 +110,73 @@ namespace sage
         return id;
     }
 
+    entt::entity GameObjectFactory::createQuestNPC(
+        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+    {
+        entt::entity id = registry->create();
+
+        auto& transform = registry->emplace<sgTransform>(id, id);
+        GridSquare actorIdx{};
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+
+        // TODO: There should be a "place actor" function that does below automatically (and calls "occupy grid
+        // square").
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        transform.SetPosition({position.x, height, position.z});
+
+        Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+        auto& renderable = registry->emplace<Renderable>(
+            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
+        renderable.name = name;
+        registry->emplace<UberShaderComponent>(
+            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+
+        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
+        animation.animationMap[AnimationEnum::IDLE] = 0;
+        animation.animationMap[AnimationEnum::TALK] = 1;
+
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
+        collideable.collisionLayer = CollisionLayer::NPC;
+        data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
+
+        auto& dialog = registry->emplace<DialogComponent>(id);
+        // TODO: Move to dialog factory
+        dialog.conversation = std::make_unique<dialog::Conversation>(id);
+        dialog.conversationPos =
+            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+
+        {
+            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+            node->content = "Hello there, by speaking to me, you will complete a quest! \n";
+            node->index = 0;
+            dialog::Option option1(node.get());
+            option1.description = "Oh, cool! \n";
+            option1.nextIndex = 1;
+            dialog::Option option2(node.get());
+            option2.description = "I don't want to complete the quest. \n";
+            option2.nextIndex = 1;
+            node->options.push_back(option1);
+            node->options.push_back(option2);
+            dialog.conversation->AddNode(std::move(node));
+        }
+        {
+            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+            node->content = "Hahaha! \n";
+            node->index = 0;
+            dialog::Option option1(node.get());
+            option1.description = "Take your leave \n";
+            node->options.push_back(option1);
+            dialog.conversation->AddNode(std::move(node));
+        }
+        // -------------------------------
+
+        auto& questTask = registry->emplace<QuestTaskComponent>(id);
+        questTask.taskType = QuestTaskComponent::TaskEnum::TALK; // TODO: Move to constructor
+
+        return id;
+    }
+
     entt::entity GameObjectFactory::createKnight(
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
@@ -142,6 +208,7 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialog = registry->emplace<DialogComponent>(id);
+        // TODO: Move to dialog factory
         dialog.conversation = std::make_unique<dialog::Conversation>(id);
         dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
@@ -169,6 +236,9 @@ namespace sage
             node->options.push_back(option1);
             dialog.conversation->AddNode(std::move(node));
         }
+        // -------------------------------
+
+        auto& questGiver = registry->emplace<QuestGiverComponent>(id);
 
         return id;
     }
@@ -263,6 +333,7 @@ namespace sage
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
 
+        // TODO: Move to factory
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
         data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
@@ -275,6 +346,7 @@ namespace sage
         auto& inventory = registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);
 
+        // TODO: Move to factory
         {
             auto itemId = registry->create();
             auto& item = registry->emplace<ItemComponent>(itemId);
@@ -295,8 +367,9 @@ namespace sage
             item.AddFlag(ItemFlags::WEAPON | ItemFlags::SWORD);
             inventory.AddItem(itemId, 0, 1);
         }
+        // ----------
 
-        // Always set state last to ensure everything is initialised properly before.
+        auto& quest = registry->emplace<QuestReceiverComponent>(id);
 
         return id;
     }

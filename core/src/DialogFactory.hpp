@@ -6,12 +6,9 @@
 
 namespace sage
 {
-    class Quest
-    {
-        bool completed = false;
 
-      public:
-        [[nodiscard]] bool IsComplete();
+    class DialogFactory
+    {
     };
 
 } // namespace sage
