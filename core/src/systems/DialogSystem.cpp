@@ -8,7 +8,6 @@
 #include "Cursor.hpp"
 #include "GameData.hpp"
 
-#include "components/Animation.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
 #include "GameUiEngine.hpp"
@@ -52,6 +51,11 @@ namespace sage
         oldCamPos = {};
         oldCamTarget = {};
         dialogWindow->Remove();
+    }
+
+    dialog::Conversation* DialogSystem::GetConversation(entt::entity owner, ConversationID conversationId)
+    {
+        return nullptr;
     }
 
     DialogSystem::DialogSystem(entt::registry* registry, GameData* _gameData)

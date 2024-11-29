@@ -16,6 +16,8 @@ namespace sage
     {
         static entt::entity createEnemy(
             entt::registry* registry, GameData* data, Vector3 position, const char* name);
+        static entt::entity createQuestNPC(
+            entt::registry* registry, GameData* data, Vector3 position, const char* name);
         static entt::entity createKnight(
             entt::registry* registry, GameData* data, Vector3 position, const char* name);
         static entt::entity createPlayer(
