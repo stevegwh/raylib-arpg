@@ -1,20 +1,15 @@
 #include "PartyMemberStateMachine.hpp"
 
-#include "GameData.hpp"
-
-#include "AbilityFactory.hpp"
-#include "components/Ability.hpp"
 #include "components/Animation.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "GameData.hpp"
+#include "StateMachines.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
 #include "raylib.h"
-#include "StateMachines.hpp"
-#include "systems/PartySystem.hpp"
 
 #include <cassert>
 #include <format>
@@ -125,7 +120,6 @@ namespace sage
             moveable.followTarget.emplace(registry, self, followTarget);
 
             const auto target = moveable.followTarget->targetActor;
-            auto& targetMoveable = registry->get<MoveableActor>(target);
 
             auto& state = registry->get<PartyMemberState>(self);
 
@@ -205,6 +199,8 @@ namespace sage
 
         void OnStateEnter(const entt::entity self) override
         {
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
         void OnStateExit(const entt::entity self) override
@@ -229,7 +225,7 @@ namespace sage
         PartyMemberStateController* stateController;
         struct StateData
         {
-            entt::entity followTarget{}; // optional
+            entt::entity followTarget{};
             Vector3 originalDestination{};
             PartyMemberStateEnum previousState{};
             double timeStart{};
@@ -250,7 +246,7 @@ namespace sage
             if (_data.tryCount >= _data.maxTries)
             {
                 moveable.followTarget.reset();
-                // TODO: BUG: This makes them pathfind to Vector3Zero.
+                gameData->actorMovementSystem->CancelMovement(entity);
                 stateController->ChangeState(entity, PartyMemberStateEnum::Default);
             }
 

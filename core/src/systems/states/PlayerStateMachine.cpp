@@ -32,10 +32,14 @@ namespace sage
     {
         PlayerStateController* stateController;
 
+        // If all below are persistent connections, maybe it would be better to move them to
+        // the PlayerStateController? Having them hear implies they are part of the state and will
+        // disconnect on state change.
+
         void onFloorClick(const entt::entity self, entt::entity x) const
         {
             auto& state = registry->get<PlayerState>(self);
-            // Change back to default then back again
+            // We're not allowed to change to the same state, so change to default and then back again
             if (state.GetCurrentState() == PlayerStateEnum::MovingToLocation)
             {
                 stateController->ChangeState(self, PlayerStateEnum::Default);
@@ -115,7 +119,6 @@ namespace sage
 
         void OnStateEnter(entt::entity self) override
         {
-
             gameData->actorMovementSystem->CancelMovement(self);
             gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
             auto& moveable = registry->get<MoveableActor>(self);

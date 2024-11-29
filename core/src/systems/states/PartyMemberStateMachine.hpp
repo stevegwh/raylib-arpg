@@ -2,7 +2,7 @@
 #pragma once
 
 #include "components/States.hpp"
-#include "systems/states/StateMachine.hpp"
+#include "StateMachine.hpp"
 #include <entt/entt.hpp>
 
 namespace sage
