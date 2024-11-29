@@ -336,6 +336,7 @@ namespace sage
 
     // ----------------------------
 
+    // TODO: Move to its own state machine
     class PlayerStateController::CombatState : public StateMachine
     {
         PlayerStateController* stateController;
