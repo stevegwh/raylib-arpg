@@ -75,6 +75,9 @@ namespace sage
         : Scene(_registry, _keyMapping, _settings)
     {
 
+        // Quests should have a manager (a hash map, basically) so we can choose a consistent identifier (a string)
+        // that will fetch the entity id for the quest Quests should all be initialised (i.e., their entity
+        // created), before spawning any actors. This stops us having to pass the quest ids as a parameter.
         auto questEntity = registry->create();
         auto& quest = registry->emplace<Quest>(questEntity, registry, questEntity);
 
