@@ -18,6 +18,9 @@ namespace sage
     void Quest::AddTask(entt::entity taskId)
     {
         tasks.push_back(taskId);
+        auto& taskComponent = registry->get<QuestTaskComponent>(taskId);
+        entt::sink sink{taskComponent.onTaskCompleted};
+        sink.connect<&Quest::IsComplete>(this);
     }
 
     void Quest::StartQuest()

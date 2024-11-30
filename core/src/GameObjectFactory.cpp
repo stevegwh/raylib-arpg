@@ -185,8 +185,7 @@ namespace sage
         auto taskType = std::make_unique<TalkQuest>(registry, questId);
         auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry, std::move(taskType));
         auto& quest = registry->get<Quest>(questId);
-        entt::sink sink{taskComponent.onTaskCompleted};
-        sink.connect<&Quest::IsComplete>(quest);
+        quest.AddTask(id);
 
         return id;
     }
@@ -236,14 +235,10 @@ namespace sage
 
             auto option1 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
                 auto& quest = registry->get<Quest>(questId);
-                return !quest.HasStarted() || !quest.IsComplete();
+                return !quest.HasStarted() && !quest.IsComplete();
             });
             option1->description = "Do you have any quests for me? \n";
             option1->nextIndex = 1;
-
-            auto option2 = std::make_unique<dialog::Option>(node.get());
-            option2->description = "Sorry, I must be leaving. \n";
-            option2->nextIndex = 2;
 
             auto option3 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
                 auto& quest = registry->get<Quest>(questId);
@@ -252,9 +247,13 @@ namespace sage
             option3->description = "I completed the quest! \n";
             option3->nextIndex = 2;
 
+            auto option2 = std::make_unique<dialog::Option>(node.get());
+            option2->description = "Sorry, I must be leaving. \n";
+            option2->nextIndex = 2;
+
             node->options.push_back(std::move(option1));
-            node->options.push_back(std::move(option2));
             node->options.push_back(std::move(option3));
+            node->options.push_back(std::move(option2));
             dialog.conversation->AddNode(std::move(node));
         }
 
