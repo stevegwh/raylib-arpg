@@ -27,20 +27,33 @@ namespace sage
         class Option
         {
           public:
-            ConversationNode* parent;
-            std::string description;
             std::optional<unsigned int> nextIndex;
+            std::string description;
+            ConversationNode* parent;
+            [[nodiscard]] bool HasNextIndex();
+            virtual std::variant<bool, unsigned int> GetNextIndex();
+            virtual bool ShouldShow();
             virtual void OnSelected();
             virtual ~Option() = default;
             explicit Option(ConversationNode* _parent);
         };
 
+        class ConditionalOption : public Option
+        {
+            std::function<bool()> condition;
+
+          public:
+            bool ShouldShow() override;
+            explicit ConditionalOption(ConversationNode* _parent, std::function<bool()> _condition);
+        };
+
         class QuestOption : public Option
         {
             bool questStart;
+            entt::entity questId{};
 
           public:
-            entt::entity questId{};
+            bool ShouldShow() override;
             void OnSelected() override;
 
             QuestOption(ConversationNode* _parent, entt::entity _questId, bool _questStart);

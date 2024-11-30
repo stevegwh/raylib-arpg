@@ -150,22 +150,31 @@ namespace sage
         auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->content = "Hello there, by speaking to me, you will complete a quest! \n";
+            node->content = "Hello there, how can I help? \n";
             node->index = 0;
             auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId, false);
-            option1->description = "Oh, cool! \n";
+            option1->description = "I want to complete the quest. \n";
             option1->nextIndex = 1;
             auto option2 = std::make_unique<dialog::Option>(node.get());
-            option2->description = "I don't want to complete the quest. \n";
-            option2->nextIndex = 1;
+            option2->description = "Hello! \n";
+            option2->nextIndex = 2;
             node->options.push_back(std::move(option1));
             node->options.push_back(std::move(option2));
             dialog.conversation->AddNode(std::move(node));
         }
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->content = "Hahaha! \n";
-            node->index = 0;
+            node->content = "Quest complete! \n";
+            node->index = 1; // TODO: ???
+            auto option1 = std::make_unique<dialog::Option>(node.get());
+            option1->description = "Take your leave \n";
+            node->options.push_back(std::move(option1));
+            dialog.conversation->AddNode(std::move(node));
+        }
+        {
+            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+            node->content = "Hello! \n";
+            node->index = 2; // TODO: ???
             auto option1 = std::make_unique<dialog::Option>(node.get());
             option1->description = "Take your leave \n";
             node->options.push_back(std::move(option1));
@@ -219,16 +228,49 @@ namespace sage
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
         auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
+
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->content = "Hello there, talk to my friend! \n";
+            node->content = "Hello! \n";
             node->index = 0;
+
+            auto option1 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
+                auto& quest = registry->get<Quest>(questId);
+                return !quest.HasStarted() || !quest.IsComplete();
+            });
+            option1->description = "Do you have any quests for me? \n";
+            option1->nextIndex = 1;
+
+            auto option2 = std::make_unique<dialog::Option>(node.get());
+            option2->description = "Sorry, I must be leaving. \n";
+            option2->nextIndex = 2;
+
+            auto option3 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
+                auto& quest = registry->get<Quest>(questId);
+                return quest.IsComplete();
+            });
+            option3->description = "I completed the quest! \n";
+            option3->nextIndex = 2;
+
+            node->options.push_back(std::move(option1));
+            node->options.push_back(std::move(option2));
+            node->options.push_back(std::move(option3));
+            dialog.conversation->AddNode(std::move(node));
+        }
+
+        {
+            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+            node->content = "Sure, talk to my friend! \n";
+            node->index = 1;
+
             auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId, true);
             option1->description = "Ok, sure. \n";
-            option1->nextIndex = 1;
+            option1->nextIndex = 2;
+
             auto option2 = std::make_unique<dialog::Option>(node.get());
             option2->description = "No, thank you! \n";
-            option2->nextIndex = 1;
+            option2->nextIndex = 2;
+
             node->options.push_back(std::move(option1));
             node->options.push_back(std::move(option2));
             dialog.conversation->AddNode(std::move(node));
@@ -236,7 +278,7 @@ namespace sage
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Ok! \n";
-            node->index = 0;
+            node->index = 2;
             auto option1 = std::make_unique<dialog::Option>(node.get());
             option1->description = "Take your leave \n";
             node->options.push_back(std::move(option1));

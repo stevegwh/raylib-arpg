@@ -13,6 +13,7 @@ namespace sage
 {
     class Quest;
 
+    // TODO: I don't think these will be needed
     class QuestTaskType
     {
       protected:
@@ -93,6 +94,7 @@ namespace sage
         {
             return completed || taskType->CheckComplete();
         }
+
         explicit QuestTaskComponent(entt::registry* _registry, std::unique_ptr<QuestTaskType> _taskType)
             : taskType(std::move(_taskType))
         {
