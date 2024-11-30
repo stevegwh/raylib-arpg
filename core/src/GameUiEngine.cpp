@@ -1209,6 +1209,23 @@ namespace sage
         sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
     }
 
+    void DialogPortrait::Draw2D()
+    {
+        DrawTextureRec(
+            tex, {0, 0, static_cast<float>(tex.width), static_cast<float>(-tex.height)}, {rec.x, rec.y}, WHITE);
+    }
+
+    DialogPortrait::DialogPortrait(GameUIEngine* _engine, TableCell* _parent, Texture _tex)
+        : ImageBox(
+              _engine,
+              _parent,
+              _tex,
+              OverflowBehaviour::SHRINK_TO_FIT,
+              VertAlignment::MIDDLE,
+              HoriAlignment::CENTER)
+    {
+    }
+
     void AbilitySlot::RetrieveInfo()
     {
         if (const Ability* ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber))

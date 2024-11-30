@@ -517,7 +517,7 @@ namespace sage
             auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
             descriptionCell->CreateTextbox(
                 std::move(textbox),
-                std::format("{}: {}", renderable.name, dialogComponent.conversation->GetCurrentNode()->content));
+                std::format("[{}]: {}", renderable.name, dialogComponent.conversation->GetCurrentNode()->content));
         }
         // ----------------
 
@@ -531,13 +531,7 @@ namespace sage
             const auto& info = engine->registry->get<PartyMemberComponent>(
                 engine->gameData->controllableActorSystem->GetSelectedActor());
             auto tex = info.portraitImg.texture;
-            auto img = std::make_unique<ImageBox>(
-                engine,
-                portraitCell,
-                tex,
-                ImageBox::OverflowBehaviour::SHRINK_TO_FIT,
-                VertAlignment::MIDDLE,
-                HoriAlignment::CENTER);
+            auto img = std::make_unique<DialogPortrait>(engine, portraitCell, tex);
             portraitCell->CreateImagebox(std::move(img));
 
             const auto optionsTable = panel->CreateTable(80);
