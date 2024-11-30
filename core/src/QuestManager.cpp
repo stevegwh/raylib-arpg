@@ -7,9 +7,11 @@
 namespace sage
 {
 
-    void QuestManager::CreateQuest(entt::registry* _registry, const std::string& key)
+    entt::entity QuestManager::CreateQuest(entt::registry* _registry, const std::string& key)
     {
-        map.emplace(key, _registry->create());
+        auto entity = _registry->create();
+        map.emplace(key, entity);
+        return entity;
     }
 
     void QuestManager::RemoveQuest(const std::string& key)
