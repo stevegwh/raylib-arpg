@@ -514,6 +514,7 @@ namespace sage
 
         for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
         {
+            if (!o->ShouldShow()) continue;
             const auto optionRow = table->CreateTableRow();
             const auto optionCell = optionRow->CreateTableCell({10, 10, 5, 5});
             auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), _fontInfo);
