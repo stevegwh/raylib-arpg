@@ -483,7 +483,7 @@ namespace sage
     {
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
-        float w = Settings::TARGET_SCREEN_WIDTH * 0.4;
+        float w = Settings::TARGET_SCREEN_WIDTH * 0.65;
         float h = Settings::TARGET_SCREEN_HEIGHT * 0.25;
         auto _windowDocked = std::make_unique<WindowDocked>(
             engine->gameData->settings,
@@ -503,7 +503,7 @@ namespace sage
         auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
         const auto table = panel->CreateTable();
         const auto descriptionRow = table->CreateTableRow();
-        const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 5, 5});
+        const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
 
         TextBox::FontInfo _fontInfo;
         _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
@@ -512,12 +512,13 @@ namespace sage
         descriptionCell->CreateTextbox(
             std::move(textbox), dialogComponent.conversation->GetCurrentNode()->content);
 
+        unsigned int i = 0;
         for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
         {
             if (!o->ShouldShow()) continue;
             const auto optionRow = table->CreateTableRow();
-            const auto optionCell = optionRow->CreateTableCell({10, 10, 5, 5});
-            auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), _fontInfo);
+            const auto optionCell = optionRow->CreateTableCell({10, 10, 50, 20});
+            auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
             optionCell->CreateDialogOption(std::move(option));
         }
         window->FinalizeLayout();
