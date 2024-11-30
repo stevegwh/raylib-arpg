@@ -5,10 +5,13 @@
 
 ## To Do
 
-- [ ]  Use new UI framework for dialogue
+- [x]  Use new UI framework for dialogue
 - [ ]  Replace the literal model for items with the dota 2 style "boxes"
 - [ ]  Cooldown timers on abilities
-- [ ] Improve placement of tooltips and abstract tooltips into a class.
+- [x] Improve placement of tooltips and abstract tooltips into a class.
+- [ ] Make dialog box look like DOS2.
+- [ ] Outline weapons, characters and clickable objects
+- [ ] Killable, fetch and "interact with" quests
 
 ----
 
