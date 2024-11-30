@@ -19,6 +19,7 @@
 #include "components/QuestComponents.hpp"
 #include "GameUiFactory.hpp"
 #include "LightManager.hpp"
+#include "QuestManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -74,17 +75,12 @@ namespace sage
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : Scene(_registry, _keyMapping, _settings)
     {
+        auto questId = QuestManager::GetInstance().CreateQuest(registry, "Test Quest");
+        registry->emplace<Quest>(questId, registry, questId);
 
-        // Quests should have a manager (a hash map, basically) so we can choose a consistent identifier (a string)
-        // that will fetch the entity id for the quest Quests should all be initialised (i.e., their entity
-        // created), before spawning any actors. This stops us having to pass the quest ids as a parameter.
-        auto questEntity = registry->create();
-        auto& quest = registry->emplace<Quest>(questEntity, registry, questEntity);
-
-        auto knightId =
-            GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight", questEntity);
+        auto knightId = GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
 
         auto talkTaskEntity =
-            GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC", questEntity);
+            GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
     }
 } // namespace sage

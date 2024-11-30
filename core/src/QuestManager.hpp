@@ -17,9 +17,9 @@ namespace sage
         ~QuestManager() = default;
 
       public:
-        void CreateQuest(entt::registry* _registry, const std::string& key);
+        entt::entity CreateQuest(entt::registry* _registry, const std::string& key);
         void RemoveQuest(const std::string& key);
-        entt::entity GetQuest(const std::string& key) const;
+        [[nodiscard]] entt::entity GetQuest(const std::string& key) const;
 
         static QuestManager& GetInstance()
         {

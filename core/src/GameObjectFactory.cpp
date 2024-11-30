@@ -32,6 +32,7 @@
 #include "components/UberShaderComponent.hpp"
 #include "components/WeaponComponent.hpp"
 #include "LightManager.hpp"
+#include "QuestManager.hpp"
 #include "raymath.h"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
@@ -111,7 +112,7 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createQuestNPC(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name, entt::entity questId)
+        entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
 
@@ -146,6 +147,7 @@ namespace sage
         dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
+        auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hello there, by speaking to me, you will complete a quest! \n";
@@ -181,7 +183,7 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createKnight(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name, entt::entity questId)
+        entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
 
@@ -216,6 +218,7 @@ namespace sage
         dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
 
+        auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hello there, talk to my friend! \n";
