@@ -628,12 +628,13 @@ namespace sage
         GameUIEngine* _engine,
         TableCell* _parent,
         dialog::Option* _option,
+        unsigned int _index,
         const FontInfo& _fontInfo,
         VertAlignment _vertAlignment,
         HoriAlignment _horiAlignment)
-        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment), option(_option)
+        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment), option(_option), index(_index)
     {
-        content = option->description;
+        content = std::format("{}: {}", _index, option->description);
     }
 
     void TitleBar::OnDragStart()

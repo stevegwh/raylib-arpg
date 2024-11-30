@@ -332,6 +332,7 @@ namespace sage
     class DialogOption : public TextBox
     {
         dialog::Option* option;
+        unsigned int index{};
         bool drawHighlight = false;
 
       public:
@@ -343,6 +344,7 @@ namespace sage
             GameUIEngine* _engine,
             TableCell* _parent,
             dialog::Option* _option,
+            unsigned int _index,
             const FontInfo& _fontInfo,
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
