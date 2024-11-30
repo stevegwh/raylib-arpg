@@ -2569,22 +2569,10 @@ namespace sage
 #pragma region GameUIEngine
     void GameUIEngine::pruneWindows()
     {
-        {
-            std::vector<unsigned int> toRemove;
-            for (unsigned int i = 0; i < windows.size(); ++i)
-            {
-                const auto& window = windows[i];
-                if (window->IsMarkedForRemoval())
-                {
-                    toRemove.push_back(i);
-                }
-            }
-
-            for (auto& i : toRemove)
-            {
-                windows.erase(windows.begin() + i);
-            }
-        }
+        windows.erase(
+            std::remove_if(
+                windows.begin(), windows.end(), [](const auto& window) { return window->IsMarkedForRemoval(); }),
+            windows.end());
 
         if (tooltipWindow && tooltipWindow->IsMarkedForRemoval())
         {
@@ -2786,9 +2774,9 @@ namespace sage
     {
         const auto mousePos = GetMousePosition();
 
-        for (auto& window : std::ranges::reverse_view(windows))
+        for (auto& window : windows)
         {
-            if (!window || window->IsHidden()) continue;
+            if (!window || window->IsMarkedForRemoval() || window->IsHidden()) continue;
 
             if (!PointInsideRect(window->rec, mousePos) || !mouseInNonObscuredWindowRegion(window.get(), mousePos))
             {
@@ -2886,8 +2874,8 @@ namespace sage
         {
             gameData->cursor->Enable();
             gameData->cursor->EnableContextSwitching();
-            pruneWindows();
             processWindows();
+            pruneWindows();
         }
     }
 
