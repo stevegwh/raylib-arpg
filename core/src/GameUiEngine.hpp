@@ -482,6 +482,15 @@ namespace sage
         friend class TableCell;
     };
 
+    class DialogPortrait : public ImageBox
+    {
+
+      public:
+        void Draw2D() override;
+        DialogPortrait(GameUIEngine* _engine, TableCell* _parent, Texture _tex);
+        friend class TableCell;
+    };
+
     class AbilitySlot : public ImageBox
     {
         unsigned int slotNumber{};
@@ -566,6 +575,7 @@ namespace sage
         bool autoSize = true;
 
       public:
+        // TODO: use polymorphism for any duplicates
         TextBox* CreateTextbox(std::unique_ptr<TextBox> _textBox, const std::string& _content);
         DialogOption* CreateDialogOption(std::unique_ptr<DialogOption> _dialogOption);
         TitleBar* CreateTitleBar(std::unique_ptr<TitleBar> _titleBar, const std::string& _title);
