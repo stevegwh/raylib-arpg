@@ -29,7 +29,7 @@ namespace sage
 
     bool Quest::IsComplete()
     {
-        std::cout << "Quest complete! \n";
+
         if (completed)
         {
             return completed;
@@ -39,6 +39,7 @@ namespace sage
             auto& subQuest = registry->get<QuestTaskComponent>(entity);
             if (!subQuest.IsComplete()) return false;
         }
+        std::cout << "Quest complete! \n";
         completed = true;
         onQuestCompleted.publish(questId);
         return true;
