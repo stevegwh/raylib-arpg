@@ -10,9 +10,12 @@
 #include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
+#include "components/PartyMemberComponent.hpp"
+#include "components/Renderable.hpp"
 #include "GameData.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/InventorySystem.hpp"
 #include "systems/PartySystem.hpp"
@@ -484,7 +487,7 @@ namespace sage
         const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
 
         float w = Settings::TARGET_SCREEN_WIDTH * 0.65;
-        float h = Settings::TARGET_SCREEN_HEIGHT * 0.25;
+        float h = Settings::TARGET_SCREEN_HEIGHT * 0.35;
         auto _windowDocked = std::make_unique<WindowDocked>(
             engine->gameData->settings,
             nPatchTexture,
@@ -498,28 +501,55 @@ namespace sage
             Padding{32, 32, 16, 16});
         auto window = engine->CreateWindowDocked(std::move(_windowDocked));
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        auto panel = window->CreatePanel();
 
         auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
-        const auto table = panel->CreateTable();
-        const auto descriptionRow = table->CreateTableRow();
-        const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
-
         TextBox::FontInfo _fontInfo;
+        _fontInfo.baseFontSize = 20;
         _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
 
-        auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
-        descriptionCell->CreateTextbox(
-            std::move(textbox), dialogComponent.conversation->GetCurrentNode()->content);
-
-        unsigned int i = 0;
-        for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
+        // NPC Part
         {
-            if (!o->ShouldShow()) continue;
-            const auto optionRow = table->CreateTableRow();
-            const auto optionCell = optionRow->CreateTableCell({10, 10, 50, 20});
-            auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
-            optionCell->CreateDialogOption(std::move(option));
+            auto& renderable = engine->registry->get<Renderable>(npc);
+            auto panel = window->CreatePanel();
+            const auto table = panel->CreateTable();
+            const auto descriptionRow = table->CreateTableRow();
+            const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
+            auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
+            descriptionCell->CreateTextbox(
+                std::move(textbox),
+                std::format("{}: {}", renderable.name, dialogComponent.conversation->GetCurrentNode()->content));
+        }
+        // ----------------
+
+        // Player part
+        {
+            auto panel = window->CreatePanel();
+            const auto portraitTable = panel->CreateTable();
+            auto portraitRow = portraitTable->CreateTableRow();
+            auto portraitCell = portraitRow->CreateTableCell();
+
+            const auto& info = engine->registry->get<PartyMemberComponent>(
+                engine->gameData->controllableActorSystem->GetSelectedActor());
+            auto tex = info.portraitImg.texture;
+            auto img = std::make_unique<ImageBox>(
+                engine,
+                portraitCell,
+                tex,
+                ImageBox::OverflowBehaviour::SHRINK_TO_FIT,
+                VertAlignment::MIDDLE,
+                HoriAlignment::CENTER);
+            portraitCell->CreateImagebox(std::move(img));
+
+            const auto optionsTable = panel->CreateTable(80);
+            unsigned int i = 0;
+            for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
+            {
+                if (!o->ShouldShow()) continue;
+                const auto optionRow = optionsTable->CreateTableRow();
+                const auto optionCell = optionRow->CreateTableCell({10, 10, 10, 10});
+                auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
+                optionCell->CreateDialogOption(std::move(option));
+            }
         }
         window->FinalizeLayout();
         return window;
