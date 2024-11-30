@@ -165,7 +165,8 @@ namespace sage
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Quest complete! \n";
-            node->index = 1; // TODO: ???
+            node->index =
+                1; // TODO: Is this necessary? Surely it'll just take the index number in the order of push_back
             auto option1 = std::make_unique<dialog::Option>(node.get());
             option1->description = "Take your leave \n";
             node->options.push_back(std::move(option1));

@@ -13,6 +13,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <variant>
 #include <vector>
 
 namespace sage
