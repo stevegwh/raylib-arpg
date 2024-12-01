@@ -7,10 +7,11 @@
 #include "AssetID.hpp"
 
 #include <string>
-#include <type_traits>
 
 namespace sage
 {
+    enum class ItemID;
+
     enum class ItemRarity
     {
         COMMON,
@@ -65,6 +66,7 @@ namespace sage
 
     struct ItemComponent
     {
+        ItemID id;
         static constexpr float MAX_ITEM_DROP_RANGE = 40.0f;
         std::string name;
         std::string description;

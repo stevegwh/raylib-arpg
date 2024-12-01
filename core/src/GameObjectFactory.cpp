@@ -31,6 +31,7 @@
 #include "components/States.hpp"
 #include "components/UberShaderComponent.hpp"
 #include "components/WeaponComponent.hpp"
+#include "ItemFactory.hpp"
 #include "LightManager.hpp"
 #include "QuestManager.hpp"
 #include "raymath.h"
@@ -152,7 +153,7 @@ namespace sage
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hello there, how can I help? \n";
             node->index = 0;
-            auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId, false);
+            auto option1 = std::make_unique<dialog::QuestHandInOption>(node.get(), questId);
             option1->description = "I want to complete the quest. \n";
             option1->nextIndex = 1;
             auto option2 = std::make_unique<dialog::Option>(node.get());
@@ -175,6 +176,86 @@ namespace sage
         {
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hello! \n";
+            node->index = 2; // TODO: ???
+            auto option1 = std::make_unique<dialog::Option>(node.get());
+            option1->description = "Take your leave \n";
+            node->options.push_back(std::move(option1));
+            dialog.conversation->AddNode(std::move(node));
+        }
+        // -------------------------------
+
+        auto taskType = std::make_unique<TalkQuest>(registry, questId);
+        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry, std::move(taskType));
+        auto& quest = registry->get<Quest>(questId);
+        quest.AddTask(id);
+
+        return id;
+    }
+
+    entt::entity GameObjectFactory::createFetchQuestNPC(
+        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+    {
+        entt::entity id = registry->create();
+
+        auto& transform = registry->emplace<sgTransform>(id, id);
+        GridSquare actorIdx{};
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+
+        // TODO: There should be a "place actor" function that does below automatically (and calls "occupy grid
+        // square").
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        transform.SetPosition({position.x, height, position.z});
+
+        Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+        auto& renderable = registry->emplace<Renderable>(
+            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
+        renderable.name = name;
+        registry->emplace<UberShaderComponent>(
+            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+
+        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
+        animation.animationMap[AnimationEnum::IDLE] = 0;
+        animation.animationMap[AnimationEnum::TALK] = 1;
+
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
+        collideable.collisionLayer = CollisionLayer::NPC;
+        data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
+
+        auto& dialog = registry->emplace<DialogComponent>(id);
+        // TODO: Move to dialog factory
+        dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
+        dialog.conversationPos =
+            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+
+        auto questId = QuestManager::GetInstance().GetQuest("Item Fetch Quest");
+        {
+            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+            node->content = "Hello there, how can I help? \n";
+            node->index = 0;
+            auto option1 = std::make_unique<dialog::QuestHandInOption>(node.get(), questId);
+            option1->description = "I found this item on the ground, is it yours? \n";
+            option1->nextIndex = 1;
+            auto option2 = std::make_unique<dialog::Option>(node.get());
+            option2->description = "Take your leave. \n";
+            option2->nextIndex = 2;
+            node->options.push_back(std::move(option1));
+            node->options.push_back(std::move(option2));
+            dialog.conversation->AddNode(std::move(node));
+        }
+        {
+            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+            node->content = "Oh, thank you! I've been looking everywhere for this. \n";
+            node->index =
+                1; // TODO: Is this necessary? Surely it'll just take the index number in the order of push_back
+            auto option1 = std::make_unique<dialog::Option>(node.get());
+            option1->description = "Take your leave \n";
+            node->options.push_back(std::move(option1));
+            dialog.conversation->AddNode(std::move(node));
+        }
+        {
+            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+            node->content = "Good day. \n";
             node->index = 2; // TODO: ???
             auto option1 = std::make_unique<dialog::Option>(node.get());
             option1->description = "Take your leave \n";
@@ -263,7 +344,7 @@ namespace sage
             node->content = "Sure, talk to my friend! \n";
             node->index = 1;
 
-            auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId, true);
+            auto option1 = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
             option1->description = "Ok, sure. \n";
             option1->nextIndex = 2;
 
@@ -379,7 +460,7 @@ namespace sage
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::PLAYER;
 
-        // TODO: Move to factory
+        // TODO: Move elsewhere/read from save file
         // Initialise starting abilities
         data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
         data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
@@ -387,33 +468,10 @@ namespace sage
             2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
         data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
-        // ---
-
         auto& inventory = registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);
-
-        // TODO: Move to factory
-        {
-            auto itemId = registry->create();
-            auto& item = registry->emplace<ItemComponent>(itemId);
-            item.name = "Dagger";
-            item.description = "A test inventory item.";
-            item.icon = AssetID::IMG_ICON_WEAPON_DAGGER01;
-            item.model = AssetID::MDL_WPN_DAGGER01;
-            item.AddFlag(ItemFlags::WEAPON | ItemFlags::DAGGER);
-            inventory.AddItem(itemId, 0, 0);
-        }
-        {
-            auto itemId = registry->create();
-            auto& item = registry->emplace<ItemComponent>(itemId);
-            item.name = "Sword";
-            item.description = "A test inventory item.";
-            item.icon = AssetID::IMG_ICON_WEAPON_SWORD01;
-            item.model = AssetID::MDL_WPN_SWORD01;
-            item.AddFlag(ItemFlags::WEAPON | ItemFlags::SWORD);
-            inventory.AddItem(itemId, 0, 1);
-        }
-        // ----------
+        inventory.AddItem(data->itemFactory->GetItem(ItemID::DAGGER), 0, 0);
+        inventory.AddItem(data->itemFactory->GetItem(ItemID::SWORD), 0, 1);
 
         return id;
     }
@@ -511,7 +569,7 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::BUILDING;
     }
 
-    bool GameObjectFactory::spawnInventoryItem(
+    bool GameObjectFactory::spawnItemInWorld(
         entt::registry* registry, GameData* data, entt::entity itemId, Vector3 position)
     {
         auto& item = registry->get<ItemComponent>(itemId);

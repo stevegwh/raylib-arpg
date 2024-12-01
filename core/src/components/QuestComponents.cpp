@@ -5,7 +5,6 @@
 #include "QuestComponents.hpp"
 
 #include <iostream>
-#include <utility>
 
 namespace sage
 {
@@ -23,6 +22,25 @@ namespace sage
         sink.connect<&Quest::IsComplete>(this);
     }
 
+    unsigned int Quest::GetTaskCount() const
+    {
+        return tasks.size();
+    }
+
+    unsigned int Quest::GetTaskCompleteCount() const
+    {
+        unsigned int count = 0;
+        for (const auto& task : tasks)
+        {
+            auto& taskComponent = registry->get<QuestTaskComponent>(task);
+            if (taskComponent.IsComplete())
+            {
+                ++count;
+            }
+        }
+        return count;
+    }
+
     void Quest::StartQuest()
     {
         std::cout << "Quest started! \n";
@@ -32,7 +50,6 @@ namespace sage
 
     bool Quest::IsComplete()
     {
-
         if (completed)
         {
             return completed;

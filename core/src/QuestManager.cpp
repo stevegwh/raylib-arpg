@@ -3,6 +3,7 @@
 //
 
 #include "QuestManager.hpp"
+#include "components/QuestComponents.hpp"
 
 namespace sage
 {
@@ -10,7 +11,9 @@ namespace sage
     entt::entity QuestManager::CreateQuest(entt::registry* _registry, const std::string& key)
     {
         auto entity = _registry->create();
+        _registry->emplace<Quest>(entity, _registry, entity);
         map.emplace(key, entity);
+
         return entity;
     }
 

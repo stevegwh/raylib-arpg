@@ -18,6 +18,7 @@ namespace sage
     struct KeyMapping;
     class GameUIEngine;
 
+    class ItemFactory;
     class EquipmentSystem;
     class RenderSystem;
     class CollisionSystem;
@@ -61,6 +62,7 @@ namespace sage
         std::unique_ptr<HealthBarSystem> healthBarSystem;
         std::unique_ptr<StateMachines> stateMachines;
         std::unique_ptr<AbilityFactory> abilityRegistry;
+        std::unique_ptr<ItemFactory> itemFactory;
         std::unique_ptr<PlayerAbilitySystem> playerAbilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
