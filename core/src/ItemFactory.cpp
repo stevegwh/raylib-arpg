@@ -31,7 +31,7 @@ namespace sage
         item.description = "A test inventory item.";
         item.icon = AssetID::IMG_ICON_WEAPON_SWORD01;
         item.model = AssetID::MDL_WPN_SWORD01;
-        item.AddFlag(ItemFlags::WEAPON | ItemFlags::SWORD);
+        item.AddFlag(ItemFlags::WEAPON | ItemFlags::SWORD | ItemFlags::MAIN_HAND_ONLY);
         return itemEntity;
     }
 

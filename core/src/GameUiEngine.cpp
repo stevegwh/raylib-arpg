@@ -1473,8 +1473,9 @@ namespace sage
             {
                 return true;
             }
-            if (itemType == EquipmentSlotName::RIGHTHAND &&
-                !item.HasAnyFlag(ItemFlags::RIGHT_HAND_RESTRICTED_FLAGS))
+            const ItemFlags RIGHT_HAND_RESTRICTED_FLAGS =
+                ItemFlags::MAIN_HAND_ONLY | ItemFlags::TWO_HANDED | ItemFlags::BOW | ItemFlags::CROSSBOW;
+            if (itemType == EquipmentSlotName::RIGHTHAND && !item.HasAnyFlag(RIGHT_HAND_RESTRICTED_FLAGS))
             {
                 return true;
             }
@@ -1543,6 +1544,7 @@ namespace sage
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
+            // TODO: BUG: Can swap main hand only to offhand here
             const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
             if (!engine->gameData->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
             {
