@@ -72,7 +72,7 @@ namespace sage::serializer
     }
 
     template <typename T>
-    void SaveClassJson(const char* path, const char* name, const T& toSave)
+    void SaveClassJson(const char* path, const T& toSave)
     {
         std::cout << "START: Saving class data to json file." << std::endl;
         using namespace entt::literals;
@@ -88,7 +88,7 @@ namespace sage::serializer
         {
             // output finishes flushing its contents when it goes out of scope
             cereal::JSONOutputArchive output{storage};
-            output.setNextName(name);
+            // output.setNextName(name);
             output(toSave);
         }
 
