@@ -20,11 +20,11 @@ namespace sage
     void Application::init()
     {
         Settings _settings;
-        serializer::DeserializeXMLFile<Settings>("resources/settings.xml", _settings);
+        serializer::DeserializeJsonFile<Settings>("resources/settings.json", _settings);
         settings = std::make_unique<Settings>(_settings);
 
         KeyMapping _keyMapping;
-        serializer::DeserializeXMLFile<KeyMapping>("resources/keybinding.xml", _keyMapping);
+        serializer::DeserializeJsonFile<KeyMapping>("resources/keybinding.json", _keyMapping);
         keyMapping = std::make_unique<KeyMapping>(_keyMapping);
 
         SetConfigFlags(FLAG_MSAA_4X_HINT);

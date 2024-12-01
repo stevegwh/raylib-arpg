@@ -21,7 +21,7 @@
 
 namespace sage
 {
-    enum class ItemFlags;
+    enum class ItemFlags : unsigned int;
 }
 template <>
 struct magic_enum::customize::enum_range<sage::ItemFlags>
@@ -31,7 +31,6 @@ struct magic_enum::customize::enum_range<sage::ItemFlags>
 
 namespace sage
 {
-    enum class ItemID;
 
     enum class ItemRarity
     {
@@ -84,7 +83,6 @@ namespace sage
 
     struct ItemComponent
     {
-        ItemID id;
         static constexpr float MAX_ITEM_DROP_RANGE = 40.0f;
         std::string name;
         std::string description;
@@ -120,13 +118,14 @@ namespace sage
         void load(Archive& archive)
         {
             std::vector<std::string> flagNames;
+            std::string _rarity;
+            std::string _icon;
+            std::string _model;
 
-            archive(name, description, flagNames);
+            archive(name, description, _rarity, flagNames, _icon, _model);
 
-            // Reset flags
             flags = static_cast<ItemFlags>(0);
 
-            // Reconstruct flags from names
             for (const auto& flagName : flagNames)
             {
                 auto maybeFlag = magic_enum::enum_cast<ItemFlags>(flagName);
@@ -135,7 +134,10 @@ namespace sage
                     AddFlag(*maybeFlag);
                 }
             }
-            
+
+            rarity = magic_enum::enum_cast<ItemRarity>(_rarity).value();
+            icon = magic_enum::enum_cast<AssetID>(_icon).value();
+            model = magic_enum::enum_cast<AssetID>(_model).value();
         }
 
         // Helper methods for flags

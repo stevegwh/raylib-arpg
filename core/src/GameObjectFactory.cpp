@@ -470,8 +470,8 @@ namespace sage
 
         auto& inventory = registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);
-        inventory.AddItem(data->itemFactory->GetItem(ItemID::DAGGER), 0, 0);
-        inventory.AddItem(data->itemFactory->GetItem(ItemID::SWORD), 0, 1);
+        inventory.AddItem(data->itemFactory->GetItem("Dagger"), 0, 0);
+        inventory.AddItem(data->itemFactory->GetItem("Sword"), 0, 1);
 
         return id;
     }

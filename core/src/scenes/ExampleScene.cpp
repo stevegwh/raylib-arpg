@@ -85,7 +85,7 @@ namespace sage
         GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
 
         {
-            auto item = data->itemFactory->GetItem(ItemID::DAGGER);
+            auto item = data->itemFactory->GetItem("Dagger");
             GameObjectFactory::spawnItemInWorld(registry, data.get(), item, {0, 0, 0});
             auto quest2Id = QuestManager::GetInstance().CreateQuest(registry, "Item Fetch Quest");
             auto taskType = std::make_unique<FetchQuest>(registry, quest2Id);
@@ -96,8 +96,8 @@ namespace sage
             quest.StartQuest();
         }
 
-        ViewSerializer<ItemComponent> itemComponents(registry);
-        serializer::SaveClassJson<ViewSerializer<ItemComponent>>(
-            "resources/items.json", "ItemFactory", itemComponents);
+        // ViewSerializer<ItemComponent> itemComponents(registry);
+        // serializer::SaveClassJson<ViewSerializer<ItemComponent>>(
+        //     "resources/items.json", "ItemFactory", itemComponents);
     }
 } // namespace sage
