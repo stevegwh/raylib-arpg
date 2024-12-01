@@ -1,9 +1,10 @@
 #pragma once
 
 #include "components/Animation.hpp"
+#include "enum_flag_operators.hpp"
+
 #include <cereal/cereal.hpp>
 #include <string>
-#include <type_traits>
 
 namespace sage
 {
@@ -96,13 +97,6 @@ namespace sage
         CIRCULAR_MAGIC_CURSOR
     };
 
-    // Enable bitwise operations
-    template <typename E>
-    struct EnableBitMaskOperators
-    {
-        static const bool enable = false;
-    };
-
     template <>
     struct EnableBitMaskOperators<AbilityBehaviour>
     {
@@ -120,28 +114,6 @@ namespace sage
     {
         static const bool enable = true;
     };
-
-    // Bitwise operators
-    template <typename E>
-    typename std::enable_if<EnableBitMaskOperators<E>::enable, E>::type operator|(E lhs, E rhs)
-    {
-        using underlying = typename std::underlying_type<E>::type;
-        return static_cast<E>(static_cast<underlying>(lhs) | static_cast<underlying>(rhs));
-    }
-
-    template <typename E>
-    typename std::enable_if<EnableBitMaskOperators<E>::enable, E>::type operator&(E lhs, E rhs)
-    {
-        using underlying = typename std::underlying_type<E>::type;
-        return static_cast<E>(static_cast<underlying>(lhs) & static_cast<underlying>(rhs));
-    }
-
-    template <typename E>
-    typename std::enable_if<EnableBitMaskOperators<E>::enable, E&>::type operator|=(E& lhs, E rhs)
-    {
-        lhs = lhs | rhs;
-        return lhs;
-    }
 
     /**
      * Auto attack: REPEAT_AUTO | SPAWN_AT_CASTER (needed?) | CASTER_FOLLOW | MOVEMENT_HITSCAN | CAST_INSTANT |
