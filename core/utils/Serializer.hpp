@@ -22,7 +22,7 @@ namespace sage::serializer
 {
     void SaveMap(entt::registry& source, const char* path);
     void LoadMap(entt::registry* destination, const char* path);
-    void LoadBinFile(entt::registry* destination, const char* path);
+    void LoadAssetBinFIle(entt::registry* destination, const char* path);
     void LoadAbilityData(AbilityData& abilityData, const char* path);
 
     template <typename T>
@@ -94,6 +94,28 @@ namespace sage::serializer
 
         storage.close();
         std::cout << "FINISH: Saving class data to json file." << std::endl;
+    }
+
+    template <typename T>
+    void DeserializeJsonFile(const char* path, T& target)
+    {
+        std::cout << "START: Loading data from file." << std::endl;
+        using namespace entt::literals;
+
+        std::ifstream storage(path);
+        if (storage.is_open())
+        {
+            cereal::JSONInputArchive input{storage};
+            input(target);
+            storage.close();
+        }
+        else
+        {
+            // File doesn't exist, create a new file with the default key mapping
+            std::cout << "INFO: File not found. Creating a new file with defaults." << std::endl;
+            SaveClassJson<T>(path, target);
+        }
+        std::cout << "FINISH: Loading data from file." << std::endl;
     }
 
     template <typename T>
