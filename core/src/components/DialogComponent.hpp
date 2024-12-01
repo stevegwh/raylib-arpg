@@ -8,6 +8,13 @@
 
 #include "common_types.hpp"
 
+#include "cereal/cereal.hpp"
+#include "cereal/types/string.hpp"
+#include "cereal/types/vector.hpp"
+#include "entt/core/hashed_string.hpp"
+#include "entt/core/type_traits.hpp"
+#include <cereal/archives/json.hpp>
+
 #include <cassert>
 #include <entt/entt.hpp>
 #include <iostream>
@@ -88,6 +95,19 @@ namespace sage
             unsigned int index = 0;
             std::string content;
             std::vector<std::unique_ptr<Option>> options;
+
+            template <class Archive>
+            void save(Archive& archive) const
+            {
+                archive();
+            }
+
+            template <class Archive>
+            void load(Archive& archive)
+            {
+                archive();
+            }
+
             explicit ConversationNode(Conversation* _parent);
         };
 
@@ -126,6 +146,18 @@ namespace sage
                 nodes.push_back(std::move(node));
             }
 
+            template <class Archive>
+            void save(Archive& archive) const
+            {
+                archive();
+            }
+
+            template <class Archive>
+            void load(Archive& archive)
+            {
+                archive();
+            }
+
             explicit Conversation(entt::registry* _registry, entt::entity _owner)
                 : registry(_registry), owner(_owner)
             {
@@ -139,5 +171,17 @@ namespace sage
         entt::entity dialogTarget; // Who are you talking with
         Vector3 conversationPos;   // Where the other person stands
         std::unique_ptr<dialog::Conversation> conversation;
+
+        template <class Archive>
+        void save(Archive& archive) const
+        {
+            archive();
+        }
+
+        template <class Archive>
+        void load(Archive& archive)
+        {
+            archive();
+        }
     };
 } // namespace sage

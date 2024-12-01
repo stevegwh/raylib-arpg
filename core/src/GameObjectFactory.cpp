@@ -158,6 +158,7 @@ namespace sage
             option1->nextIndex = 1;
             auto option2 = std::make_unique<dialog::Option>(node.get());
             option2->description = "Hello! \n";
+
             option2->nextIndex = 2;
             node->options.push_back(std::move(option1));
             node->options.push_back(std::move(option2));

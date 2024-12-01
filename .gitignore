@@ -7,7 +7,7 @@ resources/models
 resources/maps
 resources/models/*
 resources/maps/*
-resources/settings.xml
+resources/settings.json
 *.bin
 out
 .vs
