@@ -34,6 +34,8 @@
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 
+#include <Serializer.hpp>
+
 #include "raylib.h"
 
 namespace sage
@@ -92,5 +94,7 @@ namespace sage
             GameObjectFactory::createFetchQuestNPC(registry, data.get(), {-10.0f, 0, 0}, "Fetch Quest NPC");
             quest.StartQuest();
         }
+
+        serializer::SaveClassJson<ItemFactory>("resources/items.json", "ItemFactory", *data->itemFactory);
     }
 } // namespace sage

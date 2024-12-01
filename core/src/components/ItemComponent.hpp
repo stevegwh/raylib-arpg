@@ -6,6 +6,14 @@
 
 #include "AssetID.hpp"
 
+#include "cereal/cereal.hpp"
+#include "cereal/types/string.hpp"
+#include "cereal/types/vector.hpp"
+#include "entt/core/hashed_string.hpp"
+#include "entt/core/type_traits.hpp"
+#include <cereal/archives/json.hpp>
+
+#include <magic_enum.hpp>
 #include <string>
 
 namespace sage
@@ -74,6 +82,30 @@ namespace sage
         unsigned int flags = ItemFlags::JUNK;
         AssetID icon;
         AssetID model;
+
+        template <class Archive>
+        void save(Archive& archive) const
+        {
+            archive(
+                cereal::make_nvp("Name", name),
+                cereal::make_nvp("Description", description),
+                cereal::make_nvp("Rarity", std::string(magic_enum::enum_name(rarity))),
+                cereal::make_nvp("Flags", flags),
+                cereal::make_nvp("Icon", std::string(magic_enum::enum_name(icon))),
+                cereal::make_nvp("Model", std::string(magic_enum::enum_name(model))));
+        }
+
+        template <class Archive>
+        void load(Archive& archive)
+        {
+            // std::string _rarity, _icon, _model;
+            // archive(name, description, _rarity, flags, _icon, _model);
+            // rarity = magic_enum::enum_cast<ItemRarity>(_rarity).value();
+            // icon = magic_enum::enum_cast<AssetID>(_icon).value();
+            // model = magic_enum::enum_cast<AssetID>(_model).value();
+
+            archive(name, description);
+        }
 
         [[nodiscard]] bool HasFlag(unsigned int flag) const
         {

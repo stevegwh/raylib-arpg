@@ -1,0 +1,62 @@
+{
+    "Item Factory": {
+        "Items": [
+            {
+                "Name": "Dagger",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": 289,
+                "Icon": "IMG_ICON_WEAPON_DAGGER01",
+                "Model": "MDL_WPN_DAGGER01"
+            },
+            {
+                "Name": "Sword",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": 545,
+                "Icon": "IMG_ICON_WEAPON_SWORD01",
+                "Model": "MDL_WPN_SWORD01"
+            },
+            {
+                "Name": "Dagger",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": 289,
+                "Icon": "IMG_ICON_WEAPON_DAGGER01",
+                "Model": "MDL_WPN_DAGGER01"
+            },
+            {
+                "Name": "Sword",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": 545,
+                "Icon": "IMG_ICON_WEAPON_SWORD01",
+                "Model": "MDL_WPN_SWORD01"
+            },
+            {
+                "Name": "Dagger",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": 289,
+                "Icon": "IMG_ICON_WEAPON_DAGGER01",
+                "Model": "MDL_WPN_DAGGER01"
+            },
+            {
+                "Name": "Sword",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": 545,
+                "Icon": "IMG_ICON_WEAPON_SWORD01",
+                "Model": "MDL_WPN_SWORD01"
+            },
+            {
+                "Name": "Dagger",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": 289,
+                "Icon": "IMG_ICON_WEAPON_DAGGER01",
+                "Model": "MDL_WPN_DAGGER01"
+            }
+        ]
+    }
+}

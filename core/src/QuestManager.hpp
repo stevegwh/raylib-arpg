@@ -26,6 +26,15 @@ namespace sage
             static QuestManager instance;
             return instance;
         }
+
+        // TODO: Move renderable.name to its own component and create a system that has a map of Name ->
+        // std::vector<entt::entity>. This identifier component can also specify if it must be unique, then the
+        // system will assert(size <= 1) to enforce it. This would allow quests to specify a quest giver by a named
+        // id (rather than an enum).
+        //
+        // Likewise, ItemFactory should use strings instead of an enum. Moving to string
+        // identifiers allows us to reference these things consistently in JSON files without having to add
+        // anything to a C++ enum (and recompiling).
     };
 
 } // namespace sage
