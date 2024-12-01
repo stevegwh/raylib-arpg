@@ -133,7 +133,7 @@ namespace sage
             std::cout << "FINISH: Loading resource data from file." << std::endl;
         }
 
-        void LoadBinFile(entt::registry* destination, const char* path)
+        void LoadAssetBinFIle(entt::registry* destination, const char* path)
         {
             assert(destination != nullptr);
 
