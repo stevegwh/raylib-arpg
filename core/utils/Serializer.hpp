@@ -22,7 +22,7 @@ namespace sage::serializer
 {
     void SaveMap(entt::registry& source, const char* path);
     void LoadMap(entt::registry* destination, const char* path);
-    void LoadAssetBinFIle(entt::registry* destination, const char* path);
+    void LoadAssetBinFile(entt::registry* destination, const char* path);
     void LoadAbilityData(AbilityData& abilityData, const char* path);
 
     template <typename T>
