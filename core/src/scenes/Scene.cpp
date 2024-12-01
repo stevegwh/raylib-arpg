@@ -87,9 +87,9 @@ namespace sage
 
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
 
-        // data->itemFactory->CreateDagger();
-        // data->itemFactory->CreateSword();
-        // serializer::SaveClassJson<ItemFactory>("resources/items.json", *data->itemFactory);
+        //        data->itemFactory->CreateDagger();
+        //        data->itemFactory->CreateSword();
+        //        serializer::SaveClassJson<ItemFactory>("resources/items.json", *data->itemFactory);
 
         // TODO: This is calculated during the map construction process. Need to find a way of reading that data,
         // instead of a magic number
