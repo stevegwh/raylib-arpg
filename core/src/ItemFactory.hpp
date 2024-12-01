@@ -38,29 +38,6 @@ namespace sage
       public:
         [[nodiscard]] entt::entity GetItem(ItemID itemId) const;
 
-        template <class Archive>
-        void save(Archive& archive) const
-        {
-            std::vector<ItemComponent> items;
-            auto view = registry->view<ItemComponent>();
-            for (auto entity : view)
-            {
-                auto& item = registry->get<ItemComponent>(entity);
-                items.push_back(item);
-            }
-
-            archive(cereal::make_nvp("Items", items));
-        }
-
-        template <class Archive>
-        void load(Archive& archive)
-        {
-            archive();
-        }
-
-        // TODO: Change this to use JSON files that act as "recipes" for the items. Store the recipe by their UUID
-        // and retrieve them with GetItem(std::string uuid). Don't use an enum.
-
         ItemFactory(entt::registry* _registry, GameData* _gameData);
     };
 

@@ -13,10 +13,10 @@ namespace sage
 
     /**
      * Convenience class to wrap am entt view into a serializable collection (and back again)
-     * @tparam Asset
+     * @tparam ViewName
      */
-    template <typename Asset>
-    class AssetSerializer
+    template <typename ViewName>
+    class ViewSerializer
     {
         entt::registry* registry;
 
@@ -24,29 +24,29 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            std::vector<Asset> assets;
-            for (const auto view = registry->view<Asset>(); auto& entity : view)
+            std::vector<ViewName> components;
+            for (const auto view = registry->view<ViewName>(); auto& entity : view)
             {
-                auto& asset = registry->get<Asset>(entity);
-                assets.push_back(asset);
+                auto& asset = registry->get<ViewName>(entity);
+                components.push_back(asset);
             }
-            archive(assets);
+            archive(components);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            std::vector<Asset> assets;
-            archive(assets);
-            assert(!assets.empty());
-            for (const auto& asset : assets)
+            std::vector<ViewName> components;
+            archive(components);
+            assert(!components.empty());
+            for (const auto& asset : components)
             {
                 const auto entity = registry->create();
-                registry->emplace<Asset>(entity, asset);
+                registry->emplace<ViewName>(entity, asset);
             }
         }
 
-        explicit AssetSerializer(entt::registry* _registry) : registry(_registry)
+        explicit ViewSerializer(entt::registry* _registry) : registry(_registry)
         {
         }
     };

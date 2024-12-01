@@ -419,6 +419,6 @@ namespace sage
             }
         }
         std::cout << "FINISH: Loading assets into memory \n";
-        serializer::SaveCurrentResourceData(*registry, output.c_str());
+        serializer::SaveClassBinary(output.c_str(), ResourceManager::GetInstance());
     }
 }; // namespace sage
