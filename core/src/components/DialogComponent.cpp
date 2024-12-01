@@ -50,38 +50,55 @@ namespace sage
         bool QuestOption::ShouldShow()
         {
             auto& quest = parent->parent->registry->get<Quest>(questId);
-            // if (quest.IsComplete()) return false;
-            if (questStart)
-            {
-                return !quest.HasStarted();
-            }
             return quest.HasStarted();
         }
 
         void QuestOption::OnSelected()
         {
-            // Could/Should just fire events here and let Quest handle it
-            if (questStart)
+            auto& task = parent->parent->registry->get<QuestTaskComponent>(parent->parent->owner);
+            auto& quest = parent->parent->registry->get<Quest>(questId);
+            if (quest.HasStarted())
             {
-                auto& quest = parent->parent->registry->get<Quest>(questId);
-                if (!quest.HasStarted())
-                {
-                    quest.StartQuest();
-                }
-            }
-            else
-            {
-                auto& task = parent->parent->registry->get<QuestTaskComponent>(parent->parent->owner);
-                auto& quest = parent->parent->registry->get<Quest>(questId);
-                if (quest.HasStarted())
-                {
-                    task.MarkComplete();
-                }
+                task.MarkComplete();
             }
         }
 
-        QuestOption::QuestOption(ConversationNode* _parent, entt::entity _questId, bool _questStart)
-            : Option(_parent), questStart(_questStart), questId(_questId)
+        QuestOption::QuestOption(ConversationNode* _parent, entt::entity _questId)
+            : Option(_parent), questId(_questId)
+        {
+        }
+
+        void QuestStartOption::OnSelected()
+        {
+            auto& quest = parent->parent->registry->get<Quest>(questId);
+            if (!quest.HasStarted())
+            {
+                quest.StartQuest();
+                // TODO: Should starting the quest be a task? If so, add a task component to the quest giver and
+                // uncomment below.
+                // QuestOption::OnSelected();
+            }
+        }
+
+        bool QuestStartOption::ShouldShow()
+        {
+            auto& quest = parent->parent->registry->get<Quest>(questId);
+            return !quest.HasStarted();
+        }
+
+        QuestStartOption::QuestStartOption(ConversationNode* _parent, entt::entity _questId)
+            : QuestOption(_parent, _questId)
+        {
+        }
+
+        bool QuestHandInOption::ShouldShow()
+        {
+            auto& quest = parent->parent->registry->get<Quest>(questId);
+            return QuestOption::ShouldShow() && quest.GetTaskCompleteCount() == quest.GetTaskCount() - 1;
+        }
+
+        QuestHandInOption::QuestHandInOption(ConversationNode* _parent, entt::entity _questId)
+            : QuestOption(_parent, _questId)
         {
         }
 

@@ -118,6 +118,8 @@ namespace sage
         std::vector<entt::entity> tasks;
 
       public:
+        [[nodiscard]] unsigned int GetTaskCount() const;
+        [[nodiscard]] unsigned int GetTaskCompleteCount() const;
         void StartQuest();
         void AddTask(entt::entity taskId);
         [[nodiscard]] bool IsComplete();

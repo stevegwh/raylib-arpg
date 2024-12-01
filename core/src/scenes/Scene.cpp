@@ -1,23 +1,22 @@
 #include "Scene.hpp"
 
+// NB: We have to include all the headers required to build GameData
 #include "AbilityFactory.hpp"
 #include "Camera.hpp"
+#include "components/EquipmentComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
 #include "components/Renderable.hpp"
 #include "components/Spawner.hpp"
+#include "components/UberShaderComponent.hpp"
 #include "Cursor.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
-#include "Serializer.hpp"
-#include "UserInput.hpp"
-
-// NB: We have to include all the headers required to build GameData
-#include "components/EquipmentComponent.hpp"
-#include "components/UberShaderComponent.hpp"
+#include "ItemFactory.hpp"
 #include "LightManager.hpp"
+#include "Serializer.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -34,6 +33,7 @@
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 #include "systems/UberShaderSystem.hpp"
+#include "UserInput.hpp"
 
 #include "abilities/vfx/SpiralFountainVFX.hpp"
 
@@ -62,7 +62,7 @@ namespace sage
     {
         data->renderSystem->Draw();
         data->cursor->Draw3D();
-        spiral->Draw3D();
+        // spiral->Draw3D();
     };
 
     void Scene::DrawDebug2D()

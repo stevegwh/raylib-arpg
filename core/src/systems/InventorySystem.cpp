@@ -8,6 +8,7 @@
 #include "components/Collideable.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
+#include "components/QuestComponents.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "ControllableActorSystem.hpp"
@@ -57,6 +58,11 @@ namespace sage
             if (registry->any_of<Collideable>(entity))
             {
                 registry->remove<Collideable>(entity);
+            }
+            if (registry->any_of<QuestTaskComponent>(entity))
+            {
+                auto& questTask = registry->get<QuestTaskComponent>(entity);
+                questTask.MarkComplete();
             }
         }
         else

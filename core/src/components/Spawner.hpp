@@ -18,6 +18,7 @@ namespace sage
 
     struct Spawner
     {
+        // Can add a name for named/important mobs
         SpawnerType spawnerType;
         Vector3 pos;
         Vector3 rot;

@@ -18,6 +18,7 @@
 // Systems
 #include "components/QuestComponents.hpp"
 #include "GameUiFactory.hpp"
+#include "ItemFactory.hpp"
 #include "LightManager.hpp"
 #include "QuestManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
@@ -76,11 +77,20 @@ namespace sage
         : Scene(_registry, _keyMapping, _settings)
     {
         auto questId = QuestManager::GetInstance().CreateQuest(registry, "Test Quest");
-        registry->emplace<Quest>(questId, registry, questId);
-
         auto knightId = GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
 
-        auto talkTaskEntity =
-            GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
+        GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
+
+        {
+            auto item = data->itemFactory->GetItem(ItemID::DAGGER);
+            GameObjectFactory::spawnItemInWorld(registry, data.get(), item, {0, 0, 0});
+            auto quest2Id = QuestManager::GetInstance().CreateQuest(registry, "Item Fetch Quest");
+            auto taskType = std::make_unique<FetchQuest>(registry, quest2Id);
+            auto& taskComponent = registry->emplace<QuestTaskComponent>(item, registry, std::move(taskType));
+            auto& quest = registry->get<Quest>(quest2Id);
+            quest.AddTask(item);
+            GameObjectFactory::createFetchQuestNPC(registry, data.get(), {-10.0f, 0, 0}, "Fetch Quest NPC");
+            quest.StartQuest();
+        }
     }
 } // namespace sage

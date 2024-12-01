@@ -28,7 +28,7 @@ namespace sage
 
       public:
         entt::entity GetAbility(entt::entity caster, AbilityEnum abilityEnum);
-        entt::entity RegisterAbility(entt::entity caster, AbilityEnum abilityEnum);
+        entt::entity RegisterAbility(entt::entity caster, AbilityEnum abilityEnum); // "Equip" ability
 
         AbilityFactory(entt::registry* _registry, GameData* _gameData);
     };

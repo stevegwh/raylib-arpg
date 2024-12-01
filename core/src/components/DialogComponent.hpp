@@ -48,16 +48,38 @@ namespace sage
             explicit ConditionalOption(ConversationNode* _parent, std::function<bool()> _condition);
         };
 
+        // Shows if quest has started. Marks as complete. Does not finish the quest.
         class QuestOption : public Option
         {
-            bool questStart;
+          protected:
             entt::entity questId{};
 
           public:
             bool ShouldShow() override;
             void OnSelected() override;
 
-            QuestOption(ConversationNode* _parent, entt::entity _questId, bool _questStart);
+            QuestOption(ConversationNode* _parent, entt::entity _questId);
+        };
+
+        // Shows if quest has not been started (and starts quest on select)
+        class QuestStartOption : public QuestOption
+        {
+
+          public:
+            bool ShouldShow() override;
+            void OnSelected() override;
+
+            QuestStartOption(ConversationNode* _parent, entt::entity _questId);
+        };
+
+        // Shows if the dialog task is the final task left to be complete
+        class QuestHandInOption : public QuestOption
+        {
+
+          public:
+            bool ShouldShow() override;
+
+            QuestHandInOption(ConversationNode* _parent, entt::entity _questId);
         };
 
         struct ConversationNode

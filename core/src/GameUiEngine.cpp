@@ -1326,7 +1326,7 @@ namespace sage
 
         if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
         {
-            if (GameObjectFactory::spawnInventoryItem(engine->registry, engine->gameData, itemId, cursorPos.point))
+            if (GameObjectFactory::spawnItemInWorld(engine->registry, engine->gameData, itemId, cursorPos.point))
             {
                 onItemDroppedToWorld();
                 RetrieveInfo();
