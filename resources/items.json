@@ -1,6 +1,6 @@
 {
-    "Item Factory": {
-        "Items": [
+    "ItemFactory": {
+        "value0": [
             {
                 "Name": "Dagger",
                 "Description": "A test inventory item.",

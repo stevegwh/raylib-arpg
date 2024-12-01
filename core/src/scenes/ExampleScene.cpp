@@ -37,6 +37,7 @@
 #include <Serializer.hpp>
 
 #include "raylib.h"
+#include "ViewSerializer.hpp"
 
 namespace sage
 {
@@ -95,6 +96,8 @@ namespace sage
             quest.StartQuest();
         }
 
-        serializer::SaveClassJson<ItemFactory>("resources/items.json", "ItemFactory", *data->itemFactory);
+        ViewSerializer<ItemComponent> itemComponents(registry);
+        serializer::SaveClassJson<ViewSerializer<ItemComponent>>(
+            "resources/items.json", "ItemFactory", itemComponents);
     }
 } // namespace sage
