@@ -15,12 +15,7 @@ namespace sage
 
         [[nodiscard]] bool Option::HasNextIndex()
         {
-            return nextIndex.has_value();
-        }
-
-        std::variant<bool, unsigned int> Option::GetNextIndex()
-        {
-            return nextIndex.value_or(false);
+            return nextNode.has_value();
         }
 
         bool Option::ShouldShow()

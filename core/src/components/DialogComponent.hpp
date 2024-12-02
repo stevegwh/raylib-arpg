@@ -22,6 +22,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -37,11 +38,11 @@ namespace sage
         class Option
         {
           public:
-            std::optional<unsigned int> nextIndex;
+            std::optional<std::string> nextNode;
+            // std::optional<unsigned int> nextNode;
             std::string description;
             ConversationNode* parent;
             [[nodiscard]] bool HasNextIndex();
-            virtual std::variant<bool, unsigned int> GetNextIndex();
             virtual bool ShouldShow();
             virtual void OnSelected();
 
@@ -95,7 +96,8 @@ namespace sage
         struct ConversationNode
         {
             Conversation* parent;
-            unsigned int index = 0;
+            // unsigned int index = 0;
+            std::string title;
             std::string content;
             std::vector<std::unique_ptr<Option>> options;
 
@@ -117,8 +119,12 @@ namespace sage
         class Conversation
         {
             ConversationID conversationId{};
-            unsigned int current = 0;
-            std::vector<std::unique_ptr<ConversationNode>> nodes;
+            // unsigned int current = 0;
+            std::string start;
+            std::string current;
+            // std::vector<std::unique_ptr<ConversationNode>> nodes;
+
+            std::unordered_map<std::string, std::unique_ptr<ConversationNode>> nodes;
 
           public:
             entt::registry* registry;
@@ -134,19 +140,24 @@ namespace sage
             void SelectOption(Option* option)
             {
                 option->OnSelected();
-                current = option->nextIndex.value();
+                current = option->nextNode.value();
                 onConversationProgress.publish(this);
             }
 
             void EndConversation()
             {
-                current = 0;
+                current = start;
                 onConversationEnd.publish();
             }
 
             void AddNode(std::unique_ptr<ConversationNode> node)
             {
-                nodes.push_back(std::move(node));
+                if (nodes.empty())
+                {
+                    start = node->title;
+                    current = start;
+                }
+                nodes.emplace(node->title, std::move(node));
             }
 
             template <class Archive>
