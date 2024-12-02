@@ -9,6 +9,7 @@
 #include "components/Spawner.hpp"
 #include "components/UberShaderComponent.hpp"
 #include "Cursor.hpp"
+#include "DialogFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"

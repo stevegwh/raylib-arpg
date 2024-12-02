@@ -13,6 +13,8 @@
 #include "cereal/types/vector.hpp"
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
+#include "raylib-cereal.hpp"
+#include "sage-cereal.hpp"
 #include <cereal/archives/json.hpp>
 
 #include <cassert>
@@ -42,6 +44,7 @@ namespace sage
             virtual std::variant<bool, unsigned int> GetNextIndex();
             virtual bool ShouldShow();
             virtual void OnSelected();
+
             virtual ~Option() = default;
             explicit Option(ConversationNode* _parent);
         };
