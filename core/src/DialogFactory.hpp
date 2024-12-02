@@ -17,7 +17,7 @@ namespace sage
       public:
         void GetDialog(const std::string& npcName, entt::entity entity) const;
 
-        DialogFactory(entt::registry* _registry);
+        explicit DialogFactory(entt::registry* _registry);
     };
 
 } // namespace sage

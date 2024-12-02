@@ -1,0 +1,29 @@
+#node start
+title: start
+---
+<<set QuestID "The Curious Case of the Badger">>
+This is my dialog block. Here I can write lots of things. Maybe even some $variables.
+---
+[[That's a great idea! I hope it works out. | node2]]
+#if not <<QuestComplete $QuestID>>
+[[Do you have any quests for me?| quest]]#
+#endif
+[[Take your leave. | <<Exit>>]]
+#node end
+
+#node start
+title: quest
+---
+<<StartQuest $QuestID>>
+Sure, here is a quest. Go speak to my friend.
+---
+[[Thanks so much! | <<Exit>>]]
+#node end
+
+#node start
+title: node2
+---
+We can only hope!
+---
+[[Take your leave. | <<Exit>>]]
+#node end
