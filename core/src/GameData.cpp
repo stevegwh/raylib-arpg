@@ -13,6 +13,7 @@
 
 // Systems
 #include "AbilityFactory.hpp"
+#include "DialogFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
@@ -51,6 +52,7 @@ namespace sage
           controllableActorSystem(std::make_unique<ControllableActorSystem>(_registry, this)),
           animationSystem(std::make_unique<AnimationSystem>(_registry)),
           dialogSystem(std::make_unique<DialogSystem>(_registry, this)),
+          dialogFactory(std::make_unique<DialogFactory>(_registry)),
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
           abilityRegistry(std::make_unique<AbilityFactory>(_registry, this)),

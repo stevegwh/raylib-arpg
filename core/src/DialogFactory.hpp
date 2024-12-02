@@ -4,11 +4,20 @@
 
 #pragma once
 
+#include <entt/entt.hpp>
+#include <string>
+
 namespace sage
 {
 
     class DialogFactory
     {
+        entt::registry* registry;
+
+      public:
+        void GetDialog(const std::string& npcName, entt::entity entity) const;
+
+        DialogFactory(entt::registry* _registry);
     };
 
 } // namespace sage
