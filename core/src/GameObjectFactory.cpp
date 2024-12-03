@@ -233,10 +233,10 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialog = registry->emplace<DialogComponent>(id);
-        dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
-        dialog.conversationPos =
-            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
-        data->dialogFactory->GetDialog(renderable.name, id);
+        // dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
+        // dialog.conversationPos =
+        //     Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+        // data->dialogFactory->GetDialog(renderable.name, id);
 
         return id;
     }

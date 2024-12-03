@@ -10,6 +10,10 @@
 
 namespace sage
 {
+    class NPCManager;
+}
+namespace sage
+{
     class DialogFactory;
 }
 namespace sage
@@ -64,6 +68,7 @@ namespace sage
         std::unique_ptr<AnimationSystem> animationSystem;
         std::unique_ptr<DialogSystem> dialogSystem;
         std::unique_ptr<DialogFactory> dialogFactory;
+        std::unique_ptr<NPCManager> npcManager;
         std::unique_ptr<HealthBarSystem> healthBarSystem;
         std::unique_ptr<StateMachines> stateMachines;
         std::unique_ptr<AbilityFactory> abilityRegistry;

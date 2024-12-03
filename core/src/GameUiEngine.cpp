@@ -614,14 +614,7 @@ namespace sage
     void DialogOption::OnClick()
     {
         auto* conversation = option->parent->parent;
-        if (option->HasNextIndex())
-        {
-            conversation->SelectOption(option);
-        }
-        else
-        {
-            conversation->EndConversation();
-        }
+        conversation->SelectOption(option);
     }
 
     DialogOption::DialogOption(

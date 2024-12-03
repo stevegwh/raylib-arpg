@@ -17,6 +17,7 @@
 
 // Systems
 #include "components/QuestComponents.hpp"
+#include "DialogFactory.hpp"
 #include "GameUiFactory.hpp"
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
@@ -95,6 +96,8 @@ namespace sage
             GameObjectFactory::createFetchQuestNPC(registry, data.get(), {-10.0f, 0, 0}, "Fetch Quest NPC");
             quest.StartQuest();
         }
+
+        data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
 
         // ViewSerializer<ItemComponent> itemComponents(registry);
         // serializer::SaveClassJson<ViewSerializer<ItemComponent>>(

@@ -17,6 +17,7 @@
 #include "EntityReflectionSignalRouter.hpp"
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
+#include "NpcManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -52,7 +53,8 @@ namespace sage
           controllableActorSystem(std::make_unique<ControllableActorSystem>(_registry, this)),
           animationSystem(std::make_unique<AnimationSystem>(_registry)),
           dialogSystem(std::make_unique<DialogSystem>(_registry, this)),
-          dialogFactory(std::make_unique<DialogFactory>(_registry)),
+          dialogFactory(std::make_unique<DialogFactory>(_registry, this)),
+          npcManager(std::make_unique<NPCManager>(_registry)),
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
           abilityRegistry(std::make_unique<AbilityFactory>(_registry, this)),
