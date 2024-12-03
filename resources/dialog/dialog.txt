@@ -1,6 +1,7 @@
 #meta start
 owner: Knight
 camera_pos: 10.0 2.0 5.0
+quest: Test Quest
 #meta end
 
 #node start
