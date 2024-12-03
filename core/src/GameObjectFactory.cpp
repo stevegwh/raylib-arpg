@@ -147,7 +147,7 @@ namespace sage
         dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
         dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
-        auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
+        auto questId = QuestManager::GetInstance().GetQuest("TestQuest");
         // data->dialogFactory->GetDialog(renderable.name, id);
         auto taskType = std::make_unique<TalkQuest>(registry, questId);
         auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry, std::move(taskType));
@@ -191,7 +191,7 @@ namespace sage
         dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
         dialog.conversationPos =
             Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
-        auto questId = QuestManager::GetInstance().GetQuest("Item Fetch Quest");
+        auto questId = QuestManager::GetInstance().GetQuest("ItemFetchQuest");
         // data->dialogFactory->GetDialog(renderable.name, id);
 
         auto taskType = std::make_unique<TalkQuest>(registry, questId);

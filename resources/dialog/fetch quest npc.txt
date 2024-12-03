@@ -1,16 +1,19 @@
 #meta start
 owner: Fetch Quest NPC
 camera_pos: 10.0 2.0 5.0
-quest: Item Fetch Quest
 #meta end
+
+#variables start
+questId: ItemFetchQuest
+#variables end
 
 #node start
 title: start
 ---
 Hello there, how can I help?
 ---
-if quest_hand_in
-[[quest_finish | I found this item on the ground, is it yours? | quest]]
+if quest_hand_in($questId)
+[[quest_finish($questId) | I found this item on the ground, is it yours? | quest]]
 end
 [[Sorry, I must be leaving. | exit]]
 #node end

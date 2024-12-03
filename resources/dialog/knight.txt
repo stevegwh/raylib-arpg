@@ -1,15 +1,18 @@
 #meta start
 owner: Knight
 camera_pos: 10.0 2.0 5.0
-quest: Test Quest
 #meta end
+
+#variables start
+questId: TestQuest
+#variables end
 
 #node start
 title: start
 ---
 Hello! How's it going?
 ---
-if not quest_in_progress
+if not quest_in_progress($questId)
 [[Do you have any quests for me? | quest]]
 end
 [[Sorry, I must be leaving. | exit]]
@@ -20,6 +23,6 @@ title: quest
 ---
 Sure, I have a quest for you!
 ---
-[[quest_start | Accept the quest | exit]]
+[[quest_start($questId) | Accept the quest | exit]]
 [[Not right now | exit]]
 #node end

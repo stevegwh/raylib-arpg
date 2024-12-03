@@ -1,16 +1,19 @@
 #meta start
 owner: Quest NPC
 camera_pos: 10.0 2.0 5.0
-quest: Test Quest
 #meta end
+
+#variables start
+questId: TestQuest
+#variables end
 
 #node start
 title: start
 ---
 Hello there, how can I help?
 ---
-if quest_hand_in
-[[quest_finish | I want to complete the quest. | quest]]
+if quest_hand_in($questId)
+[[quest_finish($questId) | I want to complete the quest. | quest]]
 end
 [Hello! | hello]
 [[Sorry, I must be leaving. | exit]]

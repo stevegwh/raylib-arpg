@@ -80,7 +80,7 @@ namespace sage
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : Scene(_registry, _keyMapping, _settings)
     {
-        auto questId = QuestManager::GetInstance().CreateQuest(registry, "Test Quest");
+        auto questId = QuestManager::GetInstance().CreateQuest(registry, "TestQuest");
         auto knightId = GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
 
         GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
@@ -88,7 +88,7 @@ namespace sage
         {
             auto item = data->itemFactory->GetItem("Dagger");
             GameObjectFactory::spawnItemInWorld(registry, data.get(), item, {0, 0, 0});
-            auto quest2Id = QuestManager::GetInstance().CreateQuest(registry, "Item Fetch Quest");
+            auto quest2Id = QuestManager::GetInstance().CreateQuest(registry, "ItemFetchQuest");
             auto taskType = std::make_unique<FetchQuest>(registry, quest2Id);
             auto& taskComponent = registry->emplace<QuestTaskComponent>(item, registry, std::move(taskType));
             auto& quest = registry->get<Quest>(quest2Id);
