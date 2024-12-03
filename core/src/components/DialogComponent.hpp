@@ -37,6 +37,9 @@ namespace sage
 
         class Option
         {
+          protected:
+            std::optional<std::function<bool()>> condition;
+
           public:
             std::optional<std::string> nextNode;
             // std::optional<unsigned int> nextNode;
@@ -48,15 +51,7 @@ namespace sage
 
             virtual ~Option() = default;
             explicit Option(ConversationNode* _parent);
-        };
-
-        class ConditionalOption : public Option
-        {
-            std::function<bool()> condition;
-
-          public:
-            bool ShouldShow() override;
-            explicit ConditionalOption(ConversationNode* _parent, std::function<bool()> _condition);
+            Option(ConversationNode* _parent, std::function<bool()> _condition);
         };
 
         // Shows if quest has started. Marks as complete. Does not finish the quest.
@@ -70,6 +65,7 @@ namespace sage
             void OnSelected() override;
 
             QuestOption(ConversationNode* _parent, entt::entity _questId);
+            QuestOption(ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition);
         };
 
         // Shows if quest has not been started (and starts quest on select)
@@ -81,6 +77,7 @@ namespace sage
             void OnSelected() override;
 
             QuestStartOption(ConversationNode* _parent, entt::entity _questId);
+            QuestStartOption(ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition);
         };
 
         // Shows if the dialog task is the final task left to be complete
@@ -91,6 +88,7 @@ namespace sage
             bool ShouldShow() override;
 
             QuestHandInOption(ConversationNode* _parent, entt::entity _questId);
+            QuestHandInOption(ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition);
         };
 
         struct ConversationNode

@@ -9,7 +9,9 @@ title: start
 ---
 Hello! How's it going?
 ---
-[[conditional | quest_not_started | Do you have any quests for me? | quest]]
+if quest_not_started
+[[Do you have any quests for me? | quest]]
+end
 [[Sorry, I must be leaving. | exit]]
 #node end
 
