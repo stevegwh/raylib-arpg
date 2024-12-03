@@ -45,25 +45,34 @@ namespace sage
                 assert(!condition.has_value()); // if blocks must be closed with end. No nesting allowed (yet).
                 // TODO: Should check if condition is related to quests
                 assert(questId != entt::null);
+                bool negateCondition = false;
+                unsigned int parameterIndex = 1;
+                if (option.at(1) == "not")
+                {
+                    negateCondition = true;
+                    parameterIndex = 2;
+                }
                 auto& quest = registry->get<Quest>(questId);
-                condition = [&quest, condition = option.at(1)]() -> bool {
-                    if (condition == "quest_not_started")
+                // TODO "AND" and "OR"
+                condition = [&quest, negateCondition, condition = option.at(parameterIndex)]() -> bool {
+                    bool out = false;
+                    if (condition == "quest_complete")
                     {
-                        return !quest.HasStarted() && !quest.IsComplete();
-                    }
-                    else if (condition == "quest_complete")
-                    {
-                        return quest.IsComplete();
+                        out = quest.IsComplete();
                     }
                     else if (condition == "quest_in_progress")
                     {
-                        return quest.HasStarted() && !quest.IsComplete();
+                        out = quest.HasStarted() && !quest.IsComplete();
                     }
                     else if (condition == "quest_hand_in")
                     {
-                        return quest.HasStarted() && quest.GetTaskCompleteCount() == quest.GetTaskCount() - 1;
+                        out = quest.HasStarted() && quest.GetTaskCompleteCount() == quest.GetTaskCount() - 1;
                     }
-                    return true;
+                    else
+                    {
+                        assert(0); // unknown conditional token
+                    }
+                    return negateCondition ? !out : out;
                 };
             }
             else if (option.at(0) == "end")
