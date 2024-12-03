@@ -9,7 +9,7 @@ title: start
 ---
 Hello! How's it going?
 ---
-if quest_not_started
+if not quest_in_progress
 [[Do you have any quests for me? | quest]]
 end
 [[Sorry, I must be leaving. | exit]]
