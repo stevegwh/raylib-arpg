@@ -69,16 +69,22 @@ namespace sage
         return bb;
     }
 
+    void placeActor(entt::registry* registry, entt::entity entity, GameData* data, Vector3 position)
+    {
+        auto& transform = registry->get<sgTransform>(entity);
+        GridSquare actorIdx{};
+        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        transform.SetPosition({position.x, height, position.z});
+    }
+
     entt::entity GameObjectFactory::createEnemy(
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
 
-        auto& transform = registry->emplace<sgTransform>(id, id);
-        GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z});
+        registry->emplace<sgTransform>(id, id);
+        placeActor(registry, id, data, position);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.25f;
@@ -104,12 +110,9 @@ namespace sage
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
-        // collideable.debugDraw = true;
         collideable.collisionLayer = CollisionLayer::ENEMY;
 
-        // data->lightSubSystem->LinkRenderableToLight(id);
         registry->emplace<WavemobState>(id);
-        // Always set state last to ensure everything is initialised properly before.
         return id;
     }
 
@@ -118,14 +121,8 @@ namespace sage
     {
         entt::entity id = registry->create();
 
-        auto& transform = registry->emplace<sgTransform>(id, id);
-        GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-
-        // TODO: There should be a "place actor" function that does below automatically (and calls "occupy grid
-        // square").
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z});
+        registry->emplace<sgTransform>(id, id);
+        placeActor(registry, id, data, position);
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
@@ -157,14 +154,8 @@ namespace sage
     {
         entt::entity id = registry->create();
 
-        auto& transform = registry->emplace<sgTransform>(id, id);
-        GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-
-        // TODO: There should be a "place actor" function that does below automatically (and calls "occupy grid
-        // square").
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z});
+        registry->emplace<sgTransform>(id, id);
+        placeActor(registry, id, data, position);
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
@@ -182,9 +173,9 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::NPC;
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
-        auto& dialog = registry->emplace<DialogComponent>(id);
+        registry->emplace<DialogComponent>(id);
+        registry->emplace<QuestTaskComponent>(id, registry);
         auto questId = QuestManager::GetInstance().GetQuest("ItemFetchQuest");
-        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry);
         auto& quest = registry->get<Quest>(questId);
         quest.AddTask(id);
 
@@ -196,14 +187,8 @@ namespace sage
     {
         entt::entity id = registry->create();
 
-        auto& transform = registry->emplace<sgTransform>(id, id);
-        GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-
-        // TODO: There should be a "place actor" function that does below automatically (and calls "occupy grid
-        // square").
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z});
+        registry->emplace<sgTransform>(id, id);
+        placeActor(registry, id, data, position);
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
@@ -221,7 +206,7 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::NPC;
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
-        auto& dialog = registry->emplace<DialogComponent>(id);
+        registry->emplace<DialogComponent>(id);
 
         return id;
     }
@@ -231,11 +216,8 @@ namespace sage
     {
         entt::entity id = registry->create();
 
-        auto& transform = registry->emplace<sgTransform>(id, id);
-        GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
-        transform.SetPosition({position.x, height, position.z});
+        registry->emplace<sgTransform>(id, id);
+        placeActor(registry, id, data, position);
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
@@ -254,7 +236,7 @@ namespace sage
 
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
-
+        // TODO: I think we're going to need to move these elsewhere to make this function more generic
         animation.animationMap[AnimationEnum::WALK] = 1;
         animation.animationMap[AnimationEnum::TALK] = 2;
         animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
@@ -268,49 +250,11 @@ namespace sage
         animation.animationMap[AnimationEnum::ROLL] = 9;
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
-        // N.B. Do not remove "entity" from below (needed to match signature)
-        {
-            entt::sink sink{moveable.onMovementCancel};
-            sink.connect<[](Animation& animation, entt::entity entity) {
-                animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-            }>(animation);
-        }
-
-        {
-            entt::sink sink{moveable.onDestinationReached};
-            sink.connect<[](Animation& animation, entt::entity entity) {
-                animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-            }>(animation);
-        }
-        {
-            entt::sink sink{moveable.onStartMovement};
-            sink.connect<[](Animation& animation, entt::entity entity) {
-                animation.ChangeAnimationByEnum(AnimationEnum::RUN);
-            }>(animation);
-        }
-        {
-            // TODO: Just to test animations on demand
-            // entt::sink sink{data->userInput->keyIPressed};
-            // sink.connect<[](Animation& animation) {
-            //    if (animation.animIndex == 0)
-            //    {
-            //        animation.ChangeAnimationByEnum(AnimationEnum::TALK);
-            //    }
-            //    else if (animation.animIndex == 2)
-            //    {
-            //        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-            //    }
-            //}>(animation);
-        }
-
-        auto& partyComponent = registry->emplace<PartyMemberComponent>(id, id);
-        partyComponent.portraitImage = AssetID::IMG_PORTRAIT_01;
+        registry->emplace<PartyMemberComponent>(id, id);
         data->partySystem->AddMember(id);
-
-        auto& controllable = registry->emplace<ControllableActor>(id, id);
+        registry->emplace<ControllableActor>(id, id);
         data->controllableActorSystem->SetSelectedActor(id);
-
-        auto& dialogComponent = registry->emplace<DialogComponent>(id);
+        registry->emplace<DialogComponent>(id);
 
         // Combat
         auto& combatable = registry->emplace<CombatableActor>(id);
@@ -326,6 +270,7 @@ namespace sage
 
         auto& inventory = registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);
+        // TODO: Move elsewhere/read from save file
         inventory.AddItem(data->itemFactory->GetItem("Dagger"), 0, 0);
         inventory.AddItem(data->itemFactory->GetItem("Sword"), 0, 1);
 
@@ -335,7 +280,6 @@ namespace sage
     void GameObjectFactory::createPortal(entt::registry* registry, GameData* data, Vector3 position)
     {
         {
-
             entt::entity id = registry->create();
 
             auto& transform = registry->emplace<sgTransform>(id, id);
