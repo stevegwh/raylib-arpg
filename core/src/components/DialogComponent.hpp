@@ -42,7 +42,7 @@ namespace sage
             // std::optional<unsigned int> nextNode;
             std::string description;
             ConversationNode* parent;
-            [[nodiscard]] bool HasNextIndex();
+            [[nodiscard]] bool HasNextIndex() const;
             virtual bool ShouldShow();
             virtual void OnSelected();
 
@@ -126,6 +126,12 @@ namespace sage
 
             std::unordered_map<std::string, std::unique_ptr<ConversationNode>> nodes;
 
+            void endConversation()
+            {
+                current = start;
+                onConversationEnd.publish();
+            }
+
           public:
             entt::registry* registry;
             const entt::entity owner;
@@ -140,14 +146,16 @@ namespace sage
             void SelectOption(Option* option)
             {
                 option->OnSelected();
-                current = option->nextNode.value();
-                onConversationProgress.publish(this);
-            }
 
-            void EndConversation()
-            {
-                current = start;
-                onConversationEnd.publish();
+                if (option->HasNextIndex())
+                {
+                    current = option->nextNode.value();
+                    onConversationProgress.publish(this);
+                }
+                else
+                {
+                    endConversation();
+                }
             }
 
             void AddNode(std::unique_ptr<ConversationNode> node)

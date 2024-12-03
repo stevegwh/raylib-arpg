@@ -13,7 +13,7 @@ namespace sage
     namespace dialog
     {
 
-        [[nodiscard]] bool Option::HasNextIndex()
+        [[nodiscard]] bool Option::HasNextIndex() const
         {
             return nextNode.has_value();
         }
