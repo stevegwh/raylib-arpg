@@ -89,8 +89,7 @@ namespace sage
             auto item = data->itemFactory->GetItem("Dagger");
             GameObjectFactory::spawnItemInWorld(registry, data.get(), item, {0, 0, 0});
             auto quest2Id = QuestManager::GetInstance().CreateQuest(registry, "ItemFetchQuest");
-            auto taskType = std::make_unique<FetchQuest>(registry, quest2Id);
-            auto& taskComponent = registry->emplace<QuestTaskComponent>(item, registry, std::move(taskType));
+            auto& taskComponent = registry->emplace<QuestTaskComponent>(item, registry);
             auto& quest = registry->get<Quest>(quest2Id);
             quest.AddTask(item);
             GameObjectFactory::createFetchQuestNPC(registry, data.get(), {-10.0f, 0, 0}, "Fetch Quest NPC");

@@ -1,0 +1,12 @@
+#meta start
+questId: TestQuest
+#meta end
+
+#variables start
+#variables end
+
+title: A Test Quest
+---
+This is a quest description.
+---
+speak_to: Quest NPC

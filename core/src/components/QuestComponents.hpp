@@ -13,73 +13,9 @@ namespace sage
 {
     class Quest;
 
-    // TODO: I don't think these will be needed
-    class QuestTaskType
-    {
-      protected:
-        entt::registry* registry;
-        // entt::entity questId;
-        entt::entity questTarget;
-
-        explicit QuestTaskType(entt::registry* _registry, entt::entity _questTarget)
-            : registry(_registry), questTarget(_questTarget)
-        {
-        }
-
-      public:
-        [[nodiscard]] virtual bool CheckComplete()
-        {
-            return false;
-        };
-        virtual ~QuestTaskType() = default;
-    };
-
-    struct FetchQuest : public QuestTaskType
-    {
-        // Get what?
-        [[nodiscard]] bool CheckComplete() override
-        {
-            return false;
-        }
-
-        explicit FetchQuest(entt::registry* _registry, entt::entity _questTarget)
-            : QuestTaskType(_registry, _questTarget)
-        {
-        }
-    };
-
-    struct TalkQuest : public QuestTaskType
-    {
-        // With who?
-        [[nodiscard]] bool CheckComplete() override
-        {
-            return false;
-        }
-
-        explicit TalkQuest(entt::registry* _registry, entt::entity _questTarget)
-            : QuestTaskType(_registry, _questTarget)
-        {
-        }
-    };
-
-    struct KillQuest : public QuestTaskType
-    {
-        // Kill who?
-        [[nodiscard]] bool CheckComplete() override
-        {
-            return false;
-        }
-
-        explicit KillQuest(entt::registry* _registry, entt::entity _questTarget)
-            : QuestTaskType(_registry, _questTarget)
-        {
-        }
-    };
-
     // Attach this to entities that are part of a quest
     struct QuestTaskComponent
     {
-        std::unique_ptr<QuestTaskType> taskType;
         bool completed = false;
         entt::sigh<void(QuestTaskComponent*)> onTaskCompleted;
 
@@ -92,11 +28,10 @@ namespace sage
 
         [[nodiscard]] bool IsComplete() const
         {
-            return completed || taskType->CheckComplete();
+            return completed;
         }
 
-        explicit QuestTaskComponent(entt::registry* _registry, std::unique_ptr<QuestTaskType> _taskType)
-            : taskType(std::move(_taskType))
+        explicit QuestTaskComponent(entt::registry* _registry)
         {
         }
     };
