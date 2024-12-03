@@ -7,7 +7,7 @@ quest: Test Quest
 #node start
 title: start
 ---
-Hello! Welcome to my shop.
+Hello! How's it going?
 ---
 [[conditional | quest_not_started | Do you have any quests for me? | quest]]
 [[Sorry, I must be leaving. | exit]]

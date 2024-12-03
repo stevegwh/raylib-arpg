@@ -1,0 +1,31 @@
+#meta start
+owner: Quest NPC
+camera_pos: 10.0 2.0 5.0
+quest: Test Quest
+#meta end
+
+#node start
+title: start
+---
+Hello there, how can I help?
+---
+[[conditional | quest_in_progress | I want to complete the quest. | quest]]
+[Hello! | hello]
+[[Sorry, I must be leaving. | exit]]
+#node end
+
+#node start
+title: hello
+---
+Hello!
+---
+[[Sorry, I must be leaving. | exit]]
+#node end
+
+#node start
+title: quest
+---
+Sure, when I implement this, you'll be able to complete it.
+---
+[[Excellent. | exit]]
+#node end
