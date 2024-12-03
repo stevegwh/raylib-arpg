@@ -95,7 +95,7 @@ namespace sage
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hello there, how can I help? \n";
             node->title = "start";
-            auto option1 = std::make_unique<dialog::QuestHandInOption>(node.get(), questId);
+            auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId);
             option1->description = "I found this item on the ground, is it yours? \n";
             option1->nextNode = "quest";
             auto option2 = std::make_unique<dialog::Option>(node.get());
@@ -135,7 +135,7 @@ namespace sage
             auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
             node->content = "Hello there, how can I help? \n";
             node->title = "start";
-            auto option1 = std::make_unique<dialog::QuestHandInOption>(node.get(), questId);
+            auto option1 = std::make_unique<dialog::QuestOption>(node.get(), questId);
             option1->description = "I want to complete the quest. \n";
             option1->nextNode = "quest";
             auto option2 = std::make_unique<dialog::Option>(node.get());
@@ -225,8 +225,20 @@ namespace sage
                         questStartOption->nextNode = next;
                     }
                     node->options.push_back(std::move(questStartOption));
-                    // TODO: this does not start the quest
                 }
+                else if (token == "quest_task")
+                {
+                    assert(questId != entt::null);
+                    auto questStartOption = std::make_unique<dialog::QuestHandInOption>(node.get(), questId);
+                    questStartOption->description = option.at(1);
+                    const auto& next = option.at(2);
+                    if (!next.empty() && next != "exit")
+                    {
+                        questStartOption->nextNode = next;
+                    }
+                    node->options.push_back(std::move(questStartOption));
+                }
+                // TODO: Hand in quests
             }
             else if (option.size() > 3)
             {
