@@ -135,6 +135,9 @@ namespace sage
             // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
 
             onTargetPathChanged(self, target);
+
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
         }
 
         void OnStateExit(const entt::entity self) override
@@ -195,6 +198,9 @@ namespace sage
             state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
             entt::sink sink2{gameData->controllableActorSystem->onSelectedActorChange};
             state.AddConnection(sink2.connect<&WaitingForLeaderState::onMovementCancelled>(this));
+
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
         void OnStateEnter(const entt::entity self) override
@@ -288,6 +294,9 @@ namespace sage
         {
             assert(previousState == PartyMemberStateEnum::FollowingLeader);
             data[entity] = {followTarget, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
+
+            auto& animation = registry->get<Animation>(entity);
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
         void OnStateExit(entt::entity self) override

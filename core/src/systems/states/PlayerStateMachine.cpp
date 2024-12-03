@@ -33,7 +33,7 @@ namespace sage
         PlayerStateController* stateController;
 
         // If all below are persistent connections, maybe it would be better to move them to
-        // the PlayerStateController? Having them hear implies they are part of the state and will
+        // the PlayerStateController? Having them here implies they are part of the state and will
         // disconnect on state change.
 
         void onFloorClick(const entt::entity self, entt::entity x) const
@@ -127,6 +127,9 @@ namespace sage
             state.AddConnection(sink.connect<&MovingToLocationState::onTargetReached>(this));
             entt::sink sink2{moveable.onMovementCancel};
             state.AddConnection(sink2.connect<&MovingToLocationState::onMovementCancelled>(this));
+
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
         }
 
         void OnStateExit(entt::entity self) override
@@ -179,6 +182,9 @@ namespace sage
             state.AddConnection(sink.connect<&MovingToTalkToNPCState::onTargetReached>(this));
             entt::sink sink2{moveable.onMovementCancel};
             state.AddConnection(sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this));
+
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
         }
 
         void OnStateExit(entt::entity self) override
@@ -218,6 +224,9 @@ namespace sage
         void OnStateEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
         {
             data[entity] = {originalDestination, previousState, GetTime(), 1.5f, 0, 4};
+
+            auto& animation = registry->get<Animation>(entity);
+            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
         void OnStateExit(entt::entity self) override
@@ -263,6 +272,8 @@ namespace sage
             auto& playerDiag = registry->get<DialogComponent>(self);
             registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::IDLE);
             playerDiag.dialogTarget = entt::null;
+
+            // TODO: Bug: Doesn't change back to default on dialog end
         }
 
         ~InDialogState() override = default;
@@ -294,7 +305,7 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::WALK);
+            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
 
             auto& moveableActor = registry->get<MoveableActor>(self);
 
