@@ -41,19 +41,6 @@ namespace sage
         {
         }
 
-        bool QuestOption::ShouldShow()
-        {
-            if (condition.has_value())
-            {
-                return condition.value()();
-            }
-            else
-            {
-                auto& quest = parent->parent->registry->get<Quest>(questId);
-                return quest.HasStarted();
-            }
-        }
-
         void QuestOption::OnSelected()
         {
             auto& task = parent->parent->registry->get<QuestTaskComponent>(parent->parent->owner);
@@ -87,12 +74,6 @@ namespace sage
             }
         }
 
-        bool QuestStartOption::ShouldShow()
-        {
-            auto& quest = parent->parent->registry->get<Quest>(questId);
-            return !quest.HasStarted();
-        }
-
         QuestStartOption::QuestStartOption(ConversationNode* _parent, entt::entity _questId)
             : QuestOption(_parent, _questId)
         {
@@ -104,18 +85,12 @@ namespace sage
         {
         }
 
-        bool QuestHandInOption::ShouldShow()
-        {
-            auto& quest = parent->parent->registry->get<Quest>(questId);
-            return QuestOption::ShouldShow() && quest.GetTaskCompleteCount() == quest.GetTaskCount() - 1;
-        }
-
-        QuestHandInOption::QuestHandInOption(ConversationNode* _parent, entt::entity _questId)
+        QuestFinishOption::QuestFinishOption(ConversationNode* _parent, entt::entity _questId)
             : QuestOption(_parent, _questId)
         {
         }
 
-        QuestHandInOption::QuestHandInOption(
+        QuestFinishOption::QuestFinishOption(
             ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
             : QuestOption(_parent, _questId, std::move(_condition))
         {

@@ -46,7 +46,7 @@ namespace sage
             std::string description;
             ConversationNode* parent;
             [[nodiscard]] bool HasNextIndex() const;
-            virtual bool ShouldShow();
+            bool ShouldShow();
             virtual void OnSelected();
 
             virtual ~Option() = default;
@@ -61,7 +61,6 @@ namespace sage
             entt::entity questId{};
 
           public:
-            bool ShouldShow() override;
             void OnSelected() override;
 
             QuestOption(ConversationNode* _parent, entt::entity _questId);
@@ -73,7 +72,6 @@ namespace sage
         {
 
           public:
-            bool ShouldShow() override;
             void OnSelected() override;
 
             QuestStartOption(ConversationNode* _parent, entt::entity _questId);
@@ -81,14 +79,12 @@ namespace sage
         };
 
         // Shows if the dialog task is the final task left to be complete
-        class QuestHandInOption : public QuestOption
+        class QuestFinishOption : public QuestOption
         {
 
           public:
-            bool ShouldShow() override;
-
-            QuestHandInOption(ConversationNode* _parent, entt::entity _questId);
-            QuestHandInOption(ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition);
+            QuestFinishOption(ConversationNode* _parent, entt::entity _questId);
+            QuestFinishOption(ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition);
         };
 
         struct ConversationNode
