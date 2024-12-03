@@ -144,13 +144,8 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialog = registry->emplace<DialogComponent>(id);
-        dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
-        dialog.conversationPos =
-            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
         auto questId = QuestManager::GetInstance().GetQuest("TestQuest");
-        // data->dialogFactory->GetDialog(renderable.name, id);
-        auto taskType = std::make_unique<TalkQuest>(registry, questId);
-        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry, std::move(taskType));
+        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry);
         auto& quest = registry->get<Quest>(questId);
         quest.AddTask(id);
 
@@ -188,14 +183,8 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialog = registry->emplace<DialogComponent>(id);
-        dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
-        dialog.conversationPos =
-            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
         auto questId = QuestManager::GetInstance().GetQuest("ItemFetchQuest");
-        // data->dialogFactory->GetDialog(renderable.name, id);
-
-        auto taskType = std::make_unique<TalkQuest>(registry, questId);
-        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry, std::move(taskType));
+        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry);
         auto& quest = registry->get<Quest>(questId);
         quest.AddTask(id);
 
@@ -233,10 +222,6 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialog = registry->emplace<DialogComponent>(id);
-        // dialog.conversation = std::make_unique<dialog::Conversation>(registry, id);
-        // dialog.conversationPos =
-        //     Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
-        // data->dialogFactory->GetDialog(renderable.name, id);
 
         return id;
     }
