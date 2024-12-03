@@ -216,6 +216,7 @@ namespace sage
 
                 if (token == "quest_start")
                 {
+                    assert(questId != entt::null);
                     auto questStartOption = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
                     questStartOption->description = option.at(1);
                     const auto& next = option.at(2);
@@ -230,6 +231,7 @@ namespace sage
             else if (option.size() > 3)
             {
                 // TODO: check if "quest" related
+                assert(questId != entt::null);
                 auto& quest = registry->get<Quest>(questId);
                 auto conditionalOption = std::make_unique<dialog::ConditionalOption>(
                     node.get(), [&quest, condition = option.at(1)]() -> bool {
@@ -281,7 +283,7 @@ namespace sage
             entt::entity entity = entt::null;
             DialogComponent* dialogComponent = nullptr;
 
-            auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
+            entt::entity questId = entt::null;
 
             std::string currentNodeName;
             std::string currentNodeContent;
@@ -332,6 +334,14 @@ namespace sage
                         dialogComponent->conversationPos = Vector3Add(
                             transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
                     }
+                }
+                else if (line.starts_with("quest:"))
+                {
+                    assert(dialogComponent);
+                    auto questName = line.substr(6);
+                    questName.erase(0, questName.find_first_not_of(' '));
+                    questName.erase(questName.find_last_not_of(' ') + 1);
+                    questId = QuestManager::GetInstance().GetQuest(questName);
                 }
                 else if (line == "#node start")
                 {
