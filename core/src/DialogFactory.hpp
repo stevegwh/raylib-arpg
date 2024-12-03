@@ -13,9 +13,6 @@ namespace sage
 
     namespace dialog
     {
-        class Option;
-        class ConditionalOption;
-        struct ConversationNode;
         class Conversation;
     } // namespace dialog
 
@@ -32,8 +29,6 @@ namespace sage
             entt::entity questId) const;
 
       public:
-        void GetDialog(const std::string& npcName, entt::entity entity) const;
-
         void LoadDialog();
 
         DialogFactory(entt::registry* _registry, GameData* _gameData);

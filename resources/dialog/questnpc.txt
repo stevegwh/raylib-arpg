@@ -9,7 +9,9 @@ title: start
 ---
 Hello there, how can I help?
 ---
+if quest_hand_in
 [[quest_finish | I want to complete the quest. | quest]]
+end
 [Hello! | hello]
 [[Sorry, I must be leaving. | exit]]
 #node end

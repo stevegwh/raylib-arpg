@@ -9,7 +9,7 @@ title: start
 ---
 Hello there, how can I help?
 ---
-if quest_started
+if quest_hand_in
 [[quest_finish | I found this item on the ground, is it yours? | quest]]
 end
 [[Sorry, I must be leaving. | exit]]
