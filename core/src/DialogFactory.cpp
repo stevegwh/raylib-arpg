@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <tuple>
 #include <vector>
@@ -25,12 +26,125 @@ namespace fs = std::filesystem;
 namespace sage
 {
 
+    class DialogPreprocessor
+    {
+      public:
+        // Trim whitespace from start and end of a string
+        static std::string trim(const std::string& str)
+        {
+            auto start = str.begin();
+            while (start != str.end() && std::isspace(*start))
+            {
+                start++;
+            }
+
+            auto end = str.end();
+            do
+            {
+                end--;
+            } while (std::distance(start, end) > 0 && std::isspace(*end));
+
+            return {start, end + 1};
+        }
+
+        // Extract variables from dialog content
+        static std::unordered_map<std::string, std::string> extractVariables(const std::string& content)
+        {
+            std::unordered_map<std::string, std::string> variables;
+            std::istringstream stream(content);
+            std::string line;
+            bool inVariableBlock = false;
+
+            while (std::getline(stream, line, '\n'))
+            {
+                line = trim(line);
+
+                if (line == "#variables start")
+                {
+                    inVariableBlock = true;
+                    continue;
+                }
+
+                if (line == "#variables end")
+                {
+                    inVariableBlock = false;
+                    continue;
+                }
+
+                if (inVariableBlock)
+                {
+                    size_t colonPos = line.find(':');
+                    if (colonPos != std::string::npos)
+                    {
+                        std::string key = trim(line.substr(0, colonPos));
+                        std::string value = trim(line.substr(colonPos + 1));
+                        variables[key] = value;
+                    }
+                }
+            }
+
+            return variables;
+        }
+
+        static std::string substituteVariables(
+            const std::string& content, const std::unordered_map<std::string, std::string>& variables)
+        {
+            std::string result = content;
+
+            for (const auto& [varName, value] : variables)
+            {
+
+                result = std::regex_replace(result, std::regex(R"(\$)" + varName), value);
+            }
+
+            return result;
+        }
+
+        // Preprocess entire dialog, combining all steps
+        static std::string preprocessDialog(const std::string& content)
+        {
+            // Extract variables
+            auto variables = extractVariables(content);
+
+            // Substitute variables
+            return substituteVariables(content, variables);
+        }
+    };
+
+    std::string trim(const std::string& str)
+    {
+        auto start = str.find_first_not_of(" \t\n\r");
+        auto end = str.find_last_not_of(" \t\n\r");
+        return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
+    }
+
+    std::pair<std::string, std::string> getFunctionNameAndArgs(const std::string& input)
+    {
+        std::string trimmedInput = trim(input);
+
+        // Adjusted regex pattern to allow broader parameters
+        std::regex pattern(R"(^(\w+)\(([^)]+)\)$)");
+        std::smatch match;
+
+        if (std::regex_match(trimmedInput, match, pattern))
+        {
+            std::string functionName = match[1]; // First capture group
+            std::string parameter = match[2];    // Second capture group
+
+            return {functionName, parameter};
+        }
+        else
+        {
+
+            return {trimmedInput, ""};
+        }
+    }
+
     void DialogFactory::parseNode(
         dialog::Conversation* conversation,
         const std::string& nodeName,
         const std::string& content,
-        const std::vector<std::vector<std::string>>& optionData,
-        entt::entity questId) const
+        const std::vector<std::vector<std::string>>& optionData) const
     {
         auto node = std::make_unique<dialog::ConversationNode>(conversation);
         node->title = nodeName;
@@ -44,7 +158,6 @@ namespace sage
             {
                 assert(!condition.has_value()); // if blocks must be closed with end. No nesting allowed (yet).
                 // TODO: Should check if condition is related to quests
-                assert(questId != entt::null);
                 bool negateCondition = false;
                 unsigned int parameterIndex = 1;
                 if (option.at(1) == "not")
@@ -52,20 +165,28 @@ namespace sage
                     negateCondition = true;
                     parameterIndex = 2;
                 }
-                auto& quest = registry->get<Quest>(questId);
                 // TODO "AND" and "OR"
-                condition = [&quest, negateCondition, condition = option.at(parameterIndex)]() -> bool {
+                auto reg = registry;
+                condition = [reg,
+                             negateCondition,
+                             condition = getFunctionNameAndArgs(option.at(parameterIndex))]() -> bool {
                     bool out = false;
-                    if (condition == "quest_complete")
+                    if (condition.first == "quest_complete")
                     {
+                        assert(!condition.second.empty());
+                        auto& quest = reg->get<Quest>(QuestManager::GetInstance().GetQuest(condition.second));
                         out = quest.IsComplete();
                     }
-                    else if (condition == "quest_in_progress")
+                    else if (condition.first == "quest_in_progress")
                     {
+                        assert(!condition.second.empty());
+                        auto& quest = reg->get<Quest>(QuestManager::GetInstance().GetQuest(condition.second));
                         out = quest.HasStarted() && !quest.IsComplete();
                     }
-                    else if (condition == "quest_hand_in")
+                    else if (condition.first == "quest_hand_in")
                     {
+                        assert(!condition.second.empty());
+                        auto& quest = reg->get<Quest>(QuestManager::GetInstance().GetQuest(condition.second));
                         out = quest.HasStarted() && quest.GetTaskCompleteCount() == quest.GetTaskCount() - 1;
                     }
                     else
@@ -101,11 +222,11 @@ namespace sage
             }
             else if (option.size() == 3)
             {
-                const auto& token = option.at(0);
-                // TODO: I think "ShouldShow" should not be virtual and just be controlled by the conditional
-                if (token == "quest_task")
+                const auto& token = getFunctionNameAndArgs(option.at(0));
+                if (token.first == "quest_task")
                 {
-                    assert(questId != entt::null);
+                    assert(!token.second.empty());
+                    auto questId = QuestManager::GetInstance().GetQuest(token.second);
                     std::unique_ptr<dialog::QuestOption> questOption;
                     if (condition.has_value())
                     {
@@ -124,9 +245,10 @@ namespace sage
                     }
                     node->options.push_back(std::move(questOption));
                 }
-                else if (token == "quest_start")
+                else if (token.first == "quest_start")
                 {
-                    assert(questId != entt::null);
+                    assert(!token.second.empty());
+                    auto questId = QuestManager::GetInstance().GetQuest(token.second);
                     std::unique_ptr<dialog::QuestStartOption> questStartOption;
                     if (condition.has_value())
                     {
@@ -145,9 +267,10 @@ namespace sage
                     }
                     node->options.push_back(std::move(questStartOption));
                 }
-                else if (token == "quest_finish")
+                else if (token.first == "quest_finish")
                 {
-                    assert(questId != entt::null);
+                    assert(!token.second.empty());
+                    auto questId = QuestManager::GetInstance().GetQuest(token.second);
                     std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
                     if (condition.has_value())
                     {
@@ -187,27 +310,36 @@ namespace sage
 
         for (const auto& entry : fs::directory_iterator(inputPath))
         {
+            if (entry.path().extension() != ".txt") continue;
             std::ifstream infile(entry.path());
+
             if (!infile)
             {
                 std::cerr << "Could not open file: " << entry.path() << std::endl;
                 continue;
             }
 
+            // Load all file data for preprocessing
+            std::ostringstream fileContent;
+            fileContent << infile.rdbuf();
+            std::cout << fileContent.str() << std::endl;
+
+            // Preprocess the dialog
+            std::string processedContent = DialogPreprocessor::preprocessDialog(fileContent.str());
+            std::stringstream contentStream(processedContent);
+
             // Variables to track current parsing state
             entt::entity entity = entt::null;
             DialogComponent* dialogComponent = nullptr;
-
-            entt::entity questId = entt::null;
 
             std::string currentNodeName;
             std::string currentNodeContent;
             std::vector<std::vector<std::string>> currentNodeOptions;
             std::string line;
 
-            while (std::getline(infile, line))
+            while (std::getline(contentStream, line))
             {
-                // TODO: Should trim any white space from start of line, to allow for indentation.
+
                 if (line == "#meta start")
                 {
                     // Reset for a new dialog
@@ -251,14 +383,6 @@ namespace sage
                             transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
                     }
                 }
-                else if (line.starts_with("quest:"))
-                {
-                    assert(dialogComponent);
-                    auto questName = line.substr(6);
-                    questName.erase(0, questName.find_first_not_of(' '));
-                    questName.erase(questName.find_last_not_of(' ') + 1);
-                    questId = QuestManager::GetInstance().GetQuest(questName);
-                }
                 else if (line == "#node start")
                 {
                     // Reset node-specific variables
@@ -276,7 +400,7 @@ namespace sage
                 {
                     std::string contentLine;
                     currentNodeContent.clear();
-                    while (std::getline(infile, contentLine) && contentLine != "---")
+                    while (std::getline(contentStream, contentLine) && contentLine != "---")
                     {
                         currentNodeContent += contentLine + "\n";
                     }
@@ -328,8 +452,7 @@ namespace sage
                             dialogComponent->conversation.get(),
                             currentNodeName,
                             currentNodeContent,
-                            currentNodeOptions,
-                            questId);
+                            currentNodeOptions);
                     }
                 }
             }
