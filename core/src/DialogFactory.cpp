@@ -27,64 +27,64 @@ namespace sage
 
     void GetKnightDialog(entt::registry* registry, entt::entity entity)
     {
-        auto& dialog = registry->get<DialogComponent>(entity);
-        auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
-
-        {
-            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->title = "start";
-            node->content = "Hello! \n";
-
-            auto option1 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
-                auto& quest = registry->get<Quest>(questId);
-                return !quest.HasStarted() && !quest.IsComplete();
-            });
-            option1->description = "Do you have any quests for me? \n";
-            option1->nextNode = "quest";
-
-            auto option3 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
-                auto& quest = registry->get<Quest>(questId);
-                return quest.IsComplete();
-            });
-            option3->description = "I completed the quest! \n";
-            option3->nextNode = "quest complete";
-
-            auto option2 = std::make_unique<dialog::Option>(node.get());
-            option2->description = "Sorry, I must be leaving. \n";
-            option2->nextNode = "exit";
-
-            node->options.push_back(std::move(option1));
-            node->options.push_back(std::move(option3));
-            node->options.push_back(std::move(option2));
-            dialog.conversation->AddNode(std::move(node));
-        }
-
-        {
-            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->title = "quest";
-            node->content = "Sure, talk to my friend! \n";
-
-            auto option1 = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
-            option1->description = "Ok, sure. \n";
-            option1->nextNode = "exit";
-
-            auto option2 = std::make_unique<dialog::Option>(node.get());
-            option2->description = "No, thank you! \n";
-            option2->nextNode = "exit";
-
-            node->options.push_back(std::move(option1));
-            node->options.push_back(std::move(option2));
-            dialog.conversation->AddNode(std::move(node));
-        }
-        {
-            auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
-            node->title = "exit";
-            node->content = "Ok! \n";
-            auto option1 = std::make_unique<dialog::Option>(node.get());
-            option1->description = "Take your leave \n";
-            node->options.push_back(std::move(option1));
-            dialog.conversation->AddNode(std::move(node));
-        }
+        // auto& dialog = registry->get<DialogComponent>(entity);
+        // auto questId = QuestManager::GetInstance().GetQuest("Test Quest");
+        //
+        // {
+        //     auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+        //     node->title = "start";
+        //     node->content = "Hello! \n";
+        //
+        //     auto option1 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
+        //         auto& quest = registry->get<Quest>(questId);
+        //         return !quest.HasStarted() && !quest.IsComplete();
+        //     });
+        //     option1->description = "Do you have any quests for me? \n";
+        //     option1->nextNode = "quest";
+        //
+        //     auto option3 = std::make_unique<dialog::ConditionalOption>(node.get(), [registry, questId]() {
+        //         auto& quest = registry->get<Quest>(questId);
+        //         return quest.IsComplete();
+        //     });
+        //     option3->description = "I completed the quest! \n";
+        //     option3->nextNode = "quest complete";
+        //
+        //     auto option2 = std::make_unique<dialog::Option>(node.get());
+        //     option2->description = "Sorry, I must be leaving. \n";
+        //     option2->nextNode = "exit";
+        //
+        //     node->options.push_back(std::move(option1));
+        //     node->options.push_back(std::move(option3));
+        //     node->options.push_back(std::move(option2));
+        //     dialog.conversation->AddNode(std::move(node));
+        // }
+        //
+        // {
+        //     auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+        //     node->title = "quest";
+        //     node->content = "Sure, talk to my friend! \n";
+        //
+        //     auto option1 = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
+        //     option1->description = "Ok, sure. \n";
+        //     option1->nextNode = "exit";
+        //
+        //     auto option2 = std::make_unique<dialog::Option>(node.get());
+        //     option2->description = "No, thank you! \n";
+        //     option2->nextNode = "exit";
+        //
+        //     node->options.push_back(std::move(option1));
+        //     node->options.push_back(std::move(option2));
+        //     dialog.conversation->AddNode(std::move(node));
+        // }
+        // {
+        //     auto node = std::make_unique<dialog::ConversationNode>(dialog.conversation.get());
+        //     node->title = "exit";
+        //     node->content = "Ok! \n";
+        //     auto option1 = std::make_unique<dialog::Option>(node.get());
+        //     option1->description = "Take your leave \n";
+        //     node->options.push_back(std::move(option1));
+        //     dialog.conversation->AddNode(std::move(node));
+        // }
     }
 
     void GetFetchQuestNPCDialog(entt::registry* registry, entt::entity entity)
@@ -197,11 +197,48 @@ namespace sage
         node->title = nodeName;
         node->content = content;
 
+        std::optional<std::function<bool()>> condition;
+
         for (const auto& option : optionData)
         {
-            if (option.size() == 2)
+            if (option.at(0) == "if")
             {
-                auto baseOption = std::make_unique<dialog::Option>(node.get());
+                assert(!condition.has_value()); // if blocks must be closed with end. No nesting allowed (yet).
+                // TODO: Should check if condition is related to quests
+                assert(questId != entt::null);
+                auto& quest = registry->get<Quest>(questId);
+                condition = [&quest, condition = option.at(1)]() -> bool {
+                    if (condition == "quest_not_started")
+                    {
+                        return !quest.HasStarted() && !quest.IsComplete();
+                    }
+                    else if (condition == "quest_complete")
+                    {
+                        return quest.IsComplete();
+                    }
+                    else if (condition == "quest_in_progress")
+                    {
+                        return quest.HasStarted() && !quest.IsComplete();
+                    }
+                    return true;
+                };
+            }
+            else if (option.at(0) == "end")
+            {
+                assert(condition.has_value()); // ensures that 'end' has an accompanying 'if'
+                condition.reset();
+            }
+            else if (option.size() == 2)
+            {
+                std::unique_ptr<dialog::Option> baseOption;
+                if (condition.has_value())
+                {
+                    baseOption = std::make_unique<dialog::Option>(node.get(), condition.value());
+                }
+                else
+                {
+                    baseOption = std::make_unique<dialog::Option>(node.get());
+                }
                 baseOption->description = option.at(0);
                 const auto& next = option.at(1);
                 if (!next.empty() && next != "exit")
@@ -213,61 +250,75 @@ namespace sage
             else if (option.size() == 3)
             {
                 const auto& token = option.at(0);
+                // TODO: I think "ShouldShow" should not be virtual and just be controlled by the conditional
+                if (token == "quest_task")
+                {
+                    assert(questId != entt::null);
+                    std::unique_ptr<dialog::QuestOption> questOption;
+                    if (condition.has_value())
+                    {
+                        questOption =
+                            std::make_unique<dialog::QuestOption>(node.get(), questId, condition.value());
+                    }
+                    else
+                    {
+                        questOption = std::make_unique<dialog::QuestOption>(node.get(), questId);
+                    }
+                    questOption->description = option.at(1);
+                    const auto& next = option.at(2);
+                    if (!next.empty() && next != "exit")
+                    {
+                        questOption->nextNode = next;
+                    }
+                    node->options.push_back(std::move(questOption));
+                }
+                else if (token == "quest_start")
+                {
+                    assert(questId != entt::null);
+                    std::unique_ptr<dialog::QuestStartOption> questStartOption;
+                    if (condition.has_value())
+                    {
+                        questStartOption =
+                            std::make_unique<dialog::QuestStartOption>(node.get(), questId, condition.value());
+                    }
+                    else
+                    {
+                        questStartOption = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
+                    }
+                    questStartOption->description = option.at(1);
+                    const auto& next = option.at(2);
+                    if (!next.empty() && next != "exit")
+                    {
+                        questStartOption->nextNode = next;
+                    }
+                    node->options.push_back(std::move(questStartOption));
+                }
+                else if (token == "quest_finish")
+                {
+                    assert(questId != entt::null);
+                    std::unique_ptr<dialog::QuestHandInOption> questFinishOption;
+                    if (condition.has_value())
+                    {
+                        questFinishOption =
+                            std::make_unique<dialog::QuestHandInOption>(node.get(), questId, condition.value());
+                    }
+                    else
+                    {
+                        questFinishOption = std::make_unique<dialog::QuestHandInOption>(node.get(), questId);
+                    }
 
-                if (token == "quest_start")
-                {
-                    assert(questId != entt::null);
-                    auto questStartOption = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
-                    questStartOption->description = option.at(1);
+                    questFinishOption->description = option.at(1);
                     const auto& next = option.at(2);
                     if (!next.empty() && next != "exit")
                     {
-                        questStartOption->nextNode = next;
+                        questFinishOption->nextNode = next;
                     }
-                    node->options.push_back(std::move(questStartOption));
+                    node->options.push_back(std::move(questFinishOption));
                 }
-                else if (token == "quest_task")
+                else
                 {
-                    assert(questId != entt::null);
-                    auto questStartOption = std::make_unique<dialog::QuestHandInOption>(node.get(), questId);
-                    questStartOption->description = option.at(1);
-                    const auto& next = option.at(2);
-                    if (!next.empty() && next != "exit")
-                    {
-                        questStartOption->nextNode = next;
-                    }
-                    node->options.push_back(std::move(questStartOption));
+                    assert(0);
                 }
-                // TODO: Hand in quests
-            }
-            else if (option.size() > 3)
-            {
-                // TODO: check if "quest" related
-                assert(questId != entt::null);
-                auto& quest = registry->get<Quest>(questId);
-                auto conditionalOption = std::make_unique<dialog::ConditionalOption>(
-                    node.get(), [&quest, condition = option.at(1)]() -> bool {
-                        if (condition == "quest_not_started")
-                        {
-                            return !quest.HasStarted() && !quest.IsComplete();
-                        }
-                        else if (condition == "quest_complete")
-                        {
-                            return quest.IsComplete();
-                        }
-                        else if (condition == "quest_in_progress")
-                        {
-                            return quest.HasStarted() && !quest.IsComplete();
-                        }
-                        return true;
-                    });
-                conditionalOption->description = option.at(2);
-                const auto& next = option.at(3);
-                if (!next.empty() && next != "exit")
-                {
-                    conditionalOption->nextNode = next;
-                }
-                node->options.push_back(std::move(conditionalOption));
             }
         }
         conversation->AddNode(std::move(node));
@@ -304,6 +355,7 @@ namespace sage
 
             while (std::getline(infile, line))
             {
+                // TODO: Should trim any white space from start of line, to allow for indentation.
                 if (line == "#meta start")
                 {
                     // Reset for a new dialog
@@ -376,6 +428,26 @@ namespace sage
                     {
                         currentNodeContent += contentLine + "\n";
                     }
+                }
+                else if (line.starts_with("if"))
+                {
+                    std::istringstream iss(line);
+                    std::vector<std::string> optionParts;
+                    std::string part;
+
+                    while (std::getline(iss, part, ' '))
+                    {
+                        // Trim whitespace
+                        part.erase(0, part.find_first_not_of(' '));
+                        part.erase(part.find_last_not_of(' ') + 1);
+                        optionParts.push_back(part);
+                    }
+
+                    currentNodeOptions.push_back(optionParts);
+                }
+                else if (line == "end")
+                {
+                    currentNodeOptions.push_back({"end"});
                 }
                 else if (line.starts_with("[["))
                 {

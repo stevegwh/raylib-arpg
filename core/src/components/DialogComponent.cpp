@@ -20,6 +20,10 @@ namespace sage
 
         bool Option::ShouldShow()
         {
+            if (condition.has_value())
+            {
+                return condition.value()();
+            }
             return true;
         }
 
@@ -32,20 +36,22 @@ namespace sage
         {
         }
 
-        bool ConditionalOption::ShouldShow()
-        {
-            return condition();
-        }
-
-        ConditionalOption::ConditionalOption(ConversationNode* _parent, std::function<bool()> _condition)
-            : Option(_parent), condition(std::move(_condition))
+        Option::Option(ConversationNode* _parent, std::function<bool()> _condition)
+            : condition(std::move(_condition)), parent(_parent)
         {
         }
 
         bool QuestOption::ShouldShow()
         {
-            auto& quest = parent->parent->registry->get<Quest>(questId);
-            return quest.HasStarted();
+            if (condition.has_value())
+            {
+                return condition.value()();
+            }
+            else
+            {
+                auto& quest = parent->parent->registry->get<Quest>(questId);
+                return quest.HasStarted();
+            }
         }
 
         void QuestOption::OnSelected()
@@ -60,6 +66,12 @@ namespace sage
 
         QuestOption::QuestOption(ConversationNode* _parent, entt::entity _questId)
             : Option(_parent), questId(_questId)
+        {
+        }
+
+        QuestOption::QuestOption(
+            ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
+            : Option(_parent, std::move(_condition)), questId(_questId)
         {
         }
 
@@ -86,6 +98,12 @@ namespace sage
         {
         }
 
+        QuestStartOption::QuestStartOption(
+            ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
+            : QuestOption(_parent, _questId, std::move(_condition))
+        {
+        }
+
         bool QuestHandInOption::ShouldShow()
         {
             auto& quest = parent->parent->registry->get<Quest>(questId);
@@ -94,6 +112,12 @@ namespace sage
 
         QuestHandInOption::QuestHandInOption(ConversationNode* _parent, entt::entity _questId)
             : QuestOption(_parent, _questId)
+        {
+        }
+
+        QuestHandInOption::QuestHandInOption(
+            ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
+            : QuestOption(_parent, _questId, std::move(_condition))
         {
         }
 
