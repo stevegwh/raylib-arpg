@@ -26,96 +26,69 @@ namespace fs = std::filesystem;
 namespace sage
 {
 
-    class DialogPreprocessor
-    {
-      public:
-        // Trim whitespace from start and end of a string
-        static std::string trim(const std::string& str)
-        {
-            auto start = str.begin();
-            while (start != str.end() && std::isspace(*start))
-            {
-                start++;
-            }
-
-            auto end = str.end();
-            do
-            {
-                end--;
-            } while (std::distance(start, end) > 0 && std::isspace(*end));
-
-            return {start, end + 1};
-        }
-
-        // Extract variables from dialog content
-        static std::unordered_map<std::string, std::string> extractVariables(const std::string& content)
-        {
-            std::unordered_map<std::string, std::string> variables;
-            std::istringstream stream(content);
-            std::string line;
-            bool inVariableBlock = false;
-
-            while (std::getline(stream, line, '\n'))
-            {
-                line = trim(line);
-
-                if (line == "#variables start")
-                {
-                    inVariableBlock = true;
-                    continue;
-                }
-
-                if (line == "#variables end")
-                {
-                    inVariableBlock = false;
-                    continue;
-                }
-
-                if (inVariableBlock)
-                {
-                    size_t colonPos = line.find(':');
-                    if (colonPos != std::string::npos)
-                    {
-                        std::string key = trim(line.substr(0, colonPos));
-                        std::string value = trim(line.substr(colonPos + 1));
-                        variables[key] = value;
-                    }
-                }
-            }
-
-            return variables;
-        }
-
-        static std::string substituteVariables(
-            const std::string& content, const std::unordered_map<std::string, std::string>& variables)
-        {
-            std::string result = content;
-
-            for (const auto& [varName, value] : variables)
-            {
-
-                result = std::regex_replace(result, std::regex(R"(\$)" + varName), value);
-            }
-
-            return result;
-        }
-
-        // Preprocess entire dialog, combining all steps
-        static std::string preprocessDialog(const std::string& content)
-        {
-            // Extract variables
-            auto variables = extractVariables(content);
-
-            // Substitute variables
-            return substituteVariables(content, variables);
-        }
-    };
-
-    std::string trim(const std::string& str)
+    static std::string trim(const std::string& str)
     {
         auto start = str.find_first_not_of(" \t\n\r");
         auto end = str.find_last_not_of(" \t\n\r");
         return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
+    }
+
+    static std::unordered_map<std::string, std::string> extractVariables(const std::string& content)
+    {
+        std::unordered_map<std::string, std::string> variables;
+        std::istringstream stream(content);
+        std::string line;
+        bool inVariableBlock = false;
+
+        while (std::getline(stream, line, '\n'))
+        {
+            line = trim(line);
+
+            if (line == "#variables start")
+            {
+                inVariableBlock = true;
+                continue;
+            }
+
+            if (line == "#variables end")
+            {
+                inVariableBlock = false;
+                continue;
+            }
+
+            if (inVariableBlock)
+            {
+                size_t colonPos = line.find(':');
+                if (colonPos != std::string::npos)
+                {
+                    std::string key = trim(line.substr(0, colonPos));
+                    std::string value = trim(line.substr(colonPos + 1));
+                    variables[key] = value;
+                }
+            }
+        }
+
+        return variables;
+    }
+
+    static std::string substituteVariables(
+        const std::string& content, const std::unordered_map<std::string, std::string>& variables)
+    {
+        std::string result = content;
+
+        for (const auto& [varName, value] : variables)
+        {
+
+            result = std::regex_replace(result, std::regex(R"(\$)" + varName), value);
+        }
+
+        return result;
+    }
+
+    static std::string preprocessDialog(const std::string& content)
+    {
+        auto variables = extractVariables(content);
+        return substituteVariables(content, variables);
     }
 
     std::pair<std::string, std::string> getFunctionNameAndArgs(const std::string& input)
@@ -319,16 +292,12 @@ namespace sage
                 continue;
             }
 
-            // Load all file data for preprocessing
             std::ostringstream fileContent;
             fileContent << infile.rdbuf();
             std::cout << fileContent.str() << std::endl;
-
-            // Preprocess the dialog
-            std::string processedContent = DialogPreprocessor::preprocessDialog(fileContent.str());
+            std::string processedContent = preprocessDialog(fileContent.str());
             std::stringstream contentStream(processedContent);
 
-            // Variables to track current parsing state
             entt::entity entity = entt::null;
             DialogComponent* dialogComponent = nullptr;
 
@@ -352,9 +321,7 @@ namespace sage
                 else if (line.starts_with("owner:"))
                 {
                     auto owner = line.substr(6);
-                    // Trim whitespace
-                    owner.erase(0, owner.find_first_not_of(' '));
-                    owner.erase(owner.find_last_not_of(' ') + 1);
+                    owner = trim(owner);
 
                     entity = gameData->npcManager->GetNPC(owner);
                     dialogComponent = &registry->get<DialogComponent>(entity);
@@ -393,8 +360,7 @@ namespace sage
                 else if (line.starts_with("title:"))
                 {
                     currentNodeName = line.substr(6);
-                    currentNodeName.erase(0, currentNodeName.find_first_not_of(' '));
-                    currentNodeName.erase(currentNodeName.find_last_not_of(' ') + 1);
+                    currentNodeName = trim(currentNodeName);
                 }
                 else if (line == "---")
                 {
@@ -413,9 +379,7 @@ namespace sage
 
                     while (std::getline(iss, part, ' '))
                     {
-                        // Trim whitespace
-                        part.erase(0, part.find_first_not_of(' '));
-                        part.erase(part.find_last_not_of(' ') + 1);
+                        part = trim(part);
                         optionParts.push_back(part);
                     }
 
@@ -434,9 +398,7 @@ namespace sage
 
                     while (std::getline(iss, part, '|'))
                     {
-                        // Trim whitespace
-                        part.erase(0, part.find_first_not_of(' '));
-                        part.erase(part.find_last_not_of(' ') + 1);
+                        part = trim(part);
                         optionParts.push_back(part);
                     }
 
