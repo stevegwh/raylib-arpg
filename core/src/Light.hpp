@@ -16,9 +16,13 @@ namespace sage
         Vector3 position;
         Vector3 target;
         Color color;
-        float intensity;
+        float brightness;
+        // TODO: Allow user to set below values
+        float constant = 0;
+        float linear = 2;
+        float quadratic = 0.3;
 
-        void LinkShader(const Shader shader, const int lightsCount)
+        void LinkShader(const Shader shader, const int lightsCount) const
         {
             // NOTE: Lighting shader naming must be the provided ones
             int enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
@@ -26,7 +30,10 @@ namespace sage
             int positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
             int targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
             int colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
-            int intensityLoc = GetShaderLocation(shader, TextFormat("lights[%i].intensity", lightsCount));
+            int brightnessLoc = GetShaderLocation(shader, TextFormat("lights[%i].brightness", lightsCount));
+            int constantLoc = GetShaderLocation(shader, TextFormat("lights[%i].constant", lightsCount));
+            int linearLoc = GetShaderLocation(shader, TextFormat("lights[%i].linear", lightsCount));
+            int quadraticLoc = GetShaderLocation(shader, TextFormat("lights[%i].quadratic", lightsCount));
 
             // UpdateLightValues(shader, *this);
             float _position[3] = {position.x, position.y, position.z};
@@ -41,13 +48,16 @@ namespace sage
             SetShaderValue(shader, positionLoc, _position, SHADER_UNIFORM_VEC3);
             SetShaderValue(shader, targetLoc, _target, SHADER_UNIFORM_VEC3);
             SetShaderValue(shader, colorLoc, _color, SHADER_UNIFORM_VEC4);
-            SetShaderValue(shader, intensityLoc, &intensity, SHADER_UNIFORM_FLOAT);
+            SetShaderValue(shader, brightnessLoc, &brightness, SHADER_UNIFORM_FLOAT);
+            SetShaderValue(shader, constantLoc, &constant, SHADER_UNIFORM_FLOAT);
+            SetShaderValue(shader, linearLoc, &linear, SHADER_UNIFORM_FLOAT);
+            SetShaderValue(shader, quadraticLoc, &quadratic, SHADER_UNIFORM_FLOAT);
         }
 
         template <typename Archive>
         void serialize(Archive& archive)
         {
-            archive(type, position, target, color, intensity);
+            archive(type, position, target, color, brightness);
         }
     };
 } // namespace sage

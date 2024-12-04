@@ -186,7 +186,7 @@ namespace sage
             light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         }
 
-        light.intensity = s / 115; // Seems to work well.
+        light.brightness = s / 115; // Seems to work well.
 
         light.color =
             Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 1};
