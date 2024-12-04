@@ -49,7 +49,8 @@ namespace sage
         RefreshLights();
     }
 
-    entt::entity LightManager::CreateLight(int type, Vector3 position, Vector3 target, Color color)
+    entt::entity LightManager::CreateLight(
+        int type, Vector3 position, Vector3 target, Color color, float intensity)
     {
         if (lightsCount < MAX_LIGHTS)
         {
@@ -59,6 +60,7 @@ namespace sage
             light.position = position;
             light.target = target;
             light.color = color;
+            light.intensity = intensity;
             RefreshLights();
             return entity;
         }

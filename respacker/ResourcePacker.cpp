@@ -146,11 +146,14 @@ namespace sage
 
     void HandleLight(entt::registry* registry, std::ifstream& infile)
     {
+        std::string light_type;
         std::string objectName;
         float x, y, z;
         int r, g, b, s;
         try
         {
+            light_type = readLine(infile, "light_type");
+
             objectName = readLine(infile, "name");
 
             std::istringstream locStream(readLine(infile, "location"));
@@ -170,12 +173,23 @@ namespace sage
 
         auto entity = registry->create();
         auto& light = registry->emplace<Light>(entity);
-        light.type = LIGHT_POINT;
         light.target = Vector3Zero();
-        light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
+
+        if (light_type == "sun")
+        {
+            light.type = LIGHT_DIRECTIONAL;
+            light.position = {0, 1000, 0};
+        }
+        else if (light_type == "point")
+        {
+            light.type = LIGHT_POINT;
+            light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
+        }
+
+        light.intensity = s / 115; // Seems to work well.
+
         light.color =
             Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 1};
-        light.attenuation = s;
     }
 
     void HandleSpawner(entt::registry* registry, std::ifstream& infile)
