@@ -16,7 +16,7 @@ namespace sage
         Vector3 position;
         Vector3 target;
         Color color;
-        float attenuation;
+        float intensity;
 
         void LinkShader(const Shader shader, const int lightsCount)
         {
@@ -26,7 +26,7 @@ namespace sage
             int positionLoc = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
             int targetLoc = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
             int colorLoc = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
-            int attenuationLoc = GetShaderLocation(shader, TextFormat("lights[%i].attenuation", lightsCount));
+            int intensityLoc = GetShaderLocation(shader, TextFormat("lights[%i].intensity", lightsCount));
 
             // UpdateLightValues(shader, *this);
             float _position[3] = {position.x, position.y, position.z};
@@ -41,13 +41,13 @@ namespace sage
             SetShaderValue(shader, positionLoc, _position, SHADER_UNIFORM_VEC3);
             SetShaderValue(shader, targetLoc, _target, SHADER_UNIFORM_VEC3);
             SetShaderValue(shader, colorLoc, _color, SHADER_UNIFORM_VEC4);
-            SetShaderValue(shader, attenuationLoc, &attenuation, SHADER_UNIFORM_FLOAT);
+            SetShaderValue(shader, intensityLoc, &intensity, SHADER_UNIFORM_FLOAT);
         }
 
         template <typename Archive>
         void serialize(Archive& archive)
         {
-            archive(type, position, target, color);
+            archive(type, position, target, color, intensity);
         }
     };
 } // namespace sage

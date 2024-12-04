@@ -23,8 +23,8 @@ namespace sage
         Shader defaultShader{};
         std::vector<Shader> shaders;
         int lightsCount = 0;
-        float gamma = 3.3;
-        std::array<float, 4> ambient;
+        float gamma = 2.3;
+        std::array<float, 4> ambient{};
         void updateShaderLights(Shader& _shader);
         void updateAmbientLight(Shader& _shader) const;
 
@@ -34,7 +34,8 @@ namespace sage
             int type,
             Vector3 position,
             Vector3 target,
-            Color color); // Create a light and get shader locations
+            Color color,
+            float intensity); // Create a light and get shader locations
         void LinkShaderToLights(Shader& _shader);
         void SetAmbientLight(float r, float g, float b, float a);
         void SetGamma(float g);
