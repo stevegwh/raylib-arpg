@@ -60,7 +60,7 @@ namespace sage
             light.position = position;
             light.target = target;
             light.color = color;
-            light.intensity = intensity;
+            light.brightness = intensity;
             RefreshLights();
             return entity;
         }

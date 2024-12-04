@@ -8,7 +8,10 @@ struct Light {
     vec3 position;
     vec3 target;
     vec4 color;
-    float intensity;
+    float brightness;
+    float constant; // See: https://developer.valvesoftware.com/wiki/Constant-Linear-Quadratic_Falloff
+    float linear;
+    float quadratic;
 };
 
 // Input lighting values
@@ -17,12 +20,6 @@ uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 uniform vec3 viewPos;
 uniform float gamma;
-
-// attenuation type: constant, linear, quadratic 
-
-// Light control parameters (to be replaced with uniforms later)
-const float lightReachMultiplier = 0.8;// Adjusts how far the light reaches (attenuation?)
-// const float lightPowerMultiplier = 1.4;// Adjusts the intensity of the light
 
 vec4 Lighting_CalculateLighting(vec4 texelColor)
 {
@@ -36,11 +33,12 @@ vec4 Lighting_CalculateLighting(vec4 texelColor)
         {
             vec3 light = vec3(0.0);
             float attenuation = 1.0;
-            float strength = lights[i].intensity;
+            float strength = lights[i].brightness;
 
             if (lights[i].type == LIGHT_DIRECTIONAL)
             {
                 light = -normalize(lights[i].target - lights[i].position);
+                attenuation = 1.0; // constant
             }
 
             if (lights[i].type == LIGHT_POINT)
@@ -49,13 +47,16 @@ vec4 Lighting_CalculateLighting(vec4 texelColor)
                 light = normalize(lightVector);
 
                 float distance = length(lightVector);
-                float constant = 1.0;
-                float linear = 0.09 / lightReachMultiplier;
-                float quadratic = 0.032 / (lightReachMultiplier * lightReachMultiplier);
-                attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
 
-                // Apply power multiplier
-                attenuation = pow(attenuation, 1.0 / strength);
+                // https://developer.valvesoftware.com/wiki/Constant-Linear-Quadratic_Falloff
+                // constant (I = 1)
+                float constant = lights[i].constant * (1.0);
+                // linear (I = 1/d)
+                float linear = lights[i].linear * (1.0/distance);
+                // quadratic (I = 100/d^2)
+                float quadratic = lights[i].quadratic * (100.0/(distance*distance));
+                
+                attenuation = constant + linear + quadratic;
             }
 
             float NdotL = max(dot(normal, light), 0.0);
