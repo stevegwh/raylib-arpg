@@ -41,6 +41,7 @@ namespace sage
             {
                 SetShaderValue(shader, skinnedLoc, &valueF, RL_SHADER_UNIFORM_INT);
             }
+
             if (HasFlag(materialIdx, Lit))
             {
                 SetShaderValue(shader, litLoc, &valueT, RL_SHADER_UNIFORM_INT);

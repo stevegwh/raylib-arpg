@@ -29,15 +29,18 @@ out vec3 fragNormal;
 // Raylib defaults end
 
 // Custom
-uniform bool skinned;
-uniform bool lit;
+uniform int skinned;
 
 void main()
 {
+    // MacOS GLSL is strange and doesn't work well when you pass an int as a bool.
+    int TRUE = 1;
+    int FALSE = 0;
+    
 	vec4 pos = vec4(vertexPosition, 1.0);
 	vec3 normal = vertexNormal;
 	
-	if (skinned)
+	if (skinned == 1)
 	{
 	    int boneIndex0 = int(vertexBoneIds.x);
 		int boneIndex1 = int(vertexBoneIds.y);
