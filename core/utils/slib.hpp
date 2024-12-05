@@ -11,8 +11,12 @@
 #include <entt/entt.hpp>
 #include <string>
 
+#include <optional>
+
 namespace sage
 {
+    struct UberShaderComponent;
+
     class ImageSafe
     {
         Image image{};
@@ -71,6 +75,13 @@ namespace sage
         void UpdateAnimation(ModelAnimation anim, int frame) const;
         void Draw(Vector3 position, float scale, Color tint) const;
         void Draw(Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) const;
+        void DrawUber(
+            UberShaderComponent* uber,
+            Vector3 position,
+            Vector3 rotationAxis,
+            float rotationAngle,
+            Vector3 scale,
+            Color tint) const;
         [[nodiscard]] int GetMeshCount() const;
         [[nodiscard]] int GetMaterialCount() const;
         [[nodiscard]] Matrix GetTransform() const;

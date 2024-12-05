@@ -18,20 +18,22 @@ namespace sage
         uber.shader = shader;
         uber.litLoc = litLoc;
         uber.skinnedLoc = skinnedLoc;
-        uber.emissiveLoc = emissiveLoc;
+        uber.emissiveTexLoc = emissiveTexLoc;
+        uber.emissiveColLoc = emissiveColLoc;
         auto& renderable = registry->get<Renderable>(entity);
 
         auto& materials = renderable.GetModel()->rlmodel.materials;
         for (int i = 0; i < renderable.GetModel()->rlmodel.materialCount; ++i)
         {
-            // auto col = renderable.GetModel()->rlmodel.materials[i].maps[MATERIAL_MAP_EMISSION].color;
+            auto col = renderable.GetModel()->rlmodel.materials[i].maps[MATERIAL_MAP_EMISSION].color;
             auto emissiveTex = renderable.GetModel()->rlmodel.materials[i].maps[MATERIAL_MAP_EMISSION].texture.id;
-            //            if (emissiveTex > 1 || (col.r != 0 || col.g != 0 || col.b != 0))
+            if (col.r != 0 || col.g != 0 || col.b != 0)
+            {
+                uber.SetFlag(i, UberShaderComponent::Flags::EmissiveCol);
+            }
             if (emissiveTex > 1)
             {
-                // Means that if one material is emissive then all will be set as it.
-                uber.SetFlag(i, UberShaderComponent::Flags::Emissive);
-                break;
+                uber.SetFlag(i, UberShaderComponent::Flags::EmissiveTexture);
             }
         }
 
@@ -60,6 +62,7 @@ namespace sage
         gameData->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
         litLoc = GetShaderLocation(shader, "lit");
         skinnedLoc = GetShaderLocation(shader, "skinned");
-        emissiveLoc = GetShaderLocation(shader, "emission");
+        emissiveTexLoc = GetShaderLocation(shader, "hasEmissionTex");
+        emissiveColLoc = GetShaderLocation(shader, "hasEmissionCol");
     }
 } // namespace sage

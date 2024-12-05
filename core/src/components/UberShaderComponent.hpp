@@ -15,48 +15,64 @@ namespace sage
         {
             Skinned = 1 << 0,
             Lit = 1 << 1,
-            Emissive = 1 << 2
+            EmissiveTexture = 1 << 2,
+            EmissiveCol = 1 << 3
         };
 
         // uint32_t flags{};
         Shader shader{};
         int litLoc{};
         int skinnedLoc{};
-        int emissiveLoc{}; // The boolean, not the texture
+        int emissiveTexLoc{}; // The boolean, not the texture
+        int emissiveColLoc{};
 
         std::vector<uint32_t> materialMap;
+
+        // TODO: Change this to "SetShaderBools"
+        void SetShaderLocs(unsigned int materialIdx) const
+        {
+            int valueT = 1;
+            int valueF = 0;
+            if (HasFlag(materialIdx, Skinned))
+            {
+                SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_INT);
+            }
+            else
+            {
+                SetShaderValue(shader, skinnedLoc, &valueF, RL_SHADER_UNIFORM_INT);
+            }
+            if (HasFlag(materialIdx, Lit))
+            {
+                SetShaderValue(shader, litLoc, &valueT, RL_SHADER_UNIFORM_INT);
+            }
+            else
+            {
+                SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
+            }
+
+            if (HasFlag(materialIdx, EmissiveTexture))
+            {
+                SetShaderValue(shader, emissiveTexLoc, &valueT, RL_SHADER_UNIFORM_INT);
+            }
+            else
+            {
+                SetShaderValue(shader, emissiveTexLoc, &valueF, RL_SHADER_UNIFORM_INT);
+            }
+            if (HasFlag(materialIdx, EmissiveCol))
+            {
+                SetShaderValue(shader, emissiveColLoc, &valueT, RL_SHADER_UNIFORM_INT);
+            }
+            else
+            {
+                SetShaderValue(shader, emissiveColLoc, &valueF, RL_SHADER_UNIFORM_INT);
+            }
+        }
 
         void SetShaderLocs() const
         {
             for (unsigned int i = 0; i < materialMap.size(); ++i)
             {
-                int valueT = 1;
-                int valueF = 0;
-                if (HasFlag(i, Skinned))
-                {
-                    SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_INT);
-                }
-                else
-                {
-                    SetShaderValue(shader, skinnedLoc, &valueF, RL_SHADER_UNIFORM_INT);
-                }
-                if (HasFlag(i, Lit))
-                {
-                    SetShaderValue(shader, litLoc, &valueT, RL_SHADER_UNIFORM_INT);
-                }
-                else
-                {
-                    SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
-                }
-
-                if (HasFlag(i, Emissive))
-                {
-                    SetShaderValue(shader, emissiveLoc, &valueT, RL_SHADER_UNIFORM_INT);
-                }
-                else
-                {
-                    SetShaderValue(shader, emissiveLoc, &valueF, RL_SHADER_UNIFORM_INT);
-                }
+                SetShaderLocs(i);
             }
         }
 
