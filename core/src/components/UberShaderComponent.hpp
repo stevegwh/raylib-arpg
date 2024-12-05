@@ -31,41 +31,42 @@ namespace sage
 
         void SetShaderBools(unsigned int materialIdx) const
         {
-            int valueT = 1;
-            int valueF = 0;
+            unsigned int valueT = 1;
+            unsigned int valueF = 0;
             if (HasFlag(materialIdx, Skinned))
             {
-                SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_UINT);
             }
             else
             {
-                SetShaderValue(shader, skinnedLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, skinnedLoc, &valueF, RL_SHADER_UNIFORM_UINT);
             }
+
             if (HasFlag(materialIdx, Lit))
             {
-                SetShaderValue(shader, litLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, litLoc, &valueT, RL_SHADER_UNIFORM_UINT);
             }
             else
             {
-                SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_UINT);
             }
 
             if (HasFlag(materialIdx, EmissiveTexture))
             {
-                SetShaderValue(shader, hasEmissiveTexLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveTexLoc, &valueT, RL_SHADER_UNIFORM_UINT);
             }
             else
             {
-                SetShaderValue(shader, hasEmissiveTexLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveTexLoc, &valueF, RL_SHADER_UNIFORM_UINT);
             }
 
             if (HasFlag(materialIdx, EmissiveCol))
             {
-                SetShaderValue(shader, hasEmissiveColLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveColLoc, &valueT, RL_SHADER_UNIFORM_UINT);
             }
             else
             {
-                SetShaderValue(shader, hasEmissiveColLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveColLoc, &valueF, RL_SHADER_UNIFORM_UINT);
             }
         }
 

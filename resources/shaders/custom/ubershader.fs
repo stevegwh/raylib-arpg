@@ -18,23 +18,24 @@ uniform sampler2D texture2;
 out vec4 finalColor;
 
 // Custom
-uniform bool skinned;
-uniform bool lit;
-uniform bool hasEmissionTex;
-uniform bool hasEmissionCol;
+uniform uint lit;
+uniform uint hasEmissionTex;
+uniform uint hasEmissionCol;
 uniform sampler2D emissionMap;
 uniform vec4 colEmission;
-
 
 #include "lighting.fs"
 
 void main()
 {
+    // MacOS GLSL is strange and doesn't work well when you pass an int as a bool.
+    uint TRUE = uint(1);
+    uint FALSE = uint(0);
+
     // Texel color fetching from texture sampler
     vec4 texelColor = texture(texture0, fragTexCoord);
 
-
-    if (lit)
+    if (lit == TRUE)
     {
        finalColor = Lighting_CalculateLighting(texelColor);
     }
@@ -43,12 +44,12 @@ void main()
        finalColor = texelColor * colDiffuse * fragColor;
     }
 
-    if (hasEmissionTex)
+    if (hasEmissionTex == TRUE)
     {
         vec4 emissionTexelCol = texture(emissionMap, fragTexCoord);
         finalColor = finalColor + emissionTexelCol;
     }
-    else if (hasEmissionCol)
+    else if (hasEmissionCol == TRUE)
     {
         finalColor = finalColor + colEmission;
     }

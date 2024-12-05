@@ -212,10 +212,10 @@ namespace sage
                 auto emCol = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color;
 
                 float values[4] = {
-                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.r / 255.0f,
-                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.g / 255.0f,
-                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.b / 255.0f,
-                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.a / 255.0f};
+                    static_cast<float>(emCol.r) / 255.0f,
+                    static_cast<float>(emCol.g) / 255.0f,
+                    static_cast<float>(emCol.b) / 255.0f,
+                    static_cast<float>(emCol.a) / 255.0f};
                 // model.materials[i].shader.locs[SHADER_LOC_COLOR_AMBIENT]
                 SetShaderValue(model.materials[i].shader, uber->colEmissiveLoc, &values, SHADER_UNIFORM_VEC4);
             }
@@ -223,10 +223,10 @@ namespace sage
             Color color = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color;
 
             auto colorTint = WHITE;
-            colorTint.r = (unsigned char)(((int)color.r * (int)tint.r) / 255);
-            colorTint.g = (unsigned char)(((int)color.g * (int)tint.g) / 255);
-            colorTint.b = (unsigned char)(((int)color.b * (int)tint.b) / 255);
-            colorTint.a = (unsigned char)(((int)color.a * (int)tint.a) / 255);
+            colorTint.r = static_cast<unsigned char>((static_cast<int>(color.r) * static_cast<int>(tint.r)) / 255);
+            colorTint.g = static_cast<unsigned char>((static_cast<int>(color.g) * static_cast<int>(tint.g)) / 255);
+            colorTint.b = static_cast<unsigned char>((static_cast<int>(color.b) * static_cast<int>(tint.b)) / 255);
+            colorTint.a = static_cast<unsigned char>((static_cast<int>(color.a) * static_cast<int>(tint.a)) / 255);
 
             model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
             DrawMesh(model.meshes[i], model.materials[model.meshMaterial[i]], model.transform);
