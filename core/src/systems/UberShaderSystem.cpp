@@ -24,13 +24,13 @@ namespace sage
         auto& materials = renderable.GetModel()->rlmodel.materials;
         for (int i = 0; i < renderable.GetModel()->rlmodel.materialCount; ++i)
         {
-            auto col = renderable.GetModel()->rlmodel.materials[i].maps[MATERIAL_MAP_EMISSION].color;
+            // auto col = renderable.GetModel()->rlmodel.materials[i].maps[MATERIAL_MAP_EMISSION].color;
             auto emissiveTex = renderable.GetModel()->rlmodel.materials[i].maps[MATERIAL_MAP_EMISSION].texture.id;
-            if (emissiveTex > 1 || (col.r != 0 || col.g != 0 || col.b != 0))
+            //            if (emissiveTex > 1 || (col.r != 0 || col.g != 0 || col.b != 0))
+            if (emissiveTex > 1)
             {
                 // Means that if one material is emissive then all will be set as it.
                 uber.SetFlag(UberShaderComponent::Flags::Emissive);
-
                 break;
             }
         }

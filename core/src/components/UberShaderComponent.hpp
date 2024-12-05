@@ -13,6 +13,7 @@ namespace sage
     struct UberShaderComponent
     {
         Renderable* renderable;
+
         enum Flags
         {
             Skinned = 1 << 0,
@@ -25,6 +26,8 @@ namespace sage
         int litLoc{};
         int skinnedLoc{};
         int emissiveLoc{}; // The boolean, not the texture
+
+        std::vector<uint32_t> materialMap;
 
         void SetShaderLocs() const
         {

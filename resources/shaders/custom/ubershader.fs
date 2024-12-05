@@ -43,7 +43,7 @@ void main()
     
     if (emission)
     {
-        vec4 emissionTexelCol = texture(texture0, fragTexCoord);
+        vec4 emissionTexelCol = texture(emissionMap, fragTexCoord);
         finalColor = finalColor + emissionTexelCol;
     }
 }

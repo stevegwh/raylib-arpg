@@ -25,6 +25,36 @@ namespace sage
             if (!renderable.active) return;
 
             if (renderable.reqShaderUpdate) renderable.reqShaderUpdate(entity);
+            auto& model = renderable.GetModel()->rlmodel;
+
+            // Find emissive colors
+            int colIndex = -1;
+            for (int i = 0; i < model.materialCount; ++i)
+            {
+                //                auto _col = model.materials[i].maps[MATERIAL_MAP_EMISSION].color;
+                //                if (_col.r != 0 || _col.g != 0 || _col.b != 0)
+                //                {
+                //                    colIndex = i;
+                //                    break;
+                //                }
+
+                auto _col = model.materials[i].maps[MATERIAL_MAP_EMISSION].texture;
+                if (_col.id > 1) // has texture
+                {
+                    colIndex = i;
+                    break;
+                }
+            }
+
+            if (colIndex >= 0)
+            {
+                auto col = model.materials[colIndex].maps[MATERIAL_MAP_EMISSION].texture;
+                SetShaderValue(
+                    model.materials[colIndex].shader,
+                    model.materials[colIndex].shader.locs[SHADER_LOC_MAP_EMISSION],
+                    &col,
+                    SHADER_UNIFORM_SAMPLER2D);
+            }
 
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
             renderable.GetModel()->Draw(

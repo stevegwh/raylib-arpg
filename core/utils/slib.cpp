@@ -165,12 +165,6 @@ namespace sage
     void ModelSafe::Draw(
         Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) const
     {
-        auto col = rlmodel.materials[0].maps[MATERIAL_MAP_EMISSION].color;
-        SetShaderValue(
-            rlmodel.materials[0].shader,
-            rlmodel.materials[0].shader.locs[SHADER_LOC_COLOR_AMBIENT],
-            &col,
-            SHADER_UNIFORM_IVEC4);
         DrawModelEx(rlmodel, position, rotationAxis, rotationAngle, scale, tint);
     }
 
