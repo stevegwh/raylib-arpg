@@ -6,20 +6,25 @@
 
 #include "raylib.h"
 
+#include "components/Renderable.hpp"
+
 namespace sage
 {
     struct UberShaderComponent
     {
+        Renderable* renderable;
         enum Flags
         {
             Skinned = 1 << 0,
-            Lit = 1 << 1
+            Lit = 1 << 1,
+            Emissive = 1 << 2
         };
 
         uint32_t flags;
         Shader shader{};
         int litLoc{};
         int skinnedLoc{};
+        int emissiveLoc{}; // The boolean, not the texture
 
         void SetShaderLocs() const
         {
@@ -41,6 +46,15 @@ namespace sage
             {
                 SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
             }
+
+            if (HasFlag(Emissive))
+            {
+                SetShaderValue(shader, emissiveLoc, &valueT, RL_SHADER_UNIFORM_INT);
+            }
+            else
+            {
+                SetShaderValue(shader, emissiveLoc, &valueF, RL_SHADER_UNIFORM_INT);
+            }
         }
 
         [[nodiscard]] bool HasFlag(Flags flag) const
@@ -58,7 +72,8 @@ namespace sage
             flags &= ~flag;
         }
 
-        explicit UberShaderComponent(uint32_t initialFlags = 0) : flags(initialFlags)
+        explicit UberShaderComponent(Renderable* _renderable, uint32_t initialFlags = 0)
+            : renderable(_renderable), flags(initialFlags)
         {
         }
     };

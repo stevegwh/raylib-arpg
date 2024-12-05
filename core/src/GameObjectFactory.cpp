@@ -78,6 +78,26 @@ namespace sage
         transform.SetPosition({position.x, height, position.z});
     }
 
+    entt::entity GameObjectFactory::createEmissiveCrystal(
+        entt::registry* registry, sage::GameData* data, Vector3 position, const char* name)
+    {
+        auto rlModel = LoadModel("resources/models/Synty Emissive Crystal.glb");
+        auto model = ModelSafe(rlModel);
+        auto id = registry->create();
+        Matrix modelTransform = MatrixScale(3.0f, 3.0f, 3.0f);
+        auto& renderable = registry->emplace<Renderable>(id, std::move(model), modelTransform);
+        renderable.name = name;
+
+        registry->emplace<UberShaderComponent>(id, &renderable, UberShaderComponent::Flags::Lit);
+        auto& transform = registry->emplace<sgTransform>(id, id);
+        placeActor(registry, id, data, position);
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
+        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
+        collideable.collisionLayer = CollisionLayer::BUILDING;
+
+        return id;
+    }
+
     entt::entity GameObjectFactory::createEnemy(
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
@@ -94,7 +114,7 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_ENEMY_GOBLIN), modelTransform);
         renderable.name = name;
         registry->emplace<UberShaderComponent>(
-            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_ENEMY_GOBLIN);
         animation.animationMap[AnimationEnum::IDLE] = 1;
@@ -129,7 +149,7 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
         registry->emplace<UberShaderComponent>(
-            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -162,7 +182,7 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
         registry->emplace<UberShaderComponent>(
-            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -195,7 +215,7 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
         registry->emplace<UberShaderComponent>(
-            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -224,7 +244,7 @@ namespace sage
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = name;
         registry->emplace<UberShaderComponent>(
-            id, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;

@@ -157,13 +157,20 @@ namespace sage
 
     void ModelSafe::Draw(Vector3 position, float scale, Color tint) const
     {
-        DrawModel(rlmodel, position, scale, tint);
+        // DrawModel(rlmodel, position, scale, tint);
+        Draw(position, {0, 1, 0}, 0, {scale, scale, scale}, tint);
     }
 
     // Expects angle in degrees
     void ModelSafe::Draw(
         Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) const
     {
+        auto col = rlmodel.materials[0].maps[MATERIAL_MAP_EMISSION].color;
+        SetShaderValue(
+            rlmodel.materials[0].shader,
+            rlmodel.materials[0].shader.locs[SHADER_LOC_COLOR_AMBIENT],
+            &col,
+            SHADER_UNIFORM_IVEC4);
         DrawModelEx(rlmodel, position, rotationAxis, rotationAngle, scale, tint);
     }
 
@@ -201,18 +208,6 @@ namespace sage
     void ModelSafe::SetShader(Shader shader, int materialIdx) const
     {
         assert(materialIdx < rlmodel.materialCount);
-
-        if (rlmodel.materials[materialIdx].maps[MATERIAL_MAP_EMISSION].texture.id > 1)
-        {
-            const auto value = 1;
-            SetShaderValue(shader, GetShaderLocation(shader, "emission"), &value, SHADER_UNIFORM_INT);
-
-            if (shader.locs[SHADER_LOC_MAP_EMISSION] == -1)
-            {
-                shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "emissionMap");
-            }
-        }
-
         rlmodel.materials[materialIdx].shader = shader;
     }
 
