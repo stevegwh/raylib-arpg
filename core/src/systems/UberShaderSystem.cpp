@@ -37,6 +37,7 @@ namespace sage
 
         shader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/ubershader.vs", "resources/shaders/custom/ubershader.fs");
+
         gameData->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
         litLoc = GetShaderLocation(shader, "lit");
         skinnedLoc = GetShaderLocation(shader, "skinned");

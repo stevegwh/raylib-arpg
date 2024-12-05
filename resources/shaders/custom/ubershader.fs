@@ -20,6 +20,8 @@ out vec4 finalColor;
 // Custom
 uniform bool skinned;
 uniform bool lit;
+uniform bool emission;
+uniform sampler2D emissionMap;
 
 #include "lighting.fs"
 
@@ -27,15 +29,20 @@ void main()
 {
     // Texel color fetching from texture sampler
     vec4 texelColor = texture(texture0, fragTexCoord);
-	
-	if (lit)
-	{ 
-		finalColor = Lighting_CalculateLighting(texelColor);
-	}
-	else
-	{
-		finalColor = texelColor*colDiffuse*fragColor;
-	}
     
+    
+    if (lit)
+    { 
+       finalColor = Lighting_CalculateLighting(texelColor);
+    }
+    else
+    {
+       finalColor = texelColor * colDiffuse * fragColor;
+    }
+    
+    if (emission)
+    {
+        vec4 emissionCol = texture(emissionMap, fragTexCoord);
+        finalColor = finalColor + emissionCol;
+    }
 }
-

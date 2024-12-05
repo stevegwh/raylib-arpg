@@ -294,7 +294,6 @@ namespace sage
 
             std::ostringstream fileContent;
             fileContent << infile.rdbuf();
-            std::cout << fileContent.str() << std::endl;
             std::string processedContent = preprocessDialog(fileContent.str());
             std::stringstream contentStream(processedContent);
 

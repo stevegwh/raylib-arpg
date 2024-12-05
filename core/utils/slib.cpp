@@ -201,6 +201,18 @@ namespace sage
     void ModelSafe::SetShader(Shader shader, int materialIdx) const
     {
         assert(materialIdx < rlmodel.materialCount);
+
+        if (rlmodel.materials[materialIdx].maps[MATERIAL_MAP_EMISSION].texture.id > 1)
+        {
+            const auto value = 1;
+            SetShaderValue(shader, GetShaderLocation(shader, "emission"), &value, SHADER_UNIFORM_INT);
+
+            if (shader.locs[SHADER_LOC_MAP_EMISSION] == -1)
+            {
+                shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "emissionMap");
+            }
+        }
+
         rlmodel.materials[materialIdx].shader = shader;
     }
 
@@ -208,7 +220,7 @@ namespace sage
     {
         for (int i = 0; i < rlmodel.materialCount; ++i)
         {
-            rlmodel.materials[i].shader = shader;
+            SetShader(shader, i);
         }
     }
 
