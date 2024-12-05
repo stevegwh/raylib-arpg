@@ -23,7 +23,8 @@ uniform bool lit;
 uniform bool hasEmissionTex;
 uniform bool hasEmissionCol;
 uniform sampler2D emissionMap;
-uniform vec4 emissionCol;
+uniform vec4 colEmission;
+
 
 #include "lighting.fs"
 
@@ -49,6 +50,6 @@ void main()
     }
     else if (hasEmissionCol)
     {
-        finalColor = finalColor + emissionCol;
+        finalColor = finalColor + colEmission;
     }
 }

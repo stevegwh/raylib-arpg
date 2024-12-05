@@ -18,8 +18,9 @@ namespace sage
         uber.shader = shader;
         uber.litLoc = litLoc;
         uber.skinnedLoc = skinnedLoc;
-        uber.emissiveTexLoc = emissiveTexLoc;
-        uber.emissiveColLoc = emissiveColLoc;
+        uber.hasEmissiveTexLoc = hasEmissiveTexLoc;
+        uber.hasEmissiveColLoc = hasEmissiveColLoc;
+        uber.colEmissiveLoc = colEmissionLoc;
         auto& renderable = registry->get<Renderable>(entity);
 
         auto& materials = renderable.GetModel()->rlmodel.materials;
@@ -57,12 +58,15 @@ namespace sage
             "resources/shaders/custom/ubershader.vs", "resources/shaders/custom/ubershader.fs");
 
         shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "emissionMap");
-        shader.locs[SHADER_LOC_COLOR_AMBIENT] =
-            GetShaderLocation(shader, "emissionCol");         // stealing ambient color slot for emission
+        colEmissionLoc = GetShaderLocation(shader, "colEmission");
+        //        shader.locs[SHADER_LOC_COLOR_AMBIENT] =
+        //            GetShaderLocation(shader, "emissionCol");         // stealing ambient color slot for emission
         gameData->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+
         litLoc = GetShaderLocation(shader, "lit");
         skinnedLoc = GetShaderLocation(shader, "skinned");
-        emissiveTexLoc = GetShaderLocation(shader, "hasEmissionTex");
-        emissiveColLoc = GetShaderLocation(shader, "hasEmissionCol");
+        hasEmissiveTexLoc = GetShaderLocation(shader, "hasEmissionTex");
+        hasEmissiveColLoc = GetShaderLocation(shader, "hasEmissionCol");
+        // debug
     }
 } // namespace sage

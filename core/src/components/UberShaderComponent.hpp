@@ -23,13 +23,13 @@ namespace sage
         Shader shader{};
         int litLoc{};
         int skinnedLoc{};
-        int emissiveTexLoc{}; // The boolean, not the texture
-        int emissiveColLoc{};
+        int hasEmissiveTexLoc{}; // The boolean, not the texture
+        int hasEmissiveColLoc{};
+        int colEmissiveLoc{}; // Loc of the color itself (not the bool)
 
         std::vector<uint32_t> materialMap;
 
-        // TODO: Change this to "SetShaderBools"
-        void SetShaderLocs(unsigned int materialIdx) const
+        void SetShaderBools(unsigned int materialIdx) const
         {
             int valueT = 1;
             int valueF = 0;
@@ -52,27 +52,28 @@ namespace sage
 
             if (HasFlag(materialIdx, EmissiveTexture))
             {
-                SetShaderValue(shader, emissiveTexLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveTexLoc, &valueT, RL_SHADER_UNIFORM_INT);
             }
             else
             {
-                SetShaderValue(shader, emissiveTexLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveTexLoc, &valueF, RL_SHADER_UNIFORM_INT);
             }
+
             if (HasFlag(materialIdx, EmissiveCol))
             {
-                SetShaderValue(shader, emissiveColLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveColLoc, &valueT, RL_SHADER_UNIFORM_INT);
             }
             else
             {
-                SetShaderValue(shader, emissiveColLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                SetShaderValue(shader, hasEmissiveColLoc, &valueF, RL_SHADER_UNIFORM_INT);
             }
         }
 
-        void SetShaderLocs() const
+        void SetShaderBools() const
         {
             for (unsigned int i = 0; i < materialMap.size(); ++i)
             {
-                SetShaderLocs(i);
+                SetShaderBools(i);
             }
         }
 

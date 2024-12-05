@@ -194,9 +194,12 @@ namespace sage
 
         for (int i = 0; i < model.meshCount; i++)
         {
-            auto emTex = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].texture;
-            if (emTex.id > 1) // has texture
+
+            uber->SetShaderBools(model.meshMaterial[i]); // Set shader booleans per material.
+
+            if (uber->HasFlag(model.meshMaterial[i], UberShaderComponent::EmissiveTexture))
             {
+                auto emTex = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].texture;
                 SetShaderValue(
                     model.materials[i].shader,
                     model.materials[model.meshMaterial[i]].shader.locs[SHADER_LOC_MAP_EMISSION],
@@ -204,19 +207,18 @@ namespace sage
                     SHADER_UNIFORM_SAMPLER2D);
             }
 
-            auto emCol = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color;
-            if (emCol.r != 0 || emCol.g != 0 || emCol.b != 0)
+            if (uber->HasFlag(model.meshMaterial[i], UberShaderComponent::EmissiveCol))
             {
-                SetShaderValue(
-                    model.materials[i].shader,
-                    model.materials[model.meshMaterial[i]]
-                        .shader.locs[SHADER_LOC_COLOR_AMBIENT], // We steal AMBIENT loc
-                                                                // for emissive colour
-                    &emCol,
-                    SHADER_UNIFORM_IVEC4);
-            }
+                auto emCol = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color;
 
-            uber->SetShaderLocs(model.meshMaterial[i]); // Set shader booleans per material.
+                float values[4] = {
+                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.r / 255.0f,
+                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.g / 255.0f,
+                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.b / 255.0f,
+                    (float)model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color.a / 255.0f};
+                // model.materials[i].shader.locs[SHADER_LOC_COLOR_AMBIENT]
+                SetShaderValue(model.materials[i].shader, uber->colEmissiveLoc, &values, SHADER_UNIFORM_VEC4);
+            }
 
             Color color = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color;
 

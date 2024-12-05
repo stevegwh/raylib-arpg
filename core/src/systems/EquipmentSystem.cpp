@@ -135,7 +135,7 @@ namespace sage
         BeginMode3D(*gameData->camera->getRaylibCam());
         auto& uber = registry->get<UberShaderComponent>(entity);
         uber.ClearFlagAll(UberShaderComponent::Lit);
-        uber.SetShaderLocs();
+        uber.SetShaderBools();
         uber.SetFlagAll(UberShaderComponent::Lit);
         renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 
@@ -176,7 +176,7 @@ namespace sage
         BeginMode3D(*gameData->camera->getRaylibCam());
         auto& uber = registry->get<UberShaderComponent>(entity);
         uber.ClearFlagAll(UberShaderComponent::Lit);
-        uber.SetShaderLocs();
+        uber.SetShaderBools();
         uber.SetFlagAll(UberShaderComponent::Lit);
         renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 
@@ -191,7 +191,7 @@ namespace sage
                 auto& weaponUber =
                     registry->get<UberShaderComponent>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
                 weaponUber.ClearFlagAll(UberShaderComponent::Lit);
-                weaponUber.SetShaderLocs();
+                weaponUber.SetShaderBools();
                 weaponUber.SetFlagAll(UberShaderComponent::Lit);
                 leftHandRenderable.GetModel()->Draw(
                     leftHandTrans.GetWorldPos(), leftHandTrans.GetScale().x, WHITE);
