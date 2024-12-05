@@ -93,6 +93,8 @@ namespace sage
         friend class Renderable;
         friend class ResourceManager;
         friend class TextureTerrainOverlay;
+        friend class UberShaderComponent;
+        friend class UberShaderSystem;
     };
     bool AlmostEquals(Vector3 a, Vector3 b);
     bool PointInsideRect(Rectangle rec, Vector2 point);

@@ -14,6 +14,8 @@ namespace sage
 
     struct GameObjectFactory
     {
+        static entt::entity createEmissiveCrystal(
+            entt::registry* registry, GameData* data, Vector3 position, const char* name);
         static entt::entity createEnemy(
             entt::registry* registry, GameData* data, Vector3 position, const char* name);
         static entt::entity createQuestNPC(

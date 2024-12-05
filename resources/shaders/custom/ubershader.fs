@@ -22,6 +22,7 @@ uniform bool skinned;
 uniform bool lit;
 uniform bool emission;
 uniform sampler2D emissionMap;
+uniform vec4 emissionCol;
 
 #include "lighting.fs"
 
@@ -42,7 +43,7 @@ void main()
     
     if (emission)
     {
-        vec4 emissionCol = texture(emissionMap, fragTexCoord);
-        finalColor = finalColor + emissionCol;
+        vec4 emissionTexelCol = texture(texture0, fragTexCoord);
+        finalColor = finalColor + emissionTexelCol;
     }
 }

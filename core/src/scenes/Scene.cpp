@@ -104,7 +104,8 @@ namespace sage
 
         // NB: Dependent on *only* the map/static meshes having been loaded at this point
         for (const auto view = registry->view<Renderable>(); auto entity : view)
-            registry->emplace<UberShaderComponent>(entity, UberShaderComponent::Flags::Lit);
+            registry->emplace<UberShaderComponent>(
+                entity, &registry->get<Renderable>(entity), UberShaderComponent::Flags::Lit);
 
         entt::entity firstPlayer = entt::null;
 
@@ -122,9 +123,11 @@ namespace sage
             }
         }
 
-        auto p2 = GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
+        // auto p2 = GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
         auto p3 = GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
         data->controllableActorSystem->SetSelectedActor(firstPlayer);
+
+        GameObjectFactory::createEmissiveCrystal(registry, data.get(), {30, 0, 20}, "Crystal");
 
         // GameObjectFactory::createPlayer(registry, data.get(), {25, 0, 10}, "Player 3");
         // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);

@@ -89,9 +89,9 @@ namespace sage
         auto& renderable = registry->get<Renderable>(owner);
         auto& transform = registry->get<sgTransform>(owner);
         auto& item = registry->get<ItemComponent>(itemId);
-        registry->emplace<Renderable>(
+        auto& weaponRenderable = registry->emplace<Renderable>(
             weaponEntity, ResourceManager::GetInstance().GetModelCopy(item.model), renderable.initialTransform);
-        registry->emplace<UberShaderComponent>(weaponEntity, UberShaderComponent::Lit);
+        registry->emplace<UberShaderComponent>(weaponEntity, &weaponRenderable, UberShaderComponent::Lit);
 
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
