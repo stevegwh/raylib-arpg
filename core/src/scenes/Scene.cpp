@@ -104,8 +104,11 @@ namespace sage
 
         // NB: Dependent on *only* the map/static meshes having been loaded at this point
         for (const auto view = registry->view<Renderable>(); auto entity : view)
-            registry->emplace<UberShaderComponent>(
-                entity, &registry->get<Renderable>(entity), UberShaderComponent::Flags::Lit);
+        {
+            auto& uber = registry->emplace<UberShaderComponent>(
+                entity, registry->get<Renderable>(entity).GetModel()->GetMaterialCount());
+            uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        }
 
         entt::entity firstPlayer = entt::null;
 

@@ -89,9 +89,11 @@ namespace sage
         auto& renderable = registry->get<Renderable>(owner);
         auto& transform = registry->get<sgTransform>(owner);
         auto& item = registry->get<ItemComponent>(itemId);
-        auto& weaponRenderable = registry->emplace<Renderable>(
+        registry->emplace<Renderable>(
             weaponEntity, ResourceManager::GetInstance().GetModelCopy(item.model), renderable.initialTransform);
-        registry->emplace<UberShaderComponent>(weaponEntity, &weaponRenderable, UberShaderComponent::Lit);
+        auto& uber =
+            registry->emplace<UberShaderComponent>(weaponEntity, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
 
         auto& weaponTrans = registry->emplace<sgTransform>(weaponEntity, weaponEntity);
         weaponTrans.SetParent(&transform);
@@ -132,9 +134,9 @@ namespace sage
         ClearBackground(BLACK);
         BeginMode3D(*gameData->camera->getRaylibCam());
         auto& uber = registry->get<UberShaderComponent>(entity);
-        uber.ClearFlag(UberShaderComponent::Lit);
+        uber.ClearFlagAll(UberShaderComponent::Lit);
         uber.SetShaderLocs();
-        uber.SetFlag(UberShaderComponent::Lit);
+        uber.SetFlagAll(UberShaderComponent::Lit);
         renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 
         EndMode3D();
@@ -173,9 +175,9 @@ namespace sage
         ClearBackground(BLANK);
         BeginMode3D(*gameData->camera->getRaylibCam());
         auto& uber = registry->get<UberShaderComponent>(entity);
-        uber.ClearFlag(UberShaderComponent::Lit);
+        uber.ClearFlagAll(UberShaderComponent::Lit);
         uber.SetShaderLocs();
-        uber.SetFlag(UberShaderComponent::Lit);
+        uber.SetFlagAll(UberShaderComponent::Lit);
         renderable.GetModel()->Draw(transform.GetWorldPos(), transform.GetScale().x, WHITE);
 
         if (equipment.worldModels.contains(EquipmentSlotName::LEFTHAND))
@@ -188,9 +190,9 @@ namespace sage
                     registry->get<sgTransform>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
                 auto& weaponUber =
                     registry->get<UberShaderComponent>(equipment.worldModels[EquipmentSlotName::LEFTHAND]);
-                weaponUber.ClearFlag(UberShaderComponent::Lit);
+                weaponUber.ClearFlagAll(UberShaderComponent::Lit);
                 weaponUber.SetShaderLocs();
-                weaponUber.SetFlag(UberShaderComponent::Lit);
+                weaponUber.SetFlagAll(UberShaderComponent::Lit);
                 leftHandRenderable.GetModel()->Draw(
                     leftHandTrans.GetWorldPos(), leftHandTrans.GetScale().x, WHITE);
             }

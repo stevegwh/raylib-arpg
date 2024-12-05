@@ -6,13 +6,10 @@
 
 #include "raylib.h"
 
-#include "components/Renderable.hpp"
-
 namespace sage
 {
     struct UberShaderComponent
     {
-        Renderable* renderable;
 
         enum Flags
         {
@@ -21,7 +18,7 @@ namespace sage
             Emissive = 1 << 2
         };
 
-        uint32_t flags;
+        // uint32_t flags{};
         Shader shader{};
         int litLoc{};
         int skinnedLoc{};
@@ -31,53 +28,72 @@ namespace sage
 
         void SetShaderLocs() const
         {
-            int valueT = 1;
-            int valueF = 0;
-            if (HasFlag(Skinned))
+            for (unsigned int i = 0; i < materialMap.size(); ++i)
             {
-                SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_INT);
-            }
-            else
-            {
-                SetShaderValue(shader, skinnedLoc, &valueF, RL_SHADER_UNIFORM_INT);
-            }
-            if (HasFlag(Lit))
-            {
-                SetShaderValue(shader, litLoc, &valueT, RL_SHADER_UNIFORM_INT);
-            }
-            else
-            {
-                SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
-            }
+                int valueT = 1;
+                int valueF = 0;
+                if (HasFlag(i, Skinned))
+                {
+                    SetShaderValue(shader, skinnedLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                }
+                else
+                {
+                    SetShaderValue(shader, skinnedLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                }
+                if (HasFlag(i, Lit))
+                {
+                    SetShaderValue(shader, litLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                }
+                else
+                {
+                    SetShaderValue(shader, litLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                }
 
-            if (HasFlag(Emissive))
-            {
-                SetShaderValue(shader, emissiveLoc, &valueT, RL_SHADER_UNIFORM_INT);
-            }
-            else
-            {
-                SetShaderValue(shader, emissiveLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                if (HasFlag(i, Emissive))
+                {
+                    SetShaderValue(shader, emissiveLoc, &valueT, RL_SHADER_UNIFORM_INT);
+                }
+                else
+                {
+                    SetShaderValue(shader, emissiveLoc, &valueF, RL_SHADER_UNIFORM_INT);
+                }
             }
         }
 
-        [[nodiscard]] bool HasFlag(Flags flag) const
+        [[nodiscard]] bool HasFlag(unsigned int idx, Flags flag) const
         {
-            return flags & flag;
+            return materialMap.at(idx) & flag;
         }
 
-        void SetFlag(Flags flag)
+        void SetFlag(unsigned int idx, Flags flag)
         {
-            flags |= flag;
+            materialMap.at(idx) |= flag;
         }
 
-        void ClearFlag(Flags flag)
+        void ClearFlag(unsigned int idx, Flags flag)
         {
-            flags &= ~flag;
+            materialMap.at(idx) &= ~flag;
         }
 
-        explicit UberShaderComponent(Renderable* _renderable, uint32_t initialFlags = 0)
-            : renderable(_renderable), flags(initialFlags)
+        void SetFlagAll(Flags flag)
         {
+            for (unsigned int& i : materialMap)
+            {
+                i |= flag;
+            }
+        }
+
+        void ClearFlagAll(Flags flag)
+        {
+            for (unsigned int& i : materialMap)
+            {
+                i &= ~flag;
+            }
+        }
+
+        explicit UberShaderComponent(unsigned int materialCount)
+        {
+            materialMap.resize(materialCount);
         }
     };
 

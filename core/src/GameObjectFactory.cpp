@@ -88,7 +88,9 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(id, std::move(model), modelTransform);
         renderable.name = name;
 
-        registry->emplace<UberShaderComponent>(id, &renderable, UberShaderComponent::Flags::Lit);
+        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+
         auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
@@ -113,8 +115,9 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_ENEMY_GOBLIN), modelTransform);
         renderable.name = name;
-        registry->emplace<UberShaderComponent>(
-            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_ENEMY_GOBLIN);
         animation.animationMap[AnimationEnum::IDLE] = 1;
@@ -148,8 +151,9 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
-        registry->emplace<UberShaderComponent>(
-            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -181,8 +185,9 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
-        registry->emplace<UberShaderComponent>(
-            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -214,8 +219,9 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
         renderable.name = name;
-        registry->emplace<UberShaderComponent>(
-            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
         animation.animationMap[AnimationEnum::IDLE] = 0;
@@ -243,8 +249,9 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
         renderable.name = name;
-        registry->emplace<UberShaderComponent>(
-            id, &renderable, UberShaderComponent::Flags::Lit | UberShaderComponent::Flags::Skinned);
+        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.35f;
@@ -399,6 +406,8 @@ namespace sage
             registry->emplace<Renderable>(itemId, std::move(model), MatrixScale(0.035, 0.035, 0.035));
         auto& transform = registry->emplace<sgTransform>(itemId, itemId);
         transform.SetPosition(position);
+
+        // TODO: Uber shader? Lit?
 
         auto& collideable = registry->emplace<Collideable>(
             itemId, createRectangularBoundingBox(2.0, 2.0), transform.GetMatrixNoRot());

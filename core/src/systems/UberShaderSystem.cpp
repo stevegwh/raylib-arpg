@@ -30,7 +30,7 @@ namespace sage
             if (emissiveTex > 1)
             {
                 // Means that if one material is emissive then all will be set as it.
-                uber.SetFlag(UberShaderComponent::Flags::Emissive);
+                uber.SetFlag(i, UberShaderComponent::Flags::Emissive);
                 break;
             }
         }
