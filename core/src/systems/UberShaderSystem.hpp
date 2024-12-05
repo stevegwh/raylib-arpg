@@ -19,7 +19,8 @@ namespace sage
         Shader shader{};
         int litLoc;
         int skinnedLoc;
-        int emissiveLoc;
+        int emissiveTexLoc;
+        int emissiveColLoc;
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
 
