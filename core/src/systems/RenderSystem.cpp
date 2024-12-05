@@ -57,6 +57,7 @@ namespace sage
             }
 
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
+
             renderable.GetModel()->Draw(
                 transform.GetWorldPos(),
                 rotationAxis,
