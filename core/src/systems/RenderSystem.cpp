@@ -16,7 +16,6 @@ namespace sage
     {
     }
 
-    // NB: Only supports one emissive material per mesh
     void RenderSystem::Draw() // Can't be const as GetModel returns pointers
     {
         auto normalView =
@@ -53,12 +52,11 @@ namespace sage
         for (auto entity : uberView)
         {
             auto& renderable = normalView.get<Renderable>(entity);
-            const auto& transform = normalView.get<sgTransform>(entity);
-            auto& uber = registry->get<UberShaderComponent>(entity);
             if (!renderable.active) return;
 
+            const auto& transform = normalView.get<sgTransform>(entity);
+            auto& uber = registry->get<UberShaderComponent>(entity);
             if (renderable.reqShaderUpdate) renderable.reqShaderUpdate(entity);
-            auto& model = renderable.GetModel()->rlmodel;
 
             Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
 
