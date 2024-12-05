@@ -66,6 +66,21 @@ def handle_light(obj, output_folder):
             g = obj.data.color.g * 255
             b = obj.data.color.b * 255
             f.write(f"type: light\n")
+            f.write(f"light_type: point\n")
+            f.write(f"name: {obj.name}\n")
+            f.write(f"location: {obj.location.x:.6f} {obj.location.z:.6f} {-obj.location.y:.6f}\n")
+            f.write(f"color: {int(r)} {int(g)} {int(b)}\n")
+            f.write(f"strength: {int(obj.data.energy)}\n")
+
+        print(f"Exported light: {light_file}")
+    elif obj.data.type == 'SUN':
+        light_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
+        with open(light_file, 'w') as f:
+            r = obj.data.color.r * 255
+            g = obj.data.color.g * 255
+            b = obj.data.color.b * 255
+            f.write(f"type: light\n")
+            f.write(f"light_type: sun\n")
             f.write(f"name: {obj.name}\n")
             f.write(f"location: {obj.location.x:.6f} {obj.location.z:.6f} {-obj.location.y:.6f}\n")
             f.write(f"color: {int(r)} {int(g)} {int(b)}\n")
