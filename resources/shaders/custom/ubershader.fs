@@ -18,9 +18,10 @@ uniform sampler2D texture2;
 out vec4 finalColor;
 
 // Custom
-uniform uint lit;
-uniform uint hasEmissionTex;
-uniform uint hasEmissionCol;
+// macOS GLSL doesn't seem to like converting bools to ints
+uniform int lit;
+uniform int hasEmissionTex;
+uniform int hasEmissionCol;
 uniform sampler2D emissionMap;
 uniform vec4 colEmission;
 
@@ -28,14 +29,10 @@ uniform vec4 colEmission;
 
 void main()
 {
-    // MacOS GLSL is strange and doesn't work well when you pass an int as a bool.
-    uint TRUE = uint(1);
-    uint FALSE = uint(0);
-
     // Texel color fetching from texture sampler
     vec4 texelColor = texture(texture0, fragTexCoord);
 
-    if (lit == TRUE)
+    if (lit == 1)
     {
        finalColor = Lighting_CalculateLighting(texelColor);
     }
@@ -44,12 +41,12 @@ void main()
        finalColor = texelColor * colDiffuse * fragColor;
     }
 
-    if (hasEmissionTex == TRUE)
+    if (hasEmissionTex == 1)
     {
         vec4 emissionTexelCol = texture(emissionMap, fragTexCoord);
         finalColor = finalColor + emissionTexelCol;
     }
-    else if (hasEmissionCol == TRUE)
+    else if (hasEmissionCol == 1)
     {
         finalColor = finalColor + colEmission;
     }
