@@ -13,14 +13,14 @@
 
 namespace sage
 {
+    class GameData;
+
     struct HoverInfo
     {
         entt::entity target = entt::null;
         double beginHoverTime = 0.0;
         const float hoverTimeThreshold = 0.75f;
     };
-
-    class GameData;
 
     class Cursor
     {

@@ -9,6 +9,7 @@
 #include "components/Spawner.hpp"
 #include "components/UberShaderComponent.hpp"
 #include "Cursor.hpp"
+#include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
@@ -51,6 +52,7 @@ namespace sage
         data->lightSubSystem->Update();
         data->uiEngine->Update();
         spiral->Update(GetFrameTime());
+        data->cursorClickIndicator->Update();
     }
 
     void Scene::DrawDebug3D()
