@@ -13,6 +13,7 @@
 
 // Systems
 #include "AbilityFactory.hpp"
+#include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
 #include "ItemFactory.hpp"
@@ -66,7 +67,8 @@ namespace sage
           inventorySystem(std::make_unique<InventorySystem>(_registry, this)),
           partySystem(std::make_unique<PartySystem>(_registry, this)),
           equipmentSystem(std::make_unique<EquipmentSystem>(_registry, this)),
-          uberShaderSystem(std::make_unique<UberShaderSystem>(_registry, this))
+          uberShaderSystem(std::make_unique<UberShaderSystem>(_registry, this)),
+          cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this, registry->create()))
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this

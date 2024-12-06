@@ -172,7 +172,7 @@ namespace sage
     TooltipWindow* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.1;
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.05;
         auto tooltip = std::make_unique<TooltipWindow>(
             engine->gameData->settings,
@@ -191,8 +191,10 @@ namespace sage
             auto table = panel->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
+
             TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
+
             auto textbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(textbox), name);
         }
@@ -205,7 +207,7 @@ namespace sage
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.1;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.05;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
         auto tooltip = std::make_unique<TooltipWindow>(
             engine->gameData->settings,
             nullptr,
@@ -224,7 +226,7 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(headerTextbox), name);
             auto row = table->CreateTableRow({10, 0, 0, 0});
@@ -262,7 +264,7 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(headerTextbox), item.name);
             auto row = table->CreateTableRow({10, 0, 0, 0});
