@@ -2309,7 +2309,7 @@ void UpdateModelAnimationBones(Model model, ModelAnimation anim, int frame)
     }
 }
 
-// at least 2x speed up vs the old method 
+// at least 2x speed up vs the old method
 // Update model animated vertex data (positions and normals) for a given frame
 // NOTE: Updated data is uploaded to GPU
 void UpdateModelAnimation(Model model, ModelAnimation anim, int frame)

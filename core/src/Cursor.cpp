@@ -31,6 +31,7 @@ namespace sage
 {
     void Cursor::checkMouseHover()
     {
+        if (!registry->any_of<Collideable>(m_mouseHitInfo.collidedEntityId)) return;
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         if ((layer != CollisionLayer::NPC && layer != CollisionLayer::ENEMY && layer != CollisionLayer::ITEM) ||
             !m_mouseHitInfo.rlCollision.hit)
