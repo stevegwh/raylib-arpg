@@ -27,7 +27,7 @@ namespace sage
 
       public:
         void Update();
-        CursorClickIndicator(entt::registry* _registry, GameData* _gameData, entt::entity _self);
+        CursorClickIndicator(entt::registry* _registry, GameData* _gameData);
     };
 
 } // namespace sage

@@ -54,8 +54,8 @@ namespace sage
         transform.SetScale(scale);
     }
 
-    CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData, entt::entity _self)
-        : registry(_registry), gameData(_gameData), self(_self)
+    CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData)
+        : registry(_registry), gameData(_gameData), self(registry->create())
     {
         entt::sink sink{gameData->cursor->onFloorClick};
         sink.connect<&CursorClickIndicator::onCursorClick>(this);
@@ -69,6 +69,7 @@ namespace sage
         auto& renderable =
             registry->emplace<Renderable>(self, std::move(sphere), MatrixIdentity()); // requires model etc.
         renderable.hint = GREEN;
+        renderable.active = false;
     }
 
 } // namespace sage
