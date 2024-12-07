@@ -52,7 +52,7 @@ namespace sage
         for (auto entity : uberView)
         {
             auto& renderable = normalView.get<Renderable>(entity);
-            if (!renderable.active) return;
+            if (!renderable.active) continue;
 
             const auto& transform = normalView.get<sgTransform>(entity);
             auto& uber = registry->get<UberShaderComponent>(entity);
