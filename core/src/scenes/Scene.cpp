@@ -129,7 +129,7 @@ namespace sage
         }
 
         // auto p2 = GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
-        auto p3 = GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
+        // auto p3 = GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
         data->controllableActorSystem->SetSelectedActor(firstPlayer);
 
         GameObjectFactory::createEmissiveCrystal(registry, data.get(), {30, 0, 20}, "Crystal");

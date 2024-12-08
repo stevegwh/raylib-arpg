@@ -74,7 +74,9 @@ namespace sage
         auto& transform = registry->get<sgTransform>(entity);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        auto gs = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col);
+        assert(gs);
+        float height = gs->terrainHeight;
         transform.SetPosition({position.x, height, position.z});
     }
 
