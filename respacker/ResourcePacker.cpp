@@ -34,7 +34,7 @@ namespace sage
         return Vector3Scale(point, scale);
     }
 
-    CollisionLayer setCollisionLayer(const std::string& objectName)
+    CollisionLayer getCollisionLayer(const std::string& objectName)
     {
         if (objectName.find("_BLD_") != std::string::npos)
         {
@@ -71,7 +71,7 @@ namespace sage
             return CollisionLayer::STAIRS;
         }
 
-        return CollisionLayer::DEFAULT;
+        return CollisionLayer::BACKGROUND; // by default, objects are ignored
     }
 
     // void parseMtlFile(const fs::path& mtlPath, std::string& materialKey)
@@ -186,7 +186,7 @@ namespace sage
             light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         }
 
-        light.brightness = s / 115; // Seems to work well.
+        light.brightness = s / 150; // Seems to work well.
 
         light.color =
             Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 1};
@@ -281,7 +281,7 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(
             entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
 
-        collideable.collisionLayer = setCollisionLayer(objectName);
+        collideable.collisionLayer = getCollisionLayer(objectName);
         if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE ||
             collideable.collisionLayer == CollisionLayer::FLOORCOMPLEX)
             floorMeshes.push_back(&collideable);
@@ -344,7 +344,7 @@ namespace sage
         std::cout << "START: Loading mesh data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
-            if (entry.path().extension() == ".obj")
+            if (entry.path().extension() == ".obj" || entry.path().extension() == ".glb")
             {
                 // std::string materialKey = "DEFAULT"; // Load default raylib mat
                 // fs::path mtlPath = entry.path();

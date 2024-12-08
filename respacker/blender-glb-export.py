@@ -8,7 +8,7 @@ if not basedir:
     raise Exception("Blend file is not saved")
 
 # Create 'output' folder if it doesn't exist
-output_folder = os.path.join(basedir, "output")
+output_folder = os.path.join(basedir, "cave")
 
 # If output folder exists, delete its contents
 if os.path.exists(output_folder):
@@ -108,14 +108,18 @@ for obj in selection:
             mesh_name = bpy.path.clean_name(obj.data.name)
             fn = os.path.join(mesh_folder, mesh_name)
 
-            # Export OBJ files
-            bpy.ops.wm.obj_export(filepath=fn + ".obj", export_selected_objects=True, path_mode='STRIP')
+            # Export GLB files
+            bpy.ops.export_scene.gltf(
+                filepath=fn + ".glb",
+                export_format='GLB',
+                use_selection=True
+            )
 
             # Restore original transform
             obj.matrix_world = original_transform
 
             unique_meshes[obj.data.name] = mesh_name
-            print("Exported mesh:", fn + ".obj")
+            print("Exported mesh:", fn + ".glb")
 
         # Prepare transform data
         location = obj.location
@@ -127,7 +131,7 @@ for obj in selection:
         with open(transform_file, 'w') as f:
             f.write(f"type: mesh\n")
             f.write(f"name: {obj.name}\n")
-            f.write(f"mesh: {unique_meshes[obj.data.name]}.obj\n")
+            f.write(f"mesh: {unique_meshes[obj.data.name]}.glb\n")
             f.write(f"location: {location.x:.6f} {location.z:.6f} {-location.y:.6f}\n")
             f.write(f"rotation: {rotation.x:.6f} {rotation.z:.6f} {rotation.y:.6f}\n")
             f.write(f"scale: {scale.x:.6f} {scale.z:.6f} {scale.y:.6f}\n")

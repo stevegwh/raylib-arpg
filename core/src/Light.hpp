@@ -19,8 +19,8 @@ namespace sage
         float brightness;
         // TODO: Allow user to set below values
         float constant = 0;
-        float linear = 2;
-        float quadratic = 0.3;
+        float linear = 1.0;
+        float quadratic = 0.5;
 
         void LinkShader(const Shader shader, const int lightsCount) const
         {

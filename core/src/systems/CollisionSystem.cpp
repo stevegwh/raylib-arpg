@@ -144,7 +144,20 @@ namespace sage
         for (auto entity : view)
         {
             auto& c = registry->get<Collideable>(entity);
-            DrawBoundingBox(c.worldBoundingBox, YELLOW);
+            if (c.collisionLayer != CollisionLayer::BACKGROUND && c.collisionLayer != CollisionLayer::DEFAULT)
+            {
+                Color col = YELLOW;
+                if (c.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
+                    c.collisionLayer == CollisionLayer::FLOORSIMPLE)
+                {
+                    col = GREEN;
+                }
+                else if (c.collisionLayer == CollisionLayer::BUILDING)
+                {
+                    col = RED;
+                }
+                DrawBoundingBox(c.worldBoundingBox, col);
+            }
         }
     }
 
