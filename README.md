@@ -7,8 +7,16 @@ similar gameplay to 'Dungeon Siege' or 'Torchlight' (but much smaller in scale).
 camera movement, contextual cursors, pathfinding and the beginnings of an combat, state and dialogue system have been
 implemented.
 
+Please note: To build this project you will need to provide your own assets.
+
 ## Screenshots
 
 ![](screenshots/speech.gif)
 ![](screenshots/rotation.gif)
 ![](screenshots/combat.gif)
+
+The purpose of this repository is to showcase the underlying code of this engine to potential employers and those
+interested in its inner-workings. This repository is source-available for viewing and demonstration purposes only. The
+code is not currently open source.
+
+Copyright © 2024. All rights reserved.
