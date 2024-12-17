@@ -3,11 +3,7 @@ build
 .DS_Store
 .idea
 .vscode
-resources/models
-resources/maps
-resources/models/*
-resources/maps/*
-resources/settings.json
-*.bin
+resources
+.bin
 out
 .vs
