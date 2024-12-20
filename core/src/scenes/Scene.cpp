@@ -97,7 +97,7 @@ namespace sage
 
         // TODO: This is calculated during the map construction process. Need to find a way of reading that data,
         // instead of a magic number
-        float slices = 500;
+        static constexpr int slices = 1000; // TODO: This should be dynamic.
         data->navigationGridSystem->Init(slices, 1.0f);
 
         auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);

@@ -178,15 +178,15 @@ namespace sage
         if (light_type == "sun")
         {
             light.type = LIGHT_DIRECTIONAL;
-            light.position = {0, 1000, 0};
+            light.position = {0, 1500, 0};
+            light.brightness = 0.75; // TODO
         }
         else if (light_type == "point")
         {
             light.type = LIGHT_POINT;
             light.position = scaleFromOrigin({x, y, z}, WORLD_SCALE);
+            light.brightness = s / 150; // Seems to work well.
         }
-
-        light.brightness = s / 150; // Seems to work well.
 
         light.color =
             Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), 1};
@@ -371,7 +371,8 @@ namespace sage
         createFloor(registry, mapBB);
 
         ImageSafe heightMap(false), normalMap(false);
-        navigationGridSystem->Init(500, 1.0f);
+        auto slices = 1000;
+        navigationGridSystem->Init(slices, 1.0f);
         navigationGridSystem->InitGridHeightAndNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);
         navigationGridSystem->GenerateNormalMap(normalMap);

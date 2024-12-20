@@ -454,9 +454,10 @@ namespace sage
         std::cout << "FINISH: Generating normal map..." << std::endl;
     }
 
-    float NavigationGridSystem::getMaxHeight(float slices)
+    std::pair<float, float> NavigationGridSystem::getHeightBounds(float slices)
     {
-        float max = 0;
+        std::optional<float> minHeight;
+        std::optional<float> maxHeight;
         BoundingBox bb = {.min = {-slices, 0.1f, -slices}, .max = {slices, 0.1f, slices}};
 
         auto inside = [bb](float x, float z) {
@@ -472,25 +473,33 @@ namespace sage
                 c.collisionLayer != CollisionLayer::FLOORSIMPLE)
                 continue;
 
-            // Check if either min or max point of the bounding box is inside the defined
+            // Ensure point of the bounding box is inside the defined walkable
             // area
-            if (inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z) ||
-                inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z))
+            // TODO: What is bounding box is rotated? (If that's valid)
+            if (inside(c.worldBoundingBox.min.x, c.worldBoundingBox.min.z))
             {
-                if (c.worldBoundingBox.max.y > max)
+                if (!minHeight.has_value() || c.worldBoundingBox.min.y < minHeight)
                 {
-                    max = c.worldBoundingBox.max.y;
+                    minHeight = c.worldBoundingBox.min.y;
+                }
+            }
+            if (inside(c.worldBoundingBox.max.x, c.worldBoundingBox.max.z))
+            {
+                if (!maxHeight.has_value() || c.worldBoundingBox.max.y > maxHeight)
+                {
+                    maxHeight = c.worldBoundingBox.max.y;
                 }
             }
         }
 
-        return max;
+        return {*minHeight, *maxHeight};
     }
 
     void NavigationGridSystem::GenerateHeightMap(ImageSafe& image)
     {
         int slices = gridSquares.size();
-        float maxHeight = getMaxHeight(slices); // TODO
+        auto [minHeight, maxHeight] = getHeightBounds(slices);
+        float heightRange = maxHeight - minHeight;
 
         Image heightMap = GenImageColor(slices, slices, BLACK);
         std::cout << "START: Generating height map..." << std::endl;
@@ -500,8 +509,7 @@ namespace sage
             {
                 float height = gridSquares[y][x]->terrainHeight;
 
-                unsigned char heightValue =
-                    static_cast<unsigned char>(std::min((height / maxHeight) * 255.0f, 255.0f));
+                auto heightValue = static_cast<unsigned char>(((height - minHeight) / heightRange) * 255.0f);
 
                 Color pixelColor = {heightValue, heightValue, heightValue, 255};
                 ImageDrawPixel(&heightMap, x, y, pixelColor);
@@ -543,29 +551,29 @@ namespace sage
         std::cout << "FINISH: Applying terrain normal map to grid. \n";
     }
 
-    void NavigationGridSystem::loadTerrainHeightMap(const ImageSafe& heightMap, float maxHeight) const
+    void NavigationGridSystem::loadTerrainHeightMap(const ImageSafe& heightMap)
     {
         std::cout << "START: Applying terrain height map to grid. \n";
+        auto [minHeight, maxHeight] = getHeightBounds(slices);
+        float heightRange = maxHeight - minHeight;
         int halfSlices = slices / 2;
 
         for (int j = 0; j < slices; ++j)
         {
             for (int i = 0; i < slices; ++i)
             {
-                // Get the color of the pixel
                 Color color = heightMap.GetColor(i, j);
 
                 // The height is stored in the red channel, normalized to 0-255
                 float normalizedHeight = static_cast<float>(color.r) / 255.0f;
 
-                // Scale the height to the maxHeight
-                float height = normalizedHeight * maxHeight;
+                // Scale the normalized height back to the original range
+                float height = (normalizedHeight * heightRange) + minHeight;
 
                 // Calculate the grid index
                 int gridX = i;
                 int gridY = j;
 
-                // Assign the height to the corresponding grid square
                 if (gridX >= 0 && gridX < slices && gridY >= 0 && gridY < slices)
                 {
                     gridSquares[gridY][gridX]->terrainHeight = height;
@@ -1153,7 +1161,7 @@ namespace sage
         const auto& view = registry->view<Collideable, Renderable>();
         // Load from image data
         loadTerrainNormalMap(normalMap);
-        loadTerrainHeightMap(heightMap, getMaxHeight(slices));
+        loadTerrainHeightMap(heightMap);
 
         std::cout << "START: Populating grid. \n";
         for (const auto& entity : view)
@@ -1166,7 +1174,10 @@ namespace sage
             }
             else if (bb.collisionLayer == CollisionLayer::FLOORCOMPLEX)
             {
-                MarkSquareAreaOccupiedIfSteep(bb.worldBoundingBox, true);
+                // TODO: Using normals as a way of marking terrain as occupied was too troublesome. Needs a better
+                // algorithm.
+                //
+                // MarkSquareAreaOccupiedIfSteep(bb.worldBoundingBox, true);
                 // TODO: Does not account for FLOORSIMPLE.
             }
         }
