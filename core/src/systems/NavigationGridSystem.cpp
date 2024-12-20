@@ -94,9 +94,8 @@ namespace sage
                 entt::entity id = registry->create();
 
                 GridSquare gridSquareIndex = {i + halfSlices, j + halfSlices};
-                auto& gridSquare = registry->emplace<NavigationGridSquare>(
-                    id, gridSquareIndex, v1, v3, calculateGridsquareCentre(v1, v3));
-                gridSquares[j + halfSlices][i + halfSlices] = &gridSquare;
+                gridSquares[j + halfSlices][i + halfSlices] = std::make_unique<NavigationGridSquare>(
+                    gridSquareIndex, v1, v3, calculateGridsquareCentre(v1, v3));
             }
         }
     }
@@ -844,7 +843,7 @@ namespace sage
                 continue;
             }
 
-            const auto cell = gridSquares[square.row][square.col];
+            const auto cell = gridSquares[square.row][square.col].get();
             cell->drawDebug = true;
             cell->debugColor = PURPLE;
 
@@ -1184,14 +1183,14 @@ namespace sage
         std::cout << "FINISH: Populating grid. \n";
     }
 
-    const std::vector<std::vector<NavigationGridSquare*>>& NavigationGridSystem::GetGridSquares()
+    const std::vector<std::vector<std::unique_ptr<NavigationGridSquare>>>& NavigationGridSystem::GetGridSquares()
     {
         return gridSquares;
     }
 
     const NavigationGridSquare* NavigationGridSystem::GetGridSquare(int row, int col) const
     {
-        return gridSquares[row][col];
+        return gridSquares[row][col].get();
     }
 
     NavigationGridSystem::NavigationGridSystem(entt::registry* _registry, CollisionSystem* _collisionSystem)

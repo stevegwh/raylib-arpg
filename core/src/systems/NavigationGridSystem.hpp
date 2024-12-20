@@ -6,6 +6,7 @@
 
 #include "entt/entt.hpp"
 #include "raylib.h"
+#include <memory>
 
 namespace sage
 {
@@ -24,7 +25,7 @@ namespace sage
         std::vector<std::pair<int, int>> directions = {
             {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
         CollisionSystem* collisionSystem;
-        std::vector<std::vector<NavigationGridSquare*>> gridSquares;
+        std::vector<std::vector<std::unique_ptr<NavigationGridSquare>>> gridSquares;
 
         //---------------------------------------------------------
         [[nodiscard]] std::vector<Vector3> tracebackPath(
@@ -34,7 +35,7 @@ namespace sage
         //---------------------------------------------------------
         bool getExtents(entt::entity entity, GridSquare& extents) const;
         //---------------------------------------------------------
-        bool checkExtents(GridSquare square, GridSquare extents) const;
+        [[nodiscard]] bool checkExtents(GridSquare square, GridSquare extents) const;
         //---------------------------------------------------------
         bool getExtents(Vector3 worldPos, GridSquare& extents) const;
         //---------------------------------------------------------
@@ -116,7 +117,7 @@ namespace sage
             const GridSquare& minRange,
             const GridSquare& maxRange);
         //---------------------------------------------------------
-        const std::vector<std::vector<NavigationGridSquare*>>& GetGridSquares();
+        const std::vector<std::vector<std::unique_ptr<NavigationGridSquare>>>& GetGridSquares();
         //---------------------------------------------------------
         [[nodiscard]] const NavigationGridSquare* GetGridSquare(int row, int col) const;
         //---------------------------------------------------------

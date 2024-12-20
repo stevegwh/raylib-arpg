@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
     // sage::ResourcePacker::PackAssets(&registry, "resources/assets.bin");
     sage::ResourcePacker::ConstructMap(
-        &registry, &navigationGridSystem, "resources/maps/cave", "resources/cave.bin");
+        &registry, &navigationGridSystem, "resources/maps/dungeon-map", "resources/dungeon-map.bin");
 
     CloseWindow();
 
