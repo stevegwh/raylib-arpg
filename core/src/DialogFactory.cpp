@@ -33,6 +33,26 @@ namespace sage
         return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
     }
 
+    static std::string normalizeLineEndings(const std::string& content)
+    {
+        std::string normalized = content;
+        // First replace all CRLF with LF
+        size_t pos = normalized.find("\r\n");
+        while (pos != std::string::npos)
+        {
+            normalized.replace(pos, 2, "\n");
+            pos = normalized.find("\r\n", pos);
+        }
+        // Then replace any remaining CR with LF
+        pos = normalized.find('\r');
+        while (pos != std::string::npos)
+        {
+            normalized.replace(pos, 1, "\n");
+            pos = normalized.find('\r', pos);
+        }
+        return normalized;
+    }
+
     static std::unordered_map<std::string, std::string> extractVariables(const std::string& content)
     {
         std::unordered_map<std::string, std::string> variables;
@@ -294,7 +314,7 @@ namespace sage
 
             std::ostringstream fileContent;
             fileContent << infile.rdbuf();
-            std::string processedContent = preprocessDialog(fileContent.str());
+            std::string processedContent = normalizeLineEndings(preprocessDialog(fileContent.str()));
             std::stringstream contentStream(processedContent);
 
             entt::entity entity = entt::null;
