@@ -124,8 +124,12 @@ namespace sage
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
 
         BoundingBox mapBB = calculateFloorSize(registry);
-        // int slices = std::ceil(std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z)) + 1;
-        int slices = 1500;
+        int slices = std::floor(std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z));
+        if (slices % 2 == 1)
+        {
+            slices -= 1;
+        }
+        // int slices = 1500;
         data->navigationGridSystem->Init(slices, 1.0f);
 
         auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);
