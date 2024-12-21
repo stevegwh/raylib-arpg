@@ -370,7 +370,7 @@ namespace sage
 
         ImageSafe heightMap(false), normalMap(false);
         auto slices = std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z);
-        slices += 1;
+        slices += 10;
         navigationGridSystem->Init(slices, 1.0f);
         navigationGridSystem->InitGridHeightAndNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);

@@ -91,8 +91,6 @@ namespace sage
                 Vector3 v1 = {static_cast<float>(i) * spacing, 0, static_cast<float>(j) * spacing};
                 Vector3 v3 = {static_cast<float>(i + 1) * spacing, 1.0f, static_cast<float>(j + 1) * spacing};
 
-                entt::entity id = registry->create();
-
                 GridSquare gridSquareIndex = {i + halfSlices, j + halfSlices};
                 gridSquares[j + halfSlices][i + halfSlices] = std::make_unique<NavigationGridSquare>(
                     gridSquareIndex, v1, v3, calculateGridsquareCentre(v1, v3));

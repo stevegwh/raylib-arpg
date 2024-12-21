@@ -125,7 +125,7 @@ namespace sage
 
         BoundingBox mapBB = calculateFloorSize(registry);
         auto slices = std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z);
-        slices += 1;
+        slices += 10;
         data->navigationGridSystem->Init(slices, 1.0f);
 
         auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);

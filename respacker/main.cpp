@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
     // sage::ResourcePacker::PackAssets(&registry, "resources/assets.bin");
     sage::ResourcePacker::ConstructMap(
-        &registry, &navigationGridSystem, "resources/maps/level", "resources/level.bin");
+        &registry, &navigationGridSystem, "resources/maps/verona", "resources/verona.bin");
 
     CloseWindow();
 
