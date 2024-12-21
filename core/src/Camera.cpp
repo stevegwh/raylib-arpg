@@ -92,7 +92,8 @@ namespace sage
         GridSquare square{};
         if (!gameData->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
 
-        float floorHeight = *gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->terrainHeight;
+        float floorHeight =
+            gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
         const float targetOffsetY = 8.0f; // Offset from the floor
 
         float idealTargetY = floorHeight + targetOffsetY;

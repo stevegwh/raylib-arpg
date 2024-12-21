@@ -76,7 +76,7 @@ namespace sage
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
         auto gs = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col);
         assert(gs);
-        float height = *gs->terrainHeight;
+        float height = gs->GetTerrainHeight();
         transform.SetPosition({position.x, height, position.z});
     }
 
@@ -314,7 +314,8 @@ namespace sage
             auto& transform = registry->emplace<sgTransform>(id, id);
             GridSquare actorIdx{};
             data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-            float height = *data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+            float height =
+                data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
             transform.SetPosition({position.x, 12, position.z});
             transform.SetScale(1.0f);
             transform.SetRotation({0, 0, 0});
@@ -358,7 +359,7 @@ namespace sage
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = *data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
         transform.SetPosition({position.x, height, position.z});
         transform.SetScale(10.0f);
         transform.SetRotation({0, 0, 0});
@@ -382,7 +383,7 @@ namespace sage
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
         data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = *data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->terrainHeight;
+        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
         transform.SetPosition({position.x, height, position.z});
         transform.SetScale(1.0f);
         transform.SetRotation({0, 0, 0});

@@ -60,6 +60,10 @@ namespace sage
 
     struct NavigationGridSquare
     {
+      private:
+        std::optional<float> terrainHeight;
+
+      public:
         int pathfindingCost = 1;
         bool drawDebug = false;
         Color debugColor = RED;
@@ -72,9 +76,17 @@ namespace sage
         bool occupied = false;
 
         Vector3 terrainNormal = {0, 1, 0};
-        // float terrainHeight = 0.0f;
 
-        std::optional<float> terrainHeight;
+        void SetTerrainHeight(float _terrainHeight)
+        {
+            terrainHeight = _terrainHeight;
+        }
+
+        [[nodiscard]] float GetTerrainHeight() const
+        {
+            assert(terrainHeight.has_value());
+            return *terrainHeight;
+        }
 
         NavigationGridSquare(
             GridSquare _gridSquareIndex, Vector3 _worldPosMin, Vector3 _worldPosMax, Vector3 _worldPosCentre)
@@ -85,5 +97,7 @@ namespace sage
               debugBox({fabsf(worldPosMax.x - worldPosMin.x), 0.1f, fabsf(worldPosMax.z - worldPosMin.z)})
         {
         }
+
+        friend class NavigationGridSystem;
     };
 } // namespace sage

@@ -49,7 +49,7 @@ namespace sage
     {
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
         mesh.vertices[vertexIndex * 3] = gridSquares[gridRow][gridCol]->worldPosMin.x;
-        mesh.vertices[vertexIndex * 3 + 1] = *gridSquares[gridRow][gridCol]->terrainHeight +
+        mesh.vertices[vertexIndex * 3 + 1] = gridSquares[gridRow][gridCol]->GetTerrainHeight() +
                                              0.3; // Little buffer so the overlay doesnt blend into terrain
         mesh.vertices[vertexIndex * 3 + 2] = gridSquares[gridRow][gridCol]->worldPosMin.z;
     }
@@ -158,11 +158,11 @@ namespace sage
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
         Vector3 meshMin = {
             gridSquares[minRange.row][minRange.col]->worldPosMin.x,
-            *gridSquares[minRange.row][minRange.col]->terrainHeight,
+            gridSquares[minRange.row][minRange.col]->GetTerrainHeight(),
             gridSquares[minRange.row][minRange.col]->worldPosMin.z};
         Vector3 meshMax = {
             gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMax.x,
-            *gridSquares[maxRange.row - 1][maxRange.col - 1]->terrainHeight,
+            gridSquares[maxRange.row - 1][maxRange.col - 1]->GetTerrainHeight(),
             gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMax.z};
         Vector3 meshCenter = {(meshMin.x + meshMax.x) * 0.5f, 0, (meshMin.z + meshMax.z) * 0.5f};
 
