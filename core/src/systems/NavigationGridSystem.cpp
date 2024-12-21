@@ -379,7 +379,8 @@ namespace sage
                     float relativePosition = relativeX * stairDirection.x + relativeZ * stairDirection.z;
                     float interpolatedHeight = area.min.y + (area.max.y - area.min.y) * relativePosition;
 
-                    if (gridSquares[row][col]->terrainHeight < interpolatedHeight)
+                    if (!gridSquares[row][col]->terrainHeight.has_value() ||
+                        gridSquares[row][col]->terrainHeight < interpolatedHeight)
                     {
                         gridSquares[row][col]->terrainHeight = interpolatedHeight;
                         gridSquares[row][col]->terrainNormal =
@@ -391,7 +392,8 @@ namespace sage
                 }
                 else if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE)
                 {
-                    if (gridSquares[row][col]->terrainHeight < area.max.y)
+                    if (!gridSquares[row][col]->terrainHeight.has_value() ||
+                        gridSquares[row][col]->terrainHeight < area.max.y)
                     {
                         gridSquares[row][col]->terrainHeight = area.max.y;
                         gridSquares[row][col]->terrainNormal = {0, 1, 0};
@@ -413,7 +415,8 @@ namespace sage
 
                     if (getFirstCollision.hit)
                     {
-                        if (gridSquares[row][col]->terrainHeight < getFirstCollision.point.y)
+                        if (!gridSquares[row][col]->terrainHeight.has_value() ||
+                            gridSquares[row][col]->terrainHeight < getFirstCollision.point.y)
                         {
                             gridSquares[row][col]->terrainHeight = getFirstCollision.point.y;
                             gridSquares[row][col]->terrainNormal = getFirstCollision.normal;
@@ -504,7 +507,7 @@ namespace sage
         {
             for (int x = 0; x < slices; ++x)
             {
-                float height = gridSquares[y][x]->terrainHeight;
+                float height = *gridSquares[y][x]->terrainHeight;
 
                 auto heightValue = static_cast<unsigned char>(((height - minHeight) / heightRange) * 255.0f);
 
@@ -734,7 +737,7 @@ namespace sage
     {
         auto combineWorldPosTerrainHeight = [this](auto gridPos) {
             Vector3 worldPos = gridSquares[gridPos.row][gridPos.col]->worldPosMin;
-            worldPos.y = gridSquares[gridPos.row][gridPos.col]->terrainHeight;
+            worldPos.y = *gridSquares[gridPos.row][gridPos.col]->terrainHeight;
             return worldPos;
         };
         std::vector<Vector3> path;
