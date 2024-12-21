@@ -4,6 +4,8 @@
 
 #include <slib.hpp>
 
+#include "components/NavigationGridSquare.hpp"
+
 #include "entt/entt.hpp"
 #include "raylib.h"
 #include <memory>
@@ -11,7 +13,6 @@
 namespace sage
 {
     class CollisionSystem;
-    struct NavigationGridSquare;
     struct GridSquare;
 
     enum class AStarHeuristic

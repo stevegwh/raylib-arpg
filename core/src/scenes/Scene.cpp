@@ -85,19 +85,47 @@ namespace sage
         // ResourceManager::GetInstance().UnloadAll();
     }
 
+    BoundingBox calculateFloorSize(entt::registry* registry)
+    {
+        auto view = registry->view<Collideable>();
+        std::vector<Collideable*> floorMeshes;
+
+        for (const auto& entity : view)
+        {
+            auto& col = registry->get<Collideable>(entity);
+            if (col.collisionLayer == CollisionLayer::FLOORSIMPLE ||
+                col.collisionLayer == CollisionLayer::FLOORCOMPLEX)
+            {
+                floorMeshes.push_back(&col);
+            }
+        }
+
+        BoundingBox mapBB{Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
+        for (const auto& col : floorMeshes)
+        {
+            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
+            {
+                mapBB.min = col->worldBoundingBox.min;
+            }
+            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
+            {
+                mapBB.max = col->worldBoundingBox.max;
+            }
+        }
+        mapBB.min.y = 0.1f;
+        mapBB.max.y = 0.1f;
+        return mapBB;
+    }
+
     Scene::Scene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings))
     {
 
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
 
-        //        data->itemFactory->CreateDagger();
-        //        data->itemFactory->CreateSword();
-        //        serializer::SaveClassJson<ItemFactory>("resources/items.json", *data->itemFactory);
-
-        // TODO: This is calculated during the map construction process. Need to find a way of reading that data,
-        // instead of a magic number
-        static constexpr int slices = 1000; // TODO: This should be dynamic.
+        BoundingBox mapBB = calculateFloorSize(registry);
+        auto slices = std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z);
+        slices += 1;
         data->navigationGridSystem->Init(slices, 1.0f);
 
         auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);

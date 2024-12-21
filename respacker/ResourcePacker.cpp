@@ -111,7 +111,6 @@ namespace sage
 
     BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
     {
-        // TODO: Below doesn't seem to work always, depending on the map.
         BoundingBox mapBB{Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
         for (const auto& col : floorMeshes)
         {
@@ -368,10 +367,10 @@ namespace sage
         std::cout << "FINISH: Processing txt data into resource manager. \n";
 
         BoundingBox mapBB = calculateFloorSize(floorMeshes);
-        createFloor(registry, mapBB);
 
         ImageSafe heightMap(false), normalMap(false);
-        auto slices = 1000;
+        auto slices = std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z);
+        slices += 1;
         navigationGridSystem->Init(slices, 1.0f);
         navigationGridSystem->InitGridHeightAndNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);
