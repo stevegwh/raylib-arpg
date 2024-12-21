@@ -1146,7 +1146,6 @@ namespace sage
      */
     void NavigationGridSystem::PopulateGrid(const ImageSafe& heightMap, const ImageSafe& normalMap)
     {
-        // TODO: The below crashes when trying to autogenerate the amount of slices
         for (auto& row : gridSquares)
         {
             for (auto& gridSquare : row)

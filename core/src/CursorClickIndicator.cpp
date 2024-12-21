@@ -19,6 +19,7 @@ namespace sage
         renderable.active = true;
         auto selectedActor = gameData->controllableActorSystem->GetSelectedActor();
         auto& moveable = registry->get<MoveableActor>(selectedActor);
+        if (!moveable.IsMoving()) return;
         auto dest = moveable.GetDestination();
         auto& transform = registry->get<sgTransform>(self);
         transform.SetPosition(dest);

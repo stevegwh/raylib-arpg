@@ -369,8 +369,8 @@ namespace sage
         BoundingBox mapBB = calculateFloorSize(floorMeshes);
 
         ImageSafe heightMap(false), normalMap(false);
-        auto slices = std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z);
-        slices += 10;
+        // int slices = std::ceil(std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z)) + 1;
+        int slices = 1500;
         navigationGridSystem->Init(slices, 1.0f);
         navigationGridSystem->InitGridHeightAndNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);
