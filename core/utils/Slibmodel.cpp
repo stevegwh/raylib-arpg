@@ -754,6 +754,7 @@ namespace sage::model
     // Process obj materials
     static void ProcessMaterialsOBJ(Material* materials, const std::vector<tinyobj::material_t>& mats)
     {
+        auto path = "/Users/steve/Sync/Raylib-ARPG/Blender Files/dungeon-map/mesh/";
         // Init model mats
         for (int m = 0; m < mats.size(); m++)
         {
@@ -769,8 +770,8 @@ namespace sage::model
                 (Texture2D){rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 
             if (!mats[m].diffuse_texname.empty())
-                materials[m].maps[MATERIAL_MAP_DIFFUSE].texture =
-                    LoadTexture(mats[m].diffuse_texname.c_str()); // char *diffuse_texname; // map_Kd
+                materials[m].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(
+                    std::string(path + mats[m].diffuse_texname).c_str()); // char *diffuse_texname; // map_Kd
             else
                 materials[m].maps[MATERIAL_MAP_DIFFUSE].color = (Color){
                     static_cast<unsigned char>(mats[m].diffuse[0] * 255.0f),
@@ -780,8 +781,8 @@ namespace sage::model
             materials[m].maps[MATERIAL_MAP_DIFFUSE].value = 0.0f;
 
             if (!mats[m].specular_texname.empty())
-                materials[m].maps[MATERIAL_MAP_SPECULAR].texture =
-                    LoadTexture(mats[m].specular_texname.c_str()); // char *specular_texname; // map_Ks
+                materials[m].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture(
+                    std::string(path + mats[m].specular_texname).c_str()); // char *specular_texname; // map_Ks
             materials[m].maps[MATERIAL_MAP_SPECULAR].color = (Color){
                 static_cast<unsigned char>(mats[m].specular[0] * 255.0f),
                 static_cast<unsigned char>(mats[m].specular[1] * 255.0f),
@@ -790,15 +791,15 @@ namespace sage::model
             materials[m].maps[MATERIAL_MAP_SPECULAR].value = 0.0f;
 
             if (!mats[m].bump_texname.empty())
-                materials[m].maps[MATERIAL_MAP_NORMAL].texture =
-                    LoadTexture(mats[m].bump_texname.c_str()); // char *bump_texname; // map_bump, bump
+                materials[m].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture(
+                    std::string(path + mats[m].bump_texname).c_str()); // char *bump_texname; // map_bump, bump
             materials[m].maps[MATERIAL_MAP_NORMAL].color = WHITE;
             materials[m].maps[MATERIAL_MAP_NORMAL].value = mats[m].shininess;
 
             if (!mats[m].emissive_texname.empty())
             {
-                materials[m].maps[MATERIAL_MAP_EMISSION].texture =
-                    LoadTexture(mats[m].emissive_texname.c_str()); // char *emissive_texname; // map_Ke
+                materials[m].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture(
+                    std::string(path + mats[m].emissive_texname).c_str()); // char *emissive_texname; // map_Ke
             }
 
             materials[m].maps[MATERIAL_MAP_EMISSION].color = (Color){
@@ -809,7 +810,8 @@ namespace sage::model
 
             if (!mats[m].displacement_texname.empty())
                 materials[m].maps[MATERIAL_MAP_HEIGHT].texture =
-                    LoadTexture(mats[m].displacement_texname.c_str()); // char *displacement_texname; // disp
+                    LoadTexture(std::string(path + mats[m].displacement_texname)
+                                    .c_str()); // char *displacement_texname; // disp
         }
     }
 #endif
