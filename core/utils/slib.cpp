@@ -101,10 +101,8 @@ namespace sage
         return rlmodel.meshes[num];
     }
 
-    BoundingBox ModelSafe::CalcLocalBoundingBox() const
+    BoundingBox ModelSafe::CalcLocalMeshBoundingBox(const Mesh& mesh) const
     {
-        assert(rlmodel.meshCount > 0);
-        const Mesh& mesh = rlmodel.meshes[0];
         std::vector<float> vertices(mesh.vertices, mesh.vertices + mesh.vertexCount * 3);
 
         BoundingBox bb;
@@ -138,6 +136,38 @@ namespace sage
             bb.max.x = std::max(bb.max.x, v.x);
             bb.max.y = std::max(bb.max.y, v.y);
             bb.max.z = std::max(bb.max.z, v.z);
+        }
+
+        return bb;
+    }
+
+    BoundingBox ModelSafe::CalcLocalBoundingBox() const
+    {
+        assert(rlmodel.meshCount > 0);
+
+        BoundingBox bb;
+        bb.min = {0, 0, 0};
+        bb.max = {0, 0, 0};
+
+        for (size_t i = 0; i < rlmodel.meshCount; ++i)
+        {
+            auto currentBB = CalcLocalMeshBoundingBox(rlmodel.meshes[i]);
+
+            if (i == 0)
+            {
+                bb = currentBB;
+                continue;
+            }
+
+            bb.min = {
+                std::min(bb.min.x, currentBB.min.x),
+                std::min(bb.min.y, currentBB.min.y),
+                std::min(bb.min.z, currentBB.min.z)};
+
+            bb.max = {
+                std::max(bb.max.x, currentBB.max.x),
+                std::max(bb.max.y, currentBB.max.y),
+                std::max(bb.max.z, currentBB.max.z)};
         }
 
         return bb;
