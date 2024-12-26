@@ -71,6 +71,10 @@ namespace sage
         {
             return CollisionLayer::STAIRS;
         }
+        if (objectName.find("_MAPBASE_") != std::string::npos)
+        {
+            return CollisionLayer::BACKGROUND;
+        }
 
         return CollisionLayer::BACKGROUND; // by default, objects are ignored
     }
@@ -102,37 +106,6 @@ namespace sage
     //         }
     //     }
     // }
-
-    void createFloor(entt::registry* registry, BoundingBox bb)
-    {
-        entt::entity floor = registry->create();
-        auto& floorCollidable = registry->emplace<Collideable>(floor, bb, MatrixIdentity());
-        floorCollidable.collisionLayer = CollisionLayer::FLOORSIMPLE;
-    }
-
-    BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
-    {
-        std::optional<Vector3> min;
-        std::optional<Vector3> max;
-
-        for (const auto& col : floorMeshes)
-        {
-            if (!min.has_value() || col->worldBoundingBox.min.x <= min->x && col->worldBoundingBox.min.z <= min->z)
-            {
-                min = col->worldBoundingBox.min;
-            }
-            if (!max.has_value() || col->worldBoundingBox.max.x >= max->x && col->worldBoundingBox.max.z >= max->z)
-            {
-                max = col->worldBoundingBox.max;
-            }
-        }
-        assert(min.has_value());
-        assert(max.has_value());
-        BoundingBox mapBB{*min, *max}; // min, max
-        mapBB.min.y = 0.1f;
-        mapBB.max.y = 0.1f;
-        return mapBB;
-    }
 
     std::string readLine(std::ifstream& infile, const std::string& key)
     {
@@ -233,11 +206,7 @@ namespace sage
         }
     }
 
-    void HandleMesh(
-        entt::registry* registry,
-        std::ifstream& infile,
-        const fs::path& meshPath,
-        std::vector<Collideable*>& floorMeshes)
+    void HandleMesh(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath, int& slices)
     {
         std::string meshName, objectName;
         float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
@@ -287,16 +256,20 @@ namespace sage
             entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
 
         collideable.collisionLayer = getCollisionLayer(objectName);
-        if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE ||
-            collideable.collisionLayer == CollisionLayer::FLOORCOMPLEX)
-            floorMeshes.push_back(&collideable);
+
+        if (objectName.find("_MAPBASE_") != std::string::npos)
+        {
+            slices = std::ceil(std::max(
+                collideable.worldBoundingBox.max.x - collideable.worldBoundingBox.min.x,
+                collideable.worldBoundingBox.max.z - collideable.worldBoundingBox.min.z));
+            if (slices % 2 == 1)
+            {
+                slices += 1;
+            }
+        }
     }
 
-    void processTxtFile(
-        entt::registry* registry,
-        const fs::path& meshPath,
-        const fs::path& txtPath,
-        std::vector<Collideable*>& floorMeshes)
+    void processTxtFile(entt::registry* registry, const fs::path& meshPath, const fs::path& txtPath, int& slices)
     {
         std::string typeName;
         std::ifstream infile(txtPath);
@@ -321,7 +294,7 @@ namespace sage
         }
         else
         {
-            HandleMesh(registry, infile, meshPath, floorMeshes);
+            HandleMesh(registry, infile, meshPath, slices);
         }
     }
 
@@ -360,26 +333,20 @@ namespace sage
         }
         std::cout << "FINISH: Loading mesh data into resource manager. \n";
 
-        std::vector<Collideable*> floorMeshes;
+        int slices = 0;
 
         std::cout << "START: Processing txt data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(inputPath))
         {
             if (entry.path().extension() == ".txt")
             {
-                processTxtFile(registry, meshPath, entry.path(), floorMeshes);
+                processTxtFile(registry, meshPath, entry.path(), slices);
             }
         }
         std::cout << "FINISH: Processing txt data into resource manager. \n";
 
-        BoundingBox mapBB = calculateFloorSize(floorMeshes);
-
         ImageSafe heightMap(false), normalMap(false);
-        int slices = std::floor(std::max(mapBB.max.x, mapBB.max.z) - std::min(mapBB.min.x, mapBB.min.z));
-        if (slices % 2 == 1)
-        {
-            slices -= 1;
-        }
+
         navigationGridSystem->Init(slices, 1.0f);
         navigationGridSystem->InitGridHeightAndNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);
