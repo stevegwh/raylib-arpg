@@ -322,7 +322,8 @@ namespace sage
         std::cout << "START: Loading mesh data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
-            if (entry.path().extension() == ".obj" || entry.path().extension() == ".glb")
+            if (entry.path().extension() == ".obj" || entry.path().extension() == ".glb" ||
+                entry.path().extension() == ".gltf")
             {
                 // std::string materialKey = "DEFAULT"; // Load default raylib mat
                 // fs::path mtlPath = entry.path();
