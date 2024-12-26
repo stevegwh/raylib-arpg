@@ -7,6 +7,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <entt/entt.hpp>
+#include <optional>
 
 namespace sage
 {

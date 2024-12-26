@@ -3,7 +3,7 @@
 #include "entt/entt.hpp"
 #include "raylib.h"
 
-#define MAX_LIGHTS 25 // Max dynamic lights supported by shader
+#define MAX_LIGHTS 50 // Max dynamic lights supported by shader
 
 namespace sage
 {
@@ -23,7 +23,7 @@ namespace sage
         Shader defaultShader{};
         std::vector<Shader> shaders;
         int lightsCount = 0;
-        float gamma = 1.3;
+        float gamma = 1.6;
         std::array<float, 4> ambient{};
         void updateShaderLights(Shader& _shader);
         void updateAmbientLight(Shader& _shader) const;

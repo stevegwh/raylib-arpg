@@ -92,6 +92,9 @@ def handle_light(obj, output_folder):
 for obj in selection:
     obj.select_set(True)
 
+    if obj.type == 'NONE' or obj is None or obj.data is None:
+        continue
+
     if "Spawner" in obj.name:
         handle_spawner(obj, output_folder)
     elif obj.type == 'LIGHT':
