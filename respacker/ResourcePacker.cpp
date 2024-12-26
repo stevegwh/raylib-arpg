@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -111,18 +112,23 @@ namespace sage
 
     BoundingBox calculateFloorSize(const std::vector<Collideable*>& floorMeshes)
     {
-        BoundingBox mapBB{Vector3{0, 0, 0}, Vector3{0, 0, 0}}; // min, max
+        std::optional<Vector3> min;
+        std::optional<Vector3> max;
+
         for (const auto& col : floorMeshes)
         {
-            if (col->worldBoundingBox.min.x <= mapBB.min.x && col->worldBoundingBox.min.z <= mapBB.min.z)
+            if (!min.has_value() || col->worldBoundingBox.min.x <= min->x && col->worldBoundingBox.min.z <= min->z)
             {
-                mapBB.min = col->worldBoundingBox.min;
+                min = col->worldBoundingBox.min;
             }
-            if (col->worldBoundingBox.max.x >= mapBB.max.x && col->worldBoundingBox.max.z >= mapBB.max.z)
+            if (!max.has_value() || col->worldBoundingBox.max.x >= max->x && col->worldBoundingBox.max.z >= max->z)
             {
-                mapBB.max = col->worldBoundingBox.max;
+                max = col->worldBoundingBox.max;
             }
         }
+        assert(min.has_value());
+        assert(max.has_value());
+        BoundingBox mapBB{*min, *max}; // min, max
         mapBB.min.y = 0.1f;
         mapBB.max.y = 0.1f;
         return mapBB;
@@ -374,7 +380,6 @@ namespace sage
         {
             slices -= 1;
         }
-        // int slices = 1500;
         navigationGridSystem->Init(slices, 1.0f);
         navigationGridSystem->InitGridHeightAndNormals();
         navigationGridSystem->GenerateHeightMap(heightMap);
