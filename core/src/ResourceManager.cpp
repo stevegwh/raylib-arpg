@@ -116,7 +116,7 @@ namespace sage
 
         // Below taken from raylib's LoadModel().
         model.transform = MatrixIdentity();
-        if ((model.meshCount != 0) && (model.meshes != NULL))
+        if ((model.meshCount != 0) && (model.meshes != nullptr))
         {
             // Upload vertex data to GPU (static meshes)
             for (int i = 0; i < model.meshCount; i++)
@@ -358,7 +358,7 @@ namespace sage
             // This might not be a big deal, if we limit "EmplaceModel" to only be used when constructing the map
             // binary. If the goblin (etc) mesh is archived in the binary, then EmplaceModel will never need to be
             // called at runtime.
-            modelCereal.model = model::LoadModel(path.c_str());
+            modelCereal.model = LoadModel(path.c_str());
 
             modelCereal.key = path;
 

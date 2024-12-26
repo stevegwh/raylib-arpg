@@ -236,7 +236,6 @@ namespace sage
                     &emTex,
                     SHADER_UNIFORM_SAMPLER2D);
             }
-
             if (uber->HasFlag(model.meshMaterial[i], UberShaderComponent::EmissiveCol))
             {
                 auto emCol = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color;

@@ -23,7 +23,7 @@ namespace sage
         uber.colEmissiveLoc = colEmissionLoc;
         auto& renderable = registry->get<Renderable>(entity);
 
-        auto& materials = renderable.GetModel()->rlmodel.materials;
+        // auto& materials = renderable.GetModel()->rlmodel.materials;
         for (int i = 0; i < renderable.GetModel()->rlmodel.materialCount; ++i)
         {
             auto col = renderable.GetModel()->rlmodel.materials[i].maps[MATERIAL_MAP_EMISSION].color;

@@ -1419,11 +1419,11 @@ namespace sage::model
 
                         // Load emissive color factor
                         model.materials[j].maps[MATERIAL_MAP_EMISSION].color.r =
-                            (unsigned char)(data->materials[i].emissive_factor[0] * 255);
+                            static_cast<unsigned char>(data->materials[i].emissive_factor[0] * 255);
                         model.materials[j].maps[MATERIAL_MAP_EMISSION].color.g =
-                            (unsigned char)(data->materials[i].emissive_factor[1] * 255);
+                            static_cast<unsigned char>(data->materials[i].emissive_factor[1] * 255);
                         model.materials[j].maps[MATERIAL_MAP_EMISSION].color.b =
-                            (unsigned char)(data->materials[i].emissive_factor[2] * 255);
+                            static_cast<unsigned char>(data->materials[i].emissive_factor[2] * 255);
                         model.materials[j].maps[MATERIAL_MAP_EMISSION].color.a = 255;
                     }
                 }
