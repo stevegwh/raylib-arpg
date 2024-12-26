@@ -70,7 +70,7 @@ namespace sage
         // TODO: return GetRlModel to const
         [[nodiscard]] Model& GetRlModel();
         [[nodiscard]] const Mesh& GetMesh(int num) const;
-        [[nodiscard]] BoundingBox CalcLocalMeshBoundingBox(const Mesh& mesh) const;
+        [[nodiscard]] BoundingBox CalcLocalMeshBoundingBox(const Mesh& mesh, bool& success) const;
         [[nodiscard]] BoundingBox CalcLocalBoundingBox() const;
         [[nodiscard]] RayCollision GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const;
         void UpdateAnimation(ModelAnimation anim, int frame) const;

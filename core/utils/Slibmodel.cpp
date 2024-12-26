@@ -4,49 +4,9 @@
 
 #include "Slibmodel.hpp"
 
-#include <vector>
+#include "raylib.h" // Declares module functions
 
-/**********************************************************************************************
- *
- *   rmodels - Basic functions to draw 3d shapes and load and draw 3d models
- *
- *   CONFIGURATION:
- *       #define SUPPORT_MODULE_RMODELS
- *           rmodels module is included in the build
- *
- *       #define SUPPORT_FILEFORMAT_OBJ
- *       #define SUPPORT_FILEFORMAT_MTL
- *       #define SUPPORT_FILEFORMAT_IQM
- *       #define SUPPORT_FILEFORMAT_GLTF
- *       #define SUPPORT_FILEFORMAT_VOX
- *       #define SUPPORT_FILEFORMAT_M3D
- *           Selected desired fileformats to be supported for model data loading.
- *
- *       #define SUPPORT_MESH_GENERATION
- *           Support procedural mesh generation functions, uses external par_shapes.h library
- *           NOTE: Some generated meshes DO NOT include generated texture coordinates
- *
- *
- *   LICENSE: zlib/libpng
- *
- *   Copyright (c) 2013-2024 Ramon Santamaria (@raysan5)
- *
- *   This software is provided "as-is", without any express or implied warranty. In no event
- *   will the authors be held liable for any damages arising from the use of this software.
- *
- *   Permission is granted to anyone to use this software for any purpose, including commercial
- *   applications, and to alter it and redistribute it freely, subject to the following restrictions:
- *
- *     1. The origin of this software must not be misrepresented; you must not claim that you
- *     wrote the original software. If you use this software in a product, an acknowledgment
- *     in the product documentation would be appreciated but is not required.
- *
- *     2. Altered source versions must be plainly marked as such, and must not be misrepresented
- *     as being the original software.
- *
- *     3. This notice may not be removed or altered from any source distribution.
- *
- **********************************************************************************************/
+#include <vector>
 
 // Check if config flags have been externally provided on compilation line
 #if !defined(EXTERNAL_CONFIG_FLAGS)
@@ -60,16 +20,10 @@
 #include "utils.h"   // Required for: TRACELOG(), LoadFileData(), LoadFileText(), SaveFileText()
 
 #include <cassert>
-#include <cmath>   // Required for: sinf(), cosf(), sqrtf(), fabsf()
-#include <cstdio>  // Required for: sprintf()
 #include <cstdlib> // Required for: malloc(), calloc(), free()
 #include <cstring> // Required for: memcmp(), strlen(), strncpy()
 
 #if defined(SUPPORT_FILEFORMAT_OBJ) || defined(SUPPORT_FILEFORMAT_MTL)
-#define TINYOBJ_MALLOC RL_MALLOC
-#define TINYOBJ_CALLOC RL_CALLOC
-#define TINYOBJ_REALLOC RL_REALLOC
-#define TINYOBJ_FREE RL_FREE
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -83,49 +37,22 @@
 #include "external/cgltf.h" // glTF file format loading
 #endif
 
-#if defined(_WIN32)
-#include <direct.h> // Required for: _chdir() [Used in LoadOBJ()]
-#define CHDIR _chdir
-#else
-#include <unistd.h> // Required for: chdir() (POSIX) [Used in LoadOBJ()]
-#define CHDIR chdir
-#endif
-
-//----------------------------------------------------------------------------------
-// Defines and Macros
-//----------------------------------------------------------------------------------
-#ifndef MAX_MATERIAL_MAPS
-#define MAX_MATERIAL_MAPS 12 // Maximum number of maps supported
-#endif
-#ifndef MAX_MESH_VERTEX_BUFFERS
-#define MAX_MESH_VERTEX_BUFFERS 9 // Maximum vertex buffers (VBO) per mesh
-#endif
-
-//----------------------------------------------------------------------------------
-// Types and Structures Definition
-//----------------------------------------------------------------------------------
-// ...
-
-//----------------------------------------------------------------------------------
-// Global Variables Definition
-//----------------------------------------------------------------------------------
-// ...
-
-namespace sage::model
+namespace sage
 {
+
     //----------------------------------------------------------------------------------
     // Module specific Functions Declaration
     //----------------------------------------------------------------------------------
 #if defined(SUPPORT_FILEFORMAT_OBJ)
-    static Model LoadOBJ(const char* fileName); // Load OBJ mesh data
+    static Model sgLoadOBJ(const char* fileName); // Load OBJ mesh data
 #endif
 #if defined(SUPPORT_FILEFORMAT_GLTF)
-    static Model LoadGLTF(const char* fileName); // Load GLTF mesh data
-    static ModelAnimation* LoadModelAnimationsGLTF(
+    static Model sgLoadGLTF(const char* fileName); // Load GLTF mesh data
+    static ModelAnimation* sgLoadModelAnimationsGLTF(
         const char* fileName, int* animCount); // Load GLTF animation data
 #endif
 #if defined(SUPPORT_FILEFORMAT_OBJ) || defined(SUPPORT_FILEFORMAT_MTL)
-    static void ProcessMaterialsOBJ(
+    static void sgProcessMaterialsOBJ(
         Material* materials,
         const std::vector<tinyobj::material_t>& mats,
         const std::string& path); // Process obj materials
@@ -136,15 +63,15 @@ namespace sage::model
     //----------------------------------------------------------------------------------
 
     // Load model from files (mesh and material)
-    Model LoadModel(const char* fileName)
+    Model sgLoadModel(const char* fileName)
     {
         Model model{};
 
 #if defined(SUPPORT_FILEFORMAT_OBJ)
-        if (IsFileExtension(fileName, ".obj")) model = LoadOBJ(fileName);
+        if (IsFileExtension(fileName, ".obj")) model = sgLoadOBJ(fileName);
 #endif
 #if defined(SUPPORT_FILEFORMAT_GLTF)
-        if (IsFileExtension(fileName, ".gltf") || IsFileExtension(fileName, ".glb")) model = LoadGLTF(fileName);
+        if (IsFileExtension(fileName, ".gltf") || IsFileExtension(fileName, ".glb")) model = sgLoadGLTF(fileName);
 #endif
 
         // Make sure model transform is set to identity matrix!
@@ -181,7 +108,7 @@ namespace sage::model
     // WARNING: A shallow copy of mesh is generated, passed by value,
     // as long as struct contains pointers to data and some values, we get a copy
     // of mesh pointing to same data as original version... be careful!
-    Model LoadModelFromMesh(const Mesh& mesh)
+    Model sgLoadModelFromMesh(const Mesh& mesh)
     {
         Model model = {0};
 
@@ -202,7 +129,7 @@ namespace sage::model
     }
 
     // Check if a model is valid (loaded in GPU, VAO/VBOs)
-    bool IsModelValid(const Model& model)
+    bool sgIsModelValid(const Model& model)
     {
         bool result = false;
 
@@ -270,485 +197,196 @@ namespace sage::model
         return result;
     }
 
-    // Unload model (meshes/materials) from memory (RAM and/or VRAM)
-    // NOTE: This function takes care of all model elements, for a detailed control
-    // over them, use UnloadMesh() and UnloadMaterial()
-    void UnloadModel(Model model)
-    {
-        // Unload meshes
-        for (int i = 0; i < model.meshCount; i++)
-            UnloadMesh(model.meshes[i]);
-
-        // Unload materials maps
-        // NOTE: As the user could be sharing shaders and textures between models,
-        // we don't unload the material but just free its maps,
-        // the user is responsible for freeing models shaders and textures
-        for (int i = 0; i < model.materialCount; i++)
-            RL_FREE(model.materials[i].maps);
-
-        // Unload arrays
-        RL_FREE(model.meshes);
-        RL_FREE(model.materials);
-        RL_FREE(model.meshMaterial);
-
-        // Unload animation data
-        RL_FREE(model.bones);
-        RL_FREE(model.bindPose);
-
-        TRACELOG(LOG_INFO, "MODEL: Unloaded model (and meshes) from RAM and VRAM");
-    }
-
-    // Upload vertex data into a VAO (if supported) and VBO
-    void UploadMesh(Mesh* mesh, bool dynamic)
-    {
-        if (mesh->vaoId > 0)
-        {
-            // Check if mesh has already been loaded in GPU
-            TRACELOG(LOG_WARNING, "VAO: [ID %i] Trying to re-load an already loaded mesh", mesh->vaoId);
-            return;
-        }
-
-        mesh->vboId = static_cast<unsigned int*>(RL_CALLOC(MAX_MESH_VERTEX_BUFFERS, sizeof(unsigned int)));
-
-        mesh->vaoId = 0;                                              // Vertex Array Object
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION] = 0;  // Vertex buffer: positions
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD] = 0;  // Vertex buffer: texcoords
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL] = 0;    // Vertex buffer: normals
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR] = 0;     // Vertex buffer: colors
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT] = 0;   // Vertex buffer: tangents
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2] = 0; // Vertex buffer: texcoords2
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES] = 0;   // Vertex buffer: indices
-
-#ifdef RL_SUPPORT_MESH_GPU_SKINNING
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS] = 0;     // Vertex buffer: boneIds
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS] = 0; // Vertex buffer: boneWeights
-#endif
-
-#if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
-        mesh->vaoId = rlLoadVertexArray();
-        rlEnableVertexArray(mesh->vaoId);
-
-        // NOTE: Vertex attributes must be uploaded considering default locations points and available vertex data
-
-        // Enable vertex attributes: position (shader-location = 0)
-        void* vertices = (mesh->animVertices != nullptr) ? mesh->animVertices : mesh->vertices;
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION] =
-            rlLoadVertexBuffer(vertices, mesh->vertexCount * 3 * sizeof(float), dynamic);
-        rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION, 3, RL_FLOAT, false, 0, 0);
-        rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION);
-
-        // Enable vertex attributes: texcoords (shader-location = 1)
-        mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD] =
-            rlLoadVertexBuffer(mesh->texcoords, mesh->vertexCount * 2 * sizeof(float), dynamic);
-        rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD, 2, RL_FLOAT, false, 0, 0);
-        rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD);
-
-        // WARNING: When setting default vertex attribute values, the values for each generic vertex attribute
-        // is part of current state, and it is maintained even if a different program object is used
-
-        if (mesh->normals != nullptr)
-        {
-            // Enable vertex attributes: normals (shader-location = 2)
-            void* normals = (mesh->animNormals != nullptr) ? mesh->animNormals : mesh->normals;
-            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL] =
-                rlLoadVertexBuffer(normals, mesh->vertexCount * 3 * sizeof(float), dynamic);
-            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL, 3, RL_FLOAT, false, 0, 0);
-            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL);
-        }
-        else
-        {
-            // Default vertex attribute: normal
-            // WARNING: Default value provided to shader if location available
-            float value[3] = {1.0f, 1.0f, 1.0f};
-            rlSetVertexAttributeDefault(RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL, value, SHADER_ATTRIB_VEC3, 3);
-            rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL);
-        }
-
-        if (mesh->colors != nullptr)
-        {
-            // Enable vertex attribute: color (shader-location = 3)
-            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR] =
-                rlLoadVertexBuffer(mesh->colors, mesh->vertexCount * 4 * sizeof(unsigned char), dynamic);
-            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR, 4, RL_UNSIGNED_BYTE, 1, 0, 0);
-            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR);
-        }
-        else
-        {
-            // Default vertex attribute: color
-            // WARNING: Default value provided to shader if location available
-            float value[4] = {1.0f, 1.0f, 1.0f, 1.0f}; // WHITE
-            rlSetVertexAttributeDefault(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR, value, SHADER_ATTRIB_VEC4, 4);
-            rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR);
-        }
-
-        if (mesh->tangents != nullptr)
-        {
-            // Enable vertex attribute: tangent (shader-location = 4)
-            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT] =
-                rlLoadVertexBuffer(mesh->tangents, mesh->vertexCount * 4 * sizeof(float), dynamic);
-            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT, 4, RL_FLOAT, 0, 0, 0);
-            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT);
-        }
-        else
-        {
-            // Default vertex attribute: tangent
-            // WARNING: Default value provided to shader if location available
-            float value[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-            rlSetVertexAttributeDefault(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT, value, SHADER_ATTRIB_VEC4, 4);
-            rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT);
-        }
-
-        if (mesh->texcoords2 != nullptr)
-        {
-            // Enable vertex attribute: texcoord2 (shader-location = 5)
-            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2] =
-                rlLoadVertexBuffer(mesh->texcoords2, mesh->vertexCount * 2 * sizeof(float), dynamic);
-            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2, 2, RL_FLOAT, 0, 0, 0);
-            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2);
-        }
-        else
-        {
-            // Default vertex attribute: texcoord2
-            // WARNING: Default value provided to shader if location available
-            float value[2] = {0.0f, 0.0f};
-            rlSetVertexAttributeDefault(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2, value, SHADER_ATTRIB_VEC2, 2);
-            rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2);
-        }
-
-#ifdef RL_SUPPORT_MESH_GPU_SKINNING
-        if (mesh->boneIds != nullptr)
-        {
-            // Enable vertex attribute: boneIds (shader-location = 7)
-            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS] =
-                rlLoadVertexBuffer(mesh->boneIds, mesh->vertexCount * 4 * sizeof(unsigned char), dynamic);
-            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS, 4, RL_UNSIGNED_BYTE, 0, 0, 0);
-            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS);
-        }
-        else
-        {
-            // Default vertex attribute: boneIds
-            // WARNING: Default value provided to shader if location available
-            float value[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-            rlSetVertexAttributeDefault(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS, value, SHADER_ATTRIB_VEC4, 4);
-            rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS);
-        }
-
-        if (mesh->boneWeights != nullptr)
-        {
-            // Enable vertex attribute: boneWeights (shader-location = 8)
-            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS] =
-                rlLoadVertexBuffer(mesh->boneWeights, mesh->vertexCount * 4 * sizeof(float), dynamic);
-            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS, 4, RL_FLOAT, 0, 0, 0);
-            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS);
-        }
-        else
-        {
-            // Default vertex attribute: boneWeights
-            // WARNING: Default value provided to shader if location available
-            float value[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-            rlSetVertexAttributeDefault(
-                RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS, value, SHADER_ATTRIB_VEC4, 2);
-            rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS);
-        }
-#endif
-
-        if (mesh->indices != nullptr)
-        {
-            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES] = rlLoadVertexBufferElement(
-                mesh->indices, mesh->triangleCount * 3 * sizeof(unsigned short), dynamic);
-        }
-
-        if (mesh->vaoId > 0)
-            TRACELOG(LOG_INFO, "VAO: [ID %i] Mesh uploaded successfully to VRAM (GPU)", mesh->vaoId);
-        else
-            TRACELOG(LOG_INFO, "VBO: Mesh uploaded successfully to VRAM (GPU)");
-
-        rlDisableVertexArray();
-#endif
-    }
+    //        // Upload vertex data into a VAO (if supported) and VBO
+    //        void sgUploadMesh(Mesh* mesh, bool dynamic)
+    //        {
+    //            if (mesh->vaoId > 0)
+    //            {
+    //                // Check if mesh has already been loaded in GPU
+    //                TRACELOG(LOG_WARNING, "VAO: [ID %i] Trying to re-load an already loaded mesh",
+    //                mesh->vaoId); return;
+    //            }
+    //
+    //            mesh->vboId = static_cast<unsigned int*>(RL_CALLOC(MAX_MESH_VERTEX_BUFFERS, sizeof(unsigned
+    //            int)));
+    //
+    //            mesh->vaoId = 0;                                              // Vertex Array Object
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION] = 0;  // Vertex buffer: positions
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD] = 0;  // Vertex buffer: texcoords
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL] = 0;    // Vertex buffer: normals
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR] = 0;     // Vertex buffer: colors
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT] = 0;   // Vertex buffer: tangents
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2] = 0; // Vertex buffer: texcoords2
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES] = 0;   // Vertex buffer: indices
+    //
+    // #ifdef RL_SUPPORT_MESH_GPU_SKINNING
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS] = 0;     // Vertex buffer: boneIds
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS] = 0; // Vertex buffer: boneWeights
+    // #endif
+    //
+    // #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
+    //            mesh->vaoId = rlLoadVertexArray();
+    //            rlEnableVertexArray(mesh->vaoId);
+    //
+    //            // NOTE: Vertex attributes must be uploaded considering default locations points and
+    //            available vertex
+    //            // data
+    //
+    //            // Enable vertex attributes: position (shader-location = 0)
+    //            void* vertices = (mesh->animVertices != nullptr) ? mesh->animVertices : mesh->vertices;
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION] =
+    //                rlLoadVertexBuffer(vertices, mesh->vertexCount * 3 * sizeof(float), dynamic);
+    //            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION, 3, RL_FLOAT, false, 0, 0);
+    //            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION);
+    //
+    //            // Enable vertex attributes: texcoords (shader-location = 1)
+    //            mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD] =
+    //                rlLoadVertexBuffer(mesh->texcoords, mesh->vertexCount * 2 * sizeof(float), dynamic);
+    //            rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD, 2, RL_FLOAT, false, 0, 0);
+    //            rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD);
+    //
+    //            // WARNING: When setting default vertex attribute values, the values for each generic vertex
+    //            attribute
+    //            // is part of current state, and it is maintained even if a different program object is used
+    //
+    //            if (mesh->normals != nullptr)
+    //            {
+    //                // Enable vertex attributes: normals (shader-location = 2)
+    //                void* normals = (mesh->animNormals != nullptr) ? mesh->animNormals : mesh->normals;
+    //                mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL] =
+    //                    rlLoadVertexBuffer(normals, mesh->vertexCount * 3 * sizeof(float), dynamic);
+    //                rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL, 3, RL_FLOAT, false, 0, 0);
+    //                rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL);
+    //            }
+    //            else
+    //            {
+    //                // Default vertex attribute: normal
+    //                // WARNING: Default value provided to shader if location available
+    //                float value[3] = {1.0f, 1.0f, 1.0f};
+    //                rlSetVertexAttributeDefault(
+    //                    RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL, value, SHADER_ATTRIB_VEC3, 3);
+    //                rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL);
+    //            }
+    //
+    //            if (mesh->colors != nullptr)
+    //            {
+    //                // Enable vertex attribute: color (shader-location = 3)
+    //                mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR] =
+    //                    rlLoadVertexBuffer(mesh->colors, mesh->vertexCount * 4 * sizeof(unsigned char),
+    //                    dynamic);
+    //                rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR, 4, RL_UNSIGNED_BYTE, 1, 0,
+    //                0); rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR);
+    //            }
+    //            else
+    //            {
+    //                // Default vertex attribute: color
+    //                // WARNING: Default value provided to shader if location available
+    //                float value[4] = {1.0f, 1.0f, 1.0f, 1.0f}; // WHITE
+    //                rlSetVertexAttributeDefault(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR, value,
+    //                SHADER_ATTRIB_VEC4, 4);
+    //                rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR);
+    //            }
+    //
+    //            if (mesh->tangents != nullptr)
+    //            {
+    //                // Enable vertex attribute: tangent (shader-location = 4)
+    //                mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT] =
+    //                    rlLoadVertexBuffer(mesh->tangents, mesh->vertexCount * 4 * sizeof(float), dynamic);
+    //                rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT, 4, RL_FLOAT, 0, 0, 0);
+    //                rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT);
+    //            }
+    //            else
+    //            {
+    //                // Default vertex attribute: tangent
+    //                // WARNING: Default value provided to shader if location available
+    //                float value[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    //                rlSetVertexAttributeDefault(
+    //                    RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT, value, SHADER_ATTRIB_VEC4, 4);
+    //                rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT);
+    //            }
+    //
+    //            if (mesh->texcoords2 != nullptr)
+    //            {
+    //                // Enable vertex attribute: texcoord2 (shader-location = 5)
+    //                mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2] =
+    //                    rlLoadVertexBuffer(mesh->texcoords2, mesh->vertexCount * 2 * sizeof(float), dynamic);
+    //                rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2, 2, RL_FLOAT, 0, 0, 0);
+    //                rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2);
+    //            }
+    //            else
+    //            {
+    //                // Default vertex attribute: texcoord2
+    //                // WARNING: Default value provided to shader if location available
+    //                float value[2] = {0.0f, 0.0f};
+    //                rlSetVertexAttributeDefault(
+    //                    RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2, value, SHADER_ATTRIB_VEC2, 2);
+    //                rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2);
+    //            }
+    //
+    // #ifdef RL_SUPPORT_MESH_GPU_SKINNING
+    //            if (mesh->boneIds != nullptr)
+    //            {
+    //                // Enable vertex attribute: boneIds (shader-location = 7)
+    //                mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS] =
+    //                    rlLoadVertexBuffer(mesh->boneIds, mesh->vertexCount * 4 * sizeof(unsigned char),
+    //                    dynamic);
+    //                rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS, 4, RL_UNSIGNED_BYTE, 0,
+    //                0, 0); rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS);
+    //            }
+    //            else
+    //            {
+    //                // Default vertex attribute: boneIds
+    //                // WARNING: Default value provided to shader if location available
+    //                float value[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    //                rlSetVertexAttributeDefault(
+    //                    RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS, value, SHADER_ATTRIB_VEC4, 4);
+    //                rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS);
+    //            }
+    //
+    //            if (mesh->boneWeights != nullptr)
+    //            {
+    //                // Enable vertex attribute: boneWeights (shader-location = 8)
+    //                mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS] =
+    //                    rlLoadVertexBuffer(mesh->boneWeights, mesh->vertexCount * 4 * sizeof(float),
+    //                    dynamic);
+    //                rlSetVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS, 4, RL_FLOAT, 0, 0,
+    //                0); rlEnableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS);
+    //            }
+    //            else
+    //            {
+    //                // Default vertex attribute: boneWeights
+    //                // WARNING: Default value provided to shader if location available
+    //                float value[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    //                rlSetVertexAttributeDefault(
+    //                    RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS, value, SHADER_ATTRIB_VEC4, 2);
+    //                rlDisableVertexAttribute(RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS);
+    //            }
+    // #endif
+    //
+    //            if (mesh->indices != nullptr)
+    //            {
+    //                mesh->vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES] = rlLoadVertexBufferElement(
+    //                    mesh->indices, mesh->triangleCount * 3 * sizeof(unsigned short), dynamic);
+    //            }
+    //
+    //            if (mesh->vaoId > 0)
+    //                TRACELOG(LOG_INFO, "VAO: [ID %i] Mesh uploaded successfully to VRAM (GPU)", mesh->vaoId);
+    //            else
+    //                TRACELOG(LOG_INFO, "VBO: Mesh uploaded successfully to VRAM (GPU)");
+    //
+    //            rlDisableVertexArray();
+    // #endif
+    //        }
 
     // Update mesh vertex data in GPU for a specific buffer index
-    void UpdateMeshBuffer(Mesh mesh, int index, const void* data, int dataSize, int offset)
+    void sgUpdateMeshBuffer(Mesh mesh, int index, const void* data, int dataSize, int offset)
     {
         rlUpdateVertexBuffer(mesh.vboId[index], data, dataSize, offset);
     }
 
-    // Draw a 3d mesh with material and transform
-    void DrawMesh(Mesh mesh, Material material, Matrix transform)
-    {
-#if defined(GRAPHICS_API_OPENGL_11)
-#define GL_VERTEX_ARRAY 0x8074
-#define GL_NORMAL_ARRAY 0x8075
-#define GL_COLOR_ARRAY 0x8076
-#define GL_TEXTURE_COORD_ARRAY 0x8078
-
-        rlEnableTexture(material.maps[MATERIAL_MAP_DIFFUSE].texture.id);
-
-        rlEnableStatePointer(GL_VERTEX_ARRAY, mesh.vertices);
-        rlEnableStatePointer(GL_TEXTURE_COORD_ARRAY, mesh.texcoords);
-        rlEnableStatePointer(GL_NORMAL_ARRAY, mesh.normals);
-        rlEnableStatePointer(GL_COLOR_ARRAY, mesh.colors);
-
-        rlPushMatrix();
-        rlMultMatrixf(MatrixToFloat(transform));
-        rlColor4ub(
-            material.maps[MATERIAL_MAP_DIFFUSE].color.r,
-            material.maps[MATERIAL_MAP_DIFFUSE].color.g,
-            material.maps[MATERIAL_MAP_DIFFUSE].color.b,
-            material.maps[MATERIAL_MAP_DIFFUSE].color.a);
-
-        if (mesh.indices != nullptr)
-            rlDrawVertexArrayElements(0, mesh.triangleCount * 3, mesh.indices);
-        else
-            rlDrawVertexArray(0, mesh.vertexCount);
-        rlPopMatrix();
-
-        rlDisableStatePointer(GL_VERTEX_ARRAY);
-        rlDisableStatePointer(GL_TEXTURE_COORD_ARRAY);
-        rlDisableStatePointer(GL_NORMAL_ARRAY);
-        rlDisableStatePointer(GL_COLOR_ARRAY);
-
-        rlDisableTexture();
-#endif
-
-#if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
-        // Bind shader program
-        rlEnableShader(material.shader.id);
-
-        // Send required data to shader (matrices, values)
-        //-----------------------------------------------------
-        // Upload to shader material.colDiffuse
-        if (material.shader.locs[SHADER_LOC_COLOR_DIFFUSE] != -1)
-        {
-            float values[4] = {
-                (float)material.maps[MATERIAL_MAP_DIFFUSE].color.r / 255.0f,
-                (float)material.maps[MATERIAL_MAP_DIFFUSE].color.g / 255.0f,
-                (float)material.maps[MATERIAL_MAP_DIFFUSE].color.b / 255.0f,
-                (float)material.maps[MATERIAL_MAP_DIFFUSE].color.a / 255.0f};
-
-            rlSetUniform(material.shader.locs[SHADER_LOC_COLOR_DIFFUSE], values, SHADER_UNIFORM_VEC4, 1);
-        }
-
-        // Upload to shader material.colSpecular (if location available)
-        if (material.shader.locs[SHADER_LOC_COLOR_SPECULAR] != -1)
-        {
-            float values[4] = {
-                static_cast<float>(material.maps[MATERIAL_MAP_SPECULAR].color.r) / 255.0f,
-                static_cast<float>(material.maps[MATERIAL_MAP_SPECULAR].color.g) / 255.0f,
-                static_cast<float>(material.maps[MATERIAL_MAP_SPECULAR].color.b) / 255.0f,
-                static_cast<float>(material.maps[MATERIAL_MAP_SPECULAR].color.a) / 255.0f};
-
-            rlSetUniform(material.shader.locs[SHADER_LOC_COLOR_SPECULAR], values, SHADER_UNIFORM_VEC4, 1);
-        }
-
-        // Get a copy of current matrices to work with,
-        // just in case stereo render is required, and we need to modify them
-        // NOTE: At this point the modelview matrix just contains the view matrix (camera)
-        // That's because BeginMode3D() sets it and there is no model-drawing function
-        // that modifies it, all use rlPushMatrix() and rlPopMatrix()
-        Matrix matModel = MatrixIdentity();
-        Matrix matView = rlGetMatrixModelview();
-        Matrix matModelView = MatrixIdentity();
-        Matrix matProjection = rlGetMatrixProjection();
-
-        // Upload view and projection matrices (if locations available)
-        if (material.shader.locs[SHADER_LOC_MATRIX_VIEW] != -1)
-            rlSetUniformMatrix(material.shader.locs[SHADER_LOC_MATRIX_VIEW], matView);
-        if (material.shader.locs[SHADER_LOC_MATRIX_PROJECTION] != -1)
-            rlSetUniformMatrix(material.shader.locs[SHADER_LOC_MATRIX_PROJECTION], matProjection);
-
-        // Accumulate several model transformations:
-        //    transform: model transformation provided (includes DrawModel() params combined with model.transform)
-        //    rlGetMatrixTransform(): rlgl internal transform matrix due to push/pop matrix stack
-        matModel = MatrixMultiply(transform, rlGetMatrixTransform());
-
-        // Model transformation matrix is sent to shader uniform location: SHADER_LOC_MATRIX_MODEL
-        if (material.shader.locs[SHADER_LOC_MATRIX_MODEL] != -1)
-            rlSetUniformMatrix(material.shader.locs[SHADER_LOC_MATRIX_MODEL], matModel);
-
-        // Get model-view matrix
-        matModelView = MatrixMultiply(matModel, matView);
-
-        // Upload model normal matrix (if locations available)
-        if (material.shader.locs[SHADER_LOC_MATRIX_NORMAL] != -1)
-            rlSetUniformMatrix(
-                material.shader.locs[SHADER_LOC_MATRIX_NORMAL], MatrixTranspose(MatrixInvert(matModel)));
-
-#ifdef RL_SUPPORT_MESH_GPU_SKINNING
-        // Upload Bone Transforms
-        if ((material.shader.locs[SHADER_LOC_BONE_MATRICES] != -1) && mesh.boneMatrices)
-        {
-            rlSetUniformMatrices(
-                material.shader.locs[SHADER_LOC_BONE_MATRICES], mesh.boneMatrices, mesh.boneCount);
-        }
-#endif
-        //-----------------------------------------------------
-
-        // Bind active texture maps (if available)
-        for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
-        {
-            if (material.maps[i].texture.id > 0)
-            {
-                // Select current shader texture slot
-                rlActiveTextureSlot(i);
-
-                // Enable texture for active slot
-                if ((i == MATERIAL_MAP_IRRADIANCE) || (i == MATERIAL_MAP_PREFILTER) || (i == MATERIAL_MAP_CUBEMAP))
-                    rlEnableTextureCubemap(material.maps[i].texture.id);
-                else
-                    rlEnableTexture(material.maps[i].texture.id);
-
-                rlSetUniform(material.shader.locs[SHADER_LOC_MAP_DIFFUSE + i], &i, SHADER_UNIFORM_INT, 1);
-            }
-        }
-
-        // Try binding vertex array objects (VAO) or use VBOs if not possible
-        // WARNING: UploadMesh() enables all vertex attributes available in mesh and sets default attribute values
-        // for shader expected vertex attributes that are not provided by the mesh (i.e. colors)
-        // This could be a dangerous approach because different meshes with different shaders can enable/disable
-        // some attributes
-        if (!rlEnableVertexArray(mesh.vaoId))
-        {
-            // Bind mesh VBO data: vertex position (shader-location = 0)
-            rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_POSITION]);
-            rlSetVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_POSITION], 3, RL_FLOAT, 0, 0, 0);
-            rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_POSITION]);
-
-            // Bind mesh VBO data: vertex texcoords (shader-location = 1)
-            rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD]);
-            rlSetVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_TEXCOORD01], 2, RL_FLOAT, 0, 0, 0);
-            rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_TEXCOORD01]);
-
-            if (material.shader.locs[SHADER_LOC_VERTEX_NORMAL] != -1)
-            {
-                // Bind mesh VBO data: vertex normals (shader-location = 2)
-                rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_NORMAL]);
-                rlSetVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_NORMAL], 3, RL_FLOAT, 0, 0, 0);
-                rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_NORMAL]);
-            }
-
-            // Bind mesh VBO data: vertex colors (shader-location = 3, if available)
-            if (material.shader.locs[SHADER_LOC_VERTEX_COLOR] != -1)
-            {
-                if (mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR] != 0)
-                {
-                    rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_COLOR]);
-                    rlSetVertexAttribute(
-                        material.shader.locs[SHADER_LOC_VERTEX_COLOR], 4, RL_UNSIGNED_BYTE, 1, 0, 0);
-                    rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_COLOR]);
-                }
-                else
-                {
-                    // Set default value for defined vertex attribute in shader but not provided by mesh
-                    // WARNING: It could result in GPU undefined behaviour
-                    float value[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-                    rlSetVertexAttributeDefault(
-                        material.shader.locs[SHADER_LOC_VERTEX_COLOR], value, SHADER_ATTRIB_VEC4, 4);
-                    rlDisableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_COLOR]);
-                }
-            }
-
-            // Bind mesh VBO data: vertex tangents (shader-location = 4, if available)
-            if (material.shader.locs[SHADER_LOC_VERTEX_TANGENT] != -1)
-            {
-                rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TANGENT]);
-                rlSetVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_TANGENT], 4, RL_FLOAT, 0, 0, 0);
-                rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_TANGENT]);
-            }
-
-            // Bind mesh VBO data: vertex texcoords2 (shader-location = 5, if available)
-            if (material.shader.locs[SHADER_LOC_VERTEX_TEXCOORD02] != -1)
-            {
-                rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_TEXCOORD2]);
-                rlSetVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_TEXCOORD02], 2, RL_FLOAT, 0, 0, 0);
-                rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_TEXCOORD02]);
-            }
-
-#ifdef RL_SUPPORT_MESH_GPU_SKINNING
-            // Bind mesh VBO data: vertex bone ids (shader-location = 6, if available)
-            if (material.shader.locs[SHADER_LOC_VERTEX_BONEIDS] != -1)
-            {
-                rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEIDS]);
-                rlSetVertexAttribute(
-                    material.shader.locs[SHADER_LOC_VERTEX_BONEIDS], 4, RL_UNSIGNED_BYTE, 0, 0, 0);
-                rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_BONEIDS]);
-            }
-
-            // Bind mesh VBO data: vertex bone weights (shader-location = 7, if available)
-            if (material.shader.locs[SHADER_LOC_VERTEX_BONEWEIGHTS] != -1)
-            {
-                rlEnableVertexBuffer(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_BONEWEIGHTS]);
-                rlSetVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_BONEWEIGHTS], 4, RL_FLOAT, 0, 0, 0);
-                rlEnableVertexAttribute(material.shader.locs[SHADER_LOC_VERTEX_BONEWEIGHTS]);
-            }
-#endif
-
-            if (mesh.indices != nullptr)
-                rlEnableVertexBufferElement(mesh.vboId[RL_DEFAULT_SHADER_ATTRIB_LOCATION_INDICES]);
-        }
-
-        int eyeCount = 1;
-        if (rlIsStereoRenderEnabled()) eyeCount = 2;
-
-        for (int eye = 0; eye < eyeCount; eye++)
-        {
-            // Calculate model-view-projection matrix (MVP)
-            Matrix matModelViewProjection = MatrixIdentity();
-            if (eyeCount == 1)
-                matModelViewProjection = MatrixMultiply(matModelView, matProjection);
-            else
-            {
-                // Setup current eye viewport (half screen width)
-                rlViewport(
-                    eye * rlGetFramebufferWidth() / 2, 0, rlGetFramebufferWidth() / 2, rlGetFramebufferHeight());
-                matModelViewProjection = MatrixMultiply(
-                    MatrixMultiply(matModelView, rlGetMatrixViewOffsetStereo(eye)),
-                    rlGetMatrixProjectionStereo(eye));
-            }
-
-            // Send combined model-view-projection matrix to shader
-            rlSetUniformMatrix(material.shader.locs[SHADER_LOC_MATRIX_MVP], matModelViewProjection);
-
-            // Draw mesh
-            if (mesh.indices != nullptr)
-                rlDrawVertexArrayElements(0, mesh.triangleCount * 3, nullptr);
-            else
-                rlDrawVertexArray(0, mesh.vertexCount);
-        }
-
-        // Unbind all bound texture maps
-        for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
-        {
-            if (material.maps[i].texture.id > 0)
-            {
-                // Select current shader texture slot
-                rlActiveTextureSlot(i);
-
-                // Disable texture for active slot
-                if ((i == MATERIAL_MAP_IRRADIANCE) || (i == MATERIAL_MAP_PREFILTER) || (i == MATERIAL_MAP_CUBEMAP))
-                    rlDisableTextureCubemap();
-                else
-                    rlDisableTexture();
-            }
-        }
-
-        // Disable all possible vertex array objects (or VBOs)
-        rlDisableVertexArray();
-        rlDisableVertexBuffer();
-        rlDisableVertexBufferElement();
-
-        // Disable shader program
-        rlDisableShader();
-
-        // Restore rlgl internal modelview and projection matrices
-        rlSetMatrixModelview(matView);
-        rlSetMatrixProjection(matProjection);
-#endif
-    }
-
 #if defined(SUPPORT_FILEFORMAT_OBJ) || defined(SUPPORT_FILEFORMAT_MTL)
     // Process obj materials
-    static void ProcessMaterialsOBJ(
+    static void sgProcessMaterialsOBJ(
         Material* materials, const std::vector<tinyobj::material_t>& mats, const std::string& path)
     {
         // Init model mats
@@ -763,13 +401,13 @@ namespace sage::model
             // Get default texture, in case no texture is defined
             // NOTE: rlgl default texture is a 1x1 pixel UNCOMPRESSED_R8G8B8A8
             materials[m].maps[MATERIAL_MAP_DIFFUSE].texture =
-                (Texture2D){rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+                Texture2D{rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 
             if (!mats[m].diffuse_texname.empty())
                 materials[m].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(
                     std::string(path + mats[m].diffuse_texname).c_str()); // char *diffuse_texname; // map_Kd
             else
-                materials[m].maps[MATERIAL_MAP_DIFFUSE].color = (Color){
+                materials[m].maps[MATERIAL_MAP_DIFFUSE].color = Color{
                     static_cast<unsigned char>(mats[m].diffuse[0] * 255.0f),
                     static_cast<unsigned char>(mats[m].diffuse[1] * 255.0f),
                     static_cast<unsigned char>(mats[m].diffuse[2] * 255.0f),
@@ -779,7 +417,7 @@ namespace sage::model
             if (!mats[m].specular_texname.empty())
                 materials[m].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture(
                     std::string(path + mats[m].specular_texname).c_str()); // char *specular_texname; // map_Ks
-            materials[m].maps[MATERIAL_MAP_SPECULAR].color = (Color){
+            materials[m].maps[MATERIAL_MAP_SPECULAR].color = Color{
                 static_cast<unsigned char>(mats[m].specular[0] * 255.0f),
                 static_cast<unsigned char>(mats[m].specular[1] * 255.0f),
                 static_cast<unsigned char>(mats[m].specular[2] * 255.0f),
@@ -798,7 +436,7 @@ namespace sage::model
                     std::string(path + mats[m].emissive_texname).c_str()); // char *emissive_texname; // map_Ke
             }
 
-            materials[m].maps[MATERIAL_MAP_EMISSION].color = (Color){
+            materials[m].maps[MATERIAL_MAP_EMISSION].color = Color{
                 static_cast<unsigned char>(mats[m].emission[0] * 255.0f),
                 static_cast<unsigned char>(mats[m].emission[1] * 255.0f),
                 static_cast<unsigned char>(mats[m].emission[2] * 255.0f),
@@ -813,7 +451,7 @@ namespace sage::model
 #endif
 
     // Check if a material is valid (map textures loaded in GPU)
-    bool IsMaterialValid(Material material)
+    bool sgIsMaterialValid(Material material)
     {
         bool result = false;
 
@@ -828,13 +466,13 @@ namespace sage::model
 
     // Set texture for a material map type (MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_SPECULAR...)
     // NOTE: Previous texture should be manually unloaded
-    void SetMaterialTexture(Material* material, int mapType, Texture2D texture)
+    void sgSetMaterialTexture(Material* material, int mapType, Texture2D texture)
     {
         material->maps[mapType].texture = texture;
     }
 
     // Set the material for a mesh
-    void SetModelMeshMaterial(Model* model, int meshId, int materialId)
+    void sgSetModelMeshMaterial(Model* model, int meshId, int materialId)
     {
         if (meshId >= model->meshCount)
             TRACELOG(LOG_WARNING, "MESH: Id greater than mesh count");
@@ -845,12 +483,12 @@ namespace sage::model
     }
 
     // Load model animations from file
-    ModelAnimation* LoadModelAnimations(const char* fileName, int* animCount)
+    ModelAnimation* sgLoadModelAnimations(const char* fileName, int* animCount)
     {
         ModelAnimation* animations = nullptr;
 
 #if defined(SUPPORT_FILEFORMAT_GLTF)
-        if (IsFileExtension(fileName, ".gltf;.glb")) animations = LoadModelAnimationsGLTF(fileName, animCount);
+        if (IsFileExtension(fileName, ".gltf;.glb")) animations = sgLoadModelAnimationsGLTF(fileName, animCount);
 #endif
 
         return animations;
@@ -859,7 +497,7 @@ namespace sage::model
     // Update model animated bones transform matrices for a given frame
     // NOTE: Updated data is not uploaded to GPU but kept at model.meshes[i].boneMatrices[boneId],
     // to be uploaded to shader at drawing, in case GPU skinning is enabled
-    void UpdateModelAnimationBones(Model model, ModelAnimation anim, int frame)
+    void sgUpdateModelAnimationBones(Model model, ModelAnimation anim, int frame)
     {
         if ((anim.frameCount > 0) && (anim.bones != nullptr) && (anim.framePoses != nullptr))
         {
@@ -884,7 +522,7 @@ namespace sage::model
                         Vector3 invTranslation =
                             Vector3RotateByQuaternion(Vector3Negate(inTranslation), QuaternionInvert(inRotation));
                         Quaternion invRotation = QuaternionInvert(inRotation);
-                        Vector3 invScale = Vector3Divide((Vector3){1.0f, 1.0f, 1.0f}, inScale);
+                        Vector3 invScale = Vector3Divide(Vector3{1.0f, 1.0f, 1.0f}, inScale);
 
                         Vector3 boneTranslation = Vector3Add(
                             Vector3RotateByQuaternion(Vector3Multiply(outScale, invTranslation), outRotation),
@@ -911,7 +549,7 @@ namespace sage::model
 #if defined(SUPPORT_FILEFORMAT_IQM) || defined(SUPPORT_FILEFORMAT_GLTF)
     // Build pose from parent joints
     // NOTE: Required for animations loading (required by IQM and GLTF)
-    static void BuildPoseFromParentJoints(BoneInfo* bones, int boneCount, Transform* transforms)
+    static void sgBuildPoseFromParentJoints(BoneInfo* bones, int boneCount, Transform* transforms)
     {
         for (int i = 0; i < boneCount; i++)
         {
@@ -945,7 +583,7 @@ namespace sage::model
     //  - A mesh is created for every material present in the obj file
     //  - the model.meshCount is therefore the materialCount returned from tinyobj
     //  - the mesh is automatically triangulated by tinyobj
-    static Model LoadOBJ(const char* fileName)
+    static Model sgLoadOBJ(const char* fileName)
     {
         Model model{};
         model.transform = MatrixIdentity();
@@ -1049,7 +687,7 @@ namespace sage::model
         // Process materials
         if (!materials.empty())
         {
-            ProcessMaterialsOBJ(model.materials, materials, path);
+            sgProcessMaterialsOBJ(model.materials, materials, path);
         }
         else
         {
@@ -1059,7 +697,7 @@ namespace sage::model
         // Upload mesh data to GPU
         for (int i = 0; i < model.meshCount; i++)
         {
-            raylib::UploadMesh(&model.meshes[i], true);
+            UploadMesh(&model.meshes[i], true);
         }
 
         return model;
@@ -1068,7 +706,7 @@ namespace sage::model
 
 #if defined(SUPPORT_FILEFORMAT_GLTF)
     // Load file data callback for cgltf
-    static cgltf_result LoadFileGLTFCallback(
+    static cgltf_result sgLoadFileGLTFCallback(
         const struct cgltf_memory_options* memoryOptions,
         const struct cgltf_file_options* fileOptions,
         const char* path,
@@ -1087,14 +725,14 @@ namespace sage::model
     }
 
     // Release file data callback for cgltf
-    static void ReleaseFileGLTFCallback(
+    static void sgReleaseFileGLTFCallback(
         const struct cgltf_memory_options* memoryOptions, const struct cgltf_file_options* fileOptions, void* data)
     {
         UnloadFileData((unsigned char*)data);
     }
 
     // Load image from different glTF provided methods (uri, path, buffer_view)
-    static Image LoadImageFromCgltfImage(cgltf_image* cgltfImage, const char* texPath)
+    static Image sgLoadImageFromCgltfImage(cgltf_image* cgltfImage, const char* texPath)
     {
         Image image{};
 
@@ -1125,8 +763,8 @@ namespace sage::model
                     void* data = nullptr;
 
                     cgltf_options options{};
-                    options.file.read = LoadFileGLTFCallback;
-                    options.file.release = ReleaseFileGLTFCallback;
+                    options.file.read = sgLoadFileGLTFCallback;
+                    options.file.release = sgReleaseFileGLTFCallback;
                     cgltf_result result =
                         cgltf_load_buffer_base64(&options, outSize, cgltfImage->uri + i + 1, &data);
 
@@ -1177,7 +815,7 @@ namespace sage::model
     }
 
     // Load bone info from GLTF skin data
-    static BoneInfo* LoadBoneInfoGLTF(cgltf_skin skin, int* boneCount)
+    static BoneInfo* sgLoadBoneInfoGLTF(cgltf_skin skin, int* boneCount)
     {
         *boneCount = (int)skin.joints_count;
         auto bones = (BoneInfo*)RL_MALLOC(skin.joints_count * sizeof(BoneInfo));
@@ -1210,7 +848,7 @@ namespace sage::model
     }
 
     // Load glTF file into model struct, .gltf and .glb supported
-    static Model LoadGLTF(const char* fileName)
+    static Model sgLoadGLTF(const char* fileName)
     {
         /*********************************************************************************************
 
@@ -1272,8 +910,8 @@ namespace sage::model
 
         // glTF data loading
         cgltf_options options{};
-        options.file.read = LoadFileGLTFCallback;
-        options.file.release = ReleaseFileGLTFCallback;
+        options.file.read = sgLoadFileGLTFCallback;
+        options.file.release = sgReleaseFileGLTFCallback;
         cgltf_data* data = nullptr;
         cgltf_result result = cgltf_parse(&options, fileData, dataSize, &data);
 
@@ -1341,7 +979,7 @@ namespace sage::model
                     // Load base color texture (albedo)
                     if (data->materials[i].pbr_metallic_roughness.base_color_texture.texture)
                     {
-                        Image imAlbedo = LoadImageFromCgltfImage(
+                        Image imAlbedo = sgLoadImageFromCgltfImage(
                             data->materials[i].pbr_metallic_roughness.base_color_texture.texture->image, texPath);
                         if (imAlbedo.data != nullptr)
                         {
@@ -1362,7 +1000,7 @@ namespace sage::model
                     // Load metallic/roughness texture
                     if (data->materials[i].pbr_metallic_roughness.metallic_roughness_texture.texture)
                     {
-                        Image imMetallicRoughness = LoadImageFromCgltfImage(
+                        Image imMetallicRoughness = sgLoadImageFromCgltfImage(
                             data->materials[i].pbr_metallic_roughness.metallic_roughness_texture.texture->image,
                             texPath);
                         if (imMetallicRoughness.data != nullptr)
@@ -1384,7 +1022,7 @@ namespace sage::model
                     if (data->materials[i].normal_texture.texture)
                     {
                         Image imNormal =
-                            LoadImageFromCgltfImage(data->materials[i].normal_texture.texture->image, texPath);
+                            sgLoadImageFromCgltfImage(data->materials[i].normal_texture.texture->image, texPath);
                         if (imNormal.data != nullptr)
                         {
                             model.materials[j].maps[MATERIAL_MAP_NORMAL].texture = LoadTextureFromImage(imNormal);
@@ -1395,8 +1033,8 @@ namespace sage::model
                     // Load ambient occlusion texture
                     if (data->materials[i].occlusion_texture.texture)
                     {
-                        Image imOcclusion =
-                            LoadImageFromCgltfImage(data->materials[i].occlusion_texture.texture->image, texPath);
+                        Image imOcclusion = sgLoadImageFromCgltfImage(
+                            data->materials[i].occlusion_texture.texture->image, texPath);
                         if (imOcclusion.data != nullptr)
                         {
                             model.materials[j].maps[MATERIAL_MAP_OCCLUSION].texture =
@@ -1409,7 +1047,7 @@ namespace sage::model
                     if (data->materials[i].emissive_texture.texture)
                     {
                         Image imEmissive =
-                            LoadImageFromCgltfImage(data->materials[i].emissive_texture.texture->image, texPath);
+                            sgLoadImageFromCgltfImage(data->materials[i].emissive_texture.texture->image, texPath);
                         if (imEmissive.data != nullptr)
                         {
                             model.materials[j].maps[MATERIAL_MAP_EMISSION].texture =
@@ -1508,7 +1146,7 @@ namespace sage::model
                                 for (unsigned int k = 0; k < attribute->count; k++)
                                 {
                                     Vector3 vt = Vector3Transform(
-                                        (Vector3){vertices[3 * k], vertices[3 * k + 1], vertices[3 * k + 2]},
+                                        Vector3{vertices[3 * k], vertices[3 * k + 1], vertices[3 * k + 2]},
                                         worldMatrix);
                                     vertices[3 * k] = vt.x;
                                     vertices[3 * k + 1] = vt.y;
@@ -1542,7 +1180,7 @@ namespace sage::model
                                 for (unsigned int k = 0; k < attribute->count; k++)
                                 {
                                     Vector3 nt = Vector3Transform(
-                                        (Vector3){normals[3 * k], normals[3 * k + 1], normals[3 * k + 2]},
+                                        Vector3{normals[3 * k], normals[3 * k + 1], normals[3 * k + 2]},
                                         worldMatrixNormals);
                                     normals[3 * k] = nt.x;
                                     normals[3 * k + 1] = nt.y;
@@ -1577,7 +1215,7 @@ namespace sage::model
                                 for (unsigned int k = 0; k < attribute->count; k++)
                                 {
                                     Vector3 tt = Vector3Transform(
-                                        (Vector3){tangents[3 * k], tangents[3 * k + 1], tangents[3 * k + 2]},
+                                        Vector3{tangents[3 * k], tangents[3 * k + 1], tangents[3 * k + 2]},
                                         worldMatrix);
                                     tangents[3 * k] = tt.x;
                                     tangents[3 * k + 1] = tt.y;
@@ -1650,7 +1288,8 @@ namespace sage::model
                             else
                                 TRACELOG(
                                     LOG_WARNING,
-                                    "MODEL: [%s] Texcoords attribute data format not supported, use vec2 float",
+                                    "MODEL: [%s] Texcoords attribute data format not supported, use vec2 "
+                                    "float",
                                     fileName);
 
                             int index = mesh->primitives[p].attributes[j].index;
@@ -1673,8 +1312,8 @@ namespace sage::model
                         {
                             cgltf_accessor* attribute = mesh->primitives[p].attributes[j].data;
 
-                            // WARNING: SPECS: All components of each COLOR_n accessor element MUST be clamped to
-                            // [0.0, 1.0] range
+                            // WARNING: SPECS: All components of each COLOR_n accessor element MUST be clamped
+                            // to [0.0, 1.0] range
 
                             if (attribute->type == cgltf_type_vec3) // RGB
                             {
@@ -1793,8 +1432,8 @@ namespace sage::model
                                     auto* temp = (float*)RL_MALLOC(attribute->count * 4 * sizeof(float));
                                     LOAD_ATTRIBUTE(attribute, 4, float, temp);
 
-                                    // Convert data to raylib color data type (4 bytes), we expect the color data
-                                    // normalized
+                                    // Convert data to raylib color data type (4 bytes), we expect the color
+                                    // data normalized
                                     for (unsigned int c = 0; c < attribute->count * 4; c++)
                                         model.meshes[meshIndex].colors[c] = (unsigned char)(temp[c] * 255.0f);
 
@@ -1868,9 +1507,9 @@ namespace sage::model
                     for (unsigned int m = 0; m < data->materials_count; m++)
                     {
                         // The primitive actually keeps the pointer to the corresponding material,
-                        // raylib instead assigns to the mesh the by its index, as loaded in model.materials array
-                        // To get the index, we check if material pointers match, and we assign the corresponding
-                        // index, skipping index 0, the default material
+                        // raylib instead assigns to the mesh the by its index, as loaded in model.materials
+                        // array To get the index, we check if material pointers match, and we assign the
+                        // corresponding index, skipping index 0, the default material
                         if (&data->materials[m] == mesh->primitives[p].material)
                         {
                             model.meshMaterial[meshIndex] = m + 1;
@@ -1896,7 +1535,7 @@ namespace sage::model
             if (data->skins_count > 0)
             {
                 cgltf_skin skin = data->skins[0];
-                model.bones = LoadBoneInfoGLTF(skin, &model.boneCount);
+                model.bones = sgLoadBoneInfoGLTF(skin, &model.boneCount);
                 model.bindPose = (Transform*)RL_MALLOC(model.boneCount * sizeof(Transform));
 
                 for (int i = 0; i < model.boneCount; i++)
@@ -2079,14 +1718,16 @@ namespace sage::model
                                 else
                                     TRACELOG(
                                         LOG_WARNING,
-                                        "MODEL: [%s] Joint weight attribute data format not supported, use vec4 "
+                                        "MODEL: [%s] Joint weight attribute data format not supported, use "
+                                        "vec4 "
                                         "float",
                                         fileName);
                             }
                             else
                                 TRACELOG(
                                     LOG_WARNING,
-                                    "MODEL: [%s] Joint weight attribute data format not supported, use vec4 float",
+                                    "MODEL: [%s] Joint weight attribute data format not supported, use vec4 "
+                                    "float",
                                     fileName);
                         }
                     }
@@ -2135,7 +1776,7 @@ namespace sage::model
     }
 
     // Get interpolated pose for bone sampler at a specific time. Returns true on success
-    static bool GetPoseAtTimeGLTF(
+    static bool sgGetPoseAtTimeGLTF(
         cgltf_interpolation_type interpolationType,
         cgltf_accessor* input,
         cgltf_accessor* output,
@@ -2278,7 +1919,7 @@ namespace sage::model
 
 #define GLTF_ANIMDELAY 17 // Animation frames delay, (~1000 ms/60 FPS = 16.666666* ms)
 
-    static ModelAnimation* LoadModelAnimationsGLTF(const char* fileName, int* animCount)
+    static ModelAnimation* sgLoadModelAnimationsGLTF(const char* fileName, int* animCount)
     {
         // glTF file loading
         int dataSize = 0;
@@ -2288,8 +1929,8 @@ namespace sage::model
 
         // glTF data loading
         cgltf_options options{};
-        options.file.read = LoadFileGLTFCallback;
-        options.file.release = ReleaseFileGLTFCallback;
+        options.file.read = sgLoadFileGLTFCallback;
+        options.file.release = sgReleaseFileGLTFCallback;
         cgltf_data* data = nullptr;
         cgltf_result result = cgltf_parse(&options, fileData, dataSize, &data);
 
@@ -2314,7 +1955,7 @@ namespace sage::model
 
                 for (unsigned int i = 0; i < data->animations_count; i++)
                 {
-                    animations[i].bones = LoadBoneInfoGLTF(skin, &animations[i].boneCount);
+                    animations[i].bones = sgLoadBoneInfoGLTF(skin, &animations[i].boneCount);
 
                     cgltf_animation animData = data->animations[i];
 
@@ -2369,7 +2010,8 @@ namespace sage::model
                             {
                                 TRACELOG(
                                     LOG_WARNING,
-                                    "MODEL: [%s] Unsupported target_path on channel %d's sampler for animation "
+                                    "MODEL: [%s] Unsupported target_path on channel %d's sampler for "
+                                    "animation "
                                     "%d. Skipping.",
                                     fileName,
                                     j,
@@ -2427,7 +2069,7 @@ namespace sage::model
 
                             if (boneChannels[k].translate)
                             {
-                                if (!GetPoseAtTimeGLTF(
+                                if (!sgGetPoseAtTimeGLTF(
                                         boneChannels[k].interpolationType,
                                         boneChannels[k].translate->sampler->input,
                                         boneChannels[k].translate->sampler->output,
@@ -2444,7 +2086,7 @@ namespace sage::model
 
                             if (boneChannels[k].rotate)
                             {
-                                if (!GetPoseAtTimeGLTF(
+                                if (!sgGetPoseAtTimeGLTF(
                                         boneChannels[k].interpolationType,
                                         boneChannels[k].rotate->sampler->input,
                                         boneChannels[k].rotate->sampler->output,
@@ -2461,7 +2103,7 @@ namespace sage::model
 
                             if (boneChannels[k].scale)
                             {
-                                if (!GetPoseAtTimeGLTF(
+                                if (!sgGetPoseAtTimeGLTF(
                                         boneChannels[k].interpolationType,
                                         boneChannels[k].scale->sampler->input,
                                         boneChannels[k].scale->sampler->output,
@@ -2477,10 +2119,10 @@ namespace sage::model
                             }
 
                             animations[i].framePoses[j][k] =
-                                (Transform){.translation = translation, .rotation = rotation, .scale = scale};
+                                Transform{.translation = translation, .rotation = rotation, .scale = scale};
                         }
 
-                        BuildPoseFromParentJoints(
+                        sgBuildPoseFromParentJoints(
                             animations[i].bones, animations[i].boneCount, animations[i].framePoses[j]);
                     }
 

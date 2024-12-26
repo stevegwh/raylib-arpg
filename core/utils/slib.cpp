@@ -101,13 +101,20 @@ namespace sage
         return rlmodel.meshes[num];
     }
 
-    BoundingBox ModelSafe::CalcLocalMeshBoundingBox(const Mesh& mesh) const
+    BoundingBox ModelSafe::CalcLocalMeshBoundingBox(const Mesh& mesh, bool& success) const
     {
+        success = true;
         std::vector<float> vertices(mesh.vertices, mesh.vertices + mesh.vertexCount * 3);
 
         BoundingBox bb;
         bb.min = {0, 0, 0};
         bb.max = {0, 0, 0};
+
+        if (mesh.vertexCount < 3)
+        {
+            success = false;
+            return bb;
+        }
 
         {
             float x = vertices[0];
@@ -145,32 +152,34 @@ namespace sage
     {
         assert(rlmodel.meshCount > 0);
 
-        BoundingBox bb;
-        bb.min = {0, 0, 0};
-        bb.max = {0, 0, 0};
+        std::optional<BoundingBox> bb;
 
         for (size_t i = 0; i < rlmodel.meshCount; ++i)
         {
-            auto currentBB = CalcLocalMeshBoundingBox(rlmodel.meshes[i]);
+            bool success = false;
+            auto currentBB = CalcLocalMeshBoundingBox(rlmodel.meshes[i], success);
+            if (!success) continue;
 
-            if (i == 0)
+            if (!bb.has_value())
             {
                 bb = currentBB;
                 continue;
             }
 
-            bb.min = {
-                std::min(bb.min.x, currentBB.min.x),
-                std::min(bb.min.y, currentBB.min.y),
-                std::min(bb.min.z, currentBB.min.z)};
+            bb->min = {
+                std::min(bb->min.x, currentBB.min.x),
+                std::min(bb->min.y, currentBB.min.y),
+                std::min(bb->min.z, currentBB.min.z)};
 
-            bb.max = {
-                std::max(bb.max.x, currentBB.max.x),
-                std::max(bb.max.y, currentBB.max.y),
-                std::max(bb.max.z, currentBB.max.z)};
+            bb->max = {
+                std::max(bb->max.x, currentBB.max.x),
+                std::max(bb->max.y, currentBB.max.y),
+                std::max(bb->max.z, currentBB.max.z)};
         }
 
-        return bb;
+        assert(bb.has_value());
+
+        return *bb;
     }
 
     RayCollision ModelSafe::GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const

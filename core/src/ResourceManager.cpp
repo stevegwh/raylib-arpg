@@ -6,13 +6,13 @@
 
 #include "AssetManager.hpp"
 #include "components/Renderable.hpp"
+#include "Slibmodel.hpp"
 
 #include "raylib/src/config.h"
 #include "raymath.h"
 #include "rlgl.h"
 #define STB_INCLUDE_IMPLEMENTATION
 #define STB_INCLUDE_LINE_NONE
-#include "Slibmodel.hpp"
 
 #include <stb_include.h>
 
@@ -358,7 +358,7 @@ namespace sage
             // This might not be a big deal, if we limit "EmplaceModel" to only be used when constructing the map
             // binary. If the goblin (etc) mesh is archived in the binary, then EmplaceModel will never need to be
             // called at runtime.
-            modelCereal.model = LoadModel(path.c_str());
+            modelCereal.model = sgLoadModel(path.c_str());
 
             modelCereal.key = path;
 

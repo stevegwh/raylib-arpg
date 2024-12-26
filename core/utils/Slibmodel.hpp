@@ -4,13 +4,9 @@
 
 #pragma once
 
-namespace raylib
-{
-#include "raylib.h" // Declares module functions
-}
-using namespace raylib;
+struct Model;
 
-namespace sage::model
+namespace sage
 {
-    Model LoadModel(const char* fileName);
-} // namespace sage::model
+    Model sgLoadModel(const char* fileName);
+} // namespace sage
