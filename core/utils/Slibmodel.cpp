@@ -35,6 +35,7 @@
 #define CGLTF_FREE RL_FREE
 
 #include "external/cgltf.h" // glTF file format loading
+#include "ResourceManager.hpp"
 #endif
 
 namespace sage
@@ -404,8 +405,9 @@ namespace sage
                 Texture2D{rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 
             if (!mats[m].diffuse_texname.empty())
-                materials[m].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture(
-                    std::string(path + mats[m].diffuse_texname).c_str()); // char *diffuse_texname; // map_Kd
+                materials[m].maps[MATERIAL_MAP_DIFFUSE].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].diffuse_texname,
+                    std::string(path + mats[m].diffuse_texname)); // char *diffuse_texname; // map_Kd
             else
                 materials[m].maps[MATERIAL_MAP_DIFFUSE].color = Color{
                     static_cast<unsigned char>(mats[m].diffuse[0] * 255.0f),
@@ -415,8 +417,11 @@ namespace sage
             materials[m].maps[MATERIAL_MAP_DIFFUSE].value = 0.0f;
 
             if (!mats[m].specular_texname.empty())
-                materials[m].maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture(
-                    std::string(path + mats[m].specular_texname).c_str()); // char *specular_texname; // map_Ks
+            {
+                materials[m].maps[MATERIAL_MAP_SPECULAR].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].specular_texname,
+                    std::string(path + mats[m].specular_texname)); // char *specular_texname; // map_Ks
+            }
             materials[m].maps[MATERIAL_MAP_SPECULAR].color = Color{
                 static_cast<unsigned char>(mats[m].specular[0] * 255.0f),
                 static_cast<unsigned char>(mats[m].specular[1] * 255.0f),
@@ -425,17 +430,20 @@ namespace sage
             materials[m].maps[MATERIAL_MAP_SPECULAR].value = 0.0f;
 
             if (!mats[m].bump_texname.empty())
-                materials[m].maps[MATERIAL_MAP_NORMAL].texture = LoadTexture(
-                    std::string(path + mats[m].bump_texname).c_str()); // char *bump_texname; // map_bump, bump
+            {
+                materials[m].maps[MATERIAL_MAP_NORMAL].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].bump_texname,
+                    std::string(path + mats[m].bump_texname)); // char *bump_texname; // map_bump, bump
+            }
             materials[m].maps[MATERIAL_MAP_NORMAL].color = WHITE;
             materials[m].maps[MATERIAL_MAP_NORMAL].value = mats[m].shininess;
 
             if (!mats[m].emissive_texname.empty())
             {
-                materials[m].maps[MATERIAL_MAP_EMISSION].texture = LoadTexture(
-                    std::string(path + mats[m].emissive_texname).c_str()); // char *emissive_texname; // map_Ke
+                materials[m].maps[MATERIAL_MAP_EMISSION].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].emissive_texname,
+                    std::string(path + mats[m].emissive_texname)); // char *emissive_texname; // map_Ke
             }
-
             materials[m].maps[MATERIAL_MAP_EMISSION].color = Color{
                 static_cast<unsigned char>(mats[m].emission[0] * 255.0f),
                 static_cast<unsigned char>(mats[m].emission[1] * 255.0f),
@@ -443,9 +451,11 @@ namespace sage
                 255}; // float emission[3];
 
             if (!mats[m].displacement_texname.empty())
-                materials[m].maps[MATERIAL_MAP_HEIGHT].texture =
-                    LoadTexture(std::string(path + mats[m].displacement_texname)
-                                    .c_str()); // char *displacement_texname; // disp
+            {
+                materials[m].maps[MATERIAL_MAP_HEIGHT].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].displacement_texname,
+                    std::string(path + mats[m].displacement_texname)); // char *displacement_texname; // disp
+            }
         }
     }
 #endif
@@ -494,87 +504,9 @@ namespace sage
         return animations;
     }
 
-    // Update model animated bones transform matrices for a given frame
-    // NOTE: Updated data is not uploaded to GPU but kept at model.meshes[i].boneMatrices[boneId],
-    // to be uploaded to shader at drawing, in case GPU skinning is enabled
-    void sgUpdateModelAnimationBones(Model model, ModelAnimation anim, int frame)
-    {
-        if ((anim.frameCount > 0) && (anim.bones != nullptr) && (anim.framePoses != nullptr))
-        {
-            if (frame >= anim.frameCount) frame = frame % anim.frameCount;
-
-            for (int i = 0; i < model.meshCount; i++)
-            {
-                if (model.meshes[i].boneMatrices)
-                {
-                    assert(model.meshes[i].boneCount == anim.boneCount);
-
-                    for (int boneId = 0; boneId < model.meshes[i].boneCount; boneId++)
-                    {
-                        Vector3 inTranslation = model.bindPose[boneId].translation;
-                        Quaternion inRotation = model.bindPose[boneId].rotation;
-                        Vector3 inScale = model.bindPose[boneId].scale;
-
-                        Vector3 outTranslation = anim.framePoses[frame][boneId].translation;
-                        Quaternion outRotation = anim.framePoses[frame][boneId].rotation;
-                        Vector3 outScale = anim.framePoses[frame][boneId].scale;
-
-                        Vector3 invTranslation =
-                            Vector3RotateByQuaternion(Vector3Negate(inTranslation), QuaternionInvert(inRotation));
-                        Quaternion invRotation = QuaternionInvert(inRotation);
-                        Vector3 invScale = Vector3Divide(Vector3{1.0f, 1.0f, 1.0f}, inScale);
-
-                        Vector3 boneTranslation = Vector3Add(
-                            Vector3RotateByQuaternion(Vector3Multiply(outScale, invTranslation), outRotation),
-                            outTranslation);
-                        Quaternion boneRotation = QuaternionMultiply(outRotation, invRotation);
-                        Vector3 boneScale = Vector3Multiply(outScale, invScale);
-
-                        Matrix boneMatrix = MatrixMultiply(
-                            MatrixMultiply(
-                                QuaternionToMatrix(boneRotation),
-                                MatrixTranslate(boneTranslation.x, boneTranslation.y, boneTranslation.z)),
-                            MatrixScale(boneScale.x, boneScale.y, boneScale.z));
-
-                        model.meshes[i].boneMatrices[boneId] = boneMatrix;
-                    }
-                }
-            }
-        }
-    }
-
     //----------------------------------------------------------------------------------
     // Module specific Functions Definition
     //----------------------------------------------------------------------------------
-#if defined(SUPPORT_FILEFORMAT_IQM) || defined(SUPPORT_FILEFORMAT_GLTF)
-    // Build pose from parent joints
-    // NOTE: Required for animations loading (required by IQM and GLTF)
-    static void sgBuildPoseFromParentJoints(BoneInfo* bones, int boneCount, Transform* transforms)
-    {
-        for (int i = 0; i < boneCount; i++)
-        {
-            if (bones[i].parent >= 0)
-            {
-                if (bones[i].parent > i)
-                {
-                    TRACELOG(
-                        LOG_WARNING,
-                        "Assumes bones are toplogically sorted, but bone %d has parent %d. Skipping.",
-                        i,
-                        bones[i].parent);
-                    continue;
-                }
-                transforms[i].rotation =
-                    QuaternionMultiply(transforms[bones[i].parent].rotation, transforms[i].rotation);
-                transforms[i].translation =
-                    Vector3RotateByQuaternion(transforms[i].translation, transforms[bones[i].parent].rotation);
-                transforms[i].translation =
-                    Vector3Add(transforms[i].translation, transforms[bones[i].parent].translation);
-                transforms[i].scale = Vector3Multiply(transforms[i].scale, transforms[bones[i].parent].scale);
-            }
-        }
-    }
-#endif
 
 #if defined(SUPPORT_FILEFORMAT_OBJ)
     // Load OBJ mesh data
@@ -1916,6 +1848,36 @@ namespace sage
 
         return true;
     }
+
+#if defined(SUPPORT_FILEFORMAT_IQM) || defined(SUPPORT_FILEFORMAT_GLTF)
+    // Build pose from parent joints
+    // NOTE: Required for animations loading (required by IQM and GLTF)
+    static void sgBuildPoseFromParentJoints(BoneInfo* bones, int boneCount, Transform* transforms)
+    {
+        for (int i = 0; i < boneCount; i++)
+        {
+            if (bones[i].parent >= 0)
+            {
+                if (bones[i].parent > i)
+                {
+                    TRACELOG(
+                        LOG_WARNING,
+                        "Assumes bones are toplogically sorted, but bone %d has parent %d. Skipping.",
+                        i,
+                        bones[i].parent);
+                    continue;
+                }
+                transforms[i].rotation =
+                    QuaternionMultiply(transforms[bones[i].parent].rotation, transforms[i].rotation);
+                transforms[i].translation =
+                    Vector3RotateByQuaternion(transforms[i].translation, transforms[bones[i].parent].rotation);
+                transforms[i].translation =
+                    Vector3Add(transforms[i].translation, transforms[bones[i].parent].translation);
+                transforms[i].scale = Vector3Multiply(transforms[i].scale, transforms[bones[i].parent].scale);
+            }
+        }
+    }
+#endif
 
 #define GLTF_ANIMDELAY 17 // Animation frames delay, (~1000 ms/60 FPS = 16.666666* ms)
 

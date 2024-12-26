@@ -272,6 +272,29 @@ namespace sage
         return nonModelTextures[path];
     }
 
+    Texture ResourceManager::TextureLoad(const std::string& fileName, const std::string& path)
+    {
+        if (!nonModelTextures.contains(fileName))
+        {
+            if (!images.contains(fileName))
+            {
+                images.emplace(fileName, LoadImage(path.c_str()));
+            }
+            nonModelTextures[path] = LoadTextureFromImage(images[fileName]);
+        }
+        return nonModelTextures[path];
+    }
+
+    Texture ResourceManager::TextureLoadFromImage(const std::string& name, Image image)
+    {
+        if (!images.contains(name))
+        {
+            images.emplace(name, image);
+            nonModelTextures[name] = LoadTextureFromImage(images[name]);
+        }
+        return nonModelTextures[name];
+    }
+
     Font ResourceManager::FontLoad(const std::string& path)
     {
         // TODO: asset id

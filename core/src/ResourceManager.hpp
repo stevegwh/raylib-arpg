@@ -63,6 +63,8 @@ namespace sage
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(AssetID id);
         Texture TextureLoad(const std::string& path);
+        Texture TextureLoad(const std::string& fileName, const std::string& path);
+        Texture TextureLoadFromImage(const std::string& name, Image image);
         Font FontLoad(const std::string& path);
         void ImageUnload(AssetID id);
         ImageSafe GetImage(AssetID id);
