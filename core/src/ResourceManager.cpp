@@ -376,42 +376,34 @@ namespace sage
         if (!modelCopies.contains(path))
         {
             assert(FileExists(path.c_str()));
-            ModelCereal modelCereal;
-            // TODO: We're still loading and allocating a material here, potentially unnecessarily
-            // This might not be a big deal, if we limit "EmplaceModel" to only be used when constructing the map
-            // binary. If the goblin (etc) mesh is archived in the binary, then EmplaceModel will never need to be
-            // called at runtime.
-            modelCereal.model = sgLoadModel(path.c_str());
 
-            modelCereal.key = path;
+            auto modelInfo = sgLoadModel(path.c_str());
+            modelInfo.model = modelInfo.model;
 
-            if (!modelMaterials.contains(path))
+            for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
             {
-                std::vector<Material> materials;
-                materials.reserve(modelCereal.model.materialCount);
-                for (int i = 0; i < modelCereal.model.materialCount; ++i)
+                const auto& mat = modelInfo.materialNames.at(i);
+                if (!materialMap.contains(mat))
                 {
-                    materials.push_back(modelCereal.model.materials[i]);
+                    materials.push_back(modelInfo.model.materials[i]);
+                    materialMap.emplace(mat, i);
                 }
-                modelMaterials.emplace(path, std::move(materials));
-
-                // Free the original materials array
-                RL_FREE(modelCereal.model.materials);
-            }
-            else
-            {
-                // Free the loaded materials as we're going to use existing ones
-                for (int i = 0; i < modelCereal.model.materialCount; ++i)
+                else
                 {
-                    UnloadMaterial(modelCereal.model.materials[i]);
+                    UnloadMaterial(modelInfo.model.materials[i]);
                 }
-                RL_FREE(modelCereal.model.materials);
+                modelInfo.model.materials[i] = materials[materialMap.at(mat)];
+
+                for (unsigned int j = 0; j < modelInfo.model.meshCount; ++j)
+                {
+                    auto& matIndex = modelInfo.model.meshMaterial[j];
+                    if (i == j)
+                    {
+                        matIndex = materialMap.at(mat);
+                    }
+                }
             }
-
-            // Set the materials pointer to the stored materials
-            modelCereal.model.materials = modelMaterials[path].data();
-
-            modelCopies.emplace(path, std::move(modelCereal));
+            modelCopies.emplace(path, std::move(modelInfo));
         }
     }
 
@@ -528,16 +520,13 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
-        for (auto& [key, materials] : modelMaterials)
+        for (auto& mat : materials)
         {
-            for (auto& mat : materials)
+            for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
             {
-                for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
-                {
-                    if (mat.maps[i].texture.id != rlGetTextureIdDefault()) rlUnloadTexture(mat.maps[i].texture.id);
-                }
-                RL_FREE(mat.maps);
+                if (mat.maps[i].texture.id != rlGetTextureIdDefault()) rlUnloadTexture(mat.maps[i].texture.id);
             }
+            RL_FREE(mat.maps);
         }
         for (auto& [path, model] : modelCopies)
         {

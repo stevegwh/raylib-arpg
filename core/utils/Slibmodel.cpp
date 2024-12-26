@@ -4,10 +4,6 @@
 
 #include "Slibmodel.hpp"
 
-#include "raylib.h" // Declares module functions
-
-#include <vector>
-
 // Check if config flags have been externally provided on compilation line
 #if !defined(EXTERNAL_CONFIG_FLAGS)
 #include "config.h" // Defines module configuration flags
@@ -45,7 +41,7 @@ namespace sage
     // Module specific Functions Declaration
     //----------------------------------------------------------------------------------
 #if defined(SUPPORT_FILEFORMAT_OBJ)
-    static Model sgLoadOBJ(const char* fileName); // Load OBJ mesh data
+    static ModelInfo sgLoadOBJ(const char* fileName); // Load OBJ mesh data
 #endif
 #if defined(SUPPORT_FILEFORMAT_GLTF)
     static Model sgLoadGLTF(const char* fileName); // Load GLTF mesh data
@@ -64,45 +60,50 @@ namespace sage
     //----------------------------------------------------------------------------------
 
     // Load model from files (mesh and material)
-    Model sgLoadModel(const char* fileName)
+    ModelInfo sgLoadModel(const char* fileName)
     {
-        Model model{};
+        ModelInfo modelInfo{};
 
 #if defined(SUPPORT_FILEFORMAT_OBJ)
-        if (IsFileExtension(fileName, ".obj")) model = sgLoadOBJ(fileName);
+        if (IsFileExtension(fileName, ".obj")) modelInfo = sgLoadOBJ(fileName);
 #endif
 #if defined(SUPPORT_FILEFORMAT_GLTF)
-        if (IsFileExtension(fileName, ".gltf") || IsFileExtension(fileName, ".glb")) model = sgLoadGLTF(fileName);
+        if (IsFileExtension(fileName, ".gltf") || IsFileExtension(fileName, ".glb"))
+            modelInfo = {sgLoadGLTF(fileName), {}};
 #endif
 
         // Make sure model transform is set to identity matrix!
-        model.transform = MatrixIdentity();
+        modelInfo.model.transform = MatrixIdentity();
 
-        if ((model.meshCount != 0) && (model.meshes != nullptr))
+        if ((modelInfo.model.meshCount != 0) && (modelInfo.model.meshes != nullptr))
         {
             // Upload vertex data to GPU (static meshes)
-            for (int i = 0; i < model.meshCount; i++)
-                UploadMesh(&model.meshes[i], false);
+            for (int i = 0; i < modelInfo.model.meshCount; i++)
+                UploadMesh(&modelInfo.model.meshes[i], false);
         }
         else
             TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data", fileName);
 
-        if (model.materialCount == 0)
+        if (modelInfo.model.materialCount == 0)
         {
             TRACELOG(
                 LOG_WARNING,
                 "MATERIAL: [%s] Failed to load model material data, default to white material",
                 fileName);
 
-            model.materialCount = 1;
-            model.materials = static_cast<Material*>(RL_CALLOC(model.materialCount, sizeof(Material)));
-            model.materials[0] = LoadMaterialDefault();
+            modelInfo.model.materialCount = 1;
+            modelInfo.model.materials =
+                static_cast<Material*>(RL_CALLOC(modelInfo.model.materialCount, sizeof(Material)));
+            modelInfo.model.materials[0] = LoadMaterialDefault();
 
-            if (model.meshMaterial == nullptr)
-                model.meshMaterial = static_cast<int*>(RL_CALLOC(model.meshCount, sizeof(int)));
+            if (modelInfo.model.meshMaterial == nullptr)
+            {
+                modelInfo.model.meshMaterial =
+                    static_cast<int*>(RL_CALLOC(modelInfo.model.meshCount, sizeof(int)));
+            }
         }
 
-        return model;
+        return modelInfo;
     }
 
     // Load model from generated mesh
@@ -515,7 +516,7 @@ namespace sage
     //  - A mesh is created for every material present in the obj file
     //  - the model.meshCount is therefore the materialCount returned from tinyobj
     //  - the mesh is automatically triangulated by tinyobj
-    static Model sgLoadOBJ(const char* fileName)
+    static ModelInfo sgLoadOBJ(const char* fileName)
     {
         Model model{};
         model.transform = MatrixIdentity();
@@ -531,7 +532,7 @@ namespace sage
 
         if (!warn.empty()) TRACELOG(LOG_WARNING, "MODEL: %s", warn.c_str());
         if (!err.empty()) TRACELOG(LOG_ERROR, "MODEL: %s", err.c_str());
-        if (!ret) return model;
+        if (!ret) return {model, {}};
 
         // Setup model with material-based meshes
         model.materialCount = static_cast<int>(materials.empty() ? 1 : materials.size());
@@ -632,7 +633,13 @@ namespace sage
             UploadMesh(&model.meshes[i], true);
         }
 
-        return model;
+        std::vector<std::string> matNames;
+        for (const auto& mat : materials)
+        {
+            matNames.push_back(mat.name);
+        }
+
+        return {model, matNames};
     }
 #endif
 

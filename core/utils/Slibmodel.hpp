@@ -4,9 +4,12 @@
 
 #pragma once
 
-struct Model;
+#include "raylib.h"
+#include <string>
+#include <vector>
 
 namespace sage
 {
-    Model sgLoadModel(const char* fileName);
+    struct ModelInfo;
+    ModelInfo sgLoadModel(const char* fileName);
 } // namespace sage

@@ -21,14 +21,16 @@
 
 namespace sage
 {
-    struct ModelCereal
+    struct ModelInfo
     {
-        Model model{};
-        std::string key{};
+        Model model;
+        std::vector<std::string>
+            materialNames; // names of this mesh's materials (at the same index in model.materials)
+
         template <class Archive>
         void serialize(Archive& archive)
         {
-            archive(model, key);
+            archive(model, materialNames);
         }
     };
 
@@ -39,10 +41,11 @@ namespace sage
 
         std::unordered_map<std::string, Font> fonts{};
         std::unordered_map<std::string, Shader> shaders{};
-        std::unordered_map<std::string, std::vector<Material>> modelMaterials{}; // Shared model materials
-        std::unordered_map<std::string, Image> images{};                         // Image (CPU) data
+        std::vector<Material> materials;                             // master materials
+        std::unordered_map<std::string, unsigned int> materialMap;   // map for above array
+        std::unordered_map<std::string, Image> images{};             // Image (CPU) data
         std::unordered_map<std::string, Texture> nonModelTextures{}; // Textures loaded outside of model loading
-        std::unordered_map<std::string, ModelCereal> modelCopies{};
+        std::unordered_map<std::string, ModelInfo> modelCopies{};
         std::unordered_map<std::string, std::pair<ModelAnimation*, int>> modelAnimations{};
         std::unordered_map<std::string, char*> vertShaderFileText{};
         std::unordered_map<std::string, char*> fragShaderFileText{};
@@ -107,7 +110,8 @@ namespace sage
             archive(
                 GetInstance().images,
                 GetInstance().modelCopies,
-                GetInstance().modelMaterials,
+                GetInstance().materials,
+                GetInstance().materialMap,
                 animatedModelKeys,
                 modelAnimCounts,
                 modelAnimationsData);
@@ -122,20 +126,32 @@ namespace sage
 
             // Copy necessary (I believe) so we can concat multiple calls of "load"
             std::unordered_map<std::string, Image> _images{};
-            std::unordered_map<std::string, ModelCereal> _modelCopies{};
-            std::unordered_map<std::string, std::vector<Material>> _modelMaterials{};
+            std::unordered_map<std::string, ModelInfo> _modelCopies{};
+            std::vector<Material> _materials{};
+            std::unordered_map<std::string, int> _materialMap;
 
             archive(
-                _images, _modelCopies, _modelMaterials, animatedModelKeys, modelAnimCounts, modelAnimationsData);
+                _images,
+                _modelCopies,
+                _materials,
+                _materialMap,
+                animatedModelKeys,
+                modelAnimCounts,
+                modelAnimationsData);
 
             // WARNING: Does *not* account for overlapping keys (does nothing if key exists)
             images.insert(_images.begin(), _images.end());
             modelCopies.insert(_modelCopies.begin(), _modelCopies.end());
-            modelMaterials.insert(_modelMaterials.begin(), _modelMaterials.end());
+            materials.assign(_materials.begin(), _materials.end());
+            materialMap.insert(_materialMap.begin(), _materialMap.end());
 
             for (auto& [key, model] : GetInstance().modelCopies)
             {
-                model.model.materials = modelMaterials.at(model.key).data();
+                for (unsigned int i = 0; i < model.materialNames.size(); ++i)
+                {
+                    const auto& mat = model.materialNames.at(i);
+                    model.model.materials[i] = materials[materialMap.at(mat)];
+                }
             }
 
             for (int i = 0; i < animatedModelKeys.size(); ++i)
