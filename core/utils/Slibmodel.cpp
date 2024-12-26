@@ -71,11 +71,6 @@
 #define TINYOBJ_REALLOC RL_REALLOC
 #define TINYOBJ_FREE RL_FREE
 
-// extern "C"
-// {
-// #include "external/tinyobj_loader_c.h" // OBJ/MTL file formats loading
-// }
-
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
@@ -132,7 +127,8 @@ namespace sage::model
 #if defined(SUPPORT_FILEFORMAT_OBJ) || defined(SUPPORT_FILEFORMAT_MTL)
     static void ProcessMaterialsOBJ(
         Material* materials,
-        const std::vector<tinyobj::material_t>& mats); // Process obj materials
+        const std::vector<tinyobj::material_t>& mats,
+        const std::string& path); // Process obj materials
 #endif
 
     //----------------------------------------------------------------------------------
@@ -752,9 +748,9 @@ namespace sage::model
 
 #if defined(SUPPORT_FILEFORMAT_OBJ) || defined(SUPPORT_FILEFORMAT_MTL)
     // Process obj materials
-    static void ProcessMaterialsOBJ(Material* materials, const std::vector<tinyobj::material_t>& mats)
+    static void ProcessMaterialsOBJ(
+        Material* materials, const std::vector<tinyobj::material_t>& mats, const std::string& path)
     {
-        auto path = "/Users/steve/Sync/Raylib-ARPG/Blender Files/dungeon-map/mesh/";
         // Init model mats
         for (int m = 0; m < mats.size(); m++)
         {
@@ -954,21 +950,14 @@ namespace sage::model
         Model model{};
         model.transform = MatrixIdentity();
 
+        auto path = std::string(GetDirectoryPath(fileName)) + std::string("/");
+
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string warn, err;
 
-        bool ret = tinyobj::LoadObj(
-            &attrib,
-            &shapes,
-            &materials,
-            &warn,
-            &err,
-            fileName,
-            "/Users/steve/Sync/Raylib-ARPG/Blender Files/dungeon-map/mesh/",
-            true,
-            true);
+        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, fileName, path.c_str(), true, true);
 
         if (!warn.empty()) TRACELOG(LOG_WARNING, "MODEL: %s", warn.c_str());
         if (!err.empty()) TRACELOG(LOG_ERROR, "MODEL: %s", err.c_str());
@@ -1060,7 +1049,7 @@ namespace sage::model
         // Process materials
         if (!materials.empty())
         {
-            ProcessMaterialsOBJ(model.materials, materials);
+            ProcessMaterialsOBJ(model.materials, materials, path);
         }
         else
         {
