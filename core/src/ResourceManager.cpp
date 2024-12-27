@@ -381,26 +381,16 @@ namespace sage
 
             for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
             {
-                const auto& mat = modelInfo.materialNames.at(i);
+                const auto& mat = modelInfo.materialNames[i];
                 if (!materialMap.contains(mat))
                 {
-                    materials.push_back(modelInfo.model.materials[i]);
-                    materialMap.emplace(mat, materials.size());
+                    materialMap.emplace(mat, modelInfo.model.materials[i]);
                 }
                 else
                 {
                     UnloadMaterial(modelInfo.model.materials[i]);
                 }
-                modelInfo.model.materials[i] = materials[materialMap.at(mat)];
-
-                // for (unsigned int j = 0; j < modelInfo.model.meshCount; ++j)
-                // {
-                //     // Check if this mesh uses the current material
-                //     if (modelInfo.model.meshMaterial[j] == i)
-                //     {
-                //         modelInfo.model.meshMaterial[j] = materialMap.at(mat);
-                //     }
-                // }
+                modelInfo.model.materials[i] = materialMap.at(mat);
             }
 
             modelCopies.emplace(path, std::move(modelInfo));
@@ -520,7 +510,7 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
-        for (auto& mat : materials)
+        for (auto& [key, mat] : materialMap)
         {
             for (int i = 0; i < MAX_MATERIAL_MAPS; i++)
             {
