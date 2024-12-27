@@ -870,9 +870,10 @@ namespace sage
             TRACELOG(LOG_DEBUG, "    > Images count: %i", data->images_count);
             TRACELOG(LOG_DEBUG, "    > Textures count: %i", data->textures_count);
 
-            for (unsigned int img = 0; img < data->materials_count; ++img)
+            modelInfo.materialNames.resize(data->materials_count + 1);
+            for (int i = 1; i <= data->materials_count; ++i)
             {
-                modelInfo.materialNames.emplace_back(data->materials[img].name);
+                modelInfo.materialNames[i] = data->materials[i - 1].name;
             }
 
             // Force reading data buffers (fills buffer_view->buffer->data)
@@ -914,6 +915,7 @@ namespace sage
             //----------------------------------------------------------------------------------------------------
             for (unsigned int i = 0, j = 1; i < data->materials_count; i++, j++)
             {
+
                 model.materials[j] = LoadMaterialDefault();
                 const char* texPath = GetDirectoryPath(fileName);
 
