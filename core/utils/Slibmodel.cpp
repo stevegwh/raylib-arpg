@@ -79,7 +79,9 @@ namespace sage
         {
             // Upload vertex data to GPU (static meshes)
             for (int i = 0; i < modelInfo.model.meshCount; i++)
+            {
                 UploadMesh(&modelInfo.model.meshes[i], false);
+            }
         }
         else
             TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data", fileName);
@@ -627,12 +629,6 @@ namespace sage
             model.materials[0] = LoadMaterialDefault();
         }
 
-        // Upload mesh data to GPU
-        for (int i = 0; i < model.meshCount; i++)
-        {
-            UploadMesh(&model.meshes[i], true);
-        }
-
         std::vector<std::string> matNames;
         for (const auto& mat : materials)
         {
@@ -721,14 +717,16 @@ namespace sage
         }
         else if (cgltfImage->buffer_view->buffer->data != nullptr) // Check if image is provided as data buffer
         {
-            auto data = (unsigned char*)RL_MALLOC(cgltfImage->buffer_view->size);
-            int offset = (int)cgltfImage->buffer_view->offset;
-            int stride = (int)cgltfImage->buffer_view->stride ? (int)cgltfImage->buffer_view->stride : 1;
+            auto data = static_cast<unsigned char*>(RL_MALLOC(cgltfImage->buffer_view->size));
+            int offset = static_cast<int>(cgltfImage->buffer_view->offset);
+            int stride = static_cast<int>(cgltfImage->buffer_view->stride)
+                             ? static_cast<int>(cgltfImage->buffer_view->stride)
+                             : 1;
 
             // Copy buffer data to memory for loading
             for (unsigned int i = 0; i < cgltfImage->buffer_view->size; i++)
             {
-                data[i] = ((unsigned char*)cgltfImage->buffer_view->buffer->data)[offset];
+                data[i] = static_cast<unsigned char*>(cgltfImage->buffer_view->buffer->data)[offset];
                 offset += stride;
             }
 
@@ -756,8 +754,8 @@ namespace sage
     // Load bone info from GLTF skin data
     static BoneInfo* sgLoadBoneInfoGLTF(cgltf_skin skin, int* boneCount)
     {
-        *boneCount = (int)skin.joints_count;
-        auto bones = (BoneInfo*)RL_MALLOC(skin.joints_count * sizeof(BoneInfo));
+        *boneCount = static_cast<int>(skin.joints_count);
+        auto bones = static_cast<BoneInfo*>(RL_MALLOC(skin.joints_count * sizeof(BoneInfo)));
 
         for (unsigned int i = 0; i < skin.joints_count; i++)
         {
@@ -775,7 +773,7 @@ namespace sage
             {
                 if (skin.joints[j] == node.parent)
                 {
-                    parentIndex = (int)j;
+                    parentIndex = static_cast<int>(j);
                     break;
                 }
             }
@@ -1161,7 +1159,7 @@ namespace sage
                             {
                                 // Init raylib mesh tangent to copy glTF attribute data
                                 model.meshes[meshIndex].tangents =
-                                    (float*)RL_MALLOC(attribute->count * 4 * sizeof(float));
+                                    static_cast<float*>(RL_MALLOC(attribute->count * 4 * sizeof(float)));
 
                                 // Load 4 components of float data type into mesh.tangents
                                 LOAD_ATTRIBUTE(attribute, 4, float, model.meshes[meshIndex].tangents)
@@ -1198,7 +1196,8 @@ namespace sage
                                 if (attribute->component_type == cgltf_component_type_r_32f) // vec2, float
                                 {
                                     // Init raylib mesh texcoords to copy glTF attribute data
-                                    texcoordPtr = (float*)RL_MALLOC(attribute->count * 2 * sizeof(float));
+                                    texcoordPtr =
+                                        static_cast<float*>(RL_MALLOC(attribute->count * 2 * sizeof(float)));
 
                                     // Load 3 components of float data type into mesh.texcoords
                                     LOAD_ATTRIBUTE(attribute, 2, float, texcoordPtr)
@@ -1206,32 +1205,34 @@ namespace sage
                                 else if (attribute->component_type == cgltf_component_type_r_8u) // vec2, u8n
                                 {
                                     // Init raylib mesh texcoords to copy glTF attribute data
-                                    texcoordPtr = (float*)RL_MALLOC(attribute->count * 2 * sizeof(float));
+                                    texcoordPtr =
+                                        static_cast<float*>(RL_MALLOC(attribute->count * 2 * sizeof(float)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 2 * sizeof(unsigned char));
+                                    auto* temp = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 2 * sizeof(unsigned char)));
                                     LOAD_ATTRIBUTE(attribute, 2, unsigned char, temp);
 
                                     // Convert data to raylib texcoord data type (float)
                                     for (unsigned int t = 0; t < attribute->count * 2; t++)
-                                        texcoordPtr[t] = (float)temp[t] / 255.0f;
+                                        texcoordPtr[t] = static_cast<float>(temp[t]) / 255.0f;
 
                                     RL_FREE(temp);
                                 }
                                 else if (attribute->component_type == cgltf_component_type_r_16u) // vec2, u16n
                                 {
                                     // Init raylib mesh texcoords to copy glTF attribute data
-                                    texcoordPtr = (float*)RL_MALLOC(attribute->count * 2 * sizeof(float));
+                                    texcoordPtr =
+                                        static_cast<float*>(RL_MALLOC(attribute->count * 2 * sizeof(float)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp =
-                                        (unsigned short*)RL_MALLOC(attribute->count * 2 * sizeof(unsigned short));
+                                    auto* temp = static_cast<unsigned short*>(
+                                        RL_MALLOC(attribute->count * 2 * sizeof(unsigned short)));
                                     LOAD_ATTRIBUTE(attribute, 2, unsigned short, temp);
 
                                     // Convert data to raylib texcoord data type (float)
                                     for (unsigned int t = 0; t < attribute->count * 2; t++)
-                                        texcoordPtr[t] = (float)temp[t] / 65535.0f;
+                                        texcoordPtr[t] = static_cast<float>(temp[t]) / 65535.0f;
 
                                     RL_FREE(temp);
                                 }
@@ -1276,12 +1277,12 @@ namespace sage
                                 if (attribute->component_type == cgltf_component_type_r_8u)
                                 {
                                     // Init raylib mesh color to copy glTF attribute data
-                                    model.meshes[meshIndex].colors =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned char));
+                                    model.meshes[meshIndex].colors = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned char)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 3 * sizeof(unsigned char));
+                                    auto* temp = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 3 * sizeof(unsigned char)));
                                     LOAD_ATTRIBUTE(attribute, 3, unsigned char, temp);
 
                                     // Convert data to raylib color data type (4 bytes)
@@ -1298,23 +1299,23 @@ namespace sage
                                 else if (attribute->component_type == cgltf_component_type_r_16u)
                                 {
                                     // Init raylib mesh color to copy glTF attribute data
-                                    model.meshes[meshIndex].colors =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned char));
+                                    model.meshes[meshIndex].colors = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned char)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp =
-                                        (unsigned short*)RL_MALLOC(attribute->count * 3 * sizeof(unsigned short));
+                                    auto* temp = static_cast<unsigned short*>(
+                                        RL_MALLOC(attribute->count * 3 * sizeof(unsigned short)));
                                     LOAD_ATTRIBUTE(attribute, 3, unsigned short, temp);
 
                                     // Convert data to raylib color data type (4 bytes)
                                     for (unsigned int c = 0, k = 0; c < (attribute->count * 4 - 3); c += 4, k += 3)
                                     {
-                                        model.meshes[meshIndex].colors[c] =
-                                            (unsigned char)(((float)temp[k] / 65535.0f) * 255.0f);
-                                        model.meshes[meshIndex].colors[c + 1] =
-                                            (unsigned char)(((float)temp[k + 1] / 65535.0f) * 255.0f);
-                                        model.meshes[meshIndex].colors[c + 2] =
-                                            (unsigned char)(((float)temp[k + 2] / 65535.0f) * 255.0f);
+                                        model.meshes[meshIndex].colors[c] = static_cast<unsigned char>(
+                                            (static_cast<float>(temp[k]) / 65535.0f) * 255.0f);
+                                        model.meshes[meshIndex].colors[c + 1] = static_cast<unsigned char>(
+                                            (static_cast<float>(temp[k + 1]) / 65535.0f) * 255.0f);
+                                        model.meshes[meshIndex].colors[c + 2] = static_cast<unsigned char>(
+                                            (static_cast<float>(temp[k + 2]) / 65535.0f) * 255.0f);
                                         model.meshes[meshIndex].colors[c + 3] = 255;
                                     }
 
@@ -1323,21 +1324,23 @@ namespace sage
                                 else if (attribute->component_type == cgltf_component_type_r_32f)
                                 {
                                     // Init raylib mesh color to copy glTF attribute data
-                                    model.meshes[meshIndex].colors =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned char));
+                                    model.meshes[meshIndex].colors = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned char)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp = (float*)RL_MALLOC(attribute->count * 3 * sizeof(float));
+                                    auto* temp =
+                                        static_cast<float*>(RL_MALLOC(attribute->count * 3 * sizeof(float)));
                                     LOAD_ATTRIBUTE(attribute, 3, float, temp);
 
                                     // Convert data to raylib color data type (4 bytes)
                                     for (unsigned int c = 0, k = 0; c < (attribute->count * 4 - 3); c += 4, k += 3)
                                     {
-                                        model.meshes[meshIndex].colors[c] = (unsigned char)(temp[k] * 255.0f);
+                                        model.meshes[meshIndex].colors[c] =
+                                            static_cast<unsigned char>(temp[k] * 255.0f);
                                         model.meshes[meshIndex].colors[c + 1] =
-                                            (unsigned char)(temp[k + 1] * 255.0f);
+                                            static_cast<unsigned char>(temp[k + 1] * 255.0f);
                                         model.meshes[meshIndex].colors[c + 2] =
-                                            (unsigned char)(temp[k + 2] * 255.0f);
+                                            static_cast<unsigned char>(temp[k + 2] * 255.0f);
                                         model.meshes[meshIndex].colors[c + 3] = 255;
                                     }
 
@@ -1354,8 +1357,8 @@ namespace sage
                                 if (attribute->component_type == cgltf_component_type_r_8u)
                                 {
                                     // Init raylib mesh color to copy glTF attribute data
-                                    model.meshes[meshIndex].colors =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned char));
+                                    model.meshes[meshIndex].colors = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned char)));
 
                                     // Load 4 components of unsigned char data type into mesh.colors
                                     LOAD_ATTRIBUTE(attribute, 4, unsigned char, model.meshes[meshIndex].colors)
@@ -1381,17 +1384,19 @@ namespace sage
                                 else if (attribute->component_type == cgltf_component_type_r_32f)
                                 {
                                     // Init raylib mesh color to copy glTF attribute data
-                                    model.meshes[meshIndex].colors =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned char));
+                                    model.meshes[meshIndex].colors = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned char)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp = (float*)RL_MALLOC(attribute->count * 4 * sizeof(float));
+                                    auto* temp =
+                                        static_cast<float*>(RL_MALLOC(attribute->count * 4 * sizeof(float)));
                                     LOAD_ATTRIBUTE(attribute, 4, float, temp);
 
                                     // Convert data to raylib color data type (4 bytes), we expect the color
                                     // data normalized
                                     for (unsigned int c = 0; c < attribute->count * 4; c++)
-                                        model.meshes[meshIndex].colors[c] = (unsigned char)(temp[c] * 255.0f);
+                                        model.meshes[meshIndex].colors[c] =
+                                            static_cast<unsigned char>(temp[c] * 255.0f);
 
                                     RL_FREE(temp);
                                 }
@@ -1750,7 +1755,7 @@ namespace sage
         float tend = 0.0f;
         int keyframe = 0; // Defaults to first pose
 
-        for (int i = 0; i < (int)input->count - 1; i++)
+        for (int i = 0; i < static_cast<int>(input->count) - 1; i++)
         {
             cgltf_bool r1 = cgltf_accessor_read_float(input, i, &tstart, 1);
             if (!r1) return false;
@@ -1783,7 +1788,7 @@ namespace sage
                 float tmp[3] = {0.0f};
                 cgltf_accessor_read_float(output, keyframe, tmp, 3);
                 Vector3 v1 = {tmp[0], tmp[1], tmp[2]};
-                auto r = (Vector3*)data;
+                auto r = static_cast<Vector3*>(data);
 
                 *r = v1;
             }
@@ -1794,7 +1799,7 @@ namespace sage
                 Vector3 v1 = {tmp[0], tmp[1], tmp[2]};
                 cgltf_accessor_read_float(output, keyframe + 1, tmp, 3);
                 Vector3 v2 = {tmp[0], tmp[1], tmp[2]};
-                auto r = (Vector3*)data;
+                auto r = static_cast<Vector3*>(data);
 
                 *r = Vector3Lerp(v1, v2, t);
             }
@@ -1809,7 +1814,7 @@ namespace sage
                 Vector3 v2 = {tmp[0], tmp[1], tmp[2]};
                 cgltf_accessor_read_float(output, 3 * (keyframe + 1), tmp, 3);
                 Vector3 tangent2 = {tmp[0], tmp[1], tmp[2]};
-                auto r = (Vector3*)data;
+                auto r = static_cast<Vector3*>(data);
 
                 *r = Vector3CubicHermite(v1, tangent1, v2, tangent2, t);
             }
@@ -1827,7 +1832,7 @@ namespace sage
                 float tmp[4] = {0.0f};
                 cgltf_accessor_read_float(output, keyframe, tmp, 4);
                 Vector4 v1 = {tmp[0], tmp[1], tmp[2], tmp[3]};
-                auto r = (Vector4*)data;
+                auto r = static_cast<Vector4*>(data);
 
                 *r = v1;
             }
@@ -1838,7 +1843,7 @@ namespace sage
                 Vector4 v1 = {tmp[0], tmp[1], tmp[2], tmp[3]};
                 cgltf_accessor_read_float(output, keyframe + 1, tmp, 4);
                 Vector4 v2 = {tmp[0], tmp[1], tmp[2], tmp[3]};
-                auto r = (Vector4*)data;
+                auto r = static_cast<Vector4*>(data);
 
                 *r = QuaternionSlerp(v1, v2, t);
             }
@@ -1853,7 +1858,7 @@ namespace sage
                 Vector4 v2 = {tmp[0], tmp[1], tmp[2], tmp[3]};
                 cgltf_accessor_read_float(output, 3 * (keyframe + 1), tmp, 4);
                 Vector4 inTangent2 = {tmp[0], tmp[1], tmp[2], 0.0f};
-                auto r = (Vector4*)data;
+                auto r = static_cast<Vector4*>(data);
 
                 v1 = QuaternionNormalize(v1);
                 v2 = QuaternionNormalize(v2);
@@ -1940,8 +1945,9 @@ namespace sage
             if (data->skins_count > 0)
             {
                 cgltf_skin skin = data->skins[0];
-                *animCount = (int)data->animations_count;
-                animations = (ModelAnimation*)RL_MALLOC(data->animations_count * sizeof(ModelAnimation));
+                *animCount = static_cast<int>(data->animations_count);
+                animations =
+                    static_cast<ModelAnimation*>(RL_MALLOC(data->animations_count * sizeof(ModelAnimation)));
 
                 for (unsigned int i = 0; i < data->animations_count; i++)
                 {
@@ -1957,7 +1963,8 @@ namespace sage
                         cgltf_interpolation_type interpolationType;
                     };
 
-                    auto boneChannels = (Channels*)RL_CALLOC(animations[i].boneCount, sizeof(struct Channels));
+                    auto boneChannels =
+                        static_cast<Channels*>(RL_CALLOC(animations[i].boneCount, sizeof(struct Channels)));
                     float animDuration = 0.0f;
 
                     for (unsigned int j = 0; j < animData.channels_count; j++)
@@ -2033,15 +2040,15 @@ namespace sage
                         animations[i].name[sizeof(animations[i].name) - 1] = '\0';
                     }
 
-                    animations[i].frameCount = (int)(animDuration * 1000.0f / GLTF_ANIMDELAY) + 1;
+                    animations[i].frameCount = static_cast<int>(animDuration * 1000.0f / GLTF_ANIMDELAY) + 1;
                     animations[i].framePoses =
-                        (Transform**)RL_MALLOC(animations[i].frameCount * sizeof(Transform*));
+                        static_cast<Transform**>(RL_MALLOC(animations[i].frameCount * sizeof(Transform*)));
 
                     for (int j = 0; j < animations[i].frameCount; j++)
                     {
                         animations[i].framePoses[j] =
-                            (Transform*)RL_MALLOC(animations[i].boneCount * sizeof(Transform));
-                        float time = ((float)j * GLTF_ANIMDELAY) / 1000.0f;
+                            static_cast<Transform*>(RL_MALLOC(animations[i].boneCount * sizeof(Transform)));
+                        float time = (static_cast<float>(j) * GLTF_ANIMDELAY) / 1000.0f;
 
                         for (int k = 0; k < animations[i].boneCount; k++)
                         {

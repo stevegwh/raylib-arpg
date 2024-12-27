@@ -120,7 +120,9 @@ namespace sage
         {
             // Upload vertex data to GPU (static meshes)
             for (int i = 0; i < model.meshCount; i++)
+            {
                 UploadMesh(&model.meshes[i], false);
+            }
         }
         // else TRACELOG(LOG_WARNING, "MESH: [%s] Failed to load model mesh(es) data",
         // "Cereal Model Import");
