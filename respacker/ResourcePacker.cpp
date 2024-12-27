@@ -79,34 +79,6 @@ namespace sage
         return CollisionLayer::BACKGROUND; // by default, objects are ignored
     }
 
-    // void parseMtlFile(const fs::path& mtlPath, std::string& materialKey)
-    // {
-    //     if (!fs::exists(mtlPath))
-    //     {
-    //         std::cout << "WARNING: MTL file could not be found: " << mtlPath << std::endl;
-    //         return;
-    //     }
-    //     std::ifstream infile(mtlPath);
-    //     std::string line;
-    //     while (std::getline(infile, line))
-    //     {
-    //         if (line.substr(0, 6) != "newmtl") continue;
-    //
-    //         infile.close();
-    //         size_t textureNameStart = line.find_first_not_of(" \t", 6);
-    //
-    //         if (textureNameStart != std::string::npos)
-    //         {
-    //             materialKey = line.substr(textureNameStart);
-    //         }
-    //         else
-    //         {
-    //             std::cout << "ERROR: Failed to read material name \n";
-    //             exit(1);
-    //         }
-    //     }
-    // }
-
     std::string readLine(std::ifstream& infile, const std::string& key)
     {
         std::string line;
@@ -325,10 +297,6 @@ namespace sage
             if (entry.path().extension() == ".obj" || entry.path().extension() == ".glb" ||
                 entry.path().extension() == ".gltf")
             {
-                // std::string materialKey = "DEFAULT"; // Load default raylib mat
-                // fs::path mtlPath = entry.path();
-                // mtlPath.replace_extension(".mtl");
-                // parseMtlFile(mtlPath, materialKey);
                 ResourceManager::GetInstance().ModelLoadFromFile(entry.path().generic_string());
             }
         }
@@ -409,6 +377,24 @@ namespace sage
                 // TODO: See if txt of same name/path exists and parse that for socket data etc
             }
         }
+
+        // TODO: Make these use AssetIDs and move paths to json
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/equipment.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/hammer.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/inventory.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/spellbook.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_hud.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/inventory-bg.png");
+        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/scroll-bg.png");
+
         std::cout << "FINISH: Loading assets into memory \n";
         serializer::SaveClassBinary(output.c_str(), ResourceManager::GetInstance());
     }

@@ -134,31 +134,12 @@ namespace sage
         // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);
         //  registry->erase<Spawner>(view.begin(), view.end());
 
-        // Clear any CPU resources that are no longer needed
-        // ResourceManager::GetInstance().UnloadImages();
-        // ResourceManager::GetInstance().UnloadShaderFileText();
-
         ResourceManager::GetInstance().FontLoadFromFile(
             "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/equipment.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/hammer.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/inventory.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/spellbook.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_hud.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/inventory-bg.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/scroll-bg.png");
 
         const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
-        auto w = data->settings->TARGET_SCREEN_WIDTH * 0.3;
-        auto h = data->settings->TARGET_SCREEN_HEIGHT * 0.6;
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.3;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.6;
         auto* inventoryWindow =
             GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
         auto* equipmentWindow =
@@ -173,6 +154,10 @@ namespace sage
 
         spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
         spiral->InitSystem();
+
+        // Clear any CPU resources that are no longer needed
+        ResourceManager::GetInstance().UnloadImages();
+        // ResourceManager::GetInstance().UnloadShaderFileText();
     };
 
 } // namespace sage

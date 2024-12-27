@@ -5,13 +5,14 @@
 
 ## To Do
 
-- [x]  Use new UI framework for dialogue
+- [ ]  Text above head for spoken dialogue (outside of a conversation)
+- [ ]  Have 'arissa' locked in a cell and a quest to save her
+- [ ]  Make base quest of the game you needing to find a lever to open the gate out of the location. Make it so you have
+  to trade a Goblin or Dog a bone (or something) for the lever, to get this bone (or something) you need to complete a
+  few other things?
 - [ ]  Replace the literal model for items with the dota 2 style "boxes"
 - [ ]  Cooldown timers on abilities
-- [x] Improve placement of tooltips and abstract tooltips into a class.
-- [ ] Make dialog box look like DOS2.
 - [ ] Outline weapons, characters and clickable objects
-- [ ] Killable, fetch and "interact with" quests
 
 ----
 
@@ -23,10 +24,14 @@
 - [ ]  Lightning effect with rotated additive texture: https://www.youtube.com/watch?v=XVQDUcr6dwo
 - [ ]  If camera cant see renderable, dont render it
 - [ ]  If camera cant see animation, do not "UpdateAnimation" (Keep ticking the animation counter)
-- [ ]  Enemy logic for moving towards player/starting combat is poor, right now.
+- [x]  Enemy logic for moving towards player/starting combat is poor, right now.
 
 ----
 
+- [x]  Use new UI framework for dialogue
+- [x] Improve placement of tooltips and abstract tooltips into a class.
+- [x] Make dialog box look like DOS2.
+- [x] Killable, fetch and "interact with" quests
 - [x] Enable user to pickup and drop objects
 - [x] Build UI framework.
 - [x]  Camera "look at" should needs to look at the nearest hit floor object, rather than the world origin.
