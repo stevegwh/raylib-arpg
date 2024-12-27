@@ -931,8 +931,10 @@ namespace sage
                             data->materials[i].pbr_metallic_roughness.base_color_texture.texture->image, texPath);
                         if (imAlbedo.data != nullptr)
                         {
-                            model.materials[j].maps[MATERIAL_MAP_ALBEDO].texture = LoadTextureFromImage(imAlbedo);
-                            UnloadImage(imAlbedo);
+                            model.materials[j].maps[MATERIAL_MAP_ALBEDO].texture =
+                                ResourceManager::GetInstance().TextureLoadFromImage(
+                                    data->materials[i].name + std::string("_diffuse"), imAlbedo);
+                            // UnloadImage(imAlbedo);
                         }
                     }
                     // Load base color factor (tint)
@@ -954,8 +956,9 @@ namespace sage
                         if (imMetallicRoughness.data != nullptr)
                         {
                             model.materials[j].maps[MATERIAL_MAP_ROUGHNESS].texture =
-                                LoadTextureFromImage(imMetallicRoughness);
-                            UnloadImage(imMetallicRoughness);
+                                ResourceManager::GetInstance().TextureLoadFromImage(
+                                    data->materials[i].name + std::string("_roughness"), imMetallicRoughness);
+                            // UnloadImage(imMetallicRoughness);
                         }
 
                         // Load metallic/roughness material properties
@@ -973,8 +976,10 @@ namespace sage
                             sgLoadImageFromCgltfImage(data->materials[i].normal_texture.texture->image, texPath);
                         if (imNormal.data != nullptr)
                         {
-                            model.materials[j].maps[MATERIAL_MAP_NORMAL].texture = LoadTextureFromImage(imNormal);
-                            UnloadImage(imNormal);
+                            model.materials[j].maps[MATERIAL_MAP_NORMAL].texture =
+                                ResourceManager::GetInstance().TextureLoadFromImage(
+                                    data->materials[i].name + std::string("_normal"), imNormal);
+                            // UnloadImage(imNormal);
                         }
                     }
 
@@ -986,8 +991,9 @@ namespace sage
                         if (imOcclusion.data != nullptr)
                         {
                             model.materials[j].maps[MATERIAL_MAP_OCCLUSION].texture =
-                                LoadTextureFromImage(imOcclusion);
-                            UnloadImage(imOcclusion);
+                                ResourceManager::GetInstance().TextureLoadFromImage(
+                                    data->materials[i].name + std::string("_occlusion"), imOcclusion);
+                            // UnloadImage(imOcclusion);
                         }
                     }
 
@@ -999,8 +1005,10 @@ namespace sage
                         if (imEmissive.data != nullptr)
                         {
                             model.materials[j].maps[MATERIAL_MAP_EMISSION].texture =
-                                LoadTextureFromImage(imEmissive);
-                            UnloadImage(imEmissive);
+                                ResourceManager::GetInstance().TextureLoadFromImage(
+                                    data->materials[i].name + std::string("_emissive"), imEmissive);
+
+                            // UnloadImage(imEmissive);
                         }
 
                         // Load emissive color factor
