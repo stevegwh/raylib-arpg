@@ -870,6 +870,7 @@ namespace sage
             TRACELOG(LOG_DEBUG, "    > Images count: %i", data->images_count);
             TRACELOG(LOG_DEBUG, "    > Textures count: %i", data->textures_count);
 
+            // LoadGLTF reserves index 0 for the default material, so we need to offset the names here
             modelInfo.materialNames.resize(data->materials_count + 1);
             for (int i = 1; i <= data->materials_count; ++i)
             {

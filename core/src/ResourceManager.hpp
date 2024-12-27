@@ -125,8 +125,6 @@ namespace sage
             //
         }
 
-        // TODO: Weapons and Arissa are not loading their materials correctly
-
         template <class Archive>
         void load(Archive& archive)
         {
