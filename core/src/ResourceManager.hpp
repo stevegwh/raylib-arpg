@@ -140,9 +140,9 @@ namespace sage
             archive(_images, _modelCopies, _materialMap, animatedModelKeys, modelAnimCounts, modelAnimationsData);
 
             // WARNING: Does *not* account for overlapping keys (does nothing if key exists)
-            images.insert(_images.begin(), _images.end());
-            modelCopies.insert(_modelCopies.begin(), _modelCopies.end());
-            materialMap.insert(_materialMap.begin(), _materialMap.end());
+            images.merge(_images);
+            modelCopies.merge(_modelCopies);
+            materialMap.merge(_materialMap);
 
             for (auto& [key, model] : GetInstance().modelCopies)
             {
