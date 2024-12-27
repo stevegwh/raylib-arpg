@@ -378,7 +378,6 @@ namespace sage
             assert(FileExists(path.c_str()));
 
             auto modelInfo = sgLoadModel(path.c_str());
-            modelInfo.model = modelInfo.model;
 
             for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
             {
@@ -386,7 +385,7 @@ namespace sage
                 if (!materialMap.contains(mat))
                 {
                     materials.push_back(modelInfo.model.materials[i]);
-                    materialMap.emplace(mat, i);
+                    materialMap.emplace(mat, materials.size());
                 }
                 else
                 {
@@ -394,15 +393,16 @@ namespace sage
                 }
                 modelInfo.model.materials[i] = materials[materialMap.at(mat)];
 
-                for (unsigned int j = 0; j < modelInfo.model.meshCount; ++j)
-                {
-                    auto& matIndex = modelInfo.model.meshMaterial[j];
-                    if (i == j)
-                    {
-                        matIndex = materialMap.at(mat);
-                    }
-                }
+                // for (unsigned int j = 0; j < modelInfo.model.meshCount; ++j)
+                // {
+                //     // Check if this mesh uses the current material
+                //     if (modelInfo.model.meshMaterial[j] == i)
+                //     {
+                //         modelInfo.model.meshMaterial[j] = materialMap.at(mat);
+                //     }
+                // }
             }
+
             modelCopies.emplace(path, std::move(modelInfo));
         }
     }

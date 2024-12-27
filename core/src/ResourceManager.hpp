@@ -5,7 +5,7 @@
 
 #include "AssetID.hpp"
 #include "magic_enum/magic_enum.hpp"
-// #include "raylib-cereal.hpp"
+#include "raylib-cereal.hpp"
 #include "raylib.h"
 #include "slib.hpp"
 
@@ -28,9 +28,17 @@ namespace sage
             materialNames; // names of this mesh's materials (at the same index in model.materials)
 
         template <class Archive>
-        void serialize(Archive& archive)
+        void save(Archive& archive) const
         {
             archive(model, materialNames);
+        }
+        template <class Archive>
+        void load(Archive& archive)
+        {
+            std::vector<std::string> _materialNames;
+            archive(model, _materialNames);
+
+            materialNames = _materialNames;
         }
     };
 
@@ -115,6 +123,8 @@ namespace sage
                 animatedModelKeys,
                 modelAnimCounts,
                 modelAnimationsData);
+
+            //
         }
 
         template <class Archive>
@@ -142,11 +152,16 @@ namespace sage
             // WARNING: Does *not* account for overlapping keys (does nothing if key exists)
             images.insert(_images.begin(), _images.end());
             modelCopies.insert(_modelCopies.begin(), _modelCopies.end());
-            materials.assign(_materials.begin(), _materials.end());
+            materials.insert(materials.end(), _materials.begin(), _materials.end());
             materialMap.insert(_materialMap.begin(), _materialMap.end());
 
             for (auto& [key, model] : GetInstance().modelCopies)
             {
+                // for (unsigned int i = 0; i < model.model.materialCount; ++i)
+                // {
+                //     assert(model.model.materials[i].maps == nullptr);
+                //     model.model.materials[i] = LoadMaterialDefault();
+                // }
                 for (unsigned int i = 0; i < model.materialNames.size(); ++i)
                 {
                     const auto& mat = model.materialNames.at(i);

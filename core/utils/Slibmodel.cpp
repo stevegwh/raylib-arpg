@@ -44,7 +44,7 @@ namespace sage
     static ModelInfo sgLoadOBJ(const char* fileName); // Load OBJ mesh data
 #endif
 #if defined(SUPPORT_FILEFORMAT_GLTF)
-    static Model sgLoadGLTF(const char* fileName); // Load GLTF mesh data
+    static ModelInfo sgLoadGLTF(const char* fileName); // Load GLTF mesh data
     static ModelAnimation* sgLoadModelAnimationsGLTF(
         const char* fileName, int* animCount); // Load GLTF animation data
 #endif
@@ -69,7 +69,7 @@ namespace sage
 #endif
 #if defined(SUPPORT_FILEFORMAT_GLTF)
         if (IsFileExtension(fileName, ".gltf") || IsFileExtension(fileName, ".glb"))
-            modelInfo = {sgLoadGLTF(fileName), {}};
+            modelInfo = sgLoadGLTF(fileName);
 #endif
 
         // Make sure model transform is set to identity matrix!
@@ -787,7 +787,7 @@ namespace sage
     }
 
     // Load glTF file into model struct, .gltf and .glb supported
-    static Model sgLoadGLTF(const char* fileName)
+    static ModelInfo sgLoadGLTF(const char* fileName)
     {
         /*********************************************************************************************
 
@@ -839,13 +839,14 @@ namespace sage
         }                                                                                                         \
     }
 
-        Model model = {0};
+        ModelInfo modelInfo{};
+        Model model{};
 
         // glTF file loading
         int dataSize = 0;
         unsigned char* fileData = LoadFileData(fileName, &dataSize);
 
-        if (fileData == nullptr) return model;
+        if (fileData == nullptr) return ModelInfo{model, {}};
 
         // glTF data loading
         cgltf_options options{};
@@ -868,6 +869,11 @@ namespace sage
             TRACELOG(LOG_DEBUG, "    > Buffers count: %i", data->buffers_count);
             TRACELOG(LOG_DEBUG, "    > Images count: %i", data->images_count);
             TRACELOG(LOG_DEBUG, "    > Textures count: %i", data->textures_count);
+
+            for (unsigned int img = 0; img < data->materials_count; ++img)
+            {
+                modelInfo.materialNames.emplace_back(data->materials[img].name);
+            }
 
             // Force reading data buffers (fills buffer_view->buffer->data)
             // NOTE: If an uri is defined to base64 data or external path, it's automatically loaded
@@ -894,15 +900,15 @@ namespace sage
 
             // Load our model data: meshes and materials
             model.meshCount = primitivesCount;
-            model.meshes = (Mesh*)RL_CALLOC(model.meshCount, sizeof(Mesh));
+            model.meshes = static_cast<Mesh*>(RL_CALLOC(model.meshCount, sizeof(Mesh)));
 
             // NOTE: We keep an extra slot for default material, in case some mesh requires it
-            model.materialCount = (int)data->materials_count + 1;
-            model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+            model.materialCount = static_cast<int>(data->materials_count) + 1;
+            model.materials = static_cast<Material*>(RL_CALLOC(model.materialCount, sizeof(Material)));
             model.materials[0] = LoadMaterialDefault(); // Load default material (index: 0)
 
             // Load mesh-material indices, by default all meshes are mapped to material index: 0
-            model.meshMaterial = (int*)RL_CALLOC(model.meshCount, sizeof(int));
+            model.meshMaterial = static_cast<int*>(RL_CALLOC(model.meshCount, sizeof(int)));
 
             // Load materials data
             //----------------------------------------------------------------------------------------------------
@@ -927,14 +933,14 @@ namespace sage
                         }
                     }
                     // Load base color factor (tint)
-                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.r =
-                        (unsigned char)(data->materials[i].pbr_metallic_roughness.base_color_factor[0] * 255);
-                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.g =
-                        (unsigned char)(data->materials[i].pbr_metallic_roughness.base_color_factor[1] * 255);
-                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.b =
-                        (unsigned char)(data->materials[i].pbr_metallic_roughness.base_color_factor[2] * 255);
-                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.a =
-                        (unsigned char)(data->materials[i].pbr_metallic_roughness.base_color_factor[3] * 255);
+                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.r = static_cast<unsigned char>(
+                        data->materials[i].pbr_metallic_roughness.base_color_factor[0] * 255);
+                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.g = static_cast<unsigned char>(
+                        data->materials[i].pbr_metallic_roughness.base_color_factor[1] * 255);
+                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.b = static_cast<unsigned char>(
+                        data->materials[i].pbr_metallic_roughness.base_color_factor[2] * 255);
+                    model.materials[j].maps[MATERIAL_MAP_ALBEDO].color.a = static_cast<unsigned char>(
+                        data->materials[i].pbr_metallic_roughness.base_color_factor[3] * 255);
 
                     // Load metallic/roughness texture
                     if (data->materials[i].pbr_metallic_roughness.metallic_roughness_texture.texture)
@@ -1073,9 +1079,9 @@ namespace sage
                                 (attribute->component_type == cgltf_component_type_r_32f))
                             {
                                 // Init raylib mesh vertices to copy glTF attribute data
-                                model.meshes[meshIndex].vertexCount = (int)attribute->count;
+                                model.meshes[meshIndex].vertexCount = static_cast<int>(attribute->count);
                                 model.meshes[meshIndex].vertices =
-                                    (float*)RL_MALLOC(attribute->count * 3 * sizeof(float));
+                                    static_cast<float*>(RL_MALLOC(attribute->count * 3 * sizeof(float)));
 
                                 // Load 3 components of float data type into mesh.vertices
                                 LOAD_ATTRIBUTE(attribute, 3, float, model.meshes[meshIndex].vertices)
@@ -1109,7 +1115,7 @@ namespace sage
                             {
                                 // Init raylib mesh normals to copy glTF attribute data
                                 model.meshes[meshIndex].normals =
-                                    (float*)RL_MALLOC(attribute->count * 3 * sizeof(float));
+                                    static_cast<float*>(RL_MALLOC(attribute->count * 3 * sizeof(float)));
 
                                 // Load 3 components of float data type into mesh.normals
                                 LOAD_ATTRIBUTE(attribute, 3, float, model.meshes[meshIndex].normals)
@@ -1346,18 +1352,18 @@ namespace sage
                                 else if (attribute->component_type == cgltf_component_type_r_16u)
                                 {
                                     // Init raylib mesh color to copy glTF attribute data
-                                    model.meshes[meshIndex].colors =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned char));
+                                    model.meshes[meshIndex].colors = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned char)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp =
-                                        (unsigned short*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned short));
+                                    auto* temp = static_cast<unsigned short*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned short)));
                                     LOAD_ATTRIBUTE(attribute, 4, unsigned short, temp);
 
                                     // Convert data to raylib color data type (4 bytes)
                                     for (unsigned int c = 0; c < attribute->count * 4; c++)
-                                        model.meshes[meshIndex].colors[c] =
-                                            (unsigned char)(((float)temp[c] / 65535.0f) * 255.0f);
+                                        model.meshes[meshIndex].colors[c] = static_cast<unsigned char>(
+                                            (static_cast<float>(temp[c]) / 65535.0f) * 255.0f);
 
                                     RL_FREE(temp);
                                 }
@@ -1399,13 +1405,13 @@ namespace sage
                     {
                         cgltf_accessor* attribute = mesh->primitives[p].indices;
 
-                        model.meshes[meshIndex].triangleCount = (int)attribute->count / 3;
+                        model.meshes[meshIndex].triangleCount = static_cast<int>(attribute->count) / 3;
 
                         if (attribute->component_type == cgltf_component_type_r_16u)
                         {
                             // Init raylib mesh indices to copy glTF attribute data
                             model.meshes[meshIndex].indices =
-                                (unsigned short*)RL_MALLOC(attribute->count * sizeof(unsigned short));
+                                static_cast<unsigned short*>(RL_MALLOC(attribute->count * sizeof(unsigned short)));
 
                             // Load unsigned short data type into mesh.indices
                             LOAD_ATTRIBUTE(attribute, 1, unsigned short, model.meshes[meshIndex].indices)
@@ -1414,7 +1420,7 @@ namespace sage
                         {
                             // Init raylib mesh indices to copy glTF attribute data
                             model.meshes[meshIndex].indices =
-                                (unsigned short*)RL_MALLOC(attribute->count * sizeof(unsigned short));
+                                static_cast<unsigned short*>(RL_MALLOC(attribute->count * sizeof(unsigned short)));
                             LOAD_ATTRIBUTE_CAST(
                                 attribute, 1, unsigned char, model.meshes[meshIndex].indices, unsigned short)
                         }
@@ -1422,7 +1428,7 @@ namespace sage
                         {
                             // Init raylib mesh indices to copy glTF attribute data
                             model.meshes[meshIndex].indices =
-                                (unsigned short*)RL_MALLOC(attribute->count * sizeof(unsigned short));
+                                static_cast<unsigned short*>(RL_MALLOC(attribute->count * sizeof(unsigned short)));
                             LOAD_ATTRIBUTE_CAST(
                                 attribute, 1, unsigned int, model.meshes[meshIndex].indices, unsigned short);
 
@@ -1475,7 +1481,7 @@ namespace sage
             {
                 cgltf_skin skin = data->skins[0];
                 model.bones = sgLoadBoneInfoGLTF(skin, &model.boneCount);
-                model.bindPose = (Transform*)RL_MALLOC(model.boneCount * sizeof(Transform));
+                model.bindPose = static_cast<Transform*>(RL_MALLOC(model.boneCount * sizeof(Transform)));
 
                 for (int i = 0; i < model.boneCount; i++)
                 {
@@ -1550,8 +1556,8 @@ namespace sage
                                 if (attribute->component_type == cgltf_component_type_r_8u)
                                 {
                                     // Init raylib mesh boneIds to copy glTF attribute data
-                                    model.meshes[meshIndex].boneIds = (unsigned char*)RL_CALLOC(
-                                        model.meshes[meshIndex].vertexCount * 4, sizeof(unsigned char));
+                                    model.meshes[meshIndex].boneIds = static_cast<unsigned char*>(
+                                        RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(unsigned char)));
 
                                     // Load attribute: vec4, u8 (unsigned char)
                                     LOAD_ATTRIBUTE(attribute, 4, unsigned char, model.meshes[meshIndex].boneIds)
@@ -1559,12 +1565,12 @@ namespace sage
                                 else if (attribute->component_type == cgltf_component_type_r_16u)
                                 {
                                     // Init raylib mesh boneIds to copy glTF attribute data
-                                    model.meshes[meshIndex].boneIds = (unsigned char*)RL_CALLOC(
-                                        model.meshes[meshIndex].vertexCount * 4, sizeof(unsigned char));
+                                    model.meshes[meshIndex].boneIds = static_cast<unsigned char*>(
+                                        RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(unsigned char)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto* temp = (unsigned short*)RL_CALLOC(
-                                        model.meshes[meshIndex].vertexCount * 4, sizeof(unsigned short));
+                                    auto* temp = static_cast<unsigned short*>(RL_CALLOC(
+                                        model.meshes[meshIndex].vertexCount * 4, sizeof(unsigned short)));
                                     LOAD_ATTRIBUTE(attribute, 4, unsigned short, temp);
 
                                     // Convert data to raylib color data type (4 bytes)
@@ -1610,42 +1616,44 @@ namespace sage
                                 if (attribute->component_type == cgltf_component_type_r_8u)
                                 {
                                     // Init raylib mesh bone weight to copy glTF attribute data
-                                    model.meshes[meshIndex].boneWeights =
-                                        (float*)RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(float));
+                                    model.meshes[meshIndex].boneWeights = static_cast<float*>(
+                                        RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(float)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto temp =
-                                        (unsigned char*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned char));
+                                    auto temp = static_cast<unsigned char*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned char)));
                                     LOAD_ATTRIBUTE(attribute, 4, unsigned char, temp);
 
                                     // Convert data to raylib bone weight data type (4 bytes)
                                     for (unsigned int b = 0; b < attribute->count * 4; b++)
-                                        model.meshes[meshIndex].boneWeights[b] = (float)temp[b] / 255.0f;
+                                        model.meshes[meshIndex].boneWeights[b] =
+                                            static_cast<float>(temp[b]) / 255.0f;
 
                                     RL_FREE(temp);
                                 }
                                 else if (attribute->component_type == cgltf_component_type_r_16u)
                                 {
                                     // Init raylib mesh bone weight to copy glTF attribute data
-                                    model.meshes[meshIndex].boneWeights =
-                                        (float*)RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(float));
+                                    model.meshes[meshIndex].boneWeights = static_cast<float*>(
+                                        RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(float)));
 
                                     // Load data into a temp buffer to be converted to raylib data type
-                                    auto temp =
-                                        (unsigned short*)RL_MALLOC(attribute->count * 4 * sizeof(unsigned short));
+                                    auto temp = static_cast<unsigned short*>(
+                                        RL_MALLOC(attribute->count * 4 * sizeof(unsigned short)));
                                     LOAD_ATTRIBUTE(attribute, 4, unsigned short, temp);
 
                                     // Convert data to raylib bone weight data type
                                     for (unsigned int b = 0; b < attribute->count * 4; b++)
-                                        model.meshes[meshIndex].boneWeights[b] = (float)temp[b] / 65535.0f;
+                                        model.meshes[meshIndex].boneWeights[b] =
+                                            static_cast<float>(temp[b]) / 65535.0f;
 
                                     RL_FREE(temp);
                                 }
                                 else if (attribute->component_type == cgltf_component_type_r_32f)
                                 {
                                     // Init raylib mesh bone weight to copy glTF attribute data
-                                    model.meshes[meshIndex].boneWeights =
-                                        (float*)RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(float));
+                                    model.meshes[meshIndex].boneWeights = static_cast<float*>(
+                                        RL_CALLOC(model.meshes[meshIndex].vertexCount * 4, sizeof(float)));
 
                                     // Load 4 components of float data type into mesh.boneWeights
                                     // for cgltf_attribute_type_weights we have:
@@ -1711,7 +1719,9 @@ namespace sage
         // WARNING: cgltf requires the file pointer available while reading data
         UnloadFileData(fileData);
 
-        return model;
+        modelInfo.model = model;
+
+        return modelInfo;
     }
 
     // Get interpolated pose for bone sampler at a specific time. Returns true on success

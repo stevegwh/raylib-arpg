@@ -415,7 +415,13 @@ void load(Archive& archive, Model& model)
         bindPose);
 
     model.meshes = static_cast<Mesh*>(RL_CALLOC(model.meshCount, sizeof(Mesh)));
-    // model.materials = (Material*)RL_CALLOC(model.materialCount, sizeof(Material));
+    model.materials = static_cast<Material*>(RL_CALLOC(model.materialCount, sizeof(Material)));
+
+    for (unsigned int i = 0; i < model.materialCount; ++i)
+    {
+        model.materials[i] = LoadMaterialDefault();
+    }
+
     model.meshMaterial = static_cast<int*>(RL_CALLOC(model.meshCount, sizeof(int)));
     model.bones = static_cast<BoneInfo*>(RL_MALLOC(model.boneCount * sizeof(BoneInfo)));
     model.bindPose = static_cast<Transform*>(RL_MALLOC(model.boneCount * sizeof(Transform)));
