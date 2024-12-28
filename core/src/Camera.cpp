@@ -235,15 +235,18 @@ namespace sage
 
         rlCamera.position.y = rlCamera.target.y;
 
-        // Calculate the camera's position behind the actor's shoulder
-        Vector3 cameraOffset = {5.0f, 10.0f, 18.0f}; // TODO: Shouldn't be hardcoded
+        // Define the base camera offset in local space
+        Vector3 localOffset = {
+            5.0f, 10.0f, 18.0f}; // Distance from actor in local space (TODO: Shouldn't be hardcoded)
 
-        Vector3 cameraPosition = Vector3Add(npcTrans.GetWorldPos(), cameraOffset);
+        Vector3 rotation = npcTrans.GetWorldRot();
+        Matrix rotationMatrix =
+            MatrixRotateXYZ({rotation.x * DEG2RAD, rotation.y * DEG2RAD, rotation.z * DEG2RAD});
 
-        // Calculate the camera's target position slightly above the actor's position
+        Vector3 rotatedOffset = Vector3Transform(localOffset, rotationMatrix);
+        Vector3 cameraPosition = Vector3Add(npcTrans.GetWorldPos(), rotatedOffset);
         Vector3 cameraTarget = Vector3Add(npcTrans.GetWorldPos(), {0.0f, 1.0f, 0.0f});
 
-        // Set the camera's position and target
         rlCamera.position = cameraPosition;
         rlCamera.target = cameraTarget;
     }
