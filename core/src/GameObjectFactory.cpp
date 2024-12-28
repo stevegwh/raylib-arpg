@@ -80,28 +80,6 @@ namespace sage
         transform.SetPosition({position.x, height, position.z});
     }
 
-    entt::entity GameObjectFactory::createEmissiveCrystal(
-        entt::registry* registry, sage::GameData* data, Vector3 position, const char* name)
-    {
-        auto rlModel = LoadModel("resources/models/Synty Emissive Crystal.glb");
-        auto model = ModelSafe(rlModel);
-        auto id = registry->create();
-        Matrix modelTransform = MatrixScale(3.0f, 3.0f, 3.0f);
-        auto& renderable = registry->emplace<Renderable>(id, std::move(model), modelTransform);
-        renderable.name = name;
-
-        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
-        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
-
-        auto& transform = registry->emplace<sgTransform>(id, id);
-        placeActor(registry, id, data, position);
-        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
-        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
-        collideable.collisionLayer = CollisionLayer::BUILDING;
-
-        return id;
-    }
-
     entt::entity GameObjectFactory::createEnemy(
         entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
     {
@@ -109,7 +87,6 @@ namespace sage
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
-        transform.SetRotation(rotation);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.25f;
@@ -137,6 +114,9 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::ENEMY;
+
+        transform.SetRotation(
+            rotation); // TODO: Find out why this must be called after bounding box from collideable is created
 
         registry->emplace<WavemobState>(id);
         return id;
@@ -168,7 +148,7 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialog = registry->emplace<DialogComponent>(id);
-        auto questId = QuestManager::GetInstance().GetQuest("TestQuest");
+        auto questId = QuestManager::GetInstance().GetQuest("ArissaQuest");
         auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry);
         auto& quest = registry->get<Quest>(questId);
         quest.AddTask(id);
@@ -210,19 +190,18 @@ namespace sage
         return id;
     }
 
-    entt::entity GameObjectFactory::createKnight(
-        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
+    entt::entity GameObjectFactory::createArissa(
+        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation)
     {
         entt::entity id = registry->create();
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
-        transform.SetRotation(rotation);
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
-        renderable.name = name;
+        renderable.name = "Arissa";
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
@@ -234,6 +213,7 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
+        transform.SetRotation(rotation);
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
@@ -248,7 +228,6 @@ namespace sage
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
-        transform.SetRotation(rotation);
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
@@ -265,6 +244,7 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 4.5f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
+        transform.SetRotation(rotation);
 
         // Set animation hooks
         auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);

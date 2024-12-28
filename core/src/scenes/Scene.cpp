@@ -125,7 +125,8 @@ namespace sage
             }
             else if (spawner.spawnerType == SpawnerType::NPC)
             {
-                GameObjectFactory::createKnight(registry, data.get(), spawner.pos, spawner.rot, "Arissa");
+                auto npc = data->npcManager->CreateNPC(spawner.spawnerName, spawner.pos, spawner.rot);
+                assert(npc != entt::null);
             }
         }
 
