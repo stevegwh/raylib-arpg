@@ -275,6 +275,10 @@ namespace sage
         {
             HandleLight(registry, infile);
         }
+        else if (typeName.find("quest_item") != std::string::npos)
+        {
+            // HandleQuestItem(registry, infile);
+        }
         else
         {
             HandleMesh(registry, infile, meshPath, slices);
