@@ -2,6 +2,8 @@ import bpy
 import os
 import shutil
 
+print(f'=======================')
+
 basedir = os.path.dirname(bpy.data.filepath)
 if not basedir:
     raise Exception("Blend file is not saved")
@@ -34,6 +36,19 @@ unique_meshes = {}
 
 
 def handle_spawner(obj, output_folder):
+    print(f"\nDEBUG INFO for object: {obj.name}")
+
+    # Check if we have mesh data and try to get the property
+    spawner_name = "NOT_FOUND"
+    if "spawner_name" in obj:
+        try:
+            spawner_name = obj["spawner_name"]
+            print(f"Found spawner_name in mesh data: {spawner_name}")
+        except:
+            print("Failed to access spawner_name")
+    else:
+        print("No spawner_name property found")
+
     transform_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
     with open(transform_file, 'w') as f:
         f.write(f"type: spawner\n")
@@ -41,14 +56,22 @@ def handle_spawner(obj, output_folder):
         f.write(f"location: {obj.location.x:.6f} {obj.location.z:.6f} {-obj.location.y:.6f}\n")
         f.write(f"rotation: {obj.rotation_euler.x:.6f} {obj.rotation_euler.z:.6f} {obj.rotation_euler.y:.6f}\n")
 
-        if "Goblin" in obj.name:
-            spawner_type = "GOBLIN"
+        if "Enemy" in obj.name:
+            spawner_type = "ENEMY"
         elif "Player" in obj.name:
             spawner_type = "PLAYER"
+        elif "NPC" in obj.name:
+            spawner_type = "NPC"
         else:
             spawner_type = "UNKNOWN"
 
         f.write(f"spawner_type: {spawner_type}\n")
+
+        # Handle spawned_name based on type
+        if spawner_type == "PLAYER":
+            f.write("spawner_name: PLAYER\n")
+        else:
+            f.write(f"spawner_name: {spawner_name}\n")
 
     print(f"Exported spawner: {transform_file}")
 

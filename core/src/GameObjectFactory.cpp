@@ -103,12 +103,13 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createEnemy(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
     {
         entt::entity id = registry->create();
 
-        registry->emplace<sgTransform>(id, id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
+        transform.SetRotation(rotation);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.25f;
@@ -210,12 +211,13 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createKnight(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
     {
         entt::entity id = registry->create();
 
-        registry->emplace<sgTransform>(id, id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
+        transform.SetRotation(rotation);
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
@@ -240,12 +242,13 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createPlayer(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
     {
         entt::entity id = registry->create();
 
-        registry->emplace<sgTransform>(id, id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
+        transform.SetRotation(rotation);
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(

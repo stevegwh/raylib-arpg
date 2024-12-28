@@ -145,6 +145,8 @@ namespace sage
     void HandleSpawner(entt::registry* registry, std::ifstream& infile)
     {
         std::string objectName;
+        std::string spawnerType;
+        std::string spawnerName;
         float x, y, z, rotx, roty, rotz;
         try
         {
@@ -155,6 +157,9 @@ namespace sage
 
             std::istringstream rotStream(readLine(infile, "rotation"));
             rotStream >> rotx >> roty >> rotz;
+
+            spawnerType = readLine(infile, "spawner_type");
+            spawnerName = readLine(infile, "spawner_name");
         }
         catch (const std::exception& e)
         {
@@ -167,15 +172,21 @@ namespace sage
         Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         auto& spawner = registry->emplace<Spawner>(entity);
         spawner.pos = {scaledPosition.x, scaledPosition.y, scaledPosition.z};
-        spawner.rot = {rotx, roty, rotz};
-        if (objectName.find("Goblin") != std::string::npos)
+        spawner.rot = {rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG};
+
+        if (spawnerType == "ENEMY")
         {
-            spawner.spawnerType = SpawnerType::GOBLIN;
+            spawner.spawnerType = SpawnerType::ENEMY;
         }
-        else if (objectName.find("Player") != std::string::npos)
+        else if (spawnerType == "PLAYER")
         {
             spawner.spawnerType = SpawnerType::PLAYER;
         }
+        else if (spawnerType == "NPC")
+        {
+            spawner.spawnerType = SpawnerType::NPC;
+        }
+        spawner.spawnerName = spawnerName;
     }
 
     void HandleMesh(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath, int& slices)

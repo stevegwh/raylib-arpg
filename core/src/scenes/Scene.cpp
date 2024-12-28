@@ -116,11 +116,16 @@ namespace sage
             auto& spawner = registry->get<Spawner>(entity);
             if (spawner.spawnerType == SpawnerType::PLAYER)
             {
-                firstPlayer = GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, "Player");
+                firstPlayer =
+                    GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, spawner.rot, "Player");
             }
-            else if (spawner.spawnerType == SpawnerType::GOBLIN)
+            else if (spawner.spawnerType == SpawnerType::ENEMY)
             {
-                GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, "Goblin");
+                GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, spawner.rot, "Goblin");
+            }
+            else if (spawner.spawnerType == SpawnerType::NPC)
+            {
+                GameObjectFactory::createKnight(registry, data.get(), spawner.pos, spawner.rot, "Arissa");
             }
         }
 
@@ -156,7 +161,7 @@ namespace sage
         spiral->InitSystem();
 
         // Clear any CPU resources that are no longer needed
-        ResourceManager::GetInstance().UnloadImages();
+        // ResourceManager::GetInstance().UnloadImages();
         // ResourceManager::GetInstance().UnloadShaderFileText();
     };
 

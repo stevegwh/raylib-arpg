@@ -12,20 +12,21 @@ namespace sage
     enum class SpawnerType
     {
         PLAYER,
-        GOBLIN,
-        LIGHT
+        ENEMY,
+        NPC
     };
 
     struct Spawner
     {
         // Can add a name for named/important mobs
         SpawnerType spawnerType;
+        std::string spawnerName;
         Vector3 pos;
         Vector3 rot;
         template <class Archive>
         void serialize(Archive& archive)
         {
-            archive(spawnerType, pos, rot);
+            archive(spawnerType, spawnerName, pos, rot);
         }
     };
 } // namespace sage

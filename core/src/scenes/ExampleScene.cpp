@@ -81,7 +81,8 @@ namespace sage
         : Scene(_registry, _keyMapping, _settings)
     {
         auto questId = QuestManager::GetInstance().CreateQuest(registry, "TestQuest");
-        auto knightId = GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, "Knight");
+        auto knightId =
+            GameObjectFactory::createKnight(registry, data.get(), {20.0f, 0, 20.0f}, {0, 0, 0}, "Knight");
 
         GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
 
