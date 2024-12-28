@@ -1,0 +1,29 @@
+{
+    "value0": {
+        "value0": [
+            {
+                "Name": "Dagger",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": [
+                    "WEAPON",
+                    "DAGGER"
+                ],
+                "Icon": "IMG_ICON_WEAPON_DAGGER01",
+                "Model": "MDL_WPN_DAGGER01"
+            },
+            {
+                "Name": "Sword",
+                "Description": "A test inventory item.",
+                "Rarity": "COMMON",
+                "Flags": [
+                    "WEAPON",
+                    "SWORD",
+                    "MAIN_HAND_ONLY"
+                ],
+                "Icon": "IMG_ICON_WEAPON_SWORD01",
+                "Model": "MDL_WPN_SWORD01"
+            }
+        ]
+    }
+}

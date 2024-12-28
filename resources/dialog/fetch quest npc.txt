@@ -1,0 +1,27 @@
+#meta start
+owner: Fetch Quest NPC
+camera_pos: 10.0 2.0 5.0
+#meta end
+
+#variables start
+questId: ItemFetchQuest
+#variables end
+
+#node start
+title: start
+---
+Hello there, how can I help?
+---
+if quest_hand_in($questId)
+[[quest_finish($questId) | I found this item on the ground, is it yours? | quest]]
+end
+[[Sorry, I must be leaving. | exit]]
+#node end
+
+#node start
+title: quest
+---
+Oh, thank you! I've been looking everywhere for this.
+---
+[[No problem | exit]]
+#node end
