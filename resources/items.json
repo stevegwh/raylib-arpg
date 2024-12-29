@@ -3,6 +3,7 @@
     "value0": [
       {
         "Name": "Dagger",
+        "LocalizedName": "Dagger",
         "Description": "A test inventory item.",
         "Rarity": "COMMON",
         "Flags": [
@@ -14,6 +15,7 @@
       },
       {
         "Name": "Sword",
+        "LocalizedName": "Sword",
         "Description": "A test inventory item.",
         "Rarity": "COMMON",
         "Flags": [
@@ -25,7 +27,8 @@
         "Model": "MDL_WPN_SWORD01"
       },
       {
-        "Name": "Lever",
+        "Name": "QUEST_LEVER",
+        "LocalizedName": "Lever",
         "Description": "A lever for a switch.",
         "Rarity": "COMMON",
         "Flags": [
@@ -35,7 +38,8 @@
         "Model": "MDL_QUEST_LEVER"
       },
       {
-        "Name": "Bone",
+        "Name": "QUEST_BONE",
+        "LocalizedName": "Bone",
         "Description": "A sizeable bone.",
         "Rarity": "COMMON",
         "Flags": [

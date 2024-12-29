@@ -2837,7 +2837,7 @@ namespace sage
             viewport.x,
             viewport.y);
         pos.x += gameData->settings->ScaleValueWidth(20); // TODO: magic number
-        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.name, pos);
+        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.localizedName, pos);
     }
 
     void GameUIEngine::onWorldCombatableHover(entt::entity entity) const

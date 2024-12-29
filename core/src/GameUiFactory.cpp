@@ -266,7 +266,7 @@ namespace sage
             TextBox::FontInfo _fontInfo{};
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
-            cell0->CreateTextbox(std::move(headerTextbox), item.name);
+            cell0->CreateTextbox(std::move(headerTextbox), item.localizedName);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);

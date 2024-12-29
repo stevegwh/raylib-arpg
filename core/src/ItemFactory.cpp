@@ -12,7 +12,8 @@ namespace sage
     {
         ItemComponent item;
         item.name = "Dagger";
-        item.description = "A test inventory item.";
+        item.localizedName = "Worn Dagger";
+        item.description = "A worn and slightly pathetic dagger.";
         item.icon = AssetID::IMG_ICON_WEAPON_DAGGER01;
         item.model = AssetID::MDL_WPN_DAGGER01;
         item.AddFlag(ItemFlags::WEAPON | ItemFlags::DAGGER);
@@ -23,6 +24,7 @@ namespace sage
     {
         ItemComponent item;
         item.name = "Sword";
+        item.name = "Common Sword";
         item.description = "A test inventory item.";
         item.icon = AssetID::IMG_ICON_WEAPON_SWORD01;
         item.model = AssetID::MDL_WPN_SWORD01;

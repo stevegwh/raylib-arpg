@@ -85,6 +85,7 @@ namespace sage
     {
         static constexpr float MAX_ITEM_DROP_RANGE = 40.0f;
         std::string name;
+        std::string localizedName;
         std::string description;
         ItemRarity rarity = static_cast<ItemRarity>(0);
         ItemFlags flags = static_cast<ItemFlags>(0);
@@ -107,6 +108,7 @@ namespace sage
 
             archive(
                 cereal::make_nvp("Name", name),
+                cereal::make_nvp("LocalizedName", localizedName),
                 cereal::make_nvp("Description", description),
                 cereal::make_nvp("Rarity", std::string(magic_enum::enum_name(rarity))),
                 cereal::make_nvp("Flags", flagNames),
@@ -122,7 +124,7 @@ namespace sage
             std::string _icon;
             std::string _model;
 
-            archive(name, description, _rarity, flagNames, _icon, _model);
+            archive(name, localizedName, description, _rarity, flagNames, _icon, _model);
 
             flags = static_cast<ItemFlags>(0);
 
