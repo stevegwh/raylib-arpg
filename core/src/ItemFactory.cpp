@@ -38,8 +38,13 @@ namespace sage
         return entity;
     }
 
-    ItemFactory::ItemFactory(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    void ItemFactory::AttachItem(entt::entity entity, const std::string& name) const
+    {
+        auto item = itemMap.at(name);
+        registry->emplace<ItemComponent>(entity, item);
+    }
+
+    ItemFactory::ItemFactory(entt::registry* _registry) : registry(_registry)
     {
     }
 } // namespace sage

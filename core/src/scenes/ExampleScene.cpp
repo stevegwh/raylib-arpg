@@ -81,15 +81,15 @@ namespace sage
         : Scene(_registry, _keyMapping, _settings)
     {
         GameObjectFactory::createArissa(registry, data.get(), {0.0f, 0, 25.0f}, {0, 0, 0});
-        QuestManager::GetInstance().CreateQuest(registry, "ArissaQuest");
+        data->questManager->GetQuest("ArissaQuest");
 
         GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
 
         {
             auto item = data->itemFactory->GetItem("Dagger");
             GameObjectFactory::spawnItemInWorld(registry, data.get(), item, {0, 0, 0});
-            auto quest2Id = QuestManager::GetInstance().CreateQuest(registry, "ItemFetchQuest");
-            auto& taskComponent = registry->emplace<QuestTaskComponent>(item, registry);
+            auto quest2Id = data->questManager->GetQuest("ItemFetchQuest");
+            registry->emplace<QuestTaskComponent>(item, "ItemFetchQuest");
             auto& quest = registry->get<Quest>(quest2Id);
             quest.AddTask(item);
             GameObjectFactory::createFetchQuestNPC(registry, data.get(), {-10.0f, 0, 0}, "Fetch Quest NPC");

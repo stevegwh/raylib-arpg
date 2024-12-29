@@ -19,6 +19,7 @@
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
 #include "NpcManager.hpp"
+#include "QuestManager.hpp"
 #include "Serializer.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"

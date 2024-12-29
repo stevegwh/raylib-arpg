@@ -114,6 +114,14 @@
         "value": "resources/models/obj/flattorus.obj"
       },
       {
+        "key": "MDL_QUEST_LEVER",
+        "value": "QUEST_LEVER"
+      },
+      {
+        "key": "MDL_QUEST_BONE",
+        "value": "QUEST_BONE"
+      },
+      {
         "key": "MDL_WPN_DAGGER01",
         "value": "resources/models/weps/dagger.glb"
       },

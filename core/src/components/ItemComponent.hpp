@@ -137,7 +137,10 @@ namespace sage
 
             rarity = magic_enum::enum_cast<ItemRarity>(_rarity).value();
             icon = magic_enum::enum_cast<AssetID>(_icon).value();
-            model = magic_enum::enum_cast<AssetID>(_model).value();
+            if (_model != "NONE")
+            {
+                model = magic_enum::enum_cast<AssetID>(_model).value();
+            }
         }
 
         // Helper methods for flags

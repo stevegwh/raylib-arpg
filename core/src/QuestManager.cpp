@@ -8,10 +8,10 @@
 namespace sage
 {
 
-    entt::entity QuestManager::CreateQuest(entt::registry* _registry, const std::string& key)
+    entt::entity QuestManager::createQuest(const std::string& key)
     {
-        auto entity = _registry->create();
-        _registry->emplace<Quest>(entity, _registry, entity);
+        auto entity = registry->create();
+        registry->emplace<Quest>(entity, registry, entity, key);
         map.emplace(key, entity);
 
         return entity;
@@ -20,12 +20,21 @@ namespace sage
     void QuestManager::RemoveQuest(const std::string& key)
     {
         map.erase(key);
+        // TODO: Surely remove from registry?
     }
 
-    entt::entity QuestManager::GetQuest(const std::string& key) const
+    entt::entity QuestManager::GetQuest(const std::string& key)
     {
-        assert(map.contains(key));
+        // assert(map.contains(key));
+        if (!map.contains(key))
+        {
+            return createQuest(key);
+        }
         return map.at(key);
+    }
+
+    QuestManager::QuestManager(entt::registry* _registry) : registry(_registry)
+    {
     }
 
 } // namespace sage

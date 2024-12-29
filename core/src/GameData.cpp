@@ -19,6 +19,7 @@
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
 #include "NpcManager.hpp"
+#include "QuestManager.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
@@ -59,7 +60,7 @@ namespace sage
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
           abilityRegistry(std::make_unique<AbilityFactory>(_registry, this)),
-          itemFactory(std::make_unique<ItemFactory>(_registry, this)),
+          itemFactory(std::make_unique<ItemFactory>(_registry)),
           playerAbilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),
           timerSystem(std::make_unique<TimerSystem>(_registry)),
@@ -68,7 +69,8 @@ namespace sage
           partySystem(std::make_unique<PartySystem>(_registry, this)),
           equipmentSystem(std::make_unique<EquipmentSystem>(_registry, this)),
           uberShaderSystem(std::make_unique<UberShaderSystem>(_registry, this)),
-          cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this))
+          cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this)),
+          questManager(std::make_unique<QuestManager>(_registry))
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this

@@ -9,6 +9,8 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/Spawner.hpp"
+#include "GameData.hpp"
+#include "ItemFactory.hpp"
 #include "Light.hpp"
 #include "ViewSerializer.hpp"
 
@@ -16,6 +18,7 @@
 #include "cereal/archives/xml.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"
+#include "components/QuestComponents.hpp"
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
 #include "raylib-cereal.hpp"
@@ -68,7 +71,24 @@ namespace sage
 
                 output(ResourceManager::GetInstance());
 
-                const auto view = source.view<sgTransform, Renderable, Collideable>();
+                ViewSerializer<QuestTaskComponent, ItemComponent> questItemLoader(&source);
+                output(questItemLoader);
+
+                const auto questView =
+                    source.view<sgTransform, Renderable, Collideable, QuestTaskComponent, ItemComponent>();
+                for (const auto& ent : questView)
+                {
+                    const auto& rend = questView.get<Renderable>(ent);
+                    const auto& trans = questView.get<sgTransform>(ent);
+                    const auto& col = questView.get<Collideable>(ent);
+
+                    entity entity{};
+                    entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
+                    output(entity, trans, col, rend);
+                }
+
+                const auto view =
+                    source.view<sgTransform, Renderable, Collideable>(entt::exclude<QuestTaskComponent>);
                 for (const auto& ent : view)
                 {
                     const auto& rend = view.get<Renderable>(ent);
@@ -109,9 +129,32 @@ namespace sage
 
                 input(ResourceManager::GetInstance());
 
+                ViewSerializer<QuestTaskComponent, ItemComponent> questItemLoader(destination);
+                input(questItemLoader);
+
+                auto view = destination->view<QuestTaskComponent, ItemComponent>();
+                for (auto entt : view)
+                {
+                    entity entityId{}; // ignore this (old serialized entity)
+                    // auto entt = destination->create();
+                    auto& transform = destination->emplace<sgTransform>(entt, entt);
+                    auto& collideable = destination->emplace<Collideable>(entt);
+                    auto& renderable = destination->emplace<Renderable>(entt);
+
+                    try
+                    {
+                        input(entityId, transform, collideable, renderable);
+                    }
+                    catch (const cereal::Exception& e)
+                    {
+                        std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
+                        break;
+                    }
+                }
+
                 while (storage.peek() != EOF)
                 {
-                    entity entityId{}; // ignore this
+                    entity entityId{}; // ignore this (old serialized entity)
                     auto entt = destination->create();
                     auto& transform = destination->emplace<sgTransform>(entt, entt);
                     auto& collideable = destination->emplace<Collideable>(entt);

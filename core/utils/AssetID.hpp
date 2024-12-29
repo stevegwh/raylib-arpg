@@ -15,6 +15,8 @@ namespace sage
         MDL_BUILDING_WIZARDTOWER1,
         MDL_VFX_SPHERE,
         MDL_VFX_FLATTORUS,
+        MDL_QUEST_LEVER,
+        MDL_QUEST_BONE,
         MDL_WPN_DAGGER01,
         MDL_WPN_SWORD01,
         IMG_ABILITY_RAINOFFIRE,

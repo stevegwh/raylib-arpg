@@ -4,7 +4,10 @@
 
 #include "QuestComponents.hpp"
 
+#include "QuestManager.hpp"
+
 #include <iostream>
+#include <utility>
 
 namespace sage
 {
@@ -65,7 +68,8 @@ namespace sage
         return true;
     }
 
-    Quest::Quest(entt::registry* _registry, entt::entity _questID) : registry(_registry), questId(_questID)
+    Quest::Quest(entt::registry* _registry, const entt::entity _questId, std::string  _questKey)
+        : registry(_registry), questKey(std::move(_questKey)), questId(_questId)
     {
     }
 } // namespace sage

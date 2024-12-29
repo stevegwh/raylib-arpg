@@ -137,7 +137,7 @@ namespace sage
         dialog::Conversation* conversation,
         const std::string& nodeName,
         const std::string& content,
-        const std::vector<std::vector<std::string>>& optionData) const
+        const std::vector<std::vector<std::string>>& optionData)
     {
         auto node = std::make_unique<dialog::ConversationNode>(conversation);
         node->title = nodeName;
@@ -162,24 +162,25 @@ namespace sage
                 auto reg = registry;
                 condition = [reg,
                              negateCondition,
-                             condition = getFunctionNameAndArgs(option.at(parameterIndex))]() -> bool {
+                             condition = getFunctionNameAndArgs(option.at(parameterIndex)),
+                             this]() -> bool {
                     bool out = false;
                     if (condition.first == "quest_complete")
                     {
                         assert(!condition.second.empty());
-                        auto& quest = reg->get<Quest>(QuestManager::GetInstance().GetQuest(condition.second));
+                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.second));
                         out = quest.IsComplete();
                     }
                     else if (condition.first == "quest_in_progress")
                     {
                         assert(!condition.second.empty());
-                        auto& quest = reg->get<Quest>(QuestManager::GetInstance().GetQuest(condition.second));
+                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.second));
                         out = quest.HasStarted() && !quest.IsComplete();
                     }
                     else if (condition.first == "quest_hand_in")
                     {
                         assert(!condition.second.empty());
-                        auto& quest = reg->get<Quest>(QuestManager::GetInstance().GetQuest(condition.second));
+                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.second));
                         out = quest.HasStarted() && quest.GetTaskCompleteCount() == quest.GetTaskCount() - 1;
                     }
                     else
@@ -219,7 +220,7 @@ namespace sage
                 if (token.first == "quest_task")
                 {
                     assert(!token.second.empty());
-                    auto questId = QuestManager::GetInstance().GetQuest(token.second);
+                    auto questId = gameData->questManager->GetQuest(token.second);
                     std::unique_ptr<dialog::QuestOption> questOption;
                     if (condition.has_value())
                     {
@@ -241,7 +242,7 @@ namespace sage
                 else if (token.first == "quest_start")
                 {
                     assert(!token.second.empty());
-                    auto questId = QuestManager::GetInstance().GetQuest(token.second);
+                    auto questId = gameData->questManager->GetQuest(token.second);
                     std::unique_ptr<dialog::QuestStartOption> questStartOption;
                     if (condition.has_value())
                     {
@@ -263,7 +264,7 @@ namespace sage
                 else if (token.first == "quest_finish")
                 {
                     assert(!token.second.empty());
-                    auto questId = QuestManager::GetInstance().GetQuest(token.second);
+                    auto questId = gameData->questManager->GetQuest(token.second);
                     std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
                     if (condition.has_value())
                     {

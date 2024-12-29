@@ -148,8 +148,8 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         auto& dialog = registry->emplace<DialogComponent>(id);
-        auto questId = QuestManager::GetInstance().GetQuest("ArissaQuest");
-        auto& taskComponent = registry->emplace<QuestTaskComponent>(id, registry);
+        auto questId = data->questManager->GetQuest("ArissaQuest");
+        registry->emplace<QuestTaskComponent>(id, "ArissaQuest");
         auto& quest = registry->get<Quest>(questId);
         quest.AddTask(id);
 
@@ -182,8 +182,8 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
-        registry->emplace<QuestTaskComponent>(id, registry);
-        auto questId = QuestManager::GetInstance().GetQuest("ItemFetchQuest");
+        registry->emplace<QuestTaskComponent>(id, "ItemFetchQuest");
+        auto questId = data->questManager->GetQuest("ItemFetchQuest");
         auto& quest = registry->get<Quest>(questId);
         quest.AddTask(id);
 

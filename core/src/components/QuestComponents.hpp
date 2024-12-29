@@ -7,6 +7,7 @@
 #include <entt/entt.hpp>
 #include <iostream>
 
+#include <utility>
 #include <vector>
 
 namespace sage
@@ -16,6 +17,7 @@ namespace sage
     // Attach this to entities that are part of a quest
     struct QuestTaskComponent
     {
+        std::string questKey;
         bool completed = false;
         entt::sigh<void(QuestTaskComponent*)> onTaskCompleted;
 
@@ -31,9 +33,16 @@ namespace sage
             return completed;
         }
 
-        explicit QuestTaskComponent(entt::registry* _registry)
+        template <class Archive>
+        void serialize(Archive& archive)
+        {
+            archive(questKey);
+        }
+
+        explicit QuestTaskComponent(std::string _questKey) : questKey(std::move(_questKey))
         {
         }
+        QuestTaskComponent() = default;
     };
 
     struct QuestRewards
@@ -46,6 +55,7 @@ namespace sage
         entt::registry* registry{};
         bool started = false;
         bool completed = false;
+        std::string questKey{};
         entt::entity questId{};
         int experience{};
         std::string journalExplanation;
@@ -63,7 +73,7 @@ namespace sage
         entt::sigh<void(entt::entity)> onQuestStart;
         entt::sigh<void(entt::entity)> onQuestCompleted;
 
-        explicit Quest(entt::registry* _registry, entt::entity _questId);
+        explicit Quest(entt::registry* _registry, entt::entity _questId, std::string _questKey);
     };
 
 } // namespace sage

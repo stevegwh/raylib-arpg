@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AssetID.hpp"
+#include "ItemFactory.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
 #include <entt/entt.hpp>
@@ -15,6 +16,7 @@
 namespace sage
 {
     class NavigationGridSystem;
+    class ItemFactory;
 
     class ResourcePacker
     {

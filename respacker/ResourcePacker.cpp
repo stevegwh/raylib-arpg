@@ -6,13 +6,16 @@
 #include "components/sgTransform.hpp"
 #include "components/Spawner.hpp"
 #include "GameObjectFactory.hpp"
+#include "ItemFactory.hpp"
 #include "Light.hpp"
 #include "LightManager.hpp"
+#include "QuestManager.hpp"
 #include "ResourceManager.hpp"
 #include "Serializer.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
+#include "components/QuestComponents.hpp"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -74,6 +77,10 @@ namespace sage
         if (objectName.find("_MAPBASE_") != std::string::npos)
         {
             return CollisionLayer::BACKGROUND;
+        }
+        if (objectName.find("_QUESTITEM_") != std::string::npos)
+        {
+            return CollisionLayer::ITEM;
         }
 
         return CollisionLayer::BACKGROUND; // by default, objects are ignored
@@ -189,6 +196,65 @@ namespace sage
         spawner.spawnerName = spawnerName;
     }
 
+    void HandleQuestItem(
+        entt::registry* registry, ItemFactory* itemFactory, std::ifstream& infile, const fs::path& meshPath)
+    {
+        std::string meshName, objectName, questName, itemName;
+        float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
+        try
+        {
+            objectName = readLine(infile, "name");
+            meshName = readLine(infile, "mesh");
+
+            std::istringstream locStream(readLine(infile, "location"));
+            locStream >> x >> y >> z;
+
+            std::istringstream rotStream(readLine(infile, "rotation"));
+            rotStream >> rotx >> roty >> rotz;
+
+            std::istringstream scaleStream(readLine(infile, "scale"));
+            scaleStream >> scalex >> scaley >> scalez;
+
+            questName = readLine(infile, "quest_id");
+            itemName = readLine(infile, "quest_item_name");
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error parsing mesh data: " << e.what() << std::endl;
+            assert(0);
+        }
+
+        fs::path fullMeshPath = meshPath / meshName;
+        std::string meshKey = fullMeshPath.generic_string();
+
+        auto entity = registry->create();
+
+        auto model = ResourceManager::GetInstance().GetModelCopy(meshKey);
+        assert(!meshKey.empty());
+        model.SetKey(meshKey);
+
+        Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
+        Matrix rotMat =
+            MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
+        Matrix transMat = MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z);
+        Matrix scaleMat = MatrixScale(scalex * WORLD_SCALE, scaley * WORLD_SCALE, scalez * WORLD_SCALE);
+
+        Matrix mat = MatrixMultiply(MatrixMultiply(scaleMat, rotMat), transMat);
+
+        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), mat);
+        renderable.name = objectName;
+
+        auto& trans = registry->emplace<sgTransform>(entity, entity);
+
+        auto& collideable = registry->emplace<Collideable>(
+            entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
+
+        collideable.collisionLayer = getCollisionLayer(objectName);
+
+        registry->emplace<QuestTaskComponent>(entity, questName);
+        itemFactory->AttachItem(entity, itemName);
+    }
+
     void HandleMesh(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath, int& slices)
     {
         std::string meshName, objectName;
@@ -252,7 +318,12 @@ namespace sage
         }
     }
 
-    void processTxtFile(entt::registry* registry, const fs::path& meshPath, const fs::path& txtPath, int& slices)
+    void processTxtFile(
+        entt::registry* registry,
+        ItemFactory* itemFactory,
+        const fs::path& meshPath,
+        const fs::path& txtPath,
+        int& slices)
     {
         std::string typeName;
         std::ifstream infile(txtPath);
@@ -277,7 +348,7 @@ namespace sage
         }
         else if (typeName.find("quest_item") != std::string::npos)
         {
-            // HandleQuestItem(registry, infile);
+            HandleQuestItem(registry, itemFactory, infile, meshPath);
         }
         else
         {
@@ -293,6 +364,8 @@ namespace sage
     {
         registry->clear();
         ResourceManager::GetInstance().Reset();
+        ItemFactory itemFactory(registry);
+        serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", itemFactory);
 
         fs::path inputPath(input);
         fs::path meshPath = inputPath / "mesh";
@@ -324,7 +397,7 @@ namespace sage
         {
             if (entry.path().extension() == ".txt")
             {
-                processTxtFile(registry, meshPath, entry.path(), slices);
+                processTxtFile(registry, &itemFactory, meshPath, entry.path(), slices);
             }
         }
         std::cout << "FINISH: Processing txt data into resource manager. \n";

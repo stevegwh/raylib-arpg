@@ -22,18 +22,17 @@
 
 namespace sage
 {
-    class GameData;
 
     class ItemFactory
     {
         entt::registry* registry;
-        GameData* gameData;
         std::unordered_map<std::string, ItemComponent> itemMap{};
 
       public:
         void CreateSword();
         void CreateDagger();
         [[nodiscard]] entt::entity GetItem(const std::string& name) const;
+        void AttachItem(entt::entity entity, const std::string& name) const;
 
         template <class Archive>
         void save(Archive& archive) const
@@ -63,7 +62,7 @@ namespace sage
             }
         }
 
-        ItemFactory(entt::registry* _registry, GameData* _gameData);
+        ItemFactory(entt::registry* _registry);
     };
 
 } // namespace sage
