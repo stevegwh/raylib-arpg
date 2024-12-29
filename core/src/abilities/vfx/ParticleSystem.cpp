@@ -3,6 +3,62 @@
 #include <algorithm>
 #include <utility>
 
+/**
+ * This is a heavily modified version of the 'libpartikel' project modified for 3D and ported to C++.
+ * The original notice is included below.
+ */
+/**********************************************************************************************
+ *
+ *   libpartikel v0.0.3 ALPHA
+ *   [https://github.com/dbriemann/libpartikel]
+ *
+ *
+ *   A simple particle system built with and for raylib, to be used as header
+ *only library.
+ *
+ *
+ *   FEATURES:
+ *       - Supports all platforms that raylib supports
+ *
+ *   DEPENDENCIES:
+ *       raylib >= v2.5.0 and all of its dependencies
+ *
+ *   CONFIGURATION:
+ *   #define LIBPARTIKEL_IMPLEMENTATION
+ *       Generates the implementation of the library into the included file.
+ *       If not defined, the library is in header only mode and can be included
+ *in other headers or source files without problems. But only ONE file should
+ *hold the implementation.
+ *
+ *   LICENSE: zlib/libpng
+ *
+ *   libpartikel is licensed under an unmodified zlib/libpng license, which is
+ *an OSI-certified, BSD-like license that allows static linking with closed
+ *source software:
+ *
+ *   Copyright (c) 2017 David Linus Briemann (@Raging_Dave)
+ *
+ *   This software is provided "as-is", without any express or implied warranty.
+ *In no event will the authors be held liable for any damages arising from the
+ *use of this software.
+ *
+ *   Permission is granted to anyone to use this software for any purpose,
+ *including commercial applications, and to alter it and redistribute it freely,
+ *subject to the following restrictions:
+ *
+ *     1. The origin of this software must not be misrepresented; you must not
+ *claim that you wrote the original software. If you use this software in a
+ *product, an acknowledgment in the product documentation would be appreciated
+ *but is not required.
+ *
+ *     2. Altered source versions must be plainly marked as such, and must not
+ *be misrepresented as being the original software.
+ *
+ *     3. This notice may not be removed or altered from any source
+ *distribution.
+ *
+ **********************************************************************************************/
+
 namespace sage
 {
     // Utility functions & structs.
