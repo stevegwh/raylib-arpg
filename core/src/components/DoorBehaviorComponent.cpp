@@ -10,6 +10,17 @@
 namespace sage
 {
 
+    void DoorBehaviorComponent::UnlockDoor()
+    {
+        locked = false;
+    }
+
+    void DoorBehaviorComponent::UnlockAndOpenDoor()
+    {
+        UnlockDoor();
+        ExecuteBehavior(self);
+    }
+
     // TODO: This is essentially hard coded to open the sole door in the game right now.
     void DoorBehaviorComponent::ExecuteBehavior(entt::entity clicked)
     {

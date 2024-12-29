@@ -19,9 +19,11 @@ namespace sage
         sgTransform* transform{};
         float openYRotation = 5;
         bool open = false;
-        bool locked = false;
+        bool locked = true;
 
       public:
+        void UnlockDoor();
+        void UnlockAndOpenDoor();
         void ExecuteBehavior(entt::entity clicked);
         ~DoorBehaviorComponent();
         DoorBehaviorComponent(entt::entity _self, sgTransform* _transform);

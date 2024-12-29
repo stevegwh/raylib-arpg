@@ -35,15 +35,18 @@
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
 #include "QuestManager.hpp"
-#include "raymath.h"
+
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
+#include "systems/RenderSystem.hpp"
 #include "systems/states/WavemobStateMachine.hpp"
-
 #include <slib.hpp>
+
+#include "components/DoorBehaviorComponent.hpp"
+#include "raymath.h"
 
 #include <iostream>
 
@@ -241,6 +244,11 @@ namespace sage
         auto& questCompleteReaction = registry->emplace<ReactToQuestFinishComponent>(id, id, quest);
         entt::sink sink{questCompleteReaction.onQuestCompleted};
         sink.connect<&PartySystem::NPCToMember>(data->partySystem);
+
+        auto doorEntity = data->renderSystem->FindRenderableByMeshName("QUEST_DOOR");
+        assert(doorEntity != entt::null);
+        auto& door = registry->get<DoorBehaviorComponent>(doorEntity);
+        sink.connect<&DoorBehaviorComponent::UnlockAndOpenDoor>(door);
 
         return id;
     }
