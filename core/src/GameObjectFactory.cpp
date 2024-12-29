@@ -130,17 +130,21 @@ namespace sage
         registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
 
-        Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+        Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_NPC_ARISSA"), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
         renderable.name = name;
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, "MDL_NPC_ARISSA");
-        animation.animationMap[AnimationEnum::IDLE] = 0;
+        auto& animation = registry->emplace<Animation>(id, "MDL_ENEMY_GOBLIN");
+        animation.animationMap[AnimationEnum::IDLE] = 1;
+        animation.animationMap[AnimationEnum::DEATH] = 0;
+        animation.animationMap[AnimationEnum::WALK] = 4;
+        animation.animationMap[AnimationEnum::AUTOATTACK] = 2;
         animation.animationMap[AnimationEnum::TALK] = 1;
+        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
