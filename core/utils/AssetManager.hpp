@@ -1,10 +1,10 @@
 #pragma once
 
-#include "AssetID.hpp"
 #include "cereal/archives/json.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"
 #include "cereal/types/unordered_map.hpp"
+#include "common_types.hpp"
 #include <string>
 #include <unordered_map>
 

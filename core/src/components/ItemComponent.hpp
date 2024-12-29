@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "AssetID.hpp"
+#include "common_types.hpp"
 
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"

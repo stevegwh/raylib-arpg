@@ -4,7 +4,7 @@
 
 #include "ControllableActorSystem.hpp"
 
-#include "AssetID.hpp"
+#include "common_types.hpp"
 #include "components/Collideable.hpp"
 #include "components/ControllableActor.hpp"
 #include "components/sgTransform.hpp"

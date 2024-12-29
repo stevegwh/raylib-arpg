@@ -1,5 +1,5 @@
 #meta start
-owner: Quest NPC
+owner: Cell Guard
 camera_pos: 10.0 2.0 5.0
 #meta end
 
@@ -10,19 +10,21 @@ questId: ArissaQuest
 #node start
 title: start
 ---
-Hello there, how can I help?
+WOT?
 ---
-if quest_hand_in($questId)
-[[quest_finish($questId) | I want to complete the quest. | quest]]
+if quest_in_progress($questId)
+[[quest_task($questId) | Give me those keys. | quest]]
 end
-[Hello! | hello]
+
+[[Hello. | hello]]
+
 [[Sorry, I must be leaving. | exit]]
 #node end
 
 #node start
 title: hello
 ---
-Hello!
+ERRRR. 'ELLO.
 ---
 [[Sorry, I must be leaving. | exit]]
 #node end
@@ -30,7 +32,7 @@ Hello!
 #node start
 title: quest
 ---
-Sure, the quest should now be complete.
+WELL. AS U ASKED NOICELY. HERE.
 ---
-[[Excellent. | exit]]
+[[Many thanks!. | exit]]
 #node end

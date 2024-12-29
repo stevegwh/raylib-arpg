@@ -4,7 +4,10 @@
 
 #pragma once
 
+#include <string>
+
 namespace sage
 {
     using ConversationID = unsigned int;
+    using AssetID = std::string;
 } // namespace sage

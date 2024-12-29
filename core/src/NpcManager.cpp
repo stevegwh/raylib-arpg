@@ -17,6 +17,10 @@ namespace sage
         {
             return GameObjectFactory::createArissa(registry, gameData, pos, rot);
         }
+        else if (name == "Cell Guard")
+        {
+            return GameObjectFactory::createQuestNPC(registry, gameData, pos, name.c_str());
+        }
 
         return entt::null;
     }

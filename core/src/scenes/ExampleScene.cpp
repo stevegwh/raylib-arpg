@@ -80,26 +80,22 @@ namespace sage
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : Scene(_registry, _keyMapping, _settings)
     {
-        GameObjectFactory::createArissa(registry, data.get(), {0.0f, 0, 25.0f}, {0, 0, 0});
-        data->questManager->GetQuest("ArissaQuest");
+        // GameObjectFactory::createArissa(registry, data.get(), {0.0f, 0, 25.0f}, {0, 0, 0});
+        // data->questManager->GetQuest("ArissaQuest");
 
-        GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
+        // GameObjectFactory::createQuestNPC(registry, data.get(), {10.0f, 0, 25.0f}, "Quest NPC");
 
-        {
-            auto item = data->itemFactory->GetItem("Dagger");
-            GameObjectFactory::spawnItemInWorld(registry, data.get(), item, {0, 0, 0});
-            auto quest2Id = data->questManager->GetQuest("ItemFetchQuest");
-            registry->emplace<QuestTaskComponent>(item, "ItemFetchQuest");
-            auto& quest = registry->get<Quest>(quest2Id);
-            quest.AddTask(item);
-            GameObjectFactory::createFetchQuestNPC(registry, data.get(), {-10.0f, 0, 0}, "Fetch Quest NPC");
-            quest.StartQuest();
-        }
+        //        {
+        //            auto item = data->itemFactory->GetItem("Dagger");
+        //            GameObjectFactory::spawnItemInWorld(registry, data.get(), item, {0, 0, 0});
+        //            auto quest2Id = data->questManager->GetQuest("ItemFetchQuest");
+        //            registry->emplace<QuestTaskComponent>(item, "ItemFetchQuest");
+        //            auto& quest = registry->get<Quest>(quest2Id);
+        //            quest.AddTask(item);
+        //            GameObjectFactory::createFetchQuestNPC(registry, data.get(), {-10.0f, 0, 0}, "Fetch Quest
+        //            NPC"); quest.StartQuest();
+        //        }
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
-
-        // ViewSerializer<ItemComponent> itemComponents(registry);
-        // serializer::SaveClassJson<ViewSerializer<ItemComponent>>(
-        //     "resources/items.json", "ItemFactory", itemComponents);
     }
 } // namespace sage

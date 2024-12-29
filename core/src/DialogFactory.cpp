@@ -352,12 +352,9 @@ namespace sage
                 else if (line.starts_with("camera_pos:"))
                 {
                     assert(dialogComponent);
-                    // Ensure entity and transform exist before accessing
                     if (entity != entt::null && registry->all_of<sgTransform>(entity))
                     {
                         auto& transform = registry->get<sgTransform>(entity);
-
-                        // Parse camera position from file
                         std::istringstream iss(line.substr(11));
                         Vector3 filePos{0};
                         iss >> filePos.x >> filePos.y >> filePos.z;
