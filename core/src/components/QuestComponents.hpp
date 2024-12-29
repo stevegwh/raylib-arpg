@@ -76,4 +76,30 @@ namespace sage
         explicit Quest(entt::registry* _registry, entt::entity _questId, std::string _questKey);
     };
 
+    // Attach this if you want something to happen to a specific entity once a quest is complete
+    // TODO: Sure you can't just use a hook? Maybe two sinks? One if we care about the quest (give reward) one if
+    // not?
+    class ReactToQuestFinishComponent
+    {
+        entt::connection connection;
+        entt::entity self{};
+        void reactToQuestFinish(entt::entity)
+        {
+            onQuestCompleted.publish(self);
+        }
+
+      public:
+        ~ReactToQuestFinishComponent()
+        {
+            connection.release();
+        }
+
+        entt::sigh<void(entt::entity)> onQuestCompleted;
+        ReactToQuestFinishComponent(entt::entity _self, Quest& quest) : self(_self)
+        {
+            entt::sink sink{quest.onQuestCompleted};
+            sink.connect<&ReactToQuestFinishComponent::reactToQuestFinish>(this);
+        }
+    };
+
 } // namespace sage

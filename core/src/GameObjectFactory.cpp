@@ -198,17 +198,29 @@ namespace sage
         auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
 
-        Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+        Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_NPC_ARISSA"), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_PLAYER_DEFAULT"), modelTransform);
         renderable.name = "Arissa";
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, "MDL_NPC_ARISSA");
-        animation.animationMap[AnimationEnum::IDLE] = 0;
-        animation.animationMap[AnimationEnum::TALK] = 1;
+        // Set animation hooks
+        auto& animation = registry->emplace<Animation>(id, "MDL_PLAYER_DEFAULT");
+        // TODO: I think we're going to need to move these elsewhere to make this function more generic
+        animation.animationMap[AnimationEnum::WALK] = 1;
+        animation.animationMap[AnimationEnum::TALK] = 2;
+        animation.animationMap[AnimationEnum::AUTOATTACK] = 6;
+        animation.animationMap[AnimationEnum::RUN] = 4;
+        animation.animationMap[AnimationEnum::IDLE2] = 0;
+        animation.animationMap[AnimationEnum::IDLE] = 10; // 11 is T-Pose, 10 is ninja idle
+        animation.animationMap[AnimationEnum::SPIN] = 5;
+        animation.animationMap[AnimationEnum::SLASH] = 6;
+        animation.animationMap[AnimationEnum::SPELLCAST_UP] = 7;
+        animation.animationMap[AnimationEnum::SPELLCAST_FWD] = 8;
+        animation.animationMap[AnimationEnum::ROLL] = 9;
+        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
@@ -221,6 +233,10 @@ namespace sage
         // TODO: Really not a fan of adding the quest like this.
         auto& quest = registry->get<Quest>(data->questManager->GetQuest("ArissaQuest"));
         quest.AddTask(id);
+
+        auto& questCompleteReaction = registry->emplace<ReactToQuestFinishComponent>(id, id, quest);
+        entt::sink sink{questCompleteReaction.onQuestCompleted};
+        sink.connect<&PartySystem::NPCToMember>(data->partySystem);
 
         return id;
     }

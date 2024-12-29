@@ -25,6 +25,7 @@ namespace sage
 
       public:
         void SetLeader(entt::entity leader) const;
+        void NPCToMember(entt::entity npc);
         void AddMember(entt::entity member);
         void RemoveMember(entt::entity entity);
         [[nodiscard]] entt::entity GetMember(unsigned int memberNumber) const;

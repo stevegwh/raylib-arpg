@@ -4,10 +4,17 @@
 
 #include "PartySystem.hpp"
 
+#include "components/Collideable.hpp"
+#include "components/CombatableActor.hpp"
+#include "components/ControllableActor.hpp"
+#include "components/EquipmentComponent.hpp"
+#include "components/InventoryComponent.hpp"
+#include "components/MoveableActor.hpp"
 #include "components/PartyMemberComponent.hpp"
 #include "components/States.hpp"
 #include "ControllableActorSystem.hpp"
 #include "GameData.hpp"
+#include "TextureTerrainOverlay.hpp" // used for construction
 
 #include <cassert>
 
@@ -17,6 +24,22 @@ namespace sage
     void PartySystem::SetLeader(entt::entity leader) const
     {
         // Combine with ControllableActorSystem and put function here
+    }
+
+    void PartySystem::NPCToMember(entt::entity npc)
+    {
+        registry->emplace<PartyMemberComponent>(npc, npc);
+        registry->emplace<ControllableActor>(npc, npc);
+        registry->emplace<InventoryComponent>(npc);
+        registry->emplace<EquipmentComponent>(npc);
+        auto& combatable = registry->emplace<CombatableActor>(npc);
+        combatable.actorType = CombatableActorType::PLAYER;
+        auto& moveable = registry->emplace<MoveableActor>(npc);
+        moveable.movementSpeed = 0.35f;
+        moveable.pathfindingBounds = 100;
+        auto& col = registry->get<Collideable>(npc);
+        col.collisionLayer = CollisionLayer::PLAYER;
+        AddMember(npc);
     }
 
     void PartySystem::AddMember(entt::entity member)
