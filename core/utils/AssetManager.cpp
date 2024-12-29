@@ -19,56 +19,29 @@
 namespace sage
 {
 
-    void AssetManager::addAsset(AssetID asset, const std::string& path)
+    void AssetManager::addAsset(const AssetID& asset, const std::string& path)
     {
         assert(!assetMap.contains(asset));
-        // Could check if path has been referenced by other object. Easy to do with a two-way map
         assert(FileExists(path.c_str()));
         assetMap.emplace(asset, path);
     }
 
-    const std::string& AssetManager::GetAssetPath(AssetID asset)
+    const std::string& AssetManager::GetAssetPath(const AssetID& assetKey)
     {
-        return assetMap.at(asset);
+        assert(assetMap.contains(assetKey));
+        return assetMap.at(assetKey);
     }
 
-    void AssetManager::GenerateBlankJson()
+    const std::string& AssetManager::TryGetAssetPath(const std::string& assetKey)
     {
-        for (int i = 0; i < magic_enum::enum_underlying(AssetID::COUNT); ++i)
+        if (assetMap.contains(assetKey))
         {
-            auto id = magic_enum::enum_cast<AssetID>(i).value();
-            assetMap.emplace(id, "");
+            return assetMap.at(assetKey);
         }
-        SavePaths();
+        return assetKey;
     }
 
-    void AssetManager::SavePaths()
-    {
-        std::cout << "START: Saving asset paths to JSON file \n";
-        using namespace entt::literals;
-        if (FileExists(ASSET_JSON))
-        {
-            auto file = LoadFileText(ASSET_JSON);
-            SaveFileText(std::string(std::string(ASSET_JSON) + ".bak").c_str(), file);
-            UnloadFileText(file);
-        }
-
-        std::ofstream storage(ASSET_JSON);
-        if (!storage.is_open())
-        {
-            return;
-        }
-
-        {
-            cereal::JSONOutputArchive output{storage};
-            output.setNextName("AssetManager");
-            output(GetInstance());
-        }
-        storage.close();
-        std::cout << "FINISH: Saving asset paths to JSON file \n";
-    }
-
-    void AssetManager::LoadPaths()
+    void AssetManager::LoadPaths() const
     {
         if (!assetMap.empty())
         {

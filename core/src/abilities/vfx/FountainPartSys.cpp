@@ -14,7 +14,7 @@ namespace sage
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/fire.png");
         auto texCircle16 = ResourceManager::GetInstance().TextureLoad("resources/textures/fire.png");
-        auto texCircle8 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_SPARKFLAME);
+        auto texCircle8 = ResourceManager::GetInstance().TextureLoad("IMG_SPARKFLAME");
 
         EmitterConfig ecfg1;
         ecfg1.size = 8.0f;

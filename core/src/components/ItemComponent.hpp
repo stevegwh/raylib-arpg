@@ -112,8 +112,8 @@ namespace sage
                 cereal::make_nvp("Description", description),
                 cereal::make_nvp("Rarity", std::string(magic_enum::enum_name(rarity))),
                 cereal::make_nvp("Flags", flagNames),
-                cereal::make_nvp("Icon", std::string(magic_enum::enum_name(icon))),
-                cereal::make_nvp("Model", std::string(magic_enum::enum_name(model))));
+                cereal::make_nvp("Icon", icon),
+                cereal::make_nvp("Model", model));
         }
 
         template <class Archive>
@@ -121,10 +121,8 @@ namespace sage
         {
             std::vector<std::string> flagNames;
             std::string _rarity;
-            std::string _icon;
-            std::string _model;
 
-            archive(name, localizedName, description, _rarity, flagNames, _icon, _model);
+            archive(name, localizedName, description, _rarity, flagNames, icon, model);
 
             flags = static_cast<ItemFlags>(0);
 
@@ -138,11 +136,6 @@ namespace sage
             }
 
             rarity = magic_enum::enum_cast<ItemRarity>(_rarity).value();
-            icon = magic_enum::enum_cast<AssetID>(_icon).value();
-            if (_model != "NONE")
-            {
-                model = magic_enum::enum_cast<AssetID>(_model).value();
-            }
         }
 
         // Helper methods for flags

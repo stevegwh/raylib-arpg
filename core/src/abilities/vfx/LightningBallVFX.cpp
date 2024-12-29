@@ -48,13 +48,13 @@ namespace sage
     LightningBallVFX::LightningBallVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
     {
         // Texture/Material
-        auto texture = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE53);
-        auto texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE53);
+        auto texture = ResourceManager::GetInstance().TextureLoad("IMG_NOISE53");
+        auto texture2 = ResourceManager::GetInstance().TextureLoad("IMG_NOISE53");
 
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/lightning.fs");
         secondsLoc = GetShaderLocation(shader, "seconds");
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
-        model = ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_VFX_SPHERE);
+        model = ResourceManager::GetInstance().GetModelCopy("MDL_VFX_SPHERE");
 
         model.SetTexture(texture, 0, MATERIAL_MAP_DIFFUSE);
         model.SetTexture(texture2, 0, MATERIAL_MAP_EMISSION);

@@ -335,7 +335,7 @@ namespace sage
             auto cell2 = row->CreateTableCell(20);
             auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleBar), "Inventory");
-            auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
+            auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
             auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             cell2->CreateCloseButton(std::move(closeBtn));
         }
@@ -387,7 +387,7 @@ namespace sage
             auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleText), "Character");
 
-            const auto tex = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_UI_CLOSE);
+            const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
             auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             cell2->CreateCloseButton(std::move(closeBtn));
         }

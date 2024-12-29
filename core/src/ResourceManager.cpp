@@ -258,20 +258,15 @@ namespace sage
         return gpuShaderLoad(vShaderStr, fShaderStr);
     }
 
-    Texture ResourceManager::TextureLoad(const AssetID id)
-    {
-        const auto& path = getAssetPath(id);
-        return TextureLoad(path);
-    }
-
     Texture ResourceManager::TextureLoad(const std::string& path)
     {
-        if (!nonModelTextures.contains(path))
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        if (!nonModelTextures.contains(key))
         {
-            assert(images.contains(path));
-            nonModelTextures[path] = LoadTextureFromImage(images[path]);
+            assert(images.contains(key));
+            nonModelTextures[key] = LoadTextureFromImage(images[key]);
         }
-        return nonModelTextures[path];
+        return nonModelTextures[key];
     }
 
     Texture ResourceManager::TextureLoad(const std::string& fileName, const std::string& path)
@@ -304,9 +299,9 @@ namespace sage
         return fonts[path];
     }
 
-    void ResourceManager::ImageUnload(const AssetID id)
+    void ResourceManager::ImageUnload(const std::string& id)
     {
-        const auto& path = getAssetPath(id);
+        auto path = AssetManager::GetInstance().TryGetAssetPath(id);
         if (images.contains(path))
         {
             UnloadImage(images.at(path));
@@ -314,16 +309,11 @@ namespace sage
         }
     }
 
-    ImageSafe ResourceManager::GetImage(const AssetID id)
-    {
-        const auto& path = getAssetPath(id);
-        return GetImage(path);
-    }
-
     ImageSafe ResourceManager::GetImage(const std::string& path)
     {
-        assert(images.contains(path));
-        return ImageSafe(images[path], false);
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        assert(images.contains(key));
+        return ImageSafe(images[key], false);
     }
 
     void ResourceManager::FontLoadFromFile(const std::string& path)
@@ -335,51 +325,34 @@ namespace sage
         }
     }
 
-    void ResourceManager::ImageLoadFromFile(const AssetID id)
-    {
-        const auto& path = getAssetPath(id);
-        ImageLoadFromFile(path);
-    }
-
     void ResourceManager::ImageLoadFromFile(const std::string& path)
     {
-        assert(FileExists(path.c_str()));
-        if (!images.contains(path))
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        assert(FileExists(key.c_str()));
+        if (!images.contains(key))
         {
-            images[path] = LoadImage(path.c_str());
+            images[key] = LoadImage(key.c_str());
         }
-    }
-
-    void ResourceManager::ImageLoadFromFile(const AssetID id, Image image)
-    {
-        const auto& path = getAssetPath(id);
-        assert(FileExists(path.c_str()));
-        ImageLoadFromFile(path, image);
     }
 
     void ResourceManager::ImageLoadFromFile(const std::string& path, Image image)
     {
-        if (!images.contains(path))
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        if (!images.contains(key))
         {
-            images[path] = image;
+            images[key] = image;
             image = {};
         }
     }
 
-    void ResourceManager::ModelLoadFromFile(const AssetID id)
-    {
-        const auto path = getAssetPath(id);
-        assert(FileExists(path.c_str()));
-        ModelLoadFromFile(path);
-    }
-
     void ResourceManager::ModelLoadFromFile(const std::string& path)
     {
-        if (!modelCopies.contains(path))
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        if (!modelCopies.contains(key))
         {
-            assert(FileExists(path.c_str()));
+            assert(FileExists(key.c_str()));
 
-            auto modelInfo = sgLoadModel(path.c_str());
+            auto modelInfo = sgLoadModel(key.c_str());
 
             for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
             {
@@ -395,14 +368,8 @@ namespace sage
                 modelInfo.model.materials[i] = materialMap.at(mat);
             }
 
-            modelCopies.emplace(path, std::move(modelInfo));
+            modelCopies.emplace(key, std::move(modelInfo));
         }
-    }
-
-    ModelSafe ResourceManager::GetModelCopy(AssetID id)
-    {
-        const auto& path = getAssetPath(id);
-        return GetModelCopy(path);
     }
 
     /**
@@ -414,9 +381,10 @@ namespace sage
 
     ModelSafe ResourceManager::GetModelCopy(const std::string& path)
     {
-        assert(modelCopies.contains(path));
-        ModelSafe modelsafe(modelCopies.at(path).model, false);
-        modelsafe.SetKey(path);
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        assert(modelCopies.contains(key));
+        ModelSafe modelsafe(modelCopies.at(key).model, false);
+        modelsafe.SetKey(key);
         return std::move(modelsafe);
     }
 
@@ -426,22 +394,22 @@ namespace sage
      * @param path
      * @return
      */
-    ModelSafe ResourceManager::GetModelDeepCopy(AssetID id) const
+    ModelSafe ResourceManager::GetModelDeepCopy(const std::string& id) const
     {
         // TODO: Unsure if deep copy is ever really necessary.
         // For animated models, I believe all that's needed is to shallow copy the mesh minus
         // animVertices/animNormals. So, allocate memory for new meshes, shallow copy the majority of its data, but
         // allocate and point to new animVertices/animNormals arrays
-        const auto& path = getAssetPath(id);
+        const auto& path = AssetManager::GetInstance().TryGetAssetPath(id);
         assert(modelCopies.contains(path));
         Model model = modelCopies.at(path).model;
         deepCopyModel(modelCopies.at(path).model, model);
         return ModelSafe(model);
     }
 
-    void ResourceManager::ModelAnimationLoadFromFile(const AssetID id)
+    void ResourceManager::ModelAnimationLoadFromFile(const std::string& id)
     {
-        const auto& path = getAssetPath(id);
+        const auto& path = AssetManager::GetInstance().TryGetAssetPath(id);
         if (!modelAnimations.contains(path))
         {
             int animsCount;
@@ -456,18 +424,13 @@ namespace sage
         }
     }
 
-    ModelAnimation* ResourceManager::GetModelAnimation(AssetID id, int* animsCount)
+    ModelAnimation* ResourceManager::GetModelAnimation(const std::string& id, int* animsCount)
     {
-        const auto& path = getAssetPath(id);
+        const auto& path = AssetManager::GetInstance().TryGetAssetPath(id);
         assert(modelAnimations.contains(path));
         const auto& pair = modelAnimations[path];
         *animsCount = pair.second;
         return pair.first;
-    }
-
-    const std::string& ResourceManager::getAssetPath(AssetID id)
-    {
-        return AssetManager::GetInstance().GetAssetPath(id);
     }
 
     void ResourceManager::UnloadImages()

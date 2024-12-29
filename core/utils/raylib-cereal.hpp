@@ -1,7 +1,5 @@
 #pragma once
 
-#include "AssetID.hpp"
-
 #include "cereal/cereal.hpp"
 #include "cereal/types/array.hpp"
 #include "cereal/types/string.hpp"
@@ -13,21 +11,6 @@
 #include "rlgl.h"
 #include <array>
 #include <cstring>
-
-namespace cereal
-{
-    template <class Archive>
-    inline std::string save_minimal(Archive const&, const sage::AssetID& t)
-    {
-        return std::string(magic_enum::enum_name(t));
-    }
-
-    template <class Archive>
-    inline void load_minimal(Archive const&, sage::AssetID& t, std::string const& value)
-    {
-        t = magic_enum::enum_cast<sage::AssetID>(value).value();
-    }
-} // namespace cereal
 
 template <typename Archive>
 void serialize(Archive& archive, Vector2& v2)

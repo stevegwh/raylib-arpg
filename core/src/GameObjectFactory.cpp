@@ -93,13 +93,13 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_ENEMY_GOBLIN), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
         renderable.name = name;
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_ENEMY_GOBLIN);
+        auto& animation = registry->emplace<Animation>(id, "MDL_ENEMY_GOBLIN");
         animation.animationMap[AnimationEnum::IDLE] = 1;
         animation.animationMap[AnimationEnum::DEATH] = 0;
         animation.animationMap[AnimationEnum::WALK] = 4;
@@ -132,13 +132,13 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_NPC_ARISSA"), modelTransform);
         renderable.name = name;
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
+        auto& animation = registry->emplace<Animation>(id, "MDL_NPC_ARISSA");
         animation.animationMap[AnimationEnum::IDLE] = 0;
         animation.animationMap[AnimationEnum::TALK] = 1;
 
@@ -166,13 +166,13 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_NPC_ARISSA"), modelTransform);
         renderable.name = name;
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
+        auto& animation = registry->emplace<Animation>(id, "MDL_NPC_ARISSA");
         animation.animationMap[AnimationEnum::IDLE] = 0;
         animation.animationMap[AnimationEnum::TALK] = 1;
 
@@ -200,13 +200,13 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_NPC_ARISSA), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_NPC_ARISSA"), modelTransform);
         renderable.name = "Arissa";
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_NPC_ARISSA);
+        auto& animation = registry->emplace<Animation>(id, "MDL_NPC_ARISSA");
         animation.animationMap[AnimationEnum::IDLE] = 0;
         animation.animationMap[AnimationEnum::TALK] = 1;
 
@@ -231,7 +231,7 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy(AssetID::MDL_PLAYER_DEFAULT), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_PLAYER_DEFAULT"), modelTransform);
         renderable.name = name;
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
@@ -247,7 +247,7 @@ namespace sage
         transform.SetRotation(rotation);
 
         // Set animation hooks
-        auto& animation = registry->emplace<Animation>(id, AssetID::MDL_PLAYER_DEFAULT);
+        auto& animation = registry->emplace<Animation>(id, "MDL_PLAYER_DEFAULT");
         // TODO: I think we're going to need to move these elsewhere to make this function more generic
         animation.animationMap[AnimationEnum::WALK] = 1;
         animation.animationMap[AnimationEnum::TALK] = 2;
@@ -307,8 +307,8 @@ namespace sage
             timer.SetMaxTime(1000000);
             timer.Start();
 
-            Texture texture = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE50);
-            Texture texture2 = ResourceManager::GetInstance().TextureLoad(AssetID::IMG_NOISE45);
+            Texture texture = ResourceManager::GetInstance().TextureLoad("IMG_NOISE50");
+            Texture texture2 = ResourceManager::GetInstance().TextureLoad("IMG_NOISE45");
 
             Matrix modelTransform = MatrixRotateX(90 * DEG2RAD);
 
@@ -350,7 +350,7 @@ namespace sage
         Matrix modelTransform = MatrixIdentity();
 
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_BUILDING_PORTAL), modelTransform);
+            id, ResourceManager::GetInstance().GetModelCopy("MDL_BUILDING_PORTAL"), modelTransform);
         renderable.name = "Portal Outer";
         data->lightSubSystem->LinkRenderableToLight(id);
 
@@ -373,7 +373,7 @@ namespace sage
 
         Matrix modelTransform = MatrixIdentity();
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelCopy(AssetID::MDL_BUILDING_WIZARDTOWER1), modelTransform);
+            id, ResourceManager::GetInstance().GetModelCopy("MDL_BUILDING_WIZARDTOWER1"), modelTransform);
         renderable.name = "Wizard Tower";
         data->lightSubSystem->LinkRenderableToLight(id);
 

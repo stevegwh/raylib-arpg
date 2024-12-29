@@ -94,8 +94,8 @@ namespace sage
 
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
 
-        auto heightMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_HEIGHTMAP);
-        auto normalMap = ResourceManager::GetInstance().GetImage(AssetID::GEN_IMG_NORMALMAP);
+        auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
+        auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
         auto slices = heightMap.GetWidth();
         data->navigationGridSystem->Init(slices, 1.0f);
 

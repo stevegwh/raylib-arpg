@@ -61,7 +61,6 @@ namespace sage
         static void deepCopyModel(const Model& oldModel, Model& newModel);
         static void deepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
         void init();
-        static const std::string& getAssetPath(AssetID id);
 
       public:
         static ResourceManager& GetInstance()
@@ -71,26 +70,20 @@ namespace sage
         }
 
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
-        Texture TextureLoad(AssetID id);
         Texture TextureLoad(const std::string& path);
         Texture TextureLoad(const std::string& fileName, const std::string& path);
         Texture TextureLoadFromImage(const std::string& name, Image image);
         Font FontLoad(const std::string& path);
-        void ImageUnload(AssetID id);
-        ImageSafe GetImage(AssetID id);
+        void ImageUnload(const std::string& id);
         ImageSafe GetImage(const std::string& path);
         void FontLoadFromFile(const std::string& path);
-        void ImageLoadFromFile(AssetID id);
         void ImageLoadFromFile(const std::string& path);
-        void ImageLoadFromFile(AssetID id, Image image);
         void ImageLoadFromFile(const std::string& path, Image image);
-        void ModelLoadFromFile(AssetID id);
         void ModelLoadFromFile(const std::string& path);
         [[nodiscard]] ModelSafe GetModelCopy(const std::string& id);
-        [[nodiscard]] ModelSafe GetModelCopy(AssetID id);
-        [[nodiscard]] ModelSafe GetModelDeepCopy(AssetID id) const;
-        void ModelAnimationLoadFromFile(AssetID id);
-        ModelAnimation* GetModelAnimation(AssetID id, int* animsCount);
+        [[nodiscard]] ModelSafe GetModelDeepCopy(const std::string& id) const;
+        void ModelAnimationLoadFromFile(const std::string& id);
+        ModelAnimation* GetModelAnimation(const std::string& id, int* animsCount);
         void UnloadImages();
         void UnloadShaderFileText();
 

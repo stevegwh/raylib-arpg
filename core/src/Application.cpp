@@ -39,9 +39,9 @@ namespace sage
         serializer::LoadMap(registry.get(), "resources/dungeon-map.bin");
         // serializer::LoadMap(registry.get(), "resources/cave.bin");
 
-        auto icon = ResourceManager::GetInstance().GetImage(AssetID::IMG_APPLICATIONICON);
+        auto icon = ResourceManager::GetInstance().GetImage("IMG_APPLICATIONICON");
         SetWindowIcon(icon.GetImage());
-        ResourceManager::GetInstance().ImageUnload(AssetID::IMG_APPLICATIONICON);
+        ResourceManager::GetInstance().ImageUnload("IMG_APPLICATIONICON");
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 

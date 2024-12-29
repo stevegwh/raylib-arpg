@@ -443,24 +443,22 @@ namespace sage
 
         std::cout << "START: Loading assets into memory \n";
 
-        for (int i = 0; i < magic_enum::enum_underlying(AssetID::COUNT); ++i)
+        for (const auto& [name, _] : AssetManager::GetInstance().assetMap)
         {
-            auto id = magic_enum::enum_cast<AssetID>(i).value();
-            auto name = std::string(magic_enum::enum_name(id));
             auto tag = name.substr(0, 3);
 
             if (tag == "IMG")
             {
-                ResourceManager::GetInstance().ImageLoadFromFile(id);
+                ResourceManager::GetInstance().ImageLoadFromFile(name);
             }
             else if (tag == "MDL")
             {
-                ResourceManager::GetInstance().ModelLoadFromFile(id);
+                ResourceManager::GetInstance().ModelLoadFromFile(name);
 
-                fs::path assetPath = AssetManager::GetInstance().GetAssetPath(id);
+                fs::path assetPath = AssetManager::GetInstance().GetAssetPath(name);
                 if (assetPath.extension() == ".glb" || assetPath.extension() == ".gltf")
                 {
-                    ResourceManager::GetInstance().ModelAnimationLoadFromFile(id);
+                    ResourceManager::GetInstance().ModelAnimationLoadFromFile(name);
                 }
                 // TODO: See if txt of same name/path exists and parse that for socket data etc
             }
