@@ -10,5 +10,5 @@ out
 resources/*
 !resources/dialog/
 !resources/shaders/
-!resources/asset-paths.json
+!resources/asset-path-aliases.json
 !resources/items.json
