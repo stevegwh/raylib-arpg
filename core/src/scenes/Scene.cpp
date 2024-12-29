@@ -29,6 +29,7 @@
 #include "systems/DialogSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
+#include "systems/InteractableSystem.hpp"
 #include "systems/InventorySystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"

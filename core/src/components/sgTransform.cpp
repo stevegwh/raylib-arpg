@@ -84,17 +84,21 @@ namespace sage
     void sgTransform::SetLocalRot(const Quaternion& rotation)
     {
         Vector3 rot = QuaternionToEuler(rotation);
-        rot = Vector3MultiplyByValue(rot, RAD2DEG);
-        m_rotationLocal = rot;
-        if (!m_parent) return;
-        SetRotation(Vector3Add(m_parent->m_rotationWorld, m_rotationLocal));
+        rot = Vector3MultiplyByValue(rot, RAD2DEG); // raylib gives this back in rad
+        SetLocalRot(rot);
     }
 
     void sgTransform::SetLocalRot(const Vector3& rotation)
     {
         m_rotationLocal = rotation;
-        if (!m_parent) return;
-        SetRotation(Vector3Add(m_parent->m_rotationWorld, m_rotationLocal));
+        if (!m_parent)
+        {
+            SetRotation(m_rotationLocal);
+        }
+        else
+        {
+            SetRotation(Vector3Add(m_parent->m_rotationWorld, m_rotationLocal));
+        }
     }
 
     void sgTransform::SetPosition(const Vector3& position)

@@ -84,6 +84,10 @@ namespace sage
         {
             onItemClick.publish(m_mouseHitInfo.collidedEntityId);
         }
+        else if (layer == CollisionLayer::INTERACTABLE)
+        {
+            onInteractableClick.publish(m_mouseHitInfo.collidedEntityId);
+        }
         else if (
             layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
             layer == CollisionLayer::STAIRS)

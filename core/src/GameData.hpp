@@ -47,6 +47,7 @@ namespace sage
     class UberShaderSystem;
     class CursorClickIndicator;
     class QuestManager;
+    class InteractableSystem;
 
     // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
     // TODO: Also, should rename to "GameSystems"
@@ -85,6 +86,7 @@ namespace sage
         std::unique_ptr<UberShaderSystem> uberShaderSystem;
         std::unique_ptr<CursorClickIndicator> cursorClickIndicator;
         std::unique_ptr<QuestManager> questManager;
+        std::unique_ptr<InteractableSystem> interactableSystem;
 
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };

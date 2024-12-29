@@ -15,6 +15,7 @@
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
+#include "components/DoorBehaviorComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "raylib.h"
 #include "raymath.h"
@@ -81,6 +82,10 @@ namespace sage
         if (objectName.find("_QUESTITEM_") != std::string::npos)
         {
             return CollisionLayer::ITEM;
+        }
+        if (objectName.find("_DOOR_") != std::string::npos)
+        {
+            return CollisionLayer::INTERACTABLE;
         }
 
         return CollisionLayer::BACKGROUND; // by default, objects are ignored
@@ -255,7 +260,7 @@ namespace sage
         itemFactory->AttachItem(entity, itemName);
     }
 
-    void HandleMesh(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath, int& slices)
+    entt::entity HandleMesh(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath, int& slices)
     {
         std::string meshName, objectName;
         float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
@@ -316,6 +321,8 @@ namespace sage
                 slices += 1;
             }
         }
+
+        return entity;
     }
 
     void processTxtFile(
@@ -350,6 +357,11 @@ namespace sage
         {
             HandleQuestItem(registry, itemFactory, infile, meshPath);
         }
+        // else if (typeName.find("door") != std::string::npos)
+        // {
+        //     auto entity = HandleMesh(registry, infile, meshPath, slices);
+        //     registry->emplace<DoorBehaviorComponent>(entity);
+        // }
         else
         {
             HandleMesh(registry, infile, meshPath, slices);

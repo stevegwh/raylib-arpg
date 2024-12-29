@@ -25,6 +25,7 @@ namespace sage
         BACKGROUND,   // Collides with nothing
         STAIRS,
         ITEM,
+        INTERACTABLE,
         COUNT // Must always be last
     };
 

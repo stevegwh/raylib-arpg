@@ -83,7 +83,7 @@ namespace sage
     {
         entt::connection connection;
         entt::entity self{};
-        void reactToQuestFinish(entt::entity)
+        void reactToQuestFinish(entt::entity) const
         {
             onQuestCompleted.publish(self);
         }
@@ -98,7 +98,7 @@ namespace sage
         ReactToQuestFinishComponent(entt::entity _self, Quest& quest) : self(_self)
         {
             entt::sink sink{quest.onQuestCompleted};
-            sink.connect<&ReactToQuestFinishComponent::reactToQuestFinish>(this);
+            connection = sink.connect<&ReactToQuestFinishComponent::reactToQuestFinish>(this);
         }
     };
 
