@@ -29,8 +29,6 @@ namespace sage
         std::unordered_map<std::string, ItemComponent> itemMap{};
 
       public:
-        void CreateSword();
-        void CreateDagger();
         [[nodiscard]] entt::entity GetItem(const std::string& name) const;
         void AttachItem(entt::entity entity, const std::string& name) const;
 
