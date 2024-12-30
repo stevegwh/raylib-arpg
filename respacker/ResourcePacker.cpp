@@ -85,6 +85,10 @@ namespace sage
         }
         if (objectName.find("_DOOR_") != std::string::npos)
         {
+            return CollisionLayer::BUILDING;
+        }
+        if (objectName.find("_INTERACTABLE_") != std::string::npos)
+        {
             return CollisionLayer::INTERACTABLE;
         }
 

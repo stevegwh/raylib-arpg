@@ -10,6 +10,7 @@
 #include "components/sgTransform.hpp"
 #include "components/Spawner.hpp"
 #include "GameData.hpp"
+#include "GameObjectFactory.hpp"
 #include "ItemFactory.hpp"
 #include "Light.hpp"
 #include "ViewSerializer.hpp"
@@ -177,6 +178,10 @@ namespace sage::serializer
                 if (renderable.name.find("_DOOR_") != std::string::npos)
                 {
                     destination->emplace<DoorBehaviorComponent>(entt, entt, &transform);
+                }
+                if (renderable.name.find("_INTERACTABLE_") != std::string::npos)
+                {
+                    GameObjectFactory::makeInteractable(destination, entt);
                 }
             }
         }

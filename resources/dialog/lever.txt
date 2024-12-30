@@ -1,6 +1,7 @@
 #meta start
-owner: Lever
-camera_pos: 10.0 8.0 10.0
+owner: _INTERACTABLE_QUEST_LEVER
+speaker_name: Narrator
+conversation_pos: 10.0 1.0 10.0
 #meta end
 
 #variables start

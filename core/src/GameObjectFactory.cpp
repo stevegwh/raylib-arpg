@@ -83,20 +83,18 @@ namespace sage
         transform.SetPosition({position.x, height, position.z});
     }
 
-    entt::entity GameObjectFactory::initQuestLever(entt::registry* registry, GameData* data)
+    void GameObjectFactory::makeInteractable(entt::registry* registry, entt::entity entity)
     {
-        // Finds the QUEST_LEVER mesh and attaches a dialog component to it
-        auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
-        registry->emplace<DialogComponent>(leverId);
-        auto& collision = registry->get<Collideable>(leverId);
-        collision.collisionLayer = CollisionLayer::NPC;
+        registry->emplace<DialogComponent>(entity);
+        auto& collision = registry->get<Collideable>(entity);
+        collision.collisionLayer = CollisionLayer::INTERACTABLE;
 
         // By the default, for static geometry (that loaded from the blender file) all the positions are set via
         // their transform matrix. This means the sgTransform is set to world origin, which causes an issue with
         // dialog conversation pos (which uses the dynamic sgTransform).
         // I could potentially change how the models are loaded to make sgTransform position the same as the
         // matrix's translation?
-        auto rlModel = registry->get<Renderable>(leverId).GetModel();
+        auto rlModel = registry->get<Renderable>(entity).GetModel();
         auto rayTrans = rlModel->GetTransform();
         Vector3 translation{};
         Quaternion rotation{};
@@ -104,10 +102,8 @@ namespace sage
         MatrixDecompose(rayTrans, &translation, &rotation, &scale);
         rlModel->SetTransform(
             MatrixMultiply(MatrixScale(scale.x, scale.y, scale.z), MatrixRotateZYX(QuaternionToEuler(rotation))));
-        auto& trans = registry->get<sgTransform>(leverId);
+        auto& trans = registry->get<sgTransform>(entity);
         trans.SetPosition(translation);
-
-        return leverId;
     }
 
     entt::entity GameObjectFactory::createEnemy(

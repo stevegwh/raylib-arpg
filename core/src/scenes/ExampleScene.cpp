@@ -96,7 +96,9 @@ namespace sage
         //            NPC"); quest.StartQuest();
         //        }
 
-        GameObjectFactory::initQuestLever(registry, data.get());
+        // Finds the QUEST_LEVER mesh and attaches a dialog component to it
+        // auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
+        // GameObjectFactory::convertToInteractable(registry, leverId);
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
     }

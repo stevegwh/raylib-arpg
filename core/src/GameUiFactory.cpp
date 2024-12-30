@@ -517,9 +517,20 @@ namespace sage
             const auto descriptionRow = table->CreateTableRow();
             const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
             auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
+
+            std::string speakerName;
+            if (!dialogComponent.conversation->speaker.empty())
+            {
+                speakerName = dialogComponent.conversation->speaker;
+            }
+            else
+            {
+                speakerName = renderable.name;
+            }
+
             descriptionCell->CreateTextbox(
                 std::move(textbox),
-                std::format("[{}]: {}", renderable.name, dialogComponent.conversation->GetCurrentNode()->content));
+                std::format("[{}]: {}", speakerName, dialogComponent.conversation->GetCurrentNode()->content));
         }
         // ----------------
 

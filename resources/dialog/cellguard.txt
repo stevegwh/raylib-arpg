@@ -1,6 +1,7 @@
 #meta start
 owner: Cell Guard
-camera_pos: 5.0 1.0 5.0
+speaker_name: Cell Guard
+conversation_pos: 5.0 1.0 5.0
 #meta end
 
 #variables start

@@ -28,7 +28,6 @@
 #include "systems/DialogSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
-#include "systems/InteractableSystem.hpp"
 #include "systems/InventorySystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
@@ -71,8 +70,7 @@ namespace sage
           equipmentSystem(std::make_unique<EquipmentSystem>(_registry, this)),
           uberShaderSystem(std::make_unique<UberShaderSystem>(_registry, this)),
           cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this)),
-          questManager(std::make_unique<QuestManager>(_registry)),
-          interactableSystem(std::make_unique<InteractableSystem>(_registry, this))
+          questManager(std::make_unique<QuestManager>(_registry))
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this

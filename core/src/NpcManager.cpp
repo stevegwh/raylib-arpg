@@ -30,7 +30,11 @@ namespace sage
 
     entt::entity NPCManager::GetNPC(const std::string& name)
     {
-        return npcMap[name];
+        if (npcMap.contains(name))
+        {
+            return npcMap[name];
+        }
+        return entt::null;
     }
 
     void NPCManager::onComponentAdded(entt::entity entity)

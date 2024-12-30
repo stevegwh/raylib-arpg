@@ -78,6 +78,10 @@
           "value": "resources/textures/cursor/32/pickup.png"
       },
       {
+          "key": "IMG_CURSOR_INTERACT",
+          "value": "resources/textures/cursor/32/look.png"
+      },
+      {
         "key": "IMG_CURSOR_REGULAR",
         "value": "resources/textures/cursor/32/regular.png"
       },

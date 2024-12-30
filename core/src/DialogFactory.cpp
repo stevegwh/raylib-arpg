@@ -12,6 +12,7 @@
 
 #include "components/sgTransform.hpp"
 #include "raylib.h"
+#include "systems/RenderSystem.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -344,18 +345,32 @@ namespace sage
                     owner = trim(owner);
 
                     entity = gameData->npcManager->GetNPC(owner);
+                    if (entity == entt::null)
+                    {
+                        entity = gameData->renderSystem->FindRenderableByName(owner);
+                    }
+                    assert(entity != entt::null);
                     dialogComponent = &registry->get<DialogComponent>(entity);
 
                     // Create conversation tied to this entity
                     dialogComponent->conversation = std::make_unique<dialog::Conversation>(registry, entity);
                 }
-                else if (line.starts_with("camera_pos:"))
+                else if (line.starts_with("speaker_name:"))
+                {
+                    assert(dialogComponent);
+                    auto str_size = std::string("speaker_name:").size();
+                    auto speaker = line.substr(str_size);
+                    speaker = trim(speaker);
+                    dialogComponent->conversation->speaker = speaker;
+                }
+                else if (line.starts_with("conversation_pos:"))
                 {
                     assert(dialogComponent);
                     if (entity != entt::null && registry->all_of<sgTransform>(entity))
                     {
                         auto& transform = registry->get<sgTransform>(entity);
-                        std::istringstream iss(line.substr(11));
+                        auto str_size = std::string("conversation_pos:").size();
+                        std::istringstream iss(line.substr(str_size));
                         Vector3 filePos{0};
                         iss >> filePos.x >> filePos.y >> filePos.z;
 

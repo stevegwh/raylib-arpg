@@ -57,7 +57,7 @@ namespace sage
         if (!enabled) return;
 
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
-        if (layer == CollisionLayer::NPC)
+        if (layer == CollisionLayer::NPC || layer == CollisionLayer::INTERACTABLE)
         {
             onNPCHover.publish(m_mouseHitInfo.collidedEntityId);
         }
@@ -86,7 +86,10 @@ namespace sage
         }
         else if (layer == CollisionLayer::INTERACTABLE)
         {
-            onInteractableClick.publish(m_mouseHitInfo.collidedEntityId);
+            // Could call it 'inspectable' instead?
+            // Interactables are essentially just NPCs but without an actor name/portrait
+            onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
+            // onInteractableClick.publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (
             layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
@@ -245,6 +248,11 @@ namespace sage
         {
             currentTex = &talktex;
             hitObjectName = "NPC";
+        }
+        else if (layer == CollisionLayer::INTERACTABLE)
+        {
+            currentTex = &interacttex;
+            hitObjectName = "Interactable";
         }
         else if (layer == CollisionLayer::ENEMY)
         {
@@ -429,6 +437,7 @@ namespace sage
         invalidmovetex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_DENIED");
         combattex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_ATTACK");
         pickuptex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_PICKUP");
+        interacttex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_INTERACT");
         currentTex = &regulartex;
         EnableContextSwitching();
     }

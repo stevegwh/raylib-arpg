@@ -129,6 +129,7 @@ namespace sage
           public:
             entt::registry* registry;
             const entt::entity owner;
+            std::string speaker{}; // Name of speaker to appear in text (uses owner renderable name if none)
             entt::sigh<void(Conversation*)> onConversationProgress;
             entt::sigh<void()> onConversationEnd;
 
