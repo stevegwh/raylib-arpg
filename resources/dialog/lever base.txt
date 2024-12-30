@@ -1,0 +1,31 @@
+#meta start
+owner: _INTERACTABLE_QUEST_LEVER_BASE
+speaker_name: Narrator
+conversation_pos: 10.0 1.0 10.0
+#meta end
+
+#variables start
+questId: LeverBaseQuest
+#variables end
+
+#node start
+title: start
+---
+You see the base of a lever. Its handle seems to be missing.
+---
+if quest_hand_in($questId)
+[[quest_finish($questId) | Place the lever into the base. | finish]]
+end
+if quest_complete($questId)
+[[quest_finish($questId) | Place the lever into the base. | finish]]
+end
+[[Take your leave. | exit]]
+#node end
+
+#node start
+title: finish
+---
+You place the lever into its base and pull back. The door screeches and lifts upwards, opening up the path forward.
+---
+[[Take your leave. | exit]]
+#node end

@@ -179,11 +179,9 @@ namespace sage
         collideable.collisionLayer = CollisionLayer::NPC;
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
-        auto& dialog = registry->emplace<DialogComponent>(id);
-        auto questId = data->questManager->GetQuest("ArissaQuest");
+        registry->emplace<DialogComponent>(id);
         registry->emplace<QuestTaskComponent>(id, "ArissaQuest");
-        auto& quest = registry->get<Quest>(questId);
-        quest.AddTask(id);
+        data->questManager->AddTaskToQuest("ArissaQuest", id);
 
         return id;
     }

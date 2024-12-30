@@ -85,6 +85,10 @@ namespace sage
         auto& quest = registry->get<Quest>(data->questManager->GetQuest("LeverQuest"));
         quest.StartQuest();
 
+        auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
+        registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
+        data->questManager->AddTaskToQuest("LeverBaseQuest", leverBaseId);
+
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
     }
 } // namespace sage

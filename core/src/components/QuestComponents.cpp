@@ -46,7 +46,7 @@ namespace sage
 
     void Quest::StartQuest()
     {
-        std::cout << "Quest started! \n";
+        std::cout << "Quest started:" << questKey << " \n";
         started = true;
         onQuestStart.publish(questId);
     }
@@ -63,7 +63,7 @@ namespace sage
             auto& subQuest = registry->get<QuestTaskComponent>(entity);
             if (!subQuest.IsComplete()) return false;
         }
-        std::cout << "Quest complete! \n";
+        std::cout << "Quest complete:" << questKey << " \n";
         completed = true;
         onQuestCompleted.publish(questId);
         return true;

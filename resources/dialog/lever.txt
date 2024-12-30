@@ -6,6 +6,7 @@ conversation_pos: 10.0 1.0 10.0
 
 #variables start
 questId: LeverQuest
+baseQuestId: LeverBaseQuest
 #variables end
 
 #node start
@@ -37,5 +38,5 @@ title: grab2
 ---
 You grab the lever and place it in your inventory, the goblin sitting at the table distracted, gnawing on his new bone.
 ---
-[[Take your leave. | exit]]
+[[quest_start($baseQuestId) |Take your leave. | exit]]
 #node end
