@@ -8,27 +8,18 @@
 
 namespace sage
 {
-    class GameData;
-    class Cursor;
-    class sgTransform;
-
     class DoorBehaviorComponent
     {
-        entt::entity self;
         entt::connection connection;
-        sgTransform* transform{};
         float openYRotation = 5;
         bool open = false;
         bool locked = true;
 
       public:
-        void UnlockDoor();
-        void UnlockAndOpenDoor();
-        void ExecuteBehavior(entt::entity clicked);
         ~DoorBehaviorComponent();
-        DoorBehaviorComponent(entt::entity _self, sgTransform* _transform);
+        DoorBehaviorComponent() = default;
 
-        friend class InteractableSystem;
+        friend class DoorSystem;
     };
 
 } // namespace sage

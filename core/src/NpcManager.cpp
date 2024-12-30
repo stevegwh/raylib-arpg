@@ -24,35 +24,17 @@ namespace sage
         {
             return GameObjectFactory::createQuestNPC(registry, gameData, pos, name.c_str());
         }
-
-        return entt::null;
-    }
-
-    entt::entity NPCManager::GetNPC(const std::string& name)
-    {
-        if (npcMap.contains(name))
+        else if (name == "Lever Goblin")
         {
-            return npcMap[name];
+            return GameObjectFactory::createFetchQuestNPC(registry, gameData, pos, name.c_str());
         }
+
         return entt::null;
-    }
-
-    void NPCManager::onComponentAdded(entt::entity entity)
-    {
-        const auto& renderable = registry->get<Renderable>(entity);
-        npcMap.emplace(renderable.name, entity);
-    }
-
-    void NPCManager::onComponentRemoved(entt::entity entity)
-    {
     }
 
     NPCManager::NPCManager(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
-        // TODO: What if we want an NPC that doesn't speak?
-        registry->on_construct<DialogComponent>().connect<&NPCManager::onComponentAdded>(this);
-        registry->on_destroy<DialogComponent>().connect<&NPCManager::onComponentRemoved>(this);
     }
 
 } // namespace sage

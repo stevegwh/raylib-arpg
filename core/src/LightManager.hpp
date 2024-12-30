@@ -23,7 +23,7 @@ namespace sage
         Shader defaultShader{};
         std::vector<Shader> shaders;
         int lightsCount = 0;
-        float gamma = 1.6;
+        float gamma = 2.2;
         std::array<float, 4> ambient{};
         void updateShaderLights(Shader& _shader);
         void updateAmbientLight(Shader& _shader) const;

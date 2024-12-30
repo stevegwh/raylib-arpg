@@ -344,7 +344,7 @@ namespace sage
                     auto owner = line.substr(6);
                     owner = trim(owner);
 
-                    entity = gameData->npcManager->GetNPC(owner);
+                    entity = gameData->renderSystem->FindRenderableByName<DialogComponent>(owner);
                     if (entity == entt::null)
                     {
                         entity = gameData->renderSystem->FindRenderableByName(owner);

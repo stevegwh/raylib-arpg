@@ -13,7 +13,13 @@ title: start
 ---
 You see a lever inexplicably resting on a table.
 ---
+if not quest_complete($questId)
 [[*Reach out and grab the lever*. | grab]]
+end
+
+if quest_complete($questId)
+[[*Reach out and grab the lever*. | grab2]]
+end
 
 [[Take your leave. | exit]]
 #node end
@@ -22,6 +28,14 @@ You see a lever inexplicably resting on a table.
 title: grab
 ---
 The goblin sitting at the table snarls at you, menacingly.
+---
+[[Take your leave. | exit]]
+#node end
+
+#node start
+title: grab2
+---
+You grab the lever and place it in your inventory, the goblin sitting at the table distracted, gnawing on his new bone.
 ---
 [[Take your leave. | exit]]
 #node end

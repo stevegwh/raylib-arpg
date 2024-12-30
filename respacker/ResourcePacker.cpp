@@ -361,11 +361,6 @@ namespace sage
         {
             HandleQuestItem(registry, itemFactory, infile, meshPath);
         }
-        // else if (typeName.find("door") != std::string::npos)
-        // {
-        //     auto entity = HandleMesh(registry, infile, meshPath, slices);
-        //     registry->emplace<DoorBehaviorComponent>(entity);
-        // }
         else
         {
             HandleMesh(registry, infile, meshPath, slices);

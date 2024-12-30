@@ -93,8 +93,12 @@ namespace sage
         navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
 
         const auto& actorTrans = registry->get<sgTransform>(entity);
+        //        const auto path =
+        //            navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange,
+        //            maxRange);
+
         const auto path =
-            navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
+            navigationGridSystem->BFSPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
 
         if (moveable.IsMoving()) // Was previously moving
         {

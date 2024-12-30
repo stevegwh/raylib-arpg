@@ -38,6 +38,7 @@
 
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
+#include "systems/DoorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
@@ -86,8 +87,8 @@ namespace sage
     void GameObjectFactory::makeInteractable(entt::registry* registry, entt::entity entity)
     {
         registry->emplace<DialogComponent>(entity);
-        auto& collision = registry->get<Collideable>(entity);
-        collision.collisionLayer = CollisionLayer::INTERACTABLE;
+        auto& collideable = registry->get<Collideable>(entity);
+        collideable.collisionLayer = CollisionLayer::INTERACTABLE;
 
         // By the default, for static geometry (that loaded from the blender file) all the positions are set via
         // their transform matrix. This means the sgTransform is set to world origin, which causes an issue with
@@ -100,8 +101,9 @@ namespace sage
         Quaternion rotation{};
         Vector3 scale{};
         MatrixDecompose(rayTrans, &translation, &rotation, &scale);
-        rlModel->SetTransform(
-            MatrixMultiply(MatrixScale(scale.x, scale.y, scale.z), MatrixRotateZYX(QuaternionToEuler(rotation))));
+        auto mat =
+            MatrixMultiply(MatrixScale(scale.x, scale.y, scale.z), MatrixRotateZYX(QuaternionToEuler(rotation)));
+        rlModel->SetTransform(mat);
         auto& trans = registry->get<sgTransform>(entity);
         trans.SetPosition(translation);
     }
@@ -194,17 +196,21 @@ namespace sage
         registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, data, position);
 
-        Matrix modelTransform = MatrixScale(0.045f, 0.045f, 0.045f);
+        Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_NPC_ARISSA"), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
         renderable.name = name;
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, "MDL_NPC_ARISSA");
-        animation.animationMap[AnimationEnum::IDLE] = 0;
+        auto& animation = registry->emplace<Animation>(id, "MDL_ENEMY_GOBLIN");
+        animation.animationMap[AnimationEnum::IDLE] = 1;
+        animation.animationMap[AnimationEnum::DEATH] = 0;
+        animation.animationMap[AnimationEnum::WALK] = 4;
+        animation.animationMap[AnimationEnum::AUTOATTACK] = 2;
         animation.animationMap[AnimationEnum::TALK] = 1;
+        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
@@ -212,11 +218,8 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
-        registry->emplace<QuestTaskComponent>(id, "ItemFetchQuest");
-        auto questId = data->questManager->GetQuest("ItemFetchQuest");
-        auto& quest = registry->get<Quest>(questId);
-        quest.AddTask(id);
-
+        registry->emplace<QuestTaskComponent>(id, "LeverQuest");
+        data->questManager->AddTaskToQuest("LeverQuest", id);
         return id;
     }
 
@@ -263,15 +266,17 @@ namespace sage
         // TODO: Really not a fan of adding the quest like this.
         auto& quest = registry->get<Quest>(data->questManager->GetQuest("ArissaQuest"));
         quest.AddTask(id);
-
-        auto& questCompleteReaction = registry->emplace<ReactToQuestFinishComponent>(id, id, quest);
-        entt::sink sink{questCompleteReaction.onQuestCompleted};
-        sink.connect<&PartySystem::NPCToMember>(data->partySystem);
-
-        auto doorEntity = data->renderSystem->FindRenderableByMeshName("QUEST_DOOR");
-        assert(doorEntity != entt::null);
-        auto& door = registry->get<DoorBehaviorComponent>(doorEntity);
-        sink.connect<&DoorBehaviorComponent::UnlockAndOpenDoor>(door);
+        {
+            auto& questCompleteReaction = registry->emplace<ReactToQuestFinishComponent>(id, id, quest);
+            entt::sink sink{questCompleteReaction.onQuestCompleted};
+            sink.connect<&PartySystem::NPCToMember>(data->partySystem);
+        }
+        {
+            auto doorId = data->renderSystem->FindRenderableByMeshName<DoorBehaviorComponent>("QUEST_DOOR");
+            auto& questCompleteReaction = registry->emplace<ReactToQuestFinishComponent>(doorId, doorId, quest);
+            entt::sink sink{questCompleteReaction.onQuestCompleted};
+            sink.connect<&DoorSystem::UnlockAndOpenDoor>(data->doorSystem);
+        }
 
         return id;
     }

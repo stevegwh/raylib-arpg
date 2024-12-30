@@ -33,6 +33,18 @@ namespace sage
         return map.at(key);
     }
 
+    void QuestManager::AddTaskToQuest(const std::string& questKey, entt::entity taskId)
+    {
+        auto& quest = registry->get<Quest>(GetQuest(questKey));
+        quest.AddTask(taskId);
+    }
+
+    void QuestManager::AddTaskToQuest(entt::entity questId, entt::entity taskId)
+    {
+        auto& quest = registry->get<Quest>(questId);
+        quest.AddTask(taskId);
+    }
+
     QuestManager::QuestManager(entt::registry* _registry) : registry(_registry)
     {
     }

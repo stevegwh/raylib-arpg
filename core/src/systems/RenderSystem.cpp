@@ -12,7 +12,7 @@
 
 namespace sage
 {
-    std::string stripPath(const std::string& fullPath)
+    std::string RenderSystem::stripPath(const std::string& fullPath)
     {
         size_t lastSlash = fullPath.find_last_of("/\\");
 
@@ -22,34 +22,6 @@ namespace sage
         size_t length = (lastDot == std::string::npos) ? std::string::npos : lastDot - startPos;
 
         return fullPath.substr(startPos, length);
-    }
-
-    // Very inefficient way to find the entity id of a renderable
-    entt::entity RenderSystem::FindRenderableByMeshName(const std::string& name) const
-    {
-        auto meshKey = stripPath(name);
-        auto view = registry->view<Renderable>();
-
-        for (const auto& entity : view)
-        {
-            const auto& renderable = registry->get<Renderable>(entity);
-            const auto& key = stripPath(renderable.GetModel()->GetKey());
-            if (key == meshKey) return entity;
-        }
-        return entt::null;
-    }
-
-    // Very inefficient way to find the entity id of a renderable
-    entt::entity RenderSystem::FindRenderableByName(const std::string& name) const
-    {
-        auto view = registry->view<Renderable>();
-
-        for (const auto& entity : view)
-        {
-            const auto& renderable = registry->get<Renderable>(entity);
-            if (renderable.name == name) return entity;
-        }
-        return entt::null;
     }
 
     void RenderSystem::Update()

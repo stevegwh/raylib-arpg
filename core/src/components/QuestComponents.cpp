@@ -53,6 +53,7 @@ namespace sage
 
     bool Quest::IsComplete()
     {
+        assert(started); // Throw error if task has been completed but the quest was not started.
         if (completed)
         {
             return completed;
@@ -68,7 +69,7 @@ namespace sage
         return true;
     }
 
-    Quest::Quest(entt::registry* _registry, const entt::entity _questId, std::string  _questKey)
+    Quest::Quest(entt::registry* _registry, const entt::entity _questId, std::string _questKey)
         : registry(_registry), questKey(std::move(_questKey)), questId(_questId)
     {
     }
