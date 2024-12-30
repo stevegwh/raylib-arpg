@@ -254,7 +254,10 @@ namespace sage
         {
             auto& playerDiag = registry->get<DialogComponent>(self);
             registry->get<Animation>(self).ChangeAnimationByEnum(AnimationEnum::TALK);
-            registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::TALK);
+            if (registry->any_of<Animation>(playerDiag.dialogTarget))
+            {
+                registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::TALK);
+            }
 
             // Rotate to look at NPC
             auto& actorTrans = registry->get<sgTransform>(self);
@@ -270,7 +273,10 @@ namespace sage
         void OnStateExit(entt::entity self) override
         {
             auto& playerDiag = registry->get<DialogComponent>(self);
-            registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::IDLE);
+            if (registry->any_of<Animation>(playerDiag.dialogTarget))
+            {
+                registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::IDLE);
+            }
             playerDiag.dialogTarget = entt::null;
 
             // TODO: Bug: Doesn't change back to default on dialog end

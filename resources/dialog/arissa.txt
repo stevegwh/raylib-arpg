@@ -1,6 +1,6 @@
 #meta start
 owner: Arissa
-camera_pos: 10.0 2.0 5.0
+camera_pos: 10.0 1.0 10.0
 #meta end
 
 #variables start

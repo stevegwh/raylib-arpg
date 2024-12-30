@@ -14,6 +14,7 @@ namespace sage
 
     struct GameObjectFactory
     {
+        static entt::entity initQuestLever(entt::registry* registry, GameData* data);
         static entt::entity createEnemy(
             entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name);
         static entt::entity createQuestNPC(

@@ -11,6 +11,9 @@
 namespace sage
 {
 
+    // TODO: Currently this confuses 'NPC' with 'Speakable'. In reality, you could likely just use
+    // FindRenderableByName for this, the only issue comes from name collisions.
+
     entt::entity NPCManager::CreateNPC(const std::string& name, Vector3 pos, Vector3 rot)
     {
         if (name == "Arissa")

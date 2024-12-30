@@ -96,6 +96,8 @@ namespace sage
         //            NPC"); quest.StartQuest();
         //        }
 
+        GameObjectFactory::initQuestLever(registry, data.get());
+
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
     }
 } // namespace sage

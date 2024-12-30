@@ -25,7 +25,7 @@ namespace sage
     }
 
     // Very inefficient way to find the entity id of a renderable
-    entt::entity RenderSystem::FindRenderableByMeshName(const std::string& name)
+    entt::entity RenderSystem::FindRenderableByMeshName(const std::string& name) const
     {
         auto meshKey = stripPath(name);
         auto view = registry->view<Renderable>();
@@ -40,7 +40,7 @@ namespace sage
     }
 
     // Very inefficient way to find the entity id of a renderable
-    entt::entity RenderSystem::FindRenderableByName(const std::string& name)
+    entt::entity RenderSystem::FindRenderableByName(const std::string& name) const
     {
         auto view = registry->view<Renderable>();
 

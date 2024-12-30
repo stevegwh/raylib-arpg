@@ -13,8 +13,8 @@ namespace sage
     class RenderSystem : public BaseSystem
     {
       public:
-        entt::entity FindRenderableByName(const std::string& name);
-        entt::entity FindRenderableByMeshName(const std::string& name);
+        entt::entity FindRenderableByName(const std::string& name) const;
+        entt::entity FindRenderableByMeshName(const std::string& name) const;
         void Update() override;
         void Draw();
         explicit RenderSystem(entt::registry* _registry);

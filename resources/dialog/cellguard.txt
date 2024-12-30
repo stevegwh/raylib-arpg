@@ -1,6 +1,6 @@
 #meta start
 owner: Cell Guard
-camera_pos: 10.0 2.0 5.0
+camera_pos: 5.0 1.0 5.0
 #meta end
 
 #variables start

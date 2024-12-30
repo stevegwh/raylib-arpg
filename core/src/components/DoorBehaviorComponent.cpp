@@ -24,6 +24,8 @@ namespace sage
     // TODO: This is essentially hard coded to open the sole door in the game right now.
     void DoorBehaviorComponent::ExecuteBehavior(entt::entity clicked)
     {
+        // TODO: Likely, the issue with rotation stems from the fact that its position and rotation are currently
+        // set by the transform matrix, it's world position/rotation is currently set to zero.
         if (clicked != self || locked) return;
 
         static const float closedRotation = 0.0f;

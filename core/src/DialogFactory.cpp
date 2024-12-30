@@ -360,11 +360,13 @@ namespace sage
                         iss >> filePos.x >> filePos.y >> filePos.z;
 
                         // Option 1: Use file-specified position
-                        // dialogComponent->conversationPos = filePos;
+                        dialogComponent->conversationPos =
+                            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), filePos));
+                        ;
 
                         // Option 2: Relative to NPC's transform (if needed)
-                        dialogComponent->conversationPos = Vector3Add(
-                            transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
+                        // dialogComponent->conversationPos = Vector3Add(
+                        //     transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
                     }
                 }
                 else if (line == "#node start")
