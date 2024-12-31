@@ -1310,6 +1310,8 @@ namespace sage
 
     void ItemSlot::dropItemInWorld()
     {
+        // TODO: If you're going to have it so that an item can only be picked up if you can pathfind there, you
+        // should do the same for this.
         const auto itemId = getItemId();
         const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
         const auto playerPos =

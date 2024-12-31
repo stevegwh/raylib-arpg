@@ -15,6 +15,7 @@
 #include "Cursor.hpp"
 #include "GameData.hpp"
 #include "ItemFactory.hpp"
+#include "NavigationGridSystem.hpp"
 
 namespace sage
 {
@@ -26,16 +27,24 @@ namespace sage
 
     bool InventorySystem::CheckWorldItemRange() const
     {
-        const auto playerPos =
-            registry->get<sgTransform>(gameData->controllableActorSystem->GetSelectedActor()).GetWorldPos();
+        auto actorId = gameData->controllableActorSystem->GetSelectedActor();
+        const auto playerPos = registry->get<sgTransform>(actorId).GetWorldPos();
         const auto cursorPos = gameData->cursor->getMouseHitInfo().rlCollision.point;
         const auto dist = Vector3Distance(cursorPos, playerPos);
         if (dist > ItemComponent::MAX_ITEM_DROP_RANGE)
         {
             // TODO: Say to player it's out of range
-            std::cout << "Item out of pick up range \n";
+            std::cout << "Item out of pick up range. \n";
             return false;
         }
+
+        if (gameData->navigationGridSystem->AStarPathfind(actorId, playerPos, cursorPos).empty())
+        {
+            // TODO: Say to player
+            std::cout << "Item unreachable \n";
+            return false;
+        }
+
         return true;
     }
 
