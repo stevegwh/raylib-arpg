@@ -13,8 +13,16 @@
 
 namespace sage
 {
-    void CursorClickIndicator::onCursorClick()
+
+    void CursorClickIndicator::onCursorClick(entt::entity entity)
     {
+        auto& col = registry->get<Collideable>(entity);
+        if (col.collisionLayer != CollisionLayer::FLOORSIMPLE &&
+            col.collisionLayer != CollisionLayer::FLOORCOMPLEX)
+        {
+            onReachLocation();
+            return;
+        }
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = true;
         auto selectedActor = gameData->controllableActorSystem->GetSelectedActor();
@@ -36,7 +44,10 @@ namespace sage
 
     void CursorClickIndicator::onReachLocation()
     {
-        destinationReachedCnx.release();
+        if (destinationReachedCnx)
+        {
+            destinationReachedCnx.release();
+        }
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
     }
@@ -58,8 +69,10 @@ namespace sage
     CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData), self(registry->create())
     {
-        entt::sink sink{gameData->cursor->onFloorClick};
-        sink.connect<&CursorClickIndicator::onCursorClick>(this);
+        {
+            entt::sink sink{gameData->cursor->onAnyLeftClick};
+            sink.connect<&CursorClickIndicator::onCursorClick>(this);
+        }
         entt::sink sink2{gameData->controllableActorSystem->onSelectedActorChange};
         sink2.connect<&CursorClickIndicator::onSelectedActorChanged>(this);
 

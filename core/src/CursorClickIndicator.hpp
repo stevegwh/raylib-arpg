@@ -21,7 +21,7 @@ namespace sage
 
         entt::connection destinationReachedCnx;
 
-        void onCursorClick();
+        void onCursorClick(entt::entity entity);
         void onReachLocation();
         void onSelectedActorChanged();
 
