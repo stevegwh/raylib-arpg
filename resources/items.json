@@ -34,7 +34,7 @@
         "Flags": [
           "QUEST"
         ],
-        "Icon": "IMG_ICON_WEAPON_SWORD01",
+        "Icon": "IMG_ICON_JUNK_LEVER",
         "Model": "MDL_QUEST_LEVER"
       },
       {
@@ -45,7 +45,7 @@
         "Flags": [
           "QUEST"
         ],
-        "Icon": "IMG_ICON_WEAPON_SWORD01",
+        "Icon": "IMG_ICON_JUNK_BONE",
         "Model": "MDL_QUEST_BONE"
       }
     ]

@@ -38,6 +38,7 @@
 #include <Serializer.hpp>
 
 #include "raylib.h"
+#include "systems/PartySystem.hpp"
 #include "ViewSerializer.hpp"
 
 namespace sage
@@ -80,14 +81,35 @@ namespace sage
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
         : Scene(_registry, _keyMapping, _settings)
     {
-        auto boneId = data->renderSystem->FindRenderableByMeshName("QUEST_BONE");
-        data->questManager->AddTaskToQuest("LeverQuest", boneId);
-        auto& quest = registry->get<Quest>(data->questManager->GetQuest("LeverQuest"));
-        quest.StartQuest();
+        {
+            auto boneId = data->renderSystem->FindRenderableByMeshName("QUEST_BONE");
+            data->questManager->AddTaskToQuest("LeverQuest", boneId);
+            auto& quest = registry->get<Quest>(data->questManager->GetQuest("LeverQuest"));
+            quest.StartQuest();
 
-        auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
-        registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
-        data->questManager->AddTaskToQuest("LeverBaseQuest", leverBaseId);
+            auto& event = registry->emplace<QuestEventReactionComponent>(boneId, boneId, quest);
+            entt::sink sink{event.onQuestCompleted};
+            sink.connect<[](PartySystem& partySystem, entt::entity entity) {
+                partySystem.RemoveItemFromParty("QUEST_BONE");
+            }>(*data->partySystem);
+        }
+
+        {
+            auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
+            registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
+            data->questManager->AddTaskToQuest("LeverBaseQuest", leverBaseId);
+            auto& quest = registry->get<Quest>(data->questManager->GetQuest("LeverBaseQuest"));
+            auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
+            auto& event = registry->emplace<QuestEventReactionComponent>(leverId, leverId, quest);
+            entt::sink sink{event.onQuestStart};
+            auto& renderable = registry->get<Renderable>(leverId);
+            sink.connect<&Renderable::Disable>(renderable);
+            auto& col = registry->get<Collideable>(leverId);
+            sink.connect<&Collideable::Disable>(col);
+            sink.connect<[](PartySystem& partySystem, entt::entity entity) {
+                partySystem.GiveItemToSelected("QUEST_LEVER");
+            }>(*data->partySystem);
+        }
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
     }

@@ -7,7 +7,7 @@
 /**
  * This file is a modified version of rmodels.c. The original license is included below.
  *
- * /**********************************************************************************************
+ ***********************************************************************************************
  *
  *   rmodels - Basic functions to draw 3d shapes and load and draw 3d models
  *   LICENSE: zlib/libpng

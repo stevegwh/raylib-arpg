@@ -27,6 +27,7 @@ namespace sage
         auto view = registry->view<Collideable>();
 
         view.each([&](auto entity, const auto& c) {
+            if (!c.active) return;
             if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 if (CheckCollisionBoxes(bb, c.worldBoundingBox))
@@ -56,10 +57,10 @@ namespace sage
     {
         std::vector<CollisionInfo> collisions;
 
-        auto view = registry->view<Collideable>();
+        const auto view = registry->view<Collideable>();
 
         view.each([&](auto entity, const auto& c) {
-            if (entity == caster) return;
+            if (!c.active || entity == caster) return;
             if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
@@ -85,12 +86,13 @@ namespace sage
         auto view = registry->view<Collideable>();
 
         view.each([&](auto entity, const auto& c) {
+            if (!c.active) return false;
             if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 auto col = GetRayCollisionBox(ray, c.worldBoundingBox);
                 if (col.hit)
                 {
-                    CollisionInfo _info = {
+                    const CollisionInfo _info = {
                         .collidedEntityId = entity,
                         .collidedBB = c.worldBoundingBox,
                         .rlCollision = col,
@@ -109,10 +111,10 @@ namespace sage
     {
         std::vector<CollisionInfo> collisions;
 
-        auto view = registry->view<Collideable>();
+        const auto view = registry->view<Collideable>();
 
         view.each([&](auto entity, const auto& c) {
-            if (entity == caster) return;
+            if (!c.active || entity == caster) return;
             if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
                 if (registry->any_of<Renderable>(entity))
@@ -138,15 +140,16 @@ namespace sage
         return collisions;
     }
 
-    void CollisionSystem::DrawDebug()
+    void CollisionSystem::DrawDebug() const
     {
         auto view = registry->view<Collideable>();
         for (auto entity : view)
         {
             auto& c = registry->get<Collideable>(entity);
+            if (!c.active) continue;
             if (c.collisionLayer != CollisionLayer::BACKGROUND && c.collisionLayer != CollisionLayer::DEFAULT)
             {
-                Color col = YELLOW;
+                auto col = YELLOW;
                 if (c.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
                     c.collisionLayer == CollisionLayer::FLOORSIMPLE)
                 {
@@ -195,13 +198,13 @@ namespace sage
         {
             if (caller == entity) continue;
             const auto& col = view.get<Collideable>(entity);
+            if (!col.active) continue;
             if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(col.collisionLayer)])
             {
                 bool colHit = CheckBoxCollision(bb, col.worldBoundingBox);
                 if (colHit)
                 {
-                    CollisionInfo colInfo;
-                    colInfo = {
+                    CollisionInfo colInfo = {
                         .collidedEntityId = entity,
                         .collidedBB = col.worldBoundingBox,
                         .rlCollision = {},
@@ -251,9 +254,12 @@ namespace sage
 
     void CollisionSystem::Update()
     {
+        // TODO: Is this used ever? Does it work?
         auto view = registry->view<Collideable, CollisionChecker>();
         for (entt::entity entity : view)
         {
+            const auto& col = registry->get<Collideable>(entity);
+            if (!col.active) continue;
             CollisionInfo out;
             auto& colChecker = registry->get<CollisionChecker>(entity);
             if (Vector3Distance(colChecker.origin, colChecker.destination) > colChecker.maxDistance)
@@ -262,7 +268,6 @@ namespace sage
                 registry->remove<CollisionChecker>(entity);
                 continue;
             }
-            const auto& col = registry->get<Collideable>(entity);
             auto& bb = col.worldBoundingBox;
             if (GetFirstCollisionBB(entity, bb, col.collisionLayer, out))
             {

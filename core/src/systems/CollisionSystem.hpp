@@ -37,7 +37,7 @@ namespace sage
         void BoundingBoxDraw(entt::entity entityId, Color color = LIME) const;
         static bool CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2);
         bool GetFirstCollisionBB(entt::entity caller, BoundingBox bb, CollisionLayer layer, CollisionInfo& out);
-        void DrawDebug();
+        void DrawDebug() const;
         void Update() override;
         explicit CollisionSystem(entt::registry* _registry);
     };

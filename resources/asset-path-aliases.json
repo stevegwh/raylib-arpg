@@ -106,6 +106,14 @@
         "value": "resources/icons/items/weapons/sword.png"
       },
       {
+        "key": "IMG_ICON_JUNK_BONE",
+        "value": "resources/icons/items/bone.png"
+      },
+      {
+        "key": "IMG_ICON_JUNK_LEVER",
+        "value": "resources/icons/items/lever.png"
+      },
+      {
           "key": "IMG_UI_CLOSE",
           "value": "resources/icons/ui/close.png"
       },
@@ -116,14 +124,6 @@
       {
         "key": "MDL_VFX_FLATTORUS",
         "value": "resources/models/obj/flattorus.obj"
-      },
-      {
-        "key": "MDL_QUEST_LEVER",
-        "value": "QUEST_LEVER"
-      },
-      {
-        "key": "MDL_QUEST_BONE",
-        "value": "QUEST_BONE"
       },
       {
         "key": "MDL_WPN_DAGGER01",

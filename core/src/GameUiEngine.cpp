@@ -1324,11 +1324,16 @@ namespace sage
                 onItemDroppedToWorld();
                 RetrieveInfo();
             }
+            else
+            {
+                // TODO: Report error to user.
+                std::cout << "Item Cannot be Dropped. \n";
+            }
         }
         else
         {
             // TODO: Report to the user that you can't drop it here.
-            std::cout << "Out of range \n";
+            std::cout << "Out of Range \n";
         }
     }
 

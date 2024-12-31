@@ -23,6 +23,7 @@ namespace sage
         [[nodiscard]] bool AddItem(entt::entity entity);
         bool AddItem(entt::entity entity, unsigned int row, unsigned int col);
         void RemoveItem(unsigned int row, unsigned int col);
+        void RemoveItem(entt::entity item);
         void SwapItems(unsigned int row1, unsigned int col1, unsigned int row2, unsigned int col2);
         [[nodiscard]] entt::entity GetItem(unsigned int row, unsigned int col) const;
         InventoryComponent();

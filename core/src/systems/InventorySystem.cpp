@@ -14,6 +14,7 @@
 #include "ControllableActorSystem.hpp"
 #include "Cursor.hpp"
 #include "GameData.hpp"
+#include "ItemFactory.hpp"
 
 namespace sage
 {

@@ -475,7 +475,7 @@ namespace sage
             }
         }
 
-        // TODO: Make these use AssetIDs and move paths to json
+        // TODO: Can alias these and move paths to json
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/equipment.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/hammer.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/inventory.png");

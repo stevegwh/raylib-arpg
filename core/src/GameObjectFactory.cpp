@@ -265,13 +265,13 @@ namespace sage
         auto& quest = registry->get<Quest>(data->questManager->GetQuest("ArissaQuest"));
         quest.AddTask(id);
         {
-            auto& questCompleteReaction = registry->emplace<ReactToQuestFinishComponent>(id, id, quest);
+            auto& questCompleteReaction = registry->emplace<QuestEventReactionComponent>(id, id, quest);
             entt::sink sink{questCompleteReaction.onQuestCompleted};
             sink.connect<&PartySystem::NPCToMember>(data->partySystem);
         }
         {
             auto doorId = data->renderSystem->FindRenderableByMeshName<DoorBehaviorComponent>("QUEST_DOOR");
-            auto& questCompleteReaction = registry->emplace<ReactToQuestFinishComponent>(doorId, doorId, quest);
+            auto& questCompleteReaction = registry->emplace<QuestEventReactionComponent>(doorId, doorId, quest);
             entt::sink sink{questCompleteReaction.onQuestCompleted};
             sink.connect<&DoorSystem::UnlockAndOpenDoor>(data->doorSystem);
         }
@@ -444,6 +444,7 @@ namespace sage
         entt::registry* registry, GameData* data, entt::entity itemId, Vector3 position)
     {
         auto& item = registry->get<ItemComponent>(itemId);
+        if (item.HasFlag(ItemFlags::QUEST)) return false;
         auto model = ResourceManager::GetInstance().GetModelCopy(item.model);
         // TODO: Need a way to store the matrix scale? Maybe in the resource packer we should store the transform
         auto& renderable =

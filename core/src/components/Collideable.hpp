@@ -50,6 +50,7 @@ namespace sage
         entt::registry* registry{};
 
       public:
+        bool active = true;
         void OnTransformUpdate(entt::entity entity);
         BoundingBox localBoundingBox{}; // BoundingBox in local space
         BoundingBox worldBoundingBox{}; // BoundingBox in world space (bb * world mat)
@@ -58,9 +59,11 @@ namespace sage
         bool debugDraw = false;
 
         void SetWorldBoundingBox(Matrix mat);
+        void Enable();
+        void Disable();
 
         // Static object
-        explicit Collideable(BoundingBox _localBoundingBox, Matrix worldMatrix);
+        explicit Collideable(const BoundingBox& _localBoundingBox, const Matrix& worldMatrix);
         // Dynamic object
         Collideable(entt::registry* _registry, entt::entity _self, BoundingBox _localBoundingBox);
         // Static object (required for serialization)

@@ -79,26 +79,47 @@ namespace sage
     // Attach this if you want something to happen to a specific entity once a quest is complete
     // TODO: Sure you can't just use a hook? Maybe two sinks? One if we care about the quest (give reward) one if
     // not?
-    class ReactToQuestFinishComponent
+    class QuestEventReactionComponent
     {
-        entt::connection connection;
+        entt::connection completedConnection;
+        entt::connection startConnection;
         entt::entity self{};
+
         void reactToQuestFinish(entt::entity) const
         {
             onQuestCompleted.publish(self);
         }
 
-      public:
-        ~ReactToQuestFinishComponent()
+        void reactToQuestStart(entt::entity) const
         {
-            connection.release();
+            onQuestStart.publish(self);
         }
 
-        entt::sigh<void(entt::entity)> onQuestCompleted;
-        ReactToQuestFinishComponent(entt::entity _self, Quest& quest) : self(_self)
+      public:
+        ~QuestEventReactionComponent()
         {
-            entt::sink sink{quest.onQuestCompleted};
-            connection = sink.connect<&ReactToQuestFinishComponent::reactToQuestFinish>(this);
+            if (completedConnection)
+            {
+                completedConnection.release();
+            }
+            if (startConnection)
+            {
+                startConnection.release();
+            }
+        }
+
+        entt::sigh<void(entt::entity)> onQuestStart;
+        entt::sigh<void(entt::entity)> onQuestCompleted;
+        QuestEventReactionComponent(entt::entity _self, Quest& quest) : self(_self)
+        {
+            {
+                entt::sink sink{quest.onQuestCompleted};
+                completedConnection = sink.connect<&QuestEventReactionComponent::reactToQuestFinish>(this);
+            }
+            {
+                entt::sink sink{quest.onQuestStart};
+                startConnection = sink.connect<&QuestEventReactionComponent::reactToQuestStart>(this);
+            }
         }
     };
 

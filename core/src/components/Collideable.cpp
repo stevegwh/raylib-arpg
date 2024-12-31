@@ -25,9 +25,20 @@ namespace sage
         worldBoundingBox = bb;
     }
 
-    Collideable::Collideable(BoundingBox _localBoundingBox, Matrix mat) : localBoundingBox(_localBoundingBox)
+    void Collideable::Enable()
     {
-        SetWorldBoundingBox(mat);
+        active = true;
+    }
+
+    void Collideable::Disable()
+    {
+        active = false;
+    }
+
+    Collideable::Collideable(const BoundingBox& _localBoundingBox, const Matrix& worldMatrix)
+        : localBoundingBox(_localBoundingBox)
+    {
+        SetWorldBoundingBox(worldMatrix);
     }
 
     // Applies the world matrix of this entity's transform and subscribes to its updates

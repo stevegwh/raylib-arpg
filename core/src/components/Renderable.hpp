@@ -36,6 +36,9 @@ namespace sage
         bool serializable = true;
         [[nodiscard]] ModelSafe* GetModel() const;
 
+        void Enable();
+        void Disable();
+
         Renderable() = default;
         Renderable(const Renderable&) = delete;
         Renderable& operator=(const Renderable&) = delete;

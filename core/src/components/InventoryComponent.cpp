@@ -46,6 +46,20 @@ namespace sage
         onItemRemoved.publish();
     }
 
+    void InventoryComponent::RemoveItem(entt::entity item)
+    {
+        for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
+        {
+            for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
+            {
+                if (auto _item = items[row][col]; item == _item)
+                {
+                    RemoveItem(row, col);
+                }
+            }
+        }
+    }
+
     entt::entity InventoryComponent::GetItem(unsigned int row, unsigned int col) const
     {
         return items[row][col];

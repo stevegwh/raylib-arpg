@@ -15,6 +15,16 @@ namespace sage
         return model.get();
     }
 
+    void Renderable::Enable()
+    {
+        active = true;
+    }
+
+    void Renderable::Disable()
+    {
+        active = false;
+    }
+
     Renderable::Renderable(std::unique_ptr<ModelSafe> _model, Matrix _localTransform)
         : model(std::move(_model)), initialTransform(_localTransform)
     {

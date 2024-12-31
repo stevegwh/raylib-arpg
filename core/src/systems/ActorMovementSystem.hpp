@@ -13,7 +13,7 @@ namespace sage
     class CollisionSystem;
     class NavigationGridSystem;
     struct MoveableActor;
-    struct Collideable;
+    class Collideable;
     struct sgTransform;
     struct GridSquare;
     struct NavigationGridSquare;
