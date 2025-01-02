@@ -39,6 +39,7 @@
 
 #include "raylib.h"
 #include "systems/PartySystem.hpp"
+#include "UserInput.hpp"
 #include "ViewSerializer.hpp"
 
 namespace sage

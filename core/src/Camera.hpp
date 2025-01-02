@@ -73,7 +73,9 @@ namespace sage
         [[nodiscard]] Vector3 GetLeft();
         [[nodiscard]] Vector3 GetPosition() const;
         void CutscenePose(const sgTransform& location);
+        void LerpToLoc(const sgTransform& location);
         void SetCamera(Vector3 _pos, Vector3 _target);
+        void FocusSelectedActor();
         void DrawDebug();
         void Update();
         explicit Camera(entt::registry* _registry, UserInput* userInput, GameData* _gameData);

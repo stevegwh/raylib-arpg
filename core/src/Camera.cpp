@@ -14,6 +14,7 @@
 #include "raymath.h"
 #include "rcamera.h"
 #include "systems/CollisionSystem.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
 namespace sage
@@ -255,6 +256,14 @@ namespace sage
     {
         rlCamera.position = _pos;
         rlCamera.target = _target;
+    }
+
+    void Camera::FocusSelectedActor()
+    {
+        auto actorId = gameData->controllableActorSystem->GetSelectedActor();
+        auto& transform = registry->get<sgTransform>(actorId);
+        auto diff = Vector3Subtract(rlCamera.position, rlCamera.target);
+        SetCamera(Vector3Add(transform.GetWorldPos(), diff), transform.GetWorldPos());
     }
 
     void Camera::DrawDebug()

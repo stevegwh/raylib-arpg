@@ -154,6 +154,8 @@ namespace sage
         sink.connect<&Window::ToggleHide>(*inventoryWindow);
         entt::sink sink2{data->userInput->keyCPressed};
         sink2.connect<&Window::ToggleHide>(*equipmentWindow);
+        entt::sink sink3{data->userInput->keyFPressed};
+        sink3.connect<&Camera::FocusSelectedActor>(data->camera);
 
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
