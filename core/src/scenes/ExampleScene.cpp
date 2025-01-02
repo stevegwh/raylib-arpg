@@ -113,5 +113,6 @@ namespace sage
         }
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
+        data->camera->FocusSelectedActor();
     }
 } // namespace sage
