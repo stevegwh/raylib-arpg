@@ -294,8 +294,11 @@ namespace sage
 
     Font ResourceManager::FontLoad(const std::string& path)
     {
-        // TODO: asset id
-        assert(fonts.contains(path));
+        // assert(fonts.contains(path));
+        if (!fonts.contains(path))
+        {
+            FontLoadFromFile(path);
+        }
         return fonts[path];
     }
 

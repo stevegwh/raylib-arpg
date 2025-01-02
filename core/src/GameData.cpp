@@ -16,6 +16,7 @@
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "FullscreenTextOverlayFactory.hpp"
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
 #include "NpcManager.hpp"
@@ -72,7 +73,8 @@ namespace sage
           uberShaderSystem(std::make_unique<UberShaderSystem>(_registry, this)),
           cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this)),
           questManager(std::make_unique<QuestManager>(_registry)),
-          doorSystem(std::make_unique<DoorSystem>(_registry, this))
+          doorSystem(std::make_unique<DoorSystem>(_registry, this)),
+          fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayFactory>(this))
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this

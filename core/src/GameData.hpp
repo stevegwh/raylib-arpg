@@ -42,6 +42,7 @@ namespace sage
     class NPCManager;
     class DialogFactory;
     class DoorSystem;
+    class FullscreenTextOverlayFactory;
 
     // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
     // TODO: Also, should rename to "GameSystems"
@@ -81,6 +82,7 @@ namespace sage
         std::unique_ptr<CursorClickIndicator> cursorClickIndicator;
         std::unique_ptr<QuestManager> questManager;
         std::unique_ptr<DoorSystem> doorSystem;
+        std::unique_ptr<FullscreenTextOverlayFactory> fullscreenTextOverlayFactory;
 
         GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
     };

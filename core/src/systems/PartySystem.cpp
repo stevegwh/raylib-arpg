@@ -137,6 +137,7 @@ namespace sage
             }
         }
         assert(0);
+        return {};
     }
 
     PartySystem::PartySystem(entt::registry* _registry, GameData* _gameData)

@@ -12,6 +12,7 @@
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
+#include "FullscreenTextOverlayFactory.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "GameUiEngine.hpp"
@@ -57,6 +58,7 @@ namespace sage
         data->uiEngine->Update();
         spiral->Update(GetFrameTime());
         data->cursorClickIndicator->Update();
+        data->fullscreenTextOverlayFactory->Update();
     }
 
     void Scene::DrawDebug3D()
@@ -82,6 +84,7 @@ namespace sage
     {
         data->uiEngine->Draw2D();
         data->cursor->Draw2D();
+        data->fullscreenTextOverlayFactory->Draw2D();
     }
 
     Scene::~Scene()
@@ -156,6 +159,11 @@ namespace sage
         sink2.connect<&Window::ToggleHide>(*equipmentWindow);
         entt::sink sink3{data->userInput->keyFPressed};
         sink3.connect<&Camera::FocusSelectedActor>(data->camera);
+
+        entt::sink sink4{data->userInput->keyOPressed};
+        sink4.connect<[](FullscreenTextOverlayFactory& fullscreenTextOverlayFactory) {
+            fullscreenTextOverlayFactory.SetOverlayTimed("You awaken in a cave.", 5.0f, 0.0f, 1.0f);
+        }>(*data->fullscreenTextOverlayFactory);
 
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
