@@ -1,2 +1,5 @@
+distance: 60
+reactee: PLAYER
+---
 There's the exit!
 Hmm, something seems wrong with its lever.

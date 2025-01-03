@@ -1,1 +1,4 @@
+distance: 30
+reactee: PLAYER
+---
 Wait, what's that on the table?

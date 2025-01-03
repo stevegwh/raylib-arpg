@@ -23,7 +23,7 @@
 #include <fstream>
 
 namespace fs = std::filesystem;
-static constexpr auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
+constexpr const auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
 
 namespace sage
 {
@@ -34,33 +34,49 @@ namespace sage
         {
             if (entry.path().extension() == ".txt")
             {
-                auto text = loadDialogFromFile(entry.path().filename());
-                auto entity = gameData->renderSystem->FindRenderableByMeshName(entry.path().filename());
+                std::string fileName = entry.path().filename().string();
+                std::ifstream file{std::format("{}/{}", CONTEXTUAL_DIALOG_PATH, fileName)};
+
+                std::vector<std::string> text;
+                auto entity = gameData->renderSystem->FindRenderableByMeshName(fileName);
+                auto& trigger = registry->emplace<ContextualDialogTriggerComponent>(entity);
+
+                if (file.is_open())
+                {
+                    bool metaEnd = false;
+                    std::string buff;
+                    while (std::getline(file, buff, '\n'))
+                    {
+                        if (metaEnd)
+                        {
+                            text.push_back(buff);
+                            continue;
+                        }
+                        if (buff == "---")
+                        {
+                            metaEnd = true;
+                        }
+                        else if (buff.find("distance:") != std::string::npos)
+                        {
+                            auto sub = buff.substr(std::string("distance:").size());
+                            float dist = std::stof(sub);
+                            trigger.distance = dist;
+                        }
+                        else if (buff.find("reactee:") != std::string::npos)
+                        {
+                            auto sub = buff.substr(std::string("reactee:").size());
+                            // Who reacts to this object (so far, only the player can).
+                            // But maybe we want a goblin to say something when the player is near, etc.
+                        }
+                    }
+                }
+                else
+                {
+                    assert(0);
+                }
                 dialogTextMap.emplace(entity, text);
-                registry->emplace<ContextualDialogTriggerComponent>(entity);
             }
         }
-    }
-
-    std::vector<std::string> ContextualDialogSystem::loadDialogFromFile(const std::string& key)
-    {
-        std::ifstream text{std::format("{}/{}", CONTEXTUAL_DIALOG_PATH, key)};
-        std::vector<std::string> out;
-
-        if (text.is_open())
-        {
-            std::string buff;
-            while (std::getline(text, buff, '\n'))
-            {
-                out.push_back(buff);
-            }
-        }
-        else
-        {
-            assert(0);
-        }
-
-        return out;
     }
 
     void ContextualDialogSystem::Draw2D() const
@@ -85,7 +101,7 @@ namespace sage
         }
     }
 
-    void ContextualDialogSystem::Update()
+    void ContextualDialogSystem::Update() const
     {
         const auto actor = gameData->controllableActorSystem->GetSelectedActor();
         if (registry->any_of<OverheadDialogComponent>(actor))

@@ -19,10 +19,9 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         void initContextualDialogsFromDirectory();
-        static std::vector<std::string> loadDialogFromFile(const std::string& key);
 
       public:
-        void Update();
+        void Update() const;
         void Draw2D() const;
 
         ContextualDialogSystem(entt::registry* _registry, GameData* _gameData);
