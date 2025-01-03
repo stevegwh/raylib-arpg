@@ -16,6 +16,7 @@ namespace sage
 
     void CursorClickIndicator::onCursorClick(entt::entity entity)
     {
+        if (entity == entt::null || !registry->any_of<Collideable>(entity)) return;
         auto& col = registry->get<Collideable>(entity);
         if (col.collisionLayer != CollisionLayer::FLOORSIMPLE &&
             col.collisionLayer != CollisionLayer::FLOORCOMPLEX)

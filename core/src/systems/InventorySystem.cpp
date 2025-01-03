@@ -38,14 +38,18 @@ namespace sage
             return false;
         }
 
+        bool inRange = true;
+
+        const auto& collideable = registry->get<Collideable>(actorId);
+        gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
         if (gameData->navigationGridSystem->AStarPathfind(actorId, playerPos, cursorPos).empty())
         {
             // TODO: Say to player
             std::cout << "Item unreachable \n";
-            return false;
+            inRange = false;
         }
-
-        return true;
+        gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
+        return inRange;
     }
 
     void InventorySystem::onWorldItemClicked(entt::entity entity) const
