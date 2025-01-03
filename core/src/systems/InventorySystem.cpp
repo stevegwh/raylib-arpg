@@ -25,11 +25,20 @@ namespace sage
         onInventoryUpdated.publish();
     }
 
-    bool InventorySystem::CheckWorldItemRange() const
+    bool InventorySystem::CheckWorldItemRange()
     {
+        const auto cursorPos = gameData->cursor->getMouseHitInfo().rlCollision.point;
+        if (AlmostEquals(cursorPos, lastWorldItemHovered.pos))
+        {
+            return lastWorldItemHovered.reachable;
+        }
+
+        lastWorldItemHovered.pos = cursorPos;
+        lastWorldItemHovered.reachable = false;
+
         auto actorId = gameData->controllableActorSystem->GetSelectedActor();
         const auto playerPos = registry->get<sgTransform>(actorId).GetWorldPos();
-        const auto cursorPos = gameData->cursor->getMouseHitInfo().rlCollision.point;
+
         const auto dist = Vector3Distance(cursorPos, playerPos);
         if (dist > ItemComponent::MAX_ITEM_DROP_RANGE)
         {
@@ -38,21 +47,23 @@ namespace sage
             return false;
         }
 
-        bool inRange = true;
-
         const auto& collideable = registry->get<Collideable>(actorId);
         gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
         if (gameData->navigationGridSystem->AStarPathfind(actorId, playerPos, cursorPos).empty())
         {
             // TODO: Say to player
             std::cout << "Item unreachable \n";
-            inRange = false;
+        }
+        else
+        {
+            lastWorldItemHovered.reachable = true;
         }
         gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
-        return inRange;
+
+        return lastWorldItemHovered.reachable;
     }
 
-    void InventorySystem::onWorldItemClicked(entt::entity entity) const
+    void InventorySystem::onWorldItemClicked(entt::entity entity)
     {
         if (!CheckWorldItemRange()) return;
 

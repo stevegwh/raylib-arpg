@@ -47,15 +47,6 @@ namespace sage
     void ExampleScene::Update()
     {
         Scene::Update();
-        data->actorMovementSystem->Update();
-        data->controllableActorSystem->Update();
-        data->dialogSystem->Update();
-        data->healthBarSystem->Update();
-        data->stateMachines->Update();
-        data->playerAbilitySystem->Update();
-        data->timerSystem->Update();
-        data->collisionSystem->Update();
-        data->animationSystem->Update();
     }
 
     void ExampleScene::Draw2D()
@@ -66,17 +57,11 @@ namespace sage
     void ExampleScene::Draw3D()
     {
         Scene::Draw3D();
-        data->healthBarSystem->Draw3D();
-        data->playerAbilitySystem->Draw3D();
-        data->stateMachines->Draw3D();
     }
 
     void ExampleScene::DrawDebug3D()
     {
         Scene::DrawDebug3D();
-        data->navigationGridSystem->DrawDebug();
-        data->actorMovementSystem->DrawDebug();
-        data->collisionSystem->DrawDebug();
     }
 
     ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "raylib.h"
 #include <entt/entt.hpp>
 
 namespace sage
@@ -13,15 +14,22 @@ namespace sage
 
     class InventorySystem
     {
+        struct LastHit
+        {
+            Vector3 pos;
+            bool reachable = false;
+        };
+
         entt::registry* registry;
         GameData* gameData;
-        void onWorldItemClicked(entt::entity entity) const;
+        LastHit lastWorldItemHovered;
+        void onWorldItemClicked(entt::entity entity);
         void inventoryUpdated() const;
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
 
       public:
-        [[nodiscard]] bool CheckWorldItemRange() const;
+        [[nodiscard]] bool CheckWorldItemRange();
         entt::sigh<void()> onInventoryUpdated;
         InventorySystem(entt::registry* _registry, GameData* _gameData);
     };

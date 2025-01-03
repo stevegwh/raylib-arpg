@@ -59,6 +59,15 @@ namespace sage
         spiral->Update(GetFrameTime());
         data->cursorClickIndicator->Update();
         data->fullscreenTextOverlayFactory->Update();
+        data->actorMovementSystem->Update();
+        data->controllableActorSystem->Update();
+        data->dialogSystem->Update();
+        data->healthBarSystem->Update();
+        data->stateMachines->Update();
+        data->playerAbilitySystem->Update();
+        data->timerSystem->Update();
+        data->collisionSystem->Update();
+        data->animationSystem->Update();
     }
 
     void Scene::DrawDebug3D()
@@ -66,12 +75,18 @@ namespace sage
         data->cursor->DrawDebug();
         data->camera->DrawDebug();
         data->lightSubSystem->DrawDebugLights();
+        data->navigationGridSystem->DrawDebug();
+        data->actorMovementSystem->DrawDebug();
+        data->collisionSystem->DrawDebug();
     }
 
     void Scene::Draw3D()
     {
         data->renderSystem->Draw();
         data->cursor->Draw3D();
+        data->healthBarSystem->Draw3D();
+        data->playerAbilitySystem->Draw3D();
+        data->stateMachines->Draw3D();
         // spiral->Draw3D();
     };
 
