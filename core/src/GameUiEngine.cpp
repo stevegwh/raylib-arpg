@@ -1199,7 +1199,9 @@ namespace sage
         tex.height = height;
         canReceiveDragDrops = true;
         entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
+        entt::sink sink2{engine->gameData->partySystem->onPartyChange};
         sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
+        sink2.connect<&PartyMemberPortrait::RetrieveInfo>(this);
     }
 
     void DialogPortrait::Draw2D()

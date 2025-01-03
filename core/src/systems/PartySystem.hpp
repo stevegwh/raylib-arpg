@@ -24,6 +24,8 @@ namespace sage
         std::vector<std::vector<entt::entity>> groups;
 
       public:
+        entt::sigh<void()> onPartyChange;
+        
         void GiveItemToSelected(const std::string& itemName) const;
         void RemoveItemFromParty(const std::string& itemName) const;
         void RemoveItemFromParty(entt::entity itemId) const;

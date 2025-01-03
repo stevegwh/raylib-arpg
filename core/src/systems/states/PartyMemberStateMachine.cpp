@@ -340,10 +340,15 @@ namespace sage
         auto& state = registry->get<PartyMemberState>(entity);
         // Forward leader's movement to the state's onLeaderMovement
         auto& leaderMoveable = registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
+        for (const auto id : state.hooks)
+        {
+            gameData->reflectionSignalRouter->RemoveHook(id);
+        }
         state.hooks.push_back(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
             entity, leaderMoveable.onStartMovement, state.onLeaderMove));
         entt::sink sink{state.onLeaderMove};
         sink.connect<&DefaultState::onLeaderMove>(GetSystem<DefaultState>(PartyMemberStateEnum::Default));
+        ChangeState(entity, PartyMemberStateEnum::Default);
     }
 
     void PartyMemberStateController::onComponentRemoved(entt::entity entity)

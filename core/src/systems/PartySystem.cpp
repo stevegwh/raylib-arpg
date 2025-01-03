@@ -13,6 +13,8 @@
 #include "components/PartyMemberComponent.hpp"
 #include "components/States.hpp"
 #include "ControllableActorSystem.hpp"
+#include "Cursor.hpp"
+#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "InventorySystem.hpp"
 #include "ItemFactory.hpp"
@@ -67,17 +69,20 @@ namespace sage
 
     void PartySystem::NPCToMember(entt::entity npc)
     {
-        registry->emplace<PartyMemberComponent>(npc, npc);
-        registry->emplace<ControllableActor>(npc, npc);
+        // Taken from ControllableActorSystem (more grounds to merge both)
+        auto& moveable = registry->emplace<MoveableActor>(npc);
+        moveable.movementSpeed = 0.35f;
+        moveable.pathfindingBounds = 100;
+        auto& controllable = registry->emplace<ControllableActor>(npc, npc);
         registry->emplace<InventoryComponent>(npc);
         registry->emplace<EquipmentComponent>(npc);
         auto& combatable = registry->emplace<CombatableActor>(npc);
         combatable.actorType = CombatableActorType::PLAYER;
-        auto& moveable = registry->emplace<MoveableActor>(npc);
-        moveable.movementSpeed = 0.35f;
-        moveable.pathfindingBounds = 100;
         auto& col = registry->get<Collideable>(npc);
         col.collisionLayer = CollisionLayer::PLAYER;
+        registry->emplace<PartyMemberComponent>(npc, npc);
+        registry->emplace<PartyMemberState>(npc);
+
         AddMember(npc);
     }
 
@@ -86,6 +91,7 @@ namespace sage
         assert(party.size() < PARTY_MEMBER_MAX);
         party.push_back(member);
         groups.at(0).push_back(member);
+        onPartyChange.publish();
     }
 
     void PartySystem::RemoveMember(entt::entity entity)
@@ -95,6 +101,7 @@ namespace sage
             if (*it == entity)
             {
                 party.erase(it);
+                onPartyChange.publish();
                 return;
             }
         }

@@ -28,6 +28,7 @@
 #include "systems/CombatSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
+#include "systems/DoorSystem.hpp"
 #include "systems/HealthBarSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
