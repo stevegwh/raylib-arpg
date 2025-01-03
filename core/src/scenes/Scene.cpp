@@ -177,7 +177,11 @@ namespace sage
 
         entt::sink sink4{data->userInput->keyOPressed};
         sink4.connect<[](FullscreenTextOverlayFactory& fullscreenTextOverlayFactory) {
-            fullscreenTextOverlayFactory.SetOverlayTimed("You awaken in a cave.", 5.0f, 0.0f, 1.0f);
+            std::vector<std::pair<std::string, float>> text;
+            text.emplace_back("You awaken in a cave.", 4.0f);
+            text.emplace_back("You should find a way out.", 2.0f);
+            text.emplace_back("Drip drip.", 2.0f);
+            fullscreenTextOverlayFactory.SetOverlay(text, 0.5f, 1.0f);
         }>(*data->fullscreenTextOverlayFactory);
 
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());

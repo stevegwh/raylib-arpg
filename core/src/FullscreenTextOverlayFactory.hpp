@@ -8,6 +8,8 @@
 #include "Timer.hpp"
 #include <optional>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace sage
 {
@@ -18,16 +20,18 @@ namespace sage
         Font font;
         float fadeIn{};
         float fadeOut{};
-        std::optional<Timer> timer;
+        Timer timer;
         GameData* gameData;
-        std::string overlayText;
+        unsigned int currentTextIdx = 0;
+        std::vector<std::pair<std::string, float>> overlayText;
         bool enabled = false;
+        void setNextText();
 
       public:
         void Update();
         void Draw2D() const;
-        void SetOverlay(const std::string& _overlayText);
-        void SetOverlayTimed(const std::string& _overlayText, float time, float _fadeIn = 0, float _fadeOut = 0);
+        void SetOverlay(
+            const std::vector<std::pair<std::string, float>>& _overlayText, float _fadeIn = 0, float _fadeOut = 0);
         void RemoveOverlay();
         explicit FullscreenTextOverlayFactory(GameData* _gameData);
     };

@@ -16,38 +16,53 @@ namespace sage
     void FullscreenTextOverlayFactory::RemoveOverlay()
     {
         enabled = false;
+        fadeIn = 0;
+        fadeOut = 0;
+        currentTextIdx = 0;
+        overlayText.clear();
+        timer.Reset();
     }
 
-    void FullscreenTextOverlayFactory::SetOverlay(const std::string& _overlayText)
+    void FullscreenTextOverlayFactory::setNextText()
+    {
+        ++currentTextIdx;
+        auto time = overlayText.at(currentTextIdx).second;
+        timer.SetMaxTime(time);
+        timer.Restart();
+    }
+
+    void FullscreenTextOverlayFactory::SetOverlay(
+        const std::vector<std::pair<std::string, float>>& _overlayText, float _fadeIn, float _fadeOut)
     {
         enabled = true;
-        overlayText = _overlayText;
-    }
-
-    void FullscreenTextOverlayFactory::SetOverlayTimed(
-        const std::string& _overlayText, float time, float _fadeIn, float _fadeOut)
-    {
-        assert((fadeIn + fadeOut) < time);
         fadeIn = _fadeIn;
         fadeOut = _fadeOut;
-        timer.emplace(Timer{});
-        timer->SetMaxTime(time);
-        timer->Start();
-        SetOverlay(_overlayText);
+        for (const auto& p : _overlayText)
+        {
+            overlayText.emplace_back(p);
+        }
+        // Set final overlay to fade out
+        if (fadeOut > 0)
+        {
+            overlayText.emplace_back("", fadeOut);
+        }
+        currentTextIdx = 0;
+        timer.SetMaxTime(overlayText.at(0).second);
+        timer.Start();
     }
 
     void FullscreenTextOverlayFactory::Update()
     {
-        if (timer.has_value())
+        timer.Update(GetFrameTime());
+        if (timer.HasFinished())
         {
-            if (timer->HasFinished())
+            if (currentTextIdx + 1 < overlayText.size())
             {
-                RemoveOverlay();
-                timer.reset();
+                setNextText();
             }
             else
             {
-                timer->Update(GetFrameTime());
+                RemoveOverlay();
             }
         }
     }
@@ -57,32 +72,40 @@ namespace sage
         if (!enabled) return;
         const auto [width, height] = gameData->settings->GetViewPort();
         unsigned char a = 255;
-        if (timer->GetCurrentTime() < fadeIn)
+
+        const bool last = currentTextIdx == overlayText.size() - 1;
+        if (timer.GetRemainingTime() < fadeOut || last)
         {
-            a = static_cast<unsigned char>((timer->GetCurrentTime() / fadeIn) * 255);
+            a = static_cast<unsigned char>((timer.GetRemainingTime() / fadeOut) * 255);
         }
-        else if (timer->GetRemainingTime() < fadeOut)
+        else if (timer.GetCurrentTime() < fadeIn)
         {
-            a = static_cast<unsigned char>((timer->GetRemainingTime() / fadeOut) * 255);
+            a = static_cast<unsigned char>((timer.GetCurrentTime() / fadeIn) * 255);
         }
 
-        auto col1 = Color{0, 0, 0, a};
-        DrawRectangle(0, 0, width, height, col1);
-        auto col2 = Color{255, 255, 255, a};
+        auto bgCol = Color{0, 0, 0, 255};
+        if (last)
+        {
+            bgCol.a = a;
+        }
+        DrawRectangle(0, 0, width, height, bgCol);
 
-        auto textSize = MeasureTextEx(font, overlayText.c_str(), 32.0f, 1.5f);
+        auto textCol = Color{255, 255, 255, a};
+        const char* text = overlayText.at(currentTextIdx).first.c_str();
+        auto textSize = MeasureTextEx(font, text, 32.0f, 1.5f);
         DrawTextEx(
             font,
-            std::format("{}", overlayText).c_str(),
+            std::format("{}", text).c_str(),
             Vector2{(width - textSize.x) / 2, (gameData->settings->GetViewPort().y - textSize.y) / 2},
             32,
             1.5f,
-            col2);
+            textCol);
     }
 
     FullscreenTextOverlayFactory::FullscreenTextOverlayFactory(GameData* _gameData)
         : font(ResourceManager::GetInstance().FontLoad(
               "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+          timer({}),
           gameData(_gameData)
     {
     }
