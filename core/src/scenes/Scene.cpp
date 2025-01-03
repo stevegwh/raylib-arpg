@@ -178,7 +178,8 @@ namespace sage
         entt::sink sink4{data->userInput->keyOPressed};
         sink4.connect<[](FullscreenTextOverlayFactory& fullscreenTextOverlayFactory) {
             std::vector<std::pair<std::string, float>> text;
-            text.emplace_back("You awaken in a cave.", 4.0f);
+            text.emplace_back(
+                "You awaken in a cave.\n This is a test new line.\n And another for good measure.", 4.0f);
             text.emplace_back("You should find a way out.", 2.0f);
             text.emplace_back("Drip drip.", 2.0f);
             fullscreenTextOverlayFactory.SetOverlay(text, 0.5f, 1.0f);

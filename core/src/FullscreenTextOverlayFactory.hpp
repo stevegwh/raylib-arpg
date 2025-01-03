@@ -23,9 +23,10 @@ namespace sage
         Timer timer;
         GameData* gameData;
         unsigned int currentTextIdx = 0;
-        std::vector<std::pair<std::string, float>> overlayText;
+        std::vector<std::pair<std::vector<std::string>, float>> overlayText;
         bool enabled = false;
         void setNextText();
+        static std::vector<std::string> divideTextOnNewLine(const std::string& str);
 
       public:
         void Update();
