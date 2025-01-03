@@ -299,7 +299,7 @@ namespace sage
         moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 100;
 
-        BoundingBox bb = createRectangularBoundingBox(3.0f, 4.5f); // Manually set bounding box dimensions
+        BoundingBox bb = createRectangularBoundingBox(3.0f, 6.5f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::PLAYER;
         transform.SetRotation(rotation);

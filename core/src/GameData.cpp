@@ -25,6 +25,7 @@
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/CombatSystem.hpp"
+#include "systems/ContextualDialogSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
 #include "systems/DoorSystem.hpp"
@@ -74,7 +75,8 @@ namespace sage
           cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this)),
           questManager(std::make_unique<QuestManager>(_registry)),
           doorSystem(std::make_unique<DoorSystem>(_registry, this)),
-          fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayFactory>(this))
+          fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayFactory>(this)),
+          contextualDialogSystem(std::make_unique<ContextualDialogSystem>(registry, this))
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this

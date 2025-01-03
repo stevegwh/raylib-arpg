@@ -26,6 +26,7 @@
 #include "systems/AnimationSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/CombatSystem.hpp"
+#include "systems/ContextualDialogSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
 #include "systems/DoorSystem.hpp"
@@ -42,6 +43,7 @@
 #include "UserInput.hpp"
 
 #include "abilities/vfx/SpiralFountainVFX.hpp"
+#include "components/ContextualDialogComponent.hpp"
 
 #include <optional>
 
@@ -97,6 +99,7 @@ namespace sage
 
     void Scene::Draw2D()
     {
+        data->contextualDialogSystem->Draw2D();
         data->uiEngine->Draw2D();
         data->cursor->Draw2D();
         data->fullscreenTextOverlayFactory->Draw2D();
@@ -175,6 +178,12 @@ namespace sage
         entt::sink sink3{data->userInput->keyFPressed};
         sink3.connect<&Camera::FocusSelectedActor>(data->camera);
 
+        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
+        GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
+
+        spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
+        spiral->InitSystem();
+
         entt::sink sink4{data->userInput->keyOPressed};
         sink4.connect<[](FullscreenTextOverlayFactory& fullscreenTextOverlayFactory) {
             std::vector<std::pair<std::string, float>> text;
@@ -185,11 +194,12 @@ namespace sage
             fullscreenTextOverlayFactory.SetOverlay(text, 0.5f, 1.0f);
         }>(*data->fullscreenTextOverlayFactory);
 
-        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
-        GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
+        auto& contextualDiag = registry->emplace<ContextualDialogComponent>(firstPlayer, firstPlayer);
+        std::vector<std::string> contextualDialog;
+        contextualDialog.emplace_back("Oh, a lever?");
+        contextualDialog.emplace_back("Hmm, seems like something is wrong with it.");
 
-        spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
-        spiral->InitSystem();
+        contextualDiag.SetText(contextualDialog, 3.0f);
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
