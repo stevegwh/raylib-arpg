@@ -18,12 +18,12 @@ namespace sage
         std::unordered_map<entt::entity, std::vector<std::string>> dialogTextMap;
         entt::registry* registry;
         GameData* gameData;
-        void initContextualDialogsFromDirectory();
 
       public:
         void Update() const;
         void Draw2D() const;
 
+        void InitContextualDialogsFromDirectory();
         ContextualDialogSystem(entt::registry* _registry, GameData* _gameData);
     };
 

@@ -196,6 +196,9 @@ namespace sage
             fullscreenTextOverlayFactory.SetOverlay(text, 0.5f, 1.0f);
         }>(*data->fullscreenTextOverlayFactory);
 
+        // Requires renderables being loaded first
+        data->contextualDialogSystem->InitContextualDialogsFromDirectory();
+
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
         // ResourceManager::GetInstance().UnloadShaderFileText();

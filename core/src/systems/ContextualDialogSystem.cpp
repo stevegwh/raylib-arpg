@@ -28,7 +28,7 @@ constexpr const auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
 namespace sage
 {
 
-    void ContextualDialogSystem::initContextualDialogsFromDirectory()
+    void ContextualDialogSystem::InitContextualDialogsFromDirectory()
     {
         for (const fs::path path{CONTEXTUAL_DIALOG_PATH}; const auto& entry : fs::directory_iterator(path))
         {
@@ -56,17 +56,22 @@ namespace sage
                         {
                             metaEnd = true;
                         }
-                        else if (buff.find("distance:") != std::string::npos)
+                        else if (buff.find("distance: ") != std::string::npos)
                         {
-                            auto sub = buff.substr(std::string("distance:").size());
+                            auto sub = buff.substr(std::string("distance: ").size());
                             float dist = std::stof(sub);
                             trigger.distance = dist;
                         }
-                        else if (buff.find("reactee:") != std::string::npos)
+                        else if (buff.find("speaker: ") != std::string::npos)
                         {
-                            auto sub = buff.substr(std::string("reactee:").size());
-                            // Who reacts to this object (so far, only the player can).
-                            // But maybe we want a goblin to say something when the player is near, etc.
+                            auto sub = buff.substr(std::string("speaker: ").size());
+                            entt::entity speaker = gameData->renderSystem->FindRenderableByMeshName(sub);
+                            if (speaker == entt::null)
+                            {
+                                speaker = gameData->renderSystem->FindRenderableByName(sub);
+                            }
+                            assert(trigger.speaker != entt::null);
+                            trigger.speaker = speaker;
                         }
                     }
                 }
@@ -101,29 +106,35 @@ namespace sage
         }
     }
 
+    // Selected player triggers an overhead dialog to appear over the `speaker` (declared in the trigger's file)
+    // based on `distance` (declared in the trigger's file).
     void ContextualDialogSystem::Update() const
     {
-        const auto actor = gameData->controllableActorSystem->GetSelectedActor();
-        if (registry->any_of<OverheadDialogComponent>(actor))
-        {
-            if (auto& overhead = registry->get<OverheadDialogComponent>(actor); overhead.IsFinished())
-            {
-                registry->erase<OverheadDialogComponent>(actor);
-            }
-            else
-            {
-                return;
-            }
-        }
-        const auto actorPos = registry->get<sgTransform>(actor).GetWorldPos();
         for (const auto view = registry->view<sgTransform, ContextualDialogTriggerComponent, Renderable>();
              auto entity : view)
         {
-            const auto& trans = registry->get<sgTransform>(entity);
-            if (auto& trigger = registry->get<ContextualDialogTriggerComponent>(entity);
-                trigger.CanTrigger() && Vector3Distance(trans.GetWorldPos(), actorPos) < trigger.distance)
+            auto& trigger = registry->get<ContextualDialogTriggerComponent>(entity);
+            const auto speaker = trigger.speaker;
+
+            if (registry->any_of<OverheadDialogComponent>(speaker))
             {
-                auto& overhead = registry->emplace<OverheadDialogComponent>(actor);
+                if (auto& overhead = registry->get<OverheadDialogComponent>(speaker); overhead.IsFinished())
+                {
+                    registry->erase<OverheadDialogComponent>(speaker);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
+            const auto playerPos =
+                registry->get<sgTransform>(gameData->controllableActorSystem->GetSelectedActor()).GetWorldPos();
+            const auto& trans = registry->get<sgTransform>(entity);
+
+            if (trigger.CanTrigger() && Vector3Distance(trans.GetWorldPos(), playerPos) < trigger.distance)
+            {
+                auto& overhead = registry->emplace<OverheadDialogComponent>(speaker);
                 const auto contextualDialog = dialogTextMap.at(entity);
                 overhead.SetText(contextualDialog, 3.0f);
                 trigger.SetTriggered();
@@ -134,7 +145,6 @@ namespace sage
     ContextualDialogSystem::ContextualDialogSystem(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
-        initContextualDialogsFromDirectory();
     }
 
 } // namespace sage

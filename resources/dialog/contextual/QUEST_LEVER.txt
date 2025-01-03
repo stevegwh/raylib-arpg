@@ -1,4 +1,4 @@
 distance: 30
-reactee: PLAYER
+speaker: Lever Goblin
 ---
-Wait, what's that on the table?
+Get away from my lever!

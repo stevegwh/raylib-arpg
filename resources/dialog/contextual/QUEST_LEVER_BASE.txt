@@ -1,5 +1,5 @@
 distance: 60
-reactee: PLAYER
+speaker: Player
 ---
 There's the exit!
 Hmm, something seems wrong with its lever.

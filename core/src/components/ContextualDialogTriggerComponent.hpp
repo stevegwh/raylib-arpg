@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <entt/entt.hpp>
+
 namespace sage
 {
 
@@ -13,6 +15,9 @@ namespace sage
         bool triggered = false;
 
       public:
+        entt::entity speaker{}; // Entity that speaks when triggered
+        float distance = 75.0f; // Distance for the dialog to trigger
+
         [[nodiscard]] bool CanTrigger() const
         {
             return !triggered;
@@ -22,8 +27,6 @@ namespace sage
         {
             triggered = true;
         }
-
-        float distance = 75.0f; // Distance for the dialog to trigger
     };
 
 } // namespace sage
