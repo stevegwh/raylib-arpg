@@ -2,7 +2,7 @@
 // Created by Steve Wheeler on 03/01/2025.
 //
 
-#include "ContextualDialogComponent.hpp"
+#include "ContextualDialogTriggerComponent.hpp"
 
 namespace sage {
 } // sage

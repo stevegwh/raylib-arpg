@@ -43,7 +43,8 @@
 #include "UserInput.hpp"
 
 #include "abilities/vfx/SpiralFountainVFX.hpp"
-#include "components/ContextualDialogComponent.hpp"
+#include "components/ContextualDialogTriggerComponent.hpp"
+#include "components/OverheadDialogComponent.hpp"
 
 #include <optional>
 
@@ -70,6 +71,7 @@ namespace sage
         data->timerSystem->Update();
         data->collisionSystem->Update();
         data->animationSystem->Update();
+        data->contextualDialogSystem->Update();
     }
 
     void Scene::DrawDebug3D()
@@ -193,13 +195,6 @@ namespace sage
             text.emplace_back("Drip drip.", 2.0f);
             fullscreenTextOverlayFactory.SetOverlay(text, 0.5f, 1.0f);
         }>(*data->fullscreenTextOverlayFactory);
-
-        auto& contextualDiag = registry->emplace<ContextualDialogComponent>(firstPlayer, firstPlayer);
-        std::vector<std::string> contextualDialog;
-        contextualDialog.emplace_back("Oh, a lever?");
-        contextualDialog.emplace_back("Hmm, seems like something is wrong with it.");
-
-        contextualDiag.SetText(contextualDialog, 3.0f);
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();

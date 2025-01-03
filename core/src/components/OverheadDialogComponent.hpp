@@ -13,16 +13,18 @@
 namespace sage
 {
 
-    class ContextualDialogComponent
+    class OverheadDialogComponent
     {
-        entt::entity self;
         unsigned int currentIdx = 0;
         std::vector<std::string> text;
         double initialTime;
         float delay = 0;
 
       public:
-        entt::sigh<void(entt::entity)> onDialogFinished;
+        [[nodiscard]] bool IsFinished() const
+        {
+            return currentIdx >= text.size();
+        }
 
         std::string GetText()
         {
@@ -33,7 +35,6 @@ namespace sage
             }
             if (currentIdx >= text.size())
             {
-                onDialogFinished.publish(self);
                 return "";
             }
             return text.at(currentIdx);
@@ -45,7 +46,7 @@ namespace sage
             delay = _delay;
         }
 
-        explicit ContextualDialogComponent(entt::entity _self) : self(_self), initialTime(GetTime())
+        explicit OverheadDialogComponent() : initialTime(GetTime())
         {
         }
     };
