@@ -87,8 +87,10 @@ namespace sage
             auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
             registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
             data->questManager->AddTaskToQuest("LeverBaseQuest", leverBaseId);
+
             auto& quest = registry->get<Quest>(data->questManager->GetQuest("LeverBaseQuest"));
             auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
+
             auto& event = registry->emplace<QuestEventReactionComponent>(leverId, leverId, quest);
             entt::sink sink{event.onQuestStart};
             auto& renderable = registry->get<Renderable>(leverId);

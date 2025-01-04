@@ -23,7 +23,7 @@
 #include <fstream>
 
 namespace fs = std::filesystem;
-constexpr const auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
+constexpr auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
 
 namespace sage
 {

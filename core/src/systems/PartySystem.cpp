@@ -18,12 +18,56 @@
 #include "GameData.hpp"
 #include "InventorySystem.hpp"
 #include "ItemFactory.hpp"
+#include "RenderSystem.hpp"
 #include "TextureTerrainOverlay.hpp" // used for construction
 
 #include <cassert>
 
 namespace sage
 {
+
+    bool PartySystem::CheckPartyHasItem(entt::entity targetItemId) const
+    {
+        for (auto entity : party)
+        {
+            auto& inventory = registry->get<InventoryComponent>(entity);
+            for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
+            {
+                for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
+                {
+                    auto itemId = inventory.GetItem(row, col);
+                    if (itemId == entt::null) continue;
+                    if (itemId == targetItemId)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    bool PartySystem::CheckPartyHasItem(const std::string& itemName) const
+    {
+        for (auto entity : party)
+        {
+            auto& inventory = registry->get<InventoryComponent>(entity);
+            for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
+            {
+                for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
+                {
+                    auto itemId = inventory.GetItem(row, col);
+                    if (itemId == entt::null) continue;
+                    auto& item = registry->get<ItemComponent>(itemId);
+                    if (item.name == itemName)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     void PartySystem::GiveItemToSelected(const std::string& itemName) const
     {

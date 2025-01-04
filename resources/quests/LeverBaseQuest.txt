@@ -1,7 +1,6 @@
-questId: LeverBaseQuest
-title: TODO.
+title: The missing lever.
+giver: QUEST_LEVER
 ---
-TODO
+We found the lever's missing handle. Time to put it back and get out of here.
 ---
-pick_up: QUEST_BONE
-speak_to: Lever Goblin
+get_item: QUEST_LEVER

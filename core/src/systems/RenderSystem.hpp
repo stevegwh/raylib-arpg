@@ -6,6 +6,7 @@
 
 #include "BaseSystem.hpp"
 #include "components/Renderable.hpp"
+#include "slib.hpp"
 
 #include "entt/entt.hpp"
 
@@ -13,7 +14,6 @@ namespace sage
 {
     class RenderSystem : public BaseSystem
     {
-        static std::string stripPath(const std::string& fullPath);
 
       public:
         [[nodiscard]] entt::entity FindRenderableByMeshName(const std::string& name) const
@@ -25,13 +25,13 @@ namespace sage
         template <typename... Components>
         [[nodiscard]] entt::entity FindRenderableByMeshName(const std::string& name) const
         {
-            auto meshKey = stripPath(name);
+            auto meshKey = StripPath(name);
             auto view = registry->view<Renderable, Components...>();
 
             for (const auto& entity : view)
             {
                 const auto& renderable = registry->get<Renderable>(entity);
-                const auto& key = stripPath(renderable.GetModel()->GetKey());
+                const auto& key = StripPath(renderable.GetModel()->GetKey());
                 if (key == meshKey) return entity;
             }
             return entt::null;
@@ -46,7 +46,7 @@ namespace sage
         template <typename... Components>
         [[nodiscard]] entt::entity FindRenderableByName(const std::string& name) const
         {
-            auto nameStripped = stripPath(name);
+            auto nameStripped = StripPath(name);
             auto view = registry->view<Renderable, Components...>();
 
             for (const auto& entity : view)

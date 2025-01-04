@@ -117,4 +117,5 @@ namespace sage
     Matrix ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale);
     int GetBoneIdByName(const BoneInfo* bones, int numBones, const char* boneName);
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer);
+    std::string StripPath(const std::string& fullPath);
 } // namespace sage

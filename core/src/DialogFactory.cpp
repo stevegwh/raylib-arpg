@@ -12,6 +12,7 @@
 
 #include "components/sgTransform.hpp"
 #include "raylib.h"
+#include "systems/PartySystem.hpp"
 #include "systems/RenderSystem.hpp"
 
 #include <filesystem>
@@ -26,6 +27,12 @@ namespace fs = std::filesystem;
 
 namespace sage
 {
+
+    struct TextFunction
+    {
+        std::string functionName;
+        std::string functionParams;
+    };
 
     static std::string trim(const std::string& str)
     {
@@ -112,18 +119,17 @@ namespace sage
         return substituteVariables(content, variables);
     }
 
-    std::pair<std::string, std::string> getFunctionNameAndArgs(const std::string& input)
+    TextFunction getFunctionNameAndArgs(const std::string& input)
     {
         std::string trimmedInput = trim(input);
 
-        // Adjusted regex pattern to allow broader parameters
         std::regex pattern(R"(^(\w+)\(([^)]+)\)$)");
         std::smatch match;
 
         if (std::regex_match(trimmedInput, match, pattern))
         {
-            std::string functionName = match[1]; // First capture group
-            std::string parameter = match[2];    // Second capture group
+            std::string functionName = match[1];
+            std::string parameter = match[2];
 
             return {functionName, parameter};
         }
@@ -138,7 +144,7 @@ namespace sage
         dialog::Conversation* conversation,
         const std::string& nodeName,
         const std::string& content,
-        const std::vector<std::vector<std::string>>& optionData)
+        const std::vector<std::vector<std::string>>& optionData) const
     {
         auto node = std::make_unique<dialog::ConversationNode>(conversation);
         node->title = nodeName;
@@ -150,7 +156,7 @@ namespace sage
         {
             if (option.at(0) == "if")
             {
-                assert(!condition.has_value()); // if blocks must be closed with end. No nesting allowed (yet).
+                assert(!condition.has_value()); // "if blocks" must be closed with end. No nesting allowed (yet).
                 // TODO: Should check if condition is related to quests
                 bool negateCondition = false;
                 unsigned int parameterIndex = 1;
@@ -166,23 +172,28 @@ namespace sage
                              condition = getFunctionNameAndArgs(option.at(parameterIndex)),
                              this]() -> bool {
                     bool out = false;
-                    if (condition.first == "quest_complete")
+                    if (condition.functionName == "quest_complete")
                     {
                         assert(!condition.second.empty());
-                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.second));
+                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
                         out = quest.IsComplete();
                     }
-                    else if (condition.first == "quest_in_progress")
+                    else if (condition.functionName == "quest_in_progress")
                     {
                         assert(!condition.second.empty());
-                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.second));
+                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
                         out = quest.HasStarted() && !quest.IsComplete();
                     }
-                    else if (condition.first == "quest_hand_in")
+                    else if (condition.functionName == "has_item")
                     {
                         assert(!condition.second.empty());
-                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.second));
-                        out = quest.HasStarted() && quest.GetTaskCompleteCount() == quest.GetTaskCount() - 1;
+                        return gameData->partySystem->CheckPartyHasItem(condition.functionParams);
+                    }
+                    else if (condition.functionName == "quest_tasks_complete")
+                    {
+                        assert(!condition.second.empty());
+                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
+                        out = quest.HasStarted() && quest.AllTasksComplete();
                     }
                     else
                     {
@@ -196,7 +207,7 @@ namespace sage
                 assert(condition.has_value()); // ensures that 'end' has an accompanying 'if'
                 condition.reset();
             }
-            else if (option.size() == 2)
+            else if (option.size() == 2) // "regular [["
             {
                 std::unique_ptr<dialog::Option> baseOption;
                 if (condition.has_value())
@@ -215,13 +226,13 @@ namespace sage
                 }
                 node->options.push_back(std::move(baseOption));
             }
-            else if (option.size() == 3)
+            else if (option.size() == 3) // "[[" with function
             {
                 const auto& token = getFunctionNameAndArgs(option.at(0));
-                if (token.first == "quest_task")
+                if (token.functionName == "complete_quest_task")
                 {
                     assert(!token.second.empty());
-                    auto questId = gameData->questManager->GetQuest(token.second);
+                    auto questId = gameData->questManager->GetQuest(token.functionParams);
                     std::unique_ptr<dialog::QuestOption> questOption;
                     if (condition.has_value())
                     {
@@ -240,10 +251,10 @@ namespace sage
                     }
                     node->options.push_back(std::move(questOption));
                 }
-                else if (token.first == "quest_start")
+                else if (token.functionName == "quest_start")
                 {
                     assert(!token.second.empty());
-                    auto questId = gameData->questManager->GetQuest(token.second);
+                    auto questId = gameData->questManager->GetQuest(token.functionParams);
                     std::unique_ptr<dialog::QuestStartOption> questStartOption;
                     if (condition.has_value())
                     {
@@ -262,10 +273,10 @@ namespace sage
                     }
                     node->options.push_back(std::move(questStartOption));
                 }
-                else if (token.first == "quest_finish")
+                else if (token.functionName == "complete_quest")
                 {
                     assert(!token.second.empty());
-                    auto questId = gameData->questManager->GetQuest(token.second);
+                    auto questId = gameData->questManager->GetQuest(token.functionParams);
                     std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
                     if (condition.has_value())
                     {

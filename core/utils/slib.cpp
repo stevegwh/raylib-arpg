@@ -511,4 +511,16 @@ namespace sage
         return image;
     }
 
+    std::string StripPath(const std::string& fullPath)
+    {
+        size_t lastSlash = fullPath.find_last_of("/\\");
+
+        size_t lastDot = fullPath.find_last_of('.');
+
+        size_t startPos = (lastSlash == std::string::npos) ? 0 : lastSlash + 1;
+        size_t length = (lastDot == std::string::npos) ? std::string::npos : lastDot - startPos;
+
+        return fullPath.substr(startPos, length);
+    }
+
 } // namespace sage

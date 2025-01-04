@@ -1,7 +1,6 @@
-questId: LeverQuest
-title: TODO.
+title: A mysterious bone.
+giver: QUEST_BONE
 ---
-TODO
+We found a bone in Arissa's cell. Maybe it could be of some use?
 ---
-pick_up: QUEST_BONE
-speak_to: Lever Goblin
+get_item: QUEST_LEVER

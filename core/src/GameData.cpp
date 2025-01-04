@@ -76,7 +76,7 @@ namespace sage
           equipmentSystem(std::make_unique<EquipmentSystem>(_registry, this)),
           uberShaderSystem(std::make_unique<UberShaderSystem>(_registry, this)),
           cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this)),
-          questManager(std::make_unique<QuestManager>(_registry)),
+          questManager(std::make_unique<QuestManager>(_registry, this)),
           doorSystem(std::make_unique<DoorSystem>(_registry, this)),
           fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayFactory>(this)),
           contextualDialogSystem(std::make_unique<ContextualDialogSystem>(registry, this)),

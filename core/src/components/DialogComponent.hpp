@@ -83,6 +83,7 @@ namespace sage
         {
 
           public:
+            void OnSelected() override;
             QuestFinishOption(ConversationNode* _parent, entt::entity _questId);
             QuestFinishOption(ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition);
         };

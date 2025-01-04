@@ -57,17 +57,18 @@ namespace sage
         bool completed = false;
         std::string questKey{};
         entt::entity questId{};
-        int experience{};
-        std::string journalExplanation;
-        std::vector<QuestRewards> rewards;
         std::vector<entt::entity> tasks;
 
       public:
+        std::string journalTitle;
+        std::string journalDescription;
         [[nodiscard]] unsigned int GetTaskCount() const;
         [[nodiscard]] unsigned int GetTaskCompleteCount() const;
         void StartQuest();
         void AddTask(entt::entity taskId);
-        [[nodiscard]] bool IsComplete();
+        void CompleteQuest();
+        [[nodiscard]] bool AllTasksComplete() const;
+        [[nodiscard]] bool IsComplete() const;
         [[nodiscard]] bool HasStarted() const;
 
         entt::sigh<void(entt::entity)> onQuestStart;

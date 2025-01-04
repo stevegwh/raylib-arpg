@@ -1,7 +1,6 @@
-questId: ArissaQuest
 title: Free the prisoner.
+giver: Arissa
 ---
 We met a prisoner in the Goblin Camp who wants to be freed. She mentioned that the keys to the cell can be found on a guard resting in the barracks.
 ---
-speak_to: Arissa
 speak_to: Cell Guard

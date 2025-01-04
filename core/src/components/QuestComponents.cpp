@@ -51,22 +51,27 @@ namespace sage
         onQuestStart.publish(questId);
     }
 
-    bool Quest::IsComplete()
+    void Quest::CompleteQuest()
     {
-        assert(started); // Throw error if task has been completed but the quest was not started.
-        if (completed)
-        {
-            return completed;
-        }
+        std::cout << "Quest complete:" << questKey << " \n";
+        completed = true;
+        onQuestCompleted.publish(questId);
+    }
+
+    bool Quest::AllTasksComplete() const
+    {
         for (const auto& entity : tasks)
         {
             auto& subQuest = registry->get<QuestTaskComponent>(entity);
             if (!subQuest.IsComplete()) return false;
         }
-        std::cout << "Quest complete:" << questKey << " \n";
-        completed = true;
-        onQuestCompleted.publish(questId);
         return true;
+    }
+
+    bool Quest::IsComplete() const
+    {
+        assert(started); // Throw error if task has been completed but the quest was not started.
+        return completed;
     }
 
     Quest::Quest(entt::registry* _registry, const entt::entity _questId, std::string _questKey)

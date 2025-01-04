@@ -25,7 +25,9 @@ namespace sage
 
       public:
         entt::sigh<void()> onPartyChange;
-        
+
+        [[nodiscard]] bool CheckPartyHasItem(entt::entity targetItemId) const;
+        [[nodiscard]] bool CheckPartyHasItem(const std::string& itemName) const;
         void GiveItemToSelected(const std::string& itemName) const;
         void RemoveItemFromParty(const std::string& itemName) const;
         void RemoveItemFromParty(entt::entity itemId) const;

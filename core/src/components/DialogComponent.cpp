@@ -68,9 +68,6 @@ namespace sage
             if (!quest.HasStarted())
             {
                 quest.StartQuest();
-                // TODO: Should starting the quest be a task? If so, add a task component to the quest giver and
-                // uncomment below.
-                // QuestOption::OnSelected();
             }
         }
 
@@ -83,6 +80,15 @@ namespace sage
             ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
             : QuestOption(_parent, _questId, std::move(_condition))
         {
+        }
+
+        void QuestFinishOption::OnSelected()
+        {
+            auto& quest = parent->parent->registry->get<Quest>(questId);
+            if (quest.HasStarted())
+            {
+                quest.CompleteQuest();
+            }
         }
 
         QuestFinishOption::QuestFinishOption(ConversationNode* _parent, entt::entity _questId)

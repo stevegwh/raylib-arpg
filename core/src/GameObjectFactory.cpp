@@ -260,10 +260,8 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
-        registry->emplace<QuestTaskComponent>(id, "ArissaQuest");
         // TODO: Really not a fan of adding the quest like this.
         auto& quest = registry->get<Quest>(data->questManager->GetQuest("ArissaQuest"));
-        quest.AddTask(id);
         {
             auto& questCompleteReaction = registry->emplace<QuestEventReactionComponent>(id, id, quest);
             entt::sink sink{questCompleteReaction.onQuestCompleted};

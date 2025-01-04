@@ -14,7 +14,7 @@ title: start
 WOT?
 ---
 if quest_in_progress($questId)
-[[quest_task($questId) | Give me those keys. | quest]]
+[[complete_quest_task($questId) | Give me those keys. | quest]]
 end
 
 [[Hello. | hello]]
