@@ -34,6 +34,8 @@ namespace sage
             "Baldur's Raylib");
         _settings.UpdateViewport();
 
+        InitAudioDevice();
+
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
         serializer::LoadMap(registry.get(), "resources/dungeon-map.bin");
@@ -105,6 +107,8 @@ namespace sage
     {
         init();
 
+        Music music = LoadMusicStream("resources/audio/music/8 Sanctuary FULL LOOP TomMusic.ogg");
+
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
         {
@@ -122,11 +126,15 @@ namespace sage
                     exitWindowRequested = false;
             }
 
+            UpdateMusicStream(music);
+            PlayMusicStream(music);
             scene->Update();
 
             draw();
             handleScreenUpdate();
         }
+
+        UnloadMusicStream(music);
     }
 
     void Application::draw()
@@ -171,6 +179,7 @@ namespace sage
     void Application::cleanup()
     {
         CloseWindow();
+        CloseAudioDevice();
     }
 
     Application::~Application()
