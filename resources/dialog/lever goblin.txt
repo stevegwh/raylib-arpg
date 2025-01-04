@@ -5,7 +5,7 @@ conversation_pos: 10.0 2.0 5.0
 #meta end
 
 #variables start
-questId: LeverQuest
+questId: LeverBaseQuest
 itemId: QUEST_BONE
 #variables end
 
@@ -15,7 +15,7 @@ title: start
 I'M HUNGRY. LEAVE ME ALONE.
 ---
 if has_item($itemId)
-[[complete_quest($questId) | Look what I have here. A tasty bone! | quest]]
+[[start_quest($questId) | Look what I have here. A tasty bone! | quest]]
 end
 [[Take your leave. | exit]]
 #node end

@@ -5,8 +5,8 @@ conversation_pos: 10.0 1.0 10.0
 #meta end
 
 #variables start
-questId: LeverQuest
-baseQuestId: LeverBaseQuest
+questId: LeverBaseQuest
+itemId: QUEST_LEVER
 #variables end
 
 #node start
@@ -14,11 +14,11 @@ title: start
 ---
 You see a lever inexplicably resting on a table.
 ---
-if not quest_complete($questId)
+if not qu($questId)
 [[*Reach out and grab the lever*. | grab]]
 end
 
-if quest_complete($questId)
+if quest_started($questId)
 [[*Reach out and grab the lever*. | grab2]]
 end
 
@@ -38,5 +38,5 @@ title: grab2
 ---
 You grab the lever and place it in your inventory, the goblin sitting at the table distracted, gnawing on his new bone.
 ---
-[[quest_start($baseQuestId) |Take your leave. | exit]]
+[[complete_quest_task($questId) |Take your leave. | exit]]
 #node end

@@ -6,6 +6,7 @@ conversation_pos: 10.0 1.0 10.0
 
 #variables start
 questId: LeverBaseQuest
+itemId: QUEST_LEVER
 #variables end
 
 #node start
@@ -13,11 +14,8 @@ title: start
 ---
 You see the base of a lever. Its handle seems to be missing.
 ---
-if quest_hand_in($questId)
-[[quest_finish($questId) | Place the lever into the base. | finish]]
-end
-if quest_complete($questId)
-[[quest_finish($questId) | Place the lever into the base. | finish]]
+if has_item($itemId)
+[[complete_quest($questId) | Place the lever into the base. | finish]]
 end
 [[Take your leave. | exit]]
 #node end

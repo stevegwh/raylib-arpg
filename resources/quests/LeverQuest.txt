@@ -1,6 +1,0 @@
-title: A mysterious bone.
-giver: QUEST_BONE
----
-We found a bone in Arissa's cell. Maybe it could be of some use?
----
-get_item: QUEST_LEVER

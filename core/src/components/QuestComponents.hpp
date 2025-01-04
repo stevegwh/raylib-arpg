@@ -84,6 +84,7 @@ namespace sage
     {
         entt::connection completedConnection;
         entt::connection startConnection;
+        entt::connection taskConnection;
         entt::entity self{};
 
         void reactToQuestFinish(entt::entity) const
@@ -94,6 +95,11 @@ namespace sage
         void reactToQuestStart(entt::entity) const
         {
             onQuestStart.publish(self);
+        }
+
+        void reactToTaskFinish(QuestTaskComponent*) const
+        {
+            onTaskCompleted.publish(self);
         }
 
       public:
@@ -107,10 +113,16 @@ namespace sage
             {
                 startConnection.release();
             }
+            if (taskConnection)
+            {
+                taskConnection.release();
+            }
         }
 
         entt::sigh<void(entt::entity)> onQuestStart;
         entt::sigh<void(entt::entity)> onQuestCompleted;
+        entt::sigh<void(entt::entity)> onTaskCompleted;
+
         QuestEventReactionComponent(entt::entity _self, Quest& quest) : self(_self)
         {
             {
@@ -120,6 +132,13 @@ namespace sage
             {
                 entt::sink sink{quest.onQuestStart};
                 startConnection = sink.connect<&QuestEventReactionComponent::reactToQuestStart>(this);
+            }
+        }
+        QuestEventReactionComponent(entt::entity _self, QuestTaskComponent& task) : self(_self)
+        {
+            {
+                entt::sink sink{task.onTaskCompleted};
+                completedConnection = sink.connect<&QuestEventReactionComponent::reactToTaskFinish>(this);
             }
         }
     };

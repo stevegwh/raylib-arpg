@@ -174,24 +174,24 @@ namespace sage
                     bool out = false;
                     if (condition.functionName == "quest_complete")
                     {
-                        assert(!condition.second.empty());
+                        assert(!condition.functionParams.empty());
                         auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
                         out = quest.IsComplete();
                     }
                     else if (condition.functionName == "quest_in_progress")
                     {
-                        assert(!condition.second.empty());
+                        assert(!condition.functionParams.empty());
                         auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
                         out = quest.HasStarted() && !quest.IsComplete();
                     }
                     else if (condition.functionName == "has_item")
                     {
-                        assert(!condition.second.empty());
+                        assert(!condition.functionParams.empty());
                         return gameData->partySystem->CheckPartyHasItem(condition.functionParams);
                     }
                     else if (condition.functionName == "quest_tasks_complete")
                     {
-                        assert(!condition.second.empty());
+                        assert(!condition.functionParams.empty());
                         auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
                         out = quest.HasStarted() && quest.AllTasksComplete();
                     }
@@ -231,7 +231,7 @@ namespace sage
                 const auto& token = getFunctionNameAndArgs(option.at(0));
                 if (token.functionName == "complete_quest_task")
                 {
-                    assert(!token.second.empty());
+                    assert(!token.functionParams.empty());
                     auto questId = gameData->questManager->GetQuest(token.functionParams);
                     std::unique_ptr<dialog::QuestOption> questOption;
                     if (condition.has_value())
@@ -251,9 +251,9 @@ namespace sage
                     }
                     node->options.push_back(std::move(questOption));
                 }
-                else if (token.functionName == "quest_start")
+                else if (token.functionName == "start_quest")
                 {
-                    assert(!token.second.empty());
+                    assert(!token.functionParams.empty());
                     auto questId = gameData->questManager->GetQuest(token.functionParams);
                     std::unique_ptr<dialog::QuestStartOption> questStartOption;
                     if (condition.has_value())
@@ -275,7 +275,7 @@ namespace sage
                 }
                 else if (token.functionName == "complete_quest")
                 {
-                    assert(!token.second.empty());
+                    assert(!token.functionParams.empty());
                     auto questId = gameData->questManager->GetQuest(token.functionParams);
                     std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
                     if (condition.has_value())

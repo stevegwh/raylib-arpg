@@ -70,43 +70,39 @@ namespace sage
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : Scene(_registry, _keyMapping, _settings, _audioManager)
     {
-        {
-            auto boneId = data->renderSystem->FindRenderableByMeshName("QUEST_BONE");
-            data->questManager->AddTaskToQuest("LeverQuest", boneId);
-            auto& quest = registry->get<Quest>(data->questManager->GetQuest("LeverQuest"));
-            quest.StartQuest();
 
-            auto& event = registry->emplace<QuestEventReactionComponent>(boneId, boneId, quest);
-            entt::sink sink{event.onQuestCompleted};
-            sink.connect<[](PartySystem& partySystem, entt::entity entity) {
-                partySystem.RemoveItemFromParty("QUEST_BONE");
-            }>(*data->partySystem);
-        }
+        auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
+        auto& quest = registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
+        data->questManager->AddTaskToQuest("LeverBaseQuest", leverBaseId);
 
-        {
-            auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
-            registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
-            data->questManager->AddTaskToQuest("LeverBaseQuest", leverBaseId);
+        auto boneId = data->renderSystem->FindRenderableByMeshName("QUEST_BONE");
+        auto& leverQuestStartEvent = registry->emplace<QuestEventReactionComponent>(boneId, boneId, quest);
+        entt::sink leverQuestStartSink{leverQuestStartEvent.onQuestStart};
+        leverQuestStartSink.connect<[](PartySystem& partySystem, entt::entity entity) {
+            partySystem.RemoveItemFromParty("QUEST_BONE");
+        }>(*data->partySystem);
 
-            auto& quest = registry->get<Quest>(data->questManager->GetQuest("LeverBaseQuest"));
-            auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
+        auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
+        registry->emplace<QuestTaskComponent>(leverId, "LeverBaseQuest");
+        auto& leverRenderable = registry->get<Renderable>(leverId);
+        auto& leverTask = registry->get<QuestTaskComponent>(leverId);
 
-            auto& event = registry->emplace<QuestEventReactionComponent>(leverId, leverId, quest);
-            entt::sink sink{event.onQuestStart};
-            auto& renderable = registry->get<Renderable>(leverId);
-            sink.connect<&Renderable::Disable>(renderable);
-            auto& col = registry->get<Collideable>(leverId);
-            sink.connect<&Collideable::Disable>(col);
-            sink.connect<[](PartySystem& partySystem, entt::entity entity) {
-                partySystem.GiveItemToSelected("QUEST_LEVER");
-            }>(*data->partySystem);
+        auto& leverPickedUpEvent = registry->emplace<QuestEventReactionComponent>(leverId, leverId, leverTask);
+        entt::sink leverPickedUpSink{leverPickedUpEvent.onTaskCompleted};
 
-            auto& finishEvent = registry->emplace<QuestEventReactionComponent>(leverBaseId, leverBaseId, quest);
-            entt::sink sink2{finishEvent.onQuestCompleted};
-            sink2.connect<[](AudioManager& audioManager, entt::entity entity) {
-                audioManager.PlaySFX("resources/audio/sfx/test.ogg");
-            }>(*data->audioManager);
-        }
+        leverPickedUpSink.connect<&Renderable::Disable>(leverRenderable);
+        auto& col = registry->get<Collideable>(leverId);
+        leverPickedUpSink.connect<&Collideable::Disable>(col);
+        leverPickedUpSink.connect<[](const PartySystem& partySystem, entt::entity entity) {
+            partySystem.GiveItemToSelected("QUEST_LEVER");
+        }>(*data->partySystem);
+
+        auto& leverQuestFinishEvent =
+            registry->emplace<QuestEventReactionComponent>(leverBaseId, leverBaseId, quest);
+        entt::sink leverQuestFinishSink{leverQuestFinishEvent.onQuestCompleted};
+        leverQuestFinishSink.connect<[](AudioManager& audioManager, entt::entity entity) {
+            audioManager.PlaySFX("resources/audio/sfx/test.ogg");
+        }>(*data->audioManager);
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
         data->camera->FocusSelectedActor();

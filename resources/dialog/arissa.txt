@@ -14,7 +14,7 @@ title: start
 Hey! You've got to help me get out of here. Please. They're going to use me for their ritual.
 ---
 if not quest_in_progress($questId)
-[[quest_start($questId) | Ok, don't worry. I'll get you out of here. | quest]]
+[[start_quest($questId) | Ok, don't worry. I'll get you out of here. | quest]]
 end
 if quest_in_progress($questId)
 [[Don't worry. I'll get you out of here. | quest2]]
