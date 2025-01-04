@@ -46,14 +46,14 @@ namespace sage
 
     void Quest::StartQuest()
     {
-        std::cout << "Quest started:" << questKey << " \n";
+        std::cout << "Quest started: " << questKey << " \n";
         started = true;
         onQuestStart.publish(questId);
     }
 
     void Quest::CompleteQuest()
     {
-        std::cout << "Quest complete:" << questKey << " \n";
+        std::cout << "Quest complete: " << questKey << " \n";
         completed = true;
         onQuestCompleted.publish(questId);
     }

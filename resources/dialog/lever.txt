@@ -14,11 +14,11 @@ title: start
 ---
 You see a lever inexplicably resting on a table.
 ---
-if not qu($questId)
+if not quest_in_progress($questId)
 [[*Reach out and grab the lever*. | grab]]
 end
 
-if quest_started($questId)
+if quest_in_progress($questId)
 [[*Reach out and grab the lever*. | grab2]]
 end
 

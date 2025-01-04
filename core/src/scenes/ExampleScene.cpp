@@ -70,10 +70,12 @@ namespace sage
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : Scene(_registry, _keyMapping, _settings, _audioManager)
     {
+        auto questId = data->questManager->GetQuest("LeverBaseQuest");
+        auto& quest = registry->get<Quest>(questId);
 
         auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
-        auto& quest = registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
-        data->questManager->AddTaskToQuest("LeverBaseQuest", leverBaseId);
+        registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
+        quest.AddTask(leverBaseId);
 
         auto boneId = data->renderSystem->FindRenderableByMeshName("QUEST_BONE");
         auto& leverQuestStartEvent = registry->emplace<QuestEventReactionComponent>(boneId, boneId, quest);
