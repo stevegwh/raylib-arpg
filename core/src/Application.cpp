@@ -107,10 +107,6 @@ namespace sage
     {
         init();
 
-        audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
-        auto soundScape = audioManager->PlayMusic("resources/audio/bgs/Cave.ogg");
-        SetMusicVolume(soundScape, 0.75);
-
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
         {

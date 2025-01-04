@@ -108,5 +108,8 @@ namespace sage
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
         data->camera->FocusSelectedActor();
+        data->audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
+        auto soundScape = data->audioManager->PlayMusic("resources/audio/bgs/Cave.ogg");
+        SetMusicVolume(soundScape, 0.75);
     }
 } // namespace sage
