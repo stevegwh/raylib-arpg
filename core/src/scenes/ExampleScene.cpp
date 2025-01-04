@@ -74,9 +74,6 @@ namespace sage
         auto& quest = registry->get<Quest>(questId);
 
         auto leverBaseId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER_BASE");
-        registry->emplace<QuestTaskComponent>(leverBaseId, "LeverBaseQuest");
-        quest.AddTask(leverBaseId);
-
         auto boneId = data->renderSystem->FindRenderableByMeshName("QUEST_BONE");
         auto& leverQuestStartEvent = registry->emplace<QuestEventReactionComponent>(boneId, boneId, quest);
         entt::sink leverQuestStartSink{leverQuestStartEvent.onQuestStart};
@@ -85,9 +82,9 @@ namespace sage
         }>(*data->partySystem);
 
         auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
-        registry->emplace<QuestTaskComponent>(leverId, "LeverBaseQuest");
+        auto& leverTask = registry->emplace<QuestTaskComponent>(leverId, "LeverBaseQuest");
+        quest.AddTask(leverId);
         auto& leverRenderable = registry->get<Renderable>(leverId);
-        auto& leverTask = registry->get<QuestTaskComponent>(leverId);
 
         auto& leverPickedUpEvent = registry->emplace<QuestEventReactionComponent>(leverId, leverId, leverTask);
         entt::sink leverPickedUpSink{leverPickedUpEvent.onTaskCompleted};

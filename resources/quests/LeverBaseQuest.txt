@@ -3,4 +3,4 @@ giver: QUEST_LEVER
 ---
 We found the lever's missing handle. Time to put it back and get out of here.
 ---
-get_item: QUEST_LEVER
+item: QUEST_LEVER

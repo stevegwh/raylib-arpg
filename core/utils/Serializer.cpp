@@ -72,27 +72,25 @@ namespace sage::serializer
 
             // TODO: Below would be solved better with ViewSerializer if we could pass in Renderable,
             // Collideable etc. Currently not possible as they cannot be copied.
-            const auto questView =
-                source.view<Renderable, sgTransform, Collideable, QuestTaskComponent, ItemComponent>();
-            unsigned int questCount = 0;
-            for (const auto& entity : questView)
-                ++questCount;
-            output(questCount);
+            const auto itemView = source.view<Renderable, sgTransform, Collideable, ItemComponent>();
+            unsigned int itemCount = 0;
+            for (const auto& entity : itemView)
+                ++itemCount;
+            output(itemCount);
 
-            for (const auto& ent : questView)
+            for (const auto& ent : itemView)
             {
                 const auto& rend = source.get<Renderable>(ent);
                 const auto& trans = source.get<sgTransform>(ent);
                 const auto& col = source.get<Collideable>(ent);
-                const auto& quest = source.get<QuestTaskComponent>(ent);
                 const auto& item = source.get<ItemComponent>(ent);
 
                 entity entity{};
                 entity.id = entt::entt_traits<entt::entity>::to_entity(ent);
-                output(entity, trans, col, rend, quest, item);
+                output(entity, trans, col, rend, item);
             }
 
-            const auto view = source.view<sgTransform, Renderable, Collideable>(entt::exclude<QuestTaskComponent>);
+            const auto view = source.view<sgTransform, Renderable, Collideable>(entt::exclude<ItemComponent>);
             for (const auto& ent : view)
             {
                 const auto& rend = view.get<Renderable>(ent);
@@ -133,22 +131,21 @@ namespace sage::serializer
 
             input(ResourceManager::GetInstance());
 
-            unsigned int questCount;
-            input(questCount);
+            unsigned int itemCount;
+            input(itemCount);
 
-            for (unsigned int i = 0; i < questCount; ++i)
+            for (unsigned int i = 0; i < itemCount; ++i)
             {
                 auto entt = destination->create();
                 entity entityId{}; // ignore this (old serialized entity)
                 auto& transform = destination->emplace<sgTransform>(entt, entt);
                 auto& collideable = destination->emplace<Collideable>(entt);
                 auto& renderable = destination->emplace<Renderable>(entt);
-                auto& quest = destination->emplace<QuestTaskComponent>(entt);
                 auto& item = destination->emplace<ItemComponent>(entt);
 
                 try
                 {
-                    input(entityId, transform, collideable, renderable, quest, item);
+                    input(entityId, transform, collideable, renderable, item);
                 }
                 catch (const cereal::Exception& e)
                 {

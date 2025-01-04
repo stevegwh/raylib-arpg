@@ -12,6 +12,7 @@
 #include "QuestManager.hpp"
 #include "ResourceManager.hpp"
 #include "Serializer.hpp"
+#include "slib.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
@@ -79,7 +80,7 @@ namespace sage
         {
             return CollisionLayer::BACKGROUND;
         }
-        if (objectName.find("_QUESTITEM_") != std::string::npos)
+        if (objectName.find("_ITEM_") != std::string::npos)
         {
             return CollisionLayer::ITEM;
         }
@@ -205,65 +206,6 @@ namespace sage
         spawner.spawnerName = spawnerName;
     }
 
-    void HandleQuestItem(
-        entt::registry* registry, ItemFactory* itemFactory, std::ifstream& infile, const fs::path& meshPath)
-    {
-        std::string meshName, objectName, questName, itemName;
-        float x, y, z, rotx, roty, rotz, scalex, scaley, scalez;
-        try
-        {
-            objectName = readLine(infile, "name");
-            meshName = readLine(infile, "mesh");
-
-            std::istringstream locStream(readLine(infile, "location"));
-            locStream >> x >> y >> z;
-
-            std::istringstream rotStream(readLine(infile, "rotation"));
-            rotStream >> rotx >> roty >> rotz;
-
-            std::istringstream scaleStream(readLine(infile, "scale"));
-            scaleStream >> scalex >> scaley >> scalez;
-
-            questName = readLine(infile, "quest_id");
-            itemName = readLine(infile, "quest_item_name");
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << "Error parsing mesh data: " << e.what() << std::endl;
-            assert(0);
-        }
-
-        fs::path fullMeshPath = meshPath / meshName;
-        std::string meshKey = fullMeshPath.generic_string();
-
-        auto entity = registry->create();
-
-        auto model = ResourceManager::GetInstance().GetModelCopy(meshKey);
-        assert(!meshKey.empty());
-        model.SetKey(meshKey);
-
-        Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
-        Matrix rotMat =
-            MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
-        Matrix transMat = MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z);
-        Matrix scaleMat = MatrixScale(scalex * WORLD_SCALE, scaley * WORLD_SCALE, scalez * WORLD_SCALE);
-
-        Matrix mat = MatrixMultiply(MatrixMultiply(scaleMat, rotMat), transMat);
-
-        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), mat);
-        renderable.name = objectName;
-
-        auto& trans = registry->emplace<sgTransform>(entity, entity);
-
-        auto& collideable = registry->emplace<Collideable>(
-            entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());
-
-        collideable.collisionLayer = getCollisionLayer(objectName);
-
-        registry->emplace<QuestTaskComponent>(entity, questName);
-        itemFactory->AttachItem(entity, itemName);
-    }
-
     entt::entity HandleMesh(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath, int& slices)
     {
         std::string meshName, objectName;
@@ -271,7 +213,7 @@ namespace sage
         try
         {
             objectName = readLine(infile, "name");
-            meshName = readLine(infile, "mesh");
+            meshName = StripPath(readLine(infile, "mesh"));
 
             std::istringstream locStream(readLine(infile, "location"));
             locStream >> x >> y >> z;
@@ -288,14 +230,10 @@ namespace sage
             assert(0);
         }
 
-        fs::path fullMeshPath = meshPath / meshName;
-        std::string meshKey = fullMeshPath.generic_string();
-
         auto entity = registry->create();
 
-        auto model = ResourceManager::GetInstance().GetModelCopy(meshKey);
-        assert(!meshKey.empty());
-        model.SetKey(meshKey);
+        auto model = ResourceManager::GetInstance().GetModelCopy(meshName);
+        model.SetKey(meshName);
 
         Vector3 scaledPosition = scaleFromOrigin({x, y, z}, WORLD_SCALE);
         Matrix rotMat =
@@ -329,6 +267,15 @@ namespace sage
         return entity;
     }
 
+    void HandleItem(
+        entt::registry* registry, ItemFactory* itemFactory, std::ifstream& infile, const fs::path& meshPath)
+    {
+        int x;
+        auto itemEntity = HandleMesh(registry, infile, meshPath, x);
+        auto itemName = registry->get<Renderable>(itemEntity).GetModel()->GetKey();
+        itemFactory->AttachItem(itemEntity, itemName);
+    }
+
     void processTxtFile(
         entt::registry* registry,
         ItemFactory* itemFactory,
@@ -357,9 +304,9 @@ namespace sage
         {
             HandleLight(registry, infile);
         }
-        else if (typeName.find("quest_item") != std::string::npos)
+        else if (typeName.find("item") != std::string::npos)
         {
-            HandleQuestItem(registry, itemFactory, infile, meshPath);
+            HandleItem(registry, itemFactory, infile, meshPath);
         }
         else
         {
@@ -396,7 +343,7 @@ namespace sage
             if (entry.path().extension() == ".obj" || entry.path().extension() == ".glb" ||
                 entry.path().extension() == ".gltf")
             {
-                ResourceManager::GetInstance().ModelLoadFromFile(entry.path().generic_string());
+                ResourceManager::GetInstance().ModelLoadFromFile(entry.path().string());
             }
         }
         std::cout << "FINISH: Loading mesh data into resource manager. \n";
@@ -464,9 +411,8 @@ namespace sage
             }
             else if (tag == "MDL")
             {
-                ResourceManager::GetInstance().ModelLoadFromFile(name);
-
                 fs::path assetPath = AssetManager::GetInstance().GetAssetPath(name);
+                ResourceManager::GetInstance().ModelLoadFromFile(name);
                 if (assetPath.extension() == ".glb" || assetPath.extension() == ".gltf")
                 {
                     ResourceManager::GetInstance().ModelAnimationLoadFromFile(name);

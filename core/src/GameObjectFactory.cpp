@@ -216,8 +216,6 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
-        registry->emplace<QuestTaskComponent>(id, "LeverQuest");
-        data->questManager->AddTaskToQuest("LeverQuest", id);
         return id;
     }
 

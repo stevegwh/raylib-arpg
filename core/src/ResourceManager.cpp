@@ -370,12 +370,15 @@ namespace sage
 
     void ResourceManager::ModelLoadFromFile(const std::string& path)
     {
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        // Can pass an alias into this function (e.g., "MDL_GOBLIN") and it will first be translated to its path
+        // (specified in items.json) then stripped to be used as a key.
+        auto nonAliasPath = AssetManager::GetInstance().TryGetAssetPath(path); // Pah could be an asset alias
+        auto key = StripPath(nonAliasPath);
         if (!modelCopies.contains(key))
         {
-            assert(FileExists(key.c_str()));
+            assert(FileExists(path.c_str()));
 
-            auto modelInfo = sgLoadModel(key.c_str());
+            auto modelInfo = sgLoadModel(path.c_str());
 
             for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
             {

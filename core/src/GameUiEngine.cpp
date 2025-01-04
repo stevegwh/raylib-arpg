@@ -1364,6 +1364,11 @@ namespace sage
         auto itemId = getItemId();
         if (itemId != entt::null)
         {
+            if (engine->registry->any_of<Renderable>(itemId))
+            {
+                auto& renderable = engine->registry->get<Renderable>(itemId);
+                std::cout << renderable.GetModel()->GetKey() << std::endl;
+            }
             auto& item = engine->registry->get<ItemComponent>(itemId);
             tex = ResourceManager::GetInstance().TextureLoad(item.icon);
             stateLocked = false;

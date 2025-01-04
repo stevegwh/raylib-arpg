@@ -20,6 +20,7 @@ namespace sage
     void ItemFactory::AttachItem(entt::entity entity, const std::string& name) const
     {
         auto item = itemMap.at(name);
+
         registry->emplace<ItemComponent>(entity, item);
     }
 
