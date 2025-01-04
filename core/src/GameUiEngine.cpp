@@ -2441,18 +2441,27 @@ namespace sage
     void ErrorMessage::Draw2D() const
     {
         auto currentTime = GetTime();
-        auto remainingTime = currentTime - initialTime;
+
+        if (currentTime > initialTime + totalDisplayTime)
+        {
+            return;
+        }
+
+        auto elapsedTime = currentTime - initialTime;
         unsigned char a = 255;
 
-        // if (remainingTime < initialTime + totalDisplayTime - fadeOut)
-        // {
-        //     a = static_cast<unsigned char>((remainingTime / fadeOut) * 255);
-        // }
+        if (elapsedTime > (totalDisplayTime - fadeOut))
+        {
+            float fadeProgress = (elapsedTime - (totalDisplayTime - fadeOut)) / fadeOut;
+            a = static_cast<unsigned char>((1.0f - fadeProgress) * 255);
+        }
 
         const auto [width, height] = settings->GetViewPort();
-        auto col = Color{255, 255, 255, a};
+        auto col = RAYWHITE;
+        col.a = a;
+        auto textSize = MeasureText(msg.c_str(), 18);
 
-        DrawText(msg.c_str(), width / 2, height / 2, 18, col);
+        DrawText(msg.c_str(), (width - textSize) / 2, height / 4, 18, col);
     }
 
     ErrorMessage::ErrorMessage(Settings* _settings, std::string _msg)
