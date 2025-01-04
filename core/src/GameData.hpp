@@ -10,14 +10,15 @@
 
 namespace sage
 {
+    struct Settings;
+    struct KeyMapping;
+    class AudioManager;
+
     class Cursor;
     class UserInput;
     class Camera;
-    class LightManager;
-    struct Settings;
-    struct KeyMapping;
     class GameUIEngine;
-
+    class LightManager;
     class ItemFactory;
     class EquipmentSystem;
     class RenderSystem;
@@ -52,6 +53,7 @@ namespace sage
       public:
         entt::registry* registry;
         Settings* settings;
+        AudioManager* audioManager;
 
         std::unique_ptr<UserInput> userInput;
         std::unique_ptr<Cursor> cursor;
@@ -86,6 +88,7 @@ namespace sage
         std::unique_ptr<FullscreenTextOverlayFactory> fullscreenTextOverlayFactory;
         std::unique_ptr<ContextualDialogSystem> contextualDialogSystem;
 
-        GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
+        GameData(
+            entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);
     };
 } // namespace sage

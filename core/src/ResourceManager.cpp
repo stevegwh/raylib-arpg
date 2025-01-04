@@ -203,6 +203,16 @@ namespace sage
         mesh.vaoId = 0; // Default value (ensures it gets uploaded to gpu)
     }
 
+    Music ResourceManager::MusicLoad(const std::string& path)
+    {
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        if (!music.contains(key))
+        {
+            music[key] = LoadMusicStream(path.c_str());
+        }
+        return music[key];
+    }
+
     /*
     * @brief Stores the shader's text file in memory, saving on reading the file multiple
     times.
@@ -478,6 +488,10 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
+        for (auto& [key, mus] : music)
+        {
+            UnloadMusicStream(mus);
+        }
         for (auto& [key, mat] : materialMap)
         {
             for (int i = 0; i < MAX_MATERIAL_MAPS; i++)

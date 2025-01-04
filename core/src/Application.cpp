@@ -5,13 +5,12 @@
 #include "Application.hpp"
 
 #include "AssetManager.hpp"
-#include "scenes/ExampleScene.hpp"
-
+#include "AudioManager.hpp"
 #include "Camera.hpp"
 #include "components/Renderable.hpp"
 #include "GameData.hpp"
+#include "scenes/ExampleScene.hpp"
 #include "Serializer.hpp"
-#include "slib.hpp"
 #include "UserInput.hpp"
 
 namespace sage
@@ -34,7 +33,7 @@ namespace sage
             "Baldur's Raylib");
         _settings.UpdateViewport();
 
-        InitAudioDevice();
+        audioManager = std::make_unique<AudioManager>();
 
         AssetManager::GetInstance().LoadPaths(); // Init asset paths
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
@@ -47,7 +46,8 @@ namespace sage
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 
-        scene = std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get());
+        scene =
+            std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
         const auto viewport = settings->GetViewPort();
         renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
         renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
@@ -107,11 +107,9 @@ namespace sage
     {
         init();
 
-        Music music = LoadMusicStream("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
-        Music soundScape = LoadMusicStream("resources/audio/bgs/Cave.ogg");
+        audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
+        auto soundScape = audioManager->PlayMusic("resources/audio/bgs/Cave.ogg");
         SetMusicVolume(soundScape, 0.75);
-        PlayMusicStream(music);
-        PlayMusicStream(soundScape);
 
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
@@ -130,16 +128,11 @@ namespace sage
                     exitWindowRequested = false;
             }
 
-            UpdateMusicStream(music);
-            UpdateMusicStream(soundScape);
-
             scene->Update();
 
             draw();
             handleScreenUpdate();
         }
-
-        UnloadMusicStream(music);
     }
 
     void Application::draw()
@@ -184,7 +177,6 @@ namespace sage
     void Application::cleanup()
     {
         CloseWindow();
-        CloseAudioDevice();
     }
 
     Application::~Application()

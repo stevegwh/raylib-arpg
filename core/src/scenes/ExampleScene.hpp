@@ -12,9 +12,6 @@
 
 namespace sage
 {
-    struct Settings;
-    struct KeyMapping;
-
     class ExampleScene : public Scene
     {
 
@@ -24,6 +21,7 @@ namespace sage
         void Draw3D() override;
         void DrawDebug3D() override;
         ~ExampleScene() override = default;
-        ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
+        ExampleScene(
+            entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);
     };
 } // namespace sage

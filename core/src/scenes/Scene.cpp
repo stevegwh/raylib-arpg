@@ -2,8 +2,11 @@
 
 // NB: We have to include all the headers required to build GameData
 #include "AbilityFactory.hpp"
+#include "AudioManager.hpp"
 #include "Camera.hpp"
+#include "components/ContextualDialogTriggerComponent.hpp"
 #include "components/EquipmentComponent.hpp"
+#include "components/OverheadDialogComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
 #include "components/Renderable.hpp"
 #include "components/Spawner.hpp"
@@ -43,8 +46,6 @@
 #include "UserInput.hpp"
 
 #include "abilities/vfx/SpiralFountainVFX.hpp"
-#include "components/ContextualDialogTriggerComponent.hpp"
-#include "components/OverheadDialogComponent.hpp"
 
 #include <optional>
 
@@ -53,6 +54,7 @@ namespace sage
 
     void Scene::Update()
     {
+        data->audioManager->Update();
         data->renderSystem->Update();
         data->camera->Update();
         data->userInput->ListenForInput();
@@ -112,8 +114,9 @@ namespace sage
         // ResourceManager::GetInstance().UnloadAll();
     }
 
-    Scene::Scene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
-        : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings))
+    Scene::Scene(
+        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
+        : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings, _audioManager))
     {
 
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);

@@ -15,12 +15,15 @@
 
 namespace sage
 {
+    class AudioManager;
+    
     class Application
     {
         RenderTexture renderTexture{};
         RenderTexture renderTexture2d{};
 
       protected:
+        std::unique_ptr<AudioManager> audioManager;
         std::unique_ptr<Settings> settings;
         std::unique_ptr<KeyMapping> keyMapping;
         std::unique_ptr<entt::registry> registry;

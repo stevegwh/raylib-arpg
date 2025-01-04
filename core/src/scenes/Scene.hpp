@@ -13,6 +13,7 @@ namespace sage
     class GameData;
     struct Settings;
     struct KeyMapping;
+    class AudioManager;
     class SpiralFountainVFX;
 
     class Scene
@@ -35,6 +36,7 @@ namespace sage
         virtual void DrawDebug2D();
         virtual ~Scene();
 
-        explicit Scene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings);
+        explicit Scene(
+            entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);
     };
 } // namespace sage

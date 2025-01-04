@@ -13,6 +13,7 @@
 
 // Systems
 #include "AbilityFactory.hpp"
+#include "AudioManager.hpp"
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
 #include "EntityReflectionSignalRouter.hpp"
@@ -42,9 +43,11 @@
 
 namespace sage
 {
-    GameData::GameData(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
+    GameData::GameData(
+        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : registry(_registry),
           settings(_settings),
+          audioManager(_audioManager),
           userInput(std::make_unique<UserInput>(_keyMapping, _settings)),
           cursor(std::make_unique<Cursor>(_registry, this)),
           camera(std::make_unique<Camera>(_registry, userInput.get(), this)),
@@ -53,8 +56,7 @@ namespace sage
           renderSystem(std::make_unique<RenderSystem>(_registry)),
           collisionSystem(std::make_unique<CollisionSystem>(_registry)),
           navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
-          actorMovementSystem(
-              std::make_unique<ActorMovementSystem>(_registry, this)),
+          actorMovementSystem(std::make_unique<ActorMovementSystem>(_registry, this)),
           controllableActorSystem(std::make_unique<ControllableActorSystem>(_registry, this)),
           animationSystem(std::make_unique<AnimationSystem>(_registry)),
           dialogSystem(std::make_unique<DialogSystem>(_registry, this)),

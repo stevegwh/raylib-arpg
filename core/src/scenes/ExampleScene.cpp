@@ -65,8 +65,9 @@ namespace sage
         Scene::DrawDebug3D();
     }
 
-    ExampleScene::ExampleScene(entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings)
-        : Scene(_registry, _keyMapping, _settings)
+    ExampleScene::ExampleScene(
+        entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
+        : Scene(_registry, _keyMapping, _settings, _audioManager)
     {
         {
             auto boneId = data->renderSystem->FindRenderableByMeshName("QUEST_BONE");
