@@ -9,6 +9,7 @@ out
 .vs
 resources/*
 !resources/dialog/
+!resources/quests/
 !resources/shaders/
 !resources/asset-path-aliases.json
 !resources/items.json

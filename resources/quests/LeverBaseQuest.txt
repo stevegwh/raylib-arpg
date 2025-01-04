@@ -1,0 +1,7 @@
+questId: LeverBaseQuest
+title: TODO.
+---
+TODO
+---
+pick_up: QUEST_BONE
+speak_to: Lever Goblin
