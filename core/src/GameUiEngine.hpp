@@ -13,6 +13,7 @@
 
 #include <entt/entt.hpp>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace sage
@@ -770,6 +771,21 @@ namespace sage
         friend class GameUIEngine;
     };
 
+    class ErrorMessage
+    {
+        Settings* settings;
+        std::string msg;
+        double initialTime;
+        float totalDisplayTime = 3.0f;
+        float fadeOut = 1.0f;
+
+      public:
+        [[nodiscard]] bool Finished() const;
+        void Draw2D() const;
+
+        explicit ErrorMessage(Settings* _settings, std::string _msg);
+    };
+
     class UIState
     {
       protected:
@@ -832,6 +848,7 @@ namespace sage
 
     class GameUIEngine
     {
+        std::optional<ErrorMessage> errorMessage;
         std::vector<std::unique_ptr<Window>> windows;
         std::unique_ptr<TooltipWindow> tooltipWindow;
         std::optional<CellElement*> draggedObject;
@@ -850,6 +867,7 @@ namespace sage
         entt::registry* registry;
         GameData* gameData;
         void BringClickedWindowToFront(Window* clicked);
+        void CreateErrorMessage(const std::string& msg);
         TooltipWindow* CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow);
         Window* CreateWindow(std::unique_ptr<Window> _window);
         WindowDocked* CreateWindowDocked(std::unique_ptr<WindowDocked> _windowDocked);

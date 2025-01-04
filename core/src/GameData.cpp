@@ -54,7 +54,7 @@ namespace sage
           collisionSystem(std::make_unique<CollisionSystem>(_registry)),
           navigationGridSystem(std::make_unique<NavigationGridSystem>(_registry, collisionSystem.get())),
           actorMovementSystem(
-              std::make_unique<ActorMovementSystem>(_registry, collisionSystem.get(), navigationGridSystem.get())),
+              std::make_unique<ActorMovementSystem>(_registry, this)),
           controllableActorSystem(std::make_unique<ControllableActorSystem>(_registry, this)),
           animationSystem(std::make_unique<AnimationSystem>(_registry)),
           dialogSystem(std::make_unique<DialogSystem>(_registry, this)),

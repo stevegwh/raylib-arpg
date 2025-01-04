@@ -3,10 +3,11 @@
 #include "components/MoveableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/sgTransform.hpp"
+#include "GameData.hpp"
+#include "GameUiEngine.hpp"
 #include "NavigationGridSystem.hpp"
+#include "Serializer.hpp"
 #include "slib.hpp"
-
-#include <Serializer.hpp>
 
 #include <format>
 #include <ranges>
@@ -58,31 +59,36 @@ namespace sage
     {
         auto& moveable = registry->get<MoveableActor>(entity);
 
-        if (!navigationGridSystem->CheckWithinGridBounds(destination))
+        if (!gameData->navigationGridSystem->CheckWithinGridBounds(destination))
         {
             moveable.onDestinationUnreachable.publish(entity, destination);
             hasPrintedLine = true;
+            gameData->uiEngine->CreateErrorMessage("Out of bounds.");
             // std::cout << std::format(
             // "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
+
             return;
         }
 
         GridSquare minRange{};
         GridSquare maxRange{};
-        if (!navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange))
+        if (!gameData->navigationGridSystem->GetPathfindRange(
+                entity, moveable.pathfindingBounds, minRange, maxRange))
         {
             // This will very rarely happen. Only triggers if the entity's current position is outside of grid
             // bounds.
             hasPrintedLine = true;
+            gameData->uiEngine->CreateErrorMessage("Out of bounds.");
             // std::cout << std::format(
             // "Entity {}: Current position out of grid bounds \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
             return;
         }
 
-        if (!navigationGridSystem->CheckWithinBounds(destination, minRange, maxRange))
+        if (!gameData->navigationGridSystem->CheckWithinBounds(destination, minRange, maxRange))
         {
             hasPrintedLine = true;
+            gameData->uiEngine->CreateErrorMessage("Out of range.");
             // std::cout << std::format(
             // "Entity {}: Requested destination is outside of pathfinding range \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
@@ -90,15 +96,15 @@ namespace sage
         }
 
         const auto& collideable = registry->get<Collideable>(entity);
-        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
+        gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
 
         const auto& actorTrans = registry->get<sgTransform>(entity);
         //        const auto path =
         //            navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange,
         //            maxRange);
 
-        const auto path =
-            navigationGridSystem->BFSPathfind(entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
+        const auto path = gameData->navigationGridSystem->BFSPathfind(
+            entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
 
         if (moveable.IsMoving()) // Was previously moving
         {
@@ -122,11 +128,12 @@ namespace sage
         else
         {
             hasPrintedLine = true;
+            gameData->uiEngine->CreateErrorMessage("Destination unreachable.");
             // std::cout << std::format(// "Entity {}: Destination unreachable \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
         }
 
-        navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
+        gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
     }
 
     bool ActorMovementSystem::ReachedDestination(entt::entity entity) const
@@ -168,7 +175,7 @@ namespace sage
     bool ActorMovementSystem::isNextPointOccupied(
         const MoveableActor& moveableActor, const Collideable& collideable) const
     {
-        return !navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
+        return !gameData->navigationGridSystem->CheckBoundingBoxAreaUnoccupied(
             moveableActor.path.front(), collideable.worldBoundingBox);
     }
 
@@ -203,8 +210,8 @@ namespace sage
     {
         // Set continuous pos to grid/discrete pos
         GridSquare targetGridPos{};
-        navigationGridSystem->WorldToGridSpace(moveableActor.path.front(), targetGridPos);
-        const auto square = navigationGridSystem->GetGridSquare(targetGridPos.row, targetGridPos.col);
+        gameData->navigationGridSystem->WorldToGridSpace(moveableActor.path.front(), targetGridPos);
+        const auto square = gameData->navigationGridSystem->GetGridSquare(targetGridPos.row, targetGridPos.col);
         transform.SetPosition({square->worldPosMin.x, square->GetTerrainHeight(), square->worldPosMin.z});
     }
 
@@ -219,7 +226,7 @@ namespace sage
     {
         constexpr float avoidanceDistance = 10;
         GridSquare actorIndex{};
-        navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
+        gameData->navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
 
         // navigationGridSystem->MarkSquaresDebug(moveableActor.debugRay, PURPLE, false);
         // Looks ahead and checks if getFirstCollision will occur
@@ -268,7 +275,7 @@ namespace sage
     NavigationGridSquare* ActorMovementSystem::castCollisionRay(
         const GridSquare& actorIndex, const Vector3& direction, float distance, MoveableActor& moveableActor) const
     {
-        return navigationGridSystem->CastRay(
+        return gameData->navigationGridSystem->CastRay(
             actorIndex.row, actorIndex.col, {direction.x, direction.z}, distance, moveableActor.debugRay);
     }
 
@@ -289,8 +296,8 @@ namespace sage
     void ActorMovementSystem::updateActorWorldPosition(entt::entity entity, sgTransform& transform) const
     {
         GridSquare actorIndex{};
-        navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
-        auto gridSquare = navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
+        gameData->navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
+        auto gridSquare = gameData->navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
         auto& moveable = registry->get<MoveableActor>(entity);
         Vector3 newPos = {
             transform.GetWorldPos().x + transform.direction.x * moveable.movementSpeed,
@@ -363,9 +370,9 @@ namespace sage
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {
             hasPrintedLine = false;
-            navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
+            gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
             updateActor(entity, moveableActor, transform, collideable);
-            navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
+            gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
             if (hasPrintedLine)
             {
                 // std::cout << "---------\n";
@@ -380,9 +387,8 @@ namespace sage
         }
     }
 
-    ActorMovementSystem::ActorMovementSystem(
-        entt::registry* _registry, CollisionSystem* _collisionSystem, NavigationGridSystem* _navigationGridSystem)
-        : BaseSystem(_registry), collisionSystem(_collisionSystem), navigationGridSystem(_navigationGridSystem)
+    ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, GameData* _gameData)
+        : BaseSystem(_registry), gameData(_gameData)
     {
     }
 } // namespace sage

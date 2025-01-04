@@ -1127,7 +1127,7 @@ namespace sage
             }
             else
             {
-                // inventory full
+                engine->CreateErrorMessage("Inventory full.");
             }
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
@@ -1145,7 +1145,7 @@ namespace sage
             }
             else
             {
-                // inventory full
+                engine->CreateErrorMessage("Inventory full.");
             }
         }
     }
@@ -1330,14 +1330,12 @@ namespace sage
             }
             else
             {
-                // TODO: Report error to user.
-                std::cout << "Item Cannot be Dropped. \n";
+                engine->CreateErrorMessage("Item cannot be dropped.");
             }
         }
         else
         {
-            // TODO: Report to the user that you can't drop it here.
-            std::cout << "Out of Range \n";
+            engine->CreateErrorMessage("Out of range.");
         }
     }
 
@@ -2434,6 +2432,34 @@ namespace sage
     TableCell::TableCell(TableRow* _parent, Padding _padding) : TableElement(_parent, _padding)
     {
     }
+
+    bool ErrorMessage::Finished() const
+    {
+        return GetTime() > initialTime + totalDisplayTime;
+    }
+
+    void ErrorMessage::Draw2D() const
+    {
+        auto currentTime = GetTime();
+        auto remainingTime = currentTime - initialTime;
+        unsigned char a = 255;
+
+        // if (remainingTime < initialTime + totalDisplayTime - fadeOut)
+        // {
+        //     a = static_cast<unsigned char>((remainingTime / fadeOut) * 255);
+        // }
+
+        const auto [width, height] = settings->GetViewPort();
+        auto col = Color{255, 255, 255, a};
+
+        DrawText(msg.c_str(), width / 2, height / 2, 18, col);
+    }
+
+    ErrorMessage::ErrorMessage(Settings* _settings, std::string _msg)
+        : settings(_settings), msg(std::move(_msg)), initialTime(GetTime())
+    {
+    }
+
 #pragma endregion
 
 #pragma region UIStates
@@ -2602,6 +2628,11 @@ namespace sage
         }
     }
 
+    void GameUIEngine::CreateErrorMessage(const std::string& msg)
+    {
+        errorMessage.emplace(gameData->settings, msg);
+    }
+
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
@@ -2760,6 +2791,11 @@ namespace sage
         {
             draggedObject.value()->state->Draw();
         }
+
+        if (errorMessage.has_value())
+        {
+            errorMessage->Draw2D();
+        }
     }
 
     /**
@@ -2837,7 +2873,7 @@ namespace sage
 
     void GameUIEngine::onWorldItemHover(entt::entity entity) const
     {
-        if (!gameData->inventorySystem->CheckWorldItemRange() || tooltipWindow) return;
+        if (!gameData->inventorySystem->CheckWorldItemRange(true) || tooltipWindow) return;
         auto& item = registry->get<ItemComponent>(entity);
         auto viewport = gameData->settings->GetViewPort();
         Vector2 pos = GetWorldToScreenEx(
@@ -2898,6 +2934,11 @@ namespace sage
             gameData->cursor->EnableContextSwitching();
             processWindows();
             pruneWindows();
+        }
+
+        if (errorMessage.has_value() && errorMessage->Finished())
+        {
+            errorMessage.reset();
         }
     }
 

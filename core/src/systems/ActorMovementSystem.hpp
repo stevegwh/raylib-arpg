@@ -10,8 +10,7 @@
 namespace sage
 {
     // Forward declarations
-    class CollisionSystem;
-    class NavigationGridSystem;
+    struct GameData;
     struct MoveableActor;
     class Collideable;
     struct sgTransform;
@@ -20,10 +19,9 @@ namespace sage
 
     class ActorMovementSystem : public BaseSystem
     {
+        GameData* gameData;
         std::vector<Ray> debugRays;
         std::vector<RayCollision> debugCollisions;
-        CollisionSystem* collisionSystem;
-        NavigationGridSystem* navigationGridSystem;
 
         void clearDebugData();
         void updateActor(
@@ -62,10 +60,7 @@ namespace sage
         void Update() override;
         void DrawDebug() const;
 
-        ActorMovementSystem(
-            entt::registry* _registry,
-            CollisionSystem* _collisionSystem,
-            NavigationGridSystem* _navigationGridSystem);
+        ActorMovementSystem(entt::registry* _registry, GameData* _gameData);
     };
 
 } // namespace sage

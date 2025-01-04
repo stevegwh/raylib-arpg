@@ -29,7 +29,7 @@ namespace sage
         void onComponentRemoved(entt::entity entity);
 
       public:
-        [[nodiscard]] bool CheckWorldItemRange();
+        [[nodiscard]] bool CheckWorldItemRange(bool hover = false);
         entt::sigh<void()> onInventoryUpdated;
         InventorySystem(entt::registry* _registry, GameData* _gameData);
     };

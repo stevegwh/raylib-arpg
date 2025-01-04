@@ -136,7 +136,7 @@ namespace sage
         ClearBackground(BLANK);
         BeginMode3D(*scene->data->camera->getRaylibCam());
         scene->Draw3D();
-        scene->DrawDebug3D();
+        // scene->DrawDebug3D();
         EndMode3D();
         EndTextureMode();
 
@@ -160,7 +160,6 @@ namespace sage
 
         if (exitWindowRequested)
         {
-
             DrawRectangle(0, letterbox.y / 2 + 100, width, 200, BLACK);
             auto textSize = MeasureText("Are you sure you want to exit program? [Y/N]", 30);
             DrawText("Are you sure you want to exit program? [Y/N]", (width - textSize) / 2, 180, 30, WHITE);
