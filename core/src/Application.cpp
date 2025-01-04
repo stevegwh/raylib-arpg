@@ -107,7 +107,11 @@ namespace sage
     {
         init();
 
-        Music music = LoadMusicStream("resources/audio/music/8 Sanctuary FULL LOOP TomMusic.ogg");
+        Music music = LoadMusicStream("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
+        Music soundScape = LoadMusicStream("resources/audio/bgs/Cave.ogg");
+        SetMusicVolume(soundScape, 0.75);
+        PlayMusicStream(music);
+        PlayMusicStream(soundScape);
 
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
@@ -127,7 +131,8 @@ namespace sage
             }
 
             UpdateMusicStream(music);
-            PlayMusicStream(music);
+            UpdateMusicStream(soundScape);
+
             scene->Update();
 
             draw();

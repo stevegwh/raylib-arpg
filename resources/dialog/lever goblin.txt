@@ -11,18 +11,18 @@ questId: LeverQuest
 #node start
 title: start
 ---
-Hello there, how can I help?
+I'M HUNGRY. LEAVE ME ALONE.
 ---
 if quest_hand_in($questId)
-[[quest_finish($questId) | I found this item on the ground, is it yours? | quest]]
+[[quest_finish($questId) | Look what I have here. A tasty bone! | quest]]
 end
-[[Sorry, I must be leaving. | exit]]
+[[Take your leave. | exit]]
 #node end
 
 #node start
 title: quest
 ---
-Oh, thank you! I've been looking everywhere for this.
+MMMMM. BONE. *The goblin starts gnawing on the bone enthusiastically.*
 ---
-[[No problem | exit]]
+[[Take your leave. | exit]]
 #node end

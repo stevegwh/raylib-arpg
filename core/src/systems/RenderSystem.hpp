@@ -46,12 +46,13 @@ namespace sage
         template <typename... Components>
         [[nodiscard]] entt::entity FindRenderableByName(const std::string& name) const
         {
+            auto nameStripped = stripPath(name);
             auto view = registry->view<Renderable, Components...>();
 
             for (const auto& entity : view)
             {
                 const auto& renderable = registry->get<Renderable>(entity);
-                if (renderable.name == name) return entity;
+                if (renderable.name == nameStripped) return entity;
             }
             return entt::null;
         }
