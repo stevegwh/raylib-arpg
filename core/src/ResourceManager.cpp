@@ -213,6 +213,16 @@ namespace sage
         return music[key];
     }
 
+    Sound ResourceManager::SFXLoad(const std::string& path)
+    {
+        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        if (!sfx.contains(key))
+        {
+            sfx[key] = LoadSound(path.c_str());
+        }
+        return sfx[key];
+    }
+
     /*
     * @brief Stores the shader's text file in memory, saving on reading the file multiple
     times.
@@ -488,6 +498,10 @@ namespace sage
 
     void ResourceManager::UnloadAll()
     {
+        for (auto& [key, s] : sfx)
+        {
+            UnloadSound(s);
+        }
         for (auto& [key, mus] : music)
         {
             UnloadMusicStream(mus);

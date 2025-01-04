@@ -40,12 +40,14 @@
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
+#include "systems/SpatialAudioSystem.hpp"
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 #include "systems/UberShaderSystem.hpp"
 #include "UserInput.hpp"
 
 #include "abilities/vfx/SpiralFountainVFX.hpp"
+#include "components/SpatialAudioComponent.hpp"
 
 #include <optional>
 
@@ -74,6 +76,7 @@ namespace sage
         data->collisionSystem->Update();
         data->animationSystem->Update();
         data->contextualDialogSystem->Update();
+        data->spatialAudioSystem->Update();
     }
 
     void Scene::DrawDebug3D()
@@ -186,6 +189,8 @@ namespace sage
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
 
+        // Test stuff -----------------------------
+
         spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
         spiral->InitSystem();
 
@@ -198,6 +203,11 @@ namespace sage
             text.emplace_back("Drip drip.", 2.0f);
             fullscreenTextOverlayFactory.SetOverlay(text, 0.5f, 1.0f);
         }>(*data->fullscreenTextOverlayFactory);
+
+        //        auto& spatial = registry->emplace<SpatialAudioComponent>(firstPlayer);
+        //        spatial.audioKey = "";
+
+        // -----------------------------------------
 
         // Requires renderables being loaded first
         data->contextualDialogSystem->InitContextualDialogsFromDirectory();

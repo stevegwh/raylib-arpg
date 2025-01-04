@@ -43,6 +43,7 @@ namespace sage
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
                     auto itemId = inventory.GetItem(row, col);
+                    if (itemId == entt::null) continue;
                     auto& item = registry->get<ItemComponent>(itemId);
                     if (item.name == itemName)
                     {

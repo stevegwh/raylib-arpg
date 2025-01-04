@@ -16,6 +16,7 @@
 #include "Settings.hpp"
 
 // Systems
+#include "AudioManager.hpp"
 #include "components/QuestComponents.hpp"
 #include "DialogFactory.hpp"
 #include "GameUiFactory.hpp"
@@ -97,6 +98,12 @@ namespace sage
             sink.connect<[](PartySystem& partySystem, entt::entity entity) {
                 partySystem.GiveItemToSelected("QUEST_LEVER");
             }>(*data->partySystem);
+
+            auto& finishEvent = registry->emplace<QuestEventReactionComponent>(leverBaseId, leverBaseId, quest);
+            entt::sink sink2{finishEvent.onQuestCompleted};
+            sink2.connect<[](AudioManager& audioManager, entt::entity entity) {
+                audioManager.PlaySFX("resources/audio/sfx/test.ogg");
+            }>(*data->audioManager);
         }
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded

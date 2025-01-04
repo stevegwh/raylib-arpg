@@ -57,6 +57,7 @@ namespace sage
         std::unordered_map<std::string, char*> vertShaderFileText{};
         std::unordered_map<std::string, char*> fragShaderFileText{};
         std::unordered_map<std::string, Music> music;
+        std::unordered_map<std::string, Sound> sfx;
 
         Shader gpuShaderLoad(const char* vs, const char* fs);
         static void deepCopyModel(const Model& oldModel, Model& newModel);
@@ -71,6 +72,7 @@ namespace sage
         }
 
         Music MusicLoad(const std::string& path);
+        Sound SFXLoad(const std::string& path);
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
         Texture TextureLoad(const std::string& fileName, const std::string& path);

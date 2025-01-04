@@ -15,10 +15,11 @@ namespace sage
     class AudioManager
     {
         std::unordered_set<std::string> music;
+        std::unordered_set<std::string> sfx;
 
       public:
-        Music LoadMusic(const std::string& name);
         Music PlayMusic(const std::string& name);
+        Sound PlaySFX(const std::string& name);
         void Update() const;
         ~AudioManager();
         AudioManager();

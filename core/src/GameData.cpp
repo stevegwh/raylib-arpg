@@ -37,6 +37,7 @@
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
+#include "systems/SpatialAudioSystem.hpp"
 #include "systems/states/StateMachines.hpp"
 #include "systems/TimerSystem.hpp"
 #include "systems/UberShaderSystem.hpp"
@@ -78,7 +79,8 @@ namespace sage
           questManager(std::make_unique<QuestManager>(_registry)),
           doorSystem(std::make_unique<DoorSystem>(_registry, this)),
           fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayFactory>(this)),
-          contextualDialogSystem(std::make_unique<ContextualDialogSystem>(registry, this))
+          contextualDialogSystem(std::make_unique<ContextualDialogSystem>(registry, this)),
+          spatialAudioSystem(std::make_unique<SpatialAudioSystem>(registry, this))
     {
         // TODO: Move GameData out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this

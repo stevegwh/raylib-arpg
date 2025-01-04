@@ -45,6 +45,7 @@ namespace sage
     class DoorSystem;
     class FullscreenTextOverlayFactory;
     class ContextualDialogSystem;
+    class SpatialAudioSystem;
 
     // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
     // TODO: Also, should rename to "GameSystems"
@@ -87,6 +88,7 @@ namespace sage
         std::unique_ptr<DoorSystem> doorSystem;
         std::unique_ptr<FullscreenTextOverlayFactory> fullscreenTextOverlayFactory;
         std::unique_ptr<ContextualDialogSystem> contextualDialogSystem;
+        std::unique_ptr<SpatialAudioSystem> spatialAudioSystem;
 
         GameData(
             entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);
