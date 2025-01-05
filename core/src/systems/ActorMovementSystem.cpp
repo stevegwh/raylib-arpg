@@ -3,6 +3,7 @@
 #include "components/MoveableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/sgTransform.hpp"
+#include "ControllableActorSystem.hpp"
 #include "GameData.hpp"
 #include "GameUiEngine.hpp"
 #include "NavigationGridSystem.hpp"
@@ -15,7 +16,6 @@
 
 namespace sage
 {
-    bool hasPrintedLine = false;
 
     void ActorMovementSystem::PruneMoveCommands(const entt::entity& entity) const
     {
@@ -62,8 +62,10 @@ namespace sage
         if (!gameData->navigationGridSystem->CheckWithinGridBounds(destination))
         {
             moveable.onDestinationUnreachable.publish(entity, destination);
-            hasPrintedLine = true;
-            gameData->uiEngine->CreateErrorMessage("Out of bounds.");
+            if (entity == gameData->controllableActorSystem->GetSelectedActor())
+            {
+                gameData->uiEngine->CreateErrorMessage("Out of bounds.");
+            }
             // std::cout << std::format(
             // "Entity {}: Requested destination out of grid bounds \n", static_cast<int>(entity));
 
@@ -77,8 +79,10 @@ namespace sage
         {
             // This will very rarely happen. Only triggers if the entity's current position is outside of grid
             // bounds.
-            hasPrintedLine = true;
-            gameData->uiEngine->CreateErrorMessage("Out of bounds.");
+            if (entity == gameData->controllableActorSystem->GetSelectedActor())
+            {
+                gameData->uiEngine->CreateErrorMessage("Out of bounds.");
+            }
             // std::cout << std::format(
             // "Entity {}: Current position out of grid bounds \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
@@ -87,8 +91,10 @@ namespace sage
 
         if (!gameData->navigationGridSystem->CheckWithinBounds(destination, minRange, maxRange))
         {
-            hasPrintedLine = true;
-            gameData->uiEngine->CreateErrorMessage("Out of range.");
+            if (entity == gameData->controllableActorSystem->GetSelectedActor())
+            {
+                gameData->uiEngine->CreateErrorMessage("Out of range.");
+            }
             // std::cout << std::format(
             // "Entity {}: Requested destination is outside of pathfinding range \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
@@ -127,8 +133,10 @@ namespace sage
         }
         else
         {
-            hasPrintedLine = true;
-            gameData->uiEngine->CreateErrorMessage("Destination unreachable.");
+            if (entity == gameData->controllableActorSystem->GetSelectedActor())
+            {
+                gameData->uiEngine->CreateErrorMessage("Destination unreachable.");
+            }
             // std::cout << std::format(// "Entity {}: Destination unreachable \n", static_cast<int>(entity));
             moveable.onDestinationUnreachable.publish(entity, destination);
         }
@@ -260,7 +268,6 @@ namespace sage
                 if (Vector3Distance(hitTransform.GetWorldPos(), transform.GetWorldPos()) <
                     Vector3Distance(moveableActor.path.back(), transform.GetWorldPos()))
                 {
-                    hasPrintedLine = true;
                     // std::cout << std::format(
                     // "Entity {}: Collided with a moving object, rerouting \n", static_cast<int>(entity));
                     PathfindToLocation(entity, moveableActor.GetDestination());
@@ -325,7 +332,6 @@ namespace sage
 
         if (isNextPointOccupied(moveableActor, collideable))
         {
-            hasPrintedLine = true;
             // std::cout << std::format(// "Entity {}: Next point occupied, rerouting \n",
             // static_cast<int>(entity));
             recalculatePath(entity, moveableActor, collideable);
@@ -369,14 +375,9 @@ namespace sage
         auto fullView = registry->view<MoveableActor, sgTransform, Collideable>();
         for (auto [entity, moveableActor, transform, collideable] : fullView.each())
         {
-            hasPrintedLine = false;
             gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
             updateActor(entity, moveableActor, transform, collideable);
             gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
-            if (hasPrintedLine)
-            {
-                // std::cout << "---------\n";
-            }
         }
 
         // Process entities without Collideable component (e.g., some abilities etc)

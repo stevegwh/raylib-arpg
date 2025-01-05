@@ -23,7 +23,7 @@ namespace sage
       public:
         void InitQuestsFromDirectory();
         void RemoveQuest(const std::string& key);
-        entt::entity GetQuest(const std::string& key);
+        entt::entity GetQuest(const std::string& key) const;
 
         explicit QuestManager(entt::registry* _registry, GameData* _gameData);
     };
