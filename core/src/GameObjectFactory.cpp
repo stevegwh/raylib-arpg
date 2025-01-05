@@ -180,8 +180,8 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
-        registry->emplace<QuestTaskComponent>(id, "ArissaQuest");
-        data->questManager->AddTaskToQuest("ArissaQuest", id);
+        // registry->emplace<QuestTaskComponent>(id, "ArissaQuest");
+        // data->questManager->AddTaskToQuest("ArissaQuest", id);
 
         return id;
     }
@@ -258,19 +258,6 @@ namespace sage
         data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
-        // TODO: Really not a fan of adding the quest like this.
-        auto& quest = registry->get<Quest>(data->questManager->GetQuest("ArissaQuest"));
-        {
-            auto& questCompleteReaction = registry->emplace<QuestEventReactionComponent>(id, id, quest);
-            entt::sink sink{questCompleteReaction.onQuestCompleted};
-            sink.connect<&PartySystem::NPCToMember>(data->partySystem);
-        }
-        {
-            auto doorId = data->renderSystem->FindRenderableByMeshName<DoorBehaviorComponent>("QUEST_DOOR");
-            auto& questCompleteReaction = registry->emplace<QuestEventReactionComponent>(doorId, doorId, quest);
-            entt::sink sink{questCompleteReaction.onQuestCompleted};
-            sink.connect<&DoorSystem::UnlockAndOpenDoor>(data->doorSystem);
-        }
 
         return id;
     }

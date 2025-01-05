@@ -42,6 +42,27 @@ namespace sage
             return FindRenderableByName<>(name);
         }
 
+        template <typename... Components>
+        [[nodiscard]] entt::entity FindRenderable(const std::string& name) const
+        {
+            auto entity = FindRenderableByName<Components...>(name);
+            if (entity == entt::null)
+            {
+                entity = FindRenderableByMeshName<Components...>(name);
+            }
+            return entity;
+        }
+
+        [[nodiscard]] entt::entity FindRenderable(const std::string& name) const
+        {
+            auto entity = FindRenderableByName(name);
+            if (entity == entt::null)
+            {
+                entity = FindRenderableByMeshName(name);
+            }
+            return entity;
+        }
+
         // Very inefficient way to find the entity id of a renderable
         template <typename... Components>
         [[nodiscard]] entt::entity FindRenderableByName(const std::string& name) const

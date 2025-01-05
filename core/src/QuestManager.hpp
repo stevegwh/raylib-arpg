@@ -24,8 +24,8 @@ namespace sage
         void InitQuestsFromDirectory();
         void RemoveQuest(const std::string& key);
         entt::entity GetQuest(const std::string& key);
-        void AddTaskToQuest(const std::string& questKey, entt::entity taskId);
-        void AddTaskToQuest(entt::entity questId, entt::entity taskId);
+        // void AddTaskToQuest(const std::string& questKey, entt::entity taskId);
+        // void AddTaskToQuest(entt::entity questId, entt::entity taskId);
 
         explicit QuestManager(entt::registry* _registry, GameData* _gameData);
     };

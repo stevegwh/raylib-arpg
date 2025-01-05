@@ -211,6 +211,7 @@ namespace sage
 
         // Requires renderables being loaded first
         data->contextualDialogSystem->InitContextualDialogsFromDirectory();
+        data->questManager->InitQuestsFromDirectory();
 
         // Clear any CPU resources that are no longer needed
         // ResourceManager::GetInstance().UnloadImages();
