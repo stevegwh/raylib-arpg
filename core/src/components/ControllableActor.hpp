@@ -32,10 +32,10 @@ namespace sage
         Connection<entt::entity, entt::entity> onFloorClickCnx{};
         Connection<entt::entity, entt::entity> onNPCLeftClickCnx{};
 
-        std::unique_ptr<Event<entt::entity, entt::entity>> onEnemyLeftClick{};  // Self, Clicked enemy
-        std::unique_ptr<Event<entt::entity, entt::entity>> onEnemyRightClick{}; // Self, Clicked enemy
-        std::unique_ptr<Event<entt::entity, entt::entity>> onFloorClick{};      // Self, Clicked Col (can discard)
-        std::unique_ptr<Event<entt::entity, entt::entity>> onNPCLeftClick{};    // Self, Clicked NPC
+        const std::unique_ptr<Event<entt::entity, entt::entity>> onEnemyLeftClick{};  // Self, Clicked enemy
+        const std::unique_ptr<Event<entt::entity, entt::entity>> onEnemyRightClick{}; // Self, Clicked enemy
+        const std::unique_ptr<Event<entt::entity, entt::entity>> onFloorClick{}; // Self, Clicked Col (can discard)
+        const std::unique_ptr<Event<entt::entity, entt::entity>> onNPCLeftClick{}; // Self, Clicked NPC
 
         ControllableActor();
     };

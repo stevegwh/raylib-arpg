@@ -10,7 +10,7 @@
 namespace sage
 {
 
-    using SubscriberId = unsigned int;
+    using SubscriberId = int;
 
     template <typename... Args>
     class Event;
@@ -24,12 +24,12 @@ namespace sage
       public:
         void UnSubscribe()
         {
-            event->Unsubscribe(id);
+            event->unSubscribe(id);
         }
 
         ~Connection()
         {
-            event->Unsubscribe(id);
+            event->unSubscribe(id);
         }
 
         explicit Connection(Event<Args...>* _event, const SubscriberId _id) : event(_event), id(_id)
@@ -42,8 +42,15 @@ namespace sage
     template <typename... Args>
     class Event
     {
-        unsigned int count = 0;
+        int count = 0;
         std::unordered_map<SubscriberId, std::function<void(Args...)>> subscribers;
+
+        void unSubscribe(SubscriberId& id)
+        {
+            if (id == -1) return;
+            subscribers.erase(id);
+            id = -1;
+        }
 
       public:
         Connection<Args...> Subscribe(std::function<void(Args...)> func)
@@ -61,12 +68,7 @@ namespace sage
             }
         }
 
-        void Unsubscribe(SubscriberId& id)
-        {
-            if (id == -1) return;
-            subscribers.erase(id);
-            id = -1;
-        }
+        friend class Connection<Args...>;
     };
 
 } // namespace sage

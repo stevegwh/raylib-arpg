@@ -393,8 +393,9 @@ namespace sage
             assert(combatable.target != entt::null);
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
-            enemyCombatable.onDeath->Subscribe([entity, this, &combatable](entt::entity target) {
-                combatable.onTargetDeath->Publish(entity, target);
+            enemyCombatable.onDeath->Subscribe([entity, this](const entt::entity target) {
+                const auto& c = registry->get<CombatableActor>(entity);
+                c.onTargetDeath->Publish(entity, target);
             });
 
             combatable.onTargetDeathCnx = combatable.onTargetDeath->Subscribe(

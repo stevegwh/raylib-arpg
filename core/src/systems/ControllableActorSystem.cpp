@@ -57,24 +57,26 @@ namespace sage
         current.selectedIndicator->SetShader(
             ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
 
-        auto& controllable = registry->get<ControllableActor>(id);
-
         // Forward cursor clicks to this actor's controllable component's events
-        controllable.cursorOnFloorClickCnx =
-            gameData->cursor->onFloorClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
-                controllable.onFloorClick->Publish(id, clickedEntity);
+        current.cursorOnFloorClickCnx =
+            gameData->cursor->onFloorClick->Subscribe([this](const entt::entity clickedEntity) {
+                const auto& c = registry->get<ControllableActor>(selectedActorId);
+                c.onFloorClick->Publish(selectedActorId, clickedEntity);
             });
-        controllable.cursorOnEnemyLeftClickCnx =
-            gameData->cursor->onEnemyLeftClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
-                controllable.onEnemyLeftClick->Publish(id, clickedEntity);
+        current.cursorOnEnemyLeftClickCnx =
+            gameData->cursor->onEnemyLeftClick->Subscribe([this](const entt::entity clickedEntity) {
+                const auto& c = registry->get<ControllableActor>(selectedActorId);
+                c.onEnemyLeftClick->Publish(selectedActorId, clickedEntity);
             });
-        controllable.cursorOnEnemyRightClickCnx =
-            gameData->cursor->onEnemyRightClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
-                controllable.onEnemyRightClick->Publish(id, clickedEntity);
+        current.cursorOnEnemyRightClickCnx =
+            gameData->cursor->onEnemyRightClick->Subscribe([this](const entt::entity clickedEntity) {
+                const auto& c = registry->get<ControllableActor>(selectedActorId);
+                c.onEnemyRightClick->Publish(selectedActorId, clickedEntity);
             });
-        controllable.cursorOnNPCLeftClickCnx =
-            gameData->cursor->onNPCClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
-                controllable.onNPCLeftClick->Publish(id, clickedEntity);
+        current.cursorOnNPCLeftClickCnx =
+            gameData->cursor->onNPCClick->Subscribe([this](const entt::entity clickedEntity) {
+                const auto& c = registry->get<ControllableActor>(selectedActorId);
+                c.onNPCLeftClick->Publish(selectedActorId, clickedEntity);
             });
 
         for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
