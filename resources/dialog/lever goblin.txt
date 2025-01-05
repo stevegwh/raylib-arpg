@@ -1,15 +1,15 @@
-#meta start
+<meta>
 owner: Lever Goblin
 speaker: Grumpy Goblin
 conversation_pos: 10.0 2.0 5.0
-#meta end
+</meta>
 
-#variables start
+<variables>
 questId: LeverBaseQuest
 itemId: QUEST_BONE
-#variables end
+</variables>
 
-#node start
+<node>
 title: start
 ---
 I'M HUNGRY. LEAVE ME ALONE.
@@ -18,12 +18,12 @@ if has_item($itemId)
 [[start_quest($questId) | Look what I have here. A tasty bone! | quest]]
 end
 [[Take your leave. | exit]]
-#node end
+</node>
 
-#node start
+<node>
 title: quest
 ---
 MMMMM. BONE. *The goblin starts gnawing on the bone enthusiastically.*
 ---
 [[Take your leave. | exit]]
-#node end
+</node>
