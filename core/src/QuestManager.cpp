@@ -74,6 +74,11 @@ namespace sage
                             if (taskLine.find("dialog: ") != std::string::npos)
                             {
                                 auto sub = taskLine.substr(std::string("dialog: ").size());
+                                auto command = sub.find_first_of(',');
+                                if (command != std::string::npos)
+                                {
+                                    sub = sub.substr(0, command);
+                                }
                                 auto speakToEntity = gameData->renderSystem->FindRenderable(sub);
                                 assert(speakToEntity != entt::null);
                                 registry->emplace<QuestTaskComponent>(speakToEntity, questName);
@@ -83,6 +88,11 @@ namespace sage
                             else if (taskLine.find("item: ") != std::string::npos)
                             {
                                 auto sub = taskLine.substr(std::string("item: ").size());
+                                auto command = sub.find_first_of(',');
+                                if (command != std::string::npos)
+                                {
+                                    sub = sub.substr(0, command);
+                                }
                                 auto pickupEntity = gameData->renderSystem->FindRenderable(sub);
                                 assert(pickupEntity != entt::null);
                                 registry->emplace<QuestTaskComponent>(pickupEntity, questName);
