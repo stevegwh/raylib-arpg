@@ -27,11 +27,6 @@ namespace sage
             event->unSubscribe(id);
         }
 
-        ~Connection()
-        {
-            event->unSubscribe(id);
-        }
-
         explicit Connection(Event<Args...>* _event, const SubscriberId _id) : event(_event), id(_id)
         {
         }
@@ -53,7 +48,7 @@ namespace sage
         }
 
       public:
-        Connection<Args...> Subscribe(std::function<void(Args...)> func)
+        [[nodiscard]] Connection<Args...> Subscribe(std::function<void(Args...)> func)
         {
             subscribers.emplace(++count, func);
 

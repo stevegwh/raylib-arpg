@@ -441,10 +441,8 @@ namespace sage
 
     void PlayerStateController::onComponentAdded(entt::entity entity)
     {
-        // Bridge was created in ControllableActorSystem to connect controllable to cursor
-
+        // Cursor and controllable events are connected in ControllableActorSystem
         auto& controllable = registry->get<ControllableActor>(entity);
-
         controllable.onEnemyLeftClickCnx =
             controllable.onEnemyLeftClick->Subscribe([this](entt::entity self, entt::entity target) {
                 GetSystem<DefaultState>(PlayerStateEnum::Default)->onEnemyLeftClick(self, target);
