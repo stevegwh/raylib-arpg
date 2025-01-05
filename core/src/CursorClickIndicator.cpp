@@ -17,8 +17,8 @@ namespace sage
     void CursorClickIndicator::onCursorClick(entt::entity entity)
     {
         if (entity == entt::null || !registry->any_of<Collideable>(entity)) return;
-        auto& col = registry->get<Collideable>(entity);
-        if (col.collisionLayer != CollisionLayer::FLOORSIMPLE &&
+        if (const auto& col = registry->get<Collideable>(entity);
+            col.collisionLayer != CollisionLayer::FLOORSIMPLE &&
             col.collisionLayer != CollisionLayer::FLOORCOMPLEX)
         {
             onReachLocation();
@@ -26,29 +26,26 @@ namespace sage
         }
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = true;
-        auto selectedActor = gameData->controllableActorSystem->GetSelectedActor();
-        auto& moveable = registry->get<MoveableActor>(selectedActor);
+        const auto selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& moveable = registry->get<MoveableActor>(selectedActor);
         if (!moveable.IsMoving()) return;
-        auto dest = moveable.GetDestination();
+        const auto dest = moveable.GetDestination();
         auto& transform = registry->get<sgTransform>(self);
         transform.SetPosition(dest);
-        entt::sink sink{moveable.onDestinationReached};
-        destinationReachedCnx = sink.connect<&CursorClickIndicator::onReachLocation>(this);
+        destinationReachedCnx =
+            moveable.onDestinationReached->Subscribe([this](entt::entity) { onReachLocation(); });
     }
 
     void CursorClickIndicator::onSelectedActorChanged()
     {
-        destinationReachedCnx.release();
+        destinationReachedCnx.UnSubscribe();
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
     }
 
     void CursorClickIndicator::onReachLocation()
     {
-        if (destinationReachedCnx)
-        {
-            destinationReachedCnx.release();
-        }
+        destinationReachedCnx.UnSubscribe();
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
     }

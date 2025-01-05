@@ -28,7 +28,7 @@ namespace sage
     {
         PruneMoveCommands(entity);
         auto& moveable = registry->get<MoveableActor>(entity);
-        moveable.onMovementCancel.publish(entity);
+        moveable.onMovementCancel->Publish(entity);
     }
 
     // TODO: If an object has a collideable, this is completely pointless, as it will inevitably use pathfinding if
@@ -45,7 +45,7 @@ namespace sage
         auto& moveableActor = registry->get<MoveableActor>(entity);
         moveableActor.path.emplace_back(transform.GetWorldPos());
         moveableActor.path.emplace_back(location);
-        moveableActor.onStartMovement.publish(entity);
+        moveableActor.onStartMovement->Publish(entity);
     }
 
     bool ActorMovementSystem::TryPathfindToLocation(const entt::entity& entity, const Vector3& destination) const
@@ -61,7 +61,7 @@ namespace sage
 
         if (!gameData->navigationGridSystem->CheckWithinGridBounds(destination))
         {
-            moveable.onDestinationUnreachable.publish(entity, destination);
+            moveable.onDestinationUnreachable->Publish(entity, destination);
             if (entity == gameData->controllableActorSystem->GetSelectedActor())
             {
                 gameData->uiEngine->CreateErrorMessage("Out of bounds.");
@@ -85,7 +85,7 @@ namespace sage
             }
             // std::cout << std::format(
             // "Entity {}: Current position out of grid bounds \n", static_cast<int>(entity));
-            moveable.onDestinationUnreachable.publish(entity, destination);
+            moveable.onDestinationUnreachable->Publish(entity, destination);
             return;
         }
 
@@ -97,7 +97,7 @@ namespace sage
             }
             // std::cout << std::format(
             // "Entity {}: Requested destination is outside of pathfinding range \n", static_cast<int>(entity));
-            moveable.onDestinationUnreachable.publish(entity, destination);
+            moveable.onDestinationUnreachable->Publish(entity, destination);
             return;
         }
 
@@ -115,7 +115,7 @@ namespace sage
         if (moveable.IsMoving()) // Was previously moving
         {
             PruneMoveCommands(entity);
-            moveable.onPathChanged.publish(entity);
+            moveable.onPathChanged->Publish(entity);
         }
 
         for (auto n : path)
@@ -129,7 +129,7 @@ namespace sage
         {
             updateActorDirection(transform, moveable);
             updateActorRotation(entity, transform);
-            moveable.onStartMovement.publish(entity);
+            moveable.onStartMovement->Publish(entity);
         }
         else
         {
@@ -138,7 +138,7 @@ namespace sage
                 gameData->uiEngine->CreateErrorMessage("Destination unreachable.");
             }
             // std::cout << std::format(// "Entity {}: Destination unreachable \n", static_cast<int>(entity));
-            moveable.onDestinationUnreachable.publish(entity, destination);
+            moveable.onDestinationUnreachable->Publish(entity, destination);
         }
 
         gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
@@ -226,7 +226,7 @@ namespace sage
     void ActorMovementSystem::handleDestinationReached(
         const entt::entity entity, const MoveableActor& moveableActor)
     {
-        moveableActor.onDestinationReached.publish(entity);
+        moveableActor.onDestinationReached->Publish(entity);
     }
 
     bool ActorMovementSystem::checkCollisionWithOtherMoveable(

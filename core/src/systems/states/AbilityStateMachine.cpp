@@ -139,8 +139,7 @@ namespace sage
             {
                 createProjectile(registry, ab.caster, abilityEntity, gameData);
                 auto& moveable = registry->get<MoveableActor>(abilityEntity);
-                entt::sink sink{moveable.onDestinationReached};
-                sink.connect<&AwaitingExecutionState::signalExecute>(this);
+                moveable.onDestinationReached->Subscribe([this](entt::entity _entity) { signalExecute(_entity); });
             }
         }
 

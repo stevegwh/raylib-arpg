@@ -121,11 +121,14 @@ namespace sage
             gameData->actorMovementSystem->CancelMovement(self);
             gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
             auto& moveable = registry->get<MoveableActor>(self);
-            auto& state = registry->get<PlayerState>(self);
-            entt::sink sink{moveable.onDestinationReached};
-            state.AddConnection(sink.connect<&MovingToLocationState::onTargetReached>(this));
-            entt::sink sink2{moveable.onMovementCancel};
-            state.AddConnection(sink2.connect<&MovingToLocationState::onMovementCancelled>(this));
+            // auto& state = registry->get<PlayerState>(self);
+
+            moveable.onDestinationReached->Subscribe([this](entt::entity _entity) { onTargetReached(_entity); });
+            // state.AddConnection(sink.connect<&MovingToLocationState::onTargetReached>(this));
+
+            moveable.onMovementCancel->Subscribe([this](entt::entity _entity) { onMovementCancelled(_entity); });
+
+            // state.AddConnection(sink2.connect<&MovingToLocationState::onMovementCancelled>(this));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
@@ -177,10 +180,12 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, pos);
 
             auto& state = registry->get<PlayerState>(self);
-            entt::sink sink{moveable.onDestinationReached};
-            state.AddConnection(sink.connect<&MovingToTalkToNPCState::onTargetReached>(this));
-            entt::sink sink2{moveable.onMovementCancel};
-            state.AddConnection(sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this));
+            // entt::sink sink{moveable.onDestinationReached};
+            moveable.onDestinationReached->Subscribe([this](entt::entity _entity) { onTargetReached(_entity); });
+            // state.AddConnection(sink.connect<&MovingToTalkToNPCState::onTargetReached>(this));
+            // entt::sink sink2{moveable.onMovementCancel};
+            moveable.onMovementCancel->Subscribe([this](entt::entity _entity) { onMovementCancelled(_entity); });
+            // state.AddConnection(sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
@@ -314,9 +319,10 @@ namespace sage
 
             auto& moveableActor = registry->get<MoveableActor>(self);
 
-            auto& state = registry->get<PlayerState>(self);
-            entt::sink sink{moveableActor.onDestinationReached};
-            state.AddConnection(sink.connect<&MovingToAttackEnemyState::onTargetReached>(this));
+            // auto& state = registry->get<PlayerState>(self);
+            moveableActor.onDestinationReached->Subscribe(
+                [this](entt::entity _entity) { onTargetReached(_entity); });
+            // state.AddConnection(sink.connect<&MovingToAttackEnemyState::onTargetReached>(this));
 
             auto& combatable = registry->get<CombatableActor>(self);
             assert(combatable.target != entt::null);

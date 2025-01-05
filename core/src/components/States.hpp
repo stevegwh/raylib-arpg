@@ -1,5 +1,7 @@
 #pragma once
 
+#include "raylib.h"
+
 #include <entt/entt.hpp>
 #include <Event.hpp>
 #include <vector>
@@ -60,6 +62,12 @@ namespace sage
     class PartyMemberState : public BaseState<PartyMemberState, PartyMemberStateEnum>
     {
       public:
+        Connection<entt::entity> onLeaderMoveCnx{};
+        Connection<entt::entity> onDestinationReachedCnx{};
+        Connection<entt::entity, entt::entity> onTargetPathChangedCnx{};
+        Connection<entt::entity> onMovementCancelCnx{};
+        Connection<entt::entity, Vector3> onDestinationUnreachableCnx{};
+
         std::unique_ptr<Event<entt::entity, entt::entity>> onLeaderMove; // self, leader
 
         PartyMemberState()

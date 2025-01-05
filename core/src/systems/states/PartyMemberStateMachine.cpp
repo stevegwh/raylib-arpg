@@ -122,14 +122,17 @@ namespace sage
 
             auto& state = registry->get<PartyMemberState>(self);
 
-            entt::sink sink1{moveable.onDestinationReached};
-            state.AddConnection(sink1.connect<&FollowingLeaderState::onTargetReached>(this));
-            entt::sink sink2{moveable.followTarget->onTargetPathChanged};
-            state.AddConnection(sink2.connect<&FollowingLeaderState::onTargetPathChanged>(this));
-            entt::sink sink3{moveable.onMovementCancel};
-            state.AddConnection(sink3.connect<&FollowingLeaderState::onMovementCancelled>(this));
-            entt::sink sink4{moveable.onDestinationUnreachable};
-            state.AddConnection(sink4.connect<&FollowingLeaderState::onDestinationUnreachable>(this));
+            state.onDestinationReachedCnx =
+                moveable.onDestinationReached->Subscribe([this](entt::entity _self) { onTargetReached(_self); });
+            state.onTargetPathChangedCnx = moveable.followTarget->onTargetPathChanged->Subscribe(
+                [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); });
+            state.onMovementCancelCnx =
+                moveable.onMovementCancel->Subscribe([this](entt::entity _self) { onMovementCancelled(_self); });
+            state.onDestinationUnreachableCnx =
+                moveable.onDestinationUnreachable->Subscribe([this](entt::entity _self, Vector3 requestedPos) {
+                    onDestinationUnreachable(_self, requestedPos);
+                });
+
             // entt::sink sink5{moveable.followTarget->onTargetMovementCancelled};
             // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
 
@@ -141,6 +144,7 @@ namespace sage
 
         void OnStateExit(const entt::entity self) override
         {
+            // TODO: We don't disconnect the connections here?
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.reset();
             gameData->actorMovementSystem->CancelMovement(self);
@@ -192,9 +196,9 @@ namespace sage
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.emplace(registry, self, followTarget);
-            auto& state = registry->get<PartyMemberState>(self);
-            entt::sink sink{moveable.onMovementCancel};
-            state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
+
+            moveable.onMovementCancel->Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
+
             gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
                 [this](entt::entity entity) { onMovementCancelled(entity); });
 
@@ -212,6 +216,7 @@ namespace sage
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.reset();
+            // Do we do this? state.onMovementCancelCnx.UnSubscribe();
         }
 
         ~WaitingForLeaderState() override = default;
@@ -337,28 +342,27 @@ namespace sage
     void PartyMemberStateController::onComponentAdded(entt::entity entity)
     {
         auto& state = registry->get<PartyMemberState>(entity);
+
         // Forward leader's movement to the state's onLeaderMovement
-        auto& leaderMoveable = registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
-        for (const auto id : state.hooks)
-        {
-            gameData->reflectionSignalRouter->RemoveHook(id);
-        }
-        state.hooks.push_back(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
-            entity, leaderMoveable.onStartMovement, state.onLeaderMove));
-        entt::sink sink{state.onLeaderMove};
-        sink.connect<&DefaultState::onLeaderMove>(GetSystem<DefaultState>(PartyMemberStateEnum::Default));
+        const auto& leaderMoveable =
+            registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
+
+        state.onLeaderMoveCnx = leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
+            const auto& _state = registry->get<PartyMemberState>(entity);
+            _state.onLeaderMove->Publish(entity, leader);
+        });
+
+        state.onLeaderMove->Subscribe([this](const entt::entity self, const entt::entity leader) {
+            GetSystem<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
+        });
+
         ChangeState(entity, PartyMemberStateEnum::Default);
     }
 
     void PartyMemberStateController::onComponentRemoved(entt::entity entity)
     {
         auto& state = registry->get<PartyMemberState>(entity);
-        for (const auto id : state.hooks)
-        {
-            gameData->reflectionSignalRouter->RemoveHook(id);
-        }
-        entt::sink sink{state.onLeaderMove};
-        sink.disconnect<&DefaultState::onLeaderMove>(GetSystem<DefaultState>(PartyMemberStateEnum::Default));
+        state.onLeaderMoveCnx.UnSubscribe();
     }
 
     PartyMemberStateController::PartyMemberStateController(entt::registry* _registry, GameData* _gameData)

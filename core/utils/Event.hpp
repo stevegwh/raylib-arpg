@@ -48,7 +48,8 @@ namespace sage
         }
 
       public:
-        [[nodiscard]] Connection<Args...> Subscribe(std::function<void(Args...)> func)
+        // [[nodiscard]]
+        Connection<Args...> Subscribe(std::function<void(Args...)> func)
         {
             subscribers.emplace(++count, func);
 

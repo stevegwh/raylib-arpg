@@ -114,7 +114,7 @@ namespace sage
         }
         updateChildrenPos();
 
-        onPositionUpdate.publish(self);
+        onPositionUpdate->Publish(self);
     }
 
     void sgTransform::SetRotation(const Vector3& rotation)
@@ -182,7 +182,8 @@ namespace sage
         newChild->SetParent(this);
     }
 
-    sgTransform::sgTransform(entt::entity _self) : self(_self)
+    sgTransform::sgTransform(entt::entity _self)
+        : self(_self), onPositionUpdate(std::make_unique<Event<entt::entity>>())
     {
         m_positionLocal = Vector3Zero();
         m_positionWorld = Vector3Zero();

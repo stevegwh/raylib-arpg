@@ -7,6 +7,7 @@
 #include "Timer.hpp"
 
 #include <entt/entt.hpp>
+#include <Event.hpp>
 
 namespace sage
 {
@@ -19,7 +20,7 @@ namespace sage
         entt::entity self;
         float k = 0;
 
-        entt::connection destinationReachedCnx;
+        Connection<entt::entity> destinationReachedCnx;
 
         void onCursorClick(entt::entity entity);
         void onReachLocation();

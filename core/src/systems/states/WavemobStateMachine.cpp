@@ -140,12 +140,9 @@ namespace sage
             const auto& combatable = registry->get<CombatableActor>(self);
             moveable.followTarget.emplace(registry, self, combatable.target);
 
-            auto& state = registry->get<WavemobState>(self);
-
-            entt::sink finishMovementSink{moveable.onDestinationReached};
-            state.AddConnection(finishMovementSink.connect<&TargetOutOfRangeState::onTargetReached>(this));
-            entt::sink posUpdateSink{moveable.followTarget->onTargetPathChanged};
-            state.AddConnection(posUpdateSink.connect<&TargetOutOfRangeState::onTargetPosUpdate>(this));
+            moveable.onDestinationReached->Subscribe([this](entt::entity _entity) { onTargetReached(_entity); });
+            moveable.followTarget->onTargetPathChanged->Subscribe(
+                [this](entt::entity _self, entt::entity _target) { onTargetPosUpdate(_self, _target); });
 
             onTargetPosUpdate(self, combatable.target);
         }

@@ -9,29 +9,11 @@
 
 namespace sage
 {
-    void FollowTarget::targetReachedDestination() const
-    {
-        // TODO: Replace with a hook?
-        onTargetDestinationReached.publish(self, targetActor);
-    }
-
-    void FollowTarget::targetPathChanged() const
-    {
-        // TODO: Replace with a hook?
-        onTargetPathChanged.publish(self, targetActor);
-    }
-
-    void FollowTarget::targetMovementCancelled() const
-    {
-        // TODO: Replace with a hook?
-        onTargetMovementCancelled.publish(self, targetActor);
-    }
-
     FollowTarget::~FollowTarget()
     {
-        onTargetPathChangedCnx.release();
-        onTargetDestinationReachedCnx.release();
-        onTargetMovementCancelledCnx.release();
+        onTargetPathChangedCnx.UnSubscribe();
+        onTargetDestinationReachedCnx.UnSubscribe();
+        onTargetMovementCancelledCnx.UnSubscribe();
     }
 
     FollowTarget::FollowTarget(
@@ -39,11 +21,22 @@ namespace sage
         : registry(_registry), self(_self), timeStarted(GetTime()), targetActor(_targetActor)
     {
         auto& moveable = _registry->get<MoveableActor>(_targetActor);
-        entt::sink sink{moveable.onPathChanged};
-        onTargetPathChangedCnx = sink.connect<&FollowTarget::targetPathChanged>(this);
-        entt::sink sink2{moveable.onMovementCancel};
-        onTargetMovementCancelledCnx = sink2.connect<&FollowTarget::targetMovementCancelled>(this);
-        entt::sink sink3{moveable.onDestinationReached};
-        onTargetDestinationReachedCnx = sink3.connect<&FollowTarget::targetReachedDestination>(this);
+
+        onTargetPathChangedCnx = moveable.onPathChanged->Subscribe(
+            [this](entt::entity) { onTargetPathChanged->Publish(self, targetActor); });
+        onTargetMovementCancelledCnx = moveable.onMovementCancel->Subscribe(
+            [this](entt::entity) { onTargetMovementCancelled->Publish(self, targetActor); });
+        onTargetDestinationReachedCnx = moveable.onDestinationReached->Subscribe(
+            [this](entt::entity) { onTargetDestinationReached->Publish(self, targetActor); });
     }
+
+    MoveableActor::MoveableActor()
+        : onStartMovement(std::make_unique<Event<entt::entity>>()),
+          onDestinationReached(std::make_unique<Event<entt::entity>>()),
+          onDestinationUnreachable(std::make_unique<Event<entt::entity, Vector3>>()),
+          onPathChanged(std::make_unique<Event<entt::entity>>()),
+          onMovementCancel(std::make_unique<Event<entt::entity>>())
+    {
+    }
+
 } // namespace sage

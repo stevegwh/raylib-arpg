@@ -47,8 +47,7 @@ namespace sage
     {
         assert(registry->any_of<sgTransform>(_self));
         auto& transform = registry->get<sgTransform>(_self);
-        entt::sink sink{transform.onPositionUpdate};
-        sink.connect<&Collideable::OnTransformUpdate>(this);
+        transform.onPositionUpdate->Subscribe([this](entt::entity entity) { OnTransformUpdate(entity); });
         SetWorldBoundingBox(transform.GetMatrix());
     }
 } // namespace sage

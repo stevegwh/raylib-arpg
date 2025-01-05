@@ -7,6 +7,8 @@
 #include "cereal/cereal.hpp"
 #include "entt/entt.hpp"
 #include "raylib.h"
+
+#include <Event.hpp>
 #include <vector>
 
 namespace sage
@@ -42,7 +44,7 @@ namespace sage
             archive(m_positionWorld, m_rotationWorld, m_scale);
         }
 
-        entt::sigh<void(entt::entity)> onPositionUpdate{};
+        std::unique_ptr<Event<entt::entity>> onPositionUpdate{};
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;
         [[nodiscard]] Matrix GetMatrix() const;
