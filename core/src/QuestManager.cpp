@@ -4,6 +4,7 @@
 
 #include "QuestManager.hpp"
 
+#include "AudioManager.hpp"
 #include "components/DialogComponent.hpp"
 #include "components/DoorBehaviorComponent.hpp"
 #include "components/ItemComponent.hpp"
@@ -32,21 +33,6 @@ namespace sage
     void QuestManager::bindFunctionToQuestEvent(
         const std::string& functionName, const std::string& functionParams, Quest* quest, EventType eventType)
     {
-        // TODO:
-        // As we have a separation between systems and entities, it's common that a system subscribes to an event
-        // on behalf of an entity, but the event does not return back which entity is the one that wanted to react
-        // to the event. This creates a big issue that could be solved nicely with captured lambdas, e.g.:
-        // sink.connect<[&npcName](PartySystem& partySystem, entt::entity)
-        // {partySystem.NPCToMember(npcName);}(*gameData->partySystem);
-        // But, we are not allowed to capture anything
-        // in an entt lamba, so we can't pass the string name as an argument in this way. Not sure how to
-        // avoid this in a better way.
-        // The current "solution" I have created for this is using "SignalHooks" (classes that subscribe on behalf
-        // of the entity and forward on the entity's id). But its quite messy.
-
-        // Just use std::function and capturing lambdas. Don't even really need a library, just a templated class
-        // with a list of std::function
-
         if (functionName.find("OpenDoor") != std::string::npos)
         {
             auto startPos = functionParams.find_first_of('"');
@@ -87,9 +73,68 @@ namespace sage
                     [npcId, this](entt::entity) { gameData->partySystem->NPCToMember(npcId); });
             }
         }
+        else if (functionName.find("RemoveItem") != std::string::npos)
+        {
+
+            auto startPos = functionParams.find_first_of('"');
+            auto endPos = functionParams.find_last_of('"');
+            std::string itemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
+
+            auto itemId = gameData->renderSystem->FindRenderable(itemName);
+
+            if (eventType == EventType::OnStart)
+            {
+                quest->onQuestStart->Subscribe(
+                    [itemId, this](entt::entity) { gameData->partySystem->RemoveItemFromParty(itemId); });
+            }
+            else if (eventType == EventType::OnComplete)
+            {
+                quest->onQuestCompleted->Subscribe(
+                    [itemId, this](entt::entity) { gameData->partySystem->RemoveItemFromParty(itemId); });
+            }
+        }
+        else if (functionName.find("GiveItem") != std::string::npos)
+        {
+            auto startPos = functionParams.find_first_of('"');
+            auto endPos = functionParams.find_last_of('"');
+            std::string itemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
+
+            if (eventType == EventType::OnStart)
+            {
+                quest->onQuestStart->Subscribe(
+                    [itemName, this](entt::entity) { gameData->partySystem->GiveItemToSelected(itemName); });
+            }
+            else if (eventType == EventType::OnComplete)
+            {
+                quest->onQuestCompleted->Subscribe(
+                    [itemName, this](entt::entity) { gameData->partySystem->GiveItemToSelected(itemName); });
+            }
+        }
+        else if (functionName.find("PlaySFX") != std::string::npos)
+        {
+
+            auto startPos = functionParams.find_first_of('"');
+            auto endPos = functionParams.find_last_of('"');
+            std::string sfxName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
+
+            if (eventType == EventType::OnStart)
+            {
+                quest->onQuestStart->Subscribe(
+                    [sfxName, this](entt::entity) { gameData->audioManager->PlaySFX(sfxName); });
+            }
+            else if (eventType == EventType::OnComplete)
+            {
+                quest->onQuestCompleted->Subscribe(
+                    [sfxName, this](entt::entity) { gameData->audioManager->PlaySFX(sfxName); });
+            }
+        }
+        else if (functionName.find("EndGame") != std::string::npos)
+        {
+            // TODO
+        }
         else
         {
-            // assert(0);
+            assert(0);
         }
     }
 
@@ -143,34 +188,51 @@ namespace sage
                         std::string taskLine;
                         while (std::getline(file, taskLine) && !taskLine.empty())
                         {
+                            std::string sub;
+                            entt::entity entity;
+
+                            auto command = taskLine.find_first_of(',');
+
                             if (taskLine.find("dialog: ") != std::string::npos)
                             {
-                                auto sub = taskLine.substr(std::string("dialog: ").size());
-                                auto command = sub.find_first_of(',');
+                                auto start = std::string("dialog: ").size();
                                 if (command != std::string::npos)
                                 {
-                                    sub = sub.substr(0, command);
+                                    sub = taskLine.substr(start, command - start);
                                 }
-                                auto speakToEntity = gameData->renderSystem->FindRenderable(sub);
-                                assert(speakToEntity != entt::null);
-                                registry->emplace<QuestTaskComponent>(speakToEntity, questName);
-                                quest.AddTask(speakToEntity);
-                                assert(registry->any_of<DialogComponent>(speakToEntity));
+                                else
+                                {
+                                    sub = taskLine.substr(start);
+                                }
+                                entity = gameData->renderSystem->FindRenderable(sub);
+                                assert(entity != entt::null);
+                                assert(registry->any_of<DialogComponent>(entity));
                             }
                             else if (taskLine.find("item: ") != std::string::npos)
                             {
-                                auto sub = taskLine.substr(std::string("item: ").size());
-                                auto command = sub.find_first_of(',');
+                                auto start = std::string("item: ").size();
                                 if (command != std::string::npos)
                                 {
-                                    sub = sub.substr(0, command);
+                                    sub = taskLine.substr(start, command - start);
                                 }
-                                auto pickupEntity = gameData->renderSystem->FindRenderable(sub);
-                                assert(pickupEntity != entt::null);
-                                registry->emplace<QuestTaskComponent>(pickupEntity, questName);
-                                quest.AddTask(pickupEntity);
-                                assert(registry->any_of<ItemComponent>(pickupEntity));
+                                else
+                                {
+                                    sub = taskLine.substr(start);
+                                }
+                                entity = gameData->renderSystem->FindRenderable(sub);
+                                assert(entity != entt::null);
+                                assert(registry->any_of<ItemComponent>(entity));
                             }
+
+                            //                            if (command != std::string::npos)
+                            //                            {
+                            //                                sub = sub.substr(0, command);
+                            //                            }
+
+                            registry->emplace<QuestTaskComponent>(entity, questName);
+                            quest.AddTask(entity);
+
+                            // TODO: Do something with the task command/function if it has one
                         }
                     }
                     else if (buff.find("[OnStart]") != std::string::npos)

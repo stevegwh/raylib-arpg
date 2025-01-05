@@ -72,11 +72,11 @@ namespace sage
         : Scene(_registry, _keyMapping, _settings, _audioManager)
     {
         {
-            auto questId = data->questManager->GetQuest("LeverBaseQuest");
-            auto& leverBaseQuest = registry->get<Quest>(questId);
+            //            auto questId = data->questManager->GetQuest("LeverBaseQuest");
+            //            auto& leverBaseQuest = registry->get<Quest>(questId);
 
-            leverBaseQuest.onQuestStart->Subscribe(
-                [this](entt::entity) { data->partySystem->RemoveItemFromParty("QUEST_BONE"); });
+            //            leverBaseQuest.onQuestStart->Subscribe(
+            //                [this](entt::entity) { data->partySystem->RemoveItemFromParty("QUEST_BONE"); });
 
             auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
             auto& leverPickedUpTask = registry->get<QuestTaskComponent>(leverId);
@@ -89,9 +89,10 @@ namespace sage
                 leverRenderable.Disable();
                 data->partySystem->GiveItemToSelected("QUEST_LEVER");
             });
-
-            leverBaseQuest.onQuestCompleted->Subscribe(
-                [this](entt::entity) { data->audioManager->PlaySFX("resources/audio/sfx/test.ogg"); });
+            //
+            //            leverBaseQuest.onQuestCompleted->Subscribe(
+            //                [this](entt::entity) { data->audioManager->PlaySFX("resources/audio/sfx/test.ogg");
+            //                });
         }
 
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
