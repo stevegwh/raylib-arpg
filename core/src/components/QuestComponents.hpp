@@ -21,14 +21,15 @@ namespace sage
     {
         std::string questKey;
         bool completed = false;
-        // entt::sigh<void(QuestTaskComponent*)> onTaskCompleted;
-        std::unique_ptr<Event<QuestTaskComponent*>> onTaskCompleted;
+        std::unique_ptr<Event<QuestTaskComponent*>>
+            onStart; // NB: nullptr (QuestTasks are not started), defined for compatibility with 'Quest'
+        std::unique_ptr<Event<QuestTaskComponent*>> onCompleted;
 
         void MarkComplete()
         {
             std::cout << "Task complete! \n";
             completed = true;
-            onTaskCompleted->Publish(this);
+            onCompleted->Publish(this);
         }
 
         [[nodiscard]] bool IsComplete() const
@@ -43,7 +44,7 @@ namespace sage
         }
 
         explicit QuestTaskComponent(std::string _questKey)
-            : questKey(std::move(_questKey)), onTaskCompleted(std::make_unique<Event<QuestTaskComponent*>>())
+            : questKey(std::move(_questKey)), onCompleted(std::make_unique<Event<QuestTaskComponent*>>())
         {
         }
         QuestTaskComponent() = default;
@@ -75,8 +76,8 @@ namespace sage
         [[nodiscard]] bool IsComplete() const;
         [[nodiscard]] bool HasStarted() const;
 
-        std::unique_ptr<Event<entt::entity>> onQuestStart;
-        std::unique_ptr<Event<entt::entity>> onQuestCompleted;
+        std::unique_ptr<Event<entt::entity>> onStart;
+        std::unique_ptr<Event<entt::entity>> onCompleted;
 
         explicit Quest(entt::registry* _registry, entt::entity _questId, std::string _questKey);
     };

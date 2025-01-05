@@ -5,6 +5,7 @@
 #include "QuestManager.hpp"
 
 #include "AudioManager.hpp"
+#include "components/Collideable.hpp"
 #include "components/DialogComponent.hpp"
 #include "components/DoorBehaviorComponent.hpp"
 #include "components/ItemComponent.hpp"
@@ -18,20 +19,21 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <sstream>
 
 namespace fs = std::filesystem;
 static constexpr auto QUEST_PATH = "resources/quests";
 
 namespace sage
 {
-    enum class EventType
-    {
-        OnStart,
-        OnComplete
-    };
 
-    void QuestManager::bindFunctionToQuestEvent(
-        const std::string& functionName, const std::string& functionParams, Quest* quest, EventType eventType)
+    template <typename QuestEvent, typename... Args>
+    void bindFunctionToEvent(
+        entt::registry* registry,
+        GameData* gameData,
+        const std::string& functionName,
+        const std::string& functionParams,
+        QuestEvent* event)
     {
         if (functionName.find("OpenDoor") != std::string::npos)
         {
@@ -42,16 +44,7 @@ namespace sage
             auto doorId = gameData->renderSystem->FindRenderable<DoorBehaviorComponent>(doorName);
             assert(doorId != entt::null);
 
-            if (eventType == EventType::OnStart)
-            {
-                quest->onQuestStart->Subscribe(
-                    [doorId, this](entt::entity) { gameData->doorSystem->UnlockAndOpenDoor(doorId); });
-            }
-            else if (eventType == EventType::OnComplete)
-            {
-                quest->onQuestCompleted->Subscribe(
-                    [doorId, this](entt::entity) { gameData->doorSystem->UnlockAndOpenDoor(doorId); });
-            }
+            event->Subscribe([doorId, gameData](Args...) { gameData->doorSystem->UnlockAndOpenDoor(doorId); });
         }
         else if (functionName.find("JoinParty") != std::string::npos)
         {
@@ -62,16 +55,7 @@ namespace sage
 
             auto npcId = gameData->renderSystem->FindRenderable(npcName);
 
-            if (eventType == EventType::OnStart)
-            {
-                quest->onQuestStart->Subscribe(
-                    [npcId, this](entt::entity) { gameData->partySystem->NPCToMember(npcId); });
-            }
-            else if (eventType == EventType::OnComplete)
-            {
-                quest->onQuestCompleted->Subscribe(
-                    [npcId, this](entt::entity) { gameData->partySystem->NPCToMember(npcId); });
-            }
+            event->Subscribe([npcId, gameData](Args...) { gameData->partySystem->NPCToMember(npcId); });
         }
         else if (functionName.find("RemoveItem") != std::string::npos)
         {
@@ -82,16 +66,7 @@ namespace sage
 
             auto itemId = gameData->renderSystem->FindRenderable(itemName);
 
-            if (eventType == EventType::OnStart)
-            {
-                quest->onQuestStart->Subscribe(
-                    [itemId, this](entt::entity) { gameData->partySystem->RemoveItemFromParty(itemId); });
-            }
-            else if (eventType == EventType::OnComplete)
-            {
-                quest->onQuestCompleted->Subscribe(
-                    [itemId, this](entt::entity) { gameData->partySystem->RemoveItemFromParty(itemId); });
-            }
+            event->Subscribe([itemId, gameData](Args...) { gameData->partySystem->RemoveItemFromParty(itemId); });
         }
         else if (functionName.find("GiveItem") != std::string::npos)
         {
@@ -99,16 +74,8 @@ namespace sage
             auto endPos = functionParams.find_last_of('"');
             std::string itemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
 
-            if (eventType == EventType::OnStart)
-            {
-                quest->onQuestStart->Subscribe(
-                    [itemName, this](entt::entity) { gameData->partySystem->GiveItemToSelected(itemName); });
-            }
-            else if (eventType == EventType::OnComplete)
-            {
-                quest->onQuestCompleted->Subscribe(
-                    [itemName, this](entt::entity) { gameData->partySystem->GiveItemToSelected(itemName); });
-            }
+            event->Subscribe(
+                [itemName, gameData](Args...) { gameData->partySystem->GiveItemToSelected(itemName); });
         }
         else if (functionName.find("PlaySFX") != std::string::npos)
         {
@@ -117,16 +84,24 @@ namespace sage
             auto endPos = functionParams.find_last_of('"');
             std::string sfxName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
 
-            if (eventType == EventType::OnStart)
-            {
-                quest->onQuestStart->Subscribe(
-                    [sfxName, this](entt::entity) { gameData->audioManager->PlaySFX(sfxName); });
-            }
-            else if (eventType == EventType::OnComplete)
-            {
-                quest->onQuestCompleted->Subscribe(
-                    [sfxName, this](entt::entity) { gameData->audioManager->PlaySFX(sfxName); });
-            }
+            event->Subscribe([sfxName, gameData](Args...) { gameData->audioManager->PlaySFX(sfxName); });
+        }
+        else if (functionName.find("DisableWorldItem") != std::string::npos)
+        {
+            auto startPos = functionParams.find_first_of('"');
+            auto endPos = functionParams.find_last_of('"');
+            std::string worldItemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
+            auto itemId = gameData->renderSystem->FindRenderable(worldItemName);
+            event->Subscribe([itemId, registry](Args...) {
+                if (registry->any_of<Renderable>(itemId))
+                {
+                    registry->get<Renderable>(itemId).Disable();
+                }
+                if (registry->any_of<Collideable>(itemId))
+                {
+                    registry->get<Collideable>(itemId).Disable();
+                }
+            });
         }
         else if (functionName.find("EndGame") != std::string::npos)
         {
@@ -191,14 +166,14 @@ namespace sage
                             std::string sub;
                             entt::entity entity;
 
-                            auto command = taskLine.find_first_of(',');
+                            auto commandStartPos = taskLine.find_first_of(';');
 
                             if (taskLine.find("dialog: ") != std::string::npos)
                             {
                                 auto start = std::string("dialog: ").size();
-                                if (command != std::string::npos)
+                                if (commandStartPos != std::string::npos)
                                 {
-                                    sub = taskLine.substr(start, command - start);
+                                    sub = taskLine.substr(start, commandStartPos - start);
                                 }
                                 else
                                 {
@@ -211,9 +186,9 @@ namespace sage
                             else if (taskLine.find("item: ") != std::string::npos)
                             {
                                 auto start = std::string("item: ").size();
-                                if (command != std::string::npos)
+                                if (commandStartPos != std::string::npos)
                                 {
-                                    sub = taskLine.substr(start, command - start);
+                                    sub = taskLine.substr(start, commandStartPos - start);
                                 }
                                 else
                                 {
@@ -224,15 +199,28 @@ namespace sage
                                 assert(registry->any_of<ItemComponent>(entity));
                             }
 
-                            //                            if (command != std::string::npos)
-                            //                            {
-                            //                                sub = sub.substr(0, command);
-                            //                            }
-
-                            registry->emplace<QuestTaskComponent>(entity, questName);
+                            auto& task = registry->emplace<QuestTaskComponent>(entity, questName);
                             quest.AddTask(entity);
 
-                            // TODO: Do something with the task command/function if it has one
+                            if (commandStartPos != std::string::npos)
+                            {
+                                std::string commandLine = taskLine.substr(commandStartPos + 1);
+                                commandLine.erase(
+                                    remove_if(commandLine.begin(), commandLine.end(), isspace), commandLine.end());
+                                std::stringstream commandStream(commandLine);
+                                std::string command;
+
+                                while (std::getline(commandStream, command, ';'))
+                                {
+                                    auto paramStartPos = command.find_first_of('(');
+                                    auto paramEndPos = command.find_last_of(')');
+                                    auto functionName = command.substr(0, paramStartPos);
+                                    auto functionParams =
+                                        command.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
+                                    bindFunctionToEvent<Event<QuestTaskComponent*>, QuestTaskComponent*>(
+                                        registry, gameData, functionName, functionParams, task.onCompleted.get());
+                                }
+                            }
                         }
                     }
                     else if (buff.find("[OnStart]") != std::string::npos)
@@ -245,7 +233,8 @@ namespace sage
                             auto functionName = functionLine.substr(0, paramStartPos);
                             auto functionParams =
                                 functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
-                            bindFunctionToQuestEvent(functionName, functionParams, &quest, EventType::OnStart);
+                            bindFunctionToEvent<Event<entt::entity>, entt::entity>(
+                                registry, gameData, functionName, functionParams, quest.onStart.get());
                         }
                     }
                     else if (buff.find("[OnComplete]") != std::string::npos)
@@ -258,7 +247,8 @@ namespace sage
                             auto functionName = functionLine.substr(0, paramStartPos);
                             auto functionParams =
                                 functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
-                            bindFunctionToQuestEvent(functionName, functionParams, &quest, EventType::OnComplete);
+                            bindFunctionToEvent<Event<entt::entity>, entt::entity>(
+                                registry, gameData, functionName, functionParams, quest.onCompleted.get());
                         }
                     }
                 }
@@ -284,24 +274,8 @@ namespace sage
     entt::entity QuestManager::GetQuest(const std::string& key)
     {
         assert(map.contains(key));
-        // if (!map.contains(key))
-        // {
-        //     return createQuest(key);
-        // }
         return map.at(key);
     }
-
-    // void QuestManager::AddTaskToQuest(const std::string& questKey, entt::entity taskId)
-    // {
-    //     auto& quest = registry->get<Quest>(GetQuest(questKey));
-    //     quest.AddTask(taskId);
-    // }
-    //
-    // void QuestManager::AddTaskToQuest(entt::entity questId, entt::entity taskId)
-    // {
-    //     auto& quest = registry->get<Quest>(questId);
-    //     quest.AddTask(taskId);
-    // }
 
     QuestManager::QuestManager(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)

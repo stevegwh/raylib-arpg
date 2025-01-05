@@ -45,14 +45,14 @@ namespace sage
     {
         std::cout << "Quest started: " << questKey << " \n";
         started = true;
-        onQuestStart->Publish(questId);
+        onStart->Publish(questId);
     }
 
     void Quest::CompleteQuest()
     {
         std::cout << "Quest complete: " << questKey << " \n";
         completed = true;
-        onQuestCompleted->Publish(questId);
+        onCompleted->Publish(questId);
     }
 
     bool Quest::AllTasksComplete() const
@@ -75,8 +75,8 @@ namespace sage
         : registry(_registry),
           questKey(std::move(_questKey)),
           questId(_questId),
-          onQuestStart(std::make_unique<Event<entt::entity>>()),
-          onQuestCompleted(std::make_unique<Event<entt::entity>>())
+          onStart(std::make_unique<Event<entt::entity>>()),
+          onCompleted(std::make_unique<Event<entt::entity>>())
     {
     }
 } // namespace sage

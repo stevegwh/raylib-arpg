@@ -71,30 +71,6 @@ namespace sage
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : Scene(_registry, _keyMapping, _settings, _audioManager)
     {
-        {
-            //            auto questId = data->questManager->GetQuest("LeverBaseQuest");
-            //            auto& leverBaseQuest = registry->get<Quest>(questId);
-
-            //            leverBaseQuest.onQuestStart->Subscribe(
-            //                [this](entt::entity) { data->partySystem->RemoveItemFromParty("QUEST_BONE"); });
-
-            auto leverId = data->renderSystem->FindRenderableByMeshName("QUEST_LEVER");
-            auto& leverPickedUpTask = registry->get<QuestTaskComponent>(leverId);
-
-            auto& leverCol = registry->get<Collideable>(leverId);
-            auto& leverRenderable = registry->get<Renderable>(leverId);
-
-            leverPickedUpTask.onTaskCompleted->Subscribe([this, &leverCol, &leverRenderable](QuestTaskComponent*) {
-                leverCol.Disable();
-                leverRenderable.Disable();
-                data->partySystem->GiveItemToSelected("QUEST_LEVER");
-            });
-            //
-            //            leverBaseQuest.onQuestCompleted->Subscribe(
-            //                [this](entt::entity) { data->audioManager->PlaySFX("resources/audio/sfx/test.ogg");
-            //                });
-        }
-
         data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
         data->camera->FocusSelectedActor();
         data->audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");

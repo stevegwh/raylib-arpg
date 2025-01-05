@@ -6,7 +6,7 @@ giver: QUEST_LEVER
 We found the lever's missing handle. Time to put it back and get out of here.
 
 [Tasks]
-dialog: QUEST_LEVER, GiveItem("QUEST_LEVER"), RemoveItem("QUEST_BONE")
+dialog: QUEST_LEVER; GiveItem("QUEST_LEVER"); DisableWorldItem("QUEST_LEVER")
 
 [OnStart]
 RemoveItem(QUEST_BONE)
