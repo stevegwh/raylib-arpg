@@ -12,6 +12,8 @@
 namespace sage
 {
     struct GameData;
+    enum class EventType;
+    class Quest;
 
     class QuestManager
     {
@@ -19,6 +21,8 @@ namespace sage
         GameData* gameData;
         std::unordered_map<std::string, entt::entity> map{};
         entt::entity createQuest(const std::string& key);
+        void bindFunctionToQuestEvent(
+            const std::string& functionName, const std::string& functionParams, Quest* quest, EventType eventType);
 
       public:
         void InitQuestsFromDirectory();

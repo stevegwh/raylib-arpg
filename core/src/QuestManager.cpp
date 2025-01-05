@@ -5,9 +5,12 @@
 #include "QuestManager.hpp"
 
 #include "components/DialogComponent.hpp"
+#include "components/DoorBehaviorComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "GameData.hpp"
+#include "systems/DoorSystem.hpp"
+#include "systems/PartySystem.hpp"
 #include "systems/RenderSystem.hpp"
 
 #include <cassert>
@@ -20,6 +23,75 @@ static constexpr auto QUEST_PATH = "resources/quests";
 
 namespace sage
 {
+    enum class EventType
+    {
+        OnStart,
+        OnComplete
+    };
+
+    void QuestManager::bindFunctionToQuestEvent(
+        const std::string& functionName, const std::string& functionParams, Quest* quest, EventType eventType)
+    {
+        // TODO:
+        // As we have a separation between systems and entities, it's common that a system subscribes to an event
+        // on behalf of an entity, but the event does not return back which entity is the one that wanted to react
+        // to the event. This creates a big issue that could be solved nicely with captured lambdas, e.g.:
+        // sink.connect<[&npcName](PartySystem& partySystem, entt::entity)
+        // {partySystem.NPCToMember(npcName);}(*gameData->partySystem);
+        // But, we are not allowed to capture anything
+        // in an entt lamba, so we can't pass the string name as an argument in this way. Not sure how to
+        // avoid this in a better way.
+        // The current "solution" I have created for this is using "SignalHooks" (classes that subscribe on behalf
+        // of the entity and forward on the entity's id). But its quite messy.
+
+        // Just use std::function and capturing lambdas. Don't even really need a library, just a templated class
+        // with a list of std::function
+
+        if (functionName.find("OpenDoor") != std::string::npos)
+        {
+            auto startPos = functionParams.find_first_of('"');
+            auto endPos = functionParams.find_last_of('"');
+            std::string doorName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
+
+            auto doorId = gameData->renderSystem->FindRenderable<DoorBehaviorComponent>(doorName);
+            assert(doorId != entt::null);
+
+            if (eventType == EventType::OnStart)
+            {
+                quest->onQuestStart->Subscribe(
+                    [doorId, this](entt::entity) { gameData->doorSystem->UnlockAndOpenDoor(doorId); });
+            }
+            else if (eventType == EventType::OnComplete)
+            {
+                quest->onQuestCompleted->Subscribe(
+                    [doorId, this](entt::entity) { gameData->doorSystem->UnlockAndOpenDoor(doorId); });
+            }
+        }
+        else if (functionName.find("JoinParty") != std::string::npos)
+        {
+
+            auto startPos = functionParams.find_first_of('"');
+            auto endPos = functionParams.find_last_of('"');
+            std::string npcName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
+
+            auto npcId = gameData->renderSystem->FindRenderable(npcName);
+
+            if (eventType == EventType::OnStart)
+            {
+                quest->onQuestStart->Subscribe(
+                    [npcId, this](entt::entity) { gameData->partySystem->NPCToMember(npcId); });
+            }
+            else if (eventType == EventType::OnComplete)
+            {
+                quest->onQuestCompleted->Subscribe(
+                    [npcId, this](entt::entity) { gameData->partySystem->NPCToMember(npcId); });
+            }
+        }
+        else
+        {
+            // assert(0);
+        }
+    }
 
     void QuestManager::InitQuestsFromDirectory()
     {
@@ -99,6 +171,32 @@ namespace sage
                                 quest.AddTask(pickupEntity);
                                 assert(registry->any_of<ItemComponent>(pickupEntity));
                             }
+                        }
+                    }
+                    else if (buff.find("[OnStart]") != std::string::npos)
+                    {
+                        std::string functionLine;
+                        while (std::getline(file, functionLine) && !functionLine.empty())
+                        {
+                            auto paramStartPos = functionLine.find_first_of('(');
+                            auto paramEndPos = functionLine.find_last_of(')');
+                            auto functionName = functionLine.substr(0, paramStartPos);
+                            auto functionParams =
+                                functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
+                            bindFunctionToQuestEvent(functionName, functionParams, &quest, EventType::OnStart);
+                        }
+                    }
+                    else if (buff.find("[OnComplete]") != std::string::npos)
+                    {
+                        std::string functionLine;
+                        while (std::getline(file, functionLine) && !functionLine.empty())
+                        {
+                            auto paramStartPos = functionLine.find_first_of('(');
+                            auto paramEndPos = functionLine.find_last_of(')');
+                            auto functionName = functionLine.substr(0, paramStartPos);
+                            auto functionParams =
+                                functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
+                            bindFunctionToQuestEvent(functionName, functionParams, &quest, EventType::OnComplete);
                         }
                     }
                 }

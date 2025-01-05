@@ -20,9 +20,6 @@ namespace sage
     void Quest::AddTask(entt::entity taskId)
     {
         tasks.push_back(taskId);
-        auto& taskComponent = registry->get<QuestTaskComponent>(taskId);
-        entt::sink sink{taskComponent.onTaskCompleted};
-        sink.connect<&Quest::IsComplete>(this);
     }
 
     unsigned int Quest::GetTaskCount() const
@@ -48,14 +45,14 @@ namespace sage
     {
         std::cout << "Quest started: " << questKey << " \n";
         started = true;
-        onQuestStart.publish(questId);
+        onQuestStart->Publish(questId);
     }
 
     void Quest::CompleteQuest()
     {
         std::cout << "Quest complete: " << questKey << " \n";
         completed = true;
-        onQuestCompleted.publish(questId);
+        onQuestCompleted->Publish(questId);
     }
 
     bool Quest::AllTasksComplete() const
@@ -75,7 +72,11 @@ namespace sage
     }
 
     Quest::Quest(entt::registry* _registry, const entt::entity _questId, std::string _questKey)
-        : registry(_registry), questKey(std::move(_questKey)), questId(_questId)
+        : registry(_registry),
+          questKey(std::move(_questKey)),
+          questId(_questId),
+          onQuestStart(std::make_unique<Event<entt::entity>>()),
+          onQuestCompleted(std::make_unique<Event<entt::entity>>())
     {
     }
 } // namespace sage

@@ -4,9 +4,11 @@
 
 #pragma once
 
-#include <entt/entt.hpp>
-#include <iostream>
+#include "Event.hpp"
 
+#include "entt/entt.hpp"
+
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -19,13 +21,14 @@ namespace sage
     {
         std::string questKey;
         bool completed = false;
-        entt::sigh<void(QuestTaskComponent*)> onTaskCompleted;
+        // entt::sigh<void(QuestTaskComponent*)> onTaskCompleted;
+        std::unique_ptr<Event<QuestTaskComponent*>> onTaskCompleted;
 
         void MarkComplete()
         {
             std::cout << "Task complete! \n";
             completed = true;
-            onTaskCompleted.publish(this);
+            onTaskCompleted->Publish(this);
         }
 
         [[nodiscard]] bool IsComplete() const
@@ -39,7 +42,8 @@ namespace sage
             archive(questKey);
         }
 
-        explicit QuestTaskComponent(std::string _questKey) : questKey(std::move(_questKey))
+        explicit QuestTaskComponent(std::string _questKey)
+            : questKey(std::move(_questKey)), onTaskCompleted(std::make_unique<Event<QuestTaskComponent*>>())
         {
         }
         QuestTaskComponent() = default;
@@ -71,76 +75,10 @@ namespace sage
         [[nodiscard]] bool IsComplete() const;
         [[nodiscard]] bool HasStarted() const;
 
-        entt::sigh<void(entt::entity)> onQuestStart;
-        entt::sigh<void(entt::entity)> onQuestCompleted;
+        std::unique_ptr<Event<entt::entity>> onQuestStart;
+        std::unique_ptr<Event<entt::entity>> onQuestCompleted;
 
         explicit Quest(entt::registry* _registry, entt::entity _questId, std::string _questKey);
-    };
-
-    // Attach this if you want something to happen to a specific entity once a quest is complete
-    // TODO: Sure you can't just use a hook? Maybe two sinks? One if we care about the quest (give reward) one if
-    // not?
-    class QuestEventReactionComponent
-    {
-        entt::connection completedConnection;
-        entt::connection startConnection;
-        entt::connection taskConnection;
-        entt::entity self{};
-
-        void reactToQuestFinish(entt::entity) const
-        {
-            onQuestCompleted.publish(self);
-        }
-
-        void reactToQuestStart(entt::entity) const
-        {
-            onQuestStart.publish(self);
-        }
-
-        void reactToTaskFinish(QuestTaskComponent*) const
-        {
-            onTaskCompleted.publish(self);
-        }
-
-      public:
-        ~QuestEventReactionComponent()
-        {
-            if (completedConnection)
-            {
-                completedConnection.release();
-            }
-            if (startConnection)
-            {
-                startConnection.release();
-            }
-            if (taskConnection)
-            {
-                taskConnection.release();
-            }
-        }
-
-        entt::sigh<void(entt::entity)> onQuestStart;
-        entt::sigh<void(entt::entity)> onQuestCompleted;
-        entt::sigh<void(entt::entity)> onTaskCompleted;
-
-        QuestEventReactionComponent(entt::entity _self, Quest& quest) : self(_self)
-        {
-            {
-                entt::sink sink{quest.onQuestCompleted};
-                completedConnection = sink.connect<&QuestEventReactionComponent::reactToQuestFinish>(this);
-            }
-            {
-                entt::sink sink{quest.onQuestStart};
-                startConnection = sink.connect<&QuestEventReactionComponent::reactToQuestStart>(this);
-            }
-        }
-        QuestEventReactionComponent(entt::entity _self, QuestTaskComponent& task) : self(_self)
-        {
-            {
-                entt::sink sink{task.onTaskCompleted};
-                completedConnection = sink.connect<&QuestEventReactionComponent::reactToTaskFinish>(this);
-            }
-        }
     };
 
 } // namespace sage
