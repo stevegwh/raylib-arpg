@@ -702,11 +702,11 @@ namespace sage
         GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo, StatisticType _statisticType)
         : TextBox(_engine, _parent, _fontInfo), statisticType(_statisticType)
     {
-        entt::sink sink{_engine->gameData->controllableActorSystem->onSelectedActorChange};
-        sink.connect<&CharacterStatText::RetrieveInfo>(this);
+        _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
 
-        entt::sink sink2{engine->gameData->equipmentSystem->onEquipmentUpdated};
-        sink2.connect<&CharacterStatText::RetrieveInfo>(this);
+        _engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
 
         if (_statisticType == StatisticType::NAME)
         {
@@ -1083,11 +1083,11 @@ namespace sage
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
     {
-        entt::sink sink{_engine->gameData->controllableActorSystem->onSelectedActorChange};
-        sink.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
+        _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
 
-        entt::sink sink2{engine->gameData->equipmentSystem->onEquipmentUpdated};
-        sink2.connect<&EquipmentCharacterPreview::RetrieveInfo>(this);
+        _engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
     }
 
     void PartyMemberPortrait::UpdateDimensions()
@@ -1198,10 +1198,9 @@ namespace sage
         tex.width = width;
         tex.height = height;
         canReceiveDragDrops = true;
-        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
-        entt::sink sink2{engine->gameData->partySystem->onPartyChange};
-        sink.connect<&PartyMemberPortrait::RetrieveInfo>(this);
-        sink2.connect<&PartyMemberPortrait::RetrieveInfo>(this);
+        _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
+        _engine->gameData->partySystem->onPartyChange->Subscribe([this]() { RetrieveInfo(); });
     }
 
     void DialogPortrait::Draw2D()
@@ -1300,8 +1299,8 @@ namespace sage
     {
         draggable = true;
         canReceiveDragDrops = true;
-        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
-        sink.connect<&AbilitySlot::RetrieveInfo>(this);
+        engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
     }
 
     Texture ItemSlot::getEmptyTex()
@@ -1573,8 +1572,8 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
 
-        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
-        sink.connect<&EquipmentSlot::RetrieveInfo>(this);
+        engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
     }
 
     void InventorySlot::onItemDroppedToWorld()
@@ -1624,8 +1623,8 @@ namespace sage
     InventorySlot::InventorySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _row, unsigned int _col)
         : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), row(_row), col(_col)
     {
-        entt::sink sink{engine->gameData->controllableActorSystem->onSelectedActorChange};
-        sink.connect<&InventorySlot::RetrieveInfo>(this);
+        engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](entt::entity) { RetrieveInfo(); });
     }
 
     void CloseButton::OnClick()
@@ -2959,14 +2958,11 @@ namespace sage
     GameUIEngine::GameUIEngine(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
-        entt::sink sink{_gameData->cursor->onCombatableHover};
-        sink.connect<&GameUIEngine::onWorldCombatableHover>(this);
-        entt::sink sink2{_gameData->cursor->onItemHover};
-        sink2.connect<&GameUIEngine::onWorldItemHover>(this);
-        entt::sink sink3{_gameData->cursor->onStopHover};
-        sink3.connect<&GameUIEngine::onStopWorldHover>(this);
-        entt::sink sink4{_gameData->cursor->onNPCHover};
-        sink4.connect<&GameUIEngine::onNPCHover>(this);
+        _gameData->cursor->onCombatableHover->Subscribe(
+            [this](const entt::entity entity) { onWorldCombatableHover(entity); });
+        _gameData->cursor->onItemHover->Subscribe([this](const entt::entity entity) { onWorldItemHover(entity); });
+        _gameData->cursor->onStopHover->Subscribe([this]() { onStopWorldHover(); });
+        _gameData->cursor->onNPCHover->Subscribe([this](const entt::entity entity) { onNPCHover(entity); });
     }
 #pragma endregion
 } // namespace sage

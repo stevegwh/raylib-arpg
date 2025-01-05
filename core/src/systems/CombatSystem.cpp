@@ -10,11 +10,8 @@ namespace sage
 
     void CombatSystem::onComponentAdded(entt::entity entity)
     {
-        auto& c = registry->get<CombatableActor>(entity);
-        {
-            entt::sink sink{c.onHit};
-            sink.connect<&CombatSystem::RegisterAttack>(*this);
-        }
+        const auto& c = registry->get<CombatableActor>(entity);
+        c.onHit->Subscribe([this](const AttackData ad) { RegisterAttack(ad); });
     }
 
     void CombatSystem::onComponentRemoved(entt::entity entity)
@@ -34,7 +31,7 @@ namespace sage
         {
             targetCombat.dying = true;
             targetCombat.data.hp = 0;
-            targetCombat.onDeath.publish(attackData.hit);
+            targetCombat.onDeath->Publish(attackData.hit);
         }
         if (registry->any_of<HealthBar>(attackData.hit))
         {

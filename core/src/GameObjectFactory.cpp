@@ -305,7 +305,7 @@ namespace sage
 
         registry->emplace<PartyMemberComponent>(id, id);
         data->partySystem->AddMember(id);
-        registry->emplace<ControllableActor>(id, id);
+        registry->emplace<ControllableActor>(id);
         data->controllableActorSystem->SetSelectedActor(id);
         registry->emplace<DialogComponent>(id);
 

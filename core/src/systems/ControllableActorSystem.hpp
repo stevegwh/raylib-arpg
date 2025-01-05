@@ -8,6 +8,8 @@
 #include "entt/entt.hpp"
 #include "raylib.h"
 
+#include <Event.hpp>
+
 namespace sage
 {
     class GameData;
@@ -23,8 +25,8 @@ namespace sage
 
       public:
         void SetSelectedActor(entt::entity id);
-        entt::entity GetSelectedActor() const;
-        entt::sigh<void(entt::entity)> onSelectedActorChange;
+        [[nodiscard]] entt::entity GetSelectedActor() const;
+        std::unique_ptr<Event<entt::entity>> onSelectedActorChange;
         void Update() const;
         ControllableActorSystem(entt::registry* _registry, GameData* _gameData);
     };

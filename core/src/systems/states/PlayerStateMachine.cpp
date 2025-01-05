@@ -323,8 +323,8 @@ namespace sage
             assert(combatable.target != entt::null);
 
             auto& controllable = registry->get<ControllableActor>(self);
-            entt::sink attackCancelSink{controllable.onFloorClick};
-            state.AddConnection(attackCancelSink.connect<&MovingToAttackEnemyState::onAttackCancelled>(this));
+            controllable.onFloorClick->Subscribe(
+                [this](const entt::entity self, entt::entity clicked) { onAttackCancelled(self, clicked); });
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
@@ -393,23 +393,18 @@ namespace sage
             assert(combatable.target != entt::null);
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
+            enemyCombatable.onDeath->Subscribe([entity, this, &combatable](entt::entity target) {
+                combatable.onTargetDeath->Publish(entity, target);
+            });
 
-            combatable.onTargetDeathHookId = gameData->reflectionSignalRouter->CreateHook<entt::entity>(
-                entity, enemyCombatable.onDeath, combatable.onTargetDeath);
-
-            auto& state = registry->get<PlayerState>(entity);
-            entt::sink sink{combatable.onTargetDeath};
-            state.AddConnection(sink.connect<&CombatState::onTargetDeath>(this));
-
-            auto& controllable = registry->get<ControllableActor>(entity);
-            entt::sink attackCancelSink{controllable.onFloorClick};
-            state.AddConnection(attackCancelSink.connect<&CombatState::onAttackCancelled>(this));
+            combatable.onTargetDeathCnx = combatable.onTargetDeath->Subscribe(
+                [this](entt::entity self, entt::entity target) { onTargetDeath(self, target); });
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
-            gameData->reflectionSignalRouter->RemoveHook(combatable.onTargetDeathHookId);
+            combatable.onTargetDeathCnx.UnSubscribe();
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
         }
@@ -446,25 +441,30 @@ namespace sage
     void PlayerStateController::onComponentAdded(entt::entity entity)
     {
         // Bridge was created in ControllableActorSystem to connect controllable to cursor
+
         auto& controllable = registry->get<ControllableActor>(entity);
-        entt::sink leftSink{controllable.onEnemyLeftClick};
-        leftSink.connect<&DefaultState::onEnemyLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
-        entt::sink npcSink{controllable.onNPCLeftClick};
-        npcSink.connect<&DefaultState::onNPCLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
-        entt::sink floorClickSink{controllable.onFloorClick};
-        floorClickSink.connect<&DefaultState::onFloorClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+
+        controllable.onEnemyLeftClickCnx =
+            controllable.onEnemyLeftClick->Subscribe([this](entt::entity self, entt::entity target) {
+                GetSystem<DefaultState>(PlayerStateEnum::Default)->onEnemyLeftClick(self, target);
+            });
+        controllable.onNPCLeftClickCnx =
+            controllable.onNPCLeftClick->Subscribe([this](entt::entity self, entt::entity target) {
+                GetSystem<DefaultState>(PlayerStateEnum::Default)->onNPCLeftClick(self, target);
+            });
+        controllable.onFloorClickCnx =
+            controllable.onFloorClick->Subscribe([this](entt::entity self, entt::entity target) {
+                GetSystem<DefaultState>(PlayerStateEnum::Default)->onFloorClick(self, target);
+            });
         // ----------------------------
     }
 
     void PlayerStateController::onComponentRemoved(entt::entity entity)
     {
         auto& controllable = registry->get<ControllableActor>(entity);
-        entt::sink leftSink{controllable.onEnemyLeftClick};
-        leftSink.disconnect<&DefaultState::onEnemyLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
-        entt::sink npcSink{controllable.onNPCLeftClick};
-        npcSink.disconnect<&DefaultState::onNPCLeftClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
-        entt::sink floorClickSink{controllable.onFloorClick};
-        floorClickSink.disconnect<&DefaultState::onFloorClick>(GetSystem<DefaultState>(PlayerStateEnum::Default));
+        controllable.onEnemyLeftClickCnx.UnSubscribe();
+        controllable.onNPCLeftClickCnx.UnSubscribe();
+        controllable.onFloorClickCnx.UnSubscribe();
     }
 
     PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)

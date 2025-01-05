@@ -196,8 +196,8 @@ namespace sage
             auto& state = registry->get<PartyMemberState>(self);
             entt::sink sink{moveable.onMovementCancel};
             state.AddConnection(sink.connect<&WaitingForLeaderState::onMovementCancelled>(this));
-            entt::sink sink2{gameData->controllableActorSystem->onSelectedActorChange};
-            state.AddConnection(sink2.connect<&WaitingForLeaderState::onMovementCancelled>(this));
+            gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+                [this](entt::entity entity) { onMovementCancelled(entity); });
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);

@@ -38,7 +38,7 @@ namespace sage
         {
             if (m_hoverInfo.has_value())
             {
-                onStopHover.publish();
+                onStopHover->Publish();
             }
             m_hoverInfo.reset();
             return;
@@ -59,15 +59,15 @@ namespace sage
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         if (layer == CollisionLayer::NPC || layer == CollisionLayer::INTERACTABLE)
         {
-            onNPCHover.publish(m_mouseHitInfo.collidedEntityId);
+            onNPCHover->Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (layer == CollisionLayer::ITEM)
         {
-            onItemHover.publish(m_mouseHitInfo.collidedEntityId);
+            onItemHover->Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (layer == CollisionLayer::ENEMY || layer == CollisionLayer::PLAYER)
         {
-            onCombatableHover.publish(m_mouseHitInfo.collidedEntityId);
+            onCombatableHover->Publish(m_mouseHitInfo.collidedEntityId);
         }
     }
 
@@ -78,30 +78,30 @@ namespace sage
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         if (layer == CollisionLayer::NPC)
         {
-            onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
+            onNPCClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (layer == CollisionLayer::ITEM)
         {
-            onItemClick.publish(m_mouseHitInfo.collidedEntityId);
+            onItemClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (layer == CollisionLayer::INTERACTABLE)
         {
             // Could call it 'inspectable' instead?
             // Interactables are essentially just NPCs but without an actor name/portrait
-            onNPCClick.publish(m_mouseHitInfo.collidedEntityId);
-            // onInteractableClick.publish(m_mouseHitInfo.collidedEntityId);
+            onNPCClick->Publish(m_mouseHitInfo.collidedEntityId);
+            // onInteractableClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (
             layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
             layer == CollisionLayer::STAIRS)
         {
-            onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
+            onFloorClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (layer == CollisionLayer::ENEMY)
         {
-            onEnemyLeftClick.publish(m_mouseHitInfo.collidedEntityId);
+            onEnemyLeftClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
-        onAnyLeftClick.publish(m_mouseHitInfo.collidedEntityId);
+        onAnyLeftClick->Publish(m_mouseHitInfo.collidedEntityId);
     }
 
     void Cursor::onMouseRightClick() const
@@ -111,9 +111,9 @@ namespace sage
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         if (layer == CollisionLayer::ENEMY)
         {
-            onEnemyRightClick.publish(m_mouseHitInfo.collidedEntityId);
+            onEnemyRightClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
-        onAnyRightClick.publish(m_mouseHitInfo.collidedEntityId);
+        onAnyRightClick->Publish(m_mouseHitInfo.collidedEntityId);
     }
 
     void Cursor::onMouseLeftDown()
@@ -128,11 +128,11 @@ namespace sage
         if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
             layer == CollisionLayer::STAIRS)
         {
-            onFloorClick.publish(m_mouseHitInfo.collidedEntityId);
+            onFloorClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (layer == CollisionLayer::ENEMY)
         {
-            onEnemyLeftClick.publish(m_mouseHitInfo.collidedEntityId);
+            onEnemyLeftClick->Publish(m_mouseHitInfo.collidedEntityId);
         }
     }
 
@@ -321,7 +321,7 @@ namespace sage
             }
         }
 
-        onCollisionHit.publish(m_mouseHitInfo.collidedEntityId);
+        onCollisionHit->Publish(m_mouseHitInfo.collidedEntityId);
 
         const auto layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
         changeCursors(layer);
@@ -429,7 +429,22 @@ namespace sage
         DrawTextureEx(*currentTex, pos, 0.0, 1.0f, WHITE);
     }
 
-    Cursor::Cursor(entt::registry* _registry, GameData* _gameData) : registry(_registry), gameData(_gameData)
+    Cursor::Cursor(entt::registry* _registry, GameData* _gameData)
+        : registry(_registry),
+          gameData(_gameData),
+          onCollisionHit(std::make_unique<Event<entt::entity>>()),
+          onNPCClick(std::make_unique<Event<entt::entity>>()),
+          onInteractableClick(std::make_unique<Event<entt::entity>>()),
+          onItemClick(std::make_unique<Event<entt::entity>>()),
+          onFloorClick(std::make_unique<Event<entt::entity>>()),
+          onAnyLeftClick(std::make_unique<Event<entt::entity>>()),
+          onAnyRightClick(std::make_unique<Event<entt::entity>>()),
+          onEnemyLeftClick(std::make_unique<Event<entt::entity>>()),
+          onEnemyRightClick(std::make_unique<Event<entt::entity>>()),
+          onCombatableHover(std::make_unique<Event<entt::entity>>()),
+          onNPCHover(std::make_unique<Event<entt::entity>>()),
+          onItemHover(std::make_unique<Event<entt::entity>>()),
+          onStopHover(std::make_unique<Event<>>())
     {
         regulartex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_REGULAR");
         talktex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_TALK");

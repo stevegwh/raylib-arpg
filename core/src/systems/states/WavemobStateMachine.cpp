@@ -51,11 +51,9 @@ namespace sage
         {
             auto& state = registry->get<WavemobState>(self);
             auto& combatable = registry->get<CombatableActor>(self);
-            entt::sink sink{combatable.onHit};
-            state.AddConnection(sink.connect<&DefaultState::OnHit>(this));
+            combatable.onHit->Subscribe([this](const AttackData ad) { OnHit(ad); });
             // Persistent connections
-            entt::sink deathSink{combatable.onDeath};
-            deathSink.connect<&DefaultState::OnDeath>(this);
+            combatable.onDeath->Subscribe([this](const entt::entity entity) { OnDeath(entity); });
             // ----------------------------
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);

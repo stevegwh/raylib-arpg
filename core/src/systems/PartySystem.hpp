@@ -7,6 +7,7 @@
 #include "entt/entt.hpp"
 #include "raylib.h"
 
+#include <Event.hpp>
 #include <vector>
 
 namespace sage
@@ -24,7 +25,7 @@ namespace sage
         std::vector<std::vector<entt::entity>> groups;
 
       public:
-        entt::sigh<void()> onPartyChange;
+        std::unique_ptr<Event<>> onPartyChange;
 
         [[nodiscard]] bool CheckPartyHasItem(entt::entity targetItemId) const;
         [[nodiscard]] bool CheckPartyHasItem(const std::string& itemName) const;

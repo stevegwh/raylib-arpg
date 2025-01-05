@@ -24,12 +24,12 @@ namespace sage
 {
     void ControllableActorSystem::Update() const
     {
-        for (auto view = registry->view<ControllableActor, sgTransform, Collideable>(); auto entity : view)
+        for (const auto view = registry->view<ControllableActor, sgTransform, Collideable>();
+             const auto entity : view)
         {
-            auto& controllable = registry->get<ControllableActor>(entity);
-            auto& trans = registry->get<sgTransform>(entity);
-            auto& collideable = registry->get<Collideable>(entity);
-            auto pos = trans.GetWorldPos();
+            const auto& controllable = registry->get<ControllableActor>(entity);
+            const auto& trans = registry->get<sgTransform>(entity);
+            const auto pos = trans.GetWorldPos();
             controllable.selectedIndicator->Update(pos);
         }
     }
@@ -43,6 +43,12 @@ namespace sage
             old.selectedIndicator->SetShader(
                 ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
             old.selectedIndicator->SetHint(inactiveCol);
+
+            // Stop forwarding cursor clicks to this actor
+            old.cursorOnFloorClickCnx.UnSubscribe();
+            old.cursorOnEnemyLeftClickCnx.UnSubscribe();
+            old.cursorOnEnemyRightClickCnx.UnSubscribe();
+            old.cursorOnNPCLeftClickCnx.UnSubscribe();
         }
         selectedActorId = id;
 
@@ -52,18 +58,24 @@ namespace sage
             ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
 
         auto& controllable = registry->get<ControllableActor>(id);
-        controllable.ReleaseAllHooks(gameData->reflectionSignalRouter.get());
 
-        // Below forwards the cursor's events with the subscriber's entity ID injected into it (so we know which
-        // entity is reacting to the click).
-        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
-            id, gameData->cursor->onFloorClick, controllable.onFloorClick));
-        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
-            id, gameData->cursor->onEnemyLeftClick, controllable.onEnemyLeftClick));
-        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
-            id, gameData->cursor->onEnemyRightClick, controllable.onEnemyRightClick));
-        controllable.AddHook(gameData->reflectionSignalRouter->CreateHook<entt::entity>(
-            id, gameData->cursor->onNPCClick, controllable.onNPCLeftClick));
+        // Forward cursor clicks to this actor's controllable component's events
+        controllable.cursorOnFloorClickCnx =
+            gameData->cursor->onFloorClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
+                controllable.onFloorClick->Publish(id, clickedEntity);
+            });
+        controllable.cursorOnEnemyLeftClickCnx =
+            gameData->cursor->onEnemyLeftClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
+                controllable.onEnemyLeftClick->Publish(id, clickedEntity);
+            });
+        controllable.cursorOnEnemyRightClickCnx =
+            gameData->cursor->onEnemyRightClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
+                controllable.onEnemyRightClick->Publish(id, clickedEntity);
+            });
+        controllable.cursorOnNPCLeftClickCnx =
+            gameData->cursor->onNPCClick->Subscribe([&controllable, id](const entt::entity clickedEntity) {
+                controllable.onNPCLeftClick->Publish(id, clickedEntity);
+            });
 
         for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
         {
@@ -85,7 +97,7 @@ namespace sage
             }
         }
 
-        onSelectedActorChange.publish(id);
+        onSelectedActorChange->Publish(id);
     }
 
     entt::entity ControllableActorSystem::GetSelectedActor() const
@@ -119,7 +131,9 @@ namespace sage
     }
 
     ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, GameData* _gameData)
-        : BaseSystem(_registry), gameData(_gameData)
+        : BaseSystem(_registry),
+          gameData(_gameData),
+          onSelectedActorChange(std::make_unique<Event<entt::entity>>())
     {
         registry->on_construct<ControllableActor>().connect<&ControllableActorSystem::onComponentAdded>(this);
         registry->on_destroy<ControllableActor>().connect<&ControllableActorSystem::onComponentRemoved>(this);

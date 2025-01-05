@@ -118,7 +118,7 @@ namespace sage
         auto& moveable = registry->emplace<MoveableActor>(npc);
         moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 100;
-        auto& controllable = registry->emplace<ControllableActor>(npc, npc);
+        auto& controllable = registry->emplace<ControllableActor>(npc);
         registry->emplace<InventoryComponent>(npc);
         registry->emplace<EquipmentComponent>(npc);
         auto& combatable = registry->emplace<CombatableActor>(npc);
@@ -136,7 +136,7 @@ namespace sage
         assert(party.size() < PARTY_MEMBER_MAX);
         party.push_back(member);
         groups.at(0).push_back(member);
-        onPartyChange.publish();
+        onPartyChange->Publish();
     }
 
     void PartySystem::RemoveMember(entt::entity entity)
@@ -146,7 +146,7 @@ namespace sage
             if (*it == entity)
             {
                 party.erase(it);
-                onPartyChange.publish();
+                onPartyChange->Publish();
                 return;
             }
         }
@@ -193,11 +193,11 @@ namespace sage
     }
 
     PartySystem::PartySystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+        : registry(_registry), gameData(_gameData), onPartyChange(std::make_unique<Event<>>())
     {
         groups.resize(1);
 
-        entt::sink sink{gameData->controllableActorSystem->onSelectedActorChange};
-        sink.connect<&PartySystem::SetLeader>(this);
+        gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](const entt::entity actor) { SetLeader(actor); });
     }
 } // namespace sage

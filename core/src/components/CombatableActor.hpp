@@ -8,6 +8,8 @@
 
 #include "abilities/AbilityData.hpp"
 
+#include <Event.hpp>
+
 namespace sage
 {
     static constexpr int MAX_ABILITY_NUMBER = 10;
@@ -58,15 +60,20 @@ namespace sage
         entt::entity target{};
         int attackRange = 5; // TODO: each ability has its own range
 
-        entt::sigh<void(AttackData)> onHit{}; // Self, attacker, damage
-        entt::sigh<void(entt::entity)> onDeath{};
-        entt::sigh<void(entt::entity, entt::entity)> onAttackCancelled{}; // Self, object clicked (can discard)
-        int onTargetDeathHookId = -1;
-        entt::sigh<void(entt::entity, entt::entity)> onTargetDeath{}; // Self, target (that died)
+        std::unique_ptr<Event<AttackData>> onHit{}; // Self, attacker, damage
+        std::unique_ptr<Event<entt::entity>> onDeath{};
+        std::unique_ptr<Event<entt::entity, entt::entity>>
+            onAttackCancelled{}; // Self, object clicked (can discard)
+        Connection<entt::entity, entt::entity> onTargetDeathCnx;
+        std::unique_ptr<Event<entt::entity, entt::entity>> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(const CombatableActor&) = delete;
         CombatableActor& operator=(const CombatableActor&) = delete;
         CombatableActor()
+            : onHit(std::make_unique<Event<AttackData>>()),
+              onDeath(std::make_unique<Event<entt::entity>>()),
+              onAttackCancelled(std::make_unique<Event<entt::entity, entt::entity>>()),
+              onTargetDeath(std::make_unique<Event<entt::entity, entt::entity>>())
         {
             for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)
             {

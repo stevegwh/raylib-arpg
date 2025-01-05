@@ -122,8 +122,8 @@ namespace sage
     InventorySystem::InventorySystem(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
-        entt::sink sink{_gameData->cursor->onItemClick};
-        sink.connect<&InventorySystem::onWorldItemClicked>(this);
+
+        _gameData->cursor->onItemClick->Subscribe([this](entt::entity itemId) { onWorldItemClicked(itemId); });
 
         registry->on_construct<InventoryComponent>().connect<&InventorySystem::onComponentAdded>(this);
         registry->on_destroy<InventoryComponent>().connect<&InventorySystem::onComponentRemoved>(this);

@@ -374,7 +374,6 @@ namespace sage
             424 * 1.5,
             Padding{20, 20, 14, 14});
         auto window = engine->CreateWindow(std::move(_window));
-        entt::sink equipmentUpdateSink{engine->gameData->equipmentSystem->onEquipmentUpdated};
 
         {
             // TODO: Having the concept of "margins" would make it so much easier to create consistent layouts
@@ -396,11 +395,13 @@ namespace sage
         int maxCols = 1;
 
         auto createEquipSlot =
-            [&engine, &equipmentUpdateSink](
-                const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
+            [&engine](const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
                 auto& cell = table->children[row]->children[col];
                 auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell.get(), itemType);
-                equipmentUpdateSink.connect<&EquipmentSlot::RetrieveInfo>(equipSlot.get());
+
+                engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
+                    [&equipSlot](entt::entity) { equipSlot->RetrieveInfo(); });
+
                 cell->CreateEquipmentSlot(std::move(equipSlot));
             };
 

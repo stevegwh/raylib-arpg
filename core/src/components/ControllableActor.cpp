@@ -1,25 +1,15 @@
 #include "ControllableActor.hpp"
 
-#include "EntityReflectionSignalRouter.hpp"
 #include "TextureTerrainOverlay.hpp" // used for construction
 
 namespace sage
 {
-    void ControllableActor::AddHook(const int id)
-    {
-        hooks.push_back(id);
-    }
 
-    void ControllableActor::ReleaseAllHooks(EntityReflectionSignalRouter* router)
-    {
-        for (const auto hook : hooks)
-        {
-            router->RemoveHook(hook);
-        }
-        hooks.clear();
-    }
-
-    ControllableActor::ControllableActor(entt::entity _self) : self(_self)
+    ControllableActor::ControllableActor()
+        : onEnemyLeftClick(std::make_unique<Event<entt::entity, entt::entity>>()),
+          onEnemyRightClick(std::make_unique<Event<entt::entity, entt::entity>>()),
+          onFloorClick(std::make_unique<Event<entt::entity, entt::entity>>()),
+          onNPCLeftClick(std::make_unique<Event<entt::entity, entt::entity>>())
     {
     }
 } // namespace sage

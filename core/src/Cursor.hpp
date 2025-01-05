@@ -7,7 +7,9 @@
 #include "components/Collideable.hpp"
 
 #include "raylib.h"
+
 #include <entt/entt.hpp>
+#include <Event.hpp>
 
 #include <optional>
 
@@ -68,20 +70,35 @@ namespace sage
         [[nodiscard]] const RayCollision& getFirstNaviCollision() const;
         [[nodiscard]] const RayCollision& getFirstCollision() const;
 
-        entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
-        entt::sigh<void(entt::entity)> onNPCClick{};
-        entt::sigh<void(entt::entity)> onInteractableClick{};
-        entt::sigh<void(entt::entity)> onItemClick{};
-        entt::sigh<void(entt::entity)> onFloorClick{};
-        entt::sigh<void(entt::entity)> onAnyLeftClick{};
-        entt::sigh<void(entt::entity)> onAnyRightClick{};
-        entt::sigh<void(entt::entity)> onEnemyLeftClick{};
-        entt::sigh<void(entt::entity)> onEnemyRightClick{};
+        std::unique_ptr<Event<entt::entity>> onCollisionHit{}; // Returns the hit entity (all layers)
+        std::unique_ptr<Event<entt::entity>> onNPCClick{};
+        std::unique_ptr<Event<entt::entity>> onInteractableClick{};
+        std::unique_ptr<Event<entt::entity>> onItemClick{};
+        std::unique_ptr<Event<entt::entity>> onFloorClick{};
+        std::unique_ptr<Event<entt::entity>> onAnyLeftClick{};
+        std::unique_ptr<Event<entt::entity>> onAnyRightClick{};
+        std::unique_ptr<Event<entt::entity>> onEnemyLeftClick{};
+        std::unique_ptr<Event<entt::entity>> onEnemyRightClick{};
 
-        entt::sigh<void(entt::entity)> onCombatableHover{};
-        entt::sigh<void(entt::entity)> onNPCHover{};
-        entt::sigh<void(entt::entity)> onItemHover{};
-        entt::sigh<void()> onStopHover{};
+        std::unique_ptr<Event<entt::entity>> onCombatableHover{};
+        std::unique_ptr<Event<entt::entity>> onNPCHover{};
+        std::unique_ptr<Event<entt::entity>> onItemHover{};
+        std::unique_ptr<Event<>> onStopHover{};
+
+        // entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
+        // entt::sigh<void(entt::entity)> onNPCClick{};
+        // entt::sigh<void(entt::entity)> onInteractableClick{};
+        // entt::sigh<void(entt::entity)> onItemClick{};
+        // entt::sigh<void(entt::entity)> onFloorClick{};
+        // entt::sigh<void(entt::entity)> onAnyLeftClick{};
+        // entt::sigh<void(entt::entity)> onAnyRightClick{};
+        // entt::sigh<void(entt::entity)> onEnemyLeftClick{};
+        // entt::sigh<void(entt::entity)> onEnemyRightClick{};
+        //
+        // entt::sigh<void(entt::entity)> onCombatableHover{};
+        // entt::sigh<void(entt::entity)> onNPCHover{};
+        // entt::sigh<void(entt::entity)> onItemHover{};
+        // entt::sigh<void()> onStopHover{};
 
         void Update();
         void DrawDebug() const;

@@ -70,12 +70,9 @@ namespace sage
     CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData), self(registry->create())
     {
-        {
-            entt::sink sink{gameData->cursor->onAnyLeftClick};
-            sink.connect<&CursorClickIndicator::onCursorClick>(this);
-        }
-        entt::sink sink2{gameData->controllableActorSystem->onSelectedActorChange};
-        sink2.connect<&CursorClickIndicator::onSelectedActorChanged>(this);
+        gameData->cursor->onAnyLeftClick->Subscribe([this](const entt::entity entity) { onCursorClick(entity); });
+        gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+            [this](entt::entity entity) { onSelectedActorChanged(); });
 
         // Init indicator graphics here
         registry->emplace<sgTransform>(self, self);

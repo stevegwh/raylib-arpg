@@ -5,28 +5,38 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <Event.hpp>
+
+#include <memory>
 #include <vector>
 
 namespace sage
 {
-    class EntityReflectionSignalRouter;
     class TextureTerrainOverlay;
 
     class ControllableActor
     {
-        entt::entity self;
-        std::vector<int> hooks;
 
       public:
-        void AddHook(int id);
-        void ReleaseAllHooks(EntityReflectionSignalRouter* router);
         std::unique_ptr<TextureTerrainOverlay>
             selectedIndicator; // Initialised by ControllableActorSystem on creation
-        entt::sigh<void(entt::entity, entt::entity)> onEnemyLeftClick{};  // Self, Clicked enemy
-        entt::sigh<void(entt::entity, entt::entity)> onEnemyRightClick{}; // Self, Clicked enemy
-        entt::sigh<void(entt::entity, entt::entity)> onFloorClick{};      // Self, object clicked (can discard)
-        entt::sigh<void(entt::entity, entt::entity)> onNPCLeftClick{};
 
-        explicit ControllableActor(entt::entity _self);
+        // We forward the cursor's clicks onto our own events (and inject this entity's id into it)
+        Connection<entt::entity> cursorOnEnemyLeftClickCnx{};
+        Connection<entt::entity> cursorOnEnemyRightClickCnx{};
+        Connection<entt::entity> cursorOnFloorClickCnx{};
+        Connection<entt::entity> cursorOnNPCLeftClickCnx{};
+
+        Connection<entt::entity, entt::entity> onEnemyLeftClickCnx{};
+        Connection<entt::entity, entt::entity> onEnemyRightClickCnx{};
+        Connection<entt::entity, entt::entity> onFloorClickCnx{};
+        Connection<entt::entity, entt::entity> onNPCLeftClickCnx{};
+
+        std::unique_ptr<Event<entt::entity, entt::entity>> onEnemyLeftClick{};  // Self, Clicked enemy
+        std::unique_ptr<Event<entt::entity, entt::entity>> onEnemyRightClick{}; // Self, Clicked enemy
+        std::unique_ptr<Event<entt::entity, entt::entity>> onFloorClick{};      // Self, Clicked Col (can discard)
+        std::unique_ptr<Event<entt::entity, entt::entity>> onNPCLeftClick{};    // Self, Clicked NPC
+
+        ControllableActor();
     };
 } // namespace sage

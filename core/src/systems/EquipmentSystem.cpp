@@ -221,7 +221,7 @@ namespace sage
         {
             instantiateWeapon(owner, item, itemType);
         }
-        onEquipmentUpdated.publish(owner);
+        onEquipmentUpdated->Publish(owner);
     }
 
     void EquipmentSystem::MoveItemToInventory(entt::entity owner, EquipmentSlotName itemType) const
@@ -239,7 +239,7 @@ namespace sage
             equipment.worldModels[itemType] = entt::null;
         }
         equipment.slots[itemType] = entt::null;
-        onEquipmentUpdated.publish(owner);
+        onEquipmentUpdated->Publish(owner);
     }
 
     void EquipmentSystem::DestroyItem(entt::entity owner, EquipmentSlotName itemType) const
@@ -253,7 +253,7 @@ namespace sage
                 equipment.worldModels[itemType] = entt::null;
             }
             equipment.slots[itemType] = entt::null;
-            onEquipmentUpdated.publish(owner);
+            onEquipmentUpdated->Publish(owner);
         }
     }
 
@@ -315,7 +315,7 @@ namespace sage
     }
 
     EquipmentSystem::EquipmentSystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+        : registry(_registry), gameData(_gameData), onEquipmentUpdated(std::make_unique<Event<entt::entity>>())
     {
         registry->on_construct<EquipmentComponent>().connect<&EquipmentSystem::onComponentAdded>(this);
         registry->on_destroy<EquipmentComponent>().connect<&EquipmentSystem::onComponentRemoved>(this);
