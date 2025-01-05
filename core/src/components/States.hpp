@@ -1,6 +1,7 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include <Event.hpp>
 #include <vector>
 
 namespace sage
@@ -59,10 +60,11 @@ namespace sage
     class PartyMemberState : public BaseState<PartyMemberState, PartyMemberStateEnum>
     {
       public:
-        std::vector<int> hooks;
-        entt::sigh<void(entt::entity, entt::entity)> onLeaderMove; // self, leader
+        std::unique_ptr<Event<entt::entity, entt::entity>> onLeaderMove; // self, leader
 
-        PartyMemberState() : BaseState(PartyMemberStateEnum::Default)
+        PartyMemberState()
+            : BaseState(PartyMemberStateEnum::Default),
+              onLeaderMove(std::make_unique<Event<entt::entity, entt::entity>>())
         {
         }
     };

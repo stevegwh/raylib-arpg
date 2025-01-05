@@ -295,7 +295,7 @@ namespace sage
     }
 
     UserInput::UserInput(KeyMapping* _keyMapping, Settings* _settings)
-        : keyMapping(_keyMapping), settings(_settings)
+        : keyMapping(_keyMapping), settings(_settings), onWindowUpdate(std::make_unique<Event<Vector2, Vector2>>())
     {
         assert(settings != nullptr);
         assert(keyMapping != nullptr);

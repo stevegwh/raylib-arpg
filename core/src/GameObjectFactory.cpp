@@ -6,7 +6,6 @@
 #include "ResourceManager.hpp"
 #include "scenes/Scene.hpp"
 
-#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "UserInput.hpp"
 #include <Timer.hpp>

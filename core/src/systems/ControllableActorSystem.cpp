@@ -10,7 +10,6 @@
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 #include "Cursor.hpp"
-#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "PartySystem.hpp"
 #include "ResourceManager.hpp"

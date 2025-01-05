@@ -85,21 +85,6 @@ namespace sage
         std::unique_ptr<Event<entt::entity>> onItemHover{};
         std::unique_ptr<Event<>> onStopHover{};
 
-        // entt::sigh<void(entt::entity)> onCollisionHit{}; // Returns the hit entity (all layers)
-        // entt::sigh<void(entt::entity)> onNPCClick{};
-        // entt::sigh<void(entt::entity)> onInteractableClick{};
-        // entt::sigh<void(entt::entity)> onItemClick{};
-        // entt::sigh<void(entt::entity)> onFloorClick{};
-        // entt::sigh<void(entt::entity)> onAnyLeftClick{};
-        // entt::sigh<void(entt::entity)> onAnyRightClick{};
-        // entt::sigh<void(entt::entity)> onEnemyLeftClick{};
-        // entt::sigh<void(entt::entity)> onEnemyRightClick{};
-        //
-        // entt::sigh<void(entt::entity)> onCombatableHover{};
-        // entt::sigh<void(entt::entity)> onNPCHover{};
-        // entt::sigh<void(entt::entity)> onItemHover{};
-        // entt::sigh<void()> onStopHover{};
-
         void Update();
         void DrawDebug() const;
         void Draw3D();

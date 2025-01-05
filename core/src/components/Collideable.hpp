@@ -37,6 +37,7 @@ namespace sage
         CollisionLayer collisionLayer{};
     };
 
+    // TODO: Remove?
     struct CollisionChecker
     {
         float maxDistance = 0;

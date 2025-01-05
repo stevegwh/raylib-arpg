@@ -14,7 +14,6 @@
 #include "components/States.hpp"
 #include "ControllableActorSystem.hpp"
 #include "Cursor.hpp"
-#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "InventorySystem.hpp"
 #include "ItemFactory.hpp"

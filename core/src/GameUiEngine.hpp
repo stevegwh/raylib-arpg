@@ -12,6 +12,7 @@
 #include "Timer.hpp"
 
 #include <entt/entt.hpp>
+#include <Event.hpp>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -244,7 +245,7 @@ namespace sage
     class CellElement : public UIElement
     {
       protected:
-        entt::sigh<void()> onMouseClicked;
+        std::unique_ptr<Event<>> onMouseClicked;
         Vector2 dragOffset{};
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
@@ -677,8 +678,8 @@ namespace sage
         void resetAll();
 
       public:
-        entt::sigh<void()> onHide;
-        entt::connection windowUpdateCnx{};
+        std::unique_ptr<Event<>> onHide;
+        Connection<Vector2, Vector2> windowUpdateCnx{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height
 
@@ -718,7 +719,7 @@ namespace sage
 
     class TooltipWindow final : public Window
     {
-        entt::connection parentWindowHideCnx;
+        Connection<> parentWindowHideCnx;
 
       public:
         void ScaleContents() override;

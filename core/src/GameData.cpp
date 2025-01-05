@@ -16,7 +16,6 @@
 #include "AudioManager.hpp"
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
-#include "EntityReflectionSignalRouter.hpp"
 #include "FullscreenTextOverlayFactory.hpp"
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
@@ -70,7 +69,6 @@ namespace sage
           playerAbilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),
           timerSystem(std::make_unique<TimerSystem>(_registry)),
-          reflectionSignalRouter(std::make_unique<EntityReflectionSignalRouter>()),
           inventorySystem(std::make_unique<InventorySystem>(_registry, this)),
           partySystem(std::make_unique<PartySystem>(_registry, this)),
           equipmentSystem(std::make_unique<EquipmentSystem>(_registry, this)),

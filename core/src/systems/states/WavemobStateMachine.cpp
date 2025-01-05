@@ -8,7 +8,6 @@
 #include "components/CombatableActor.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "EntityReflectionSignalRouter.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"

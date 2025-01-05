@@ -14,7 +14,6 @@
 #include "Cursor.hpp"
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
-#include "EntityReflectionSignalRouter.hpp"
 #include "FullscreenTextOverlayFactory.hpp"
 #include "GameData.hpp"
 #include "GameObjectFactory.hpp"

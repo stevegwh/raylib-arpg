@@ -35,7 +35,6 @@ namespace sage
     class PlayerAbilitySystem;
     class CombatSystem;
     class TimerSystem;
-    class EntityReflectionSignalRouter;
     class PartySystem;
     class UberShaderSystem;
     class CursorClickIndicator;
@@ -78,7 +77,6 @@ namespace sage
         std::unique_ptr<PlayerAbilitySystem> playerAbilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;
         std::unique_ptr<TimerSystem> timerSystem;
-        std::unique_ptr<EntityReflectionSignalRouter> reflectionSignalRouter;
         std::unique_ptr<InventorySystem> inventorySystem;
         std::unique_ptr<PartySystem> partySystem;
         std::unique_ptr<EquipmentSystem> equipmentSystem;

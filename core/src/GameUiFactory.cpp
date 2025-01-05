@@ -326,7 +326,6 @@ namespace sage
             424 * 1.5,
             Padding{20, 0, 14, 14});
         auto window = engine->CreateWindow(std::move(_window));
-        entt::sink inventoryUpdateSink{engine->gameData->inventorySystem->onInventoryUpdated};
         {
             auto panel = window->CreatePanel(4);
             auto table = panel->CreateTable();
@@ -349,8 +348,10 @@ namespace sage
                 {
                     auto& cell = table->children[row]->children[col];
                     auto invSlot = std::make_unique<InventorySlot>(engine, cell.get(), row, col);
-                    inventoryUpdateSink.connect<&InventorySlot::RetrieveInfo>(invSlot.get());
-                    cell->CreateInventorySlot(std::move(invSlot));
+                    auto ptr = cell->CreateInventorySlot(std::move(invSlot));
+
+                    engine->gameData->inventorySystem->onInventoryUpdated->Subscribe(
+                        [ptr]() { ptr->RetrieveInfo(); });
                 }
             }
         }

@@ -5,7 +5,9 @@
 #pragma once
 
 #include "raylib.h"
+
 #include <entt/entt.hpp>
+#include <Event.hpp>
 
 #include <string>
 
@@ -27,14 +29,13 @@ namespace sage::editor
         bool hovering = false;
         Vector2 scroll{};
 
-        entt::sigh<void()> onWindowHover{};
-        entt::sigh<void()> onWindowHoverStop{};
+        std::unique_ptr<Event<>> onWindowHover{};
+        std::unique_ptr<Event<>> onWindowHoverStop{};
 
         virtual void Update() = 0;
 
         virtual ~Window() = default;
-        Window(
-            Vector2 _position, Vector2 _size, Vector2 _content_size, std::string _title);
+        Window(Vector2 _position, Vector2 _size, Vector2 _content_size, std::string _title);
     };
 } // namespace sage::editor
 // editor

@@ -5,7 +5,9 @@
 #pragma once
 
 #include "raylib.h"
+
 #include <entt/entt.hpp>
+#include <Event.hpp>
 
 namespace sage
 {
@@ -30,7 +32,7 @@ namespace sage
 
       public:
         [[nodiscard]] bool CheckWorldItemRange(bool hover = false);
-        entt::sigh<void()> onInventoryUpdated;
+        std::unique_ptr<Event<>> onInventoryUpdated;
         InventorySystem(entt::registry* _registry, GameData* _gameData);
     };
 

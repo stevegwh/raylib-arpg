@@ -3,7 +3,6 @@
 #include "components/Animation.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
-#include "EntityReflectionSignalRouter.hpp"
 #include "GameData.hpp"
 #include "StateMachines.hpp"
 #include "systems/ActorMovementSystem.hpp"

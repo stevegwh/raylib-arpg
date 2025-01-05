@@ -12,7 +12,6 @@
 #include "components/MoveableActor.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
-#include "EntityReflectionSignalRouter.hpp"
 #include "PartyMemberStateMachine.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"

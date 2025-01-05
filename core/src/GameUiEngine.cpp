@@ -395,7 +395,7 @@ namespace sage
 
     void CellElement::OnClick()
     {
-        onMouseClicked.publish();
+        onMouseClicked->Publish();
     }
 
     void CellElement::HoverUpdate()
@@ -442,6 +442,7 @@ namespace sage
           horiAlignment(_horiAlignment),
           parent(_parent),
           engine(_engine),
+          onMouseClicked(std::make_unique<Event<>>()),
           state(std::make_unique<IdleState>(this, engine))
     {
     }
@@ -1824,7 +1825,7 @@ namespace sage
         hidden = !hidden;
         if (hidden)
         {
-            onHide.publish();
+            onHide->Publish();
         }
     }
 
@@ -1836,7 +1837,7 @@ namespace sage
     void Window::Hide()
     {
         hidden = true;
-        onHide.publish();
+        onHide->Publish();
     }
 
     bool Window::IsHidden() const
@@ -1853,7 +1854,7 @@ namespace sage
     {
         hidden = true;
         markForRemoval = true;
-        onHide.publish();
+        onHide->Publish();
     }
 
     void Window::FinalizeLayout()
@@ -2043,10 +2044,11 @@ namespace sage
 
     Window::~Window()
     {
-        windowUpdateCnx.release();
+        windowUpdateCnx.UnSubscribe();
     }
 
-    Window::Window(Settings* _settings, Padding _padding) : TableElement(nullptr, _padding), settings(_settings)
+    Window::Window(Settings* _settings, Padding _padding)
+        : TableElement(nullptr, _padding), settings(_settings), onHide(std::make_unique<Event<>>())
     {
     }
 
@@ -2059,14 +2061,18 @@ namespace sage
         float width,
         float height,
         Padding _padding)
-        : TableElement(nullptr, x, y, width, height, _padding), settings(_settings)
+        : TableElement(nullptr, x, y, width, height, _padding),
+          settings(_settings),
+          onHide(std::make_unique<Event<>>())
     {
         tex = _tex;
         textureStretchMode = _stretchMode;
     }
 
     Window::Window(Settings* _settings, float x, float y, float width, float height, Padding _padding)
-        : TableElement(nullptr, x, y, width, height, _padding), settings(_settings)
+        : TableElement(nullptr, x, y, width, height, _padding),
+          settings(_settings),
+          onHide(std::make_unique<Event<>>())
     {
     }
 
@@ -2092,7 +2098,7 @@ namespace sage
 
     TooltipWindow::~TooltipWindow()
     {
-        parentWindowHideCnx.release();
+        parentWindowHideCnx.UnSubscribe();
     }
 
     TooltipWindow::TooltipWindow(
@@ -2109,8 +2115,7 @@ namespace sage
     {
         if (parentWindow)
         {
-            entt::sink sink{parentWindow->onHide};
-            parentWindowHideCnx = sink.connect<&TooltipWindow::Remove>(this);
+            parentWindowHideCnx = parentWindow->onHide->Subscribe([this]() { Remove(); });
         }
         tex = _tex;
         textureStretchMode = _stretchMode;
@@ -2649,8 +2654,8 @@ namespace sage
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
-        entt::sink sink{gameData->userInput->onWindowUpdate};
-        tooltipWindow->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(tooltipWindow.get());
+        tooltipWindow->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
+            [this](Vector2 prev, Vector2 current) { tooltipWindow->OnWindowUpdate(prev, current); });
         tooltipWindow->InitLayout();
         // tooltipWindow->ScaleContents(); // TODO: Maybe not needed
         return tooltipWindow.get();
@@ -2660,8 +2665,8 @@ namespace sage
     {
         windows.push_back(std::move(_window));
         auto* window = windows.back().get();
-        entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&Window::OnWindowUpdate>(window);
+        window->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
+            [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
     }
@@ -2670,8 +2675,8 @@ namespace sage
     {
         windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        entt::sink sink{gameData->userInput->onWindowUpdate};
-        window->windowUpdateCnx = sink.connect<&WindowDocked::OnWindowUpdate>(window);
+        window->windowUpdateCnx = window->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
+            [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
     }

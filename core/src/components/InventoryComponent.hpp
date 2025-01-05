@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Event.hpp"
+
 #include <array>
 #include <entt/entt.hpp>
 
@@ -17,9 +19,13 @@ namespace sage
         std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items{}; // ItemComponent etc
 
       public:
-        entt::sigh<void()> onItemAdded;
-        entt::sigh<void()> onItemRemoved;
-        entt::sigh<void()> onInventoryFull;
+        Connection<> onItemAddedCnx;
+        Connection<> onItemRemovedCnx;
+        Connection<> onInventoryFullCnx;
+
+        std::unique_ptr<Event<>> onItemAdded;
+        std::unique_ptr<Event<>> onItemRemoved;
+        std::unique_ptr<Event<>> onInventoryFull;
         [[nodiscard]] bool AddItem(entt::entity entity);
         bool AddItem(entt::entity entity, unsigned int row, unsigned int col);
         void RemoveItem(unsigned int row, unsigned int col);

@@ -36,14 +36,14 @@ namespace sage
     {
         if (items[row][col] != entt::null) return false;
         items[row][col] = entity;
-        onItemAdded.publish();
+        onItemAdded->Publish();
         return true;
     }
 
     void InventoryComponent::RemoveItem(unsigned int row, unsigned int col)
     {
         items[row][col] = entt::null;
-        onItemRemoved.publish();
+        onItemRemoved->Publish();
     }
 
     void InventoryComponent::RemoveItem(entt::entity item)
@@ -74,6 +74,9 @@ namespace sage
     }
 
     InventoryComponent::InventoryComponent()
+        : onItemAdded(std::make_unique<Event<>>()),
+          onItemRemoved(std::make_unique<Event<>>()),
+          onInventoryFull(std::make_unique<Event<>>())
     {
         // I believe this is necessary;
         for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)

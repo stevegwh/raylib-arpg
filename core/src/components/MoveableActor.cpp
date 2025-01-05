@@ -4,7 +4,6 @@
 
 #include "MoveableActor.hpp"
 
-#include "EntityReflectionSignalRouter.hpp"
 #include "sgTransform.hpp"
 #include "slib.hpp"
 
