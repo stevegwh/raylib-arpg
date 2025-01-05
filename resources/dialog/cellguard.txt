@@ -1,14 +1,14 @@
-#meta start
+<meta>
 owner: Cell Guard
 speaker_name: Cell Guard
 conversation_pos: 5.0 1.0 5.0
-#meta end
+</meta>
 
-#variables start
+<variables>
 questId: ArissaQuest
-#variables end
+</variables>
 
-#node start
+<node>
 title: start
 ---
 WOT?
@@ -20,20 +20,20 @@ end
 [[Hello. | hello]]
 
 [[Sorry, I must be leaving. | exit]]
-#node end
+</node>
 
-#node start
+<node>
 title: hello
 ---
 ERRRR. 'ELLO.
 ---
 [[Sorry, I must be leaving. | exit]]
-#node end
+</node>
 
-#node start
+<node>
 title: quest
 ---
 WELL. AS U ASKED NOICELY. HERE.
 ---
 [[Many thanks!. | exit]]
-#node end
+</node>

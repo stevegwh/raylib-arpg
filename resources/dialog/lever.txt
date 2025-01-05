@@ -1,15 +1,15 @@
-#meta start
+<meta>
 owner: _INTERACTABLE_QUEST_LEVER
 speaker_name: Narrator
 conversation_pos: 10.0 1.0 10.0
-#meta end
+</meta>
 
-#variables start
+<variables>
 questId: LeverBaseQuest
 itemId: QUEST_LEVER
-#variables end
+</variables>
 
-#node start
+<node>
 title: start
 ---
 You see a lever inexplicably resting on a table.
@@ -23,20 +23,20 @@ if quest_in_progress($questId)
 end
 
 [[Take your leave. | exit]]
-#node end
+</node>
 
-#node start
+<node>
 title: grab
 ---
 The goblin sitting at the table snarls at you, menacingly.
 ---
 [[Take your leave. | exit]]
-#node end
+</node>
 
-#node start
+<node>
 title: grab2
 ---
 You grab the lever and place it in your inventory, the goblin sitting at the table distracted, gnawing on his new bone.
 ---
 [[complete_quest_task($questId) |Take your leave. | exit]]
-#node end
+</node>

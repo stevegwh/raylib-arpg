@@ -72,13 +72,13 @@ namespace sage
         {
             line = trim(line);
 
-            if (line == "#variables start")
+            if (line == "<variables>")
             {
                 inVariableBlock = true;
                 continue;
             }
 
-            if (line == "#variables end")
+            if (line == "</variables>")
             {
                 inVariableBlock = false;
                 continue;
@@ -340,8 +340,7 @@ namespace sage
 
             while (std::getline(contentStream, line))
             {
-
-                if (line == "#meta start")
+                if (line == "<meta>")
                 {
                     // Reset for a new dialog
                     entity = entt::null;
@@ -352,7 +351,7 @@ namespace sage
                 }
                 else if (line.starts_with("owner:"))
                 {
-                    auto owner = line.substr(6);
+                    auto owner = line.substr(std::string("owner:").size());
                     owner = trim(owner);
 
                     entity = gameData->renderSystem->FindRenderableByName<DialogComponent>(owner);
@@ -395,7 +394,7 @@ namespace sage
                         //     transform.GetWorldPos(), Vector3Multiply(transform.forward(), {10.0f, 1, 10.0f}));
                     }
                 }
-                else if (line == "#node start")
+                else if (line == "<node>")
                 {
                     // Reset node-specific variables
                     currentNodeName.clear();
@@ -449,7 +448,7 @@ namespace sage
 
                     currentNodeOptions.push_back(optionParts);
                 }
-                else if (line == "#node end")
+                else if (line == "</node>")
                 {
                     assert(dialogComponent);
                     // Finalize and parse the node
