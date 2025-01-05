@@ -1,6 +1,15 @@
+[Meta]
 title: The missing lever.
 giver: QUEST_LEVER
----
+
+[Description]
 We found the lever's missing handle. Time to put it back and get out of here.
----
-dialog: QUEST_LEVER
+
+[Tasks]
+dialog: QUEST_LEVER, GiveItem("QUEST_LEVER")
+
+[On Start]
+
+[On Complete]
+PlaySFX("resources/audio/sfx/test.ogg")
+EndGame()

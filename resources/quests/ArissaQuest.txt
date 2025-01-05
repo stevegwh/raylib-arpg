@@ -1,6 +1,15 @@
+[Meta]
 title: Free the prisoner.
 giver: Arissa
----
+
+[Description]
 We met a prisoner in the Goblin Camp who wants to be freed. She mentioned that the keys to the cell can be found on a guard resting in the barracks.
----
+
+[Tasks]
 dialog: Cell Guard
+
+[OnStart]
+
+[OnComplete]
+JoinParty("Arissa")
+OpenDoor("QUEST_DOOR")
