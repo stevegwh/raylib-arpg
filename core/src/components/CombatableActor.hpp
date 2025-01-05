@@ -7,8 +7,9 @@
 #include <entt/entt.hpp>
 
 #include "abilities/AbilityData.hpp"
-
 #include <Event.hpp>
+
+#include <memory>
 
 namespace sage
 {
@@ -64,7 +65,7 @@ namespace sage
         const std::unique_ptr<Event<entt::entity>> onDeath{};
         const std::unique_ptr<Event<entt::entity, entt::entity>>
             onAttackCancelled{}; // Self, object clicked (can discard)
-        Connection<entt::entity, entt::entity> onTargetDeathCnx{};
+        std::shared_ptr<Connection<entt::entity>> onTargetDeathCnx{};
         const std::unique_ptr<Event<entt::entity, entt::entity>> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(const CombatableActor&) = delete;
@@ -73,6 +74,7 @@ namespace sage
             : onHit(std::make_unique<Event<AttackData>>()),
               onDeath(std::make_unique<Event<entt::entity>>()),
               onAttackCancelled(std::make_unique<Event<entt::entity, entt::entity>>()),
+              onTargetDeathCnx(std::make_shared<Connection<entt::entity>>()),
               onTargetDeath(std::make_unique<Event<entt::entity, entt::entity>>())
         {
             for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)

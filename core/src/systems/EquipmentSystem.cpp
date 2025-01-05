@@ -57,7 +57,7 @@ namespace sage
         const ModelAnimation& anim = animation.animations[animData.index];
         animData.currentFrame = anim.frameCount;
         renderable.GetModel()->UpdateAnimation(anim, animData.currentFrame);
-        animation.onAnimationUpdated.publish(entity);
+        animation.onAnimationUpdated->Publish(entity);
     }
 
     void EquipmentSystem::instantiateWeapon(
@@ -101,8 +101,8 @@ namespace sage
         weaponTrans.SetLocalRot({0, 0, 0, 0});
 
         auto& animation = registry->get<Animation>(owner);
-        entt::sink sink{animation.onAnimationUpdated};
-        sink.connect<&EquipmentSystem::updateCharacterWeaponPosition>(this);
+        animation.onAnimationUpdated->Subscribe(
+            [this](entt::entity _entity) { updateCharacterWeaponPosition(_entity); });
     }
 
     void EquipmentSystem::GeneratePortraitRenderTexture(entt::entity entity, float width, float height)

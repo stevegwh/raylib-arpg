@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <unordered_map>
 
 namespace sage
@@ -15,14 +16,21 @@ namespace sage
     template <typename... Args>
     class Event;
 
+    class BaseConnection
+    {
+      public:
+        virtual void UnSubscribe() = 0;
+        virtual ~BaseConnection() = default;
+    };
+
     template <typename... Args>
-    class Connection
+    class Connection : public BaseConnection
     {
         Event<Args...>* event;
         SubscriberId id = -1;
 
       public:
-        void UnSubscribe()
+        void UnSubscribe() override
         {
             event->unSubscribe(id);
         }
@@ -49,11 +57,11 @@ namespace sage
 
       public:
         // [[nodiscard]]
-        Connection<Args...> Subscribe(std::function<void(Args...)> func)
+        std::shared_ptr<Connection<Args...>> Subscribe(std::function<void(Args...)> func)
         {
             subscribers.emplace(++count, func);
 
-            return Connection<Args...>{this, count};
+            return std::make_shared<Connection<Args...>>(this, count);
         }
 
         void Publish(Args... args)

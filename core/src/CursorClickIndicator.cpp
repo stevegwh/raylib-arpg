@@ -38,14 +38,14 @@ namespace sage
 
     void CursorClickIndicator::onSelectedActorChanged()
     {
-        destinationReachedCnx.UnSubscribe();
+        destinationReachedCnx->UnSubscribe();
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
     }
 
     void CursorClickIndicator::onReachLocation()
     {
-        destinationReachedCnx.UnSubscribe();
+        destinationReachedCnx->UnSubscribe();
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
     }
@@ -65,7 +65,10 @@ namespace sage
     }
 
     CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData), self(registry->create())
+        : registry(_registry),
+          gameData(_gameData),
+          self(registry->create()),
+          destinationReachedCnx(std::make_shared<Connection<entt::entity>>())
     {
         gameData->cursor->onAnyLeftClick->Subscribe([this](const entt::entity entity) { onCursorClick(entity); });
         gameData->controllableActorSystem->onSelectedActorChange->Subscribe(

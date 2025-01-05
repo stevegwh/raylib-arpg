@@ -8,6 +8,7 @@
 
 #include <array>
 #include <entt/entt.hpp>
+#include <memory>
 
 namespace sage
 {
@@ -19,9 +20,9 @@ namespace sage
         std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items{}; // ItemComponent etc
 
       public:
-        Connection<> onItemAddedCnx;
-        Connection<> onItemRemovedCnx;
-        Connection<> onInventoryFullCnx;
+        std::shared_ptr<Connection<>> onItemAddedCnx;
+        std::shared_ptr<Connection<>> onItemRemovedCnx;
+        std::shared_ptr<Connection<>> onInventoryFullCnx;
 
         std::unique_ptr<Event<>> onItemAdded;
         std::unique_ptr<Event<>> onItemRemoved;

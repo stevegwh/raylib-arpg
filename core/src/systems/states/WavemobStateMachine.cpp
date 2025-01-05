@@ -230,10 +230,6 @@ namespace sage
         {
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
-            {
-                entt::sink sink{animation.onAnimationEnd};
-                sink.disconnect<&DyingState::destroyEntity>(this);
-            }
             registry->destroy(self);
         }
 
@@ -249,8 +245,8 @@ namespace sage
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             auto& state = registry->get<WavemobState>(self);
-            entt::sink sink{animation.onAnimationEnd};
-            state.AddConnection(sink.connect<&DyingState::destroyEntity>(this));
+            state.AddConnection(
+                animation.onAnimationEnd->Subscribe([this](entt::entity _entity) { destroyEntity(_entity); }));
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);

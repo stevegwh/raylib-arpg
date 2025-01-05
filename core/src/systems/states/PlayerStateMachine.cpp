@@ -121,14 +121,12 @@ namespace sage
             gameData->actorMovementSystem->CancelMovement(self);
             gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
             auto& moveable = registry->get<MoveableActor>(self);
-            // auto& state = registry->get<PlayerState>(self);
+            auto& state = registry->get<PlayerState>(self);
+            state.AddConnection(moveable.onDestinationReached->Subscribe(
+                [this](entt::entity _entity) { onTargetReached(_entity); }));
 
-            moveable.onDestinationReached->Subscribe([this](entt::entity _entity) { onTargetReached(_entity); });
-            // state.AddConnection(sink.connect<&MovingToLocationState::onTargetReached>(this));
-
-            moveable.onMovementCancel->Subscribe([this](entt::entity _entity) { onMovementCancelled(_entity); });
-
-            // state.AddConnection(sink2.connect<&MovingToLocationState::onMovementCancelled>(this));
+            state.AddConnection(moveable.onMovementCancel->Subscribe(
+                [this](entt::entity _entity) { onMovementCancelled(_entity); }));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
@@ -180,12 +178,10 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, pos);
 
             auto& state = registry->get<PlayerState>(self);
-            // entt::sink sink{moveable.onDestinationReached};
-            moveable.onDestinationReached->Subscribe([this](entt::entity _entity) { onTargetReached(_entity); });
-            // state.AddConnection(sink.connect<&MovingToTalkToNPCState::onTargetReached>(this));
-            // entt::sink sink2{moveable.onMovementCancel};
-            moveable.onMovementCancel->Subscribe([this](entt::entity _entity) { onMovementCancelled(_entity); });
-            // state.AddConnection(sink2.connect<&MovingToTalkToNPCState::onMovementCancelled>(this));
+            state.AddConnection(moveable.onDestinationReached->Subscribe(
+                [this](entt::entity _entity) { onTargetReached(_entity); }));
+            state.AddConnection(moveable.onMovementCancel->Subscribe(
+                [this](entt::entity _entity) { onMovementCancelled(_entity); }));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
@@ -319,10 +315,9 @@ namespace sage
 
             auto& moveableActor = registry->get<MoveableActor>(self);
 
-            // auto& state = registry->get<PlayerState>(self);
-            moveableActor.onDestinationReached->Subscribe(
-                [this](entt::entity _entity) { onTargetReached(_entity); });
-            // state.AddConnection(sink.connect<&MovingToAttackEnemyState::onTargetReached>(this));
+            auto& state = registry->get<PlayerState>(self);
+            state.AddConnection(moveableActor.onDestinationReached->Subscribe(
+                [this](entt::entity _entity) { onTargetReached(_entity); }));
 
             auto& combatable = registry->get<CombatableActor>(self);
             assert(combatable.target != entt::null);
@@ -398,19 +393,21 @@ namespace sage
             assert(combatable.target != entt::null);
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
-            enemyCombatable.onDeath->Subscribe([entity, this](const entt::entity target) {
-                const auto& c = registry->get<CombatableActor>(entity);
-                c.onTargetDeath->Publish(entity, target);
-            });
+            combatable.onTargetDeathCnx =
+                enemyCombatable.onDeath->Subscribe([entity, this](const entt::entity target) {
+                    const auto& c = registry->get<CombatableActor>(entity);
+                    c.onTargetDeath->Publish(entity, target);
+                });
 
-            combatable.onTargetDeathCnx = combatable.onTargetDeath->Subscribe(
-                [this](entt::entity self, entt::entity target) { onTargetDeath(self, target); });
+            auto& state = registry->get<PlayerState>(entity);
+            state.AddConnection(combatable.onTargetDeath->Subscribe(
+                [this](entt::entity self, entt::entity target) { onTargetDeath(self, target); }));
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
-            combatable.onTargetDeathCnx.UnSubscribe();
+            combatable.onTargetDeathCnx->UnSubscribe();
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
         }
@@ -466,9 +463,9 @@ namespace sage
     void PlayerStateController::onComponentRemoved(entt::entity entity)
     {
         auto& controllable = registry->get<ControllableActor>(entity);
-        controllable.onEnemyLeftClickCnx.UnSubscribe();
-        controllable.onNPCLeftClickCnx.UnSubscribe();
-        controllable.onFloorClickCnx.UnSubscribe();
+        controllable.onEnemyLeftClickCnx->UnSubscribe();
+        controllable.onNPCLeftClickCnx->UnSubscribe();
+        controllable.onFloorClickCnx->UnSubscribe();
     }
 
     PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)

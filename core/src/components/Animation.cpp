@@ -70,6 +70,9 @@ namespace sage
     }
 
     Animation::Animation(const AssetID id)
+        : onAnimationEnd(std::make_unique<Event<entt::entity>>()),
+          onAnimationStart(std::make_unique<Event<entt::entity>>()),
+          onAnimationUpdated(std::make_unique<Event<entt::entity>>())
     {
         animsCount = 0;
         animations = ResourceManager::GetInstance().GetModelAnimation(id, &animsCount);

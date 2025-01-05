@@ -8,6 +8,7 @@
 
 #include <entt/entt.hpp>
 #include <Event.hpp>
+#include <memory>
 
 namespace sage
 {
@@ -20,7 +21,7 @@ namespace sage
         entt::entity self;
         float k = 0;
 
-        Connection<entt::entity> destinationReachedCnx;
+        std::shared_ptr<Connection<entt::entity>> destinationReachedCnx;
 
         void onCursorClick(entt::entity entity);
         void onReachLocation();

@@ -5,12 +5,13 @@
 #pragma once
 
 #include "NavigationGridSquare.hpp"
-#include "raylib.h"
 
+#include "raylib.h"
 #include <entt/entt.hpp>
+#include <Event.hpp>
 
 #include <deque>
-#include <Event.hpp>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -20,9 +21,9 @@ namespace sage
     {
         entt::registry* registry;
         entt::entity self{}; // The actor following
-        Connection<entt::entity> onTargetDestinationReachedCnx{};
-        Connection<entt::entity> onTargetMovementCancelledCnx{};
-        Connection<entt::entity> onTargetPathChangedCnx{};
+        std::shared_ptr<Connection<entt::entity>> onTargetDestinationReachedCnx{};
+        std::shared_ptr<Connection<entt::entity>> onTargetMovementCancelledCnx{};
+        std::shared_ptr<Connection<entt::entity>> onTargetPathChangedCnx{};
 
         Vector3 targetPrevPos{};
         double timeStarted{};

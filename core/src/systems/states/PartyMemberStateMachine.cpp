@@ -122,16 +122,16 @@ namespace sage
 
             auto& state = registry->get<PartyMemberState>(self);
 
-            state.onDestinationReachedCnx =
-                moveable.onDestinationReached->Subscribe([this](entt::entity _self) { onTargetReached(_self); });
-            state.onTargetPathChangedCnx = moveable.followTarget->onTargetPathChanged->Subscribe(
-                [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); });
-            state.onMovementCancelCnx =
-                moveable.onMovementCancel->Subscribe([this](entt::entity _self) { onMovementCancelled(_self); });
-            state.onDestinationUnreachableCnx =
+            state.AddConnection(
+                moveable.onDestinationReached->Subscribe([this](entt::entity _self) { onTargetReached(_self); }));
+            state.AddConnection(moveable.followTarget->onTargetPathChanged->Subscribe(
+                [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); }));
+            state.AddConnection(
+                moveable.onMovementCancel->Subscribe([this](entt::entity _self) { onMovementCancelled(_self); }));
+            state.AddConnection(
                 moveable.onDestinationUnreachable->Subscribe([this](entt::entity _self, Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
-                });
+                }));
 
             // entt::sink sink5{moveable.followTarget->onTargetMovementCancelled};
             // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
@@ -347,10 +347,10 @@ namespace sage
         const auto& leaderMoveable =
             registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
 
-        state.onLeaderMoveCnx = leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
+        state.AddConnection(leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
             const auto& _state = registry->get<PartyMemberState>(entity);
             _state.onLeaderMove->Publish(entity, leader);
-        });
+        }));
 
         state.onLeaderMove->Subscribe([this](const entt::entity self, const entt::entity leader) {
             GetSystem<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
@@ -361,8 +361,6 @@ namespace sage
 
     void PartyMemberStateController::onComponentRemoved(entt::entity entity)
     {
-        auto& state = registry->get<PartyMemberState>(entity);
-        state.onLeaderMoveCnx.UnSubscribe();
     }
 
     PartyMemberStateController::PartyMemberStateController(entt::registry* _registry, GameData* _gameData)

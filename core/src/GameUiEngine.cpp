@@ -2044,7 +2044,7 @@ namespace sage
 
     Window::~Window()
     {
-        windowUpdateCnx.UnSubscribe();
+        windowUpdateCnx->UnSubscribe();
     }
 
     Window::Window(Settings* _settings, Padding _padding)
@@ -2063,7 +2063,8 @@ namespace sage
         Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding),
           settings(_settings),
-          onHide(std::make_unique<Event<>>())
+          onHide(std::make_unique<Event<>>()),
+          windowUpdateCnx(std::make_shared<Connection<Vector2, Vector2>>())
     {
         tex = _tex;
         textureStretchMode = _stretchMode;
@@ -2072,7 +2073,8 @@ namespace sage
     Window::Window(Settings* _settings, float x, float y, float width, float height, Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding),
           settings(_settings),
-          onHide(std::make_unique<Event<>>())
+          onHide(std::make_unique<Event<>>()),
+          windowUpdateCnx(std::make_shared<Connection<Vector2, Vector2>>())
     {
     }
 
@@ -2098,7 +2100,7 @@ namespace sage
 
     TooltipWindow::~TooltipWindow()
     {
-        parentWindowHideCnx.UnSubscribe();
+        parentWindowHideCnx->UnSubscribe();
     }
 
     TooltipWindow::TooltipWindow(
@@ -2111,7 +2113,7 @@ namespace sage
         float width,
         float height,
         Padding _padding)
-        : Window(_settings, x, y, width, height, _padding)
+        : Window(_settings, x, y, width, height, _padding), parentWindowHideCnx(std::make_shared<Connection<>>())
     {
         if (parentWindow)
         {

@@ -6,6 +6,7 @@
 #include "components/Animation.hpp"
 #include "components/Renderable.hpp"
 #include "components/WeaponComponent.hpp"
+#include "Event.hpp"
 
 namespace sage
 {
@@ -21,7 +22,7 @@ namespace sage
 
             if (animData.currentFrame == 0 || animData.currentFrame < animData.lastFrame)
             {
-                animation.onAnimationStart.publish(entity);
+                animation.onAnimationStart->Publish(entity);
             }
 
             bool finalFrame = animData.currentFrame + animData.speed >= anim.frameCount;
@@ -31,13 +32,13 @@ namespace sage
 
             if (finalFrame) // Must be at end, as end of death animations can result in entities being destroyed
             {
-                animation.onAnimationEnd.publish(entity);
+                animation.onAnimationEnd->Publish(entity);
                 if (animation.oneShotMode)
                 {
                     animation.RestoreAfterOneShot();
                 }
             }
-            animation.onAnimationUpdated.publish(entity);
+            animation.onAnimationUpdated->Publish(entity);
         }
     }
 

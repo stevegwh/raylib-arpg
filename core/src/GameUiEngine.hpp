@@ -7,12 +7,14 @@
 #include "Settings.hpp"
 
 #include "components/DialogComponent.hpp"
-#include "raylib.h"
+#include "Event.hpp"
 #include "ResourceManager.hpp"
 #include "Timer.hpp"
 
+#include "raylib.h"
+
 #include <entt/entt.hpp>
-#include <Event.hpp>
+#include <memory>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -679,7 +681,7 @@ namespace sage
 
       public:
         std::unique_ptr<Event<>> onHide;
-        Connection<Vector2, Vector2> windowUpdateCnx{};
+        std::shared_ptr<Connection<Vector2, Vector2>> windowUpdateCnx{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height
 
@@ -719,7 +721,7 @@ namespace sage
 
     class TooltipWindow final : public Window
     {
-        Connection<> parentWindowHideCnx;
+        std::shared_ptr<Connection<>> parentWindowHideCnx;
 
       public:
         void ScaleContents() override;

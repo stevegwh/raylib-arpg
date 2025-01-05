@@ -11,14 +11,20 @@ namespace sage
 {
     FollowTarget::~FollowTarget()
     {
-        onTargetPathChangedCnx.UnSubscribe();
-        onTargetDestinationReachedCnx.UnSubscribe();
-        onTargetMovementCancelledCnx.UnSubscribe();
+        onTargetPathChangedCnx->UnSubscribe();
+        onTargetDestinationReachedCnx->UnSubscribe();
+        onTargetMovementCancelledCnx->UnSubscribe();
     }
 
     FollowTarget::FollowTarget(
         entt::registry* _registry, const entt::entity _self, const entt::entity _targetActor)
-        : registry(_registry), self(_self), timeStarted(GetTime()), targetActor(_targetActor)
+        : registry(_registry),
+          self(_self),
+          timeStarted(GetTime()),
+          targetActor(_targetActor),
+          onTargetDestinationReachedCnx(std::make_shared<Connection<entt::entity>>()),
+          onTargetPathChangedCnx(std::make_shared<Connection<entt::entity>>()),
+          onTargetMovementCancelledCnx(std::make_shared<Connection<entt::entity>>())
     {
         auto& moveable = _registry->get<MoveableActor>(_targetActor);
 
