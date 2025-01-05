@@ -35,10 +35,11 @@ namespace sage
         const std::string& functionParams,
         QuestEvent* event)
     {
+        auto startPos = functionParams.find_first_of('"');
+        auto endPos = functionParams.find_last_of('"');
+
         if (functionName.find("OpenDoor") != std::string::npos)
         {
-            auto startPos = functionParams.find_first_of('"');
-            auto endPos = functionParams.find_last_of('"');
             std::string doorName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
 
             auto doorId = gameData->renderSystem->FindRenderable<DoorBehaviorComponent>(doorName);
@@ -48,9 +49,6 @@ namespace sage
         }
         else if (functionName.find("JoinParty") != std::string::npos)
         {
-
-            auto startPos = functionParams.find_first_of('"');
-            auto endPos = functionParams.find_last_of('"');
             std::string npcName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
 
             auto npcId = gameData->renderSystem->FindRenderable(npcName);
@@ -59,9 +57,6 @@ namespace sage
         }
         else if (functionName.find("RemoveItem") != std::string::npos)
         {
-
-            auto startPos = functionParams.find_first_of('"');
-            auto endPos = functionParams.find_last_of('"');
             std::string itemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
 
             auto itemId = gameData->renderSystem->FindRenderable(itemName);
@@ -70,8 +65,6 @@ namespace sage
         }
         else if (functionName.find("GiveItem") != std::string::npos)
         {
-            auto startPos = functionParams.find_first_of('"');
-            auto endPos = functionParams.find_last_of('"');
             std::string itemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
 
             event->Subscribe(
@@ -79,17 +72,12 @@ namespace sage
         }
         else if (functionName.find("PlaySFX") != std::string::npos)
         {
-
-            auto startPos = functionParams.find_first_of('"');
-            auto endPos = functionParams.find_last_of('"');
             std::string sfxName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
 
             event->Subscribe([sfxName, gameData](Args...) { gameData->audioManager->PlaySFX(sfxName); });
         }
         else if (functionName.find("DisableWorldItem") != std::string::npos)
         {
-            auto startPos = functionParams.find_first_of('"');
-            auto endPos = functionParams.find_last_of('"');
             std::string worldItemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
             auto itemId = gameData->renderSystem->FindRenderable(worldItemName);
             event->Subscribe([itemId, registry](Args...) {
@@ -206,7 +194,7 @@ namespace sage
                             {
                                 std::string commandLine = taskLine.substr(commandStartPos + 1);
                                 commandLine.erase(
-                                    remove_if(commandLine.begin(), commandLine.end(), isspace), commandLine.end());
+                                    std::ranges::remove_if(commandLine, isspace).begin(), commandLine.end());
                                 std::stringstream commandStream(commandLine);
                                 std::string command;
 
@@ -271,7 +259,7 @@ namespace sage
         // TODO: Surely remove from registry?
     }
 
-    entt::entity QuestManager::GetQuest(const std::string& key)
+    entt::entity QuestManager::GetQuest(const std::string& key) const
     {
         assert(map.contains(key));
         return map.at(key);
