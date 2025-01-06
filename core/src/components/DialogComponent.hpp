@@ -177,7 +177,10 @@ namespace sage
             }
 
             explicit Conversation(entt::registry* _registry, entt::entity _owner)
-                : registry(_registry), owner(_owner)
+                : registry(_registry),
+                  owner(_owner),
+                  onConversationProgress(std::make_unique<Event<Conversation*>>()),
+                  onConversationEnd(std::make_unique<Event<>>())
             {
             }
         };

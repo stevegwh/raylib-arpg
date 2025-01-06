@@ -26,7 +26,7 @@ namespace sage
         void startCast(entt::entity abilityEntity);
 
         void onComponentAdded(entt::entity addedEntity);
-        void onComponentRemoved(entt::entity addedEntity);
+        void onComponentRemoved(entt::entity addedEntity) const;
 
       public:
         void Update();

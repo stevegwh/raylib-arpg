@@ -18,6 +18,9 @@ namespace sage
         Timer cooldownTimer;
         Timer castTimer;
 
+        std::unique_ptr<Connection> onStartCastCnx;
+        std::unique_ptr<Connection> onCancelCastCnx;
+
         std::string name;
         std::string description;
         AssetID icon{};
@@ -34,11 +37,11 @@ namespace sage
         [[nodiscard]] float GetCooldownDuration() const;
         [[nodiscard]] bool CooldownReady() const;
 
-        entt::sigh<void(entt::entity)> startCast;
-        entt::sigh<void(entt::entity)> cancelCast;
-        entt::sigh<void(entt::entity, AbilityCastFail)> castFailed;
+        std::unique_ptr<Event<entt::entity>> startCast;
+        std::unique_ptr<Event<entt::entity>> cancelCast;
+        std::unique_ptr<Event<entt::entity, AbilityCastFail>> castFailed;
 
-        Ability() = default;
+        Ability();
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
     };

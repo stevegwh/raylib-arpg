@@ -28,7 +28,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast.publish(abilitySlots[slotNumber]);
+        ab.startCast->Publish(abilitySlots[slotNumber]);
     }
 
     void PlayerAbilitySystem::AbilityOnePressed()
@@ -48,7 +48,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast.publish(abilitySlots[0]);
+        ab.startCast->Publish(abilitySlots[0]);
     }
 
     void PlayerAbilitySystem::AbilityTwoPressed()
@@ -68,7 +68,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast.publish(abilitySlots[1]);
+        ab.startCast->Publish(abilitySlots[1]);
     }
 
     void PlayerAbilitySystem::AbilityThreePressed()
@@ -88,7 +88,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast.publish(abilitySlots[2]);
+        ab.startCast->Publish(abilitySlots[2]);
     }
 
     void PlayerAbilitySystem::AbilityFourPressed()
@@ -110,7 +110,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast.publish(abilitySlots[3]);
+        ab.startCast->Publish(abilitySlots[3]);
     }
 
     Ability* PlayerAbilitySystem::GetAbility(unsigned int slotNumber) const

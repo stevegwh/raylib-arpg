@@ -5,6 +5,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "Event.hpp"
 
 #include <memory>
 
@@ -26,8 +27,8 @@ namespace sage
 
       public:
         std::unique_ptr<GameData> data;
-        entt::sigh<void()> sceneLoadingFinished; // Currently unused
-        entt::sigh<void()> sceneChange;
+        std::unique_ptr<Event<entt::entity>> sceneLoadingFinished; // Currently unused
+        std::unique_ptr<Event<entt::entity>> sceneChange;
 
         virtual void Update();
         virtual void Draw3D();

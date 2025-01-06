@@ -27,4 +27,12 @@ namespace sage
     {
         return cooldownTimer.HasFinished() || cooldownTimer.GetRemainingTime() <= 0;
     }
+
+    Ability::Ability()
+        : startCast(std::make_unique<Event<entt::entity>>()),
+          cancelCast(std::make_unique<Event<entt::entity>>()),
+          castFailed(std::make_unique<Event<entt::entity, AbilityCastFail>>())
+    {
+    }
+
 }; // namespace sage

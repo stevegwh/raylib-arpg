@@ -6,6 +6,7 @@
 
 #include "cereal/cereal.hpp"
 #include "entt/entt.hpp"
+#include "Event.hpp"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -41,9 +42,13 @@ namespace sage
     struct CollisionChecker
     {
         float maxDistance = 0;
-        Vector3 origin;
-        Vector3 destination;
-        entt::sigh<void(entt::entity, CollisionInfo)> onHit;
+        Vector3 origin{};
+        Vector3 destination{};
+        std::unique_ptr<Event<entt::entity, CollisionInfo>> onHit;
+
+        CollisionChecker() : onHit(std::make_unique<Event<entt::entity, CollisionInfo>>())
+        {
+        }
     };
 
     class Collideable

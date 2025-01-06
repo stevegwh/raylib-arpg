@@ -135,7 +135,7 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             const auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
 
             auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
@@ -209,13 +209,13 @@ namespace sage
         void OnStateEnter(entt::entity entity) override
         {
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).startCast.publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).startCast->Publish(abilityEntity);
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
         }
 
         ~CombatState() override = default;
@@ -256,7 +256,7 @@ namespace sage
             state.ManageSubscription(std::move(cnx));
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
 
             gameData->actorMovementSystem->CancelMovement(self);
         }

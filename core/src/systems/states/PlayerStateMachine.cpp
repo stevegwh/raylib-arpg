@@ -392,7 +392,7 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).startCast.publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).startCast->Publish(abilityEntity);
 
             auto& combatable = registry->get<CombatableActor>(entity);
             assert(combatable.target != entt::null);
@@ -415,7 +415,7 @@ namespace sage
             auto& combatable = registry->get<CombatableActor>(entity);
             combatable.onTargetDeathCnx->UnSubscribe();
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
         }
 
         ~CombatState() override = default;

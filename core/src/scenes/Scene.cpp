@@ -118,14 +118,17 @@ namespace sage
 
     Scene::Scene(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
-        : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings, _audioManager))
+        : registry(_registry),
+          data(std::make_unique<GameData>(_registry, _keyMapping, _settings, _audioManager)),
+          sceneLoadingFinished(std::make_unique<Event<entt::entity>>()),
+          sceneChange(std::make_unique<Event<entt::entity>>())
     {
 
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
 
-        auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
-        auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
-        auto slices = heightMap.GetWidth();
+        const auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
+        const auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
+        const auto slices = heightMap.GetWidth();
         data->navigationGridSystem->Init(slices, 1.0f);
 
         data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
