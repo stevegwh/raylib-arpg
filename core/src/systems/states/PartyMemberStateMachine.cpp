@@ -354,10 +354,11 @@ namespace sage
         const auto& leaderMoveable =
             registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
 
-        leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
-            const auto& _state = registry->get<PartyMemberState>(entity);
-            _state.onLeaderMove->Publish(entity, leader);
-        });
+        state.onLeaderMoveForwardCnx =
+            leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
+                const auto& _state = registry->get<PartyMemberState>(entity);
+                _state.onLeaderMove->Publish(entity, leader);
+            });
 
         state.onLeaderMove->Subscribe([this](const entt::entity self, const entt::entity leader) {
             GetSystem<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
@@ -368,7 +369,11 @@ namespace sage
 
     void PartyMemberStateController::onComponentRemoved(entt::entity entity)
     {
-        // TODO: Must disconnect subscriptions made in onComponentAdded
+        auto& state = registry->get<PartyMemberState>(entity);
+        if (state.onLeaderMoveForwardCnx)
+        {
+            state.onLeaderMoveForwardCnx->UnSubscribe();
+        }
     }
 
     PartyMemberStateController::PartyMemberStateController(entt::registry* _registry, GameData* _gameData)

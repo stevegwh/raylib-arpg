@@ -69,6 +69,7 @@ namespace sage
     class PartyMemberState : public BaseState<PartyMemberState, PartyMemberStateEnum>
     {
       public:
+        std::unique_ptr<Connection> onLeaderMoveForwardCnx{};
         std::unique_ptr<Event<entt::entity, entt::entity>> onLeaderMove; // self, leader
 
         PartyMemberState()
