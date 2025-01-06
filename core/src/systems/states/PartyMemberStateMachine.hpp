@@ -19,7 +19,7 @@ namespace sage
         class DestinationUnreachableState;
 
         void onComponentAdded(entt::entity entity);
-        void onComponentRemoved(entt::entity entity);
+        void onComponentRemoved(entt::entity entity) const;
 
       public:
         void Update();

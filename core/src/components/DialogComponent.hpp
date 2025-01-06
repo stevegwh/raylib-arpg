@@ -124,15 +124,15 @@ namespace sage
             void endConversation()
             {
                 current = start;
-                onConversationEnd.publish();
+                onConversationEnd->Publish();
             }
 
           public:
             entt::registry* registry;
             const entt::entity owner;
             std::string speaker{}; // Name of speaker to appear in text (uses owner renderable name if none)
-            entt::sigh<void(Conversation*)> onConversationProgress;
-            entt::sigh<void()> onConversationEnd;
+            std::unique_ptr<Event<Conversation*>> onConversationProgress;
+            std::unique_ptr<Event<>> onConversationEnd;
 
             [[nodiscard]] ConversationNode* GetCurrentNode() const
             {
@@ -146,7 +146,7 @@ namespace sage
                 if (option->HasNextIndex())
                 {
                     current = option->nextNode.value();
-                    onConversationProgress.publish(this);
+                    onConversationProgress->Publish(this);
                 }
                 else
                 {

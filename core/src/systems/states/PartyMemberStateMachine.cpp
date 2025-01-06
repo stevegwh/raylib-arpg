@@ -22,7 +22,7 @@ namespace sage
         PartyMemberStateController* stateController;
 
       public:
-        void onLeaderMove(entt::entity self, entt::entity leader)
+        void onLeaderMove(entt::entity self, entt::entity leader) const
         {
             gameData->actorMovementSystem->CancelMovement(self);
             stateController->ChangeState<FollowingLeaderState, entt::entity>(
@@ -367,7 +367,7 @@ namespace sage
         ChangeState(entity, PartyMemberStateEnum::Default);
     }
 
-    void PartyMemberStateController::onComponentRemoved(entt::entity entity)
+    void PartyMemberStateController::onComponentRemoved(entt::entity entity) const
     {
         auto& state = registry->get<PartyMemberState>(entity);
         if (state.onLeaderMoveForwardCnx)

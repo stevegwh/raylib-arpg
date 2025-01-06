@@ -31,14 +31,10 @@ namespace sage
         gameData->cursor->DisableContextSwitching();
 
         auto& dialogComponent = registry->get<DialogComponent>(npc);
-        {
-            entt::sink sink{dialogComponent.conversation->onConversationProgress};
-            sink.connect<&DialogSystem::progressConversation>(this);
-        }
-        {
-            entt::sink sink{dialogComponent.conversation->onConversationEnd};
-            sink.connect<&DialogSystem::EndConversation>(this);
-        }
+        dialogComponent.conversation->onConversationProgress->Subscribe(
+            [this](const dialog::Conversation* conv) { progressConversation(conv); });
+
+        dialogComponent.conversation->onConversationEnd->Subscribe([this]() { EndConversation(); });
 
         dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), npc);
     }
