@@ -46,7 +46,8 @@ namespace sage
 
         void unSubscribe(SubscriberId id) override
         {
-            if (id < 0 || !subscribers.contains(id)) return; // Has already been unsubscribed
+            if (id < 0 || subscribers.empty() || !subscribers.contains(id))
+                return; // Has already been unsubscribed
             subscribers.erase(id);
         }
 

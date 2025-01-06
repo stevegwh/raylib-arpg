@@ -34,12 +34,12 @@ namespace sage
         dialogComponent.conversation->onConversationProgress.Subscribe(
             [this](const dialog::Conversation* conv) { progressConversation(conv); });
 
-        dialogComponent.conversation->onConversationEnd.Subscribe([this]() { EndConversation(); });
+        dialogComponent.conversation->onConversationEnd.Subscribe([this]() { endConversation(); });
 
         dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), npc);
     }
 
-    void DialogSystem::EndConversation()
+    void DialogSystem::endConversation()
     {
         gameData->camera->UnlockInput();
         gameData->cursor->EnableContextSwitching();

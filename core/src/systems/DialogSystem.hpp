@@ -22,11 +22,11 @@ namespace sage
         Window* dialogWindow{};
         Vector3 oldCamPos{};
         Vector3 oldCamTarget{};
+        void endConversation();
         void progressConversation(const dialog::Conversation* conversation);
 
       public:
         void StartConversation(const sgTransform& cutscenePose, entt::entity npc);
-        void EndConversation();
         dialog::Conversation* GetConversation(entt::entity owner, ConversationID conversationId);
         explicit DialogSystem(entt::registry* registry, GameData* _gameData);
     };
