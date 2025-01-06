@@ -70,11 +70,9 @@ namespace sage
     {
       public:
         std::unique_ptr<Connection> onLeaderMoveForwardCnx{};
-        std::unique_ptr<Event<entt::entity, entt::entity>> onLeaderMove; // self, leader
+        Event<entt::entity, entt::entity> onLeaderMove; // self, leader
 
-        PartyMemberState()
-            : BaseState(PartyMemberStateEnum::Default),
-              onLeaderMove(std::make_unique<Event<entt::entity, entt::entity>>())
+        PartyMemberState() : BaseState(PartyMemberStateEnum::Default)
         {
         }
     };

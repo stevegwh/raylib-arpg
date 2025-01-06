@@ -60,24 +60,24 @@ namespace sage
 
         // Forward cursor clicks to this actor's controllable component's events
         current.cursorOnFloorClickCnx =
-            gameData->cursor->onFloorClick->Subscribe([this](const entt::entity clickedEntity) {
+            gameData->cursor->onFloorClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
-                c.onFloorClick->Publish(selectedActorId, clickedEntity);
+                c.onFloorClick.Publish(selectedActorId, clickedEntity);
             });
         current.cursorOnEnemyLeftClickCnx =
-            gameData->cursor->onEnemyLeftClick->Subscribe([this](const entt::entity clickedEntity) {
+            gameData->cursor->onEnemyLeftClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
-                c.onEnemyLeftClick->Publish(selectedActorId, clickedEntity);
+                c.onEnemyLeftClick.Publish(selectedActorId, clickedEntity);
             });
         current.cursorOnEnemyRightClickCnx =
-            gameData->cursor->onEnemyRightClick->Subscribe([this](const entt::entity clickedEntity) {
+            gameData->cursor->onEnemyRightClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
-                c.onEnemyRightClick->Publish(selectedActorId, clickedEntity);
+                c.onEnemyRightClick.Publish(selectedActorId, clickedEntity);
             });
         current.cursorOnNPCLeftClickCnx =
-            gameData->cursor->onNPCClick->Subscribe([this](const entt::entity clickedEntity) {
+            gameData->cursor->onNPCClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
-                c.onNPCLeftClick->Publish(selectedActorId, clickedEntity);
+                c.onNPCLeftClick.Publish(selectedActorId, clickedEntity);
             });
 
         for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
@@ -100,7 +100,7 @@ namespace sage
             }
         }
 
-        onSelectedActorChange->Publish(oldEntity, id);
+        onSelectedActorChange.Publish(oldEntity, id);
     }
 
     entt::entity ControllableActorSystem::GetSelectedActor() const
@@ -134,9 +134,7 @@ namespace sage
     }
 
     ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, GameData* _gameData)
-        : BaseSystem(_registry),
-          gameData(_gameData),
-          onSelectedActorChange(std::make_unique<Event<entt::entity, entt::entity>>())
+        : BaseSystem(_registry), gameData(_gameData)
     {
         registry->on_construct<ControllableActor>().connect<&ControllableActorSystem::onComponentAdded>(this);
         registry->on_destroy<ControllableActor>().connect<&ControllableActorSystem::onComponentRemoved>(this);

@@ -22,7 +22,7 @@ namespace sage
 
             if (animData.currentFrame == 0 || animData.currentFrame < animData.lastFrame)
             {
-                animation.onAnimationStart->Publish(entity);
+                animation.onAnimationStart.Publish(entity);
             }
 
             bool finalFrame = animData.currentFrame + animData.speed >= anim.frameCount;
@@ -32,13 +32,13 @@ namespace sage
 
             if (finalFrame) // Must be at end, as end of death animations can result in entities being destroyed
             {
-                animation.onAnimationEnd->Publish(entity);
+                animation.onAnimationEnd.Publish(entity);
                 if (animation.oneShotMode)
                 {
                     animation.RestoreAfterOneShot();
                 }
             }
-            animation.onAnimationUpdated->Publish(entity);
+            animation.onAnimationUpdated.Publish(entity);
         }
     }
 

@@ -28,7 +28,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast->Publish(abilitySlots[slotNumber]);
+        ab.startCast.Publish(abilitySlots[slotNumber]);
     }
 
     void PlayerAbilitySystem::AbilityOnePressed()
@@ -48,7 +48,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast->Publish(abilitySlots[0]);
+        ab.startCast.Publish(abilitySlots[0]);
     }
 
     void PlayerAbilitySystem::AbilityTwoPressed()
@@ -68,7 +68,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast->Publish(abilitySlots[1]);
+        ab.startCast.Publish(abilitySlots[1]);
     }
 
     void PlayerAbilitySystem::AbilityThreePressed()
@@ -88,7 +88,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast->Publish(abilitySlots[2]);
+        ab.startCast.Publish(abilitySlots[2]);
     }
 
     void PlayerAbilitySystem::AbilityFourPressed()
@@ -110,7 +110,7 @@ namespace sage
             std::cout << "Waiting for cooldown timer: " << ab.GetRemainingCooldownTime() << "\n";
             return;
         }
-        ab.startCast->Publish(abilitySlots[3]);
+        ab.startCast.Publish(abilitySlots[3]);
     }
 
     Ability* PlayerAbilitySystem::GetAbility(unsigned int slotNumber) const
@@ -155,9 +155,9 @@ namespace sage
     PlayerAbilitySystem::PlayerAbilitySystem(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
-        gameData->userInput->keyOnePressed->Subscribe([this]() { AbilityOnePressed(); });
-        gameData->userInput->keyTwoPressed->Subscribe([this]() { AbilityTwoPressed(); });
-        gameData->userInput->keyThreePressed->Subscribe([this]() { AbilityThreePressed(); });
-        gameData->userInput->keyFourPressed->Subscribe([this]() { AbilityFourPressed(); });
+        gameData->userInput->keyOnePressed.Subscribe([this]() { AbilityOnePressed(); });
+        gameData->userInput->keyTwoPressed.Subscribe([this]() { AbilityTwoPressed(); });
+        gameData->userInput->keyThreePressed.Subscribe([this]() { AbilityThreePressed(); });
+        gameData->userInput->keyFourPressed.Subscribe([this]() { AbilityFourPressed(); });
     }
 } // namespace sage

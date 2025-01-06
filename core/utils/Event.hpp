@@ -59,7 +59,7 @@ namespace sage
             return std::make_unique<Connection>(this, key);
         }
 
-        void Publish(Args... args)
+        void Publish(Args... args) const
         {
             // Make a copy of the subscribers to prevent issues if callbacks modify the subscriber list
             auto subscribersCopy = subscribers;
@@ -68,6 +68,11 @@ namespace sage
                 subscriber(args...);
             }
         }
+
+        Event() = default;
+        Event(const Event&) = delete;
+        Event& operator=(const Event&) = delete;
+        // Delete move?
 
         ~Event() override = default;
     };

@@ -47,7 +47,7 @@ namespace sage
     {
         assert(registry->any_of<sgTransform>(_self));
         auto& transform = registry->get<sgTransform>(_self);
-        transform.onPositionUpdate->Subscribe([this](entt::entity entity) { OnTransformUpdate(entity); });
+        transform.onPositionUpdate.Subscribe([this](entt::entity entity) { OnTransformUpdate(entity); });
         SetWorldBoundingBox(transform.GetMatrix());
     }
 } // namespace sage

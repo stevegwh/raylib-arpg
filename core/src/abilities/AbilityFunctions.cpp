@@ -39,7 +39,7 @@ namespace sage
                     .hit = entity,
                     .damage = abilityData.base.baseDamage,
                     .elements = abilityData.base.elements};
-                combatable.onHit->Publish(attackData);
+                combatable.onHit.Publish(attackData);
             }
         }
     }
@@ -65,7 +65,7 @@ namespace sage
                 .hit = target,
                 .damage = abilityData.base.baseDamage,
                 .elements = abilityData.base.elements};
-            enemyCombatable.onHit->Publish(attack);
+            enemyCombatable.onHit.Publish(attack);
         }
     }
 

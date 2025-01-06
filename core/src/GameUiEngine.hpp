@@ -247,7 +247,7 @@ namespace sage
     class CellElement : public UIElement
     {
       protected:
-        std::unique_ptr<Event<>> onMouseClicked;
+        Event<> onMouseClicked;
         Vector2 dragOffset{};
         VertAlignment vertAlignment = VertAlignment::TOP;
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
@@ -680,7 +680,7 @@ namespace sage
         void resetAll();
 
       public:
-        std::unique_ptr<Event<>> onHide;
+        Event<> onHide;
         std::unique_ptr<Connection> windowUpdateCnx{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height

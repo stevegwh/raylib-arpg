@@ -61,20 +61,15 @@ namespace sage
         entt::entity target{};
         int attackRange = 5; // TODO: each ability has its own range
 
-        const std::unique_ptr<Event<AttackData>> onHit{}; // Self, attacker, damage
-        const std::unique_ptr<Event<entt::entity>> onDeath{};
-        const std::unique_ptr<Event<entt::entity, entt::entity>>
-            onAttackCancelled{}; // Self, object clicked (can discard)
+        Event<AttackData> onHit{}; // Self, attacker, damage
+        Event<entt::entity> onDeath{};
+        Event<entt::entity, entt::entity> onAttackCancelled{}; // Self, object clicked (can discard)
         std::unique_ptr<Connection> onTargetDeathCnx{};
-        const std::unique_ptr<Event<entt::entity, entt::entity>> onTargetDeath{}; // Self, target (that died)
+        Event<entt::entity, entt::entity> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(const CombatableActor&) = delete;
         CombatableActor& operator=(const CombatableActor&) = delete;
         CombatableActor()
-            : onHit(std::make_unique<Event<AttackData>>()),
-              onDeath(std::make_unique<Event<entt::entity>>()),
-              onAttackCancelled(std::make_unique<Event<entt::entity, entt::entity>>()),
-              onTargetDeath(std::make_unique<Event<entt::entity, entt::entity>>())
         {
             for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)
             {

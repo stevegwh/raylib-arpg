@@ -206,7 +206,7 @@ namespace sage
                                     auto functionParams =
                                         command.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
                                     bindFunctionToEvent<Event<QuestTaskComponent*>, QuestTaskComponent*>(
-                                        registry, gameData, functionName, functionParams, task.onCompleted.get());
+                                        registry, gameData, functionName, functionParams, &task.onCompleted);
                                 }
                             }
                         }
@@ -222,7 +222,7 @@ namespace sage
                             auto functionParams =
                                 functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(
-                                registry, gameData, functionName, functionParams, quest.onStart.get());
+                                registry, gameData, functionName, functionParams, &quest.onStart);
                         }
                     }
                     else if (buff.find("[OnComplete]") != std::string::npos)
@@ -236,7 +236,7 @@ namespace sage
                             auto functionParams =
                                 functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(
-                                registry, gameData, functionName, functionParams, quest.onCompleted.get());
+                                registry, gameData, functionName, functionParams, &quest.onCompleted);
                         }
                     }
                 }

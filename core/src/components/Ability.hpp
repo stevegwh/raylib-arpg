@@ -37,11 +37,11 @@ namespace sage
         [[nodiscard]] float GetCooldownDuration() const;
         [[nodiscard]] bool CooldownReady() const;
 
-        std::unique_ptr<Event<entt::entity>> startCast;
-        std::unique_ptr<Event<entt::entity>> cancelCast;
-        std::unique_ptr<Event<entt::entity, AbilityCastFail>> castFailed;
+        Event<entt::entity> startCast;
+        Event<entt::entity> cancelCast;
+        Event<entt::entity, AbilityCastFail> castFailed;
 
-        Ability();
+        Ability() = default;
         Ability(const Ability&) = delete;
         Ability& operator=(const Ability&) = delete;
     };

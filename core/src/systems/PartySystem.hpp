@@ -25,7 +25,7 @@ namespace sage
         std::vector<std::vector<entt::entity>> groups;
 
       public:
-        std::unique_ptr<Event<>> onPartyChange;
+        Event<> onPartyChange;
 
         [[nodiscard]] bool CheckPartyHasItem(entt::entity targetItemId) const;
         [[nodiscard]] bool CheckPartyHasItem(const std::string& itemName) const;

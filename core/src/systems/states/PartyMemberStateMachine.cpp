@@ -121,13 +121,13 @@ namespace sage
             const auto target = moveable.followTarget->targetActor;
 
             auto cnx =
-                moveable.onDestinationReached->Subscribe([this](entt::entity _self) { onTargetReached(_self); });
-            auto cnx1 = moveable.followTarget->onTargetPathChanged->Subscribe(
+                moveable.onDestinationReached.Subscribe([this](entt::entity _self) { onTargetReached(_self); });
+            auto cnx1 = moveable.followTarget->onTargetPathChanged.Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); });
             auto cnx2 =
-                moveable.onMovementCancel->Subscribe([this](entt::entity _self) { onMovementCancelled(_self); });
+                moveable.onMovementCancel.Subscribe([this](entt::entity _self) { onMovementCancelled(_self); });
             auto cnx3 =
-                moveable.onDestinationUnreachable->Subscribe([this](entt::entity _self, Vector3 requestedPos) {
+                moveable.onDestinationUnreachable.Subscribe([this](entt::entity _self, Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
                 });
 
@@ -202,8 +202,8 @@ namespace sage
             moveable.followTarget.emplace(registry, self, followTarget);
 
             auto cnx =
-                moveable.onMovementCancel->Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
-            auto cnx1 = gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+                moveable.onMovementCancel.Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
+            auto cnx1 = gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
                 [this](entt::entity, entt::entity entity) { onMovementCancelled(entity); });
 
             auto& state = registry->get<PartyMemberState>(self);
@@ -351,16 +351,15 @@ namespace sage
         auto& state = registry->get<PartyMemberState>(entity);
 
         // Forward leader's movement to the state's onLeaderMovement
-        const auto& leaderMoveable =
-            registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
+        auto& leaderMoveable = registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
 
         state.onLeaderMoveForwardCnx =
-            leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
+            leaderMoveable.onStartMovement.Subscribe([this, entity](entt::entity leader) {
                 const auto& _state = registry->get<PartyMemberState>(entity);
-                _state.onLeaderMove->Publish(entity, leader);
+                _state.onLeaderMove.Publish(entity, leader);
             });
 
-        state.onLeaderMove->Subscribe([this](const entt::entity self, const entt::entity leader) {
+        state.onLeaderMove.Subscribe([this](const entt::entity self, const entt::entity leader) {
             GetSystem<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
         });
 

@@ -135,7 +135,7 @@ namespace sage
         assert(party.size() < PARTY_MEMBER_MAX);
         party.push_back(member);
         groups.at(0).push_back(member);
-        onPartyChange->Publish();
+        onPartyChange.Publish();
     }
 
     void PartySystem::RemoveMember(entt::entity entity)
@@ -145,7 +145,7 @@ namespace sage
             if (*it == entity)
             {
                 party.erase(it);
-                onPartyChange->Publish();
+                onPartyChange.Publish();
                 return;
             }
         }
@@ -192,11 +192,11 @@ namespace sage
     }
 
     PartySystem::PartySystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData), onPartyChange(std::make_unique<Event<>>())
+        : registry(_registry), gameData(_gameData)
     {
         groups.resize(1);
 
-        gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, const entt::entity actor) { SetLeader(actor); });
     }
 } // namespace sage

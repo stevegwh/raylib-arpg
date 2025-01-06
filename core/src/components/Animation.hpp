@@ -58,9 +58,9 @@ namespace sage
         bool oneShotMode = false;
         AnimData current{};
 
-        std::unique_ptr<Event<entt::entity>> onAnimationEnd{};
-        std::unique_ptr<Event<entt::entity>> onAnimationStart{};
-        std::unique_ptr<Event<entt::entity>> onAnimationUpdated{};
+        Event<entt::entity> onAnimationEnd{};
+        Event<entt::entity> onAnimationStart{};
+        Event<entt::entity> onAnimationUpdated{};
 
         void ChangeAnimationByParams(AnimationParams params);
         void ChangeAnimationByEnum(AnimationEnum animEnum, int _animSpeed);

@@ -44,7 +44,7 @@ namespace sage
             archive(m_positionWorld, m_rotationWorld, m_scale);
         }
 
-        std::unique_ptr<Event<entt::entity>> onPositionUpdate{};
+        Event<entt::entity> onPositionUpdate{};
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;
         [[nodiscard]] Matrix GetMatrix() const;

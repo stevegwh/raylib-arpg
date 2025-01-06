@@ -350,7 +350,7 @@ namespace sage
                     auto invSlot = std::make_unique<InventorySlot>(engine, cell.get(), row, col);
                     auto ptr = cell->CreateInventorySlot(std::move(invSlot));
 
-                    engine->gameData->inventorySystem->onInventoryUpdated->Subscribe(
+                    engine->gameData->inventorySystem->onInventoryUpdated.Subscribe(
                         [ptr]() { ptr->RetrieveInfo(); });
                 }
             }
@@ -400,7 +400,7 @@ namespace sage
                 const auto& cell = table->children[row]->children[col];
                 auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell.get(), itemType);
                 auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
-                engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
+                engine->gameData->equipmentSystem->onEquipmentUpdated.Subscribe(
                     [ptr](entt::entity) { ptr->RetrieveInfo(); });
             };
 

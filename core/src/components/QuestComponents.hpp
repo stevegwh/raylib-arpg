@@ -23,13 +23,13 @@ namespace sage
         bool completed = false;
         std::unique_ptr<Event<QuestTaskComponent*>>
             onStart; // NB: nullptr (QuestTasks are not started), defined for compatibility with 'Quest'
-        std::unique_ptr<Event<QuestTaskComponent*>> onCompleted;
+        Event<QuestTaskComponent*> onCompleted;
 
         void MarkComplete()
         {
             std::cout << "Task complete! \n";
             completed = true;
-            onCompleted->Publish(this);
+            onCompleted.Publish(this);
         }
 
         [[nodiscard]] bool IsComplete() const
@@ -43,8 +43,7 @@ namespace sage
             archive(questKey);
         }
 
-        explicit QuestTaskComponent(std::string _questKey)
-            : questKey(std::move(_questKey)), onCompleted(std::make_unique<Event<QuestTaskComponent*>>())
+        explicit QuestTaskComponent(std::string _questKey) : questKey(std::move(_questKey))
         {
         }
         QuestTaskComponent() = default;
@@ -76,8 +75,8 @@ namespace sage
         [[nodiscard]] bool IsComplete() const;
         [[nodiscard]] bool HasStarted() const;
 
-        std::unique_ptr<Event<entt::entity>> onStart;
-        std::unique_ptr<Event<entt::entity>> onCompleted;
+        Event<entt::entity> onStart;
+        Event<entt::entity> onCompleted;
 
         explicit Quest(entt::registry* _registry, entt::entity _questId, std::string _questKey);
     };

@@ -23,7 +23,7 @@ namespace sage
 
     void InventorySystem::inventoryUpdated() const
     {
-        onInventoryUpdated->Publish();
+        onInventoryUpdated.Publish();
     }
 
     bool InventorySystem::CheckWorldItemRange(bool hover)
@@ -97,15 +97,15 @@ namespace sage
         }
         else
         {
-            inventoryComponent.onInventoryFull->Publish();
+            inventoryComponent.onInventoryFull.Publish();
         }
     }
 
     void InventorySystem::onComponentAdded(entt::entity entity)
     {
         auto& component = registry->get<InventoryComponent>(entity);
-        component.onItemAddedCnx = component.onItemAdded->Subscribe([this]() { inventoryUpdated(); });
-        component.onItemRemovedCnx = component.onItemRemoved->Subscribe([this]() { inventoryUpdated(); });
+        component.onItemAddedCnx = component.onItemAdded.Subscribe([this]() { inventoryUpdated(); });
+        component.onItemRemovedCnx = component.onItemRemoved.Subscribe([this]() { inventoryUpdated(); });
     }
 
     void InventorySystem::onComponentRemoved(entt::entity entity)
@@ -116,10 +116,10 @@ namespace sage
     }
 
     InventorySystem::InventorySystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData), onInventoryUpdated(std::make_unique<Event<>>())
+        : registry(_registry), gameData(_gameData)
     {
 
-        _gameData->cursor->onItemClick->Subscribe([this](entt::entity itemId) { onWorldItemClicked(itemId); });
+        _gameData->cursor->onItemClick.Subscribe([this](entt::entity itemId) { onWorldItemClicked(itemId); });
 
         registry->on_construct<InventoryComponent>().connect<&InventorySystem::onComponentAdded>(this);
         registry->on_destroy<InventoryComponent>().connect<&InventorySystem::onComponentRemoved>(this);

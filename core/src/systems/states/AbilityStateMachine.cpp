@@ -26,7 +26,7 @@ namespace sage
     {
 
       public:
-        std::unique_ptr<Event<entt::entity>> onRestartTriggered;
+        Event<entt::entity> onRestartTriggered;
 
         void Update(entt::entity abilityEntity) override
         {
@@ -35,12 +35,11 @@ namespace sage
             if (ab.cooldownTimer.HasFinished() &&
                 ab.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO))
             {
-                onRestartTriggered->Publish(abilityEntity);
+                onRestartTriggered.Publish(abilityEntity);
             }
         }
 
-        IdleState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry, _gameData), onRestartTriggered(std::make_unique<Event<entt::entity>>())
+        IdleState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
@@ -83,14 +82,14 @@ namespace sage
         }
 
       public:
-        std::unique_ptr<Event<entt::entity>> onConfirm;
+        Event<entt::entity> onConfirm;
         void Update(entt::entity abilityEntity) override
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             ab.abilityIndicator->Update(gameData->cursor->getFirstNaviCollision().point);
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
             {
-                onConfirm->Publish(abilityEntity);
+                onConfirm.Publish(abilityEntity);
             }
         }
 
@@ -109,8 +108,7 @@ namespace sage
             }
         }
 
-        CursorSelectState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry, _gameData), onConfirm(std::make_unique<Event<entt::entity>>())
+        CursorSelectState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
         {
         }
     };
@@ -124,11 +122,11 @@ namespace sage
 
         void signalExecute(entt::entity abilityEntity)
         {
-            onExecute->Publish(abilityEntity);
+            onExecute.Publish(abilityEntity);
         }
 
       public:
-        std::unique_ptr<Event<entt::entity>> onExecute;
+        Event<entt::entity> onExecute;
 
         void OnStateEnter(entt::entity abilityEntity) override
         {
@@ -141,7 +139,7 @@ namespace sage
             {
                 createProjectile(registry, ab.caster, abilityEntity, gameData);
                 auto& moveable = registry->get<MoveableActor>(abilityEntity);
-                moveable.onDestinationReached->Subscribe([this](entt::entity _entity) { signalExecute(_entity); });
+                moveable.onDestinationReached.Subscribe([this](entt::entity _entity) { signalExecute(_entity); });
             }
         }
 
@@ -156,12 +154,11 @@ namespace sage
             if (ab.castTimer.HasFinished() &&
                 !ad.base.HasBehaviour(AbilityBehaviour::CAST_REGULAR)) // Might be FOLLOW_NONE
             {
-                onExecute->Publish(abilityEntity);
+                onExecute.Publish(abilityEntity);
             }
         }
 
-        AwaitingExecutionState(entt::registry* _registry, GameData* _gameData)
-            : StateMachine(_registry, _gameData), onExecute(std::make_unique<Event<entt::entity>>())
+        AwaitingExecutionState(entt::registry* _registry, GameData* _gameData) : StateMachine(_registry, _gameData)
 
         {
         }
@@ -222,7 +219,7 @@ namespace sage
             if (Vector3Distance(point, casterPos) > ad.base.range)
             {
                 std::cout << "Out of range. \n";
-                ab.castFailed->Publish(abilityEntity, AbilityCastFail::OUT_OF_RANGE);
+                ab.castFailed.Publish(abilityEntity, AbilityCastFail::OUT_OF_RANGE);
                 return false;
             }
         }
@@ -345,11 +342,10 @@ namespace sage
     void AbilityStateController::onComponentAdded(entt::entity addedEntity)
     {
         auto& ability = registry->get<Ability>(addedEntity);
-        ability.onStartCastCnx =
-            ability.startCast->Subscribe([this](entt::entity _entity) { startCast(_entity); });
+        ability.onStartCastCnx = ability.startCast.Subscribe([this](entt::entity _entity) { startCast(_entity); });
 
         ability.onCancelCastCnx =
-            ability.cancelCast->Subscribe([this](entt::entity _entity) { cancelCast(_entity); });
+            ability.cancelCast.Subscribe([this](entt::entity _entity) { cancelCast(_entity); });
     }
 
     void AbilityStateController::onComponentRemoved(entt::entity addedEntity) const
@@ -367,15 +363,15 @@ namespace sage
         registry->on_destroy<Ability>().connect<&AbilityStateController::onComponentRemoved>(this);
 
         auto idleState = std::make_unique<IdleState>(_registry, _gameData);
-        idleState->onRestartTriggered->Subscribe([this](entt::entity _entity) { startCast(_entity); });
+        idleState->onRestartTriggered.Subscribe([this](entt::entity _entity) { startCast(_entity); });
         states[AbilityStateEnum::IDLE] = std::move(idleState);
 
         auto awaitingExecutionState = std::make_unique<AwaitingExecutionState>(_registry, _gameData);
-        awaitingExecutionState->onExecute->Subscribe([this](entt::entity _entity) { executeAbility(_entity); });
+        awaitingExecutionState->onExecute.Subscribe([this](entt::entity _entity) { executeAbility(_entity); });
         states[AbilityStateEnum::AWAITING_EXECUTION] = std::move(awaitingExecutionState);
 
         auto cursorState = std::make_unique<CursorSelectState>(_registry, _gameData);
-        cursorState->onConfirm->Subscribe([this](entt::entity _entity) { spawnAbility(_entity); });
+        cursorState->onConfirm.Subscribe([this](entt::entity _entity) { spawnAbility(_entity); });
         states[AbilityStateEnum::CURSOR_SELECT] = std::move(cursorState);
     }
 

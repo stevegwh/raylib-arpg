@@ -32,7 +32,7 @@ namespace sage
 
       public:
         [[nodiscard]] bool CheckWorldItemRange(bool hover = false);
-        std::unique_ptr<Event<>> onInventoryUpdated;
+        Event<> onInventoryUpdated;
         InventorySystem(entt::registry* _registry, GameData* _gameData);
     };
 

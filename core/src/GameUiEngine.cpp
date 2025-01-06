@@ -395,7 +395,7 @@ namespace sage
 
     void CellElement::OnClick()
     {
-        onMouseClicked->Publish();
+        onMouseClicked.Publish();
     }
 
     void CellElement::HoverUpdate()
@@ -442,7 +442,6 @@ namespace sage
           horiAlignment(_horiAlignment),
           parent(_parent),
           engine(_engine),
-          onMouseClicked(std::make_unique<Event<>>()),
           state(std::make_unique<IdleState>(this, engine))
     {
     }
@@ -703,11 +702,10 @@ namespace sage
         GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo, StatisticType _statisticType)
         : TextBox(_engine, _parent, _fontInfo), statisticType(_statisticType)
     {
-        _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        _engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
 
-        _engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+        _engine->gameData->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
 
         if (_statisticType == StatisticType::NAME)
         {
@@ -1084,11 +1082,10 @@ namespace sage
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
     {
-        _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        _engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
 
-        _engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+        _engine->gameData->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
     }
 
     void PartyMemberPortrait::UpdateDimensions()
@@ -1199,9 +1196,9 @@ namespace sage
         tex.width = width;
         tex.height = height;
         canReceiveDragDrops = true;
-        _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        _engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
-        _engine->gameData->partySystem->onPartyChange->Subscribe([this]() { RetrieveInfo(); });
+        _engine->gameData->partySystem->onPartyChange.Subscribe([this]() { RetrieveInfo(); });
     }
 
     void DialogPortrait::Draw2D()
@@ -1300,7 +1297,7 @@ namespace sage
     {
         draggable = true;
         canReceiveDragDrops = true;
-        engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
@@ -1573,7 +1570,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
 
-        engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
@@ -1624,7 +1621,7 @@ namespace sage
     InventorySlot::InventorySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _row, unsigned int _col)
         : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), row(_row), col(_col)
     {
-        engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
@@ -1825,7 +1822,7 @@ namespace sage
         hidden = !hidden;
         if (hidden)
         {
-            onHide->Publish();
+            onHide.Publish();
         }
     }
 
@@ -1837,7 +1834,7 @@ namespace sage
     void Window::Hide()
     {
         hidden = true;
-        onHide->Publish();
+        onHide.Publish();
     }
 
     bool Window::IsHidden() const
@@ -1854,7 +1851,7 @@ namespace sage
     {
         hidden = true;
         markForRemoval = true;
-        onHide->Publish();
+        onHide.Publish();
     }
 
     void Window::FinalizeLayout()
@@ -2047,8 +2044,7 @@ namespace sage
         windowUpdateCnx->UnSubscribe();
     }
 
-    Window::Window(Settings* _settings, Padding _padding)
-        : TableElement(nullptr, _padding), settings(_settings), onHide(std::make_unique<Event<>>())
+    Window::Window(Settings* _settings, Padding _padding) : TableElement(nullptr, _padding), settings(_settings)
     {
     }
 
@@ -2062,7 +2058,7 @@ namespace sage
         float height,
         Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding),
-          onHide(std::make_unique<Event<>>()),
+
           settings(_settings)
     {
         tex = _tex;
@@ -2070,9 +2066,7 @@ namespace sage
     }
 
     Window::Window(Settings* _settings, float x, float y, float width, float height, Padding _padding)
-        : TableElement(nullptr, x, y, width, height, _padding),
-          onHide(std::make_unique<Event<>>()),
-          settings(_settings)
+        : TableElement(nullptr, x, y, width, height, _padding), settings(_settings)
     {
     }
 
@@ -2118,7 +2112,7 @@ namespace sage
     {
         if (parentWindow)
         {
-            parentWindowHideCnx = parentWindow->onHide->Subscribe([this]() { Remove(); });
+            parentWindowHideCnx = parentWindow->onHide.Subscribe([this]() { Remove(); });
         }
         tex = _tex;
         textureStretchMode = _stretchMode;
@@ -2657,7 +2651,7 @@ namespace sage
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
-        tooltipWindow->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
+        tooltipWindow->windowUpdateCnx = gameData->userInput->onWindowUpdate.Subscribe(
             [this](Vector2 prev, Vector2 current) { tooltipWindow->OnWindowUpdate(prev, current); });
         tooltipWindow->InitLayout();
         // tooltipWindow->ScaleContents(); // TODO: Maybe not needed
@@ -2668,7 +2662,7 @@ namespace sage
     {
         windows.push_back(std::move(_window));
         auto* window = windows.back().get();
-        window->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
+        window->windowUpdateCnx = gameData->userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
@@ -2678,7 +2672,7 @@ namespace sage
     {
         windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
+        window->windowUpdateCnx = gameData->userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
@@ -2966,11 +2960,11 @@ namespace sage
     GameUIEngine::GameUIEngine(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
-        _gameData->cursor->onCombatableHover->Subscribe(
+        _gameData->cursor->onCombatableHover.Subscribe(
             [this](const entt::entity entity) { onWorldCombatableHover(entity); });
-        _gameData->cursor->onItemHover->Subscribe([this](const entt::entity entity) { onWorldItemHover(entity); });
-        _gameData->cursor->onStopHover->Subscribe([this]() { onStopWorldHover(); });
-        _gameData->cursor->onNPCHover->Subscribe([this](const entt::entity entity) { onNPCHover(entity); });
+        _gameData->cursor->onItemHover.Subscribe([this](const entt::entity entity) { onWorldItemHover(entity); });
+        _gameData->cursor->onStopHover.Subscribe([this]() { onStopWorldHover(); });
+        _gameData->cursor->onNPCHover.Subscribe([this](const entt::entity entity) { onNPCHover(entity); });
     }
 #pragma endregion
 } // namespace sage

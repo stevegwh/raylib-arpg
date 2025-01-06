@@ -70,20 +70,20 @@ namespace sage
         [[nodiscard]] const RayCollision& getFirstNaviCollision() const;
         [[nodiscard]] const RayCollision& getFirstCollision() const;
 
-        std::unique_ptr<Event<entt::entity>> onCollisionHit{}; // Returns the hit entity (all layers)
-        std::unique_ptr<Event<entt::entity>> onNPCClick{};
-        std::unique_ptr<Event<entt::entity>> onInteractableClick{};
-        std::unique_ptr<Event<entt::entity>> onItemClick{};
-        std::unique_ptr<Event<entt::entity>> onFloorClick{};
-        std::unique_ptr<Event<entt::entity>> onAnyLeftClick{};
-        std::unique_ptr<Event<entt::entity>> onAnyRightClick{};
-        std::unique_ptr<Event<entt::entity>> onEnemyLeftClick{};
-        std::unique_ptr<Event<entt::entity>> onEnemyRightClick{};
+        Event<entt::entity> onCollisionHit{}; // Returns the hit entity (all layers)
+        Event<entt::entity> onNPCClick{};
+        Event<entt::entity> onInteractableClick{};
+        Event<entt::entity> onItemClick{};
+        Event<entt::entity> onFloorClick{};
+        Event<entt::entity> onAnyLeftClick{};
+        Event<entt::entity> onAnyRightClick{};
+        Event<entt::entity> onEnemyLeftClick{};
+        Event<entt::entity> onEnemyRightClick{};
 
-        std::unique_ptr<Event<entt::entity>> onCombatableHover{};
-        std::unique_ptr<Event<entt::entity>> onNPCHover{};
-        std::unique_ptr<Event<entt::entity>> onItemHover{};
-        std::unique_ptr<Event<>> onStopHover{};
+        Event<entt::entity> onCombatableHover{};
+        Event<entt::entity> onNPCHover{};
+        Event<entt::entity> onItemHover{};
+        Event<> onStopHover{};
 
         void Update();
         void DrawDebug() const;

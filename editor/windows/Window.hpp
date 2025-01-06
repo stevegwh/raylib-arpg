@@ -29,8 +29,8 @@ namespace sage::editor
         bool hovering = false;
         Vector2 scroll{};
 
-        std::unique_ptr<Event<>> onWindowHover{};
-        std::unique_ptr<Event<>> onWindowHoverStop{};
+        Event<> onWindowHover{};
+        Event<> onWindowHoverStop{};
 
         virtual void Update() = 0;
 

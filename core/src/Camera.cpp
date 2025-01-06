@@ -288,18 +288,18 @@ namespace sage
         currentPositionY = rlCamera.position.y;
         currentTargetY = rlCamera.target.y;
 
-        userInput->keyWPressed->Subscribe([this]() { onForwardKeyPressed(); });
-        userInput->keyWPressed->Subscribe([this]() { onForwardKeyPressed(); });
-        userInput->keySPressed->Subscribe([this]() { onBackKeyPressed(); });
-        userInput->keyAPressed->Subscribe([this]() { onLeftKeyPressed(); });
-        userInput->keyDPressed->Subscribe([this]() { onRightKeyPressed(); });
-        userInput->keyEPressed->Subscribe([this]() { onRotateLeftKeyPressed(); });
-        userInput->keyQPressed->Subscribe([this]() { onRotateRightKeyPressed(); });
-        userInput->keyWUp->Subscribe([this]() { onForwardKeyUp(); });
-        userInput->keySUp->Subscribe([this]() { onBackKeyUp(); });
-        userInput->keyAUp->Subscribe([this]() { onLeftKeyUp(); });
-        userInput->keyDUp->Subscribe([this]() { onRightKeyUp(); });
-        userInput->keyEUp->Subscribe([this]() { onRotateLeftKeyUp(); });
-        userInput->keyQUp->Subscribe([this]() { onRotateRightKeyUp(); });
+        userInput->keyWPressed.Subscribe([this]() { onForwardKeyPressed(); });
+        userInput->keyWPressed.Subscribe([this]() { onForwardKeyPressed(); });
+        userInput->keySPressed.Subscribe([this]() { onBackKeyPressed(); });
+        userInput->keyAPressed.Subscribe([this]() { onLeftKeyPressed(); });
+        userInput->keyDPressed.Subscribe([this]() { onRightKeyPressed(); });
+        userInput->keyEPressed.Subscribe([this]() { onRotateLeftKeyPressed(); });
+        userInput->keyQPressed.Subscribe([this]() { onRotateRightKeyPressed(); });
+        userInput->keyWUp.Subscribe([this]() { onForwardKeyUp(); });
+        userInput->keySUp.Subscribe([this]() { onBackKeyUp(); });
+        userInput->keyAUp.Subscribe([this]() { onLeftKeyUp(); });
+        userInput->keyDUp.Subscribe([this]() { onRightKeyUp(); });
+        userInput->keyEUp.Subscribe([this]() { onRotateLeftKeyUp(); });
+        userInput->keyQUp.Subscribe([this]() { onRotateRightKeyUp(); });
     }
 } // namespace sage

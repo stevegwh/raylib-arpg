@@ -96,7 +96,7 @@ namespace sage
 #endif
             settings->toggleFullScreenRequested = false;
             const auto viewport = settings->GetViewPort();
-            scene->data->userInput->onWindowUpdate->Publish(prev, viewport);
+            scene->data->userInput->onWindowUpdate.Publish(prev, viewport);
             UnloadTexture(renderTexture.texture);
             UnloadTexture(renderTexture2d.texture);
             renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));

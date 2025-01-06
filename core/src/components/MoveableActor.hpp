@@ -32,9 +32,9 @@ namespace sage
 
       public:
         const entt::entity targetActor = entt::null;
-        std::unique_ptr<Event<entt::entity, entt::entity>> onTargetDestinationReached{}; // Self, target
-        std::unique_ptr<Event<entt::entity, entt::entity>> onTargetMovementCancelled{};  // Self, target
-        std::unique_ptr<Event<entt::entity, entt::entity>> onTargetPathChanged{};        // Self, target
+        Event<entt::entity, entt::entity> onTargetDestinationReached{}; // Self, target
+        Event<entt::entity, entt::entity> onTargetMovementCancelled{};  // Self, target
+        Event<entt::entity, entt::entity> onTargetPathChanged{};        // Self, target
 
         ~FollowTarget();
         FollowTarget(entt::registry* _registry, entt::entity _self, entt::entity _targetActor);
@@ -57,11 +57,11 @@ namespace sage
         std::optional<FollowTarget> followTarget;
         std::deque<Vector3> path{};
 
-        std::unique_ptr<Event<entt::entity>> onStartMovement{};
-        std::unique_ptr<Event<entt::entity>> onDestinationReached{};
-        std::unique_ptr<Event<entt::entity, Vector3>> onDestinationUnreachable{}; // self, original dest
-        std::unique_ptr<Event<entt::entity>> onPathChanged{}; // Was previously moving, now moving somewhere else
-        std::unique_ptr<Event<entt::entity>> onMovementCancel{}; // Was previously moving, now cancelled
+        Event<entt::entity> onStartMovement{};
+        Event<entt::entity> onDestinationReached{};
+        Event<entt::entity, Vector3> onDestinationUnreachable{}; // self, original dest
+        Event<entt::entity> onPathChanged{};    // Was previously moving, now moving somewhere else
+        Event<entt::entity> onMovementCancel{}; // Was previously moving, now cancelled
 
         [[nodiscard]] bool IsMoving() const
         {
@@ -75,7 +75,5 @@ namespace sage
         }
 
         std::vector<GridSquare> debugRay;
-
-        MoveableActor();
     };
 } // namespace sage

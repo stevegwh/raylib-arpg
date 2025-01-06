@@ -122,10 +122,10 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
             auto& moveable = registry->get<MoveableActor>(self);
             auto& state = registry->get<PlayerState>(self);
-            auto cnx = moveable.onDestinationReached->Subscribe(
+            auto cnx = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
             state.ManageSubscription(std::move(cnx));
-            auto cnx1 = moveable.onMovementCancel->Subscribe(
+            auto cnx1 = moveable.onMovementCancel.Subscribe(
                 [this](entt::entity _entity) { onMovementCancelled(_entity); });
             state.ManageSubscription(std::move(cnx1));
 
@@ -179,10 +179,10 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, pos);
 
             auto& state = registry->get<PlayerState>(self);
-            auto cnx = moveable.onDestinationReached->Subscribe(
+            auto cnx = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
             state.ManageSubscription(std::move(cnx));
-            auto cnx1 = moveable.onMovementCancel->Subscribe(
+            auto cnx1 = moveable.onMovementCancel.Subscribe(
                 [this](entt::entity _entity) { onMovementCancelled(_entity); });
             state.ManageSubscription(std::move(cnx1));
 
@@ -319,7 +319,7 @@ namespace sage
             auto& moveableActor = registry->get<MoveableActor>(self);
 
             auto& state = registry->get<PlayerState>(self);
-            auto cnx = moveableActor.onDestinationReached->Subscribe(
+            auto cnx = moveableActor.onDestinationReached.Subscribe(
                 [this](const entt::entity _entity) { onTargetReached(_entity); });
             state.ManageSubscription(std::move(cnx));
 
@@ -327,7 +327,7 @@ namespace sage
             assert(combatable.target != entt::null);
 
             auto& controllable = registry->get<ControllableActor>(self);
-            auto cnx1 = controllable.onFloorClick->Subscribe(
+            auto cnx1 = controllable.onFloorClick.Subscribe(
                 [this](const entt::entity _self, entt::entity clicked) { onAttackCancelled(_self, clicked); });
             state.ManageSubscription(std::move(cnx1));
 
@@ -392,20 +392,20 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).startCast->Publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).startCast.Publish(abilityEntity);
 
             auto& combatable = registry->get<CombatableActor>(entity);
             assert(combatable.target != entt::null);
 
             auto& enemyCombatable = registry->get<CombatableActor>(combatable.target);
             combatable.onTargetDeathCnx =
-                enemyCombatable.onDeath->Subscribe([entity, this](const entt::entity target) {
+                enemyCombatable.onDeath.Subscribe([entity, this](const entt::entity target) {
                     const auto& c = registry->get<CombatableActor>(entity);
-                    c.onTargetDeath->Publish(entity, target);
+                    c.onTargetDeath.Publish(entity, target);
                 });
 
             auto& state = registry->get<PlayerState>(entity);
-            auto cnx = combatable.onTargetDeath->Subscribe(
+            auto cnx = combatable.onTargetDeath.Subscribe(
                 [this](entt::entity self, entt::entity target) { onTargetDeath(self, target); });
             state.ManageSubscription(std::move(cnx));
         }
@@ -415,7 +415,7 @@ namespace sage
             auto& combatable = registry->get<CombatableActor>(entity);
             combatable.onTargetDeathCnx->UnSubscribe();
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
         }
 
         ~CombatState() override = default;
@@ -452,15 +452,15 @@ namespace sage
         // Cursor and controllable events are connected in ControllableActorSystem
         auto& controllable = registry->get<ControllableActor>(entity);
         controllable.onEnemyLeftClickCnx =
-            controllable.onEnemyLeftClick->Subscribe([this](entt::entity self, entt::entity target) {
+            controllable.onEnemyLeftClick.Subscribe([this](entt::entity self, entt::entity target) {
                 GetSystem<DefaultState>(PlayerStateEnum::Default)->onEnemyLeftClick(self, target);
             });
         controllable.onNPCLeftClickCnx =
-            controllable.onNPCLeftClick->Subscribe([this](entt::entity self, entt::entity target) {
+            controllable.onNPCLeftClick.Subscribe([this](entt::entity self, entt::entity target) {
                 GetSystem<DefaultState>(PlayerStateEnum::Default)->onNPCLeftClick(self, target);
             });
         controllable.onFloorClickCnx =
-            controllable.onFloorClick->Subscribe([this](entt::entity self, entt::entity target) {
+            controllable.onFloorClick.Subscribe([this](entt::entity self, entt::entity target) {
                 GetSystem<DefaultState>(PlayerStateEnum::Default)->onFloorClick(self, target);
             });
         // ----------------------------

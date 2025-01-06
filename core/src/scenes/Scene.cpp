@@ -118,10 +118,7 @@ namespace sage
 
     Scene::Scene(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
-        : registry(_registry),
-          data(std::make_unique<GameData>(_registry, _keyMapping, _settings, _audioManager)),
-          sceneLoadingFinished(std::make_unique<Event<entt::entity>>()),
-          sceneChange(std::make_unique<Event<entt::entity>>())
+        : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings, _audioManager))
     {
 
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
@@ -181,9 +178,9 @@ namespace sage
             GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
         auto* equipmentWindow =
             GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
-        data->userInput->keyIPressed->Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
-        data->userInput->keyCPressed->Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
-        data->userInput->keyFPressed->Subscribe([this]() { data->camera->FocusSelectedActor(); });
+        data->userInput->keyIPressed.Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
+        data->userInput->keyCPressed.Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
+        data->userInput->keyFPressed.Subscribe([this]() { data->camera->FocusSelectedActor(); });
 
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
@@ -193,7 +190,7 @@ namespace sage
         spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
         spiral->InitSystem();
 
-        data->userInput->keyOPressed->Subscribe([this]() {
+        data->userInput->keyOPressed.Subscribe([this]() {
             std::vector<std::pair<std::string, float>> text;
             text.emplace_back(
                 "You awaken in a cave.\n This is a test new line.\n And another for good measure.", 4.0f);

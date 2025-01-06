@@ -31,7 +31,7 @@ namespace sage
       public:
         void GeneratePortraitRenderTexture(entt::entity entity, float width, float height);
         void GenerateRenderTexture(entt::entity entity, float width, float height);
-        std::unique_ptr<Event<entt::entity>> onEquipmentUpdated; // Selected actor
+        Event<entt::entity> onEquipmentUpdated; // Selected actor
         [[nodiscard]] entt::entity GetItem(entt::entity owner, EquipmentSlotName itemType) const;
         void EquipItem(entt::entity owner, entt::entity item, EquipmentSlotName itemType) const;
         void MoveItemToInventory(entt::entity owner, EquipmentSlotName itemType) const;

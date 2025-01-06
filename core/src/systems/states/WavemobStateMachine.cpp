@@ -51,9 +51,9 @@ namespace sage
         {
             auto& state = registry->get<WavemobState>(self);
             auto& combatable = registry->get<CombatableActor>(self);
-            combatable.onHit->Subscribe([this](const AttackData ad) { OnHit(ad); });
+            combatable.onHit.Subscribe([this](const AttackData ad) { OnHit(ad); });
             // Persistent connections
-            combatable.onDeath->Subscribe([this](const entt::entity entity) { OnDeath(entity); });
+            combatable.onDeath.Subscribe([this](const entt::entity entity) { OnDeath(entity); });
             // ----------------------------
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
@@ -135,15 +135,15 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             const auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
 
             auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
             moveable.followTarget.emplace(registry, self, combatable.target);
 
-            auto cnx = moveable.onDestinationReached->Subscribe(
+            auto cnx = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
-            auto cnx1 = moveable.followTarget->onTargetPathChanged->Subscribe(
+            auto cnx1 = moveable.followTarget->onTargetPathChanged.Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPosUpdate(_self, _target); });
 
             auto& state = registry->get<WavemobState>(self);
@@ -209,13 +209,13 @@ namespace sage
         void OnStateEnter(entt::entity entity) override
         {
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).startCast->Publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).startCast.Publish(abilityEntity);
         }
 
         void OnStateExit(entt::entity entity) override
         {
             auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
         }
 
         ~CombatState() override = default;
@@ -252,11 +252,11 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             auto& state = registry->get<WavemobState>(self);
             auto cnx =
-                animation.onAnimationEnd->Subscribe([this](entt::entity _entity) { destroyEntity(_entity); });
+                animation.onAnimationEnd.Subscribe([this](entt::entity _entity) { destroyEntity(_entity); });
             state.ManageSubscription(std::move(cnx));
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
-            registry->get<Ability>(abilityEntity).cancelCast->Publish(abilityEntity);
+            registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
 
             gameData->actorMovementSystem->CancelMovement(self);
         }

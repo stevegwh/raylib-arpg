@@ -44,7 +44,7 @@ namespace sage
         renderable.active = false;
         auto& moveable = registry->get<MoveableActor>(current);
         destinationReachedCnx =
-            moveable.onDestinationReached->Subscribe([this](entt::entity) { disableIndicator(); });
+            moveable.onDestinationReached.Subscribe([this](entt::entity) { disableIndicator(); });
     }
 
     void CursorClickIndicator::disableIndicator() const
@@ -70,8 +70,8 @@ namespace sage
     CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData), self(registry->create())
     {
-        _gameData->cursor->onAnyLeftClick->Subscribe([this](const entt::entity entity) { onCursorClick(entity); });
-        _gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+        _gameData->cursor->onAnyLeftClick.Subscribe([this](const entt::entity entity) { onCursorClick(entity); });
+        _gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity prev, entt::entity current) { onSelectedActorChanged(prev, current); });
 
         // Init indicator graphics here

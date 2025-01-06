@@ -27,8 +27,8 @@ namespace sage
 
       public:
         std::unique_ptr<GameData> data;
-        std::unique_ptr<Event<entt::entity>> sceneLoadingFinished; // Currently unused
-        std::unique_ptr<Event<entt::entity>> sceneChange;
+        Event<entt::entity> sceneLoadingFinished; // Currently unused
+        Event<entt::entity> sceneChange;
 
         virtual void Update();
         virtual void Draw3D();

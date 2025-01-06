@@ -44,11 +44,7 @@ namespace sage
         float maxDistance = 0;
         Vector3 origin{};
         Vector3 destination{};
-        std::unique_ptr<Event<entt::entity, CollisionInfo>> onHit;
-
-        CollisionChecker() : onHit(std::make_unique<Event<entt::entity, CollisionInfo>>())
-        {
-        }
+        Event<entt::entity, CollisionInfo> onHit{};
     };
 
     class Collideable

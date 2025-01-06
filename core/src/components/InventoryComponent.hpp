@@ -24,9 +24,9 @@ namespace sage
         std::unique_ptr<Connection> onItemRemovedCnx;
         std::unique_ptr<Connection> onInventoryFullCnx;
 
-        std::unique_ptr<Event<>> onItemAdded;
-        std::unique_ptr<Event<>> onItemRemoved;
-        std::unique_ptr<Event<>> onInventoryFull;
+        Event<> onItemAdded;
+        Event<> onItemRemoved;
+        Event<> onInventoryFull;
         [[nodiscard]] bool AddItem(entt::entity entity);
         bool AddItem(entt::entity entity, unsigned int row, unsigned int col);
         void RemoveItem(unsigned int row, unsigned int col);

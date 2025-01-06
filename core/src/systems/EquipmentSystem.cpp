@@ -57,7 +57,7 @@ namespace sage
         const ModelAnimation& anim = animation.animations[animData.index];
         animData.currentFrame = anim.frameCount;
         renderable.GetModel()->UpdateAnimation(anim, animData.currentFrame);
-        animation.onAnimationUpdated->Publish(entity);
+        animation.onAnimationUpdated.Publish(entity);
     }
 
     void EquipmentSystem::instantiateWeapon(
@@ -101,7 +101,7 @@ namespace sage
         weaponTrans.SetLocalRot({0, 0, 0, 0});
 
         auto& animation = registry->get<Animation>(owner);
-        animation.onAnimationUpdated->Subscribe(
+        animation.onAnimationUpdated.Subscribe(
             [this](entt::entity _entity) { updateCharacterWeaponPosition(_entity); });
     }
 
@@ -221,7 +221,7 @@ namespace sage
         {
             instantiateWeapon(owner, item, itemType);
         }
-        onEquipmentUpdated->Publish(owner);
+        onEquipmentUpdated.Publish(owner);
     }
 
     void EquipmentSystem::MoveItemToInventory(entt::entity owner, EquipmentSlotName itemType) const
@@ -239,7 +239,7 @@ namespace sage
             equipment.worldModels[itemType] = entt::null;
         }
         equipment.slots[itemType] = entt::null;
-        onEquipmentUpdated->Publish(owner);
+        onEquipmentUpdated.Publish(owner);
     }
 
     void EquipmentSystem::DestroyItem(entt::entity owner, EquipmentSlotName itemType) const
@@ -253,7 +253,7 @@ namespace sage
                 equipment.worldModels[itemType] = entt::null;
             }
             equipment.slots[itemType] = entt::null;
-            onEquipmentUpdated->Publish(owner);
+            onEquipmentUpdated.Publish(owner);
         }
     }
 
@@ -315,7 +315,7 @@ namespace sage
     }
 
     EquipmentSystem::EquipmentSystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData), onEquipmentUpdated(std::make_unique<Event<entt::entity>>())
+        : registry(_registry), gameData(_gameData)
     {
         registry->on_construct<EquipmentComponent>().connect<&EquipmentSystem::onComponentAdded>(this);
         registry->on_destroy<EquipmentComponent>().connect<&EquipmentSystem::onComponentRemoved>(this);

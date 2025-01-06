@@ -264,14 +264,14 @@ namespace sage
             auto& colChecker = registry->get<CollisionChecker>(entity);
             if (Vector3Distance(colChecker.origin, colChecker.destination) > colChecker.maxDistance)
             {
-                colChecker.onHit->Publish(entity, out);
+                colChecker.onHit.Publish(entity, out);
                 registry->remove<CollisionChecker>(entity);
                 continue;
             }
             auto& bb = col.worldBoundingBox;
             if (GetFirstCollisionBB(entity, bb, col.collisionLayer, out))
             {
-                colChecker.onHit->Publish(entity, out);
+                colChecker.onHit.Publish(entity, out);
             }
         }
     }
