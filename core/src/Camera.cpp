@@ -20,74 +20,6 @@
 namespace sage
 {
 
-    void Camera::onForwardKeyPressed()
-    {
-        forwardKeyDown = true;
-    }
-
-    void Camera::onLeftKeyPressed()
-    {
-        leftKeyDown = true;
-    }
-
-    void Camera::onRightKeyPressed()
-    {
-        rightKeyDown = true;
-    }
-
-    void Camera::onBackKeyPressed()
-    {
-        backKeyDown = true;
-    }
-
-    void Camera::onRotateLeftKeyPressed()
-    {
-        rotateLeftKeyDown = true;
-    }
-
-    void Camera::onRotateRightKeyPressed()
-    {
-        rotateRightKeyDown = true;
-    }
-
-    void Camera::onForwardKeyUp()
-    {
-        forwardKeyDown = false;
-    }
-
-    void Camera::onLeftKeyUp()
-    {
-        leftKeyDown = false;
-    }
-
-    void Camera::onRightKeyUp()
-    {
-        rightKeyDown = false;
-    }
-
-    void Camera::onBackKeyUp()
-    {
-        backKeyDown = false;
-    }
-
-    void Camera::onRotateLeftKeyUp()
-    {
-        rotateLeftKeyDown = false;
-    }
-
-    void Camera::onRotateRightKeyUp()
-    {
-        rotateRightKeyDown = false;
-    }
-
-    void Camera::SaveCamera()
-    {
-    }
-
-    void Camera::LoadCamera()
-    {
-    }
-
     void Camera::updateTarget()
     {
         GridSquare square{};
@@ -237,16 +169,15 @@ namespace sage
         rlCamera.position.y = rlCamera.target.y;
 
         // Define the base camera offset in local space
-        Vector3 localOffset = {
+        constexpr Vector3 localOffset = {
             5.0f, 10.0f, 18.0f}; // Distance from actor in local space (TODO: Shouldn't be hardcoded)
 
-        Vector3 rotation = npcTrans.GetWorldRot();
-        Matrix rotationMatrix =
-            MatrixRotateXYZ({rotation.x * DEG2RAD, rotation.y * DEG2RAD, rotation.z * DEG2RAD});
+        auto [rotx, roty, rotz] = npcTrans.GetWorldRot();
+        const Matrix rotationMatrix = MatrixRotateXYZ({rotx * DEG2RAD, roty * DEG2RAD, rotz * DEG2RAD});
 
-        Vector3 rotatedOffset = Vector3Transform(localOffset, rotationMatrix);
-        Vector3 cameraPosition = Vector3Add(npcTrans.GetWorldPos(), rotatedOffset);
-        Vector3 cameraTarget = Vector3Add(npcTrans.GetWorldPos(), {0.0f, 1.0f, 0.0f});
+        const Vector3 rotatedOffset = Vector3Transform(localOffset, rotationMatrix);
+        const Vector3 cameraPosition = Vector3Add(npcTrans.GetWorldPos(), rotatedOffset);
+        const Vector3 cameraTarget = Vector3Add(npcTrans.GetWorldPos(), {0.0f, 1.0f, 0.0f});
 
         rlCamera.position = cameraPosition;
         rlCamera.target = cameraTarget;
@@ -293,18 +224,17 @@ namespace sage
         currentPositionY = rlCamera.position.y;
         currentTargetY = rlCamera.target.y;
 
-        userInput->keyWPressed.Subscribe([this]() { onForwardKeyPressed(); });
-        userInput->keyWPressed.Subscribe([this]() { onForwardKeyPressed(); });
-        userInput->keySPressed.Subscribe([this]() { onBackKeyPressed(); });
-        userInput->keyAPressed.Subscribe([this]() { onLeftKeyPressed(); });
-        userInput->keyDPressed.Subscribe([this]() { onRightKeyPressed(); });
-        userInput->keyEPressed.Subscribe([this]() { onRotateLeftKeyPressed(); });
-        userInput->keyQPressed.Subscribe([this]() { onRotateRightKeyPressed(); });
-        userInput->keyWUp.Subscribe([this]() { onForwardKeyUp(); });
-        userInput->keySUp.Subscribe([this]() { onBackKeyUp(); });
-        userInput->keyAUp.Subscribe([this]() { onLeftKeyUp(); });
-        userInput->keyDUp.Subscribe([this]() { onRightKeyUp(); });
-        userInput->keyEUp.Subscribe([this]() { onRotateLeftKeyUp(); });
-        userInput->keyQUp.Subscribe([this]() { onRotateRightKeyUp(); });
+        userInput->keyWPressed.Subscribe([this]() { forwardKeyDown = true; });
+        userInput->keySPressed.Subscribe([this]() { backKeyDown = true; });
+        userInput->keyAPressed.Subscribe([this]() { leftKeyDown = true; });
+        userInput->keyDPressed.Subscribe([this]() { rightKeyDown = true; });
+        userInput->keyEPressed.Subscribe([this]() { rotateLeftKeyDown = true; });
+        userInput->keyQPressed.Subscribe([this]() { rotateRightKeyDown = true; });
+        userInput->keyWUp.Subscribe([this]() { forwardKeyDown = false; });
+        userInput->keySUp.Subscribe([this]() { backKeyDown = false; });
+        userInput->keyAUp.Subscribe([this]() { leftKeyDown = false; });
+        userInput->keyDUp.Subscribe([this]() { rightKeyDown = false; });
+        userInput->keyEUp.Subscribe([this]() { rotateLeftKeyDown = false; });
+        userInput->keyQUp.Subscribe([this]() { rotateRightKeyDown = false; });
     }
 } // namespace sage

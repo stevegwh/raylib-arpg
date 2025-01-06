@@ -65,8 +65,6 @@ namespace sage
         void ScrollDisable();
         void LockInput();
         void UnlockInput();
-        void LoadCamera();
-        void SaveCamera();
         [[nodiscard]] Vector3 GetForward();
         [[nodiscard]] Vector3 GetRight();
         [[nodiscard]] Vector3 GetBackward();
@@ -74,7 +72,6 @@ namespace sage
         [[nodiscard]] Vector3 GetPosition() const;
         void CutscenePose(const sgTransform& location);
         void CutsceneEnd();
-        void LerpToLoc(const sgTransform& location);
         void SetCamera(Vector3 _pos, Vector3 _target);
         void FocusSelectedActor();
         void DrawDebug();

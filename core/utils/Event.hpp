@@ -31,7 +31,6 @@ namespace sage
     {
         virtual void unSubscribe(SubscriberId id) = 0;
 
-      protected:
       public:
         virtual ~EventBase() = default;
 
