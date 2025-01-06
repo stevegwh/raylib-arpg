@@ -36,9 +36,11 @@ namespace sage
     void ControllableActorSystem::SetSelectedActor(entt::entity id)
     {
         if (id == selectedActorId) return;
+        entt::entity oldEntity = entt::null;
         if (selectedActorId != entt::null)
         {
-            auto& old = registry->get<ControllableActor>(selectedActorId);
+            oldEntity = selectedActorId;
+            auto& old = registry->get<ControllableActor>(oldEntity);
             old.selectedIndicator->SetShader(
                 ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
             old.selectedIndicator->SetHint(inactiveCol);
@@ -98,7 +100,7 @@ namespace sage
             }
         }
 
-        onSelectedActorChange->Publish(id);
+        onSelectedActorChange->Publish(oldEntity, id);
     }
 
     entt::entity ControllableActorSystem::GetSelectedActor() const
@@ -134,7 +136,7 @@ namespace sage
     ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, GameData* _gameData)
         : BaseSystem(_registry),
           gameData(_gameData),
-          onSelectedActorChange(std::make_unique<Event<entt::entity>>())
+          onSelectedActorChange(std::make_unique<Event<entt::entity, entt::entity>>())
     {
         registry->on_construct<ControllableActor>().connect<&ControllableActorSystem::onComponentAdded>(this);
         registry->on_destroy<ControllableActor>().connect<&ControllableActorSystem::onComponentRemoved>(this);

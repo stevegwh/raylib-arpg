@@ -204,7 +204,7 @@ namespace sage
             auto cnx =
                 moveable.onMovementCancel->Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
             auto cnx1 = gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-                [this](entt::entity entity) { onMovementCancelled(entity); });
+                [this](entt::entity, entt::entity entity) { onMovementCancelled(entity); });
 
             auto& state = registry->get<PartyMemberState>(self);
             state.ManageSubscription(std::move(cnx));

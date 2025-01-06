@@ -372,6 +372,7 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = entt::null;
+            combatable.onTargetDeathCnx->UnSubscribe();
             stateController->ChangeState(self, PlayerStateEnum::Default);
         }
 

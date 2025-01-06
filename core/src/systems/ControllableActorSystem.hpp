@@ -26,7 +26,7 @@ namespace sage
       public:
         void SetSelectedActor(entt::entity id);
         [[nodiscard]] entt::entity GetSelectedActor() const;
-        std::unique_ptr<Event<entt::entity>> onSelectedActorChange;
+        std::unique_ptr<Event<entt::entity, entt::entity>> onSelectedActorChange; // prev, current
         void Update() const;
         ControllableActorSystem(entt::registry* _registry, GameData* _gameData);
     };

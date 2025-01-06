@@ -33,9 +33,7 @@ namespace sage
 
       protected:
       public:
-        virtual ~EventBase(){
-
-        };
+        virtual ~EventBase() = default;
 
         friend class Connection;
     };
@@ -70,6 +68,8 @@ namespace sage
                 subscriber(args...);
             }
         }
+
+        ~Event() override = default;
     };
 
 } // namespace sage

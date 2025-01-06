@@ -12,6 +12,7 @@
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
+#include "components/DeleteEntityComponent.hpp"
 #include "raylib.h"
 
 namespace sage
@@ -229,11 +230,14 @@ namespace sage
     {
         WavemobStateController* stateController;
 
-        void destroyEntity(entt::entity self)
+        void destroyEntity(entt::entity self) const
         {
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
-            registry->destroy(self);
+            auto& state = registry->get<WavemobState>(self);
+            state.RemoveAllConnections();
+            // registry->destroy(self);
+            registry->emplace<DeleteEntityComponent>(self);
         }
 
       public:

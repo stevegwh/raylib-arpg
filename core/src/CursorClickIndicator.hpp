@@ -23,9 +23,9 @@ namespace sage
 
         std::unique_ptr<Connection> destinationReachedCnx;
 
-        void onCursorClick(entt::entity entity);
-        void onReachLocation() const;
-        void onSelectedActorChanged() const;
+        void onCursorClick(entt::entity entity) const;
+        void disableIndicator() const;
+        void onSelectedActorChanged(entt::entity, entt::entity current);
 
       public:
         void Update();

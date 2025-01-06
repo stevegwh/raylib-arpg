@@ -16,17 +16,19 @@
 namespace sage
 {
     class AudioManager;
-    
+    class CleanupSystem;
+
     class Application
     {
         RenderTexture renderTexture{};
         RenderTexture renderTexture2d{};
 
       protected:
+        std::unique_ptr<entt::registry> registry;
+        std::unique_ptr<CleanupSystem> cleanupSystem;
         std::unique_ptr<AudioManager> audioManager;
         std::unique_ptr<Settings> settings;
         std::unique_ptr<KeyMapping> keyMapping;
-        std::unique_ptr<entt::registry> registry;
         std::unique_ptr<Scene> scene;
         bool exitWindowRequested = false; // Flag to request window to exit
         bool exitWindow = false;          // Flag to set window to exit

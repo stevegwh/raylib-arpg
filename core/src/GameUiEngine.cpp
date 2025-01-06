@@ -704,7 +704,7 @@ namespace sage
         : TextBox(_engine, _parent, _fontInfo), statisticType(_statisticType)
     {
         _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+            [this](entt::entity, entt::entity) { RetrieveInfo(); });
 
         _engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
             [this](entt::entity) { RetrieveInfo(); });
@@ -1085,7 +1085,7 @@ namespace sage
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
     {
         _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+            [this](entt::entity, entt::entity) { RetrieveInfo(); });
 
         _engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
             [this](entt::entity) { RetrieveInfo(); });
@@ -1200,7 +1200,7 @@ namespace sage
         tex.height = height;
         canReceiveDragDrops = true;
         _engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+            [this](entt::entity, entt::entity) { RetrieveInfo(); });
         _engine->gameData->partySystem->onPartyChange->Subscribe([this]() { RetrieveInfo(); });
     }
 
@@ -1301,7 +1301,7 @@ namespace sage
         draggable = true;
         canReceiveDragDrops = true;
         engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+            [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     Texture ItemSlot::getEmptyTex()
@@ -1574,7 +1574,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
 
         engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+            [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     void InventorySlot::onItemDroppedToWorld()
@@ -1625,7 +1625,7 @@ namespace sage
         : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), row(_row), col(_col)
     {
         engine->gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-            [this](entt::entity) { RetrieveInfo(); });
+            [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     void CloseButton::OnClick()

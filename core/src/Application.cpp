@@ -11,6 +11,7 @@
 #include "GameData.hpp"
 #include "scenes/ExampleScene.hpp"
 #include "Serializer.hpp"
+#include "systems/CleanupSystem.hpp"
 #include "UserInput.hpp"
 
 namespace sage
@@ -125,7 +126,7 @@ namespace sage
             }
 
             scene->Update();
-
+            cleanupSystem->Execute();
             draw();
             handleScreenUpdate();
         }
@@ -180,7 +181,9 @@ namespace sage
         cleanup();
     }
 
-    Application::Application() : registry(std::make_unique<entt::registry>())
+    Application::Application()
+        : registry(std::make_unique<entt::registry>()),
+          cleanupSystem(std::make_unique<CleanupSystem>(registry.get()))
     {
     }
 } // namespace sage

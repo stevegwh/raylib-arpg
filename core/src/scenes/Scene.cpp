@@ -69,13 +69,13 @@ namespace sage
         data->controllableActorSystem->Update();
         data->dialogSystem->Update();
         data->healthBarSystem->Update();
-        data->stateMachines->Update();
         data->playerAbilitySystem->Update();
         data->timerSystem->Update();
         data->collisionSystem->Update();
         data->animationSystem->Update();
         data->contextualDialogSystem->Update();
         data->spatialAudioSystem->Update();
+        data->stateMachines->Update();
     }
 
     void Scene::DrawDebug3D()

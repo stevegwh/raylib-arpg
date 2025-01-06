@@ -197,6 +197,6 @@ namespace sage
         groups.resize(1);
 
         gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-            [this](const entt::entity actor) { SetLeader(actor); });
+            [this](entt::entity, const entt::entity actor) { SetLeader(actor); });
     }
 } // namespace sage
