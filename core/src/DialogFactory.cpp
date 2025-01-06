@@ -36,8 +36,8 @@ namespace sage
 
     static std::string trim(const std::string& str)
     {
-        auto start = str.find_first_not_of(" \t\n\r");
-        auto end = str.find_last_not_of(" \t\n\r");
+        const auto start = str.find_first_not_of(" \t\n\r");
+        const auto end = str.find_last_not_of(" \t\n\r");
         return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
     }
 
@@ -106,7 +106,6 @@ namespace sage
 
         for (const auto& [varName, value] : variables)
         {
-
             result = std::regex_replace(result, std::regex(R"(\$)" + varName), value);
         }
 
@@ -135,7 +134,6 @@ namespace sage
         }
         else
         {
-
             return {trimmedInput, ""};
         }
     }
@@ -266,13 +264,15 @@ namespace sage
 
                 std::stringstream ss(line.substr(2)); // 2 == [[
                 std::string word;
-
                 std::vector<std::string> option;
 
                 while (std::getline(ss, word, '|'))
                 {
                     option.push_back(trim(word));
                 }
+
+                auto& lastWord = option.at(option.size() - 1);
+                lastWord = lastWord.substr(0, lastWord.find_first_of("]]"));
 
                 if (option.size() == 2)
                 {
@@ -286,8 +286,6 @@ namespace sage
                 }
                 else if (option.size() == 3) // "[[" with function
                 {
-                    option.at(2) = option.at(2).substr(0, option.at(2).find_first_of("]]"));
-
                     const auto& token = getFunctionNameAndArgs(option.at(0));
                     if (token.name == "complete_quest_task")
                     {
@@ -364,6 +362,7 @@ namespace sage
             }
         }
         conversation->AddNode(std::move(node));
+        //
     }
 
     void DialogFactory::LoadDialog()
@@ -415,15 +414,9 @@ namespace sage
                     auto owner = line.substr(std::string("owner:").size());
                     owner = trim(owner);
 
-                    entity = gameData->renderSystem->FindRenderableByName<DialogComponent>(owner);
-                    if (entity == entt::null)
-                    {
-                        entity = gameData->renderSystem->FindRenderableByName(owner);
-                    }
+                    entity = gameData->renderSystem->FindRenderable<DialogComponent>(owner);
                     assert(entity != entt::null);
                     dialogComponent = &registry->get<DialogComponent>(entity);
-
-                    // Create conversation tied to this entity
                     dialogComponent->conversation = std::make_unique<dialog::Conversation>(registry, entity);
                 }
                 else if (line.starts_with("speaker_name:"))
