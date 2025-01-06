@@ -2098,7 +2098,10 @@ namespace sage
 
     TooltipWindow::~TooltipWindow()
     {
-        parentWindowHideCnx->UnSubscribe();
+        if (parent)
+        {
+            parentWindowHideCnx->UnSubscribe();
+        }
     }
 
     TooltipWindow::TooltipWindow(

@@ -681,7 +681,7 @@ namespace sage
 
       public:
         std::unique_ptr<Event<>> onHide;
-        std::shared_ptr<Connection<Vector2, Vector2>> windowUpdateCnx{};
+        std::shared_ptr<Connection> windowUpdateCnx{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height
 
@@ -721,7 +721,7 @@ namespace sage
 
     class TooltipWindow final : public Window
     {
-        std::shared_ptr<Connection<>> parentWindowHideCnx;
+        std::shared_ptr<Connection> parentWindowHideCnx;
 
       public:
         void ScaleContents() override;

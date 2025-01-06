@@ -23,16 +23,16 @@ namespace sage
 
         // We forward the cursor's clicks onto our own events (and inject this entity's id into it)
         // Persists between state changes (do not try to add them via state.AddConnection)
-        std::shared_ptr<Connection<entt::entity>> cursorOnEnemyLeftClickCnx{};
-        std::shared_ptr<Connection<entt::entity>> cursorOnEnemyRightClickCnx{};
-        std::shared_ptr<Connection<entt::entity>> cursorOnFloorClickCnx{};
-        std::shared_ptr<Connection<entt::entity>> cursorOnNPCLeftClickCnx{};
+        std::shared_ptr<Connection> cursorOnEnemyLeftClickCnx{};
+        std::shared_ptr<Connection> cursorOnEnemyRightClickCnx{};
+        std::shared_ptr<Connection> cursorOnFloorClickCnx{};
+        std::shared_ptr<Connection> cursorOnNPCLeftClickCnx{};
 
         // The forwarded events' connections (to unsubscribe)
-        std::shared_ptr<Connection<entt::entity, entt::entity>> onEnemyLeftClickCnx{};
-        std::shared_ptr<Connection<entt::entity, entt::entity>> onEnemyRightClickCnx{};
-        std::shared_ptr<Connection<entt::entity, entt::entity>> onFloorClickCnx{};
-        std::shared_ptr<Connection<entt::entity, entt::entity>> onNPCLeftClickCnx{};
+        std::shared_ptr<Connection> onEnemyLeftClickCnx{};
+        std::shared_ptr<Connection> onEnemyRightClickCnx{};
+        std::shared_ptr<Connection> onFloorClickCnx{};
+        std::shared_ptr<Connection> onNPCLeftClickCnx{};
 
         // The events themselves
         const std::unique_ptr<Event<entt::entity, entt::entity>> onEnemyLeftClick{};  // Self, Clicked enemy

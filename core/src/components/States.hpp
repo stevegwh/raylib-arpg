@@ -12,11 +12,11 @@ namespace sage
     class BaseState
     {
         StateEnum currentState;
-        std::vector<std::shared_ptr<BaseConnection>> currentStateConnections;
+        std::vector<std::shared_ptr<Connection>> currentStateConnections;
 
       public:
         // All connections added here will be removed when ChangeState is called (via StateMachine).
-        void ManageSubscription(const std::shared_ptr<BaseConnection>& newConnection)
+        void ManageSubscription(const std::shared_ptr<Connection>& newConnection)
         {
             currentStateConnections.push_back(newConnection);
         }

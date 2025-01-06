@@ -21,7 +21,7 @@ namespace sage
         entt::entity self;
         float k = 0;
 
-        std::shared_ptr<Connection<entt::entity>> destinationReachedCnx;
+        std::shared_ptr<Connection> destinationReachedCnx;
 
         void onCursorClick(entt::entity entity);
         void onReachLocation() const;

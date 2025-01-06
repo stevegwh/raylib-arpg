@@ -65,7 +65,7 @@ namespace sage
         const std::unique_ptr<Event<entt::entity>> onDeath{};
         const std::unique_ptr<Event<entt::entity, entt::entity>>
             onAttackCancelled{}; // Self, object clicked (can discard)
-        std::shared_ptr<Connection<entt::entity>> onTargetDeathCnx{};
+        std::shared_ptr<Connection> onTargetDeathCnx{};
         const std::unique_ptr<Event<entt::entity, entt::entity>> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(const CombatableActor&) = delete;

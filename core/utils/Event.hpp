@@ -6,62 +6,57 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 namespace sage
 {
-    using SubscriberId = std::string;
+    using SubscriberId = int;
 
-    template <typename... Args>
-    class Event;
+    class EventBase;
 
-    class BaseConnection
+    class Connection
     {
+        EventBase* event{};
+        SubscriberId id = -1;
+
       public:
-        virtual void UnSubscribe() = 0;
-        virtual ~BaseConnection() = default;
+        void UnSubscribe();
+        explicit Connection(EventBase* _event, SubscriberId _id);
+    };
+
+    class EventBase
+    {
+        virtual void unSubscribe(SubscriberId id) = 0;
+
+      protected:
+      public:
+        virtual ~EventBase() = default;
+
+        friend class Connection;
     };
 
     template <typename... Args>
-    class Connection final : public BaseConnection
+    class Event : public EventBase
     {
-        Event<Args...>* event;
-        SubscriberId id;
+        unsigned int count = 0;
+        std::unordered_map<unsigned int, std::function<void(Args...)>> subscribers;
 
-      public:
-        void UnSubscribe() override
+        void unSubscribe(SubscriberId id) override
         {
-            if (!event) return;
-            event->unSubscribe(id);
-            id.clear();
-            event = nullptr;
-        }
-
-        explicit Connection(Event<Args...>* _event, SubscriberId _id) : event(_event), id(std::move(_id))
-        {
-        }
-    };
-
-    template <typename... Args>
-    class Event
-    {
-        int count = 0;
-        std::unordered_map<SubscriberId, std::function<void(Args...)>> subscribers;
-
-        void unSubscribe(SubscriberId id)
-        {
-            if (id.empty()) return;
+            if (id < 0 || !subscribers.contains(id)) return; // Has already been unsubscribed
             subscribers.erase(id);
         }
 
       public:
-        [[nodiscard]] std::shared_ptr<Connection<Args...>> Subscribe(std::function<void(Args...)> func)
+        // [[nodiscard]]
+        std::shared_ptr<Connection> Subscribe(std::function<void(Args...)> func)
         {
-            auto key = std::string(std::to_string(++count));
+            auto key = ++count;
             subscribers.emplace(key, func);
 
             // Shared ptr makes us able to treat connections as polymorphic due to BaseConnection
-            return std::make_shared<Connection<Args...>>(this, key);
+            return std::make_shared<Connection>(this, key);
         }
 
         void Publish(Args... args)
@@ -73,8 +68,6 @@ namespace sage
                 subscriber(args...);
             }
         }
-
-        friend class Connection<Args...>;
     };
 
 } // namespace sage
