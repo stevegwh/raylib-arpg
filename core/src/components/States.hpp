@@ -16,12 +16,12 @@ namespace sage
 
       public:
         // All connections added here will be removed when ChangeState is called (via StateMachine).
-        void AddConnection(std::shared_ptr<BaseConnection> newConnection)
+        void ManageSubscription(const std::shared_ptr<BaseConnection>& newConnection)
         {
             currentStateConnections.push_back(newConnection);
         }
 
-        void RemoveAllConnections()
+        void RemoveAllConnections() const
         {
             for (auto& connection : currentStateConnections)
             {

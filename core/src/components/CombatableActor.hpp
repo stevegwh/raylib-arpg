@@ -74,7 +74,6 @@ namespace sage
             : onHit(std::make_unique<Event<AttackData>>()),
               onDeath(std::make_unique<Event<entt::entity>>()),
               onAttackCancelled(std::make_unique<Event<entt::entity, entt::entity>>()),
-              onTargetDeathCnx(std::make_shared<Connection<entt::entity>>()),
               onTargetDeath(std::make_unique<Event<entt::entity, entt::entity>>())
         {
             for (unsigned int i = 0; i < MAX_ABILITY_NUMBER; ++i)

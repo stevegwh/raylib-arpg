@@ -2062,9 +2062,8 @@ namespace sage
         float height,
         Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding),
-          settings(_settings),
           onHide(std::make_unique<Event<>>()),
-          windowUpdateCnx(std::make_shared<Connection<Vector2, Vector2>>())
+          settings(_settings)
     {
         tex = _tex;
         textureStretchMode = _stretchMode;
@@ -2072,9 +2071,8 @@ namespace sage
 
     Window::Window(Settings* _settings, float x, float y, float width, float height, Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding),
-          settings(_settings),
           onHide(std::make_unique<Event<>>()),
-          windowUpdateCnx(std::make_shared<Connection<Vector2, Vector2>>())
+          settings(_settings)
     {
     }
 
@@ -2113,7 +2111,7 @@ namespace sage
         float width,
         float height,
         Padding _padding)
-        : Window(_settings, x, y, width, height, _padding), parentWindowHideCnx(std::make_shared<Connection<>>())
+        : Window(_settings, x, y, width, height, _padding)
     {
         if (parentWindow)
         {

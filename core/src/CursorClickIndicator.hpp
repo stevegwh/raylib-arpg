@@ -24,8 +24,8 @@ namespace sage
         std::shared_ptr<Connection<entt::entity>> destinationReachedCnx;
 
         void onCursorClick(entt::entity entity);
-        void onReachLocation();
-        void onSelectedActorChanged();
+        void onReachLocation() const;
+        void onSelectedActorChanged() const;
 
       public:
         void Update();

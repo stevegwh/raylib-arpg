@@ -74,10 +74,7 @@ namespace sage
     }
 
     InventoryComponent::InventoryComponent()
-        : onItemAddedCnx(std::make_shared<Connection<>>()),
-          onItemRemovedCnx(std::make_shared<Connection<>>()),
-          onInventoryFullCnx(std::make_shared<Connection<>>()),
-          onItemAdded(std::make_unique<Event<>>()),
+        : onItemAdded(std::make_unique<Event<>>()),
           onItemRemoved(std::make_unique<Event<>>()),
           onInventoryFull(std::make_unique<Event<>>())
     {

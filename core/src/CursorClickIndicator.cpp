@@ -36,16 +36,22 @@ namespace sage
             moveable.onDestinationReached->Subscribe([this](entt::entity) { onReachLocation(); });
     }
 
-    void CursorClickIndicator::onSelectedActorChanged()
+    void CursorClickIndicator::onSelectedActorChanged() const
     {
-        destinationReachedCnx->UnSubscribe();
+        if (destinationReachedCnx)
+        {
+            destinationReachedCnx->UnSubscribe();
+        }
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
     }
 
-    void CursorClickIndicator::onReachLocation()
+    void CursorClickIndicator::onReachLocation() const
     {
-        destinationReachedCnx->UnSubscribe();
+        if (destinationReachedCnx)
+        {
+            destinationReachedCnx->UnSubscribe();
+        }
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
     }
@@ -65,10 +71,7 @@ namespace sage
     }
 
     CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry),
-          gameData(_gameData),
-          self(registry->create()),
-          destinationReachedCnx(std::make_shared<Connection<entt::entity>>())
+        : registry(_registry), gameData(_gameData), self(registry->create())
     {
         gameData->cursor->onAnyLeftClick->Subscribe([this](const entt::entity entity) { onCursorClick(entity); });
         gameData->controllableActorSystem->onSelectedActorChange->Subscribe(

@@ -122,10 +122,10 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
             auto& moveable = registry->get<MoveableActor>(self);
             auto& state = registry->get<PlayerState>(self);
-            state.AddConnection(moveable.onDestinationReached->Subscribe(
+            state.ManageSubscription(moveable.onDestinationReached->Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); }));
 
-            state.AddConnection(moveable.onMovementCancel->Subscribe(
+            state.ManageSubscription(moveable.onMovementCancel->Subscribe(
                 [this](entt::entity _entity) { onMovementCancelled(_entity); }));
 
             auto& animation = registry->get<Animation>(self);
@@ -178,9 +178,9 @@ namespace sage
             gameData->actorMovementSystem->PathfindToLocation(self, pos);
 
             auto& state = registry->get<PlayerState>(self);
-            state.AddConnection(moveable.onDestinationReached->Subscribe(
+            state.ManageSubscription(moveable.onDestinationReached->Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); }));
-            state.AddConnection(moveable.onMovementCancel->Subscribe(
+            state.ManageSubscription(moveable.onMovementCancel->Subscribe(
                 [this](entt::entity _entity) { onMovementCancelled(_entity); }));
 
             auto& animation = registry->get<Animation>(self);
@@ -316,15 +316,15 @@ namespace sage
             auto& moveableActor = registry->get<MoveableActor>(self);
 
             auto& state = registry->get<PlayerState>(self);
-            state.AddConnection(moveableActor.onDestinationReached->Subscribe(
-                [this](entt::entity _entity) { onTargetReached(_entity); }));
+            state.ManageSubscription(moveableActor.onDestinationReached->Subscribe(
+                [this](const entt::entity _entity) { onTargetReached(_entity); }));
 
             auto& combatable = registry->get<CombatableActor>(self);
             assert(combatable.target != entt::null);
 
             auto& controllable = registry->get<ControllableActor>(self);
-            controllable.onFloorClick->Subscribe(
-                [this](const entt::entity self, entt::entity clicked) { onAttackCancelled(self, clicked); });
+            state.ManageSubscription(controllable.onFloorClick->Subscribe(
+                [this](const entt::entity _self, entt::entity clicked) { onAttackCancelled(_self, clicked); }));
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
@@ -400,7 +400,7 @@ namespace sage
                 });
 
             auto& state = registry->get<PlayerState>(entity);
-            state.AddConnection(combatable.onTargetDeath->Subscribe(
+            state.ManageSubscription(combatable.onTargetDeath->Subscribe(
                 [this](entt::entity self, entt::entity target) { onTargetDeath(self, target); }));
         }
 

@@ -5,13 +5,13 @@
 #pragma once
 
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <unordered_map>
 
 namespace sage
 {
-
-    using SubscriberId = int;
+    using SubscriberId = std::string;
 
     template <typename... Args>
     class Event;
@@ -24,22 +24,23 @@ namespace sage
     };
 
     template <typename... Args>
-    class Connection : public BaseConnection
+    class Connection final : public BaseConnection
     {
         Event<Args...>* event;
-        SubscriberId id = -1;
+        SubscriberId id;
 
       public:
         void UnSubscribe() override
         {
+            if (!event) return;
             event->unSubscribe(id);
+            id.clear();
+            event = nullptr;
         }
 
-        explicit Connection(Event<Args...>* _event, const SubscriberId _id) : event(_event), id(_id)
+        explicit Connection(Event<Args...>* _event, SubscriberId _id) : event(_event), id(std::move(_id))
         {
         }
-
-        Connection() = default;
     };
 
     template <typename... Args>
@@ -48,25 +49,26 @@ namespace sage
         int count = 0;
         std::unordered_map<SubscriberId, std::function<void(Args...)>> subscribers;
 
-        void unSubscribe(SubscriberId& id)
+        void unSubscribe(SubscriberId id)
         {
-            if (id == -1) return;
+            if (id.empty()) return;
             subscribers.erase(id);
-            id = -1;
         }
 
       public:
-        // [[nodiscard]]
-        std::shared_ptr<Connection<Args...>> Subscribe(std::function<void(Args...)> func)
+        [[nodiscard]] std::shared_ptr<Connection<Args...>> Subscribe(std::function<void(Args...)> func)
         {
-            subscribers.emplace(++count, func);
+            auto key = std::string(std::to_string(++count));
+            subscribers.emplace(key, func);
 
-            return std::make_shared<Connection<Args...>>(this, count);
+            return std::make_shared<Connection<Args...>>(this, key);
         }
 
         void Publish(Args... args)
         {
-            for (const auto& [key, subscriber] : subscribers)
+            // Make a copy of the subscribers to prevent issues if callbacks modify the subscriber list
+            auto subscribersCopy = subscribers;
+            for (const auto& [key, subscriber] : subscribersCopy)
             {
                 subscriber(args...);
             }

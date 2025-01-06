@@ -122,13 +122,13 @@ namespace sage
 
             auto& state = registry->get<PartyMemberState>(self);
 
-            state.AddConnection(
+            state.ManageSubscription(
                 moveable.onDestinationReached->Subscribe([this](entt::entity _self) { onTargetReached(_self); }));
-            state.AddConnection(moveable.followTarget->onTargetPathChanged->Subscribe(
+            state.ManageSubscription(moveable.followTarget->onTargetPathChanged->Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); }));
-            state.AddConnection(
+            state.ManageSubscription(
                 moveable.onMovementCancel->Subscribe([this](entt::entity _self) { onMovementCancelled(_self); }));
-            state.AddConnection(
+            state.ManageSubscription(
                 moveable.onDestinationUnreachable->Subscribe([this](entt::entity _self, Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
                 }));
@@ -197,10 +197,11 @@ namespace sage
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.emplace(registry, self, followTarget);
 
-            moveable.onMovementCancel->Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
-
-            gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-                [this](entt::entity entity) { onMovementCancelled(entity); });
+            auto& state = registry->get<PartyMemberState>(self);
+            state.ManageSubscription(moveable.onMovementCancel->Subscribe(
+                [this](entt::entity entity) { onMovementCancelled(entity); }));
+            state.ManageSubscription(gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+                [this](entt::entity entity) { onMovementCancelled(entity); }));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
@@ -216,7 +217,6 @@ namespace sage
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.reset();
-            // Do we do this? state.onMovementCancelCnx.UnSubscribe();
         }
 
         ~WaitingForLeaderState() override = default;
@@ -347,10 +347,10 @@ namespace sage
         const auto& leaderMoveable =
             registry->get<MoveableActor>(gameData->controllableActorSystem->GetSelectedActor());
 
-        state.AddConnection(leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
+        leaderMoveable.onStartMovement->Subscribe([this, entity](entt::entity leader) {
             const auto& _state = registry->get<PartyMemberState>(entity);
             _state.onLeaderMove->Publish(entity, leader);
-        }));
+        });
 
         state.onLeaderMove->Subscribe([this](const entt::entity self, const entt::entity leader) {
             GetSystem<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
@@ -361,6 +361,7 @@ namespace sage
 
     void PartyMemberStateController::onComponentRemoved(entt::entity entity)
     {
+        // TODO: Must disconnect subscriptions made in onComponentAdded
     }
 
     PartyMemberStateController::PartyMemberStateController(entt::registry* _registry, GameData* _gameData)
