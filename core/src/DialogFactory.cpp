@@ -30,8 +30,8 @@ namespace sage
 
     struct TextFunction
     {
-        std::string functionName;
-        std::string functionParams;
+        std::string name;
+        std::string params;
     };
 
     static std::string trim(const std::string& str)
@@ -144,7 +144,7 @@ namespace sage
         dialog::Conversation* conversation,
         const std::string& nodeName,
         const std::string& content,
-        const std::vector<std::vector<std::string>>& optionData) const
+        const std::string& dialogOptions) const
     {
         auto node = std::make_unique<dialog::ConversationNode>(conversation);
         node->title = nodeName;
@@ -152,62 +152,107 @@ namespace sage
 
         std::optional<std::function<bool()>> condition;
 
-        for (const auto& option : optionData)
+        std::stringstream optionStream(dialogOptions);
+        std::string line;
+
+        while (std::getline(optionStream, line, '\n'))
         {
-            if (option.at(0) == "if")
+            if (line.find("if") != std::string::npos)
             {
                 assert(!condition.has_value()); // "if blocks" must be closed with end. No nesting allowed (yet).
-                // TODO: Should check if condition is related to quests
-                bool negateCondition = false;
-                unsigned int parameterIndex = 1;
-                if (option.at(1) == "not")
-                {
-                    negateCondition = true;
-                    parameterIndex = 2;
-                }
-                // TODO "AND" and "OR"
-                auto reg = registry;
-                condition = [reg,
-                             negateCondition,
-                             condition = getFunctionNameAndArgs(option.at(parameterIndex)),
-                             this]() -> bool {
+
+                condition = [line, this]() -> bool {
+                    std::function<bool(std::string)> quest_complete = [this](const std::string& params) {
+                        auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                        return quest.IsComplete();
+                    };
+
+                    std::function<bool(std::string)> quest_in_progress = [this](const std::string& params) {
+                        auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                        return quest.HasStarted() && !quest.IsComplete();
+                        ;
+                    };
+
+                    std::function<bool(std::string)> has_item = [this](const std::string& params) {
+                        return gameData->partySystem->CheckPartyHasItem(params);
+                    };
+
+                    std::function<bool(std::string)> quest_tasks_complete = [this](const std::string& params) {
+                        auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                        return quest.HasStarted() && quest.AllTasksComplete();
+                    };
+
+                    std::stringstream condStream(line.substr(3)); // 3 == if and initial space
+                    std::string current;
+
                     bool out = false;
-                    if (condition.functionName == "quest_complete")
+                    bool positive = true;
+                    bool andCondition = false;
+                    bool orCondition = false;
+
+                    auto evaluateCondition = [&](bool condition) {
+                        if (!andCondition && !orCondition)
+                        {
+                            out = positive && condition;
+                        }
+                        else if (andCondition)
+                        {
+                            out = out && (positive && condition);
+                        }
+                        else if (orCondition)
+                        {
+                            out = out || (positive && condition);
+                        }
+                    };
+
+                    const std::unordered_map<std::string, std::function<bool(std::string)>> functionMap = {
+                        {"quest_complete", quest_complete},
+                        {"quest_in_progress", quest_in_progress},
+                        {"has_item", has_item},
+                        {"quest_tasks_complete", quest_tasks_complete}};
+
+                    while (std::getline(condStream, current, ' '))
                     {
-                        assert(!condition.functionParams.empty());
-                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
-                        out = quest.IsComplete();
+                        if (current == "not")
+                        {
+                            positive = false;
+                            continue;
+                        }
+                        if (current == "and")
+                        {
+                            andCondition = true;
+                            continue;
+                        }
+                        if (current == "or")
+                        {
+                            orCondition = true;
+                            continue;
+                        }
+                        auto func = getFunctionNameAndArgs(current);
+                        auto funcIt = functionMap.find(func.name);
+
+                        if (funcIt != functionMap.end())
+                        {
+                            evaluateCondition(funcIt->second(func.params));
+                        }
+                        else
+                        {
+                            assert(0); // unknown conditional token
+                        }
+
+                        positive = true;
+                        andCondition = false;
+                        orCondition = false;
                     }
-                    else if (condition.functionName == "quest_in_progress")
-                    {
-                        assert(!condition.functionParams.empty());
-                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
-                        out = quest.HasStarted() && !quest.IsComplete();
-                    }
-                    else if (condition.functionName == "has_item")
-                    {
-                        assert(!condition.functionParams.empty());
-                        return gameData->partySystem->CheckPartyHasItem(condition.functionParams);
-                    }
-                    else if (condition.functionName == "quest_tasks_complete")
-                    {
-                        assert(!condition.functionParams.empty());
-                        auto& quest = reg->get<Quest>(gameData->questManager->GetQuest(condition.functionParams));
-                        out = quest.HasStarted() && quest.AllTasksComplete();
-                    }
-                    else
-                    {
-                        assert(0); // unknown conditional token
-                    }
-                    return negateCondition ? !out : out;
+                    return out;
                 };
             }
-            else if (option.at(0) == "end")
+            else if (line == "end")
             {
                 assert(condition.has_value()); // ensures that 'end' has an accompanying 'if'
                 condition.reset();
             }
-            else if (option.size() == 2) // "regular [["
+            else if (line.find("[[") != std::string::npos)
             {
                 std::unique_ptr<dialog::Option> baseOption;
                 if (condition.has_value())
@@ -218,87 +263,103 @@ namespace sage
                 {
                     baseOption = std::make_unique<dialog::Option>(node.get());
                 }
-                baseOption->description = option.at(0);
-                const auto& next = option.at(1);
-                if (!next.empty() && next != "exit")
-                {
-                    baseOption->nextNode = next;
-                }
-                node->options.push_back(std::move(baseOption));
-            }
-            else if (option.size() == 3) // "[[" with function
-            {
-                const auto& token = getFunctionNameAndArgs(option.at(0));
-                if (token.functionName == "complete_quest_task")
-                {
-                    assert(!token.functionParams.empty());
-                    auto questId = gameData->questManager->GetQuest(token.functionParams);
-                    std::unique_ptr<dialog::QuestOption> questOption;
-                    if (condition.has_value())
-                    {
-                        questOption =
-                            std::make_unique<dialog::QuestOption>(node.get(), questId, condition.value());
-                    }
-                    else
-                    {
-                        questOption = std::make_unique<dialog::QuestOption>(node.get(), questId);
-                    }
-                    questOption->description = option.at(1);
-                    const auto& next = option.at(2);
-                    if (!next.empty() && next != "exit")
-                    {
-                        questOption->nextNode = next;
-                    }
-                    node->options.push_back(std::move(questOption));
-                }
-                else if (token.functionName == "start_quest")
-                {
-                    assert(!token.functionParams.empty());
-                    auto questId = gameData->questManager->GetQuest(token.functionParams);
-                    std::unique_ptr<dialog::QuestStartOption> questStartOption;
-                    if (condition.has_value())
-                    {
-                        questStartOption =
-                            std::make_unique<dialog::QuestStartOption>(node.get(), questId, condition.value());
-                    }
-                    else
-                    {
-                        questStartOption = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
-                    }
-                    questStartOption->description = option.at(1);
-                    const auto& next = option.at(2);
-                    if (!next.empty() && next != "exit")
-                    {
-                        questStartOption->nextNode = next;
-                    }
-                    node->options.push_back(std::move(questStartOption));
-                }
-                else if (token.functionName == "complete_quest")
-                {
-                    assert(!token.functionParams.empty());
-                    auto questId = gameData->questManager->GetQuest(token.functionParams);
-                    std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
-                    if (condition.has_value())
-                    {
-                        questFinishOption =
-                            std::make_unique<dialog::QuestFinishOption>(node.get(), questId, condition.value());
-                    }
-                    else
-                    {
-                        questFinishOption = std::make_unique<dialog::QuestFinishOption>(node.get(), questId);
-                    }
 
-                    questFinishOption->description = option.at(1);
-                    const auto& next = option.at(2);
+                std::stringstream ss(line.substr(2)); // 2 == [[
+                std::string word;
+
+                std::vector<std::string> option;
+
+                while (std::getline(ss, word, '|'))
+                {
+                    option.push_back(trim(word));
+                }
+
+                if (option.size() == 2)
+                {
+                    baseOption->description = option.at(0);
+                    const auto& next = option.at(1);
                     if (!next.empty() && next != "exit")
                     {
-                        questFinishOption->nextNode = next;
+                        baseOption->nextNode = next;
                     }
-                    node->options.push_back(std::move(questFinishOption));
+                    node->options.push_back(std::move(baseOption));
                 }
-                else
+                else if (option.size() == 3) // "[[" with function
                 {
-                    assert(0);
+                    option.at(2) = option.at(2).substr(0, option.at(2).find_first_of("]]"));
+
+                    const auto& token = getFunctionNameAndArgs(option.at(0));
+                    if (token.name == "complete_quest_task")
+                    {
+                        assert(!token.params.empty());
+                        auto questId = gameData->questManager->GetQuest(token.params);
+                        std::unique_ptr<dialog::QuestOption> questOption;
+                        if (condition.has_value())
+                        {
+                            questOption =
+                                std::make_unique<dialog::QuestOption>(node.get(), questId, condition.value());
+                        }
+                        else
+                        {
+                            questOption = std::make_unique<dialog::QuestOption>(node.get(), questId);
+                        }
+                        questOption->description = option.at(1);
+                        const auto& next = option.at(2);
+                        if (!next.empty() && next != "exit")
+                        {
+                            questOption->nextNode = next;
+                        }
+                        node->options.push_back(std::move(questOption));
+                    }
+                    else if (token.name == "start_quest")
+                    {
+                        assert(!token.params.empty());
+                        auto questId = gameData->questManager->GetQuest(token.params);
+                        std::unique_ptr<dialog::QuestStartOption> questStartOption;
+                        if (condition.has_value())
+                        {
+                            questStartOption =
+                                std::make_unique<dialog::QuestStartOption>(node.get(), questId, condition.value());
+                        }
+                        else
+                        {
+                            questStartOption = std::make_unique<dialog::QuestStartOption>(node.get(), questId);
+                        }
+                        questStartOption->description = option.at(1);
+                        const auto& next = option.at(2);
+                        if (!next.empty() && next != "exit")
+                        {
+                            questStartOption->nextNode = next;
+                        }
+                        node->options.push_back(std::move(questStartOption));
+                    }
+                    else if (token.name == "complete_quest")
+                    {
+                        assert(!token.params.empty());
+                        auto questId = gameData->questManager->GetQuest(token.params);
+                        std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
+                        if (condition.has_value())
+                        {
+                            questFinishOption = std::make_unique<dialog::QuestFinishOption>(
+                                node.get(), questId, condition.value());
+                        }
+                        else
+                        {
+                            questFinishOption = std::make_unique<dialog::QuestFinishOption>(node.get(), questId);
+                        }
+
+                        questFinishOption->description = option.at(1);
+                        const auto& next = option.at(2);
+                        if (!next.empty() && next != "exit")
+                        {
+                            questFinishOption->nextNode = next;
+                        }
+                        node->options.push_back(std::move(questFinishOption));
+                    }
+                    else
+                    {
+                        assert(0);
+                    }
                 }
             }
         }
@@ -334,8 +395,8 @@ namespace sage
             DialogComponent* dialogComponent = nullptr;
 
             std::string currentNodeName;
-            std::string currentNodeContent;
-            std::vector<std::vector<std::string>> currentNodeOptions;
+            std::string currentNodeSpeakerText;
+            std::string currentNodeOptions;
             std::string line;
 
             while (std::getline(contentStream, line))
@@ -346,7 +407,7 @@ namespace sage
                     entity = entt::null;
                     dialogComponent = nullptr;
                     currentNodeName.clear();
-                    currentNodeContent.clear();
+                    currentNodeSpeakerText.clear();
                     currentNodeOptions.clear();
                 }
                 else if (line.starts_with("owner:"))
@@ -392,7 +453,7 @@ namespace sage
                 {
                     // Reset node-specific variables
                     currentNodeName.clear();
-                    currentNodeContent.clear();
+                    currentNodeSpeakerText.clear();
                     currentNodeOptions.clear();
                 }
                 else if (line.starts_with("title:"))
@@ -403,44 +464,23 @@ namespace sage
                 else if (line == "---")
                 {
                     std::string contentLine;
-                    currentNodeContent.clear();
+                    currentNodeSpeakerText.clear();
                     while (std::getline(contentStream, contentLine) && contentLine != "---")
                     {
-                        currentNodeContent += contentLine + "\n";
+                        currentNodeSpeakerText += contentLine + "\n";
                     }
                 }
                 else if (line.starts_with("if"))
                 {
-                    std::istringstream iss(line);
-                    std::vector<std::string> optionParts;
-                    std::string part;
-
-                    while (std::getline(iss, part, ' '))
-                    {
-                        part = trim(part);
-                        optionParts.push_back(part);
-                    }
-
-                    currentNodeOptions.push_back(optionParts);
+                    currentNodeOptions += (trim(line) + "\n");
                 }
                 else if (line == "end")
                 {
-                    currentNodeOptions.push_back({"end"});
+                    currentNodeOptions += "end\n";
                 }
                 else if (line.starts_with("[["))
                 {
-                    line = line.substr(2, line.length() - 4); // Remove [[ and ]]
-                    std::istringstream iss(line);
-                    std::vector<std::string> optionParts;
-                    std::string part;
-
-                    while (std::getline(iss, part, '|'))
-                    {
-                        part = trim(part);
-                        optionParts.push_back(part);
-                    }
-
-                    currentNodeOptions.push_back(optionParts);
+                    currentNodeOptions += (trim(line) + "\n");
                 }
                 else if (line == "</node>")
                 {
@@ -451,7 +491,7 @@ namespace sage
                         parseNode(
                             dialogComponent->conversation.get(),
                             currentNodeName,
-                            currentNodeContent,
+                            currentNodeSpeakerText,
                             currentNodeOptions);
                     }
                 }

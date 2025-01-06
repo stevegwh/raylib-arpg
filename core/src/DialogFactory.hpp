@@ -25,7 +25,7 @@ namespace sage
             dialog::Conversation* conversation,
             const std::string& nodeName,
             const std::string& content,
-            const std::vector<std::vector<std::string>>& optionData) const;
+            const std::string& dialogOptions) const;
 
       public:
         void LoadDialog();
