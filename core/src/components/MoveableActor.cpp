@@ -18,7 +18,13 @@ namespace sage
 
     FollowTarget::FollowTarget(
         entt::registry* _registry, const entt::entity _self, const entt::entity _targetActor)
-        : registry(_registry), self(_self), timeStarted(GetTime()), targetActor(_targetActor)
+        : registry(_registry),
+          self(_self),
+          timeStarted(GetTime()),
+          targetActor(_targetActor),
+          onTargetDestinationReached(std::make_unique<Event<entt::entity, entt::entity>>()),
+          onTargetMovementCancelled(std::make_unique<Event<entt::entity, entt::entity>>()),
+          onTargetPathChanged(std::make_unique<Event<entt::entity, entt::entity>>())
     {
         auto& moveable = _registry->get<MoveableActor>(_targetActor);
 

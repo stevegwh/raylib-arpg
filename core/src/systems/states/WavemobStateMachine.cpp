@@ -77,12 +77,12 @@ namespace sage
     {
         WavemobStateController* stateController;
 
-        void onTargetReached(entt::entity self)
+        void onTargetReached(entt::entity self) const
         {
             stateController->ChangeState(self, WavemobStateEnum::Combat);
         }
 
-        bool isTargetOutOfSight(entt::entity self)
+        [[nodiscard]] bool isTargetOutOfSight(entt::entity self) const
         {
             auto& combatable = registry->get<CombatableActor>(self);
             auto& trans = registry->get<sgTransform>(self);
@@ -140,13 +140,15 @@ namespace sage
             auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
             moveable.followTarget.emplace(registry, self, combatable.target);
-            auto& state = registry->get<WavemobState>(self);
+
             auto cnx = moveable.onDestinationReached->Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
-            state.ManageSubscription(std::move(cnx));
             auto cnx1 = moveable.followTarget->onTargetPathChanged->Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPosUpdate(_self, _target); });
+
+            auto& state = registry->get<WavemobState>(self);
             state.ManageSubscription(std::move(cnx1));
+            state.ManageSubscription(std::move(cnx));
 
             onTargetPosUpdate(self, combatable.target);
         }
@@ -176,7 +178,7 @@ namespace sage
         {
         }
 
-        bool checkInCombat(entt::entity entity)
+        [[nodiscard]] bool checkInCombat(entt::entity entity) const
         {
             auto& combatable = registry->get<CombatableActor>(entity);
             return !combatable.dying && combatable.target != entt::null;
@@ -232,11 +234,8 @@ namespace sage
 
         void destroyEntity(entt::entity self) const
         {
-            auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             auto& state = registry->get<WavemobState>(self);
             state.RemoveAllConnections();
-            // registry->destroy(self);
             registry->emplace<DeleteEntityComponent>(self);
         }
 

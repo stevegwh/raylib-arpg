@@ -17,6 +17,7 @@
 
 namespace sage
 {
+    // An entity that this moveable actor is following
     class FollowTarget
     {
         entt::registry* registry;

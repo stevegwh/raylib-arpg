@@ -362,17 +362,16 @@ namespace sage
     class PlayerStateController::CombatState : public StateMachine
     {
         PlayerStateController* stateController;
-        void onAttackCancelled(entt::entity self, entt::entity x)
+        void onAttackCancelled(entt::entity self, entt::entity) const
         {
             // Both outcomes are the same
             onTargetDeath(self, entt::null);
         }
 
-        void onTargetDeath(entt::entity self, entt::entity target)
+        void onTargetDeath(entt::entity self, entt::entity) const
         {
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.target = entt::null;
-            combatable.onTargetDeathCnx->UnSubscribe();
             stateController->ChangeState(self, PlayerStateEnum::Default);
         }
 
