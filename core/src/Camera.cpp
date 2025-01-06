@@ -288,53 +288,18 @@ namespace sage
         currentPositionY = rlCamera.position.y;
         currentTargetY = rlCamera.target.y;
 
-        {
-            entt::sink keyWPressed{userInput->keyWPressed};
-            keyWPressed.connect<&Camera::onForwardKeyPressed>(this);
-        }
-        {
-            entt::sink keySPressed{userInput->keySPressed};
-            keySPressed.connect<&Camera::onBackKeyPressed>(this);
-        }
-        {
-            entt::sink keyAPressed{userInput->keyAPressed};
-            keyAPressed.connect<&Camera::onLeftKeyPressed>(this);
-        }
-        {
-            entt::sink keyDPressed{userInput->keyDPressed};
-            keyDPressed.connect<&Camera::onRightKeyPressed>(this);
-        }
-        {
-            entt::sink keyEPressed{userInput->keyEPressed};
-            keyEPressed.connect<&Camera::onRotateLeftKeyPressed>(this);
-        }
-        {
-            entt::sink keyQPressed{userInput->keyQPressed};
-            keyQPressed.connect<&Camera::onRotateRightKeyPressed>(this);
-        }
-        {
-            entt::sink keyWUp{userInput->keyWUp};
-            keyWUp.connect<&Camera::onForwardKeyUp>(this);
-        }
-        {
-            entt::sink keySUp{userInput->keySUp};
-            keySUp.connect<&Camera::onBackKeyUp>(this);
-        }
-        {
-            entt::sink keyAUp{userInput->keyAUp};
-            keyAUp.connect<&Camera::onLeftKeyUp>(this);
-        }
-        {
-            entt::sink keyDUp{userInput->keyDUp};
-            keyDUp.connect<&Camera::onRightKeyUp>(this);
-        }
-        {
-            entt::sink keyEUp{userInput->keyEUp};
-            keyEUp.connect<&Camera::onRotateLeftKeyUp>(this);
-        }
-        {
-            entt::sink keyQUp{userInput->keyQUp};
-            keyQUp.connect<&Camera::onRotateRightKeyUp>(this);
-        }
+        userInput->keyWPressed->Subscribe([this]() { onForwardKeyPressed(); });
+        userInput->keyWPressed->Subscribe([this]() { onForwardKeyPressed(); });
+        userInput->keySPressed->Subscribe([this]() { onBackKeyPressed(); });
+        userInput->keyAPressed->Subscribe([this]() { onLeftKeyPressed(); });
+        userInput->keyDPressed->Subscribe([this]() { onRightKeyPressed(); });
+        userInput->keyEPressed->Subscribe([this]() { onRotateLeftKeyPressed(); });
+        userInput->keyQPressed->Subscribe([this]() { onRotateRightKeyPressed(); });
+        userInput->keyWUp->Subscribe([this]() { onForwardKeyUp(); });
+        userInput->keySUp->Subscribe([this]() { onBackKeyUp(); });
+        userInput->keyAUp->Subscribe([this]() { onLeftKeyUp(); });
+        userInput->keyDUp->Subscribe([this]() { onRightKeyUp(); });
+        userInput->keyEUp->Subscribe([this]() { onRotateLeftKeyUp(); });
+        userInput->keyQUp->Subscribe([this]() { onRotateRightKeyUp(); });
     }
 } // namespace sage

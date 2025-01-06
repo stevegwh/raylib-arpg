@@ -30,272 +30,340 @@ namespace sage
 
         if (IsKeyPressed(keyMapping->keyA))
         {
-            keyAPressed.publish();
+            keyAPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyA))
         {
-            keyAUp.publish();
+            keyAUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyB))
         {
-            keyBPressed.publish();
+            keyBPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyB))
         {
-            keyBUp.publish();
+            keyBUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyC))
         {
-            keyCPressed.publish();
+            keyCPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyC))
         {
-            keyCUp.publish();
+            keyCUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyD))
         {
-            keyDPressed.publish();
+            keyDPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyD))
         {
-            keyDUp.publish();
+            keyDUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyE))
         {
-            keyEPressed.publish();
+            keyEPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyE))
         {
-            keyEUp.publish();
+            keyEUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyF))
         {
-            keyFPressed.publish();
+            keyFPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyF))
         {
-            keyFUp.publish();
+            keyFUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyG))
         {
-            keyGPressed.publish();
+            keyGPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyG))
         {
-            keyGUp.publish();
+            keyGUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyH))
         {
-            keyHPressed.publish();
+            keyHPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyH))
         {
-            keyHUp.publish();
+            keyHUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyI))
         {
-            keyIPressed.publish();
+            keyIPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyI))
         {
-            keyIUp.publish();
+            keyIUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyJ))
         {
-            keyJPressed.publish();
+            keyJPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyJ))
         {
-            keyJUp.publish();
+            keyJUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyK))
         {
-            keyKPressed.publish();
+            keyKPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyK))
         {
-            keyKUp.publish();
+            keyKUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyL))
         {
-            keyLPressed.publish();
+            keyLPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyL))
         {
-            keyLUp.publish();
+            keyLUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyM))
         {
-            keyMPressed.publish();
+            keyMPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyM))
         {
-            keyMUp.publish();
+            keyMUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyN))
         {
-            keyNPressed.publish();
+            keyNPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyN))
         {
-            keyNUp.publish();
+            keyNUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyO))
         {
-            keyOPressed.publish();
+            keyOPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyO))
         {
-            keyOUp.publish();
+            keyOUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyP))
         {
-            keyPPressed.publish();
+            keyPPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyP))
         {
-            keyPUp.publish();
+            keyPUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyQ))
         {
-            keyQPressed.publish();
+            keyQPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyQ))
         {
-            keyQUp.publish();
+            keyQUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyR))
         {
-            keyRPressed.publish();
+            keyRPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyR))
         {
-            keyRUp.publish();
+            keyRUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyS))
         {
-            keySPressed.publish();
+            keySPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyS))
         {
-            keySUp.publish();
+            keySUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyT))
         {
-            keyTPressed.publish();
+            keyTPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyT))
         {
-            keyTUp.publish();
+            keyTUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyU))
         {
-            keyUPressed.publish();
+            keyUPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyU))
         {
-            keyUUp.publish();
+            keyUUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyV))
         {
-            keyVPressed.publish();
+            keyVPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyV))
         {
-            keyVUp.publish();
+            keyVUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyW))
         {
-            keyWPressed.publish();
+            keyWPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyW))
         {
-            keyWUp.publish();
+            keyWUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyX))
         {
-            keyXPressed.publish();
+            keyXPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyX))
         {
-            keyXUp.publish();
+            keyXUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyY))
         {
-            keyYPressed.publish();
+            keyYPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyY))
         {
-            keyYUp.publish();
+            keyYUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyZ))
         {
-            keyZPressed.publish();
+            keyZPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyZ))
         {
-            keyZUp.publish();
+            keyZUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyEscape))
         {
-            keyEscapePressed.publish();
+            keyEscapePressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyEscape))
         {
-            keyEscapeUp.publish();
+            keyEscapeUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keySpace))
         {
-            keySpacePressed.publish();
+            keySpacePressed->Publish();
         }
         if (IsKeyUp(keyMapping->keySpace))
         {
-            keySpaceUp.publish();
+            keySpaceUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyDelete))
         {
-            keyDeletePressed.publish();
+            keyDeletePressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyDelete))
         {
-            keyDeleteUp.publish();
+            keyDeleteUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyOne))
         {
-            keyOnePressed.publish();
+            keyOnePressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyOne))
         {
-            keyOneUp.publish();
+            keyOneUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyTwo))
         {
-            keyTwoPressed.publish();
+            keyTwoPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyTwo))
         {
-            keyTwoUp.publish();
+            keyTwoUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyThree))
         {
-            keyThreePressed.publish();
+            keyThreePressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyThree))
         {
-            keyThreeUp.publish();
+            keyThreeUp->Publish();
         }
         if (IsKeyPressed(keyMapping->keyFour))
         {
-            keyFourPressed.publish();
+            keyFourPressed->Publish();
         }
         if (IsKeyUp(keyMapping->keyFour))
         {
-            keyFourUp.publish();
+            keyFourUp->Publish();
         }
     }
 
     UserInput::UserInput(KeyMapping* _keyMapping, Settings* _settings)
-        : keyMapping(_keyMapping), settings(_settings), onWindowUpdate(std::make_unique<Event<Vector2, Vector2>>())
+        : keyMapping(_keyMapping),
+          settings(_settings),
+          onWindowUpdate(std::make_unique<Event<Vector2, Vector2>>()),
+          keyAPressed(std::make_unique<Event<>>()),
+          keyAUp(std::make_unique<Event<>>()),
+          keyBPressed(std::make_unique<Event<>>()),
+          keyBUp(std::make_unique<Event<>>()),
+          keyCPressed(std::make_unique<Event<>>()),
+          keyCUp(std::make_unique<Event<>>()),
+          keyDPressed(std::make_unique<Event<>>()),
+          keyDUp(std::make_unique<Event<>>()),
+          keyEPressed(std::make_unique<Event<>>()),
+          keyEUp(std::make_unique<Event<>>()),
+          keyFPressed(std::make_unique<Event<>>()),
+          keyFUp(std::make_unique<Event<>>()),
+          keyGPressed(std::make_unique<Event<>>()),
+          keyGUp(std::make_unique<Event<>>()),
+          keyHPressed(std::make_unique<Event<>>()),
+          keyHUp(std::make_unique<Event<>>()),
+          keyIPressed(std::make_unique<Event<>>()),
+          keyIUp(std::make_unique<Event<>>()),
+          keyJPressed(std::make_unique<Event<>>()),
+          keyJUp(std::make_unique<Event<>>()),
+          keyKPressed(std::make_unique<Event<>>()),
+          keyKUp(std::make_unique<Event<>>()),
+          keyLPressed(std::make_unique<Event<>>()),
+          keyLUp(std::make_unique<Event<>>()),
+          keyMPressed(std::make_unique<Event<>>()),
+          keyMUp(std::make_unique<Event<>>()),
+          keyNPressed(std::make_unique<Event<>>()),
+          keyNUp(std::make_unique<Event<>>()),
+          keyOPressed(std::make_unique<Event<>>()),
+          keyOUp(std::make_unique<Event<>>()),
+          keyPPressed(std::make_unique<Event<>>()),
+          keyPUp(std::make_unique<Event<>>()),
+          keyQPressed(std::make_unique<Event<>>()),
+          keyQUp(std::make_unique<Event<>>()),
+          keyRPressed(std::make_unique<Event<>>()),
+          keyRUp(std::make_unique<Event<>>()),
+          keySPressed(std::make_unique<Event<>>()),
+          keySUp(std::make_unique<Event<>>()),
+          keyTPressed(std::make_unique<Event<>>()),
+          keyTUp(std::make_unique<Event<>>()),
+          keyUPressed(std::make_unique<Event<>>()),
+          keyUUp(std::make_unique<Event<>>()),
+          keyVPressed(std::make_unique<Event<>>()),
+          keyVUp(std::make_unique<Event<>>()),
+          keyWPressed(std::make_unique<Event<>>()),
+          keyWUp(std::make_unique<Event<>>()),
+          keyXPressed(std::make_unique<Event<>>()),
+          keyXUp(std::make_unique<Event<>>()),
+          keyYPressed(std::make_unique<Event<>>()),
+          keyYUp(std::make_unique<Event<>>()),
+          keyZPressed(std::make_unique<Event<>>()),
+          keyZUp(std::make_unique<Event<>>()),
+          keyEscapePressed(std::make_unique<Event<>>()),
+          keyEscapeUp(std::make_unique<Event<>>()),
+          keySpacePressed(std::make_unique<Event<>>()),
+          keySpaceUp(std::make_unique<Event<>>()),
+          keyDeletePressed(std::make_unique<Event<>>()),
+          keyDeleteUp(std::make_unique<Event<>>()),
+          keyOnePressed(std::make_unique<Event<>>()),
+          keyOneUp(std::make_unique<Event<>>()),
+          keyTwoPressed(std::make_unique<Event<>>()),
+          keyTwoUp(std::make_unique<Event<>>()),
+          keyThreePressed(std::make_unique<Event<>>()),
+          keyThreeUp(std::make_unique<Event<>>()),
+          keyFourPressed(std::make_unique<Event<>>()),
+          keyFourUp(std::make_unique<Event<>>())
     {
         assert(settings != nullptr);
         assert(keyMapping != nullptr);

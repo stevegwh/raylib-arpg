@@ -181,12 +181,9 @@ namespace sage
             GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
         auto* equipmentWindow =
             GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
-        entt::sink sink{data->userInput->keyIPressed};
-        sink.connect<&Window::ToggleHide>(*inventoryWindow);
-        entt::sink sink2{data->userInput->keyCPressed};
-        sink2.connect<&Window::ToggleHide>(*equipmentWindow);
-        entt::sink sink3{data->userInput->keyFPressed};
-        sink3.connect<&Camera::FocusSelectedActor>(data->camera);
+        data->userInput->keyIPressed->Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
+        data->userInput->keyCPressed->Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
+        data->userInput->keyFPressed->Subscribe([this]() { data->camera->FocusSelectedActor(); });
 
         auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
         GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
@@ -196,15 +193,14 @@ namespace sage
         spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
         spiral->InitSystem();
 
-        entt::sink sink4{data->userInput->keyOPressed};
-        sink4.connect<[](FullscreenTextOverlayFactory& fullscreenTextOverlayFactory) {
+        data->userInput->keyOPressed->Subscribe([this]() {
             std::vector<std::pair<std::string, float>> text;
             text.emplace_back(
                 "You awaken in a cave.\n This is a test new line.\n And another for good measure.", 4.0f);
             text.emplace_back("You should find a way out.", 2.0f);
             text.emplace_back("Drip drip.", 2.0f);
-            fullscreenTextOverlayFactory.SetOverlay(text, 0.5f, 1.0f);
-        }>(*data->fullscreenTextOverlayFactory);
+            data->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
+        });
 
         //        auto& spatial = registry->emplace<SpatialAudioComponent>(firstPlayer);
         //        spatial.audioKey = "";

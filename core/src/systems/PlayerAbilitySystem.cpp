@@ -155,21 +155,9 @@ namespace sage
     PlayerAbilitySystem::PlayerAbilitySystem(entt::registry* _registry, GameData* _gameData)
         : registry(_registry), gameData(_gameData)
     {
-        {
-            entt::sink sink{gameData->userInput->keyOnePressed};
-            sink.connect<&PlayerAbilitySystem::AbilityOnePressed>(this);
-        }
-        {
-            entt::sink sink{gameData->userInput->keyTwoPressed};
-            sink.connect<&PlayerAbilitySystem::AbilityTwoPressed>(this);
-        }
-        {
-            entt::sink sink{gameData->userInput->keyThreePressed};
-            sink.connect<&PlayerAbilitySystem::AbilityThreePressed>(this);
-        }
-        {
-            entt::sink sink{gameData->userInput->keyFourPressed};
-            sink.connect<&PlayerAbilitySystem::AbilityFourPressed>(this);
-        }
+        gameData->userInput->keyOnePressed->Subscribe([this]() { AbilityOnePressed(); });
+        gameData->userInput->keyTwoPressed->Subscribe([this]() { AbilityTwoPressed(); });
+        gameData->userInput->keyThreePressed->Subscribe([this]() { AbilityThreePressed(); });
+        gameData->userInput->keyFourPressed->Subscribe([this]() { AbilityFourPressed(); });
     }
 } // namespace sage
