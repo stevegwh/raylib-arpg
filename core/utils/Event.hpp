@@ -5,7 +5,6 @@
 #pragma once
 
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <unordered_map>
 
@@ -61,6 +60,7 @@ namespace sage
             auto key = std::string(std::to_string(++count));
             subscribers.emplace(key, func);
 
+            // Shared ptr makes us able to treat connections as polymorphic due to BaseConnection
             return std::make_shared<Connection<Args...>>(this, key);
         }
 
