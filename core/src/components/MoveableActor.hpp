@@ -21,9 +21,9 @@ namespace sage
     {
         entt::registry* registry;
         entt::entity self{}; // The actor following
-        std::shared_ptr<Connection> onTargetDestinationReachedCnx{};
-        std::shared_ptr<Connection> onTargetMovementCancelledCnx{};
-        std::shared_ptr<Connection> onTargetPathChangedCnx{};
+        std::unique_ptr<Connection> onTargetDestinationReachedCnx{};
+        std::unique_ptr<Connection> onTargetMovementCancelledCnx{};
+        std::unique_ptr<Connection> onTargetPathChangedCnx{};
 
         Vector3 targetPrevPos{};
         double timeStarted{};

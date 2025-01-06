@@ -2678,7 +2678,7 @@ namespace sage
     {
         windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->windowUpdateCnx = window->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
+        window->windowUpdateCnx = gameData->userInput->onWindowUpdate->Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;

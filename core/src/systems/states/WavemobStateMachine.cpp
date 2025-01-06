@@ -140,10 +140,12 @@ namespace sage
             const auto& combatable = registry->get<CombatableActor>(self);
             moveable.followTarget.emplace(registry, self, combatable.target);
             auto& state = registry->get<WavemobState>(self);
-            state.ManageSubscription(moveable.onDestinationReached->Subscribe(
-                [this](entt::entity _entity) { onTargetReached(_entity); }));
-            state.ManageSubscription(moveable.followTarget->onTargetPathChanged->Subscribe(
-                [this](entt::entity _self, entt::entity _target) { onTargetPosUpdate(_self, _target); }));
+            auto cnx = moveable.onDestinationReached->Subscribe(
+                [this](entt::entity _entity) { onTargetReached(_entity); });
+            state.ManageSubscription(std::move(cnx));
+            auto cnx1 = moveable.followTarget->onTargetPathChanged->Subscribe(
+                [this](entt::entity _self, entt::entity _target) { onTargetPosUpdate(_self, _target); });
+            state.ManageSubscription(std::move(cnx1));
 
             onTargetPosUpdate(self, combatable.target);
         }
@@ -246,8 +248,9 @@ namespace sage
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             auto& state = registry->get<WavemobState>(self);
-            state.ManageSubscription(
-                animation.onAnimationEnd->Subscribe([this](entt::entity _entity) { destroyEntity(_entity); }));
+            auto cnx =
+                animation.onAnimationEnd->Subscribe([this](entt::entity _entity) { destroyEntity(_entity); });
+            state.ManageSubscription(std::move(cnx));
 
             auto abilityEntity = gameData->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.publish(abilityEntity);

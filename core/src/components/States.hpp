@@ -12,21 +12,22 @@ namespace sage
     class BaseState
     {
         StateEnum currentState;
-        std::vector<std::shared_ptr<Connection>> currentStateConnections;
+        std::vector<std::unique_ptr<Connection>> currentStateConnections;
 
       public:
         // All connections added here will be removed when ChangeState is called (via StateMachine).
-        void ManageSubscription(const std::shared_ptr<Connection>& newConnection)
+        void ManageSubscription(std::unique_ptr<Connection> newConnection)
         {
-            currentStateConnections.push_back(newConnection);
+            currentStateConnections.push_back(std::move(newConnection));
         }
 
-        void RemoveAllConnections() const
+        void RemoveAllConnections()
         {
             for (auto& connection : currentStateConnections)
             {
                 connection->UnSubscribe();
             }
+            currentStateConnections.clear();
         }
 
         void SetState(StateEnum newState)
@@ -44,8 +45,13 @@ namespace sage
             RemoveAllConnections();
         }
 
-        // BaseState(const BaseState&) = delete;
-        // BaseState& operator=(const BaseState&) = delete;
+        // Allow moving
+        BaseState(BaseState&& other) noexcept = default;
+        BaseState& operator=(BaseState&& other) noexcept = default;
+
+        // Prevent copying
+        BaseState(const BaseState&) = delete;
+        BaseState& operator=(const BaseState&) = delete;
 
         explicit BaseState(StateEnum initialState) : currentState(initialState)
         {

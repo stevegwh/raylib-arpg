@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <functional>
 #include <memory>
 #include <string>
@@ -22,6 +23,7 @@ namespace sage
 
       public:
         void UnSubscribe();
+        ~Connection();
         explicit Connection(EventBase* _event, SubscriberId _id);
     };
 
@@ -31,7 +33,9 @@ namespace sage
 
       protected:
       public:
-        virtual ~EventBase() = default;
+        virtual ~EventBase(){
+
+        };
 
         friend class Connection;
     };
@@ -49,14 +53,12 @@ namespace sage
         }
 
       public:
-        // [[nodiscard]]
-        std::shared_ptr<Connection> Subscribe(std::function<void(Args...)> func)
+        std::unique_ptr<Connection> Subscribe(std::function<void(Args...)> func)
         {
             auto key = ++count;
             subscribers.emplace(key, func);
 
-            // Shared ptr makes us able to treat connections as polymorphic due to BaseConnection
-            return std::make_shared<Connection>(this, key);
+            return std::make_unique<Connection>(this, key);
         }
 
         void Publish(Args... args)

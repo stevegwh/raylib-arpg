@@ -399,7 +399,7 @@ namespace sage
             [&engine](const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
                 const auto& cell = table->children[row]->children[col];
                 auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell.get(), itemType);
-                auto ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
+                auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
                 engine->gameData->equipmentSystem->onEquipmentUpdated->Subscribe(
                     [ptr](entt::entity) { ptr->RetrieveInfo(); });
             };

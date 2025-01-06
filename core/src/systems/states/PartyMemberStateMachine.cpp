@@ -120,18 +120,22 @@ namespace sage
 
             const auto target = moveable.followTarget->targetActor;
 
-            auto& state = registry->get<PartyMemberState>(self);
-
-            state.ManageSubscription(
-                moveable.onDestinationReached->Subscribe([this](entt::entity _self) { onTargetReached(_self); }));
-            state.ManageSubscription(moveable.followTarget->onTargetPathChanged->Subscribe(
-                [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); }));
-            state.ManageSubscription(
-                moveable.onMovementCancel->Subscribe([this](entt::entity _self) { onMovementCancelled(_self); }));
-            state.ManageSubscription(
+            auto cnx =
+                moveable.onDestinationReached->Subscribe([this](entt::entity _self) { onTargetReached(_self); });
+            auto cnx1 = moveable.followTarget->onTargetPathChanged->Subscribe(
+                [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); });
+            auto cnx2 =
+                moveable.onMovementCancel->Subscribe([this](entt::entity _self) { onMovementCancelled(_self); });
+            auto cnx3 =
                 moveable.onDestinationUnreachable->Subscribe([this](entt::entity _self, Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
-                }));
+                });
+
+            auto& state = registry->get<PartyMemberState>(self);
+            state.ManageSubscription(std::move(cnx));
+            state.ManageSubscription(std::move(cnx1));
+            state.ManageSubscription(std::move(cnx2));
+            state.ManageSubscription(std::move(cnx3));
 
             // entt::sink sink5{moveable.followTarget->onTargetMovementCancelled};
             // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
@@ -197,11 +201,14 @@ namespace sage
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.emplace(registry, self, followTarget);
 
+            auto cnx =
+                moveable.onMovementCancel->Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
+            auto cnx1 = gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
+                [this](entt::entity entity) { onMovementCancelled(entity); });
+
             auto& state = registry->get<PartyMemberState>(self);
-            state.ManageSubscription(moveable.onMovementCancel->Subscribe(
-                [this](entt::entity entity) { onMovementCancelled(entity); }));
-            state.ManageSubscription(gameData->controllableActorSystem->onSelectedActorChange->Subscribe(
-                [this](entt::entity entity) { onMovementCancelled(entity); }));
+            state.ManageSubscription(std::move(cnx));
+            state.ManageSubscription(std::move(cnx1));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
