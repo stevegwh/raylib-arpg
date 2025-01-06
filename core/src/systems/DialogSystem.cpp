@@ -24,8 +24,6 @@ namespace sage
 
     void DialogSystem::StartConversation(const sgTransform& cutscenePose, entt::entity npc)
     {
-        oldCamPos = gameData->camera->GetPosition();
-        oldCamTarget = gameData->camera->getRaylibCam()->target;
         gameData->camera->CutscenePose(cutscenePose);
         gameData->camera->LockInput();
         gameData->cursor->DisableContextSwitching();
@@ -39,13 +37,11 @@ namespace sage
         dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), npc);
     }
 
-    void DialogSystem::endConversation()
+    void DialogSystem::endConversation() const
     {
         gameData->camera->UnlockInput();
         gameData->cursor->EnableContextSwitching();
-        gameData->camera->SetCamera(oldCamPos, oldCamTarget);
-        oldCamPos = {};
-        oldCamTarget = {};
+        gameData->camera->CutsceneEnd();
         dialogWindow->Remove();
     }
 

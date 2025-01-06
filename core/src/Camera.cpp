@@ -252,6 +252,11 @@ namespace sage
         rlCamera.target = cameraTarget;
     }
 
+    void Camera::CutsceneEnd()
+    {
+        SetCamera(cameraSave.rlCamera.position, cameraSave.rlCamera.target);
+    }
+
     void Camera::SetCamera(Vector3 _pos, Vector3 _target)
     {
         rlCamera.position = _pos;

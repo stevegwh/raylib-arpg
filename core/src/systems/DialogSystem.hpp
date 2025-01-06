@@ -20,9 +20,7 @@ namespace sage
     {
         GameData* gameData;
         Window* dialogWindow{};
-        Vector3 oldCamPos{};
-        Vector3 oldCamTarget{};
-        void endConversation();
+        void endConversation() const;
         void progressConversation(const dialog::Conversation* conversation);
 
       public:

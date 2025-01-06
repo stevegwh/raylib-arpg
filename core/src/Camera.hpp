@@ -73,6 +73,7 @@ namespace sage
         [[nodiscard]] Vector3 GetLeft();
         [[nodiscard]] Vector3 GetPosition() const;
         void CutscenePose(const sgTransform& location);
+        void CutsceneEnd();
         void LerpToLoc(const sgTransform& location);
         void SetCamera(Vector3 _pos, Vector3 _target);
         void FocusSelectedActor();

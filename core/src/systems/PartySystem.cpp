@@ -117,7 +117,7 @@ namespace sage
         auto& moveable = registry->emplace<MoveableActor>(npc);
         moveable.movementSpeed = 0.35f;
         moveable.pathfindingBounds = 100;
-        auto& controllable = registry->emplace<ControllableActor>(npc);
+        registry->emplace<ControllableActor>(npc);
         registry->emplace<InventoryComponent>(npc);
         registry->emplace<EquipmentComponent>(npc);
         auto& combatable = registry->emplace<CombatableActor>(npc);
