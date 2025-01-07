@@ -190,15 +190,6 @@ namespace sage
         spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
         spiral->InitSystem();
 
-        data->userInput->keyOPressed.Subscribe([this]() {
-            std::vector<std::pair<std::string, float>> text;
-            text.emplace_back(
-                "You awaken in a cave.\n This is a test new line.\n And another for good measure.", 4.0f);
-            text.emplace_back("You should find a way out.", 2.0f);
-            text.emplace_back("Drip drip.", 2.0f);
-            data->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
-        });
-
         //        auto& spatial = registry->emplace<SpatialAudioComponent>(firstPlayer);
         //        spatial.audioKey = "";
 

@@ -10,6 +10,7 @@
 #include "components/DoorBehaviorComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/QuestComponents.hpp"
+#include "FullscreenTextOverlayFactory.hpp"
 #include "GameData.hpp"
 #include "ParsingHelpers.hpp"
 #include "systems/DoorSystem.hpp"
@@ -88,7 +89,14 @@ namespace sage
         }
         else if (func.name.find("EndGame") != std::string::npos)
         {
-            // TODO
+            event->Subscribe([gameData](Args...) {
+                std::vector<std::pair<std::string, float>> text;
+                text.emplace_back("Our bold heroes step forward, out of the gate.", 4.0f);
+                text.emplace_back("What will await our valiant heroes?", 4.0f);
+                text.emplace_back("Find out soon.", 4.0f);
+                text.emplace_back("Thanks for playing!", 4.0f);
+                gameData->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
+            });
         }
         else
         {

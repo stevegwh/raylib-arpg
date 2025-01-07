@@ -1,6 +1,5 @@
 // Option "OnSelect" functions: start_quest, complete_quest, complete_quest_task
 // Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
-// Can use not, and, and or for conditionals.
 
 <meta>
 	owner: _INTERACTABLE_QUEST_LEVER_BASE
@@ -18,7 +17,7 @@
 	---
 	You see the base of a lever. Its handle seems to be missing.
 	---
-	if has_item($itemId)
+	if has_item($itemId) and quest_in_progress($questId) // Not really necessary to check for quest_in_progress.
 		[[complete_quest_task($questId) | Place the lever into the base. | finish]]
 	end
 	[[Take your leave. | exit]]

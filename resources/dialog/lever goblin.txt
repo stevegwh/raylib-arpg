@@ -1,3 +1,6 @@
+// Option "OnSelect" functions: start_quest, complete_quest, complete_quest_task
+// Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
+
 <meta>
 	owner: Lever_Goblin
 	speaker: Grumpy Goblin
