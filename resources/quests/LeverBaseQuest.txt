@@ -7,10 +7,10 @@
 
 [Tasks]
 	dialog: QUEST_LEVER; GiveItem(QUEST_LEVER); DisableWorldItem(QUEST_LEVER)
+	dialog: QUEST_LEVER_BASE; PlaySFX(resources/audio/sfx/test.ogg)
 
 [OnStart]
 	RemoveItem(QUEST_BONE)
 
 [OnComplete]
-	PlaySFX(resources/audio/sfx/test.ogg)
 	EndGame()

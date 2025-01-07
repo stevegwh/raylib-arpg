@@ -1,0 +1,33 @@
+// Option "OnSelect" functions: start_quest, complete_quest, complete_quest_task
+// Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
+
+<meta>
+	owner:
+	speaker_name: 
+	conversation_pos: 
+</meta>
+
+<variables>
+	questId: ExampleQuest
+	itemId: ExampleItem
+</variables>
+
+
+<node>
+	title: start
+	---
+	Example text here.
+	---
+	if has_item($itemId)
+		[[complete_quest_task($questId) | I have the item. | finish]]
+	end
+	[[Take your leave. | exit]]
+</node>
+
+<node>
+	title: finish
+	---
+	Congrats, you selected the option because you had the item.
+	---
+	[[complete_quest($questId)| Take your leave. | exit]]
+</node>

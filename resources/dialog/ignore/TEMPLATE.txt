@@ -1,0 +1,42 @@
+// Option "OnSelect" functions: start_quest, complete_quest, complete_quest_task
+// Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
+// Can use not, and, and or for conditionals.
+// Indent and put comment all you like.
+
+<meta>
+	owner: OWNER_NAME // The game entity this dialog is attached to. Can be (Blender) object name (Renderable's name) or a unique mesh name (from Blender)
+	speaker_name: Narrator // The name that will appear in the dialog
+	conversation_pos: 10.0 1.0 10.0 // The (local) pos where the player will stand when having this conversation.
+</meta>
+
+// All variables declared in the nodes will be replaced with these here. 
+// Variable values should not have spaces in them.
+// Use a variable with $variableName syntax.
+<variables> 
+	questId: LeverBaseQuest
+	itemId: QUEST_LEVER
+</variables>
+
+// Format of a node:
+// title: <-- this node's name (its 'key')
+// --- <-- Starts defining the main dialog of this node. Put this again to finish the dialog block.
+// if command() and not command() etc <-- Optional. Define a conditional to check before showing this to the player. Must finish the 'if' block with 'end'
+// [[OnSelect function | Text shown to user | Next node]] Please note that the 'OnSelect Function' is optional. You can just declare options like [[Text | Next Node]]
+<node>
+	title: start
+	---
+	Example text here.
+	---
+	if has_item($itemId)
+		[[complete_quest_task($questId) | Place the lever into the base. | finish]]
+	end
+	[[Take your leave. | exit]]
+</node>
+
+<node>
+	title: finish
+	---
+	Congrats, you selected the option because you had the correct item.
+	---
+	[[complete_quest($questId)| Take your leave. | exit]]
+</node>
