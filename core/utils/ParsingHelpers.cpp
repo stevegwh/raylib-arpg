@@ -10,6 +10,32 @@
 namespace sage::parsing
 {
 
+    std::string removeCommentsFromFile(const std::string& fileContents)
+    {
+        std::stringstream ss(fileContents);
+        std::string out;
+        out.reserve(fileContents.length()); // Worth it? What if the comments take up a huge amount of space?
+        std::string buff;
+        while (std::getline(ss, buff, '\n'))
+        {
+            buff = trim(buff);
+            if (buff.starts_with("//"))
+            {
+                continue;
+            }
+            auto commentPos = buff.find("//");
+            if (commentPos != std::string::npos)
+            {
+                out.append(buff.substr(0, commentPos) + '\n');
+            }
+            else
+            {
+                out.append(buff + '\n');
+            }
+        }
+        return out;
+    }
+
     std::string trim(const std::string& str)
     {
         const auto start = str.find_first_not_of(" \t\n\r");
@@ -17,7 +43,7 @@ namespace sage::parsing
         return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
     }
 
-    std::string trimAll(const std::string& fileContents)
+    std::string trimWhiteSpaceFromFile(const std::string& fileContents)
     {
         std::string out;
         out.reserve(fileContents.length());

@@ -331,8 +331,8 @@ namespace sage
 
             std::ostringstream fileContent;
             fileContent << infile.rdbuf();
-            std::string processedContent =
-                trimAll(substituteVariablesInText(normalizeLineEndings(fileContent.str())));
+            std::string processedContent = trimWhiteSpaceFromFile(
+                substituteVariablesInText(removeCommentsFromFile(normalizeLineEndings(fileContent.str()))));
             std::stringstream contentStream(processedContent);
 
             entt::entity entity = entt::null;

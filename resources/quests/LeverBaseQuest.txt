@@ -1,16 +1,16 @@
 [Meta]
-title: The missing lever.
-giver: QUEST_LEVER
+	title: The missing lever.
+	giver: QUEST_LEVER
 
 [Description]
-We found the lever's missing handle. Time to put it back and get out of here.
+	We found the lever's missing handle. Time to put it back and get out of here.
 
 [Tasks]
-dialog: QUEST_LEVER; GiveItem(QUEST_LEVER); DisableWorldItem(QUEST_LEVER)
+	dialog: QUEST_LEVER; GiveItem(QUEST_LEVER); DisableWorldItem(QUEST_LEVER)
 
 [OnStart]
-RemoveItem(QUEST_BONE)
+	RemoveItem(QUEST_BONE)
 
 [OnComplete]
-PlaySFX(resources/audio/sfx/test.ogg)
-EndGame()
+	PlaySFX(resources/audio/sfx/test.ogg)
+	EndGame()

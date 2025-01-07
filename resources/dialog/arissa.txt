@@ -1,50 +1,50 @@
 <meta>
-owner: Arissa
-speaker_name: Arissa
-conversation_pos: 10.0 1.0 10.0
+	owner: Arissa
+	speaker_name: Arissa
+	conversation_pos: 10.0 1.0 10.0
 </meta>
 
 <variables>
-questId: ArissaQuest
+	questId: ArissaQuest
 </variables>
 
 <node>
-title: start
----
-Hey! You've got to help me get out of here. Please. They're going to use me for their ritual.
----
-if not quest_in_progress($questId)
-[[start_quest($questId) | Ok, don't worry. I'll get you out of here. | quest]]
-end
-if quest_in_progress($questId)
-[[Don't worry. I'll get you out of here. | quest2]]
-end
-if quest_all_tasks_complete($questId)
-[[complete_quest($questId) | Ok, I got the keys! Let's get you out of here. | questcomplete]]
-end
-[[Sorry, I must be leaving. | exit]]
+	title: start
+	---
+	Hey! You've got to help me get out of here. Please. They're going to use me for their ritual.
+	---
+	if not quest_in_progress($questId)
+		[[start_quest($questId) | Ok, don't worry. I'll get you out of here. | quest]]
+	end
+	if quest_in_progress($questId)
+		[[Don't worry. I'll get you out of here. | quest2]]
+	end
+	if quest_all_tasks_complete($questId)
+		[[complete_quest($questId) | Ok, I got the keys! Let's get you out of here. | questcomplete]]
+	end
+	[[Sorry, I must be leaving. | exit]]
 </node>
 
 <node>
-title: quest
----
-Oh, thank you so much! I think the guard for the cell is sleeping in the barracks.
----
-[[Take your leave. | exit]]
+	title: quest
+	---
+	Oh, thank you so much! I think the guard for the cell is sleeping in the barracks.
+	---
+	[[Take your leave. | exit]]
 </node>
 
 <node>
-title: quest2
----
-Please, hurry!
----
-[[Take your leave. | exit]]
+	title: quest2
+	---
+	Please, hurry!
+	---
+	[[Take your leave. | exit]]
 </node>
 
 <node>
-title: questcomplete
----
-Yes! Thank you, so much! Let's join together.
----
-[[Sure, let's go. | exit]]
+	title: questcomplete
+	---
+	Yes! Thank you, so much! Let's join together.
+	---
+	[[Sure, let's go. | exit]]
 </node>

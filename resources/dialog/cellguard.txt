@@ -1,40 +1,40 @@
 <meta>
-owner: Cell_Guard
-speaker_name: Cell Guard
-conversation_pos: 5.0 1.0 5.0
+	owner: Cell_Guard
+	speaker_name: Cell Guard
+	conversation_pos: 5.0 1.0 5.0
 </meta>
 
 <variables>
-questId: ArissaQuest
-speakerId: Cell_Guard
+	questId: ArissaQuest
+	speakerId: Cell_Guard
 </variables>
 
 <node>
-title: start
----
-WOT?
----
-if quest_in_progress($questId) and not quest_task_complete($speakerId)
-[[complete_quest_task($questId) | Give me those keys. | quest]]
-end
+	title: start
+	---
+	WOT?
+	---
+	if quest_in_progress($questId) and not quest_task_complete($speakerId)
+		[[complete_quest_task($questId) | Give me those keys. | quest]]
+	end
 
-[[Hello. | hello]]
+	[[Hello. | hello]]
 
-[[Sorry, I must be leaving. | exit]]
+	[[Sorry, I must be leaving. | exit]]
 </node>
 
 <node>
-title: hello
----
-ERRRR. 'ELLO.
----
-[[Sorry, I must be leaving. | exit]]
+	title: hello
+	---
+	ERRRR. 'ELLO.
+	---
+	[[Sorry, I must be leaving. | exit]]
 </node>
 
 <node>
-title: quest
----
-WELL. AS U ASKED NOICELY. HERE.
----
-[[Many thanks!. | exit]]
+	title: quest
+	---
+	WELL. AS U ASKED NOICELY. HERE.
+	---
+	[[Many thanks!. | exit]]
 </node>

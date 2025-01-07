@@ -14,8 +14,9 @@ namespace sage::parsing
         std::string params;
     };
 
-    std::string trimAll(const std::string& fileContents);
+    std::string removeCommentsFromFile(const std::string& fileContents);
     std::string trim(const std::string& str);
+    std::string trimWhiteSpaceFromFile(const std::string& fileContents);
     std::string normalizeLineEndings(const std::string& content);
     TextFunction getFunctionNameAndArgs(const std::string& input);
 

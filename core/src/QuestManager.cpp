@@ -115,7 +115,8 @@ namespace sage
                 }
 
                 auto& quest = registry->get<Quest>(createQuest(questName));
-                std::string processed = trimAll(normalizeLineEndings(fileContent.str()));
+                std::string processed =
+                    removeCommentsFromFile(trimWhiteSpaceFromFile(normalizeLineEndings(fileContent.str())));
 
                 std::stringstream ss(processed);
                 std::string buff;
