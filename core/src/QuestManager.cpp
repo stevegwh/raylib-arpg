@@ -11,6 +11,7 @@
 #include "components/ItemComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "GameData.hpp"
+#include "ParsingHelpers.hpp"
 #include "systems/DoorSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/RenderSystem.hpp"
@@ -19,6 +20,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <functional>
 #include <sstream>
 
 namespace fs = std::filesystem;
@@ -26,60 +28,53 @@ static constexpr auto QUEST_PATH = "resources/quests";
 
 namespace sage
 {
+    using namespace parsing;
 
     template <typename QuestEvent, typename... Args>
-    void bindFunctionToEvent(
-        entt::registry* registry,
-        GameData* gameData,
-        const std::string& functionName,
-        const std::string& functionParams,
-        QuestEvent* event)
+    void bindFunctionToEvent(entt::registry* registry, GameData* gameData, TextFunction func, QuestEvent* event)
     {
-        auto startPos = functionParams.find_first_of('"');
-        auto endPos = functionParams.find_last_of('"');
+        assert(!func.name.empty());
+        // Not all functions require params
 
-        if (functionName.find("OpenDoor") != std::string::npos)
+        if (func.name.find("OpenDoor") != std::string::npos)
         {
-            std::string doorName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
-
-            auto doorId = gameData->renderSystem->FindRenderable<DoorBehaviorComponent>(doorName);
+            assert(!func.params.empty());
+            auto doorId = gameData->renderSystem->FindRenderable<DoorBehaviorComponent>(func.params);
             assert(doorId != entt::null);
-
             event->Subscribe([doorId, gameData](Args...) { gameData->doorSystem->UnlockAndOpenDoor(doorId); });
         }
-        else if (functionName.find("JoinParty") != std::string::npos)
+        else if (func.name.find("JoinParty") != std::string::npos)
         {
-            std::string npcName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
-
-            auto npcId = gameData->renderSystem->FindRenderable(npcName);
-
+            assert(!func.params.empty());
+            auto npcId = gameData->renderSystem->FindRenderable(func.params);
+            assert(npcId != entt::null);
             event->Subscribe([npcId, gameData](Args...) { gameData->partySystem->NPCToMember(npcId); });
         }
-        else if (functionName.find("RemoveItem") != std::string::npos)
+        else if (func.name.find("RemoveItem") != std::string::npos)
         {
-            std::string itemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
-
-            auto itemId = gameData->renderSystem->FindRenderable(itemName);
-
+            assert(!func.params.empty());
+            auto itemId = gameData->renderSystem->FindRenderable(func.params);
+            assert(itemId != entt::null);
             event->Subscribe([itemId, gameData](Args...) { gameData->partySystem->RemoveItemFromParty(itemId); });
         }
-        else if (functionName.find("GiveItem") != std::string::npos)
+        else if (func.name.find("GiveItem") != std::string::npos)
         {
-            std::string itemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
-
+            assert(!func.params.empty());
+            event->Subscribe([itemName = func.params, gameData](Args...) {
+                gameData->partySystem->GiveItemToSelected(itemName);
+            });
+        }
+        else if (func.name.find("PlaySFX") != std::string::npos)
+        {
+            assert(!func.params.empty());
             event->Subscribe(
-                [itemName, gameData](Args...) { gameData->partySystem->GiveItemToSelected(itemName); });
+                [sfxName = func.params, gameData](Args...) { gameData->audioManager->PlaySFX(sfxName); });
         }
-        else if (functionName.find("PlaySFX") != std::string::npos)
+        else if (func.name.find("DisableWorldItem") != std::string::npos)
         {
-            std::string sfxName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
-
-            event->Subscribe([sfxName, gameData](Args...) { gameData->audioManager->PlaySFX(sfxName); });
-        }
-        else if (functionName.find("DisableWorldItem") != std::string::npos)
-        {
-            std::string worldItemName = functionParams.substr(startPos + 1, endPos - (startPos + 1));
-            auto itemId = gameData->renderSystem->FindRenderable(worldItemName);
+            assert(!func.params.empty());
+            auto itemId = gameData->renderSystem->FindRenderable(func.params);
+            assert(itemId != entt::null);
             event->Subscribe([itemId, registry](Args...) {
                 if (registry->any_of<Renderable>(itemId))
                 {
@@ -91,7 +86,7 @@ namespace sage
                 }
             });
         }
-        else if (functionName.find("EndGame") != std::string::npos)
+        else if (func.name.find("EndGame") != std::string::npos)
         {
             // TODO
         }
@@ -107,22 +102,30 @@ namespace sage
         {
             if (entry.path().extension() == ".txt")
             {
+                // TODO: Must make sure renderable and item systems are initialised before this
                 std::string fileName = entry.path().filename().string();
-                std::ifstream file{std::format("{}/{}", QUEST_PATH, fileName)};
                 std::string questName = StripPath(fileName);
+                std::ostringstream fileContent;
+
+                // Scoped to prevent accidentally using 'file' instead of 'stringstream'
+                {
+                    std::ifstream file{std::format("{}/{}", QUEST_PATH, fileName)};
+                    if (!file.is_open()) return;
+                    fileContent << file.rdbuf();
+                }
 
                 auto& quest = registry->get<Quest>(createQuest(questName));
+                std::string processed = trimAll(normalizeLineEndings(fileContent.str()));
 
-                // TODO: Must make sure renderable and item systems are intialised before this
-                if (!file.is_open()) return;
-
+                std::stringstream ss(processed);
                 std::string buff;
-                while (std::getline(file, buff, '\n'))
+
+                while (std::getline(ss, buff, '\n'))
                 {
                     if (buff.find("[Meta]") != std::string::npos)
                     {
                         std::string metaLine;
-                        while (std::getline(file, metaLine) && !metaLine.empty())
+                        while (std::getline(ss, metaLine) && !metaLine.empty())
                         {
                             if (metaLine.find("title: ") != std::string::npos)
                             {
@@ -140,7 +143,7 @@ namespace sage
                     {
                         std::string description;
                         std::string descriptionLine;
-                        while (std::getline(file, descriptionLine) && !descriptionLine.empty())
+                        while (std::getline(ss, descriptionLine) && !descriptionLine.empty())
                         {
                             description += descriptionLine + "\n";
                         }
@@ -149,7 +152,7 @@ namespace sage
                     else if (buff.find("[Tasks]") != std::string::npos)
                     {
                         std::string taskLine;
-                        while (std::getline(file, taskLine) && !taskLine.empty())
+                        while (std::getline(ss, taskLine) && !taskLine.empty())
                         {
                             std::string sub;
                             entt::entity entity;
@@ -200,13 +203,9 @@ namespace sage
 
                                 while (std::getline(commandStream, command, ';'))
                                 {
-                                    auto paramStartPos = command.find_first_of('(');
-                                    auto paramEndPos = command.find_last_of(')');
-                                    auto functionName = command.substr(0, paramStartPos);
-                                    auto functionParams =
-                                        command.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
+                                    auto func = getFunctionNameAndArgs(command);
                                     bindFunctionToEvent<Event<QuestTaskComponent*>, QuestTaskComponent*>(
-                                        registry, gameData, functionName, functionParams, &task.onCompleted);
+                                        registry, gameData, func, &task.onCompleted);
                                 }
                             }
                         }
@@ -214,29 +213,21 @@ namespace sage
                     else if (buff.find("[OnStart]") != std::string::npos)
                     {
                         std::string functionLine;
-                        while (std::getline(file, functionLine) && !functionLine.empty())
+                        while (std::getline(ss, functionLine) && !functionLine.empty())
                         {
-                            auto paramStartPos = functionLine.find_first_of('(');
-                            auto paramEndPos = functionLine.find_last_of(')');
-                            auto functionName = functionLine.substr(0, paramStartPos);
-                            auto functionParams =
-                                functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
+                            auto func = getFunctionNameAndArgs(functionLine);
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(
-                                registry, gameData, functionName, functionParams, &quest.onStart);
+                                registry, gameData, func, &quest.onStart);
                         }
                     }
                     else if (buff.find("[OnComplete]") != std::string::npos)
                     {
                         std::string functionLine;
-                        while (std::getline(file, functionLine) && !functionLine.empty())
+                        while (std::getline(ss, functionLine) && !functionLine.empty())
                         {
-                            auto paramStartPos = functionLine.find_first_of('(');
-                            auto paramEndPos = functionLine.find_last_of(')');
-                            auto functionName = functionLine.substr(0, paramStartPos);
-                            auto functionParams =
-                                functionLine.substr(paramStartPos + 1, paramEndPos - (paramStartPos + 1));
+                            auto func = getFunctionNameAndArgs(functionLine);
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(
-                                registry, gameData, functionName, functionParams, &quest.onCompleted);
+                                registry, gameData, func, &quest.onCompleted);
                         }
                     }
                 }

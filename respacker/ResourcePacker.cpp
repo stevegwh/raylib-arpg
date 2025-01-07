@@ -244,7 +244,7 @@ namespace sage
         Matrix mat = MatrixMultiply(MatrixMultiply(scaleMat, rotMat), transMat);
 
         auto& renderable = registry->emplace<Renderable>(entity, std::move(model), mat);
-        renderable.name = objectName;
+        renderable.SetName(objectName);
 
         auto& trans = registry->emplace<sgTransform>(entity, entity);
 

@@ -6,14 +6,15 @@
 
 #include "components/DialogComponent.hpp"
 #include "components/QuestComponents.hpp"
+#include "components/sgTransform.hpp"
 #include "GameData.hpp"
 #include "NpcManager.hpp"
+#include "ParsingHelpers.hpp"
 #include "QuestManager.hpp"
-
-#include "components/sgTransform.hpp"
-#include "raylib.h"
 #include "systems/PartySystem.hpp"
 #include "systems/RenderSystem.hpp"
+
+#include "raylib.h"
 
 #include <filesystem>
 #include <fstream>
@@ -27,39 +28,7 @@ namespace fs = std::filesystem;
 
 namespace sage
 {
-
-    struct TextFunction
-    {
-        std::string name;
-        std::string params;
-    };
-
-    static std::string trim(const std::string& str)
-    {
-        const auto start = str.find_first_not_of(" \t\n\r");
-        const auto end = str.find_last_not_of(" \t\n\r");
-        return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
-    }
-
-    static std::string normalizeLineEndings(const std::string& content)
-    {
-        std::string normalized = content;
-        // First replace all CRLF with LF
-        size_t pos = normalized.find("\r\n");
-        while (pos != std::string::npos)
-        {
-            normalized.replace(pos, 2, "\n");
-            pos = normalized.find("\r\n", pos);
-        }
-        // Then replace any remaining CR with LF
-        pos = normalized.find('\r');
-        while (pos != std::string::npos)
-        {
-            normalized.replace(pos, 1, "\n");
-            pos = normalized.find('\r', pos);
-        }
-        return normalized;
-    }
+    using namespace parsing;
 
     static std::unordered_map<std::string, std::string> extractVariables(const std::string& content)
     {
@@ -70,7 +39,7 @@ namespace sage
 
         while (std::getline(stream, line, '\n'))
         {
-            line = trim(line);
+            line = parsing::trim(line);
 
             if (line == "<variables>")
             {
@@ -89,8 +58,8 @@ namespace sage
                 size_t colonPos = line.find(':');
                 if (colonPos != std::string::npos)
                 {
-                    std::string key = trim(line.substr(0, colonPos));
-                    std::string value = trim(line.substr(colonPos + 1));
+                    std::string key = parsing::trim(line.substr(0, colonPos));
+                    std::string value = parsing::trim(line.substr(colonPos + 1));
                     variables[key] = value;
                 }
             }
@@ -99,9 +68,9 @@ namespace sage
         return variables;
     }
 
-    static std::string substituteVariables(
-        const std::string& content, const std::unordered_map<std::string, std::string>& variables)
+    static std::string substituteVariablesInText(const std::string& content)
     {
+        auto variables = extractVariables(content);
         std::string result = content;
 
         for (const auto& [varName, value] : variables)
@@ -110,32 +79,6 @@ namespace sage
         }
 
         return result;
-    }
-
-    static std::string preprocessDialog(const std::string& content)
-    {
-        auto variables = extractVariables(content);
-        return substituteVariables(content, variables);
-    }
-
-    TextFunction getFunctionNameAndArgs(const std::string& input)
-    {
-        std::string trimmedInput = trim(input);
-
-        std::regex pattern(R"(^(\w+)\(([^)]*)\)$)");
-        std::smatch match;
-
-        if (std::regex_match(trimmedInput, match, pattern))
-        {
-            std::string functionName = match[1];
-            std::string parameter = match[2];
-
-            return {functionName, parameter};
-        }
-        else
-        {
-            return {trimmedInput, ""};
-        }
     }
 
     void DialogFactory::parseNode(
@@ -155,7 +98,7 @@ namespace sage
 
         while (std::getline(optionStream, line, '\n'))
         {
-            if (line.find("if") != std::string::npos)
+            if (line.starts_with("if"))
             {
                 assert(!condition.has_value()); // "if blocks" must be closed with end. No nesting allowed (yet).
 
@@ -226,7 +169,7 @@ namespace sage
                         assert(functionMap.contains(func.name));
 
                         auto funcResult = functionMap.at(func.name)(func.params);
-                        const bool currentResult = positive ? funcResult : !funcResult; // 'not'
+                        const bool currentResult = positive == funcResult; // 'not'
 
                         if (isFirstCondition)
                         {
@@ -254,7 +197,7 @@ namespace sage
                 assert(condition.has_value()); // ensures that 'end' has an accompanying 'if'
                 condition.reset();
             }
-            else if (line.find("[[") != std::string::npos)
+            else if (line.starts_with("[["))
             {
                 std::stringstream ss(line.substr(2)); // 2 == [[
                 std::string word;
@@ -262,7 +205,7 @@ namespace sage
 
                 while (std::getline(ss, word, '|'))
                 {
-                    option.push_back(trim(word));
+                    option.push_back(parsing::trim(word));
                 }
 
                 auto& lastWord = option.at(option.size() - 1);
@@ -388,7 +331,8 @@ namespace sage
 
             std::ostringstream fileContent;
             fileContent << infile.rdbuf();
-            std::string processedContent = normalizeLineEndings(preprocessDialog(fileContent.str()));
+            std::string processedContent =
+                trimAll(substituteVariablesInText(normalizeLineEndings(fileContent.str())));
             std::stringstream contentStream(processedContent);
 
             entt::entity entity = entt::null;
@@ -445,7 +389,6 @@ namespace sage
                 }
                 else if (line == "<node>")
                 {
-                    // Reset node-specific variables
                     currentNodeName.clear();
                     currentNodeSpeakerText.clear();
                     currentNodeOptions.clear();

@@ -1,29 +1,29 @@
 <meta>
-owner: _INTERACTABLE_QUEST_LEVER_BASE
-speaker_name: Narrator
-conversation_pos: 10.0 1.0 10.0
+	owner: _INTERACTABLE_QUEST_LEVER_BASE
+	speaker_name: Narrator
+	conversation_pos: 10.0 1.0 10.0
 </meta>
 
 <variables>
-questId: LeverBaseQuest
-itemId: QUEST_LEVER
+	questId: LeverBaseQuest
+	itemId: QUEST_LEVER
 </variables>
 
 <node>
-title: start
----
-You see the base of a lever. Its handle seems to be missing.
----
-if has_item($itemId)
-[[complete_quest($questId) | Place the lever into the base. | finish]]
-end
-[[Take your leave. | exit]]
+	title: start
+	---
+	You see the base of a lever. Its handle seems to be missing.
+	---
+	if has_item($itemId)
+		[[complete_quest($questId) | Place the lever into the base. | finish]]
+	end
+	[[Take your leave. | exit]]
 </node>
 
 <node>
-title: finish
----
-You place the lever into its base and pull back. The door screeches and lifts upwards, opening up the path forward.
----
-[[Take your leave. | exit]]
+	title: finish
+	---
+	You place the lever into its base and pull back. The door screeches and lifts upwards, opening up the path forward.
+	---
+	[[Take your leave. | exit]]
 </node>
