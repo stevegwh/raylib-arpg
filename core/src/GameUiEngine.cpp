@@ -670,7 +670,7 @@ namespace sage
         {
             auto& renderable =
                 engine->registry->get<Renderable>(engine->gameData->controllableActorSystem->GetSelectedActor());
-            SetContent(std::format("{}", renderable.name));
+            SetContent(std::format("{}", renderable.GetVanityName()));
         }
         else if (statisticType == StatisticType::STRENGTH)
         {
@@ -2912,7 +2912,8 @@ namespace sage
             viewport.x,
             viewport.y);
         pos.x += gameData->settings->ScaleValueWidth(20); // TODO: magic number
-        GameUiFactory::CreateCombatableTooltip(gameData->uiEngine.get(), renderable.name, combatable, pos);
+        GameUiFactory::CreateCombatableTooltip(
+            gameData->uiEngine.get(), renderable.GetVanityName(), combatable, pos);
     }
 
     void GameUIEngine::onNPCHover(entt::entity entity) const
@@ -2926,7 +2927,7 @@ namespace sage
             viewport.x,
             viewport.y);
         pos.x += 20; // TODO: magic number
-        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), renderable.name, pos);
+        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), renderable.GetVanityName(), pos);
     }
 
     void GameUIEngine::onStopWorldHover() const

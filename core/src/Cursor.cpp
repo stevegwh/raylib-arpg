@@ -222,7 +222,7 @@ namespace sage
             }
             if (registry->all_of<Renderable>(m_mouseHitInfo.collidedEntityId))
             {
-                hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
+                hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).GetName();
             }
         }
         else if (layer == CollisionLayer::BUILDING)
@@ -231,7 +231,7 @@ namespace sage
             currentColor = invalidColor;
             if (registry->all_of<Renderable>(m_mouseHitInfo.collidedEntityId))
             {
-                hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).name;
+                hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).GetName();
             }
         }
         else if (layer == CollisionLayer::ITEM)

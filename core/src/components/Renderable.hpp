@@ -26,14 +26,18 @@ namespace sage
     class Renderable
     {
         std::unique_ptr<ModelSafe> model;
+        std::string name = "Default";
 
       public:
         Color hint = WHITE;
         bool active = true;
         Matrix initialTransform{};
         std::function<void(entt::entity)> reqShaderUpdate;
-        std::string name = "Default";
         bool serializable = true;
+
+        [[nodiscard]] const std::string& GetName() const;
+        void SetName(const std::string& _name);
+        [[nodiscard]] std::string GetVanityName() const;
         [[nodiscard]] ModelSafe* GetModel() const;
 
         void Enable();

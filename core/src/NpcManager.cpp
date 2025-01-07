@@ -20,11 +20,11 @@ namespace sage
         {
             return GameObjectFactory::createArissa(registry, gameData, pos, rot);
         }
-        else if (name == "Cell Guard")
+        else if (name == "Cell_Guard")
         {
             return GameObjectFactory::createQuestNPC(registry, gameData, pos, name.c_str());
         }
-        else if (name == "Lever Goblin")
+        else if (name == "Lever_Goblin")
         {
             return GameObjectFactory::createFetchQuestNPC(registry, gameData, pos, name.c_str());
         }

@@ -220,7 +220,7 @@ namespace sage
             registry->emplace<Renderable>(entity, generateTerrainPolygon(minRange, maxRange), MatrixIdentity());
         r.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
         r.active = false;
-        r.name = "TextureTerrainOverlay";
+        r.SetName("TextureTerrainOverlay");
         r.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);
         registry->emplace<RenderableDeferred>(entity);
@@ -244,7 +244,7 @@ namespace sage
             registry->emplace<Renderable>(entity, generateTerrainPolygon(minRange, maxRange), MatrixIdentity());
         r.GetModel()->SetShader(ResourceManager::GetInstance().ShaderLoad(nullptr, shaderPath), 0);
         r.active = false;
-        r.name = "TextureTerrainOverlay";
+        r.SetName("TextureTerrainOverlay");
         r.hint = _hint;
         registry->emplace<sgTransform>(entity, entity);
         registry->emplace<RenderableDeferred>(entity);
@@ -265,7 +265,7 @@ namespace sage
         auto& r =
             registry->emplace<Renderable>(entity, generateTerrainPolygon(minRange, maxRange), MatrixIdentity());
         r.active = false;
-        r.name = "TextureTerrainOverlay";
+        r.SetName("TextureTerrainOverlay");
         r.GetModel()->SetShader(_shader, 0);
         r.hint = _hint;
 

@@ -1,4 +1,4 @@
 distance: 30
-speaker: Lever Goblin
+speaker: Lever_Goblin
 ---
 Get away from my lever!

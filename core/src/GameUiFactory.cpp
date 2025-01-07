@@ -525,7 +525,7 @@ namespace sage
             }
             else
             {
-                speakerName = renderable.name;
+                speakerName = renderable.GetVanityName();
             }
 
             descriptionCell->CreateTextbox(

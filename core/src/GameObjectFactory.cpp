@@ -121,7 +121,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
-        renderable.name = name;
+        renderable.SetName(name);
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
@@ -160,7 +160,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
-        renderable.name = name;
+        renderable.SetName(name);
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
@@ -196,7 +196,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
-        renderable.name = name;
+        renderable.SetName(name);
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
@@ -229,7 +229,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_PLAYER_DEFAULT"), modelTransform);
-        renderable.name = "Arissa";
+        renderable.SetName("Arissa");
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
@@ -272,7 +272,7 @@ namespace sage
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_PLAYER_DEFAULT"), modelTransform);
-        renderable.name = name;
+        renderable.SetName(name);
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
@@ -355,7 +355,7 @@ namespace sage
             Model tmp_model = LoadModelFromMesh(GenMeshPlane(20, 20, 1, 1));
             ModelSafe model(tmp_model);
             auto& renderable = registry->emplace<Renderable>(id, std::move(model), modelTransform);
-            renderable.name = "Portal";
+            renderable.SetName("Portal");
 
             Shader shader =
                 ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/portal.fs");
@@ -391,7 +391,7 @@ namespace sage
 
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelCopy("MDL_BUILDING_PORTAL"), modelTransform);
-        renderable.name = "Portal Outer";
+        renderable.SetName("Portal Outer");
         data->lightSubSystem->LinkRenderableToLight(id);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
@@ -414,7 +414,7 @@ namespace sage
         Matrix modelTransform = MatrixIdentity();
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelCopy("MDL_BUILDING_WIZARDTOWER1"), modelTransform);
-        renderable.name = "Wizard Tower";
+        renderable.SetName("Wizard Tower");
         data->lightSubSystem->LinkRenderableToLight(id);
 
         BoundingBox bb = renderable.GetModel()->CalcLocalBoundingBox();

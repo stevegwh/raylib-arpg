@@ -3,11 +3,27 @@
 // Created by Steve Wheeler on 03/05/2024.
 //
 
-#include <memory>
-#include <utility>
+#include <algorithm>
 
 namespace sage
 {
+
+    const std::string& Renderable::GetName() const
+    {
+        return name;
+    }
+
+    void Renderable::SetName(const std::string& _name)
+    {
+        name = _name;
+    }
+
+    std::string Renderable::GetVanityName() const
+    {
+        auto vanity = name;
+        std::replace(vanity.begin(), vanity.end(), '_', ' ');
+        return vanity;
+    }
 
     ModelSafe* Renderable::GetModel() const
     {

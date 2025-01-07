@@ -172,11 +172,11 @@ namespace sage::serializer
                     break;
                 }
 
-                if (renderable.name.find("_DOOR_") != std::string::npos)
+                if (renderable.GetName().find("_DOOR_") != std::string::npos)
                 {
                     destination->emplace<DoorBehaviorComponent>(entt);
                 }
-                if (renderable.name.find("_INTERACTABLE_") != std::string::npos)
+                if (renderable.GetName().find("_INTERACTABLE_") != std::string::npos)
                 {
                     GameObjectFactory::makeInteractable(destination, entt);
                 }

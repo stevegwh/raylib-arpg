@@ -122,7 +122,7 @@ namespace sage
     {
         std::string trimmedInput = trim(input);
 
-        std::regex pattern(R"(^(\w+)\(([^)]+)\)$)");
+        std::regex pattern(R"(^(\w+)\(([^)]*)\)$)");
         std::smatch match;
 
         if (std::regex_match(trimmedInput, match, pattern))
@@ -159,55 +159,48 @@ namespace sage
             {
                 assert(!condition.has_value()); // "if blocks" must be closed with end. No nesting allowed (yet).
 
-                condition = [line, this]() -> bool {
-                    std::function<bool(std::string)> quest_complete = [this](const std::string& params) {
-                        auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                condition = [this, line]() -> bool {
+                    auto quest_complete = [&](const std::string& params) -> bool {
+                        const auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
                         return quest.IsComplete();
                     };
 
-                    std::function<bool(std::string)> quest_in_progress = [this](const std::string& params) {
-                        auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                    auto quest_in_progress = [&](const std::string& params) -> bool {
+                        const auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
                         return quest.HasStarted() && !quest.IsComplete();
-                        ;
                     };
 
-                    std::function<bool(std::string)> has_item = [this](const std::string& params) {
+                    auto has_item = [&](const std::string& params) -> bool {
                         return gameData->partySystem->CheckPartyHasItem(params);
                     };
 
-                    std::function<bool(std::string)> quest_tasks_complete = [this](const std::string& params) {
-                        auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                    auto quest_all_tasks_complete = [&](const std::string& params) -> bool {
+                        const auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
                         return quest.HasStarted() && quest.AllTasksComplete();
                     };
 
-                    std::stringstream condStream(line.substr(3)); // 3 == if and initial space
-                    std::string current;
-
-                    bool out = false;
-                    bool positive = true;
-                    bool andCondition = false;
-                    bool orCondition = false;
-
-                    auto evaluateCondition = [&](bool condition) {
-                        if (!andCondition && !orCondition)
-                        {
-                            out = positive && condition;
-                        }
-                        else if (andCondition)
-                        {
-                            out = out && (positive && condition);
-                        }
-                        else if (orCondition)
-                        {
-                            out = out || (positive && condition);
-                        }
+                    auto quest_task_complete = [&](const std::string& params) -> bool {
+                        const auto entity = gameData->renderSystem->FindRenderable(params);
+                        assert(entity != entt::null);
+                        const auto& questComponent = registry->get<QuestTaskComponent>(entity);
+                        return questComponent.IsComplete();
                     };
 
                     const std::unordered_map<std::string, std::function<bool(std::string)>> functionMap = {
                         {"quest_complete", quest_complete},
                         {"quest_in_progress", quest_in_progress},
                         {"has_item", has_item},
-                        {"quest_tasks_complete", quest_tasks_complete}};
+                        {"quest_all_tasks_complete", quest_all_tasks_complete},
+                        {"quest_task_complete", quest_task_complete}};
+
+                    bool out = false;
+                    bool positive = true;
+                    bool andCondition = false;
+                    bool orCondition = false;
+                    bool isFirstCondition = true;
+
+                    std::stringstream condStream(trim(line.substr(line.find("if") + 2)));
+                    std::string current;
 
                     while (std::getline(condStream, current, ' '))
                     {
@@ -227,15 +220,26 @@ namespace sage
                             continue;
                         }
                         auto func = getFunctionNameAndArgs(current);
-                        auto funcIt = functionMap.find(func.name);
 
-                        if (funcIt != functionMap.end())
+                        assert(!func.name.empty());
+                        assert(!func.params.empty());
+                        assert(functionMap.contains(func.name));
+
+                        auto funcResult = functionMap.at(func.name)(func.params);
+                        const bool currentResult = positive ? funcResult : !funcResult; // 'not'
+
+                        if (isFirstCondition)
                         {
-                            evaluateCondition(funcIt->second(func.params));
+                            isFirstCondition = false;
+                            out = currentResult;
                         }
-                        else
+                        else if (andCondition)
                         {
-                            assert(0); // unknown conditional token
+                            out = out && currentResult;
+                        }
+                        else if (orCondition)
+                        {
+                            out = out || currentResult;
                         }
 
                         positive = true;
@@ -252,16 +256,6 @@ namespace sage
             }
             else if (line.find("[[") != std::string::npos)
             {
-                std::unique_ptr<dialog::Option> baseOption;
-                if (condition.has_value())
-                {
-                    baseOption = std::make_unique<dialog::Option>(node.get(), condition.value());
-                }
-                else
-                {
-                    baseOption = std::make_unique<dialog::Option>(node.get());
-                }
-
                 std::stringstream ss(line.substr(2)); // 2 == [[
                 std::string word;
                 std::vector<std::string> option;
@@ -276,9 +270,17 @@ namespace sage
 
                 if (option.size() == 2)
                 {
+                    std::unique_ptr<dialog::Option> baseOption;
+                    if (condition.has_value())
+                    {
+                        baseOption = std::make_unique<dialog::Option>(node.get(), condition.value());
+                    }
+                    else
+                    {
+                        baseOption = std::make_unique<dialog::Option>(node.get());
+                    }
                     baseOption->description = option.at(0);
-                    const auto& next = option.at(1);
-                    if (!next.empty() && next != "exit")
+                    if (const auto& next = option.at(1); !next.empty() && next != "exit")
                     {
                         baseOption->nextNode = next;
                     }
@@ -286,11 +288,11 @@ namespace sage
                 }
                 else if (option.size() == 3) // "[[" with function
                 {
-                    const auto& token = getFunctionNameAndArgs(option.at(0));
-                    if (token.name == "complete_quest_task")
+                    const auto& func = getFunctionNameAndArgs(option.at(0));
+                    if (func.name == "complete_quest_task")
                     {
-                        assert(!token.params.empty());
-                        auto questId = gameData->questManager->GetQuest(token.params);
+                        assert(!func.params.empty());
+                        auto questId = gameData->questManager->GetQuest(func.params);
                         std::unique_ptr<dialog::QuestOption> questOption;
                         if (condition.has_value())
                         {
@@ -309,10 +311,10 @@ namespace sage
                         }
                         node->options.push_back(std::move(questOption));
                     }
-                    else if (token.name == "start_quest")
+                    else if (func.name == "start_quest")
                     {
-                        assert(!token.params.empty());
-                        auto questId = gameData->questManager->GetQuest(token.params);
+                        assert(!func.params.empty());
+                        auto questId = gameData->questManager->GetQuest(func.params);
                         std::unique_ptr<dialog::QuestStartOption> questStartOption;
                         if (condition.has_value())
                         {
@@ -331,10 +333,10 @@ namespace sage
                         }
                         node->options.push_back(std::move(questStartOption));
                     }
-                    else if (token.name == "complete_quest")
+                    else if (func.name == "complete_quest")
                     {
-                        assert(!token.params.empty());
-                        auto questId = gameData->questManager->GetQuest(token.params);
+                        assert(!func.params.empty());
+                        auto questId = gameData->questManager->GetQuest(func.params);
                         std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
                         if (condition.has_value())
                         {
@@ -362,7 +364,6 @@ namespace sage
             }
         }
         conversation->AddNode(std::move(node));
-        //
     }
 
     void DialogFactory::LoadDialog()

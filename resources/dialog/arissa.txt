@@ -19,7 +19,7 @@ end
 if quest_in_progress($questId)
 [[Don't worry. I'll get you out of here. | quest2]]
 end
-if quest_tasks_complete($questId)
+if quest_all_tasks_complete($questId)
 [[complete_quest($questId) | Ok, I got the keys! Let's get you out of here. | questcomplete]]
 end
 [[Sorry, I must be leaving. | exit]]

@@ -46,7 +46,7 @@ namespace sage
             std::string description;
             ConversationNode* parent;
             [[nodiscard]] bool HasNextIndex() const;
-            bool ShouldShow();
+            bool ShouldShow() const;
             virtual void OnSelected();
 
             virtual ~Option() = default;

@@ -4,108 +4,99 @@
 
 #include "DialogComponent.hpp"
 
-#include <utility>
-
 #include "QuestComponents.hpp"
 
-namespace sage
+namespace sage::dialog
 {
-    namespace dialog
+
+    [[nodiscard]] bool Option::HasNextIndex() const
     {
+        return nextNode.has_value();
+    }
 
-        [[nodiscard]] bool Option::HasNextIndex() const
+    bool Option::ShouldShow() const
+    {
+        if (condition.has_value())
         {
-            return nextNode.has_value();
+            return condition.value()();
         }
+        return true;
+    }
 
-        bool Option::ShouldShow()
+    void Option::OnSelected()
+    {
+    }
+
+    Option::Option(ConversationNode* _parent) : parent(_parent)
+    {
+    }
+
+    Option::Option(ConversationNode* _parent, std::function<bool()> _condition)
+        : condition(std::move(_condition)), parent(_parent)
+    {
+    }
+
+    void QuestOption::OnSelected()
+    {
+        auto& task = parent->parent->registry->get<QuestTaskComponent>(parent->parent->owner);
+        auto& quest = parent->parent->registry->get<Quest>(questId);
+        if (quest.HasStarted())
         {
-            if (condition.has_value())
-            {
-                return condition.value()();
-            }
-            return true;
+            task.MarkComplete();
         }
+    }
 
-        void Option::OnSelected()
+    QuestOption::QuestOption(ConversationNode* _parent, entt::entity _questId) : Option(_parent), questId(_questId)
+    {
+    }
+
+    QuestOption::QuestOption(ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
+        : Option(_parent, std::move(_condition)), questId(_questId)
+    {
+    }
+
+    void QuestStartOption::OnSelected()
+    {
+        auto& quest = parent->parent->registry->get<Quest>(questId);
+        if (!quest.HasStarted())
         {
-            std::cout << "Calling base class. \n";
+            quest.StartQuest();
         }
+    }
 
-        Option::Option(ConversationNode* _parent) : parent(_parent)
+    QuestStartOption::QuestStartOption(ConversationNode* _parent, entt::entity _questId)
+        : QuestOption(_parent, _questId)
+    {
+    }
+
+    QuestStartOption::QuestStartOption(
+        ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
+        : QuestOption(_parent, _questId, std::move(_condition))
+    {
+    }
+
+    void QuestFinishOption::OnSelected()
+    {
+        auto& quest = parent->parent->registry->get<Quest>(questId);
+        if (quest.HasStarted())
         {
+            quest.CompleteQuest();
         }
+    }
 
-        Option::Option(ConversationNode* _parent, std::function<bool()> _condition)
-            : condition(std::move(_condition)), parent(_parent)
-        {
-        }
+    QuestFinishOption::QuestFinishOption(ConversationNode* _parent, entt::entity _questId)
+        : QuestOption(_parent, _questId)
+    {
+    }
 
-        void QuestOption::OnSelected()
-        {
-            auto& task = parent->parent->registry->get<QuestTaskComponent>(parent->parent->owner);
-            auto& quest = parent->parent->registry->get<Quest>(questId);
-            if (quest.HasStarted())
-            {
-                task.MarkComplete();
-            }
-        }
+    QuestFinishOption::QuestFinishOption(
+        ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
+        : QuestOption(_parent, _questId, std::move(_condition))
+    {
+    }
 
-        QuestOption::QuestOption(ConversationNode* _parent, entt::entity _questId)
-            : Option(_parent), questId(_questId)
-        {
-        }
+    ConversationNode::ConversationNode(Conversation* _parent) : parent(_parent)
+    {
+    }
 
-        QuestOption::QuestOption(
-            ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
-            : Option(_parent, std::move(_condition)), questId(_questId)
-        {
-        }
-
-        void QuestStartOption::OnSelected()
-        {
-            auto& quest = parent->parent->registry->get<Quest>(questId);
-            if (!quest.HasStarted())
-            {
-                quest.StartQuest();
-            }
-        }
-
-        QuestStartOption::QuestStartOption(ConversationNode* _parent, entt::entity _questId)
-            : QuestOption(_parent, _questId)
-        {
-        }
-
-        QuestStartOption::QuestStartOption(
-            ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
-            : QuestOption(_parent, _questId, std::move(_condition))
-        {
-        }
-
-        void QuestFinishOption::OnSelected()
-        {
-            auto& quest = parent->parent->registry->get<Quest>(questId);
-            if (quest.HasStarted())
-            {
-                quest.CompleteQuest();
-            }
-        }
-
-        QuestFinishOption::QuestFinishOption(ConversationNode* _parent, entt::entity _questId)
-            : QuestOption(_parent, _questId)
-        {
-        }
-
-        QuestFinishOption::QuestFinishOption(
-            ConversationNode* _parent, entt::entity _questId, std::function<bool()> _condition)
-            : QuestOption(_parent, _questId, std::move(_condition))
-        {
-        }
-
-        ConversationNode::ConversationNode(Conversation* _parent) : parent(_parent)
-        {
-        }
-
-    } // namespace dialog
-
-} // namespace sage
+} // namespace sage::dialog

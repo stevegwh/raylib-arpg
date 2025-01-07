@@ -73,7 +73,7 @@ namespace sage
             for (const auto& entity : view)
             {
                 const auto& renderable = registry->get<Renderable>(entity);
-                if (renderable.name == nameStripped) return entity;
+                if (renderable.GetName() == nameStripped) return entity;
             }
             return entt::null;
         }
