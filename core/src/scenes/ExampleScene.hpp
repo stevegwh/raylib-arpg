@@ -8,18 +8,12 @@
 
 #include <entt/entt.hpp>
 
-#include <string>
-
 namespace sage
 {
-    class ExampleScene : public Scene
+    class ExampleScene final : public Scene
     {
-
       public:
-        void Update() override;
-        void Draw2D() override;
-        void Draw3D() override;
-        void DrawDebug3D() override;
+        void Init() override;
         ~ExampleScene() override = default;
         ExampleScene(
             entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);

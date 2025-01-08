@@ -5,6 +5,7 @@
 	owner: Arissa
 	speaker_name: Arissa
 	conversation_pos: 10.0 1.0 10.0
+	camera_pos: 5.0 10.0 18.0
 </meta>
 
 <variables>

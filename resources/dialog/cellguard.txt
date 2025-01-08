@@ -5,6 +5,7 @@
 	owner: Cell_Guard
 	speaker_name: Cell Guard
 	conversation_pos: 5.0 1.0 5.0
+	camera_pos: 5.0 10.0 18.0
 </meta>
 
 <variables>

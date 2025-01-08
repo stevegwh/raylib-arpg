@@ -187,7 +187,9 @@ namespace sage
     struct DialogComponent
     {
         entt::entity dialogTarget; // Who are you talking with
-        Vector3 conversationPos;   // Where the other person stands
+        Vector3 conversationPos;   // Where the other person stands (TODO: Currently an absolute world value
+                                   // calculated in DialogFactory)
+        Vector3 cameraPos;         // The *local* camera position during the conversation
         std::unique_ptr<dialog::Conversation> conversation;
 
         template <class Archive>

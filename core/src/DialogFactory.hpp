@@ -28,7 +28,7 @@ namespace sage
             const std::string& dialogOptions) const;
 
       public:
-        void LoadDialog();
+        void InitDialogFromDirectory();
 
         DialogFactory(entt::registry* _registry, GameData* _gameData);
     };

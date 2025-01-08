@@ -350,6 +350,7 @@ namespace sage
 
     void ResourceManager::ImageLoadFromFile(const std::string& path)
     {
+        // TODO: Do we not care about aliases for images?
         auto key = AssetManager::GetInstance().TryGetAssetPath(path);
         assert(FileExists(key.c_str()));
         if (!images.contains(key))
@@ -370,15 +371,15 @@ namespace sage
 
     void ResourceManager::ModelLoadFromFile(const std::string& path)
     {
-        // Can pass an alias into this function (e.g., "MDL_GOBLIN") and it will first be translated to its path
-        // (specified in items.json) then stripped to be used as a key.
-        auto nonAliasPath = AssetManager::GetInstance().TryGetAssetPath(path); // Pah could be an asset alias
-        auto key = StripPath(nonAliasPath);
+        auto pathDealiased =
+            AssetManager::GetInstance().TryGetAssetPath(path); // Path could be an asset alias (e.g., MDL_GOBLIN)
+        auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
+                                    // from QUEST_BONE.obj)
         if (!modelCopies.contains(key))
         {
-            assert(FileExists(path.c_str()));
+            assert(FileExists(pathDealiased.c_str()));
 
-            auto modelInfo = sgLoadModel(path.c_str());
+            auto modelInfo = sgLoadModel(pathDealiased.c_str());
 
             for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
             {
@@ -401,13 +402,12 @@ namespace sage
     /**
      * @brief Returns a shallow copy of the loaded model
      * NB: Caller should not free the memory.
-     * @param path
+     * @param key the *key* of the model, not its path. This is either an alias defined in the JSON file, or the
+     * mesh name in Blender minus its format extension
      * @return Model
      */
-
-    ModelSafe ResourceManager::GetModelCopy(const std::string& path)
+    ModelSafe ResourceManager::GetModelCopy(const std::string& key)
     {
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
         assert(modelCopies.contains(key));
         ModelSafe modelsafe(modelCopies.at(key).model, false);
         modelsafe.SetKey(key);
@@ -417,44 +417,46 @@ namespace sage
     /**
      * @brief Creates a deep copy of the loaded model. Cuts down model loading times as
      * it's faster copying buffers rather than reading/parsing model files.
-     * @param path
+     * @param key the *key* of the model, not its path. This is either an alias defined in the JSON file, or the
+     * mesh name in Blender minus its format extension
      * @return
      */
-    ModelSafe ResourceManager::GetModelDeepCopy(const std::string& id) const
+    ModelSafe ResourceManager::GetModelDeepCopy(const std::string& key) const
     {
         // TODO: Unsure if deep copy is ever really necessary.
         // For animated models, I believe all that's needed is to shallow copy the mesh minus
         // animVertices/animNormals. So, allocate memory for new meshes, shallow copy the majority of its data, but
         // allocate and point to new animVertices/animNormals arrays
-        const auto& path = AssetManager::GetInstance().TryGetAssetPath(id);
-        assert(modelCopies.contains(path));
-        Model model = modelCopies.at(path).model;
-        deepCopyModel(modelCopies.at(path).model, model);
+        assert(modelCopies.contains(key));
+        Model model = modelCopies.at(key).model;
+        deepCopyModel(modelCopies.at(key).model, model);
         return ModelSafe(model);
     }
 
-    void ResourceManager::ModelAnimationLoadFromFile(const std::string& id)
+    void ResourceManager::ModelAnimationLoadFromFile(const std::string& path)
     {
-        const auto& path = AssetManager::GetInstance().TryGetAssetPath(id);
-        if (!modelAnimations.contains(path))
+        auto pathDealiased =
+            AssetManager::GetInstance().TryGetAssetPath(path); // Path could be an asset alias (e.g., MDL_GOBLIN)
+        auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
+        // from QUEST_BONE.obj)
+        if (!modelAnimations.contains(key))
         {
             int animsCount;
-            auto animations = LoadModelAnimations(path.c_str(), &animsCount);
+            auto animations = LoadModelAnimations(pathDealiased.c_str(), &animsCount);
             if (animations == nullptr)
             {
                 std::cout << "ResourceManager: Model does not contain animation data, or was unable to be loaded. "
                              "Aborting... \n";
                 return;
             }
-            modelAnimations[path] = std::make_pair(animations, animsCount);
+            modelAnimations[key] = std::make_pair(animations, animsCount);
         }
     }
 
-    ModelAnimation* ResourceManager::GetModelAnimation(const std::string& id, int* animsCount)
+    ModelAnimation* ResourceManager::GetModelAnimation(const std::string& key, int* animsCount)
     {
-        const auto& path = AssetManager::GetInstance().TryGetAssetPath(id);
-        assert(modelAnimations.contains(path));
-        const auto& pair = modelAnimations[path];
+        assert(modelAnimations.contains(key));
+        const auto& pair = modelAnimations[key];
         *animsCount = pair.second;
         return pair.first;
     }

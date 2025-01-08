@@ -84,6 +84,7 @@ namespace sage
             GetSystem(state.GetCurrentState())->OnStateEnter(entity);
         }
 
+      public:
         // NB: Passes all arguments by value
         template <typename NewStateClass, typename... StateEnterArgs>
         void ChangeState(entt::entity entity, StateEnum newState, StateEnterArgs... args)
@@ -131,7 +132,6 @@ namespace sage
             GetSystem(newState)->OnStateEnter(entity);
         }
 
-      public:
         virtual ~StateMachineController() = default;
         explicit StateMachineController(entt::registry* _registry) : registry(_registry)
         {

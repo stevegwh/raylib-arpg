@@ -1,0 +1,37 @@
+// Option "OnSelect" functions: start_quest, complete_quest, complete_quest_task
+// Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
+
+<meta>
+	owner: Opening_Dialog
+	speaker_name: Narrator
+	conversation_pos: 10.0 1.0 10.0
+	camera_pos: 18.0 80.0 18.0
+</meta>
+
+<node>
+	title: start
+	---
+	You awaken in a dark cave without any idea where you are. Crystals and bright lights surround you.
+	---
+	[[Wonder what you should do. | wonder]]
+	[[Wonder how you got here. | how]]
+	[[Take your leave. | exit]]
+</node>
+
+<node>
+	title: wonder
+	---
+	You think that the highest priority would be finding a way out of this predicament you find yourself in.
+	---
+	[[Wonder how you got here. | how]]
+	[[Take your leave. | exit]]
+</node>
+
+<node>
+	title: how
+	---
+	You look above you and see daylight pouring in from above. Could this hole be how you ended up down here? Try as you might, you can't remember a thing.
+	---
+	[[Wonder what you should do. | wonder]]
+	[[Take your leave. | exit]]
+</node>

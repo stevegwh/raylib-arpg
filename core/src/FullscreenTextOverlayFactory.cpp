@@ -33,6 +33,10 @@ namespace sage
         auto time = overlayText.at(currentTextIdx).second;
         timer.SetMaxTime(time);
         timer.Restart();
+        if (currentTextIdx == overlayText.size() - 1)
+        {
+            onOverlayEnding.Publish();
+        }
     }
 
     void FullscreenTextOverlayFactory::RemoveOverlay()
@@ -43,6 +47,7 @@ namespace sage
         currentTextIdx = 0;
         overlayText.clear();
         timer.Reset();
+        onOverlayEnd.Publish();
     }
 
     void FullscreenTextOverlayFactory::SetOverlay(

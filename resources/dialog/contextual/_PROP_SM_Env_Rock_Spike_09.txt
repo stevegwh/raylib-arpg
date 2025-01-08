@@ -1,0 +1,4 @@
+distance: 40
+speaker: Arissa
+---
+What in the world is this?

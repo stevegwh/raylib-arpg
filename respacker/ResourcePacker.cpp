@@ -203,6 +203,10 @@ namespace sage
         {
             spawner.spawnerType = SpawnerType::NPC;
         }
+        else if (spawnerType == "DIALOG_CUTSCENE")
+        {
+            spawner.spawnerType = SpawnerType::DIALOG_CUTSCENE;
+        }
         spawner.spawnerName = spawnerName;
     }
 
@@ -382,9 +386,6 @@ namespace sage
      **/
     void ResourcePacker::PackAssets(entt::registry* registry, const std::string& output)
     {
-        registry->clear();
-        ResourceManager::GetInstance().Reset();
-
         fs::path outputPath(output);
         if (!fs::is_directory(outputPath.parent_path()))
         {
@@ -396,8 +397,6 @@ namespace sage
             std::cout << "ResourcePacker: File extension for output file must be 'bin'. Aborting... \n";
             return;
         }
-
-        AssetManager::GetInstance().LoadPaths();
 
         std::cout << "START: Loading assets into memory \n";
 

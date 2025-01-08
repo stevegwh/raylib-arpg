@@ -3,78 +3,57 @@
 //
 
 #include "ExampleScene.hpp"
-#include "GameObjectFactory.hpp"
 
-#include "GameData.hpp"
-
-#include "components/Collideable.hpp"
-#include "components/sgTransform.hpp"
-
-#include "Camera.hpp"
-#include "Cursor.hpp"
-#include "KeyMapping.hpp"
-#include "Settings.hpp"
-
-// Systems
 #include "AudioManager.hpp"
-#include "components/QuestComponents.hpp"
-#include "DialogFactory.hpp"
-#include "GameUiFactory.hpp"
-#include "ItemFactory.hpp"
-#include "LightManager.hpp"
-#include "QuestManager.hpp"
-#include "systems/ActorMovementSystem.hpp"
-#include "systems/AnimationSystem.hpp"
-#include "systems/CollisionSystem.hpp"
-#include "systems/CombatSystem.hpp"
+#include "Camera.hpp"
+#include "components/States.hpp"
+#include "FullscreenTextOverlayFactory.hpp"
+#include "GameData.hpp"
+#include "Serializer.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
-#include "systems/DoorSystem.hpp"
-#include "systems/HealthBarSystem.hpp"
-#include "systems/NavigationGridSystem.hpp"
-#include "systems/PlayerAbilitySystem.hpp"
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
-#include "systems/TimerSystem.hpp"
 
-#include <Serializer.hpp>
-
-#include "components/DoorBehaviorComponent.hpp"
 #include "raylib.h"
-#include "systems/PartySystem.hpp"
-#include "UserInput.hpp"
-#include "ViewSerializer.hpp"
 
 namespace sage
 {
-    void ExampleScene::Update()
+    void ExampleScene::Init()
     {
-        Scene::Update();
-    }
+        const auto soundScape = data->audioManager->PlayMusic("resources/audio/bgs/Cave.ogg");
+        SetMusicVolume(soundScape, 0.75);
 
-    void ExampleScene::Draw2D()
-    {
-        Scene::Draw2D();
-    }
+        std::vector<std::pair<std::string, float>> text;
+        text.emplace_back("Steve Wheeler presents...", 10.0f);
+        text.emplace_back("A game by Steve Wheeler.", 3.0f);
+        text.emplace_back("LeverQuest", 5.0f);
+        data->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
 
-    void ExampleScene::Draw3D()
-    {
-        Scene::Draw3D();
-    }
+        const auto actor = data->controllableActorSystem->GetSelectedActor();
+        const auto conversationEntity = data->renderSystem->FindRenderableByName("Opening_Dialog");
+        assert(conversationEntity != entt::null);
 
-    void ExampleScene::DrawDebug3D()
-    {
-        Scene::DrawDebug3D();
+        std::unique_ptr<Connection> cnx =
+            data->fullscreenTextOverlayFactory->onOverlayEnding.Subscribe([actor, this]() {
+                data->stateMachines->playerStateMachine->ChangeState(actor, PlayerStateEnum::InDialog);
+                auto& animationComponent = registry->get<Animation>(actor);
+                animationComponent.ChangeAnimationByEnum(AnimationEnum::IDLE2);
+            });
+
+        auto& dialogComponent = registry->get<DialogComponent>(actor);
+        dialogComponent.dialogTarget = conversationEntity;
+
+        auto& conversationComponent = registry->get<DialogComponent>(conversationEntity);
+        conversationComponent.conversation->onConversationEnd.Subscribe([this]() {
+            data->camera->FocusSelectedActor();
+            data->audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
+        });
     }
 
     ExampleScene::ExampleScene(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : Scene(_registry, _keyMapping, _settings, _audioManager)
     {
-        data->dialogFactory->LoadDialog(); // Must be called after all npcs are loaded
-        data->camera->FocusSelectedActor();
-        data->audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
-        auto soundScape = data->audioManager->PlayMusic("resources/audio/bgs/Cave.ogg");
-        SetMusicVolume(soundScape, 0.75);
     }
 } // namespace sage

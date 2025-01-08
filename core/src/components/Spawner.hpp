@@ -13,6 +13,7 @@ namespace sage
     {
         PLAYER,
         ENEMY,
+        DIALOG_CUTSCENE,
         NPC
     };
 

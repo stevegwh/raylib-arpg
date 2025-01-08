@@ -24,11 +24,11 @@ namespace sage
 
     void DialogSystem::StartConversation(const sgTransform& cutscenePose, entt::entity npc)
     {
-        gameData->camera->CutscenePose(cutscenePose);
+        const auto& dialogComponent = registry->get<DialogComponent>(npc);
+        gameData->camera->CutscenePose(cutscenePose, dialogComponent.cameraPos);
         gameData->camera->LockInput();
         gameData->cursor->DisableContextSwitching();
 
-        auto& dialogComponent = registry->get<DialogComponent>(npc);
         dialogComponent.conversation->onConversationProgress.Subscribe(
             [this](const dialog::Conversation* conv) { progressConversation(conv); });
 

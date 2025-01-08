@@ -60,7 +60,7 @@ namespace sage
     {
         Model rlmodel{};
         // TODO: Why don't glb ones have their keys set? Because they're deep copies?
-        std::string modelKey; // The name/path of the model in the ResourceManager
+        std::string modelKey{}; // The name/path of the model in the ResourceManager
         bool memorySafe = true;
 
         void UnloadShaderLocs() const;

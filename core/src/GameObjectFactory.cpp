@@ -107,6 +107,22 @@ namespace sage
         trans.SetPosition(translation);
     }
 
+    entt::entity GameObjectFactory::createDialogCutscene(
+        entt::registry* registry, Vector3 position, const char* name)
+    {
+        entt::entity id = registry->create();
+
+        auto& transform = registry->emplace<sgTransform>(id, id);
+        transform.SetPosition(position);
+
+        auto& renderable = registry->emplace<Renderable>(id);
+        renderable.SetName(name);
+        renderable.Disable();
+        registry->emplace<DialogComponent>(id);
+
+        return id;
+    }
+
     entt::entity GameObjectFactory::createEnemy(
         entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
     {
@@ -149,7 +165,7 @@ namespace sage
         return id;
     }
 
-    entt::entity GameObjectFactory::createQuestNPC(
+    entt::entity GameObjectFactory::createCellGuard(
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
@@ -185,7 +201,7 @@ namespace sage
         return id;
     }
 
-    entt::entity GameObjectFactory::createFetchQuestNPC(
+    entt::entity GameObjectFactory::createLeverGoblin(
         entt::registry* registry, GameData* data, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();

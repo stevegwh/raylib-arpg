@@ -4,8 +4,11 @@
 
 #pragma once
 
-#include "raylib.h"
+#include "Event.hpp"
 #include "Timer.hpp"
+
+#include "raylib.h"
+
 #include <optional>
 #include <string>
 #include <utility>
@@ -13,7 +16,7 @@
 
 namespace sage
 {
-    struct GameData;
+    class GameData;
 
     class FullscreenTextOverlayFactory
     {
@@ -29,6 +32,8 @@ namespace sage
         static std::vector<std::string> divideTextOnNewLine(const std::string& str);
 
       public:
+        Event<> onOverlayEnd{};
+        Event<> onOverlayEnding{};
         void Update();
         void Draw2D() const;
         void SetOverlay(

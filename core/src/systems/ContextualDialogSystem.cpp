@@ -37,14 +37,12 @@ namespace sage
                 std::string fileName = entry.path().filename().string();
                 std::ifstream file{std::format("{}/{}", CONTEXTUAL_DIALOG_PATH, fileName)};
 
-                std::vector<std::string> text;
-                auto entity = gameData->renderSystem->FindRenderableByName(fileName);
-                if (entity == entt::null)
-                {
-                    entity = gameData->renderSystem->FindRenderableByMeshName(fileName);
-                }
+                std::string fileNameStripped = entry.path().filename().replace_extension("").string();
+                auto entity = gameData->renderSystem->FindRenderable(fileNameStripped);
                 assert(entity != entt::null);
+
                 auto& trigger = registry->emplace<ContextualDialogTriggerComponent>(entity);
+                std::vector<std::string> text;
 
                 if (file.is_open())
                 {

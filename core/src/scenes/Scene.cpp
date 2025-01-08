@@ -53,6 +53,85 @@
 namespace sage
 {
 
+    void Scene::loadSpawners() const
+    {
+        entt::entity firstPlayer = entt::null;
+        const auto spawnerView = registry->view<Spawner>();
+        for (auto& entity : spawnerView)
+        {
+            const auto& spawner = registry->get<Spawner>(entity);
+            if (spawner.spawnerType == SpawnerType::PLAYER)
+            {
+                firstPlayer =
+                    GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, spawner.rot, "Player");
+            }
+            else if (spawner.spawnerType == SpawnerType::ENEMY)
+            {
+                GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, spawner.rot, "Goblin");
+            }
+            else if (spawner.spawnerType == SpawnerType::NPC)
+            {
+                auto npc = data->npcManager->CreateNPC(spawner.spawnerName, spawner.pos, spawner.rot);
+                assert(npc != entt::null);
+            }
+            else if (spawner.spawnerType == SpawnerType::DIALOG_CUTSCENE)
+            {
+                GameObjectFactory::createDialogCutscene(registry, spawner.pos, spawner.spawnerName.c_str());
+            }
+        }
+        registry->erase<Spawner>(spawnerView.begin(), spawnerView.end());
+        data->controllableActorSystem->SetSelectedActor(firstPlayer);
+    }
+
+
+    void Scene::initAssets() const
+    {
+        serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
+
+        const auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
+        const auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
+        const auto slices = heightMap.GetWidth();
+        data->navigationGridSystem->Init(slices, 1.0f);
+        data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
+
+        // NB: Dependent on *only* the map/static meshes having been loaded at this point
+        for (const auto view = registry->view<Renderable>(); auto entity : view)
+        {
+            auto& uber = registry->emplace<UberShaderComponent>(
+                entity, registry->get<Renderable>(entity).GetModel()->GetMaterialCount());
+            uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        }
+
+        loadSpawners();        
+
+        // Requires renderables being loaded first
+        data->contextualDialogSystem->InitContextualDialogsFromDirectory();
+        data->questManager->InitQuestsFromDirectory();
+
+        data->dialogFactory->InitDialogFromDirectory(); // Must be called after all npcs are loaded
+        data->camera->FocusSelectedActor();
+    }
+
+    void Scene::initUI() const
+    {
+        ResourceManager::GetInstance().FontLoadFromFile(
+            "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
+
+        GameUiFactory::CreateAbilityRow(data->uiEngine.get());
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.3;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.6;
+        auto* inventoryWindow =
+            GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
+        auto* equipmentWindow =
+            GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
+        data->userInput->keyIPressed.Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
+        data->userInput->keyCPressed.Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
+        data->userInput->keyFPressed.Subscribe([this]() { data->camera->FocusSelectedActor(); });
+
+        GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
+        GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
+    }
+
     void Scene::Update()
     {
         data->audioManager->Update();
@@ -121,72 +200,14 @@ namespace sage
         : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings, _audioManager))
     {
 
-        serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
+        initAssets();
+        initUI();
 
-        const auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
-        const auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
-        const auto slices = heightMap.GetWidth();
-        data->navigationGridSystem->Init(slices, 1.0f);
-
-        data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
-
-        // NB: Dependent on *only* the map/static meshes having been loaded at this point
-        for (const auto view = registry->view<Renderable>(); auto entity : view)
-        {
-            auto& uber = registry->emplace<UberShaderComponent>(
-                entity, registry->get<Renderable>(entity).GetModel()->GetMaterialCount());
-            uber.SetFlagAll(UberShaderComponent::Flags::Lit);
-        }
-
-        entt::entity firstPlayer = entt::null;
-
-        const auto view = registry->view<Spawner>();
-        for (auto& entity : view)
-        {
-            auto& spawner = registry->get<Spawner>(entity);
-            if (spawner.spawnerType == SpawnerType::PLAYER)
-            {
-                firstPlayer =
-                    GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, spawner.rot, "Player");
-            }
-            else if (spawner.spawnerType == SpawnerType::ENEMY)
-            {
-                GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, spawner.rot, "Goblin");
-            }
-            else if (spawner.spawnerType == SpawnerType::NPC)
-            {
-                auto npc = data->npcManager->CreateNPC(spawner.spawnerName, spawner.pos, spawner.rot);
-                assert(npc != entt::null);
-            }
-        }
-
-        // auto p2 = GameObjectFactory::createPlayer(registry, data.get(), Vector3Zero(), "Player 2");
-        // auto p3 = GameObjectFactory::createPlayer(registry, data.get(), {10, 0, 10}, "Player 3");
-        data->controllableActorSystem->SetSelectedActor(firstPlayer);
-
-        // GameObjectFactory::createPlayer(registry, data.get(), {25, 0, 10}, "Player 3");
-        // data->controllableActorSystem->SetSelectedActor(data->partySystem->GetMember(1).entity);
-        //  registry->erase<Spawner>(view.begin(), view.end());
-
-        ResourceManager::GetInstance().FontLoadFromFile(
-            "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-
-        const auto abilityUi = GameUiFactory::CreateAbilityRow(data->uiEngine.get());
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.3;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.6;
-        auto* inventoryWindow =
-            GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
-        auto* equipmentWindow =
-            GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
-        data->userInput->keyIPressed.Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
-        data->userInput->keyCPressed.Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
-        data->userInput->keyFPressed.Subscribe([this]() { data->camera->FocusSelectedActor(); });
-
-        auto* window3 = GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
-        GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
+        // Clear any CPU resources that are no longer needed
+        // ResourceManager::GetInstance().UnloadImages();
+        // ResourceManager::GetInstance().UnloadShaderFileText();
 
         // Test stuff -----------------------------
-
         spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
         spiral->InitSystem();
 
@@ -194,14 +215,6 @@ namespace sage
         //        spatial.audioKey = "";
 
         // -----------------------------------------
-
-        // Requires renderables being loaded first
-        data->contextualDialogSystem->InitContextualDialogsFromDirectory();
-        data->questManager->InitQuestsFromDirectory();
-
-        // Clear any CPU resources that are no longer needed
-        // ResourceManager::GetInstance().UnloadImages();
-        // ResourceManager::GetInstance().UnloadShaderFileText();
     };
 
 } // namespace sage

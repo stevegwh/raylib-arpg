@@ -101,14 +101,14 @@ namespace sage
             UnloadTexture(renderTexture2d.texture);
             renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
             renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+            SetTargetFPS(60);
         }
     }
 
     void Application::Update()
     {
         init();
-
-        SetTargetFPS(60);
+        scene->Init();
         while (!exitWindow) // Detect window close button or ESC key
         {
 

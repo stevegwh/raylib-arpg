@@ -513,6 +513,7 @@ namespace sage
 
     std::string StripPath(const std::string& fullPath)
     {
+        if (fullPath.empty()) return "";
         size_t lastSlash = fullPath.find_last_of("/\\");
 
         size_t lastDot = fullPath.find_last_of('.');

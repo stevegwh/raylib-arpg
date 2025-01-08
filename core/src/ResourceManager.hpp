@@ -84,10 +84,10 @@ namespace sage
         void ImageLoadFromFile(const std::string& path);
         void ImageLoadFromFile(const std::string& path, Image image);
         void ModelLoadFromFile(const std::string& path);
-        [[nodiscard]] ModelSafe GetModelCopy(const std::string& id);
-        [[nodiscard]] ModelSafe GetModelDeepCopy(const std::string& id) const;
-        void ModelAnimationLoadFromFile(const std::string& id);
-        ModelAnimation* GetModelAnimation(const std::string& id, int* animsCount);
+        [[nodiscard]] ModelSafe GetModelCopy(const std::string& key);
+        [[nodiscard]] ModelSafe GetModelDeepCopy(const std::string& key) const;
+        void ModelAnimationLoadFromFile(const std::string& path);
+        ModelAnimation* GetModelAnimation(const std::string& key, int* animsCount);
         void UnloadImages();
         void UnloadShaderFileText();
 

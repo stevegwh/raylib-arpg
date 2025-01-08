@@ -43,19 +43,6 @@ namespace sage
         bool scrollEnabled = true;
         bool lockInput = false;
 
-        void onForwardKeyPressed();
-        void onLeftKeyPressed();
-        void onRightKeyPressed();
-        void onBackKeyPressed();
-        void onRotateLeftKeyPressed();
-        void onRotateRightKeyPressed();
-        void onForwardKeyUp();
-        void onLeftKeyUp();
-        void onRightKeyUp();
-        void onBackKeyUp();
-        void onRotateLeftKeyUp();
-        void onRotateRightKeyUp();
-
         void updateTarget();
         void handleInput();
 
@@ -70,7 +57,7 @@ namespace sage
         [[nodiscard]] Vector3 GetBackward();
         [[nodiscard]] Vector3 GetLeft();
         [[nodiscard]] Vector3 GetPosition() const;
-        void CutscenePose(const sgTransform& location);
+        void CutscenePose(const sgTransform& location, const Vector3& localOffset);
         void CutsceneEnd();
         void SetCamera(Vector3 _pos, Vector3 _target);
         void FocusSelectedActor();

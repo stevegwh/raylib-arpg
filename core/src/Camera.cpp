@@ -162,22 +162,18 @@ namespace sage
         return rlCamera.position;
     }
 
-    void Camera::CutscenePose(const sgTransform& npcTrans)
+    void Camera::CutscenePose(const sgTransform& location, const Vector3& localOffset)
     {
         cameraSave = CameraSave{rlCamera, currentTargetY, currentPositionY};
 
         rlCamera.position.y = rlCamera.target.y;
 
-        // Define the base camera offset in local space
-        constexpr Vector3 localOffset = {
-            5.0f, 10.0f, 18.0f}; // Distance from actor in local space (TODO: Shouldn't be hardcoded)
-
-        auto [rotx, roty, rotz] = npcTrans.GetWorldRot();
+        auto [rotx, roty, rotz] = location.GetWorldRot();
         const Matrix rotationMatrix = MatrixRotateXYZ({rotx * DEG2RAD, roty * DEG2RAD, rotz * DEG2RAD});
 
         const Vector3 rotatedOffset = Vector3Transform(localOffset, rotationMatrix);
-        const Vector3 cameraPosition = Vector3Add(npcTrans.GetWorldPos(), rotatedOffset);
-        const Vector3 cameraTarget = Vector3Add(npcTrans.GetWorldPos(), {0.0f, 1.0f, 0.0f});
+        const Vector3 cameraPosition = Vector3Add(location.GetWorldPos(), rotatedOffset);
+        const Vector3 cameraTarget = Vector3Add(location.GetWorldPos(), {0.0f, 1.0f, 0.0f});
 
         rlCamera.position = cameraPosition;
         rlCamera.target = cameraTarget;

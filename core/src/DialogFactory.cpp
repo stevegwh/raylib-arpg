@@ -39,7 +39,7 @@ namespace sage
 
         while (std::getline(stream, line, '\n'))
         {
-            line = parsing::trim(line);
+            line = trim(line);
 
             if (line == "<variables>")
             {
@@ -58,8 +58,8 @@ namespace sage
                 size_t colonPos = line.find(':');
                 if (colonPos != std::string::npos)
                 {
-                    std::string key = parsing::trim(line.substr(0, colonPos));
-                    std::string value = parsing::trim(line.substr(colonPos + 1));
+                    std::string key = trim(line.substr(0, colonPos));
+                    std::string value = trim(line.substr(colonPos + 1));
                     variables[key] = value;
                 }
             }
@@ -309,7 +309,7 @@ namespace sage
         conversation->AddNode(std::move(node));
     }
 
-    void DialogFactory::LoadDialog()
+    void DialogFactory::InitDialogFromDirectory()
     {
         fs::path inputPath("resources/dialog");
         if (!fs::is_directory(inputPath))
@@ -361,6 +361,10 @@ namespace sage
 
                     entity = gameData->renderSystem->FindRenderable<DialogComponent>(owner);
                     assert(entity != entt::null);
+                    // if (!registry->any_of<DialogComponent>(entity))
+                    // {
+                    //     registry->emplace<DialogComponent>(entity);
+                    // }
                     dialogComponent = &registry->get<DialogComponent>(entity);
                     dialogComponent->conversation = std::make_unique<dialog::Conversation>(registry, entity);
                 }
@@ -382,9 +386,23 @@ namespace sage
                         std::istringstream iss(line.substr(str_size));
                         Vector3 filePos{0};
                         iss >> filePos.x >> filePos.y >> filePos.z;
-                        dialogComponent->conversationPos =
-                            Vector3Add(transform.GetWorldPos(), Vector3Multiply(transform.forward(), filePos));
-                        ;
+                        dialogComponent->conversationPos = Vector3Add(
+                            transform.GetWorldPos(),
+                            Vector3Multiply(
+                                transform.forward(), filePos)); // This doesn't account for movable NPCs at all
+                    }
+                }
+                else if (line.starts_with("camera_pos:"))
+                {
+                    assert(dialogComponent);
+                    if (entity != entt::null && registry->all_of<sgTransform>(entity))
+                    {
+                        auto& transform = registry->get<sgTransform>(entity);
+                        auto str_size = std::string("camera_pos:").size();
+                        std::istringstream iss(line.substr(str_size));
+                        Vector3 filePos{0};
+                        iss >> filePos.x >> filePos.y >> filePos.z;
+                        dialogComponent->cameraPos = filePos;
                     }
                 }
                 else if (line == "<node>")

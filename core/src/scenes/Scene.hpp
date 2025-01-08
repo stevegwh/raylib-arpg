@@ -19,8 +19,10 @@ namespace sage
 
     class Scene
     {
-
         std::unique_ptr<SpiralFountainVFX> spiral;
+        void initAssets() const;
+        void initUI() const;
+        void loadSpawners() const;
 
       protected:
         entt::registry* registry;
@@ -30,6 +32,7 @@ namespace sage
         Event<entt::entity> sceneLoadingFinished; // Currently unused
         Event<entt::entity> sceneChange;
 
+        virtual void Init() = 0;
         virtual void Update();
         virtual void Draw3D();
         virtual void DrawDebug3D();

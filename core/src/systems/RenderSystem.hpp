@@ -31,7 +31,9 @@ namespace sage
             for (const auto& entity : view)
             {
                 const auto& renderable = registry->get<Renderable>(entity);
-                const auto& key = StripPath(renderable.GetModel()->GetKey());
+                auto model = renderable.GetModel();
+                if (!model) continue;
+                const auto& key = StripPath(model->GetKey());
                 if (key == meshKey) return entity;
             }
             return entt::null;

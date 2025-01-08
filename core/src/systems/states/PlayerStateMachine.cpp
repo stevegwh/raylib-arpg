@@ -23,8 +23,6 @@
 #include <cassert>
 #include <format>
 
-static constexpr int FOLLOW_DISTANCE = 15;
-
 namespace sage
 {
     class PlayerStateController::DefaultState : public StateMachine
