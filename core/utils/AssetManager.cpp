@@ -10,7 +10,7 @@
 #include "raylib.h"
 #include <cassert>
 #include <cereal/archives/json.hpp>
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 #include <fstream>
 #include <magic_enum.hpp>
 #include <type_traits>

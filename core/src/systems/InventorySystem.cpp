@@ -13,10 +13,10 @@
 #include "components/sgTransform.hpp"
 #include "ControllableActorSystem.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
 #include "GameUiEngine.hpp"
 #include "ItemFactory.hpp"
 #include "NavigationGridSystem.hpp"
+#include "Systems.hpp"
 
 namespace sage
 {
@@ -28,7 +28,7 @@ namespace sage
 
     bool InventorySystem::CheckWorldItemRange(bool hover)
     {
-        const auto cursorPos = gameData->cursor->getMouseHitInfo().rlCollision.point;
+        const auto cursorPos = sys->cursor->getMouseHitInfo().rlCollision.point;
         if (AlmostEquals(cursorPos, lastWorldItemHovered.pos))
         {
             return lastWorldItemHovered.reachable;
@@ -37,7 +37,7 @@ namespace sage
         lastWorldItemHovered.pos = cursorPos;
         lastWorldItemHovered.reachable = false;
 
-        auto actorId = gameData->controllableActorSystem->GetSelectedActor();
+        auto actorId = sys->controllableActorSystem->GetSelectedActor();
         const auto playerPos = registry->get<sgTransform>(actorId).GetWorldPos();
 
         const auto dist = Vector3Distance(cursorPos, playerPos);
@@ -45,25 +45,25 @@ namespace sage
         {
             if (!hover)
             {
-                gameData->uiEngine->CreateErrorMessage("Item out of range.");
+                sys->uiEngine->CreateErrorMessage("Item out of range.");
             }
             return false;
         }
 
         const auto& collideable = registry->get<Collideable>(actorId);
-        gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
-        if (gameData->navigationGridSystem->AStarPathfind(actorId, playerPos, cursorPos).empty())
+        sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
+        if (sys->navigationGridSystem->AStarPathfind(actorId, playerPos, cursorPos).empty())
         {
             if (!hover)
             {
-                gameData->uiEngine->CreateErrorMessage("Item unreachable.");
+                sys->uiEngine->CreateErrorMessage("Item unreachable.");
             }
         }
         else
         {
             lastWorldItemHovered.reachable = true;
         }
-        gameData->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
+        sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
 
         return lastWorldItemHovered.reachable;
     }
@@ -73,7 +73,7 @@ namespace sage
         if (!CheckWorldItemRange()) return;
 
         auto& inventoryComponent =
-            registry->get<InventoryComponent>(gameData->controllableActorSystem->GetSelectedActor());
+            registry->get<InventoryComponent>(sys->controllableActorSystem->GetSelectedActor());
 
         if (inventoryComponent.AddItem(entity))
         {
@@ -115,11 +115,11 @@ namespace sage
         component.onItemRemovedCnx->UnSubscribe();
     }
 
-    InventorySystem::InventorySystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    InventorySystem::InventorySystem(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
 
-        _gameData->cursor->onItemClick.Subscribe([this](entt::entity itemId) { onWorldItemClicked(itemId); });
+        _sys->cursor->onItemClick.Subscribe([this](entt::entity itemId) { onWorldItemClicked(itemId); });
 
         registry->on_construct<InventoryComponent>().connect<&InventorySystem::onComponentAdded>(this);
         registry->on_destroy<InventoryComponent>().connect<&InventorySystem::onComponentRemoved>(this);

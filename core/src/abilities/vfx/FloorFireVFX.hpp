@@ -14,7 +14,7 @@
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     class FloorFireVFX : public VisualFX
     {
         Vector2 screenSize{};
@@ -29,6 +29,6 @@ namespace sage
         void InitSystem() override;
         void Update(float dt) override;
         void Draw3D() const override;
-        explicit FloorFireVFX(GameData* _gameData, Ability* _ability);
+        explicit FloorFireVFX(Systems* _sys, Ability* _ability);
     };
 } // namespace sage

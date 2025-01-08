@@ -4,7 +4,7 @@
 
 #include "SpatialAudioSystem.hpp"
 
-#include "GameData.hpp"
+#include "Systems.hpp"
 
 #include "components/sgTransform.hpp"
 #include "components/SpatialAudioComponent.hpp"
@@ -20,8 +20,8 @@ namespace sage
         }
     }
 
-    SpatialAudioSystem::SpatialAudioSystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    SpatialAudioSystem::SpatialAudioSystem(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
     }
 } // namespace sage

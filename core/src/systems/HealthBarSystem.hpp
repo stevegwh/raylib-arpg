@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "components/HealthBar.hpp"
 #include "systems/BaseSystem.hpp"
 
 #include "entt/entt.hpp"
@@ -17,7 +16,7 @@ namespace sage
     {
         Camera* camera;
 
-        void updateHealthBarTextures();
+        void updateHealthBarTextures() const;
 
       public:
         void Draw2D();

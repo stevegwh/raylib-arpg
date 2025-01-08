@@ -14,10 +14,10 @@
 #include "components/States.hpp"
 #include "ControllableActorSystem.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
 #include "InventorySystem.hpp"
 #include "ItemFactory.hpp"
 #include "RenderSystem.hpp"
+#include "Systems.hpp"
 #include "TextureTerrainOverlay.hpp" // used for construction
 
 #include <cassert>
@@ -70,8 +70,8 @@ namespace sage
 
     void PartySystem::GiveItemToSelected(const std::string& itemName) const
     {
-        auto& inventory = registry->get<InventoryComponent>(gameData->controllableActorSystem->GetSelectedActor());
-        auto itemId = gameData->itemFactory->GetItem(itemName);
+        auto& inventory = registry->get<InventoryComponent>(sys->controllableActorSystem->GetSelectedActor());
+        auto itemId = sys->itemFactory->GetItem(itemName);
         auto success = inventory.AddItem(itemId);
     }
 
@@ -191,12 +191,12 @@ namespace sage
         return {};
     }
 
-    PartySystem::PartySystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    PartySystem::PartySystem(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
         groups.resize(1);
 
-        gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, const entt::entity actor) { SetLeader(actor); });
     }
 } // namespace sage

@@ -4,11 +4,11 @@
 #include "components/States.hpp"
 #include "StateMachine.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     class VisualFX;
 
     class AbilityStateController : StateMachineController<AbilityState, AbilityStateEnum>
@@ -17,7 +17,7 @@ namespace sage
         class AwaitingExecutionState;
         class CursorSelectState;
 
-        GameData* gameData;
+        Systems* sys;
 
         void executeAbility(entt::entity abilityEntity);
         bool checkRange(entt::entity abilityEntity);
@@ -35,7 +35,7 @@ namespace sage
         ~AbilityStateController() override = default;
         AbilityStateController(const AbilityStateController&) = delete;
         AbilityStateController& operator=(const AbilityStateController&) = delete;
-        AbilityStateController(entt::registry* _registry, GameData* _gameData);
+        AbilityStateController(entt::registry* _registry, Systems* _sys);
 
         friend class StateMachineController; // Required for CRTP
     };

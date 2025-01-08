@@ -10,9 +10,9 @@
 #include "components/OverheadDialogComponent.hpp"
 #include "components/sgTransform.hpp"
 #include "ControllableActorSystem.hpp"
-#include "GameData.hpp"
 #include "Settings.hpp"
 #include "slib.hpp"
+#include "Systems.hpp"
 
 #include "components/Renderable.hpp"
 #include "raylib.h"
@@ -38,7 +38,7 @@ namespace sage
                 std::ifstream file{std::format("{}/{}", CONTEXTUAL_DIALOG_PATH, fileName)};
 
                 std::string fileNameStripped = entry.path().filename().replace_extension("").string();
-                auto entity = gameData->renderSystem->FindRenderable(fileNameStripped);
+                auto entity = sys->renderSystem->FindRenderable(fileNameStripped);
                 assert(entity != entt::null);
 
                 auto& trigger = registry->emplace<ContextualDialogTriggerComponent>(entity);
@@ -68,7 +68,7 @@ namespace sage
                         else if (buff.find("speaker: ") != std::string::npos)
                         {
                             auto sub = buff.substr(std::string("speaker: ").size());
-                            entt::entity speaker = gameData->renderSystem->FindRenderable(sub);
+                            entt::entity speaker = sys->renderSystem->FindRenderable(sub);
                             assert(trigger.speaker != entt::null);
                             trigger.speaker = speaker;
                         }
@@ -88,11 +88,11 @@ namespace sage
         for (const auto view = registry->view<OverheadDialogComponent>(); const auto& entity : view)
         {
             const auto& col = registry->get<Collideable>(entity);
-            auto [width, height] = gameData->settings->GetViewPort();
+            auto [width, height] = sys->settings->GetViewPort();
             auto center =
                 Vector3MultiplyByValue(Vector3Add(col.worldBoundingBox.max, col.worldBoundingBox.min), 0.5f);
             const auto pos = Vector3{center.x, col.worldBoundingBox.max.y + 1.0f, center.z};
-            auto screenPos = GetWorldToScreenEx(pos, *gameData->camera->getRaylibCam(), width, height);
+            auto screenPos = GetWorldToScreenEx(pos, *sys->camera->getRaylibCam(), width, height);
             auto& contextualDiag = registry->get<OverheadDialogComponent>(entity);
 
             const auto text = contextualDiag.GetText();
@@ -128,7 +128,7 @@ namespace sage
             }
 
             const auto playerPos =
-                registry->get<sgTransform>(gameData->controllableActorSystem->GetSelectedActor()).GetWorldPos();
+                registry->get<sgTransform>(sys->controllableActorSystem->GetSelectedActor()).GetWorldPos();
 
             // As the contextual object could be a static mesh, using its collideable (which goes off the model's
             // vertex data) is a safer idea.
@@ -146,8 +146,8 @@ namespace sage
         }
     }
 
-    ContextualDialogSystem::ContextualDialogSystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    ContextualDialogSystem::ContextualDialogSystem(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
     }
 

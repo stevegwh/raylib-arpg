@@ -7,9 +7,9 @@
 #include "components/sgTransform.hpp"
 #include "EditorGui.hpp"
 #include "EditorSettings.hpp"
-#include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "LightManager.hpp"
+#include "Systems.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "windows/FloatingWindow.hpp"
@@ -18,7 +18,7 @@
 #include "Settings.hpp"
 #include "UserInput.hpp"
 
-// TODO: This shouldn't use "GameData", it should have its own "Data" class that only inits the systems that it
+// TODO: This shouldn't use "sys", it should have its own "Data" class that only inits the systems that it
 // needs.
 
 namespace sage

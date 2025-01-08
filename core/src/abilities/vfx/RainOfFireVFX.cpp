@@ -4,7 +4,7 @@
 
 #include "RainOfFireVFX.hpp"
 
-#include "GameData.hpp"
+#include "Systems.hpp"
 
 #include "Camera.hpp"
 #include "components/Ability.hpp"
@@ -59,7 +59,7 @@ namespace sage
     {
         int maxRadius = 5; // TODO: temporary. Should be the radius of the ability's cursor
 
-        auto right = gameData->camera->GetRight();
+        auto right = sys->camera->GetRight();
         auto aerialSpawn = Vector3MultiplyByValue(right, 3);
 
         // Calculate a random point in the circle around the target
@@ -81,13 +81,13 @@ namespace sage
 
         if (!fireball.fireball)
         {
-            fireball.fireball = std::make_unique<FireballVFX>(gameData, ability);
+            fireball.fireball = std::make_unique<FireballVFX>(sys, ability);
             fireball.fireball->InitSystem();
         }
 
         if (!fireball.flameEffect)
         {
-            fireball.flameEffect = std::make_unique<FlamePartSys>(gameData->camera->getRaylibCam());
+            fireball.flameEffect = std::make_unique<FlamePartSys>(sys->camera->getRaylibCam());
             fireball.flameEffect->SetOrigin(fireball.position);
             fireball.flameEffect->SetDirection(direction);
         }
@@ -101,7 +101,7 @@ namespace sage
         initialHeight = height;
         minHeight = 0.0f;
         impactRadius = 1.0f;
-        auto& transform = gameData->registry->get<sgTransform>(ability->self);
+        auto& transform = sys->registry->get<sgTransform>(ability->self);
         target = transform.GetWorldPos();
         // Base spawn point slightly behind and above the target
         baseSpawnPoint = {target.x + initialOffset, target.y + height, target.z + initialOffset};
@@ -124,7 +124,7 @@ namespace sage
         }
     }
 
-    RainOfFireVFX::RainOfFireVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
+    RainOfFireVFX::RainOfFireVFX(Systems* _sys, Ability* _ability) : VisualFX(_sys, _ability)
     {
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/billboard.fs");
     }

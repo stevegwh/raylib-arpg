@@ -8,7 +8,7 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
+#include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
 
 namespace sage
@@ -26,7 +26,7 @@ namespace sage
         }
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = true;
-        const auto selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& moveable = registry->get<MoveableActor>(selectedActor);
         if (!moveable.IsMoving()) return;
         const auto dest = moveable.GetDestination();
@@ -67,11 +67,11 @@ namespace sage
         transform.SetScale(scale);
     }
 
-    CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData), self(registry->create())
+    CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys), self(registry->create())
     {
-        _gameData->cursor->onAnyLeftClick.Subscribe([this](const entt::entity entity) { onCursorClick(entity); });
-        _gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        _sys->cursor->onAnyLeftClick.Subscribe([this](const entt::entity entity) { onCursorClick(entity); });
+        _sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity prev, entt::entity current) { onSelectedActorChanged(prev, current); });
 
         // Init indicator graphics here

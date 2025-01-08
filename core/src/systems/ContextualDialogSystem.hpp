@@ -4,27 +4,28 @@
 
 #pragma once
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
+
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     class ContextualDialogSystem
     {
         std::unordered_map<entt::entity, std::vector<std::string>> dialogTextMap;
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
 
       public:
         void Update() const;
         void Draw2D() const;
 
         void InitContextualDialogsFromDirectory();
-        ContextualDialogSystem(entt::registry* _registry, GameData* _gameData);
+        ContextualDialogSystem(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

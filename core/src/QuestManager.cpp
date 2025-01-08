@@ -11,8 +11,8 @@
 #include "components/ItemComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "FullscreenTextOverlayFactory.hpp"
-#include "GameData.hpp"
 #include "ParsingHelpers.hpp"
+#include "Systems.hpp"
 #include "systems/DoorSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/RenderSystem.hpp"
@@ -32,7 +32,7 @@ namespace sage
     using namespace parsing;
 
     template <typename QuestEvent, typename... Args>
-    void bindFunctionToEvent(entt::registry* registry, GameData* gameData, TextFunction func, QuestEvent* event)
+    void bindFunctionToEvent(entt::registry* registry, Systems* sys, TextFunction func, QuestEvent* event)
     {
         assert(!func.name.empty());
         // Not all functions require params
@@ -40,41 +40,41 @@ namespace sage
         if (func.name.find("OpenDoor") != std::string::npos)
         {
             assert(!func.params.empty());
-            auto doorId = gameData->renderSystem->FindRenderable<DoorBehaviorComponent>(func.params);
+            auto doorId = sys->renderSystem->FindRenderable<DoorBehaviorComponent>(func.params);
             assert(doorId != entt::null);
-            event->Subscribe([doorId, gameData](Args...) { gameData->doorSystem->UnlockAndOpenDoor(doorId); });
+            event->Subscribe([doorId, sys](Args...) { sys->doorSystem->UnlockAndOpenDoor(doorId); });
         }
         else if (func.name.find("JoinParty") != std::string::npos)
         {
             assert(!func.params.empty());
-            auto npcId = gameData->renderSystem->FindRenderable(func.params);
+            auto npcId = sys->renderSystem->FindRenderable(func.params);
             assert(npcId != entt::null);
-            event->Subscribe([npcId, gameData](Args...) { gameData->partySystem->NPCToMember(npcId); });
+            event->Subscribe([npcId, sys](Args...) { sys->partySystem->NPCToMember(npcId); });
         }
         else if (func.name.find("RemoveItem") != std::string::npos)
         {
             assert(!func.params.empty());
-            auto itemId = gameData->renderSystem->FindRenderable(func.params);
+            auto itemId = sys->renderSystem->FindRenderable(func.params);
             assert(itemId != entt::null);
-            event->Subscribe([itemId, gameData](Args...) { gameData->partySystem->RemoveItemFromParty(itemId); });
+            event->Subscribe([itemId, sys](Args...) { sys->partySystem->RemoveItemFromParty(itemId); });
         }
         else if (func.name.find("GiveItem") != std::string::npos)
         {
             assert(!func.params.empty());
-            event->Subscribe([itemName = func.params, gameData](Args...) {
-                gameData->partySystem->GiveItemToSelected(itemName);
+            event->Subscribe([itemName = func.params, sys](Args...) {
+                sys->partySystem->GiveItemToSelected(itemName);
             });
         }
         else if (func.name.find("PlaySFX") != std::string::npos)
         {
             assert(!func.params.empty());
             event->Subscribe(
-                [sfxName = func.params, gameData](Args...) { gameData->audioManager->PlaySFX(sfxName); });
+                [sfxName = func.params, sys](Args...) { sys->audioManager->PlaySFX(sfxName); });
         }
         else if (func.name.find("DisableWorldItem") != std::string::npos)
         {
             assert(!func.params.empty());
-            auto itemId = gameData->renderSystem->FindRenderable(func.params);
+            auto itemId = sys->renderSystem->FindRenderable(func.params);
             assert(itemId != entt::null);
             event->Subscribe([itemId, registry](Args...) {
                 if (registry->any_of<Renderable>(itemId))
@@ -89,13 +89,13 @@ namespace sage
         }
         else if (func.name.find("EndGame") != std::string::npos)
         {
-            event->Subscribe([gameData](Args...) {
+            event->Subscribe([sys](Args...) {
                 std::vector<std::pair<std::string, float>> text;
                 text.emplace_back("Our bold heroes step forward, out of the gate.", 4.0f);
                 text.emplace_back("What will await our valiant heroes?", 4.0f);
                 text.emplace_back("Find out soon.", 4.0f);
                 text.emplace_back("Thanks for playing!", 4.0f);
-                gameData->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
+                sys->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
             });
         }
         else
@@ -179,7 +179,7 @@ namespace sage
                                 {
                                     sub = taskLine.substr(start);
                                 }
-                                entity = gameData->renderSystem->FindRenderable(sub);
+                                entity = sys->renderSystem->FindRenderable(sub);
                                 assert(entity != entt::null);
                                 assert(registry->any_of<DialogComponent>(entity));
                             }
@@ -194,7 +194,7 @@ namespace sage
                                 {
                                     sub = taskLine.substr(start);
                                 }
-                                entity = gameData->renderSystem->FindRenderable(sub);
+                                entity = sys->renderSystem->FindRenderable(sub);
                                 assert(entity != entt::null);
                                 assert(registry->any_of<ItemComponent>(entity));
                             }
@@ -214,7 +214,7 @@ namespace sage
                                 {
                                     auto func = getFunctionNameAndArgs(command);
                                     bindFunctionToEvent<Event<QuestTaskComponent*>, QuestTaskComponent*>(
-                                        registry, gameData, func, &task.onCompleted);
+                                        registry, sys, func, &task.onCompleted);
                                 }
                             }
                         }
@@ -226,7 +226,7 @@ namespace sage
                         {
                             auto func = getFunctionNameAndArgs(functionLine);
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(
-                                registry, gameData, func, &quest.onStart);
+                                registry, sys, func, &quest.onStart);
                         }
                     }
                     else if (buff.find("[OnComplete]") != std::string::npos)
@@ -236,7 +236,7 @@ namespace sage
                         {
                             auto func = getFunctionNameAndArgs(functionLine);
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(
-                                registry, gameData, func, &quest.onCompleted);
+                                registry, sys, func, &quest.onCompleted);
                         }
                     }
                 }
@@ -265,8 +265,8 @@ namespace sage
         return map.at(key);
     }
 
-    QuestManager::QuestManager(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    QuestManager::QuestManager(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
     }
 

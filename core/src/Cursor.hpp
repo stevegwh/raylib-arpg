@@ -5,17 +5,16 @@
 #pragma once
 
 #include "components/Collideable.hpp"
+#include "Event.hpp"
 
 #include "raylib.h"
-
-#include <entt/entt.hpp>
-#include <Event.hpp>
+#include "entt/entt.hpp"
 
 #include <optional>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     struct HoverInfo
     {
@@ -28,7 +27,7 @@ namespace sage
     {
         float leftClickTimer = 0;
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
 
         CollisionInfo m_mouseHitInfo{};
         CollisionInfo m_naviHitInfo{};
@@ -97,6 +96,6 @@ namespace sage
         void Show();
         [[nodiscard]] bool isValidMove() const;
 
-        Cursor(entt::registry* registry, GameData* _gameData);
+        Cursor(entt::registry* registry, Systems* _sys);
     };
 } // namespace sage

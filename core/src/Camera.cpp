@@ -5,8 +5,8 @@
 #include "Camera.hpp"
 
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
 #include "slib.hpp"
+#include "Systems.hpp"
 #include "UserInput.hpp"
 
 #include "components/NavigationGridSquare.hpp"
@@ -23,10 +23,10 @@ namespace sage
     void Camera::updateTarget()
     {
         GridSquare square{};
-        if (!gameData->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
+        if (!sys->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
 
         float floorHeight =
-            gameData->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
+            sys->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
         const float targetOffsetY = 8.0f; // Offset from the floor
 
         float idealTargetY = floorHeight + targetOffsetY;
@@ -192,7 +192,7 @@ namespace sage
 
     void Camera::FocusSelectedActor()
     {
-        auto actorId = gameData->controllableActorSystem->GetSelectedActor();
+        auto actorId = sys->controllableActorSystem->GetSelectedActor();
         auto& transform = registry->get<sgTransform>(actorId);
         auto diff = Vector3Subtract(rlCamera.position, rlCamera.target);
         SetCamera(Vector3Add(transform.GetWorldPos(), diff), transform.GetWorldPos());
@@ -209,8 +209,8 @@ namespace sage
         UpdateCameraPro(&rlCamera, {0, 0, 0}, {0, 0, 0}, 0);
     }
 
-    Camera::Camera(entt::registry* _registry, UserInput* userInput, GameData* _gameData)
-        : registry(_registry), gameData(_gameData), rlCamera({0})
+    Camera::Camera(entt::registry* _registry, UserInput* userInput, Systems* _sys)
+        : registry(_registry), sys(_sys), rlCamera({0})
     {
         rlCamera.position = {20.0f, 40.0f, 20.0f};
         rlCamera.target = {0.0f, 8.0f, 0.0f};

@@ -6,13 +6,14 @@
 #include "PlayerStateMachine.hpp"
 #include "WavemobStateMachine.hpp"
 
-#include <entt/entt.hpp>
-#include <memory>
+#include "entt/entt.hpp"
+
+// #include <memory>
 
 namespace sage
 {
-    class GameData; // forward declaration
-    class Scene;    // forward declaration
+    class Systems; // forward declaration
+    class Scene;   // forward declaration
 
     class StateMachines
     {
@@ -25,6 +26,6 @@ namespace sage
         std::unique_ptr<AbilityStateController> abilityStateMachine;
         void Update() const;
         void Draw3D() const;
-        StateMachines(entt::registry* _registry, GameData* _gameData);
+        StateMachines(entt::registry* _registry, Systems* _sys);
     };
 } // namespace sage

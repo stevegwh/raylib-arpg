@@ -4,9 +4,9 @@
 
 #include "FullscreenTextOverlayFactory.hpp"
 
-#include "GameData.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
+#include "Systems.hpp"
 
 #include <format>
 #include <sstream>
@@ -89,7 +89,7 @@ namespace sage
     void FullscreenTextOverlayFactory::Draw2D() const
     {
         if (!enabled) return;
-        const auto [width, height] = gameData->settings->GetViewPort();
+        const auto [width, height] = sys->settings->GetViewPort();
         unsigned char a = 255;
 
         const bool last = currentTextIdx == overlayText.size() - 1;
@@ -121,7 +121,7 @@ namespace sage
         }
         allTextHeight += (spacing * (size - 1));
 
-        float startY = (gameData->settings->GetViewPort().y - allTextHeight) / 2;
+        float startY = (sys->settings->GetViewPort().y - allTextHeight) / 2;
 
         for (unsigned int i = 0; i < size; ++i)
         {
@@ -138,11 +138,11 @@ namespace sage
         }
     }
 
-    FullscreenTextOverlayFactory::FullscreenTextOverlayFactory(GameData* _gameData)
+    FullscreenTextOverlayFactory::FullscreenTextOverlayFactory(Systems* _sys)
         : font(ResourceManager::GetInstance().FontLoad(
               "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
           timer({}),
-          gameData(_gameData)
+          sys(_sys)
     {
     }
 

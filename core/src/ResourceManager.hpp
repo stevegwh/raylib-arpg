@@ -4,18 +4,20 @@
 #pragma once
 
 #include "common_types.hpp"
-#include "magic_enum/magic_enum.hpp"
-#include "raylib-cereal.hpp"
-#include "raylib.h"
 #include "slib.hpp"
 
+#include "magic_enum/magic_enum.hpp"
+#include "raylib.h"
+// #include "entt/entt.hpp"
+
+// Below required
 #include "cereal/archives/binary.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"
 #include "cereal/types/unordered_map.hpp"
 #include "cereal/types/vector.hpp"
+#include "raylib-cereal.hpp"
 
-#include <entt/entt.hpp>
 #include <string>
 #include <unordered_map>
 

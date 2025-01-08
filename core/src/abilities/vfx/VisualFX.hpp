@@ -1,11 +1,11 @@
 #pragma once
 
 #include "raylib.h"
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     struct sgTransform;
     struct Ability;
 
@@ -13,7 +13,7 @@ namespace sage
     {
       protected:
         Ability* ability;
-        GameData* gameData;
+        Systems* sys;
 
       public:
         bool active = false;
@@ -22,7 +22,7 @@ namespace sage
         virtual void Update(float dt) = 0;
         virtual void Draw3D() const = 0;
         VisualFX(const VisualFX&) = delete;
-        explicit VisualFX(GameData* _gameData, Ability* _ability) : gameData(_gameData), ability(_ability)
+        explicit VisualFX(Systems* _sys, Ability* _ability) : sys(_sys), ability(_ability)
         {
         }
     };

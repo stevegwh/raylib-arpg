@@ -6,7 +6,7 @@
 
 #include "Camera.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
+#include "Systems.hpp"
 
 #include "systems/ControllableActorSystem.hpp"
 
@@ -19,29 +19,29 @@ namespace sage
     void DialogSystem::progressConversation(const dialog::Conversation* conversation)
     {
         dialogWindow->Remove();
-        dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), conversation->owner);
+        dialogWindow = GameUiFactory::CreateDialogWindow(sys->uiEngine.get(), conversation->owner);
     }
 
     void DialogSystem::StartConversation(const sgTransform& cutscenePose, entt::entity npc)
     {
         const auto& dialogComponent = registry->get<DialogComponent>(npc);
-        gameData->camera->CutscenePose(cutscenePose, dialogComponent.cameraPos);
-        gameData->camera->LockInput();
-        gameData->cursor->DisableContextSwitching();
+        sys->camera->CutscenePose(cutscenePose, dialogComponent.cameraPos);
+        sys->camera->LockInput();
+        sys->cursor->DisableContextSwitching();
 
         dialogComponent.conversation->onConversationProgress.Subscribe(
             [this](const dialog::Conversation* conv) { progressConversation(conv); });
 
         dialogComponent.conversation->onConversationEnd.Subscribe([this]() { endConversation(); });
 
-        dialogWindow = GameUiFactory::CreateDialogWindow(gameData->uiEngine.get(), npc);
+        dialogWindow = GameUiFactory::CreateDialogWindow(sys->uiEngine.get(), npc);
     }
 
     void DialogSystem::endConversation() const
     {
-        gameData->camera->UnlockInput();
-        gameData->cursor->EnableContextSwitching();
-        gameData->camera->CutsceneEnd();
+        sys->camera->UnlockInput();
+        sys->cursor->EnableContextSwitching();
+        sys->camera->CutsceneEnd();
         dialogWindow->Remove();
     }
 
@@ -50,8 +50,8 @@ namespace sage
         return nullptr;
     }
 
-    DialogSystem::DialogSystem(entt::registry* registry, GameData* _gameData)
-        : BaseSystem(registry), gameData(_gameData)
+    DialogSystem::DialogSystem(entt::registry* registry, Systems* _sys)
+        : BaseSystem(registry), sys(_sys)
     {
     }
 } // namespace sage

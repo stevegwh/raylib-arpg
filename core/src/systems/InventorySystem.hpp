@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "raylib.h"
+#include "Event.hpp"
 
-#include <entt/entt.hpp>
-#include <Event.hpp>
+#include "entt/entt.hpp"
+#include "raylib.h"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     class Window;
 
     class InventorySystem
@@ -23,7 +23,7 @@ namespace sage
         };
 
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         LastHit lastWorldItemHovered;
         void onWorldItemClicked(entt::entity entity);
         void inventoryUpdated() const;
@@ -33,7 +33,7 @@ namespace sage
       public:
         [[nodiscard]] bool CheckWorldItemRange(bool hover = false);
         Event<> onInventoryUpdated;
-        InventorySystem(entt::registry* _registry, GameData* _gameData);
+        InventorySystem(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

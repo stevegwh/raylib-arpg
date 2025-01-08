@@ -6,8 +6,8 @@
 
 #include "raylib.h"
 
-#include <entt/entt.hpp>
-#include <Event.hpp>
+#include "entt/entt.hpp"
+#include "Event.hpp"
 
 #include <string>
 

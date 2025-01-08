@@ -12,9 +12,9 @@
 #include "components/ItemComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
 #include "components/Renderable.hpp"
-#include "GameData.hpp"
 #include "GameUiEngine.hpp"
 #include "ResourceManager.hpp"
+#include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/InventorySystem.hpp"
@@ -102,7 +102,7 @@ namespace sage
         auto w = portraitWidth;
         auto h = portraitHeight * PARTY_MEMBER_MAX;
         auto _windowDocked = std::make_unique<WindowDocked>(
-            engine->gameData->settings, 16, 16, w, h, VertAlignment::TOP, HoriAlignment::LEFT);
+            engine->sys->settings, 16, 16, w, h, VertAlignment::TOP, HoriAlignment::LEFT);
         auto* window = engine->CreateWindowDocked(std::move(_windowDocked));
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable();
@@ -126,7 +126,7 @@ namespace sage
         auto w = 1024; // Absolute value of the image
         auto h = 156;
         auto _windowDocked = std::make_unique<WindowDocked>(
-            engine->gameData->settings,
+            engine->sys->settings,
             nPatchTexture,
             TextureStretchMode::STRETCH,
             0,
@@ -175,7 +175,7 @@ namespace sage
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.05;
         auto tooltip = std::make_unique<TooltipWindow>(
-            engine->gameData->settings,
+            engine->sys->settings,
             nullptr,
             nPatchTexture,
             TextureStretchMode::NONE,
@@ -209,7 +209,7 @@ namespace sage
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.1;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
         auto tooltip = std::make_unique<TooltipWindow>(
-            engine->gameData->settings,
+            engine->sys->settings,
             nullptr,
             nPatchTexture,
             TextureStretchMode::NONE,
@@ -246,7 +246,7 @@ namespace sage
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto tooltip = std::make_unique<TooltipWindow>(
-            engine->gameData->settings,
+            engine->sys->settings,
             parentWindow,
             nPatchTexture,
             TextureStretchMode::NONE,
@@ -282,7 +282,7 @@ namespace sage
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.10;
         auto tooltip = std::make_unique<TooltipWindow>(
-            engine->gameData->settings,
+            engine->sys->settings,
             nullptr,
             nPatchTexture,
             TextureStretchMode::NONE,
@@ -317,7 +317,7 @@ namespace sage
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto _window = std::make_unique<Window>(
-            engine->gameData->settings,
+            engine->sys->settings,
             nPatchTexture,
             TextureStretchMode::STRETCH,
             pos.x,
@@ -350,7 +350,7 @@ namespace sage
                     auto invSlot = std::make_unique<InventorySlot>(engine, cell.get(), row, col);
                     auto ptr = cell->CreateInventorySlot(std::move(invSlot));
 
-                    engine->gameData->inventorySystem->onInventoryUpdated.Subscribe(
+                    engine->sys->inventorySystem->onInventoryUpdated.Subscribe(
                         [ptr]() { ptr->RetrieveInfo(); });
                 }
             }
@@ -366,7 +366,7 @@ namespace sage
 
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto _window = std::make_unique<Window>(
-            engine->gameData->settings,
+            engine->sys->settings,
             nPatchTexture,
             TextureStretchMode::STRETCH,
             pos.x,
@@ -400,7 +400,7 @@ namespace sage
                 const auto& cell = table->children[row]->children[col];
                 auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell.get(), itemType);
                 auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
-                engine->gameData->equipmentSystem->onEquipmentUpdated.Subscribe(
+                engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe(
                     [ptr](entt::entity) { ptr->RetrieveInfo(); });
             };
 
@@ -491,7 +491,7 @@ namespace sage
         float w = Settings::TARGET_SCREEN_WIDTH * 0.65;
         float h = Settings::TARGET_SCREEN_HEIGHT * 0.35;
         auto _windowDocked = std::make_unique<WindowDocked>(
-            engine->gameData->settings,
+            engine->sys->settings,
             nPatchTexture,
             TextureStretchMode::NONE,
             0,
@@ -542,7 +542,7 @@ namespace sage
             auto portraitCell = portraitRow->CreateTableCell();
 
             const auto& info = engine->registry->get<PartyMemberComponent>(
-                engine->gameData->controllableActorSystem->GetSelectedActor());
+                engine->sys->controllableActorSystem->GetSelectedActor());
             auto tex = info.portraitImg.texture;
             auto img = std::make_unique<DialogPortrait>(engine, portraitCell, tex);
             portraitCell->CreateImagebox(std::move(img));
@@ -568,7 +568,7 @@ namespace sage
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.075;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
         auto _windowDocked = std::make_unique<WindowDocked>(
-            engine->gameData->settings,
+            engine->sys->settings,
             0,
             0,
             w,

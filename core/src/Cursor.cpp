@@ -4,7 +4,7 @@
 
 #include "Cursor.hpp"
 
-#include "GameData.hpp"
+#include "Systems.hpp"
 
 #include "Camera.hpp"
 #include "components/CombatableActor.hpp"
@@ -175,16 +175,16 @@ namespace sage
     bool Cursor::isValidMove() const
     {
         auto mouseHit = m_naviHitInfo.rlCollision.point;
-        if (gameData->navigationGridSystem->CheckWithinGridBounds(mouseHit))
+        if (sys->navigationGridSystem->CheckWithinGridBounds(mouseHit))
         {
-            const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+            const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
             const auto& actor = registry->get<MoveableActor>(selectedActor);
             GridSquare minRange{};
             GridSquare maxRange{};
-            gameData->navigationGridSystem->GetPathfindRange(
+            sys->navigationGridSystem->GetPathfindRange(
                 selectedActor, actor.pathfindingBounds, minRange, maxRange);
 
-            if (!gameData->navigationGridSystem->CheckWithinBounds(mouseHit, minRange, maxRange))
+            if (!sys->navigationGridSystem->CheckWithinBounds(mouseHit, minRange, maxRange))
             {
                 // Out of player's movement range
                 return false;
@@ -195,8 +195,8 @@ namespace sage
             return false;
         }
         GridSquare dest{};
-        gameData->navigationGridSystem->WorldToGridSpace(mouseHit, dest);
-        if (gameData->navigationGridSystem->GetGridSquare(dest.row, dest.col)->occupied)
+        sys->navigationGridSystem->WorldToGridSpace(mouseHit, dest);
+        if (sys->navigationGridSystem->GetGridSquare(dest.row, dest.col)->occupied)
         {
             return false;
         }
@@ -270,10 +270,10 @@ namespace sage
         currentTex = &regulartex;
         currentColor = defaultColor;
 
-        auto viewport = gameData->settings->GetViewPort();
+        auto viewport = sys->settings->GetViewPort();
         // Get ray and test against objects
-        ray = GetScreenToWorldRayEx(GetMousePosition(), *gameData->camera->getRaylibCam(), viewport.x, viewport.y);
-        auto collisions = gameData->collisionSystem->GetCollisionsWithRay(ray);
+        ray = GetScreenToWorldRayEx(GetMousePosition(), *sys->camera->getRaylibCam(), viewport.x, viewport.y);
+        auto collisions = sys->collisionSystem->GetCollisionsWithRay(ray);
 
         // Replace floor BB hit with mesh hit then re-sort vector
         // Discards hits with a BB that do not have a collision with mesh
@@ -429,7 +429,7 @@ namespace sage
         DrawTextureEx(*currentTex, pos, 0.0, 1.0f, WHITE);
     }
 
-    Cursor::Cursor(entt::registry* _registry, GameData* _gameData) : registry(_registry), gameData(_gameData)
+    Cursor::Cursor(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
         regulartex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_REGULAR");
         talktex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_TALK");

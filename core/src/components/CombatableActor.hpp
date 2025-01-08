@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include "abilities/AbilityData.hpp"
-#include <Event.hpp>
+#include "Event.hpp"
 
 #include <memory>
 

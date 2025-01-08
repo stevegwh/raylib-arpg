@@ -10,12 +10,12 @@
 namespace sage
 {
 
-    class GameData;
+    class Systems;
 
     class UberShaderSystem
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         Shader shader{};
         int litLoc;
         int skinnedLoc;
@@ -27,7 +27,7 @@ namespace sage
         void onComponentRemoved(entt::entity entity);
 
       public:
-        UberShaderSystem(entt::registry* _registry, GameData* _gameData);
+        UberShaderSystem(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

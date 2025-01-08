@@ -27,6 +27,6 @@ namespace sage
         void Update(float dt) override;
         void Draw3D() const override;
         ~FireballVFX() override = default;
-        explicit FireballVFX(GameData* _gameData, Ability* _ability);
+        explicit FireballVFX(Systems* _sys, Ability* _ability);
     };
 } // namespace sage

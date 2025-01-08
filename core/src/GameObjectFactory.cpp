@@ -3,16 +3,8 @@
 //
 
 #include "GameObjectFactory.hpp"
-#include "ResourceManager.hpp"
-#include "scenes/Scene.hpp"
-
-#include "GameData.hpp"
-#include "UserInput.hpp"
-#include <Timer.hpp>
 
 #include "AbilityFactory.hpp"
-#include "AssetManager.hpp"
-#include "components/Ability.hpp"
 #include "components/Animation.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
@@ -24,31 +16,22 @@
 #include "components/ItemComponent.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/PartyMemberComponent.hpp"
-#include "components/QuestComponents.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 #include "components/UberShaderComponent.hpp"
-#include "components/WeaponComponent.hpp"
-#include "DialogFactory.hpp"
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"
-#include "QuestManager.hpp"
-
-#include "systems/ActorMovementSystem.hpp"
+#include "ResourceManager.hpp"
+#include "slib.hpp"
+#include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
-#include "systems/DoorSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
-#include "systems/RenderSystem.hpp"
-#include "systems/states/WavemobStateMachine.hpp"
-#include <slib.hpp>
+#include "Timer.hpp"
 
-#include "components/DoorBehaviorComponent.hpp"
 #include "raymath.h"
-
-#include <iostream>
 
 namespace sage
 {
@@ -72,12 +55,12 @@ namespace sage
         return bb;
     }
 
-    void placeActor(entt::registry* registry, entt::entity entity, GameData* data, Vector3 position)
+    void placeActor(entt::registry* registry, entt::entity entity, Systems* sys, Vector3 position)
     {
         auto& transform = registry->get<sgTransform>(entity);
         GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        auto gs = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col);
+        sys->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        auto gs = sys->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col);
         assert(gs);
         float height = gs->GetTerrainHeight();
         transform.SetPosition({position.x, height, position.z});
@@ -100,12 +83,12 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createEnemy(
-        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
+        entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation, const char* name)
     {
         entt::entity id = registry->create();
 
         auto& transform = registry->emplace<sgTransform>(id, id);
-        placeActor(registry, id, data, position);
+        placeActor(registry, id, sys, position);
 
         auto& moveable = registry->emplace<MoveableActor>(id);
         moveable.movementSpeed = 0.25f;
@@ -127,7 +110,7 @@ namespace sage
 
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-        data->abilityRegistry->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
+        sys->abilityRegistry->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
         registry->emplace<HealthBar>(id);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
@@ -142,12 +125,12 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createCellGuard(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+        entt::registry* registry, Systems* sys, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
 
         registry->emplace<sgTransform>(id, id);
-        placeActor(registry, id, data, position);
+        placeActor(registry, id, sys, position);
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
@@ -168,22 +151,22 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
-        data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
+        sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
         // registry->emplace<QuestTaskComponent>(id, "ArissaQuest");
-        // data->questManager->AddTaskToQuest("ArissaQuest", id);
+        // sys->questManager->AddTaskToQuest("ArissaQuest", id);
 
         return id;
     }
 
     entt::entity GameObjectFactory::createLeverGoblin(
-        entt::registry* registry, GameData* data, Vector3 position, const char* name)
+        entt::registry* registry, Systems* sys, Vector3 position, const char* name)
     {
         entt::entity id = registry->create();
 
         registry->emplace<sgTransform>(id, id);
-        placeActor(registry, id, data, position);
+        placeActor(registry, id, sys, position);
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
@@ -204,19 +187,19 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
-        data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
+        sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
         return id;
     }
 
     entt::entity GameObjectFactory::createArissa(
-        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation)
+        entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation)
     {
         entt::entity id = registry->create();
 
         auto& transform = registry->emplace<sgTransform>(id, id);
-        placeActor(registry, id, data, position);
+        placeActor(registry, id, sys, position);
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
@@ -246,7 +229,7 @@ namespace sage
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
         transform.SetRotation(rotation);
-        data->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
+        sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
 
@@ -254,12 +237,12 @@ namespace sage
     }
 
     entt::entity GameObjectFactory::createPlayer(
-        entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name)
+        entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation, const char* name)
     {
         entt::entity id = registry->create();
 
         auto& transform = registry->emplace<sgTransform>(id, id);
-        placeActor(registry, id, data, position);
+        placeActor(registry, id, sys, position);
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
@@ -295,9 +278,9 @@ namespace sage
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
 
         registry->emplace<PartyMemberComponent>(id, id);
-        data->partySystem->AddMember(id);
+        sys->partySystem->AddMember(id);
         registry->emplace<ControllableActor>(id);
-        data->controllableActorSystem->SetSelectedActor(id);
+        sys->controllableActorSystem->SetSelectedActor(id);
         registry->emplace<DialogComponent>(id);
 
         // Combat
@@ -306,31 +289,31 @@ namespace sage
 
         // TODO: Move elsewhere/read from save file
         // Initialise starting abilities
-        data->playerAbilitySystem->SetSlot(0, data->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
-        data->playerAbilitySystem->SetSlot(1, data->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
-        data->playerAbilitySystem->SetSlot(
-            2, data->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
-        data->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
+        sys->playerAbilitySystem->SetSlot(0, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
+        sys->playerAbilitySystem->SetSlot(1, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
+        sys->playerAbilitySystem->SetSlot(
+            2, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
+        sys->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         auto& inventory = registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);
         // TODO: Move elsewhere/read from save file
-        inventory.AddItem(data->itemFactory->GetItem("Dagger"), 0, 0);
-        inventory.AddItem(data->itemFactory->GetItem("Sword"), 0, 1);
+        inventory.AddItem(sys->itemFactory->GetItem("Dagger"), 0, 0);
+        inventory.AddItem(sys->itemFactory->GetItem("Sword"), 0, 1);
 
         return id;
     }
 
-    void GameObjectFactory::createPortal(entt::registry* registry, GameData* data, Vector3 position)
+    void GameObjectFactory::createPortal(entt::registry* registry, Systems* sys, Vector3 position)
     {
         {
             entt::entity id = registry->create();
 
             auto& transform = registry->emplace<sgTransform>(id, id);
             GridSquare actorIdx{};
-            data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+            sys->navigationGridSystem->WorldToGridSpace(position, actorIdx);
             float height =
-                data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
+                sys->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
             transform.SetPosition({position.x, 12, position.z});
             transform.SetScale(1.0f);
             transform.SetRotation({0, 0, 0});
@@ -357,9 +340,9 @@ namespace sage
             shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
             renderable.GetModel()->SetShader(shader, 0);
 
-            renderable.reqShaderUpdate = [data, secondsLoc](entt::entity entity) -> void {
-                auto& r = data->registry->get<Renderable>(entity);
-                auto& t = data->registry->get<Timer>(entity);
+            renderable.reqShaderUpdate = [sys, secondsLoc](entt::entity entity) -> void {
+                auto& r = sys->registry->get<Renderable>(entity);
+                auto& t = sys->registry->get<Timer>(entity);
                 auto time = t.GetCurrentTime();
                 SetShaderValue(r.GetModel()->GetShader(0), secondsLoc, &time, SHADER_UNIFORM_FLOAT);
             };
@@ -373,8 +356,8 @@ namespace sage
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
+        sys->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = sys->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
         transform.SetPosition({position.x, height, position.z});
         transform.SetScale(10.0f);
         transform.SetRotation({0, 0, 0});
@@ -384,21 +367,21 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelCopy("MDL_BUILDING_PORTAL"), modelTransform);
         renderable.SetName("Portal Outer");
-        data->lightSubSystem->LinkRenderableToLight(id);
+        sys->lightSubSystem->LinkRenderableToLight(id);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::BUILDING;
     }
 
-    void GameObjectFactory::createWizardTower(entt::registry* registry, GameData* data, Vector3 position)
+    void GameObjectFactory::createWizardTower(entt::registry* registry, Systems* sys, Vector3 position)
     {
         entt::entity id = registry->create();
 
         auto& transform = registry->emplace<sgTransform>(id, id);
         GridSquare actorIdx{};
-        data->navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = data->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
+        sys->navigationGridSystem->WorldToGridSpace(position, actorIdx);
+        float height = sys->navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->GetTerrainHeight();
         transform.SetPosition({position.x, height, position.z});
         transform.SetScale(1.0f);
         transform.SetRotation({0, 0, 0});
@@ -407,7 +390,7 @@ namespace sage
         auto& renderable = registry->emplace<Renderable>(
             id, ResourceManager::GetInstance().GetModelCopy("MDL_BUILDING_WIZARDTOWER1"), modelTransform);
         renderable.SetName("Wizard Tower");
-        data->lightSubSystem->LinkRenderableToLight(id);
+        sys->lightSubSystem->LinkRenderableToLight(id);
 
         BoundingBox bb = renderable.GetModel()->CalcLocalBoundingBox();
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
@@ -415,7 +398,7 @@ namespace sage
     }
 
     bool GameObjectFactory::spawnItemInWorld(
-        entt::registry* registry, GameData* data, entt::entity itemId, Vector3 position)
+        entt::registry* registry, Systems* sys, entt::entity itemId, Vector3 position)
     {
         auto& item = registry->get<ItemComponent>(itemId);
         if (item.HasFlag(ItemFlags::QUEST)) return false;

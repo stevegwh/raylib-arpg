@@ -5,11 +5,11 @@
 #pragma once
 
 #include "raylib.h"
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     class UserInput;
     class sgTransform;
 
@@ -25,7 +25,7 @@ namespace sage
         CameraSave cameraSave;
 
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         Camera3D rlCamera;
         int zoom = 10;
 
@@ -63,6 +63,6 @@ namespace sage
         void FocusSelectedActor();
         void DrawDebug();
         void Update();
-        explicit Camera(entt::registry* _registry, UserInput* userInput, GameData* _gameData);
+        explicit Camera(entt::registry* _registry, UserInput* userInput, Systems* _sys);
     };
 } // namespace sage

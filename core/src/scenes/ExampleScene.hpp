@@ -6,7 +6,7 @@
 
 #include "Scene.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

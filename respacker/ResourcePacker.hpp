@@ -8,7 +8,7 @@
 #include "ItemFactory.hpp"
 #include "systems/NavigationGridSystem.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 #include <string>
 
 // Takes a gltf or obj file, instantiates it into game components and serializes it as a "bin" file

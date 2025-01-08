@@ -18,22 +18,22 @@ namespace sage
     {
         if (name == "Arissa")
         {
-            return GameObjectFactory::createArissa(registry, gameData, pos, rot);
+            return GameObjectFactory::createArissa(registry, sys, pos, rot);
         }
         else if (name == "Cell_Guard")
         {
-            return GameObjectFactory::createCellGuard(registry, gameData, pos, name.c_str());
+            return GameObjectFactory::createCellGuard(registry, sys, pos, name.c_str());
         }
         else if (name == "Lever_Goblin")
         {
-            return GameObjectFactory::createLeverGoblin(registry, gameData, pos, name.c_str());
+            return GameObjectFactory::createLeverGoblin(registry, sys, pos, name.c_str());
         }
 
         return entt::null;
     }
 
-    NPCManager::NPCManager(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    NPCManager::NPCManager(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
     }
 

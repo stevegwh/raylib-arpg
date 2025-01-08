@@ -7,8 +7,8 @@
 #include "components/Ability.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
 #include "ResourceManager.hpp"
+#include "Systems.hpp"
 
 #include "raylib.h"
 #include "rlgl.h"
@@ -19,7 +19,7 @@ namespace sage
     {
         // Draw model (if needed)
         rlDisableBackfaceCulling();
-        auto& transform = gameData->registry->get<sgTransform>(ability->self);
+        auto& transform = sys->registry->get<sgTransform>(ability->self);
         slashModel.Draw(
             transform.GetWorldPos(),
             Vector3{0, 1, 0},
@@ -46,7 +46,7 @@ namespace sage
         time = 0;
     }
 
-    WhirlwindVFX::WhirlwindVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
+    WhirlwindVFX::WhirlwindVFX(Systems* _sys, Ability* _ability) : VisualFX(_sys, _ability)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/particles/twirl_01.png");
         // Texture/Material

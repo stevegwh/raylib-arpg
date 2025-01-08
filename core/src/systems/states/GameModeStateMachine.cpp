@@ -4,8 +4,8 @@
 
 #include "GameModeStateMachine.hpp"
 
-#include "GameData.hpp"
 #include "GameObjectFactory.hpp"
+#include "Systems.hpp"
 #include <ResourceManager.hpp>
 
 #include <iostream>
@@ -38,10 +38,10 @@ namespace sage
 
         DefaultState(
             entt::registry* _registry,
-            GameData* _gameData,
+            Systems* _sys,
             entt::entity _gameEntity,
             GameModeStateController* _stateController)
-            : StateMachine(_registry, _gameData), gameEntity(_gameEntity), stateController(_stateController)
+            : StateMachine(_registry, _sys), gameEntity(_gameEntity), stateController(_stateController)
         {
         }
     };
@@ -77,10 +77,10 @@ namespace sage
 
         WaveState(
             entt::registry* _registry,
-            GameData* _gameData,
+            Systems* _sys,
             entt::entity _gameEntity,
             GameModeStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
             // Preload model(s)
             // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
@@ -114,10 +114,10 @@ namespace sage
 
         CombatState(
             entt::registry* _registry,
-            GameData* _gameData,
+            Systems* _sys,
             entt::entity _gameEntity,
             GameModeStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -141,12 +141,12 @@ namespace sage
         GetSystem(state)->Draw3D(gameEntity);
     }
 
-    GameModeStateController::GameModeStateController(entt::registry* _registry, GameData* _gameData)
+    GameModeStateController::GameModeStateController(entt::registry* _registry, Systems* _sys)
         : StateMachineController(_registry), gameEntity(_registry->create())
     {
-        states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _gameData, gameEntity, this);
-        states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _gameData, gameEntity, this);
-        states[GameStateEnum::Combat] = std::make_unique<CombatState>(registry, _gameData, gameEntity, this);
+        states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _sys, gameEntity, this);
+        states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _sys, gameEntity, this);
+        states[GameStateEnum::Combat] = std::make_unique<CombatState>(registry, _sys, gameEntity, this);
         registry->emplace<GameState>(gameEntity);
     }
 } // namespace sage

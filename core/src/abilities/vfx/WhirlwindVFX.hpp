@@ -7,7 +7,7 @@
 #include "VisualFX.hpp"
 
 #include "raylib.h"
-#include <slib.hpp>
+#include "slib.hpp"
 
 #include <memory>
 #include <vector>
@@ -28,6 +28,6 @@ namespace sage
         void Update(float dt) override;
         void Draw3D() const override;
         ~WhirlwindVFX() override = default;
-        explicit WhirlwindVFX(GameData* _gameData, Ability* _ability);
+        explicit WhirlwindVFX(Systems* _sys, Ability* _ability);
     };
 } // namespace sage

@@ -12,8 +12,8 @@
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
 #include "Serializer.hpp"
+#include "Systems.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/states/AbilityStateMachine.hpp"
 
@@ -30,8 +30,8 @@ namespace sage
     void CreateLightningBallAbility(Ability& abilityComponent);
     void CreateWavemobAutoAttackAbility(Ability& abilityComponenty);
     void CreateWhirlwindAbility(Ability& abilityComponent);
-    std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, GameData* _gameData);
-    std::unique_ptr<VisualFX> GetVisualFX(GameData* _gameData, Ability* _ability);
+    std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, Systems* _sys);
+    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, Ability* _ability);
 
     entt::entity AbilityFactory::GetAbility(entt::entity caster, AbilityEnum abilityEnum)
     {
@@ -89,25 +89,25 @@ namespace sage
         ability.cooldownTimer.SetMaxTime(ability.ad.base.cooldownDuration);
         ability.castTimer.SetMaxTime(ability.ad.base.castTime);
 
-        ability.vfx = GetVisualFX(gameData, &ability);
+        ability.vfx = GetVisualFX(sys, &ability);
 
         if (ability.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
-            ability.abilityIndicator = GetIndicator(ability.ad.indicator, gameData);
+            ability.abilityIndicator = GetIndicator(ability.ad.indicator, sys);
         }
 
         return out;
     }
 
-    AbilityFactory::AbilityFactory(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    AbilityFactory::AbilityFactory(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
     }
 
     // Helper functions
     // --------------------------------------------
 
-    std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, GameData* _gameData)
+    std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, Systems* _sys)
     {
         if (data.indicatorKey == AbilityIndicatorEnum::NONE) return nullptr;
 
@@ -116,7 +116,7 @@ namespace sage
         if (data.indicatorKey == AbilityIndicatorEnum::CIRCULAR_MAGIC_CURSOR)
         {
             obj = std::make_unique<AbilityIndicator>(
-                _gameData->registry, _gameData->navigationGridSystem.get(), "IMG_RAINOFFIRE_CURSOR");
+                _sys->registry, _sys->navigationGridSystem.get(), "IMG_RAINOFFIRE_CURSOR");
         }
         else
         {
@@ -125,7 +125,7 @@ namespace sage
         return std::move(obj);
     }
 
-    std::unique_ptr<VisualFX> GetVisualFX(GameData* _gameData, Ability* _ability)
+    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, Ability* _ability)
     {
         if (_ability->ad.vfx.name == AbilityVFXEnum::NONE) return nullptr;
 
@@ -133,23 +133,23 @@ namespace sage
 
         if (_ability->ad.vfx.name == AbilityVFXEnum::RAINOFFIRE)
         {
-            obj = std::make_unique<RainOfFireVFX>(_gameData, _ability);
+            obj = std::make_unique<RainOfFireVFX>(_sys, _ability);
         }
         else if (_ability->ad.vfx.name == AbilityVFXEnum::FLOORFIRE)
         {
-            obj = std::make_unique<FloorFireVFX>(_gameData, _ability);
+            obj = std::make_unique<FloorFireVFX>(_sys, _ability);
         }
         else if (_ability->ad.vfx.name == AbilityVFXEnum::WHIRLWIND)
         {
-            obj = std::make_unique<WhirlwindVFX>(_gameData, _ability);
+            obj = std::make_unique<WhirlwindVFX>(_sys, _ability);
         }
         else if (_ability->ad.vfx.name == AbilityVFXEnum::LIGHTNINGBALL)
         {
-            obj = std::make_unique<LightningBallVFX>(_gameData, _ability);
+            obj = std::make_unique<LightningBallVFX>(_sys, _ability);
         }
         else if (_ability->ad.vfx.name == AbilityVFXEnum::FIREBALL)
         {
-            obj = std::make_unique<FireballVFX>(_gameData, _ability);
+            obj = std::make_unique<FireballVFX>(_sys, _ability);
         }
         else
         {
@@ -160,7 +160,7 @@ namespace sage
     }
 
     void createProjectile(
-        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, GameData* data)
+        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Systems* data)
     {
         auto& ad = registry->get<Ability>(abilityEntity).ad;
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);

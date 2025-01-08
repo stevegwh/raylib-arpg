@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include "entt/entt.hpp"
-#include "raylib.h"
+#include "Event.hpp"
 
-#include <Event.hpp>
+#include "entt/entt.hpp"
+
 #include <vector>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     struct PartyMemberComponent;
 
     static constexpr unsigned int PARTY_MEMBER_MAX = 4;
@@ -20,7 +20,7 @@ namespace sage
     class PartySystem
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         std::vector<entt::entity> party;
         std::vector<std::vector<entt::entity>> groups;
 
@@ -40,6 +40,6 @@ namespace sage
         [[nodiscard]] unsigned int GetSize() const;
         [[nodiscard]] bool CheckSameGroup(entt::entity a, entt::entity b) const;
         [[nodiscard]] std::vector<entt::entity> GetGroup(entt::entity entity) const;
-        PartySystem(entt::registry* _registry, GameData* _gameData);
+        PartySystem(entt::registry* _registry, Systems* _sys);
     };
 } // namespace sage

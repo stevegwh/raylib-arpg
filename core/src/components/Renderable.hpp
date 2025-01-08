@@ -7,9 +7,9 @@
 #include "raylib-cereal.hpp"
 #include "raylib.h"
 #include "ResourceManager.hpp"
-#include <slib.hpp>
+#include "slib.hpp"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <functional>
 #include <string>

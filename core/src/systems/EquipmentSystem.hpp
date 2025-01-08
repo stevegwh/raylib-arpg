@@ -6,19 +6,19 @@
 
 #include "Event.hpp"
 
-#include <entt/entt.hpp>
-#include <memory>
+#include "entt/entt.hpp"
+// #include <memory>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     enum class EquipmentSlotName;
 
     // Depends on Animation being initialised
     class EquipmentSystem
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
 
         // TODO: Make this an independent class
         entt::entity renderTextureSceneLight = entt::null;
@@ -37,7 +37,7 @@ namespace sage
         void MoveItemToInventory(entt::entity owner, EquipmentSlotName itemType) const;
         void DestroyItem(entt::entity owner, EquipmentSlotName itemType) const;
         [[nodiscard]] bool SwapItems(entt::entity owner, EquipmentSlotName itemType1, EquipmentSlotName itemType2);
-        EquipmentSystem(entt::registry* _registry, GameData* _gameData);
+        EquipmentSystem(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

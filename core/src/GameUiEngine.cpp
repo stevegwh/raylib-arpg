@@ -5,6 +5,7 @@
 #include "GameUiEngine.hpp"
 
 #include "Camera.hpp"
+#include "components/Ability.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
@@ -13,11 +14,11 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "GameUiFactory.hpp"
 #include "ResourceManager.hpp"
 #include "slib.hpp"
+#include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/InventorySystem.hpp"
@@ -464,7 +465,7 @@ namespace sage
 
     void TextBox::UpdateFontScaling()
     {
-        float scaleFactor = engine->gameData->settings->GetCurrentScaleFactor();
+        float scaleFactor = engine->sys->settings->GetCurrentScaleFactor();
         fontInfo.fontSize = fontInfo.baseFontSize * scaleFactor;
         fontInfo.fontSize = std::clamp(fontInfo.fontSize, FontInfo::minFontSize, FontInfo::maxFontSize);
     }
@@ -665,11 +666,11 @@ namespace sage
     void CharacterStatText::RetrieveInfo()
     {
         auto& combatable =
-            engine->registry->get<CombatableActor>(engine->gameData->controllableActorSystem->GetSelectedActor());
+            engine->registry->get<CombatableActor>(engine->sys->controllableActorSystem->GetSelectedActor());
         if (statisticType == StatisticType::NAME)
         {
             auto& renderable =
-                engine->registry->get<Renderable>(engine->gameData->controllableActorSystem->GetSelectedActor());
+                engine->registry->get<Renderable>(engine->sys->controllableActorSystem->GetSelectedActor());
             SetContent(std::format("{}", renderable.GetVanityName()));
         }
         else if (statisticType == StatisticType::STRENGTH)
@@ -702,10 +703,10 @@ namespace sage
         GameUIEngine* _engine, TableCell* _parent, const FontInfo& _fontInfo, StatisticType _statisticType)
         : TextBox(_engine, _parent, _fontInfo), statisticType(_statisticType)
     {
-        _engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        _engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
 
-        _engine->gameData->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
+        _engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
 
         if (_statisticType == StatisticType::NAME)
         {
@@ -1044,8 +1045,7 @@ namespace sage
     {
         ImageBox::UpdateDimensions();
         auto& renderTexture =
-            engine->registry
-                ->get<EquipmentComponent>(engine->gameData->controllableActorSystem->GetSelectedActor())
+            engine->registry->get<EquipmentComponent>(engine->sys->controllableActorSystem->GetSelectedActor())
                 .renderTexture;
         renderTexture.texture.width = parent->GetRec().width;
         renderTexture.texture.height = parent->GetRec().height;
@@ -1053,8 +1053,8 @@ namespace sage
 
     void EquipmentCharacterPreview::RetrieveInfo()
     {
-        engine->gameData->equipmentSystem->GenerateRenderTexture(
-            engine->gameData->controllableActorSystem->GetSelectedActor(),
+        engine->sys->equipmentSystem->GenerateRenderTexture(
+            engine->sys->controllableActorSystem->GetSelectedActor(),
             parent->GetRec().width * 4,
             parent->GetRec().height * 4);
         UpdateDimensions();
@@ -1063,8 +1063,7 @@ namespace sage
     void EquipmentCharacterPreview::Draw2D()
     {
         auto renderTexture =
-            engine->registry
-                ->get<EquipmentComponent>(engine->gameData->controllableActorSystem->GetSelectedActor())
+            engine->registry->get<EquipmentComponent>(engine->sys->controllableActorSystem->GetSelectedActor())
                 .renderTexture;
         DrawTextureRec(
             renderTexture.texture,
@@ -1082,28 +1081,27 @@ namespace sage
         GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
     {
-        _engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        _engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
 
-        _engine->gameData->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
+        _engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
     }
 
     void PartyMemberPortrait::UpdateDimensions()
     {
         ImageBox::UpdateDimensions();
-        portraitBgTex.width = tex.width + engine->gameData->settings->ScaleValueWidth(10);
-        portraitBgTex.height = tex.height + engine->gameData->settings->ScaleValueHeight(10);
+        portraitBgTex.width = tex.width + engine->sys->settings->ScaleValueWidth(10);
+        portraitBgTex.height = tex.height + engine->sys->settings->ScaleValueHeight(10);
     }
 
     void PartyMemberPortrait::RetrieveInfo()
     {
-        const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
+        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
         if (entity != entt::null)
         {
             const auto& info = engine->registry->get<PartyMemberComponent>(entity);
 
-            engine->gameData->equipmentSystem->GeneratePortraitRenderTexture(
-                entity, tex.width * 4, tex.height * 4);
+            engine->sys->equipmentSystem->GeneratePortraitRenderTexture(entity, tex.width * 4, tex.height * 4);
 
             tex.id = info.portraitImg.texture.id;
         }
@@ -1114,8 +1112,8 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            const auto receiver = engine->gameData->partySystem->GetMember(memberNumber);
-            const auto sender = engine->gameData->controllableActorSystem->GetSelectedActor();
+            const auto receiver = engine->sys->partySystem->GetMember(memberNumber);
+            const auto sender = engine->sys->controllableActorSystem->GetSelectedActor();
             if (receiver == sender) return;
             auto& receiverInv = engine->registry->get<InventoryComponent>(receiver);
             auto& senderInv = engine->registry->get<InventoryComponent>(sender);
@@ -1130,14 +1128,14 @@ namespace sage
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
-            const auto receiver = engine->gameData->partySystem->GetMember(memberNumber);
-            auto sender = engine->gameData->controllableActorSystem->GetSelectedActor();
+            const auto receiver = engine->sys->partySystem->GetMember(memberNumber);
+            auto sender = engine->sys->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(receiver);
-            auto droppedItemId = engine->gameData->equipmentSystem->GetItem(sender, droppedE->itemType);
+            auto droppedItemId = engine->sys->equipmentSystem->GetItem(sender, droppedE->itemType);
 
             if (inventory.AddItem(droppedItemId))
             {
-                engine->gameData->equipmentSystem->DestroyItem(sender, droppedE->itemType);
+                engine->sys->equipmentSystem->DestroyItem(sender, droppedE->itemType);
                 droppedE->RetrieveInfo();
                 RetrieveInfo();
             }
@@ -1150,15 +1148,15 @@ namespace sage
 
     void PartyMemberPortrait::OnClick()
     {
-        const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
-        engine->gameData->controllableActorSystem->SetSelectedActor(entity);
+        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
+        engine->sys->controllableActorSystem->SetSelectedActor(entity);
     }
 
     void PartyMemberPortrait::Draw2D()
     {
-        const auto entity = engine->gameData->partySystem->GetMember(memberNumber);
+        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
         if (entity == entt::null) return;
-        if (engine->gameData->controllableActorSystem->GetSelectedActor() == entity)
+        if (engine->sys->controllableActorSystem->GetSelectedActor() == entity)
         {
             SetHoverShader();
         }
@@ -1172,8 +1170,8 @@ namespace sage
         }
         DrawTexture(
             portraitBgTex,
-            rec.x - engine->gameData->settings->ScaleValueWidth(5),
-            rec.y - engine->gameData->settings->ScaleValueHeight(5),
+            rec.x - engine->sys->settings->ScaleValueWidth(5),
+            rec.y - engine->sys->settings->ScaleValueHeight(5),
             WHITE);
         if (shader.has_value())
         {
@@ -1196,9 +1194,9 @@ namespace sage
         tex.width = width;
         tex.height = height;
         canReceiveDragDrops = true;
-        _engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        _engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
-        _engine->gameData->partySystem->onPartyChange.Subscribe([this]() { RetrieveInfo(); });
+        _engine->sys->partySystem->onPartyChange.Subscribe([this]() { RetrieveInfo(); });
     }
 
     void DialogPortrait::Draw2D()
@@ -1220,7 +1218,7 @@ namespace sage
 
     void AbilitySlot::RetrieveInfo()
     {
-        if (const Ability* ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber))
+        if (const Ability* ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber))
         {
             tex = ResourceManager::GetInstance().TextureLoad(ability->icon);
             stateLocked = false;
@@ -1237,7 +1235,7 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
-            engine->gameData->playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
+            engine->sys->playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
             dropped->RetrieveInfo();
             RetrieveInfo();
         }
@@ -1251,7 +1249,7 @@ namespace sage
         }
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        if (auto* ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber))
+        if (auto* ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber))
         {
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
             const auto _rec = tooltipWindow.value()->GetRec();
@@ -1262,7 +1260,7 @@ namespace sage
 
     void AbilitySlot::Draw2D()
     {
-        const auto ability = engine->gameData->playerAbilitySystem->GetAbility(slotNumber);
+        const auto ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber);
         if (!ability)
         {
             ImageBox::Draw2D();
@@ -1282,7 +1280,7 @@ namespace sage
 
     void AbilitySlot::OnClick()
     {
-        engine->gameData->playerAbilitySystem->PressAbility(slotNumber);
+        engine->sys->playerAbilitySystem->PressAbility(slotNumber);
         CellElement::OnClick();
     }
 
@@ -1297,7 +1295,7 @@ namespace sage
     {
         draggable = true;
         canReceiveDragDrops = true;
-        engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
@@ -1312,15 +1310,15 @@ namespace sage
         // TODO: If you're going to have it so that an item can only be picked up if you can pathfind there, you
         // should do the same for this.
         const auto itemId = getItemId();
-        const auto cursorPos = engine->gameData->cursor->getFirstNaviCollision();
+        const auto cursorPos = engine->sys->cursor->getFirstNaviCollision();
         const auto playerPos =
-            engine->registry->get<sgTransform>(engine->gameData->controllableActorSystem->GetSelectedActor())
+            engine->registry->get<sgTransform>(engine->sys->controllableActorSystem->GetSelectedActor())
                 .GetWorldPos();
         const auto dist = Vector3Distance(playerPos, cursorPos.point);
 
         if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
         {
-            if (GameObjectFactory::spawnItemInWorld(engine->registry, engine->gameData, itemId, cursorPos.point))
+            if (GameObjectFactory::spawnItemInWorld(engine->registry, engine->sys, itemId, cursorPos.point))
             {
                 onItemDroppedToWorld();
                 RetrieveInfo();
@@ -1463,8 +1461,8 @@ namespace sage
 
     void EquipmentSlot::onItemDroppedToWorld()
     {
-        engine->gameData->equipmentSystem->DestroyItem(
-            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
+        engine->sys->equipmentSystem->DestroyItem(
+            engine->sys->controllableActorSystem->GetSelectedActor(), itemType);
     }
 
     bool EquipmentSlot::validateDrop(const ItemComponent& item) const
@@ -1524,22 +1522,22 @@ namespace sage
 
     entt::entity EquipmentSlot::getItemId()
     {
-        return engine->gameData->equipmentSystem->GetItem(
-            engine->gameData->controllableActorSystem->GetSelectedActor(), itemType);
+        return engine->sys->equipmentSystem->GetItem(
+            engine->sys->controllableActorSystem->GetSelectedActor(), itemType);
     }
 
     void EquipmentSlot::ReceiveDrop(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
+            const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(actor);
             const auto itemId = inventory.GetItem(dropped->row, dropped->col);
             auto& item = engine->registry->get<ItemComponent>(itemId);
             if (!validateDrop(item)) return;
             inventory.RemoveItem(dropped->row, dropped->col);
-            engine->gameData->equipmentSystem->MoveItemToInventory(actor, itemType);
-            engine->gameData->equipmentSystem->EquipItem(actor, itemId, itemType);
+            engine->sys->equipmentSystem->MoveItemToInventory(actor, itemType);
+            engine->sys->equipmentSystem->EquipItem(actor, itemId, itemType);
             dropped->RetrieveInfo();
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
@@ -1547,8 +1545,8 @@ namespace sage
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
             // TODO: BUG: Can swap main hand only to offhand here
-            const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
-            if (!engine->gameData->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
+            const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
+            if (!engine->sys->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
             {
                 // handle swap fail?
             }
@@ -1570,21 +1568,21 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
 
-        engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     void InventorySlot::onItemDroppedToWorld()
     {
-        auto& inventory = engine->registry->get<InventoryComponent>(
-            engine->gameData->controllableActorSystem->GetSelectedActor());
+        auto& inventory =
+            engine->registry->get<InventoryComponent>(engine->sys->controllableActorSystem->GetSelectedActor());
         inventory.RemoveItem(row, col);
     }
 
     entt::entity InventorySlot::getItemId()
     {
-        auto& inventory = engine->registry->get<InventoryComponent>(
-            engine->gameData->controllableActorSystem->GetSelectedActor());
+        auto& inventory =
+            engine->registry->get<InventoryComponent>(engine->sys->controllableActorSystem->GetSelectedActor());
         return inventory.GetItem(row, col);
     }
 
@@ -1593,7 +1591,7 @@ namespace sage
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
             auto& inventory = engine->registry->get<InventoryComponent>(
-                engine->gameData->controllableActorSystem->GetSelectedActor());
+                engine->sys->controllableActorSystem->GetSelectedActor());
             inventory.SwapItems(row, col, dropped->row, dropped->col);
             dropped->RetrieveInfo();
             RetrieveInfo();
@@ -1601,14 +1599,14 @@ namespace sage
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
-            const auto actor = engine->gameData->controllableActorSystem->GetSelectedActor();
+            const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(actor);
-            const auto droppedItemId = engine->gameData->equipmentSystem->GetItem(actor, droppedE->itemType);
-            engine->gameData->equipmentSystem->DestroyItem(actor, droppedE->itemType);
+            const auto droppedItemId = engine->sys->equipmentSystem->GetItem(actor, droppedE->itemType);
+            engine->sys->equipmentSystem->DestroyItem(actor, droppedE->itemType);
 
             if (const auto inventoryItemId = inventory.GetItem(row, col); inventoryItemId != entt::null)
             {
-                engine->gameData->equipmentSystem->EquipItem(actor, inventoryItemId, droppedE->itemType);
+                engine->sys->equipmentSystem->EquipItem(actor, inventoryItemId, droppedE->itemType);
             }
 
             inventory.AddItem(droppedItemId, row, col);
@@ -1621,7 +1619,7 @@ namespace sage
     InventorySlot::InventorySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _row, unsigned int _col)
         : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), row(_row), col(_col)
     {
-        engine->gameData->controllableActorSystem->onSelectedActorChange.Subscribe(
+        engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
@@ -2515,8 +2513,8 @@ namespace sage
 
     void HoverState::Update()
     {
-        engine->gameData->cursor->DisableContextSwitching();
-        engine->gameData->cursor->Disable();
+        engine->sys->cursor->DisableContextSwitching();
+        engine->sys->cursor->Disable();
 
         auto mousePos = GetMousePosition();
         if (!PointInsideRect(element->parent->GetRec(), mousePos))
@@ -2645,13 +2643,13 @@ namespace sage
 
     void GameUIEngine::CreateErrorMessage(const std::string& msg)
     {
-        errorMessage.emplace(gameData->settings, msg);
+        errorMessage.emplace(sys->settings, msg);
     }
 
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
-        tooltipWindow->windowUpdateCnx = gameData->userInput->onWindowUpdate.Subscribe(
+        tooltipWindow->windowUpdateCnx = sys->userInput->onWindowUpdate.Subscribe(
             [this](Vector2 prev, Vector2 current) { tooltipWindow->OnWindowUpdate(prev, current); });
         tooltipWindow->InitLayout();
         // tooltipWindow->ScaleContents(); // TODO: Maybe not needed
@@ -2662,7 +2660,7 @@ namespace sage
     {
         windows.push_back(std::move(_window));
         auto* window = windows.back().get();
-        window->windowUpdateCnx = gameData->userInput->onWindowUpdate.Subscribe(
+        window->windowUpdateCnx = sys->userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
@@ -2672,7 +2670,7 @@ namespace sage
     {
         windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->windowUpdateCnx = gameData->userInput->onWindowUpdate.Subscribe(
+        window->windowUpdateCnx = sys->userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
@@ -2862,8 +2860,8 @@ namespace sage
                 BringClickedWindowToFront(window.get());
             }
 
-            gameData->cursor->Disable();
-            gameData->cursor->DisableContextSwitching();
+            sys->cursor->Disable();
+            sys->cursor->DisableContextSwitching();
 
             window->OnHoverStart(); // TODO: Need to check if it was already being hovered?
             for (const auto& panel : window->children)
@@ -2888,16 +2886,16 @@ namespace sage
 
     void GameUIEngine::onWorldItemHover(entt::entity entity) const
     {
-        if (!gameData->inventorySystem->CheckWorldItemRange(true) || tooltipWindow) return;
+        if (!sys->inventorySystem->CheckWorldItemRange(true) || tooltipWindow) return;
         auto& item = registry->get<ItemComponent>(entity);
-        auto viewport = gameData->settings->GetViewPort();
+        auto viewport = sys->settings->GetViewPort();
         Vector2 pos = GetWorldToScreenEx(
-            gameData->cursor->getMouseHitInfo().rlCollision.point,
-            *gameData->camera->getRaylibCam(),
+            sys->cursor->getMouseHitInfo().rlCollision.point,
+            *sys->camera->getRaylibCam(),
             viewport.x,
             viewport.y);
-        pos.x += gameData->settings->ScaleValueWidth(20); // TODO: magic number
-        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), item.localizedName, pos);
+        pos.x += sys->settings->ScaleValueWidth(20); // TODO: magic number
+        GameUiFactory::CreateWorldTooltip(sys->uiEngine.get(), item.localizedName, pos);
     }
 
     void GameUIEngine::onWorldCombatableHover(entt::entity entity) const
@@ -2905,29 +2903,28 @@ namespace sage
         if (tooltipWindow) return;
         auto& renderable = registry->get<Renderable>(entity);
         auto& combatable = registry->get<CombatableActor>(entity);
-        auto viewport = gameData->settings->GetViewPort();
+        auto viewport = sys->settings->GetViewPort();
         Vector2 pos = GetWorldToScreenEx(
-            gameData->cursor->getMouseHitInfo().rlCollision.point,
-            *gameData->camera->getRaylibCam(),
+            sys->cursor->getMouseHitInfo().rlCollision.point,
+            *sys->camera->getRaylibCam(),
             viewport.x,
             viewport.y);
-        pos.x += gameData->settings->ScaleValueWidth(20); // TODO: magic number
-        GameUiFactory::CreateCombatableTooltip(
-            gameData->uiEngine.get(), renderable.GetVanityName(), combatable, pos);
+        pos.x += sys->settings->ScaleValueWidth(20); // TODO: magic number
+        GameUiFactory::CreateCombatableTooltip(sys->uiEngine.get(), renderable.GetVanityName(), combatable, pos);
     }
 
     void GameUIEngine::onNPCHover(entt::entity entity) const
     {
         if (tooltipWindow) return;
         auto& renderable = registry->get<Renderable>(entity);
-        auto viewport = gameData->settings->GetViewPort();
+        auto viewport = sys->settings->GetViewPort();
         Vector2 pos = GetWorldToScreenEx(
-            gameData->cursor->getMouseHitInfo().rlCollision.point,
-            *gameData->camera->getRaylibCam(),
+            sys->cursor->getMouseHitInfo().rlCollision.point,
+            *sys->camera->getRaylibCam(),
             viewport.x,
             viewport.y);
         pos.x += 20; // TODO: magic number
-        GameUiFactory::CreateWorldTooltip(gameData->uiEngine.get(), renderable.GetVanityName(), pos);
+        GameUiFactory::CreateWorldTooltip(sys->uiEngine.get(), renderable.GetVanityName(), pos);
     }
 
     void GameUIEngine::onStopWorldHover() const
@@ -2946,8 +2943,8 @@ namespace sage
         }
         else
         {
-            gameData->cursor->Enable();
-            gameData->cursor->EnableContextSwitching();
+            sys->cursor->Enable();
+            sys->cursor->EnableContextSwitching();
             processWindows();
             pruneWindows();
         }
@@ -2958,14 +2955,13 @@ namespace sage
         }
     }
 
-    GameUIEngine::GameUIEngine(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    GameUIEngine::GameUIEngine(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
-        _gameData->cursor->onCombatableHover.Subscribe(
+        _sys->cursor->onCombatableHover.Subscribe(
             [this](const entt::entity entity) { onWorldCombatableHover(entity); });
-        _gameData->cursor->onItemHover.Subscribe([this](const entt::entity entity) { onWorldItemHover(entity); });
-        _gameData->cursor->onStopHover.Subscribe([this]() { onStopWorldHover(); });
-        _gameData->cursor->onNPCHover.Subscribe([this](const entt::entity entity) { onNPCHover(entity); });
+        _sys->cursor->onItemHover.Subscribe([this](const entt::entity entity) { onWorldItemHover(entity); });
+        _sys->cursor->onStopHover.Subscribe([this]() { onStopWorldHover(); });
+        _sys->cursor->onNPCHover.Subscribe([this](const entt::entity entity) { onNPCHover(entity); });
     }
 #pragma endregion
 } // namespace sage

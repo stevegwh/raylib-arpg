@@ -1,8 +1,6 @@
 #pragma once
 
-#include <Timer.hpp>
-
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <vector>
 
@@ -13,7 +11,7 @@ namespace sage
         entt::registry* registry;
 
       public:
-        void Update();
+        void Update() const;
         TimerSystem(entt::registry* _registry);
     };
 } // namespace sage

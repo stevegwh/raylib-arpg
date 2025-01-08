@@ -8,7 +8,7 @@
 #include "entt/entt.hpp"
 #include "raylib.h"
 
-#include <Event.hpp>
+#include "Event.hpp"
 #include <vector>
 
 namespace sage

@@ -13,11 +13,11 @@
 #include "components/sgTransform.hpp"
 #include "components/WeaponComponent.hpp"
 #include "ControllableActorSystem.hpp"
-#include "GameData.hpp"
 #include "LightManager.hpp"
 #include "PartySystem.hpp"
 #include "ResourceManager.hpp"
 #include "slib.hpp"
+#include "Systems.hpp"
 #include "systems/AnimationSystem.hpp"
 
 #include "components/PartyMemberComponent.hpp"
@@ -119,20 +119,20 @@ namespace sage
         // TODO: Should probably update the weapons again after taking the "photo"
 
         auto oldPos = transform.GetWorldPos();
-        auto cameraPos = gameData->camera->GetPosition();
-        auto cameraTarget = gameData->camera->getRaylibCam()->target;
+        auto cameraPos = sys->camera->GetPosition();
+        auto cameraTarget = sys->camera->getRaylibCam()->target;
 
         transform.SetPosition({0, -999, 0});
 
         auto current = animation.current;
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE2);
         updateCharacterPreviewPose(entity);
-        gameData->camera->SetCamera({-1.5, -992.5, 1.5}, {0.5, -992.5, 0});
+        sys->camera->SetCamera({-1.5, -992.5, 1.5}, {0.5, -992.5, 0});
 
         info.portraitImg = LoadRenderTexture(width, height);
         BeginTextureMode(info.portraitImg);
         ClearBackground(BLACK);
-        BeginMode3D(*gameData->camera->getRaylibCam());
+        BeginMode3D(*sys->camera->getRaylibCam());
         auto& uber = registry->get<UberShaderComponent>(entity);
         uber.ClearFlagAll(UberShaderComponent::Lit);
         uber.SetShaderBools();
@@ -144,7 +144,7 @@ namespace sage
 
         animation.current = current;
         transform.SetPosition(oldPos);
-        gameData->camera->SetCamera(cameraPos, cameraTarget);
+        sys->camera->SetCamera(cameraPos, cameraTarget);
     }
 
     void EquipmentSystem::GenerateRenderTexture(entt::entity entity, float width, float height)
@@ -157,11 +157,11 @@ namespace sage
         // TODO: Should probably update the weapons again after taking the "photo"
 
         auto oldPos = transform.GetWorldPos();
-        auto cameraPos = gameData->camera->GetPosition();
-        auto cameraTarget = gameData->camera->getRaylibCam()->target;
+        auto cameraPos = sys->camera->GetPosition();
+        auto cameraTarget = sys->camera->getRaylibCam()->target;
 
         transform.SetPosition({0, -999, 0});
-        gameData->camera->SetCamera({6, -996, 12}, {0, -996, 0});
+        sys->camera->SetCamera({6, -996, 12}, {0, -996, 0});
 
         auto current = animation.current;
         animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
@@ -173,7 +173,7 @@ namespace sage
 
         BeginTextureMode(equipment.renderTexture);
         ClearBackground(BLANK);
-        BeginMode3D(*gameData->camera->getRaylibCam());
+        BeginMode3D(*sys->camera->getRaylibCam());
         auto& uber = registry->get<UberShaderComponent>(entity);
         uber.ClearFlagAll(UberShaderComponent::Lit);
         uber.SetShaderBools();
@@ -203,7 +203,7 @@ namespace sage
 
         animation.current = current;
         transform.SetPosition(oldPos);
-        gameData->camera->SetCamera(cameraPos, cameraTarget);
+        sys->camera->SetCamera(cameraPos, cameraTarget);
     }
 
     entt::entity EquipmentSystem::GetItem(entt::entity owner, EquipmentSlotName itemType) const
@@ -314,8 +314,8 @@ namespace sage
     {
     }
 
-    EquipmentSystem::EquipmentSystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    EquipmentSystem::EquipmentSystem(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
         registry->on_construct<EquipmentComponent>().connect<&EquipmentSystem::onComponentAdded>(this);
         registry->on_destroy<EquipmentComponent>().connect<&EquipmentSystem::onComponentRemoved>(this);

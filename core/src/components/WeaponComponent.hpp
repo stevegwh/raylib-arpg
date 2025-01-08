@@ -7,7 +7,7 @@
 #include "common_types.hpp"
 #include "raylib.h"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {

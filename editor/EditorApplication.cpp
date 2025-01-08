@@ -8,8 +8,8 @@
 #include "EditorGui.hpp"
 #include "EditorScene.hpp"
 #include "EditorSettings.hpp"
-#include "GameData.hpp"
 #include "scenes/ExampleScene.hpp"
+#include "Systems.hpp"
 #include "UserInput.hpp"
 
 #include <fstream>

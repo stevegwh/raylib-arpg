@@ -7,6 +7,7 @@
 #include "Camera.hpp"
 #include "components/Collideable.hpp"
 #include "components/CombatableActor.hpp"
+#include "components/HealthBar.hpp"
 
 #include "raylib.h"
 
@@ -16,7 +17,7 @@ namespace sage
     {
     }
 
-    void HealthBarSystem::updateHealthBarTextures()
+    void HealthBarSystem::updateHealthBarTextures() const
     {
         const auto& view = registry->view<HealthBar>();
         for (const auto& entity : view)

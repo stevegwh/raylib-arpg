@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include <entt/entt.hpp>
-#include <string>
+#include "entt/entt.hpp"
+// #include <string>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     namespace dialog
     {
@@ -19,7 +19,7 @@ namespace sage
     class DialogFactory
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
 
         void parseNode(
             dialog::Conversation* conversation,
@@ -30,7 +30,7 @@ namespace sage
       public:
         void InitDialogFromDirectory();
 
-        DialogFactory(entt::registry* _registry, GameData* _gameData);
+        DialogFactory(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

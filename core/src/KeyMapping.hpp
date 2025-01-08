@@ -5,7 +5,7 @@
 #pragma once
 
 #include "cereal/cereal.hpp"
-#include "raylib/src/raylib.h"
+#include "raylib.h"
 #include "Serializer.hpp"
 
 namespace sage

@@ -4,7 +4,7 @@
 
 #include "DoorSystem.hpp"
 
-#include "GameData.hpp"
+#include "Systems.hpp"
 
 #include "components/Collideable.hpp"
 #include "components/DoorBehaviorComponent.hpp"
@@ -42,7 +42,7 @@ namespace sage
             auto& col = registry->get<Collideable>(entity);
             // TODO: Below not working?
             col.collisionLayer = CollisionLayer::BACKGROUND;
-            gameData->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, false);
+            sys->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, false);
             float targetRotation = (transform.forward().z > 0) ? door.openYRotation : -door.openYRotation;
             transform.SetLocalRot(Vector3{rotx, targetRotation, rotz});
             door.open = true;
@@ -53,12 +53,12 @@ namespace sage
             door.open = false;
             auto& col = registry->get<Collideable>(entity);
             col.collisionLayer = CollisionLayer::BUILDING;
-            gameData->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true);
+            sys->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, true);
         }
     }
 
-    DoorSystem::DoorSystem(entt::registry* _registry, sage::GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    DoorSystem::DoorSystem(entt::registry* _registry, sage::Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
     }
 } // namespace sage

@@ -5,20 +5,21 @@
 #pragma once
 
 #include "BaseSystem.hpp"
+
 #include "entt/entt.hpp"
 #include "raylib.h"
 
-#include <Event.hpp>
+#include "Event.hpp"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     class ControllableActorSystem : public BaseSystem
     {
         static constexpr Color activeCol = {0, 255, 0, 255};
         static constexpr Color inactiveCol = {0, 255, 0, 75};
-        GameData* gameData;
+        Systems* sys;
         entt::entity selectedActorId = entt::null;
         void onComponentAdded(entt::entity addedEntity);
         void onComponentRemoved(entt::entity removedEntity);
@@ -28,6 +29,6 @@ namespace sage
         [[nodiscard]] entt::entity GetSelectedActor() const;
         Event<entt::entity, entt::entity> onSelectedActorChange; // prev, current
         void Update() const;
-        ControllableActorSystem(entt::registry* _registry, GameData* _gameData);
+        ControllableActorSystem(entt::registry* _registry, Systems* _sys);
     };
 } // namespace sage

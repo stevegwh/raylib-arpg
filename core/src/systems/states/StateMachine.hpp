@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <format>
 #include <iostream>
@@ -13,7 +13,7 @@
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     class StateMachine
     {
@@ -21,7 +21,7 @@ namespace sage
 
       protected:
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
 
         void LockState(entt::entity entity)
         {
@@ -34,8 +34,8 @@ namespace sage
                 std::remove(lockedEntities.begin(), lockedEntities.end(), entity), lockedEntities.end());
         }
 
-        explicit StateMachine(entt::registry* _registry, GameData* _gameData)
-            : registry(_registry), gameData(_gameData)
+        explicit StateMachine(entt::registry* _registry, Systems* _sys)
+            : registry(_registry), sys(_sys)
         {
         }
 

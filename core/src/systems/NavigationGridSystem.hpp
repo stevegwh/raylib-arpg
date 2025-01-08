@@ -2,7 +2,7 @@
 
 #include "BaseSystem.hpp"
 
-#include <slib.hpp>
+#include "slib.hpp"
 
 #include "components/NavigationGridSquare.hpp"
 

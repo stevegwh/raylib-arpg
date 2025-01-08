@@ -5,9 +5,9 @@
 #include "UberShaderSystem.hpp"
 #include "components/Renderable.hpp"
 #include "components/UberShaderComponent.hpp"
-#include "GameData.hpp"
 #include "LightManager.hpp"
 #include "ResourceManager.hpp"
+#include "Systems.hpp"
 
 namespace sage
 {
@@ -48,8 +48,8 @@ namespace sage
     {
     }
 
-    UberShaderSystem::UberShaderSystem(entt::registry* _registry, sage::GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    UberShaderSystem::UberShaderSystem(entt::registry* _registry, sage::Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
         registry->on_construct<UberShaderComponent>().connect<&UberShaderSystem::onComponentAdded>(this);
         registry->on_destroy<UberShaderComponent>().connect<&UberShaderSystem::onComponentRemoved>(this);
@@ -61,7 +61,7 @@ namespace sage
         colEmissionLoc = GetShaderLocation(shader, "colEmission");
         //        shader.locs[SHADER_LOC_COLOR_AMBIENT] =
         //            GetShaderLocation(shader, "emissionCol");         // stealing ambient color slot for emission
-        gameData->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
+        sys->lightSubSystem->LinkShaderToLights(shader); // Links shader to light data
 
         litLoc = GetShaderLocation(shader, "lit");
         skinnedLoc = GetShaderLocation(shader, "skinned");

@@ -9,10 +9,10 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "components/Spawner.hpp"
-#include "GameData.hpp"
 #include "GameObjectFactory.hpp"
 #include "ItemFactory.hpp"
 #include "Light.hpp"
+#include "Systems.hpp"
 #include "ViewSerializer.hpp"
 
 #include "cereal/archives/binary.hpp"

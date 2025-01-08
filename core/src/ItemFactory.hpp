@@ -5,20 +5,16 @@
 #pragma once
 
 #include "components/ItemComponent.hpp"
-#include "Serializer.hpp"
-#include "ViewSerializer.hpp"
 
 #include "cereal/cereal.hpp"
-#include "cereal/types/string.hpp"
-#include "cereal/types/vector.hpp"
-#include "entt/core/type_traits.hpp"
-#include <cereal/archives/json.hpp>
+#include "entt/entt.hpp"
+// #include "cereal/types/string.hpp"
+// #include "cereal/types/vector.hpp"
+// #include "entt/core/type_traits.hpp"
+#include "cereal/archives/json.hpp"
 
-#include <magic_enum.hpp>
 #include <unordered_map>
 #include <vector>
-
-#include <entt/entt.hpp>
 
 namespace sage
 {
@@ -60,7 +56,7 @@ namespace sage
             }
         }
 
-        ItemFactory(entt::registry* _registry);
+        explicit ItemFactory(entt::registry* _registry);
     };
 
 } // namespace sage

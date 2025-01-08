@@ -6,7 +6,7 @@
 
 #include "entt/entt.hpp"
 
-#include <memory>
+// #include <memory>
 
 namespace sage
 {
@@ -50,7 +50,7 @@ namespace sage
     class ContextualDialogSystem;
     class SpatialAudioSystem;
 
-    class GameData
+    class Systems
     {
       public:
         entt::registry* registry;
@@ -90,7 +90,7 @@ namespace sage
         std::unique_ptr<ContextualDialogSystem> contextualDialogSystem;
         std::unique_ptr<SpatialAudioSystem> spatialAudioSystem;
 
-        GameData(
+        Systems(
             entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);
     };
 } // namespace sage

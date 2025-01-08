@@ -7,10 +7,10 @@
 #include "components/DialogComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
 #include "NpcManager.hpp"
 #include "ParsingHelpers.hpp"
 #include "QuestManager.hpp"
+#include "Systems.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/RenderSystem.hpp"
 
@@ -104,26 +104,26 @@ namespace sage
 
                 condition = [this, line]() -> bool {
                     auto quest_complete = [&](const std::string& params) -> bool {
-                        const auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                        const auto& quest = registry->get<Quest>(sys->questManager->GetQuest(params));
                         return quest.IsComplete();
                     };
 
                     auto quest_in_progress = [&](const std::string& params) -> bool {
-                        const auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                        const auto& quest = registry->get<Quest>(sys->questManager->GetQuest(params));
                         return quest.HasStarted() && !quest.IsComplete();
                     };
 
                     auto has_item = [&](const std::string& params) -> bool {
-                        return gameData->partySystem->CheckPartyHasItem(params);
+                        return sys->partySystem->CheckPartyHasItem(params);
                     };
 
                     auto quest_all_tasks_complete = [&](const std::string& params) -> bool {
-                        const auto& quest = registry->get<Quest>(gameData->questManager->GetQuest(params));
+                        const auto& quest = registry->get<Quest>(sys->questManager->GetQuest(params));
                         return quest.HasStarted() && quest.AllTasksComplete();
                     };
 
                     auto quest_task_complete = [&](const std::string& params) -> bool {
-                        const auto entity = gameData->renderSystem->FindRenderable(params);
+                        const auto entity = sys->renderSystem->FindRenderable(params);
                         assert(entity != entt::null);
                         const auto& questComponent = registry->get<QuestTaskComponent>(entity);
                         return questComponent.IsComplete();
@@ -235,7 +235,7 @@ namespace sage
                     if (func.name == "complete_quest_task")
                     {
                         assert(!func.params.empty());
-                        auto questId = gameData->questManager->GetQuest(func.params);
+                        auto questId = sys->questManager->GetQuest(func.params);
                         std::unique_ptr<dialog::QuestOption> questOption;
                         if (condition.has_value())
                         {
@@ -257,7 +257,7 @@ namespace sage
                     else if (func.name == "start_quest")
                     {
                         assert(!func.params.empty());
-                        auto questId = gameData->questManager->GetQuest(func.params);
+                        auto questId = sys->questManager->GetQuest(func.params);
                         std::unique_ptr<dialog::QuestStartOption> questStartOption;
                         if (condition.has_value())
                         {
@@ -279,7 +279,7 @@ namespace sage
                     else if (func.name == "complete_quest")
                     {
                         assert(!func.params.empty());
-                        auto questId = gameData->questManager->GetQuest(func.params);
+                        auto questId = sys->questManager->GetQuest(func.params);
                         std::unique_ptr<dialog::QuestFinishOption> questFinishOption;
                         if (condition.has_value())
                         {
@@ -359,7 +359,7 @@ namespace sage
                     auto owner = line.substr(std::string("owner:").size());
                     owner = trim(owner);
 
-                    entity = gameData->renderSystem->FindRenderable<DialogComponent>(owner);
+                    entity = sys->renderSystem->FindRenderable<DialogComponent>(owner);
                     assert(entity != entt::null);
                     // if (!registry->any_of<DialogComponent>(entity))
                     // {
@@ -454,8 +454,8 @@ namespace sage
         }
     }
 
-    DialogFactory::DialogFactory(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    DialogFactory::DialogFactory(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
     }
 

@@ -3,11 +3,11 @@
 
 #include "components/States.hpp"
 #include "systems/states/StateMachine.hpp"
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     class PlayerStateController final : public StateMachineController<PlayerState, PlayerStateEnum>
     {
@@ -27,7 +27,7 @@ namespace sage
         void Draw3D();
 
         ~PlayerStateController() override = default;
-        PlayerStateController(entt::registry* _registry, GameData* gameData);
+        PlayerStateController(entt::registry* _registry, Systems* sys);
 
         friend class StateMachineController; // Required for CRTP
     };

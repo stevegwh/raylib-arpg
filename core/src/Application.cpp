@@ -7,12 +7,12 @@
 #include "AssetManager.hpp"
 #include "AudioManager.hpp"
 #include "Camera.hpp"
-#include "GameData.hpp"
 #include "KeyMapping.hpp"
 #include "scenes/ExampleScene.hpp"
 #include "scenes/Scene.hpp"
 #include "Serializer.hpp"
 #include "Settings.hpp"
+#include "Systems.hpp"
 #include "systems/CleanupSystem.hpp"
 #include "UserInput.hpp"
 

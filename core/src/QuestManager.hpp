@@ -4,28 +4,28 @@
 
 #pragma once
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <string>
 #include <unordered_map>
 
 namespace sage
 {
-    struct GameData;
+    struct Systems;
 
     class QuestManager
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         std::unordered_map<std::string, entt::entity> map{};
         entt::entity createQuest(const std::string& key);
 
       public:
         void InitQuestsFromDirectory();
         void RemoveQuest(const std::string& key);
-        entt::entity GetQuest(const std::string& key) const;
+        [[nodiscard]] entt::entity GetQuest(const std::string& key) const;
 
-        explicit QuestManager(entt::registry* _registry, GameData* _gameData);
+        explicit QuestManager(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

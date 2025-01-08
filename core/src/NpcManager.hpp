@@ -4,26 +4,26 @@
 
 #pragma once
 
+#include "entt/entt.hpp"
 #include "raylib.h"
 
-#include <entt/entt.hpp>
 #include <string>
 #include <unordered_map>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     class NPCManager
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         std::unordered_map<std::string, entt::entity> npcMap;
 
       public:
         entt::entity CreateNPC(const std::string& name, Vector3 pos, Vector3 rot);
 
-        explicit NPCManager(entt::registry* _registry, GameData* _gameData);
+        explicit NPCManager(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

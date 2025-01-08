@@ -8,8 +8,8 @@
 #include "components/Ability.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
-#include "GameData.hpp"
 #include "ResourceManager.hpp"
+#include "Systems.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -27,7 +27,7 @@ namespace sage
     void FireballVFX::Draw3D() const
     {
         rlDisableBackfaceCulling();
-        auto& transform = gameData->registry->get<sgTransform>(ability->self);
+        auto& transform = sys->registry->get<sgTransform>(ability->self);
         model.Draw(transform.GetWorldPos(), Vector3{0, 1, 0}, 0, Vector3{1, 1, 1}, WHITE);
         rlEnableBackfaceCulling();
     }
@@ -44,7 +44,7 @@ namespace sage
         time = 0;
     }
 
-    FireballVFX::FireballVFX(GameData* _gameData, Ability* _ability) : VisualFX(_gameData, _ability)
+    FireballVFX::FireballVFX(Systems* _sys, Ability* _ability) : VisualFX(_sys, _ability)
     {
         // Texture/Material
         auto texture = ResourceManager::GetInstance().TextureLoad("IMG_NOISE50");

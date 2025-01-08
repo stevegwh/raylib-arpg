@@ -2,8 +2,8 @@
 
 #include "Camera.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
 #include "GameObjectFactory.hpp"
+#include "Systems.hpp"
 
 #include "components/Ability.hpp"
 #include "components/Collideable.hpp"

@@ -2,15 +2,16 @@
 // Created by Steve Wheeler on 21/02/2024.
 //
 #pragma once
+
 #include "BaseSystem.hpp"
 #include "raylib.h"
-#include <deque>
+
 #include <vector>
 
 namespace sage
 {
     // Forward declarations
-    struct GameData;
+    struct Systems;
     struct MoveableActor;
     class Collideable;
     struct sgTransform;
@@ -19,7 +20,7 @@ namespace sage
 
     class ActorMovementSystem : public BaseSystem
     {
-        GameData* gameData;
+        Systems* sys;
         std::vector<Ray> debugRays;
         std::vector<RayCollision> debugCollisions;
 
@@ -60,7 +61,7 @@ namespace sage
         void Update() override;
         void DrawDebug() const;
 
-        ActorMovementSystem(entt::registry* _registry, GameData* _gameData);
+        ActorMovementSystem(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

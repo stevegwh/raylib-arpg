@@ -8,7 +8,7 @@
 #include "raylib-cereal.hpp"
 #include "raylib.h"
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 #include <string>
 
 #include <optional>

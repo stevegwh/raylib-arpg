@@ -11,7 +11,7 @@
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     struct Settings;
     struct KeyMapping;
     class AudioManager;
@@ -28,7 +28,7 @@ namespace sage
         entt::registry* registry;
 
       public:
-        std::unique_ptr<GameData> data;
+        std::unique_ptr<Systems> data;
         Event<entt::entity> sceneLoadingFinished; // Currently unused
         Event<entt::entity> sceneChange;
 

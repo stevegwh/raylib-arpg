@@ -4,22 +4,22 @@
 
 #pragma once
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
     class DoorSystem
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
 
       public:
         void UnlockDoor(entt::entity entity);
         void UnlockAndOpenDoor(entt::entity entity);
         void OpenClickedDoor(entt::entity entity);
 
-        DoorSystem(entt::registry* _registry, GameData* _gameData);
+        DoorSystem(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

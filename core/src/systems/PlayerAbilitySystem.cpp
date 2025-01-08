@@ -2,7 +2,7 @@
 
 #include "components/Ability.hpp"
 #include "components/CombatableActor.hpp"
-#include "GameData.hpp"
+#include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "UserInput.hpp"
 
@@ -13,7 +13,7 @@ namespace sage
 
     void PlayerAbilitySystem::PressAbility(unsigned int slotNumber) const
     {
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         std::cout << "Ability " << slotNumber << " pressed \n";
         if (abilitySlots[slotNumber] == entt::null)
@@ -33,7 +33,7 @@ namespace sage
 
     void PlayerAbilitySystem::AbilityOnePressed()
     {
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         std::cout << "Ability 1 pressed \n";
         if (abilitySlots[0] == entt::null)
@@ -53,7 +53,7 @@ namespace sage
 
     void PlayerAbilitySystem::AbilityTwoPressed()
     {
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         std::cout << "Ability 2 pressed \n";
         if (abilitySlots[1] == entt::null)
@@ -73,7 +73,7 @@ namespace sage
 
     void PlayerAbilitySystem::AbilityThreePressed()
     {
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         std::cout << "Ability 3 pressed \n";
         if (abilitySlots[2] == entt::null)
@@ -93,7 +93,7 @@ namespace sage
 
     void PlayerAbilitySystem::AbilityFourPressed()
     {
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         std::cout << "Ability 4 pressed \n";
 
@@ -116,7 +116,7 @@ namespace sage
     Ability* PlayerAbilitySystem::GetAbility(unsigned int slotNumber) const
     {
         assert(slotNumber < MAX_ABILITY_NUMBER);
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         if (abilitySlots.at(slotNumber) == entt::null) return nullptr;
         return &registry->get<Ability>(abilitySlots.at(slotNumber));
@@ -124,7 +124,7 @@ namespace sage
 
     void PlayerAbilitySystem::SwapAbility(unsigned int slot1, unsigned int slot2)
     {
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         auto ability1 = abilitySlots.at(slot1);
         auto ability2 = abilitySlots.at(slot2);
@@ -135,7 +135,7 @@ namespace sage
     void PlayerAbilitySystem::SetSlot(unsigned int slot, entt::entity abilityEntity) const
     {
         assert(slot < MAX_ABILITY_NUMBER);
-        const auto& selectedActor = gameData->controllableActorSystem->GetSelectedActor();
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
         auto& abilitySlots = registry->get<CombatableActor>(selectedActor).abilities;
         abilitySlots[slot] = abilityEntity;
     }
@@ -152,12 +152,12 @@ namespace sage
     {
     }
 
-    PlayerAbilitySystem::PlayerAbilitySystem(entt::registry* _registry, GameData* _gameData)
-        : registry(_registry), gameData(_gameData)
+    PlayerAbilitySystem::PlayerAbilitySystem(entt::registry* _registry, Systems* _sys)
+        : registry(_registry), sys(_sys)
     {
-        gameData->userInput->keyOnePressed.Subscribe([this]() { AbilityOnePressed(); });
-        gameData->userInput->keyTwoPressed.Subscribe([this]() { AbilityTwoPressed(); });
-        gameData->userInput->keyThreePressed.Subscribe([this]() { AbilityThreePressed(); });
-        gameData->userInput->keyFourPressed.Subscribe([this]() { AbilityFourPressed(); });
+        sys->userInput->keyOnePressed.Subscribe([this]() { AbilityOnePressed(); });
+        sys->userInput->keyTwoPressed.Subscribe([this]() { AbilityTwoPressed(); });
+        sys->userInput->keyThreePressed.Subscribe([this]() { AbilityThreePressed(); });
+        sys->userInput->keyFourPressed.Subscribe([this]() { AbilityFourPressed(); });
     }
 } // namespace sage

@@ -1,19 +1,16 @@
 #pragma once
 
-#include "components/Ability.hpp"
-
-#include <entt/entt.hpp>
-
-#include <array>
+#include "entt/entt.hpp"
 
 namespace sage
 {
-    class GameData;
+    class Systems;
+    class Ability;
 
     class PlayerAbilitySystem
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
 
       public:
         void PressAbility(unsigned int slotNumber) const;
@@ -27,6 +24,6 @@ namespace sage
         void Update();
         void Draw2D();
         void Draw3D();
-        PlayerAbilitySystem(entt::registry* _registry, GameData* _gameData);
+        PlayerAbilitySystem(entt::registry* _registry, Systems* _sys);
     };
 } // namespace sage

@@ -4,10 +4,10 @@
 
 #pragma once
 
+#include "Serializer.hpp"
+
 #include "cereal/cereal.hpp"
 #include "raylib.h"
-#include "raymath.h"
-#include "Serializer.hpp"
 
 namespace sage
 {

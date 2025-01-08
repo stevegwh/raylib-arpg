@@ -10,9 +10,9 @@
 #include "components/sgTransform.hpp"
 #include "components/States.hpp"
 #include "Cursor.hpp"
-#include "GameData.hpp"
 #include "PartySystem.hpp"
 #include "ResourceManager.hpp"
+#include "Systems.hpp"
 #include "systems/ActorMovementSystem.hpp"
 #include "TextureTerrainOverlay.hpp"
 
@@ -60,27 +60,27 @@ namespace sage
 
         // Forward cursor clicks to this actor's controllable component's events
         current.cursorOnFloorClickCnx =
-            gameData->cursor->onFloorClick.Subscribe([this](const entt::entity clickedEntity) {
+            sys->cursor->onFloorClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onFloorClick.Publish(selectedActorId, clickedEntity);
             });
         current.cursorOnEnemyLeftClickCnx =
-            gameData->cursor->onEnemyLeftClick.Subscribe([this](const entt::entity clickedEntity) {
+            sys->cursor->onEnemyLeftClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onEnemyLeftClick.Publish(selectedActorId, clickedEntity);
             });
         current.cursorOnEnemyRightClickCnx =
-            gameData->cursor->onEnemyRightClick.Subscribe([this](const entt::entity clickedEntity) {
+            sys->cursor->onEnemyRightClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onEnemyRightClick.Publish(selectedActorId, clickedEntity);
             });
         current.cursorOnNPCLeftClickCnx =
-            gameData->cursor->onNPCClick.Subscribe([this](const entt::entity clickedEntity) {
+            sys->cursor->onNPCClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onNPCLeftClick.Publish(selectedActorId, clickedEntity);
             });
 
-        for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
+        for (const auto group = sys->partySystem->GetGroup(id); const auto& entity : group)
         {
             if (registry->any_of<PlayerState>(entity))
             {
@@ -92,7 +92,7 @@ namespace sage
             }
         }
         registry->emplace<PlayerState>(id);
-        for (const auto group = gameData->partySystem->GetGroup(id); const auto& entity : group)
+        for (const auto group = sys->partySystem->GetGroup(id); const auto& entity : group)
         {
             if (entity != id)
             {
@@ -114,7 +114,7 @@ namespace sage
         auto& controllable = registry->get<ControllableActor>(addedEntity);
         controllable.selectedIndicator = std::make_unique<TextureTerrainOverlay>(
             registry,
-            gameData->navigationGridSystem.get(),
+            sys->navigationGridSystem.get(),
             ResourceManager::GetInstance().TextureLoad("resources/textures/particles/circle_03.png"),
             inactiveCol,
             "resources/shaders/glsl330/base.fs");
@@ -133,8 +133,8 @@ namespace sage
     {
     }
 
-    ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, GameData* _gameData)
-        : BaseSystem(_registry), gameData(_gameData)
+    ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, Systems* _sys)
+        : BaseSystem(_registry), sys(_sys)
     {
         registry->on_construct<ControllableActor>().connect<&ControllableActorSystem::onComponentAdded>(this);
         registry->on_destroy<ControllableActor>().connect<&ControllableActorSystem::onComponentRemoved>(this);

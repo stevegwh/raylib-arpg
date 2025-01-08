@@ -1,10 +1,12 @@
 #include "TimerSystem.hpp"
 
+#include "Timer.hpp"
+
 #include "raylib.h"
 
 namespace sage
 {
-    void TimerSystem::Update()
+    void TimerSystem::Update() const
     {
         auto view = registry->view<Timer>();
         for (auto& entity : view)

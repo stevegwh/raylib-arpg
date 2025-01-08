@@ -5,7 +5,7 @@
 #include "abilities/vfx/VisualFX.hpp"
 #include <Timer.hpp>
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 #include <unordered_map>
 
 namespace sage

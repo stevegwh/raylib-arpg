@@ -4,20 +4,20 @@
 
 #pragma once
 
-#include "Timer.hpp"
+#include "Event.hpp"
 
-#include <entt/entt.hpp>
-#include <Event.hpp>
+#include "entt/entt.hpp"
+
 #include <memory>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     class CursorClickIndicator
     {
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         entt::entity self;
         float k = 0;
 
@@ -29,7 +29,7 @@ namespace sage
 
       public:
         void Update();
-        CursorClickIndicator(entt::registry* _registry, GameData* _gameData);
+        CursorClickIndicator(entt::registry* _registry, Systems* _sys);
     };
 
 } // namespace sage

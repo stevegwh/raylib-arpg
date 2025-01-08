@@ -8,13 +8,13 @@
 #include "systems/states/StateMachine.hpp"
 #include <Timer.hpp>
 
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 
 #include <vector>
 
 namespace sage
 {
-    class GameData;
+    class Systems;
 
     class GameModeStateController : public StateMachineController<GameState, GameStateEnum>
     {
@@ -29,7 +29,7 @@ namespace sage
         void Draw3D();
         void StartCombat();
 
-        GameModeStateController(entt::registry* _registry, GameData* gameData);
+        GameModeStateController(entt::registry* _registry, Systems* sys);
 
         friend class StateMachineController; // Required for CRTP
     };

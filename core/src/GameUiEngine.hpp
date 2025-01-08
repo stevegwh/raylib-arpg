@@ -11,18 +11,18 @@
 #include "ResourceManager.hpp"
 #include "Timer.hpp"
 
+#include "entt/entt.hpp"
 #include "raylib.h"
 
-#include <entt/entt.hpp>
-#include <memory>
+// #include <memory>
 #include <optional>
-#include <utility>
+// #include <utility>
 #include <vector>
 
 namespace sage
 {
     class TooltipWindow;
-    class GameData;
+    class Systems;
     class GameUIEngine;
     struct Settings;
     class UserInput;
@@ -868,7 +868,7 @@ namespace sage
 
       public:
         entt::registry* registry;
-        GameData* gameData;
+        Systems* sys;
         void BringClickedWindowToFront(Window* clicked);
         void CreateErrorMessage(const std::string& msg);
         TooltipWindow* CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow);
@@ -884,7 +884,7 @@ namespace sage
         void Draw2D() const;
         void Update();
 
-        GameUIEngine(entt::registry* _registry, GameData* _gameData);
+        GameUIEngine(entt::registry* _registry, Systems* _sys);
         friend class UIState;
         friend class DragDelayState;
         friend class DragState;

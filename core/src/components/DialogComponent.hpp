@@ -18,7 +18,7 @@
 #include <cereal/archives/json.hpp>
 
 #include <cassert>
-#include <entt/entt.hpp>
+#include "entt/entt.hpp"
 #include <iostream>
 #include <memory>
 #include <optional>

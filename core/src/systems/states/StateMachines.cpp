@@ -1,7 +1,7 @@
 #include "StateMachines.hpp"
 
-#include "GameData.hpp"
 #include "scenes/Scene.hpp"
+#include "Systems.hpp"
 
 namespace sage
 {
@@ -23,12 +23,12 @@ namespace sage
         abilityStateMachine->Draw3D();
     }
 
-    StateMachines::StateMachines(entt::registry* _registry, GameData* _gameData)
-        : gameModeStateMachine(std::make_unique<GameModeStateController>(_registry, _gameData)),
-          wavemobStatemachine(std::make_unique<WavemobStateController>(_registry, _gameData)),
-          playerStateMachine(std::make_unique<PlayerStateController>(_registry, _gameData)),
-          partyMemberStateMachine(std::make_unique<PartyMemberStateController>(_registry, _gameData)),
-          abilityStateMachine(std::make_unique<AbilityStateController>(_registry, _gameData))
+    StateMachines::StateMachines(entt::registry* _registry, Systems* _sys)
+        : gameModeStateMachine(std::make_unique<GameModeStateController>(_registry, _sys)),
+          wavemobStatemachine(std::make_unique<WavemobStateController>(_registry, _sys)),
+          playerStateMachine(std::make_unique<PlayerStateController>(_registry, _sys)),
+          partyMemberStateMachine(std::make_unique<PartyMemberStateController>(_registry, _sys)),
+          abilityStateMachine(std::make_unique<AbilityStateController>(_registry, _sys))
     {
     }
 } // namespace sage

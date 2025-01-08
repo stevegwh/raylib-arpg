@@ -2,7 +2,7 @@
 // Created by Steve Wheeler on 27/03/2024.
 //
 
-#include "GameData.hpp"
+#include "Systems.hpp"
 
 #include "Serializer.hpp"
 
@@ -10,7 +10,7 @@
 
 namespace sage
 {
-    GameData::GameData(
+    Systems::Systems(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : registry(_registry),
           settings(_settings),
@@ -47,7 +47,7 @@ namespace sage
           contextualDialogSystem(std::make_unique<ContextualDialogSystem>(registry, this)),
           spatialAudioSystem(std::make_unique<SpatialAudioSystem>(registry, this))
     {
-        // TODO: Move GameData out of Scene and into Application
+        // TODO: Move sys out of Scene and into Application
         // Minus lights and timers, I'm not sure if anything would suffer from this
     }
 } // namespace sage

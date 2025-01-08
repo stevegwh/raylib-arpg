@@ -1,9 +1,9 @@
 #include "Scene.hpp"
 
-#include "GameData.hpp"
 #include "system_includes.hpp"
+#include "Systems.hpp"
 
-// NB: We have to include all the headers required to build GameData
+// NB: We have to include all the headers required to build sys
 #include "AudioManager.hpp"
 #include "Camera.hpp"
 
@@ -173,7 +173,7 @@ namespace sage
 
     Scene::Scene(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
-        : registry(_registry), data(std::make_unique<GameData>(_registry, _keyMapping, _settings, _audioManager))
+        : registry(_registry), data(std::make_unique<Systems>(_registry, _keyMapping, _settings, _audioManager))
     {
 
         initAssets();

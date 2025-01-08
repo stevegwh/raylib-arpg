@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "Cursor.hpp"
 #include "Event.hpp"
 #include "KeyMapping.hpp"
 #include "Settings.hpp"

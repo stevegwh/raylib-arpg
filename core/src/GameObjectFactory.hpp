@@ -10,24 +10,24 @@
 namespace sage
 {
     class Scene;
-    class GameData;
+    class Systems;
 
     struct GameObjectFactory
     {
         static entt::entity createDialogCutscene(entt::registry* registry, Vector3 position, const char* name);
         static entt::entity createEnemy(
-            entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name);
+            entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation, const char* name);
         static entt::entity createCellGuard(
-            entt::registry* registry, GameData* data, Vector3 position, const char* name);
+            entt::registry* registry, Systems* sys, Vector3 position, const char* name);
         static entt::entity createLeverGoblin(
-            entt::registry* registry, GameData* data, Vector3 position, const char* name);
+            entt::registry* registry, Systems* sys, Vector3 position, const char* name);
         static entt::entity createArissa(
-            entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation);
+            entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation);
         static entt::entity createPlayer(
-            entt::registry* registry, GameData* data, Vector3 position, Vector3 rotation, const char* name);
-        static void createPortal(entt::registry* registry, GameData* data, Vector3 position);
-        static void createWizardTower(entt::registry* registry, GameData* data, Vector3 position);
+            entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation, const char* name);
+        static void createPortal(entt::registry* registry, Systems* sys, Vector3 position);
+        static void createWizardTower(entt::registry* registry, Systems* sys, Vector3 position);
         static bool spawnItemInWorld(
-            entt::registry* registry, GameData* data, entt::entity itemId, Vector3 position);
+            entt::registry* registry, Systems* sys, entt::entity itemId, Vector3 position);
     };
 } // namespace sage

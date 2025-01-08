@@ -1,6 +1,6 @@
 #include "PlayerStateMachine.hpp"
 
-#include "GameData.hpp"
+#include "Systems.hpp"
 
 #include "AbilityFactory.hpp"
 #include "Camera.hpp"
@@ -85,8 +85,8 @@ namespace sage
 
         ~DefaultState() override = default;
 
-        DefaultState(entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+        DefaultState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
 
@@ -116,8 +116,8 @@ namespace sage
 
         void OnStateEnter(entt::entity self) override
         {
-            gameData->actorMovementSystem->CancelMovement(self);
-            gameData->actorMovementSystem->PathfindToLocation(self, gameData->cursor->getFirstCollision().point);
+            sys->actorMovementSystem->CancelMovement(self);
+            sys->actorMovementSystem->PathfindToLocation(self, sys->cursor->getFirstCollision().point);
             auto& moveable = registry->get<MoveableActor>(self);
             auto& state = registry->get<PlayerState>(self);
             auto cnx = moveable.onDestinationReached.Subscribe(
@@ -138,8 +138,8 @@ namespace sage
         ~MovingToLocationState() override = default;
 
         MovingToLocationState(
-            entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -174,7 +174,7 @@ namespace sage
             auto& playerDiag = registry->get<DialogComponent>(self);
             playerDiag.dialogTarget = target;
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
-            gameData->actorMovementSystem->PathfindToLocation(self, pos);
+            sys->actorMovementSystem->PathfindToLocation(self, pos);
 
             auto& state = registry->get<PlayerState>(self);
             auto cnx = moveable.onDestinationReached.Subscribe(
@@ -195,8 +195,8 @@ namespace sage
         ~MovingToTalkToNPCState() override = default;
 
         MovingToTalkToNPCState(
-            entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -238,8 +238,8 @@ namespace sage
         ~DestinationUnreachableState() override = default;
 
         DestinationUnreachableState(
-            entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -268,7 +268,7 @@ namespace sage
             const float angle = atan2f(direction.x, direction.z);
             actorTrans.SetRotation({actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z});
 
-            gameData->dialogSystem->StartConversation(npcTrans, playerDiag.dialogTarget);
+            sys->dialogSystem->StartConversation(npcTrans, playerDiag.dialogTarget);
         }
 
         void OnStateExit(entt::entity self) override
@@ -285,8 +285,8 @@ namespace sage
 
         ~InDialogState() override = default;
 
-        InDialogState(entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+        InDialogState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -338,7 +338,7 @@ namespace sage
 
             Vector3 targetPos = Vector3Subtract(enemyPos, direction);
 
-            gameData->actorMovementSystem->PathfindToLocation(self, targetPos);
+            sys->actorMovementSystem->PathfindToLocation(self, targetPos);
         }
 
         void OnStateExit(entt::entity self) override
@@ -348,8 +348,8 @@ namespace sage
         ~MovingToAttackEnemyState() override = default;
 
         MovingToAttackEnemyState(
-            entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -389,7 +389,7 @@ namespace sage
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
-            auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).startCast.Publish(abilityEntity);
 
             auto& combatable = registry->get<CombatableActor>(entity);
@@ -412,13 +412,13 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(entity);
             combatable.onTargetDeathCnx->UnSubscribe();
-            auto abilityEntity = gameData->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
         }
 
         ~CombatState() override = default;
-        CombatState(entt::registry* _registry, GameData* _gameData, PlayerStateController* _stateController)
-            : StateMachine(_registry, _gameData), stateController(_stateController)
+        CombatState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -472,20 +472,20 @@ namespace sage
         controllable.onFloorClickCnx->UnSubscribe();
     }
 
-    PlayerStateController::PlayerStateController(entt::registry* _registry, GameData* _gameData)
+    PlayerStateController::PlayerStateController(entt::registry* _registry, Systems* _sys)
         : StateMachineController(_registry)
     {
-        states[PlayerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _gameData, this);
+        states[PlayerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _sys, this);
         states[PlayerStateEnum::MovingToAttackEnemy] =
-            std::make_unique<MovingToAttackEnemyState>(_registry, _gameData, this);
-        states[PlayerStateEnum::Combat] = std::make_unique<CombatState>(_registry, _gameData, this);
+            std::make_unique<MovingToAttackEnemyState>(_registry, _sys, this);
+        states[PlayerStateEnum::Combat] = std::make_unique<CombatState>(_registry, _sys, this);
         states[PlayerStateEnum::MovingToTalkToNPC] =
-            std::make_unique<MovingToTalkToNPCState>(_registry, _gameData, this);
-        states[PlayerStateEnum::InDialog] = std::make_unique<InDialogState>(_registry, _gameData, this);
+            std::make_unique<MovingToTalkToNPCState>(_registry, _sys, this);
+        states[PlayerStateEnum::InDialog] = std::make_unique<InDialogState>(_registry, _sys, this);
         states[PlayerStateEnum::MovingToLocation] =
-            std::make_unique<MovingToLocationState>(_registry, _gameData, this);
+            std::make_unique<MovingToLocationState>(_registry, _sys, this);
         states[PlayerStateEnum::DestinationUnreachable] =
-            std::make_unique<DestinationUnreachableState>(_registry, _gameData, this);
+            std::make_unique<DestinationUnreachableState>(_registry, _sys, this);
 
         registry->on_construct<PlayerState>().connect<&PlayerStateController::onComponentAdded>(this);
         registry->on_destroy<PlayerState>().connect<&PlayerStateController::onComponentRemoved>(this);
