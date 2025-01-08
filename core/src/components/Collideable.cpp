@@ -12,6 +12,7 @@ namespace sage
 {
     void Collideable::OnTransformUpdate(entt::entity self)
     {
+        assert(registry);
         auto& trans = registry->get<sgTransform>(self);
         Matrix mat = trans.GetMatrixNoRot(); // AABB, so no rotation
         SetWorldBoundingBox(mat);

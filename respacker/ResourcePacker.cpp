@@ -191,23 +191,14 @@ namespace sage
         spawner.pos = {scaledPosition.x, scaledPosition.y, scaledPosition.z};
         spawner.rot = {rotx * RAD2DEG, roty * RAD2DEG, rotz * RAD2DEG};
 
-        if (spawnerType == "ENEMY")
-        {
-            spawner.spawnerType = SpawnerType::ENEMY;
-        }
-        else if (spawnerType == "PLAYER")
-        {
-            spawner.spawnerType = SpawnerType::PLAYER;
-        }
-        else if (spawnerType == "NPC")
-        {
-            spawner.spawnerType = SpawnerType::NPC;
-        }
-        else if (spawnerType == "DIALOG_CUTSCENE")
-        {
-            spawner.spawnerType = SpawnerType::DIALOG_CUTSCENE;
-        }
-        spawner.spawnerName = spawnerName;
+        std::unordered_map<std::string, SpawnerType> spawnerMap{
+            {"ENEMY", SpawnerType::ENEMY},
+            {"PLAYER", SpawnerType::PLAYER},
+            {"NPC", SpawnerType::NPC},
+            {"DIALOG_CUTSCENE", SpawnerType::DIALOG_CUTSCENE}};
+
+        spawner.type = spawnerMap.at(spawnerType);
+        spawner.name = spawnerName;
     }
 
     entt::entity HandleMesh(entt::registry* registry, std::ifstream& infile, const fs::path& meshPath, int& slices)
@@ -244,13 +235,16 @@ namespace sage
             MatrixMultiply(MatrixMultiply(MatrixRotateZ(rotz), MatrixRotateY(roty)), MatrixRotateX(rotx));
         Matrix transMat = MatrixTranslate(scaledPosition.x, scaledPosition.y, scaledPosition.z);
         Matrix scaleMat = MatrixScale(scalex * WORLD_SCALE, scaley * WORLD_SCALE, scalez * WORLD_SCALE);
-
         Matrix mat = MatrixMultiply(MatrixMultiply(scaleMat, rotMat), transMat);
 
-        auto& renderable = registry->emplace<Renderable>(entity, std::move(model), mat);
+        auto& renderable =
+            registry->emplace<Renderable>(entity, std::move(model), MatrixMultiply(scaleMat, rotMat));
         renderable.SetName(objectName);
 
+        // We set the transform component's position instead of setting the model's transform.
+        // By doing this, we can track where certain (static) objects are.
         auto& trans = registry->emplace<sgTransform>(entity, entity);
+        trans.SetPosition(scaledPosition);
 
         auto& collideable = registry->emplace<Collideable>(
             entity, renderable.GetModel()->CalcLocalBoundingBox(), trans.GetMatrix());

@@ -19,6 +19,7 @@
 #include "cereal/archives/xml.hpp"
 #include "cereal/cereal.hpp"
 #include "cereal/types/string.hpp"
+#include "components/DialogComponent.hpp"
 #include "components/DoorBehaviorComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "entt/core/hashed_string.hpp"
@@ -178,7 +179,7 @@ namespace sage::serializer
                 }
                 if (renderable.GetName().find("_INTERACTABLE_") != std::string::npos)
                 {
-                    GameObjectFactory::makeInteractable(destination, entt);
+                    destination->emplace<DialogComponent>(entt);
                 }
             }
         }

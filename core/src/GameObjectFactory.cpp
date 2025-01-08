@@ -83,30 +83,6 @@ namespace sage
         transform.SetPosition({position.x, height, position.z});
     }
 
-    void GameObjectFactory::makeInteractable(entt::registry* registry, entt::entity id)
-    {
-        registry->emplace<DialogComponent>(id);
-        auto& collideable = registry->get<Collideable>(id);
-        collideable.collisionLayer = CollisionLayer::INTERACTABLE;
-
-        // By the default, for static geometry (that loaded from the blender file) all the positions are set via
-        // their transform matrix. This means the sgTransform is set to world origin, which causes an issue with
-        // dialog conversation pos (which uses the dynamic sgTransform).
-        // I could potentially change how the models are loaded to make sgTransform position the same as the
-        // matrix's translation?
-        auto rlModel = registry->get<Renderable>(id).GetModel();
-        auto rayTrans = rlModel->GetTransform();
-        Vector3 translation{};
-        Quaternion rotation{};
-        Vector3 scale{};
-        MatrixDecompose(rayTrans, &translation, &rotation, &scale);
-        auto mat =
-            MatrixMultiply(MatrixScale(scale.x, scale.y, scale.z), MatrixRotateZYX(QuaternionToEuler(rotation)));
-        rlModel->SetTransform(mat);
-        auto& trans = registry->get<sgTransform>(id);
-        trans.SetPosition(translation);
-    }
-
     entt::entity GameObjectFactory::createDialogCutscene(
         entt::registry* registry, Vector3 position, const char* name)
     {

@@ -141,6 +141,19 @@ namespace sage
         m_scale = {scale, scale, scale};
     }
 
+    void sgTransform::SetViaMatrix(Matrix mat)
+    {
+        Matrix newMat{};
+        Vector3 trans{};
+        Quaternion rotQ{};
+        Vector3 scale{};
+        MatrixDecompose(newMat, &trans, &rotQ, &scale);
+        Vector3 rot = QuaternionToEuler(rotQ);
+        SetScale(scale);
+        SetRotation(rot);
+        SetPosition(trans);
+    }
+
     sgTransform* sgTransform::GetParent()
     {
         return m_parent;

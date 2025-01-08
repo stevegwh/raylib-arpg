@@ -4,7 +4,7 @@
 <meta>
 	owner: Cell_Guard
 	speaker_name: Cell Guard
-	conversation_pos: 5.0 1.0 5.0
+	conversation_pos: 6.0 1.0 10.0
 	camera_pos: 5.0 10.0 18.0
 </meta>
 

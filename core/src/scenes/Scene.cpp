@@ -60,29 +60,28 @@ namespace sage
         for (auto& entity : spawnerView)
         {
             const auto& spawner = registry->get<Spawner>(entity);
-            if (spawner.spawnerType == SpawnerType::PLAYER)
+            if (spawner.type == SpawnerType::PLAYER)
             {
                 firstPlayer =
                     GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, spawner.rot, "Player");
             }
-            else if (spawner.spawnerType == SpawnerType::ENEMY)
+            else if (spawner.type == SpawnerType::ENEMY)
             {
                 GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, spawner.rot, "Goblin");
             }
-            else if (spawner.spawnerType == SpawnerType::NPC)
+            else if (spawner.type == SpawnerType::NPC)
             {
-                auto npc = data->npcManager->CreateNPC(spawner.spawnerName, spawner.pos, spawner.rot);
+                auto npc = data->npcManager->CreateNPC(spawner.name, spawner.pos, spawner.rot);
                 assert(npc != entt::null);
             }
-            else if (spawner.spawnerType == SpawnerType::DIALOG_CUTSCENE)
+            else if (spawner.type == SpawnerType::DIALOG_CUTSCENE)
             {
-                GameObjectFactory::createDialogCutscene(registry, spawner.pos, spawner.spawnerName.c_str());
+                GameObjectFactory::createDialogCutscene(registry, spawner.pos, spawner.name.c_str());
             }
         }
         registry->erase<Spawner>(spawnerView.begin(), spawnerView.end());
         data->controllableActorSystem->SetSelectedActor(firstPlayer);
     }
-
 
     void Scene::initAssets() const
     {
@@ -102,7 +101,7 @@ namespace sage
             uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         }
 
-        loadSpawners();        
+        loadSpawners();
 
         // Requires renderables being loaded first
         data->contextualDialogSystem->InitContextualDialogsFromDirectory();

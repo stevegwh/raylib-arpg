@@ -1,4 +1,4 @@
 distance: 40
-speaker: Arissa
+speaker: Player
 ---
-What in the world is this?
+What in the world is this place?

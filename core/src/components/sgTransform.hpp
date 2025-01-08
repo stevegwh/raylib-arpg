@@ -61,6 +61,7 @@ namespace sage
         void SetRotation(const Vector3& rotation);
         void SetScale(const Vector3& scale);
         void SetScale(float scale);
+        void SetViaMatrix(Matrix mat);
 
         void SetParent(sgTransform* newParent);
         void AddChild(sgTransform* newChild);

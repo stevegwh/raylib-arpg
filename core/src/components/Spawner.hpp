@@ -20,14 +20,14 @@ namespace sage
     struct Spawner
     {
         // Can add a name for named/important mobs
-        SpawnerType spawnerType;
-        std::string spawnerName;
+        std::string name;
+        SpawnerType type;
         Vector3 pos;
         Vector3 rot;
         template <class Archive>
         void serialize(Archive& archive)
         {
-            archive(spawnerType, spawnerName, pos, rot);
+            archive(type, name, pos, rot);
         }
     };
 } // namespace sage

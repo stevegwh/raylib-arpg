@@ -108,7 +108,7 @@ namespace sage
     void Application::Update()
     {
         init();
-        scene->Init();
+        // scene->Init();
         while (!exitWindow) // Detect window close button or ESC key
         {
 

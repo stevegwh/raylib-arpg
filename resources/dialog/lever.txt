@@ -4,8 +4,8 @@
 <meta>
 	owner: _INTERACTABLE_QUEST_LEVER
 	speaker_name: Narrator
-	conversation_pos: 10.0 1.0 10.0
-	camera_pos: 5.0 10.0 18.0
+	conversation_pos: 10.0 1.0 6.0
+	camera_pos: -22.0 54.0 44.0
 </meta>
 
 <variables>

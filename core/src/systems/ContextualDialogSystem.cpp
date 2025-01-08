@@ -68,11 +68,7 @@ namespace sage
                         else if (buff.find("speaker: ") != std::string::npos)
                         {
                             auto sub = buff.substr(std::string("speaker: ").size());
-                            entt::entity speaker = gameData->renderSystem->FindRenderableByMeshName(sub);
-                            if (speaker == entt::null)
-                            {
-                                speaker = gameData->renderSystem->FindRenderableByName(sub);
-                            }
+                            entt::entity speaker = gameData->renderSystem->FindRenderable(sub);
                             assert(trigger.speaker != entt::null);
                             trigger.speaker = speaker;
                         }
@@ -133,9 +129,14 @@ namespace sage
 
             const auto playerPos =
                 registry->get<sgTransform>(gameData->controllableActorSystem->GetSelectedActor()).GetWorldPos();
-            const auto& trans = registry->get<sgTransform>(entity);
 
-            if (trigger.CanTrigger() && Vector3Distance(trans.GetWorldPos(), playerPos) < trigger.distance)
+            // As the contextual object could be a static mesh, using its collideable (which goes off the model's
+            // vertex data) is a safer idea.
+            const auto& col = registry->get<Collideable>(entity);
+            auto center =
+                Vector3MultiplyByValue(Vector3Add(col.worldBoundingBox.max, col.worldBoundingBox.min), 0.5f);
+
+            if (trigger.CanTrigger() && Vector3Distance(center, playerPos) < trigger.distance)
             {
                 auto& overhead = registry->emplace<OverheadDialogComponent>(speaker);
                 const auto contextualDialog = dialogTextMap.at(entity);
