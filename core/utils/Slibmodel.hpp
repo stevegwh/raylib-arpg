@@ -30,9 +30,9 @@
  *     3. This notice may not be removed or altered from any source distribution.
  *
  **********************************************************************************************/
-
+#include <string>
+#include <vector>
 namespace sage
 {
-    struct ModelInfo;
-    ModelInfo sgLoadModel(const char* fileName);
+    std::vector<std::string> GetMaterialNames(const char* fileName);
 } // namespace sage

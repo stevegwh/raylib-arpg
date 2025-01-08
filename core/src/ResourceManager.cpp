@@ -301,18 +301,6 @@ namespace sage
         return nonModelTextures[key];
     }
 
-    Texture ResourceManager::TextureLoad(const std::string& fileName, const std::string& path)
-    {
-        // TODO: This is wrong but left here as I can't figure out how OBJs work without this.
-        // LoadOBJ doesn't work with the above 'TextureLoad'
-        if (!images.contains(path))
-        {
-            images.emplace(path, LoadImage(path.c_str()));
-        }
-        nonModelTextures[path] = LoadTextureFromImage(images[path]);
-        return nonModelTextures[path];
-    }
-
     Texture ResourceManager::TextureLoadFromImage(const std::string& name, Image image)
     {
         if (!images.contains(name))
@@ -391,24 +379,25 @@ namespace sage
         {
             assert(FileExists(pathDealiased.c_str()));
 
-            auto modelInfo = sgLoadModel(pathDealiased.c_str());
+            auto materialNames = GetMaterialNames(pathDealiased.c_str());
+            Model model = LoadModel(pathDealiased.c_str());
 
-            for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
+            for (unsigned int i = 0; i < materialNames.size(); ++i)
             {
-                const auto& mat = modelInfo.materialNames[i];
+                const auto& mat = materialNames[i];
 
                 if (!materialMap.contains(mat))
                 {
-                    materialMap.emplace(mat, modelInfo.model.materials[i]);
+                    materialMap[mat] = model.materials[i];
                 }
                 else
                 {
-                    UnloadMaterial(modelInfo.model.materials[i]);
+                    UnloadMaterial(model.materials[i]);
                 }
-                modelInfo.model.materials[i] = materialMap.at(mat);
+                model.materials[i] = materialMap.at(mat);
             }
 
-            modelCopies.emplace(key, std::move(modelInfo));
+            modelCopies.emplace(key, std::move(ModelInfo{model, materialNames}));
         }
     }
 
