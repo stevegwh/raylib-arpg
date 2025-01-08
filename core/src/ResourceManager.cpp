@@ -297,23 +297,20 @@ namespace sage
                 images.emplace(key, LoadImage(pathDealiased.c_str()));
             }
             nonModelTextures[key] = LoadTextureFromImage(images[key]);
-            assert(nonModelTextures[key].id > 1);
         }
         return nonModelTextures[key];
     }
 
     Texture ResourceManager::TextureLoad(const std::string& fileName, const std::string& path)
     {
-        // I assume the material name is used later
-        if (!nonModelTextures.contains(fileName))
+        // TODO: This is wrong but left here as I can't figure out how OBJs work without this.
+        // LoadOBJ doesn't work with the above 'TextureLoad'
+        if (!images.contains(path))
         {
-            if (!images.contains(fileName))
-            {
-                images.emplace(fileName, LoadImage(path.c_str()));
-            }
-            nonModelTextures[path] = LoadTextureFromImage(images[fileName]); // uses path?
+            images.emplace(path, LoadImage(path.c_str()));
         }
-        return nonModelTextures[path]; // uses path?
+        nonModelTextures[path] = LoadTextureFromImage(images[path]);
+        return nonModelTextures[path];
     }
 
     Texture ResourceManager::TextureLoadFromImage(const std::string& name, Image image)
