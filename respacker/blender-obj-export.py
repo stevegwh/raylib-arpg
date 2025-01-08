@@ -61,6 +61,8 @@ def handle_spawner(obj):
             spawner_type = "ENEMY"
         elif "Player" in obj.name:
             spawner_type = "PLAYER"
+        elif "Dialog_Cutscene" in obj.name:
+            spawner_type = "DIALOG_CUTSCENE"
         elif "NPC" in obj.name:
             spawner_type = "NPC"
         else:
@@ -108,31 +110,7 @@ def handle_light(obj):
         print(f"Exported light: {light_file}")
 
 
-def handle_quest_item(obj):
-    print(f"\nDEBUG INFO for object: {obj.name}")
-
-    # Check if we have mesh data and try to get the property
-    quest_id = "ERROR"
-    quest_item_name = "ERROR"
-    if "quest_id" in obj:
-        try:
-            quest_id = obj["quest_id"]
-            print(f"Found quest_id in mesh data: {obj.name}")
-        except:
-            print("Failed to access quest_id")
-    else:
-        print("No quest_id property found")
-
-    if "quest_item_name" in obj:
-        try:
-            quest_item_name = obj["quest_item_name"]
-            print(f"Found quest_item_name in mesh data: {obj.name}")
-        except:
-            print("Failed to access quest_id")
-    else:
-        print("No quest_item_name property found")
-
-    # Export mesh
+def handle_item(obj):
     if obj.data.name not in unique_meshes:
         original_transform = obj.matrix_world.copy()
         obj.matrix_world.identity()
@@ -154,16 +132,14 @@ def handle_quest_item(obj):
 
     transform_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
     with open(transform_file, 'w') as f:
-        f.write(f"type: quest_item\n")
+        f.write(f"type: item\n")
         f.write(f"name: {obj.name}\n")
         f.write(f"mesh: {unique_meshes[obj.data.name]}.obj\n")
         f.write(f"location: {location.x:.6f} {location.z:.6f} {-location.y:.6f}\n")
         f.write(f"rotation: {rotation.x:.6f} {rotation.z:.6f} {rotation.y:.6f}\n")
         f.write(f"scale: {scale.x:.6f} {scale.z:.6f} {scale.y:.6f}\n")
-        f.write(f"quest_id: {quest_id}\n")
-        f.write(f"quest_item_name: {quest_item_name}\n")
 
-    print(f"Exported quest item: {transform_file}")
+    print("Exported transform:", transform_file)
 
 
 def handle_mesh(obj):
@@ -218,8 +194,8 @@ for obj in selection:
 
     if "Spawner" in obj.name:
         handle_spawner(obj)
-    elif "QUESTITEM" in obj.name:
-        handle_quest_item(obj)
+    elif "_ITEM_" in obj.name:
+        handle_item(obj)
     elif obj.type == 'LIGHT':
         handle_light(obj)
     else:
