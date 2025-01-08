@@ -7,6 +7,7 @@
 #include "cereal/cereal.hpp"
 #include "raylib.h"
 #include "raymath.h"
+#include "Serializer.hpp"
 
 namespace sage
 {
@@ -111,6 +112,11 @@ namespace sage
             screenWidthUser = SCREEN_WIDTH;
             screenHeightUser = SCREEN_HEIGHT;
             ResetToUserDefined();
+        }
+
+        Settings()
+        {
+            serializer::DeserializeJsonFile<Settings>("resources/settings.json", *this);
         }
 
         template <class Archive>

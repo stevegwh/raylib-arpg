@@ -19,20 +19,12 @@ namespace sage
 
     void Application::init()
     {
-        Settings _settings;
-        serializer::DeserializeJsonFile<Settings>("resources/settings.json", _settings);
-        settings = std::make_unique<Settings>(_settings);
-
-        KeyMapping _keyMapping;
-        serializer::DeserializeJsonFile<KeyMapping>("resources/keybinding.json", _keyMapping);
-        keyMapping = std::make_unique<KeyMapping>(_keyMapping);
-
         SetConfigFlags(FLAG_MSAA_4X_HINT);
         InitWindow(
-            static_cast<int>(_settings.GetScreenSize().x),
-            static_cast<int>(_settings.GetScreenSize().y),
+            static_cast<int>(settings->GetScreenSize().x),
+            static_cast<int>(settings->GetScreenSize().y),
             "Baldur's Raylib");
-        _settings.UpdateViewport();
+        settings->UpdateViewport();
 
         audioManager = std::make_unique<AudioManager>();
 
@@ -183,7 +175,9 @@ namespace sage
 
     Application::Application()
         : registry(std::make_unique<entt::registry>()),
-          cleanupSystem(std::make_unique<CleanupSystem>(registry.get()))
+          cleanupSystem(std::make_unique<CleanupSystem>(registry.get())),
+          settings(std::make_unique<Settings>()),
+          keyMapping(std::make_unique<KeyMapping>())
     {
     }
 } // namespace sage

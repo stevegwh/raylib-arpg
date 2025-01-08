@@ -205,20 +205,26 @@ namespace sage
 
     Music ResourceManager::MusicLoad(const std::string& path)
     {
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        auto pathDealiased =
+            AssetManager::GetInstance().TryGetAssetPath(path); // Path could be an asset alias (e.g., MDL_GOBLIN)
+        auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
+        // from QUEST_BONE.obj)
         if (!music.contains(key))
         {
-            music[key] = LoadMusicStream(path.c_str());
+            music[key] = LoadMusicStream(pathDealiased.c_str());
         }
         return music[key];
     }
 
     Sound ResourceManager::SFXLoad(const std::string& path)
     {
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        auto pathDealiased =
+            AssetManager::GetInstance().TryGetAssetPath(path); // Path could be an asset alias (e.g., MDL_GOBLIN)
+        auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
+        // from QUEST_BONE.obj)
         if (!sfx.contains(key))
         {
-            sfx[key] = LoadSound(path.c_str());
+            sfx[key] = LoadSound(pathDealiased.c_str());
         }
         return sfx[key];
     }
@@ -280,26 +286,19 @@ namespace sage
 
     Texture ResourceManager::TextureLoad(const std::string& path)
     {
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        auto pathDealiased =
+            AssetManager::GetInstance().TryGetAssetPath(path); // Path could be an asset alias (e.g., MDL_GOBLIN)
+        auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
+        // from QUEST_BONE.obj)
         if (!nonModelTextures.contains(key))
         {
-            assert(images.contains(key));
+            if (!images.contains(key))
+            {
+                images.emplace(key, LoadImage(pathDealiased.c_str()));
+            }
             nonModelTextures[key] = LoadTextureFromImage(images[key]);
         }
         return nonModelTextures[key];
-    }
-
-    Texture ResourceManager::TextureLoad(const std::string& fileName, const std::string& path)
-    {
-        if (!nonModelTextures.contains(fileName))
-        {
-            if (!images.contains(fileName))
-            {
-                images.emplace(fileName, LoadImage(path.c_str()));
-            }
-            nonModelTextures[path] = LoadTextureFromImage(images[fileName]);
-        }
-        return nonModelTextures[path];
     }
 
     Texture ResourceManager::TextureLoadFromImage(const std::string& name, Image image)
@@ -322,19 +321,17 @@ namespace sage
         return fonts[path];
     }
 
-    void ResourceManager::ImageUnload(const std::string& id)
+    void ResourceManager::ImageUnload(const std::string& key)
     {
-        auto path = AssetManager::GetInstance().TryGetAssetPath(id);
-        if (images.contains(path))
+        if (images.contains(key))
         {
-            UnloadImage(images.at(path));
-            images.erase(path);
+            UnloadImage(images.at(key));
+            images.erase(key);
         }
     }
 
-    ImageSafe ResourceManager::GetImage(const std::string& path)
+    ImageSafe ResourceManager::GetImage(const std::string& key)
     {
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
         assert(images.contains(key));
         return ImageSafe(images[key], false);
     }
@@ -350,18 +347,21 @@ namespace sage
 
     void ResourceManager::ImageLoadFromFile(const std::string& path)
     {
-        // TODO: Do we not care about aliases for images?
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
-        assert(FileExists(key.c_str()));
+        auto pathDealiased =
+            AssetManager::GetInstance().TryGetAssetPath(path); // Path could be an asset alias (e.g., MDL_GOBLIN)
+        auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
+        // from QUEST_BONE.obj)
+        assert(FileExists(pathDealiased.c_str()));
         if (!images.contains(key))
         {
-            images[key] = LoadImage(key.c_str());
+            images[key] = LoadImage(pathDealiased.c_str());
         }
     }
 
     void ResourceManager::ImageLoadFromFile(const std::string& path, Image image)
     {
-        auto key = AssetManager::GetInstance().TryGetAssetPath(path);
+        auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
+        // from QUEST_BONE.obj)
         if (!images.contains(key))
         {
             images[key] = image;

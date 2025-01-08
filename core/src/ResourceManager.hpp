@@ -75,11 +75,10 @@ namespace sage
         Sound SFXLoad(const std::string& path);
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
-        Texture TextureLoad(const std::string& fileName, const std::string& path);
         Texture TextureLoadFromImage(const std::string& name, Image image);
         Font FontLoad(const std::string& path);
-        void ImageUnload(const std::string& id);
-        ImageSafe GetImage(const std::string& path);
+        void ImageUnload(const std::string& key);
+        ImageSafe GetImage(const std::string& key);
         void FontLoadFromFile(const std::string& path);
         void ImageLoadFromFile(const std::string& path);
         void ImageLoadFromFile(const std::string& path, Image image);

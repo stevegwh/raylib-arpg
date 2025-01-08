@@ -15,9 +15,9 @@ int main(int argc, char* argv[])
     sage::CollisionSystem collisionSystem(&registry);
     sage::NavigationGridSystem navigationGridSystem(&registry, &collisionSystem);
 
-    // sage::ResourcePacker::PackAssets(&registry, "resources/assets.bin");
-    sage::ResourcePacker::ConstructMap(
-        &registry, &navigationGridSystem, "resources/maps/dungeon-map", "resources/dungeon-map.bin");
+    sage::ResourcePacker::PackAssets(&registry, "resources/assets.bin");
+    // sage::ResourcePacker::ConstructMap(
+    //     &registry, &navigationGridSystem, "resources/maps/dungeon-map", "resources/dungeon-map.bin");
 
     CloseWindow();
 
