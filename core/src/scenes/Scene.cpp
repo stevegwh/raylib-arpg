@@ -1,54 +1,31 @@
 #include "Scene.hpp"
 
+#include "GameData.hpp"
+#include "system_includes.hpp"
+
 // NB: We have to include all the headers required to build GameData
-#include "AbilityFactory.hpp"
 #include "AudioManager.hpp"
 #include "Camera.hpp"
-#include "components/ContextualDialogTriggerComponent.hpp"
-#include "components/EquipmentComponent.hpp"
-#include "components/OverheadDialogComponent.hpp"
-#include "components/PartyMemberComponent.hpp"
+
 #include "components/Renderable.hpp"
 #include "components/Spawner.hpp"
 #include "components/UberShaderComponent.hpp"
+
 #include "Cursor.hpp"
+
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
 #include "FullscreenTextOverlayFactory.hpp"
-#include "GameData.hpp"
+
 #include "GameObjectFactory.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
-#include "ItemFactory.hpp"
-#include "LightManager.hpp"
-#include "NpcManager.hpp"
-#include "QuestManager.hpp"
 #include "Serializer.hpp"
-#include "systems/ActorMovementSystem.hpp"
-#include "systems/AnimationSystem.hpp"
-#include "systems/CollisionSystem.hpp"
-#include "systems/CombatSystem.hpp"
-#include "systems/ContextualDialogSystem.hpp"
-#include "systems/ControllableActorSystem.hpp"
-#include "systems/DialogSystem.hpp"
-#include "systems/DoorSystem.hpp"
-#include "systems/EquipmentSystem.hpp"
-#include "systems/HealthBarSystem.hpp"
-#include "systems/InventorySystem.hpp"
-#include "systems/NavigationGridSystem.hpp"
-#include "systems/PartySystem.hpp"
-#include "systems/PlayerAbilitySystem.hpp"
-#include "systems/RenderSystem.hpp"
-#include "systems/SpatialAudioSystem.hpp"
-#include "systems/states/StateMachines.hpp"
-#include "systems/TimerSystem.hpp"
-#include "systems/UberShaderSystem.hpp"
+
 #include "UserInput.hpp"
 
 #include "abilities/vfx/SpiralFountainVFX.hpp"
 #include "components/SpatialAudioComponent.hpp"
-
-#include <optional>
 
 namespace sage
 {

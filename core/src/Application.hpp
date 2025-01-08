@@ -4,19 +4,16 @@
 
 #pragma once
 
-// Misc
-#include "KeyMapping.hpp"
-#include "scenes/Scene.hpp"
-#include "Settings.hpp"
-
 #include "entt/entt.hpp"
-
-#include <stack>
+#include "raylib.h"
 
 namespace sage
 {
     class AudioManager;
     class CleanupSystem;
+    class Scene;
+    struct Settings;
+    struct KeyMapping;
 
     class Application
     {

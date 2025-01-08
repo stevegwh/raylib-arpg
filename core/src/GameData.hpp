@@ -10,44 +10,46 @@
 
 namespace sage
 {
+    // Core structs/classes
     struct Settings;
     struct KeyMapping;
     class AudioManager;
 
-    class Cursor;
+    // Input/UI group
     class UserInput;
+    class Cursor;
     class Camera;
-    class GameUIEngine;
     class LightManager;
-    class ItemFactory;
-    class EquipmentSystem;
+    class GameUIEngine;
+
+    // Systems group
     class RenderSystem;
     class CollisionSystem;
     class NavigationGridSystem;
     class ActorMovementSystem;
     class ControllableActorSystem;
-    class InventorySystem;
     class AnimationSystem;
     class DialogSystem;
+    class DialogFactory;
+    class NPCManager;
     class HealthBarSystem;
     class StateMachines;
     class AbilityFactory;
+    class ItemFactory;
     class PlayerAbilitySystem;
     class CombatSystem;
     class TimerSystem;
+    class InventorySystem;
     class PartySystem;
+    class EquipmentSystem;
     class UberShaderSystem;
     class CursorClickIndicator;
     class QuestManager;
-    class NPCManager;
-    class DialogFactory;
     class DoorSystem;
     class FullscreenTextOverlayFactory;
     class ContextualDialogSystem;
     class SpatialAudioSystem;
 
-    // TODO: This should be owned by application, not "scene", and shouldn't be destroyed often.
-    // TODO: Also, should rename to "GameSystems"
     class GameData
     {
       public:
