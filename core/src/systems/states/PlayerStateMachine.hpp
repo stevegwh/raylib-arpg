@@ -2,8 +2,8 @@
 #pragma once
 
 #include "components/States.hpp"
-#include "systems/states/StateMachine.hpp"
 #include "entt/entt.hpp"
+#include "systems/states/StateMachine.hpp"
 
 namespace sage
 {
@@ -21,6 +21,10 @@ namespace sage
 
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
+
+        void onFloorClick(const entt::entity self, entt::entity);
+        void onNPCLeftClick(entt::entity self, entt::entity target);
+        void onEnemyLeftClick(entt::entity self, entt::entity target);
 
       public:
         void Update();

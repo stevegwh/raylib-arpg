@@ -14,8 +14,6 @@
 
 namespace sage
 {
-    class TextureTerrainOverlay;
-
     class ControllableActor
     {
 

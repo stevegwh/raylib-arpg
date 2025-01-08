@@ -29,41 +29,6 @@ namespace sage
     {
         PlayerStateController* stateController;
 
-        // If all below are persistent connections, maybe it would be better to move them to
-        // the PlayerStateController? Having them here implies they are part of the state and will
-        // disconnect on state change.
-
-        void onFloorClick(const entt::entity self, entt::entity x) const
-        {
-            auto& state = registry->get<PlayerState>(self);
-            // We're not allowed to change to the same state, so change to default and then back again
-            if (state.GetCurrentState() == PlayerStateEnum::MovingToLocation)
-            {
-                stateController->ChangeState(self, PlayerStateEnum::Default);
-            }
-            stateController->ChangeState(self, PlayerStateEnum::MovingToLocation);
-        }
-
-        void onNPCLeftClick(entt::entity self, entt::entity target) const
-        {
-            if (!registry->any_of<DialogComponent>(target)) return;
-
-            if (registry->any_of<MoveableActor>(target)) // Not all NPCs move
-            {
-                auto& moveable = registry->get<MoveableActor>(self);
-                moveable.followTarget.emplace(registry, self, target);
-            }
-            stateController->ChangeState<MovingToTalkToNPCState, entt::entity>(
-                self, PlayerStateEnum::MovingToTalkToNPC, target);
-        }
-
-        void onEnemyLeftClick(entt::entity self, entt::entity target) const
-        {
-            auto& combatable = registry->get<CombatableActor>(self);
-            combatable.target = target;
-            stateController->ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
-        }
-
       public:
         void Update(entt::entity entity) override
         {
@@ -85,8 +50,7 @@ namespace sage
 
         ~DefaultState() override = default;
 
-        DefaultState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        DefaultState(entt::registry* _registry, Systems* _sys) : StateMachine(_registry, _sys)
         {
         }
 
@@ -137,8 +101,7 @@ namespace sage
 
         ~MovingToLocationState() override = default;
 
-        MovingToLocationState(
-            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+        MovingToLocationState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
             : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
@@ -194,8 +157,7 @@ namespace sage
 
         ~MovingToTalkToNPCState() override = default;
 
-        MovingToTalkToNPCState(
-            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+        MovingToTalkToNPCState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
             : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
@@ -347,8 +309,7 @@ namespace sage
 
         ~MovingToAttackEnemyState() override = default;
 
-        MovingToAttackEnemyState(
-            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+        MovingToAttackEnemyState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
             : StateMachine(_registry, _sys), stateController(_stateController)
         {
         }
@@ -425,6 +386,36 @@ namespace sage
 
     // ----------------------------
 
+    void PlayerStateController::onFloorClick(const entt::entity self, entt::entity)
+    {
+        auto& state = registry->get<PlayerState>(self);
+        // We're not allowed to change to the same state, so change to default and then back again
+        if (state.GetCurrentState() == PlayerStateEnum::MovingToLocation)
+        {
+            ChangeState(self, PlayerStateEnum::Default);
+        }
+        ChangeState(self, PlayerStateEnum::MovingToLocation);
+    }
+
+    void PlayerStateController::onNPCLeftClick(entt::entity self, entt::entity target)
+    {
+        if (!registry->any_of<DialogComponent>(target)) return;
+
+        if (registry->any_of<MoveableActor>(target)) // Not all NPCs move
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.followTarget.emplace(registry, self, target);
+        }
+        ChangeState<MovingToTalkToNPCState, entt::entity>(self, PlayerStateEnum::MovingToTalkToNPC, target);
+    }
+
+    void PlayerStateController::onEnemyLeftClick(entt::entity self, entt::entity target)
+    {
+        auto& combatable = registry->get<CombatableActor>(self);
+        combatable.target = target;
+        ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
+    }
+
     void PlayerStateController::Update()
     {
         for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
@@ -449,18 +440,12 @@ namespace sage
     {
         // Cursor and controllable events are connected in ControllableActorSystem
         auto& controllable = registry->get<ControllableActor>(entity);
-        controllable.onEnemyLeftClickCnx =
-            controllable.onEnemyLeftClick.Subscribe([this](entt::entity self, entt::entity target) {
-                GetSystem<DefaultState>(PlayerStateEnum::Default)->onEnemyLeftClick(self, target);
-            });
-        controllable.onNPCLeftClickCnx =
-            controllable.onNPCLeftClick.Subscribe([this](entt::entity self, entt::entity target) {
-                GetSystem<DefaultState>(PlayerStateEnum::Default)->onNPCLeftClick(self, target);
-            });
-        controllable.onFloorClickCnx =
-            controllable.onFloorClick.Subscribe([this](entt::entity self, entt::entity target) {
-                GetSystem<DefaultState>(PlayerStateEnum::Default)->onFloorClick(self, target);
-            });
+        controllable.onEnemyLeftClickCnx = controllable.onEnemyLeftClick.Subscribe(
+            [this](entt::entity self, entt::entity target) { onEnemyLeftClick(self, target); });
+        controllable.onNPCLeftClickCnx = controllable.onNPCLeftClick.Subscribe(
+            [this](entt::entity self, entt::entity target) { onNPCLeftClick(self, target); });
+        controllable.onFloorClickCnx = controllable.onFloorClick.Subscribe(
+            [this](entt::entity self, entt::entity target) { onFloorClick(self, target); });
         // ----------------------------
     }
 
@@ -475,15 +460,14 @@ namespace sage
     PlayerStateController::PlayerStateController(entt::registry* _registry, Systems* _sys)
         : StateMachineController(_registry)
     {
-        states[PlayerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _sys, this);
+        states[PlayerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _sys);
         states[PlayerStateEnum::MovingToAttackEnemy] =
             std::make_unique<MovingToAttackEnemyState>(_registry, _sys, this);
         states[PlayerStateEnum::Combat] = std::make_unique<CombatState>(_registry, _sys, this);
         states[PlayerStateEnum::MovingToTalkToNPC] =
             std::make_unique<MovingToTalkToNPCState>(_registry, _sys, this);
         states[PlayerStateEnum::InDialog] = std::make_unique<InDialogState>(_registry, _sys, this);
-        states[PlayerStateEnum::MovingToLocation] =
-            std::make_unique<MovingToLocationState>(_registry, _sys, this);
+        states[PlayerStateEnum::MovingToLocation] = std::make_unique<MovingToLocationState>(_registry, _sys, this);
         states[PlayerStateEnum::DestinationUnreachable] =
             std::make_unique<DestinationUnreachableState>(_registry, _sys, this);
 
