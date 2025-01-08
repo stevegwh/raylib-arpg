@@ -77,6 +77,7 @@ namespace sage
         Sound SFXLoad(const std::string& path);
         Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
         Texture TextureLoad(const std::string& path);
+        Texture TextureLoad(const std::string& fileName, const std::string& path);
         Texture TextureLoadFromImage(const std::string& name, Image image);
         Font FontLoad(const std::string& path);
         void ImageUnload(const std::string& key);
@@ -146,6 +147,7 @@ namespace sage
             {
                 for (unsigned int i = 0; i < model.materialNames.size(); ++i)
                 {
+
                     const auto& mat = model.materialNames.at(i);
                     model.model.materials[i] = materialMap[mat];
                 }

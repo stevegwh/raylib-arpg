@@ -289,7 +289,7 @@ namespace sage
         auto pathDealiased =
             AssetManager::GetInstance().TryGetAssetPath(path); // Path could be an asset alias (e.g., MDL_GOBLIN)
         auto key = StripPath(path); // Will either be a mesh alias (MDL_GOBLIN) or a mesh name (e.g., QUEST_BONE
-        // from QUEST_BONE.obj)
+        //  from QUEST_BONE.obj)
         if (!nonModelTextures.contains(key))
         {
             if (!images.contains(key))
@@ -297,8 +297,23 @@ namespace sage
                 images.emplace(key, LoadImage(pathDealiased.c_str()));
             }
             nonModelTextures[key] = LoadTextureFromImage(images[key]);
+            assert(nonModelTextures[key].id > 1);
         }
         return nonModelTextures[key];
+    }
+
+    Texture ResourceManager::TextureLoad(const std::string& fileName, const std::string& path)
+    {
+        // I assume the material name is used later
+        if (!nonModelTextures.contains(fileName))
+        {
+            if (!images.contains(fileName))
+            {
+                images.emplace(fileName, LoadImage(path.c_str()));
+            }
+            nonModelTextures[path] = LoadTextureFromImage(images[fileName]); // uses path?
+        }
+        return nonModelTextures[path]; // uses path?
     }
 
     Texture ResourceManager::TextureLoadFromImage(const std::string& name, Image image)
@@ -384,6 +399,7 @@ namespace sage
             for (unsigned int i = 0; i < modelInfo.materialNames.size(); ++i)
             {
                 const auto& mat = modelInfo.materialNames[i];
+
                 if (!materialMap.contains(mat))
                 {
                     materialMap.emplace(mat, modelInfo.model.materials[i]);

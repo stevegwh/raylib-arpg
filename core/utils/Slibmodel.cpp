@@ -435,8 +435,12 @@ namespace sage
                 Texture2D{rlGetTextureIdDefault(), 1, 1, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 
             if (!mats[m].diffuse_texname.empty())
+            {
                 materials[m].maps[MATERIAL_MAP_DIFFUSE].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].diffuse_texname,
                     std::string(path + mats[m].diffuse_texname)); // char *diffuse_texname; // map_Kd
+                assert(materials[m].maps[MATERIAL_MAP_DIFFUSE].texture.id > 1);
+            }
             else
                 materials[m].maps[MATERIAL_MAP_DIFFUSE].color = Color{
                     static_cast<unsigned char>(mats[m].diffuse[0] * 255.0f),
@@ -448,6 +452,7 @@ namespace sage
             if (!mats[m].specular_texname.empty())
             {
                 materials[m].maps[MATERIAL_MAP_SPECULAR].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].specular_texname,
                     std::string(path + mats[m].specular_texname)); // char *specular_texname; // map_Ks
             }
             materials[m].maps[MATERIAL_MAP_SPECULAR].color = Color{
@@ -460,6 +465,7 @@ namespace sage
             if (!mats[m].bump_texname.empty())
             {
                 materials[m].maps[MATERIAL_MAP_NORMAL].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].bump_texname,
                     std::string(path + mats[m].bump_texname)); // char *bump_texname; // map_bump, bump
             }
             materials[m].maps[MATERIAL_MAP_NORMAL].color = WHITE;
@@ -468,6 +474,7 @@ namespace sage
             if (!mats[m].emissive_texname.empty())
             {
                 materials[m].maps[MATERIAL_MAP_EMISSION].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].emissive_texname,
                     std::string(path + mats[m].emissive_texname)); // char *emissive_texname; // map_Ke
             }
             materials[m].maps[MATERIAL_MAP_EMISSION].color = Color{
@@ -479,6 +486,7 @@ namespace sage
             if (!mats[m].displacement_texname.empty())
             {
                 materials[m].maps[MATERIAL_MAP_HEIGHT].texture = ResourceManager::GetInstance().TextureLoad(
+                    mats[m].displacement_texname,
                     std::string(path + mats[m].displacement_texname)); // char *displacement_texname; // disp
             }
         }
@@ -652,6 +660,7 @@ namespace sage
         }
 
         std::vector<std::string> matNames;
+        matNames.reserve(materials.size());
         for (const auto& mat : materials)
         {
             matNames.push_back(mat.name);
