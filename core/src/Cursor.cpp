@@ -33,8 +33,10 @@ namespace sage
     {
         if (!registry->any_of<Collideable>(m_mouseHitInfo.collidedEntityId)) return;
         const auto& layer = registry->get<Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
-        if ((layer != CollisionLayer::NPC && layer != CollisionLayer::ENEMY && layer != CollisionLayer::ITEM) ||
-            !m_mouseHitInfo.rlCollision.hit)
+
+        if (!m_mouseHitInfo.rlCollision.hit ||
+            (layer != CollisionLayer::NPC && layer != CollisionLayer::ENEMY && layer != CollisionLayer::ITEM &&
+             layer != CollisionLayer::INTERACTABLE))
         {
             if (m_hoverInfo.has_value())
             {
@@ -86,10 +88,9 @@ namespace sage
         }
         else if (layer == CollisionLayer::INTERACTABLE)
         {
-            // Could call it 'inspectable' instead?
-            // Interactables are essentially just NPCs but without an actor name/portrait
+            // Interactables are just NPCs without a portrait etc., at this point.
+            // When you click on the item, it starts a conversation.
             onNPCClick.Publish(m_mouseHitInfo.collidedEntityId);
-            // onInteractableClick.Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (
             layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||

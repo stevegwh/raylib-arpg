@@ -109,6 +109,8 @@ namespace sage
         friend class UberShaderSystem;
         friend class RenderSystem;
     };
+
+    std::string TitleCase(const std::string& A);
     bool AlmostEquals(Vector3 a, Vector3 b);
     bool PointInsideRect(Rectangle rec, Vector2 point);
     Vector2 Vec3ToVec2(const Vector3& vec3);

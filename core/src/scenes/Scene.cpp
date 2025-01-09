@@ -3,7 +3,6 @@
 #include "system_includes.hpp"
 #include "Systems.hpp"
 
-// NB: We have to include all the headers required to build sys
 #include "AudioManager.hpp"
 #include "Camera.hpp"
 

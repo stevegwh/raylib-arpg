@@ -2,7 +2,7 @@
 // Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
 
 <meta>
-	owner: _INTERACTABLE_QUEST_LEVER
+	owner: QUEST_LEVER
 	speaker_name: Narrator
 	conversation_pos: 10.0 1.0 6.0
 	camera_pos: -22.0 54.0 44.0

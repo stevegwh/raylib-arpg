@@ -27,6 +27,8 @@ namespace sage
     {
         std::unique_ptr<ModelSafe> model;
         std::string name = "Default";
+        std::string vanityName;
+        void setVanityName();
 
       public:
         Color hint = WHITE;
@@ -54,14 +56,14 @@ namespace sage
         void save(Archive& archive) const
         {
             // assert(!model->GetKey().empty());
-            archive(model->GetKey(), name, initialTransform);
+            archive(model->GetKey(), name, vanityName, initialTransform);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
             std::string modelKey;
-            archive(modelKey, name, initialTransform);
+            archive(modelKey, name, vanityName, initialTransform);
             ModelSafe modelSafe(ResourceManager::GetInstance().GetModelCopy(modelKey));
             // Model data must be deserialised from ResourceManager before deserialising models
             assert(modelSafe.rlmodel.meshes != nullptr);

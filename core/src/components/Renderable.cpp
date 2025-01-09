@@ -3,6 +3,7 @@
 // Created by Steve Wheeler on 03/05/2024.
 //
 
+#include "slib.hpp"
 #include <algorithm>
 
 namespace sage
@@ -16,13 +17,29 @@ namespace sage
     void Renderable::SetName(const std::string& _name)
     {
         name = _name;
+        setVanityName();
+    }
+
+    void Renderable::setVanityName()
+    {
+        std::string vanity;
+
+        if (name[0] == '_') // Remove tag
+        {
+            if (const auto endPos = name.substr(1).find_first_of('_'); endPos != std::string::npos)
+            {
+                vanity = name.substr(endPos + 1);
+            }
+        }
+
+        std::ranges::replace(vanity, '_', ' ');
+
+        vanityName = TitleCase(vanity);
     }
 
     std::string Renderable::GetVanityName() const
     {
-        auto vanity = name;
-        std::replace(vanity.begin(), vanity.end(), '_', ' ');
-        return vanity;
+        return vanityName;
     }
 
     ModelSafe* Renderable::GetModel() const

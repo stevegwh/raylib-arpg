@@ -368,7 +368,7 @@ namespace sage
         for (int i = 0; i < rlmodel.materialCount; ++i)
         {
             // Unload loaded texture maps (avoid unloading default texture, managed by raylib)
-            if (rlmodel.materials[i].maps != NULL)
+            if (rlmodel.materials[i].maps != nullptr)
             {
                 for (int j = 0; j < MAX_MATERIAL_MAPS; j++)
                 {
@@ -400,6 +400,54 @@ namespace sage
 
     ModelSafe::ModelSafe(const char* path, bool _memorySafe) : rlmodel(LoadModel(path)), memorySafe(_memorySafe)
     {
+    }
+
+    std::string TitleCase(const std::string& A)
+    {
+
+        std::string B;
+
+        int pos = 0;
+        int pre_pos = 0;
+
+        pos = A.find(' ', pre_pos);
+
+        while (pos != std::string::npos)
+        {
+            std::string sub = "";
+
+            sub = A.substr(pre_pos, (pos - pre_pos));
+
+            if (pre_pos != pos)
+            {
+                sub = A.substr(pre_pos, (pos - pre_pos));
+            }
+            else
+            {
+                sub = A.substr(pre_pos, 1);
+            }
+
+            sub[0] = toupper(sub[0]);
+            B += sub + A[pos];
+
+            if (pos < (A.length() - 1))
+            {
+                pre_pos = (pos + 1);
+            }
+            else
+            {
+                pre_pos = pos;
+                break;
+            }
+
+            pos = A.find(' ', pre_pos);
+        }
+
+        std::string sub = A.substr(pre_pos, std::string::npos);
+        sub[0] = toupper(sub[0]);
+        B += sub;
+
+        return B;
     }
 
     bool AlmostEquals(Vector3 a, Vector3 b)
