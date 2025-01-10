@@ -25,8 +25,7 @@ namespace sage
         GridSquare square{};
         if (!sys->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
 
-        float floorHeight =
-            sys->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
+        float floorHeight = sys->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
         const float targetOffsetY = 8.0f; // Offset from the floor
 
         float idealTargetY = floorHeight + targetOffsetY;
@@ -194,8 +193,21 @@ namespace sage
     {
         auto actorId = sys->controllableActorSystem->GetSelectedActor();
         auto& transform = registry->get<sgTransform>(actorId);
+
         auto diff = Vector3Subtract(rlCamera.position, rlCamera.target);
         SetCamera(Vector3Add(transform.GetWorldPos(), diff), transform.GetWorldPos());
+
+        GridSquare square{};
+        if (!sys->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
+        float floorHeight = sys->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
+        const float targetOffsetY = 8.0f; // Offset from the floor
+
+        float idealTargetY = floorHeight + targetOffsetY;
+        float idealPositionY = idealTargetY + (rlCamera.position.y - rlCamera.target.y);
+        rlCamera.target.y = idealTargetY;
+        rlCamera.position.y = idealPositionY;
+        currentPositionY = rlCamera.position.y;
+        currentTargetY = rlCamera.target.y;
     }
 
     void Camera::DrawDebug()

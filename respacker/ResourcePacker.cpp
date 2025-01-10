@@ -365,8 +365,8 @@ namespace sage
         navigationGridSystem->GenerateHeightMap(heightMap);
         navigationGridSystem->GenerateNormalMap(normalMap);
 
-        ExportImage(heightMap.GetImage(), "resources/HeightMap.png");
-        ExportImage(normalMap.GetImage(), "resources/NormalMap.png");
+        // ExportImage(heightMap.GetImage(), "resources/HeightMap.png");
+        // ExportImage(normalMap.GetImage(), "resources/NormalMap.png");
 
         ResourceManager::GetInstance().ImageLoadFromFile("HEIGHT_MAP", heightMap.GetImage());
         ResourceManager::GetInstance().ImageLoadFromFile("NORMAL_MAP", normalMap.GetImage());
