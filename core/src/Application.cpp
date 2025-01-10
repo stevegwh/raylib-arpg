@@ -27,6 +27,7 @@ namespace sage
             static_cast<int>(settings->GetScreenSize().y),
             "Baldur's Raylib");
         settings->UpdateViewport();
+        rlSetClipPlanes(0.1, 1000); // Increase depth to reduce z-fighting at distance.
 
         audioManager = std::make_unique<AudioManager>();
 
