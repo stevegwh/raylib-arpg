@@ -36,10 +36,11 @@ namespace sage
         virtual void draw();
 
       public:
+        void Quit();
+        virtual void Update();
         Application();
         virtual ~Application();
         Application(const Application&) = delete;
         void operator=(const Application&) = delete;
-        virtual void Update();
     };
 } // namespace sage

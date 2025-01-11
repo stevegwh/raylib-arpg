@@ -12,6 +12,7 @@
 #include "components/QuestComponents.hpp"
 #include "FullscreenTextOverlayFactory.hpp"
 #include "ParsingHelpers.hpp"
+#include "Settings.hpp"
 #include "Systems.hpp"
 #include "systems/DoorSystem.hpp"
 #include "systems/PartySystem.hpp"
@@ -61,15 +62,13 @@ namespace sage
         else if (func.name.find("GiveItem") != std::string::npos)
         {
             assert(!func.params.empty());
-            event->Subscribe([itemName = func.params, sys](Args...) {
-                sys->partySystem->GiveItemToSelected(itemName);
-            });
+            event->Subscribe(
+                [itemName = func.params, sys](Args...) { sys->partySystem->GiveItemToSelected(itemName); });
         }
         else if (func.name.find("PlaySFX") != std::string::npos)
         {
             assert(!func.params.empty());
-            event->Subscribe(
-                [sfxName = func.params, sys](Args...) { sys->audioManager->PlaySFX(sfxName); });
+            event->Subscribe([sfxName = func.params, sys](Args...) { sys->audioManager->PlaySFX(sfxName); });
         }
         else if (func.name.find("DisableWorldItem") != std::string::npos)
         {
@@ -96,6 +95,7 @@ namespace sage
                 text.emplace_back("Find out soon.", 4.0f);
                 text.emplace_back("Thanks for playing!", 4.0f);
                 sys->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
+                sys->fullscreenTextOverlayFactory->onOverlayEnd.Subscribe([sys] { sys->settings->ExitProgram(); });
             });
         }
         else
@@ -265,8 +265,7 @@ namespace sage
         return map.at(key);
     }
 
-    QuestManager::QuestManager(entt::registry* _registry, Systems* _sys)
-        : registry(_registry), sys(_sys)
+    QuestManager::QuestManager(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
     }
 

@@ -14,17 +14,32 @@ namespace sage
     struct Settings
     {
       private:
+        bool* exitProgram;
+
         // Current settings
         int screenWidth = 1280;
         int screenHeight = 720;
         int viewportWidth = 1920;
         int viewportHeight = 1080;
 
+        // Serialized settings (loaded from settings.xml)
+        int screenWidthUser{};
+        int screenHeightUser{};
+
+        // Hardcoded defaults
+        static constexpr int SCREEN_WIDTH = 1920;
+        static constexpr int SCREEN_HEIGHT = 1080;
+
       public:
         static constexpr float TARGET_SCREEN_WIDTH = 1920.0f;
         static constexpr float TARGET_SCREEN_HEIGHT = 1080.0f;
 
         bool toggleFullScreenRequested = false;
+
+        void ExitProgram()
+        {
+            *exitProgram = true;
+        }
 
         void SetScreenSize(int w, int h)
         {
@@ -114,7 +129,7 @@ namespace sage
             ResetToUserDefined();
         }
 
-        Settings()
+        explicit Settings(bool* _exitProgram) : exitProgram(_exitProgram)
         {
             serializer::DeserializeJsonFile<Settings>("resources/settings.json", *this);
         }
@@ -128,14 +143,5 @@ namespace sage
                 cereal::make_nvp("screen_height", screenHeightUser));
             ResetToUserDefined();
         }
-
-      private:
-        // Serialized settings (loaded from settings.xml)
-        int screenWidthUser{};
-        int screenHeightUser{};
-
-        // Hardcoded defaults
-        static constexpr int SCREEN_WIDTH = 1920;
-        static constexpr int SCREEN_HEIGHT = 1080;
     };
 } // namespace sage

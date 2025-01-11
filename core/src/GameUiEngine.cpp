@@ -449,6 +449,25 @@ namespace sage
 
     const std::string& TextBox::GetContent() const
     {
+        // if (fontInfo.overflowBehaviour == OverflowBehaviour::WORD_WRAP) return content;
+        //
+        // float availableWidth = parent->GetRec().width - (parent->padding.left + parent->padding.right);
+        // auto textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+        //
+        // if (textSize.x > availableWidth)
+        // {
+        //     auto _content = content;
+        //
+        //     while (textSize.x > availableWidth)
+        //     {
+        //         auto finalWordPos = content.find_last_of(' ');
+        //         _content = std::string(_content.substr(0, finalWordPos) + "...");
+        //         textSize = MeasureTextEx(fontInfo.font, _content.c_str(), fontInfo.fontSize,
+        //         fontInfo.fontSpacing);
+        //     }
+        //     return _content;
+        // }
+
         return content;
     }
 

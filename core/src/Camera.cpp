@@ -199,11 +199,12 @@ namespace sage
 
         GridSquare square{};
         if (!sys->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
-        float floorHeight = sys->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
-        const float targetOffsetY = 8.0f; // Offset from the floor
+        const float floorHeight =
+            sys->navigationGridSystem->GetGridSquare(square.row, square.col)->GetTerrainHeight();
+        constexpr float targetOffsetY = 8.0f; // Offset from the floor
+        const float idealTargetY = floorHeight + targetOffsetY;
+        const float idealPositionY = idealTargetY + (rlCamera.position.y - rlCamera.target.y);
 
-        float idealTargetY = floorHeight + targetOffsetY;
-        float idealPositionY = idealTargetY + (rlCamera.position.y - rlCamera.target.y);
         rlCamera.target.y = idealTargetY;
         rlCamera.position.y = idealPositionY;
         currentPositionY = rlCamera.position.y;

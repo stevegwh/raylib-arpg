@@ -99,6 +99,11 @@ namespace sage
         }
     }
 
+    void Application::Quit()
+    {
+        exitWindow = true;
+    }
+
     void Application::Update()
     {
         init();
@@ -179,7 +184,7 @@ namespace sage
     Application::Application()
         : registry(std::make_unique<entt::registry>()),
           cleanupSystem(std::make_unique<CleanupSystem>(registry.get())),
-          settings(std::make_unique<Settings>()),
+          settings(std::make_unique<Settings>(&exitWindow)),
           keyMapping(std::make_unique<KeyMapping>())
     {
     }

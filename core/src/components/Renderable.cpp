@@ -22,7 +22,7 @@ namespace sage
 
     void Renderable::setVanityName()
     {
-        std::string vanity;
+        std::string vanity = name;
 
         if (name[0] == '_') // Remove tag
         {
