@@ -864,7 +864,6 @@ namespace sage
         void pruneWindows();
         void processWindows();
         void onWorldItemHover(entt::entity entity) const;
-        void onWorldCombatableHover(entt::entity entity) const;
         void onNPCHover(entt::entity entity) const;
         void onStopWorldHover() const;
 

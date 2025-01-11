@@ -36,8 +36,6 @@ namespace sage
         static Window* CreateCharacterWindow(
             entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h);
         static TooltipWindow* CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos);
-        static TooltipWindow* CreateCombatableTooltip(
-            GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos);
         static TooltipWindow* CreateItemTooltip(
             GameUIEngine* engine, ItemComponent& item, Window* parentWindow, Vector2 pos);
         static TooltipWindow* CreateAbilityToolTip(GameUIEngine* engine, const Ability& ability, Vector2 pos);

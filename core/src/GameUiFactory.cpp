@@ -138,20 +138,6 @@ namespace sage
             Padding{0, 0, 0, 0});
         auto window = engine->CreateWindowDocked(std::move(_windowDocked));
 
-        // auto panel = window->CreatePanel();
-        // auto table = panel->CreateTable(15.5);
-        // auto abilityTable = panel->CreateTableGrid(2, MAX_ABILITY_NUMBER, 4, {16, 0, 0, 0});
-        // panel->CreateTable(15.5);
-        // // TODO: Change this to two ability rows
-        // for (auto& row : abilityTable->children)
-        // {
-        //     for (unsigned int i = 0; i < row->children.size(); ++i)
-        //     {
-        //         auto& cell = row->children[i];
-        //         cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell.get(), i));
-        //     }
-        // }
-
         auto panel = window->CreatePanel();
         auto table = panel->CreateTable(15.5);
         auto abilityTable = panel->CreateTable({16, 0, 0, 0});
@@ -171,20 +157,28 @@ namespace sage
 
     TooltipWindow* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
     {
+
+        // Set window's dimensions to the size of the text
+        Padding padding = {10, 10, 10, 20};
+
+        TextBox::FontInfo _fontInfo{};
+        _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
+        float scaleFactor = engine->sys->settings->GetCurrentScaleFactor();
+        _fontInfo.fontSize = _fontInfo.baseFontSize * scaleFactor;
+        _fontInfo.fontSize =
+            std::clamp(_fontInfo.fontSize, TextBox::FontInfo::minFontSize, TextBox::FontInfo::maxFontSize);
+
+        Vector2 textSize = MeasureTextEx(_fontInfo.font, name.c_str(), _fontInfo.fontSize, _fontInfo.fontSpacing);
+        auto w = textSize.x + padding.left + padding.right;
+        auto h = textSize.y + padding.up + padding.down;
+
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.05;
+
         auto tooltip = std::make_unique<TooltipWindow>(
-            engine->sys->settings,
-            nullptr,
-            nPatchTexture,
-            TextureStretchMode::NONE,
-            pos.x,
-            pos.y,
-            w,
-            h,
-            Padding{2, 2, 6, 6});
+            engine->sys->settings, nullptr, nPatchTexture, TextureStretchMode::NONE, pos.x, pos.y, w, h, padding);
+
         auto* window = engine->CreateTooltipWindow(std::move(tooltip));
+
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();
@@ -192,49 +186,11 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
 
-            TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::EXTEND_WINDOW;
-
             auto textbox = std::make_unique<TextBox>(engine, cell0, _fontInfo);
             cell0->CreateTextbox(std::move(textbox), name);
         }
-        window->FinalizeLayout();
-        return window;
-    }
 
-    TooltipWindow* GameUiFactory::CreateCombatableTooltip(
-        GameUIEngine* engine, const std::string& name, CombatableActor& combatInfo, Vector2 pos)
-    {
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.1;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
-        auto tooltip = std::make_unique<TooltipWindow>(
-            engine->sys->settings,
-            nullptr,
-            nPatchTexture,
-            TextureStretchMode::NONE,
-            pos.x,
-            pos.y,
-            w,
-            h,
-            Padding{2, 2, 10, 6});
-        auto* window = engine->CreateTooltipWindow(std::move(tooltip));
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
-        auto panel = window->CreatePanel();
-        {
-            auto table = panel->CreateTable();
-            auto row0 = table->CreateTableRow(10);
-            auto cell0 = row0->CreateTableCell();
-            TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::EXTEND_WINDOW;
-            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo);
-            cell0->CreateTextbox(std::move(headerTextbox), name);
-            auto row = table->CreateTableRow({10, 0, 0, 0});
-            auto cell = row->CreateTableCell();
-            auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
-            cell->CreateTextbox(
-                std::move(bodyTextbox), std::format("HP: {}/{}", combatInfo.data.hp, combatInfo.data.maxHp));
-        }
+        window->InitLayout();
         window->FinalizeLayout();
         return window;
     }
@@ -247,17 +203,17 @@ namespace sage
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto tooltip = std::make_unique<TooltipWindow>(
             engine->sys->settings,
-            parentWindow,
+            nullptr,
             nPatchTexture,
             TextureStretchMode::NONE,
             pos.x,
             pos.y,
             w,
             h,
-            Padding{2, 2, 10, 6});
+            Padding{20, 20, 10, 6});
         auto* window = engine->CreateTooltipWindow(std::move(tooltip));
-        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
+        window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
             auto panel = window->CreatePanel();
             auto table = panel->CreateTable();
@@ -265,7 +221,7 @@ namespace sage
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
-            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo);
+            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
             cell0->CreateTextbox(std::move(headerTextbox), item.localizedName);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
@@ -280,7 +236,7 @@ namespace sage
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.15;
-        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.10;
+        auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto tooltip = std::make_unique<TooltipWindow>(
             engine->sys->settings,
             nullptr,
@@ -290,7 +246,7 @@ namespace sage
             pos.y,
             w,
             h,
-            Padding{2, 2, 10, 6});
+            Padding{20, 20, 10, 6});
         auto* window = engine->CreateTooltipWindow(std::move(tooltip));
 
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};

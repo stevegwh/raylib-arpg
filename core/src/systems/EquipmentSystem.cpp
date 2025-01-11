@@ -6,11 +6,14 @@
 
 #include "Camera.hpp"
 #include "components/Animation.hpp"
+#include "components/DeleteEntityComponent.hpp"
 #include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
+#include "components/PartyMemberComponent.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
+#include "components/UberShaderComponent.hpp"
 #include "components/WeaponComponent.hpp"
 #include "ControllableActorSystem.hpp"
 #include "LightManager.hpp"
@@ -20,8 +23,6 @@
 #include "Systems.hpp"
 #include "systems/AnimationSystem.hpp"
 
-#include "components/PartyMemberComponent.hpp"
-#include "components/UberShaderComponent.hpp"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -68,7 +69,7 @@ namespace sage
 
         if (equipment.worldModels.contains(itemType) && registry->valid(equipment.worldModels[itemType]))
         {
-            registry->destroy(equipment.worldModels[itemType]);
+            DestroyItem(owner, itemType);
         }
         equipment.worldModels[itemType] = weaponEntity;
 
@@ -101,7 +102,7 @@ namespace sage
         weaponTrans.SetLocalRot({0, 0, 0, 0});
 
         auto& animation = registry->get<Animation>(owner);
-        animation.onAnimationUpdated.Subscribe(
+        weapon.animationFollowCnx = animation.onAnimationUpdated.Subscribe(
             [this](entt::entity _entity) { updateCharacterWeaponPosition(_entity); });
     }
 
@@ -149,6 +150,7 @@ namespace sage
 
     void EquipmentSystem::GenerateRenderTexture(entt::entity entity, float width, float height)
     {
+
         auto& equipment = registry->get<EquipmentComponent>(entity);
         auto& transform = registry->get<sgTransform>(entity);
         auto& renderable = registry->get<Renderable>(entity);
@@ -232,14 +234,11 @@ namespace sage
             auto& inventory = registry->get<InventoryComponent>(owner);
             if (!inventory.AddItem(equipment.slots[itemType]))
             {
-                // TODO: handle inventory full.
+                inventory.onInventoryFull.Publish();
                 return;
             }
-            registry->destroy(equipment.worldModels[itemType]);
-            equipment.worldModels[itemType] = entt::null;
+            DestroyItem(owner, itemType);
         }
-        equipment.slots[itemType] = entt::null;
-        onEquipmentUpdated.Publish(owner);
     }
 
     void EquipmentSystem::DestroyItem(entt::entity owner, EquipmentSlotName itemType) const
@@ -249,7 +248,11 @@ namespace sage
         {
             if (equipment.worldModels.contains(itemType) && equipment.worldModels[itemType] != entt::null)
             {
-                registry->destroy(equipment.worldModels[itemType]);
+                auto& trans = registry->get<sgTransform>(equipment.worldModels[itemType]);
+                trans.SetParent(nullptr);
+                registry->emplace<DeleteEntityComponent>(equipment.worldModels[itemType]);
+                auto& weapon = registry->get<WeaponComponent>(equipment.worldModels[itemType]);
+                weapon.animationFollowCnx->UnSubscribe();
                 equipment.worldModels[itemType] = entt::null;
             }
             equipment.slots[itemType] = entt::null;
@@ -314,8 +317,7 @@ namespace sage
     {
     }
 
-    EquipmentSystem::EquipmentSystem(entt::registry* _registry, Systems* _sys)
-        : registry(_registry), sys(_sys)
+    EquipmentSystem::EquipmentSystem(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
         registry->on_construct<EquipmentComponent>().connect<&EquipmentSystem::onComponentAdded>(this);
         registry->on_destroy<EquipmentComponent>().connect<&EquipmentSystem::onComponentRemoved>(this);

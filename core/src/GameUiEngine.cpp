@@ -474,11 +474,11 @@ namespace sage
     {
         UpdateFontScaling();
         float availableWidth = parent->GetRec().width - (parent->padding.left + parent->padding.right);
+        Vector2 textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
 
         if (fontInfo.overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
-            Vector2 textSize =
-                MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+
             while (textSize.x > availableWidth && fontInfo.fontSize > FontInfo::minFontSize)
             {
                 fontInfo.fontSize -= 1;
@@ -487,18 +487,21 @@ namespace sage
         }
         else if (fontInfo.overflowBehaviour == OverflowBehaviour::EXTEND_WINDOW)
         {
-            // float availableHeight = parent->GetRec().height - (parent->padding.up + parent->padding.down);
-            Vector2 textSize =
-                MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+            float availableHeight = parent->GetRec().height - (parent->padding.up + parent->padding.down);
             if (textSize.x > availableWidth)
             {
-                parent->GetWindow()->SetDimensions(textSize.x + parent->padding.right, rec.height);
-                parent->GetWindow()->UpdateTextureDimensions();
+                parent->GetWindow()->SetDimensions(
+                    textSize.x + parent->padding.left + parent->padding.right,
+                    parent->GetWindow()->GetRec().height);
             }
-            // if (textSize.y > availableHeight)
-            // {
-            //     parent->GetWindow()->SetDimensions(rec.width, textSize.y);
-            // }
+            if (textSize.y > availableHeight)
+            {
+                parent->GetWindow()->SetDimensions(
+                    parent->GetWindow()->GetRec().width, textSize.y + parent->padding.up + parent->padding.down);
+            }
+            parent->UpdateTextureDimensions();
+            // N.B.: Must call the window's "InitLayout" function for these changes to proliferate. (Calling it
+            // here will cause a stack overflow).
         }
         else if (fontInfo.overflowBehaviour == OverflowBehaviour::WORD_WRAP)
         {
@@ -545,7 +548,7 @@ namespace sage
         }
 
         // Measure final text size
-        Vector2 textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+        textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
 
         float horiOffset = 0;
         float vertOffset = 0;
@@ -2913,21 +2916,6 @@ namespace sage
         GameUiFactory::CreateWorldTooltip(sys->uiEngine.get(), item.localizedName, pos);
     }
 
-    void GameUIEngine::onWorldCombatableHover(entt::entity entity) const
-    {
-        if (tooltipWindow) return;
-        auto& renderable = registry->get<Renderable>(entity);
-        auto& combatable = registry->get<CombatableActor>(entity);
-        auto viewport = sys->settings->GetViewPort();
-        Vector2 pos = GetWorldToScreenEx(
-            sys->cursor->getMouseHitInfo().rlCollision.point,
-            *sys->camera->getRaylibCam(),
-            viewport.x,
-            viewport.y);
-        pos.x += sys->settings->ScaleValueWidth(20); // TODO: magic number
-        GameUiFactory::CreateCombatableTooltip(sys->uiEngine.get(), renderable.GetVanityName(), combatable, pos);
-    }
-
     void GameUIEngine::onNPCHover(entt::entity entity) const
     {
         if (tooltipWindow) return;
@@ -2972,8 +2960,6 @@ namespace sage
 
     GameUIEngine::GameUIEngine(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
-        _sys->cursor->onCombatableHover.Subscribe(
-            [this](const entt::entity entity) { onWorldCombatableHover(entity); });
         _sys->cursor->onItemHover.Subscribe([this](const entt::entity entity) { onWorldItemHover(entity); });
         _sys->cursor->onStopHover.Subscribe([this]() { onStopWorldHover(); });
         _sys->cursor->onNPCHover.Subscribe([this](const entt::entity entity) { onNPCHover(entity); });
