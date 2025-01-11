@@ -15,7 +15,6 @@
 #include "systems/RenderSystem.hpp"
 #include "systems/states/StateMachines.hpp"
 
-#include "components/DoorBehaviorComponent.hpp"
 #include "raylib.h"
 #include "systems/DoorSystem.hpp"
 
@@ -57,7 +56,5 @@ namespace sage
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : Scene(_registry, _keyMapping, _settings, _audioManager)
     {
-        auto doorId = sys->renderSystem->FindRenderable<DoorBehaviorComponent>("QUEST_DOOR");
-        sys->doorSystem->UnlockAndOpenDoor(doorId);
     }
 } // namespace sage
