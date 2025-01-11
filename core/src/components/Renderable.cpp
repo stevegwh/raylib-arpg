@@ -3,6 +3,7 @@
 // Created by Steve Wheeler on 03/05/2024.
 //
 
+#include "ParsingHelpers.hpp"
 #include "slib.hpp"
 #include <algorithm>
 
@@ -33,6 +34,8 @@ namespace sage
         }
 
         std::ranges::replace(vanity, '_', ' ');
+
+        vanity = parsing::trim(vanity);
 
         vanityName = TitleCase(vanity);
     }

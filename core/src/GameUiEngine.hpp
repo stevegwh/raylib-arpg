@@ -289,8 +289,12 @@ namespace sage
       public:
         enum class OverflowBehaviour
         {
-            SHRINK_TO_FIT,
-            WORD_WRAP
+            SHRINK_TO_FIT, // Text will be shrunk down to a minimum size (then left to overflow)
+            WORD_WRAP, // Words will be broken onto a new line if they do not fit. Will be shrunk if the new line
+                       // also does not fit. Does not truncate words.
+            EXTEND_WINDOW // Window's 'rec' will be extended in the necessary direction to fit the requested text
+                          // and size.
+            // SHRINK_THEN_EXTEND ?
         };
 
         struct FontInfo

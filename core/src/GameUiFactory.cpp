@@ -183,7 +183,7 @@ namespace sage
             pos.y,
             w,
             h,
-            Padding{16, 2, 10, 6});
+            Padding{2, 2, 6, 6});
         auto* window = engine->CreateTooltipWindow(std::move(tooltip));
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
@@ -193,9 +193,9 @@ namespace sage
             auto cell0 = row0->CreateTableCell();
 
             TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::EXTEND_WINDOW;
 
-            auto textbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
+            auto textbox = std::make_unique<TextBox>(engine, cell0, _fontInfo);
             cell0->CreateTextbox(std::move(textbox), name);
         }
         window->FinalizeLayout();
@@ -217,7 +217,7 @@ namespace sage
             pos.y,
             w,
             h,
-            Padding{16, 2, 10, 6});
+            Padding{2, 2, 10, 6});
         auto* window = engine->CreateTooltipWindow(std::move(tooltip));
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         auto panel = window->CreatePanel();
@@ -226,8 +226,8 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
-            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::EXTEND_WINDOW;
+            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo);
             cell0->CreateTextbox(std::move(headerTextbox), name);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
@@ -254,7 +254,7 @@ namespace sage
             pos.y,
             w,
             h,
-            Padding{16, 2, 10, 6});
+            Padding{2, 2, 10, 6});
         auto* window = engine->CreateTooltipWindow(std::move(tooltip));
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
 
@@ -264,8 +264,8 @@ namespace sage
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
-            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::SHRINK_TO_FIT;
-            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo);
             cell0->CreateTextbox(std::move(headerTextbox), item.localizedName);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
@@ -290,7 +290,7 @@ namespace sage
             pos.y,
             w,
             h,
-            Padding{16, 2, 10, 6});
+            Padding{2, 2, 10, 6});
         auto* window = engine->CreateTooltipWindow(std::move(tooltip));
 
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
@@ -350,8 +350,7 @@ namespace sage
                     auto invSlot = std::make_unique<InventorySlot>(engine, cell.get(), row, col);
                     auto ptr = cell->CreateInventorySlot(std::move(invSlot));
 
-                    engine->sys->inventorySystem->onInventoryUpdated.Subscribe(
-                        [ptr]() { ptr->RetrieveInfo(); });
+                    engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo(); });
                 }
             }
         }
