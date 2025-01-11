@@ -62,6 +62,7 @@ namespace sage
         void Publish(Args... args) const
         {
             // Make a copy of the subscribers to prevent issues if callbacks modify the subscriber list
+            if (subscribers.empty()) return;
             auto subscribersCopy = subscribers;
             for (const auto& [key, subscriber] : subscribersCopy)
             {

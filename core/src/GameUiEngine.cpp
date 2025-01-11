@@ -2086,6 +2086,12 @@ namespace sage
     {
     }
 
+    void TooltipWindow::Remove()
+    {
+        hidden = true;
+        markForRemoval = true;
+    }
+
     void TooltipWindow::ScaleContents()
     {
         // Tooltip's original position is scaled to the screen already
@@ -2648,15 +2654,15 @@ namespace sage
 #pragma region GameUIEngine
     void GameUIEngine::pruneWindows()
     {
-        windows.erase(
-            std::remove_if(
-                windows.begin(), windows.end(), [](const auto& window) { return window->IsMarkedForRemoval(); }),
-            windows.end());
-
         if (tooltipWindow && tooltipWindow->IsMarkedForRemoval())
         {
             tooltipWindow.reset();
         }
+
+        windows.erase(
+            std::remove_if(
+                windows.begin(), windows.end(), [](const auto& window) { return window->IsMarkedForRemoval(); }),
+            windows.end());
     }
 
     void GameUIEngine::CreateErrorMessage(const std::string& msg)
@@ -2813,7 +2819,7 @@ namespace sage
             window->Draw2D();
         }
 
-        if (tooltipWindow)
+        if (tooltipWindow && !tooltipWindow->hidden)
         {
             tooltipWindow->Draw2D();
         }

@@ -203,7 +203,7 @@ namespace sage
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto tooltip = std::make_unique<TooltipWindow>(
             engine->sys->settings,
-            nullptr,
+            parentWindow,
             nPatchTexture,
             TextureStretchMode::NONE,
             pos.x,

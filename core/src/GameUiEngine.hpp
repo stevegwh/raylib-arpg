@@ -702,7 +702,7 @@ namespace sage
         void Hide();
         [[nodiscard]] bool IsHidden() const;
         [[nodiscard]] bool IsMarkedForRemoval() const;
-        void Remove();
+        virtual void Remove();
         void DrawDebug2D() override;
         void Draw2D() override;
         void InitLayout() override;
@@ -728,6 +728,7 @@ namespace sage
         std::unique_ptr<Connection> parentWindowHideCnx;
 
       public:
+        void Remove() override;
         void ScaleContents() override;
         ~TooltipWindow() override;
         TooltipWindow(
