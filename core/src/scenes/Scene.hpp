@@ -28,7 +28,7 @@ namespace sage
         entt::registry* registry;
 
       public:
-        std::unique_ptr<Systems> data;
+        std::unique_ptr<Systems> sys;
         Event<entt::entity> sceneLoadingFinished; // Currently unused
         Event<entt::entity> sceneChange;
 

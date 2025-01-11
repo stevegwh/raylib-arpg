@@ -39,15 +39,15 @@ namespace sage
             if (spawner.type == SpawnerType::PLAYER)
             {
                 firstPlayer =
-                    GameObjectFactory::createPlayer(registry, data.get(), spawner.pos, spawner.rot, "Player");
+                    GameObjectFactory::createPlayer(registry, sys.get(), spawner.pos, spawner.rot, "Player");
             }
             else if (spawner.type == SpawnerType::ENEMY)
             {
-                GameObjectFactory::createEnemy(registry, data.get(), spawner.pos, spawner.rot, "Goblin");
+                GameObjectFactory::createEnemy(registry, sys.get(), spawner.pos, spawner.rot, "Goblin");
             }
             else if (spawner.type == SpawnerType::NPC)
             {
-                auto npc = data->npcManager->CreateNPC(spawner.name, spawner.pos, spawner.rot);
+                auto npc = sys->npcManager->CreateNPC(spawner.name, spawner.pos, spawner.rot);
                 assert(npc != entt::null);
             }
             else if (spawner.type == SpawnerType::DIALOG_CUTSCENE)
@@ -56,18 +56,18 @@ namespace sage
             }
         }
         registry->erase<Spawner>(spawnerView.begin(), spawnerView.end());
-        data->controllableActorSystem->SetSelectedActor(firstPlayer);
+        sys->controllableActorSystem->SetSelectedActor(firstPlayer);
     }
 
     void Scene::initAssets() const
     {
-        serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *data->itemFactory);
+        serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *sys->itemFactory);
 
         const auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
         const auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");
         const auto slices = heightMap.GetWidth();
-        data->navigationGridSystem->Init(slices, 1.0f);
-        data->navigationGridSystem->PopulateGrid(heightMap, normalMap);
+        sys->navigationGridSystem->Init(slices, 1.0f);
+        sys->navigationGridSystem->PopulateGrid(heightMap, normalMap);
 
         // NB: Dependent on *only* the map/static meshes having been loaded at this point
         for (const auto view = registry->view<Renderable>(); auto entity : view)
@@ -80,11 +80,11 @@ namespace sage
         loadSpawners();
 
         // Requires renderables being loaded first
-        data->contextualDialogSystem->InitContextualDialogsFromDirectory();
-        data->questManager->InitQuestsFromDirectory();
+        sys->contextualDialogSystem->InitContextualDialogsFromDirectory();
+        sys->questManager->InitQuestsFromDirectory();
 
-        data->dialogFactory->InitDialogFromDirectory(); // Must be called after all npcs are loaded
-        data->camera->FocusSelectedActor();
+        sys->dialogFactory->InitDialogFromDirectory(); // Must be called after all npcs are loaded
+        sys->camera->FocusSelectedActor();
     }
 
     void Scene::initUI() const
@@ -92,77 +92,77 @@ namespace sage
         ResourceManager::GetInstance().FontLoadFromFile(
             "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
 
-        GameUiFactory::CreateAbilityRow(data->uiEngine.get());
+        GameUiFactory::CreateAbilityRow(sys->uiEngine.get());
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.3;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.6;
         auto* inventoryWindow =
-            GameUiFactory::CreateInventoryWindow(registry, data->uiEngine.get(), {200, 50}, w, h);
+            GameUiFactory::CreateInventoryWindow(registry, sys->uiEngine.get(), {200, 50}, w, h);
         auto* equipmentWindow =
-            GameUiFactory::CreateCharacterWindow(registry, data->uiEngine.get(), {700, 50}, w, h);
-        data->userInput->keyIPressed.Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
-        data->userInput->keyCPressed.Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
-        data->userInput->keyFPressed.Subscribe([this]() { data->camera->FocusSelectedActor(); });
+            GameUiFactory::CreateCharacterWindow(registry, sys->uiEngine.get(), {700, 50}, w, h);
+        sys->userInput->keyIPressed.Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
+        sys->userInput->keyCPressed.Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
+        sys->userInput->keyFPressed.Subscribe([this]() { sys->camera->FocusSelectedActor(); });
 
-        GameUiFactory::CreatePartyPortraitsColumn(data->uiEngine.get());
-        GameUiFactory::CreateGameWindowButtons(data->uiEngine.get(), inventoryWindow, equipmentWindow);
+        GameUiFactory::CreatePartyPortraitsColumn(sys->uiEngine.get());
+        GameUiFactory::CreateGameWindowButtons(sys->uiEngine.get(), inventoryWindow, equipmentWindow);
     }
 
     void Scene::Update()
     {
-        data->audioManager->Update();
-        data->renderSystem->Update();
-        data->camera->Update();
-        data->userInput->ListenForInput();
-        data->cursor->Update();
-        data->lightSubSystem->Update();
-        data->uiEngine->Update();
+        sys->audioManager->Update();
+        sys->renderSystem->Update();
+        sys->camera->Update();
+        sys->userInput->ListenForInput();
+        sys->cursor->Update();
+        sys->lightSubSystem->Update();
+        sys->uiEngine->Update();
         spiral->Update(GetFrameTime());
-        data->cursorClickIndicator->Update();
-        data->fullscreenTextOverlayFactory->Update();
-        data->actorMovementSystem->Update();
-        data->controllableActorSystem->Update();
-        data->dialogSystem->Update();
-        data->healthBarSystem->Update();
-        data->playerAbilitySystem->Update();
-        data->timerSystem->Update();
-        data->collisionSystem->Update();
-        data->animationSystem->Update();
-        data->contextualDialogSystem->Update();
-        data->spatialAudioSystem->Update();
-        data->stateMachines->Update();
+        sys->cursorClickIndicator->Update();
+        sys->fullscreenTextOverlayFactory->Update();
+        sys->actorMovementSystem->Update();
+        sys->controllableActorSystem->Update();
+        sys->dialogSystem->Update();
+        sys->healthBarSystem->Update();
+        sys->playerAbilitySystem->Update();
+        sys->timerSystem->Update();
+        sys->collisionSystem->Update();
+        sys->animationSystem->Update();
+        sys->contextualDialogSystem->Update();
+        sys->spatialAudioSystem->Update();
+        sys->stateMachines->Update();
     }
 
     void Scene::DrawDebug3D()
     {
-        data->cursor->DrawDebug();
-        data->camera->DrawDebug();
-        data->lightSubSystem->DrawDebugLights();
-        data->navigationGridSystem->DrawDebug();
-        data->actorMovementSystem->DrawDebug();
-        data->collisionSystem->DrawDebug();
+        sys->cursor->DrawDebug();
+        sys->camera->DrawDebug();
+        sys->lightSubSystem->DrawDebugLights();
+        sys->navigationGridSystem->DrawDebug();
+        sys->actorMovementSystem->DrawDebug();
+        sys->collisionSystem->DrawDebug();
     }
 
     void Scene::Draw3D()
     {
-        data->renderSystem->Draw();
-        data->cursor->Draw3D();
-        data->healthBarSystem->Draw3D();
-        data->playerAbilitySystem->Draw3D();
-        data->stateMachines->Draw3D();
+        sys->renderSystem->Draw();
+        sys->cursor->Draw3D();
+        sys->healthBarSystem->Draw3D();
+        sys->playerAbilitySystem->Draw3D();
+        sys->stateMachines->Draw3D();
         // spiral->Draw3D();
     };
 
     void Scene::DrawDebug2D()
     {
-        data->uiEngine->DrawDebug2D();
+        sys->uiEngine->DrawDebug2D();
     }
 
     void Scene::Draw2D()
     {
-        data->contextualDialogSystem->Draw2D();
-        data->uiEngine->Draw2D();
-        data->cursor->Draw2D();
-        data->fullscreenTextOverlayFactory->Draw2D();
+        sys->contextualDialogSystem->Draw2D();
+        sys->uiEngine->Draw2D();
+        sys->cursor->Draw2D();
+        sys->fullscreenTextOverlayFactory->Draw2D();
     }
 
     Scene::~Scene()
@@ -172,7 +172,7 @@ namespace sage
 
     Scene::Scene(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
-        : registry(_registry), data(std::make_unique<Systems>(_registry, _keyMapping, _settings, _audioManager))
+        : registry(_registry), sys(std::make_unique<Systems>(_registry, _keyMapping, _settings, _audioManager))
     {
 
         initAssets();
@@ -183,7 +183,7 @@ namespace sage
         // ResourceManager::GetInstance().UnloadShaderFileText();
 
         // Test stuff -----------------------------
-        spiral = std::make_unique<SpiralFountainVFX>(data.get(), nullptr);
+        spiral = std::make_unique<SpiralFountainVFX>(sys.get(), nullptr);
         spiral->InitSystem();
 
         //        auto& spatial = registry->emplace<SpatialAudioComponent>(firstPlayer);

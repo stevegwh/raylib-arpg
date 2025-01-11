@@ -9,9 +9,4 @@
 
 namespace sage
 {
-
-    DoorBehaviorComponent::~DoorBehaviorComponent()
-    {
-        connection.release();
-    }
 } // namespace sage

@@ -4,19 +4,15 @@
 
 #pragma once
 
-#include "entt/entt.hpp"
-
 namespace sage
 {
     class DoorBehaviorComponent
     {
-        entt::connection connection;
-        float openYRotation = 5;
+        float openYRotation = -130;
         bool open = false;
         bool locked = true;
 
       public:
-        ~DoorBehaviorComponent();
         DoorBehaviorComponent() = default;
 
         friend class DoorSystem;
