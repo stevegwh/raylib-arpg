@@ -485,24 +485,6 @@ namespace sage
                 textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
             }
         }
-        else if (fontInfo.overflowBehaviour == OverflowBehaviour::EXTEND_WINDOW)
-        {
-            float availableHeight = parent->GetRec().height - (parent->padding.up + parent->padding.down);
-            if (textSize.x > availableWidth)
-            {
-                parent->GetWindow()->SetDimensions(
-                    textSize.x + parent->padding.left + parent->padding.right,
-                    parent->GetWindow()->GetRec().height);
-            }
-            if (textSize.y > availableHeight)
-            {
-                parent->GetWindow()->SetDimensions(
-                    parent->GetWindow()->GetRec().width, textSize.y + parent->padding.up + parent->padding.down);
-            }
-            parent->UpdateTextureDimensions();
-            // N.B.: Must call the window's "InitLayout" function for these changes to proliferate. (Calling it
-            // here will cause a stack overflow).
-        }
         else if (fontInfo.overflowBehaviour == OverflowBehaviour::WORD_WRAP)
         {
             std::string wrappedText;

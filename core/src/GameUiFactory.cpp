@@ -121,7 +121,6 @@ namespace sage
             cell0->CreateTextbox(std::move(textbox), name);
         }
 
-        window->InitLayout();
         window->FinalizeLayout();
         return window;
     }
