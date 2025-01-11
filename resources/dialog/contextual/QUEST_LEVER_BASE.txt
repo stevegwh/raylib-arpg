@@ -1,4 +1,4 @@
-distance: 95
+distance: 80
 speaker: Player
 ---
-There's the exit!
+That looks like the way out of here.

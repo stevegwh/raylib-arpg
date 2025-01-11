@@ -111,28 +111,34 @@ namespace sage
 
         auto textCol = Color{255, 255, 255, a};
 
-        float spacing = 24;
+        float baseSpacing = 48.0f;
+        float baseFontSize = 64.0f;
+        float scaledSpacing = sys->settings->ScaleValueHeight(baseSpacing);
+        float scaledFontSize = sys->settings->ScaleValueMaintainRatio(baseFontSize);
+
         auto size = overlayText.at(currentTextIdx).first.size();
         float allTextHeight = 0;
 
         for (const auto& str : overlayText.at(currentTextIdx).first)
         {
-            allTextHeight += MeasureTextEx(font, str.c_str(), 32.0f, 1.5f).y;
+            allTextHeight += MeasureTextEx(font, str.c_str(), scaledFontSize, 1.5f).y;
         }
-        allTextHeight += (spacing * (size - 1));
+        allTextHeight += (scaledSpacing * (size - 1));
 
-        float startY = (sys->settings->GetViewPort().y - allTextHeight) / 2;
+        float startY = (height - allTextHeight) / 2;
 
         for (unsigned int i = 0; i < size; ++i)
         {
             const char* text = overlayText.at(currentTextIdx).first.at(i).c_str();
-            auto textSize = MeasureTextEx(font, text, 32.0f, 1.5f);
+            auto textSize = MeasureTextEx(font, text, scaledFontSize, 1.5f);
+
+            Vector2 unscaledPos{(width - textSize.x) / 2, startY + (i * (textSize.y + scaledSpacing))};
 
             DrawTextEx(
                 font,
                 std::format("{}", text).c_str(),
-                Vector2{(width - textSize.x) / 2, startY + (i * (textSize.y + spacing))},
-                32,
+                unscaledPos, // Position is already in screen coordinates
+                scaledFontSize,
                 1.5f,
                 textCol);
         }

@@ -1,0 +1,9 @@
+distance: 90
+speaker: Goblin_Priest
+---
+Come forth my brothers and rejoice!
+Our lamb for the slaughter has been captured!
+And soon the ritual shall begin!
+Today is a day unlike no other!
+Today is the day that our sacred Lord returns to us!
+Today, we shall reign supreme!

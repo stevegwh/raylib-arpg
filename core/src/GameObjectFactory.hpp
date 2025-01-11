@@ -17,10 +17,8 @@ namespace sage
         static entt::entity createDialogCutscene(entt::registry* registry, Vector3 position, const char* name);
         static entt::entity createEnemy(
             entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation, const char* name);
-        static entt::entity createCellGuard(
-            entt::registry* registry, Systems* sys, Vector3 position, const char* name);
-        static entt::entity createLeverGoblin(
-            entt::registry* registry, Systems* sys, Vector3 position, const char* name);
+        static entt::entity createGoblinNPC(
+            entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation, const char* name);
         static entt::entity createArissa(
             entt::registry* registry, Systems* sys, Vector3 position, Vector3 rotation);
         static entt::entity createPlayer(

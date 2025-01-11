@@ -32,7 +32,7 @@
 <node>
 	title: quest
 	---
-	Oh, thank you so much! I think the guard for the cell is sleeping in the barracks.
+	Oh, thank you so much! I think the guard for the cell is in the barracks.
 	---
 	[[Take your leave. | exit]]
 </node>

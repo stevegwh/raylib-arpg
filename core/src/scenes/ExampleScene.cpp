@@ -22,13 +22,14 @@ namespace sage
 {
     void ExampleScene::Init()
     {
+        return;
         const auto soundScape = sys->audioManager->PlayMusic("resources/audio/bgs/Cave.ogg");
         SetMusicVolume(soundScape, 0.75);
 
         std::vector<std::pair<std::string, float>> text;
-        text.emplace_back("Steve Wheeler presents...", 10.0f);
-        text.emplace_back("A game by Steve Wheeler.", 3.0f);
-        text.emplace_back("LeverQuest", 5.0f);
+        text.emplace_back("Steve Wheeler presents...", 5.0f);
+        text.emplace_back("A game by Steve Wheeler.", 5.0f);
+        text.emplace_back("LeverQuest", 8.0f);
         sys->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
 
         const auto actor = sys->controllableActorSystem->GetSelectedActor();

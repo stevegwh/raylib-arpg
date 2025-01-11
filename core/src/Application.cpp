@@ -107,7 +107,7 @@ namespace sage
     void Application::Update()
     {
         init();
-        // scene->Init();
+        scene->Init();
         SetTargetFPS(60);
         while (!exitWindow) // Detect window close button or ESC key
         {

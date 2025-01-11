@@ -140,7 +140,7 @@ namespace sage
             {
                 auto& overhead = registry->emplace<OverheadDialogComponent>(speaker);
                 const auto contextualDialog = dialogTextMap.at(entity);
-                overhead.SetText(contextualDialog, 3.0f);
+                overhead.SetText(contextualDialog, 5.0f);
                 trigger.SetTriggered();
             }
         }

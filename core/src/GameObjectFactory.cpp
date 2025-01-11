@@ -124,12 +124,12 @@ namespace sage
         return id;
     }
 
-    entt::entity GameObjectFactory::createCellGuard(
-        entt::registry* registry, Systems* sys, Vector3 position, const char* name)
+    entt::entity GameObjectFactory::createGoblinNPC(
+        entt::registry* registry, sage::Systems* sys, Vector3 position, Vector3 rotation, const char* name)
     {
         entt::entity id = registry->create();
 
-        registry->emplace<sgTransform>(id, id);
+        auto& transform = registry->emplace<sgTransform>(id, id);
         placeActor(registry, id, sys, position);
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
@@ -151,45 +151,11 @@ namespace sage
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
         auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
         collideable.collisionLayer = CollisionLayer::NPC;
+        transform.SetRotation(rotation);
         sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
-        // registry->emplace<QuestTaskComponent>(id, "ArissaQuest");
-        // sys->questManager->AddTaskToQuest("ArissaQuest", id);
 
-        return id;
-    }
-
-    entt::entity GameObjectFactory::createLeverGoblin(
-        entt::registry* registry, Systems* sys, Vector3 position, const char* name)
-    {
-        entt::entity id = registry->create();
-
-        registry->emplace<sgTransform>(id, id);
-        placeActor(registry, id, sys, position);
-
-        Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
-        auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
-        renderable.SetName(name);
-        auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
-        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
-        uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
-
-        auto& animation = registry->emplace<Animation>(id, "MDL_ENEMY_GOBLIN");
-        animation.animationMap[AnimationEnum::IDLE] = 1;
-        animation.animationMap[AnimationEnum::DEATH] = 0;
-        animation.animationMap[AnimationEnum::WALK] = 4;
-        animation.animationMap[AnimationEnum::AUTOATTACK] = 2;
-        animation.animationMap[AnimationEnum::TALK] = 1;
-        animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
-
-        BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f); // Manually set bounding box dimensions
-        auto& collideable = registry->emplace<Collideable>(id, registry, id, bb);
-        collideable.collisionLayer = CollisionLayer::NPC;
-        sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
-
-        registry->emplace<DialogComponent>(id);
         return id;
     }
 

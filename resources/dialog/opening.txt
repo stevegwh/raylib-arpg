@@ -5,7 +5,7 @@
 	owner: Opening_Dialog
 	speaker_name: Narrator
 	conversation_pos: 10.0 1.0 10.0
-	camera_pos: 18.0 80.0 18.0
+	camera_pos: 18.0 80.0 35.0
 </meta>
 
 <node>
