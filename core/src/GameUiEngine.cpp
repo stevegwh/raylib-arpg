@@ -1105,6 +1105,20 @@ namespace sage
         _engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
     }
 
+    void PartyMemberPortrait::HoverUpdate()
+    {
+        // Hacky solution.
+        // The size of the columm of PartyMemberPortrait is calculated beforehand.
+        // However, normally OnHover disables the cursor interacting with the environment when focused on the UI.
+        // Therefore, to avoid this, if there is no party member in this slot then we reenable the cursor.
+        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
+        if (entity == entt::null)
+        {
+            engine->sys->cursor->EnableContextSwitching();
+            engine->sys->cursor->Enable();
+        }
+    }
+
     void PartyMemberPortrait::UpdateDimensions()
     {
         ImageBox::UpdateDimensions();
@@ -1128,6 +1142,8 @@ namespace sage
 
     void PartyMemberPortrait::ReceiveDrop(CellElement* droppedElement)
     {
+        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
+        if (entity == entt::null) return;
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
             const auto receiver = engine->sys->partySystem->GetMember(memberNumber);
@@ -1167,6 +1183,7 @@ namespace sage
     void PartyMemberPortrait::OnClick()
     {
         const auto entity = engine->sys->partySystem->GetMember(memberNumber);
+        if (entity == entt::null) return;
         engine->sys->controllableActorSystem->SetSelectedActor(entity);
     }
 

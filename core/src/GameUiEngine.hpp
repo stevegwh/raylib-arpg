@@ -480,6 +480,7 @@ namespace sage
         int height;
 
       public:
+        void HoverUpdate() override;
         void UpdateDimensions() override;
         void RetrieveInfo() override;
         void ReceiveDrop(CellElement* droppedElement) override;
