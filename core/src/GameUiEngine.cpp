@@ -1629,7 +1629,7 @@ namespace sage
     {
     }
 
-    void WindowDocked::ScaleContents()
+    void WindowDocked::ScaleContents(Settings* _settings)
     {
         Reset();
         setAlignment();
@@ -1648,25 +1648,9 @@ namespace sage
 
         UpdateTextureDimensions();
 
-        for (auto& panel : children)
+        for (auto& child : children)
         {
-            panel->ScaleContents(settings);
-            for (auto& table : panel->children)
-            {
-                table->ScaleContents(settings);
-                for (auto& row : table->children)
-                {
-                    row->ScaleContents(settings);
-                    for (auto& cell : row->children)
-                    {
-                        cell->ScaleContents(settings);
-                        if (cell->element.has_value())
-                        {
-                            cell->element.value()->UpdateDimensions();
-                        }
-                    }
-                }
-            }
+            child->ScaleContents(settings);
         }
     }
 
@@ -1869,15 +1853,15 @@ namespace sage
         {
             child->FinalizeLayout();
         }
-        ScaleContents();
+        ScaleContents(settings);
     }
 
     void Window::OnWindowUpdate(Vector2 prev, Vector2 current)
     {
-        ScaleContents();
+        ScaleContents(settings);
     }
 
-    void Window::ScaleContents()
+    void Window::ScaleContents(Settings* _settings)
     {
         // assert(finalized);
         if (markForRemoval) return;
@@ -1898,25 +1882,9 @@ namespace sage
 
         UpdateTextureDimensions();
 
-        for (auto& panel : children)
+        for (auto& child : children)
         {
-            panel->ScaleContents(settings);
-            for (auto& table : panel->children)
-            {
-                table->ScaleContents(settings);
-                for (auto& row : table->children)
-                {
-                    row->ScaleContents(settings);
-                    for (auto& cell : row->children)
-                    {
-                        cell->ScaleContents(settings);
-                        if (cell->element.has_value())
-                        {
-                            cell->element.value()->UpdateDimensions();
-                        }
-                    }
-                }
-            }
+            child->ScaleContents(settings);
         }
 
         // InitLayout();
@@ -2031,7 +1999,7 @@ namespace sage
         markForRemoval = true;
     }
 
-    void TooltipWindow::ScaleContents()
+    void TooltipWindow::ScaleContents(Settings* _settings)
     {
         // Tooltip's original position is scaled to the screen already
         if (markForRemoval) return;
@@ -2049,6 +2017,8 @@ namespace sage
             settings->ScaleValueMaintainRatio(padding.right)};
 
         UpdateTextureDimensions();
+
+        // Update children?
     }
 
     TooltipWindow::~TooltipWindow()
