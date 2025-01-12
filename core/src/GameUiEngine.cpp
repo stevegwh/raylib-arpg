@@ -2104,8 +2104,6 @@ namespace sage
         {
             child->ScaleContents(settings);
         }
-
-        // InitLayout();
     }
 
     void Window::ClampToScreen()
@@ -2195,7 +2193,10 @@ namespace sage
 
     TooltipWindow::~TooltipWindow()
     {
-        parentWindowHideCnx->UnSubscribe();
+        if (parentWindowHideCnx)
+        {
+            parentWindowHideCnx->UnSubscribe();
+        }
     }
 
     TooltipWindow::TooltipWindow(
@@ -2679,15 +2680,16 @@ namespace sage
 #pragma region GameUIEngine
     void GameUIEngine::pruneWindows()
     {
-        windows.erase(
-            std::remove_if(
-                windows.begin(), windows.end(), [](const auto& window) { return window->IsMarkedForRemoval(); }),
-            windows.end());
 
         if (tooltipWindow && tooltipWindow->IsMarkedForRemoval())
         {
             tooltipWindow.reset();
         }
+
+        windows.erase(
+            std::remove_if(
+                windows.begin(), windows.end(), [](const auto& window) { return window->IsMarkedForRemoval(); }),
+            windows.end());
     }
 
     void GameUIEngine::CreateErrorMessage(const std::string& msg)

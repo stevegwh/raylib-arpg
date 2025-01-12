@@ -18,13 +18,14 @@ namespace sage
 
     class Connection
     {
-        EventBase* event{};
+        EventBase* event = nullptr;
         SubscriberId id = -1;
 
       public:
         void UnSubscribe();
         ~Connection();
         explicit Connection(EventBase* _event, SubscriberId _id);
+        Connection() = default;
     };
 
     class EventBase

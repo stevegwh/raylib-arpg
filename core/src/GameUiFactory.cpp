@@ -234,9 +234,9 @@ namespace sage
             {
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
-                    auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-                    auto invSlot = std::make_unique<InventorySlot>(engine, cell, row, col);
-                    auto ptr = cell->CreateInventorySlot(std::move(invSlot));
+                    auto invCell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+                    auto invSlot = std::make_unique<InventorySlot>(engine, invCell, row, col);
+                    auto ptr = invCell->CreateInventorySlot(std::move(invSlot));
 
                     engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo(); });
                 }
