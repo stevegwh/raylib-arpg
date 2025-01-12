@@ -492,44 +492,36 @@ namespace sage
             std::istringstream words(content);
             std::string word;
 
-            // Process each word
             while (words >> word)
             {
-                // Create temporary line with new word
                 std::string testLine = currentLine;
-                if (!testLine.empty()) testLine += " "; // Add space between words
+                if (!testLine.empty()) testLine += " ";
                 testLine += word;
 
-                // Measure the line with the new word
                 Vector2 lineSize =
                     MeasureTextEx(fontInfo.font, testLine.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
 
                 if (lineSize.x <= availableWidth)
                 {
-                    // Word fits, add it to current line
                     currentLine = testLine;
                 }
                 else
                 {
-                    // Word doesn't fit, start new line
                     if (!wrappedText.empty()) wrappedText += "\n";
                     wrappedText += currentLine;
                     currentLine = word;
                 }
             }
 
-            // Add the last line
             if (!currentLine.empty())
             {
                 if (!wrappedText.empty()) wrappedText += "\n";
                 wrappedText += currentLine;
             }
 
-            // Update the content with wrapped text
             content = wrappedText;
         }
 
-        // Measure final text size
         textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
 
         float horiOffset = 0;
