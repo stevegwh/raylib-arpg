@@ -495,7 +495,6 @@ namespace sage
         InventorySlot* CreateInventorySlot(std::unique_ptr<InventorySlot> _slot);
         void InitLayout() override;
         void DrawDebug2D() override;
-        void Draw2D() override;
         ~TableCell() override = default;
         explicit TableCell(TableRow* _parent, Padding _padding = {0, 0, 0, 0});
         friend class TableRow;
@@ -511,7 +510,6 @@ namespace sage
         TableCell* CreateTableCell(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void InitLayout() override;
         void DrawDebug2D() override;
-        void Draw2D() override;
         ~TableRow() override = default;
         explicit TableRow(Table* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Table;
@@ -538,7 +536,6 @@ namespace sage
         TableRow* CreateTableRow(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void InitLayout() override;
         void DrawDebug2D() override;
-        void Draw2D() override;
         ~Table() override = default;
         explicit Table(Panel* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Panel;
@@ -564,7 +561,6 @@ namespace sage
         Table* CreateTable(Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void DrawDebug2D() override;
-        void Draw2D() override;
         void InitLayout() override;
         explicit Panel(Window* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Window;
@@ -598,7 +594,6 @@ namespace sage
         [[nodiscard]] bool IsMarkedForRemoval() const;
         virtual void Remove();
         void DrawDebug2D() override;
-        void Draw2D() override;
         void InitLayout() override;
         ~Window() override;
         explicit Window(Settings* _settings, Padding _padding = {0, 0, 0, 0});

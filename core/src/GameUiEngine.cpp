@@ -1938,6 +1938,17 @@ namespace sage
                 }
             }
         }
+        if (element.has_value())
+        {
+            element.value()->Draw2D();
+        }
+        else
+        {
+            for (const auto& child : children)
+            {
+                child->Draw2D();
+            }
+        }
     }
 
     TableElement::TableElement(
@@ -2126,15 +2137,6 @@ namespace sage
         }
     }
 
-    void Window::Draw2D()
-    {
-        TableElement::Draw2D();
-        for (const auto& child : children)
-        {
-            child->Draw2D();
-        }
-    }
-
     Window::~Window()
     {
         windowUpdateCnx->UnSubscribe();
@@ -2232,15 +2234,6 @@ namespace sage
         }
     }
 
-    void Panel::Draw2D()
-    {
-        TableElement::Draw2D();
-        for (const auto& table : children)
-        {
-            table->Draw2D();
-        }
-    }
-
     TableGrid* Panel::CreateTableGrid(int rows, int cols, float cellSpacing, Padding _padding)
     {
         children.push_back(std::make_unique<TableGrid>(this, _padding));
@@ -2294,15 +2287,6 @@ namespace sage
             col.a = 150;
             DrawRectangle(row->rec.x, row->rec.y, row->rec.width, row->rec.height, col);
             row->DrawDebug2D();
-        }
-    }
-
-    void Table::Draw2D()
-    {
-        TableElement::Draw2D();
-        for (const auto& row : children)
-        {
-            row->Draw2D();
         }
     }
 
@@ -2384,15 +2368,6 @@ namespace sage
             col.a = 100;
             DrawRectangle(cell->rec.x, cell->rec.y, cell->rec.width, cell->rec.height, col);
             cell->DrawDebug2D();
-        }
-    }
-
-    void TableRow::Draw2D()
-    {
-        TableElement::Draw2D();
-        for (const auto& cell : children)
-        {
-            cell->Draw2D();
         }
     }
 
@@ -2520,18 +2495,6 @@ namespace sage
                 element.value()->parent = this;
                 element.value()->rec = rec;
                 element.value()->UpdateDimensions();
-            }
-        }
-    }
-
-    void TableCell::Draw2D()
-    {
-        TableElement::Draw2D();
-        if (element.has_value())
-        {
-            if (element.value())
-            {
-                element.value()->Draw2D();
             }
         }
     }
