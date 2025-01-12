@@ -197,15 +197,7 @@ namespace sage
         };
 
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
-        virtual void Reset()
-        {
-            rec = unscaledDimensions.rec;
-            padding = unscaledDimensions.padding;
-            for (auto& child : children)
-            {
-                child->Reset();
-            }
-        }
+        virtual void Reset();
 
       public:
         Padding padding;
@@ -216,168 +208,21 @@ namespace sage
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
-        virtual CellElement* GetCellUnderCursor()
-        {
-            const auto& mousePos = GetMousePosition();
-            if (element.has_value())
-            {
-                if (PointInsideRect(rec, mousePos))
-                {
-                    return element.value().get();
-                }
-                return nullptr;
-            }
-            for (const auto& child : children)
-            {
-                if (auto childCell = child->GetCellUnderCursor())
-                {
-                    return childCell;
-                }
-            }
-            return nullptr;
-        }
-
+        virtual CellElement* GetCellUnderCursor();
         virtual void Update();
-        virtual void ScaleContents(Settings* _settings)
-        {
-            auto posScaled = _settings->ScalePos({rec.x, rec.y});
-
-            rec = {
-                posScaled.x,
-                posScaled.y,
-                _settings->ScaleValueMaintainRatio(rec.width),
-                _settings->ScaleValueMaintainRatio(rec.height)};
-
-            padding = {
-                _settings->ScaleValueMaintainRatio(padding.up),
-                _settings->ScaleValueMaintainRatio(padding.down),
-                _settings->ScaleValueMaintainRatio(padding.left),
-                _settings->ScaleValueMaintainRatio(padding.right)};
-
-            UpdateTextureDimensions();
-
-            if (element.has_value())
-            {
-                element.value()->UpdateDimensions();
-            }
-            else
-            {
-                for (const auto& child : children)
-                {
-                    child->ScaleContents(_settings);
-                }
-            }
-        }
-
-        virtual void SetPos(float x, float y)
-        {
-            rec = {x, y, rec.width, rec.height};
-        }
-
-        void SetDimensions(float w, float h)
-        {
-            rec = {rec.x, rec.y, w, h};
-        }
-
-        void SetTexture(const Texture& _tex, TextureStretchMode _stretchMode)
-        {
-            tex = _tex;
-            textureStretchMode = _stretchMode;
-            UpdateTextureDimensions();
-        }
-
-        void UpdateTextureDimensions()
-        {
-            if (!tex.has_value()) return;
-            if (textureStretchMode == TextureStretchMode::STRETCH)
-            {
-                tex->width = rec.width;
-                tex->height = rec.height;
-            }
-            else if (textureStretchMode == TextureStretchMode::FILL)
-            {
-                if (tex->width > tex->height)
-                {
-                    tex->width = rec.width;
-                }
-                else
-                {
-                    tex->height = rec.height;
-                }
-            }
-
-            // TILE not needed to update here
-        }
-        virtual void FinalizeLayout()
-        {
-            unscaledDimensions.rec = rec;
-            unscaledDimensions.padding = padding;
-            for (auto& child : children)
-            {
-                child->FinalizeLayout();
-            }
-        }
+        virtual void ScaleContents(Settings* _settings);
+        virtual void SetPos(float x, float y);
+        void SetDimensions(float w, float h);
+        void SetTexture(const Texture& _tex, TextureStretchMode _stretchMode);
+        void UpdateTextureDimensions();
+        virtual void FinalizeLayout();
         virtual void InitLayout() = 0;
         virtual void DrawDebug2D() = 0;
-        virtual void Draw2D()
-        {
-            if (tex.has_value())
-            {
-                if (nPatchInfo.has_value())
-                {
-                    DrawTextureNPatch(
-                        tex.value(),
-                        nPatchInfo.value(),
-                        rec,
-                        {0.0f, 0.0f},
-                        0.0f,
-                        WHITE); // Use {0.0f, 0.0f} for origin
-                }
-                else
-                {
+        virtual void Draw2D();
+        [[nodiscard]] Window* GetWindow();
 
-                    if (textureStretchMode == TextureStretchMode::STRETCH ||
-                        textureStretchMode == TextureStretchMode::NONE)
-                    {
-                        DrawTexture(tex.value(), rec.x, rec.y, WHITE);
-                    }
-                    else if (
-                        textureStretchMode == TextureStretchMode::FILL ||
-                        textureStretchMode == TextureStretchMode::TILE)
-                    {
-                        DrawTextureRec(
-                            tex.value(),
-                            {0, 0, static_cast<float>(rec.width), static_cast<float>(rec.height)},
-                            {rec.x, rec.y},
-                            WHITE);
-                    }
-                }
-            }
-        }
-
-        [[nodiscard]] Window* GetWindow()
-        {
-
-            TableElement* current = this;
-            while (current->parent != nullptr)
-            {
-                current = reinterpret_cast<TableElement*>(current->parent);
-            }
-
-            return reinterpret_cast<Window*>(current);
-        }
-
-        TableElement(TableElement* _parent, float x, float y, float width, float height, Padding _padding)
-            : padding(_padding), parent(_parent)
-        {
-            rec = {x, y, width, height};
-            unscaledDimensions = {rec, padding};
-        }
-
-        TableElement(TableElement* _parent, Padding _padding) : padding(_padding), parent(_parent)
-        {
-            unscaledDimensions = {rec, padding};
-        }
+        TableElement(TableElement* _parent, float x, float y, float width, float height, Padding _padding);
+        TableElement(TableElement* _parent, Padding _padding);
 
         TableElement(const TableElement&) = default;
         TableElement(TableElement&&) noexcept = default;

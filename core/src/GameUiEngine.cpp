@@ -1745,6 +1745,37 @@ namespace sage
         unscaledDimensions.padding = padding;
     }
 
+    void TableElement::Reset()
+    {
+        rec = unscaledDimensions.rec;
+        padding = unscaledDimensions.padding;
+        for (auto& child : children)
+        {
+            child->Reset();
+        }
+    }
+
+    CellElement* TableElement::GetCellUnderCursor()
+    {
+        const auto& mousePos = GetMousePosition();
+        if (element.has_value())
+        {
+            if (PointInsideRect(rec, mousePos))
+            {
+                return element.value().get();
+            }
+            return nullptr;
+        }
+        for (const auto& child : children)
+        {
+            if (auto childCell = child->GetCellUnderCursor())
+            {
+                return childCell;
+            }
+        }
+        return nullptr;
+    }
+
     void TableElement::Update()
     {
         assert(!(element.has_value() && !children.empty()));
@@ -1757,6 +1788,151 @@ namespace sage
         {
             child->Update();
         }
+    }
+
+    void TableElement::ScaleContents(Settings* _settings)
+    {
+        {
+            auto posScaled = _settings->ScalePos({rec.x, rec.y});
+
+            rec = {
+                posScaled.x,
+                posScaled.y,
+                _settings->ScaleValueMaintainRatio(rec.width),
+                _settings->ScaleValueMaintainRatio(rec.height)};
+
+            padding = {
+                _settings->ScaleValueMaintainRatio(padding.up),
+                _settings->ScaleValueMaintainRatio(padding.down),
+                _settings->ScaleValueMaintainRatio(padding.left),
+                _settings->ScaleValueMaintainRatio(padding.right)};
+
+            UpdateTextureDimensions();
+
+            if (element.has_value())
+            {
+                element.value()->UpdateDimensions();
+            }
+            else
+            {
+                for (const auto& child : children)
+                {
+                    child->ScaleContents(_settings);
+                }
+            }
+        }
+    }
+
+    void TableElement::SetPos(float x, float y)
+    {
+
+        rec = {x, y, rec.width, rec.height};
+    }
+
+    void TableElement::SetDimensions(float w, float h)
+    {
+        rec = {rec.x, rec.y, w, h};
+    }
+
+    void TableElement::SetTexture(const Texture& _tex, TextureStretchMode _stretchMode)
+    {
+        tex = _tex;
+        textureStretchMode = _stretchMode;
+        UpdateTextureDimensions();
+    }
+
+    void TableElement::UpdateTextureDimensions()
+    {
+        if (!tex.has_value()) return;
+        if (textureStretchMode == TextureStretchMode::STRETCH)
+        {
+            tex->width = rec.width;
+            tex->height = rec.height;
+        }
+        else if (textureStretchMode == TextureStretchMode::FILL)
+        {
+            if (tex->width > tex->height)
+            {
+                tex->width = rec.width;
+            }
+            else
+            {
+                tex->height = rec.height;
+            }
+        }
+
+        // TILE not needed to update here
+    }
+
+    void TableElement::FinalizeLayout()
+    {
+        unscaledDimensions.rec = rec;
+        unscaledDimensions.padding = padding;
+        for (auto& child : children)
+        {
+            child->FinalizeLayout();
+        }
+    }
+
+    Window* TableElement::GetWindow()
+    {
+
+        TableElement* current = this;
+        while (current->parent != nullptr)
+        {
+            current = reinterpret_cast<TableElement*>(current->parent);
+        }
+
+        return reinterpret_cast<Window*>(current);
+    }
+
+    void TableElement::Draw2D()
+    {
+        if (tex.has_value())
+        {
+            if (nPatchInfo.has_value())
+            {
+                DrawTextureNPatch(
+                    tex.value(),
+                    nPatchInfo.value(),
+                    rec,
+                    {0.0f, 0.0f},
+                    0.0f,
+                    WHITE); // Use {0.0f, 0.0f} for origin
+            }
+            else
+            {
+
+                if (textureStretchMode == TextureStretchMode::STRETCH ||
+                    textureStretchMode == TextureStretchMode::NONE)
+                {
+                    DrawTexture(tex.value(), rec.x, rec.y, WHITE);
+                }
+                else if (
+                    textureStretchMode == TextureStretchMode::FILL ||
+                    textureStretchMode == TextureStretchMode::TILE)
+                {
+                    DrawTextureRec(
+                        tex.value(),
+                        {0, 0, static_cast<float>(rec.width), static_cast<float>(rec.height)},
+                        {rec.x, rec.y},
+                        WHITE);
+                }
+            }
+        }
+    }
+
+    TableElement::TableElement(
+        TableElement* _parent, float x, float y, float width, float height, Padding _padding)
+        : padding(_padding), parent(_parent)
+    {
+        rec = {x, y, width, height};
+        unscaledDimensions = {rec, padding};
+    }
+
+    TableElement::TableElement(TableElement* _parent, Padding _padding) : padding(_padding), parent(_parent)
+    {
+        unscaledDimensions = {rec, padding};
     }
 
     void Window::SetPos(float x, float y)
