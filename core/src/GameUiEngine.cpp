@@ -1953,35 +1953,37 @@ namespace sage
         unscaledDimensions = {rec, padding};
     }
 
-    // TODO
     void Window::SetPos(float x, float y)
     {
         auto old = Vector2{rec.x, rec.y};
         rec = {x, y, rec.width, rec.height};
         ClampToScreen();
         auto diff = Vector2Subtract(Vector2{rec.x, rec.y}, Vector2{old.x, old.y});
+
+        std::queue<TableElement*> elementsToProcess;
+
         for (auto& panel : children)
         {
-            panel->rec.x += diff.x;
-            panel->rec.y += diff.y;
-            for (auto& table : panel->children)
+            elementsToProcess.push(panel.get());
+        }
+
+        while (!elementsToProcess.empty())
+        {
+            auto current = elementsToProcess.front();
+            elementsToProcess.pop();
+
+            current->rec.x += diff.x;
+            current->rec.y += diff.y;
+
+            if (current->element.has_value())
             {
-                table->rec.x += diff.x;
-                table->rec.y += diff.y;
-                for (auto& row : table->children)
-                {
-                    row->rec.x += diff.x;
-                    row->rec.y += diff.y;
-                    for (auto& cell : row->children)
-                    {
-                        cell->rec.x += diff.x;
-                        cell->rec.y += diff.y;
-                        if (cell->element.has_value())
-                        {
-                            cell->element.value()->UpdateDimensions();
-                        }
-                    }
-                }
+                current->element.value()->UpdateDimensions();
+                continue; // Skip adding children since this is an end node
+            }
+
+            for (auto& child : current->children)
+            {
+                elementsToProcess.push(child.get());
             }
         }
     }
