@@ -197,6 +197,15 @@ namespace sage
         };
 
         TextureStretchMode textureStretchMode = TextureStretchMode::NONE;
+        virtual void Reset()
+        {
+            rec = unscaledDimensions.rec;
+            padding = unscaledDimensions.padding;
+            for (auto& child : children)
+            {
+                child->Reset();
+            }
+        }
 
       public:
         Padding padding;
@@ -689,7 +698,6 @@ namespace sage
       protected:
         bool hidden = false;
         bool markForRemoval = false;
-        void resetAll();
 
       public:
         Event<> onHide;

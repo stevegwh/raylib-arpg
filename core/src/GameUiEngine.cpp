@@ -1631,7 +1631,7 @@ namespace sage
 
     void WindowDocked::ScaleContents()
     {
-        resetAll();
+        Reset();
         setAlignment();
 
         rec = {
@@ -1877,49 +1877,12 @@ namespace sage
         ScaleContents();
     }
 
-    void Window::resetAll()
-    {
-        rec = unscaledDimensions.rec;
-        padding = unscaledDimensions.padding;
-
-        for (auto& panel : children)
-        {
-            panel->SetPos(panel->unscaledDimensions.rec.x, panel->unscaledDimensions.rec.y);
-            panel->SetDimensions(panel->unscaledDimensions.rec.width, panel->unscaledDimensions.rec.height);
-            panel->padding = panel->unscaledDimensions.padding;
-
-            for (auto& table : panel->children)
-            {
-                table->SetPos(table->unscaledDimensions.rec.x, table->unscaledDimensions.rec.y);
-                table->SetDimensions(table->unscaledDimensions.rec.width, table->unscaledDimensions.rec.height);
-                table->padding = table->unscaledDimensions.padding;
-                for (auto& row : table->children)
-                {
-                    row->SetPos(panel->unscaledDimensions.rec.x, row->unscaledDimensions.rec.y);
-                    row->SetDimensions(row->unscaledDimensions.rec.width, row->unscaledDimensions.rec.height);
-                    row->padding = row->unscaledDimensions.padding;
-                    for (auto& cell : row->children)
-                    {
-                        cell->SetPos(cell->unscaledDimensions.rec.x, cell->unscaledDimensions.rec.y);
-                        cell->SetDimensions(
-                            cell->unscaledDimensions.rec.width, cell->unscaledDimensions.rec.height);
-                        cell->padding = cell->unscaledDimensions.padding;
-                        if (cell->element.has_value())
-                        {
-                            cell->element.value()->UpdateDimensions();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     void Window::ScaleContents()
     {
         // assert(finalized);
         if (markForRemoval) return;
 
-        resetAll();
+        Reset();
 
         rec = {
             settings->ScaleValueWidth(rec.x),
