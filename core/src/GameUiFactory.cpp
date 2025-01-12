@@ -200,49 +200,51 @@ namespace sage
     Window* GameUiFactory::CreateInventoryWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
-        // auto _window = std::make_unique<Window>(
-        //     engine->sys->settings,
-        //     nPatchTexture,
-        //     TextureStretchMode::STRETCH,
-        //     pos.x,
-        //     pos.y,
-        //     274 * 1.5,
-        //     424 * 1.5,
-        //     Padding{20, 0, 14, 14});
-        // auto window = engine->CreateWindow(std::move(_window));
-        // {
-        //     auto panel = window->CreatePanel(4);
-        //     auto table = panel->CreateTable();
-        //     auto row = table->CreateTableRow();
-        //     auto cell = row->CreateTableCell(80);
-        //     auto cell2 = row->CreateTableCell(20);
-        //     auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
-        //     cell->CreateTitleBar(std::move(titleBar), "Inventory");
-        //     auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
-        //     auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
-        //     cell2->CreateCloseButton(std::move(closeBtn));
-        // }
-        //
-        // {
-        //     auto panel1 = window->CreatePanel({20, 0, 0, 0});
-        //     auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
-        //     for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
-        //     {
-        //         for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
-        //         {
-        //             auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-        //             auto invSlot = std::make_unique<InventorySlot>(engine, cell, row, col);
-        //             auto ptr = cell->CreateInventorySlot(std::move(invSlot));
-        //
-        //             engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo();
-        //             });
-        //         }
-        //     }
-        // }
-        // window->FinalizeLayout();
-        // window->Hide();
-        // return window;
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
+        auto _window = std::make_unique<Window>(
+            engine->sys->settings,
+            nPatchTexture,
+            TextureStretchMode::STRETCH,
+            pos.x,
+            pos.y,
+            274 * 1.5,
+            424 * 1.5,
+            Padding{20, 0, 14, 14});
+        auto window = engine->CreateWindow(std::move(_window));
+        auto mainTable = window->CreateTable();
+        auto mainTableRow1 = mainTable->CreateTableRow(4);
+        auto mainTableRow2 = mainTable->CreateTableRow({20, 0, 0, 0});
+
+        {
+            // Title bar
+            auto cell = mainTableRow1->CreateTableCell(80);
+            auto cell2 = mainTableRow1->CreateTableCell(20);
+            auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
+            cell->CreateTitleBar(std::move(titleBar), "Inventory");
+            auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+            cell2->CreateCloseButton(std::move(closeBtn));
+        }
+
+        {
+            // Inventory grid
+            auto cell = mainTableRow2->CreateTableCell();
+            auto table = cell->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
+            for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
+            {
+                for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
+                {
+                    auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+                    auto invSlot = std::make_unique<InventorySlot>(engine, cell, row, col);
+                    auto ptr = cell->CreateInventorySlot(std::move(invSlot));
+
+                    engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo(); });
+                }
+            }
+        }
+        window->FinalizeLayout();
+        window->Hide();
+        return window;
     }
 
     Window* GameUiFactory::CreateCharacterWindow(
