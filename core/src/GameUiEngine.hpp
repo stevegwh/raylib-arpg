@@ -216,6 +216,27 @@ namespace sage
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
+        virtual CellElement* GetCellUnderCursor()
+        {
+            const auto& mousePos = GetMousePosition();
+            if (element.has_value())
+            {
+                if (PointInsideRect(rec, mousePos))
+                {
+                    return element.value().get();
+                }
+                return nullptr;
+            }
+            for (const auto& child : children)
+            {
+                if (auto childCell = child->GetCellUnderCursor())
+                {
+                    return childCell;
+                }
+            }
+            return nullptr;
+        }
+
         virtual void Update();
         virtual void ScaleContents(Settings* _settings)
         {

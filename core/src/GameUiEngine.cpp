@@ -2699,23 +2699,12 @@ namespace sage
             }
         }
         if (windowUnderCursor == nullptr) return nullptr;
-        for (const auto& panel : windowUnderCursor->children)
+        for (const auto& child : windowUnderCursor->children)
         {
-            for (const auto& table : panel->children)
+
+            if (auto childElement = child->GetCellUnderCursor())
             {
-                for (const auto& row : table->children)
-                {
-                    for (const auto& cell : row->children)
-                    {
-                        if (PointInsideRect(cell->GetRec(), mousePos))
-                        {
-                            if (cell->element.has_value())
-                            {
-                                return cell->element.value().get();
-                            }
-                        }
-                    }
-                }
+                return childElement;
             }
         }
         return nullptr;
