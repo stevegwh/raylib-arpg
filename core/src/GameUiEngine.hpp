@@ -234,11 +234,6 @@ namespace sage
                 _settings->ScaleValueMaintainRatio(padding.right)};
 
             UpdateTextureDimensions();
-
-            for (const auto& child : children)
-            {
-                child->ScaleContents(_settings);
-            }
         }
 
         virtual void SetPos(float x, float y)
@@ -698,7 +693,7 @@ namespace sage
 
     class Window : public TableElement
     {
-        void ScaleContents(Settings* _settings) override;
+        virtual void ScaleContents();
 
       protected:
         bool hidden = false;
@@ -750,7 +745,7 @@ namespace sage
 
       public:
         void Remove() override;
-        void ScaleContents(Settings* _settings) override;
+        void ScaleContents() override;
         ~TooltipWindow() override;
         TooltipWindow(
             Settings* _settings,
@@ -774,7 +769,7 @@ namespace sage
         HoriAlignment horiAlignment = HoriAlignment::LEFT;
 
       public:
-        void ScaleContents(Settings* _settings) override;
+        void ScaleContents() override;
         WindowDocked(
             Settings* _settings,
             float _xOffset,
