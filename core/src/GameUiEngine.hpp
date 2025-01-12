@@ -209,6 +209,7 @@ namespace sage
         std::optional<NPatchInfo> nPatchInfo{};
 
         virtual CellElement* GetCellUnderCursor();
+        void OnHoverStop() override;
         virtual void Update();
         virtual void ScaleContents(Settings* _settings);
         virtual void SetPos(float x, float y);
@@ -588,7 +589,6 @@ namespace sage
         void OnWindowUpdate(Vector2 prev, Vector2 current);
         void ClampToScreen();
         void OnHoverStart() override;
-        void OnHoverStop() override;
         Panel* CreatePanel(Padding _padding = {0, 0, 0, 0});
         Panel* CreatePanel(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void ToggleHide();

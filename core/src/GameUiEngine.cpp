@@ -1790,6 +1790,24 @@ namespace sage
         }
     }
 
+    void TableElement::OnHoverStop()
+    {
+        if (element.has_value())
+        {
+            if (!element.value()) return;
+            if (element.value()->beingDragged) return;
+            element.value()->ChangeState(
+                std::make_unique<IdleState>(element.value().get(), element.value()->engine));
+        }
+        else
+        {
+            for (const auto& child : children)
+            {
+                child->OnHoverStop();
+            }
+        }
+    }
+
     void TableElement::ScaleContents(Settings* _settings)
     {
         {
@@ -1935,6 +1953,7 @@ namespace sage
         unscaledDimensions = {rec, padding};
     }
 
+    // TODO
     void Window::SetPos(float x, float y)
     {
         auto old = Vector2{rec.x, rec.y};
@@ -2090,30 +2109,6 @@ namespace sage
     void Window::OnHoverStart()
     {
         UIElement::OnHoverStart();
-    }
-
-    void Window::OnHoverStop()
-    {
-        UIElement::OnHoverStop();
-        for (const auto& panel : children)
-        {
-            for (const auto& table : panel->children)
-            {
-                for (const auto& row : table->children)
-                {
-                    for (const auto& cell : row->children)
-                    {
-                        if (cell->element.has_value())
-                        {
-                            if (!cell->element.value()) continue;
-                            if (cell->element.value()->beingDragged) continue;
-                            cell->element.value()->ChangeState(std::make_unique<IdleState>(
-                                cell->element.value().get(), cell->element.value()->engine));
-                        }
-                    }
-                }
-            }
-        }
     }
 
     void Window::DrawDebug2D()
