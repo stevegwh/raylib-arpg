@@ -58,13 +58,9 @@ namespace sage
             cell->SetDimensions(cellSize, cellSize);
             currentX += cellSize + cellSpacing; // Add spacing after each cell
 
-            if (std::holds_alternative<std::unique_ptr<CellElement>>(cell->children))
+            if (cell->element.has_value())
             {
-                auto element = std::get<std::unique_ptr<CellElement>>(cell->children).get();
-                if (element)
-                {
-                    element->UpdateDimensions();
-                }
+                cell->element.value()->UpdateDimensions();
             }
         }
     }
@@ -107,13 +103,9 @@ namespace sage
         {
             for (auto& cell : row->children)
             {
-                if (std::holds_alternative<std::unique_ptr<CellElement>>(cell->children))
+                if (cell->element.has_value())
                 {
-                    auto& element = std::get<std::unique_ptr<CellElement>>(cell->children);
-                    if (element)
-                    {
-                        element->UpdateDimensions();
-                    }
+                    cell->element.value()->UpdateDimensions();
                 }
             }
         }
@@ -128,8 +120,9 @@ namespace sage
         int autoSizeCount = 0;
 
         // First pass: Calculate total of percentage-based widths
-        for (const auto& cell : children)
+        for (const auto& c : children)
         {
+            auto cell = reinterpret_cast<TableCell*>(c.get());
             if (cell->autoSize)
             {
                 autoSizeCount++;
@@ -150,8 +143,9 @@ namespace sage
 
         // Second pass: Update each cell
         float currentX = startX;
-        for (const auto& cell : children)
+        for (const auto& c : children)
         {
+            auto cell = reinterpret_cast<TableCell*>(c.get());
             cell->parent = this;
             cell->rec = rec;
 
@@ -196,8 +190,9 @@ namespace sage
         int autoSizeCount = 0;
 
         // First pass: Calculate total of percentage-based heights
-        for (const auto& panel : children)
+        for (const auto& p : children)
         {
+            auto panel = reinterpret_cast<Panel*>(p.get());
             if (panel->autoSize)
             {
                 autoSizeCount++;
@@ -214,8 +209,9 @@ namespace sage
 
         // Second pass: Update each panel
         float currentY = startY;
-        for (const auto& panel : children)
+        for (const auto& p : children)
         {
+            auto panel = reinterpret_cast<Panel*>(p.get());
             panel->parent = this;
             panel->rec = rec;
 
@@ -255,8 +251,9 @@ namespace sage
         int autoSizeCount = 0;
 
         // First pass: Calculate total of percentage-based widths
-        for (const auto& table : children)
+        for (const auto& t : children)
         {
+            auto table = reinterpret_cast<Table*>(t.get());
             if (table->autoSize)
             {
                 autoSizeCount++;
@@ -273,8 +270,9 @@ namespace sage
 
         // Second pass: Update each table
         float currentX = startX;
-        for (const auto& table : children)
+        for (const auto& t : children)
         {
+            auto table = reinterpret_cast<Table*>(t.get());
             table->parent = this;
             table->rec = rec;
 
@@ -311,8 +309,9 @@ namespace sage
         int autoSizeCount = 0;
 
         // First pass: Calculate total of percentage-based heights
-        for (const auto& row : children)
+        for (const auto& r : children)
         {
+            auto row = reinterpret_cast<TableRow*>(r.get());
             if (row->autoSize)
             {
                 autoSizeCount++;
@@ -333,8 +332,9 @@ namespace sage
 
         // Second pass: Update each row
         float currentY = startY;
-        for (const auto& row : children)
+        for (const auto& r : children)
         {
+            auto row = reinterpret_cast<TableRow*>(r.get());
             row->parent = this;
             row->rec = rec;
 
@@ -819,7 +819,8 @@ namespace sage
 
         for (auto& cell : row)
         {
-            auto* imageBox = dynamic_cast<ImageBox*>(std::get<std::unique_ptr<CellElement>>(cell->children).get());
+            if (!cell->element.has_value()) continue;
+            auto* imageBox = dynamic_cast<ImageBox*>(cell->element.value().get());
             if (!imageBox) continue;
 
             auto space = imageBox->calculateAvailableSpace();
@@ -837,7 +838,8 @@ namespace sage
         // Second pass: apply the minimum scale factor to all cells
         for (auto& cell : row)
         {
-            auto* imageBox = dynamic_cast<ImageBox*>(std::get<std::unique_ptr<CellElement>>(cell->children).get());
+            if (!cell->element.has_value()) continue;
+            auto* imageBox = dynamic_cast<ImageBox*>(cell->element.value().get());
             if (!imageBox) continue;
 
             auto space = imageBox->calculateAvailableSpace();
@@ -871,8 +873,8 @@ namespace sage
             if (row->children.size() <= myColIndex) continue;
 
             auto* cellInColumn = row->children[myColIndex].get();
-            auto* imageBox =
-                dynamic_cast<ImageBox*>(std::get<std::unique_ptr<CellElement>>(cellInColumn->children).get());
+            if (!cellInColumn->element.has_value()) continue;
+            auto* imageBox = dynamic_cast<ImageBox*>(cellInColumn->element.value().get());
             if (!imageBox) continue;
 
             auto space = imageBox->calculateAvailableSpace();
@@ -894,8 +896,8 @@ namespace sage
             if (row->children.size() <= myColIndex) continue;
 
             auto* cellInColumn = row->children[myColIndex].get();
-            auto* imageBox =
-                dynamic_cast<ImageBox*>(std::get<std::unique_ptr<CellElement>>(cellInColumn->children).get());
+            if (!cellInColumn->element.has_value()) continue;
+            auto* imageBox = dynamic_cast<ImageBox*>(cellInColumn->element.value().get());
             if (!imageBox) continue;
 
             auto space = imageBox->calculateAvailableSpace();
@@ -1658,9 +1660,9 @@ namespace sage
                     for (auto& cell : row->children)
                     {
                         cell->ScaleContents(settings);
-                        if (std::holds_alternative<std::unique_ptr<CellElement>>(cell->children))
+                        if (cell->element.has_value())
                         {
-                            std::get<std::unique_ptr<CellElement>>(cell->children)->UpdateDimensions();
+                            cell->element.value()->UpdateDimensions();
                         }
                     }
                 }
@@ -1781,9 +1783,9 @@ namespace sage
                     {
                         cell->rec.x += diff.x;
                         cell->rec.y += diff.y;
-                        if (std::holds_alternative<std::unique_ptr<CellElement>>(cell->children))
+                        if (cell->element.has_value())
                         {
-                            std::get<std::unique_ptr<CellElement>>(cell->children)->UpdateDimensions();
+                            cell->element.value()->UpdateDimensions();
                         }
                     }
                 }
@@ -1794,9 +1796,9 @@ namespace sage
     Panel* Window::CreatePanel(Padding _padding)
     {
         children.push_back(std::make_unique<Panel>(this, _padding));
-        const auto& panel = children.back();
+        const auto& panel = dynamic_cast<Panel*>(children.back().get());
         InitLayout();
-        return panel.get();
+        return panel;
     }
 
     Panel* Window::CreatePanel(float _requestedHeight, Padding _padding)
@@ -1905,9 +1907,9 @@ namespace sage
                         cell->SetDimensions(
                             cell->unscaledDimensions.rec.width, cell->unscaledDimensions.rec.height);
                         cell->padding = cell->unscaledDimensions.padding;
-                        if (std::holds_alternative<std::unique_ptr<CellElement>>(cell->children))
+                        if (cell->element.has_value())
                         {
-                            std::get<std::unique_ptr<CellElement>>(cell->children)->UpdateDimensions();
+                            cell->element.value()->UpdateDimensions();
                         }
                     }
                 }
@@ -1948,9 +1950,9 @@ namespace sage
                     for (auto& cell : row->children)
                     {
                         cell->ScaleContents(settings);
-                        if (std::holds_alternative<std::unique_ptr<CellElement>>(cell->children))
+                        if (cell->element.has_value())
                         {
-                            std::get<std::unique_ptr<CellElement>>(cell->children)->UpdateDimensions();
+                            cell->element.value()->UpdateDimensions();
                         }
                     }
                 }
@@ -1997,13 +1999,12 @@ namespace sage
                 {
                     for (const auto& cell : row->children)
                     {
-                        if (std::holds_alternative<std::unique_ptr<CellElement>>(cell->children))
+                        if (cell->element.has_value())
                         {
-                            auto& element = std::get<std::unique_ptr<CellElement>>(cell->children);
-                            if (!element.get()) continue;
-                            // Allow elements being dragged to continue being active outside of window's bounds
-                            if (element->beingDragged) continue;
-                            element->ChangeState(std::make_unique<IdleState>(element.get(), element->engine));
+                            if (!cell->element.value()) continue;
+                            if (cell->element.value()->beingDragged) continue;
+                            cell->element.value()->ChangeState(std::make_unique<IdleState>(
+                                cell->element.value().get(), cell->element.value()->engine));
                         }
                     }
                 }
@@ -2158,9 +2159,9 @@ namespace sage
     Table* Panel::CreateTable(Padding _padding)
     {
         children.push_back(std::make_unique<Table>(this, _padding));
-        const auto& table = children.back();
+        const auto& table = dynamic_cast<Table*>(children.back().get());
         InitLayout();
-        return table.get();
+        return table;
     }
 
     Table* Panel::CreateTable(float _requestedWidth, Padding _padding)
@@ -2223,9 +2224,9 @@ namespace sage
     TableRow* Table::CreateTableRow(Padding _padding)
     {
         children.push_back(std::make_unique<TableRow>(this, _padding));
-        const auto& row = children.back();
+        const auto& row = dynamic_cast<TableRow*>(children.back().get());
         InitLayout();
-        return row.get();
+        return row;
     }
 
     /**
@@ -2238,19 +2239,19 @@ namespace sage
     {
         assert(_requestedHeight <= 100 && _requestedHeight >= 0);
         children.push_back(std::make_unique<TableRow>(this, _padding));
-        const auto& row = children.back();
+        const auto& row = dynamic_cast<TableRow*>(children.back().get());
         row->autoSize = false;
         row->requestedHeight = _requestedHeight;
         InitLayout();
-        return row.get();
+        return row;
     }
 
     TableCell* TableRow::CreateTableCell(Padding _padding)
     {
         children.push_back(std::make_unique<TableCell>(this, _padding));
-        const auto& cell = children.back();
+        const auto& cell = dynamic_cast<TableCell*>(children.back().get());
         InitLayout();
-        return cell.get();
+        return cell;
     }
 
     /**
@@ -2263,11 +2264,11 @@ namespace sage
     {
         assert(requestedWidth <= 100 && requestedWidth >= 0);
         children.push_back(std::make_unique<TableCell>(this, _padding));
-        const auto& cell = children.back();
+        const auto& cell = dynamic_cast<TableCell*>(children.back().get());
         cell->autoSize = false;
         cell->requestedWidth = requestedWidth;
         InitLayout();
-        return cell.get();
+        return cell;
     }
 
     void TableRow::DrawDebug2D()
@@ -2302,10 +2303,9 @@ namespace sage
 
     PartyMemberPortrait* TableCell::CreatePartyMemberPortrait(std::unique_ptr<PartyMemberPortrait> _portrait)
     {
-        children = std::move(_portrait);
+        element = std::move(_portrait);
 
-        auto* portrait =
-            dynamic_cast<PartyMemberPortrait*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        auto* portrait = dynamic_cast<PartyMemberPortrait*>(element.value().get());
         portrait->RetrieveInfo();
         InitLayout();
         return portrait;
@@ -2313,16 +2313,16 @@ namespace sage
 
     GameWindowButton* TableCell::CreateGameWindowButton(std::unique_ptr<GameWindowButton> _button)
     {
-        children = std::move(_button);
-        auto* button = dynamic_cast<GameWindowButton*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_button);
+        auto* button = dynamic_cast<GameWindowButton*>(element.value().get());
         InitLayout();
         return button;
     }
 
     AbilitySlot* TableCell::CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot)
     {
-        children = std::move(_slot);
-        auto* abilitySlot = dynamic_cast<AbilitySlot*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_slot);
+        auto* abilitySlot = dynamic_cast<AbilitySlot*>(element.value().get());
         abilitySlot->RetrieveInfo();
         InitLayout();
         return abilitySlot;
@@ -2330,8 +2330,8 @@ namespace sage
 
     EquipmentSlot* TableCell::CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot)
     {
-        children = std::move(_slot);
-        auto* slot = dynamic_cast<EquipmentSlot*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_slot);
+        auto* slot = dynamic_cast<EquipmentSlot*>(element.value().get());
         slot->RetrieveInfo();
         InitLayout();
         return slot;
@@ -2339,8 +2339,8 @@ namespace sage
 
     InventorySlot* TableCell::CreateInventorySlot(std::unique_ptr<InventorySlot> _slot)
     {
-        children = std::move(_slot);
-        auto* slot = dynamic_cast<InventorySlot*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_slot);
+        auto* slot = dynamic_cast<InventorySlot*>(element.value().get());
         slot->RetrieveInfo();
         InitLayout();
         return slot;
@@ -2348,8 +2348,8 @@ namespace sage
 
     TitleBar* TableCell::CreateTitleBar(std::unique_ptr<TitleBar> _titleBar, const std::string& _title)
     {
-        children = std::move(_titleBar);
-        auto* titleBar = dynamic_cast<TitleBar*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_titleBar);
+        auto* titleBar = dynamic_cast<TitleBar*>(element.value().get());
         titleBar->SetContent(_title);
         InitLayout();
         return titleBar;
@@ -2357,25 +2357,24 @@ namespace sage
 
     CharacterStatText* TableCell::CreateCharacterStatText(std::unique_ptr<CharacterStatText> _statText)
     {
-        children = std::move(_statText);
-        auto* charStatText =
-            dynamic_cast<CharacterStatText*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_statText);
+        auto* charStatText = dynamic_cast<CharacterStatText*>(element.value().get());
         InitLayout();
         return charStatText;
     }
 
     CloseButton* TableCell::CreateCloseButton(std::unique_ptr<CloseButton> _closeButton)
     {
-        children = std::move(_closeButton);
-        auto* closeButton = dynamic_cast<CloseButton*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_closeButton);
+        auto* closeButton = dynamic_cast<CloseButton*>(element.value().get());
         InitLayout();
         return closeButton;
     }
 
     TextBox* TableCell::CreateTextbox(std::unique_ptr<TextBox> _textBox, const std::string& _content)
     {
-        children = std::move(_textBox);
-        auto* textbox = dynamic_cast<TextBox*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_textBox);
+        auto* textbox = dynamic_cast<TextBox*>(element.value().get());
         textbox->SetContent(_content);
         InitLayout();
         return textbox;
@@ -2383,16 +2382,16 @@ namespace sage
 
     DialogOption* TableCell::CreateDialogOption(std::unique_ptr<DialogOption> _dialogOption)
     {
-        children = std::move(_dialogOption);
-        auto* textbox = dynamic_cast<DialogOption*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_dialogOption);
+        auto* textbox = dynamic_cast<DialogOption*>(element.value().get());
         InitLayout();
         return textbox;
     }
 
     ImageBox* TableCell::CreateImagebox(std::unique_ptr<ImageBox> _imageBox)
     {
-        children = std::move(_imageBox);
-        auto* image = dynamic_cast<ImageBox*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_imageBox);
+        auto* image = dynamic_cast<ImageBox*>(element.value().get());
         InitLayout();
         return image;
     }
@@ -2400,9 +2399,8 @@ namespace sage
     EquipmentCharacterPreview* TableCell::CreateEquipmentCharacterPreview(
         std::unique_ptr<EquipmentCharacterPreview> _preview)
     {
-        children = std::move(_preview);
-        auto* image =
-            dynamic_cast<EquipmentCharacterPreview*>(std::get<std::unique_ptr<CellElement>>(children).get());
+        element = std::move(_preview);
+        auto* image = dynamic_cast<EquipmentCharacterPreview*>(element.value().get());
         image->draggable = false;
         InitLayout();
         image->RetrieveInfo();
@@ -2412,14 +2410,13 @@ namespace sage
     void TableCell::InitLayout()
     {
         // assert(!GetWindow()->finalized);
-        if (std::holds_alternative<std::unique_ptr<CellElement>>(children))
+        if (element.has_value())
         {
-            auto& element = std::get<std::unique_ptr<CellElement>>(children);
-            if (element)
+            if (element.value())
             {
-                element->parent = this;
-                element->rec = rec;
-                element->UpdateDimensions();
+                element.value()->parent = this;
+                element.value()->rec = rec;
+                element.value()->UpdateDimensions();
             }
         }
     }
@@ -2427,12 +2424,11 @@ namespace sage
     void TableCell::Draw2D()
     {
         TableElement::Draw2D();
-        if (std::holds_alternative<std::unique_ptr<CellElement>>(children))
+        if (element.has_value())
         {
-            auto& element = std::get<std::unique_ptr<CellElement>>(children);
-            if (element)
+            if (element.value())
             {
-                element->Draw2D();
+                element.value()->Draw2D();
             }
         }
     }
@@ -2751,10 +2747,12 @@ namespace sage
                 {
                     for (const auto& cell : row->children)
                     {
-                        auto element = std::get<std::unique_ptr<CellElement>>(cell->children).get();
                         if (PointInsideRect(cell->GetRec(), mousePos))
                         {
-                            return element;
+                            if (cell->element.has_value())
+                            {
+                                return cell->element.value().get();
+                            }
                         }
                     }
                 }
@@ -2883,10 +2881,9 @@ namespace sage
                     {
                         for (const auto& cell : row->children)
                         {
-                            auto element = std::get<std::unique_ptr<CellElement>>(cell->children).get();
-                            if (element)
+                            if (cell->element.has_value())
                             {
-                                element->state->Update();
+                                cell->element.value()->state->Update();
                             }
                         }
                     }

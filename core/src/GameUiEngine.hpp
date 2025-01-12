@@ -95,7 +95,97 @@ namespace sage
         UIElement() = default;
     };
 
-    template <typename Child, typename Parent>
+    class CellElement : public UIElement
+    {
+      protected:
+        Event<> onMouseClicked;
+        Vector2 dragOffset{};
+        VertAlignment vertAlignment = VertAlignment::TOP;
+        HoriAlignment horiAlignment = HoriAlignment::LEFT;
+
+      public:
+        TableCell* parent{};
+        GameUIEngine* engine{};
+
+        std::unique_ptr<UIState> state;
+        Texture tex{};
+        bool canReceiveDragDrops = false;
+        bool draggable = false;
+        bool beingDragged = false;
+        bool stateLocked = false;
+        float dragDelayTime = 0.1;
+
+        virtual void RetrieveInfo(){};
+        virtual void OnClick();
+        virtual void HoverUpdate();
+        virtual void OnDragStart();
+        virtual void DragUpdate(){};
+        virtual void DragDraw(){};
+        virtual void OnDrop(CellElement* receiver);
+        virtual void ReceiveDrop(CellElement* droppedElement);
+        void ChangeState(std::unique_ptr<UIState> newState);
+        virtual void UpdateDimensions();
+        virtual void Draw2D() = 0;
+        explicit CellElement(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+        ~CellElement() override = default;
+        friend class TableCell;
+    };
+
+    class TextBox : public CellElement
+    {
+      public:
+        enum class OverflowBehaviour
+        {
+            SHRINK_TO_FIT, // Text will be shrunk down to a minimum size (then left to overflow)
+            WORD_WRAP // Words will be broken onto a new line if they do not fit. Will be shrunk if the new line
+                      // also does not fit. Does not truncate words.
+            // SHRINK_THEN_EXTEND ?
+        };
+
+        struct FontInfo
+        {
+            float baseFontSize;
+            float fontSize;
+            float fontSpacing;
+            Font font;
+            static constexpr float minFontSize = 16.0f;
+            static constexpr float maxFontSize = 72.0f;
+            OverflowBehaviour overflowBehaviour;
+            FontInfo()
+                : baseFontSize(16),
+                  fontSize(16),
+                  fontSpacing(1.5),
+                  font(ResourceManager::GetInstance().FontLoad(
+                      "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+                  overflowBehaviour(OverflowBehaviour::SHRINK_TO_FIT)
+            {
+            }
+        };
+        [[nodiscard]] const std::string& GetContent() const;
+        void SetContent(const std::string& _content);
+        [[nodiscard]] Font GetFont() const;
+        void UpdateFontScaling();
+        void UpdateDimensions() override;
+        void Draw2D() override;
+        ~TextBox() override = default;
+
+        TextBox(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            FontInfo _fontInfo = FontInfo(),
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+
+      protected:
+        Shader sdfShader;
+        FontInfo fontInfo;
+        std::string content;
+    };
+
     class TableElement : public UIElement
     {
       protected:
@@ -111,8 +201,9 @@ namespace sage
       public:
         Padding padding;
         UnscaledDimensions unscaledDimensions{};
-        Parent parent{};
-        Child children;
+        TableElement* parent{};
+        std::vector<std::unique_ptr<TableElement>> children;
+        std::optional<std::unique_ptr<CellElement>> element;
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
@@ -225,14 +316,14 @@ namespace sage
             return reinterpret_cast<Window*>(current);
         }
 
-        TableElement(Parent _parent, float x, float y, float width, float height, Padding _padding)
+        TableElement(TableElement* _parent, float x, float y, float width, float height, Padding _padding)
             : padding(_padding), parent(_parent)
         {
             rec = {x, y, width, height};
             unscaledDimensions = {rec, padding};
         }
 
-        TableElement(Parent _parent, Padding _padding) : padding(_padding), parent(_parent)
+        TableElement(TableElement* _parent, Padding _padding) : padding(_padding), parent(_parent)
         {
             unscaledDimensions = {rec, padding};
         }
@@ -242,97 +333,6 @@ namespace sage
         TableElement& operator=(const TableElement&) = default;
         TableElement& operator=(TableElement&&) noexcept = default;
         ~TableElement() override = default;
-    };
-
-    class CellElement : public UIElement
-    {
-      protected:
-        Event<> onMouseClicked;
-        Vector2 dragOffset{};
-        VertAlignment vertAlignment = VertAlignment::TOP;
-        HoriAlignment horiAlignment = HoriAlignment::LEFT;
-
-      public:
-        TableCell* parent{};
-        GameUIEngine* engine{};
-
-        std::unique_ptr<UIState> state;
-        Texture tex{};
-        bool canReceiveDragDrops = false;
-        bool draggable = false;
-        bool beingDragged = false;
-        bool stateLocked = false;
-        float dragDelayTime = 0.1;
-
-        virtual void RetrieveInfo(){};
-        virtual void OnClick();
-        virtual void HoverUpdate();
-        virtual void OnDragStart();
-        virtual void DragUpdate(){};
-        virtual void DragDraw(){};
-        virtual void OnDrop(CellElement* receiver);
-        virtual void ReceiveDrop(CellElement* droppedElement);
-        void ChangeState(std::unique_ptr<UIState> newState);
-        virtual void UpdateDimensions();
-        virtual void Draw2D() = 0;
-        explicit CellElement(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
-        ~CellElement() override = default;
-        friend class TableCell;
-    };
-
-    class TextBox : public CellElement
-    {
-      public:
-        enum class OverflowBehaviour
-        {
-            SHRINK_TO_FIT, // Text will be shrunk down to a minimum size (then left to overflow)
-            WORD_WRAP // Words will be broken onto a new line if they do not fit. Will be shrunk if the new line
-                      // also does not fit. Does not truncate words.
-            // SHRINK_THEN_EXTEND ?
-        };
-
-        struct FontInfo
-        {
-            float baseFontSize;
-            float fontSize;
-            float fontSpacing;
-            Font font;
-            static constexpr float minFontSize = 16.0f;
-            static constexpr float maxFontSize = 72.0f;
-            OverflowBehaviour overflowBehaviour;
-            FontInfo()
-                : baseFontSize(16),
-                  fontSize(16),
-                  fontSpacing(1.5),
-                  font(ResourceManager::GetInstance().FontLoad(
-                      "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
-                  overflowBehaviour(OverflowBehaviour::SHRINK_TO_FIT)
-            {
-            }
-        };
-        [[nodiscard]] const std::string& GetContent() const;
-        void SetContent(const std::string& _content);
-        [[nodiscard]] Font GetFont() const;
-        void UpdateFontScaling();
-        void UpdateDimensions() override;
-        void Draw2D() override;
-        ~TextBox() override = default;
-
-        TextBox(
-            GameUIEngine* _engine,
-            TableCell* _parent,
-            FontInfo _fontInfo = FontInfo(),
-            VertAlignment _vertAlignment = VertAlignment::TOP,
-            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
-
-      protected:
-        Shader sdfShader;
-        FontInfo fontInfo;
-        std::string content;
     };
 
     class DialogOption : public TextBox
@@ -576,7 +576,7 @@ namespace sage
         CloseButton(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex);
     };
 
-    class TableCell final : public TableElement<std::variant<std::unique_ptr<CellElement>, Table*>, TableRow*>
+    class TableCell final : public TableElement
     {
         float requestedWidth{};
         bool autoSize = true;
@@ -604,7 +604,7 @@ namespace sage
         friend class TableRow;
     };
 
-    class TableRow : public TableElement<std::vector<std::unique_ptr<TableCell>>, Table*>
+    class TableRow : public TableElement
     {
         float requestedHeight{};
         bool autoSize = true;
@@ -630,7 +630,7 @@ namespace sage
         friend class Table;
     };
 
-    class Table : public TableElement<std::vector<std::unique_ptr<TableRow>>, std::variant<Panel*, TableCell*>>
+    class Table : public TableElement
     {
         float requestedWidth{};
         bool autoSize = true;
@@ -657,7 +657,7 @@ namespace sage
         friend class Panel;
     };
 
-    class Panel : public TableElement<std::vector<std::unique_ptr<Table>>, Window*>
+    class Panel : public TableElement
     {
         float requestedHeight{};
         bool autoSize = true;
@@ -673,7 +673,7 @@ namespace sage
         friend class Window;
     };
 
-    class Window : public TableElement<std::vector<std::unique_ptr<Panel>>, void*>
+    class Window : public TableElement
     {
         virtual void ScaleContents();
 

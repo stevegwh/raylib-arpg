@@ -77,8 +77,8 @@ namespace sage
         auto abilityRow = abilityTable->CreateTableRowGrid(MAX_ABILITY_NUMBER, 4, {4, 4, 0, 0});
         for (unsigned int i = 0; i < abilityRow->children.size(); ++i)
         {
-            auto& cell = abilityRow->children[i];
-            cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell.get(), i));
+            auto cell = dynamic_cast<TableCell*>(abilityRow->children[i].get());
+            cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
         }
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
@@ -232,8 +232,8 @@ namespace sage
             {
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
-                    auto& cell = table->children[row]->children[col];
-                    auto invSlot = std::make_unique<InventorySlot>(engine, cell.get(), row, col);
+                    auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+                    auto invSlot = std::make_unique<InventorySlot>(engine, cell, row, col);
                     auto ptr = cell->CreateInventorySlot(std::move(invSlot));
 
                     engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo(); });
@@ -282,17 +282,17 @@ namespace sage
 
         auto createEquipSlot =
             [&engine](const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
-                const auto& cell = table->children[row]->children[col];
-                auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell.get(), itemType);
+                auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+                auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell, itemType);
                 auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
                 engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe(
                     [ptr](entt::entity) { ptr->RetrieveInfo(); });
             };
 
         auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
-            auto& cell = table->children[row]->children[col];
+            auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
             auto imgBox = std::make_unique<ImageBox>(
-                engine, cell.get(), ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
+                engine, cell, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
             cell->CreateImagebox(std::move(imgBox));
         };
 

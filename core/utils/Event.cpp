@@ -11,11 +11,7 @@ namespace sage
 
     void Connection::UnSubscribe()
     {
-        if (event == nullptr)
-        {
-            return;
-        };
-        std::cout << id << std::endl;
+        if (id == -1 || !event) return;
         event->unSubscribe(id);
         id = -1;
         event = nullptr;
