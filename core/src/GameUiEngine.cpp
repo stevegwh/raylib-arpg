@@ -566,7 +566,7 @@ namespace sage
     TextBox::TextBox(
         GameUIEngine* _engine,
         TableCell* _parent,
-        FontInfo _fontInfo,
+        const FontInfo& _fontInfo,
         VertAlignment _vertAlignment,
         HoriAlignment _horiAlignment)
         : CellElement(_engine, _parent, _vertAlignment, _horiAlignment),
@@ -1214,7 +1214,7 @@ namespace sage
             tex, {0, 0, static_cast<float>(tex.width), static_cast<float>(-tex.height)}, {rec.x, rec.y}, WHITE);
     }
 
-    DialogPortrait::DialogPortrait(GameUIEngine* _engine, TableCell* _parent, Texture _tex)
+    DialogPortrait::DialogPortrait(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex)
         : ImageBox(
               _engine,
               _parent,
@@ -1721,10 +1721,10 @@ namespace sage
         HoriAlignment _horiAlignment,
         Padding _padding)
         : Window(_settings, _padding),
-          vertAlignment(_vertAlignment),
-          horiAlignment(_horiAlignment),
           baseXOffset(_xOffset),
-          baseYOffset(_yOffset)
+          baseYOffset(_yOffset),
+          vertAlignment(_vertAlignment),
+          horiAlignment(_horiAlignment)
     {
         rec.width = _width;
         rec.height = _height;
@@ -1745,10 +1745,10 @@ namespace sage
         HoriAlignment _horiAlignment,
         Padding _padding)
         : Window(_settings, _padding),
-          vertAlignment(_vertAlignment),
-          horiAlignment(_horiAlignment),
           baseXOffset(_xOffset),
-          baseYOffset(_yOffset)
+          baseYOffset(_yOffset),
+          vertAlignment(_vertAlignment),
+          horiAlignment(_horiAlignment)
     {
         tex = _tex;
         textureStretchMode = _textureStretchMode;
@@ -2687,8 +2687,8 @@ namespace sage
         }
 
         windows.erase(
-            std::remove_if(
-                windows.begin(), windows.end(), [](const auto& window) { return window->IsMarkedForRemoval(); }),
+            std::ranges::remove_if(windows, [](const auto& window) { return window->IsMarkedForRemoval(); })
+                .begin(),
             windows.end());
     }
 
@@ -2702,8 +2702,9 @@ namespace sage
         tooltipWindow = std::move(_tooltipWindow);
         tooltipWindow->windowUpdateCnx = sys->userInput->onWindowUpdate.Subscribe(
             [this](Vector2 prev, Vector2 current) { tooltipWindow->OnWindowUpdate(prev, current); });
+
         tooltipWindow->InitLayout();
-        // tooltipWindow->ScaleContents(); // TODO: Maybe not needed
+        // FinalizeLayout called externally
         return tooltipWindow.get();
     }
 
@@ -2725,31 +2726,6 @@ namespace sage
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
-    }
-
-    void GameUIEngine::PlaceWindow(Window* window, Vector2 requestedPos) const
-    {
-        window->rec.x = requestedPos.x;
-        window->rec.y = requestedPos.y;
-        window->ClampToScreen();
-        window->InitLayout();
-
-        if (auto collision = GetWindowCollision(window))
-        {
-            window->rec.x = collision->rec.x - window->rec.width;
-            window->ClampToScreen();
-            collision = GetWindowCollision(window);
-            if (collision)
-            {
-                window->rec.x = collision->rec.x + collision->rec.width;
-                window->ClampToScreen();
-                collision = GetWindowCollision(window);
-                if (collision)
-                {
-                    assert(0);
-                }
-            }
-        }
     }
 
     bool GameUIEngine::ObjectBeingDragged() const

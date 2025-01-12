@@ -176,7 +176,7 @@ namespace sage
         TextBox(
             GameUIEngine* _engine,
             TableCell* _parent,
-            FontInfo _fontInfo = FontInfo(),
+            const FontInfo& _fontInfo = FontInfo(),
             VertAlignment _vertAlignment = VertAlignment::TOP,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
 
@@ -391,7 +391,7 @@ namespace sage
 
       public:
         void Draw2D() override;
-        DialogPortrait(GameUIEngine* _engine, TableCell* _parent, Texture _tex);
+        DialogPortrait(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex);
         friend class TableCell;
     };
 
@@ -759,7 +759,6 @@ namespace sage
 
         [[nodiscard]] static Rectangle GetOverlap(Rectangle rec1, Rectangle rec2);
         [[nodiscard]] bool ObjectBeingDragged() const;
-        void PlaceWindow(Window* window, Vector2 requestedPos) const;
         [[nodiscard]] Window* GetWindowCollision(const Window* toCheck) const;
         [[nodiscard]] CellElement* GetCellUnderCursor() const;
         void DrawDebug2D() const;
