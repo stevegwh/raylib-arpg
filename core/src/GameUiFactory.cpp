@@ -250,125 +250,132 @@ namespace sage
     Window* GameUiFactory::CreateCharacterWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
+        auto _window = std::make_unique<Window>(
+            engine->sys->settings,
+            nPatchTexture,
+            TextureStretchMode::STRETCH,
+            pos.x,
+            pos.y,
+            274 * 3,
+            424 * 1.5,
+            Padding{20, 20, 14, 14});
 
-        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
-        // auto _window = std::make_unique<Window>(
-        //     engine->sys->settings,
-        //     nPatchTexture,
-        //     TextureStretchMode::STRETCH,
-        //     pos.x,
-        //     pos.y,
-        //     274 * 3,
-        //     424 * 1.5,
-        //     Padding{20, 20, 14, 14});
-        // auto window = engine->CreateWindow(std::move(_window));
-        //
-        // {
-        //     // TODO: Having the concept of "margins" would make it so much easier to create consistent layouts
-        //     // where you don't have to request different heights and add padding to make things line up
-        //     const auto panel1 = window->CreatePanel(10);
-        //     const auto table = panel1->CreateTable();
-        //     const auto row = table->CreateTableRow();
-        //     const auto cell = row->CreateTableCell(80);
-        //     const auto cell2 = row->CreateTableCell(20, {0, 18 * 2, 18, 18});
-        //     auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
-        //     cell->CreateTitleBar(std::move(titleText), "Character");
-        //
-        //     const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
-        //     auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
-        //     cell2->CreateCloseButton(std::move(closeBtn));
-        // }
-        //
-        // int maxRows = 6;
-        // int maxCols = 1;
-        //
-        // auto createEquipSlot =
-        //     [&engine](const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
-        //         auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-        //         auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell, itemType);
-        //         auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
-        //         engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe(
-        //             [ptr](entt::entity) { ptr->RetrieveInfo(); });
-        //     };
-        //
-        // auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
-        //     auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-        //     auto imgBox = std::make_unique<ImageBox>(
-        //         engine, cell, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
-        //     cell->CreateImagebox(std::move(imgBox));
-        // };
-        //
-        // auto panel2 = window->CreatePanel({0, 0, 4, 0});
-        // panel2->SetTexture(
-        //     ResourceManager::GetInstance().TextureLoad("resources/textures/ui/inventory-bg.png"),
-        //     TextureStretchMode::STRETCH);
-        // {
-        //     auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
-        //     for (unsigned int row = 0; row < maxRows; ++row)
-        //     {
-        //         for (unsigned int col = 0; col < maxCols; ++col)
-        //         {
-        //             createSpacerSlot(table, row, col);
-        //         }
-        //     }
-        //
-        //     createEquipSlot(table, 0, 0, EquipmentSlotName::HELM);
-        //     createEquipSlot(table, 1, 0, EquipmentSlotName::ARMS);
-        //     createEquipSlot(table, 2, 0, EquipmentSlotName::CHEST);
-        //     createEquipSlot(table, 3, 0, EquipmentSlotName::AMULET);
-        //     createEquipSlot(table, 4, 0, EquipmentSlotName::LEGS);
-        //     createEquipSlot(table, 5, 0, EquipmentSlotName::LEFTHAND);
-        // }
-        //
-        // {
-        //     // Character model
-        //     auto table = panel2->CreateTable(40, {0, 0, 24, 24});
-        //     auto row = table->CreateTableRow();
-        //     auto cell = row->CreateTableCell();
-        //     auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
-        //     auto img = cell->CreateEquipmentCharacterPreview(std::move(preview));
-        //     img->draggable = false;
-        // }
-        //
-        // {
-        //     auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
-        //
-        //     for (unsigned int row = 0; row < maxRows; ++row)
-        //     {
-        //         for (unsigned int col = 0; col < maxCols; ++col)
-        //         {
-        //             createSpacerSlot(table, row, col);
-        //         }
-        //     }
-        //
-        //     createEquipSlot(table, 0, 0, EquipmentSlotName::BELT);
-        //     createEquipSlot(table, 1, 0, EquipmentSlotName::BOOTS);
-        //     createEquipSlot(table, 2, 0, EquipmentSlotName::RING2);
-        //     createEquipSlot(table, 3, 0, EquipmentSlotName::RING1);
-        //     createEquipSlot(table, 5, 0, EquipmentSlotName::RIGHTHAND);
-        // }
-        //
-        // {
-        //     // Character statistics
-        //     auto table = panel2->CreateTable(40, {50, 250, 48, 48});
-        //     // ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
-        //     table->SetTexture(
-        //         ResourceManager::GetInstance().TextureLoad("resources/textures/ui/scroll-bg.png"),
-        //         TextureStretchMode::STRETCH);
-        //
-        //     for (int i = 0; i < magic_enum::enum_underlying(CharacterStatText::StatisticType::COUNT); ++i)
-        //     {
-        //         auto row = table->CreateTableRow();
-        //         auto cell = row->CreateTableCell();
-        //         auto id = magic_enum::enum_cast<CharacterStatText::StatisticType>(i).value();
-        //         auto stat = std::make_unique<CharacterStatText>(engine, cell, TextBox::FontInfo{}, id);
-        //         cell->CreateCharacterStatText(std::move(stat));
-        //     }
-        // }
-        //
-        // window->FinalizeLayout();
-        // window->Hide();
-        // return window;
+        auto window = engine->CreateWindow(std::move(_window));
+        auto mainTable = window->CreateTable({0, 0, 4, 0});
+
+        {
+            // TODO: Having the concept of "margins" would make it so much easier to create consistent layouts
+            // where you don't have to request different heights and add padding to make things line up
+            const auto titleRow = mainTable->CreateTableRow(10);
+            const auto cell = titleRow->CreateTableCell(80);
+            const auto cell2 = titleRow->CreateTableCell(20, {0, 18 * 2, 18, 18});
+            auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
+            cell->CreateTitleBar(std::move(titleText), "Character");
+
+            const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+            cell2->CreateCloseButton(std::move(closeBtn));
+        }
+
+        int maxRows = 6;
+        int maxCols = 1;
+
+        auto createEquipSlot =
+            [&engine](const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
+                auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+                auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell, itemType);
+                auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
+                engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe(
+                    [ptr](entt::entity) { ptr->RetrieveInfo(); });
+            };
+
+        auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
+            auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+            auto imgBox = std::make_unique<ImageBox>(
+                engine, cell, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
+            cell->CreateImagebox(std::move(imgBox));
+        };
+
+        auto mainRow = mainTable->CreateTableRow({0, 0, 4, 0});
+        mainRow->SetTexture(
+            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/inventory-bg.png"),
+            TextureStretchMode::STRETCH);
+
+        auto charColLeft = mainRow->CreateTableCell();
+        auto charColCenter = mainRow->CreateTableCell(40, {0, 0, 24, 24});
+        auto charColRight = mainRow->CreateTableCell();
+        auto statsCol = mainRow->CreateTableCell(40, {50, 250, 48, 48});
+        statsCol->SetTexture(
+            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/scroll-bg.png"),
+            TextureStretchMode::STRETCH);
+
+        {
+            // Left items
+            auto table = charColLeft->CreateTableGrid(maxRows, maxCols, 4);
+            for (unsigned int row = 0; row < maxRows; ++row)
+            {
+                for (unsigned int col = 0; col < maxCols; ++col)
+                {
+                    createSpacerSlot(table, row, col);
+                }
+            }
+
+            createEquipSlot(table, 0, 0, EquipmentSlotName::HELM);
+            createEquipSlot(table, 1, 0, EquipmentSlotName::ARMS);
+            createEquipSlot(table, 2, 0, EquipmentSlotName::CHEST);
+            createEquipSlot(table, 3, 0, EquipmentSlotName::AMULET);
+            createEquipSlot(table, 4, 0, EquipmentSlotName::LEGS);
+            createEquipSlot(table, 5, 0, EquipmentSlotName::LEFTHAND);
+        }
+
+        {
+            // Character model
+            auto table = charColCenter->CreateTable();
+            auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell();
+            auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
+            auto img = cell->CreateEquipmentCharacterPreview(std::move(preview));
+            img->draggable = false;
+        }
+
+        {
+            // Right items
+            auto table = charColRight->CreateTableGrid(maxRows, maxCols, 4);
+
+            for (unsigned int row = 0; row < maxRows; ++row)
+            {
+                for (unsigned int col = 0; col < maxCols; ++col)
+                {
+                    createSpacerSlot(table, row, col);
+                }
+            }
+
+            createEquipSlot(table, 0, 0, EquipmentSlotName::BELT);
+            createEquipSlot(table, 1, 0, EquipmentSlotName::BOOTS);
+            createEquipSlot(table, 2, 0, EquipmentSlotName::RING2);
+            createEquipSlot(table, 3, 0, EquipmentSlotName::RING1);
+            createEquipSlot(table, 5, 0, EquipmentSlotName::RIGHTHAND);
+        }
+
+        {
+            // Character statistics
+            auto table = statsCol->CreateTable();
+            // ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
+
+            for (int i = 0; i < magic_enum::enum_underlying(CharacterStatText::StatisticType::COUNT); ++i)
+            {
+                auto row = table->CreateTableRow();
+                auto cell = row->CreateTableCell();
+                auto id = magic_enum::enum_cast<CharacterStatText::StatisticType>(i).value();
+                auto stat = std::make_unique<CharacterStatText>(engine, cell, TextBox::FontInfo{}, id);
+                cell->CreateCharacterStatText(std::move(stat));
+            }
+        }
+
+        window->FinalizeLayout();
+        window->Hide();
+        return window;
     }
 
     Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, entt::entity npc)
