@@ -994,9 +994,9 @@ namespace sage
 
         while (!frontier.empty())
         {
-            auto currentPair = frontier.top();
+            const auto currentPair = frontier.top();
             frontier.pop();
-            auto current = currentPair.second;
+            const auto current = currentPair.second;
 
             if (current.row == finishGridSquare.row && current.col == finishGridSquare.col)
             {
@@ -1004,13 +1004,13 @@ namespace sage
                 break;
             }
 
-            for (const auto& dir : directions)
+            for (const auto& [dirX, dirY] : directions)
             {
-                GridSquare next = {current.row + dir.first, current.col + dir.second};
+                GridSquare next = {current.row + dirX, current.col + dirY};
 
-                auto current_cost = gridSquares[current.row][current.col]->pathfindingCost;
-                auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
-                double new_cost = current_cost + next_cost;
+                const auto current_cost = gridSquares[current.row][current.col]->pathfindingCost;
+                const auto next_cost = gridSquares[next.row][next.col]->pathfindingCost;
+                const double new_cost = current_cost + next_cost;
 
                 if (CheckWithinBounds(next, minRange, maxRange) && checkExtents(next, extents) &&
                     (!visited[next.row][next.col] ||
@@ -1018,8 +1018,8 @@ namespace sage
                     !gridSquares.at(next.row).at(next.col)->occupied)
                 {
                     cost_so_far[next.row][next.col] = new_cost;
-                    double heuristic_cost = heuristic(next, finishGridSquare);
-                    double priority = new_cost + heuristic_cost;
+                    const double heuristic_cost = heuristic(next, finishGridSquare);
+                    const double priority = new_cost + heuristic_cost;
                     frontier.emplace(priority, next);
                     came_from[next.row][next.col] = current;
                     visited[next.row][next.col] = true;
@@ -1042,7 +1042,7 @@ namespace sage
      * invalid (OOB or no path available).
      */
     std::vector<Vector3> NavigationGridSystem::BFSPathfind(
-        const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos)
+        const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos) const
     {
         return BFSPathfind(
             entity,
@@ -1066,7 +1066,7 @@ namespace sage
         const Vector3& startPos,
         const Vector3& finishPos,
         const GridSquare& minRange,
-        const GridSquare& maxRange)
+        const GridSquare& maxRange) const
     {
         GridSquare start{};
         GridSquare finish{};
@@ -1095,7 +1095,7 @@ namespace sage
 
         while (!frontier.empty())
         {
-            auto current = frontier.front();
+            const auto current = frontier.front();
             frontier.pop();
 
             if (current.row == finish.row && current.col == finish.col)
@@ -1104,11 +1104,10 @@ namespace sage
                 break;
             }
 
-            for (const auto& dir : directions)
+            for (const auto& [dirX, dirY] : directions)
             {
-                GridSquare next = {current.row + dir.first, current.col + dir.second};
-
-                if (CheckWithinBounds(next, minRange, maxRange) && !visited[next.row][next.col] &&
+                if (GridSquare next = {current.row + dirX, current.col + dirY};
+                    CheckWithinBounds(next, minRange, maxRange) && !visited[next.row][next.col] &&
                     checkExtents(next, extents) && !gridSquares[next.row][next.col]->occupied)
                 {
                     frontier.emplace(next);

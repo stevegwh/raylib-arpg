@@ -13,7 +13,7 @@
 
 namespace sage
 {
-    void DoorSystem::UnlockDoor(entt::entity entity)
+    void DoorSystem::UnlockDoor(entt::entity entity) const
     {
         auto& door = registry->get<DoorBehaviorComponent>(entity);
         door.locked = false;
@@ -25,11 +25,9 @@ namespace sage
         OpenClickedDoor(entity);
     }
 
-    void DoorSystem::OpenClickedDoor(entt::entity entity)
+    void DoorSystem::OpenClickedDoor(entt::entity entity) const
     {
         auto& door = registry->get<DoorBehaviorComponent>(entity);
-        // TODO: Likely, the issue with rotation stems from the fact that its position and rotation are currently
-        // set by the transform matrix, it's world position/rotation is currently set to zero.
         if (door.locked) return;
 
         static const float closedRotation = 0.0f;
@@ -40,7 +38,6 @@ namespace sage
         if (!door.open)
         {
             auto& col = registry->get<Collideable>(entity);
-            // TODO: Below not working?
             col.collisionLayer = CollisionLayer::BACKGROUND;
             sys->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, false);
             float targetRotation = (transform.forward().z > 0) ? door.openYRotation : -door.openYRotation;
@@ -57,8 +54,7 @@ namespace sage
         }
     }
 
-    DoorSystem::DoorSystem(entt::registry* _registry, sage::Systems* _sys)
-        : registry(_registry), sys(_sys)
+    DoorSystem::DoorSystem(entt::registry* _registry, sage::Systems* _sys) : registry(_registry), sys(_sys)
     {
     }
 } // namespace sage

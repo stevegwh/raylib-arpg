@@ -8,7 +8,7 @@ namespace sage
 {
     class DoorBehaviorComponent
     {
-        float openYRotation = -130;
+        float openYRotation = -130; // Hard coded for the moment
         bool open = false;
         bool locked = true;
 

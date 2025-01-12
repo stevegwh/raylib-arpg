@@ -2,15 +2,13 @@ import bpy
 import os
 import shutil
 
-# Export to 'output' folder relative to blend file location
+print(f'=======================')
+
 basedir = os.path.dirname(bpy.data.filepath)
 if not basedir:
     raise Exception("Blend file is not saved")
 
-# Create 'output' folder if it doesn't exist
-output_folder = os.path.join(basedir, "cave")
-
-# If output folder exists, delete its contents
+output_folder = os.path.join(basedir, "dungeon-map")
 if os.path.exists(output_folder):
     for filename in os.listdir(output_folder):
         file_path = os.path.join(output_folder, filename)
@@ -24,20 +22,34 @@ if os.path.exists(output_folder):
 else:
     os.makedirs(output_folder)
 
-# Create 'output/mesh' folder
+textures_dir = os.path.join(basedir, "textures")
 mesh_folder = os.path.join(output_folder, "mesh")
 os.makedirs(mesh_folder, exist_ok=True)
+
+bpy.ops.file.pack_all()
 
 view_layer = bpy.context.view_layer
 obj_active = view_layer.objects.active
 selection = bpy.context.selected_objects
 bpy.ops.object.select_all(action='DESELECT')
 
-# Dictionary to store unique meshes
 unique_meshes = {}
 
 
-def handle_spawner(obj, output_folder):
+def handle_spawner(obj):
+    print(f"\nDEBUG INFO for object: {obj.name}")
+
+    # Check if we have mesh data and try to get the property
+    spawner_name = "NOT_FOUND"
+    if "spawner_name" in obj:
+        try:
+            spawner_name = obj["spawner_name"]
+            print(f"Found spawner_name in mesh data: {spawner_name}")
+        except:
+            print("Failed to access spawner_name")
+    else:
+        print("No spawner_name property found")
+
     transform_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
     with open(transform_file, 'w') as f:
         f.write(f"type: spawner\n")
@@ -45,20 +57,29 @@ def handle_spawner(obj, output_folder):
         f.write(f"location: {obj.location.x:.6f} {obj.location.z:.6f} {-obj.location.y:.6f}\n")
         f.write(f"rotation: {obj.rotation_euler.x:.6f} {obj.rotation_euler.z:.6f} {obj.rotation_euler.y:.6f}\n")
 
-        # Determine spawner type based on object name
-        if "Goblin" in obj.name:
-            spawner_type = "GOBLIN"
+        if "Enemy" in obj.name:
+            spawner_type = "ENEMY"
         elif "Player" in obj.name:
             spawner_type = "PLAYER"
+        elif "Dialog_Cutscene" in obj.name:
+            spawner_type = "DIALOG_CUTSCENE"
+        elif "NPC" in obj.name:
+            spawner_type = "NPC"
         else:
             spawner_type = "UNKNOWN"
 
         f.write(f"spawner_type: {spawner_type}\n")
 
+        # Handle spawned_name based on type
+        if spawner_type == "PLAYER":
+            f.write("spawner_name: PLAYER\n")
+        else:
+            f.write(f"spawner_name: {spawner_name}\n")
+
     print(f"Exported spawner: {transform_file}")
 
 
-def handle_light(obj, output_folder):
+def handle_light(obj):
     if obj.data.type == 'POINT':
         light_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
         with open(light_file, 'w') as f:
@@ -89,6 +110,90 @@ def handle_light(obj, output_folder):
         print(f"Exported light: {light_file}")
 
 
+def handle_item(obj):
+    if obj.data.name not in unique_meshes:
+        original_transform = obj.matrix_world.copy()
+        obj.matrix_world.identity()
+
+        view_layer.objects.active = obj
+        mesh_name = bpy.path.clean_name(obj.data.name)
+        fn = os.path.join(mesh_folder, mesh_name)
+
+        bpy.ops.export_scene.gltf(
+            filepath=fn + ".gltf",
+            export_format='GLTF_SEPARATE',
+            use_selection=True
+        )
+
+        obj.matrix_world = original_transform
+
+        unique_meshes[obj.data.name] = mesh_name
+        print("Exported mesh:", fn + ".gltf")
+
+    location = obj.location
+    rotation = obj.rotation_euler
+    scale = obj.scale
+
+    transform_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
+    with open(transform_file, 'w') as f:
+        f.write(f"type: item\n")
+        f.write(f"name: {obj.name}\n")
+        f.write(f"mesh: {unique_meshes[obj.data.name]}.gltf\n")
+        f.write(f"location: {location.x:.6f} {location.z:.6f} {-location.y:.6f}\n")
+        f.write(f"rotation: {rotation.x:.6f} {rotation.z:.6f} {rotation.y:.6f}\n")
+        f.write(f"scale: {scale.x:.6f} {scale.z:.6f} {scale.y:.6f}\n")
+
+    print("Exported transform:", transform_file)
+
+
+def handle_mesh(obj):
+    if obj.data.name not in unique_meshes:
+        original_transform = obj.matrix_world.copy()
+        obj.matrix_world.identity()
+
+        view_layer.objects.active = obj
+        mesh_name = bpy.path.clean_name(obj.data.name)
+        fn = os.path.join(mesh_folder, mesh_name)
+
+        bpy.ops.export_scene.gltf(
+            filepath=fn + ".gltf",
+            export_format='GLTF_SEPARATE',
+            use_selection=True
+        )
+
+        obj.matrix_world = original_transform
+
+        unique_meshes[obj.data.name] = mesh_name
+        print("Exported mesh:", fn + ".gltf")
+
+    location = obj.location
+    rotation = obj.rotation_euler
+    scale = obj.scale
+
+    transform_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
+    with open(transform_file, 'w') as f:
+        f.write(f"type: mesh\n")
+        f.write(f"name: {obj.name}\n")
+        f.write(f"mesh: {unique_meshes[obj.data.name]}.gltf\n")
+        f.write(f"location: {location.x:.6f} {location.z:.6f} {-location.y:.6f}\n")
+        f.write(f"rotation: {rotation.x:.6f} {rotation.z:.6f} {rotation.y:.6f}\n")
+        f.write(f"scale: {scale.x:.6f} {scale.z:.6f} {scale.y:.6f}\n")
+
+    print("Exported transform:", transform_file)
+
+
+def copy_textures_to_mesh():
+    if os.path.exists(textures_dir):
+        for filename in os.listdir(textures_dir):
+            src = os.path.join(textures_dir, filename)
+            dst = os.path.join(mesh_folder, filename)
+            shutil.copy2(src, dst)
+        print("Copied textures to mesh directory")
+
+
+bpy.ops.file.unpack_all(method='WRITE_LOCAL')
+copy_textures_to_mesh()
+
 for obj in selection:
     obj.select_set(True)
 
@@ -96,55 +201,25 @@ for obj in selection:
         continue
 
     if "Spawner" in obj.name:
-        handle_spawner(obj, output_folder)
+        handle_spawner(obj)
+    elif "_ITEM_" in obj.name:
+        handle_item(obj)
     elif obj.type == 'LIGHT':
-        handle_light(obj, output_folder)
+        handle_light(obj)
     else:
-        # Process regular objects (meshes)
-        if obj.data.name not in unique_meshes:
-            # Set transform to 0,0,0
-            original_transform = obj.matrix_world.copy()
-            obj.matrix_world.identity()
-
-            # Some exporters only use the active object
-            view_layer.objects.active = obj
-            mesh_name = bpy.path.clean_name(obj.data.name)
-            fn = os.path.join(mesh_folder, mesh_name)
-
-            # Export GLB files
-            bpy.ops.export_scene.gltf(
-                filepath=fn + ".glb",
-                export_format='GLB',
-                use_selection=True
-            )
-
-            # Restore original transform
-            obj.matrix_world = original_transform
-
-            unique_meshes[obj.data.name] = mesh_name
-            print("Exported mesh:", fn + ".glb")
-
-        # Prepare transform data
-        location = obj.location
-        rotation = obj.rotation_euler
-        scale = obj.scale
-
-        # Export transform data to text file (Converted to "Unity" coords)
-        transform_file = os.path.join(output_folder, bpy.path.clean_name(obj.name) + ".txt")
-        with open(transform_file, 'w') as f:
-            f.write(f"type: mesh\n")
-            f.write(f"name: {obj.name}\n")
-            f.write(f"mesh: {unique_meshes[obj.data.name]}.glb\n")
-            f.write(f"location: {location.x:.6f} {location.z:.6f} {-location.y:.6f}\n")
-            f.write(f"rotation: {rotation.x:.6f} {rotation.z:.6f} {rotation.y:.6f}\n")
-            f.write(f"scale: {scale.x:.6f} {scale.z:.6f} {scale.y:.6f}\n")
-
-        print("Exported transform:", transform_file)
+        handle_mesh(obj)
 
     obj.select_set(False)
 
 view_layer.objects.active = obj_active
 for obj in selection:
     obj.select_set(True)
+
+bpy.ops.file.pack_all()
+
+# Clean up textures folder after packing
+if os.path.exists(textures_dir):
+    shutil.rmtree(textures_dir)
+    print("Cleaned up textures directory")
 
 print("Export completed.")

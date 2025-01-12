@@ -15,9 +15,9 @@ namespace sage
         Systems* sys;
 
       public:
-        void UnlockDoor(entt::entity entity);
+        void UnlockDoor(entt::entity entity) const;
         void UnlockAndOpenDoor(entt::entity entity);
-        void OpenClickedDoor(entt::entity entity);
+        void OpenClickedDoor(entt::entity entity) const;
 
         DoorSystem(entt::registry* _registry, Systems* _sys);
     };

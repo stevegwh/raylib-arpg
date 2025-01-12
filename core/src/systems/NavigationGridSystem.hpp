@@ -109,14 +109,14 @@ namespace sage
             AStarHeuristic heuristicType = AStarHeuristic::DEFAULT) const;
         //---------------------------------------------------------
         [[nodiscard]] std::vector<Vector3> BFSPathfind(
-            const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos);
+            const entt::entity& entity, const Vector3& startPos, const Vector3& finishPos) const;
         //---------------------------------------------------------
         [[nodiscard]] std::vector<Vector3> BFSPathfind(
             const entt::entity& entity,
             const Vector3& startPos,
             const Vector3& finishPos,
             const GridSquare& minRange,
-            const GridSquare& maxRange);
+            const GridSquare& maxRange) const;
         //---------------------------------------------------------
         const std::vector<std::vector<std::unique_ptr<NavigationGridSquare>>>& GetGridSquares();
         //---------------------------------------------------------
