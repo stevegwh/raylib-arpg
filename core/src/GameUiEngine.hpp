@@ -207,6 +207,7 @@ namespace sage
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
+        virtual void Update();
         virtual void ScaleContents(Settings* _settings)
         {
             auto posScaled = _settings->ScalePos({rec.x, rec.y});
@@ -265,7 +266,15 @@ namespace sage
 
             // TILE not needed to update here
         }
-
+        virtual void FinalizeLayout()
+        {
+            unscaledDimensions.rec = rec;
+            unscaledDimensions.padding = padding;
+            for (auto& child : children)
+            {
+                child->FinalizeLayout();
+            }
+        }
         virtual void InitLayout() = 0;
         virtual void DrawDebug2D() = 0;
         virtual void Draw2D()
@@ -689,7 +698,7 @@ namespace sage
         Settings* settings{}; // for screen width/height
 
         void SetPos(float x, float y) override;
-        void FinalizeLayout();
+        void FinalizeLayout() override;
         void OnWindowUpdate(Vector2 prev, Vector2 current);
         void ClampToScreen();
         void OnHoverStart() override;

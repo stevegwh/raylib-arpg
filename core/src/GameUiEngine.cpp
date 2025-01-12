@@ -1761,6 +1761,20 @@ namespace sage
         unscaledDimensions.padding = padding;
     }
 
+    void TableElement::Update()
+    {
+        assert(!(element.has_value() && !children.empty()));
+        if (element.has_value())
+        {
+            element.value()->state->Update();
+            return;
+        }
+        for (const auto& child : children)
+        {
+            child->Update();
+        }
+    }
+
     void Window::SetPos(float x, float y)
     {
         auto old = Vector2{rec.x, rec.y};
@@ -1851,26 +1865,9 @@ namespace sage
     {
         unscaledDimensions.rec = rec;
         unscaledDimensions.padding = padding;
-        for (auto& panel : children)
+        for (auto& child : children)
         {
-            panel->unscaledDimensions.rec = panel->rec;
-            panel->unscaledDimensions.padding = panel->padding;
-
-            for (auto& table : panel->children)
-            {
-                table->unscaledDimensions.rec = table->rec;
-                table->unscaledDimensions.padding = table->padding;
-                for (auto& row : table->children)
-                {
-                    row->unscaledDimensions.rec = row->rec;
-                    row->unscaledDimensions.padding = row->padding;
-                    for (auto& cell : row->children)
-                    {
-                        cell->unscaledDimensions.rec = cell->rec;
-                        cell->unscaledDimensions.padding = cell->padding;
-                    }
-                }
-            }
+            child->FinalizeLayout();
         }
         ScaleContents();
     }
@@ -2637,15 +2634,15 @@ namespace sage
 #pragma region GameUIEngine
     void GameUIEngine::pruneWindows()
     {
-        if (tooltipWindow && tooltipWindow->IsMarkedForRemoval())
-        {
-            tooltipWindow.reset();
-        }
-
         windows.erase(
             std::remove_if(
                 windows.begin(), windows.end(), [](const auto& window) { return window->IsMarkedForRemoval(); }),
             windows.end());
+
+        if (tooltipWindow && tooltipWindow->IsMarkedForRemoval())
+        {
+            tooltipWindow.reset();
+        }
     }
 
     void GameUIEngine::CreateErrorMessage(const std::string& msg)
@@ -2873,22 +2870,7 @@ namespace sage
             sys->cursor->DisableContextSwitching();
 
             window->OnHoverStart(); // TODO: Need to check if it was already being hovered?
-            for (const auto& panel : window->children)
-            {
-                for (const auto& table : panel->children)
-                {
-                    for (const auto& row : table->children)
-                    {
-                        for (const auto& cell : row->children)
-                        {
-                            if (cell->element.has_value())
-                            {
-                                cell->element.value()->state->Update();
-                            }
-                        }
-                    }
-                }
-            }
+            window->Update();
         }
     }
 
