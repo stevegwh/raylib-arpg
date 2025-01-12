@@ -51,38 +51,41 @@ namespace sage
 
     Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine)
     {
-        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_hud.png");
-        //
-        // auto w = 1024; // Absolute value of the image
-        // auto h = 156;
-        // auto _windowDocked = std::make_unique<WindowDocked>(
-        //     engine->sys->settings,
-        //     nPatchTexture,
-        //     TextureStretchMode::STRETCH,
-        //     0,
-        //     0,
-        //     w,
-        //     h,
-        //     VertAlignment::BOTTOM,
-        //     HoriAlignment::CENTER,
-        //     Padding{0, 0, 0, 0});
-        // auto window = engine->CreateWindowDocked(std::move(_windowDocked));
-        //
-        // auto panel = window->CreatePanel();
-        // auto table = panel->CreateTable(15.5);
-        // auto abilityTable = panel->CreateTable({16, 0, 0, 0});
-        // panel->CreateTable(15.5);
-        // auto experienceBar = abilityTable->CreateTableRow(24);
-        // auto abilityRow = abilityTable->CreateTableRowGrid(MAX_ABILITY_NUMBER, 4, {4, 4, 0, 0});
-        // for (unsigned int i = 0; i < abilityRow->children.size(); ++i)
-        // {
-        //     auto cell = dynamic_cast<TableCell*>(abilityRow->children[i].get());
-        //     cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
-        // }
-        //
-        // // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
-        // window->FinalizeLayout();
-        // return window;
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_hud.png");
+
+        auto w = 1024; // Absolute value of the image
+        auto h = 156;
+        auto _windowDocked = std::make_unique<WindowDocked>(
+            engine->sys->settings,
+            nPatchTexture,
+            TextureStretchMode::STRETCH,
+            0,
+            0,
+            w,
+            h,
+            VertAlignment::BOTTOM,
+            HoriAlignment::CENTER,
+            Padding{0, 0, 0, 0});
+        auto window = engine->CreateWindowDocked(std::move(_windowDocked));
+
+        auto tableMain = window->CreateTable();
+        auto tableMainRow = tableMain->CreateTableRow();
+        tableMainRow->CreateTableCell(15.5);
+        auto abilityCell = tableMainRow->CreateTableCell({16, 0, 0, 0});
+        tableMainRow->CreateTableCell(15.5);
+
+        auto table = abilityCell->CreateTable();
+        table->CreateTableRow(24); // Experience bar
+        auto abilityRow = table->CreateTableRowGrid(MAX_ABILITY_NUMBER, 4, {4, 4, 0, 0});
+        for (unsigned int i = 0; i < abilityRow->children.size(); ++i)
+        {
+            auto cell = dynamic_cast<TableCell*>(abilityRow->children[i].get());
+            cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
+        }
+
+        // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
+        window->FinalizeLayout();
+        return window;
     }
 
     TooltipWindow* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)

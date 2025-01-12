@@ -21,6 +21,7 @@
 
 namespace sage
 {
+    class TableGrid;
     class TooltipWindow;
     class Systems;
     class GameUIEngine;
@@ -217,7 +218,7 @@ namespace sage
         void UpdateTextureDimensions();
         virtual void FinalizeLayout();
         virtual void InitLayout() = 0;
-        virtual void DrawDebug2D() = 0;
+        virtual void DrawDebug2D();
         virtual void Draw2D();
         [[nodiscard]] Window* GetWindow();
 
@@ -492,8 +493,10 @@ namespace sage
         AbilitySlot* CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot);
         EquipmentSlot* CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot);
         InventorySlot* CreateInventorySlot(std::unique_ptr<InventorySlot> _slot);
+        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0, Padding _padding = {0, 0, 0, 0});
+        Table* CreateTable(Padding _padding = {0, 0, 0, 0});
+        Table* CreateTable(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void InitLayout() override;
-        void DrawDebug2D() override;
         ~TableCell() override = default;
         explicit TableCell(TableRow* _parent, Padding _padding = {0, 0, 0, 0});
         friend class TableRow;
@@ -508,7 +511,6 @@ namespace sage
         TableCell* CreateTableCell(Padding _padding = {0, 0, 0, 0});
         TableCell* CreateTableCell(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void InitLayout() override;
-        void DrawDebug2D() override;
         ~TableRow() override = default;
         explicit TableRow(Table* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Table;
@@ -534,7 +536,6 @@ namespace sage
         TableRow* CreateTableRow(Padding _padding = {0, 0, 0, 0});
         TableRow* CreateTableRow(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void InitLayout() override;
-        void DrawDebug2D() override;
         ~Table() override = default;
         explicit Table(Window* _parent, Padding _padding = {0, 0, 0, 0});
         explicit Table(TableCell* _parent, Padding _padding = {0, 0, 0, 0});
@@ -575,14 +576,13 @@ namespace sage
         void OnHoverStart() override;
         TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0, Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(Padding _padding = {0, 0, 0, 0});
-        Table* CreateTable(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
+        Table* CreateTable(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
         void ToggleHide();
         void Show();
         void Hide();
         [[nodiscard]] bool IsHidden() const;
         [[nodiscard]] bool IsMarkedForRemoval() const;
         virtual void Remove();
-        void DrawDebug2D() override;
         void InitLayout() override;
         ~Window() override;
         explicit Window(Settings* _settings, Padding _padding = {0, 0, 0, 0});
