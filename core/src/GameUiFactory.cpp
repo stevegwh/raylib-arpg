@@ -373,80 +373,83 @@ namespace sage
 
     Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, entt::entity npc)
     {
-        // const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
-        //
-        // float w = Settings::TARGET_SCREEN_WIDTH * 0.65;
-        // float h = Settings::TARGET_SCREEN_HEIGHT * 0.35;
-        // auto _windowDocked = std::make_unique<WindowDocked>(
-        //     engine->sys->settings,
-        //     nPatchTexture,
-        //     TextureStretchMode::NONE,
-        //     0,
-        //     0,
-        //     w,
-        //     h,
-        //     VertAlignment::BOTTOM,
-        //     HoriAlignment::CENTER,
-        //     Padding{32, 32, 16, 16});
-        // auto window = engine->CreateWindowDocked(std::move(_windowDocked));
-        // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        //
-        // auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
-        // TextBox::FontInfo _fontInfo;
-        // _fontInfo.baseFontSize = 20;
-        // _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
-        //
-        // // NPC Part
-        // {
-        //     auto& renderable = engine->registry->get<Renderable>(npc);
-        //     auto panel = window->CreatePanel();
-        //     const auto table = panel->CreateTable();
-        //     const auto descriptionRow = table->CreateTableRow();
-        //     const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
-        //     auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
-        //
-        //     std::string speakerName;
-        //     if (!dialogComponent.conversation->speaker.empty())
-        //     {
-        //         speakerName = dialogComponent.conversation->speaker;
-        //     }
-        //     else
-        //     {
-        //         speakerName = renderable.GetVanityName();
-        //     }
-        //
-        //     descriptionCell->CreateTextbox(
-        //         std::move(textbox),
-        //         std::format("[{}]: {}", speakerName, dialogComponent.conversation->GetCurrentNode()->content));
-        // }
-        // // ----------------
-        //
-        // // Player part
-        // {
-        //     auto panel = window->CreatePanel();
-        //     const auto portraitTable = panel->CreateTable();
-        //     auto portraitRow = portraitTable->CreateTableRow();
-        //     auto portraitCell = portraitRow->CreateTableCell();
-        //
-        //     const auto& info = engine->registry->get<PartyMemberComponent>(
-        //         engine->sys->controllableActorSystem->GetSelectedActor());
-        //     auto tex = info.portraitImg.texture;
-        //     auto img = std::make_unique<DialogPortrait>(engine, portraitCell, tex);
-        //     portraitCell->CreateImagebox(std::move(img));
-        //
-        //     const auto optionsTable = panel->CreateTable(80);
-        //     unsigned int i = 0;
-        //     for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
-        //     {
-        //         if (!o->ShouldShow()) continue;
-        //         const auto optionRow = optionsTable->CreateTableRow();
-        //         const auto optionCell = optionRow->CreateTableCell({10, 10, 10, 10});
-        //         auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
-        //         optionCell->CreateDialogOption(std::move(option));
-        //     }
-        // }
-        // window->FinalizeLayout();
-        // return window;
+        const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+
+        float w = Settings::TARGET_SCREEN_WIDTH * 0.65;
+        float h = Settings::TARGET_SCREEN_HEIGHT * 0.35;
+
+        auto _windowDocked = std::make_unique<WindowDocked>(
+            engine->sys->settings,
+            nPatchTexture,
+            TextureStretchMode::NONE,
+            0,
+            0,
+            w,
+            h,
+            VertAlignment::BOTTOM,
+            HoriAlignment::CENTER,
+            Padding{32, 32, 16, 16});
+
+        auto window = engine->CreateWindowDocked(std::move(_windowDocked));
+        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+
+        auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
+        TextBox::FontInfo _fontInfo;
+        _fontInfo.baseFontSize = 20;
+        _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+
+        const auto table = window->CreateTable();
+        // NPC Part
+        {
+            auto& renderable = engine->registry->get<Renderable>(npc);
+            const auto descriptionRow = table->CreateTableRow();
+            const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
+            auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
+
+            std::string speakerName;
+            if (!dialogComponent.conversation->speaker.empty())
+            {
+                speakerName = dialogComponent.conversation->speaker;
+            }
+            else
+            {
+                speakerName = renderable.GetVanityName();
+            }
+
+            descriptionCell->CreateTextbox(
+                std::move(textbox),
+                std::format("[{}]: {}", speakerName, dialogComponent.conversation->GetCurrentNode()->content));
+        }
+        // ----------------
+
+        // Player part
+        {
+            auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell();
+            const auto portraitTable = cell->CreateTable();
+            auto portraitRow = portraitTable->CreateTableRow();
+            auto portraitCell = portraitRow->CreateTableCell();
+
+            const auto& info = engine->registry->get<PartyMemberComponent>(
+                engine->sys->controllableActorSystem->GetSelectedActor());
+            auto tex = info.portraitImg.texture;
+            auto img = std::make_unique<DialogPortrait>(engine, portraitCell, tex);
+            portraitCell->CreateImagebox(std::move(img));
+
+            auto cell2 = row->CreateTableCell(80);
+            const auto optionsTable = cell2->CreateTable();
+            unsigned int i = 0;
+            for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
+            {
+                if (!o->ShouldShow()) continue;
+                const auto optionRow = optionsTable->CreateTableRow();
+                const auto optionCell = optionRow->CreateTableCell({10, 10, 10, 10});
+                auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
+                optionCell->CreateDialogOption(std::move(option));
+            }
+        }
+        window->FinalizeLayout();
+        return window;
     }
 
     Window* GameUiFactory::CreateGameWindowButtons(
