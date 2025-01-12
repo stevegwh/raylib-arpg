@@ -35,8 +35,7 @@ namespace sage
         auto _windowDocked = std::make_unique<WindowDocked>(
             engine->sys->settings, 16, 16, w, h, VertAlignment::TOP, HoriAlignment::LEFT);
         auto* window = engine->CreateWindowDocked(std::move(_windowDocked));
-        auto panel = window->CreatePanel();
-        auto table = panel->CreateTable();
+        auto table = window->CreateTable();
 
         for (int i = 0; i < PARTY_MEMBER_MAX; ++i)
         {
@@ -52,38 +51,38 @@ namespace sage
 
     Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine)
     {
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_hud.png");
-
-        auto w = 1024; // Absolute value of the image
-        auto h = 156;
-        auto _windowDocked = std::make_unique<WindowDocked>(
-            engine->sys->settings,
-            nPatchTexture,
-            TextureStretchMode::STRETCH,
-            0,
-            0,
-            w,
-            h,
-            VertAlignment::BOTTOM,
-            HoriAlignment::CENTER,
-            Padding{0, 0, 0, 0});
-        auto window = engine->CreateWindowDocked(std::move(_windowDocked));
-
-        auto panel = window->CreatePanel();
-        auto table = panel->CreateTable(15.5);
-        auto abilityTable = panel->CreateTable({16, 0, 0, 0});
-        panel->CreateTable(15.5);
-        auto experienceBar = abilityTable->CreateTableRow(24);
-        auto abilityRow = abilityTable->CreateTableRowGrid(MAX_ABILITY_NUMBER, 4, {4, 4, 0, 0});
-        for (unsigned int i = 0; i < abilityRow->children.size(); ++i)
-        {
-            auto cell = dynamic_cast<TableCell*>(abilityRow->children[i].get());
-            cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
-        }
-
-        // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
-        window->FinalizeLayout();
-        return window;
+        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_hud.png");
+        //
+        // auto w = 1024; // Absolute value of the image
+        // auto h = 156;
+        // auto _windowDocked = std::make_unique<WindowDocked>(
+        //     engine->sys->settings,
+        //     nPatchTexture,
+        //     TextureStretchMode::STRETCH,
+        //     0,
+        //     0,
+        //     w,
+        //     h,
+        //     VertAlignment::BOTTOM,
+        //     HoriAlignment::CENTER,
+        //     Padding{0, 0, 0, 0});
+        // auto window = engine->CreateWindowDocked(std::move(_windowDocked));
+        //
+        // auto panel = window->CreatePanel();
+        // auto table = panel->CreateTable(15.5);
+        // auto abilityTable = panel->CreateTable({16, 0, 0, 0});
+        // panel->CreateTable(15.5);
+        // auto experienceBar = abilityTable->CreateTableRow(24);
+        // auto abilityRow = abilityTable->CreateTableRowGrid(MAX_ABILITY_NUMBER, 4, {4, 4, 0, 0});
+        // for (unsigned int i = 0; i < abilityRow->children.size(); ++i)
+        // {
+        //     auto cell = dynamic_cast<TableCell*>(abilityRow->children[i].get());
+        //     cell->CreateAbilitySlot(std::make_unique<AbilitySlot>(engine, cell, i));
+        // }
+        //
+        // // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
+        // window->FinalizeLayout();
+        // return window;
     }
 
     TooltipWindow* GameUiFactory::CreateWorldTooltip(GameUIEngine* engine, const std::string& name, Vector2 pos)
@@ -112,8 +111,7 @@ namespace sage
 
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
-            auto panel = window->CreatePanel();
-            auto table = panel->CreateTable();
+            auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
 
@@ -145,8 +143,7 @@ namespace sage
 
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
-            auto panel = window->CreatePanel();
-            auto table = panel->CreateTable();
+            auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
@@ -181,8 +178,7 @@ namespace sage
 
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
-            auto panel = window->CreatePanel();
-            auto table = panel->CreateTable();
+            auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
@@ -201,250 +197,251 @@ namespace sage
     Window* GameUiFactory::CreateInventoryWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
-        auto _window = std::make_unique<Window>(
-            engine->sys->settings,
-            nPatchTexture,
-            TextureStretchMode::STRETCH,
-            pos.x,
-            pos.y,
-            274 * 1.5,
-            424 * 1.5,
-            Padding{20, 0, 14, 14});
-        auto window = engine->CreateWindow(std::move(_window));
-        {
-            auto panel = window->CreatePanel(4);
-            auto table = panel->CreateTable();
-            auto row = table->CreateTableRow();
-            auto cell = row->CreateTableCell(80);
-            auto cell2 = row->CreateTableCell(20);
-            auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
-            cell->CreateTitleBar(std::move(titleBar), "Inventory");
-            auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
-            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
-            cell2->CreateCloseButton(std::move(closeBtn));
-        }
-
-        {
-            auto panel1 = window->CreatePanel({20, 0, 0, 0});
-            auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
-            for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
-            {
-                for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
-                {
-                    auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-                    auto invSlot = std::make_unique<InventorySlot>(engine, cell, row, col);
-                    auto ptr = cell->CreateInventorySlot(std::move(invSlot));
-
-                    engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo(); });
-                }
-            }
-        }
-        window->FinalizeLayout();
-        window->Hide();
-        return window;
+        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
+        // auto _window = std::make_unique<Window>(
+        //     engine->sys->settings,
+        //     nPatchTexture,
+        //     TextureStretchMode::STRETCH,
+        //     pos.x,
+        //     pos.y,
+        //     274 * 1.5,
+        //     424 * 1.5,
+        //     Padding{20, 0, 14, 14});
+        // auto window = engine->CreateWindow(std::move(_window));
+        // {
+        //     auto panel = window->CreatePanel(4);
+        //     auto table = panel->CreateTable();
+        //     auto row = table->CreateTableRow();
+        //     auto cell = row->CreateTableCell(80);
+        //     auto cell2 = row->CreateTableCell(20);
+        //     auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
+        //     cell->CreateTitleBar(std::move(titleBar), "Inventory");
+        //     auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+        //     auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+        //     cell2->CreateCloseButton(std::move(closeBtn));
+        // }
+        //
+        // {
+        //     auto panel1 = window->CreatePanel({20, 0, 0, 0});
+        //     auto table = panel1->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
+        //     for (unsigned int row = 0; row < INVENTORY_MAX_ROWS; ++row)
+        //     {
+        //         for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
+        //         {
+        //             auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+        //             auto invSlot = std::make_unique<InventorySlot>(engine, cell, row, col);
+        //             auto ptr = cell->CreateInventorySlot(std::move(invSlot));
+        //
+        //             engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo();
+        //             });
+        //         }
+        //     }
+        // }
+        // window->FinalizeLayout();
+        // window->Hide();
+        // return window;
     }
 
     Window* GameUiFactory::CreateCharacterWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
 
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
-        auto _window = std::make_unique<Window>(
-            engine->sys->settings,
-            nPatchTexture,
-            TextureStretchMode::STRETCH,
-            pos.x,
-            pos.y,
-            274 * 3,
-            424 * 1.5,
-            Padding{20, 20, 14, 14});
-        auto window = engine->CreateWindow(std::move(_window));
-
-        {
-            // TODO: Having the concept of "margins" would make it so much easier to create consistent layouts
-            // where you don't have to request different heights and add padding to make things line up
-            const auto panel1 = window->CreatePanel(10);
-            const auto table = panel1->CreateTable();
-            const auto row = table->CreateTableRow();
-            const auto cell = row->CreateTableCell(80);
-            const auto cell2 = row->CreateTableCell(20, {0, 18 * 2, 18, 18});
-            auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
-            cell->CreateTitleBar(std::move(titleText), "Character");
-
-            const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
-            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
-            cell2->CreateCloseButton(std::move(closeBtn));
-        }
-
-        int maxRows = 6;
-        int maxCols = 1;
-
-        auto createEquipSlot =
-            [&engine](const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
-                auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-                auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell, itemType);
-                auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
-                engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe(
-                    [ptr](entt::entity) { ptr->RetrieveInfo(); });
-            };
-
-        auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
-            auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-            auto imgBox = std::make_unique<ImageBox>(
-                engine, cell, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
-            cell->CreateImagebox(std::move(imgBox));
-        };
-
-        auto panel2 = window->CreatePanel({0, 0, 4, 0});
-        panel2->SetTexture(
-            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/inventory-bg.png"),
-            TextureStretchMode::STRETCH);
-        {
-            auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
-            for (unsigned int row = 0; row < maxRows; ++row)
-            {
-                for (unsigned int col = 0; col < maxCols; ++col)
-                {
-                    createSpacerSlot(table, row, col);
-                }
-            }
-
-            createEquipSlot(table, 0, 0, EquipmentSlotName::HELM);
-            createEquipSlot(table, 1, 0, EquipmentSlotName::ARMS);
-            createEquipSlot(table, 2, 0, EquipmentSlotName::CHEST);
-            createEquipSlot(table, 3, 0, EquipmentSlotName::AMULET);
-            createEquipSlot(table, 4, 0, EquipmentSlotName::LEGS);
-            createEquipSlot(table, 5, 0, EquipmentSlotName::LEFTHAND);
-        }
-
-        {
-            // Character model
-            auto table = panel2->CreateTable(40, {0, 0, 24, 24});
-            auto row = table->CreateTableRow();
-            auto cell = row->CreateTableCell();
-            auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
-            auto img = cell->CreateEquipmentCharacterPreview(std::move(preview));
-            img->draggable = false;
-        }
-
-        {
-            auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
-
-            for (unsigned int row = 0; row < maxRows; ++row)
-            {
-                for (unsigned int col = 0; col < maxCols; ++col)
-                {
-                    createSpacerSlot(table, row, col);
-                }
-            }
-
-            createEquipSlot(table, 0, 0, EquipmentSlotName::BELT);
-            createEquipSlot(table, 1, 0, EquipmentSlotName::BOOTS);
-            createEquipSlot(table, 2, 0, EquipmentSlotName::RING2);
-            createEquipSlot(table, 3, 0, EquipmentSlotName::RING1);
-            createEquipSlot(table, 5, 0, EquipmentSlotName::RIGHTHAND);
-        }
-
-        {
-            // Character statistics
-            auto table = panel2->CreateTable(40, {50, 250, 48, 48});
-            //            ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
-            table->SetTexture(
-                ResourceManager::GetInstance().TextureLoad("resources/textures/ui/scroll-bg.png"),
-                TextureStretchMode::STRETCH);
-
-            for (int i = 0; i < magic_enum::enum_underlying(CharacterStatText::StatisticType::COUNT); ++i)
-            {
-                auto row = table->CreateTableRow();
-                auto cell = row->CreateTableCell();
-                auto id = magic_enum::enum_cast<CharacterStatText::StatisticType>(i).value();
-                auto stat = std::make_unique<CharacterStatText>(engine, cell, TextBox::FontInfo{}, id);
-                cell->CreateCharacterStatText(std::move(stat));
-            }
-        }
-
-        window->FinalizeLayout();
-        window->Hide();
-        return window;
+        // auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
+        // auto _window = std::make_unique<Window>(
+        //     engine->sys->settings,
+        //     nPatchTexture,
+        //     TextureStretchMode::STRETCH,
+        //     pos.x,
+        //     pos.y,
+        //     274 * 3,
+        //     424 * 1.5,
+        //     Padding{20, 20, 14, 14});
+        // auto window = engine->CreateWindow(std::move(_window));
+        //
+        // {
+        //     // TODO: Having the concept of "margins" would make it so much easier to create consistent layouts
+        //     // where you don't have to request different heights and add padding to make things line up
+        //     const auto panel1 = window->CreatePanel(10);
+        //     const auto table = panel1->CreateTable();
+        //     const auto row = table->CreateTableRow();
+        //     const auto cell = row->CreateTableCell(80);
+        //     const auto cell2 = row->CreateTableCell(20, {0, 18 * 2, 18, 18});
+        //     auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
+        //     cell->CreateTitleBar(std::move(titleText), "Character");
+        //
+        //     const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+        //     auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+        //     cell2->CreateCloseButton(std::move(closeBtn));
+        // }
+        //
+        // int maxRows = 6;
+        // int maxCols = 1;
+        //
+        // auto createEquipSlot =
+        //     [&engine](const Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
+        //         auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+        //         auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell, itemType);
+        //         auto* ptr = cell->CreateEquipmentSlot(std::move(equipSlot));
+        //         engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe(
+        //             [ptr](entt::entity) { ptr->RetrieveInfo(); });
+        //     };
+        //
+        // auto createSpacerSlot = [&engine](const Table* table, unsigned int row, unsigned int col) {
+        //     auto cell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+        //     auto imgBox = std::make_unique<ImageBox>(
+        //         engine, cell, ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"));
+        //     cell->CreateImagebox(std::move(imgBox));
+        // };
+        //
+        // auto panel2 = window->CreatePanel({0, 0, 4, 0});
+        // panel2->SetTexture(
+        //     ResourceManager::GetInstance().TextureLoad("resources/textures/ui/inventory-bg.png"),
+        //     TextureStretchMode::STRETCH);
+        // {
+        //     auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
+        //     for (unsigned int row = 0; row < maxRows; ++row)
+        //     {
+        //         for (unsigned int col = 0; col < maxCols; ++col)
+        //         {
+        //             createSpacerSlot(table, row, col);
+        //         }
+        //     }
+        //
+        //     createEquipSlot(table, 0, 0, EquipmentSlotName::HELM);
+        //     createEquipSlot(table, 1, 0, EquipmentSlotName::ARMS);
+        //     createEquipSlot(table, 2, 0, EquipmentSlotName::CHEST);
+        //     createEquipSlot(table, 3, 0, EquipmentSlotName::AMULET);
+        //     createEquipSlot(table, 4, 0, EquipmentSlotName::LEGS);
+        //     createEquipSlot(table, 5, 0, EquipmentSlotName::LEFTHAND);
+        // }
+        //
+        // {
+        //     // Character model
+        //     auto table = panel2->CreateTable(40, {0, 0, 24, 24});
+        //     auto row = table->CreateTableRow();
+        //     auto cell = row->CreateTableCell();
+        //     auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
+        //     auto img = cell->CreateEquipmentCharacterPreview(std::move(preview));
+        //     img->draggable = false;
+        // }
+        //
+        // {
+        //     auto table = panel2->CreateTableGrid(maxRows, maxCols, 4);
+        //
+        //     for (unsigned int row = 0; row < maxRows; ++row)
+        //     {
+        //         for (unsigned int col = 0; col < maxCols; ++col)
+        //         {
+        //             createSpacerSlot(table, row, col);
+        //         }
+        //     }
+        //
+        //     createEquipSlot(table, 0, 0, EquipmentSlotName::BELT);
+        //     createEquipSlot(table, 1, 0, EquipmentSlotName::BOOTS);
+        //     createEquipSlot(table, 2, 0, EquipmentSlotName::RING2);
+        //     createEquipSlot(table, 3, 0, EquipmentSlotName::RING1);
+        //     createEquipSlot(table, 5, 0, EquipmentSlotName::RIGHTHAND);
+        // }
+        //
+        // {
+        //     // Character statistics
+        //     auto table = panel2->CreateTable(40, {50, 250, 48, 48});
+        //     // ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
+        //     table->SetTexture(
+        //         ResourceManager::GetInstance().TextureLoad("resources/textures/ui/scroll-bg.png"),
+        //         TextureStretchMode::STRETCH);
+        //
+        //     for (int i = 0; i < magic_enum::enum_underlying(CharacterStatText::StatisticType::COUNT); ++i)
+        //     {
+        //         auto row = table->CreateTableRow();
+        //         auto cell = row->CreateTableCell();
+        //         auto id = magic_enum::enum_cast<CharacterStatText::StatisticType>(i).value();
+        //         auto stat = std::make_unique<CharacterStatText>(engine, cell, TextBox::FontInfo{}, id);
+        //         cell->CreateCharacterStatText(std::move(stat));
+        //     }
+        // }
+        //
+        // window->FinalizeLayout();
+        // window->Hide();
+        // return window;
     }
 
     Window* GameUiFactory::CreateDialogWindow(GameUIEngine* engine, entt::entity npc)
     {
-        const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
-
-        float w = Settings::TARGET_SCREEN_WIDTH * 0.65;
-        float h = Settings::TARGET_SCREEN_HEIGHT * 0.35;
-        auto _windowDocked = std::make_unique<WindowDocked>(
-            engine->sys->settings,
-            nPatchTexture,
-            TextureStretchMode::NONE,
-            0,
-            0,
-            w,
-            h,
-            VertAlignment::BOTTOM,
-            HoriAlignment::CENTER,
-            Padding{32, 32, 16, 16});
-        auto window = engine->CreateWindowDocked(std::move(_windowDocked));
-        window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-
-        auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
-        TextBox::FontInfo _fontInfo;
-        _fontInfo.baseFontSize = 20;
-        _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
-
-        // NPC Part
-        {
-            auto& renderable = engine->registry->get<Renderable>(npc);
-            auto panel = window->CreatePanel();
-            const auto table = panel->CreateTable();
-            const auto descriptionRow = table->CreateTableRow();
-            const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
-            auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
-
-            std::string speakerName;
-            if (!dialogComponent.conversation->speaker.empty())
-            {
-                speakerName = dialogComponent.conversation->speaker;
-            }
-            else
-            {
-                speakerName = renderable.GetVanityName();
-            }
-
-            descriptionCell->CreateTextbox(
-                std::move(textbox),
-                std::format("[{}]: {}", speakerName, dialogComponent.conversation->GetCurrentNode()->content));
-        }
-        // ----------------
-
-        // Player part
-        {
-            auto panel = window->CreatePanel();
-            const auto portraitTable = panel->CreateTable();
-            auto portraitRow = portraitTable->CreateTableRow();
-            auto portraitCell = portraitRow->CreateTableCell();
-
-            const auto& info = engine->registry->get<PartyMemberComponent>(
-                engine->sys->controllableActorSystem->GetSelectedActor());
-            auto tex = info.portraitImg.texture;
-            auto img = std::make_unique<DialogPortrait>(engine, portraitCell, tex);
-            portraitCell->CreateImagebox(std::move(img));
-
-            const auto optionsTable = panel->CreateTable(80);
-            unsigned int i = 0;
-            for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
-            {
-                if (!o->ShouldShow()) continue;
-                const auto optionRow = optionsTable->CreateTableRow();
-                const auto optionCell = optionRow->CreateTableCell({10, 10, 10, 10});
-                auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
-                optionCell->CreateDialogOption(std::move(option));
-            }
-        }
-        window->FinalizeLayout();
-        return window;
+        // const auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/9patch.png");
+        //
+        // float w = Settings::TARGET_SCREEN_WIDTH * 0.65;
+        // float h = Settings::TARGET_SCREEN_HEIGHT * 0.35;
+        // auto _windowDocked = std::make_unique<WindowDocked>(
+        //     engine->sys->settings,
+        //     nPatchTexture,
+        //     TextureStretchMode::NONE,
+        //     0,
+        //     0,
+        //     w,
+        //     h,
+        //     VertAlignment::BOTTOM,
+        //     HoriAlignment::CENTER,
+        //     Padding{32, 32, 16, 16});
+        // auto window = engine->CreateWindowDocked(std::move(_windowDocked));
+        // window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
+        //
+        // auto& dialogComponent = engine->registry->get<DialogComponent>(npc);
+        // TextBox::FontInfo _fontInfo;
+        // _fontInfo.baseFontSize = 20;
+        // _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+        //
+        // // NPC Part
+        // {
+        //     auto& renderable = engine->registry->get<Renderable>(npc);
+        //     auto panel = window->CreatePanel();
+        //     const auto table = panel->CreateTable();
+        //     const auto descriptionRow = table->CreateTableRow();
+        //     const auto descriptionCell = descriptionRow->CreateTableCell({10, 10, 20, 20});
+        //     auto textbox = std::make_unique<TextBox>(engine, descriptionCell, _fontInfo);
+        //
+        //     std::string speakerName;
+        //     if (!dialogComponent.conversation->speaker.empty())
+        //     {
+        //         speakerName = dialogComponent.conversation->speaker;
+        //     }
+        //     else
+        //     {
+        //         speakerName = renderable.GetVanityName();
+        //     }
+        //
+        //     descriptionCell->CreateTextbox(
+        //         std::move(textbox),
+        //         std::format("[{}]: {}", speakerName, dialogComponent.conversation->GetCurrentNode()->content));
+        // }
+        // // ----------------
+        //
+        // // Player part
+        // {
+        //     auto panel = window->CreatePanel();
+        //     const auto portraitTable = panel->CreateTable();
+        //     auto portraitRow = portraitTable->CreateTableRow();
+        //     auto portraitCell = portraitRow->CreateTableCell();
+        //
+        //     const auto& info = engine->registry->get<PartyMemberComponent>(
+        //         engine->sys->controllableActorSystem->GetSelectedActor());
+        //     auto tex = info.portraitImg.texture;
+        //     auto img = std::make_unique<DialogPortrait>(engine, portraitCell, tex);
+        //     portraitCell->CreateImagebox(std::move(img));
+        //
+        //     const auto optionsTable = panel->CreateTable(80);
+        //     unsigned int i = 0;
+        //     for (const auto& o : dialogComponent.conversation->GetCurrentNode()->options)
+        //     {
+        //         if (!o->ShouldShow()) continue;
+        //         const auto optionRow = optionsTable->CreateTableRow();
+        //         const auto optionCell = optionRow->CreateTableCell({10, 10, 10, 10});
+        //         auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
+        //         optionCell->CreateDialogOption(std::move(option));
+        //     }
+        // }
+        // window->FinalizeLayout();
+        // return window;
     }
 
     Window* GameUiFactory::CreateGameWindowButtons(
@@ -464,8 +461,7 @@ namespace sage
 
         auto window = engine->CreateWindowDocked(std::move(_windowDocked));
         window->nPatchInfo = {Rectangle{3.0f, 0.0f, 128.0f, 128.0f}, 32, 12, 32, 12, NPATCH_NINE_PATCH};
-        auto panel = window->CreatePanel();
-        auto table = panel->CreateTable();
+        auto table = window->CreateTable();
         auto row = table->CreateTableRow();
         auto cell = row->CreateTableCell();
         cell->CreateGameWindowButton(std::make_unique<GameWindowButton>(

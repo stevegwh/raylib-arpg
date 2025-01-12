@@ -32,7 +32,6 @@ namespace sage
     enum class EquipmentSlotName;
     class PartySystem;
     class Window;
-    class Panel;
     class Table;
     class TableRow;
     class TableCell;
@@ -527,7 +526,7 @@ namespace sage
 
     class Table : public TableElement
     {
-        float requestedWidth{};
+        float requestedHeight{};
         bool autoSize = true;
 
       public:
@@ -537,8 +536,10 @@ namespace sage
         void InitLayout() override;
         void DrawDebug2D() override;
         ~Table() override = default;
-        explicit Table(Panel* _parent, Padding _padding = {0, 0, 0, 0});
-        friend class Panel;
+        explicit Table(Window* _parent, Padding _padding = {0, 0, 0, 0});
+        explicit Table(TableCell* _parent, Padding _padding = {0, 0, 0, 0});
+        friend class Window;
+        friend class TableCell;
     };
 
     class TableGrid final : public Table
@@ -547,23 +548,10 @@ namespace sage
 
       public:
         void InitLayout() override;
-        explicit TableGrid(Panel* _parent, Padding _padding = {0, 0, 0, 0});
-        friend class Panel;
-    };
-
-    class Panel : public TableElement
-    {
-        float requestedHeight{};
-        bool autoSize = true;
-
-      public:
-        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0, Padding _padding = {0, 0, 0, 0});
-        Table* CreateTable(Padding _padding = {0, 0, 0, 0});
-        Table* CreateTable(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
-        void DrawDebug2D() override;
-        void InitLayout() override;
-        explicit Panel(Window* _parent, Padding _padding = {0, 0, 0, 0});
+        explicit TableGrid(Window* _parent, Padding _padding = {0, 0, 0, 0});
+        explicit TableGrid(TableCell* _parent, Padding _padding = {0, 0, 0, 0});
         friend class Window;
+        friend class TableCell;
     };
 
     class Window : public TableElement
@@ -585,8 +573,9 @@ namespace sage
         void OnWindowUpdate(Vector2 prev, Vector2 current);
         void ClampToScreen();
         void OnHoverStart() override;
-        Panel* CreatePanel(Padding _padding = {0, 0, 0, 0});
-        Panel* CreatePanel(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
+        TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0, Padding _padding = {0, 0, 0, 0});
+        Table* CreateTable(Padding _padding = {0, 0, 0, 0});
+        Table* CreateTable(float _requestedWidth, Padding _padding = {0, 0, 0, 0});
         void ToggleHide();
         void Show();
         void Hide();

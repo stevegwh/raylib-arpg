@@ -192,14 +192,14 @@ namespace sage
         // First pass: Calculate total of percentage-based heights
         for (const auto& p : children)
         {
-            auto panel = reinterpret_cast<Panel*>(p.get());
-            if (panel->autoSize)
+            auto table = reinterpret_cast<Table*>(p.get());
+            if (table->autoSize)
             {
                 autoSizeCount++;
             }
             else
             {
-                totalRequestedPercent += panel->requestedHeight;
+                totalRequestedPercent += table->requestedHeight;
             }
         }
 
@@ -211,91 +211,30 @@ namespace sage
         float currentY = startY;
         for (const auto& p : children)
         {
-            auto panel = reinterpret_cast<Panel*>(p.get());
-            panel->parent = this;
-            panel->rec = rec;
+            auto table = reinterpret_cast<Table*>(p.get());
+            table->parent = this;
+            table->rec = rec;
 
             float panelHeight;
-            if (panel->autoSize)
+            if (table->autoSize)
             {
                 panelHeight = std::ceil(availableHeight * (autoSizePercent / 100.0f));
             }
             else
             {
-                panelHeight = std::ceil(availableHeight * (panel->requestedHeight / 100.0f));
+                panelHeight = std::ceil(availableHeight * (table->requestedHeight / 100.0f));
             }
 
-            panel->rec.height = panelHeight;
-            panel->rec.y = currentY;
-            panel->rec.width = availableWidth;
-            panel->rec.x = startX;
-
-            UpdateTextureDimensions();
-
-            if (!panel->children.empty()) panel->InitLayout();
-
-            currentY += panelHeight;
-        }
-    }
-
-    void Panel::InitLayout()
-    {
-        if (children.empty()) return;
-
-        float availableWidth = rec.width - (padding.left + padding.right);
-        float availableHeight = rec.height - (padding.up + padding.down);
-        float startX = rec.x + padding.left;
-        float startY = rec.y + padding.up;
-
-        float totalRequestedPercent = 0.0f;
-        int autoSizeCount = 0;
-
-        // First pass: Calculate total of percentage-based widths
-        for (const auto& t : children)
-        {
-            auto table = reinterpret_cast<Table*>(t.get());
-            if (table->autoSize)
-            {
-                autoSizeCount++;
-            }
-            else
-            {
-                totalRequestedPercent += table->requestedWidth;
-            }
-        }
-
-        totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
-
-        // Second pass: Update each table
-        float currentX = startX;
-        for (const auto& t : children)
-        {
-            auto table = reinterpret_cast<Table*>(t.get());
-            table->parent = this;
-            table->rec = rec;
-
-            float tableWidth;
-            if (table->autoSize)
-            {
-                tableWidth = std::ceil(availableWidth * (autoSizePercent / 100.0f));
-            }
-            else
-            {
-                tableWidth = std::ceil(availableWidth * (table->requestedWidth / 100.0f));
-            }
-
-            table->rec.width = tableWidth;
-            table->rec.x = currentX;
-            table->rec.height = availableHeight;
-            table->rec.y = startY;
+            table->rec.height = panelHeight;
+            table->rec.y = currentY;
+            table->rec.width = availableWidth;
+            table->rec.x = startX;
 
             UpdateTextureDimensions();
 
             if (!table->children.empty()) table->InitLayout();
 
-            currentX += tableWidth;
+            currentY += panelHeight;
         }
     }
 
@@ -1999,23 +1938,6 @@ namespace sage
         }
     }
 
-    Panel* Window::CreatePanel(Padding _padding)
-    {
-        children.push_back(std::make_unique<Panel>(this, _padding));
-        const auto& panel = dynamic_cast<Panel*>(children.back().get());
-        InitLayout();
-        return panel;
-    }
-
-    Panel* Window::CreatePanel(float _requestedHeight, Padding _padding)
-    {
-        auto panel = CreatePanel(_padding);
-        panel->requestedHeight = _requestedHeight;
-        panel->autoSize = false;
-        InitLayout();
-        return panel;
-    }
-
     void Window::ToggleHide()
     {
         hidden = !hidden;
@@ -2221,20 +2143,7 @@ namespace sage
         textureStretchMode = _stretchMode;
     }
 
-    void Panel::DrawDebug2D()
-    {
-        std::vector colors = {PINK, RED, BLUE, YELLOW, WHITE};
-        for (int i = 0; i < children.size(); ++i)
-        {
-            const auto& table = children[i];
-            Color col = colors[i];
-            col.a = 150;
-            // DrawRectangle(table->rec.x, table->rec.y, table->rec.width, table->rec.height, col);
-            table->DrawDebug2D();
-        }
-    }
-
-    TableGrid* Panel::CreateTableGrid(int rows, int cols, float cellSpacing, Padding _padding)
+    TableGrid* Window::CreateTableGrid(int rows, int cols, float cellSpacing, Padding _padding)
     {
         children.push_back(std::make_unique<TableGrid>(this, _padding));
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
@@ -2252,7 +2161,7 @@ namespace sage
         return table;
     }
 
-    Table* Panel::CreateTable(Padding _padding)
+    Table* Window::CreateTable(Padding _padding)
     {
         children.push_back(std::make_unique<Table>(this, _padding));
         const auto& table = dynamic_cast<Table*>(children.back().get());
@@ -2260,20 +2169,20 @@ namespace sage
         return table;
     }
 
-    Table* Panel::CreateTable(float _requestedWidth, Padding _padding)
+    Table* Window::CreateTable(float _requestedWidth, Padding _padding)
     {
         auto table = CreateTable(_padding);
         table->autoSize = false;
-        table->requestedWidth = _requestedWidth;
+        table->requestedHeight = _requestedWidth;
         InitLayout();
         return table;
     }
 
-    Panel::Panel(Window* _parent, Padding _padding) : TableElement(_parent, _padding)
+    TableGrid::TableGrid(Window* _parent, Padding _padding) : Table(_parent, _padding)
     {
     }
 
-    TableGrid::TableGrid(Panel* _parent, Padding _padding) : Table(_parent, _padding)
+    TableGrid::TableGrid(TableCell* _parent, Padding _padding) : Table(_parent, _padding)
     {
     }
 
@@ -2290,7 +2199,11 @@ namespace sage
         }
     }
 
-    Table::Table(Panel* _parent, Padding _padding) : TableElement(_parent, _padding)
+    Table::Table(Window* _parent, Padding _padding) : TableElement(_parent, _padding)
+    {
+    }
+
+    Table::Table(TableCell* _parent, Padding _padding) : TableElement(_parent, _padding)
     {
     }
 
