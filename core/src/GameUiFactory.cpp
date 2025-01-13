@@ -20,7 +20,9 @@
 #include "systems/InventorySystem.hpp"
 #include "systems/PartySystem.hpp"
 
+#include "components/QuestComponents.hpp"
 #include "magic_enum.hpp"
+
 #include <format>
 
 namespace sage
@@ -244,6 +246,79 @@ namespace sage
         }
         window->FinalizeLayout();
         window->Hide();
+        return window;
+    }
+
+    Window* GameUiFactory::CreateJournalWindow(
+        entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
+    {
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
+        auto _window = std::make_unique<Window>(
+            engine->sys->settings,
+            nPatchTexture,
+            TextureStretchMode::STRETCH,
+            pos.x,
+            pos.y,
+            274 * 3,
+            424 * 1.5,
+            Padding{20, 20, 14, 14});
+
+        auto window = engine->CreateWindow(std::move(_window));
+        auto mainTable = window->CreateTable({0, 0, 4, 0});
+
+        {
+            const auto titleRow = mainTable->CreateTableRow(10);
+            const auto cell = titleRow->CreateTableCell(80);
+            const auto cell2 = titleRow->CreateTableCell(20, {0, 18 * 2, 18, 18});
+            auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
+            cell->CreateTitleBar(std::move(titleText), "Journal");
+
+            const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+            cell2->CreateCloseButton(std::move(closeBtn));
+        }
+
+        auto mainRow = mainTable->CreateTableRow();
+        mainRow->SetTexture(
+            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_quest.png"),
+            TextureStretchMode::STRETCH);
+
+        auto questList = mainRow->CreateTableCell({48, 0, 4, 0});
+        questList->SetTexture(
+            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/scroll-bg.png"),
+            TextureStretchMode::STRETCH);
+
+        auto questDescription = mainRow->CreateTableCell(70, {12, 12, 12, 12});
+
+        auto questView = registry->view<Quest>();
+        std::vector<Quest*> quests;
+        for (const auto& entity : questView)
+        {
+            auto& quest = registry->get<Quest>(entity);
+            quests.push_back(&quest);
+        }
+        {
+            auto table = questList->CreateTable();
+            for (const auto& quest : quests)
+            {
+                auto row = table->CreateTableRow();
+                auto cell = row->CreateTableCell();
+                auto textbox = std::make_unique<TextBox>(engine, cell, TextBox::FontInfo{});
+                textbox->SetContent(quest->journalTitle);
+                cell->element = std::move(textbox);
+            }
+        }
+
+        {
+            TextBox::FontInfo _fontInfo{};
+            _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
+            auto textbox = std::make_unique<TextBox>(engine, questDescription, _fontInfo);
+            textbox->SetContent(quests[0]->journalDescription);
+            questDescription->element = std::move(textbox);
+        }
+
+        window->FinalizeLayout();
+        // window->Hide();
         return window;
     }
 

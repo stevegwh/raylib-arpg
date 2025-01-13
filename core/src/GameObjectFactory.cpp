@@ -256,9 +256,9 @@ namespace sage
         // TODO: Move elsewhere/read from save file
         // Initialise starting abilities
         sys->playerAbilitySystem->SetSlot(0, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
-        sys->playerAbilitySystem->SetSlot(1, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
-        sys->playerAbilitySystem->SetSlot(
-            2, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
+        // sys->playerAbilitySystem->SetSlot(1, sys->abilityRegistry->RegisterAbility(id,
+        // AbilityEnum::RAINFOFIRE)); sys->playerAbilitySystem->SetSlot(
+        //     2, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
         sys->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         auto& inventory = registry->emplace<InventoryComponent>(id);

@@ -28,10 +28,11 @@ namespace sage
     {
 
       public:
-        static void CreateExampleWindow(GameUIEngine* engine);
         static Window* CreatePartyPortraitsColumn(GameUIEngine* engine);
         static Window* CreateAbilityRow(GameUIEngine* engine);
         static Window* CreateInventoryWindow(
+            entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h);
+        static Window* CreateJournalWindow(
             entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h);
         static Window* CreateCharacterWindow(
             entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h);
