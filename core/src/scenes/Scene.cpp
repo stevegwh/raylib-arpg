@@ -100,6 +100,7 @@ namespace sage
         auto* equipmentWindow =
             GameUiFactory::CreateCharacterWindow(registry, sys->uiEngine.get(), {700, 50}, w, h);
         auto* journalWindow = GameUiFactory::CreateJournalWindow(registry, sys->uiEngine.get(), {275, 50}, w, h);
+
         sys->userInput->keyIPressed.Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
         sys->userInput->keyCPressed.Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
         sys->userInput->keyJPressed.Subscribe([journalWindow]() { journalWindow->ToggleHide(); });

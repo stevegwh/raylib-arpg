@@ -11,11 +11,13 @@
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
+#include "components/QuestComponents.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
 #include "GameObjectFactory.hpp"
 #include "GameUiFactory.hpp"
+#include "QuestManager.hpp"
 #include "ResourceManager.hpp"
 #include "slib.hpp"
 #include "Systems.hpp"
@@ -28,6 +30,7 @@
 
 #include <cassert>
 #include <format>
+#include <queue>
 #include <ranges>
 #include <sstream>
 
@@ -575,6 +578,82 @@ namespace sage
     {
         UpdateFontScaling();
         SetTextureFilter(GetFont().texture, TEXTURE_FILTER_BILINEAR);
+    }
+
+    void JournalEntryManager::updateQuests()
+    {
+        SetContent("");
+        auto quests = engine->sys->questManager->GetActiveQuests();
+        {
+            auto table = journalEntryRoot->CreateTable();
+            for (const auto& quest : quests)
+            {
+                auto row = table->CreateTableRow();
+                auto cell = row->CreateTableCell();
+                auto textbox =
+                    std::make_unique<JournalEntry>(engine, cell, this->parent, quest, TextBox::FontInfo{});
+                cell->element = std::move(textbox);
+            }
+        }
+    }
+
+    JournalEntryManager::JournalEntryManager(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        TableCell* _journalEntryRoot,
+        QuestManager* _questManager,
+        const FontInfo& _fontInfo,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
+          journalEntryRoot(_journalEntryRoot),
+          questManager(_questManager)
+    {
+        questManager->onQuestUpdate.Subscribe([this](entt::entity) { updateQuests(); });
+    }
+
+    void JournalEntry::OnHoverStart()
+    {
+        drawHighlight = true;
+        TextBox::OnHoverStart();
+    }
+
+    void JournalEntry::OnHoverStop()
+    {
+        drawHighlight = false;
+        TextBox::OnHoverStop();
+    }
+
+    void JournalEntry::Draw2D()
+    {
+        TextBox::Draw2D();
+        if (drawHighlight)
+        {
+            float offset = 10 * parent->GetWindow()->settings->GetCurrentScaleFactor();
+            DrawRectangleLines(
+                rec.x - offset, rec.y - offset, rec.width + offset * 2, rec.height + offset * 2, BLACK);
+        }
+    }
+
+    void JournalEntry::OnClick()
+    {
+        auto text = reinterpret_cast<TextBox*>(descriptionCell->element.value().get());
+        text->SetContent(quest->journalDescription);
+    }
+
+    JournalEntry::JournalEntry(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        TableCell* _descriptionCell,
+        Quest* _quest,
+        const FontInfo& _fontInfo,
+        VertAlignment _vertAlignment,
+        HoriAlignment _horiAlignment)
+        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
+          descriptionCell(_descriptionCell),
+          quest(_quest)
+    {
+        SetContent(quest->journalTitle);
     }
 
     void DialogOption::OnHoverStart()

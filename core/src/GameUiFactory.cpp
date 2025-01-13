@@ -13,6 +13,7 @@
 #include "components/PartyMemberComponent.hpp"
 #include "components/Renderable.hpp"
 #include "GameUiEngine.hpp"
+#include "QuestManager.hpp"
 #include "ResourceManager.hpp"
 #include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
@@ -283,38 +284,16 @@ namespace sage
             ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_quest.png"),
             TextureStretchMode::STRETCH);
 
-        auto questList = mainRow->CreateTableCell({48, 0, 4, 0});
-        questList->SetTexture(
-            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/scroll-bg.png"),
-            TextureStretchMode::STRETCH);
-
-        auto questDescription = mainRow->CreateTableCell(70, {12, 12, 12, 12});
-
-        auto questView = registry->view<Quest>();
-        std::vector<Quest*> quests;
-        for (const auto& entity : questView)
-        {
-            auto& quest = registry->get<Quest>(entity);
-            quests.push_back(&quest);
-        }
-        {
-            auto table = questList->CreateTable();
-            for (const auto& quest : quests)
-            {
-                auto row = table->CreateTableRow();
-                auto cell = row->CreateTableCell();
-                auto textbox = std::make_unique<TextBox>(engine, cell, TextBox::FontInfo{});
-                textbox->SetContent(quest->journalTitle);
-                cell->element = std::move(textbox);
-            }
-        }
+        auto questList = mainRow->CreateTableCell({48, 0, 8, 0});
+        auto questDescription = mainRow->CreateTableCell(70, {12, 12, 12, 14});
 
         {
+            // The 'description' textbox also acts as a manager for the quests shown in the sidebar
             TextBox::FontInfo _fontInfo{};
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
-            auto textbox = std::make_unique<TextBox>(engine, questDescription, _fontInfo);
-            textbox->SetContent(quests[0]->journalDescription);
-            questDescription->element = std::move(textbox);
+            auto journalEntryManager = std::make_unique<JournalEntryManager>(
+                engine, questDescription, questList, engine->sys->questManager.get(), _fontInfo);
+            questDescription->element = std::move(journalEntryManager);
         }
 
         window->FinalizeLayout();

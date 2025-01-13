@@ -39,6 +39,7 @@ namespace sage
     class UIState;
     class PlayerAbilitySystem;
     class ControllableActorSystem;
+    class QuestManager;
 
     enum class TextureStretchMode
     {
@@ -230,6 +231,47 @@ namespace sage
         TableElement& operator=(const TableElement&) = default;
         TableElement& operator=(TableElement&&) noexcept = default;
         ~TableElement() override = default;
+    };
+
+    // Also displays description
+    class JournalEntryManager : public TextBox
+    {
+        TableCell* journalEntryRoot;
+        QuestManager* questManager;
+
+        void updateQuests();
+
+      public:
+        JournalEntryManager(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            TableCell* _journalEntryRoot,
+            QuestManager* _questManager,
+            const FontInfo& _fontInfo,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+    };
+
+    class JournalEntry : public TextBox
+    {
+        entt::entity questId;
+        Quest* quest;
+        TableCell* descriptionCell;
+        bool drawHighlight = false;
+
+      public:
+        void OnHoverStart() override;
+        void OnHoverStop() override;
+        void Draw2D() override;
+        void OnClick() override;
+        JournalEntry(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            TableCell* _descriptionCell,
+            Quest* _quest,
+            const FontInfo& _fontInfo,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
 
     class DialogOption : public TextBox

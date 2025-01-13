@@ -253,10 +253,42 @@ namespace sage
         return entity;
     }
 
+    void QuestManager::onComponentAdded(entt::entity entity)
+    {
+        auto& quest = registry->get<Quest>(entity);
+        auto& vec = connectionMap[entity];
+        vec.push_back(quest.onStart.Subscribe([this](entt::entity _entity) { onQuestUpdate.Publish(_entity); }));
+        vec.push_back(
+            quest.onCompleted.Subscribe([this](entt::entity _entity) { onQuestUpdate.Publish(_entity); }));
+    }
+
+    void QuestManager::onComponentRemoved(entt::entity entity)
+    {
+        auto& vec = connectionMap.at(entity);
+        for (auto& cnx : vec)
+        {
+            cnx->UnSubscribe();
+        }
+    }
+
     void QuestManager::RemoveQuest(const std::string& key)
     {
         map.erase(key);
         // TODO: Surely remove from registry?
+    }
+
+    std::vector<Quest*> QuestManager::GetActiveQuests()
+    {
+        std::vector<Quest*> out;
+        for (const auto& [key, value] : map)
+        {
+            auto& quest = registry->get<Quest>(value);
+            if (quest.HasStarted() && !quest.IsComplete())
+            {
+                out.push_back(&quest);
+            }
+        }
+        return out;
     }
 
     entt::entity QuestManager::GetQuest(const std::string& key) const
@@ -267,6 +299,8 @@ namespace sage
 
     QuestManager::QuestManager(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
+        registry->on_construct<Quest>().connect<&QuestManager::onComponentAdded>(this);
+        registry->on_destroy<Quest>().connect<&QuestManager::onComponentRemoved>(this);
     }
 
 } // namespace sage
