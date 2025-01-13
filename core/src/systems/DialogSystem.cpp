@@ -29,6 +29,8 @@ namespace sage
         sys->camera->LockInput();
         sys->cursor->DisableContextSwitching();
 
+        dialogComponent.conversation->BindKeysToOptionSelect();
+
         dialogComponent.conversation->onConversationProgress.Subscribe(
             [this](const dialog::Conversation* conv) { progressConversation(conv); });
 
@@ -50,8 +52,7 @@ namespace sage
         return nullptr;
     }
 
-    DialogSystem::DialogSystem(entt::registry* registry, Systems* _sys)
-        : BaseSystem(registry), sys(_sys)
+    DialogSystem::DialogSystem(entt::registry* registry, Systems* _sys) : BaseSystem(registry), sys(_sys)
     {
     }
 } // namespace sage

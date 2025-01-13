@@ -586,8 +586,13 @@ namespace sage
         auto quests = engine->sys->questManager->GetActiveQuests();
         {
             auto table = journalEntryRoot->CreateTable();
-            for (const auto& quest : quests)
+            for (auto i = 0; i < 12; ++i) // Adjust for spacing
             {
+                Quest* quest = nullptr;
+                if (i < quests.size())
+                {
+                    quest = quests[i];
+                }
                 auto row = table->CreateTableRow();
                 auto cell = row->CreateTableCell();
                 auto textbox =
@@ -614,18 +619,21 @@ namespace sage
 
     void JournalEntry::OnHoverStart()
     {
+        if (!quest) return;
         drawHighlight = true;
         TextBox::OnHoverStart();
     }
 
     void JournalEntry::OnHoverStop()
     {
+        if (!quest) return;
         drawHighlight = false;
         TextBox::OnHoverStop();
     }
 
     void JournalEntry::Draw2D()
     {
+        if (!quest) return;
         TextBox::Draw2D();
         if (drawHighlight)
         {
@@ -637,6 +645,7 @@ namespace sage
 
     void JournalEntry::OnClick()
     {
+        if (!quest) return;
         auto text = reinterpret_cast<TextBox*>(descriptionCell->element.value().get());
         text->SetContent(quest->journalDescription);
     }
@@ -653,7 +662,10 @@ namespace sage
           descriptionCell(_descriptionCell),
           quest(_quest)
     {
-        SetContent(quest->journalTitle);
+        if (quest)
+        {
+            SetContent(quest->journalTitle);
+        }
     }
 
     void DialogOption::OnHoverStart()

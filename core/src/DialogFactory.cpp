@@ -366,7 +366,7 @@ namespace sage
                     //     registry->emplace<DialogComponent>(entity);
                     // }
                     dialogComponent = &registry->get<DialogComponent>(entity);
-                    dialogComponent->conversation = std::make_unique<dialog::Conversation>(registry, entity);
+                    dialogComponent->conversation = std::make_unique<dialog::Conversation>(registry, sys, entity);
                 }
                 else if (line.starts_with("speaker_name:"))
                 {
@@ -454,8 +454,7 @@ namespace sage
         }
     }
 
-    DialogFactory::DialogFactory(entt::registry* _registry, Systems* _sys)
-        : registry(_registry), sys(_sys)
+    DialogFactory::DialogFactory(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
     }
 

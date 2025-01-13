@@ -127,7 +127,6 @@ namespace sage
         sys->controllableActorSystem->Update();
         sys->dialogSystem->Update();
         sys->healthBarSystem->Update();
-        sys->playerAbilitySystem->Update();
         sys->timerSystem->Update();
         sys->collisionSystem->Update();
         sys->animationSystem->Update();
@@ -151,7 +150,6 @@ namespace sage
         sys->renderSystem->Draw();
         sys->cursor->Draw3D();
         sys->healthBarSystem->Draw3D();
-        sys->playerAbilitySystem->Draw3D();
         sys->stateMachines->Draw3D();
         // spiral->Draw3D();
     };

@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "Systems.hpp"
+#include "UserInput.hpp"
+
 #include "raylib.h"
 
 #include "common_types.hpp"
@@ -17,8 +20,9 @@
 #include "sage-cereal.hpp"
 #include <cereal/archives/json.hpp>
 
-#include <cassert>
 #include "entt/entt.hpp"
+
+#include <cassert>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -113,11 +117,12 @@ namespace sage
 
         class Conversation
         {
+            Systems* sys;
             ConversationID conversationId{};
             // unsigned int current = 0;
             std::string start;
             std::string current;
-            // std::vector<std::unique_ptr<ConversationNode>> nodes;
+            std::vector<std::unique_ptr<Connection>> optionPressedConnections;
 
             std::unordered_map<std::string, std::unique_ptr<ConversationNode>> nodes;
 
@@ -139,17 +144,62 @@ namespace sage
                 return nodes.at(current).get();
             }
 
+            void BindKeysToOptionSelect()
+            {
+                for (const auto& cnx : optionPressedConnections)
+                {
+                    cnx->UnSubscribe();
+                }
+                optionPressedConnections.clear();
+                auto& n = nodes.at(current);
+                for (unsigned int i = 0; i < n->options.size(); ++i)
+                {
+                    auto& o = n->options.at(i);
+                    if (i == 0)
+                    {
+                        optionPressedConnections.push_back(
+                            sys->userInput->keyOnePressed.Subscribe([&o, this] { SelectOption(o.get()); }));
+                    }
+                    else if (i == 1)
+                    {
+                        optionPressedConnections.push_back(
+                            sys->userInput->keyTwoPressed.Subscribe([&o, this] { SelectOption(o.get()); }));
+                    }
+                    else if (i == 2)
+                    {
+                        optionPressedConnections.push_back(
+                            sys->userInput->keyThreePressed.Subscribe([&o, this] { SelectOption(o.get()); }));
+                    }
+                    else if (i == 3)
+                    {
+                        optionPressedConnections.push_back(
+                            sys->userInput->keyFourPressed.Subscribe([&o, this] { SelectOption(o.get()); }));
+                    }
+                    else
+                    {
+                        assert(0);
+                        // TODO: Need to have a better way of doing this, also to have more numbers bound
+                        // than 4.
+                    }
+                }
+            }
+
             void SelectOption(Option* option)
             {
                 option->OnSelected();
-
                 if (option->HasNextIndex())
                 {
                     current = option->nextNode.value();
+                    BindKeysToOptionSelect();
                     onConversationProgress.Publish(this);
                 }
                 else
                 {
+                    for (const auto& cnx : optionPressedConnections)
+                    {
+                        cnx->UnSubscribe();
+                    }
+                    optionPressedConnections.clear();
                     endConversation();
                 }
             }
@@ -176,8 +226,8 @@ namespace sage
                 archive();
             }
 
-            explicit Conversation(entt::registry* _registry, entt::entity _owner)
-                : registry(_registry), owner(_owner)
+            explicit Conversation(entt::registry* _registry, Systems* _sys, entt::entity _owner)
+                : registry(_registry), sys(_sys), owner(_owner)
             {
             }
         };

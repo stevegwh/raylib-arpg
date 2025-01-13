@@ -16,6 +16,7 @@
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
+#include "systems/PlayerAbilitySystem.hpp"
 
 #include "raylib.h"
 #include "StateMachines.hpp"
@@ -231,6 +232,7 @@ namespace sage
             actorTrans.SetRotation({actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z});
 
             sys->dialogSystem->StartConversation(npcTrans, playerDiag.dialogTarget);
+            sys->playerAbilitySystem->UnsubscribeFromUserInput();
         }
 
         void OnStateExit(entt::entity self) override
@@ -241,7 +243,7 @@ namespace sage
                 registry->get<Animation>(playerDiag.dialogTarget).ChangeAnimationByEnum(AnimationEnum::IDLE);
             }
             playerDiag.dialogTarget = entt::null;
-
+            sys->playerAbilitySystem->SubscribeToUserInput();
             // TODO: Bug: Doesn't change back to default on dialog end
         }
 

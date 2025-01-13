@@ -11,6 +11,7 @@
 #include "components/ItemComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "FullscreenTextOverlayFactory.hpp"
+#include "GameUiEngine.hpp"
 #include "ParsingHelpers.hpp"
 #include "Settings.hpp"
 #include "Systems.hpp"
@@ -257,7 +258,10 @@ namespace sage
     {
         auto& quest = registry->get<Quest>(entity);
         auto& vec = connectionMap[entity];
-        vec.push_back(quest.onStart.Subscribe([this](entt::entity _entity) { onQuestUpdate.Publish(_entity); }));
+        vec.push_back(quest.onStart.Subscribe([this](entt::entity _entity) {
+            onQuestUpdate.Publish(_entity);
+            sys->uiEngine->CreateErrorMessage("Quest added to journal.");
+        }));
         vec.push_back(
             quest.onCompleted.Subscribe([this](entt::entity _entity) { onQuestUpdate.Publish(_entity); }));
     }
