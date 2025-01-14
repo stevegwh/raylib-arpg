@@ -286,8 +286,8 @@ namespace sage
         }
 
         auto mainRow = mainTable->CreateTableRow();
-        auto questList = mainRow->CreateTableCell({48, 0, 12, 0});
-        auto questDescription = mainRow->CreateTableCell(70, {28, 12, 18, 18});
+        auto questList = mainRow->CreateTableCell({48, 0, 8, 8});
+        auto questDescription = mainRow->CreateTableCell(70, {38, 12, 18, 18});
 
         mainRow->SetTexture(
             ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_quest.png"),
@@ -301,7 +301,13 @@ namespace sage
             TextBox::FontInfo _fontInfo{};
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
             auto journalEntryManager = std::make_unique<JournalEntryManager>(
-                engine, questDescription, questList, engine->sys->questManager.get(), _fontInfo);
+                engine,
+                questDescription,
+                questList,
+                engine->sys->questManager.get(),
+                _fontInfo,
+                VertAlignment::TOP,
+                HoriAlignment::CENTER);
             questDescription->element = std::move(journalEntryManager);
         }
 

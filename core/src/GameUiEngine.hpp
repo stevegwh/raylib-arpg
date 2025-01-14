@@ -716,6 +716,8 @@ namespace sage
     class ErrorMessage
     {
         Settings* settings;
+        Font font{};
+        float fontSpacing;
         std::string msg;
         double initialTime;
         float totalDisplayTime = 3.0f;

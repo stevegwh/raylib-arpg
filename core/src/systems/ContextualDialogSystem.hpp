@@ -5,6 +5,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "raylib.h"
 
 #include <string>
 #include <unordered_map>
@@ -16,6 +17,7 @@ namespace sage
 
     class ContextualDialogSystem
     {
+        static constexpr float fontSize = 22;
         std::unordered_map<entt::entity, std::vector<std::string>> dialogTextMap;
         entt::registry* registry;
         Systems* sys;

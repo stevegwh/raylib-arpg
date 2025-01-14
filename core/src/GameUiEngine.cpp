@@ -595,8 +595,14 @@ namespace sage
                 }
                 auto row = table->CreateTableRow();
                 auto cell = row->CreateTableCell();
-                auto textbox =
-                    std::make_unique<JournalEntry>(engine, cell, this->parent, quest, TextBox::FontInfo{});
+                auto textbox = std::make_unique<JournalEntry>(
+                    engine,
+                    cell,
+                    this->parent,
+                    quest,
+                    TextBox::FontInfo{},
+                    VertAlignment::MIDDLE,
+                    HoriAlignment::CENTER);
                 cell->element = std::move(textbox);
             }
         }
@@ -2647,13 +2653,21 @@ namespace sage
         const auto [width, height] = settings->GetViewPort();
         auto col = RAYWHITE;
         col.a = a;
-        auto textSize = MeasureText(msg.c_str(), 18);
 
-        DrawText(msg.c_str(), (width - textSize) / 2, height / 4, 18, col);
+        auto scaledFontSize = settings->ScaleValueMaintainRatio(24);
+        auto textSize = MeasureText(msg.c_str(), scaledFontSize);
+
+        DrawTextEx(
+            font, msg.c_str(), Vector2{(width - textSize) / 2, height / 4}, scaledFontSize, fontSpacing, col);
     }
 
     ErrorMessage::ErrorMessage(Settings* _settings, std::string _msg)
-        : settings(_settings), msg(std::move(_msg)), initialTime(GetTime())
+        : settings(_settings),
+          msg(std::move(_msg)),
+          initialTime(GetTime()),
+          font(ResourceManager::GetInstance().FontLoad(
+              "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+          fontSpacing(1.5)
     {
     }
 
@@ -2814,7 +2828,6 @@ namespace sage
 #pragma region GameUIEngine
     void GameUIEngine::pruneWindows()
     {
-
         if (tooltipWindow && tooltipWindow->IsMarkedForRemoval())
         {
             tooltipWindow.reset();

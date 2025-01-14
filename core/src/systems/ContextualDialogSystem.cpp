@@ -83,28 +83,6 @@ namespace sage
         }
     }
 
-    void ContextualDialogSystem::Draw2D() const
-    {
-        for (const auto view = registry->view<OverheadDialogComponent>(); const auto& entity : view)
-        {
-            const auto& col = registry->get<Collideable>(entity);
-            auto [width, height] = sys->settings->GetViewPort();
-            auto center =
-                Vector3MultiplyByValue(Vector3Add(col.worldBoundingBox.max, col.worldBoundingBox.min), 0.5f);
-            const auto pos = Vector3{center.x, col.worldBoundingBox.max.y + 1.0f, center.z};
-            auto screenPos = GetWorldToScreenEx(pos, *sys->camera->getRaylibCam(), width, height);
-            auto& contextualDiag = registry->get<OverheadDialogComponent>(entity);
-
-            const auto text = contextualDiag.GetText();
-            DrawText(
-                text.c_str(),
-                static_cast<int>(screenPos.x) - MeasureText(text.c_str(), 16) / 2,
-                static_cast<int>(screenPos.y),
-                20,
-                WHITE);
-        }
-    }
-
     // Selected player triggers an overhead dialog to appear over the `speaker` (declared in the trigger's file)
     // based on `distance` (declared in the trigger's file).
     void ContextualDialogSystem::Update() const
@@ -143,6 +121,29 @@ namespace sage
                 overhead.SetText(contextualDialog, 5.0f);
                 trigger.SetTriggered();
             }
+        }
+    }
+
+    void ContextualDialogSystem::Draw2D() const
+    {
+        for (const auto view = registry->view<OverheadDialogComponent>(); const auto& entity : view)
+        {
+            const auto& col = registry->get<Collideable>(entity);
+            auto [width, height] = sys->settings->GetViewPort();
+            auto center =
+                Vector3MultiplyByValue(Vector3Add(col.worldBoundingBox.max, col.worldBoundingBox.min), 0.5f);
+            const auto pos = Vector3{center.x, col.worldBoundingBox.max.y + 1.0f, center.z};
+            auto screenPos = GetWorldToScreenEx(pos, *sys->camera->getRaylibCam(), width, height);
+            auto& contextualDiag = registry->get<OverheadDialogComponent>(entity);
+
+            auto scaledFontSize = sys->settings->ScaleValueMaintainRatio(fontSize);
+            const auto text = contextualDiag.GetText();
+            DrawText(
+                text.c_str(),
+                static_cast<float>(static_cast<int>(screenPos.x) - MeasureText(text.c_str(), scaledFontSize) / 2),
+                static_cast<float>(static_cast<int>(screenPos.y)),
+                scaledFontSize,
+                WHITE);
         }
     }
 
