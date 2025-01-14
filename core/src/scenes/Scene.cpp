@@ -99,7 +99,7 @@ namespace sage
             GameUiFactory::CreateInventoryWindow(registry, sys->uiEngine.get(), {200, 50}, w, h);
         auto* equipmentWindow =
             GameUiFactory::CreateCharacterWindow(registry, sys->uiEngine.get(), {700, 50}, w, h);
-        auto* journalWindow = GameUiFactory::CreateJournalWindow(registry, sys->uiEngine.get(), {275, 50}, w, h);
+        auto* journalWindow = GameUiFactory::CreateJournalWindow(registry, sys->uiEngine.get(), {900, 150}, w, h);
 
         sys->userInput->keyIPressed.Subscribe([inventoryWindow]() { inventoryWindow->ToggleHide(); });
         sys->userInput->keyCPressed.Subscribe([equipmentWindow]() { equipmentWindow->ToggleHide(); });
@@ -108,7 +108,8 @@ namespace sage
         sys->userInput->keyFPressed.Subscribe([this]() { sys->camera->FocusSelectedActor(); });
 
         GameUiFactory::CreatePartyPortraitsColumn(sys->uiEngine.get());
-        GameUiFactory::CreateGameWindowButtons(sys->uiEngine.get(), inventoryWindow, equipmentWindow, journalWindow);
+        GameUiFactory::CreateGameWindowButtons(
+            sys->uiEngine.get(), inventoryWindow, equipmentWindow, journalWindow);
     }
 
     void Scene::Update()

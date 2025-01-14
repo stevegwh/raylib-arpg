@@ -286,12 +286,15 @@ namespace sage
         }
 
         auto mainRow = mainTable->CreateTableRow();
+        auto questList = mainRow->CreateTableCell({48, 0, 12, 0});
+        auto questDescription = mainRow->CreateTableCell(70, {28, 12, 18, 18});
+
         mainRow->SetTexture(
             ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_quest.png"),
             TextureStretchMode::STRETCH);
-
-        auto questList = mainRow->CreateTableCell({48, 0, 8, 0});
-        auto questDescription = mainRow->CreateTableCell(70, {12, 12, 12, 14});
+        questDescription->SetTexture(
+            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/quest-bg.png"),
+            TextureStretchMode::STRETCH);
 
         {
             // The 'description' textbox also acts as a manager for the quests shown in the sidebar
