@@ -108,7 +108,7 @@ namespace sage
         sys->userInput->keyFPressed.Subscribe([this]() { sys->camera->FocusSelectedActor(); });
 
         GameUiFactory::CreatePartyPortraitsColumn(sys->uiEngine.get());
-        GameUiFactory::CreateGameWindowButtons(sys->uiEngine.get(), inventoryWindow, equipmentWindow);
+        GameUiFactory::CreateGameWindowButtons(sys->uiEngine.get(), inventoryWindow, equipmentWindow, journalWindow);
     }
 
     void Scene::Update()

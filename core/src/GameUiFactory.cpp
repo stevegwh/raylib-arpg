@@ -55,6 +55,8 @@ namespace sage
     Window* GameUiFactory::CreateAbilityRow(GameUIEngine* engine)
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_hud.png");
+        auto healthTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/health.png");
+        auto manaTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/mana.png");
 
         auto w = 1024; // Absolute value of the image
         auto h = 156;
@@ -73,9 +75,13 @@ namespace sage
 
         auto tableMain = window->CreateTable();
         auto tableMainRow = tableMain->CreateTableRow();
-        tableMainRow->CreateTableCell(15.5);
+
+        auto healthCell = tableMainRow->CreateTableCell(15.5, {8, 8, 8, 8});
+        healthCell->CreateImagebox(std::make_unique<ImageBox>(engine, healthCell, healthTex));
+
         auto abilityCell = tableMainRow->CreateTableCell({16, 0, 0, 0});
-        tableMainRow->CreateTableCell(15.5);
+        auto manaCell = tableMainRow->CreateTableCell(15.5, {8, 8, 8, 8});
+        manaCell->CreateImagebox(std::make_unique<ImageBox>(engine, manaCell, manaTex));
 
         auto table = abilityCell->CreateTable();
         table->CreateTableRow(24); // Experience bar
@@ -297,7 +303,7 @@ namespace sage
         }
 
         window->FinalizeLayout();
-        // window->Hide();
+        window->Hide();
         return window;
     }
 
@@ -514,9 +520,9 @@ namespace sage
     }
 
     Window* GameUiFactory::CreateGameWindowButtons(
-        GameUIEngine* engine, Window* inventoryWindow, Window* equipmentWindow)
+        GameUIEngine* engine, Window* inventoryWindow, Window* equipmentWindow, Window* journalWindow)
     {
-        auto w = Settings::TARGET_SCREEN_WIDTH * 0.075;
+        auto w = Settings::TARGET_SCREEN_WIDTH * 0.1;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.075;
         auto _windowDocked = std::make_unique<WindowDocked>(
             engine->sys->settings,
@@ -544,6 +550,12 @@ namespace sage
             cell1,
             ResourceManager::GetInstance().TextureLoad("resources/icons/ui/equipment.png"),
             equipmentWindow));
+        auto cell2 = row->CreateTableCell();
+        cell2->CreateGameWindowButton(std::make_unique<GameWindowButton>(
+            engine,
+            cell2,
+            ResourceManager::GetInstance().TextureLoad("resources/icons/ui/spellbook.png"),
+            journalWindow));
         window->FinalizeLayout();
         return window;
     }

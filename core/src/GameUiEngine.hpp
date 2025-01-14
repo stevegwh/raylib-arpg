@@ -395,6 +395,19 @@ namespace sage
         GameWindowButton(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex, Window* _toOpen);
     };
 
+    class ResourceOrb : public ImageBox // Health, mana, etc.
+    {
+
+      public:
+        void RetrieveInfo() override;
+        void Draw2D() override;
+        ResourceOrb(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+    };
+
     class EquipmentCharacterPreview : public ImageBox
     {
 
@@ -535,6 +548,7 @@ namespace sage
         AbilitySlot* CreateAbilitySlot(std::unique_ptr<AbilitySlot> _slot);
         EquipmentSlot* CreateEquipmentSlot(std::unique_ptr<EquipmentSlot> _slot);
         InventorySlot* CreateInventorySlot(std::unique_ptr<InventorySlot> _slot);
+        ResourceOrb* CreateResourceOrb(std::unique_ptr<ResourceOrb> _orb);
         TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0, Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(float _requestedHeight, Padding _padding = {0, 0, 0, 0});

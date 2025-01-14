@@ -1124,6 +1124,40 @@ namespace sage
     {
     }
 
+    void ResourceOrb::RetrieveInfo()
+    {
+        // Get health
+        // UpdateDimensions();
+    }
+
+    void ResourceOrb::Draw2D()
+    {
+        // auto renderTexture =
+        //     engine->registry->get<EquipmentComponent>(engine->sys->controllableActorSystem->GetSelectedActor())
+        //         .renderTexture;
+        // DrawTextureRec(
+        //     renderTexture.texture,
+        //     {0,
+        //      0,
+        //      static_cast<float>(renderTexture.texture.width),
+        //      static_cast<float>(-renderTexture.texture.height)},
+        //     {rec.x, rec.y},
+        //     WHITE);
+        //        DrawTextureEx(renderTexture.texture, {rec.x, rec.y}, 0, 0.75f, WHITE);
+
+        // float center_x = rec.x + (rec.width / 2);
+        // float center_y = rec.y + (rec.height / 2);
+        DrawTexture(tex, rec.x, rec.y, WHITE);
+    }
+
+    ResourceOrb::ResourceOrb(
+        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
+    {
+        _engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
+            [this](entt::entity, entt::entity) { RetrieveInfo(); });
+    }
+
     void EquipmentCharacterPreview::UpdateDimensions()
     {
         ImageBox::UpdateDimensions();
@@ -2476,6 +2510,15 @@ namespace sage
         slot->RetrieveInfo();
         InitLayout();
         return slot;
+    }
+
+    ResourceOrb* TableCell::CreateResourceOrb(std::unique_ptr<ResourceOrb> _orb)
+    {
+        element = std::move(_orb);
+        auto* orb = dynamic_cast<ResourceOrb*>(element.value().get());
+        orb->RetrieveInfo();
+        InitLayout();
+        return orb;
     }
 
     TitleBar* TableCell::CreateTitleBar(std::unique_ptr<TitleBar> _titleBar, const std::string& _title)
