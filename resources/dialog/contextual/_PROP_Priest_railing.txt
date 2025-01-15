@@ -1,3 +1,4 @@
+owner: _PROP_Priest_railing
 distance: 90
 speaker: Goblin_Priest
 loop: true

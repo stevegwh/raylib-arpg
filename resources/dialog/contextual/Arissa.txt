@@ -1,3 +1,4 @@
+owner: Arissa
 distance: 60
 speaker: Arissa
 should_retrigger: true

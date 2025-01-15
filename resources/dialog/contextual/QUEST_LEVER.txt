@@ -1,3 +1,4 @@
+owner: QUEST_LEVER
 distance: 30
 speaker: Lever_Goblin
 ---

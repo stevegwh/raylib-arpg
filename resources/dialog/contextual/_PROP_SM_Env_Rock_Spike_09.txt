@@ -1,3 +1,4 @@
+owner: _PROP_SM_Env_Rock_Spike_09
 distance: 40
 speaker: Player
 ---

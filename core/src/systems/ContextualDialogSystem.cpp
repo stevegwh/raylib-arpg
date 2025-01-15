@@ -38,14 +38,14 @@ namespace sage
                 std::ifstream file{std::format("{}/{}", CONTEXTUAL_DIALOG_PATH, fileName)};
 
                 std::string fileNameStripped = entry.path().filename().replace_extension("").string();
-                auto entity = sys->renderSystem->FindRenderable(fileNameStripped);
-                assert(entity != entt::null);
 
-                auto& trigger = registry->emplace<ContextualDialogTriggerComponent>(entity);
                 std::vector<std::string> text;
+                entt::entity entity = entt::null;
 
                 if (file.is_open())
                 {
+                    ContextualDialogTriggerComponent* trigger = nullptr;
+
                     bool metaEnd = false;
                     std::string buff;
                     while (std::getline(file, buff, '\n'))
@@ -59,33 +59,44 @@ namespace sage
                         {
                             metaEnd = true;
                         }
+                        if (buff.find("owner: ") != std::string::npos)
+                        {
+                            auto sub = buff.substr(std::string("owner: ").size());
+                            entity = sys->renderSystem->FindRenderable(sub);
+                            trigger = &registry->emplace<ContextualDialogTriggerComponent>(entity);
+                            assert(entity != entt::null && trigger);
+                        }
                         else if (buff.find("distance: ") != std::string::npos)
                         {
+                            assert(entity != entt::null && trigger);
                             auto sub = buff.substr(std::string("distance: ").size());
                             float dist = std::stof(sub);
-                            trigger.distance = dist;
+                            trigger->distance = dist;
                         }
                         else if (buff.find("speaker: ") != std::string::npos)
                         {
+                            assert(entity != entt::null && trigger);
                             auto sub = buff.substr(std::string("speaker: ").size());
                             entt::entity speaker = sys->renderSystem->FindRenderable(sub);
-                            assert(trigger.speaker != entt::null);
-                            trigger.speaker = speaker;
+                            assert(trigger->speaker != entt::null);
+                            trigger->speaker = speaker;
                         }
                         else if (buff.find("loop: ") != std::string::npos)
                         {
+                            assert(entity != entt::null && trigger);
                             auto sub = buff.substr(std::string("loop: ").size());
                             if (sub.find("true") != std::string::npos)
                             {
-                                trigger.loop = true;
+                                trigger->loop = true;
                             }
                         }
                         else if (buff.find("should_retrigger: ") != std::string::npos)
                         {
+                            assert(entity != entt::null && trigger);
                             auto sub = buff.substr(std::string("should_retrigger: ").size());
                             if (sub.find("true") != std::string::npos)
                             {
-                                trigger.shouldRetrigger = true;
+                                trigger->shouldRetrigger = true;
                             }
                         }
                     }
