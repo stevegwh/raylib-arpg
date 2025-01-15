@@ -108,20 +108,6 @@ namespace sage
         {
             auto& trigger = registry->get<ContextualDialogTriggerComponent>(entity);
             const auto speaker = trigger.speaker;
-
-            if (registry->any_of<OverheadDialogComponent>(speaker))
-            {
-                if (auto& overhead = registry->get<OverheadDialogComponent>(speaker); overhead.IsFinished())
-                {
-                    registry->erase<OverheadDialogComponent>(speaker);
-                    trigger.SetTriggered(trigger.shouldRetrigger);
-                }
-                else
-                {
-                    continue;
-                }
-            }
-
             const auto playerPos =
                 registry->get<sgTransform>(sys->controllableActorSystem->GetSelectedActor()).GetWorldPos();
 
@@ -131,20 +117,26 @@ namespace sage
             auto center =
                 Vector3MultiplyByValue(Vector3Add(col.worldBoundingBox.max, col.worldBoundingBox.min), 0.5f);
 
-            if (!trigger.HasTriggered() && Vector3Distance(center, playerPos) < trigger.distance)
+            if (!trigger.HasTriggered())
             {
-                auto& overhead = registry->emplace<OverheadDialogComponent>(speaker, trigger.ShouldLoop());
-                const auto contextualDialog = dialogTextMap.at(entity);
-                overhead.SetText(contextualDialog, 5.0f);
-                trigger.SetTriggered();
+                if (registry->any_of<OverheadDialogComponent>(speaker)) continue;
+                if (Vector3Distance(center, playerPos) < trigger.distance)
+                {
+                    auto& overhead =
+                        registry->emplace_or_replace<OverheadDialogComponent>(speaker, trigger.ShouldLoop());
+                    const auto contextualDialog = dialogTextMap.at(entity);
+                    overhead.SetText(contextualDialog, 5.0f);
+                    trigger.SetTriggered();
+                }
             }
-            else if (trigger.HasTriggered() && Vector3Distance(center, playerPos) > trigger.distance)
+            else
             {
-                // TODO: this will never reach because of the check beforehand.
-                if (registry->any_of<OverheadDialogComponent>(speaker))
+                if (!registry->any_of<OverheadDialogComponent>(speaker)) continue;
+                if (auto& overhead = registry->get<OverheadDialogComponent>(speaker);
+                    overhead.IsFinished() && Vector3Distance(center, playerPos) > trigger.distance)
                 {
                     registry->erase<OverheadDialogComponent>(speaker);
-                    trigger.SetTriggered(trigger.shouldRetrigger);
+                    trigger.SetTriggered(!trigger.shouldRetrigger);
                 }
             }
         }

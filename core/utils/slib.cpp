@@ -404,33 +404,35 @@ namespace sage
 
     std::string TitleCase(const std::string& A)
     {
+        std::string lowercased = A;
+        std::transform(lowercased.begin(), lowercased.end(), lowercased.begin(), ::tolower);
 
         std::string B;
 
         int pos = 0;
         int pre_pos = 0;
 
-        pos = A.find(' ', pre_pos);
+        pos = lowercased.find(' ', pre_pos);
 
         while (pos != std::string::npos)
         {
             std::string sub = "";
 
-            sub = A.substr(pre_pos, (pos - pre_pos));
+            sub = lowercased.substr(pre_pos, (pos - pre_pos));
 
             if (pre_pos != pos)
             {
-                sub = A.substr(pre_pos, (pos - pre_pos));
+                sub = lowercased.substr(pre_pos, (pos - pre_pos));
             }
             else
             {
-                sub = A.substr(pre_pos, 1);
+                sub = lowercased.substr(pre_pos, 1);
             }
 
             sub[0] = toupper(sub[0]);
-            B += sub + A[pos];
+            B += sub + lowercased[pos];
 
-            if (pos < (A.length() - 1))
+            if (pos < (lowercased.length() - 1))
             {
                 pre_pos = (pos + 1);
             }
@@ -440,10 +442,10 @@ namespace sage
                 break;
             }
 
-            pos = A.find(' ', pre_pos);
+            pos = lowercased.find(' ', pre_pos);
         }
 
-        std::string sub = A.substr(pre_pos, std::string::npos);
+        std::string sub = lowercased.substr(pre_pos, std::string::npos);
         sub[0] = toupper(sub[0]);
         B += sub;
 
