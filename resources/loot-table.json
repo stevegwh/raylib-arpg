@@ -1,0 +1,30 @@
+{
+  "value0": {
+    "value0": [
+      {
+        "Name": "chest_001",
+        "Items": [
+          "Dagger"
+        ]
+      },
+      {
+        "Name": "chest_002",
+        "Items": [
+          "Dagger"
+        ]
+      },
+	   {
+        "Name": "chest_003",
+        "Items": [
+          "Dagger"
+        ]
+      },
+	  {
+        "Name": "chest_004",
+        "Items": [
+          "Sword"
+        ]
+      }
+    ]
+  }
+}

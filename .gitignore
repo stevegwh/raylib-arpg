@@ -13,3 +13,4 @@ resources/*
 !resources/shaders/
 !resources/asset-path-aliases.json
 !resources/items.json
+!resources/loot-table.json
