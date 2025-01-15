@@ -173,7 +173,7 @@ namespace sage
         hideCursor = false;
     }
 
-    bool Cursor::isValidMove() const
+    bool Cursor::IsValidMove() const
     {
         auto mouseHit = m_naviHitInfo.rlCollision.point;
         if (sys->navigationGridSystem->CheckWithinGridBounds(mouseHit))
@@ -208,19 +208,19 @@ namespace sage
     {
         if (contextLocked) return;
 
+        if (!IsValidMove())
+        {
+            currentTex = &invalidmovetex;
+            currentColor = invalidColor;
+            return;
+        }
+
         if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
             layer == CollisionLayer::STAIRS)
         {
-            if (isValidMove())
-            {
-                currentTex = &movetex;
-                currentColor = GREEN;
-            }
-            else
-            {
-                currentTex = &invalidmovetex;
-                currentColor = invalidColor;
-            }
+            currentTex = &movetex;
+            currentColor = GREEN;
+
             if (registry->all_of<Renderable>(m_mouseHitInfo.collidedEntityId))
             {
                 hitObjectName = registry->get<Renderable>(m_mouseHitInfo.collidedEntityId).GetName();
@@ -374,6 +374,7 @@ namespace sage
 
     void Cursor::Update()
     {
+
         getMouseRayCollision();
         checkMouseHover();
 
@@ -395,7 +396,7 @@ namespace sage
             onMouseRightDown();
         }
         else if (
-            m_hoverInfo.has_value() &&
+            IsValidMove() && m_hoverInfo.has_value() &&
             GetTime() >= m_hoverInfo.value().beginHoverTime + m_hoverInfo.value().hoverTimeThreshold)
         {
             onMouseHover();

@@ -7,8 +7,8 @@
 #include "components/Collideable.hpp"
 #include "Event.hpp"
 
-#include "raylib.h"
 #include "entt/entt.hpp"
+#include "raylib.h"
 
 #include <optional>
 
@@ -94,7 +94,7 @@ namespace sage
         void Disable();
         void Hide();
         void Show();
-        [[nodiscard]] bool isValidMove() const;
+        [[nodiscard]] bool IsValidMove() const;
 
         Cursor(entt::registry* registry, Systems* _sys);
     };
