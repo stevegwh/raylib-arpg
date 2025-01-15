@@ -173,17 +173,29 @@ namespace sage
         hideCursor = false;
     }
 
+    bool Cursor::OutOfRange() const
+    {
+        auto mouseHit = m_naviHitInfo.rlCollision.point;
+        const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
+        const auto& moveable = registry->get<MoveableActor>(selectedActor);
+        GridSquare minRange{};
+        GridSquare maxRange{};
+        sys->navigationGridSystem->GetPathfindRange(selectedActor, moveable.pathfindingBounds, minRange, maxRange);
+
+        return !sys->navigationGridSystem->CheckWithinBounds(mouseHit, minRange, maxRange);
+    }
+
     bool Cursor::IsValidMove() const
     {
         auto mouseHit = m_naviHitInfo.rlCollision.point;
         if (sys->navigationGridSystem->CheckWithinGridBounds(mouseHit))
         {
             const auto& selectedActor = sys->controllableActorSystem->GetSelectedActor();
-            const auto& actor = registry->get<MoveableActor>(selectedActor);
+            const auto& moveable = registry->get<MoveableActor>(selectedActor);
             GridSquare minRange{};
             GridSquare maxRange{};
             sys->navigationGridSystem->GetPathfindRange(
-                selectedActor, actor.pathfindingBounds, minRange, maxRange);
+                selectedActor, moveable.pathfindingBounds, minRange, maxRange);
 
             if (!sys->navigationGridSystem->CheckWithinBounds(mouseHit, minRange, maxRange))
             {
@@ -208,7 +220,7 @@ namespace sage
     {
         if (contextLocked) return;
 
-        if (!IsValidMove())
+        if (OutOfRange())
         {
             currentTex = &invalidmovetex;
             currentColor = invalidColor;
@@ -218,6 +230,13 @@ namespace sage
         if (layer == CollisionLayer::FLOORSIMPLE || layer == CollisionLayer::FLOORCOMPLEX ||
             layer == CollisionLayer::STAIRS)
         {
+            if (!IsValidMove())
+            {
+                currentTex = &invalidmovetex;
+                currentColor = invalidColor;
+                return;
+            }
+
             currentTex = &movetex;
             currentColor = GREEN;
 
@@ -396,7 +415,7 @@ namespace sage
             onMouseRightDown();
         }
         else if (
-            IsValidMove() && m_hoverInfo.has_value() &&
+            !OutOfRange() && m_hoverInfo.has_value() &&
             GetTime() >= m_hoverInfo.value().beginHoverTime + m_hoverInfo.value().hoverTimeThreshold)
         {
             onMouseHover();

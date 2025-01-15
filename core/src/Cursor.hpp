@@ -94,6 +94,7 @@ namespace sage
         void Disable();
         void Hide();
         void Show();
+        [[nodiscard]] bool OutOfRange() const;
         [[nodiscard]] bool IsValidMove() const;
 
         Cursor(entt::registry* registry, Systems* _sys);
