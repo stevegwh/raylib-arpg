@@ -22,7 +22,6 @@ namespace sage
 {
     void ExampleScene::Init()
     {
-        return;
         const auto soundScape = sys->audioManager->PlayMusic("resources/audio/bgs/Cave.ogg");
         SetMusicVolume(soundScape, 0.75);
 

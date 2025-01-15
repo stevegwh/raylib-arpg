@@ -19,7 +19,7 @@ namespace sage
     {
         Systems* sys;
         Window* dialogWindow{};
-        void endConversation() const;
+        void endConversation(entt::entity npc) const;
         void progressConversation(const dialog::Conversation* conversation);
 
       public:
