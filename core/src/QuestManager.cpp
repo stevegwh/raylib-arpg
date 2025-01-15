@@ -132,10 +132,10 @@ namespace sage
 
                 while (std::getline(ss, buff, '\n'))
                 {
-                    if (buff.find("[Meta]") != std::string::npos)
+                    if (buff.find("<meta>") != std::string::npos)
                     {
                         std::string metaLine;
-                        while (std::getline(ss, metaLine) && !metaLine.empty())
+                        while (std::getline(ss, metaLine) && metaLine.find("</meta>") == std::string::npos)
                         {
                             if (metaLine.find("title: ") != std::string::npos)
                             {
@@ -149,20 +149,21 @@ namespace sage
                             }
                         }
                     }
-                    else if (buff.find("[Description]") != std::string::npos)
+                    else if (buff.find("<description>") != std::string::npos)
                     {
                         std::string description;
                         std::string descriptionLine;
-                        while (std::getline(ss, descriptionLine) && !descriptionLine.empty())
+                        while (std::getline(ss, descriptionLine) &&
+                               descriptionLine.find("</description>") == std::string::npos)
                         {
                             description += descriptionLine + "\n";
                         }
                         quest.journalDescription = description;
                     }
-                    else if (buff.find("[Tasks]") != std::string::npos)
+                    else if (buff.find("<tasks>") != std::string::npos)
                     {
                         std::string taskLine;
-                        while (std::getline(ss, taskLine) && !taskLine.empty())
+                        while (std::getline(ss, taskLine) && taskLine.find("</tasks>") == std::string::npos)
                         {
                             std::string sub;
                             entt::entity entity;
@@ -220,20 +221,22 @@ namespace sage
                             }
                         }
                     }
-                    else if (buff.find("[OnStart]") != std::string::npos)
+                    else if (buff.find("<onStart>") != std::string::npos)
                     {
                         std::string functionLine;
-                        while (std::getline(ss, functionLine) && !functionLine.empty())
+                        while (std::getline(ss, functionLine) &&
+                               functionLine.find("</onStart>") == std::string::npos)
                         {
                             auto func = getFunctionNameAndArgs(functionLine);
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(
                                 registry, sys, func, &quest.onStart);
                         }
                     }
-                    else if (buff.find("[OnComplete]") != std::string::npos)
+                    else if (buff.find("<onComplete>") != std::string::npos)
                     {
                         std::string functionLine;
-                        while (std::getline(ss, functionLine) && !functionLine.empty())
+                        while (std::getline(ss, functionLine) &&
+                               functionLine.find("</onComplete>") == std::string::npos)
                         {
                             auto func = getFunctionNameAndArgs(functionLine);
                             bindFunctionToEvent<Event<entt::entity>, entt::entity>(

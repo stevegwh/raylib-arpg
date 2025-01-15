@@ -1,15 +1,20 @@
-[Meta]
-title: Free the prisoner.
-giver: Arissa
+<meta>
+	title: Free the prisoner.
+	giver: Arissa
+</meta>
 
-[Description]
-We met a prisoner in the Goblin Camp who wants to be freed. She mentioned that the keys to the cell can be found on a guard resting in the barracks.
+<description>
+	We met a prisoner in the Goblin Camp who wants to be freed. She mentioned that the keys to the cell can be found on a guard resting in the barracks.
+</description>
 
-[Tasks]
-dialog: Cell_Guard
+<tasks>
+	dialog: Cell_Guard
+</tasks>
 
-[OnStart]
+<onStart>
+</onStart>
 
-[OnComplete]
-JoinParty(Arissa)
-OpenDoor(QUEST_DOOR)
+<onComplete>
+	JoinParty(Arissa)
+	OpenDoor(QUEST_DOOR)
+</onComplete>

@@ -1,18 +1,23 @@
-[Meta]
+<meta>
 	title: The missing lever.
 	giver: QUEST_LEVER
+</meta>
 
-[Description]
+<description>
 	We found the lever's missing handle. Time to put it back and get out of here.
+</description>
 
-[Tasks]
+<tasks>
 	// Speak to the lever interactable and it gives you the lever (and removes itself from scene)
 	dialog: QUEST_LEVER; GiveItem(QUEST_LEVER); DisableWorldItem(QUEST_LEVER)
 	// When we place the lever into its base, a sound effect will play
 	dialog: QUEST_LEVER_BASE; PlaySFX(resources/audio/sfx/test.ogg)
+</tasks>
 
-[OnStart]
+<onStart>
 	RemoveItem(QUEST_BONE)
+</onStart>
 
-[OnComplete]
+<onComplete>
 	EndGame()
+</onComplete>
