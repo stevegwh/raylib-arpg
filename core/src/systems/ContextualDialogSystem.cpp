@@ -72,6 +72,14 @@ namespace sage
                             assert(trigger.speaker != entt::null);
                             trigger.speaker = speaker;
                         }
+                        else if (buff.find("loop: ") != std::string::npos)
+                        {
+                            auto sub = buff.substr(std::string("loop: ").size());
+                            if (sub.find("true") != std::string::npos)
+                            {
+                                trigger.loop = true;
+                            }
+                        }
                     }
                 }
                 else
@@ -114,9 +122,9 @@ namespace sage
             auto center =
                 Vector3MultiplyByValue(Vector3Add(col.worldBoundingBox.max, col.worldBoundingBox.min), 0.5f);
 
-            if (trigger.CanTrigger() && Vector3Distance(center, playerPos) < trigger.distance)
+            if (!trigger.HasTriggered() && Vector3Distance(center, playerPos) < trigger.distance)
             {
-                auto& overhead = registry->emplace<OverheadDialogComponent>(speaker);
+                auto& overhead = registry->emplace<OverheadDialogComponent>(speaker, trigger.ShouldLoop());
                 const auto contextualDialog = dialogTextMap.at(entity);
                 overhead.SetText(contextualDialog, 5.0f);
                 trigger.SetTriggered();

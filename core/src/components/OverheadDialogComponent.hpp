@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "raylib.h"
 #include "entt/entt.hpp"
+#include "raylib.h"
 
 #include <string>
 #include <vector>
@@ -19,6 +19,7 @@ namespace sage
         std::vector<std::string> text;
         double initialTime;
         float delay = 0;
+        bool loop = false;
 
       public:
         [[nodiscard]] bool IsFinished() const
@@ -35,7 +36,11 @@ namespace sage
             }
             if (currentIdx >= text.size())
             {
-                return "";
+                if (!loop)
+                {
+                    return "";
+                }
+                currentIdx = 0;
             }
             return text.at(currentIdx);
         }
@@ -46,7 +51,7 @@ namespace sage
             delay = _delay;
         }
 
-        explicit OverheadDialogComponent() : initialTime(GetTime())
+        explicit OverheadDialogComponent(bool _loop = false) : initialTime(GetTime()), loop(_loop)
         {
         }
     };

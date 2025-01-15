@@ -1,0 +1,18 @@
+// Option "OnSelect" functions: start_quest, complete_quest, complete_quest_task
+// Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
+
+<meta>
+	owner: Goblin_Follower(1)
+	speaker: Goblin Follower
+	conversation_pos: 10.0 2.0 5.0
+	camera_pos: 5.0 10.0 18.0
+</meta>
+
+<node>
+	title: start
+	---
+	PRAISE BE TO OUR LORD.
+	---
+
+	[[Take your leave. | exit]]
+</node>

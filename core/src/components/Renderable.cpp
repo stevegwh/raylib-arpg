@@ -5,7 +5,9 @@
 
 #include "ParsingHelpers.hpp"
 #include "slib.hpp"
+
 #include <algorithm>
+#include <regex>
 
 namespace sage
 {
@@ -34,6 +36,7 @@ namespace sage
         }
 
         std::ranges::replace(vanity, '_', ' ');
+        vanity = std::regex_replace(vanity, std::regex(R"(\s*\(\d+\)\s*)"), "");
 
         vanity = parsing::trim(vanity);
 

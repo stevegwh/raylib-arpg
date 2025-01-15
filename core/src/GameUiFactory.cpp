@@ -287,10 +287,13 @@ namespace sage
 
         auto mainRow = mainTable->CreateTableRow();
         auto questList = mainRow->CreateTableCell({48, 0, 8, 8});
-        auto questDescription = mainRow->CreateTableCell(70, {38, 12, 18, 18});
+        auto questDescription = mainRow->CreateTableCell(70, {48, 12, 24, 24});
 
         mainRow->SetTexture(
             ResourceManager::GetInstance().TextureLoad("resources/textures/ui/window_quest.png"),
+            TextureStretchMode::STRETCH);
+        questList->SetTexture(
+            ResourceManager::GetInstance().TextureLoad("resources/textures/ui/quest-bg.png"),
             TextureStretchMode::STRETCH);
         questDescription->SetTexture(
             ResourceManager::GetInstance().TextureLoad("resources/textures/ui/quest-bg.png"),

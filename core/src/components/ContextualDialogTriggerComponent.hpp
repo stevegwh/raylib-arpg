@@ -13,20 +13,28 @@ namespace sage
     {
         // Could target a specific player or just the leader of the party
         bool triggered = false;
+        bool loop = false;
 
       public:
         entt::entity speaker{}; // Entity that speaks when triggered
         float distance = 75.0f; // Distance for the dialog to trigger
 
-        [[nodiscard]] bool CanTrigger() const
+        [[nodiscard]] bool HasTriggered() const
         {
-            return !triggered;
+            return triggered;
         }
 
-        void SetTriggered()
+        [[nodiscard]] bool ShouldLoop() const
         {
-            triggered = true;
+            return loop;
         }
+
+        void SetTriggered(bool _triggered = true)
+        {
+            triggered = _triggered;
+        }
+
+        friend class ContextualDialogSystem;
     };
 
 } // namespace sage
