@@ -66,6 +66,7 @@ namespace sage
 
         void onMovementCancelled(entt::entity self) const
         {
+
             stateController->ChangeState(self, PlayerStateEnum::Default);
         }
 
@@ -82,7 +83,8 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             sys->actorMovementSystem->CancelMovement(self);
-            sys->actorMovementSystem->PathfindToLocation(self, sys->cursor->getFirstCollision().point);
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
             auto& moveable = registry->get<MoveableActor>(self);
             auto& state = registry->get<PlayerState>(self);
             auto cnx = moveable.onDestinationReached.Subscribe(
@@ -91,9 +93,10 @@ namespace sage
             auto cnx1 = moveable.onMovementCancel.Subscribe(
                 [this](entt::entity _entity) { onMovementCancelled(_entity); });
             state.ManageSubscription(std::move(cnx1));
-
-            auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
+            auto cnx2 = moveable.onDestinationUnreachable.Subscribe(
+                [this](entt::entity _entity, Vector3) { onMovementCancelled(_entity); });
+            state.ManageSubscription(std::move(cnx2));
+            sys->actorMovementSystem->PathfindToLocation(self, sys->cursor->getFirstCollision().point);
         }
 
         void OnStateExit(entt::entity self) override

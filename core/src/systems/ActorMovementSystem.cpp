@@ -64,6 +64,7 @@ namespace sage
             moveable.onDestinationUnreachable.Publish(entity, destination);
             if (entity == sys->controllableActorSystem->GetSelectedActor())
             {
+                moveable.onDestinationUnreachable.Publish(entity, destination);
                 sys->uiEngine->CreateErrorMessage("Out of bounds.");
             }
             // std::cout << std::format(
@@ -74,8 +75,7 @@ namespace sage
 
         GridSquare minRange{};
         GridSquare maxRange{};
-        if (!sys->navigationGridSystem->GetPathfindRange(
-                entity, moveable.pathfindingBounds, minRange, maxRange))
+        if (!sys->navigationGridSystem->GetPathfindRange(entity, moveable.pathfindingBounds, minRange, maxRange))
         {
             // This will very rarely happen. Only triggers if the entity's current position is outside of grid
             // bounds.
