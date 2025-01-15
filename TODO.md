@@ -5,9 +5,9 @@
 
 ## To Do
 
-- [ ]  Text above head for spoken dialogue (outside of a conversation)
-- [ ]  Have 'arissa' locked in a cell and a quest to save her
-- [ ]  Make base quest of the game you needing to find a lever to open the gate out of the location. Make it so you have
+- [x]  Text above head for spoken dialogue (outside of a conversation)
+- [x]  Have 'arissa' locked in a cell and a quest to save her
+- [x]  Make base quest of the game you needing to find a lever to open the gate out of the location. Make it so you have
   to trade a Goblin or Dog a bone (or something) for the lever, to get this bone (or something) you need to complete a
   few other things?
 - [ ]  Replace the literal model for items with the dota 2 style "boxes"

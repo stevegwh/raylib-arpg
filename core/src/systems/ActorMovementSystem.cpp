@@ -229,7 +229,7 @@ namespace sage
         moveableActor.onDestinationReached.Publish(entity);
     }
 
-    bool ActorMovementSystem::checkCollisionWithOtherMoveable(
+    bool ActorMovementSystem::CheckCollisionWithOtherMoveable(
         const entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const
     {
         constexpr float avoidanceDistance = 10;
@@ -237,7 +237,7 @@ namespace sage
         sys->navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
 
         // navigationGridSystem->MarkSquaresDebug(moveableActor.debugRay, PURPLE, false);
-        // Looks ahead and checks if getFirstCollision will occur
+
         NavigationGridSquare* hitCell =
             castCollisionRay(actorIndex, transform.direction, avoidanceDistance, moveableActor);
 
@@ -344,7 +344,7 @@ namespace sage
             return;
         }
 
-        if (!checkCollisionWithOtherMoveable(entity, transform, moveableActor))
+        if (!CheckCollisionWithOtherMoveable(entity, transform, moveableActor))
         {
             // TODO: Distance of the ray cast should be from the current pos to the next node
             updateActorTransform(entity, transform, moveableActor);

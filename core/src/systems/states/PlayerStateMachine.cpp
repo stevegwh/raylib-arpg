@@ -20,6 +20,7 @@
 
 #include "raylib.h"
 #include "StateMachines.hpp"
+#include "systems/PartySystem.hpp"
 
 #include <cassert>
 #include <format>
@@ -83,20 +84,41 @@ namespace sage
         void OnStateEnter(entt::entity self) override
         {
             sys->actorMovementSystem->CancelMovement(self);
-            auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
             auto& moveable = registry->get<MoveableActor>(self);
             auto& state = registry->get<PlayerState>(self);
-            auto cnx = moveable.onDestinationReached.Subscribe(
-                [this](entt::entity _entity) { onTargetReached(_entity); });
-            state.ManageSubscription(std::move(cnx));
-            auto cnx1 = moveable.onMovementCancel.Subscribe(
-                [this](entt::entity _entity) { onMovementCancelled(_entity); });
-            state.ManageSubscription(std::move(cnx1));
-            auto cnx2 = moveable.onDestinationUnreachable.Subscribe(
-                [this](entt::entity _entity, Vector3) { onMovementCancelled(_entity); });
-            state.ManageSubscription(std::move(cnx2));
-            sys->actorMovementSystem->PathfindToLocation(self, sys->cursor->getFirstCollision().point);
+
+            auto party = sys->partySystem->GetAllMembers();
+
+            for (const auto& member : party)
+            {
+                const auto& collideable = registry->get<Collideable>(member);
+                sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false);
+            }
+
+            if (sys->actorMovementSystem->TryPathfindToLocation(self, sys->cursor->getFirstCollision().point))
+            {
+                auto& animation = registry->get<Animation>(self);
+                animation.ChangeAnimationByEnum(AnimationEnum::RUN);
+                auto cnx = moveable.onDestinationReached.Subscribe(
+                    [this](entt::entity _entity) { onTargetReached(_entity); });
+                state.ManageSubscription(std::move(cnx));
+                auto cnx1 = moveable.onMovementCancel.Subscribe(
+                    [this](entt::entity _entity) { onMovementCancelled(_entity); });
+                state.ManageSubscription(std::move(cnx1));
+                auto cnx2 = moveable.onDestinationUnreachable.Subscribe(
+                    [this](entt::entity _entity, Vector3) { onMovementCancelled(_entity); });
+                state.ManageSubscription(std::move(cnx2));
+            }
+            else
+            {
+                stateController->ChangeState(self, PlayerStateEnum::Default);
+            }
+
+            for (const auto& member : party)
+            {
+                const auto& collideable = registry->get<Collideable>(member);
+                sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true);
+            }
         }
 
         void OnStateExit(entt::entity self) override

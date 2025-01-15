@@ -151,6 +151,11 @@ namespace sage
         }
     }
 
+    const std::vector<entt::entity>& PartySystem::GetAllMembers()
+    {
+        return party;
+    }
+
     entt::entity PartySystem::GetMember(unsigned int memberNumber) const
     {
         if (memberNumber < party.size())
@@ -191,8 +196,7 @@ namespace sage
         return {};
     }
 
-    PartySystem::PartySystem(entt::registry* _registry, Systems* _sys)
-        : registry(_registry), sys(_sys)
+    PartySystem::PartySystem(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
         groups.resize(1);
 

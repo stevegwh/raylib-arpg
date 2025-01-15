@@ -36,6 +36,7 @@ namespace sage
         void NPCToMember(entt::entity npc);
         void AddMember(entt::entity member);
         void RemoveMember(entt::entity entity);
+        const std::vector<entt::entity>& GetAllMembers();
         [[nodiscard]] entt::entity GetMember(unsigned int memberNumber) const;
         [[nodiscard]] unsigned int GetSize() const;
         [[nodiscard]] bool CheckSameGroup(entt::entity a, entt::entity b) const;

@@ -39,8 +39,6 @@ namespace sage
         void handlePointReached(entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
         void setPositionToGridCenter(sgTransform& transform, const MoveableActor& moveableActor) const;
         static void handleDestinationReached(entt::entity entity, const MoveableActor& moveableActor);
-        [[nodiscard]] bool checkCollisionWithOtherMoveable(
-            entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const;
         NavigationGridSquare* castCollisionRay(
             const GridSquare& actorIndex,
             const Vector3& direction,
@@ -52,6 +50,8 @@ namespace sage
         void updateActorWorldPosition(entt::entity entity, sgTransform& transform) const;
 
       public:
+        [[nodiscard]] bool CheckCollisionWithOtherMoveable(
+            entt::entity entity, const sgTransform& transform, MoveableActor& moveableActor) const;
         [[nodiscard]] bool ReachedDestination(entt::entity entity) const;
         void PruneMoveCommands(const entt::entity& entity) const;
         [[nodiscard]] bool TryPathfindToLocation(const entt::entity& entity, const Vector3& destination) const;
