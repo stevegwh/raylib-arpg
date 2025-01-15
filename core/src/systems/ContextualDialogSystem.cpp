@@ -15,6 +15,7 @@
 #include "Systems.hpp"
 
 #include "components/Renderable.hpp"
+#include "ParsingHelpers.hpp"
 #include "raylib.h"
 #include "RenderSystem.hpp"
 
@@ -27,84 +28,90 @@ constexpr auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
 
 namespace sage
 {
-
+    using namespace parsing;
     void ContextualDialogSystem::InitContextualDialogsFromDirectory()
     {
         for (const fs::path path{CONTEXTUAL_DIALOG_PATH}; const auto& entry : fs::directory_iterator(path))
         {
             if (entry.path().extension() == ".txt")
             {
-                std::string fileName = entry.path().filename().string();
-                std::ifstream file{std::format("{}/{}", CONTEXTUAL_DIALOG_PATH, fileName)};
 
-                std::string fileNameStripped = entry.path().filename().replace_extension("").string();
+                std::ostringstream fileContent;
+                {
+                    std::string fileName = entry.path().filename().string();
+                    std::ifstream file{std::format("{}/{}", CONTEXTUAL_DIALOG_PATH, fileName)};
+                    if (!file.is_open()) assert(0);
+                    if (!file.is_open()) return;
+                    fileContent << file.rdbuf();
+                }
 
                 std::vector<std::string> text;
                 entt::entity entity = entt::null;
+                ContextualDialogTriggerComponent* trigger = nullptr;
 
-                if (file.is_open())
+                std::string processed =
+                    removeCommentsFromFile(trimWhiteSpaceFromFile(normalizeLineEndings(fileContent.str())));
+                std::stringstream ss(processed);
+                std::string buff;
+                while (std::getline(ss, buff, '\n'))
                 {
-                    ContextualDialogTriggerComponent* trigger = nullptr;
-
-                    bool metaEnd = false;
-                    std::string buff;
-                    while (std::getline(file, buff, '\n'))
+                    if (buff.find("<meta>") != std::string::npos)
                     {
-                        if (metaEnd)
+                        std::string metaLine;
+                        while (std::getline(ss, metaLine) && metaLine.find("</meta>") == std::string::npos)
                         {
-                            text.push_back(buff);
-                            continue;
-                        }
-                        if (buff == "---")
-                        {
-                            metaEnd = true;
-                        }
-                        if (buff.find("owner: ") != std::string::npos)
-                        {
-                            auto sub = buff.substr(std::string("owner: ").size());
-                            entity = sys->renderSystem->FindRenderable(sub);
-                            trigger = &registry->emplace<ContextualDialogTriggerComponent>(entity);
-                            assert(entity != entt::null && trigger);
-                        }
-                        else if (buff.find("distance: ") != std::string::npos)
-                        {
-                            assert(entity != entt::null && trigger);
-                            auto sub = buff.substr(std::string("distance: ").size());
-                            float dist = std::stof(sub);
-                            trigger->distance = dist;
-                        }
-                        else if (buff.find("speaker: ") != std::string::npos)
-                        {
-                            assert(entity != entt::null && trigger);
-                            auto sub = buff.substr(std::string("speaker: ").size());
-                            entt::entity speaker = sys->renderSystem->FindRenderable(sub);
-                            assert(trigger->speaker != entt::null);
-                            trigger->speaker = speaker;
-                        }
-                        else if (buff.find("loop: ") != std::string::npos)
-                        {
-                            assert(entity != entt::null && trigger);
-                            auto sub = buff.substr(std::string("loop: ").size());
-                            if (sub.find("true") != std::string::npos)
+                            if (metaLine.find("owner: ") != std::string::npos)
                             {
-                                trigger->loop = true;
+                                auto sub = metaLine.substr(std::string("owner: ").size());
+                                entity = sys->renderSystem->FindRenderable(sub);
+                                trigger = &registry->emplace<ContextualDialogTriggerComponent>(entity);
+                                assert(entity != entt::null && trigger);
                             }
-                        }
-                        else if (buff.find("should_retrigger: ") != std::string::npos)
-                        {
-                            assert(entity != entt::null && trigger);
-                            auto sub = buff.substr(std::string("should_retrigger: ").size());
-                            if (sub.find("true") != std::string::npos)
+                            else if (metaLine.find("distance: ") != std::string::npos)
                             {
-                                trigger->shouldRetrigger = true;
+                                assert(entity != entt::null && trigger);
+                                auto sub = metaLine.substr(std::string("distance: ").size());
+                                float dist = std::stof(sub);
+                                trigger->distance = dist;
+                            }
+                            else if (metaLine.find("speaker: ") != std::string::npos)
+                            {
+                                assert(entity != entt::null && trigger);
+                                auto sub = metaLine.substr(std::string("speaker: ").size());
+                                entt::entity speaker = sys->renderSystem->FindRenderable(sub);
+                                assert(trigger->speaker != entt::null);
+                                trigger->speaker = speaker;
+                            }
+                            else if (metaLine.find("loop: ") != std::string::npos)
+                            {
+                                assert(entity != entt::null && trigger);
+                                auto sub = metaLine.substr(std::string("loop: ").size());
+                                if (sub.find("true") != std::string::npos)
+                                {
+                                    trigger->loop = true;
+                                }
+                            }
+                            else if (metaLine.find("should_retrigger: ") != std::string::npos)
+                            {
+                                assert(entity != entt::null && trigger);
+                                auto sub = metaLine.substr(std::string("should_retrigger: ").size());
+                                if (sub.find("true") != std::string::npos)
+                                {
+                                    trigger->shouldRetrigger = true;
+                                }
                             }
                         }
                     }
+                    else if (buff.find("<dialog>") != std::string::npos)
+                    {
+                        std::string dialogLine;
+                        while (std::getline(ss, dialogLine) && dialogLine.find("</dialog>") == std::string::npos)
+                        {
+                            text.push_back(dialogLine);
+                        }
+                    }
                 }
-                else
-                {
-                    assert(0);
-                }
+
                 dialogTextMap.emplace(entity, text);
             }
         }

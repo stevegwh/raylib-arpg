@@ -49,7 +49,7 @@ namespace sage
         auto& conversationComponent = registry->get<DialogComponent>(conversationEntity);
         conversationComponent.conversation->onConversationEnd.Subscribe([this]() {
             sys->camera->FocusSelectedActor();
-            sys->audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
+            // sys->audioManager->PlayMusic("resources/audio/music/5 A Safe Space LOOP TomMusic.ogg");
         });
     }
 

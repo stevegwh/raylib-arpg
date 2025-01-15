@@ -1,7 +1,11 @@
-owner: Arissa
-distance: 60
-speaker: Arissa
-should_retrigger: true
----
-Is someone there?
-Please help!
+<meta>
+	owner: Arissa
+	distance: 60
+	speaker: Arissa
+	should_retrigger: true
+</meta>
+
+<dialog>
+	Is someone there?
+	Please help!
+</dialog>

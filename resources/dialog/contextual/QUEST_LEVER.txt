@@ -1,5 +1,9 @@
-owner: QUEST_LEVER
-distance: 30
-speaker: Lever_Goblin
----
-Get away from my lever!
+<meta>
+	owner: QUEST_LEVER
+	distance: 30
+	speaker: Lever_Goblin
+</meta>
+
+<dialog>
+	Get away from my lever!
+</dialog>

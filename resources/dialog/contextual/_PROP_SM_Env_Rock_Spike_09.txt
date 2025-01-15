@@ -1,5 +1,13 @@
-owner: _PROP_SM_Env_Rock_Spike_09
-distance: 40
-speaker: Player
----
-What in the world is this place?
+<meta>
+	owner: _PROP_SM_Env_Rock_Spike_09
+	distance: 40
+	speaker: Player
+</meta>
+
+<dialog>
+	What in the world is this place?
+</dialog>
+
+<onTrigger>
+	PlayMusic(resources/audio/music/5 A Safe Space LOOP TomMusic.ogg);
+</onTrigger>

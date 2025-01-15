@@ -1,12 +1,16 @@
-owner: _PROP_Priest_railing
-distance: 90
-speaker: Goblin_Priest
-loop: true
-should_retrigger: true
----
-Come forth my brothers and rejoice!
-Our lamb for the slaughter has been captured!
-And soon the ritual shall begin!
-Today is a day unlike no other!
-Today is the day that our sacred Lord returns to us!
-Today, we shall reign supreme!
+<meta>
+	owner: _PROP_Priest_railing
+	distance: 90
+	speaker: Goblin_Priest
+	loop: true
+	should_retrigger: true
+</meta>
+
+<dialog>
+	Come forth my brothers and rejoice!
+	Our lamb for the slaughter has been captured!
+	And soon the ritual shall begin!
+	Today is a day unlike no other!
+	Today is the day that our sacred Lord returns to us!
+	Today, we shall reign supreme!
+</dialog>

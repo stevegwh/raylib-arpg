@@ -1,5 +1,9 @@
-owner: QUEST_LEVER_BASE
-distance: 80
-speaker: Player
----
-That looks like the way out of here.
+<meta>
+	owner: QUEST_LEVER_BASE
+	distance: 80
+	speaker: Player
+</meta>
+
+<dialog>
+	That looks like the way out of here.
+</dialog>
