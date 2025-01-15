@@ -5,6 +5,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "Event.hpp"
 
 namespace sage
 {
@@ -17,6 +18,7 @@ namespace sage
         bool shouldRetrigger = false;
 
       public:
+        Event<> onTrigger;
         entt::entity speaker{}; // Entity that speaks when triggered
         float distance = 75.0f; // Distance for the dialog to trigger
 
@@ -32,6 +34,10 @@ namespace sage
 
         void SetTriggered(bool _triggered = true)
         {
+            if (_triggered)
+            {
+                onTrigger.Publish();
+            }
             triggered = _triggered;
         }
 

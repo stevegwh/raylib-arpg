@@ -4,20 +4,22 @@
 
 #include "ContextualDialogSystem.hpp"
 
+#include "AudioManager.hpp"
 #include "Camera.hpp"
 #include "components/Collideable.hpp"
 #include "components/ContextualDialogTriggerComponent.hpp"
 #include "components/OverheadDialogComponent.hpp"
 #include "components/sgTransform.hpp"
-#include "ControllableActorSystem.hpp"
+#include "GameUiEngine.hpp"
+#include "ParsingHelpers.hpp"
 #include "Settings.hpp"
 #include "slib.hpp"
 #include "Systems.hpp"
+#include "systems/ControllableActorSystem.hpp"
+#include "systems/RenderSystem.hpp"
+#include "TextToRealFunction.hpp"
 
-#include "components/Renderable.hpp"
-#include "ParsingHelpers.hpp"
 #include "raylib.h"
-#include "RenderSystem.hpp"
 
 #include <filesystem>
 #include <format>
@@ -29,6 +31,7 @@ constexpr auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
 namespace sage
 {
     using namespace parsing;
+
     void ContextualDialogSystem::InitContextualDialogsFromDirectory()
     {
         for (const fs::path path{CONTEXTUAL_DIALOG_PATH}; const auto& entry : fs::directory_iterator(path))
@@ -108,6 +111,16 @@ namespace sage
                         while (std::getline(ss, dialogLine) && dialogLine.find("</dialog>") == std::string::npos)
                         {
                             text.push_back(dialogLine);
+                        }
+                    }
+                    else if (buff.find("<onTrigger>") != std::string::npos)
+                    {
+                        std::string commandLine;
+                        while (std::getline(ss, commandLine) &&
+                               commandLine.find("</onTrigger>") == std::string::npos)
+                        {
+                            auto func = getFunctionNameAndArgs(commandLine);
+                            BindFunctionToEvent<Event<>>(registry, sys, func, &trigger->onTrigger);
                         }
                     }
                 }

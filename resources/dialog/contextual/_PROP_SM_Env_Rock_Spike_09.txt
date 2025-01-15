@@ -9,5 +9,5 @@
 </dialog>
 
 <onTrigger>
-	PlayMusic(resources/audio/music/5 A Safe Space LOOP TomMusic.ogg);
+	PlayMusic(resources/audio/music/bgm.ogg)
 </onTrigger>
