@@ -80,6 +80,14 @@ namespace sage
                                 trigger.loop = true;
                             }
                         }
+                        else if (buff.find("should_retrigger: ") != std::string::npos)
+                        {
+                            auto sub = buff.substr(std::string("should_retrigger: ").size());
+                            if (sub.find("true") != std::string::npos)
+                            {
+                                trigger.shouldRetrigger = true;
+                            }
+                        }
                     }
                 }
                 else
@@ -106,6 +114,7 @@ namespace sage
                 if (auto& overhead = registry->get<OverheadDialogComponent>(speaker); overhead.IsFinished())
                 {
                     registry->erase<OverheadDialogComponent>(speaker);
+                    trigger.SetTriggered(trigger.shouldRetrigger);
                 }
                 else
                 {
@@ -128,6 +137,15 @@ namespace sage
                 const auto contextualDialog = dialogTextMap.at(entity);
                 overhead.SetText(contextualDialog, 5.0f);
                 trigger.SetTriggered();
+            }
+            else if (trigger.HasTriggered() && Vector3Distance(center, playerPos) > trigger.distance)
+            {
+                // TODO: this will never reach because of the check beforehand.
+                if (registry->any_of<OverheadDialogComponent>(speaker))
+                {
+                    registry->erase<OverheadDialogComponent>(speaker);
+                    trigger.SetTriggered(trigger.shouldRetrigger);
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 distance: 60
 speaker: Arissa
+should_retrigger: true
 ---
 Is someone there?
 Please help!

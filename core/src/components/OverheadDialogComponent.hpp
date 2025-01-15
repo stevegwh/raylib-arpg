@@ -27,6 +27,11 @@ namespace sage
             return currentIdx >= text.size();
         }
 
+        void Reset()
+        {
+            currentIdx = 0;
+        }
+
         std::string GetText()
         {
             if (GetTime() >= initialTime + delay)

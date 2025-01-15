@@ -14,6 +14,7 @@ namespace sage
         // Could target a specific player or just the leader of the party
         bool triggered = false;
         bool loop = false;
+        bool shouldRetrigger = false;
 
       public:
         entt::entity speaker{}; // Entity that speaks when triggered
