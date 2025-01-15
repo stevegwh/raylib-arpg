@@ -2,17 +2,19 @@
 // Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
 
 <meta>
-	owner: Goblin_Priest
-	speaker: Goblin Priest
-	conversation_pos: 10.0 2.0 5.0
-	camera_pos: 5.0 20.0 18.0
+	owner: _INTERACTABLE_Ritual_Victim
+	speaker_name: Narrator
+	conversation_pos: 10.0 1.0 -10.0
+	camera_pos: 5.0 10.0 18.0
 </meta>
+
+<variables>
+</variables>
 
 <node>
 	title: start
 	---
-	BEGONE, OR BECOME OUR NEXT SACRIFICE.
+	You see a body lying on the floor burnt to a cinder. Another poor victim of the goblins?
 	---
-
 	[[Take your leave. | exit]]
 </node>

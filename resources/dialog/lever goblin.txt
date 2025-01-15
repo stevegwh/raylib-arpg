@@ -16,7 +16,7 @@
 <node>
 	title: start
 	---
-	I'M HUNGRY. LEAVE ME ALONE.
+	I'M HUNGRY. GIMME A BONE OR GO AWAY. AND DON'T TOUCH ME LEVER!
 	---
 	if has_item($itemId)
 		[[start_quest($questId) | Look what I have here. A tasty bone! | quest]]

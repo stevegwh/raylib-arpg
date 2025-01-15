@@ -13,6 +13,43 @@
 	---
 	PRAISE BE TO OUR LORD.
 	---
+	[[Who is your god? | god]]
+	[[Take your leave. | exit]]
+</node>
 
+
+<node>
+	title: god
+	---
+	WOT? YOU DUNNO THE LORD? YOU DUMB?
+	---
+	[[No, I was just curious. | god2]]
+	[[Take your leave. | exit]]
+</node>
+
+<node>
+	title: god2
+	---
+	CURIOUS? WHAT'S THAT? CAN I EAT IT?
+	---
+	[[You sure can. It's delicious. | curious_yes]]
+	[[No, no. It's an adjective. | curious_no]]
+	[[Take your leave. | exit]]
+</node>
+
+
+<node>
+	title: curious_yes
+	---
+	DEL..WHAT? YOU SPEAK FUNNY.
+	---
+	[[Take your leave. | exit]]
+</node>
+
+<node>
+	title: curious_no
+	---
+	...OK.
+	---
 	[[Take your leave. | exit]]
 </node>

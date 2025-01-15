@@ -225,7 +225,7 @@ namespace sage
     Camera::Camera(entt::registry* _registry, UserInput* userInput, Systems* _sys)
         : registry(_registry), sys(_sys), rlCamera({0})
     {
-        rlCamera.position = {20.0f, 40.0f, 20.0f};
+        rlCamera.position = {-40.0f, 85.0f, 20.0f};
         rlCamera.target = {0.0f, 8.0f, 0.0f};
         rlCamera.up = {0.0f, 1.0f, 0.0f};
         rlCamera.fovy = 45.0f;

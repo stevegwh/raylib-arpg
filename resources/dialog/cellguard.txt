@@ -22,7 +22,7 @@
 		[[complete_quest_task($questId) | Give me those keys. | quest]]
 	end
 
-	[[Hello. | hello]]
+	[['ELLO. | hello]]
 
 	[[Sorry, I must be leaving. | exit]]
 </node>
@@ -30,7 +30,7 @@
 <node>
 	title: hello
 	---
-	ERRRR. 'ELLO.
+	ERRRR. 'ELLO. YOU NEW 'ERE?
 	---
 	[[Sorry, I must be leaving. | exit]]
 </node>

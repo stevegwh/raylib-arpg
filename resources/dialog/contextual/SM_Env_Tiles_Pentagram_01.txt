@@ -1,0 +1,9 @@
+<meta>
+	owner: SM_Env_Tiles_Pentagram_01
+	distance: 80
+	speaker: Player
+</meta>
+
+<dialog>
+	Ugh, what in the hells is going on here?
+</dialog>
