@@ -159,6 +159,10 @@ namespace sage
                 {
                     col = RED;
                 }
+                else if (c.collisionLayer == CollisionLayer::CHEST)
+                {
+                    col = PURPLE;
+                }
                 DrawBoundingBox(c.worldBoundingBox, col);
             }
         }

@@ -48,10 +48,11 @@ namespace sage
 
     void LootSystem::Update()
     {
-        if (chest == entt::null) return;
+        if (chest == entt::null || !openLootWindow) return;
         if (!InLootRange())
         {
             openLootWindow->Remove();
+            openLootWindow = nullptr;
             chest = entt::null;
         }
     }

@@ -1170,6 +1170,10 @@ namespace sage
             {
                 MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
             }
+            else if (bb.collisionLayer == CollisionLayer::CHEST)
+            {
+                MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
+            }
             else if (bb.collisionLayer == CollisionLayer::FLOORCOMPLEX)
             {
                 // TODO: Using normals as a way of marking terrain as occupied was too troublesome. Needs a better

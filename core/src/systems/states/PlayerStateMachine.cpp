@@ -307,9 +307,13 @@ namespace sage
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.lootTarget = target;
-
-            auto& chestPos = registry->get<sgTransform>(target).GetWorldPos();
-            sys->actorMovementSystem->PathfindToLocation(self, chestPos);
+            auto& trans = registry->get<sgTransform>(self);
+            auto& chestTrans = registry->get<sgTransform>(target);
+            Vector3 dest = Vector3Add(
+                trans.GetWorldPos(),
+                Vector3MultiplyByValue(Vector3Subtract(chestTrans.GetWorldPos(), trans.GetWorldPos()), 0.85));
+            // TODO: N.B. Right now, its possible that 'dest' is outside of LOOT_RANGE
+            sys->actorMovementSystem->PathfindToLocation(self, dest);
 
             auto& state = registry->get<PlayerState>(self);
             auto cnx = moveable.onDestinationReached.Subscribe(
