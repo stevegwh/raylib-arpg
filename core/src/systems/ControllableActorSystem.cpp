@@ -50,6 +50,7 @@ namespace sage
             old.cursorOnEnemyLeftClickCnx->UnSubscribe();
             old.cursorOnEnemyRightClickCnx->UnSubscribe();
             old.cursorOnNPCLeftClickCnx->UnSubscribe();
+            old.cursorOnChestClickCnx->UnSubscribe();
         }
         selectedActorId = id;
 
@@ -79,6 +80,10 @@ namespace sage
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onNPCLeftClick.Publish(selectedActorId, clickedEntity);
             });
+        current.cursorOnChestClickCnx = sys->cursor->onChestClick.Subscribe([this](entt::entity clickedEntity) {
+            const auto& c = registry->get<ControllableActor>(selectedActorId);
+            c.onChestClick.Publish(selectedActorId, clickedEntity);
+        });
 
         for (const auto group = sys->partySystem->GetGroup(id); const auto& entity : group)
         {

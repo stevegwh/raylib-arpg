@@ -27,17 +27,20 @@ namespace sage
         std::unique_ptr<Connection> cursorOnEnemyRightClickCnx{};
         std::unique_ptr<Connection> cursorOnFloorClickCnx{};
         std::unique_ptr<Connection> cursorOnNPCLeftClickCnx{};
+        std::unique_ptr<Connection> cursorOnChestClickCnx{};
 
         // The forwarded events' connections (to unsubscribe)
         std::unique_ptr<Connection> onEnemyLeftClickCnx{};
         std::unique_ptr<Connection> onEnemyRightClickCnx{};
         std::unique_ptr<Connection> onFloorClickCnx{};
         std::unique_ptr<Connection> onNPCLeftClickCnx{};
+        std::unique_ptr<Connection> onChestClickCnx{};
 
         // The events themselves
         Event<entt::entity, entt::entity> onEnemyLeftClick{};  // Self, Clicked enemy
         Event<entt::entity, entt::entity> onEnemyRightClick{}; // Self, Clicked enemy
         Event<entt::entity, entt::entity> onFloorClick{};      // Self, Clicked Col (can discard)
         Event<entt::entity, entt::entity> onNPCLeftClick{};    // Self, Clicked NPC
+        Event<entt::entity, entt::entity> onChestClick{};      // Self, Clicked Chest
     };
 } // namespace sage

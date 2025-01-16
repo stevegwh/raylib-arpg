@@ -21,9 +21,8 @@ namespace sage
         entt::entity chest;
         Window* openLootWindow;
 
-        void onChestClick(entt::entity clickedChest);
-
       public:
+        void OnChestClick(entt::entity clickedChest);
         [[nodiscard]] bool InLootRange() const;
         void Update();
         LootSystem(entt::registry* _registry, Systems* _sys);

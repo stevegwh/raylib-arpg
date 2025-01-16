@@ -10,7 +10,6 @@
 #include "Cursor.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
-#include "ItemFactory.hpp"
 #include "Systems.hpp"
 
 #include "components/sgTransform.hpp"
@@ -19,7 +18,7 @@
 namespace sage
 {
 
-    void LootSystem::onChestClick(entt::entity clickedChest)
+    void LootSystem::OnChestClick(entt::entity clickedChest)
     {
         if (openLootWindow)
         {
@@ -44,11 +43,12 @@ namespace sage
         const auto& transform = registry->get<sgTransform>(chest).GetWorldPos();
         const auto& playerPos =
             registry->get<sgTransform>(sys->controllableActorSystem->GetSelectedActor()).GetWorldPos();
-        return Vector3Distance(playerPos, transform) > LOOT_DISTANCE;
+        return Vector3Distance(playerPos, transform) < LOOT_DISTANCE;
     }
 
     void LootSystem::Update()
     {
+        if (chest == entt::null) return;
         if (!InLootRange())
         {
             openLootWindow->Remove();
@@ -57,10 +57,8 @@ namespace sage
     }
 
     LootSystem::LootSystem(entt::registry* _registry, Systems* _sys)
-        : registry(_registry), sys(_sys), openLootWindow(nullptr), chest(entt::null)
+        : registry(_registry), sys(_sys), chest(entt::null), openLootWindow(nullptr)
     {
-        // TODO: Put below in PlayerStateSystem and make a state for chest interaction based on distance etc.
-        sys->cursor->onChestClick.Subscribe([this](entt::entity _chest) { onChestClick(_chest); });
     }
 
 } // namespace sage

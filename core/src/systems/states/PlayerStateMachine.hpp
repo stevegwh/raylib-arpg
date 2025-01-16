@@ -15,6 +15,7 @@ namespace sage
         class MovingToLocationState;
         class MovingToAttackEnemyState;
         class MovingToTalkToNPCState;
+        class MovingToLootState;
         class InDialogState;
         class CombatState;
         class DestinationUnreachableState;
@@ -22,7 +23,8 @@ namespace sage
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
 
-        void onFloorClick(const entt::entity self, entt::entity);
+        void onFloorClick(entt::entity self, entt::entity);
+        void onChestClick(entt::entity self, entt::entity);
         void onNPCLeftClick(entt::entity self, entt::entity target);
         void onEnemyLeftClick(entt::entity self, entt::entity target);
 

@@ -83,6 +83,7 @@ namespace sage
         MovingToLocation,
         MovingToAttackEnemy,
         MovingToTalkToNPC,
+        MovingToLoot,
         InDialog,
         DestinationUnreachable,
         Combat

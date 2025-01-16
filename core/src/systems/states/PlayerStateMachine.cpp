@@ -20,6 +20,7 @@
 
 #include "raylib.h"
 #include "StateMachines.hpp"
+#include "systems/LootSystem.hpp"
 #include "systems/PartySystem.hpp"
 
 #include <cassert>
@@ -282,6 +283,62 @@ namespace sage
 
     // ----------------------------
 
+    class PlayerStateController::MovingToLootState : public StateMachine
+    {
+        PlayerStateController* stateController;
+        void onMovementCancelled(const entt::entity self) const
+        {
+            stateController->ChangeState(self, PlayerStateEnum::Default);
+        }
+
+        void onTargetReached(const entt::entity self) const
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            sys->lootSystem->OnChestClick(moveable.lootTarget.value());
+            stateController->ChangeState(self, PlayerStateEnum::Default);
+        }
+
+      public:
+        void Update(entt::entity self) override
+        {
+        }
+
+        void OnStateEnter(entt::entity self, entt::entity target)
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.lootTarget = target;
+
+            auto& chestPos = registry->get<sgTransform>(target).GetWorldPos();
+            sys->actorMovementSystem->PathfindToLocation(self, chestPos);
+
+            auto& state = registry->get<PlayerState>(self);
+            auto cnx = moveable.onDestinationReached.Subscribe(
+                [this](entt::entity _entity) { onTargetReached(_entity); });
+            state.ManageSubscription(std::move(cnx));
+            auto cnx1 = moveable.onMovementCancel.Subscribe(
+                [this](entt::entity _entity) { onMovementCancelled(_entity); });
+            state.ManageSubscription(std::move(cnx1));
+
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
+        }
+
+        void OnStateExit(entt::entity self) override
+        {
+            auto& moveable = registry->get<MoveableActor>(self);
+            moveable.lootTarget.reset();
+        }
+
+        ~MovingToLootState() override = default;
+
+        MovingToLootState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
+            : StateMachine(_registry, _sys), stateController(_stateController)
+        {
+        }
+    };
+
+    // ----------------------------
+
     class PlayerStateController::MovingToAttackEnemyState : public StateMachine
     {
         PlayerStateController* stateController;
@@ -424,6 +481,17 @@ namespace sage
         ChangeState(self, PlayerStateEnum::MovingToLocation);
     }
 
+    void PlayerStateController::onChestClick(const entt::entity self, entt::entity target)
+    {
+        auto& state = registry->get<PlayerState>(self);
+        // We're not allowed to change to the same state, so change to default and then back again
+        if (state.GetCurrentState() == PlayerStateEnum::MovingToLoot)
+        {
+            ChangeState(self, PlayerStateEnum::Default);
+        }
+        ChangeState<MovingToLootState, entt::entity>(self, PlayerStateEnum::MovingToLoot, target);
+    }
+
     void PlayerStateController::onNPCLeftClick(entt::entity self, entt::entity target)
     {
         if (!registry->any_of<DialogComponent>(target)) return;
@@ -473,6 +541,8 @@ namespace sage
             [this](entt::entity self, entt::entity target) { onNPCLeftClick(self, target); });
         controllable.onFloorClickCnx = controllable.onFloorClick.Subscribe(
             [this](entt::entity self, entt::entity target) { onFloorClick(self, target); });
+        controllable.onChestClickCnx = controllable.onChestClick.Subscribe(
+            [this](entt::entity self, entt::entity target) { onChestClick(self, target); });
         // ----------------------------
     }
 
@@ -480,6 +550,8 @@ namespace sage
     {
         auto& controllable = registry->get<ControllableActor>(entity);
         controllable.onEnemyLeftClickCnx->UnSubscribe();
+        controllable.onEnemyRightClickCnx->UnSubscribe();
+        controllable.onChestClickCnx->UnSubscribe();
         controllable.onNPCLeftClickCnx->UnSubscribe();
         controllable.onFloorClickCnx->UnSubscribe();
     }
@@ -497,6 +569,7 @@ namespace sage
         states[PlayerStateEnum::MovingToLocation] = std::make_unique<MovingToLocationState>(_registry, _sys, this);
         states[PlayerStateEnum::DestinationUnreachable] =
             std::make_unique<DestinationUnreachableState>(_registry, _sys, this);
+        states[PlayerStateEnum::MovingToLoot] = std::make_unique<MovingToLootState>(_registry, _sys, this);
 
         registry->on_construct<PlayerState>().connect<&PlayerStateController::onComponentAdded>(this);
         registry->on_destroy<PlayerState>().connect<&PlayerStateController::onComponentRemoved>(this);

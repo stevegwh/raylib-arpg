@@ -6,9 +6,9 @@
 
 #include "NavigationGridSquare.hpp"
 
-#include "raylib.h"
 #include "entt/entt.hpp"
 #include "Event.hpp"
+#include "raylib.h"
 
 #include <deque>
 #include <memory>
@@ -55,6 +55,7 @@ namespace sage
         entt::entity hitEntityId = entt::null;
         Vector3 hitLastPos{};
         std::optional<FollowTarget> followTarget;
+        std::optional<entt::entity> lootTarget;
         std::deque<Vector3> path{};
 
         Event<entt::entity> onStartMovement{};

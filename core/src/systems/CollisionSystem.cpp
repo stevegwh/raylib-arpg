@@ -237,6 +237,8 @@ namespace sage
 
         matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::ENEMY)] = true;
         matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::BUILDING)] = true;
+        matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::INTERACTABLE)] = true;
+        matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::CHEST)] = true;
 
         matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::PLAYER)] = true;
         matrix[static_cast<int>(CollisionLayer::ENEMY)][static_cast<int>(CollisionLayer::BUILDING)] = true;
