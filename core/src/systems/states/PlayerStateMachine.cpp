@@ -554,7 +554,6 @@ namespace sage
     {
         auto& controllable = registry->get<ControllableActor>(entity);
         controllable.onEnemyLeftClickCnx->UnSubscribe();
-        controllable.onEnemyRightClickCnx->UnSubscribe();
         controllable.onChestClickCnx->UnSubscribe();
         controllable.onNPCLeftClickCnx->UnSubscribe();
         controllable.onFloorClickCnx->UnSubscribe();

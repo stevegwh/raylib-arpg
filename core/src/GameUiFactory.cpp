@@ -219,8 +219,8 @@ namespace sage
             TextureStretchMode::STRETCH,
             pos.x,
             pos.y,
-            274 * 1,
-            280 * 1,
+            274,
+            280,
             Padding{6, 6, 2, 2});
         auto window = engine->CreateWindow(std::move(_window));
         auto mainTable = window->CreateTable();
@@ -518,7 +518,7 @@ namespace sage
             [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/equip_open.ogg"); });
         window->onHide.Subscribe(
             [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/inv_close.ogg"); });
-        
+
         return window;
     }
 

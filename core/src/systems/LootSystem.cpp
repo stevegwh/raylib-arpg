@@ -28,8 +28,8 @@ namespace sage
             auto screenPos = GetWorldToScreenEx(
                 transform.GetWorldPos(),
                 *sys->camera->getRaylibCam(),
-                sys->settings->GetViewPort().x,
-                sys->settings->GetViewPort().y);
+                Settings::TARGET_SCREEN_WIDTH,
+                Settings::TARGET_SCREEN_HEIGHT);
             openLootWindow =
                 GameUiFactory::CreateLootWindow(registry, sys->uiEngine.get(), clickedChest, screenPos);
             openLootWindow->onHide.Subscribe([this] { openLootWindow = nullptr; });
