@@ -48,14 +48,16 @@ namespace sage
         moveableActor.onStartMovement.Publish(entity);
     }
 
-    bool ActorMovementSystem::TryPathfindToLocation(const entt::entity& entity, const Vector3& destination) const
+    bool ActorMovementSystem::TryPathfindToLocation(
+        const entt::entity& entity, const Vector3& destination, bool astar) const
     {
-        PathfindToLocation(entity, destination);
+        PathfindToLocation(entity, destination, astar);
         auto& moveable = registry->get<MoveableActor>(entity);
         return moveable.IsMoving();
     }
 
-    void ActorMovementSystem::PathfindToLocation(const entt::entity& entity, const Vector3& destination) const
+    void ActorMovementSystem::PathfindToLocation(
+        const entt::entity& entity, const Vector3& destination, bool astar) const
     {
         auto& moveable = registry->get<MoveableActor>(entity);
 
@@ -109,8 +111,10 @@ namespace sage
         //            navigationGridSystem->AStarPathfind(entity, actorTrans.GetWorldPos(), destination, minRange,
         //            maxRange);
 
-        const auto path = sys->navigationGridSystem->BFSPathfind(
-            entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
+        const auto path = astar ? sys->navigationGridSystem->AStarPathfind(
+                                      entity, actorTrans.GetWorldPos(), destination, minRange, maxRange)
+                                : sys->navigationGridSystem->BFSPathfind(
+                                      entity, actorTrans.GetWorldPos(), destination, minRange, maxRange);
 
         if (moveable.IsMoving()) // Was previously moving
         {

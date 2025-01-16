@@ -85,7 +85,7 @@ namespace sage
             auto dest = targetMoveable.IsMoving() ? targetMoveable.GetDestination() : targetTrans.GetWorldPos();
             const auto dir = Vector3Normalize(Vector3Subtract(dest, trans.GetWorldPos()));
             dest = Vector3Subtract(dest, Vector3MultiplyByValue(dir, FOLLOW_DISTANCE));
-            sys->actorMovementSystem->PathfindToLocation(self, dest);
+            sys->actorMovementSystem->PathfindToLocation(self, dest, true);
         }
 
         void onTargetReached(const entt::entity self) const
@@ -115,6 +115,9 @@ namespace sage
         void OnStateEnter(const entt::entity self, entt::entity followTarget)
         {
             assert(followTarget != entt::null);
+            auto& animation = registry->get<Animation>(self);
+            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
+
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.emplace(registry, self, followTarget);
 
@@ -141,9 +144,6 @@ namespace sage
             // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
 
             onTargetPathChanged(self, target);
-
-            auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::RUN);
         }
 
         void OnStateExit(const entt::entity self) override
@@ -271,7 +271,7 @@ namespace sage
             {
                 ++_data.tryCount;
                 _data.timeStart = GetTime();
-                if (sys->actorMovementSystem->TryPathfindToLocation(entity, _data.originalDestination))
+                if (sys->actorMovementSystem->TryPathfindToLocation(entity, _data.originalDestination, true))
                 {
                     if (_data.previousState == PartyMemberStateEnum::FollowingLeader)
                     {
@@ -289,7 +289,7 @@ namespace sage
                     // destination and also moving
                     // TODO: Bug. Weird bug that going to the other player's path can make us walk past the player
                     auto leaderPos = registry->get<sgTransform>(_data.followTarget).GetWorldPos();
-                    if (sys->actorMovementSystem->TryPathfindToLocation(entity, leaderPos))
+                    if (sys->actorMovementSystem->TryPathfindToLocation(entity, leaderPos, true))
                     {
                         _data.tryCount = 0;
                     }

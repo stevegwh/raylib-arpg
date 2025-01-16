@@ -3,8 +3,8 @@
     "value0": [
       {
         "Name": "Dagger",
-        "LocalizedName": "Dagger",
-        "Description": "A test inventory item.",
+        "LocalizedName": "Worn Dagger",
+        "Description": "A dagger with a dull blade.",
         "Rarity": "COMMON",
         "Flags": [
           "WEAPON",
@@ -16,7 +16,7 @@
       {
         "Name": "Sword",
         "LocalizedName": "Sword",
-        "Description": "A test inventory item.",
+        "Description": "A snazzy sword with a sharp blade.",
         "Rarity": "COMMON",
         "Flags": [
           "WEAPON",
@@ -25,6 +25,43 @@
         ],
         "Icon": "IMG_ICON_WEAPON_SWORD01",
         "Model": "MDL_WPN_SWORD01"
+      },
+	  {
+        "Name": "SwordP1",
+        "LocalizedName": "Sword +1",
+        "Description": "A snazzy sword with an even sharper blade.",
+        "Rarity": "UNCOMMON",
+        "Flags": [
+          "WEAPON",
+          "SWORD",
+          "MAIN_HAND_ONLY"
+        ],
+        "Icon": "IMG_ICON_WEAPON_SWORD01",
+        "Model": "MDL_WPN_SWORD01"
+      },
+	  {
+        "Name": "Ashbringer",
+        "LocalizedName": "Ashbringer",
+        "Description": "A legendary blade. Reading closer, it seems to have a TM branded on the blade...",
+        "Rarity": "LEGENDARY",
+        "Flags": [
+          "WEAPON",
+          "SWORD",
+          "MAIN_HAND_ONLY"
+        ],
+        "Icon": "IMG_ICON_WEAPON_ASHBRINGER",
+        "Model": "MDL_WPN_SWORD01"
+      },
+      {
+        "Name": "QUEST_KEYS",
+        "LocalizedName": "Cell Keys",
+        "Description": "Keys for a cell.",
+        "Rarity": "COMMON",
+        "Flags": [
+          "QUEST"
+        ],
+        "Icon": "IMG_ICON_JUNK_KEYS",
+        "Model": "MDL_QUEST_LEVER"
       },
       {
         "Name": "QUEST_LEVER",

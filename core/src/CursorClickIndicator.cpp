@@ -16,14 +16,20 @@ namespace sage
 
     void CursorClickIndicator::onCursorClick(entt::entity entity) const
     {
-        if (const auto& col = registry->get<Collideable>(entity);
-            (col.collisionLayer != CollisionLayer::FLOORSIMPLE &&
-             col.collisionLayer != CollisionLayer::FLOORCOMPLEX) ||
-            entity == entt::null || !registry->any_of<Collideable>(entity) || !sys->cursor->IsValidMove())
+        if (entity == entt::null || !registry->any_of<Collideable>(entity) || !sys->cursor->IsValidMove())
         {
             disableIndicator();
             return;
         }
+
+        const auto& col = registry->get<Collideable>(entity);
+        if (col.collisionLayer != CollisionLayer::FLOORSIMPLE &&
+            col.collisionLayer != CollisionLayer::FLOORCOMPLEX)
+        {
+            disableIndicator();
+            return;
+        }
+
         const auto selectedActor = sys->controllableActorSystem->GetSelectedActor();
         const auto& moveable = registry->get<MoveableActor>(selectedActor);
         if (!moveable.IsMoving())

@@ -8,13 +8,14 @@
 </description>
 
 <tasks>
-	dialog: Cell_Guard
+	dialog: Cell_Guard; GiveItem(QUEST_KEYS)
 </tasks>
 
 <onStart>
 </onStart>
 
 <onComplete>
+	RemoveItem(QUEST_KEYS)
 	JoinParty(Arissa)
 	OpenDoor(QUEST_DOOR)
 </onComplete>

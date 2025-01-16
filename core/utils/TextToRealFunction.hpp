@@ -51,9 +51,8 @@ namespace sage::parsing
         else if (func.name.find("RemoveItem") != std::string::npos)
         {
             assert(!func.params.empty());
-            auto itemId = sys->renderSystem->FindRenderable(func.params);
-            assert(itemId != entt::null);
-            event->Subscribe([itemId, sys](Args...) { sys->partySystem->RemoveItemFromParty(itemId); });
+            event->Subscribe(
+                [params = func.params, sys](Args...) { sys->partySystem->RemoveItemFromParty(params); });
         }
         else if (func.name.find("GiveItem") != std::string::npos)
         {

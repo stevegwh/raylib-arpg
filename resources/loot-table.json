@@ -12,6 +12,12 @@
                 "value": [
                     "Sword"
                 ]
+            },
+			{
+                "key": "chest_003",
+                "value": [
+                    "Ashbringer"
+                ]
             }
         ]
     }
