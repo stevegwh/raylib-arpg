@@ -628,6 +628,7 @@ namespace sage
 
       public:
         Event<> onHide;
+        Event<> onShow;
         std::unique_ptr<Connection> windowUpdateCnx{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height

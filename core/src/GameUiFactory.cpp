@@ -4,6 +4,7 @@
 
 #include "GameUiFactory.hpp"
 
+#include "AudioManager.hpp"
 #include "components/Ability.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/DialogComponent.hpp"
@@ -210,7 +211,8 @@ namespace sage
         entt::registry* registry, GameUIEngine* engine, entt::entity owner, Vector2 pos)
     {
         auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/inventory-bg.png");
-        // TODO: Have a special "loot window" which overrides Update and if the player moves out of loot range then it closes itself.
+        // TODO: Have a special "loot window" which overrides Update and if the player moves out of loot range then
+        // it closes itself.
         auto _window = std::make_unique<Window>(
             engine->sys->settings,
             nPatchTexture,
@@ -307,6 +309,12 @@ namespace sage
         }
         window->FinalizeLayout();
         window->Hide();
+
+        window->onShow.Subscribe(
+            [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/inv_open.ogg"); });
+        window->onHide.Subscribe(
+            [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/inv_close.ogg"); });
+
         return window;
     }
 
@@ -370,6 +378,11 @@ namespace sage
 
         window->FinalizeLayout();
         window->Hide();
+        window->onShow.Subscribe(
+            [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/book_open.ogg"); });
+        window->onHide.Subscribe(
+            [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/inv_close.ogg"); });
+
         return window;
     }
 
@@ -501,6 +514,11 @@ namespace sage
 
         window->FinalizeLayout();
         window->Hide();
+        window->onShow.Subscribe(
+            [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/equip_open.ogg"); });
+        window->onHide.Subscribe(
+            [engine]() { engine->sys->audioManager->PlaySFX("resources/audio/sfx/inv_close.ogg"); });
+        
         return window;
     }
 

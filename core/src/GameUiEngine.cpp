@@ -2199,11 +2199,16 @@ namespace sage
         {
             onHide.Publish();
         }
+        else
+        {
+            onShow.Publish();
+        }
     }
 
     void Window::Show()
     {
         hidden = false;
+        onShow.Publish();
     }
 
     void Window::Hide()

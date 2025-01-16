@@ -4,6 +4,7 @@
 
 #include "LootSystem.hpp"
 
+#include "AudioManager.hpp"
 #include "Camera.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/Renderable.hpp"
@@ -32,6 +33,7 @@ namespace sage
             openLootWindow =
                 GameUiFactory::CreateLootWindow(registry, sys->uiEngine.get(), clickedChest, screenPos);
             openLootWindow->onHide.Subscribe([this] { openLootWindow = nullptr; });
+            sys->audioManager->PlaySFX("resources/audio/sfx/chest_open.ogg");
         };
 
         // if the clicked chest differs from the previous, open a new window
