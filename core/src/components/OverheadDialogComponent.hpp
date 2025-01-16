@@ -22,6 +22,28 @@ namespace sage
         float delay = 0;
         bool loop = false;
 
+        std::string getNextText()
+        {
+            if (currentIdx >= text.size())
+            {
+                if (!loop)
+                {
+                    return "";
+                }
+                currentIdx = 0;
+            }
+            const auto& [txt, condition] = text.at(currentIdx);
+            if (condition())
+            {
+                return txt;
+            }
+            else
+            {
+                ++currentIdx;
+                return getNextText();
+            }
+        }
+
       public:
         [[nodiscard]] bool IsFinished() const
         {
@@ -38,33 +60,9 @@ namespace sage
             if (GetTime() >= initialTime + delay)
             {
                 ++currentIdx;
-
-                if (currentIdx < text.size())
-                {
-                    const auto& [txt, condition] = text.at(currentIdx);
-                    if (condition())
-                    {
-                        initialTime = GetTime();
-                        return txt;
-                    }
-                    else
-                    {
-                        return GetText();
-                    }
-                }
-
                 initialTime = GetTime();
             }
-            if (currentIdx >= text.size())
-            {
-                if (!loop)
-                {
-                    return "";
-                }
-                currentIdx = 0;
-            }
-            const auto& [txt, _] = text.at(currentIdx);
-            return txt;
+            return getNextText();
         }
 
         void SetText(std::vector<std::pair<std::string, std::function<bool()>>> _text, float _delay)

@@ -112,6 +112,7 @@ namespace sage
                         std::string dialogLine;
                         while (std::getline(ss, dialogLine) && dialogLine.find("</dialog>") == std::string::npos)
                         {
+
                             if (dialogLine.starts_with("if"))
                             {
                                 assert(!condition.has_value()); // "if blocks" must be closed with end. No nesting
