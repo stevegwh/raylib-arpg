@@ -135,6 +135,7 @@ namespace sage
         sys->animationSystem->Update();
         sys->contextualDialogSystem->Update();
         sys->spatialAudioSystem->Update();
+        sys->lootSystem->Update();
         sys->stateMachines->Update();
     }
 

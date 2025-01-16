@@ -209,29 +209,30 @@ namespace sage
     Window* GameUiFactory::CreateLootWindow(
         entt::registry* registry, GameUIEngine* engine, entt::entity owner, Vector2 pos)
     {
-        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/inventory-bg.png");
+        // TODO: Have a special "loot window" which overrides Update and if the player moves out of loot range then it closes itself.
         auto _window = std::make_unique<Window>(
             engine->sys->settings,
             nPatchTexture,
             TextureStretchMode::STRETCH,
             pos.x,
             pos.y,
-            274 * 1.5,
-            424 * 1.5,
-            Padding{20, 0, 14, 14});
+            274 * 1,
+            280 * 1,
+            Padding{6, 6, 2, 2});
         auto window = engine->CreateWindow(std::move(_window));
         auto mainTable = window->CreateTable();
-        auto mainTableRow1 = mainTable->CreateTableRow(4);
-        auto mainTableRow2 = mainTable->CreateTableRow({20, 0, 0, 0});
+        auto mainTableRow1 = mainTable->CreateTableRow(8);
+        auto mainTableRow2 = mainTable->CreateTableRow({8, 4, 0, 0});
 
         {
             // Title bar
             auto cell = mainTableRow1->CreateTableCell(80);
             auto cell2 = mainTableRow1->CreateTableCell(20);
             auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
-            cell->CreateTitleBar(std::move(titleBar), "Chest");
+            cell->CreateTitleBar(std::move(titleBar), "");
             auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
-            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex, true);
             cell2->CreateCloseButton(std::move(closeBtn));
             // TODO: Close should DELETE.
         }
@@ -240,10 +241,10 @@ namespace sage
 
             // Inventory grid
             auto cell = mainTableRow2->CreateTableCell();
-            auto table = cell->CreateTableGrid(5, 5, 4);
-            for (unsigned int row = 0; row < 5; ++row)
+            auto table = cell->CreateTableGrid(3, 3, 4);
+            for (unsigned int row = 0; row < 3; ++row)
             {
-                for (unsigned int col = 0; col < 5; ++col)
+                for (unsigned int col = 0; col < 3; ++col)
                 {
                     auto invCell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
                     auto invSlot = std::make_unique<InventorySlot>(engine, invCell, owner, row, col);

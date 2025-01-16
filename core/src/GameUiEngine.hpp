@@ -526,10 +526,13 @@ namespace sage
 
     class CloseButton final : public ImageBox
     {
+        bool closeDeletesWindow = false;
+
       public:
         ~CloseButton() override = default;
         void OnClick() override;
-        CloseButton(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex);
+        CloseButton(
+            GameUIEngine* _engine, TableCell* _parent, const Texture& _tex, bool _closeDeletesWindow = false);
     };
 
     class TableCell final : public TableElement

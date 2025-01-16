@@ -1670,13 +1670,13 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
-            auto& inventory = engine->registry->get<InventoryComponent>(actor);
+            auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
+            auto& inventory = engine->registry->get<InventoryComponent>(dropped->GetOwner());
             const auto itemId = inventory.GetItem(dropped->row, dropped->col);
             auto& item = engine->registry->get<ItemComponent>(itemId);
             if (!validateDrop(item)) return;
             inventory.RemoveItem(dropped->row, dropped->col);
-            engine->sys->equipmentSystem->MoveItemToInventory(actor, itemType);
+            engine->sys->equipmentSystem->MoveItemToInventory(actor, itemType); // ?
             engine->sys->equipmentSystem->EquipItem(actor, itemId, itemType);
             dropped->RetrieveInfo();
             RetrieveInfo();
@@ -1791,12 +1791,21 @@ namespace sage
 
     void CloseButton::OnClick()
     {
-        parent->GetWindow()->Hide();
+        if (closeDeletesWindow)
+        {
+            parent->GetWindow()->Remove();
+        }
+        else
+        {
+            parent->GetWindow()->Hide();
+        }
     }
 
-    CloseButton::CloseButton(GameUIEngine* _engine, TableCell* _parent, const Texture& _tex)
+    CloseButton::CloseButton(
+        GameUIEngine* _engine, TableCell* _parent, const Texture& _tex, bool _closeDeletesWindow)
         : ImageBox(
-              _engine, _parent, _tex, OverflowBehaviour::SHRINK_TO_FIT, VertAlignment::TOP, HoriAlignment::RIGHT)
+              _engine, _parent, _tex, OverflowBehaviour::SHRINK_TO_FIT, VertAlignment::TOP, HoriAlignment::RIGHT),
+          closeDeletesWindow(_closeDeletesWindow)
     {
     }
 
