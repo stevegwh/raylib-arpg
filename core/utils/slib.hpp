@@ -116,6 +116,7 @@ namespace sage
     Vector2 Vec3ToVec2(const Vector3& vec3);
     Vector3 NegateVector(const Vector3& vec3);
     Vector3 Vector3MultiplyByValue(const Vector3& vec3, float value);
+    Vector2 Vector2MultiplyByValue(const Vector2& vec3, float value);
     Matrix ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale);
     int GetBoneIdByName(const BoneInfo* bones, int numBones, const char* boneName);
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer);

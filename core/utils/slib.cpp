@@ -480,6 +480,11 @@ namespace sage
         return {vec3.x * value, vec3.y * value, vec3.z * value};
     }
 
+    Vector2 Vector2MultiplyByValue(const Vector2& vec3, float value)
+    {
+        return {vec3.x * value, vec3.y * value};
+    }
+
     Matrix ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale)
     {
         Matrix matTranslation = MatrixTranslate(translation.x, translation.y, translation.z);
