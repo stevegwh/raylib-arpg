@@ -8,6 +8,7 @@
 #include "raylib.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace sage
@@ -16,7 +17,7 @@ namespace sage
     class OverheadDialogComponent
     {
         unsigned int currentIdx = 0;
-        std::vector<std::string> text;
+        std::vector<std::pair<std::string, std::function<bool()>>> text;
         double initialTime;
         float delay = 0;
         bool loop = false;
@@ -37,6 +38,21 @@ namespace sage
             if (GetTime() >= initialTime + delay)
             {
                 ++currentIdx;
+
+                if (currentIdx < text.size())
+                {
+                    const auto& [txt, condition] = text.at(currentIdx);
+                    if (condition())
+                    {
+                        initialTime = GetTime();
+                        return txt;
+                    }
+                    else
+                    {
+                        return GetText();
+                    }
+                }
+
                 initialTime = GetTime();
             }
             if (currentIdx >= text.size())
@@ -47,10 +63,11 @@ namespace sage
                 }
                 currentIdx = 0;
             }
-            return text.at(currentIdx);
+            const auto& [txt, _] = text.at(currentIdx);
+            return txt;
         }
 
-        void SetText(std::vector<std::string> _text, float _delay)
+        void SetText(std::vector<std::pair<std::string, std::function<bool()>>> _text, float _delay)
         {
             text = std::move(_text);
             delay = _delay;

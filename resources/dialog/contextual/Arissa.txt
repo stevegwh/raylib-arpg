@@ -1,3 +1,5 @@
+// Conditional checks: quest_complete, quest_in_progress, has_item, quest_all_tasks_complete, quest_task_complete
+
 <meta>
 	owner: Arissa
 	distance: 60
@@ -6,6 +8,12 @@
 </meta>
 
 <dialog>
-	Is someone there?
-	Please help!
+	if quest_in_progress(ArissaQuest)
+		Please, hurry!
+		The guard is in the barracks!
+	end
+	if not quest_in_progress(ArissaQuest)
+		Is someone there?
+		Please help!
+	end
 </dialog>

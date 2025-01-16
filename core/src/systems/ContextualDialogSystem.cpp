@@ -24,6 +24,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <utility>
 
 namespace fs = std::filesystem;
 constexpr auto CONTEXTUAL_DIALOG_PATH = "resources/dialog/contextual";
@@ -48,7 +49,7 @@ namespace sage
                     fileContent << file.rdbuf();
                 }
 
-                std::vector<std::string> text;
+                std::vector<std::pair<std::string, std::function<bool()>>> text;
                 entt::entity entity = entt::null;
                 ContextualDialogTriggerComponent* trigger = nullptr;
 
@@ -107,10 +108,31 @@ namespace sage
                     }
                     else if (buff.find("<dialog>") != std::string::npos)
                     {
+                        std::optional<std::function<bool()>> condition;
                         std::string dialogLine;
                         while (std::getline(ss, dialogLine) && dialogLine.find("</dialog>") == std::string::npos)
                         {
-                            text.push_back(dialogLine);
+                            if (dialogLine.starts_with("if"))
+                            {
+                                assert(!condition.has_value()); // "if blocks" must be closed with end. No nesting
+                                                                // allowed (yet).
+                                condition = GetConditionalStatement(dialogLine, registry, sys);
+                            }
+                            else if (dialogLine.starts_with("end"))
+                            {
+                                condition.reset();
+                            }
+                            else
+                            {
+                                if (condition.has_value())
+                                {
+                                    text.emplace_back(dialogLine, condition.value());
+                                }
+                                else
+                                {
+                                    text.emplace_back(dialogLine, []() { return true; });
+                                }
+                            }
                         }
                     }
                     else if (buff.find("<onTrigger>") != std::string::npos)

@@ -9,6 +9,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace sage
@@ -18,7 +19,7 @@ namespace sage
     class ContextualDialogSystem
     {
         static constexpr float fontSize = 22;
-        std::unordered_map<entt::entity, std::vector<std::string>> dialogTextMap;
+        std::unordered_map<entt::entity, std::vector<std::pair<std::string, std::function<bool()>>>> dialogTextMap;
         entt::registry* registry;
         Systems* sys;
 
