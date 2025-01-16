@@ -4,15 +4,17 @@
 
 #include "LootSystem.hpp"
 
+#include "Camera.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/Renderable.hpp"
+#include "components/sgTransform.hpp"
 #include "ControllableActorSystem.hpp"
 #include "Cursor.hpp"
 #include "GameUiEngine.hpp"
 #include "GameUiFactory.hpp"
+#include "Settings.hpp"
 #include "Systems.hpp"
 
-#include "components/sgTransform.hpp"
 #include "raylib.h"
 
 namespace sage
@@ -20,20 +22,39 @@ namespace sage
 
     void LootSystem::OnChestClick(entt::entity clickedChest)
     {
-        if (openLootWindow)
-        {
-            openLootWindow->Remove();
-            openLootWindow = nullptr;
-        }
-        if (clickedChest != chest)
-        {
+        auto createLootWindow = [&]() {
+            auto& transform = registry->get<sgTransform>(clickedChest);
+            auto screenPos = GetWorldToScreenEx(
+                transform.GetWorldPos(),
+                *sys->camera->getRaylibCam(),
+                sys->settings->GetViewPort().x,
+                sys->settings->GetViewPort().y);
             openLootWindow =
-                GameUiFactory::CreateLootWindow(registry, sys->uiEngine.get(), clickedChest, GetMousePosition());
+                GameUiFactory::CreateLootWindow(registry, sys->uiEngine.get(), clickedChest, screenPos);
             openLootWindow->onHide.Subscribe([this] { openLootWindow = nullptr; });
-            chest = clickedChest;
-            return;
+        };
+
+        // if the clicked chest differs from the previous, open a new window
+        if (chest == clickedChest)
+        {
+            if (openLootWindow)
+            {
+                openLootWindow->Remove();
+            }
+            else
+            {
+                createLootWindow();
+            }
         }
-        chest = entt::null;
+        else
+        {
+            if (openLootWindow)
+            {
+                openLootWindow->Remove();
+            }
+            createLootWindow();
+            chest = clickedChest;
+        }
     }
 
     bool LootSystem::InLootRange() const

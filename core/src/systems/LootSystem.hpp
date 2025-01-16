@@ -20,6 +20,7 @@ namespace sage
         Systems* sys;
         entt::entity chest;
         Window* openLootWindow;
+        bool windowRemovedExternally = false;
 
       public:
         void OnChestClick(entt::entity clickedChest);
