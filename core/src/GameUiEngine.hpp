@@ -509,14 +509,18 @@ namespace sage
     {
 
       protected:
+        entt::entity owner{};
         void onItemDroppedToWorld() override;
         [[nodiscard]] entt::entity getItemId() override;
 
       public:
         unsigned int row{};
         unsigned int col{};
+        entt::entity GetOwner() const;
+        void SetOwner(entt::entity _owner);
         void ReceiveDrop(CellElement* droppedElement) override;
-        InventorySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _row, unsigned int _col);
+        InventorySlot(
+            GameUIEngine* _engine, TableCell* _parent, entt::entity _owner, unsigned int _row, unsigned int _col);
         friend class TableCell;
     };
 

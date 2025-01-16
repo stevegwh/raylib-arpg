@@ -1712,17 +1712,27 @@ namespace sage
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
+    entt::entity InventorySlot::GetOwner() const
+    {
+        return owner;
+    }
+
+    void InventorySlot::SetOwner(entt::entity _owner)
+    {
+        owner = _owner;
+        RetrieveInfo();
+    }
+
     void InventorySlot::onItemDroppedToWorld()
     {
-        auto& inventory =
-            engine->registry->get<InventoryComponent>(engine->sys->controllableActorSystem->GetSelectedActor());
+        auto& inventory = engine->registry->get<InventoryComponent>(owner);
         inventory.RemoveItem(row, col);
+        RetrieveInfo();
     }
 
     entt::entity InventorySlot::getItemId()
     {
-        auto& inventory =
-            engine->registry->get<InventoryComponent>(engine->sys->controllableActorSystem->GetSelectedActor());
+        auto& inventory = engine->registry->get<InventoryComponent>(owner);
         return inventory.GetItem(row, col);
     }
 
@@ -1730,23 +1740,37 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto& inventory = engine->registry->get<InventoryComponent>(
-                engine->sys->controllableActorSystem->GetSelectedActor());
-            inventory.SwapItems(row, col, dropped->row, dropped->col);
+            if (dropped->GetOwner() == owner)
+            {
+                auto& inventory = engine->registry->get<InventoryComponent>(owner);
+                inventory.SwapItems(row, col, dropped->row, dropped->col);
+            }
+            else
+            {
+                auto& inventory = engine->registry->get<InventoryComponent>(owner);
+                auto& droppedInv = engine->registry->get<InventoryComponent>(dropped->GetOwner());
+                auto itemId = droppedInv.GetItem(dropped->row, dropped->col);
+                if (!inventory.AddItem(itemId, row, col))
+                {
+                    engine->CreateErrorMessage("Inventory Full.");
+                    return;
+                }
+                droppedInv.RemoveItem(itemId);
+            }
+
             dropped->RetrieveInfo();
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
-            const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
-            auto& inventory = engine->registry->get<InventoryComponent>(actor);
-            const auto droppedItemId = engine->sys->equipmentSystem->GetItem(actor, droppedE->itemType);
-            engine->sys->equipmentSystem->DestroyItem(actor, droppedE->itemType);
+            auto& inventory = engine->registry->get<InventoryComponent>(owner);
+            const auto droppedItemId = engine->sys->equipmentSystem->GetItem(owner, droppedE->itemType);
+            engine->sys->equipmentSystem->DestroyItem(owner, droppedE->itemType);
 
             if (const auto inventoryItemId = inventory.GetItem(row, col); inventoryItemId != entt::null)
             {
-                engine->sys->equipmentSystem->EquipItem(actor, inventoryItemId, droppedE->itemType);
+                engine->sys->equipmentSystem->EquipItem(owner, inventoryItemId, droppedE->itemType);
             }
 
             inventory.AddItem(droppedItemId, row, col);
@@ -1756,11 +1780,13 @@ namespace sage
         }
     }
 
-    InventorySlot::InventorySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _row, unsigned int _col)
-        : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), row(_row), col(_col)
+    InventorySlot::InventorySlot(
+        GameUIEngine* _engine, TableCell* _parent, entt::entity _owner, unsigned int _row, unsigned int _col)
+        : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER),
+          owner(_owner),
+          row(_row),
+          col(_col)
     {
-        engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
-            [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     void CloseButton::OnClick()

@@ -1,5 +1,5 @@
 <meta>
-	owner: SM_Env_Tiles_Pentagram_01
+	owner: _FLOORCOMPLEX_SM_Env_Tiles_Pentagram_01
 	distance: 80
 	speaker: Player
 </meta>

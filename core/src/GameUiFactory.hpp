@@ -30,6 +30,8 @@ namespace sage
       public:
         static Window* CreatePartyPortraitsColumn(GameUIEngine* engine);
         static Window* CreateAbilityRow(GameUIEngine* engine);
+        static Window* CreateLootWindow(
+            entt::registry* registry, GameUIEngine* engine, entt::entity owner, Vector2 pos);
         static Window* CreateInventoryWindow(
             entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h);
         static Window* CreateJournalWindow(

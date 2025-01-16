@@ -27,6 +27,7 @@ namespace sage
         STAIRS,
         ITEM,
         INTERACTABLE,
+        CHEST,
         COUNT // Must always be last
     };
 

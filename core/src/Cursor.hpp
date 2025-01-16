@@ -78,6 +78,7 @@ namespace sage
         Event<entt::entity> onAnyRightClick{};
         Event<entt::entity> onEnemyLeftClick{};
         Event<entt::entity> onEnemyRightClick{};
+        Event<entt::entity> onChestClick{};
 
         Event<entt::entity> onCombatableHover{};
         Event<entt::entity> onNPCHover{};

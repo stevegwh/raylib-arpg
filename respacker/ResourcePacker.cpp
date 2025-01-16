@@ -92,6 +92,10 @@ namespace sage
         {
             return CollisionLayer::INTERACTABLE;
         }
+        if (objectName.find("_CHEST_") != std::string::npos)
+        {
+            return CollisionLayer::CHEST;
+        }
 
         return CollisionLayer::BACKGROUND; // by default, objects are ignored
     }

@@ -44,10 +44,10 @@ namespace sage
           questManager(std::make_unique<QuestManager>(_registry, this)),
           doorSystem(std::make_unique<DoorSystem>(_registry, this)),
           fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayFactory>(this)),
-          contextualDialogSystem(std::make_unique<ContextualDialogSystem>(registry, this)),
-          spatialAudioSystem(std::make_unique<SpatialAudioSystem>(registry, this))
+          contextualDialogSystem(std::make_unique<ContextualDialogSystem>(_registry, this)),
+          spatialAudioSystem(std::make_unique<SpatialAudioSystem>(_registry, this)),
+          lootTable(std::make_unique<LootTable>(_registry, this)),
+          lootSystem(std::make_unique<LootSystem>(_registry, this))
     {
-        // TODO: Move sys out of Scene and into Application
-        // Minus lights and timers, I'm not sure if anything would suffer from this
     }
 } // namespace sage

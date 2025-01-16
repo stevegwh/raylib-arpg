@@ -206,6 +206,55 @@ namespace sage
         return window;
     }
 
+    Window* GameUiFactory::CreateLootWindow(
+        entt::registry* registry, GameUIEngine* engine, entt::entity owner, Vector2 pos)
+    {
+        auto nPatchTexture = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
+        auto _window = std::make_unique<Window>(
+            engine->sys->settings,
+            nPatchTexture,
+            TextureStretchMode::STRETCH,
+            pos.x,
+            pos.y,
+            274 * 1.5,
+            424 * 1.5,
+            Padding{20, 0, 14, 14});
+        auto window = engine->CreateWindow(std::move(_window));
+        auto mainTable = window->CreateTable();
+        auto mainTableRow1 = mainTable->CreateTableRow(4);
+        auto mainTableRow2 = mainTable->CreateTableRow({20, 0, 0, 0});
+
+        {
+            // Title bar
+            auto cell = mainTableRow1->CreateTableCell(80);
+            auto cell2 = mainTableRow1->CreateTableCell(20);
+            auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
+            cell->CreateTitleBar(std::move(titleBar), "Chest");
+            auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
+            cell2->CreateCloseButton(std::move(closeBtn));
+            // TODO: Close should DELETE.
+        }
+
+        {
+
+            // Inventory grid
+            auto cell = mainTableRow2->CreateTableCell();
+            auto table = cell->CreateTableGrid(5, 5, 4);
+            for (unsigned int row = 0; row < 5; ++row)
+            {
+                for (unsigned int col = 0; col < 5; ++col)
+                {
+                    auto invCell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
+                    auto invSlot = std::make_unique<InventorySlot>(engine, invCell, owner, row, col);
+                    auto ptr = invCell->CreateInventorySlot(std::move(invSlot));
+                }
+            }
+        }
+        window->FinalizeLayout();
+        return window;
+    }
+
     Window* GameUiFactory::CreateInventoryWindow(
         entt::registry* registry, GameUIEngine* engine, Vector2 pos, float w, float h)
     {
@@ -236,6 +285,7 @@ namespace sage
         }
 
         {
+            auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
             // Inventory grid
             auto cell = mainTableRow2->CreateTableCell();
             auto table = cell->CreateTableGrid(INVENTORY_MAX_ROWS, INVENTORY_MAX_COLS, 4);
@@ -244,8 +294,11 @@ namespace sage
                 for (unsigned int col = 0; col < INVENTORY_MAX_COLS; ++col)
                 {
                     auto invCell = dynamic_cast<TableCell*>(table->children[row]->children[col].get());
-                    auto invSlot = std::make_unique<InventorySlot>(engine, invCell, row, col);
+                    auto invSlot = std::make_unique<InventorySlot>(engine, invCell, actor, row, col);
                     auto ptr = invCell->CreateInventorySlot(std::move(invSlot));
+
+                    engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
+                        [ptr](entt::entity prev, entt::entity current) { ptr->SetOwner(current); });
 
                     engine->sys->inventorySystem->onInventoryUpdated.Subscribe([ptr]() { ptr->RetrieveInfo(); });
                 }

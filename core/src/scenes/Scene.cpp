@@ -62,6 +62,8 @@ namespace sage
     void Scene::initAssets() const
     {
         serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", *sys->itemFactory);
+        serializer::DeserializeJsonFile<LootTable>("resources/loot-table.json", *sys->lootTable);
+        // serializer::SaveClassJson<LootFactory>("resources/loot-table.json", *sys->lootFactory);
 
         const auto heightMap = ResourceManager::GetInstance().GetImage("HEIGHT_MAP");
         const auto normalMap = ResourceManager::GetInstance().GetImage("NORMAL_MAP");

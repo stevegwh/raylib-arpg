@@ -102,6 +102,10 @@ namespace sage
         {
             onEnemyLeftClick.Publish(m_mouseHitInfo.collidedEntityId);
         }
+        else if (layer == CollisionLayer::CHEST)
+        {
+            onChestClick.Publish(m_mouseHitInfo.collidedEntityId);
+        }
         onAnyLeftClick.Publish(m_mouseHitInfo.collidedEntityId);
     }
 
@@ -258,6 +262,11 @@ namespace sage
         {
             currentTex = &pickuptex;
             hitObjectName = "Item";
+        }
+        else if (layer == CollisionLayer::CHEST)
+        {
+            currentTex = &pickuptex;
+            hitObjectName = "Chest";
         }
         else if (layer == CollisionLayer::PLAYER)
         {

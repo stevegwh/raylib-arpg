@@ -21,6 +21,7 @@
 #include "cereal/types/string.hpp"
 #include "components/DialogComponent.hpp"
 #include "components/DoorBehaviorComponent.hpp"
+#include "components/InventoryComponent.hpp"
 #include "components/QuestComponents.hpp"
 #include "entt/core/hashed_string.hpp"
 #include "entt/core/type_traits.hpp"
@@ -180,6 +181,10 @@ namespace sage::serializer
                 if (renderable.GetName().find("_INTERACTABLE_") != std::string::npos)
                 {
                     destination->emplace<DialogComponent>(entt);
+                }
+                if (renderable.GetName().find("_CHEST_") != std::string::npos)
+                {
+                    destination->emplace<InventoryComponent>(entt);
                 }
             }
         }

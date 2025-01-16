@@ -49,6 +49,8 @@ namespace sage
     class FullscreenTextOverlayFactory;
     class ContextualDialogSystem;
     class SpatialAudioSystem;
+    class LootTable;
+    class LootSystem;
 
     class Systems
     {
@@ -89,6 +91,8 @@ namespace sage
         std::unique_ptr<FullscreenTextOverlayFactory> fullscreenTextOverlayFactory;
         std::unique_ptr<ContextualDialogSystem> contextualDialogSystem;
         std::unique_ptr<SpatialAudioSystem> spatialAudioSystem;
+        std::unique_ptr<LootTable> lootTable;
+        std::unique_ptr<LootSystem> lootSystem;
 
         Systems(
             entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);
