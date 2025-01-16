@@ -261,11 +261,8 @@ namespace sage
         //     2, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
         sys->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
-        auto& inventory = registry->emplace<InventoryComponent>(id);
+        registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);
-        // TODO: Move elsewhere/read from save file
-        inventory.AddItem(sys->itemFactory->GetItem("Dagger"), 0, 0);
-        inventory.AddItem(sys->itemFactory->GetItem("Sword"), 0, 1);
 
         return id;
     }
