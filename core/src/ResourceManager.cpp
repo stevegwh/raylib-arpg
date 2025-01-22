@@ -494,6 +494,7 @@ namespace sage
 
         // Unload arrays
         RL_FREE(model.meshes);
+        RL_FREE(model.materials);
         RL_FREE(model.meshMaterial);
 
         // Unload animation data
@@ -548,6 +549,10 @@ namespace sage
         for (const auto& [key, text] : fragShaderFileText)
         {
             UnloadFileText(text);
+        }
+        for (const auto& [key, font] : fonts)
+        {
+            UnloadFont(font);
         }
         modelCopies.clear();
         nonModelTextures.clear();

@@ -226,9 +226,9 @@ namespace sage
         TableElement(TableElement* _parent, float x, float y, float width, float height, Padding _padding);
         TableElement(TableElement* _parent, Padding _padding);
 
-        TableElement(const TableElement&) = default;
+        TableElement(const TableElement&) = delete;
         TableElement(TableElement&&) noexcept = default;
-        TableElement& operator=(const TableElement&) = default;
+        TableElement& operator=(const TableElement&) = delete;
         TableElement& operator=(TableElement&&) noexcept = default;
         ~TableElement() override = default;
     };

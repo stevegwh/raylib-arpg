@@ -1,9 +1,9 @@
 #pragma once
 
 #include "components/NavigationGridSquare.hpp"
+#include "entt/entt.hpp"
 #include "raylib.h"
 #include "systems/NavigationGridSystem.hpp"
-#include "entt/entt.hpp"
 
 namespace sage
 {
@@ -20,17 +20,17 @@ namespace sage
         float radius{};
 
         void updateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange) const;
-        Model generateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange);
+        ModelSafe generateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange) const;
         void updateMeshData(Mesh& mesh, const GridSquare& minRange, const GridSquare& maxRange) const;
-        Mesh createInitialMesh(const GridSquare& minRange, const GridSquare& maxRange);
+        Mesh createInitialMesh(const GridSquare& minRange, const GridSquare& maxRange) const;
         void updateVertexData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol) const;
         void updateNormalData(Mesh& mesh, int vertexIndex, int gridRow, int gridCol) const;
         static void updateTexCoordData(Mesh& mesh, int vertexIndex, int row, int col, int maxRow, int maxCol);
         static void generateIndices(Mesh& mesh, int maxRow, int maxCol);
 
       public:
-        void SetHint(Color col);
-        void SetShader(Shader shader);
+        void SetHint(Color col) const;
+        void SetShader(Shader shader) const;
         void Enable(bool enable);
         void Init(Vector3 startPos, float _radius = 10);
         [[nodiscard]] bool IsActive() const;

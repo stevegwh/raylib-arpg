@@ -54,6 +54,24 @@ namespace sage
         return model.get();
     }
 
+    void Renderable::SetModel(Model _model)
+    {
+        if (model)
+        {
+            model.reset();
+        }
+        model = std::make_unique<ModelSafe>(_model);
+    }
+
+    void Renderable::SetModel(ModelSafe _model)
+    {
+        if (model)
+        {
+            model.reset();
+        }
+        model = std::make_unique<ModelSafe>(std::move(_model));
+    }
+
     void Renderable::Enable()
     {
         active = true;

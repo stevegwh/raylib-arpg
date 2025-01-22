@@ -39,7 +39,6 @@ namespace sage
         {
             std::vector<std::string> _materialNames;
             archive(model, _materialNames);
-
             materialNames = _materialNames;
         }
     };
@@ -142,11 +141,15 @@ namespace sage
             modelCopies.merge(_modelCopies);
             materialMap.merge(_materialMap);
 
-            for (auto& [key, model] : GetInstance().modelCopies)
+            // Merge leaves overlapping keys in the previous map. Ensure none are overlapping.
+            assert(_images.empty());
+            assert(_modelCopies.empty());
+            assert(_materialMap.empty());
+
+            for (auto& [key, model] : modelCopies)
             {
                 for (unsigned int i = 0; i < model.materialNames.size(); ++i)
                 {
-
                     const auto& mat = model.materialNames.at(i);
                     model.model.materials[i] = materialMap[mat];
                 }
@@ -157,7 +160,7 @@ namespace sage
                 auto count = modelAnimCounts[i];
                 auto* animations = static_cast<ModelAnimation*>(RL_MALLOC(count * sizeof(ModelAnimation)));
                 std::memcpy(animations, modelAnimationsData[i].data(), count * sizeof(ModelAnimation));
-                GetInstance().modelAnimations.emplace(animatedModelKeys[i], std::make_pair(animations, count));
+                modelAnimations.emplace(animatedModelKeys[i], std::make_pair(animations, count));
             }
         }
     };

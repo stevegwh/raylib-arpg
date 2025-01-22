@@ -90,7 +90,7 @@ namespace sage
     {
     }
 
-    Model& ModelSafe::GetRlModel()
+    const Model& ModelSafe::GetRlModel()
     {
         return rlmodel;
     }
@@ -295,6 +295,11 @@ namespace sage
     void ModelSafe::SetTexture(Texture texture, int materialIdx, MaterialMapIndex mapIdx) const
     {
         rlmodel.materials[materialIdx].maps[mapIdx].texture = texture;
+    }
+
+    void ModelSafe::SetMaterial(unsigned int idx, Material mat) const
+    {
+        rlmodel.materials[idx] = mat;
     }
 
     Shader ModelSafe::GetShader(int materialIdx) const

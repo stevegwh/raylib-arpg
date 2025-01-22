@@ -59,16 +59,14 @@ namespace sage
     class ModelSafe
     {
         Model rlmodel{};
-        // TODO: Why don't glb ones have their keys set? Because they're deep copies?
-        std::string modelKey{}; // The name/path of the model in the ResourceManager
+        std::string modelKey{}; // The key/path of the model in the ResourceManager
         bool memorySafe = true;
 
         void UnloadShaderLocs() const;
         void UnloadMaterials() const;
 
       public:
-        // TODO: return GetRlModel to const
-        [[nodiscard]] Model& GetRlModel();
+        [[nodiscard]] const Model& GetRlModel();
         [[nodiscard]] const Mesh& GetMesh(int num) const;
         [[nodiscard]] BoundingBox CalcLocalMeshBoundingBox(const Mesh& mesh, bool& success) const;
         [[nodiscard]] BoundingBox CalcLocalBoundingBox() const;
@@ -87,6 +85,7 @@ namespace sage
         [[nodiscard]] int GetMaterialCount() const;
         [[nodiscard]] Matrix GetTransform() const;
         void SetTransform(Matrix trans);
+        void SetMaterial(unsigned int idx, Material mat) const;
         void SetTexture(Texture texture, int materialIdx, MaterialMapIndex mapIdx) const;
         [[nodiscard]] Shader GetShader(int materialIdx) const;
         void SetShader(Shader shader, int materialIdx) const;
@@ -105,7 +104,7 @@ namespace sage
         friend class Renderable;
         friend class ResourceManager;
         friend class TextureTerrainOverlay;
-        friend class UberShaderComponent;
+        friend struct UberShaderComponent;
         friend class UberShaderSystem;
         friend class RenderSystem;
     };

@@ -41,6 +41,8 @@ namespace sage
         void SetName(const std::string& _name);
         [[nodiscard]] std::string GetVanityName() const;
         [[nodiscard]] ModelSafe* GetModel() const;
+        void SetModel(Model _model);
+        void SetModel(ModelSafe _model);
 
         void Enable();
         void Disable();

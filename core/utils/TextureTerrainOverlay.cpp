@@ -25,7 +25,7 @@ namespace sage
         }
     }
 
-    Mesh TextureTerrainOverlay::createInitialMesh(const GridSquare& minRange, const GridSquare& maxRange)
+    Mesh TextureTerrainOverlay::createInitialMesh(const GridSquare& minRange, const GridSquare& maxRange) const
     {
         int maxRow = maxRange.row - minRange.row;
         int maxCol = maxRange.col - minRange.col;
@@ -34,10 +34,10 @@ namespace sage
         Mesh mesh = {0};
         mesh.vertexCount = vertexCount;
         mesh.triangleCount = (maxRow - 1) * (maxCol - 1) * 2;
-        mesh.vertices = (float*)RL_MALLOC(vertexCount * 3 * sizeof(float));
-        mesh.normals = (float*)RL_MALLOC(vertexCount * 3 * sizeof(float));
-        mesh.texcoords = (float*)RL_MALLOC(vertexCount * 2 * sizeof(float));
-        mesh.indices = (unsigned short*)RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short));
+        mesh.vertices = static_cast<float*>(RL_MALLOC(vertexCount * 3 * sizeof(float)));
+        mesh.normals = static_cast<float*>(RL_MALLOC(vertexCount * 3 * sizeof(float)));
+        mesh.texcoords = static_cast<float*>(RL_MALLOC(vertexCount * 2 * sizeof(float)));
+        mesh.indices = static_cast<unsigned short*>(RL_MALLOC(mesh.triangleCount * 3 * sizeof(unsigned short)));
 
         updateMeshData(mesh, minRange, maxRange);
         generateIndices(mesh, maxRow, maxCol);
@@ -103,28 +103,25 @@ namespace sage
         UpdateMeshBuffer(mesh, 2, mesh.texcoords, vertexCount * 2 * sizeof(float), 0);
     }
 
-    Model TextureTerrainOverlay::generateTerrainPolygon(const GridSquare& minRange, const GridSquare& maxRange)
+    ModelSafe TextureTerrainOverlay::generateTerrainPolygon(
+        const GridSquare& minRange, const GridSquare& maxRange) const
     {
         Mesh mesh = createInitialMesh(minRange, maxRange);
 
         UploadMesh(&mesh, false);
         Model model = LoadModelFromMesh(mesh);
-
-        model.materials = (Material*)RL_MALLOC(sizeof(Material));
-        model.materials[0] = LoadMaterialDefault();
-        model.materialCount = 1;
         model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 
-        return model;
+        return ModelSafe(model);
     }
 
-    void TextureTerrainOverlay::SetHint(Color col)
+    void TextureTerrainOverlay::SetHint(Color col) const
     {
         auto& renderable = registry->get<Renderable>(entity);
         renderable.hint = col;
     }
 
-    void TextureTerrainOverlay::SetShader(Shader shader)
+    void TextureTerrainOverlay::SetShader(Shader shader) const
     {
         auto& renderable = registry->get<Renderable>(entity);
         renderable.GetModel()->SetShader(shader);
@@ -138,7 +135,7 @@ namespace sage
         renderable.active = enable;
     }
 
-    void TextureTerrainOverlay::Init(Vector3 startPos, float _radius)
+    void TextureTerrainOverlay::Init(const Vector3 startPos, const float _radius)
     {
         if (initialised)
         {
@@ -152,19 +149,19 @@ namespace sage
         GridSquare minRange{}, maxRange{};
         navigationGridSystem->GetGridRange(startPos, static_cast<int>(radius), minRange, maxRange);
         auto& renderable = registry->get<Renderable>(entity);
-        renderable.GetModel()->rlmodel = generateTerrainPolygon(minRange, maxRange);
+        renderable.SetModel(generateTerrainPolygon(minRange, maxRange));
 
         // Calculate the center of the mesh in world space
         const auto& gridSquares = navigationGridSystem->GetGridSquares();
-        Vector3 meshMin = {
+        const Vector3 meshMin = {
             gridSquares[minRange.row][minRange.col]->worldPosMin.x,
             gridSquares[minRange.row][minRange.col]->GetTerrainHeight(),
             gridSquares[minRange.row][minRange.col]->worldPosMin.z};
-        Vector3 meshMax = {
+        const Vector3 meshMax = {
             gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMax.x,
             gridSquares[maxRange.row - 1][maxRange.col - 1]->GetTerrainHeight(),
             gridSquares[maxRange.row - 1][maxRange.col - 1]->worldPosMax.z};
-        Vector3 meshCenter = {(meshMin.x + meshMax.x) * 0.5f, 0, (meshMin.z + meshMax.z) * 0.5f};
+        const Vector3 meshCenter = {(meshMin.x + meshMax.x) * 0.5f, 0, (meshMin.z + meshMax.z) * 0.5f};
 
         // Calculate the offset to center the mesh on the mouse position
         meshOffset = {startPos.x - meshCenter.x, 0, startPos.z - meshCenter.z};
@@ -199,7 +196,8 @@ namespace sage
     TextureTerrainOverlay::~TextureTerrainOverlay()
     {
         UnloadTexture(texture);
-        registry->remove<TextureTerrainOverlay>(entity);
+        // auto& renderable = registry->get<Renderable>(entity);
+        // renderable.GetModel()->UnloadMaterials();
     }
 
     TextureTerrainOverlay::TextureTerrainOverlay(
