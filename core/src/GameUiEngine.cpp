@@ -39,7 +39,6 @@ namespace sage
 
 #pragma region init
 
-    // In Window class - always stacks panels vertically
     void Window::InitLayout()
     {
         // assert(!finalized);
@@ -585,7 +584,7 @@ namespace sage
         SetContent("");
         auto quests = engine->sys->questManager->GetActiveQuests();
         {
-            auto table = journalEntryRoot->CreateTable();
+            const auto table = journalEntryRoot->CreateTable();
             for (auto i = 0; i < 12; ++i) // Adjust for spacing
             {
                 Quest* quest = nullptr;
@@ -593,16 +592,10 @@ namespace sage
                 {
                     quest = quests[i];
                 }
-                auto row = table->CreateTableRow();
+                const auto row = table->CreateTableRow();
                 auto cell = row->CreateTableCell();
                 auto textbox = std::make_unique<JournalEntry>(
-                    engine,
-                    cell,
-                    this->parent,
-                    quest,
-                    TextBox::FontInfo{},
-                    VertAlignment::MIDDLE,
-                    HoriAlignment::CENTER);
+                    engine, cell, this->parent, quest, FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER);
                 cell->element = std::move(textbox);
             }
         }
@@ -967,7 +960,6 @@ namespace sage
 
     void ImageBox::shrinkColToFit() const
     {
-        // Navigate up to get the Table
         auto* tableCell = parent;
         auto* tableRow = tableCell->parent;
         auto* table = tableRow->parent;
@@ -991,22 +983,19 @@ namespace sage
             auto space = imageBox->calculateAvailableSpace();
             auto dimensions = imageBox->calculateInitialDimensions(space);
 
-            // Calculate scale factor needed for this image
             float widthRatio = space.width / dimensions.width;
             float heightRatio = space.height / dimensions.height;
             float scaleFactor = std::min(widthRatio, heightRatio);
 
-            // Keep track of the smallest scale factor needed
             minScaleFactor = std::min(minScaleFactor, scaleFactor);
         }
 
         // Second pass: apply the minimum scale factor to all cells in this column
-        for (auto& row : allRows)
+        for (const auto& row : allRows)
         {
-            // Skip if the row doesn't have enough cells
             if (row->children.size() <= myColIndex) continue;
 
-            auto* cellInColumn = row->children[myColIndex].get();
+            const auto* cellInColumn = row->children[myColIndex].get();
             if (!cellInColumn->element.has_value()) continue;
             auto* imageBox = dynamic_cast<ImageBox*>(cellInColumn->element.value().get());
             if (!imageBox) continue;
@@ -1014,7 +1003,6 @@ namespace sage
             auto space = imageBox->calculateAvailableSpace();
             auto dimensions = imageBox->calculateInitialDimensions(space);
 
-            // Apply uniform scaling
             dimensions.width *= minScaleFactor;
             dimensions.height *= minScaleFactor;
 
@@ -1026,8 +1014,8 @@ namespace sage
     // Helper function to find the column index of the current ImageBox
     size_t ImageBox::findMyColumnIndex() const
     {
-        auto* myCell = parent;
-        auto* myRow = myCell->parent;
+        const auto* myCell = parent;
+        const auto* myRow = myCell->parent;
 
         // Find this cell's index in its row
         size_t colIndex = 0;
@@ -1052,9 +1040,9 @@ namespace sage
 
         if (overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
-            float widthRatio = space.width / dimensions.width;
-            float heightRatio = space.height / dimensions.height;
-            float scaleFactor = std::min(widthRatio, heightRatio);
+            const float widthRatio = space.width / dimensions.width;
+            const float heightRatio = space.height / dimensions.height;
+            const float scaleFactor = std::min(widthRatio, heightRatio);
 
             return {dimensions.width * scaleFactor, dimensions.height * scaleFactor};
         }
@@ -1781,7 +1769,11 @@ namespace sage
     }
 
     InventorySlot::InventorySlot(
-        GameUIEngine* _engine, TableCell* _parent, entt::entity _owner, unsigned int _row, unsigned int _col)
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        const entt::entity _owner,
+        const unsigned int _row,
+        const unsigned int _col)
         : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER),
           owner(_owner),
           row(_row),
@@ -1802,7 +1794,7 @@ namespace sage
     }
 
     CloseButton::CloseButton(
-        GameUIEngine* _engine, TableCell* _parent, const Texture& _tex, bool _closeDeletesWindow)
+        GameUIEngine* _engine, TableCell* _parent, const Texture& _tex, const bool _closeDeletesWindow)
         : ImageBox(
               _engine, _parent, _tex, OverflowBehaviour::SHRINK_TO_FIT, VertAlignment::TOP, HoriAlignment::RIGHT),
           closeDeletesWindow(_closeDeletesWindow)
@@ -1879,13 +1871,13 @@ namespace sage
 
     WindowDocked::WindowDocked(
         Settings* _settings,
-        float _xOffset,
-        float _yOffset,
-        float _width,
-        float _height,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment,
-        Padding _padding)
+        const float _xOffset,
+        const float _yOffset,
+        const float _width,
+        const float _height,
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment,
+        const Padding _padding)
         : Window(_settings, _padding),
           baseXOffset(_xOffset),
           baseYOffset(_yOffset),
@@ -1902,14 +1894,14 @@ namespace sage
     WindowDocked::WindowDocked(
         Settings* _settings,
         Texture _tex,
-        TextureStretchMode _textureStretchMode,
-        float _xOffset,
-        float _yOffset,
-        float _width,
-        float _height,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment,
-        Padding _padding)
+        const TextureStretchMode _textureStretchMode,
+        const float _xOffset,
+        const float _yOffset,
+        const float _width,
+        const float _height,
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment,
+        const Padding _padding)
         : Window(_settings, _padding),
           baseXOffset(_xOffset),
           baseYOffset(_yOffset),
@@ -2066,7 +2058,7 @@ namespace sage
     {
         unscaledDimensions.rec = rec;
         unscaledDimensions.padding = padding;
-        for (auto& child : children)
+        for (const auto& child : children)
         {
             child->FinalizeLayout();
         }
@@ -2075,10 +2067,10 @@ namespace sage
     Window* TableElement::GetWindow()
     {
 
-        TableElement* current = this;
+        auto current = this;
         while (current->parent != nullptr)
         {
-            current = reinterpret_cast<TableElement*>(current->parent);
+            current = current->parent;
         }
 
         return reinterpret_cast<Window*>(current);
@@ -2086,7 +2078,8 @@ namespace sage
 
     void TableElement::DrawDebug2D()
     {
-        std::vector colors = {RED, BLUE, YELLOW, WHITE, PINK, BLACK, ORANGE, PURPLE, BROWN, DARKGREEN};
+        static constexpr std::vector colors = {
+            RED, BLUE, YELLOW, WHITE, PINK, BLACK, ORANGE, PURPLE, BROWN, DARKGREEN};
         for (int i = 0; i < children.size(); ++i)
         {
             const auto& child = children[i];
@@ -2123,11 +2116,7 @@ namespace sage
                     textureStretchMode == TextureStretchMode::FILL ||
                     textureStretchMode == TextureStretchMode::TILE)
                 {
-                    DrawTextureRec(
-                        tex.value(),
-                        {0, 0, static_cast<float>(rec.width), static_cast<float>(rec.height)},
-                        {rec.x, rec.y},
-                        WHITE);
+                    DrawTextureRec(tex.value(), {0, 0, rec.width, rec.height}, {rec.x, rec.y}, WHITE);
                 }
             }
         }
@@ -2157,12 +2146,12 @@ namespace sage
         unscaledDimensions = {rec, padding};
     }
 
-    void Window::SetPos(float x, float y)
+    void Window::SetPos(const float x, const float y)
     {
-        auto old = Vector2{rec.x, rec.y};
+        const auto old = Vector2{rec.x, rec.y};
         rec = {x, y, rec.width, rec.height};
         ClampToScreen();
-        auto diff = Vector2Subtract(Vector2{rec.x, rec.y}, Vector2{old.x, old.y});
+        const auto diff = Vector2Subtract(Vector2{rec.x, rec.y}, Vector2{old.x, old.y});
 
         std::queue<TableElement*> elementsToProcess;
 
@@ -2173,7 +2162,7 @@ namespace sage
 
         while (!elementsToProcess.empty())
         {
-            auto current = elementsToProcess.front();
+            const auto current = elementsToProcess.front();
             elementsToProcess.pop();
 
             current->rec.x += diff.x;
@@ -2238,7 +2227,7 @@ namespace sage
     {
         unscaledDimensions.rec = rec;
         unscaledDimensions.padding = padding;
-        for (auto& child : children)
+        for (const auto& child : children)
         {
             child->FinalizeLayout();
         }
@@ -2271,7 +2260,7 @@ namespace sage
 
         UpdateTextureDimensions();
 
-        for (auto& child : children)
+        for (const auto& child : children)
         {
             child->ScaleContents(settings);
         }
@@ -2308,19 +2297,20 @@ namespace sage
         windowUpdateCnx->UnSubscribe();
     }
 
-    Window::Window(Settings* _settings, Padding _padding) : TableElement(nullptr, _padding), settings(_settings)
+    Window::Window(Settings* _settings, const Padding _padding)
+        : TableElement(nullptr, _padding), settings(_settings)
     {
     }
 
     Window::Window(
         Settings* _settings,
         const Texture& _tex,
-        TextureStretchMode _stretchMode,
-        float x,
-        float y,
-        float width,
-        float height,
-        Padding _padding)
+        const TextureStretchMode _stretchMode,
+        const float x,
+        const float y,
+        const float width,
+        const float height,
+        const Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding),
 
           settings(_settings)
@@ -2329,7 +2319,13 @@ namespace sage
         textureStretchMode = _stretchMode;
     }
 
-    Window::Window(Settings* _settings, float x, float y, float width, float height, Padding _padding)
+    Window::Window(
+        Settings* _settings,
+        const float x,
+        const float y,
+        const float width,
+        const float height,
+        const Padding _padding)
         : TableElement(nullptr, x, y, width, height, _padding), settings(_settings)
     {
     }
@@ -2375,11 +2371,11 @@ namespace sage
         Window* parentWindow,
         const Texture& _tex,
         TextureStretchMode _stretchMode,
-        float x,
-        float y,
-        float width,
-        float height,
-        Padding _padding)
+        const float x,
+        const float y,
+        const float width,
+        const float height,
+        const Padding _padding)
         : Window(_settings, x, y, width, height, _padding)
     {
         if (parentWindow)
@@ -2390,7 +2386,7 @@ namespace sage
         textureStretchMode = _stretchMode;
     }
 
-    TableGrid* Window::CreateTableGrid(int rows, int cols, float cellSpacing, Padding _padding)
+    TableGrid* Window::CreateTableGrid(const int rows, const int cols, const float cellSpacing, Padding _padding)
     {
         children.push_back(std::make_unique<TableGrid>(this, _padding));
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
@@ -2416,9 +2412,9 @@ namespace sage
         return table;
     }
 
-    Table* Window::CreateTable(float _requestedHeight, Padding _padding)
+    Table* Window::CreateTable(const float _requestedHeight, const Padding _padding)
     {
-        auto table = CreateTable(_padding);
+        const auto table = CreateTable(_padding);
         table->autoSize = false;
         table->requestedHeight = _requestedHeight;
         InitLayout();
@@ -2441,7 +2437,7 @@ namespace sage
     {
     }
 
-    TableRowGrid* Table::CreateTableRowGrid(int cols, float cellSpacing, Padding _padding)
+    TableRowGrid* Table::CreateTableRowGrid(const int cols, const float cellSpacing, Padding _padding)
     {
         children.push_back(std::make_unique<TableRowGrid>(this, _padding));
         const auto& rowGrid = dynamic_cast<TableRowGrid*>(children.back().get());
@@ -2469,7 +2465,7 @@ namespace sage
      * @param _padding
      * @return
      */
-    TableRow* Table::CreateTableRow(float _requestedHeight, Padding _padding)
+    TableRow* Table::CreateTableRow(const float _requestedHeight, Padding _padding)
     {
         assert(_requestedHeight <= 100 && _requestedHeight >= 0);
         children.push_back(std::make_unique<TableRow>(this, _padding));
@@ -2490,26 +2486,26 @@ namespace sage
 
     /**
      *
-     * @param requestedWidth The desired width of the cell as a percent (0-100)
+     * @param _requestedWidth The desired width of the cell as a percent (0-100)
      * @param _padding
      * @return
      */
-    TableCell* TableRow::CreateTableCell(float requestedWidth, Padding _padding)
+    TableCell* TableRow::CreateTableCell(float _requestedWidth, Padding _padding)
     {
-        assert(requestedWidth <= 100 && requestedWidth >= 0);
+        assert(_requestedWidth <= 100 && _requestedWidth >= 0);
         children.push_back(std::make_unique<TableCell>(this, _padding));
         const auto& cell = dynamic_cast<TableCell*>(children.back().get());
         cell->autoSize = false;
-        cell->requestedWidth = requestedWidth;
+        cell->requestedWidth = _requestedWidth;
         InitLayout();
         return cell;
     }
 
-    TableRow::TableRow(Table* _parent, Padding _padding) : TableElement(_parent, _padding)
+    TableRow::TableRow(Table* _parent, const Padding _padding) : TableElement(_parent, _padding)
     {
     }
 
-    TableRowGrid::TableRowGrid(Table* _parent, Padding _padding) : TableRow(_parent, _padding)
+    TableRowGrid::TableRowGrid(Table* _parent, const Padding _padding) : TableRow(_parent, _padding)
     {
     }
 
@@ -2628,7 +2624,8 @@ namespace sage
         return image;
     }
 
-    TableGrid* TableCell::CreateTableGrid(int rows, int cols, float cellSpacing, Padding _padding)
+    TableGrid* TableCell::CreateTableGrid(
+        const int rows, const int cols, const float cellSpacing, Padding _padding)
     {
         children.push_back(std::make_unique<TableGrid>(this, _padding));
         const auto& table = dynamic_cast<TableGrid*>(children.back().get());
@@ -2654,16 +2651,16 @@ namespace sage
         return table;
     }
 
-    Table* TableCell::CreateTable(float _requestedHeight, Padding _padding)
+    Table* TableCell::CreateTable(const float _requestedHeight, const Padding _padding)
     {
-        auto table = CreateTable(_padding);
+        const auto table = CreateTable(_padding);
         table->autoSize = false;
         table->requestedHeight = _requestedHeight;
         InitLayout();
         return table;
     }
 
-    TableCell::TableCell(TableRow* _parent, Padding _padding) : TableElement(_parent, _padding)
+    TableCell::TableCell(TableRow* _parent, const Padding _padding) : TableElement(_parent, _padding)
     {
     }
 
@@ -2674,19 +2671,19 @@ namespace sage
 
     void ErrorMessage::Draw2D() const
     {
-        auto currentTime = GetTime();
+        const auto currentTime = GetTime();
 
         if (currentTime > initialTime + totalDisplayTime)
         {
             return;
         }
 
-        auto elapsedTime = currentTime - initialTime;
+        const auto elapsedTime = currentTime - initialTime;
         unsigned char a = 255;
 
         if (elapsedTime > (totalDisplayTime - fadeOut))
         {
-            float fadeProgress = (elapsedTime - (totalDisplayTime - fadeOut)) / fadeOut;
+            const float fadeProgress = (elapsedTime - (totalDisplayTime - fadeOut)) / fadeOut;
             a = static_cast<unsigned char>((1.0f - fadeProgress) * 255);
         }
 
@@ -2694,8 +2691,8 @@ namespace sage
         auto col = RAYWHITE;
         col.a = a;
 
-        auto scaledFontSize = settings->ScaleValueMaintainRatio(24);
-        auto textSize = MeasureText(msg.c_str(), scaledFontSize);
+        const auto scaledFontSize = settings->ScaleValueMaintainRatio(24);
+        const auto textSize = MeasureText(msg.c_str(), scaledFontSize);
 
         DrawTextEx(
             font, msg.c_str(), Vector2{(width - textSize) / 2, height / 4}, scaledFontSize, fontSpacing, col);
@@ -2703,11 +2700,11 @@ namespace sage
 
     ErrorMessage::ErrorMessage(Settings* _settings, std::string _msg)
         : settings(_settings),
-          msg(std::move(_msg)),
-          initialTime(GetTime()),
           font(ResourceManager::GetInstance().FontLoad(
               "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
-          fontSpacing(1.5)
+          fontSpacing(1.5),
+          msg(std::move(_msg)),
+          initialTime(GetTime())
     {
     }
 
