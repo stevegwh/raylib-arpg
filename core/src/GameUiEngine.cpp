@@ -43,10 +43,10 @@ namespace sage
     {
         // assert(!finalized);
         if (children.empty()) return;
-        float availableWidth = rec.width - (padding.left + padding.right);
-        float availableHeight = rec.height - (padding.up + padding.down);
-        float startX = rec.x + padding.left;
-        float startY = rec.y + padding.up;
+        const float availableWidth = rec.width - (padding.left + padding.right);
+        const float availableHeight = rec.height - (padding.up + padding.down);
+        const float startX = rec.x + padding.left;
+        const float startY = rec.y + padding.up;
 
         float totalRequestedPercent = 0.0f;
         int autoSizeCount = 0;
@@ -54,8 +54,7 @@ namespace sage
         // First pass: Calculate total of percentage-based heights
         for (const auto& p : children)
         {
-            auto table = reinterpret_cast<Table*>(p.get());
-            if (table->autoSize)
+            if (const auto table = reinterpret_cast<Table*>(p.get()); table->autoSize)
             {
                 autoSizeCount++;
             }
@@ -66,14 +65,14 @@ namespace sage
         }
 
         totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+        const float remainingPercent = 100.0f - totalRequestedPercent;
+        const float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
 
         // Second pass: Update each table
         float currentY = startY;
         for (const auto& p : children)
         {
-            auto table = reinterpret_cast<Table*>(p.get());
+            const auto table = reinterpret_cast<Table*>(p.get());
             table->parent = this;
             table->rec = rec;
 
@@ -104,8 +103,8 @@ namespace sage
     {
         // assert(!GetWindow()->finalized);
         // Account for table padding
-        float availableHeight = rec.height - (padding.up + padding.down);
-        float startY = rec.y + padding.up;
+        const float availableHeight = rec.height - (padding.up + padding.down);
+        const float startY = rec.y + padding.up;
         float totalRequestedPercent = 0.0f;
         int autoSizeCount = 0;
 
@@ -128,14 +127,14 @@ namespace sage
             totalRequestedPercent = 100.0f;
         }
 
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+        const float remainingPercent = 100.0f - totalRequestedPercent;
+        const float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
 
         // Second pass: Update each row
         float currentY = startY;
         for (const auto& r : children)
         {
-            auto row = reinterpret_cast<TableRow*>(r.get());
+            const auto row = reinterpret_cast<TableRow*>(r.get());
             row->parent = this;
             row->rec = rec;
 
@@ -230,9 +229,9 @@ namespace sage
             currentY += cellSize + cellSpacing; // Add spacing after each row
         }
 
-        for (auto& row : children)
+        for (const auto& row : children)
         {
-            for (auto& cell : row->children)
+            for (const auto& cell : row->children)
             {
                 if (cell->element.has_value())
                 {
@@ -246,16 +245,15 @@ namespace sage
     void TableRow::InitLayout()
     {
         // assert(!GetWindow()->finalized);
-        float availableWidth = rec.width - (padding.left + padding.right);
-        float startX = rec.x + padding.left;
+        const float availableWidth = rec.width - (padding.left + padding.right);
+        const float startX = rec.x + padding.left;
         float totalRequestedPercent = 0.0f;
         int autoSizeCount = 0;
 
         // First pass: Calculate total of percentage-based widths
         for (const auto& c : children)
         {
-            auto cell = reinterpret_cast<TableCell*>(c.get());
-            if (cell->autoSize)
+            if (const auto cell = reinterpret_cast<TableCell*>(c.get()); cell->autoSize)
             {
                 autoSizeCount++;
             }
@@ -270,14 +268,14 @@ namespace sage
             totalRequestedPercent = 100.0f;
         }
 
-        float remainingPercent = 100.0f - totalRequestedPercent;
-        float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+        const float remainingPercent = 100.0f - totalRequestedPercent;
+        const float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
 
         // Second pass: Update each cell
         float currentX = startX;
         for (const auto& c : children)
         {
-            auto cell = reinterpret_cast<TableCell*>(c.get());
+            const auto cell = reinterpret_cast<TableCell*>(c.get());
             cell->parent = this;
             cell->rec = rec;
 
@@ -323,10 +321,10 @@ namespace sage
         else
         {
             // Same as Window::InitLayout
-            float availableWidth = rec.width - (padding.left + padding.right);
-            float availableHeight = rec.height - (padding.up + padding.down);
-            float startX = rec.x + padding.left;
-            float startY = rec.y + padding.up;
+            const float availableWidth = rec.width - (padding.left + padding.right);
+            const float availableHeight = rec.height - (padding.up + padding.down);
+            const float startX = rec.x + padding.left;
+            const float startY = rec.y + padding.up;
 
             float totalRequestedPercent = 0.0f;
             int autoSizeCount = 0;
@@ -346,14 +344,14 @@ namespace sage
             }
 
             totalRequestedPercent = std::min(totalRequestedPercent, 100.0f);
-            float remainingPercent = 100.0f - totalRequestedPercent;
-            float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
+            const float remainingPercent = 100.0f - totalRequestedPercent;
+            const float autoSizePercent = autoSizeCount > 0 ? (remainingPercent / autoSizeCount) : 0.0f;
 
             // Second pass: Update each table
             float currentY = startY;
             for (const auto& p : children)
             {
-                auto table = reinterpret_cast<Table*>(p.get());
+                const auto table = reinterpret_cast<Table*>(p.get());
                 table->parent = this;
                 table->rec = rec;
 
@@ -436,7 +434,10 @@ namespace sage
     }
 
     CellElement::CellElement(
-        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
         : vertAlignment(_vertAlignment),
           horiAlignment(_horiAlignment),
           parent(_parent),
@@ -463,7 +464,7 @@ namespace sage
 
     void TextBox::UpdateFontScaling()
     {
-        float scaleFactor = engine->sys->settings->GetCurrentScaleFactor();
+        const float scaleFactor = engine->sys->settings->GetCurrentScaleFactor();
         fontInfo.fontSize = fontInfo.baseFontSize * scaleFactor;
         fontInfo.fontSize = std::clamp(fontInfo.fontSize, FontInfo::minFontSize, FontInfo::maxFontSize);
     }
@@ -569,8 +570,8 @@ namespace sage
         GameUIEngine* _engine,
         TableCell* _parent,
         const FontInfo& _fontInfo,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment)
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
         : CellElement(_engine, _parent, _vertAlignment, _horiAlignment),
           sdfShader(ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/sdf.fs")),
           fontInfo(_fontInfo)
@@ -582,22 +583,20 @@ namespace sage
     void JournalEntryManager::updateQuests()
     {
         SetContent("");
-        auto quests = engine->sys->questManager->GetActiveQuests();
+        const auto quests = engine->sys->questManager->GetActiveQuests();
+        const auto table = journalEntryRoot->CreateTable();
+        for (auto i = 0; i < 12; ++i) // Adjust for spacing
         {
-            const auto table = journalEntryRoot->CreateTable();
-            for (auto i = 0; i < 12; ++i) // Adjust for spacing
+            Quest* quest = nullptr;
+            if (i < quests.size())
             {
-                Quest* quest = nullptr;
-                if (i < quests.size())
-                {
-                    quest = quests[i];
-                }
-                const auto row = table->CreateTableRow();
-                auto cell = row->CreateTableCell();
-                auto textbox = std::make_unique<JournalEntry>(
-                    engine, cell, this->parent, quest, FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER);
-                cell->element = std::move(textbox);
+                quest = quests[i];
             }
+            const auto row = table->CreateTableRow();
+            auto cell = row->CreateTableCell();
+            auto textbox = std::make_unique<JournalEntry>(
+                engine, cell, this->parent, quest, FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER);
+            cell->element = std::move(textbox);
         }
     }
 
@@ -607,8 +606,8 @@ namespace sage
         TableCell* _journalEntryRoot,
         QuestManager* _questManager,
         const FontInfo& _fontInfo,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment)
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
           journalEntryRoot(_journalEntryRoot),
           questManager(_questManager)
@@ -645,7 +644,7 @@ namespace sage
     void JournalEntry::OnClick()
     {
         if (!quest) return;
-        auto text = reinterpret_cast<TextBox*>(descriptionCell->element.value().get());
+        const auto text = reinterpret_cast<TextBox*>(descriptionCell->element.value().get());
         text->SetContent(quest->journalDescription);
     }
 
@@ -655,8 +654,8 @@ namespace sage
         TableCell* _descriptionCell,
         Quest* _quest,
         const FontInfo& _fontInfo,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment)
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
           descriptionCell(_descriptionCell),
           quest(_quest)
@@ -684,7 +683,7 @@ namespace sage
         TextBox::Draw2D();
         if (drawHighlight)
         {
-            float offset = 10 * parent->GetWindow()->settings->GetCurrentScaleFactor();
+            const float offset = 10 * parent->GetWindow()->settings->GetCurrentScaleFactor();
             DrawRectangleLines(
                 rec.x - offset, rec.y - offset, rec.width + offset * 2, rec.height + offset * 2, BLACK);
         }
@@ -702,8 +701,8 @@ namespace sage
         dialog::Option* _option,
         unsigned int _index,
         const FontInfo& _fontInfo,
-        VertAlignment _vertAlignment,
-        HoriAlignment _horiAlignment)
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment), option(_option), index(_index)
     {
         content = std::format("{}: {}", _index, option->description);
@@ -712,9 +711,8 @@ namespace sage
     void TitleBar::OnDragStart()
     {
         draggedWindow = parent->GetWindow();
-        auto mousePos = GetMousePosition();
-        dragOffset = {
-            mousePos.x - draggedWindow.value()->GetRec().x, mousePos.y - draggedWindow.value()->GetRec().y};
+        const auto [x, y] = GetMousePosition();
+        dragOffset = {x - draggedWindow.value()->GetRec().x, y - draggedWindow.value()->GetRec().y};
     }
 
     void TitleBar::DragUpdate()
@@ -747,7 +745,7 @@ namespace sage
             engine->registry->get<CombatableActor>(engine->sys->controllableActorSystem->GetSelectedActor());
         if (statisticType == StatisticType::NAME)
         {
-            auto& renderable =
+            const auto& renderable =
                 engine->registry->get<Renderable>(engine->sys->controllableActorSystem->GetSelectedActor());
             SetContent(std::format("{}", renderable.GetVanityName()));
         }
@@ -864,7 +862,7 @@ namespace sage
 
     Dimensions ImageBox::calculateInitialDimensions(const Dimensions& space) const
     {
-        float originalRatio = calculateAspectRatio();
+        const float originalRatio = calculateAspectRatio();
 
         if (originalRatio > 1.0f)
         { // Wider than tall
@@ -916,19 +914,19 @@ namespace sage
 
     void ImageBox::shrinkRowToFit() const
     {
-        auto& row = parent->parent->children;
+        const auto& row = parent->parent->children;
 
         // First pass: calculate the required scale factor for each cell
         float minScaleFactor = 1.0f;
 
-        for (auto& cell : row)
+        for (const auto& cell : row)
         {
             if (!cell->element.has_value()) continue;
-            auto* imageBox = dynamic_cast<ImageBox*>(cell->element.value().get());
+            const auto* imageBox = dynamic_cast<ImageBox*>(cell->element.value().get());
             if (!imageBox) continue;
 
             auto space = imageBox->calculateAvailableSpace();
-            auto dimensions = imageBox->calculateInitialDimensions(space);
+            const auto dimensions = imageBox->calculateInitialDimensions(space);
 
             // Calculate scale factor needed for this image
             float widthRatio = space.width / dimensions.width;
@@ -940,7 +938,7 @@ namespace sage
         }
 
         // Second pass: apply the minimum scale factor to all cells
-        for (auto& cell : row)
+        for (const auto& cell : row)
         {
             if (!cell->element.has_value()) continue;
             auto* imageBox = dynamic_cast<ImageBox*>(cell->element.value().get());
@@ -960,28 +958,28 @@ namespace sage
 
     void ImageBox::shrinkColToFit() const
     {
-        auto* tableCell = parent;
-        auto* tableRow = tableCell->parent;
-        auto* table = tableRow->parent;
-        auto& allRows = table->children;
+        const auto* tableCell = parent;
+        const auto* tableRow = tableCell->parent;
+        const auto* table = tableRow->parent;
+        const auto& allRows = table->children;
 
-        size_t myColIndex = findMyColumnIndex();
+        const size_t myColIndex = findMyColumnIndex();
 
         // First pass: calculate the required scale factor for each cell in this column
         float minScaleFactor = 1.0f;
 
-        for (auto& row : allRows)
+        for (const auto& row : allRows)
         {
             // Skip if the row doesn't have enough cells
             if (row->children.size() <= myColIndex) continue;
 
-            auto* cellInColumn = row->children[myColIndex].get();
+            const auto* cellInColumn = row->children[myColIndex].get();
             if (!cellInColumn->element.has_value()) continue;
-            auto* imageBox = dynamic_cast<ImageBox*>(cellInColumn->element.value().get());
+            const auto* imageBox = dynamic_cast<ImageBox*>(cellInColumn->element.value().get());
             if (!imageBox) continue;
 
             auto space = imageBox->calculateAvailableSpace();
-            auto dimensions = imageBox->calculateInitialDimensions(space);
+            const auto dimensions = imageBox->calculateInitialDimensions(space);
 
             float widthRatio = space.width / dimensions.width;
             float heightRatio = space.height / dimensions.height;
@@ -1221,8 +1219,7 @@ namespace sage
 
     void PartyMemberPortrait::RetrieveInfo()
     {
-        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
-        if (entity != entt::null)
+        if (const auto entity = engine->sys->partySystem->GetMember(memberNumber); entity != entt::null)
         {
             const auto& info = engine->registry->get<PartyMemberComponent>(entity);
 
@@ -1235,9 +1232,8 @@ namespace sage
 
     void PartyMemberPortrait::ReceiveDrop(CellElement* droppedElement)
     {
-        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
-        if (entity == entt::null) return;
-        if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
+        if (const auto entity = engine->sys->partySystem->GetMember(memberNumber); entity == entt::null) return;
+        if (const auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
             const auto receiver = engine->sys->partySystem->GetMember(memberNumber);
             const auto sender = engine->sys->controllableActorSystem->GetSelectedActor();
@@ -1256,11 +1252,11 @@ namespace sage
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
             const auto receiver = engine->sys->partySystem->GetMember(memberNumber);
-            auto sender = engine->sys->controllableActorSystem->GetSelectedActor();
+            const auto sender = engine->sys->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(receiver);
-            auto droppedItemId = engine->sys->equipmentSystem->GetItem(sender, droppedE->itemType);
 
-            if (inventory.AddItem(droppedItemId))
+            if (auto droppedItemId = engine->sys->equipmentSystem->GetItem(sender, droppedE->itemType);
+                inventory.AddItem(droppedItemId))
             {
                 engine->sys->equipmentSystem->DestroyItem(sender, droppedE->itemType);
                 droppedE->RetrieveInfo();
@@ -1308,7 +1304,11 @@ namespace sage
     }
 
     PartyMemberPortrait::PartyMemberPortrait(
-        GameUIEngine* _engine, TableCell* _parent, unsigned int _memberNumber, int _width, int _height)
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        const unsigned int _memberNumber,
+        const int _width,
+        const int _height)
         : ImageBox(
               _engine, _parent, OverflowBehaviour::ALLOW_OVERFLOW, VertAlignment::MIDDLE, HoriAlignment::CENTER),
           memberNumber(_memberNumber),
@@ -1377,7 +1377,7 @@ namespace sage
         }
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        if (auto* ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber))
+        if (const auto* ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber))
         {
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
             const auto _rec = tooltipWindow.value()->GetRec();
@@ -1412,7 +1412,7 @@ namespace sage
         CellElement::OnClick();
     }
 
-    AbilitySlot::AbilitySlot(GameUIEngine* _engine, TableCell* _parent, unsigned int _slotNumber)
+    AbilitySlot::AbilitySlot(GameUIEngine* _engine, TableCell* _parent, const unsigned int _slotNumber)
         : ImageBox(
               _engine,
               _parent,
@@ -1473,8 +1473,7 @@ namespace sage
     {
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        auto itemId = getItemId();
-        if (itemId != entt::null)
+        if (const auto itemId = getItemId(); itemId != entt::null)
         {
             auto& item = engine->registry->get<ItemComponent>(itemId);
             tooltipWindow = GameUiFactory::CreateItemTooltip(
@@ -1484,15 +1483,14 @@ namespace sage
 
     void ItemSlot::RetrieveInfo()
     {
-        auto itemId = getItemId();
-        if (itemId != entt::null)
+        if (const auto itemId = getItemId(); itemId != entt::null)
         {
             if (engine->registry->any_of<Renderable>(itemId))
             {
-                auto& renderable = engine->registry->get<Renderable>(itemId);
+                const auto& renderable = engine->registry->get<Renderable>(itemId);
                 std::cout << renderable.GetModel()->GetKey() << std::endl;
             }
-            auto& item = engine->registry->get<ItemComponent>(itemId);
+            const auto& item = engine->registry->get<ItemComponent>(itemId);
             tex = ResourceManager::GetInstance().TextureLoad(item.icon);
             stateLocked = false;
         }
@@ -1529,7 +1527,10 @@ namespace sage
     }
 
     ItemSlot::ItemSlot(
-        GameUIEngine* _engine, TableCell* _parent, VertAlignment _vertAlignment, HoriAlignment _horiAlignment)
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment)
     {
         draggable = true;
@@ -1658,11 +1659,10 @@ namespace sage
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
+            const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(dropped->GetOwner());
             const auto itemId = inventory.GetItem(dropped->row, dropped->col);
-            auto& item = engine->registry->get<ItemComponent>(itemId);
-            if (!validateDrop(item)) return;
+            if (const auto& item = engine->registry->get<ItemComponent>(itemId); !validateDrop(item)) return;
             inventory.RemoveItem(dropped->row, dropped->col);
             engine->sys->equipmentSystem->MoveItemToInventory(actor, itemType); // ?
             engine->sys->equipmentSystem->EquipItem(actor, itemId, itemType);
@@ -1670,18 +1670,18 @@ namespace sage
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
         }
-        else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
+        else if (const auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
             // TODO: BUG: Can swap main hand only to offhand here
-            const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
-            if (!engine->sys->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
+            if (const auto actor = engine->sys->controllableActorSystem->GetSelectedActor();
+                !engine->sys->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
             {
                 // handle swap fail?
             }
         }
     }
 
-    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, TableCell* _parent, EquipmentSlotName _itemType)
+    EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, TableCell* _parent, const EquipmentSlotName _itemType)
         : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), itemType(_itemType)
     {
         ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/amulet.png");
@@ -1705,7 +1705,7 @@ namespace sage
         return owner;
     }
 
-    void InventorySlot::SetOwner(entt::entity _owner)
+    void InventorySlot::SetOwner(const entt::entity _owner)
     {
         owner = _owner;
         RetrieveInfo();
@@ -1720,7 +1720,7 @@ namespace sage
 
     entt::entity InventorySlot::getItemId()
     {
-        auto& inventory = engine->registry->get<InventoryComponent>(owner);
+        const auto& inventory = engine->registry->get<InventoryComponent>(owner);
         return inventory.GetItem(row, col);
     }
 
@@ -2078,7 +2078,7 @@ namespace sage
 
     void TableElement::DrawDebug2D()
     {
-        static constexpr std::vector colors = {
+        static const std::vector colors = {
             RED, BLUE, YELLOW, WHITE, PINK, BLACK, ORANGE, PURPLE, BROWN, DARKGREEN};
         for (int i = 0; i < children.size(); ++i)
         {
