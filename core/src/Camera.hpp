@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "raylib.h"
 #include "entt/entt.hpp"
+#include "raylib.h"
 
 namespace sage
 {
@@ -29,10 +29,10 @@ namespace sage
         Camera3D rlCamera;
         int zoom = 10;
 
-        // Easing
-        float currentTargetY{};
-        float currentPositionY{};
-        float easeSpeed = 0.075;
+        // Camera height smoothing
+        float verticalSmoothingTargetY{};
+        float verticalSmoothingCurrentY{};
+        float verticalEasingSpeed = 0.075;
 
         bool forwardKeyDown{};
         bool backKeyDown{};
@@ -43,7 +43,7 @@ namespace sage
         bool scrollEnabled = true;
         bool lockInput = false;
 
-        void updateTarget();
+        void cameraHeightSmoothing();
         void handleInput();
 
       public:

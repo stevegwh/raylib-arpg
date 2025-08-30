@@ -30,7 +30,7 @@ include_directories(vendor/imgui)
 include_directories(vendor/imgui/backends)
 
 # Option to enable/disable building the editor
-option(BUILD_EDITOR "Build the editor" ON)
+option(BUILD_EDITOR "Build the editor" OFF)
 option(BUILD_RESPACKER "Build the resoource packer" ON)
 # Add the core subdirectory
 add_subdirectory(core)

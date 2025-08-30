@@ -19,8 +19,10 @@
 
 namespace sage
 {
-
-    void Camera::updateTarget()
+    /*
+     * Smooths out variations in the camera's height
+     */
+    void Camera::cameraHeightSmoothing()
     {
         GridSquare square{};
         if (!sys->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
@@ -30,10 +32,10 @@ namespace sage
 
         float idealTargetY = floorHeight + targetOffsetY;
         float idealPositionY = idealTargetY + (rlCamera.position.y - rlCamera.target.y);
-        currentTargetY = Lerp(currentTargetY, idealTargetY, easeSpeed);
-        currentPositionY = Lerp(currentPositionY, idealPositionY, easeSpeed);
-        rlCamera.target.y = currentTargetY;
-        rlCamera.position.y = currentPositionY;
+        verticalSmoothingTargetY = Lerp(verticalSmoothingTargetY, idealTargetY, verticalEasingSpeed);
+        verticalSmoothingCurrentY = Lerp(verticalSmoothingCurrentY, idealPositionY, verticalEasingSpeed);
+        rlCamera.target.y = verticalSmoothingTargetY;
+        rlCamera.position.y = verticalSmoothingCurrentY;
     }
 
     void Camera::handleInput()
@@ -42,7 +44,7 @@ namespace sage
             IsKeyDown(KEY_RIGHT_ALT) || lockInput)
             return;
 
-        updateTarget();
+        cameraHeightSmoothing();
 
         if (backKeyDown)
         {
@@ -95,18 +97,15 @@ namespace sage
                     up.z *= 2.0f;
                     rlCamera.position = Vector3Subtract(rlCamera.position, up);
                     rlCamera.position = Vector3Add(GetCameraForward(&rlCamera), rlCamera.position);
-                    currentPositionY = rlCamera.position.y; // Update currentPositionY
+                    verticalSmoothingCurrentY = rlCamera.position.y; // Update verticalSmoothingCurrentY
                 }
             }
             if (mouseScroll.y < 0)
             {
-                Vector3 up = GetCameraUp(&rlCamera);
-                up.x *= 2.0f;
-                up.y *= 2.0f;
-                up.z *= 2.0f;
+                Vector3 up = Vector3MultiplyByValue(GetCameraUp(&rlCamera), 2.0f);
                 rlCamera.position = Vector3Add(up, rlCamera.position);
                 rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
-                currentPositionY = rlCamera.position.y; // Update currentPositionY
+                verticalSmoothingCurrentY = rlCamera.position.y; // Update verticalSmoothingCurrentY
             }
         }
     }
@@ -163,7 +162,7 @@ namespace sage
 
     void Camera::CutscenePose(const sgTransform& location, const Vector3& localOffset)
     {
-        cameraSave = CameraSave{rlCamera, currentTargetY, currentPositionY};
+        cameraSave = CameraSave{rlCamera, verticalSmoothingTargetY, verticalSmoothingCurrentY};
 
         rlCamera.position.y = rlCamera.target.y;
 
@@ -207,8 +206,8 @@ namespace sage
 
         rlCamera.target.y = idealTargetY;
         rlCamera.position.y = idealPositionY;
-        currentPositionY = rlCamera.position.y;
-        currentTargetY = rlCamera.target.y;
+        verticalSmoothingCurrentY = rlCamera.position.y;
+        verticalSmoothingTargetY = rlCamera.target.y;
     }
 
     void Camera::DrawDebug()
@@ -230,8 +229,8 @@ namespace sage
         rlCamera.up = {0.0f, 1.0f, 0.0f};
         rlCamera.fovy = 45.0f;
         rlCamera.projection = CAMERA_PERSPECTIVE;
-        currentPositionY = rlCamera.position.y;
-        currentTargetY = rlCamera.target.y;
+        verticalSmoothingCurrentY = rlCamera.position.y;
+        verticalSmoothingTargetY = rlCamera.target.y;
 
         userInput->keyWPressed.Subscribe([this]() { forwardKeyDown = true; });
         userInput->keySPressed.Subscribe([this]() { backKeyDown = true; });
