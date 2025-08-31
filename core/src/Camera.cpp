@@ -37,7 +37,7 @@ namespace sage
         rlCamera.target.y = verticalSmoothingTargetY;
         rlCamera.position.y = verticalSmoothingCurrentY;
     }
-
+    // TODO: Frame time?
     void Camera::handleMouseScroll()
     {
         if (cameraScrollVelY > 0)
@@ -121,38 +121,44 @@ namespace sage
         {
             auto right = GetCameraRight(&rlCamera);
             right = Vector3RotateByAxisAngle(right, {0, 1, 0}, DEG2RAD * 90);
-            rlCamera.position = Vector3Subtract(rlCamera.position, right);
-            rlCamera.target = Vector3Subtract(rlCamera.target, right);
+            auto newPos = Vector3MultiplyByValue(right, cameraMoveSpeed);
+            rlCamera.position = Vector3Subtract(rlCamera.position, newPos);
+            rlCamera.target = Vector3Subtract(rlCamera.target, newPos);
         }
 
         if (forwardKeyDown)
         {
             auto right = GetCameraRight(&rlCamera);
             right = Vector3RotateByAxisAngle(right, {0, 1, 0}, DEG2RAD * 90);
-            rlCamera.position = Vector3Add(right, rlCamera.position);
-            rlCamera.target = Vector3Add(right, rlCamera.target);
+            auto newPos = Vector3MultiplyByValue(right, cameraMoveSpeed);
+            rlCamera.position = Vector3Add(newPos, rlCamera.position);
+            rlCamera.target = Vector3Add(newPos, rlCamera.target);
         }
 
         if (leftKeyDown)
         {
-            rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
-            rlCamera.target = Vector3Subtract(rlCamera.target, GetCameraRight(&rlCamera));
+            auto newPos = Vector3MultiplyByValue(GetCameraRight(&rlCamera), cameraMoveSpeed);
+            rlCamera.position = Vector3Subtract(rlCamera.position, newPos);
+            rlCamera.target = Vector3Subtract(rlCamera.target, newPos);
         }
 
         if (rightKeyDown)
         {
-            rlCamera.position = Vector3Add(GetCameraRight(&rlCamera), rlCamera.position);
-            rlCamera.target = Vector3Add(GetCameraRight(&rlCamera), rlCamera.target);
+            auto newPos = Vector3MultiplyByValue(GetCameraRight(&rlCamera), cameraMoveSpeed);
+            rlCamera.position = Vector3Add(newPos, rlCamera.position);
+            rlCamera.target = Vector3Add(newPos, rlCamera.target);
         }
 
         if (rotateLeftKeyDown)
         {
-            rlCamera.position = Vector3Add(GetCameraRight(&rlCamera), rlCamera.position);
+            rlCamera.position = Vector3Add(
+                Vector3MultiplyByValue(GetCameraRight(&rlCamera), cameraRotateSpeed), rlCamera.position);
         }
 
         if (rotateRightKeyDown)
         {
-            rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
+            rlCamera.position = Vector3Subtract(
+                rlCamera.position, Vector3MultiplyByValue(GetCameraRight(&rlCamera), cameraRotateSpeed));
         }
 
         cameraHeightSmoothing();

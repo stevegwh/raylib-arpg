@@ -39,6 +39,9 @@ namespace sage
         static constexpr float cameraScrollDeceleration = 0.075f;
         static constexpr float cameraMaxY = 130.0f;
 
+        static constexpr float cameraRotateSpeed = 3.0f;
+        static constexpr float cameraMoveSpeed = 1.4f;
+
         bool forwardKeyDown{};
         bool backKeyDown{};
         bool leftKeyDown{};
