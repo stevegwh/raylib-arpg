@@ -26,8 +26,8 @@ namespace sage
         SetMusicVolume(soundScape, 0.75);
 
         std::vector<std::pair<std::string, float>> text;
-        text.emplace_back("Steve Wheeler presents...", 15.0f);
-        text.emplace_back("LeverQuest", 8.0f);
+        text.emplace_back("Steve Wheeler presents...", 0.2f);
+        text.emplace_back("LeverQuest", 0.2f);
         sys->fullscreenTextOverlayFactory->SetOverlay(text, 0.5f, 1.0f);
 
         const auto actor = sys->controllableActorSystem->GetSelectedActor();

@@ -38,6 +38,59 @@ namespace sage
         rlCamera.position.y = verticalSmoothingCurrentY;
     }
 
+    void Camera::handleMouseScroll()
+    {
+        if (cameraScrollVelY > 0)
+        {
+            cameraScrollVelY -= cameraScrollDeceleration;
+            if (cameraScrollVelY < 0)
+            {
+                cameraScrollVelY = 0;
+            }
+        }
+        else if (cameraScrollVelY < 0)
+        {
+            cameraScrollVelY += cameraScrollDeceleration;
+            if (cameraScrollVelY > 0)
+            {
+                cameraScrollVelY = 0;
+            }
+        }
+        else
+        {
+            cameraScrollVelY = 0;
+        }
+
+        if (scrollEnabled)
+        {
+
+            auto mouseScroll = GetMouseWheelMoveV();
+            if (mouseScroll.y > 0)
+            {
+                cameraScrollVelY = 3.0f;
+            }
+            else if (mouseScroll.y < 0)
+            {
+                cameraScrollVelY = -3.0f;
+            }
+            Vector3 up = Vector3MultiplyByValue(GetCameraUp(&rlCamera), abs(cameraScrollVelY));
+            if (cameraScrollVelY > 0)
+            {
+                if (rlCamera.position.y > rlCamera.target.y)
+                {
+                    rlCamera.position = Vector3Subtract(rlCamera.position, up);
+                    rlCamera.position = Vector3Add(rlCamera.position, GetCameraForward(&rlCamera));
+                }
+            }
+            else if (cameraScrollVelY < 0)
+            {
+                rlCamera.position = Vector3Add(rlCamera.position, up);
+                rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
+            }
+            verticalSmoothingCurrentY = rlCamera.position.y; // Update verticalSmoothingCurrentY
+        }
+    }
+
     void Camera::handleInput()
     {
         if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL) || IsKeyDown(KEY_LEFT_ALT) ||
@@ -45,7 +98,8 @@ namespace sage
             return;
 
         cameraHeightSmoothing();
-
+        handleMouseScroll();
+        
         if (backKeyDown)
         {
             auto right = GetCameraRight(&rlCamera);
@@ -82,31 +136,6 @@ namespace sage
         if (rotateRightKeyDown)
         {
             rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
-        }
-
-        if (scrollEnabled)
-        {
-            auto mouseScroll = GetMouseWheelMoveV();
-            if (mouseScroll.y > 0)
-            {
-                if (rlCamera.position.y > rlCamera.target.y)
-                {
-                    Vector3 up = GetCameraUp(&rlCamera);
-                    up.x *= 2.0f;
-                    up.y *= 2.0f;
-                    up.z *= 2.0f;
-                    rlCamera.position = Vector3Subtract(rlCamera.position, up);
-                    rlCamera.position = Vector3Add(GetCameraForward(&rlCamera), rlCamera.position);
-                    verticalSmoothingCurrentY = rlCamera.position.y; // Update verticalSmoothingCurrentY
-                }
-            }
-            if (mouseScroll.y < 0)
-            {
-                Vector3 up = Vector3MultiplyByValue(GetCameraUp(&rlCamera), 2.0f);
-                rlCamera.position = Vector3Add(up, rlCamera.position);
-                rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
-                verticalSmoothingCurrentY = rlCamera.position.y; // Update verticalSmoothingCurrentY
-            }
         }
     }
 

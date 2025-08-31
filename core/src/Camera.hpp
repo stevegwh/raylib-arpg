@@ -34,6 +34,9 @@ namespace sage
         float verticalSmoothingCurrentY{};
         float verticalEasingSpeed = 0.075;
 
+        float cameraScrollVelY = 0.0;
+        float cameraScrollDeceleration = 0.15f;
+
         bool forwardKeyDown{};
         bool backKeyDown{};
         bool leftKeyDown{};
@@ -45,6 +48,7 @@ namespace sage
 
         void cameraHeightSmoothing();
         void handleInput();
+        void handleMouseScroll();
 
       public:
         Camera3D* getRaylibCam();
