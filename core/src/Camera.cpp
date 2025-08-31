@@ -67,25 +67,43 @@ namespace sage
             auto mouseScroll = GetMouseWheelMoveV();
             if (mouseScroll.y > 0)
             {
-                cameraScrollVelY = 3.0f;
+                cameraScrollVelY = cameraInitialVelY;
             }
             else if (mouseScroll.y < 0)
             {
-                cameraScrollVelY = -3.0f;
+                cameraScrollVelY = -cameraInitialVelY;
             }
             Vector3 up = Vector3MultiplyByValue(GetCameraUp(&rlCamera), abs(cameraScrollVelY));
             if (cameraScrollVelY > 0)
             {
-                if (rlCamera.position.y > rlCamera.target.y)
+                auto nextPos = rlCamera.position;
+                nextPos = Vector3Subtract(nextPos, up);
+                nextPos = Vector3Add(nextPos, GetCameraForward(&rlCamera));
+                if (nextPos.y > rlCamera.target.y)
                 {
-                    rlCamera.position = Vector3Subtract(rlCamera.position, up);
-                    rlCamera.position = Vector3Add(rlCamera.position, GetCameraForward(&rlCamera));
+                    rlCamera.position = nextPos;
+                }
+                else
+                {
+                    rlCamera.position.y = rlCamera.target.y;
+                    cameraScrollVelY = 0;
                 }
             }
             else if (cameraScrollVelY < 0)
             {
-                rlCamera.position = Vector3Add(rlCamera.position, up);
-                rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraForward(&rlCamera));
+                auto nextPos = rlCamera.position;
+                nextPos = Vector3Add(nextPos, up);
+                nextPos = Vector3Subtract(nextPos, GetCameraForward(&rlCamera));
+
+                if (nextPos.y < cameraMaxY)
+                {
+                    rlCamera.position = nextPos;
+                }
+                else
+                {
+                    rlCamera.position.y = cameraMaxY;
+                    cameraScrollVelY = 0;
+                }
             }
             verticalSmoothingCurrentY = rlCamera.position.y; // Update verticalSmoothingCurrentY
         }
@@ -97,9 +115,8 @@ namespace sage
             IsKeyDown(KEY_RIGHT_ALT) || lockInput)
             return;
 
-        cameraHeightSmoothing();
         handleMouseScroll();
-        
+
         if (backKeyDown)
         {
             auto right = GetCameraRight(&rlCamera);
@@ -137,6 +154,8 @@ namespace sage
         {
             rlCamera.position = Vector3Subtract(rlCamera.position, GetCameraRight(&rlCamera));
         }
+
+        cameraHeightSmoothing();
     }
 
     Camera3D* Camera::getRaylibCam()
@@ -254,7 +273,7 @@ namespace sage
         : registry(_registry), sys(_sys), rlCamera({0})
     {
         rlCamera.position = {-40.0f, 85.0f, 20.0f};
-        rlCamera.target = {0.0f, 8.0f, 0.0f};
+        rlCamera.target = {-30.0f, 8.0f, -50.0f};
         rlCamera.up = {0.0f, 1.0f, 0.0f};
         rlCamera.fovy = 45.0f;
         rlCamera.projection = CAMERA_PERSPECTIVE;

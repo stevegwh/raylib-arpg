@@ -27,15 +27,17 @@ namespace sage
         entt::registry* registry;
         Systems* sys;
         Camera3D rlCamera;
-        int zoom = 10;
+        static constexpr int zoom = 10;
 
         // Camera height smoothing
         float verticalSmoothingTargetY{};
         float verticalSmoothingCurrentY{};
-        float verticalEasingSpeed = 0.075;
+        static constexpr float verticalEasingSpeed = 0.075;
 
         float cameraScrollVelY = 0.0;
-        float cameraScrollDeceleration = 0.15f;
+        static constexpr float cameraInitialVelY = 2.0f;
+        static constexpr float cameraScrollDeceleration = 0.075f;
+        static constexpr float cameraMaxY = 130.0f;
 
         bool forwardKeyDown{};
         bool backKeyDown{};
