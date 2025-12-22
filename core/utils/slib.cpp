@@ -515,15 +515,15 @@ namespace sage
     }
 
     /**
-     * Generates a gradient with transperency (raylib version does not have transparency)
+     * Generates a gradient with transparency (raylib version does not have transparency)
      */
     Image GenImageGradientRadialTrans(int width, int height, float density, Color inner, Color outer)
     {
-        Color* pixels = (Color*)RL_MALLOC(width * height * sizeof(Color));
-        float radius = (width < height) ? (float)width / 2.0f : (float)height / 2.0f;
+        auto* pixels = static_cast<Color*>(RL_MALLOC(width * height * sizeof(Color)));
+        float radius = (width < height) ? static_cast<float>(width) / 2.0f : static_cast<float>(height) / 2.0f;
 
-        float centerX = (float)width / 2.0f;
-        float centerY = (float)height / 2.0f;
+        float centerX = static_cast<float>(width) / 2.0f;
+        float centerY = static_cast<float>(height) / 2.0f;
 
         // Set outer color's alpha to 0 (fully transparent)
         outer.a = 0;
@@ -532,14 +532,15 @@ namespace sage
         {
             for (int x = 0; x < width; x++)
             {
-                float dist = hypotf((float)x - centerX, (float)y - centerY);
+                float dist = hypotf(static_cast<float>(x) - centerX, static_cast<float>(y) - centerY);
                 float factor = (dist - radius * density) / (radius * (1.0f - density));
 
                 factor = (float)fmax(factor, 0.0f);
                 factor = (float)fmin(factor, 1.f);
 
                 // Calculate alpha first
-                unsigned char alpha = (unsigned char)((float)outer.a * factor + (float)inner.a * (1.0f - factor));
+                auto alpha = static_cast<unsigned char>(
+                    static_cast<float>(outer.a) * factor + static_cast<float>(inner.a) * (1.0f - factor));
 
                 // Only set color if alpha is not zero
                 if (alpha > 0)

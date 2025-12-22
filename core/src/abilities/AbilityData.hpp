@@ -100,19 +100,19 @@ namespace sage
     template <>
     struct EnableBitMaskOperators<AbilityBehaviour>
     {
-        static const bool enable = true;
+        static constexpr bool enable = true;
     };
 
     template <>
     struct EnableBitMaskOperators<AbilityBehaviourOptional>
     {
-        static const bool enable = true;
+        static constexpr bool enable = true;
     };
 
     template <>
     struct EnableBitMaskOperators<AbilityElement>
     {
-        static const bool enable = true;
+        static constexpr bool enable = true;
     };
 
     /**

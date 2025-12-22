@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
     sage::NavigationGridSystem navigationGridSystem(&registry, &collisionSystem);
 
     // clang-format off
-   //sage::ResourcePacker::PackAssets(&registry, "resources/assets.bin");
+   // sage::ResourcePacker::PackAssets(&registry, "resources/assets.bin");
      sage::ResourcePacker::ConstructMap( &registry, &navigationGridSystem, "resources/maps/dungeon-map", "resources/dungeon-map.bin");
     // clang-format on
 

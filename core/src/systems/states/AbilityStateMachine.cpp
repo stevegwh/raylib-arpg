@@ -120,7 +120,7 @@ namespace sage
     class AbilityStateController::AwaitingExecutionState : public StateMachine
     {
 
-        void signalExecute(entt::entity abilityEntity)
+        void signalExecute(entt::entity abilityEntity) const
         {
             onExecute.Publish(abilityEntity);
         }
@@ -206,17 +206,16 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    bool AbilityStateController::checkRange(entt::entity abilityEntity)
+    bool AbilityStateController::checkRange(const entt::entity abilityEntity) const
     {
-        // TODO: Should account for more possiblities with flags here.
-        auto& ab = registry->get<Ability>(abilityEntity);
-        auto& ad = ab.ad;
+        // TODO: Should account for more possibilities with flags here.
+        const auto& ab = registry->get<Ability>(abilityEntity);
 
-        if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
+        if (auto& ad = ab.ad; ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
         {
             auto& casterPos = registry->get<sgTransform>(ab.caster).GetWorldPos();
-            auto point = sys->cursor->getFirstNaviCollision().point;
-            if (Vector3Distance(point, casterPos) > ad.base.range)
+            if (const auto point = sys->cursor->getFirstNaviCollision().point;
+                Vector3Distance(point, casterPos) > ad.base.range)
             {
                 std::cout << "Out of range. \n";
                 ab.castFailed.Publish(abilityEntity, AbilityCastFail::OUT_OF_RANGE);
@@ -226,29 +225,29 @@ namespace sage
         return true;
     }
 
-    void AbilityStateController::spawnAbility(entt::entity abilityEntity)
+    void AbilityStateController::spawnAbility(const entt::entity abilityEntity)
     {
-        auto& ab = registry->get<Ability>(abilityEntity);
-        auto& ad = ab.ad;
+        const auto& ab {registry->get<Ability>(abilityEntity)};
+        auto& ad {ab.ad};
 
         if (!checkRange(abilityEntity)) return;
 
-        auto& animation = registry->get<Animation>(ab.caster);
+        auto& animation {registry->get<Animation>(ab.caster)};
         animation.ChangeAnimationByParams(ad.animationParams);
 
         if (ab.vfx)
         {
-            auto& trans = registry->get<sgTransform>(abilityEntity);
+            auto& trans {registry->get<sgTransform>(abilityEntity)};
             if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
             {
-                auto& casterTrans = registry->get<sgTransform>(ab.caster);
-                auto& casterBB = registry->get<Collideable>(ab.caster).worldBoundingBox;
-                float heightOffset = Vector3Subtract(casterBB.max, casterBB.min).y;
+                auto& casterTrans {registry->get<sgTransform>(ab.caster)};
+                auto& [min, max] {registry->get<Collideable>(ab.caster).worldBoundingBox};
+                const float heightOffset = Vector3Subtract(max, min).y;
 
                 if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_CASTER))
                 {
                     // TODO: Can this be set in the ability's constructor?
-                    // Then we can just say "if ability doesnt follow caster, then set its position"
+                    // Then we can just say "if ability doesn't follow caster, then set its position"
                     if (trans.GetParent() != &casterTrans)
                     {
                         trans.SetParent(&casterTrans);
@@ -258,8 +257,7 @@ namespace sage
                 }
                 else
                 {
-
-                    Vector3 pos = {casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
+                    Vector3 pos {casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
                     trans.SetPosition(pos);
                     trans.SetRotation(casterTrans.GetWorldRot());
                 }
@@ -280,11 +278,11 @@ namespace sage
     void AbilityStateController::startCast(entt::entity abilityEntity)
     {
 
-        auto& ab = registry->get<Ability>(abilityEntity);
+        auto& ab {registry->get<Ability>(abilityEntity)};
 
         if (ab.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
-            auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            auto state {registry->get<AbilityState>(abilityEntity).GetCurrentState()};
             if (state == AbilityStateEnum::CURSOR_SELECT)
             {
                 ChangeState(abilityEntity, AbilityStateEnum::IDLE);
@@ -300,13 +298,13 @@ namespace sage
         }
     }
 
-    void AbilityStateController::Update()
+    void AbilityStateController::Update() const
     {
         auto view = registry->view<AbilityState, Ability>();
         for (auto abilityEntity : view)
         {
-            auto& ab = registry->get<Ability>(abilityEntity);
-            auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            auto& ab {registry->get<Ability>(abilityEntity)};
+            auto state {registry->get<AbilityState>(abilityEntity).GetCurrentState()};
             if (!(ab.IsActive() || state == AbilityStateEnum::CURSOR_SELECT))
             {
                 continue;

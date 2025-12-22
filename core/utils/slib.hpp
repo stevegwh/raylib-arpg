@@ -54,7 +54,7 @@ namespace sage
 
     /**
      * Defines a memory safe wrapper for raylib model.
-     * Set "instanced" to true to disable memory management.
+     * Set "memorySafe" to false to disable memory management.
      */
     class ModelSafe
     {

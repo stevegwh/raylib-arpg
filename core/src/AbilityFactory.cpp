@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <functional>
 
 namespace sage
 {
@@ -57,45 +58,25 @@ namespace sage
         registry->emplace<AbilityState>(out);
         registry->emplace<sgTransform>(out, out);
         abilityMap[caster].emplace(abilityEnum, out);
-
         auto& ability = registry->emplace<Ability>(out);
-
-        switch (abilityEnum)
-        {
-        case AbilityEnum::PLAYER_AUTOATTACK:
-            CreatePlayerAutoAttack(ability);
-            break;
-        case AbilityEnum::ENEMY_AUTOATTACK:
-            CreateWavemobAutoAttackAbility(ability);
-            break;
-        case AbilityEnum::FIREBALL:
-            CreateFireballAbility(ability);
-            break;
-        case AbilityEnum::LIGHTNINGBALL:
-            CreateLightningBallAbility(ability);
-            break;
-        case AbilityEnum::RAINFOFIRE:
-            CreateRainOfFireAbility(ability);
-            break;
-        case AbilityEnum::WHIRLWIND:
-            CreateWhirlwindAbility(ability);
-            break;
-        default:
-            break;
-        }
-
+        static const std::unordered_map<AbilityEnum, std::function<void(Ability&)>> abilityCreators = {
+            {AbilityEnum::PLAYER_AUTOATTACK, CreatePlayerAutoAttack},
+            {AbilityEnum::ENEMY_AUTOATTACK, CreateWavemobAutoAttackAbility},
+            {AbilityEnum::FIREBALL, CreateFireballAbility},
+            {AbilityEnum::LIGHTNINGBALL, CreateLightningBallAbility},
+            {AbilityEnum::RAINFOFIRE, CreateRainOfFireAbility},
+            {AbilityEnum::WHIRLWIND, CreateWhirlwindAbility}
+        };
+        abilityCreators.at(abilityEnum)(ability);
         ability.self = out;
         ability.caster = caster;
         ability.cooldownTimer.SetMaxTime(ability.ad.base.cooldownDuration);
         ability.castTimer.SetMaxTime(ability.ad.base.castTime);
-
         ability.vfx = GetVisualFX(sys, &ability);
-
         if (ability.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
             ability.abilityIndicator = GetIndicator(ability.ad.indicator, sys);
         }
-
         return out;
     }
 

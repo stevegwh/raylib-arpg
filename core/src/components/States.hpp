@@ -23,7 +23,7 @@ namespace sage
 
         void RemoveAllConnections()
         {
-            for (auto& connection : currentStateConnections)
+            for (const auto& connection : currentStateConnections)
             {
                 connection->UnSubscribe();
             }

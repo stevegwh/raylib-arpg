@@ -342,8 +342,11 @@ namespace sage
         std::cout << "START: Loading mesh data into resource manager. \n";
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
-            if (entry.path().extension() == ".obj" || entry.path().extension() == ".glb" ||
-                entry.path().extension() == ".gltf")
+            auto extension = entry.path().extension().string();
+            std::ranges::transform(extension, extension.begin(),
+    [](unsigned char c){ return std::tolower(c); });
+            if (extension == ".obj" || extension == ".glb" ||
+                extension == ".gltf")
             {
                 ResourceManager::GetInstance().ModelLoadFromFile(entry.path().string());
             }

@@ -17,7 +17,7 @@ static constexpr int FOLLOW_DISTANCE = 15;
 
 namespace sage
 {
-    class PartyMemberStateController::DefaultState : public StateMachine
+    class PartyMemberStateController::DefaultState final : public StateMachine
     {
         PartyMemberStateController* stateController;
 
@@ -124,13 +124,13 @@ namespace sage
             const auto target = moveable.followTarget->targetActor;
 
             auto cnx =
-                moveable.onDestinationReached.Subscribe([this](entt::entity _self) { onTargetReached(_self); });
+                moveable.onDestinationReached.Subscribe([this](const entt::entity _self) { onTargetReached(_self); });
             auto cnx1 = moveable.followTarget->onTargetPathChanged.Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); });
             auto cnx2 =
-                moveable.onMovementCancel.Subscribe([this](entt::entity _self) { onMovementCancelled(_self); });
+                moveable.onMovementCancel.Subscribe([this](const entt::entity _self) { onMovementCancelled(_self); });
             auto cnx3 =
-                moveable.onDestinationUnreachable.Subscribe([this](entt::entity _self, Vector3 requestedPos) {
+                moveable.onDestinationUnreachable.Subscribe([this](const entt::entity _self, const Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
                 });
 
@@ -237,7 +237,7 @@ namespace sage
 
     // ----------------------------
 
-    class PartyMemberStateController::DestinationUnreachableState : public StateMachine
+    class PartyMemberStateController::DestinationUnreachableState final : public StateMachine
     {
         PartyMemberStateController* stateController;
         struct StateData
@@ -298,19 +298,19 @@ namespace sage
         }
 
         void OnStateEnter(
-            entt::entity entity,
-            entt::entity followTarget,
-            Vector3 originalDestination,
+            const entt::entity entity,
+            const entt::entity followTarget,
+            const Vector3 originalDestination,
             PartyMemberStateEnum previousState)
         {
             assert(previousState == PartyMemberStateEnum::FollowingLeader);
             data[entity] = {followTarget, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
 
-            auto& animation = registry->get<Animation>(entity);
+            auto& animation {registry->get<Animation>(entity)};
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnStateExit(const entt::entity self) override
         {
             data.erase(self);
         }
@@ -348,28 +348,23 @@ namespace sage
 
     void PartyMemberStateController::onComponentAdded(entt::entity entity)
     {
-        auto& state = registry->get<PartyMemberState>(entity);
-
+        auto& state {registry->get<PartyMemberState>(entity)};
         // Forward leader's movement to the state's onLeaderMovement
-        auto& leaderMoveable = registry->get<MoveableActor>(sys->controllableActorSystem->GetSelectedActor());
-
+        auto& leaderMoveable {registry->get<MoveableActor>(sys->controllableActorSystem->GetSelectedActor())};
         state.onLeaderMoveForwardCnx =
-            leaderMoveable.onStartMovement.Subscribe([this, entity](entt::entity leader) {
-                const auto& _state = registry->get<PartyMemberState>(entity);
+            leaderMoveable.onStartMovement.Subscribe([this, entity](const entt::entity leader) {
+                const auto& _state {registry->get<PartyMemberState>(entity)};
                 _state.onLeaderMove.Publish(entity, leader);
             });
-
         state.onLeaderMove.Subscribe([this](const entt::entity self, const entt::entity leader) {
             GetSystem<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
         });
-
         ChangeState(entity, PartyMemberStateEnum::Default);
     }
 
-    void PartyMemberStateController::onComponentRemoved(entt::entity entity) const
+    void PartyMemberStateController::onComponentRemoved(const entt::entity entity) const
     {
-        auto& state = registry->get<PartyMemberState>(entity);
-        if (state.onLeaderMoveForwardCnx)
+        if (const auto& state{registry->get<PartyMemberState>(entity)}; state.onLeaderMoveForwardCnx)
         {
             state.onLeaderMoveForwardCnx->UnSubscribe();
         }

@@ -20,7 +20,7 @@ namespace sage
         Systems* sys;
 
         void executeAbility(entt::entity abilityEntity);
-        bool checkRange(entt::entity abilityEntity);
+        bool checkRange(entt::entity abilityEntity) const;
         void spawnAbility(entt::entity abilityEntity);
         void cancelCast(entt::entity abilityEntity);
         void startCast(entt::entity abilityEntity);
@@ -29,7 +29,7 @@ namespace sage
         void onComponentRemoved(entt::entity addedEntity) const;
 
       public:
-        void Update();
+        void Update() const;
         void Draw3D();
 
         ~AbilityStateController() override = default;
