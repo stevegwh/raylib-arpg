@@ -84,8 +84,9 @@ namespace sage
     bool CollisionSystem::GetFirstCollisionWithRay(const Ray& ray, CollisionInfo& info, CollisionLayer layer)
     {
         auto view = registry->view<Collideable>();
-
-        view.each([&](auto entity, const auto& c) {
+        for (const auto& entity : view)
+        {
+            const auto& c = registry->get<Collideable>(entity);
             if (!c.active) return false;
             if (collisionMatrix[static_cast<int>(layer)][static_cast<int>(c.collisionLayer)])
             {
@@ -101,9 +102,7 @@ namespace sage
                     return true;
                 }
             }
-        });
-
-        return false;
+        }
     }
 
     std::vector<CollisionInfo> CollisionSystem::GetMeshCollisionsWithRay(
@@ -283,7 +282,7 @@ namespace sage
         }
     }
 
-    CollisionSystem::CollisionSystem(entt::registry* _registry) : BaseSystem(_registry)
+    CollisionSystem::CollisionSystem(entt::registry* _registry) : registry(_registry)
     {
         collisionMatrix = CreateCollisionMatrix();
     }

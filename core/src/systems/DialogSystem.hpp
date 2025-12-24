@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "systems/BaseSystem.hpp"
-
 #include "components/DialogComponent.hpp"
 #include "entt/entt.hpp"
 
@@ -15,8 +13,9 @@ namespace sage
     class sgTransform;
     class Window;
 
-    class DialogSystem : public BaseSystem
+    class DialogSystem
     {
+        entt::registry* registry;
         Systems* sys;
         Window* dialogWindow{};
         void endConversation(entt::entity npc) const;

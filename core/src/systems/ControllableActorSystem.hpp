@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "BaseSystem.hpp"
-
 #include "entt/entt.hpp"
 #include "raylib.h"
 
@@ -15,10 +13,11 @@ namespace sage
 {
     class Systems;
 
-    class ControllableActorSystem : public BaseSystem
+    class ControllableActorSystem
     {
         static constexpr Color activeCol = {0, 255, 0, 255};
         static constexpr Color inactiveCol = {0, 255, 0, 75};
+        entt::registry* registry;
         Systems* sys;
         entt::entity selectedActorId = entt::null;
         void onComponentAdded(entt::entity addedEntity);

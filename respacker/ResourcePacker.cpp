@@ -257,9 +257,10 @@ namespace sage
 
         if (objectName.find("_MAPBASE_") != std::string::npos)
         {
-            slices = std::ceil(std::max(
-                collideable.worldBoundingBox.max.x - collideable.worldBoundingBox.min.x,
-                collideable.worldBoundingBox.max.z - collideable.worldBoundingBox.min.z));
+            slices = std::ceil(
+                std::max(
+                    collideable.worldBoundingBox.max.x - collideable.worldBoundingBox.min.x,
+                    collideable.worldBoundingBox.max.z - collideable.worldBoundingBox.min.z));
             if (slices % 2 == 1)
             {
                 slices += 1;
@@ -343,10 +344,8 @@ namespace sage
         for (const auto& entry : fs::directory_iterator(meshPath))
         {
             auto extension = entry.path().extension().string();
-            std::ranges::transform(extension, extension.begin(),
-    [](unsigned char c){ return std::tolower(c); });
-            if (extension == ".obj" || extension == ".glb" ||
-                extension == ".gltf")
+            std::ranges::transform(extension, extension.begin(), [](unsigned char c) { return std::tolower(c); });
+            if (extension == ".obj" || extension == ".glb" || extension == ".gltf")
             {
                 ResourceManager::GetInstance().ModelLoadFromFile(entry.path().string());
             }

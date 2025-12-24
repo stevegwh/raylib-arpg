@@ -19,11 +19,11 @@ namespace sage
     {
       public:
         // Systems
-        std::unique_ptr<GameModeStateController> gameModeStateMachine;
-        std::unique_ptr<WavemobStateController> wavemobStatemachine;
-        std::unique_ptr<PlayerStateController> playerStateMachine;
-        std::unique_ptr<PartyMemberStateController> partyMemberStateMachine;
-        std::unique_ptr<AbilityStateController> abilityStateMachine;
+        std::unique_ptr<GameModeStateMachine> gameModeStateMachine;
+        std::unique_ptr<WavemobStateMachine> wavemobStatemachine;
+        std::unique_ptr<PlayerStateMachine> playerStateMachine;
+        std::unique_ptr<PartyMemberStateMachine> partyMemberStateMachine;
+        std::unique_ptr<AbilityStateMachine> abilityStateMachine;
         void Update() const;
         void Draw3D() const;
         StateMachines(entt::registry* _registry, Systems* _sys);

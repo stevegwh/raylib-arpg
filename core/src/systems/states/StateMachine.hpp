@@ -6,16 +6,14 @@
 
 #include "entt/entt.hpp"
 
-#include <format>
-#include <iostream>
-#include <magic_enum.hpp>
+// #include <iostream>
 #include <vector>
 
 namespace sage
 {
     class Systems;
 
-    class StateMachine
+    class State
     {
         std::vector<entt::entity> lockedEntities;
 
@@ -34,8 +32,7 @@ namespace sage
                 std::remove(lockedEntities.begin(), lockedEntities.end(), entity), lockedEntities.end());
         }
 
-        explicit StateMachine(entt::registry* _registry, Systems* _sys)
-            : registry(_registry), sys(_sys)
+        explicit State(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
         {
         }
 
@@ -48,28 +45,28 @@ namespace sage
             }
             return false;
         }
-        virtual ~StateMachine() = default;
-        virtual void OnStateEnter(entt::entity entity){};
-        virtual void OnStateExit(entt::entity entity){};
-        virtual void Update(entt::entity entity){};
-        virtual void Draw3D(entt::entity entity){};
+        virtual ~State() = default;
+        virtual void OnEnter(entt::entity entity) {};
+        virtual void OnExit(entt::entity entity) {};
+        virtual void Update(entt::entity entity) {};
+        virtual void Draw3D(entt::entity entity) {};
     };
 
-    template <typename StateName, typename StateEnum>
-    class StateMachineController
+    template <typename StateComponentType, typename StateEnum>
+    class StateMachine
     {
       protected:
         entt::registry* registry;
 
-        std::unordered_map<StateEnum, std::unique_ptr<StateMachine>> states;
+        std::unordered_map<StateEnum, std::unique_ptr<State>> states;
 
-        template <typename StateMachineDowncast>
-        StateMachineDowncast* GetSystem(StateEnum state)
+        template <typename StateDowncast>
+        StateDowncast* GetState(StateEnum stateEnum)
         {
-            return dynamic_cast<StateMachineDowncast*>(states[state].get());
+            return dynamic_cast<StateDowncast*>(states[stateEnum].get());
         }
 
-        StateMachine* GetSystem(StateEnum state)
+        State* GetState(StateEnum state)
         {
             return states[state].get();
         }
@@ -80,20 +77,21 @@ namespace sage
 
         void OnComponentAdded(entt::entity entity)
         {
-            auto& state = registry->get<StateName>(entity);
-            GetSystem(state.GetCurrentState())->OnStateEnter(entity);
+            auto& stateComponent = registry->get<StateComponentType>(entity);
+            GetState(stateComponent.GetCurrentState())->OnEnter(entity);
         }
 
       public:
         // NB: Passes all arguments by value
-        template <typename NewStateClass, typename... StateEnterArgs>
+        // Allows for calls to overloaded functions that take more arguments than the base 'OnEnter' function.
+        template <typename NewStateType, typename... StateEnterArgs>
         void ChangeState(entt::entity entity, StateEnum newState, StateEnterArgs... args)
         // template <typename... StateEnterArgs>
         // void ChangeState(entt::entity entity, StateEnum newState, const StateEnterArgs&... args)
         {
-            auto& oldState = registry->get<StateName>(entity);
-            StateEnum oldStateEnum = registry->get<StateName>(entity).GetCurrentState();
-            if (GetSystem(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
+            auto& oldState = registry->get<StateComponentType>(entity);
+            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentState();
+            if (GetState(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
             {
                 return;
             }
@@ -105,17 +103,16 @@ namespace sage
             //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
             //                magic_enum::enum_name(newState));
             oldState.RemoveAllConnections();
-            GetSystem(oldStateEnum)->OnStateExit(entity);
+            GetState(oldStateEnum)->OnExit(entity);
             oldState.SetState(newState);
-            static_cast<NewStateClass*>(GetSystem(newState))
-                ->OnStateEnter(entity, args...); // Allows for calls to overloaded but non-virtual functions
+            static_cast<NewStateType*>(GetState(newState))->OnEnter(entity, args...);
         }
 
         void ChangeState(entt::entity entity, StateEnum newState)
         {
-            auto& oldState = registry->get<StateName>(entity);
-            StateEnum oldStateEnum = registry->get<StateName>(entity).GetCurrentState();
-            if (GetSystem(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
+            auto& oldState = registry->get<StateComponentType>(entity);
+            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentState();
+            if (GetState(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
             {
                 return;
             }
@@ -127,18 +124,18 @@ namespace sage
             //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
             //                magic_enum::enum_name(newState));
             oldState.RemoveAllConnections();
-            GetSystem(oldStateEnum)->OnStateExit(entity);
+            GetState(oldStateEnum)->OnExit(entity);
             oldState.SetState(newState);
-            GetSystem(newState)->OnStateEnter(entity);
+            GetState(newState)->OnEnter(entity);
         }
 
-        virtual ~StateMachineController() = default;
-        explicit StateMachineController(entt::registry* _registry) : registry(_registry)
+        virtual ~StateMachine() = default;
+        explicit StateMachine(entt::registry* _registry) : registry(_registry)
         {
-            registry->template on_construct<StateName>()
-                .template connect<&StateMachineController::OnComponentAdded>(this);
-            registry->template on_destroy<StateName>()
-                .template connect<&StateMachineController::OnComponentRemoved>(this);
+            registry->template on_construct<StateComponentType>()
+                .template connect<&StateMachine::OnComponentAdded>(this);
+            registry->template on_destroy<StateComponentType>()
+                .template connect<&StateMachine::OnComponentRemoved>(this);
         }
     };
 } // namespace sage

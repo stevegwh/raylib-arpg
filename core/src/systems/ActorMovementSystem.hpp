@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "BaseSystem.hpp"
+#include "entt/entt.hpp"
 #include "raylib.h"
 
 #include <vector>
@@ -18,9 +18,10 @@ namespace sage
     struct GridSquare;
     struct NavigationGridSquare;
 
-    class ActorMovementSystem : public BaseSystem
+    class ActorMovementSystem
     {
         Systems* sys;
+        entt::registry* registry;
         std::vector<Ray> debugRays;
         std::vector<RayCollision> debugCollisions;
 
@@ -59,7 +60,7 @@ namespace sage
         void PathfindToLocation(const entt::entity& entity, const Vector3& destination, bool astar = false) const;
         void MoveToLocation(const entt::entity& entity, Vector3 location) const;
         void CancelMovement(const entt::entity& entity) const;
-        void Update() override;
+        void Update();
         void DrawDebug() const;
 
         ActorMovementSystem(entt::registry* _registry, Systems* _sys);

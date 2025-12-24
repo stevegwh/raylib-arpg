@@ -22,7 +22,7 @@
 
 namespace sage
 {
-    class AbilityStateController::IdleState : public StateMachine
+    class AbilityStateMachine::IdleState : public State
     {
 
       public:
@@ -39,14 +39,14 @@ namespace sage
             }
         }
 
-        IdleState(entt::registry* _registry, Systems* _sys) : StateMachine(_registry, _sys)
+        IdleState(entt::registry* _registry, Systems* _sys) : State(_registry, _sys)
         {
         }
     };
 
     // --------------------------------------------
 
-    class AbilityStateController::CursorSelectState : public StateMachine
+    class AbilityStateMachine::CursorSelectState : public State
     {
         bool cursorActive = false; // Limits us to one cursor at once (I assume this is fine)
 
@@ -93,13 +93,13 @@ namespace sage
             }
         }
 
-        void OnStateEnter(entt::entity abilityEntity) override
+        void OnEnter(entt::entity abilityEntity) override
         {
             enableCursor(abilityEntity);
             cursorActive = true;
         }
 
-        void OnStateExit(entt::entity abilityEntity) override
+        void OnExit(entt::entity abilityEntity) override
         {
             if (cursorActive)
             {
@@ -108,7 +108,7 @@ namespace sage
             }
         }
 
-        CursorSelectState(entt::registry* _registry, Systems* _sys) : StateMachine(_registry, _sys)
+        CursorSelectState(entt::registry* _registry, Systems* _sys) : State(_registry, _sys)
         {
         }
     };
@@ -117,7 +117,7 @@ namespace sage
 
     // TODO: I think this should be split into two states depending on whether its detached or not
     // Or maybe if it has a cast time or not...
-    class AbilityStateController::AwaitingExecutionState : public StateMachine
+    class AbilityStateMachine::AwaitingExecutionState : public State
     {
 
         void signalExecute(entt::entity abilityEntity) const
@@ -128,7 +128,7 @@ namespace sage
       public:
         Event<entt::entity> onExecute;
 
-        void OnStateEnter(entt::entity abilityEntity) override
+        void OnEnter(entt::entity abilityEntity) override
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             ab.cooldownTimer.Start();
@@ -158,7 +158,7 @@ namespace sage
             }
         }
 
-        AwaitingExecutionState(entt::registry* _registry, Systems* _sys) : StateMachine(_registry, _sys)
+        AwaitingExecutionState(entt::registry* _registry, Systems* _sys) : State(_registry, _sys)
 
         {
         }
@@ -166,7 +166,7 @@ namespace sage
 
     // ----------------------------
 
-    void AbilityStateController::cancelCast(entt::entity abilityEntity)
+    void AbilityStateMachine::cancelCast(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         if (ab.vfx && ab.vfx->active)
@@ -178,7 +178,7 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    void AbilityStateController::executeAbility(entt::entity abilityEntity)
+    void AbilityStateMachine::executeAbility(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
         auto& ad = ab.ad;
@@ -206,7 +206,7 @@ namespace sage
         ChangeState(abilityEntity, AbilityStateEnum::IDLE);
     }
 
-    bool AbilityStateController::checkRange(const entt::entity abilityEntity) const
+    bool AbilityStateMachine::checkRange(const entt::entity abilityEntity) const
     {
         // TODO: Should account for more possibilities with flags here.
         const auto& ab = registry->get<Ability>(abilityEntity);
@@ -225,23 +225,23 @@ namespace sage
         return true;
     }
 
-    void AbilityStateController::spawnAbility(const entt::entity abilityEntity)
+    void AbilityStateMachine::spawnAbility(const entt::entity abilityEntity)
     {
-        const auto& ab {registry->get<Ability>(abilityEntity)};
-        auto& ad {ab.ad};
+        const auto& ab{registry->get<Ability>(abilityEntity)};
+        auto& ad{ab.ad};
 
         if (!checkRange(abilityEntity)) return;
 
-        auto& animation {registry->get<Animation>(ab.caster)};
+        auto& animation{registry->get<Animation>(ab.caster)};
         animation.ChangeAnimationByParams(ad.animationParams);
 
         if (ab.vfx)
         {
-            auto& trans {registry->get<sgTransform>(abilityEntity)};
+            auto& trans{registry->get<sgTransform>(abilityEntity)};
             if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
             {
-                auto& casterTrans {registry->get<sgTransform>(ab.caster)};
-                auto& [min, max] {registry->get<Collideable>(ab.caster).worldBoundingBox};
+                auto& casterTrans{registry->get<sgTransform>(ab.caster)};
+                auto& [min, max]{registry->get<Collideable>(ab.caster).worldBoundingBox};
                 const float heightOffset = Vector3Subtract(max, min).y;
 
                 if (ad.base.HasBehaviour(AbilityBehaviour::FOLLOW_CASTER))
@@ -257,7 +257,7 @@ namespace sage
                 }
                 else
                 {
-                    Vector3 pos {casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
+                    Vector3 pos{casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
                     trans.SetPosition(pos);
                     trans.SetRotation(casterTrans.GetWorldRot());
                 }
@@ -275,14 +275,14 @@ namespace sage
     }
 
     // Determines if we need to display an indicator or not
-    void AbilityStateController::startCast(entt::entity abilityEntity)
+    void AbilityStateMachine::startCast(entt::entity abilityEntity)
     {
 
-        auto& ab {registry->get<Ability>(abilityEntity)};
+        auto& ab{registry->get<Ability>(abilityEntity)};
 
         if (ab.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
-            auto state {registry->get<AbilityState>(abilityEntity).GetCurrentState()};
+            auto state{registry->get<AbilityState>(abilityEntity).GetCurrentState()};
             if (state == AbilityStateEnum::CURSOR_SELECT)
             {
                 ChangeState(abilityEntity, AbilityStateEnum::IDLE);
@@ -298,13 +298,13 @@ namespace sage
         }
     }
 
-    void AbilityStateController::Update() const
+    void AbilityStateMachine::Update() const
     {
         auto view = registry->view<AbilityState, Ability>();
         for (auto abilityEntity : view)
         {
-            auto& ab {registry->get<Ability>(abilityEntity)};
-            auto state {registry->get<AbilityState>(abilityEntity).GetCurrentState()};
+            auto& ab{registry->get<Ability>(abilityEntity)};
+            auto state{registry->get<AbilityState>(abilityEntity).GetCurrentState()};
             if (!(ab.IsActive() || state == AbilityStateEnum::CURSOR_SELECT))
             {
                 continue;
@@ -318,7 +318,7 @@ namespace sage
         }
     }
 
-    void AbilityStateController::Draw3D()
+    void AbilityStateMachine::Draw3D()
     {
         auto view = registry->view<AbilityState, Ability>();
         for (auto abilityEntity : view)
@@ -337,7 +337,7 @@ namespace sage
         }
     }
 
-    void AbilityStateController::onComponentAdded(entt::entity addedEntity)
+    void AbilityStateMachine::onComponentAdded(entt::entity addedEntity)
     {
         auto& ability = registry->get<Ability>(addedEntity);
         ability.onStartCastCnx = ability.startCast.Subscribe([this](entt::entity _entity) { startCast(_entity); });
@@ -346,7 +346,7 @@ namespace sage
             ability.cancelCast.Subscribe([this](entt::entity _entity) { cancelCast(_entity); });
     }
 
-    void AbilityStateController::onComponentRemoved(entt::entity addedEntity) const
+    void AbilityStateMachine::onComponentRemoved(entt::entity addedEntity) const
     {
         // TODO: Could add the check for "FOLLOW_CASTER" here instead.
         const auto& ability = registry->get<Ability>(addedEntity);
@@ -354,11 +354,11 @@ namespace sage
         ability.onStartCastCnx->UnSubscribe();
     }
 
-    AbilityStateController::AbilityStateController(entt::registry* _registry, Systems* _sys)
-        : StateMachineController(_registry), sys(_sys)
+    AbilityStateMachine::AbilityStateMachine(entt::registry* _registry, Systems* _sys)
+        : StateMachine(_registry), sys(_sys)
     {
-        registry->on_construct<Ability>().connect<&AbilityStateController::onComponentAdded>(this);
-        registry->on_destroy<Ability>().connect<&AbilityStateController::onComponentRemoved>(this);
+        registry->on_construct<Ability>().connect<&AbilityStateMachine::onComponentAdded>(this);
+        registry->on_destroy<Ability>().connect<&AbilityStateMachine::onComponentRemoved>(this);
 
         auto idleState = std::make_unique<IdleState>(_registry, _sys);
         idleState->onRestartTriggered.Subscribe([this](entt::entity _entity) { startCast(_entity); });

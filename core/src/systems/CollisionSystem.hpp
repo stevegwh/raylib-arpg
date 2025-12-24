@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "BaseSystem.hpp"
 #include "components/Collideable.hpp"
 
 #include "entt/entt.hpp"
@@ -16,8 +15,9 @@ namespace sage
 {
     using CollisionMatrix = std::vector<std::vector<bool>>;
 
-    class CollisionSystem : public BaseSystem
+    class CollisionSystem
     {
+        entt::registry* registry;
         [[nodiscard]] static CollisionMatrix CreateCollisionMatrix();
 
       public:
@@ -38,7 +38,7 @@ namespace sage
         static bool CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2);
         bool GetFirstCollisionBB(entt::entity caller, BoundingBox bb, CollisionLayer layer, CollisionInfo& out);
         void DrawDebug() const;
-        void Update() override;
+        void Update();
         explicit CollisionSystem(entt::registry* _registry);
     };
 } // namespace sage

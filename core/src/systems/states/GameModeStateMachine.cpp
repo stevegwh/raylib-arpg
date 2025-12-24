@@ -14,9 +14,9 @@
 
 namespace sage
 {
-    class GameModeStateController::DefaultState : public StateMachine
+    class GameModeStateMachine::DefaultState : public State
     {
-        GameModeStateController* stateController;
+        GameModeStateMachine* stateController;
         entt::entity gameEntity;
 
       public:
@@ -28,11 +28,11 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnEnter(entt::entity entity) override
         {
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
         }
 
@@ -40,17 +40,17 @@ namespace sage
             entt::registry* _registry,
             Systems* _sys,
             entt::entity _gameEntity,
-            GameModeStateController* _stateController)
-            : StateMachine(_registry, _sys), gameEntity(_gameEntity), stateController(_stateController)
+            GameModeStateMachine* _stateController)
+            : State(_registry, _sys), gameEntity(_gameEntity), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class GameModeStateController::WaveState : public StateMachine
+    class GameModeStateMachine::WaveState : public State
     {
-        GameModeStateController* stateController;
+        GameModeStateMachine* stateController;
         void initWave()
         {
         }
@@ -64,14 +64,14 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnEnter(entt::entity entity) override
         {
             // Create waves here (enemies etc)
             std::cout << "Wave state entered! \n";
             initWave();
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
         }
 
@@ -79,8 +79,8 @@ namespace sage
             entt::registry* _registry,
             Systems* _sys,
             entt::entity _gameEntity,
-            GameModeStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+            GameModeStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
             // Preload model(s)
             // ResourceManager::GetInstance().EmplaceModel("resources/models/gltf/goblin.glb");
@@ -89,9 +89,9 @@ namespace sage
 
     // ----------------------------
 
-    class GameModeStateController::CombatState : public StateMachine
+    class GameModeStateMachine::CombatState : public State
     {
-        GameModeStateController* stateController;
+        GameModeStateMachine* stateController;
 
       public:
         void Update(entt::entity entity) override
@@ -102,13 +102,13 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnEnter(entt::entity entity) override
         {
             // Create waves here (enemies etc)
             std::cout << "Combat state entered! \n";
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
         }
 
@@ -116,33 +116,33 @@ namespace sage
             entt::registry* _registry,
             Systems* _sys,
             entt::entity _gameEntity,
-            GameModeStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+            GameModeStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    void GameModeStateController::StartCombat()
+    void GameModeStateMachine::StartCombat()
     {
         ChangeState(gameEntity, GameStateEnum::Combat);
     }
 
-    void GameModeStateController::Update()
+    void GameModeStateMachine::Update()
     {
         const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
-        GetSystem(state)->Update(gameEntity);
+        GetState(state)->Update(gameEntity);
     }
 
-    void GameModeStateController::Draw3D()
+    void GameModeStateMachine::Draw3D()
     {
         const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
-        GetSystem(state)->Draw3D(gameEntity);
+        GetState(state)->Draw3D(gameEntity);
     }
 
-    GameModeStateController::GameModeStateController(entt::registry* _registry, Systems* _sys)
-        : StateMachineController(_registry), gameEntity(_registry->create())
+    GameModeStateMachine::GameModeStateMachine(entt::registry* _registry, Systems* _sys)
+        : StateMachine(_registry), gameEntity(_registry->create())
     {
         states[GameStateEnum::Default] = std::make_unique<DefaultState>(registry, _sys, gameEntity, this);
         states[GameStateEnum::Wave] = std::make_unique<WaveState>(registry, _sys, gameEntity, this);

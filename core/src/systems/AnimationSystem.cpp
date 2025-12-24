@@ -46,7 +46,7 @@ namespace sage
     {
     }
 
-    AnimationSystem::AnimationSystem(entt::registry* _registry) : BaseSystem(_registry)
+    AnimationSystem::AnimationSystem(entt::registry* _registry) : registry(_registry)
     {
     }
 } // namespace sage

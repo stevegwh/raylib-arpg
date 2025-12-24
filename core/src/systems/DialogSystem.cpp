@@ -59,7 +59,7 @@ namespace sage
         return nullptr;
     }
 
-    DialogSystem::DialogSystem(entt::registry* registry, Systems* _sys) : BaseSystem(registry), sys(_sys)
+    DialogSystem::DialogSystem(entt::registry* registry, Systems* _sys) : registry(registry), sys(_sys)
     {
     }
 } // namespace sage

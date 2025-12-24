@@ -8,7 +8,7 @@
 
 namespace sage
 {
-    template <typename StateName, typename StateEnum>
+    template <typename StateComponentType, typename StateEnum>
     class BaseState
     {
         StateEnum currentState;

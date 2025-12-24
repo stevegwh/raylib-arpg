@@ -10,7 +10,7 @@ namespace sage
 {
     class Systems;
 
-    class WavemobStateController : public StateMachineController<WavemobState, WavemobStateEnum>
+    class WavemobStateMachine : public StateMachine<WavemobState, WavemobStateEnum>
     {
         class DefaultState;
         class TargetOutOfRangeState;
@@ -20,9 +20,9 @@ namespace sage
       public:
         void Update();
         void Draw3D();
-        ~WavemobStateController() override = default;
-        WavemobStateController(entt::registry* _registry, Systems* _sys);
+        ~WavemobStateMachine() override = default;
+        WavemobStateMachine(entt::registry* _registry, Systems* _sys);
 
-        friend class StateMachineController; // Required for CRTP
+        friend class StateMachine; // Required for CRTP
     };
 } // namespace sage

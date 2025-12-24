@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "BaseSystem.hpp"
-
 #include "entt/entt.hpp"
 
 namespace sage
 {
-    class AnimationSystem : public BaseSystem
+    class AnimationSystem
     {
+        entt::registry* registry;
+
       public:
         void Update() const;
         void Draw();

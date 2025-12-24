@@ -61,7 +61,7 @@ namespace sage
         entt::entity target{};
         int attackRange = 5; // TODO: each ability has its own range
 
-        Event<AttackData> onHit{}; // Self, attacker, damage
+        Event<AttackData> onHit{};
         Event<entt::entity> onDeath{};
         Event<entt::entity, entt::entity> onAttackCancelled{}; // Self, object clicked (can discard)
         std::unique_ptr<Connection> onTargetDeathCnx{};

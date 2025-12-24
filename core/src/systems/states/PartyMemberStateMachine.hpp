@@ -9,7 +9,7 @@ namespace sage
 {
     class Systems;
 
-    class PartyMemberStateController final : public StateMachineController<PartyMemberState, PartyMemberStateEnum>
+    class PartyMemberStateMachine final : public StateMachine<PartyMemberState, PartyMemberStateEnum>
     {
         Systems* sys;
 
@@ -25,10 +25,10 @@ namespace sage
         void Update();
         void Draw3D();
 
-        ~PartyMemberStateController() override = default;
-        PartyMemberStateController(entt::registry* _registry, Systems* sys);
+        ~PartyMemberStateMachine() override = default;
+        PartyMemberStateMachine(entt::registry* _registry, Systems* sys);
 
-        friend class StateMachineController; // Required for CRTP
-        friend class PlayerStateController;
+        friend class StateMachine; // Required for CRTP
+        friend class PlayerStateMachine;
     };
 } // namespace sage

@@ -17,9 +17,9 @@
 
 namespace sage
 {
-    class WavemobStateController::DefaultState : public StateMachine
+    class WavemobStateMachine::DefaultState : public State
     {
-        WavemobStateController* stateController;
+        WavemobStateMachine* stateController;
 
       public:
         void OnDeath(entt::entity entity)
@@ -47,7 +47,7 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity self) override
+        void OnEnter(entt::entity self) override
         {
             auto& state = registry->get<WavemobState>(self);
             auto& combatable = registry->get<CombatableActor>(self);
@@ -59,23 +59,23 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
         }
 
         ~DefaultState() override = default;
 
-        DefaultState(entt::registry* registry, Systems* _sys, WavemobStateController* _stateController)
-            : StateMachine(registry, _sys), stateController(_stateController)
+        DefaultState(entt::registry* registry, Systems* _sys, WavemobStateMachine* _stateController)
+            : State(registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class WavemobStateController::TargetOutOfRangeState : public StateMachine
+    class WavemobStateMachine::TargetOutOfRangeState : public State
     {
-        WavemobStateController* stateController;
+        WavemobStateMachine* stateController;
 
         void onTargetReached(entt::entity self) const
         {
@@ -101,8 +101,7 @@ namespace sage
             ray.direction.y = trans.GetWorldPos().y + height;
             trans.movementDirectionDebugLine = ray;
 
-            auto collisions =
-                sys->collisionSystem->GetCollisionsWithRay(self, ray, collideable.collisionLayer);
+            auto collisions = sys->collisionSystem->GetCollisionsWithRay(self, ray, collideable.collisionLayer);
 
             if (!collisions.empty() && collisions.at(0).collisionLayer != CollisionLayer::PLAYER)
             {
@@ -132,7 +131,7 @@ namespace sage
             }
         }
 
-        void OnStateEnter(entt::entity self) override
+        void OnEnter(entt::entity self) override
         {
             const auto abilityEntity = sys->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
@@ -153,7 +152,7 @@ namespace sage
             onTargetPosUpdate(self, combatable.target);
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.reset();
@@ -161,18 +160,17 @@ namespace sage
 
         ~TargetOutOfRangeState() override = default;
 
-        TargetOutOfRangeState(
-            entt::registry* registry, Systems* _sys, WavemobStateController* _stateController)
-            : StateMachine(registry, _sys), stateController(_stateController)
+        TargetOutOfRangeState(entt::registry* registry, Systems* _sys, WavemobStateMachine* _stateController)
+            : State(registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class WavemobStateController::CombatState : public StateMachine
+    class WavemobStateMachine::CombatState : public State
     {
-        WavemobStateController* stateController;
+        WavemobStateMachine* stateController;
 
         void onTargetDeath(entt::entity self, entt::entity target)
         {
@@ -206,13 +204,13 @@ namespace sage
             }
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnEnter(entt::entity entity) override
         {
             auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).startCast.Publish(abilityEntity);
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
             auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
@@ -220,17 +218,17 @@ namespace sage
 
         ~CombatState() override = default;
 
-        CombatState(entt::registry* registry, Systems* _sys, WavemobStateController* _stateController)
-            : StateMachine(registry, _sys), stateController(_stateController)
+        CombatState(entt::registry* registry, Systems* _sys, WavemobStateMachine* _stateController)
+            : State(registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class WavemobStateController::DyingState : public StateMachine
+    class WavemobStateMachine::DyingState : public State
     {
-        WavemobStateController* stateController;
+        WavemobStateMachine* stateController;
 
         void destroyEntity(entt::entity self) const
         {
@@ -240,7 +238,7 @@ namespace sage
         }
 
       public:
-        void OnStateEnter(entt::entity self) override
+        void OnEnter(entt::entity self) override
         {
             LockState(self); // Target is dying, do not change state
             auto& combatable = registry->get<CombatableActor>(self);
@@ -261,41 +259,40 @@ namespace sage
             sys->actorMovementSystem->CancelMovement(self);
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
             UnlockState(self);
         }
 
         ~DyingState() override = default;
 
-        DyingState(entt::registry* registry, Systems* sys, WavemobStateController* _stateController)
-            : StateMachine(registry, sys), stateController(_stateController)
+        DyingState(entt::registry* registry, Systems* sys, WavemobStateMachine* _stateController)
+            : State(registry, sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    void WavemobStateController::Update()
+    void WavemobStateMachine::Update()
     {
         for (const auto view = registry->view<WavemobState>(); const auto& entity : view)
         {
             const auto state = registry->get<WavemobState>(entity).GetCurrentState();
-            GetSystem(state)->Update(entity);
+            GetState(state)->Update(entity);
         }
     }
 
-    void WavemobStateController::Draw3D()
+    void WavemobStateMachine::Draw3D()
     {
         for (const auto view = registry->view<WavemobState>(); const auto& entity : view)
         {
             const auto state = registry->get<WavemobState>(entity).GetCurrentState();
-            GetSystem(state)->Draw3D(entity);
+            GetState(state)->Draw3D(entity);
         }
     }
 
-    WavemobStateController::WavemobStateController(entt::registry* _registry, Systems* _sys)
-        : StateMachineController(_registry)
+    WavemobStateMachine::WavemobStateMachine(entt::registry* _registry, Systems* _sys) : StateMachine(_registry)
     {
         states[WavemobStateEnum::Default] = std::make_unique<DefaultState>(_registry, _sys, this);
         states[WavemobStateEnum::TargetOutOfRange] =

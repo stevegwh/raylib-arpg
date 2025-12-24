@@ -17,9 +17,9 @@ static constexpr int FOLLOW_DISTANCE = 15;
 
 namespace sage
 {
-    class PartyMemberStateController::DefaultState final : public StateMachine
+    class PartyMemberStateMachine::DefaultState final : public State
     {
-        PartyMemberStateController* stateController;
+        PartyMemberStateMachine* stateController;
 
       public:
         void onLeaderMove(entt::entity self, entt::entity leader) const
@@ -37,29 +37,29 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnEnter(entt::entity entity) override
         {
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
         }
 
         ~DefaultState() override = default;
 
-        DefaultState(entt::registry* _registry, Systems* _sys, PartyMemberStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        DefaultState(entt::registry* _registry, Systems* _sys, PartyMemberStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class PartyMemberStateController::FollowingLeaderState final : public StateMachine
+    class PartyMemberStateMachine::FollowingLeaderState final : public State
     {
-        PartyMemberStateController* stateController;
+        PartyMemberStateMachine* stateController;
 
         void onDestinationUnreachable(const entt::entity self, const Vector3 requestedPos) const
         {
@@ -112,7 +112,7 @@ namespace sage
             }
         }
 
-        void OnStateEnter(const entt::entity self, entt::entity followTarget)
+        void OnEnter(const entt::entity self, entt::entity followTarget)
         {
             assert(followTarget != entt::null);
             auto& animation = registry->get<Animation>(self);
@@ -123,14 +123,14 @@ namespace sage
 
             const auto target = moveable.followTarget->targetActor;
 
-            auto cnx =
-                moveable.onDestinationReached.Subscribe([this](const entt::entity _self) { onTargetReached(_self); });
+            auto cnx = moveable.onDestinationReached.Subscribe(
+                [this](const entt::entity _self) { onTargetReached(_self); });
             auto cnx1 = moveable.followTarget->onTargetPathChanged.Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); });
-            auto cnx2 =
-                moveable.onMovementCancel.Subscribe([this](const entt::entity _self) { onMovementCancelled(_self); });
-            auto cnx3 =
-                moveable.onDestinationUnreachable.Subscribe([this](const entt::entity _self, const Vector3 requestedPos) {
+            auto cnx2 = moveable.onMovementCancel.Subscribe(
+                [this](const entt::entity _self) { onMovementCancelled(_self); });
+            auto cnx3 = moveable.onDestinationUnreachable.Subscribe(
+                [this](const entt::entity _self, const Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
                 });
 
@@ -146,7 +146,7 @@ namespace sage
             onTargetPathChanged(self, target);
         }
 
-        void OnStateExit(const entt::entity self) override
+        void OnExit(const entt::entity self) override
         {
             // TODO: We don't disconnect the connections here?
             auto& moveable = registry->get<MoveableActor>(self);
@@ -156,17 +156,16 @@ namespace sage
 
         ~FollowingLeaderState() override = default;
 
-        FollowingLeaderState(
-            entt::registry* _registry, Systems* _sys, PartyMemberStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        FollowingLeaderState(entt::registry* _registry, Systems* _sys, PartyMemberStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
     // ----------------------------
 
-    class PartyMemberStateController::WaitingForLeaderState final : public StateMachine
+    class PartyMemberStateMachine::WaitingForLeaderState final : public State
     {
-        PartyMemberStateController* stateController;
+        PartyMemberStateMachine* stateController;
         void onMovementCancelled(const entt::entity self) const
         {
             stateController->ChangeState(self, PartyMemberStateEnum::Default);
@@ -196,7 +195,7 @@ namespace sage
             }
         }
 
-        void OnStateEnter(const entt::entity self, entt::entity followTarget)
+        void OnEnter(const entt::entity self, entt::entity followTarget)
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.emplace(registry, self, followTarget);
@@ -214,13 +213,13 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateEnter(const entt::entity self) override
+        void OnEnter(const entt::entity self) override
         {
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateExit(const entt::entity self) override
+        void OnExit(const entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.reset();
@@ -228,18 +227,17 @@ namespace sage
 
         ~WaitingForLeaderState() override = default;
 
-        WaitingForLeaderState(
-            entt::registry* _registry, Systems* _sys, PartyMemberStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        WaitingForLeaderState(entt::registry* _registry, Systems* _sys, PartyMemberStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class PartyMemberStateController::DestinationUnreachableState final : public StateMachine
+    class PartyMemberStateMachine::DestinationUnreachableState final : public State
     {
-        PartyMemberStateController* stateController;
+        PartyMemberStateMachine* stateController;
         struct StateData
         {
             entt::entity followTarget{};
@@ -297,7 +295,7 @@ namespace sage
             }
         }
 
-        void OnStateEnter(
+        void OnEnter(
             const entt::entity entity,
             const entt::entity followTarget,
             const Vector3 originalDestination,
@@ -306,11 +304,11 @@ namespace sage
             assert(previousState == PartyMemberStateEnum::FollowingLeader);
             data[entity] = {followTarget, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
 
-            auto& animation {registry->get<Animation>(entity)};
+            auto& animation{registry->get<Animation>(entity)};
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateExit(const entt::entity self) override
+        void OnExit(const entt::entity self) override
         {
             data.erase(self);
         }
@@ -318,51 +316,51 @@ namespace sage
         ~DestinationUnreachableState() override = default;
 
         DestinationUnreachableState(
-            entt::registry* _registry, Systems* _sys, PartyMemberStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+            entt::registry* _registry, Systems* _sys, PartyMemberStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    void PartyMemberStateController::Update()
+    void PartyMemberStateMachine::Update()
     {
         for (const auto view = registry->view<PartyMemberState>(); const auto& entity : view)
         {
             assert(!registry->any_of<PlayerState>(entity));
             const auto state = registry->get<PartyMemberState>(entity).GetCurrentState();
-            GetSystem(state)->Update(entity);
+            GetState(state)->Update(entity);
         }
     }
 
-    void PartyMemberStateController::Draw3D()
+    void PartyMemberStateMachine::Draw3D()
     {
         for (const auto view = registry->view<PartyMemberState>(); const auto& entity : view)
         {
             assert(!registry->any_of<PlayerState>(entity));
             const auto state = registry->get<PartyMemberState>(entity).GetCurrentState();
-            GetSystem(state)->Draw3D(entity);
+            GetState(state)->Draw3D(entity);
         }
     }
 
-    void PartyMemberStateController::onComponentAdded(entt::entity entity)
+    void PartyMemberStateMachine::onComponentAdded(entt::entity entity)
     {
-        auto& state {registry->get<PartyMemberState>(entity)};
+        auto& state{registry->get<PartyMemberState>(entity)};
         // Forward leader's movement to the state's onLeaderMovement
-        auto& leaderMoveable {registry->get<MoveableActor>(sys->controllableActorSystem->GetSelectedActor())};
+        auto& leaderMoveable{registry->get<MoveableActor>(sys->controllableActorSystem->GetSelectedActor())};
         state.onLeaderMoveForwardCnx =
             leaderMoveable.onStartMovement.Subscribe([this, entity](const entt::entity leader) {
-                const auto& _state {registry->get<PartyMemberState>(entity)};
+                const auto& _state{registry->get<PartyMemberState>(entity)};
                 _state.onLeaderMove.Publish(entity, leader);
             });
         state.onLeaderMove.Subscribe([this](const entt::entity self, const entt::entity leader) {
-            GetSystem<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
+            GetState<DefaultState>(PartyMemberStateEnum::Default)->onLeaderMove(self, leader);
         });
         ChangeState(entity, PartyMemberStateEnum::Default);
     }
 
-    void PartyMemberStateController::onComponentRemoved(const entt::entity entity) const
+    void PartyMemberStateMachine::onComponentRemoved(const entt::entity entity) const
     {
         if (const auto& state{registry->get<PartyMemberState>(entity)}; state.onLeaderMoveForwardCnx)
         {
@@ -370,8 +368,8 @@ namespace sage
         }
     }
 
-    PartyMemberStateController::PartyMemberStateController(entt::registry* _registry, Systems* _sys)
-        : StateMachineController(_registry), sys(_sys)
+    PartyMemberStateMachine::PartyMemberStateMachine(entt::registry* _registry, Systems* _sys)
+        : StateMachine(_registry), sys(_sys)
     {
         states[PartyMemberStateEnum::Default] = std::make_unique<DefaultState>(_registry, _sys, this);
         states[PartyMemberStateEnum::FollowingLeader] =
@@ -381,7 +379,7 @@ namespace sage
         states[PartyMemberStateEnum::DestinationUnreachable] =
             std::make_unique<DestinationUnreachableState>(_registry, _sys, this);
 
-        registry->on_construct<PartyMemberState>().connect<&PartyMemberStateController::onComponentAdded>(this);
-        registry->on_destroy<PartyMemberState>().connect<&PartyMemberStateController::onComponentRemoved>(this);
+        registry->on_construct<PartyMemberState>().connect<&PartyMemberStateMachine::onComponentAdded>(this);
+        registry->on_destroy<PartyMemberState>().connect<&PartyMemberStateMachine::onComponentRemoved>(this);
     }
 } // namespace sage

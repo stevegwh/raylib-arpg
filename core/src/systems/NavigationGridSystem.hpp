@@ -1,7 +1,5 @@
 #pragma once
 
-#include "BaseSystem.hpp"
-
 #include "slib.hpp"
 
 #include "components/NavigationGridSquare.hpp"
@@ -21,8 +19,9 @@ namespace sage
         FAVOUR_RIGHT
     };
 
-    class NavigationGridSystem : public BaseSystem
+    class NavigationGridSystem
     {
+        entt::registry* registry;
         std::vector<std::pair<int, int>> directions = {
             {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, 1}, {-1, -1}, {1, -1}};
         CollisionSystem* collisionSystem;

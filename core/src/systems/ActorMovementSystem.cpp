@@ -393,7 +393,7 @@ namespace sage
     }
 
     ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, Systems* _sys)
-        : BaseSystem(_registry), sys(_sys)
+        : registry(_registry), sys(_sys)
     {
     }
 } // namespace sage

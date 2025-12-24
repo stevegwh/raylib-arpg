@@ -128,7 +128,6 @@ namespace sage
         sys->fullscreenTextOverlayFactory->Update();
         sys->actorMovementSystem->Update();
         sys->controllableActorSystem->Update();
-        sys->dialogSystem->Update();
         sys->healthBarSystem->Update();
         sys->timerSystem->Update();
         sys->collisionSystem->Update();

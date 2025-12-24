@@ -9,7 +9,7 @@ namespace sage
 {
     class Systems;
 
-    class PlayerStateController final : public StateMachineController<PlayerState, PlayerStateEnum>
+    class PlayerStateMachine final : public StateMachine<PlayerState, PlayerStateEnum>
     {
         class DefaultState;
         class MovingToLocationState;
@@ -32,9 +32,9 @@ namespace sage
         void Update();
         void Draw3D();
 
-        ~PlayerStateController() override = default;
-        PlayerStateController(entt::registry* _registry, Systems* sys);
+        ~PlayerStateMachine() override = default;
+        PlayerStateMachine(entt::registry* _registry, Systems* sys);
 
-        friend class StateMachineController; // Required for CRTP
+        friend class StateMachine; // Required for CRTP
     };
 } // namespace sage

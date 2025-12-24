@@ -115,8 +115,7 @@ namespace sage
         component.onItemRemovedCnx->UnSubscribe();
     }
 
-    InventorySystem::InventorySystem(entt::registry* _registry, Systems* _sys)
-        : registry(_registry), sys(_sys)
+    InventorySystem::InventorySystem(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
 
         _sys->cursor->onItemClick.Subscribe([this](entt::entity itemId) { onWorldItemClicked(itemId); });

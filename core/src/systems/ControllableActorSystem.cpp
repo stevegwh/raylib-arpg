@@ -139,7 +139,7 @@ namespace sage
     }
 
     ControllableActorSystem::ControllableActorSystem(entt::registry* _registry, Systems* _sys)
-        : BaseSystem(_registry), sys(_sys)
+        : registry(_registry), sys(_sys)
     {
         registry->on_construct<ControllableActor>().connect<&ControllableActorSystem::onComponentAdded>(this);
         registry->on_destroy<ControllableActor>().connect<&ControllableActorSystem::onComponentRemoved>(this);

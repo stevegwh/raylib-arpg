@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "BaseSystem.hpp"
-
 #include "components/Renderable.hpp"
 #include "slib.hpp"
 
@@ -13,8 +11,9 @@
 
 namespace sage
 {
-    class RenderSystem : public BaseSystem
+    class RenderSystem
     {
+        entt::registry* registry;
 
       public:
         [[nodiscard]] entt::entity FindRenderableByMeshName(const std::string& name) const
@@ -80,7 +79,7 @@ namespace sage
             }
             return entt::null;
         }
-        void Update() override;
+        void Update();
         void Draw();
         explicit RenderSystem(entt::registry* _registry);
     };

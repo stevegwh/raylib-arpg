@@ -6,7 +6,9 @@
 
 #include "cereal/cereal.hpp"
 #include "entt/entt.hpp"
+
 #include "Event.hpp"
+
 #include "raylib.h"
 #include "raymath.h"
 
@@ -65,11 +67,11 @@ namespace sage
         void Enable();
         void Disable();
 
-        // Static object
+        // Static, non-moveable object
         explicit Collideable(const BoundingBox& _localBoundingBox, const Matrix& worldMatrix);
-        // Dynamic object
+        // Moveable object
         Collideable(entt::registry* _registry, entt::entity _self, BoundingBox _localBoundingBox);
-        // Static object (required for serialization)
+        // Default constructor required for serialization, should *not* be used outside of this.
         Collideable() = default;
 
         Collideable(const Collideable&) = delete;

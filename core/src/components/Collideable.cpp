@@ -36,13 +36,14 @@ namespace sage
         active = false;
     }
 
+    // Applies the world matrix. Does not move, so does not subscribe to Transform updates.
     Collideable::Collideable(const BoundingBox& _localBoundingBox, const Matrix& worldMatrix)
         : localBoundingBox(_localBoundingBox)
     {
         SetWorldBoundingBox(worldMatrix);
     }
 
-    // Applies the world matrix of this entity's transform and subscribes to its updates
+    // Applies the world matrix of this entity's transform and subscribes to its updates.
     Collideable::Collideable(entt::registry* _registry, entt::entity _self, BoundingBox _localBoundingBox)
         : registry(_registry), localBoundingBox(_localBoundingBox), worldBoundingBox(_localBoundingBox)
     {

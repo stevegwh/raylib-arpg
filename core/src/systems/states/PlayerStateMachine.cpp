@@ -28,9 +28,9 @@
 
 namespace sage
 {
-    class PlayerStateController::DefaultState : public StateMachine
+    class PlayerStateMachine::DefaultState : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
 
       public:
         void Update(entt::entity entity) override
@@ -41,30 +41,30 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnEnter(entt::entity entity) override
         {
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
         }
 
         ~DefaultState() override = default;
 
-        DefaultState(entt::registry* _registry, Systems* _sys) : StateMachine(_registry, _sys)
+        DefaultState(entt::registry* _registry, Systems* _sys) : State(_registry, _sys)
         {
         }
 
-        friend class PlayerStateController;
+        friend class PlayerStateMachine;
     };
 
     // ----------------------------
 
-    class PlayerStateController::MovingToLocationState : public StateMachine
+    class PlayerStateMachine::MovingToLocationState : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
 
         void onMovementCancelled(entt::entity self) const
         {
@@ -82,7 +82,7 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity self) override
+        void OnEnter(entt::entity self) override
         {
             sys->actorMovementSystem->CancelMovement(self);
             auto& moveable = registry->get<MoveableActor>(self);
@@ -122,23 +122,23 @@ namespace sage
             }
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
         }
 
         ~MovingToLocationState() override = default;
 
-        MovingToLocationState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        MovingToLocationState(entt::registry* _registry, Systems* _sys, PlayerStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class PlayerStateController::MovingToTalkToNPCState final : public StateMachine
+    class PlayerStateMachine::MovingToTalkToNPCState final : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
         void onMovementCancelled(const entt::entity self) const
         {
             auto& dialogComponent = registry->get<DialogComponent>(self);
@@ -158,7 +158,7 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity self, entt::entity target)
+        void OnEnter(entt::entity self, entt::entity target)
         {
             auto& moveable = registry->get<MoveableActor>(self);
             auto& playerDiag = registry->get<DialogComponent>(self);
@@ -178,23 +178,23 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
         }
 
         ~MovingToTalkToNPCState() override = default;
 
-        MovingToTalkToNPCState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        MovingToTalkToNPCState(entt::registry* _registry, Systems* _sys, PlayerStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class PlayerStateController::DestinationUnreachableState : public StateMachine
+    class PlayerStateMachine::DestinationUnreachableState : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
         struct StateData
         {
             Vector3 originalDestination{};
@@ -211,7 +211,7 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
+        void OnEnter(entt::entity entity, Vector3 originalDestination, PlayerStateEnum previousState)
         {
             data[entity] = {originalDestination, previousState, GetTime(), 1.5f, 0, 4};
 
@@ -219,28 +219,27 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
             data.erase(self);
         }
 
         ~DestinationUnreachableState() override = default;
 
-        DestinationUnreachableState(
-            entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        DestinationUnreachableState(entt::registry* _registry, Systems* _sys, PlayerStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class PlayerStateController::InDialogState : public StateMachine
+    class PlayerStateMachine::InDialogState : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
 
       public:
-        void OnStateEnter(entt::entity self) override
+        void OnEnter(entt::entity self) override
         {
             auto& playerDiag = registry->get<DialogComponent>(self);
             registry->get<Animation>(self).ChangeAnimationByEnum(AnimationEnum::TALK);
@@ -261,7 +260,7 @@ namespace sage
             sys->playerAbilitySystem->UnsubscribeFromUserInput();
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
             auto& playerDiag = registry->get<DialogComponent>(self);
             if (registry->any_of<Animation>(playerDiag.dialogTarget))
@@ -275,17 +274,17 @@ namespace sage
 
         ~InDialogState() override = default;
 
-        InDialogState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        InDialogState(entt::registry* _registry, Systems* _sys, PlayerStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class PlayerStateController::MovingToLootState : public StateMachine
+    class PlayerStateMachine::MovingToLootState : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
         void onMovementCancelled(const entt::entity self) const
         {
             stateController->ChangeState(self, PlayerStateEnum::Default);
@@ -303,7 +302,7 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity self, entt::entity target)
+        void OnEnter(entt::entity self, entt::entity target)
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.lootTarget = target;
@@ -327,7 +326,7 @@ namespace sage
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.lootTarget.reset();
@@ -335,17 +334,17 @@ namespace sage
 
         ~MovingToLootState() override = default;
 
-        MovingToLootState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        MovingToLootState(entt::registry* _registry, Systems* _sys, PlayerStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    class PlayerStateController::MovingToAttackEnemyState : public StateMachine
+    class PlayerStateMachine::MovingToAttackEnemyState : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
         void onAttackCancelled(entt::entity self, entt::entity) const
         {
             auto& playerCombatable = registry->get<CombatableActor>(self);
@@ -359,7 +358,7 @@ namespace sage
         }
 
       public:
-        void OnStateEnter(entt::entity self) override
+        void OnEnter(entt::entity self) override
         {
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
@@ -391,14 +390,14 @@ namespace sage
             sys->actorMovementSystem->PathfindToLocation(self, targetPos);
         }
 
-        void OnStateExit(entt::entity self) override
+        void OnExit(entt::entity self) override
         {
         }
 
         ~MovingToAttackEnemyState() override = default;
 
-        MovingToAttackEnemyState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        MovingToAttackEnemyState(entt::registry* _registry, Systems* _sys, PlayerStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
@@ -406,9 +405,9 @@ namespace sage
     // ----------------------------
 
     // TODO: Move to its own state machine
-    class PlayerStateController::CombatState : public StateMachine
+    class PlayerStateMachine::CombatState : public State
     {
-        PlayerStateController* stateController;
+        PlayerStateMachine* stateController;
         void onAttackCancelled(entt::entity self, entt::entity) const
         {
             // Both outcomes are the same
@@ -433,7 +432,7 @@ namespace sage
         {
         }
 
-        void OnStateEnter(entt::entity entity) override
+        void OnEnter(entt::entity entity) override
         {
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
@@ -457,7 +456,7 @@ namespace sage
             state.ManageSubscription(std::move(cnx));
         }
 
-        void OnStateExit(entt::entity entity) override
+        void OnExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
             combatable.onTargetDeathCnx->UnSubscribe();
@@ -466,15 +465,15 @@ namespace sage
         }
 
         ~CombatState() override = default;
-        CombatState(entt::registry* _registry, Systems* _sys, PlayerStateController* _stateController)
-            : StateMachine(_registry, _sys), stateController(_stateController)
+        CombatState(entt::registry* _registry, Systems* _sys, PlayerStateMachine* _stateController)
+            : State(_registry, _sys), stateController(_stateController)
         {
         }
     };
 
     // ----------------------------
 
-    void PlayerStateController::onFloorClick(const entt::entity self, entt::entity)
+    void PlayerStateMachine::onFloorClick(const entt::entity self, entt::entity)
     {
         auto& state = registry->get<PlayerState>(self);
         // We're not allowed to change to the same state, so change to default and then back again
@@ -485,7 +484,7 @@ namespace sage
         ChangeState(self, PlayerStateEnum::MovingToLocation);
     }
 
-    void PlayerStateController::onChestClick(const entt::entity self, entt::entity target)
+    void PlayerStateMachine::onChestClick(const entt::entity self, entt::entity target)
     {
         auto& state = registry->get<PlayerState>(self);
         // We're not allowed to change to the same state, so change to default and then back again
@@ -496,7 +495,7 @@ namespace sage
         ChangeState<MovingToLootState, entt::entity>(self, PlayerStateEnum::MovingToLoot, target);
     }
 
-    void PlayerStateController::onNPCLeftClick(entt::entity self, entt::entity target)
+    void PlayerStateMachine::onNPCLeftClick(entt::entity self, entt::entity target)
     {
         if (!registry->any_of<DialogComponent>(target)) return;
 
@@ -508,34 +507,34 @@ namespace sage
         ChangeState<MovingToTalkToNPCState, entt::entity>(self, PlayerStateEnum::MovingToTalkToNPC, target);
     }
 
-    void PlayerStateController::onEnemyLeftClick(entt::entity self, entt::entity target)
+    void PlayerStateMachine::onEnemyLeftClick(entt::entity self, entt::entity target)
     {
         auto& combatable = registry->get<CombatableActor>(self);
         combatable.target = target;
         ChangeState(self, PlayerStateEnum::MovingToAttackEnemy);
     }
 
-    void PlayerStateController::Update()
+    void PlayerStateMachine::Update()
     {
         for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
             assert(!registry->any_of<PartyMemberState>(entity));
             const auto state = registry->get<PlayerState>(entity).GetCurrentState();
-            GetSystem(state)->Update(entity);
+            GetState(state)->Update(entity);
         }
     }
 
-    void PlayerStateController::Draw3D()
+    void PlayerStateMachine::Draw3D()
     {
         for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
             assert(!registry->any_of<PartyMemberState>(entity));
             const auto state = registry->get<PlayerState>(entity).GetCurrentState();
-            GetSystem(state)->Draw3D(entity);
+            GetState(state)->Draw3D(entity);
         }
     }
 
-    void PlayerStateController::onComponentAdded(entt::entity entity)
+    void PlayerStateMachine::onComponentAdded(entt::entity entity)
     {
         // Cursor and controllable events are connected in ControllableActorSystem
         auto& controllable = registry->get<ControllableActor>(entity);
@@ -550,7 +549,7 @@ namespace sage
         // ----------------------------
     }
 
-    void PlayerStateController::onComponentRemoved(entt::entity entity)
+    void PlayerStateMachine::onComponentRemoved(entt::entity entity)
     {
         auto& controllable = registry->get<ControllableActor>(entity);
         controllable.onEnemyLeftClickCnx->UnSubscribe();
@@ -559,8 +558,7 @@ namespace sage
         controllable.onFloorClickCnx->UnSubscribe();
     }
 
-    PlayerStateController::PlayerStateController(entt::registry* _registry, Systems* _sys)
-        : StateMachineController(_registry)
+    PlayerStateMachine::PlayerStateMachine(entt::registry* _registry, Systems* _sys) : StateMachine(_registry)
     {
         states[PlayerStateEnum::Default] = std::make_unique<DefaultState>(_registry, _sys);
         states[PlayerStateEnum::MovingToAttackEnemy] =
@@ -574,7 +572,7 @@ namespace sage
             std::make_unique<DestinationUnreachableState>(_registry, _sys, this);
         states[PlayerStateEnum::MovingToLoot] = std::make_unique<MovingToLootState>(_registry, _sys, this);
 
-        registry->on_construct<PlayerState>().connect<&PlayerStateController::onComponentAdded>(this);
-        registry->on_destroy<PlayerState>().connect<&PlayerStateController::onComponentRemoved>(this);
+        registry->on_construct<PlayerState>().connect<&PlayerStateMachine::onComponentAdded>(this);
+        registry->on_destroy<PlayerState>().connect<&PlayerStateMachine::onComponentRemoved>(this);
     }
 } // namespace sage

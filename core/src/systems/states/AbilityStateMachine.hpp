@@ -11,7 +11,7 @@ namespace sage
     class Systems;
     class VisualFX;
 
-    class AbilityStateController : StateMachineController<AbilityState, AbilityStateEnum>
+    class AbilityStateMachine : StateMachine<AbilityState, AbilityStateEnum>
     {
         class IdleState;
         class AwaitingExecutionState;
@@ -32,12 +32,12 @@ namespace sage
         void Update() const;
         void Draw3D();
 
-        ~AbilityStateController() override = default;
-        AbilityStateController(const AbilityStateController&) = delete;
-        AbilityStateController& operator=(const AbilityStateController&) = delete;
-        AbilityStateController(entt::registry* _registry, Systems* _sys);
+        ~AbilityStateMachine() override = default;
+        AbilityStateMachine(const AbilityStateMachine&) = delete;
+        AbilityStateMachine& operator=(const AbilityStateMachine&) = delete;
+        AbilityStateMachine(entt::registry* _registry, Systems* _sys);
 
-        friend class StateMachineController; // Required for CRTP
+        friend class StateMachine; // Required for CRTP
     };
 
 } // namespace sage
