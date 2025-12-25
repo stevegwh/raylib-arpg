@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "raylib-cereal.hpp"
 #include "entt/entt.hpp"
+#include "raylib-cereal.hpp"
 #include <vector>
 
 // namespace sage
@@ -82,8 +82,8 @@
 
 #pragma once
 
-#include "raylib-cereal.hpp"
 #include "entt/entt.hpp"
+#include "raylib-cereal.hpp"
 #include <vector>
 
 namespace sage

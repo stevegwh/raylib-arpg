@@ -24,7 +24,8 @@ namespace sage
     {
         entt::registry* registry;
         Systems* sys;
-        std::unordered_map<entt::entity, std::unordered_map<AbilityEnum, entt::entity>> abilityMap; // Caster -> Ability Enum - Ability Entity Id
+        std::unordered_map<entt::entity, std::unordered_map<AbilityEnum, entt::entity>>
+            abilityMap; // Caster -> Ability Enum - Ability Entity Id
 
       public:
         entt::entity GetAbility(entt::entity caster, AbilityEnum abilityEnum);

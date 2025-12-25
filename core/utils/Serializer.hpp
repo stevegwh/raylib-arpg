@@ -5,6 +5,8 @@
 #pragma once
 
 #include "abilities/AbilityData.hpp"
+#include "sage-cereal.hpp"
+#include "ViewSerializer.hpp"
 
 #include "cereal/archives/binary.hpp"
 #include "cereal/archives/xml.hpp"
@@ -72,7 +74,7 @@ namespace sage::serializer
     }
 
     template <typename T>
-    void SaveClassJson(const char* path, const T& toSave)
+    void SaveClassJson(const std::string& path, const T& toSave)
     {
         std::cout << "START: Saving class data to json file." << std::endl;
         using namespace entt::literals;
@@ -94,6 +96,31 @@ namespace sage::serializer
 
         storage.close();
         std::cout << "FINISH: Saving class data to json file." << std::endl;
+    }
+
+    template <typename T>
+    void SaveViewJson(entt::registry& source, const char* path)
+    {
+        std::cout << "START: Saving view data to json file." << std::endl;
+        using namespace entt::literals;
+        // std::stringstream storage;
+
+        std::ofstream storage(path);
+        if (!storage.is_open())
+        {
+            std::cerr << "ERROR: Unable to open file for writing." << std::endl;
+            exit(1);
+        }
+
+        {
+            // output finishes flushing its contents when it goes out of scope
+            cereal::JSONOutputArchive output{storage};
+            ViewSerializer<T> allData(&source);
+            output(allData);
+        }
+
+        storage.close();
+        std::cout << "FINISH: Saving view data to json file." << std::endl;
     }
 
     template <typename T>

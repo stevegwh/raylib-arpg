@@ -197,11 +197,11 @@ namespace sage
             TextBox::FontInfo _fontInfo{};
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
-            cell0->CreateTextbox(std::move(headerTextbox), ability.name);
+            cell0->CreateTextbox(std::move(headerTextbox), ability.ad.name);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
-            cell->CreateTextbox(std::move(bodyTextbox), ability.description);
+            cell->CreateTextbox(std::move(bodyTextbox), ability.ad.description);
         }
         window->FinalizeLayout();
         return window;
@@ -623,23 +623,26 @@ namespace sage
         auto table = window->CreateTable();
         auto row = table->CreateTableRow();
         auto cell = row->CreateTableCell();
-        cell->CreateGameWindowButton(std::make_unique<GameWindowButton>(
-            engine,
-            cell,
-            ResourceManager::GetInstance().TextureLoad("resources/icons/ui/inventory.png"),
-            inventoryWindow));
+        cell->CreateGameWindowButton(
+            std::make_unique<GameWindowButton>(
+                engine,
+                cell,
+                ResourceManager::GetInstance().TextureLoad("resources/icons/ui/inventory.png"),
+                inventoryWindow));
         auto cell1 = row->CreateTableCell();
-        cell1->CreateGameWindowButton(std::make_unique<GameWindowButton>(
-            engine,
-            cell1,
-            ResourceManager::GetInstance().TextureLoad("resources/icons/ui/equipment.png"),
-            equipmentWindow));
+        cell1->CreateGameWindowButton(
+            std::make_unique<GameWindowButton>(
+                engine,
+                cell1,
+                ResourceManager::GetInstance().TextureLoad("resources/icons/ui/equipment.png"),
+                equipmentWindow));
         auto cell2 = row->CreateTableCell();
-        cell2->CreateGameWindowButton(std::make_unique<GameWindowButton>(
-            engine,
-            cell2,
-            ResourceManager::GetInstance().TextureLoad("resources/icons/ui/spellbook.png"),
-            journalWindow));
+        cell2->CreateGameWindowButton(
+            std::make_unique<GameWindowButton>(
+                engine,
+                cell2,
+                ResourceManager::GetInstance().TextureLoad("resources/icons/ui/spellbook.png"),
+                journalWindow));
         window->FinalizeLayout();
         return window;
     }

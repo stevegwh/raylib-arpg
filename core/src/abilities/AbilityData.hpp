@@ -1,9 +1,10 @@
 #pragma once
 
 #include "components/Animation.hpp"
+
+#include "common_types.hpp"
 #include "enum_flag_operators.hpp"
 
-#include <cereal/cereal.hpp>
 #include <string>
 
 namespace sage
@@ -126,6 +127,7 @@ namespace sage
     {
       public:
         std::string name;
+        std::string description;
 
         struct BaseData
         {

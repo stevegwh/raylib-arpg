@@ -23,7 +23,8 @@ namespace sage
         RIGHTHAND,
         AMULET,
         RING1,
-        RING2
+        RING2,
+        COUNT // Must be last
     };
 
     struct EquipmentComponent

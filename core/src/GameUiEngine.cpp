@@ -28,11 +28,13 @@
 #include "systems/PlayerAbilitySystem.hpp"
 #include "UserInput.hpp"
 
+#include "magic_enum.hpp"
 #include <cassert>
 #include <format>
 #include <queue>
 #include <ranges>
 #include <sstream>
+#include <unordered_map>
 
 namespace sage
 {
@@ -1611,41 +1613,20 @@ namespace sage
         }
         else if (item.HasFlag(ItemFlags::ARMOR))
         {
-            if (itemType == EquipmentSlotName::HELM && item.HasFlag(ItemFlags::HELMET))
-            {
-                return true;
-            }
-            if (itemType == EquipmentSlotName::AMULET && item.HasFlag(ItemFlags::AMULET))
-            {
-                return true;
-            }
-            if (itemType == EquipmentSlotName::CHEST && item.HasFlag(ItemFlags::CHEST))
-            {
-                return true;
-            }
-            if (itemType == EquipmentSlotName::BELT && item.HasFlag(ItemFlags::BELT))
-            {
-                return true;
-            }
-            if (itemType == EquipmentSlotName::ARMS && item.HasFlag(ItemFlags::ARMS))
-            {
-                return true;
-            }
-            if (itemType == EquipmentSlotName::LEGS && item.HasFlag(ItemFlags::LEGS))
-            {
-                return true;
-            }
-            if (itemType == EquipmentSlotName::BOOTS && item.HasFlag(ItemFlags::BOOTS))
-            {
-                return true;
-            }
-            if ((itemType == EquipmentSlotName::RING1 || itemType == EquipmentSlotName::RING2) &&
-                item.HasFlag(ItemFlags::RING))
-            {
-                return true;
-            }
+            static const std::unordered_map<EquipmentSlotName, ItemFlags> map{
+                {EquipmentSlotName::HELM, ItemFlags::HELMET},
+                {EquipmentSlotName::AMULET, ItemFlags::AMULET},
+                {EquipmentSlotName::CHEST, ItemFlags::CHEST},
+                {EquipmentSlotName::BELT, ItemFlags::BELT},
+                {EquipmentSlotName::ARMS, ItemFlags::ARMS},
+                {EquipmentSlotName::LEGS, ItemFlags::LEGS},
+                {EquipmentSlotName::BOOTS, ItemFlags::BOOTS},
+                {EquipmentSlotName::RING1, ItemFlags::RING},
+                {EquipmentSlotName::RING2, ItemFlags::RING},
+            };
+            assert(map.size() == static_cast<int>(EquipmentSlotName::COUNT));
+            return item.HasFlag(map.at(itemType));
         }
-
         return false;
     }
 
@@ -2700,8 +2681,9 @@ namespace sage
 
     ErrorMessage::ErrorMessage(Settings* _settings, std::string _msg)
         : settings(_settings),
-          font(ResourceManager::GetInstance().FontLoad(
-              "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+          font(
+              ResourceManager::GetInstance().FontLoad(
+                  "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
           fontSpacing(1.5),
           msg(std::move(_msg)),
           initialTime(GetTime())

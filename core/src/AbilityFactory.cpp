@@ -17,10 +17,10 @@
 #include "systems/ActorMovementSystem.hpp"
 #include "systems/states/AbilityStateMachine.hpp"
 
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <functional>
 
 namespace sage
 {
@@ -65,8 +65,7 @@ namespace sage
             {AbilityEnum::FIREBALL, CreateFireballAbility},
             {AbilityEnum::LIGHTNINGBALL, CreateLightningBallAbility},
             {AbilityEnum::RAINFOFIRE, CreateRainOfFireAbility},
-            {AbilityEnum::WHIRLWIND, CreateWhirlwindAbility}
-        };
+            {AbilityEnum::WHIRLWIND, CreateWhirlwindAbility}};
         abilityCreators.at(abilityEnum)(ability);
         ability.self = out;
         ability.caster = caster;
@@ -80,8 +79,7 @@ namespace sage
         return out;
     }
 
-    AbilityFactory::AbilityFactory(entt::registry* _registry, Systems* _sys)
-        : registry(_registry), sys(_sys)
+    AbilityFactory::AbilityFactory(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
     }
 
@@ -140,8 +138,7 @@ namespace sage
         return std::move(obj);
     }
 
-    void createProjectile(
-        entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Systems* data)
+    void createProjectile(entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Systems* data)
     {
         auto& ad = registry->get<Ability>(abilityEntity).ad;
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
@@ -166,6 +163,8 @@ namespace sage
     void CreatePlayerAutoAttack(Ability& abilityComponent)
     {
         auto& ad = abilityComponent.ad;
+        ad.name = "AutoAttack";
+        ad.description = "Hits the enemy for damage every so often.";
         ad.base.AddElement(AbilityElement::PHYSICAL);
         ad.base.cooldownDuration = 0.75;
         ad.base.baseDamage = 25;
@@ -184,8 +183,8 @@ namespace sage
 
     void CreateRainOfFireAbility(Ability& abilityComponent)
     {
-        abilityComponent.name = "Rain of Fire";
-        abilityComponent.description = "Hits all enemies around the attacker.";
+        abilityComponent.ad.name = "Rain of Fire";
+        abilityComponent.ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/rain_of_fire.png";
         abilityComponent.icon = "IMG_ABILITY_RAINOFFIRE";
         auto& ad = abilityComponent.ad;
@@ -254,8 +253,8 @@ namespace sage
 
     void CreateLightningBallAbility(Ability& abilityComponent)
     {
-        abilityComponent.name = "Lightning Ball";
-        abilityComponent.description = "Hits all enemies around the attacker.";
+        abilityComponent.ad.name = "Lightning Ball";
+        abilityComponent.ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/lightning_ball.png";
         abilityComponent.icon = "IMG_ABILITY_LIGHTINGBALL";
         auto& ad = abilityComponent.ad;
@@ -280,8 +279,8 @@ namespace sage
 
     void CreateWhirlwindAbility(Ability& abilityComponent)
     {
-        abilityComponent.name = "Whirlwind";
-        abilityComponent.description = "Hits all enemies around the attacker.";
+        abilityComponent.ad.name = "Whirlwind";
+        abilityComponent.ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/whirlwind.png";
         abilityComponent.icon = "IMG_ABILITY_WHIRLWIND";
         auto& ad = abilityComponent.ad;
