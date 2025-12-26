@@ -102,7 +102,7 @@ namespace sage
         weaponTrans.SetLocalRot({0, 0, 0, 0});
 
         auto& animation = registry->get<Animation>(owner);
-        weapon.animationFollowCnx = animation.onAnimationUpdated.Subscribe(
+        weapon.animationFollowSub = animation.onAnimationUpdated.Subscribe(
             [this](entt::entity _entity) { updateCharacterWeaponPosition(_entity); });
     }
 
@@ -252,7 +252,7 @@ namespace sage
                 trans.SetParent(nullptr);
                 registry->emplace<DeleteEntityComponent>(equipment.worldModels[itemType]);
                 auto& weapon = registry->get<WeaponComponent>(equipment.worldModels[itemType]);
-                weapon.animationFollowCnx.UnSubscribe();
+                weapon.animationFollowSub.UnSubscribe();
                 equipment.worldModels[itemType] = entt::null;
             }
             equipment.slots[itemType] = entt::null;

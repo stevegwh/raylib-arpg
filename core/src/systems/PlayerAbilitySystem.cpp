@@ -60,24 +60,24 @@ namespace sage
 
     void PlayerAbilitySystem::SubscribeToUserInput()
     {
-        if (!abilityPressedConnections.empty()) return;
-        abilityPressedConnections.push_back(
+        if (!abilityPressedSubscriptions.empty()) return;
+        abilityPressedSubscriptions.push_back(
             sys->userInput->keyOnePressed.Subscribe([this]() { PressAbility(0); }));
-        abilityPressedConnections.push_back(
+        abilityPressedSubscriptions.push_back(
             sys->userInput->keyTwoPressed.Subscribe([this]() { PressAbility(1); }));
-        abilityPressedConnections.push_back(
+        abilityPressedSubscriptions.push_back(
             sys->userInput->keyThreePressed.Subscribe([this]() { PressAbility(2); }));
-        abilityPressedConnections.push_back(
+        abilityPressedSubscriptions.push_back(
             sys->userInput->keyFourPressed.Subscribe([this]() { PressAbility(3); }));
     }
 
     void PlayerAbilitySystem::UnsubscribeFromUserInput()
     {
-        for (auto& cnx : abilityPressedConnections)
+        for (auto& syb : abilityPressedSubscriptions)
         {
-            cnx.UnSubscribe();
+            syb.UnSubscribe();
         }
-        abilityPressedConnections.clear();
+        abilityPressedSubscriptions.clear();
     }
 
     PlayerAbilitySystem::PlayerAbilitySystem(entt::registry* _registry, Systems* _sys)

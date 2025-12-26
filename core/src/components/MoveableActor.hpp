@@ -22,9 +22,9 @@ namespace sage
     {
         entt::registry* registry;
         entt::entity self{}; // The actor following
-        Connection onTargetDestinationReachedCnx{};
-        Connection onTargetMovementCancelledCnx{};
-        Connection onTargetPathChangedCnx{};
+        Subscription onTargetDestinationReachedSub{};
+        Subscription onTargetMovementCancelledSub{};
+        Subscription onTargetPathChangedSub{};
 
         Vector3 targetPrevPos{};
         double timeStarted{};

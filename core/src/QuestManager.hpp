@@ -21,7 +21,7 @@ namespace sage
         entt::registry* registry;
         Systems* sys;
         std::unordered_map<std::string, entt::entity> map{};
-        std::unordered_map<entt::entity, std::vector<Connection>> connectionMap{};
+        std::unordered_map<entt::entity, std::vector<Subscription>> connectionMap{};
         entt::entity createQuest(const std::string& key);
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);

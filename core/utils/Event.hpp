@@ -16,60 +16,61 @@ namespace sage
 
     class EventBase;
 
-    // Could also be called 'subscription'. Called Connection to mimic entt's signals.
-    class Connection
+    // Wrapper class to track a subscription to an event. Allows easy unsubscribing.
+    class Subscription
     {
         EventBase* event = nullptr;
         SubscriberId id = -1;
 
       public:
-        bool IsConnected();
+        bool IsActive();
         void UnSubscribe();
-        ~Connection();
-        explicit Connection(EventBase* _event, SubscriberId _id);
-        Connection() = default;
+        ~Subscription();
+        explicit Subscription(EventBase* _event, SubscriberId _id);
+        Subscription() = default;
     };
 
     class EventBase
     {
+        // Force unsubscribing via the Subscription class
         virtual void unSubscribe(SubscriberId id) = 0;
 
       public:
         virtual ~EventBase() = default;
 
-        friend class Connection;
+        friend class Subscription;
     };
 
     template <typename... Args>
     class Event : public EventBase
     {
         unsigned int count = 0;
-        std::unordered_map<unsigned int, std::function<void(Args...)>> subscribers;
+        std::unordered_map<unsigned int, std::function<void(Args...)>> subscriptions;
 
         void unSubscribe(SubscriberId id) override
         {
-            if (id < 0 || subscribers.empty() || !subscribers.contains(id))
+            if (id < 0 || subscriptions.empty() || !subscriptions.contains(id))
                 return; // Has already been unsubscribed
-            subscribers.erase(id);
+            subscriptions.erase(id);
         }
 
       public:
-        Connection Subscribe(std::function<void(Args...)> func)
+        Subscription Subscribe(std::function<void(Args...)> func)
         {
             auto key = ++count;
-            subscribers.emplace(key, func);
+            subscriptions.emplace(key, func);
 
-            return Connection(this, key);
+            return Subscription(this, key);
         }
 
         void Publish(Args... args) const
         {
-            // Make a copy of the subscribers to prevent issues if callbacks modify the subscriber list
-            if (subscribers.empty()) return;
-            auto subscribersCopy = subscribers;
-            for (const auto& [key, subscriber] : subscribersCopy)
+            // Make a copy of the subscriptions to prevent issues if callbacks modify the subscription list
+            if (subscriptions.empty()) return;
+            auto subscribersCopy = subscriptions;
+            for (const auto& [key, callback] : subscribersCopy)
             {
-                subscriber(args...);
+                callback(args...);
             }
         }
 

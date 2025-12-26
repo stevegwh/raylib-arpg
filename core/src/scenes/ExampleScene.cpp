@@ -34,7 +34,7 @@ namespace sage
         const auto conversationEntity = sys->renderSystem->FindRenderableByName("Opening_Dialog");
         assert(conversationEntity != entt::null);
 
-        Connection cnx = sys->fullscreenTextOverlayFactory->onOverlayEnding.Subscribe([actor, this]() {
+        Subscription syb = sys->fullscreenTextOverlayFactory->onOverlayEnding.Subscribe([actor, this]() {
             sys->stateMachines->playerStateMachine->ChangeState(actor, PlayerStateEnum::InDialog);
             auto& animationComponent = registry->get<Animation>(actor);
             animationComponent.ChangeAnimationByEnum(AnimationEnum::IDLE2);

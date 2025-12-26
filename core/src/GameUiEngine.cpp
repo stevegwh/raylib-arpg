@@ -2275,7 +2275,7 @@ namespace sage
 
     Window::~Window()
     {
-        windowUpdateCnx.UnSubscribe();
+        windowUpdateSub.UnSubscribe();
     }
 
     Window::Window(Settings* _settings, const Padding _padding)
@@ -2341,9 +2341,9 @@ namespace sage
 
     TooltipWindow::~TooltipWindow()
     {
-        if (parentWindowHideCnx.IsConnected())
+        if (parentWindowHideSub.IsActive())
         {
-            parentWindowHideCnx.UnSubscribe();
+            parentWindowHideSub.UnSubscribe();
         }
     }
 
@@ -2361,7 +2361,7 @@ namespace sage
     {
         if (parentWindow)
         {
-            parentWindowHideCnx = parentWindow->onHide.Subscribe([this]() { Remove(); });
+            parentWindowHideSub = parentWindow->onHide.Subscribe([this]() { Remove(); });
         }
         tex = _tex;
         textureStretchMode = _stretchMode;
@@ -2866,7 +2866,7 @@ namespace sage
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
-        tooltipWindow->windowUpdateCnx = sys->userInput->onWindowUpdate.Subscribe(
+        tooltipWindow->windowUpdateSub = sys->userInput->onWindowUpdate.Subscribe(
             [this](Vector2 prev, Vector2 current) { tooltipWindow->OnWindowUpdate(prev, current); });
 
         tooltipWindow->InitLayout();
@@ -2878,7 +2878,7 @@ namespace sage
     {
         windows.push_back(std::move(_window));
         auto* window = windows.back().get();
-        window->windowUpdateCnx = sys->userInput->onWindowUpdate.Subscribe(
+        window->windowUpdateSub = sys->userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
@@ -2888,7 +2888,7 @@ namespace sage
     {
         windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->windowUpdateCnx = sys->userInput->onWindowUpdate.Subscribe(
+        window->windowUpdateSub = sys->userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;

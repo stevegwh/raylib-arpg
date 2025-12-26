@@ -18,9 +18,9 @@ namespace sage
         Timer cooldownTimer;
         Timer castTimer;
 
-        // TODO: Feels strange to have connections and events in the same struct?
-        Connection onStartCastCnx{};
-        Connection onCancelCastCnx{};
+        // TODO: Feels strange to have subscriptions and events in the same struct?
+        Subscription onStartCastSub{};
+        Subscription onCancelCastSub{};
 
         AssetID icon{};
         std::string iconPath; // Use AssetID where possible

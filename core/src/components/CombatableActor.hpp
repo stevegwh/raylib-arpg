@@ -64,7 +64,7 @@ namespace sage
         Event<AttackData> onHit{};
         Event<entt::entity> onDeath{};
         Event<entt::entity, entt::entity> onAttackCancelled{}; // Self, object clicked (can discard)
-        Connection onTargetDeathCnx{};
+        Subscription onTargetDeathSub{};
         Event<entt::entity, entt::entity> onTargetDeath{}; // Self, target (that died)
 
         CombatableActor(const CombatableActor&) = delete;

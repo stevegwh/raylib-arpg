@@ -104,15 +104,15 @@ namespace sage
     void InventorySystem::onComponentAdded(entt::entity entity)
     {
         auto& component = registry->get<InventoryComponent>(entity);
-        component.onItemAddedCnx = component.onItemAdded.Subscribe([this]() { inventoryUpdated(); });
-        component.onItemRemovedCnx = component.onItemRemoved.Subscribe([this]() { inventoryUpdated(); });
+        component.onItemAddedSub = component.onItemAdded.Subscribe([this]() { inventoryUpdated(); });
+        component.onItemRemovedSub = component.onItemRemoved.Subscribe([this]() { inventoryUpdated(); });
     }
 
     void InventorySystem::onComponentRemoved(entt::entity entity)
     {
         auto& component = registry->get<InventoryComponent>(entity);
-        component.onItemAddedCnx.UnSubscribe();
-        component.onItemRemovedCnx.UnSubscribe();
+        component.onItemAddedSub.UnSubscribe();
+        component.onItemRemovedSub.UnSubscribe();
     }
 
     InventorySystem::InventorySystem(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)

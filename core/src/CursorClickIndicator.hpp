@@ -21,7 +21,7 @@ namespace sage
         entt::entity self;
         float k = 0;
 
-        Connection destinationReachedCnx{};
+        Subscription destinationReachedSub{};
 
         void onCursorClick(entt::entity entity) const;
         void disableIndicator() const;

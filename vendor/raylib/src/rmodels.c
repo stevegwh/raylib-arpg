@@ -2386,7 +2386,7 @@ void UnloadModelAnimation(ModelAnimation anim)
 }
 
 // Check model animation skeleton match
-// NOTE: Only number of bones and parent connections are checked
+// NOTE: Only number of bones and parent subscriptions are checked
 bool IsModelAnimationValid(Model model, ModelAnimation anim)
 {
     int result = true;

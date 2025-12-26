@@ -122,7 +122,7 @@ namespace sage
             // unsigned int current = 0;
             std::string start;
             std::string current;
-            std::vector<Connection> optionPressedConnections;
+            std::vector<Subscription> optionPressedSubscriptions;
 
             std::unordered_map<std::string, std::unique_ptr<ConversationNode>> nodes;
 
@@ -146,33 +146,33 @@ namespace sage
 
             void BindKeysToOptionSelect()
             {
-                for (auto& cnx : optionPressedConnections)
+                for (auto& syb : optionPressedSubscriptions)
                 {
-                    cnx.UnSubscribe();
+                    syb.UnSubscribe();
                 }
-                optionPressedConnections.clear();
+                optionPressedSubscriptions.clear();
                 auto& n = nodes.at(current);
                 for (unsigned int i = 0; i < n->options.size(); ++i)
                 {
                     auto& o = n->options.at(i);
                     if (i == 0)
                     {
-                        optionPressedConnections.push_back(
+                        optionPressedSubscriptions.push_back(
                             sys->userInput->keyOnePressed.Subscribe([&o, this] { SelectOption(o.get()); }));
                     }
                     else if (i == 1)
                     {
-                        optionPressedConnections.push_back(
+                        optionPressedSubscriptions.push_back(
                             sys->userInput->keyTwoPressed.Subscribe([&o, this] { SelectOption(o.get()); }));
                     }
                     else if (i == 2)
                     {
-                        optionPressedConnections.push_back(
+                        optionPressedSubscriptions.push_back(
                             sys->userInput->keyThreePressed.Subscribe([&o, this] { SelectOption(o.get()); }));
                     }
                     else if (i == 3)
                     {
-                        optionPressedConnections.push_back(
+                        optionPressedSubscriptions.push_back(
                             sys->userInput->keyFourPressed.Subscribe([&o, this] { SelectOption(o.get()); }));
                     }
                     else
@@ -195,11 +195,11 @@ namespace sage
                 }
                 else
                 {
-                    for (auto& cnx : optionPressedConnections)
+                    for (auto& syb : optionPressedSubscriptions)
                     {
-                        cnx.UnSubscribe();
+                        syb.UnSubscribe();
                     }
-                    optionPressedConnections.clear();
+                    optionPressedSubscriptions.clear();
                     endConversation();
                 }
             }

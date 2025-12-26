@@ -20,9 +20,9 @@ namespace sage
         std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items{}; // ItemComponent etc
 
       public:
-        Connection onItemAddedCnx{};
-        Connection onItemRemovedCnx{};
-        Connection onInventoryFullCnx{};
+        Subscription onItemAddedSub{};
+        Subscription onItemRemovedSub{};
+        Subscription onInventoryFullSub{};
 
         Event<> onItemAdded;
         Event<> onItemRemoved;

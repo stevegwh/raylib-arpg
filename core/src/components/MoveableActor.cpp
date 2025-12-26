@@ -11,9 +11,9 @@ namespace sage
 {
     FollowTarget::~FollowTarget()
     {
-        onTargetPathChangedCnx.UnSubscribe();
-        onTargetDestinationReachedCnx.UnSubscribe();
-        onTargetMovementCancelledCnx.UnSubscribe();
+        onTargetPathChangedSub.UnSubscribe();
+        onTargetDestinationReachedSub.UnSubscribe();
+        onTargetMovementCancelledSub.UnSubscribe();
     }
 
     FollowTarget::FollowTarget(
@@ -22,11 +22,11 @@ namespace sage
     {
         auto& moveable = _registry->get<MoveableActor>(_targetActor);
 
-        onTargetPathChangedCnx = moveable.onPathChanged.Subscribe(
+        onTargetPathChangedSub = moveable.onPathChanged.Subscribe(
             [this](entt::entity) { onTargetPathChanged.Publish(self, targetActor); });
-        onTargetMovementCancelledCnx = moveable.onMovementCancel.Subscribe(
+        onTargetMovementCancelledSub = moveable.onMovementCancel.Subscribe(
             [this](entt::entity) { onTargetMovementCancelled.Publish(self, targetActor); });
-        onTargetDestinationReachedCnx = moveable.onDestinationReached.Subscribe(
+        onTargetDestinationReachedSub = moveable.onDestinationReached.Subscribe(
             [this](entt::entity) { onTargetDestinationReached.Publish(self, targetActor); });
     }
 

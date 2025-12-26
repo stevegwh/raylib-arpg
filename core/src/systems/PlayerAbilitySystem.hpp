@@ -12,7 +12,7 @@ namespace sage
     {
         entt::registry* registry;
         Systems* sys;
-        std::vector<Connection> abilityPressedConnections;
+        std::vector<Subscription> abilityPressedSubscriptions;
 
       public:
         void SubscribeToUserInput();

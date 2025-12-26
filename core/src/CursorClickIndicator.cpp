@@ -46,14 +46,14 @@ namespace sage
 
     void CursorClickIndicator::onSelectedActorChanged(entt::entity, entt::entity current)
     {
-        if (destinationReachedCnx.IsConnected())
+        if (destinationReachedSub.IsActive())
         {
-            destinationReachedCnx.UnSubscribe();
+            destinationReachedSub.UnSubscribe();
         }
         auto& renderable = registry->get<Renderable>(self);
         renderable.active = false;
         auto& moveable = registry->get<MoveableActor>(current);
-        destinationReachedCnx =
+        destinationReachedSub =
             moveable.onDestinationReached.Subscribe([this](entt::entity) { disableIndicator(); });
     }
 

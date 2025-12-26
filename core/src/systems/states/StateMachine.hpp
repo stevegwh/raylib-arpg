@@ -102,7 +102,7 @@ namespace sage
             //            std::cout << std::format(
             //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
             //                magic_enum::enum_name(newState));
-            oldState.RemoveAllConnections();
+            oldState.RemoveAllSubscriptions();
             GetState(oldStateEnum)->OnExit(entity);
             oldState.SetState(newState);
             static_cast<NewStateType*>(GetState(newState))->OnEnter(entity, args...);
@@ -123,7 +123,7 @@ namespace sage
             //            std::cout << std::format(
             //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
             //                magic_enum::enum_name(newState));
-            oldState.RemoveAllConnections();
+            oldState.RemoveAllSubscriptions();
             GetState(oldStateEnum)->OnExit(entity);
             oldState.SetState(newState);
             GetState(newState)->OnEnter(entity);

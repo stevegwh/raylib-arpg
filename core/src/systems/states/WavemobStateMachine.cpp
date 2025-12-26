@@ -52,7 +52,7 @@ namespace sage
             auto& state = registry->get<WavemobState>(self);
             auto& combatable = registry->get<CombatableActor>(self);
             combatable.onHit.Subscribe([this](const AttackData ad) { OnHit(ad); });
-            // Persistent connections
+            // Persistent subscriptions
             combatable.onDeath.Subscribe([this](const entt::entity entity) { OnDeath(entity); });
             // ----------------------------
             auto& animation = registry->get<Animation>(self);
@@ -140,14 +140,14 @@ namespace sage
             const auto& combatable = registry->get<CombatableActor>(self);
             moveable.followTarget.emplace(registry, self, combatable.target);
 
-            auto cnx = moveable.onDestinationReached.Subscribe(
+            auto syb = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
-            auto cnx1 = moveable.followTarget->onTargetPathChanged.Subscribe(
+            auto syb1 = moveable.followTarget->onTargetPathChanged.Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPosUpdate(_self, _target); });
 
             auto& state = registry->get<WavemobState>(self);
-            state.ManageSubscription(std::move(cnx1));
-            state.ManageSubscription(std::move(cnx));
+            state.ManageSubscription(std::move(syb1));
+            state.ManageSubscription(std::move(syb));
 
             onTargetPosUpdate(self, combatable.target);
         }
@@ -233,7 +233,7 @@ namespace sage
         void destroyEntity(entt::entity self) const
         {
             auto& state = registry->get<WavemobState>(self);
-            state.RemoveAllConnections();
+            state.RemoveAllSubscriptions();
             registry->emplace<DeleteEntityComponent>(self);
         }
 
@@ -249,9 +249,9 @@ namespace sage
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             auto& state = registry->get<WavemobState>(self);
-            auto cnx =
+            auto syb =
                 animation.onAnimationEnd.Subscribe([this](entt::entity _entity) { destroyEntity(_entity); });
-            state.ManageSubscription(std::move(cnx));
+            state.ManageSubscription(std::move(syb));
 
             auto abilityEntity = sys->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);

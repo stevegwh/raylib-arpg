@@ -2318,7 +2318,7 @@ You can start and stop a node with the following:
 
 By default the node is in a started state, but since it won't be connected to anything won't
 actually be invoked by the node graph until it's connected. When you stop a node, data will not be
-read from any of it's input connections. You can use this property to stop a group of sounds
+read from any of it's input subscriptions. You can use this property to stop a group of sounds
 atomically.
 
 You can configure the initial state of a node in it's config:
@@ -7638,7 +7638,7 @@ struct ma_context
             ma_proc AAudioStream_getFramesPerBurst;
             ma_proc AAudioStream_requestStart;
             ma_proc AAudioStream_requestStop;
-            ma_device_job_thread jobThread; /* For processing operations outside of the error callback, specifically device disconnections and rerouting. */
+            ma_device_job_thread jobThread; /* For processing operations outside of the error callback, specifically device dissubscriptions and rerouting. */
         } aaudio;
 #endif
 #ifdef MA_SUPPORT_OPENSL

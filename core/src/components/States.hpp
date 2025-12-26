@@ -12,22 +12,22 @@ namespace sage
     class BaseState
     {
         StateEnum currentState;
-        std::vector<Connection> currentStateConnections;
+        std::vector<Subscription> currentStateSubscriptions;
 
       public:
-        // All connections added here will be removed when ChangeState is called (via StateMachine).
-        void ManageSubscription(const Connection& newConnection)
+        // All subscriptions added here will be removed when ChangeState is called (via StateMachine).
+        void ManageSubscription(const Subscription& newConnection)
         {
-            currentStateConnections.push_back(newConnection);
+            currentStateSubscriptions.push_back(newConnection);
         }
 
-        void RemoveAllConnections()
+        void RemoveAllSubscriptions()
         {
-            for (auto& connection : currentStateConnections)
+            for (auto& connection : currentStateSubscriptions)
             {
                 connection.UnSubscribe();
             }
-            currentStateConnections.clear();
+            currentStateSubscriptions.clear();
         }
 
         void SetState(StateEnum newState)
@@ -42,7 +42,7 @@ namespace sage
 
         ~BaseState()
         {
-            RemoveAllConnections();
+            RemoveAllSubscriptions();
         }
 
         // Allow moving
@@ -69,7 +69,7 @@ namespace sage
     class PartyMemberState : public BaseState<PartyMemberState, PartyMemberStateEnum>
     {
       public:
-        Connection onLeaderMoveForwardCnx{};
+        Subscription onLeaderMoveForwardSub{};
         Event<entt::entity, entt::entity> onLeaderMove; // self, leader
 
         PartyMemberState() : BaseState(PartyMemberStateEnum::Default)

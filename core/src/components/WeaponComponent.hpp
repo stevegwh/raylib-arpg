@@ -19,7 +19,7 @@ namespace sage
         Matrix parentSocket{}; // Where the weapon is held by the owner in respect to their local model space
         std::string parentBoneName{};
         AssetID equipped{};
-        Connection animationFollowCnx{}; // Connection to the owner's animation movement for model to follow.
+        Subscription animationFollowSub{}; // Connection to the owner's animation movement for model to follow.
         // Would probably have a weapons' database with its model, icon, damage etc.
     };
 } // namespace sage

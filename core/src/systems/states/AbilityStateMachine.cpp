@@ -341,9 +341,9 @@ namespace sage
     void AbilityStateMachine::onComponentAdded(entt::entity addedEntity)
     {
         auto& ability = registry->get<Ability>(addedEntity);
-        ability.onStartCastCnx = ability.startCast.Subscribe([this](entt::entity _entity) { startCast(_entity); });
+        ability.onStartCastSub = ability.startCast.Subscribe([this](entt::entity _entity) { startCast(_entity); });
 
-        ability.onCancelCastCnx =
+        ability.onCancelCastSub =
             ability.cancelCast.Subscribe([this](entt::entity _entity) { cancelCast(_entity); });
     }
 
@@ -351,8 +351,8 @@ namespace sage
     {
         // TODO: Could add the check for "FOLLOW_CASTER" here instead.
         auto& ability = registry->get<Ability>(addedEntity);
-        ability.onStartCastCnx.UnSubscribe();
-        ability.onStartCastCnx.UnSubscribe();
+        ability.onStartCastSub.UnSubscribe();
+        ability.onStartCastSub.UnSubscribe();
     }
 
     AbilityStateMachine::AbilityStateMachine(entt::registry* _registry, Systems* _sys)

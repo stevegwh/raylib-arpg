@@ -46,11 +46,11 @@ namespace sage
             old.selectedIndicator->SetHint(inactiveCol);
 
             // Stop forwarding cursor clicks to this actor
-            old.cursorOnFloorClickCnx.UnSubscribe();
-            old.cursorOnEnemyLeftClickCnx.UnSubscribe();
-            old.cursorOnEnemyRightClickCnx.UnSubscribe();
-            old.cursorOnNPCLeftClickCnx.UnSubscribe();
-            old.cursorOnChestClickCnx.UnSubscribe();
+            old.cursorOnFloorClickSub.UnSubscribe();
+            old.cursorOnEnemyLeftClickSub.UnSubscribe();
+            old.cursorOnEnemyRightClickSub.UnSubscribe();
+            old.cursorOnNPCLeftClickSub.UnSubscribe();
+            old.cursorOnChestClickSub.UnSubscribe();
         }
         selectedActorId = id;
 
@@ -60,27 +60,27 @@ namespace sage
             ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/glsl330/base.fs"));
 
         // Forward cursor clicks to this actor's controllable component's events
-        current.cursorOnFloorClickCnx =
+        current.cursorOnFloorClickSub =
             sys->cursor->onFloorClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onFloorClick.Publish(selectedActorId, clickedEntity);
             });
-        current.cursorOnEnemyLeftClickCnx =
+        current.cursorOnEnemyLeftClickSub =
             sys->cursor->onEnemyLeftClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onEnemyLeftClick.Publish(selectedActorId, clickedEntity);
             });
-        current.cursorOnEnemyRightClickCnx =
+        current.cursorOnEnemyRightClickSub =
             sys->cursor->onEnemyRightClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onEnemyRightClick.Publish(selectedActorId, clickedEntity);
             });
-        current.cursorOnNPCLeftClickCnx =
+        current.cursorOnNPCLeftClickSub =
             sys->cursor->onNPCClick.Subscribe([this](const entt::entity clickedEntity) {
                 const auto& c = registry->get<ControllableActor>(selectedActorId);
                 c.onNPCLeftClick.Publish(selectedActorId, clickedEntity);
             });
-        current.cursorOnChestClickCnx = sys->cursor->onChestClick.Subscribe([this](entt::entity clickedEntity) {
+        current.cursorOnChestClickSub = sys->cursor->onChestClick.Subscribe([this](entt::entity clickedEntity) {
             const auto& c = registry->get<ControllableActor>(selectedActorId);
             c.onChestClick.Publish(selectedActorId, clickedEntity);
         });

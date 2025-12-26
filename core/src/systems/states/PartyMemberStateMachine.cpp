@@ -123,22 +123,22 @@ namespace sage
 
             const auto target = moveable.followTarget->targetActor;
 
-            auto cnx = moveable.onDestinationReached.Subscribe(
+            auto syb = moveable.onDestinationReached.Subscribe(
                 [this](const entt::entity _self) { onTargetReached(_self); });
-            auto cnx1 = moveable.followTarget->onTargetPathChanged.Subscribe(
+            auto syb1 = moveable.followTarget->onTargetPathChanged.Subscribe(
                 [this](entt::entity _self, entt::entity _target) { onTargetPathChanged(_self, _target); });
-            auto cnx2 = moveable.onMovementCancel.Subscribe(
+            auto syb2 = moveable.onMovementCancel.Subscribe(
                 [this](const entt::entity _self) { onMovementCancelled(_self); });
-            auto cnx3 = moveable.onDestinationUnreachable.Subscribe(
+            auto syb3 = moveable.onDestinationUnreachable.Subscribe(
                 [this](const entt::entity _self, const Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
                 });
 
             auto& state = registry->get<PartyMemberState>(self);
-            state.ManageSubscription(std::move(cnx));
-            state.ManageSubscription(std::move(cnx1));
-            state.ManageSubscription(std::move(cnx2));
-            state.ManageSubscription(std::move(cnx3));
+            state.ManageSubscription(std::move(syb));
+            state.ManageSubscription(std::move(syb1));
+            state.ManageSubscription(std::move(syb2));
+            state.ManageSubscription(std::move(syb3));
 
             // entt::sink sink5{moveable.followTarget->onTargetMovementCancelled};
             // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
@@ -148,7 +148,7 @@ namespace sage
 
         void OnExit(const entt::entity self) override
         {
-            // TODO: We don't disconnect the connections here?
+            // TODO: We don't disconnect the subscriptions here?
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.reset();
             sys->actorMovementSystem->CancelMovement(self);
@@ -200,14 +200,14 @@ namespace sage
             auto& moveable = registry->get<MoveableActor>(self);
             moveable.followTarget.emplace(registry, self, followTarget);
 
-            auto cnx =
+            auto syb =
                 moveable.onMovementCancel.Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
-            auto cnx1 = sys->controllableActorSystem->onSelectedActorChange.Subscribe(
+            auto syb1 = sys->controllableActorSystem->onSelectedActorChange.Subscribe(
                 [this](entt::entity, entt::entity entity) { onMovementCancelled(entity); });
 
             auto& state = registry->get<PartyMemberState>(self);
-            state.ManageSubscription(std::move(cnx));
-            state.ManageSubscription(std::move(cnx1));
+            state.ManageSubscription(std::move(syb));
+            state.ManageSubscription(std::move(syb1));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
@@ -349,7 +349,7 @@ namespace sage
         auto& state{registry->get<PartyMemberState>(entity)};
         // Forward leader's movement to the state's onLeaderMovement
         auto& leaderMoveable{registry->get<MoveableActor>(sys->controllableActorSystem->GetSelectedActor())};
-        state.onLeaderMoveForwardCnx =
+        state.onLeaderMoveForwardSub =
             leaderMoveable.onStartMovement.Subscribe([this, entity](const entt::entity leader) {
                 const auto& _state{registry->get<PartyMemberState>(entity)};
                 _state.onLeaderMove.Publish(entity, leader);
@@ -362,9 +362,9 @@ namespace sage
 
     void PartyMemberStateMachine::onComponentRemoved(const entt::entity entity) const
     {
-        if (auto& state{registry->get<PartyMemberState>(entity)}; state.onLeaderMoveForwardCnx.IsConnected())
+        if (auto& state{registry->get<PartyMemberState>(entity)}; state.onLeaderMoveForwardSub.IsActive())
         {
-            state.onLeaderMoveForwardCnx.UnSubscribe();
+            state.onLeaderMoveForwardSub.UnSubscribe();
         }
     }
 

@@ -8,25 +8,25 @@
 
 namespace sage
 {
-    bool Connection::IsConnected()
+    bool Subscription::IsActive()
     {
         return id > -1 && event;
     }
 
-    void Connection::UnSubscribe()
+    void Subscription::UnSubscribe()
     {
-        if (!IsConnected()) return;
+        if (!IsActive()) return;
         event->unSubscribe(id);
         id = -1;
         event = nullptr;
     }
 
-    Connection::~Connection()
+    Subscription::~Subscription()
     {
         // UnSubscribe();
     }
 
-    Connection::Connection(EventBase* _event, SubscriberId _id) : event(_event), id(_id)
+    Subscription::Subscription(EventBase* _event, SubscriberId _id) : event(_event), id(_id)
     {
     }
 } // namespace sage

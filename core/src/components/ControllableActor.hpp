@@ -23,18 +23,18 @@ namespace sage
 
         // We forward the cursor's clicks onto our own events (and inject this entity's id into it)
         // Persists between state changes (do not try to add them via state.AddConnection)
-        Connection cursorOnEnemyLeftClickCnx{};
-        Connection cursorOnEnemyRightClickCnx{};
-        Connection cursorOnFloorClickCnx{};
-        Connection cursorOnNPCLeftClickCnx{};
-        Connection cursorOnChestClickCnx{};
+        Subscription cursorOnEnemyLeftClickSub{};
+        Subscription cursorOnEnemyRightClickSub{};
+        Subscription cursorOnFloorClickSub{};
+        Subscription cursorOnNPCLeftClickSub{};
+        Subscription cursorOnChestClickSub{};
 
-        // The forwarded events' connections (to unsubscribe)
-        Connection onEnemyLeftClickCnx{};
-        Connection onEnemyRightClickCnx{};
-        Connection onFloorClickCnx{};
-        Connection onNPCLeftClickCnx{};
-        Connection onChestClickCnx{};
+        // The forwarded events' subscriptions (to unsubscribe)
+        Subscription onEnemyLeftClickSub{};
+        Subscription onEnemyRightClickSub{};
+        Subscription onFloorClickSub{};
+        Subscription onNPCLeftClickSub{};
+        Subscription onChestClickSub{};
 
         // The events themselves
         Event<entt::entity, entt::entity> onEnemyLeftClick{};  // Self, Clicked enemy

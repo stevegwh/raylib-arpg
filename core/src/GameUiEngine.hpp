@@ -630,7 +630,7 @@ namespace sage
       public:
         Event<> onHide;
         Event<> onShow;
-        Connection windowUpdateCnx{};
+        Subscription windowUpdateSub{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height
 
@@ -668,7 +668,7 @@ namespace sage
 
     class TooltipWindow final : public Window
     {
-        Connection parentWindowHideCnx{};
+        Subscription parentWindowHideSub{};
 
       public:
         void Remove() override;
