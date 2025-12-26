@@ -111,8 +111,8 @@ namespace sage
     void InventorySystem::onComponentRemoved(entt::entity entity)
     {
         auto& component = registry->get<InventoryComponent>(entity);
-        component.onItemAddedCnx->UnSubscribe();
-        component.onItemRemovedCnx->UnSubscribe();
+        component.onItemAddedCnx.UnSubscribe();
+        component.onItemRemovedCnx.UnSubscribe();
     }
 
     InventorySystem::InventorySystem(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)

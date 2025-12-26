@@ -18,8 +18,9 @@ namespace sage
         Timer cooldownTimer;
         Timer castTimer;
 
-        std::unique_ptr<Connection> onStartCastCnx{};
-        std::unique_ptr<Connection> onCancelCastCnx{};
+        // TODO: Feels strange to have connections and events in the same struct?
+        Connection onStartCastCnx{};
+        Connection onCancelCastCnx{};
 
         AssetID icon{};
         std::string iconPath; // Use AssetID where possible

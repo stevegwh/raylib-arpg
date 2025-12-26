@@ -252,7 +252,7 @@ namespace sage
                 trans.SetParent(nullptr);
                 registry->emplace<DeleteEntityComponent>(equipment.worldModels[itemType]);
                 auto& weapon = registry->get<WeaponComponent>(equipment.worldModels[itemType]);
-                weapon.animationFollowCnx->UnSubscribe();
+                weapon.animationFollowCnx.UnSubscribe();
                 equipment.worldModels[itemType] = entt::null;
             }
             equipment.slots[itemType] = entt::null;

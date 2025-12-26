@@ -88,8 +88,8 @@ namespace sage
         {
             return rec;
         }
-        virtual void OnIdleStart(){};
-        virtual void OnIdleStop(){};
+        virtual void OnIdleStart() {};
+        virtual void OnIdleStop() {};
         virtual void OnHoverStart();
         virtual void OnHoverStop();
         virtual ~UIElement() = default;
@@ -116,12 +116,12 @@ namespace sage
         bool stateLocked = false;
         float dragDelayTime = 0.1;
 
-        virtual void RetrieveInfo(){};
+        virtual void RetrieveInfo() {};
         virtual void OnClick();
         virtual void HoverUpdate();
         virtual void OnDragStart();
-        virtual void DragUpdate(){};
-        virtual void DragDraw(){};
+        virtual void DragUpdate() {};
+        virtual void DragDraw() {};
         virtual void OnDrop(CellElement* receiver);
         virtual void ReceiveDrop(CellElement* droppedElement);
         void ChangeState(std::unique_ptr<UIState> newState);
@@ -160,8 +160,9 @@ namespace sage
                 : baseFontSize(16),
                   fontSize(16),
                   fontSpacing(1.5),
-                  font(ResourceManager::GetInstance().FontLoad(
-                      "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+                  font(
+                      ResourceManager::GetInstance().FontLoad(
+                          "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
                   overflowBehaviour(OverflowBehaviour::SHRINK_TO_FIT)
             {
             }
@@ -629,7 +630,7 @@ namespace sage
       public:
         Event<> onHide;
         Event<> onShow;
-        std::unique_ptr<Connection> windowUpdateCnx{};
+        Connection windowUpdateCnx{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height
 
@@ -667,7 +668,7 @@ namespace sage
 
     class TooltipWindow final : public Window
     {
-        std::unique_ptr<Connection> parentWindowHideCnx;
+        Connection parentWindowHideCnx{};
 
       public:
         void Remove() override;
@@ -745,10 +746,10 @@ namespace sage
         GameUIEngine* engine{};
 
       public:
-        virtual void Update(){};
-        virtual void Draw(){};
-        virtual void Enter(){};
-        virtual void Exit(){};
+        virtual void Update() {};
+        virtual void Draw() {};
+        virtual void Enter() {};
+        virtual void Exit() {};
         virtual ~UIState() = default;
         explicit UIState(CellElement* _element, GameUIEngine* _engine);
     };

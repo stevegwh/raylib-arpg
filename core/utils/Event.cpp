@@ -8,10 +8,14 @@
 
 namespace sage
 {
+    bool Connection::IsConnected()
+    {
+        return id > -1 && event;
+    }
 
     void Connection::UnSubscribe()
     {
-        if (id == -1 || !event) return;
+        if (!IsConnected()) return;
         event->unSubscribe(id);
         id = -1;
         event = nullptr;

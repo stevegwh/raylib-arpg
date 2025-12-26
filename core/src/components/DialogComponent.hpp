@@ -122,7 +122,7 @@ namespace sage
             // unsigned int current = 0;
             std::string start;
             std::string current;
-            std::vector<std::unique_ptr<Connection>> optionPressedConnections;
+            std::vector<Connection> optionPressedConnections;
 
             std::unordered_map<std::string, std::unique_ptr<ConversationNode>> nodes;
 
@@ -146,9 +146,9 @@ namespace sage
 
             void BindKeysToOptionSelect()
             {
-                for (const auto& cnx : optionPressedConnections)
+                for (auto& cnx : optionPressedConnections)
                 {
-                    cnx->UnSubscribe();
+                    cnx.UnSubscribe();
                 }
                 optionPressedConnections.clear();
                 auto& n = nodes.at(current);
@@ -195,9 +195,9 @@ namespace sage
                 }
                 else
                 {
-                    for (const auto& cnx : optionPressedConnections)
+                    for (auto& cnx : optionPressedConnections)
                     {
-                        cnx->UnSubscribe();
+                        cnx.UnSubscribe();
                     }
                     optionPressedConnections.clear();
                     endConversation();

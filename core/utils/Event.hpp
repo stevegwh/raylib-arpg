@@ -16,12 +16,14 @@ namespace sage
 
     class EventBase;
 
+    // Could also be called 'subscription'. Called Connection to mimic entt's signals.
     class Connection
     {
         EventBase* event = nullptr;
         SubscriberId id = -1;
 
       public:
+        bool IsConnected();
         void UnSubscribe();
         ~Connection();
         explicit Connection(EventBase* _event, SubscriberId _id);
@@ -52,12 +54,12 @@ namespace sage
         }
 
       public:
-        std::unique_ptr<Connection> Subscribe(std::function<void(Args...)> func)
+        Connection Subscribe(std::function<void(Args...)> func)
         {
             auto key = ++count;
             subscribers.emplace(key, func);
 
-            return std::make_unique<Connection>(this, key);
+            return Connection(this, key);
         }
 
         void Publish(Args... args) const

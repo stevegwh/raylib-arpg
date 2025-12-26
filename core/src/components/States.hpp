@@ -12,20 +12,20 @@ namespace sage
     class BaseState
     {
         StateEnum currentState;
-        std::vector<std::unique_ptr<Connection>> currentStateConnections;
+        std::vector<Connection> currentStateConnections;
 
       public:
         // All connections added here will be removed when ChangeState is called (via StateMachine).
-        void ManageSubscription(std::unique_ptr<Connection> newConnection)
+        void ManageSubscription(const Connection& newConnection)
         {
-            currentStateConnections.push_back(std::move(newConnection));
+            currentStateConnections.push_back(newConnection);
         }
 
         void RemoveAllConnections()
         {
-            for (const auto& connection : currentStateConnections)
+            for (auto& connection : currentStateConnections)
             {
-                connection->UnSubscribe();
+                connection.UnSubscribe();
             }
             currentStateConnections.clear();
         }
@@ -69,7 +69,7 @@ namespace sage
     class PartyMemberState : public BaseState<PartyMemberState, PartyMemberStateEnum>
     {
       public:
-        std::unique_ptr<Connection> onLeaderMoveForwardCnx{};
+        Connection onLeaderMoveForwardCnx{};
         Event<entt::entity, entt::entity> onLeaderMove; // self, leader
 
         PartyMemberState() : BaseState(PartyMemberStateEnum::Default)

@@ -6,8 +6,8 @@
 
 #include "Event.hpp"
 
-#include <array>
 #include "entt/entt.hpp"
+#include <array>
 #include <memory>
 
 namespace sage
@@ -20,9 +20,9 @@ namespace sage
         std::array<std::array<entt::entity, INVENTORY_MAX_COLS>, INVENTORY_MAX_ROWS> items{}; // ItemComponent etc
 
       public:
-        std::unique_ptr<Connection> onItemAddedCnx;
-        std::unique_ptr<Connection> onItemRemovedCnx;
-        std::unique_ptr<Connection> onInventoryFullCnx;
+        Connection onItemAddedCnx{};
+        Connection onItemRemovedCnx{};
+        Connection onInventoryFullCnx{};
 
         Event<> onItemAdded;
         Event<> onItemRemoved;

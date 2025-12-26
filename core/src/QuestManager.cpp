@@ -191,7 +191,7 @@ namespace sage
         auto& vec = connectionMap.at(entity);
         for (auto& cnx : vec)
         {
-            cnx->UnSubscribe();
+            cnx.UnSubscribe();
         }
     }
 

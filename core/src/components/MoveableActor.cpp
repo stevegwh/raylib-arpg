@@ -11,9 +11,9 @@ namespace sage
 {
     FollowTarget::~FollowTarget()
     {
-        onTargetPathChangedCnx->UnSubscribe();
-        onTargetDestinationReachedCnx->UnSubscribe();
-        onTargetMovementCancelledCnx->UnSubscribe();
+        onTargetPathChangedCnx.UnSubscribe();
+        onTargetDestinationReachedCnx.UnSubscribe();
+        onTargetMovementCancelledCnx.UnSubscribe();
     }
 
     FollowTarget::FollowTarget(

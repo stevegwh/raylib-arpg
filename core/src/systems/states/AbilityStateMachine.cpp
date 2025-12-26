@@ -350,9 +350,9 @@ namespace sage
     void AbilityStateMachine::onComponentRemoved(entt::entity addedEntity) const
     {
         // TODO: Could add the check for "FOLLOW_CASTER" here instead.
-        const auto& ability = registry->get<Ability>(addedEntity);
-        ability.onStartCastCnx->UnSubscribe();
-        ability.onStartCastCnx->UnSubscribe();
+        auto& ability = registry->get<Ability>(addedEntity);
+        ability.onStartCastCnx.UnSubscribe();
+        ability.onStartCastCnx.UnSubscribe();
     }
 
     AbilityStateMachine::AbilityStateMachine(entt::registry* _registry, Systems* _sys)

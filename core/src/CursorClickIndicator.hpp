@@ -21,7 +21,7 @@ namespace sage
         entt::entity self;
         float k = 0;
 
-        std::unique_ptr<Connection> destinationReachedCnx;
+        Connection destinationReachedCnx{};
 
         void onCursorClick(entt::entity entity) const;
         void disableIndicator() const;

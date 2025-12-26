@@ -362,9 +362,9 @@ namespace sage
 
     void PartyMemberStateMachine::onComponentRemoved(const entt::entity entity) const
     {
-        if (const auto& state{registry->get<PartyMemberState>(entity)}; state.onLeaderMoveForwardCnx)
+        if (auto& state{registry->get<PartyMemberState>(entity)}; state.onLeaderMoveForwardCnx.IsConnected())
         {
-            state.onLeaderMoveForwardCnx->UnSubscribe();
+            state.onLeaderMoveForwardCnx.UnSubscribe();
         }
     }
 

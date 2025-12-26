@@ -22,9 +22,9 @@ namespace sage
     {
         entt::registry* registry;
         entt::entity self{}; // The actor following
-        std::unique_ptr<Connection> onTargetDestinationReachedCnx{};
-        std::unique_ptr<Connection> onTargetMovementCancelledCnx{};
-        std::unique_ptr<Connection> onTargetPathChangedCnx{};
+        Connection onTargetDestinationReachedCnx{};
+        Connection onTargetMovementCancelledCnx{};
+        Connection onTargetPathChangedCnx{};
 
         Vector3 targetPrevPos{};
         double timeStarted{};

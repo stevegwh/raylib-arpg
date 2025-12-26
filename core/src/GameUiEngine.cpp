@@ -2275,7 +2275,7 @@ namespace sage
 
     Window::~Window()
     {
-        windowUpdateCnx->UnSubscribe();
+        windowUpdateCnx.UnSubscribe();
     }
 
     Window::Window(Settings* _settings, const Padding _padding)
@@ -2341,9 +2341,9 @@ namespace sage
 
     TooltipWindow::~TooltipWindow()
     {
-        if (parentWindowHideCnx)
+        if (parentWindowHideCnx.IsConnected())
         {
-            parentWindowHideCnx->UnSubscribe();
+            parentWindowHideCnx.UnSubscribe();
         }
     }
 

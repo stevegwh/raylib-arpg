@@ -73,9 +73,9 @@ namespace sage
 
     void PlayerAbilitySystem::UnsubscribeFromUserInput()
     {
-        for (const auto& cnx : abilityPressedConnections)
+        for (auto& cnx : abilityPressedConnections)
         {
-            cnx->UnSubscribe();
+            cnx.UnSubscribe();
         }
         abilityPressedConnections.clear();
     }

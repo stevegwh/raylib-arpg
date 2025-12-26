@@ -459,7 +459,7 @@ namespace sage
         void OnExit(entt::entity entity) override
         {
             auto& combatable = registry->get<CombatableActor>(entity);
-            combatable.onTargetDeathCnx->UnSubscribe();
+            combatable.onTargetDeathCnx.UnSubscribe();
             auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
         }
@@ -552,10 +552,10 @@ namespace sage
     void PlayerStateMachine::onComponentRemoved(entt::entity entity)
     {
         auto& controllable = registry->get<ControllableActor>(entity);
-        controllable.onEnemyLeftClickCnx->UnSubscribe();
-        controllable.onChestClickCnx->UnSubscribe();
-        controllable.onNPCLeftClickCnx->UnSubscribe();
-        controllable.onFloorClickCnx->UnSubscribe();
+        controllable.onEnemyLeftClickCnx.UnSubscribe();
+        controllable.onChestClickCnx.UnSubscribe();
+        controllable.onNPCLeftClickCnx.UnSubscribe();
+        controllable.onFloorClickCnx.UnSubscribe();
     }
 
     PlayerStateMachine::PlayerStateMachine(entt::registry* _registry, Systems* _sys) : StateMachine(_registry)

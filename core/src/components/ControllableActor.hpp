@@ -23,18 +23,18 @@ namespace sage
 
         // We forward the cursor's clicks onto our own events (and inject this entity's id into it)
         // Persists between state changes (do not try to add them via state.AddConnection)
-        std::unique_ptr<Connection> cursorOnEnemyLeftClickCnx{};
-        std::unique_ptr<Connection> cursorOnEnemyRightClickCnx{};
-        std::unique_ptr<Connection> cursorOnFloorClickCnx{};
-        std::unique_ptr<Connection> cursorOnNPCLeftClickCnx{};
-        std::unique_ptr<Connection> cursorOnChestClickCnx{};
+        Connection cursorOnEnemyLeftClickCnx{};
+        Connection cursorOnEnemyRightClickCnx{};
+        Connection cursorOnFloorClickCnx{};
+        Connection cursorOnNPCLeftClickCnx{};
+        Connection cursorOnChestClickCnx{};
 
         // The forwarded events' connections (to unsubscribe)
-        std::unique_ptr<Connection> onEnemyLeftClickCnx{};
-        std::unique_ptr<Connection> onEnemyRightClickCnx{};
-        std::unique_ptr<Connection> onFloorClickCnx{};
-        std::unique_ptr<Connection> onNPCLeftClickCnx{};
-        std::unique_ptr<Connection> onChestClickCnx{};
+        Connection onEnemyLeftClickCnx{};
+        Connection onEnemyRightClickCnx{};
+        Connection onFloorClickCnx{};
+        Connection onNPCLeftClickCnx{};
+        Connection onChestClickCnx{};
 
         // The events themselves
         Event<entt::entity, entt::entity> onEnemyLeftClick{};  // Self, Clicked enemy

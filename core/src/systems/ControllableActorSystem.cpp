@@ -46,11 +46,11 @@ namespace sage
             old.selectedIndicator->SetHint(inactiveCol);
 
             // Stop forwarding cursor clicks to this actor
-            old.cursorOnFloorClickCnx->UnSubscribe();
-            old.cursorOnEnemyLeftClickCnx->UnSubscribe();
-            old.cursorOnEnemyRightClickCnx->UnSubscribe();
-            old.cursorOnNPCLeftClickCnx->UnSubscribe();
-            old.cursorOnChestClickCnx->UnSubscribe();
+            old.cursorOnFloorClickCnx.UnSubscribe();
+            old.cursorOnEnemyLeftClickCnx.UnSubscribe();
+            old.cursorOnEnemyRightClickCnx.UnSubscribe();
+            old.cursorOnNPCLeftClickCnx.UnSubscribe();
+            old.cursorOnChestClickCnx.UnSubscribe();
         }
         selectedActorId = id;
 
