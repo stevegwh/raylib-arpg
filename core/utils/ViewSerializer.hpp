@@ -102,6 +102,7 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
+
             std::vector<ViewName> components;
             for (const auto view = registry->view<ViewName>(); auto& entity : view)
             {
@@ -114,6 +115,7 @@ namespace sage
         template <class Archive>
         void load(Archive& archive)
         {
+
             std::vector<ViewName> components;
             archive(components);
             assert(!components.empty());

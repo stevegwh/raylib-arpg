@@ -31,9 +31,10 @@ namespace sage
         void Update(entt::entity abilityEntity) override
         {
             auto& ab = registry->get<Ability>(abilityEntity);
+            const auto& ad = registry->get<AbilityData>(abilityEntity);
             ab.cooldownTimer.Update(GetFrameTime());
             if (ab.cooldownTimer.HasFinished() &&
-                ab.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO))
+                ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO))
             {
                 onRestartTriggered.Publish(abilityEntity);
             }
@@ -134,7 +135,7 @@ namespace sage
             ab.cooldownTimer.Start();
             ab.castTimer.Start();
 
-            auto& ad = ab.ad;
+            const auto& ad = registry->get<AbilityData>(abilityEntity);
             if (ad.base.HasBehaviour(AbilityBehaviour::MOVEMENT_PROJECTILE))
             {
                 createProjectile(registry, ab.caster, abilityEntity, sys);
@@ -147,7 +148,7 @@ namespace sage
         {
             auto& ab = registry->get<Ability>(abilityEntity);
             ab.castTimer.Update(GetFrameTime());
-            auto& ad = ab.ad;
+            const auto& ad = registry->get<AbilityData>(abilityEntity);
 
             // "executionDelayTimer" should just be a cast timer. Therefore, below should check for cast time
             // behaviour
@@ -181,7 +182,7 @@ namespace sage
     void AbilityStateMachine::executeAbility(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
-        auto& ad = ab.ad;
+        const auto& ad = registry->get<AbilityData>(abilityEntity);
 
         if (ad.base.HasBehaviour(AbilityBehaviour::ATTACK_TARGET))
         {
@@ -210,8 +211,8 @@ namespace sage
     {
         // TODO: Should account for more possibilities with flags here.
         const auto& ab = registry->get<Ability>(abilityEntity);
-
-        if (auto& ad = ab.ad; ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
+        const auto& ad = registry->get<AbilityData>(abilityEntity);
+        if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
         {
             auto& casterPos = registry->get<sgTransform>(ab.caster).GetWorldPos();
             if (const auto point = sys->cursor->getFirstNaviCollision().point;
@@ -228,7 +229,7 @@ namespace sage
     void AbilityStateMachine::spawnAbility(const entt::entity abilityEntity)
     {
         const auto& ab{registry->get<Ability>(abilityEntity)};
-        auto& ad{ab.ad};
+        const auto& ad = registry->get<AbilityData>(abilityEntity);
 
         if (!checkRange(abilityEntity)) return;
 
@@ -279,8 +280,8 @@ namespace sage
     {
 
         auto& ab{registry->get<Ability>(abilityEntity)};
-
-        if (ab.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
+        const auto& ad = registry->get<AbilityData>(abilityEntity);
+        if (ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
             auto state{registry->get<AbilityState>(abilityEntity).GetCurrentState()};
             if (state == AbilityStateEnum::CURSOR_SELECT)

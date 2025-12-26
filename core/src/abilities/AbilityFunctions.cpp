@@ -22,7 +22,7 @@ namespace sage
     void AOEAtPoint(
         entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Vector3 point, float radius)
     {
-        auto& abilityData = registry->get<Ability>(abilityEntity).ad;
+        auto& abilityData = registry->get<AbilityData>(abilityEntity);
         auto view = registry->view<CombatableActor>();
         for (auto& entity : view)
         {
@@ -49,7 +49,7 @@ namespace sage
     {
         assert(target != entt::null);
 
-        auto& abilityData = registry->get<Ability>(abilityEntity).ad;
+        auto& abilityData = registry->get<AbilityData>(abilityEntity);
 
         auto& t = registry->get<sgTransform>(caster);
         auto& enemyPos = registry->get<sgTransform>(target).GetWorldPos();

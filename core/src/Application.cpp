@@ -53,20 +53,7 @@ namespace sage
         renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
         renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
 
-        /*
-        auto dummy = registry->create();
-        for (const auto& e : magic_enum::enum_values<AbilityEnum>())
-        {
-            scene->sys->abilityRegistry->RegisterAbility(dummy, e);
-        }
-            */
-
-        int count = 0;
-        for (auto abilityView = registry->view<Ability>(); const auto& entity : abilityView)
-        {
-            serializer::SaveClassJson<AbilityData>(
-                "resources/ability-data-" + std::to_string(count++) + ".json", registry->get<Ability>(entity).ad);
-        }
+        serializer::SaveViewJson<AbilityData>(*registry, "resources/ability-data.json");
     }
 
     void Application::handleScreenUpdate()

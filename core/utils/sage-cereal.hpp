@@ -104,15 +104,6 @@ namespace sage
     }
 
     template <typename Archive>
-    void serialize(Archive& archive, Ability& ab)
-    {
-        archive(
-            cereal::make_nvp("data", ab.ad),
-            cereal::make_nvp("icon", ab.icon),
-            cereal::make_nvp("path", ab.iconPath));
-    }
-
-    template <typename Archive>
     void serialize(Archive& archive, AbilityData::VisualFXData& vfx)
     {
         archive(cereal::make_nvp("name", vfx.name));

@@ -24,15 +24,15 @@
 
 namespace sage
 {
-    void CreatePlayerAutoAttack(Ability& abilityComponent);
-    void CreateRainOfFireAbility(Ability& abilityComponent);
-    void CreateFloorFireAbility(Ability& abilityComponent);
-    void CreateFireballAbility(Ability& abilityComponent);
-    void CreateLightningBallAbility(Ability& abilityComponent);
-    void CreateWavemobAutoAttackAbility(Ability& abilityComponenty);
-    void CreateWhirlwindAbility(Ability& abilityComponent);
+    void CreatePlayerAutoAttack(entt::registry* registry, entt::entity abilityEntity);
+    void CreateRainOfFireAbility(entt::registry* registry, entt::entity abilityEntity);
+    void CreateFloorFireAbility(entt::registry* registry, entt::entity abilityEntity);
+    void CreateFireballAbility(entt::registry* registry, entt::entity abilityEntity);
+    void CreateLightningBallAbility(entt::registry* registry, entt::entity abilityEntity);
+    void CreateWavemobAutoAttackAbility(entt::registry* registry, entt::entity abilityEntity);
+    void CreateWhirlwindAbility(entt::registry* registry, entt::entity abilityEntity);
     std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, Systems* _sys);
-    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, Ability* _ability);
+    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, entt::entity abilityEntity);
 
     entt::entity AbilityFactory::GetAbility(entt::entity caster, AbilityEnum abilityEnum)
     {
@@ -59,22 +59,25 @@ namespace sage
         registry->emplace<sgTransform>(out, out);
         abilityMap[caster].emplace(abilityEnum, out);
         auto& ability = registry->emplace<Ability>(out);
-        static const std::unordered_map<AbilityEnum, std::function<void(Ability&)>> abilityCreators = {
-            {AbilityEnum::PLAYER_AUTOATTACK, CreatePlayerAutoAttack},
-            {AbilityEnum::ENEMY_AUTOATTACK, CreateWavemobAutoAttackAbility},
-            {AbilityEnum::FIREBALL, CreateFireballAbility},
-            {AbilityEnum::LIGHTNINGBALL, CreateLightningBallAbility},
-            {AbilityEnum::RAINFOFIRE, CreateRainOfFireAbility},
-            {AbilityEnum::WHIRLWIND, CreateWhirlwindAbility}};
-        abilityCreators.at(abilityEnum)(ability);
+        static const std::unordered_map<AbilityEnum, std::function<void(entt::registry*, entt::entity)>>
+            abilityDataCreators = {
+                {AbilityEnum::PLAYER_AUTOATTACK, CreatePlayerAutoAttack},
+                {AbilityEnum::ENEMY_AUTOATTACK, CreateWavemobAutoAttackAbility},
+                {AbilityEnum::FIREBALL, CreateFireballAbility},
+                {AbilityEnum::LIGHTNINGBALL, CreateLightningBallAbility},
+                {AbilityEnum::RAINFOFIRE, CreateRainOfFireAbility},
+                {AbilityEnum::WHIRLWIND, CreateWhirlwindAbility}};
+        // Attaches AbilityData to the out entity
+        abilityDataCreators.at(abilityEnum)(registry, out);
+        auto& data = registry->get<AbilityData>(out);
         ability.self = out;
         ability.caster = caster;
-        ability.cooldownTimer.SetMaxTime(ability.ad.base.cooldownDuration);
-        ability.castTimer.SetMaxTime(ability.ad.base.castTime);
-        ability.vfx = GetVisualFX(sys, &ability);
-        if (ability.ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
+        ability.cooldownTimer.SetMaxTime(data.base.cooldownDuration);
+        ability.castTimer.SetMaxTime(data.base.castTime);
+        ability.vfx = GetVisualFX(sys, out);
+        if (data.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
-            ability.abilityIndicator = GetIndicator(ability.ad.indicator, sys);
+            ability.abilityIndicator = GetIndicator(data.indicator, sys);
         }
         return out;
     }
@@ -104,29 +107,30 @@ namespace sage
         return std::move(obj);
     }
 
-    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, Ability* _ability)
+    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, entt::entity abilityEntity)
     {
-        if (_ability->ad.vfx.name == AbilityVFXEnum::NONE) return nullptr;
+        const auto& ad = _sys->registry->get<AbilityData>(abilityEntity);
+        if (ad.vfx.name == AbilityVFXEnum::NONE) return nullptr;
 
         std::unique_ptr<VisualFX> obj;
-
-        if (_ability->ad.vfx.name == AbilityVFXEnum::RAINOFFIRE)
+        auto* _ability = &_sys->registry->get<Ability>(abilityEntity);
+        if (ad.vfx.name == AbilityVFXEnum::RAINOFFIRE)
         {
             obj = std::make_unique<RainOfFireVFX>(_sys, _ability);
         }
-        else if (_ability->ad.vfx.name == AbilityVFXEnum::FLOORFIRE)
+        else if (ad.vfx.name == AbilityVFXEnum::FLOORFIRE)
         {
             obj = std::make_unique<FloorFireVFX>(_sys, _ability);
         }
-        else if (_ability->ad.vfx.name == AbilityVFXEnum::WHIRLWIND)
+        else if (ad.vfx.name == AbilityVFXEnum::WHIRLWIND)
         {
             obj = std::make_unique<WhirlwindVFX>(_sys, _ability);
         }
-        else if (_ability->ad.vfx.name == AbilityVFXEnum::LIGHTNINGBALL)
+        else if (ad.vfx.name == AbilityVFXEnum::LIGHTNINGBALL)
         {
             obj = std::make_unique<LightningBallVFX>(_sys, _ability);
         }
-        else if (_ability->ad.vfx.name == AbilityVFXEnum::FIREBALL)
+        else if (ad.vfx.name == AbilityVFXEnum::FIREBALL)
         {
             obj = std::make_unique<FireballVFX>(_sys, _ability);
         }
@@ -140,7 +144,7 @@ namespace sage
 
     void createProjectile(entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Systems* data)
     {
-        auto& ad = registry->get<Ability>(abilityEntity).ad;
+        auto& ad = registry->get<AbilityData>(abilityEntity);
         auto& projectileTrans = registry->get<sgTransform>(abilityEntity);
         auto& casterPos = registry->get<sgTransform>(caster).GetWorldPos();
         auto point = data->cursor->getFirstNaviCollision().point;
@@ -160,9 +164,9 @@ namespace sage
 
     // --------------------------------------------
 
-    void CreatePlayerAutoAttack(Ability& abilityComponent)
+    void CreatePlayerAutoAttack(entt::registry* registry, entt::entity abilityEntity)
     {
-        auto& ad = abilityComponent.ad;
+        auto& ad = registry->emplace<AbilityData>(abilityEntity);
         ad.name = "AutoAttack";
         ad.description = "Hits the enemy for damage every so often.";
         ad.base.AddElement(AbilityElement::PHYSICAL);
@@ -181,13 +185,14 @@ namespace sage
         ad.animationParams.animationDelay = 0;
     }
 
-    void CreateRainOfFireAbility(Ability& abilityComponent)
+    void CreateRainOfFireAbility(entt::registry* registry, entt::entity abilityEntity)
     {
-        abilityComponent.ad.name = "Rain of Fire";
-        abilityComponent.ad.description = "Hits all enemies around the attacker.";
+        auto& ad = registry->emplace<AbilityData>(abilityEntity);
+        auto& abilityComponent = registry->get<Ability>(abilityEntity);
+        ad.name = "Rain of Fire";
+        ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/rain_of_fire.png";
         abilityComponent.icon = "IMG_ABILITY_RAINOFFIRE";
-        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 3;
         ad.base.range = 30;
         ad.base.baseDamage = 25;
@@ -209,14 +214,14 @@ namespace sage
         ad.indicator.indicatorKey = AbilityIndicatorEnum::CIRCULAR_MAGIC_CURSOR;
     }
 
-    void CreateFloorFireAbility(Ability& abilityComponent)
+    void CreateFloorFireAbility(entt::registry* registry, entt::entity abilityEntity)
     {
         // TODO: Implement
     }
 
-    void CreateFireballAbility(Ability& abilityComponent)
+    void CreateFireballAbility(entt::registry* registry, entt::entity abilityEntity)
     {
-        auto& ad = abilityComponent.ad;
+        auto& ad = registry->emplace<AbilityData>(abilityEntity);
         ad.base.cooldownDuration = 1;
         ad.base.range = 30;
         ad.base.baseDamage = 50;
@@ -235,9 +240,9 @@ namespace sage
         ad.vfx.name = AbilityVFXEnum::FIREBALL;
     }
 
-    void CreateWavemobAutoAttackAbility(Ability& abilityComponent)
+    void CreateWavemobAutoAttackAbility(entt::registry* registry, entt::entity abilityEntity)
     {
-        auto& ad = abilityComponent.ad;
+        auto& ad = registry->emplace<AbilityData>(abilityEntity);
         ad.base.cooldownDuration = 1;
         ad.base.range = 5;
         ad.base.baseDamage = 10;
@@ -251,13 +256,14 @@ namespace sage
         ad.animationParams.animEnum = AnimationEnum::AUTOATTACK;
     }
 
-    void CreateLightningBallAbility(Ability& abilityComponent)
+    void CreateLightningBallAbility(entt::registry* registry, entt::entity abilityEntity)
     {
-        abilityComponent.ad.name = "Lightning Ball";
-        abilityComponent.ad.description = "Hits all enemies around the attacker.";
+        auto& ad = registry->emplace<AbilityData>(abilityEntity);
+        auto& abilityComponent = registry->get<Ability>(abilityEntity);
+        ad.name = "Lightning Ball";
+        ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/lightning_ball.png";
         abilityComponent.icon = "IMG_ABILITY_LIGHTINGBALL";
-        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 1;
         ad.base.range = 30;
         ad.base.baseDamage = 50;
@@ -277,13 +283,14 @@ namespace sage
         ad.vfx.name = AbilityVFXEnum::LIGHTNINGBALL;
     }
 
-    void CreateWhirlwindAbility(Ability& abilityComponent)
+    void CreateWhirlwindAbility(entt::registry* registry, entt::entity abilityEntity)
     {
-        abilityComponent.ad.name = "Whirlwind";
-        abilityComponent.ad.description = "Hits all enemies around the attacker.";
+        auto& ad = registry->emplace<AbilityData>(abilityEntity);
+        auto& abilityComponent = registry->get<Ability>(abilityEntity);
+        ad.name = "Whirlwind";
+        ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/whirlwind.png";
         abilityComponent.icon = "IMG_ABILITY_WHIRLWIND";
-        auto& ad = abilityComponent.ad;
         ad.base.cooldownDuration = 0.15;
         ad.base.range = 15;
         ad.base.baseDamage = 10;

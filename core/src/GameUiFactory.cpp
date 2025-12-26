@@ -191,17 +191,18 @@ namespace sage
 
         window->nPatchInfo = {Rectangle{0.0f, 64.0f, 64.0f, 64.0f}, 8, 8, 8, 8, NPATCH_NINE_PATCH};
         {
+            const auto& ad = engine->registry->get<AbilityData>(ability.self);
             auto table = window->CreateTable();
             auto row0 = table->CreateTableRow(10);
             auto cell0 = row0->CreateTableCell();
             TextBox::FontInfo _fontInfo{};
             _fontInfo.overflowBehaviour = TextBox::OverflowBehaviour::WORD_WRAP;
             auto headerTextbox = std::make_unique<TextBox>(engine, cell0, _fontInfo, VertAlignment::BOTTOM);
-            cell0->CreateTextbox(std::move(headerTextbox), ability.ad.name);
+            cell0->CreateTextbox(std::move(headerTextbox), ad.name);
             auto row = table->CreateTableRow({10, 0, 0, 0});
             auto cell = row->CreateTableCell();
             auto bodyTextbox = std::make_unique<TextBox>(engine, cell, _fontInfo);
-            cell->CreateTextbox(std::move(bodyTextbox), ability.ad.description);
+            cell->CreateTextbox(std::move(bodyTextbox), ad.description);
         }
         window->FinalizeLayout();
         return window;

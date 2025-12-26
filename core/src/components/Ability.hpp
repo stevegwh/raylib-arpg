@@ -15,7 +15,6 @@ namespace sage
     {
         entt::entity self{};
         entt::entity caster{};
-        AbilityData ad;
         Timer cooldownTimer;
         Timer castTimer;
 
