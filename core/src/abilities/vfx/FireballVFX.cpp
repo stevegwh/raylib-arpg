@@ -54,7 +54,7 @@ namespace sage
         secondsLoc = GetShaderLocation(shader, "seconds");
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
         model = ResourceManager::GetInstance().GetModelCopy("MDL_VFX_SPHERE");
-
+        std::cout << "material count: " << model.GetMaterialCount() << std::endl;
         model.SetTexture(texture, 0, MATERIAL_MAP_DIFFUSE);
         model.SetTexture(texture2, 0, MATERIAL_MAP_EMISSION);
         model.SetShader(shader, 0);

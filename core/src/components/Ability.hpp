@@ -2,7 +2,6 @@
 
 #include "abilities/AbilityData.hpp"
 #include "abilities/AbilityIndicator.hpp"
-#include "abilities/vfx/VisualFX.hpp"
 #include <Timer.hpp>
 
 #include "entt/entt.hpp"
@@ -11,6 +10,8 @@
 
 namespace sage
 {
+    class VisualFX;
+
     struct Ability
     {
         entt::entity self{};
@@ -24,10 +25,8 @@ namespace sage
 
         AssetID icon{};
         std::string iconPath; // Use AssetID where possible
-
-        std::unique_ptr<VisualFX> vfx{};
         // TODO: VFX should have before, during and after.
-
+        VisualFX* GetVfx(entt::registry* registry) const;
         std::unique_ptr<AbilityIndicator> abilityIndicator{};
 
         void ResetCooldown();

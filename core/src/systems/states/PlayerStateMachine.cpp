@@ -404,7 +404,7 @@ namespace sage
 
     // ----------------------------
 
-    // TODO: Move to its own state machine
+    // TODO: Move combat to its own state machine
     class PlayerStateMachine::CombatState : public State
     {
         PlayerStateMachine* stateController;
@@ -437,7 +437,7 @@ namespace sage
             auto& animation = registry->get<Animation>(entity);
             animation.ChangeAnimationByEnum(AnimationEnum::AUTOATTACK);
 
-            auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).startCast.Publish(abilityEntity);
 
             auto& combatable = registry->get<CombatableActor>(entity);
@@ -460,7 +460,7 @@ namespace sage
         {
             auto& combatable = registry->get<CombatableActor>(entity);
             combatable.onTargetDeathSub.UnSubscribe();
-            auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
+            auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::PLAYER_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
         }
 

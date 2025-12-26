@@ -133,7 +133,7 @@ namespace sage
 
         void OnEnter(entt::entity self) override
         {
-            const auto abilityEntity = sys->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            const auto abilityEntity = sys->abilityFactory->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
 
             auto& moveable = registry->get<MoveableActor>(self);
@@ -206,13 +206,13 @@ namespace sage
 
         void OnEnter(entt::entity entity) override
         {
-            auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+            auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).startCast.Publish(abilityEntity);
         }
 
         void OnExit(entt::entity entity) override
         {
-            auto abilityEntity = sys->abilityRegistry->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
+            auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
         }
 
@@ -253,7 +253,7 @@ namespace sage
                 animation.onAnimationEnd.Subscribe([this](entt::entity _entity) { destroyEntity(_entity); });
             state.ManageSubscription(std::move(syb));
 
-            auto abilityEntity = sys->abilityRegistry->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
+            auto abilityEntity = sys->abilityFactory->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
 
             sys->actorMovementSystem->CancelMovement(self);

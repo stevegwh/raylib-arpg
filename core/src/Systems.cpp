@@ -31,7 +31,7 @@ namespace sage
           npcManager(std::make_unique<NPCManager>(_registry, this)),
           healthBarSystem(std::make_unique<HealthBarSystem>(_registry, camera.get())),
           stateMachines(std::make_unique<StateMachines>(_registry, this)),
-          abilityRegistry(std::make_unique<AbilityFactory>(_registry, this)),
+          abilityFactory(std::make_unique<AbilityFactory>(_registry, this)),
           itemFactory(std::make_unique<ItemFactory>(_registry)),
           playerAbilitySystem(std::make_unique<PlayerAbilitySystem>(_registry, this)),
           combatSystem(std::make_unique<CombatSystem>(_registry)),

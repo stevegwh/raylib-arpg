@@ -170,9 +170,10 @@ namespace sage
     void AbilityStateMachine::cancelCast(entt::entity abilityEntity)
     {
         auto& ab = registry->get<Ability>(abilityEntity);
-        if (ab.vfx && ab.vfx->active)
+        auto* vfx = ab.GetVfx(registry);
+        if (vfx && vfx->active)
         {
-            ab.vfx->active = false;
+            vfx->active = false;
         }
         ab.cooldownTimer.Stop();
         ab.castTimer.Stop();
@@ -235,8 +236,8 @@ namespace sage
 
         auto& animation{registry->get<Animation>(ab.caster)};
         animation.ChangeAnimationByParams(ad.animationParams);
-
-        if (ab.vfx)
+        auto* vfx = ab.GetVfx(registry);
+        if (vfx)
         {
             auto& trans{registry->get<sgTransform>(abilityEntity)};
             if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
@@ -263,12 +264,12 @@ namespace sage
                     trans.SetRotation(casterTrans.GetWorldRot());
                 }
 
-                ab.vfx->InitSystem();
+                vfx->InitSystem();
             }
             else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
             {
                 trans.SetPosition(sys->cursor->getFirstNaviCollision().point);
-                ab.vfx->InitSystem();
+                vfx->InitSystem();
             }
         }
 
@@ -312,9 +313,10 @@ namespace sage
             }
 
             states.at(state)->Update(abilityEntity);
-            if (ab.vfx && ab.vfx->active)
+            auto* vfx = ab.GetVfx(registry);
+            if (vfx && vfx->active)
             {
-                ab.vfx->Update(GetFrameTime());
+                vfx->Update(GetFrameTime());
             }
         }
     }
@@ -331,9 +333,10 @@ namespace sage
                 continue;
             }
             states.at(state)->Draw3D(abilityEntity);
-            if (ab.vfx && ab.vfx->active)
+            auto* vfx = ab.GetVfx(registry);
+            if (vfx && vfx->active)
             {
-                ab.vfx->Draw3D();
+                vfx->Draw3D();
             }
         }
     }

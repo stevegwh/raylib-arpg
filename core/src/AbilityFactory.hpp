@@ -6,6 +6,8 @@
 namespace sage
 {
     class Systems;
+    class VisualFX;
+    enum class AbilityVFXEnum;
 
     enum class AbilityEnum // Names of premade abilities.
     {

@@ -76,7 +76,7 @@ namespace sage
         std::unique_ptr<NPCManager> npcManager;
         std::unique_ptr<HealthBarSystem> healthBarSystem;
         std::unique_ptr<StateMachines> stateMachines;
-        std::unique_ptr<AbilityFactory> abilityRegistry;
+        std::unique_ptr<AbilityFactory> abilityFactory;
         std::unique_ptr<ItemFactory> itemFactory;
         std::unique_ptr<PlayerAbilitySystem> playerAbilitySystem;
         std::unique_ptr<CombatSystem> combatSystem;

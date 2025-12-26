@@ -110,7 +110,7 @@ namespace sage
 
         auto& combatable = registry->emplace<CombatableActor>(id);
         combatable.actorType = CombatableActorType::WAVEMOB;
-        sys->abilityRegistry->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
+        sys->abilityFactory->RegisterAbility(id, AbilityEnum::ENEMY_AUTOATTACK);
         registry->emplace<HealthBar>(id);
 
         BoundingBox bb = createRectangularBoundingBox(3.0f, 7.0f);
@@ -255,11 +255,9 @@ namespace sage
 
         // TODO: Move elsewhere/read from save file
         // Initialise starting abilities
-        sys->playerAbilitySystem->SetSlot(0, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::WHIRLWIND));
-        // sys->playerAbilitySystem->SetSlot(1, sys->abilityRegistry->RegisterAbility(id,
-        // AbilityEnum::RAINFOFIRE)); sys->playerAbilitySystem->SetSlot(
-        //     2, sys->abilityRegistry->RegisterAbility(id, AbilityEnum::LIGHTNINGBALL));
-        sys->abilityRegistry->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
+        sys->playerAbilitySystem->SetSlot(0, sys->abilityFactory->RegisterAbility(id, AbilityEnum::WHIRLWIND));
+        sys->playerAbilitySystem->SetSlot(1, sys->abilityFactory->RegisterAbility(id, AbilityEnum::RAINFOFIRE));
+        sys->abilityFactory->RegisterAbility(id, AbilityEnum::PLAYER_AUTOATTACK);
 
         registry->emplace<InventoryComponent>(id);
         registry->emplace<EquipmentComponent>(id);

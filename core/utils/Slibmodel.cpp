@@ -57,12 +57,14 @@ namespace sage
     static std::vector<std::string> sgLoadGLTF(const char* fileName); // Load GLTF mesh data
 
     // Load model from files (mesh and material)
+    // TODO: Horrible function made out of desperation to extract the material names from the files.
     std::vector<std::string> GetMaterialNames(const char* fileName)
     {
         std::vector<std::string> matNames{};
 
         if (IsFileExtension(fileName, ".obj"))
         {
+            // TODO: Sphere.obj does not work with this? Material causes a segfault.
             matNames = sgLoadOBJ(fileName);
         }
 

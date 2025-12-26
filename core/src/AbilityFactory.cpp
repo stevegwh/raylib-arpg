@@ -1,5 +1,6 @@
 #include "AbilityFactory.hpp"
 
+#include "abilities/AbilityData.hpp"
 #include "abilities/AbilityFunctions.hpp"
 #include "abilities/AbilityIndicator.hpp"
 #include "abilities/vfx/FireballVFX.hpp"
@@ -32,7 +33,7 @@ namespace sage
     void CreateWavemobAutoAttackAbility(entt::registry* registry, entt::entity abilityEntity);
     void CreateWhirlwindAbility(entt::registry* registry, entt::entity abilityEntity);
     std::unique_ptr<AbilityIndicator> GetIndicator(AbilityData::IndicatorData data, Systems* _sys);
-    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, entt::entity abilityEntity);
+    void AttachVisualFX(Systems* _sys, entt::entity abilityEntity);
 
     entt::entity AbilityFactory::GetAbility(entt::entity caster, AbilityEnum abilityEnum)
     {
@@ -74,7 +75,7 @@ namespace sage
         ability.caster = caster;
         ability.cooldownTimer.SetMaxTime(data.base.cooldownDuration);
         ability.castTimer.SetMaxTime(data.base.castTime);
-        ability.vfx = GetVisualFX(sys, out);
+        AttachVisualFX(sys, out);
         if (data.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
             ability.abilityIndicator = GetIndicator(data.indicator, sys);
@@ -107,39 +108,33 @@ namespace sage
         return std::move(obj);
     }
 
-    std::unique_ptr<VisualFX> GetVisualFX(Systems* _sys, entt::entity abilityEntity)
+    void AttachVisualFX(Systems* _sys, entt::entity abilityEntity)
     {
         const auto& ad = _sys->registry->get<AbilityData>(abilityEntity);
-        if (ad.vfx.name == AbilityVFXEnum::NONE) return nullptr;
+        if (ad.vfx.name == AbilityVFXEnum::NONE) return;
 
-        std::unique_ptr<VisualFX> obj;
         auto* _ability = &_sys->registry->get<Ability>(abilityEntity);
+
         if (ad.vfx.name == AbilityVFXEnum::RAINOFFIRE)
         {
-            obj = std::make_unique<RainOfFireVFX>(_sys, _ability);
+            _sys->registry->emplace<RainOfFireVFX>(abilityEntity, _sys, _ability);
         }
         else if (ad.vfx.name == AbilityVFXEnum::FLOORFIRE)
         {
-            obj = std::make_unique<FloorFireVFX>(_sys, _ability);
+            _sys->registry->emplace<FloorFireVFX>(abilityEntity, _sys, _ability);
         }
         else if (ad.vfx.name == AbilityVFXEnum::WHIRLWIND)
         {
-            obj = std::make_unique<WhirlwindVFX>(_sys, _ability);
+            _sys->registry->emplace<WhirlwindVFX>(abilityEntity, _sys, _ability);
         }
         else if (ad.vfx.name == AbilityVFXEnum::LIGHTNINGBALL)
         {
-            obj = std::make_unique<LightningBallVFX>(_sys, _ability);
+            _sys->registry->emplace<LightningBallVFX>(abilityEntity, _sys, _ability);
         }
         else if (ad.vfx.name == AbilityVFXEnum::FIREBALL)
         {
-            obj = std::make_unique<FireballVFX>(_sys, _ability);
+            _sys->registry->emplace<FireballVFX>(abilityEntity, _sys, _ability);
         }
-        else
-        {
-            return nullptr;
-        }
-
-        return std::move(obj);
     }
 
     void createProjectile(entt::registry* registry, entt::entity caster, entt::entity abilityEntity, Systems* data)
