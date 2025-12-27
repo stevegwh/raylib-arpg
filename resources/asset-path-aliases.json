@@ -127,7 +127,7 @@
             },
             {
                 "key": "MDL_VFX_SPHERE",
-                "value": "resources/models/obj/sphere.glb"
+                "value": "resources/models/obj/sphere.obj"
             },
             {
                 "key": "MDL_VFX_FLATTORUS",

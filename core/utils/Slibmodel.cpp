@@ -45,6 +45,8 @@
 #include <cstdlib> // Required for: malloc(), calloc(), free()
 #include <cstring> // Required for: memcmp(), strlen(), strncpy()
 
+#include <iostream>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 #define CGLTF_MALLOC RL_MALLOC
@@ -64,11 +66,9 @@ namespace sage
 
         if (IsFileExtension(fileName, ".obj"))
         {
-            // TODO: Sphere.obj does not work with this? Material causes a segfault.
             matNames = sgLoadOBJ(fileName);
         }
-
-        if (IsFileExtension(fileName, ".gltf") || IsFileExtension(fileName, ".glb"))
+        else if (IsFileExtension(fileName, ".gltf") || IsFileExtension(fileName, ".glb"))
         {
             matNames = sgLoadGLTF(fileName);
         }
@@ -98,6 +98,7 @@ namespace sage
         matNames.reserve(materials.size());
         for (const auto& mat : materials)
         {
+            std::cout << "Material name: " << mat.name << std::endl;
             matNames.push_back(mat.name);
         }
 

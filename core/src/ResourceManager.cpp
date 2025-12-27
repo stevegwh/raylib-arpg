@@ -382,21 +382,32 @@ namespace sage
             auto materialNames = GetMaterialNames(pathDealiased.c_str());
             Model model = LoadModel(pathDealiased.c_str());
 
-            for (unsigned int i = 0; i < materialNames.size(); ++i)
+            if (materialNames.empty())
             {
-                const auto& mat = materialNames[i];
-
-                if (!materialMap.contains(mat))
+                materialNames.push_back("Default");
+                if (!materialMap.contains("Default"))
                 {
-                    materialMap[mat] = model.materials[i];
+                    materialMap.emplace("Default", LoadMaterialDefault());
                 }
-                else
-                {
-                    UnloadMaterial(model.materials[i]);
-                }
-                model.materials[i] = materialMap.at(mat);
+                model.materials[0] = materialMap.at("Default");
             }
+            else
+            {
+                for (unsigned int i = 0; i < materialNames.size(); ++i)
+                {
+                    const auto& mat = materialNames[i];
 
+                    if (!materialMap.contains(mat))
+                    {
+                        materialMap[mat] = model.materials[i];
+                    }
+                    else
+                    {
+                        UnloadMaterial(model.materials[i]);
+                        model.materials[i] = materialMap.at(mat);
+                    }
+                }
+            }
             modelCopies.emplace(key, std::move(ModelInfo{model, materialNames}));
         }
     }
