@@ -7,6 +7,7 @@
 #include "entt/entt.hpp"
 
 // #include <iostream>
+#include <type_traits>
 #include <vector>
 
 namespace sage
@@ -76,16 +77,11 @@ namespace sage
         }
 
       public:
-        // NB: Passes all arguments by value
-        // Allows for calls to overloaded functions that take more arguments than the base 'OnEnter' function.
-        template <typename NewStateType, typename... StateEnterArgs>
-        void ChangeState(entt::entity entity, StateEnum newState, StateEnterArgs... args)
-        // template <typename... StateEnterArgs>
-        // void ChangeState(entt::entity entity, StateEnum newState, const StateEnterArgs&... args)
+        void ChangeState(entt::entity entity, StateEnum newStateEnum)
         {
-            auto& oldState = registry->get<StateComponentType>(entity);
-            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentStateEnum();
-            if (GetStateFromEnum(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
+            auto& stateComponent = registry->get<StateComponentType>(entity);
+            StateEnum oldStateEnum = stateComponent.GetCurrentStateEnum();
+            if (GetStateFromEnum(oldStateEnum)->StateLocked(entity) || oldStateEnum == newStateEnum)
             {
                 return;
             }
@@ -96,31 +92,10 @@ namespace sage
             //            std::cout << std::format(
             //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
             //                magic_enum::enum_name(newState));
-            oldState.RemoveAllSubscriptions();
+            stateComponent.RemoveAllSubscriptions();
             GetStateFromEnum(oldStateEnum)->OnExit(entity);
-            oldState.SetState(newState);
-            static_cast<NewStateType*>(GetStateFromEnum(newState))->OnEnter(entity, args...);
-        }
-
-        void ChangeState(entt::entity entity, StateEnum newState)
-        {
-            auto& oldState = registry->get<StateComponentType>(entity);
-            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentStateEnum();
-            if (GetStateFromEnum(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
-            {
-                return;
-            }
-            //            std::cout << "------------- \n";
-            //            std::cout << std::format(
-            //                "Entity {}, Exiting: {} \n", static_cast<int>(entity),
-            //                magic_enum::enum_name(oldStateEnum));
-            //            std::cout << std::format(
-            //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
-            //                magic_enum::enum_name(newState));
-            oldState.RemoveAllSubscriptions();
-            GetStateFromEnum(oldStateEnum)->OnExit(entity);
-            oldState.SetState(newState);
-            GetStateFromEnum(newState)->OnEnter(entity);
+            stateComponent.SetStateEnum(newStateEnum);
+            GetStateFromEnum(newStateEnum)->OnEnter(entity);
         }
 
         virtual ~StateMachine() = default;

@@ -138,7 +138,7 @@ namespace sage
 
             auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
-            moveable.followTarget.emplace(combatable.target);
+            moveable.actorTarget.emplace(combatable.target);
             auto& target = registry->get<MoveableActor>(combatable.target);
 
             auto syb = moveable.onDestinationReached.Subscribe(
@@ -156,7 +156,7 @@ namespace sage
         void OnExit(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.reset();
+            moveable.actorTarget.reset();
         }
 
         ~TargetOutOfRangeState() override = default;

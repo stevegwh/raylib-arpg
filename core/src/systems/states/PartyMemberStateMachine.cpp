@@ -17,16 +17,25 @@ static constexpr int FOLLOW_DISTANCE = 15;
 
 namespace sage
 {
+    // Necessary data for when the following party member cannot reach their target destination
+    struct DestinationUnreachableData
+    {
+        Vector3 originalDestination{};
+        double timeStart{};
+        unsigned int tryCount = 0;
+        const float threshold = 1.5;
+        const unsigned int maxTries = 4;
+    };
+
     class PartyMemberStateMachine::DefaultState final : public State
     {
         PartyMemberStateMachine* stateController;
 
       public:
-        void onLeaderMove(entt::entity self, entt::entity leader) const
+        void onLeaderMove(entt::entity self) const
         {
             sys->actorMovementSystem->CancelMovement(self);
-            stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                self, PartyMemberStateEnum::FollowingLeader, leader);
+            stateController->ChangeState(self, PartyMemberStateEnum::FollowingLeader);
         }
 
         void Update(entt::entity entity) override
@@ -64,12 +73,9 @@ namespace sage
         void onDestinationUnreachable(const entt::entity self, const Vector3 requestedPos) const
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            stateController->ChangeState<DestinationUnreachableState, entt::entity, Vector3, PartyMemberStateEnum>(
-                self,
-                PartyMemberStateEnum::DestinationUnreachable,
-                moveable.followTarget.value(),
-                requestedPos,
-                PartyMemberStateEnum::FollowingLeader);
+            registry->emplace<DestinationUnreachableData>(
+                self, DestinationUnreachableData{.originalDestination = requestedPos, .timeStart = GetTime()});
+            stateController->ChangeState(self, PartyMemberStateEnum::DestinationUnreachable);
         }
 
         void onMovementCancelled(const entt::entity self) const
@@ -98,59 +104,64 @@ namespace sage
         {
             const auto& moveable = registry->get<MoveableActor>(self);
             const auto& transform = registry->get<sgTransform>(self);
-            const auto& followTrans = registry->get<sgTransform>(moveable.followTarget.value());
-            const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget.value());
+            const auto& followTrans = registry->get<sgTransform>(moveable.actorTarget.value());
+            const auto& followMoveable = registry->get<MoveableActor>(moveable.actorTarget.value());
 
             // If we are closer to our destination than the leader is, then wait.
             if (followMoveable.IsMoving() &&
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE >
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
-                auto followTarget = moveable.followTarget.value();
-                stateController->ChangeState<WaitingForLeaderState, entt::entity>(
-                    self, PartyMemberStateEnum::WaitingForLeader, followTarget);
+                auto actorTarget = moveable.actorTarget.value();
+                stateController->ChangeState(self, PartyMemberStateEnum::WaitingForLeader);
             }
         }
 
-        void OnEnter(const entt::entity self, entt::entity followTarget)
+        void OnEnter(const entt::entity self, entt::entity actorTarget)
         {
-            assert(followTarget != entt::null);
+            assert(actorTarget != entt::null);
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
 
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(followTarget);
+            moveable.actorTarget.emplace(actorTarget);
 
-            auto& target = registry->get<MoveableActor>(moveable.followTarget.value());
+            auto& target = registry->get<MoveableActor>(moveable.actorTarget.value());
 
-            auto syb = moveable.onDestinationReached.Subscribe(
+            auto sub = moveable.onDestinationReached.Subscribe(
                 [this](const entt::entity _self) { onTargetReached(_self); });
-            auto syb1 = target.onPathChanged.Subscribe(
+            auto sub1 = target.onPathChanged.Subscribe(
                 [this, self](entt::entity _target) { onTargetPathChanged(self, _target); });
-            auto syb2 = moveable.onMovementCancel.Subscribe(
+            auto sub2 = moveable.onMovementCancel.Subscribe(
                 [this](const entt::entity _self) { onMovementCancelled(_self); });
-            auto syb3 = moveable.onDestinationUnreachable.Subscribe(
+            auto sub3 = moveable.onDestinationUnreachable.Subscribe(
                 [this](const entt::entity _self, const Vector3 requestedPos) {
                     onDestinationUnreachable(_self, requestedPos);
                 });
 
             auto& state = registry->get<PartyMemberState>(self);
-            state.ManageSubscription(std::move(syb));
-            state.ManageSubscription(std::move(syb1));
-            state.ManageSubscription(std::move(syb2));
-            state.ManageSubscription(std::move(syb3));
+            state.ManageSubscription(std::move(sub));
+            state.ManageSubscription(std::move(sub1));
+            state.ManageSubscription(std::move(sub2));
+            state.ManageSubscription(std::move(sub3));
 
-            // entt::sink sink5{moveable.followTarget->onTargetMovementCancelled};
+            // entt::sink sink5{moveable.actorTarget->onTargetMovementCancelled};
             // state.AddConnection(sink5.connect<&FollowingLeaderState::onMovementCancelled>(this));
 
-            onTargetPathChanged(self, followTarget);
+            onTargetPathChanged(self, actorTarget);
+        }
+
+        void OnEnter(entt::entity) override
+        {
+            // Error if this overload of OnEnter is called.
+            assert(0);
         }
 
         void OnExit(const entt::entity self) override
         {
             // TODO: We don't disconnect the subscriptions here?
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.reset();
+            moveable.actorTarget.reset();
             sys->actorMovementSystem->CancelMovement(self);
         }
 
@@ -181,40 +192,31 @@ namespace sage
 
             const auto& moveable = registry->get<MoveableActor>(self);
             const auto& transform = registry->get<sgTransform>(self);
-            const auto& followTrans = registry->get<sgTransform>(moveable.followTarget.value());
-            const auto& followMoveable = registry->get<MoveableActor>(moveable.followTarget.value());
+            const auto& followTrans = registry->get<sgTransform>(moveable.actorTarget.value());
+            const auto& followMoveable = registry->get<MoveableActor>(moveable.actorTarget.value());
 
             // Follow target is now closer to its destination than we are, so we can proceed.
             if (followMoveable.IsMoving() &&
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE <
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
-                auto followTarget = moveable.followTarget.value();
-                stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                    self, PartyMemberStateEnum::FollowingLeader, followTarget);
+                stateController->ChangeState(self, PartyMemberStateEnum::FollowingLeader);
             }
-        }
-
-        void OnEnter(const entt::entity self, entt::entity followTarget)
-        {
-            auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(followTarget);
-
-            auto syb =
-                moveable.onMovementCancel.Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
-            auto syb1 = sys->controllableActorSystem->onSelectedActorChange.Subscribe(
-                [this](entt::entity, entt::entity entity) { onMovementCancelled(entity); });
-
-            auto& state = registry->get<PartyMemberState>(self);
-            state.ManageSubscription(std::move(syb));
-            state.ManageSubscription(std::move(syb1));
-
-            auto& animation = registry->get<Animation>(self);
-            animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
         void OnEnter(const entt::entity self) override
         {
+            auto& moveable = registry->get<MoveableActor>(self);
+            assert(moveable.actorTarget.has_value());
+            auto sub =
+                moveable.onMovementCancel.Subscribe([this](entt::entity entity) { onMovementCancelled(entity); });
+            auto sub1 = sys->controllableActorSystem->onSelectedActorChange.Subscribe(
+                [this](entt::entity, entt::entity entity) { onMovementCancelled(entity); });
+
+            auto& state = registry->get<PartyMemberState>(self);
+            state.ManageSubscription(std::move(sub));
+            state.ManageSubscription(std::move(sub1));
+
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
@@ -222,7 +224,7 @@ namespace sage
         void OnExit(const entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.reset();
+            moveable.actorTarget.reset();
         }
 
         ~WaitingForLeaderState() override = default;
@@ -238,79 +240,57 @@ namespace sage
     class PartyMemberStateMachine::DestinationUnreachableState final : public State
     {
         PartyMemberStateMachine* stateController;
-        struct StateData
-        {
-            entt::entity followTarget{};
-            Vector3 originalDestination{};
-            PartyMemberStateEnum previousState{};
-            double timeStart{};
-            float threshold{};
-            unsigned int tryCount{};
-            unsigned int maxTries{};
-        };
-        std::unordered_map<entt::entity, StateData> data;
 
       public:
-        void Update(entt::entity entity) override
+        void Update(entt::entity self) override
         {
-            auto& moveable = registry->get<MoveableActor>(entity);
+            auto& moveable = registry->get<MoveableActor>(self);
             if (moveable.IsMoving()) return;
+            auto& data = registry->get<DestinationUnreachableData>(self);
 
-            auto& _data = data[entity];
-
-            if (_data.tryCount >= _data.maxTries)
+            if (data.tryCount >= data.maxTries)
             {
-                moveable.followTarget.reset();
-                sys->actorMovementSystem->CancelMovement(entity);
-                stateController->ChangeState(entity, PartyMemberStateEnum::Default);
+                // Give up trying.
+                moveable.actorTarget.reset();
+                sys->actorMovementSystem->CancelMovement(self);
+                stateController->ChangeState(self, PartyMemberStateEnum::Default);
+                return;
             }
 
-            if (GetTime() >= data[entity].timeStart + data[entity].threshold)
+            if (GetTime() >= data.timeStart + data.threshold)
             {
-                ++_data.tryCount;
-                _data.timeStart = GetTime();
-                if (sys->actorMovementSystem->TryPathfindToLocation(entity, _data.originalDestination, true))
+                ++data.tryCount;
+                data.timeStart = GetTime();
+                if (sys->actorMovementSystem->TryPathfindToLocation(self, data.originalDestination, true))
                 {
-                    if (_data.previousState == PartyMemberStateEnum::FollowingLeader)
-                    {
-                        stateController->ChangeState<FollowingLeaderState, entt::entity>(
-                            entity, _data.previousState, _data.followTarget);
-                    }
-                    else
-                    {
-                        stateController->ChangeState(entity, _data.previousState);
-                    }
+                    stateController->ChangeState(self, PartyMemberStateEnum::FollowingLeader);
                 }
                 else
                 {
                     // If the leader is too far, we could maybe follow a party member who is closer to the
                     // destination and also moving
                     // TODO: Bug. Weird bug that going to the other player's path can make us walk past the player
-                    auto leaderPos = registry->get<sgTransform>(_data.followTarget).GetWorldPos();
-                    if (sys->actorMovementSystem->TryPathfindToLocation(entity, leaderPos, true))
+                    const auto& target = registry->get<MoveableActor>(self).actorTarget;
+                    assert(target.has_value());
+                    auto leaderPos = registry->get<sgTransform>(target.value()).GetWorldPos();
+                    if (sys->actorMovementSystem->TryPathfindToLocation(self, leaderPos, true))
                     {
-                        _data.tryCount = 0;
+                        data.tryCount = 0;
                     }
                 }
             }
         }
 
-        void OnEnter(
-            const entt::entity entity,
-            const entt::entity followTarget,
-            const Vector3 originalDestination,
-            PartyMemberStateEnum previousState)
+        void OnEnter(const entt::entity self) override
         {
-            assert(previousState == PartyMemberStateEnum::FollowingLeader);
-            data[entity] = {followTarget, originalDestination, previousState, GetTime(), 1.5f, 0, 4};
-
-            auto& animation{registry->get<Animation>(entity)};
+            assert(registry->any_of<DestinationUnreachableData>(self));
+            auto& animation{registry->get<Animation>(self)};
             animation.ChangeAnimationByEnum(AnimationEnum::IDLE);
         }
 
         void OnExit(const entt::entity self) override
         {
-            data.erase(self);
+            registry->remove<DestinationUnreachableData>(self);
         }
 
         ~DestinationUnreachableState() override = default;
@@ -344,22 +324,20 @@ namespace sage
         }
     }
 
-    void PartyMemberStateMachine::onComponentAdded(entt::entity entity)
+    void PartyMemberStateMachine::onComponentAdded(entt::entity self)
     {
-        auto& state{registry->get<PartyMemberState>(entity)};
-        // Forward leader's movement to the state's onLeaderMovement
+        auto& state{registry->get<PartyMemberState>(self)};
         const auto& leaderMoveable{registry->get<MoveableActor>(sys->controllableActorSystem->GetSelectedActor())};
-        auto& moveable = registry->get<MoveableActor>(entity);
-        moveable.followTarget.emplace(sys->controllableActorSystem->GetSelectedActor());
-        auto& target = registry->get<MoveableActor>(moveable.followTarget.value());
-        target.onStartMovement.Subscribe([this, entity](const entt::entity leader) {
-            static_cast<DefaultState*>(GetStateFromEnum(PartyMemberStateEnum::Default))
-                ->onLeaderMove(entity, leader);
+        auto& moveable = registry->get<MoveableActor>(self);
+        moveable.actorTarget.emplace(sys->controllableActorSystem->GetSelectedActor());
+        auto& target = registry->get<MoveableActor>(moveable.actorTarget.value());
+        target.onStartMovement.Subscribe([this, self](const entt::entity) {
+            static_cast<DefaultState*>(GetStateFromEnum(PartyMemberStateEnum::Default))->onLeaderMove(self);
         });
-        ChangeState(entity, PartyMemberStateEnum::Default);
+        ChangeState(self, PartyMemberStateEnum::Default);
     }
 
-    void PartyMemberStateMachine::onComponentRemoved(const entt::entity entity) const
+    void PartyMemberStateMachine::onComponentRemoved(const entt::entity self) const
     {
     }
 

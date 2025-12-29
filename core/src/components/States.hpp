@@ -30,7 +30,7 @@ namespace sage
             currentStateSubscriptions.clear();
         }
 
-        void SetState(StateEnum newState)
+        void SetStateEnum(StateEnum newState)
         {
             currentState = newState;
         }

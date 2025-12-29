@@ -32,7 +32,7 @@ namespace sage
         // std::optional<MoveableActorCollision> moveableActorCollision;
         entt::entity hitEntityId = entt::null;
         Vector3 hitLastPos{};
-        std::optional<entt::entity> followTarget;
+        std::optional<entt::entity> actorTarget;
         std::optional<entt::entity> lootTarget;
         std::deque<Vector3> path{};
 

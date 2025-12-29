@@ -100,12 +100,12 @@ namespace sage
             {
                 auto& animation = registry->get<Animation>(self);
                 animation.ChangeAnimationByEnum(AnimationEnum::RUN);
-                auto syb = moveable.onDestinationReached.Subscribe(
+                auto sub = moveable.onDestinationReached.Subscribe(
                     [this](entt::entity _entity) { onTargetReached(_entity); });
-                state.ManageSubscription(std::move(syb));
-                auto syb1 = moveable.onMovementCancel.Subscribe(
+                state.ManageSubscription(std::move(sub));
+                auto sub1 = moveable.onMovementCancel.Subscribe(
                     [this](entt::entity _entity) { onMovementCancelled(_entity); });
-                state.ManageSubscription(std::move(syb1));
+                state.ManageSubscription(std::move(sub1));
                 auto syb2 = moveable.onDestinationUnreachable.Subscribe(
                     [this](entt::entity _entity, Vector3) { onMovementCancelled(_entity); });
                 state.ManageSubscription(std::move(syb2));
@@ -144,7 +144,7 @@ namespace sage
             auto& dialogComponent = registry->get<DialogComponent>(self);
             dialogComponent.dialogTarget = entt::null;
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.reset();
+            moveable.actorTarget.reset();
             stateController->ChangeState(self, PlayerStateEnum::Default);
         }
 
@@ -158,21 +158,22 @@ namespace sage
         {
         }
 
-        void OnEnter(entt::entity self, entt::entity target)
+        void OnEnter(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
+            assert(moveable.actorTarget.has_value());
             auto& playerDiag = registry->get<DialogComponent>(self);
-            playerDiag.dialogTarget = target;
+            playerDiag.dialogTarget = moveable.actorTarget.value();
             const auto& pos = registry->get<DialogComponent>(playerDiag.dialogTarget).conversationPos;
             sys->actorMovementSystem->PathfindToLocation(self, pos);
 
             auto& state = registry->get<PlayerState>(self);
-            auto syb = moveable.onDestinationReached.Subscribe(
+            auto sub = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
-            state.ManageSubscription(std::move(syb));
-            auto syb1 = moveable.onMovementCancel.Subscribe(
+            state.ManageSubscription(std::move(sub));
+            auto sub1 = moveable.onMovementCancel.Subscribe(
                 [this](entt::entity _entity) { onMovementCancelled(_entity); });
-            state.ManageSubscription(std::move(syb1));
+            state.ManageSubscription(std::move(sub1));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
@@ -302,12 +303,12 @@ namespace sage
         {
         }
 
-        void OnEnter(entt::entity self, entt::entity target)
+        void OnEnter(entt::entity self) override
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.lootTarget = target;
-            auto& trans = registry->get<sgTransform>(self);
-            auto& chestTrans = registry->get<sgTransform>(target);
+            assert(moveable.lootTarget.has_value());
+            const auto& trans = registry->get<sgTransform>(self);
+            const auto& chestTrans = registry->get<sgTransform>(moveable.lootTarget.value());
             Vector3 dest = Vector3Add(
                 trans.GetWorldPos(),
                 Vector3MultiplyByValue(Vector3Subtract(chestTrans.GetWorldPos(), trans.GetWorldPos()), 0.85));
@@ -315,12 +316,12 @@ namespace sage
             sys->actorMovementSystem->PathfindToLocation(self, dest);
 
             auto& state = registry->get<PlayerState>(self);
-            auto syb = moveable.onDestinationReached.Subscribe(
+            auto sub = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
-            state.ManageSubscription(std::move(syb));
-            auto syb1 = moveable.onMovementCancel.Subscribe(
+            state.ManageSubscription(std::move(sub));
+            auto sub1 = moveable.onMovementCancel.Subscribe(
                 [this](entt::entity _entity) { onMovementCancelled(_entity); });
-            state.ManageSubscription(std::move(syb1));
+            state.ManageSubscription(std::move(sub1));
 
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::RUN);
@@ -366,17 +367,17 @@ namespace sage
             auto& moveableActor = registry->get<MoveableActor>(self);
 
             auto& state = registry->get<PlayerState>(self);
-            auto syb = moveableActor.onDestinationReached.Subscribe(
+            auto sub = moveableActor.onDestinationReached.Subscribe(
                 [this](const entt::entity _entity) { onTargetReached(_entity); });
-            state.ManageSubscription(std::move(syb));
+            state.ManageSubscription(std::move(sub));
 
             auto& combatable = registry->get<CombatableActor>(self);
             assert(combatable.target != entt::null);
 
             auto& controllable = registry->get<ControllableActor>(self);
-            auto syb1 = controllable.onFloorClick.Subscribe(
+            auto sub1 = controllable.onFloorClick.Subscribe(
                 [this](const entt::entity _self, entt::entity clicked) { onAttackCancelled(_self, clicked); });
-            state.ManageSubscription(std::move(syb1));
+            state.ManageSubscription(std::move(sub1));
 
             const auto& enemyTrans = registry->get<sgTransform>(combatable.target);
 
@@ -451,9 +452,9 @@ namespace sage
                 });
 
             auto& state = registry->get<PlayerState>(entity);
-            auto syb = combatable.onTargetDeath.Subscribe(
+            auto sub = combatable.onTargetDeath.Subscribe(
                 [this](entt::entity self, entt::entity target) { onTargetDeath(self, target); });
-            state.ManageSubscription(std::move(syb));
+            state.ManageSubscription(std::move(sub));
         }
 
         void OnExit(entt::entity entity) override
@@ -492,7 +493,10 @@ namespace sage
         {
             ChangeState(self, PlayerStateEnum::Default);
         }
-        ChangeState<MovingToLootState, entt::entity>(self, PlayerStateEnum::MovingToLoot, target);
+        auto& moveable = registry->get<MoveableActor>(self);
+        moveable.lootTarget = target;
+        ChangeState(self, PlayerStateEnum::MovingToLoot);
+        // ChangeStateExArgs<MovingToLootState, entt::entity>(self, PlayerStateEnum::MovingToLoot, target);
     }
 
     void PlayerStateMachine::onNPCLeftClick(entt::entity self, entt::entity target)
@@ -502,9 +506,11 @@ namespace sage
         if (registry->any_of<MoveableActor>(target)) // Not all NPCs move
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(target);
+            moveable.actorTarget = target;
         }
-        ChangeState<MovingToTalkToNPCState, entt::entity>(self, PlayerStateEnum::MovingToTalkToNPC, target);
+        ChangeState(self, PlayerStateEnum::MovingToTalkToNPC);
+        //        ChangeStateExArgs<MovingToTalkToNPCState, entt::entity>(self, PlayerStateEnum::MovingToTalkToNPC,
+        //        target);
     }
 
     void PlayerStateMachine::onEnemyLeftClick(entt::entity self, entt::entity target)
