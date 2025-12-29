@@ -20,7 +20,8 @@ namespace sage
     class ImageSafe
     {
         Image image{};
-        bool memorySafe = true;
+        // If Image is a deepCopy, this class will use RAII.
+        bool deepCopy = true;
 
       public:
         [[nodiscard]] const Image& GetImage();
@@ -36,9 +37,9 @@ namespace sage
         ImageSafe& operator=(ImageSafe&& other) noexcept;
 
         ~ImageSafe();
-        explicit ImageSafe(Image _image, bool _memorySafe = true);
-        explicit ImageSafe(const std::string& path, bool _memorySafe = true);
-        explicit ImageSafe(bool _memorySafe = true);
+        explicit ImageSafe(Image _image, bool _deepCopy = true);
+        explicit ImageSafe(const std::string& path, bool _deepCopy = true);
+        explicit ImageSafe(bool _deepCopy = true);
 
         template <typename Archive>
         void serialize(Archive& archive)
@@ -54,13 +55,13 @@ namespace sage
 
     /**
      * Defines a memory safe wrapper for raylib model.
-     * Set "memorySafe" to false to disable memory management.
+     * Set "deepCopy" to false to disable memory management.
      */
     class ModelSafe
     {
         Model rlmodel{};
         std::string modelKey{}; // The key/path of the model in the ResourceManager
-        bool memorySafe = true;
+        bool deepCopy = true;
 
         void UnloadShaderLocs() const;
         void UnloadMaterials() const;
@@ -96,8 +97,8 @@ namespace sage
         ModelSafe& operator=(const ModelSafe&) = delete;
         ModelSafe(ModelSafe&& other) noexcept;
         ModelSafe& operator=(ModelSafe&& other) noexcept;
-        explicit ModelSafe(const char* path, bool _memorySafe = true);
-        explicit ModelSafe(Model& _model, bool _memorySafe = true);
+        explicit ModelSafe(const char* path, bool _deepCopy = true);
+        explicit ModelSafe(Model& _model, bool _deepCopy = true);
         ModelSafe() = default;
         ~ModelSafe();
 

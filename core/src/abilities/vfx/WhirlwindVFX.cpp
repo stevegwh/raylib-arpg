@@ -57,7 +57,7 @@ namespace sage
         // SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
         // shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
 
-        slashModel = ResourceManager::GetInstance().GetModelCopy("MDL_VFX_FLATTORUS");
+        slashModel = ResourceManager::GetInstance().GetModelDeepCopy("MDL_VFX_FLATTORUS");
         slashModel.SetTexture(texture, 0, MATERIAL_MAP_DIFFUSE);
         slashModel.SetShader(shader, 0);
     }

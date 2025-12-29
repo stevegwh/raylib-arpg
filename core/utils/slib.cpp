@@ -47,21 +47,21 @@ namespace sage
     ImageSafe::ImageSafe(ImageSafe&& other) noexcept : image(other.image)
     {
         // Reset the source object's model to prevent double deletion
-        memorySafe = other.memorySafe;
+        deepCopy = other.deepCopy;
         other.image = {};
     }
 
     ImageSafe& ImageSafe::operator=(ImageSafe&& other) noexcept
     {
 
-        if (this != &other && memorySafe)
+        if (this != &other && deepCopy)
         {
             // Clean up existing resources
             UnloadImage(image);
 
             // Move resources from other
             image = other.image;
-            memorySafe = other.memorySafe;
+            deepCopy = other.deepCopy;
 
             // Reset the source object's model
             other.image = {};
@@ -71,22 +71,22 @@ namespace sage
 
     ImageSafe::~ImageSafe()
     {
-        if (memorySafe)
+        if (deepCopy)
         {
             UnloadImage(image);
         }
     }
 
-    ImageSafe::ImageSafe(Image _image, bool _memorySafe) : image(_image), memorySafe(_memorySafe)
+    ImageSafe::ImageSafe(Image _image, bool _memorySafe) : image(_image), deepCopy(_memorySafe)
     {
     }
 
     ImageSafe::ImageSafe(const std::string& path, bool _memorySafe)
-        : image(LoadImage(path.c_str())), memorySafe(_memorySafe)
+        : image(LoadImage(path.c_str())), deepCopy(_memorySafe)
     {
     }
 
-    ImageSafe::ImageSafe(bool _memorySafe) : memorySafe(_memorySafe)
+    ImageSafe::ImageSafe(bool _memorySafe) : deepCopy(_memorySafe)
     {
     }
 
@@ -294,16 +294,20 @@ namespace sage
 
     void ModelSafe::SetTexture(Texture texture, int materialIdx, MaterialMapIndex mapIdx) const
     {
+        // TODO: Probably should have a ModelSafeCopy and ModelSafeDeep class.
+        assert(deepCopy);
         rlmodel.materials[materialIdx].maps[mapIdx].texture = texture;
     }
 
     void ModelSafe::SetMaterial(unsigned int idx, Material mat) const
     {
+        assert(deepCopy);
         rlmodel.materials[idx] = mat;
     }
 
     Shader ModelSafe::GetShader(int materialIdx) const
     {
+        assert(deepCopy);
         assert(materialIdx < rlmodel.materialCount);
         return rlmodel.materials[materialIdx].shader;
     }
@@ -335,21 +339,21 @@ namespace sage
     ModelSafe::ModelSafe(ModelSafe&& other) noexcept : rlmodel(other.rlmodel)
     {
         // Reset the source object's model to prevent double deletion
-        memorySafe = other.memorySafe;
+        deepCopy = other.deepCopy;
         modelKey = other.modelKey;
         other.rlmodel = {};
     }
 
     ModelSafe& ModelSafe::operator=(ModelSafe&& other) noexcept
     {
-        if (this != &other && memorySafe)
+        if (this != &other && deepCopy)
         {
             // Clean up existing resources
             UnloadModel(rlmodel);
 
             // Move resources from other
             rlmodel = other.rlmodel;
-            memorySafe = other.memorySafe;
+            deepCopy = other.deepCopy;
             modelKey = other.modelKey;
 
             // Reset the source object's model
@@ -386,8 +390,9 @@ namespace sage
 
     ModelSafe::~ModelSafe()
     {
-        if (memorySafe)
+        if (deepCopy)
         {
+            // TODO: Surely this leaves a memory leak with materials if they are a deep copy?
             // NB: Textures are currently shared between model copies (deep copies or not)
             // this->UnloadMaterials();
             UnloadModel(rlmodel);
@@ -396,14 +401,14 @@ namespace sage
 
     ModelSafe::ModelSafe(Model& _model, bool _memorySafe) : rlmodel(_model)
     {
-        memorySafe = _memorySafe;
+        deepCopy = _memorySafe;
         if (_memorySafe)
         {
             _model = {};
         }
     }
 
-    ModelSafe::ModelSafe(const char* path, bool _memorySafe) : rlmodel(LoadModel(path)), memorySafe(_memorySafe)
+    ModelSafe::ModelSafe(const char* path, bool _memorySafe) : rlmodel(LoadModel(path)), deepCopy(_memorySafe)
     {
     }
 

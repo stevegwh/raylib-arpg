@@ -477,7 +477,7 @@ namespace sage
     {
         auto& state = registry->get<PlayerState>(self);
         // We're not allowed to change to the same state, so change to default and then back again
-        if (state.GetCurrentState() == PlayerStateEnum::MovingToLocation)
+        if (state.GetCurrentStateEnum() == PlayerStateEnum::MovingToLocation)
         {
             ChangeState(self, PlayerStateEnum::Default);
         }
@@ -488,7 +488,7 @@ namespace sage
     {
         auto& state = registry->get<PlayerState>(self);
         // We're not allowed to change to the same state, so change to default and then back again
-        if (state.GetCurrentState() == PlayerStateEnum::MovingToLoot)
+        if (state.GetCurrentStateEnum() == PlayerStateEnum::MovingToLoot)
         {
             ChangeState(self, PlayerStateEnum::Default);
         }
@@ -502,7 +502,7 @@ namespace sage
         if (registry->any_of<MoveableActor>(target)) // Not all NPCs move
         {
             auto& moveable = registry->get<MoveableActor>(self);
-            moveable.followTarget.emplace(registry, self, target);
+            moveable.followTarget.emplace(target);
         }
         ChangeState<MovingToTalkToNPCState, entt::entity>(self, PlayerStateEnum::MovingToTalkToNPC, target);
     }
@@ -519,8 +519,8 @@ namespace sage
         for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
             assert(!registry->any_of<PartyMemberState>(entity));
-            const auto state = registry->get<PlayerState>(entity).GetCurrentState();
-            GetState(state)->Update(entity);
+            const auto state = registry->get<PlayerState>(entity).GetCurrentStateEnum();
+            GetStateFromEnum(state)->Update(entity);
         }
     }
 
@@ -529,8 +529,8 @@ namespace sage
         for (const auto view = registry->view<PlayerState>(); const auto& entity : view)
         {
             assert(!registry->any_of<PartyMemberState>(entity));
-            const auto state = registry->get<PlayerState>(entity).GetCurrentState();
-            GetState(state)->Draw3D(entity);
+            const auto state = registry->get<PlayerState>(entity).GetCurrentStateEnum();
+            GetStateFromEnum(state)->Draw3D(entity);
         }
     }
 

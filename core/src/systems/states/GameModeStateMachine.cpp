@@ -131,14 +131,14 @@ namespace sage
 
     void GameModeStateMachine::Update()
     {
-        const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
-        GetState(state)->Update(gameEntity);
+        const auto& state = registry->get<GameState>(gameEntity).GetCurrentStateEnum();
+        GetStateFromEnum(state)->Update(gameEntity);
     }
 
     void GameModeStateMachine::Draw3D()
     {
-        const auto& state = registry->get<GameState>(gameEntity).GetCurrentState();
-        GetState(state)->Draw3D(gameEntity);
+        const auto& state = registry->get<GameState>(gameEntity).GetCurrentStateEnum();
+        GetStateFromEnum(state)->Draw3D(gameEntity);
     }
 
     GameModeStateMachine::GameModeStateMachine(entt::registry* _registry, Systems* _sys)

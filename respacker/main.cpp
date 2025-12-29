@@ -13,6 +13,7 @@ int main(int argc, char* argv[])
     sage::CollisionSystem collisionSystem(&registry);
     sage::NavigationGridSystem navigationGridSystem(&registry, &collisionSystem);
 
+    // TODO: Would be great to just have this run sequentially, rather than having to comment things out!
     // clang-format off
    sage::ResourcePacker::PackAssets(&registry, "resources/assets.bin");
      // sage::ResourcePacker::ConstructMap( &registry, &navigationGridSystem, "resources/maps/dungeon-map", "resources/dungeon-map.bin");

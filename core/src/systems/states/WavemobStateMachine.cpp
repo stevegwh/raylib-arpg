@@ -33,7 +33,7 @@ namespace sage
             combatable.target = attackData.attacker;
             // What if it already has a target?
             auto& state = registry->get<WavemobState>(attackData.hit);
-            if (state.GetCurrentState() != WavemobStateEnum::Dying)
+            if (state.GetCurrentStateEnum() != WavemobStateEnum::Dying)
             {
                 stateController->ChangeState(attackData.hit, WavemobStateEnum::Combat);
             }
@@ -138,12 +138,13 @@ namespace sage
 
             auto& moveable = registry->get<MoveableActor>(self);
             const auto& combatable = registry->get<CombatableActor>(self);
-            moveable.followTarget.emplace(registry, self, combatable.target);
+            moveable.followTarget.emplace(combatable.target);
+            auto& target = registry->get<MoveableActor>(combatable.target);
 
             auto syb = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
-            auto syb1 = moveable.followTarget->onTargetPathChanged.Subscribe(
-                [this](entt::entity _self, entt::entity _target) { onTargetPosUpdate(_self, _target); });
+            auto syb1 = target.onPathChanged.Subscribe(
+                [this, self](entt::entity _target) { onTargetPosUpdate(self, _target); });
 
             auto& state = registry->get<WavemobState>(self);
             state.ManageSubscription(std::move(syb1));
@@ -278,8 +279,8 @@ namespace sage
     {
         for (const auto view = registry->view<WavemobState>(); const auto& entity : view)
         {
-            const auto state = registry->get<WavemobState>(entity).GetCurrentState();
-            GetState(state)->Update(entity);
+            const auto state = registry->get<WavemobState>(entity).GetCurrentStateEnum();
+            GetStateFromEnum(state)->Update(entity);
         }
     }
 
@@ -287,8 +288,8 @@ namespace sage
     {
         for (const auto view = registry->view<WavemobState>(); const auto& entity : view)
         {
-            const auto state = registry->get<WavemobState>(entity).GetCurrentState();
-            GetState(state)->Draw3D(entity);
+            const auto state = registry->get<WavemobState>(entity).GetCurrentStateEnum();
+            GetStateFromEnum(state)->Draw3D(entity);
         }
     }
 

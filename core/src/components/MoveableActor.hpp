@@ -17,28 +17,6 @@
 
 namespace sage
 {
-    // An entity that this moveable actor is following
-    class FollowTarget
-    {
-        entt::registry* registry;
-        entt::entity self{}; // The actor following
-        Subscription onTargetDestinationReachedSub{};
-        Subscription onTargetMovementCancelledSub{};
-        Subscription onTargetPathChangedSub{};
-
-        Vector3 targetPrevPos{};
-        double timeStarted{};
-        float timerThreshold = 0.25;
-
-      public:
-        const entt::entity targetActor = entt::null;
-        Event<entt::entity, entt::entity> onTargetDestinationReached{}; // Self, target
-        Event<entt::entity, entt::entity> onTargetMovementCancelled{};  // Self, target
-        Event<entt::entity, entt::entity> onTargetPathChanged{};        // Self, target
-
-        ~FollowTarget();
-        FollowTarget(entt::registry* _registry, entt::entity _self, entt::entity _targetActor);
-    };
 
     struct MoveableActorCollision
     {
@@ -54,7 +32,7 @@ namespace sage
         // std::optional<MoveableActorCollision> moveableActorCollision;
         entt::entity hitEntityId = entt::null;
         Vector3 hitLastPos{};
-        std::optional<FollowTarget> followTarget;
+        std::optional<entt::entity> followTarget;
         std::optional<entt::entity> lootTarget;
         std::deque<Vector3> path{};
 

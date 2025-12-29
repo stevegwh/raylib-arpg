@@ -284,7 +284,7 @@ namespace sage
         const auto& ad = registry->get<AbilityData>(abilityEntity);
         if (ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::INDICATOR))
         {
-            auto state{registry->get<AbilityState>(abilityEntity).GetCurrentState()};
+            auto state{registry->get<AbilityState>(abilityEntity).GetCurrentStateEnum()};
             if (state == AbilityStateEnum::CURSOR_SELECT)
             {
                 ChangeState(abilityEntity, AbilityStateEnum::IDLE);
@@ -306,7 +306,7 @@ namespace sage
         for (auto abilityEntity : view)
         {
             auto& ab{registry->get<Ability>(abilityEntity)};
-            auto state{registry->get<AbilityState>(abilityEntity).GetCurrentState()};
+            auto state{registry->get<AbilityState>(abilityEntity).GetCurrentStateEnum()};
             if (!(ab.IsActive() || state == AbilityStateEnum::CURSOR_SELECT))
             {
                 continue;
@@ -327,7 +327,7 @@ namespace sage
         for (auto abilityEntity : view)
         {
             auto& ab = registry->get<Ability>(abilityEntity);
-            auto state = registry->get<AbilityState>(abilityEntity).GetCurrentState();
+            auto state = registry->get<AbilityState>(abilityEntity).GetCurrentStateEnum();
             if (!(ab.IsActive() || state == AbilityStateEnum::CURSOR_SELECT))
             {
                 continue;

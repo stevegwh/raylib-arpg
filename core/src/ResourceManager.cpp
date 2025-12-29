@@ -384,6 +384,7 @@ namespace sage
 
             if (materialNames.empty())
             {
+                // If no materials loaded, link the default one.
                 materialNames.push_back("Default");
                 if (!materialMap.contains("Default"))
                 {

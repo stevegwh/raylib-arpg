@@ -9,7 +9,7 @@
 namespace sage
 {
     template <typename StateComponentType, typename StateEnum>
-    class BaseState
+    class BaseStateComponent
     {
         StateEnum currentState;
         std::vector<Subscription> currentStateSubscriptions;
@@ -35,25 +35,25 @@ namespace sage
             currentState = newState;
         }
 
-        [[nodiscard]] StateEnum GetCurrentState() const
+        [[nodiscard]] StateEnum GetCurrentStateEnum() const
         {
             return currentState;
         }
 
-        ~BaseState()
+        ~BaseStateComponent()
         {
             RemoveAllSubscriptions();
         }
 
         // Allow moving
-        BaseState(BaseState&& other) noexcept = default;
-        BaseState& operator=(BaseState&& other) noexcept = default;
+        BaseStateComponent(BaseStateComponent&& other) noexcept = default;
+        BaseStateComponent& operator=(BaseStateComponent&& other) noexcept = default;
 
         // Prevent copying
-        BaseState(const BaseState&) = delete;
-        BaseState& operator=(const BaseState&) = delete;
+        BaseStateComponent(const BaseStateComponent&) = delete;
+        BaseStateComponent& operator=(const BaseStateComponent&) = delete;
 
-        explicit BaseState(StateEnum initialState) : currentState(initialState)
+        explicit BaseStateComponent(StateEnum initialState) : currentState(initialState)
         {
         }
     };
@@ -66,13 +66,10 @@ namespace sage
         DestinationUnreachable
     };
 
-    class PartyMemberState : public BaseState<PartyMemberState, PartyMemberStateEnum>
+    class PartyMemberState : public BaseStateComponent<PartyMemberState, PartyMemberStateEnum>
     {
       public:
-        Subscription onLeaderMoveForwardSub{};
-        Event<entt::entity, entt::entity> onLeaderMove; // self, leader
-
-        PartyMemberState() : BaseState(PartyMemberStateEnum::Default)
+        PartyMemberState() : BaseStateComponent(PartyMemberStateEnum::Default)
         {
         }
     };
@@ -89,10 +86,10 @@ namespace sage
         Combat
     };
 
-    class PlayerState : public BaseState<PlayerState, PlayerStateEnum>
+    class PlayerState : public BaseStateComponent<PlayerState, PlayerStateEnum>
     {
       public:
-        PlayerState() : BaseState(PlayerStateEnum::Default)
+        PlayerState() : BaseStateComponent(PlayerStateEnum::Default)
         {
         }
     };
@@ -104,10 +101,10 @@ namespace sage
         Combat
     };
 
-    class GameState : public BaseState<GameState, GameStateEnum>
+    class GameState : public BaseStateComponent<GameState, GameStateEnum>
     {
       public:
-        GameState() : BaseState(GameStateEnum::Default)
+        GameState() : BaseStateComponent(GameStateEnum::Default)
         {
         }
     };
@@ -120,10 +117,10 @@ namespace sage
         Dying
     };
 
-    class WavemobState : public BaseState<WavemobState, WavemobStateEnum>
+    class WavemobState : public BaseStateComponent<WavemobState, WavemobStateEnum>
     {
       public:
-        WavemobState() : BaseState(WavemobStateEnum::Default)
+        WavemobState() : BaseStateComponent(WavemobStateEnum::Default)
         {
         }
     };
@@ -135,10 +132,10 @@ namespace sage
         AWAITING_EXECUTION
     };
 
-    class AbilityState : public BaseState<AbilityState, AbilityStateEnum>
+    class AbilityState : public BaseStateComponent<AbilityState, AbilityStateEnum>
     {
       public:
-        AbilityState() : BaseState(AbilityStateEnum::IDLE)
+        AbilityState() : BaseStateComponent(AbilityStateEnum::IDLE)
         {
         }
     };

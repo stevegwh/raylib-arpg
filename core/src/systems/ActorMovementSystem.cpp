@@ -258,8 +258,7 @@ namespace sage
         }
 
         if (registry->any_of<Collideable>(hitCell->occupant) &&
-            (!moveableActor.followTarget.has_value() ||
-             hitCell->occupant != moveableActor.followTarget->targetActor) &&
+            (!moveableActor.followTarget.has_value() || hitCell->occupant != moveableActor.followTarget.value()) &&
             moveableActor.hitEntityId != entity)
         {
             if (!AlmostEquals(hitTransform.GetWorldPos(), moveableActor.hitLastPos))

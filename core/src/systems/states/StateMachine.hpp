@@ -60,13 +60,7 @@ namespace sage
 
         std::unordered_map<StateEnum, std::unique_ptr<State>> states;
 
-        template <typename StateDowncast>
-        StateDowncast* GetState(StateEnum stateEnum)
-        {
-            return dynamic_cast<StateDowncast*>(states[stateEnum].get());
-        }
-
-        State* GetState(StateEnum state)
+        State* GetStateFromEnum(StateEnum state)
         {
             return states[state].get();
         }
@@ -78,7 +72,7 @@ namespace sage
         void OnComponentAdded(entt::entity entity)
         {
             auto& stateComponent = registry->get<StateComponentType>(entity);
-            GetState(stateComponent.GetCurrentState())->OnEnter(entity);
+            GetStateFromEnum(stateComponent.GetCurrentStateEnum())->OnEnter(entity);
         }
 
       public:
@@ -90,8 +84,8 @@ namespace sage
         // void ChangeState(entt::entity entity, StateEnum newState, const StateEnterArgs&... args)
         {
             auto& oldState = registry->get<StateComponentType>(entity);
-            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentState();
-            if (GetState(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
+            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentStateEnum();
+            if (GetStateFromEnum(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
             {
                 return;
             }
@@ -103,16 +97,16 @@ namespace sage
             //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
             //                magic_enum::enum_name(newState));
             oldState.RemoveAllSubscriptions();
-            GetState(oldStateEnum)->OnExit(entity);
+            GetStateFromEnum(oldStateEnum)->OnExit(entity);
             oldState.SetState(newState);
-            static_cast<NewStateType*>(GetState(newState))->OnEnter(entity, args...);
+            static_cast<NewStateType*>(GetStateFromEnum(newState))->OnEnter(entity, args...);
         }
 
         void ChangeState(entt::entity entity, StateEnum newState)
         {
             auto& oldState = registry->get<StateComponentType>(entity);
-            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentState();
-            if (GetState(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
+            StateEnum oldStateEnum = registry->get<StateComponentType>(entity).GetCurrentStateEnum();
+            if (GetStateFromEnum(oldStateEnum)->StateLocked(entity) || oldStateEnum == newState)
             {
                 return;
             }
@@ -124,9 +118,9 @@ namespace sage
             //                "Entity {}, Entering: {} \n", static_cast<int>(entity),
             //                magic_enum::enum_name(newState));
             oldState.RemoveAllSubscriptions();
-            GetState(oldStateEnum)->OnExit(entity);
+            GetStateFromEnum(oldStateEnum)->OnExit(entity);
             oldState.SetState(newState);
-            GetState(newState)->OnEnter(entity);
+            GetStateFromEnum(newState)->OnEnter(entity);
         }
 
         virtual ~StateMachine() = default;
