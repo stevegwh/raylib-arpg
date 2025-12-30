@@ -7,7 +7,7 @@
 #include "AudioManager.hpp"
 #include "Camera.hpp"
 #include "components/States.hpp"
-#include "FullscreenTextOverlayFactory.hpp"
+#include "FullscreenTextOverlayManager.hpp"
 #include "Serializer.hpp"
 #include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
@@ -34,7 +34,7 @@ namespace sage
         const auto conversationEntity = sys->renderSystem->FindRenderableByName("Opening_Dialog");
         assert(conversationEntity != entt::null);
 
-        Subscription syb = sys->fullscreenTextOverlayFactory->onOverlayEnding.Subscribe([actor, this]() {
+        sys->fullscreenTextOverlayFactory->onOverlayEnding.Subscribe([actor, this]() {
             sys->stateMachines->playerStateMachine->ChangeState(actor, PlayerStateEnum::InDialog);
             auto& animationComponent = registry->get<Animation>(actor);
             animationComponent.ChangeAnimationByEnum(AnimationEnum::IDLE2);

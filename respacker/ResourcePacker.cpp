@@ -1,6 +1,5 @@
 #include "ResourcePacker.hpp"
 
-#include "AssetManager.hpp"
 #include "components/Collideable.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
@@ -399,43 +398,84 @@ namespace sage
         }
 
         std::cout << "START: Loading assets into memory \n";
-
-        for (const auto& [name, _] : AssetManager::GetInstance().assetMap)
         {
-            auto tag = name.substr(0, 3);
-
-            if (tag == "IMG")
+            fs::path imagePath("resources/textures");
+            if (!fs::is_directory(imagePath.parent_path()))
             {
-                ResourceManager::GetInstance().ImageLoadFromFile(name);
+                std::cout << "ResourcePacker: Image directory does not exist, cannot load. Aborting... \n";
+                return;
             }
-            else if (tag == "MDL")
+            std::cout << "START: Processing image data into resource manager. \n";
+            for (const auto& entry : fs::recursive_directory_iterator(imagePath))
             {
-                fs::path assetPath = AssetManager::GetInstance().GetAssetPath(name);
-                ResourceManager::GetInstance().ModelLoadFromFile(name);
-                if (assetPath.extension() == ".glb" || assetPath.extension() == ".gltf")
+                if (entry.path().extension() == ".png")
                 {
-                    ResourceManager::GetInstance().ModelAnimationLoadFromFile(name);
+                    ResourceManager::GetInstance().ImageLoadFromFile(entry.path());
                 }
-                // TODO: See if txt of same name/path exists and parse that for socket data etc
             }
+            std::cout << "FINISH: Processing image data into resource manager. \n";
+        }
+        {
+            fs::path iconsPath("resources/icons");
+            if (!fs::is_directory(iconsPath.parent_path()))
+            {
+                std::cout << "ResourcePacker: Icon directory does not exist, cannot load. Aborting... \n";
+                return;
+            }
+            std::cout << "START: Processing icon data into resource manager. \n";
+            for (const auto& entry : fs::recursive_directory_iterator(iconsPath))
+            {
+                if (entry.path().extension() == ".png")
+                {
+                    ResourceManager::GetInstance().ImageLoadFromFile(entry.path());
+                }
+            }
+            std::cout << "FINISH: Processing icon data into resource manager. \n";
+        }
+        {
+            fs::path iconsPath("resources/fonts");
+            if (!fs::is_directory(iconsPath.parent_path()))
+            {
+                std::cout << "ResourcePacker: Font directory does not exist, cannot load. Aborting... \n";
+                return;
+            }
+            std::cout << "START: Processing font data into resource manager. \n";
+            for (const auto& entry : fs::recursive_directory_iterator(iconsPath))
+            {
+                if (entry.path().extension() == ".ttf")
+                {
+                    ResourceManager::GetInstance().FontLoadFromFile(entry.path());
+                }
+            }
+            std::cout << "FINISH: Processing font data into resource manager. \n";
+        }
+        {
+            fs::path modelPath("resources/models");
+            if (!fs::is_directory(modelPath.parent_path()))
+            {
+                std::cout << "ResourcePacker: Model directory does not exist, cannot load. Aborting... \n";
+                return;
+            }
+            std::cout << "START: Processing model data into resource manager. \n";
+            for (const auto& entry : fs::recursive_directory_iterator(modelPath))
+            {
+                ResourceManager::GetInstance().ModelLoadFromFile(entry.path());
+                if (entry.path().extension() == ".glb" || entry.path().extension() == ".gltf")
+                {
+                    ResourceManager::GetInstance().ModelAnimationLoadFromFile(entry.path());
+                }
+            }
+            std::cout << "FINISH: Processing image data into resource manager. \n";
         }
 
-        // TODO: Can alias these and move paths to json
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/equipment.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/hammer.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/inventory.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/spellbook.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/transpixel.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/9patch.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icons/ui/empty.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ninepatch_button.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/icon.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/frame.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_hud.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/window_dialogue.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/inventory-bg.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/scroll-bg.png");
+        // Currently, serialization of music/sound is not supported
+        // ResourceManager::GetInstance().MusicLoadFromFile("resources/audio/bgs/Cave.ogg");
+        // ResourceManager::GetInstance().MusicLoadFromFile("resources/audio/music/bgm.ogg");
+        // ResourceManager::GetInstance().SFXLoadFromFile("resources/audio/sfx/chest_open.ogg");
+        // ResourceManager::GetInstance().SFXLoadFromFile("resources/audio/sfx/inv_open.ogg");
+        // ResourceManager::GetInstance().SFXLoadFromFile("resources/audio/sfx/inv_close.ogg");
+        // ResourceManager::GetInstance().SFXLoadFromFile("resources/audio/sfx/book_open.ogg");
+        // ResourceManager::GetInstance().SFXLoadFromFile("resources/audio/sfx/equip_open.ogg");
 
         std::cout << "FINISH: Loading assets into memory \n";
         serializer::SaveClassBinary(output.c_str(), ResourceManager::GetInstance());

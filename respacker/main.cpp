@@ -1,13 +1,13 @@
-#include "AssetManager.hpp"
 #include "ResourcePacker.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
+
+#define RESPACKER
 
 int main(int argc, char* argv[])
 {
     InitWindow(300, 100, "Packing Assets...");
 
-    sage::AssetManager::GetInstance().LoadPaths();
     sage::ResourcePacker mapLoader;
     entt::registry registry{};
     sage::CollisionSystem collisionSystem(&registry);

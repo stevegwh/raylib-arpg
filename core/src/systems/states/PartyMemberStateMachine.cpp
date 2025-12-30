@@ -23,8 +23,8 @@ namespace sage
         Vector3 originalDestination{};
         double timeStart{};
         unsigned int tryCount = 0;
-        const float threshold = 1.5;
-        const unsigned int maxTries = 4;
+        const float retryTimeThreshold = 1.5;
+        const unsigned int maxTries = 10;
     };
 
     class PartyMemberStateMachine::DefaultState final : public State
@@ -112,7 +112,6 @@ namespace sage
                 Vector3Distance(followTrans.GetWorldPos(), followMoveable.path.back()) + FOLLOW_DISTANCE >
                     Vector3Distance(transform.GetWorldPos(), followMoveable.path.back()))
             {
-                auto actorTarget = moveable.actorTarget.value();
                 stateController->ChangeState(self, PartyMemberStateEnum::WaitingForLeader);
             }
         }
@@ -257,7 +256,7 @@ namespace sage
                 return;
             }
 
-            if (GetTime() >= data.timeStart + data.threshold)
+            if (GetTime() >= data.timeStart + data.retryTimeThreshold)
             {
                 ++data.tryCount;
                 data.timeStart = GetTime();

@@ -48,7 +48,6 @@ namespace sage
 
     WhirlwindVFX::WhirlwindVFX(Systems* _sys, Ability* _ability) : VisualFX(_sys, _ability)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/particles/twirl_01.png");
         // Texture/Material
         auto texture = ResourceManager::GetInstance().TextureLoad("resources/textures/particles/twirl_01.png");
 
@@ -57,7 +56,7 @@ namespace sage
         // SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
         // shader.locs[SHADER_LOC_MAP_EMISSION] = GetShaderLocation(shader, "texture1");
 
-        slashModel = ResourceManager::GetInstance().GetModelDeepCopy("MDL_VFX_FLATTORUS");
+        slashModel = ResourceManager::GetInstance().GetModelDeepCopy("vfx_flattorus");
         slashModel.SetTexture(texture, 0, MATERIAL_MAP_DIFFUSE);
         slashModel.SetShader(shader, 0);
     }

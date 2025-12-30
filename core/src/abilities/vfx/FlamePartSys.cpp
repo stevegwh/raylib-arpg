@@ -11,7 +11,6 @@ namespace sage
 
     FlamePartSys::FlamePartSys(Camera3D* cam) : ParticleSystem(cam)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/particles/smoke_04.png");
         texCircle16 = ResourceManager::GetInstance().TextureLoad("resources/textures/particles/smoke_04.png");
 
         EmitterConfig ecfg1;

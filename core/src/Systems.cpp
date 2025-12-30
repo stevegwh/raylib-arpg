@@ -43,7 +43,7 @@ namespace sage
           cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this)),
           questManager(std::make_unique<QuestManager>(_registry, this)),
           doorSystem(std::make_unique<DoorSystem>(_registry, this)),
-          fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayFactory>(this)),
+          fullscreenTextOverlayFactory(std::make_unique<FullscreenTextOverlayManager>(this)),
           contextualDialogSystem(std::make_unique<ContextualDialogSystem>(_registry, this)),
           spatialAudioSystem(std::make_unique<SpatialAudioSystem>(_registry, this)),
           lootTable(std::make_unique<LootTable>(_registry, this)),

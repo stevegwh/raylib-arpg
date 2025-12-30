@@ -46,7 +46,7 @@ namespace sage
     class CursorClickIndicator;
     class QuestManager;
     class DoorSystem;
-    class FullscreenTextOverlayFactory;
+    class FullscreenTextOverlayManager;
     class ContextualDialogSystem;
     class SpatialAudioSystem;
     class LootTable;
@@ -88,7 +88,7 @@ namespace sage
         std::unique_ptr<CursorClickIndicator> cursorClickIndicator;
         std::unique_ptr<QuestManager> questManager;
         std::unique_ptr<DoorSystem> doorSystem;
-        std::unique_ptr<FullscreenTextOverlayFactory> fullscreenTextOverlayFactory;
+        std::unique_ptr<FullscreenTextOverlayManager> fullscreenTextOverlayFactory;
         std::unique_ptr<ContextualDialogSystem> contextualDialogSystem;
         std::unique_ptr<SpatialAudioSystem> spatialAudioSystem;
         std::unique_ptr<LootTable> lootTable;

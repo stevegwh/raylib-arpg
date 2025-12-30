@@ -141,14 +141,14 @@ namespace sage
             moveable.actorTarget.emplace(combatable.target);
             auto& target = registry->get<MoveableActor>(combatable.target);
 
-            auto syb = moveable.onDestinationReached.Subscribe(
+            auto sub = moveable.onDestinationReached.Subscribe(
                 [this](entt::entity _entity) { onTargetReached(_entity); });
-            auto syb1 = target.onPathChanged.Subscribe(
+            auto sub1 = target.onPathChanged.Subscribe(
                 [this, self](entt::entity _target) { onTargetPosUpdate(self, _target); });
 
             auto& state = registry->get<WavemobState>(self);
-            state.ManageSubscription(std::move(syb1));
-            state.ManageSubscription(std::move(syb));
+            state.ManageSubscription(std::move(sub1));
+            state.ManageSubscription(std::move(sub));
 
             onTargetPosUpdate(self, combatable.target);
         }
@@ -250,9 +250,9 @@ namespace sage
             auto& animation = registry->get<Animation>(self);
             animation.ChangeAnimationByEnum(AnimationEnum::DEATH, true);
             auto& state = registry->get<WavemobState>(self);
-            auto syb =
+            auto sub =
                 animation.onAnimationEnd.Subscribe([this](entt::entity _entity) { destroyEntity(_entity); });
-            state.ManageSubscription(std::move(syb));
+            state.ManageSubscription(std::move(sub));
 
             auto abilityEntity = sys->abilityFactory->GetAbility(self, AbilityEnum::ENEMY_AUTOATTACK);
             registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);

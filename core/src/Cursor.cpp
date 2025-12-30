@@ -461,13 +461,13 @@ namespace sage
 
     Cursor::Cursor(entt::registry* _registry, Systems* _sys) : registry(_registry), sys(_sys)
     {
-        regulartex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_REGULAR");
-        talktex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_TALK");
-        movetex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_MOVE");
-        invalidmovetex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_DENIED");
-        combattex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_ATTACK");
-        pickuptex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_PICKUP");
-        interacttex = ResourceManager::GetInstance().TextureLoad("IMG_CURSOR_INTERACT");
+        regulartex = ResourceManager::GetInstance().TextureLoad("cursor_regular");
+        talktex = ResourceManager::GetInstance().TextureLoad("cursor_talk");
+        movetex = ResourceManager::GetInstance().TextureLoad("cursor_move");
+        invalidmovetex = ResourceManager::GetInstance().TextureLoad("cursor_denied");
+        combattex = ResourceManager::GetInstance().TextureLoad("cursor_attack");
+        pickuptex = ResourceManager::GetInstance().TextureLoad("cursor_pickup");
+        interacttex = ResourceManager::GetInstance().TextureLoad("cursor_interact");
         currentTex = &regulartex;
         EnableContextSwitching();
     }

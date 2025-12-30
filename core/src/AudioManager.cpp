@@ -9,35 +9,35 @@ namespace sage
 {
     Music AudioManager::PlayMusic(const std::string& name)
     {
-        if (!music.contains(name))
+        if (!musicPlaying.contains(name))
         {
-            music.emplace(name);
+            musicPlaying.emplace(name);
         }
-        auto m = ResourceManager::GetInstance().MusicLoad(name);
+        auto m = ResourceManager::GetInstance().GetMusic(name);
         PlayMusicStream(m);
         return m;
     }
 
     Sound AudioManager::PlaySFX(const std::string& name)
     {
-        if (!sfx.contains(name))
+        if (!sfxPlaying.contains(name))
         {
-            sfx.emplace(name);
+            sfxPlaying.emplace(name);
         }
-        auto s = ResourceManager::GetInstance().SFXLoad(name);
+        auto s = ResourceManager::GetInstance().GetSFX(name);
         PlaySound(s);
         return s;
     }
 
     void AudioManager::Update() const
     {
-        for (const auto& key : music)
+        for (const auto& key : musicPlaying)
         {
-            UpdateMusicStream(ResourceManager::GetInstance().MusicLoad(key));
+            UpdateMusicStream(ResourceManager::GetInstance().GetMusic(key));
         }
-        for (const auto& key : sfx)
+        for (const auto& key : sfxPlaying)
         {
-            // UpdateSound(ResourceManager::GetInstance().SFXLoad(key));
+            // UpdateSound(ResourceManager::GetInstance().GetSFX(key));
         }
     }
 

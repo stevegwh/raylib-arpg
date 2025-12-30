@@ -47,13 +47,13 @@ namespace sage
     FireballVFX::FireballVFX(Systems* _sys, Ability* _ability) : VisualFX(_sys, _ability)
     {
         // Texture/Material
-        auto texture = ResourceManager::GetInstance().TextureLoad("IMG_NOISE50");
-        auto texture2 = ResourceManager::GetInstance().TextureLoad("IMG_NOISE45");
+        auto texture = ResourceManager::GetInstance().TextureLoad("T_Random_50");
+        auto texture2 = ResourceManager::GetInstance().TextureLoad("T_Random_45");
 
         shader = ResourceManager::GetInstance().ShaderLoad(nullptr, "resources/shaders/custom/fireball.fs");
         secondsLoc = GetShaderLocation(shader, "seconds");
         SetShaderValue(shader, secondsLoc, &time, SHADER_UNIFORM_FLOAT);
-        model = ResourceManager::GetInstance().GetModelDeepCopy("MDL_VFX_SPHERE");
+        model = ResourceManager::GetInstance().GetModelDeepCopy("vfx_sphere");
         model.SetTexture(texture, 0, MATERIAL_MAP_DIFFUSE);
         model.SetTexture(texture2, 0, MATERIAL_MAP_EMISSION);
         model.SetShader(shader, 0);

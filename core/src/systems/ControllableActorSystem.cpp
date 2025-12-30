@@ -115,7 +115,6 @@ namespace sage
 
     void ControllableActorSystem::onComponentAdded(entt::entity addedEntity)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/particles/circle_03.png");
         auto& controllable = registry->get<ControllableActor>(addedEntity);
         controllable.selectedIndicator = std::make_unique<TextureTerrainOverlay>(
             registry,

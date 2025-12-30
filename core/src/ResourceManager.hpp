@@ -64,6 +64,11 @@ namespace sage
         static void deepCopyModel(const Model& oldModel, Model& newModel);
         static void deepCopyMesh(const Mesh& oldMesh, Mesh& mesh);
         void init();
+        void FontLoadFromFile(const std::string& path);
+        void ImageLoadFromFile(const std::string& path);
+        void ImageLoadFromFile(const std::string& path, Image image);
+        void ModelLoadFromFile(const std::string& path);
+        void ModelAnimationLoadFromFile(const std::string& path);
 
       public:
         static ResourceManager& GetInstance()
@@ -72,22 +77,17 @@ namespace sage
             return instance;
         }
 
-        Music MusicLoad(const std::string& path);
-        Sound SFXLoad(const std::string& path);
-        Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
-        Texture TextureLoad(const std::string& path);
-        Texture TextureLoadFromImage(const std::string& name, Image image);
+        [[nodiscard]] Music GetMusic(const std::string& path);
+        [[nodiscard]] Sound GetSFX(const std::string& path);
+        [[nodiscard]] Shader ShaderLoad(const char* vsFileName, const char* fsFileName);
+        [[nodiscard]] Texture TextureLoad(const std::string& path);
+        [[nodiscard]] Texture TextureLoadFromImage(const std::string& name, Image image);
         Font FontLoad(const std::string& path);
         void ImageUnload(const std::string& key);
-        ImageSafe GetImage(const std::string& key);
-        void FontLoadFromFile(const std::string& path);
-        void ImageLoadFromFile(const std::string& path);
-        void ImageLoadFromFile(const std::string& path, Image image);
-        void ModelLoadFromFile(const std::string& path);
+        [[nodiscard]] ImageSafe GetImage(const std::string& key);
         [[nodiscard]] ModelSafe GetModelCopy(const std::string& key);
         [[nodiscard]] ModelSafe GetModelDeepCopy(const std::string& key) const;
-        void ModelAnimationLoadFromFile(const std::string& path);
-        ModelAnimation* GetModelAnimation(const std::string& key, int* animsCount);
+        [[nodiscard]] ModelAnimation* GetModelAnimation(const std::string& key, int* animsCount);
         void UnloadImages();
         void UnloadShaderFileText();
 
@@ -115,6 +115,8 @@ namespace sage
                 GetInstance().images,
                 GetInstance().modelCopies,
                 GetInstance().materialMap,
+                // GetInstance().music,
+                // GetInstance().sfx,
                 animatedModelKeys,
                 modelAnimCounts,
                 modelAnimationsData);
@@ -133,13 +135,25 @@ namespace sage
             std::unordered_map<std::string, Image> _images{};
             std::unordered_map<std::string, ModelInfo> _modelCopies{};
             std::unordered_map<std::string, Material> _materialMap;
+            // std::unordered_map<std::string, Music> _music;
+            // std::unordered_map<std::string, Sound> _sfx;
 
-            archive(_images, _modelCopies, _materialMap, animatedModelKeys, modelAnimCounts, modelAnimationsData);
+            archive(
+                _images,
+                _modelCopies,
+                _materialMap,
+                // _music,
+                // _sfx,
+                animatedModelKeys,
+                modelAnimCounts,
+                modelAnimationsData);
 
             // WARNING: Does *not* account for overlapping keys (does nothing if key exists)
             images.merge(_images);
             modelCopies.merge(_modelCopies);
             materialMap.merge(_materialMap);
+            // music.merge(_music);
+            // sfx.merge(_sfx);
 
             // Merge leaves overlapping keys in the previous map. Ensure none are overlapping.
             assert(_images.empty());
@@ -163,5 +177,7 @@ namespace sage
                 modelAnimations.emplace(animatedModelKeys[i], std::make_pair(animations, count));
             }
         }
+
+        friend class ResourcePacker;
     };
 } // namespace sage

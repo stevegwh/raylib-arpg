@@ -146,9 +146,9 @@ namespace sage
 
             void BindKeysToOptionSelect()
             {
-                for (auto& syb : optionPressedSubscriptions)
+                for (auto& sub : optionPressedSubscriptions)
                 {
-                    syb.UnSubscribe();
+                    sub.UnSubscribe();
                 }
                 optionPressedSubscriptions.clear();
                 auto& n = nodes.at(current);
@@ -195,9 +195,9 @@ namespace sage
                 }
                 else
                 {
-                    for (auto& syb : optionPressedSubscriptions)
+                    for (auto& sub : optionPressedSubscriptions)
                     {
-                        syb.UnSubscribe();
+                        sub.UnSubscribe();
                     }
                     optionPressedSubscriptions.clear();
                     endConversation();

@@ -10,8 +10,8 @@
           "WEAPON",
           "DAGGER"
         ],
-        "Icon": "IMG_ICON_WEAPON_DAGGER01",
-        "Model": "MDL_WPN_DAGGER01"
+        "Icon": "icon_dagger01",
+        "Model": "mdl_dagger"
       },
       {
         "Name": "Sword",
@@ -23,10 +23,10 @@
           "SWORD",
           "MAIN_HAND_ONLY"
         ],
-        "Icon": "IMG_ICON_WEAPON_SWORD01",
-        "Model": "MDL_WPN_SWORD01"
+        "Icon": "icon_sword",
+        "Model": "mdl_sword"
       },
-	  {
+      {
         "Name": "SwordP1",
         "LocalizedName": "Sword +1",
         "Description": "A snazzy sword with an even sharper blade.",
@@ -36,10 +36,10 @@
           "SWORD",
           "MAIN_HAND_ONLY"
         ],
-        "Icon": "IMG_ICON_WEAPON_SWORD01",
-        "Model": "MDL_WPN_SWORD01"
+        "Icon": "icon_sword",
+        "Model": "mdl_sword"
       },
-	  {
+      {
         "Name": "Ashbringer",
         "LocalizedName": "Ashbringer",
         "Description": "A legendary blade. Reading closer, it seems to have a TM branded on the blade...",
@@ -49,8 +49,8 @@
           "SWORD",
           "MAIN_HAND_ONLY"
         ],
-        "Icon": "IMG_ICON_WEAPON_ASHBRINGER",
-        "Model": "MDL_WPN_SWORD01"
+        "Icon": "icon_ashbringer",
+        "Model": "mdl_sword"
       },
       {
         "Name": "QUEST_KEYS",
@@ -60,7 +60,7 @@
         "Flags": [
           "QUEST"
         ],
-        "Icon": "IMG_ICON_JUNK_KEYS",
+        "Icon": "icon_keys",
         "Model": "MDL_QUEST_LEVER"
       },
       {
@@ -71,7 +71,7 @@
         "Flags": [
           "QUEST"
         ],
-        "Icon": "IMG_ICON_JUNK_LEVER",
+        "Icon": "icon_lever",
         "Model": "MDL_QUEST_LEVER"
       },
       {
@@ -82,7 +82,7 @@
         "Flags": [
           "QUEST"
         ],
-        "Icon": "IMG_ICON_JUNK_BONE",
+        "Icon": "icon_bone",
         "Model": "MDL_QUEST_BONE"
       }
     ]

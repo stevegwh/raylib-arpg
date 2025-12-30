@@ -10,7 +10,7 @@
 #include "Cursor.hpp"
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
-#include "FullscreenTextOverlayFactory.hpp"
+#include "FullscreenTextOverlayManager.hpp"
 #include "GameUiEngine.hpp"
 #include "ItemFactory.hpp"
 #include "LightManager.hpp"

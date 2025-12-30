@@ -99,7 +99,7 @@ namespace sage
         if (data.indicatorKey == AbilityIndicatorEnum::CIRCULAR_MAGIC_CURSOR)
         {
             obj = std::make_unique<AbilityIndicator>(
-                _sys->registry, _sys->navigationGridSystem.get(), "IMG_RAINOFFIRE_CURSOR");
+                _sys->registry, _sys->navigationGridSystem.get(), "indicator_rainoffire");
         }
         else
         {
@@ -187,7 +187,7 @@ namespace sage
         ad.name = "Rain of Fire";
         ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/rain_of_fire.png";
-        abilityComponent.icon = "IMG_ABILITY_RAINOFFIRE";
+        abilityComponent.icon = "icon_rain_of_fire";
         ad.base.cooldownDuration = 3;
         ad.base.range = 30;
         ad.base.baseDamage = 25;
@@ -258,7 +258,7 @@ namespace sage
         ad.name = "Lightning Ball";
         ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/lightning_ball.png";
-        abilityComponent.icon = "IMG_ABILITY_LIGHTINGBALL";
+        abilityComponent.icon = "icon_lightning_ball";
         ad.base.cooldownDuration = 1;
         ad.base.range = 30;
         ad.base.baseDamage = 50;
@@ -285,7 +285,7 @@ namespace sage
         ad.name = "Whirlwind";
         ad.description = "Hits all enemies around the attacker.";
         // abilityComponent.iconPath = "resources/icons/abilities/whirlwind.png";
-        abilityComponent.icon = "IMG_ABILITY_WHIRLWIND";
+        abilityComponent.icon = "icon_whirlwind";
         ad.base.cooldownDuration = 0.15;
         ad.base.range = 15;
         ad.base.baseDamage = 10;

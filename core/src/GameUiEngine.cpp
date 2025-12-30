@@ -1317,7 +1317,7 @@ namespace sage
           width(_width),
           height(_height)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/avatar_border_set.png");
+
         portraitBgTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/avatar_border_set.png");
         portraitBgTex.width = width;
         portraitBgTex.height = height;
@@ -1537,7 +1537,6 @@ namespace sage
     {
         draggable = true;
         canReceiveDragDrops = true;
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/empty-inv_slot.png");
         backgroundTex = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/empty-inv_slot.png");
     }
 
@@ -1665,18 +1664,6 @@ namespace sage
     EquipmentSlot::EquipmentSlot(GameUIEngine* _engine, TableCell* _parent, const EquipmentSlotName _itemType)
         : ItemSlot(_engine, _parent, VertAlignment::MIDDLE, HoriAlignment::CENTER), itemType(_itemType)
     {
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/amulet.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/helm.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/arms.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/chest.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/belt.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/boots.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/legs.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/mainhand.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/offhand.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
-        ResourceManager::GetInstance().ImageLoadFromFile("resources/textures/ui/ring.png");
-
         engine->sys->controllableActorSystem->onSelectedActorChange.Subscribe(
             [this](entt::entity, entt::entity) { RetrieveInfo(); });
     }

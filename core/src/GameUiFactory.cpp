@@ -234,7 +234,7 @@ namespace sage
             auto cell2 = mainTableRow1->CreateTableCell(20);
             auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleBar), "");
-            auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            auto tex = ResourceManager::GetInstance().TextureLoad("ui_close");
             auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex, true);
             cell2->CreateCloseButton(std::move(closeBtn));
             // TODO: Close should DELETE.
@@ -283,7 +283,7 @@ namespace sage
             auto cell2 = mainTableRow1->CreateTableCell(20);
             auto titleBar = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleBar), "Inventory");
-            auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            auto tex = ResourceManager::GetInstance().TextureLoad("ui_close");
             auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             cell2->CreateCloseButton(std::move(closeBtn));
         }
@@ -343,7 +343,7 @@ namespace sage
             auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleText), "Journal");
 
-            const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            const auto tex = ResourceManager::GetInstance().TextureLoad("ui_close");
             auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             cell2->CreateCloseButton(std::move(closeBtn));
         }
@@ -413,7 +413,7 @@ namespace sage
             auto titleText = std::make_unique<TitleBar>(engine, cell, TextBox::FontInfo{});
             cell->CreateTitleBar(std::move(titleText), "Character");
 
-            const auto tex = ResourceManager::GetInstance().TextureLoad("IMG_UI_CLOSE");
+            const auto tex = ResourceManager::GetInstance().TextureLoad("ui_close");
             auto closeBtn = std::make_unique<CloseButton>(engine, cell2, tex);
             cell2->CreateCloseButton(std::move(closeBtn));
         }

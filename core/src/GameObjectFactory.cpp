@@ -95,13 +95,13 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("mdl_goblin"), modelTransform);
         renderable.SetName(name);
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, "MDL_ENEMY_GOBLIN");
+        auto& animation = registry->emplace<Animation>(id, "mdl_goblin");
         animation.animationMap[AnimationEnum::IDLE] = 1;
         animation.animationMap[AnimationEnum::DEATH] = 0;
         animation.animationMap[AnimationEnum::WALK] = 4;
@@ -134,13 +134,13 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.03f, 0.03f, 0.03f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_ENEMY_GOBLIN"), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("mdl_goblin"), modelTransform);
         renderable.SetName(name);
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
-        auto& animation = registry->emplace<Animation>(id, "MDL_ENEMY_GOBLIN");
+        auto& animation = registry->emplace<Animation>(id, "mdl_goblin");
         animation.animationMap[AnimationEnum::IDLE] = 1;
         animation.animationMap[AnimationEnum::DEATH] = 0;
         animation.animationMap[AnimationEnum::WALK] = 4;
@@ -169,14 +169,14 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_PLAYER_DEFAULT"), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("mdl_player_default"), modelTransform);
         renderable.SetName("Arissa");
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
         uber.SetFlagAll(UberShaderComponent::Flags::Skinned);
 
         // Set animation hooks
-        auto& animation = registry->emplace<Animation>(id, "MDL_PLAYER_DEFAULT");
+        auto& animation = registry->emplace<Animation>(id, "mdl_player_default");
         // TODO: I think we're going to need to move these elsewhere to make this function more generic
         animation.animationMap[AnimationEnum::WALK] = 1;
         animation.animationMap[AnimationEnum::TALK] = 2;
@@ -212,7 +212,7 @@ namespace sage
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<Renderable>(
-            id, ResourceManager::GetInstance().GetModelDeepCopy("MDL_PLAYER_DEFAULT"), modelTransform);
+            id, ResourceManager::GetInstance().GetModelDeepCopy("mdl_player_default"), modelTransform);
         renderable.SetName(name);
         auto& uber = registry->emplace<UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(UberShaderComponent::Flags::Lit);
@@ -228,7 +228,7 @@ namespace sage
         transform.SetRotation(rotation);
 
         // Set animation hooks
-        auto& animation = registry->emplace<Animation>(id, "MDL_PLAYER_DEFAULT");
+        auto& animation = registry->emplace<Animation>(id, "mdl_player_default");
         // TODO: I think we're going to need to move these elsewhere to make this function more generic
         animation.animationMap[AnimationEnum::WALK] = 1;
         animation.animationMap[AnimationEnum::TALK] = 2;
@@ -283,8 +283,8 @@ namespace sage
             timer.SetMaxTime(1000000);
             timer.Start();
 
-            Texture texture = ResourceManager::GetInstance().TextureLoad("IMG_NOISE50");
-            Texture texture2 = ResourceManager::GetInstance().TextureLoad("IMG_NOISE45");
+            Texture texture = ResourceManager::GetInstance().TextureLoad("T_Random_50");
+            Texture texture2 = ResourceManager::GetInstance().TextureLoad("T_Random_45");
 
             Matrix modelTransform = MatrixRotateX(90 * DEG2RAD);
 

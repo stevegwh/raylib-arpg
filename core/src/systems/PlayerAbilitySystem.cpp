@@ -73,9 +73,9 @@ namespace sage
 
     void PlayerAbilitySystem::UnsubscribeFromUserInput()
     {
-        for (auto& syb : abilityPressedSubscriptions)
+        for (auto& sub : abilityPressedSubscriptions)
         {
-            syb.UnSubscribe();
+            sub.UnSubscribe();
         }
         abilityPressedSubscriptions.clear();
     }

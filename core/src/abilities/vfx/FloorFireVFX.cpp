@@ -48,6 +48,6 @@ namespace sage
         SetShaderValue(shader, screenSizeLoc, &screenSize, SHADER_UNIFORM_VEC2);
 
         texture = std::make_unique<TextureTerrainOverlay>(
-            _sys->registry, _sys->navigationGridSystem.get(), "IMG_RAINOFFIRE_CURSOR", WHITE, shader);
+            _sys->registry, _sys->navigationGridSystem.get(), "indicator_rainoffire", WHITE, shader);
     }
 } // namespace sage

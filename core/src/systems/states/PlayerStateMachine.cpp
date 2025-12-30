@@ -106,9 +106,9 @@ namespace sage
                 auto sub1 = moveable.onMovementCancel.Subscribe(
                     [this](entt::entity _entity) { onMovementCancelled(_entity); });
                 state.ManageSubscription(std::move(sub1));
-                auto syb2 = moveable.onDestinationUnreachable.Subscribe(
+                auto sub2 = moveable.onDestinationUnreachable.Subscribe(
                     [this](entt::entity _entity, Vector3) { onMovementCancelled(_entity); });
-                state.ManageSubscription(std::move(syb2));
+                state.ManageSubscription(std::move(sub2));
             }
             else
             {

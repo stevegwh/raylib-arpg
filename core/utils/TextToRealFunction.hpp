@@ -14,7 +14,7 @@
 #include "components/OverheadDialogComponent.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
-#include "FullscreenTextOverlayFactory.hpp"
+#include "FullscreenTextOverlayManager.hpp"
 #include "ParsingHelpers.hpp"
 #include "Settings.hpp"
 #include "slib.hpp"

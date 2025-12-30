@@ -14,7 +14,7 @@
 
 #include "CursorClickIndicator.hpp"
 #include "DialogFactory.hpp"
-#include "FullscreenTextOverlayFactory.hpp"
+#include "FullscreenTextOverlayManager.hpp"
 
 #include "GameObjectFactory.hpp"
 #include "GameUiEngine.hpp"
@@ -91,9 +91,6 @@ namespace sage
 
     void Scene::initUI() const
     {
-        ResourceManager::GetInstance().FontLoadFromFile(
-            "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf");
-
         GameUiFactory::CreateAbilityRow(sys->uiEngine.get());
         auto w = Settings::TARGET_SCREEN_WIDTH * 0.3;
         auto h = Settings::TARGET_SCREEN_HEIGHT * 0.6;

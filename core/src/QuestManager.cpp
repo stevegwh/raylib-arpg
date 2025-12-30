@@ -189,9 +189,9 @@ namespace sage
     void QuestManager::onComponentRemoved(entt::entity entity)
     {
         auto& vec = connectionMap.at(entity);
-        for (auto& syb : vec)
+        for (auto& sub : vec)
         {
-            syb.UnSubscribe();
+            sub.UnSubscribe();
         }
     }
 

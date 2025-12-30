@@ -4,7 +4,6 @@
 
 #include "Application.hpp"
 
-#include "AssetManager.hpp"
 #include "AudioManager.hpp"
 #include "Camera.hpp"
 #include "KeyMapping.hpp"
@@ -36,14 +35,13 @@ namespace sage
 
         audioManager = std::make_unique<AudioManager>();
 
-        AssetManager::GetInstance().LoadPaths(); // Init asset paths
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
         serializer::LoadMap(registry.get(), "resources/dungeon-map.bin");
         // serializer::LoadMap(registry.get(), "resources/cave.bin");
 
-        auto icon = ResourceManager::GetInstance().GetImage("IMG_APPLICATIONICON");
+        auto icon = ResourceManager::GetInstance().GetImage("application_icon");
         SetWindowIcon(icon.GetImage());
-        ResourceManager::GetInstance().ImageUnload("IMG_APPLICATIONICON");
+        ResourceManager::GetInstance().ImageUnload("application_icon");
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 
