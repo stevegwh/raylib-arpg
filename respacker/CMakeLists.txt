@@ -5,7 +5,7 @@ add_executable(respacker main.cpp ${MAP_LOADER_SOURCES} ${MAP_LOADER_HEADERS})
 #target_include_directories(maploader PRIVATE vendor/assimp-src/include)
 target_link_libraries(respacker
         PRIVATE
-        core
+        engine
 )
 
 # Symbolic link for resources folder

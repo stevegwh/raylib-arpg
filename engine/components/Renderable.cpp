@@ -1,0 +1,108 @@
+#include "Renderable.hpp"
+//
+// Created by Steve Wheeler on 03/05/2024.
+//
+
+#include "engine/slib.hpp"
+
+#include <algorithm>
+#include <regex>
+
+namespace sage
+{
+
+    std::string trim(const std::string& str)
+    {
+        const auto start = str.find_first_not_of(" \t\n\r");
+        const auto end = str.find_last_not_of(" \t\n\r");
+        return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
+    }
+
+    const std::string& Renderable::GetName() const
+    {
+        return name;
+    }
+
+    void Renderable::SetName(const std::string& _name)
+    {
+        name = _name;
+        setVanityName();
+    }
+
+    void Renderable::setVanityName()
+    {
+        std::string vanity = name;
+
+        if (name[0] == '_') // Remove tag
+        {
+            if (const auto endPos = name.substr(1).find_first_of('_'); endPos != std::string::npos)
+            {
+                vanity = name.substr(endPos + 1);
+            }
+        }
+
+        std::ranges::replace(vanity, '_', ' ');
+        vanity = std::regex_replace(vanity, std::regex(R"(\s*\(\d+\)\s*)"), "");
+
+        vanity = trim(vanity);
+
+        vanityName = TitleCase(vanity);
+    }
+
+    std::string Renderable::GetVanityName() const
+    {
+        return vanityName;
+    }
+
+    ModelSafe* Renderable::GetModel() const
+    {
+        // assert(model != nullptr);
+        return model.get();
+    }
+
+    void Renderable::SetModel(Model _model)
+    {
+        if (model)
+        {
+            model.reset();
+        }
+        model = std::make_unique<ModelSafe>(_model);
+    }
+
+    void Renderable::SetModel(ModelSafe _model)
+    {
+        if (model)
+        {
+            model.reset();
+        }
+        model = std::make_unique<ModelSafe>(std::move(_model));
+    }
+
+    void Renderable::Enable()
+    {
+        active = true;
+    }
+
+    void Renderable::Disable()
+    {
+        active = false;
+    }
+
+    Renderable::Renderable(std::unique_ptr<ModelSafe> _model, Matrix _localTransform)
+        : model(std::move(_model)), initialTransform(_localTransform)
+    {
+        model->SetTransform(_localTransform);
+    }
+
+    Renderable::Renderable(Model _model, Matrix _localTransform)
+        : model(std::make_unique<ModelSafe>(_model)), initialTransform(_localTransform)
+    {
+        model->SetTransform(_localTransform);
+    }
+
+    Renderable::Renderable(ModelSafe _model, Matrix _localTransform)
+        : model(std::make_unique<ModelSafe>(std::move(_model))), initialTransform(_localTransform)
+    {
+        model->SetTransform(_localTransform);
+    }
+} // namespace sage
