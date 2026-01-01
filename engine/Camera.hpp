@@ -9,7 +9,7 @@
 
 namespace sage
 {
-    class BaseSystems;
+    class EngineSystems;
     class UserInput;
     class sgTransform;
 
@@ -25,7 +25,7 @@ namespace sage
         CameraSave cameraSave;
 
         entt::registry* registry;
-        BaseSystems* sys;
+        EngineSystems* sys;
         Camera3D rlCamera;
         static constexpr int zoom = 10;
 
@@ -72,6 +72,6 @@ namespace sage
         void FocusSelectedActor();
         void DrawDebug();
         void Update();
-        explicit Camera(entt::registry* _registry, UserInput* userInput, BaseSystems* _sys);
+        explicit Camera(entt::registry* _registry, UserInput* userInput, EngineSystems* _sys);
     };
 } // namespace sage

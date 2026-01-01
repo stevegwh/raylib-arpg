@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "engine/BaseSystems.hpp"
+#include "engine/EngineSystems.hpp"
 #include "entt/entt.hpp"
 
 // #include <memory>
@@ -32,7 +32,7 @@ namespace lq
     class ControllableActorSystem;
     class CursorClickIndicator;
 
-    class Systems : public sage::BaseSystems
+    class Systems : public sage::EngineSystems
     {
 
       public:

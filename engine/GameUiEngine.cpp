@@ -4,22 +4,19 @@
 
 #include "GameUiEngine.hpp"
 
-#include "BaseSystems.hpp"
-#include "Camera.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
+#include "EngineSystems.hpp"
 #include "ResourceManager.hpp"
 #include "slib.hpp"
 #include "UserInput.hpp"
 
-#include "magic_enum.hpp"
 #include <cassert>
 #include <format>
 #include <queue>
 #include <ranges>
 #include <sstream>
-#include <unordered_map>
 
 namespace sage
 {
@@ -451,7 +448,7 @@ namespace sage
 
     void TextBox::UpdateFontScaling()
     {
-        const float scaleFactor = engine->sys->settings->GetCurrentScaleFactor();
+        const float scaleFactor = engine->settings->GetCurrentScaleFactor();
         fontInfo.fontSize = fontInfo.baseFontSize * scaleFactor;
         fontInfo.fontSize = std::clamp(fontInfo.fontSize, FontInfo::minFontSize, FontInfo::maxFontSize);
     }
@@ -1817,8 +1814,8 @@ namespace sage
 
     void HoverState::Update()
     {
-        engine->sys->cursor->DisableContextSwitching();
-        engine->sys->cursor->Disable();
+        engine->cursor->DisableContextSwitching();
+        engine->cursor->Disable();
 
         auto mousePos = GetMousePosition();
         if (!PointInsideRect(element->parent->GetRec(), mousePos))
@@ -1947,13 +1944,13 @@ namespace sage
 
     void GameUIEngine::CreateErrorMessage(const std::string& msg)
     {
-        errorMessage.emplace(sys->settings, msg);
+        errorMessage.emplace(settings, msg);
     }
 
     TooltipWindow* GameUIEngine::CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow)
     {
         tooltipWindow = std::move(_tooltipWindow);
-        tooltipWindow->windowUpdateSub = sys->userInput->onWindowUpdate.Subscribe(
+        tooltipWindow->windowUpdateSub = userInput->onWindowUpdate.Subscribe(
             [this](Vector2 prev, Vector2 current) { tooltipWindow->OnWindowUpdate(prev, current); });
 
         tooltipWindow->InitLayout();
@@ -1965,7 +1962,7 @@ namespace sage
     {
         windows.push_back(std::move(_window));
         auto* window = windows.back().get();
-        window->windowUpdateSub = sys->userInput->onWindowUpdate.Subscribe(
+        window->windowUpdateSub = userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
@@ -1975,7 +1972,7 @@ namespace sage
     {
         windows.push_back(std::move(_windowDocked));
         auto* window = dynamic_cast<WindowDocked*>(windows.back().get());
-        window->windowUpdateSub = sys->userInput->onWindowUpdate.Subscribe(
+        window->windowUpdateSub = userInput->onWindowUpdate.Subscribe(
             [window](Vector2 prev, Vector2 current) { window->OnWindowUpdate(prev, current); });
         window->InitLayout();
         return window;
@@ -2131,8 +2128,8 @@ namespace sage
                 BringClickedWindowToFront(window.get());
             }
 
-            sys->cursor->Disable();
-            sys->cursor->DisableContextSwitching();
+            cursor->Disable();
+            cursor->DisableContextSwitching();
 
             window->OnHoverStart(); // TODO: Need to check if it was already being hovered?
             window->Update();
@@ -2147,8 +2144,8 @@ namespace sage
         }
         else
         {
-            sys->cursor->Enable();
-            sys->cursor->EnableContextSwitching();
+            cursor->Enable();
+            cursor->EnableContextSwitching();
             processWindows();
             pruneWindows();
         }
@@ -2159,7 +2156,11 @@ namespace sage
         }
     }
 
-    GameUIEngine::GameUIEngine(entt::registry* _registry, BaseSystems* _sys) : registry(_registry), sys(_sys)
+    GameUIEngine::GameUIEngine(entt::registry* _registry, const EngineSystems* _sys)
+        : registry(_registry),
+          userInput(_sys->userInput.get()),
+          cursor(_sys->cursor.get()),
+          settings(_sys->settings)
     {
     }
 #pragma endregion

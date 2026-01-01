@@ -4,12 +4,12 @@
 
 #include "engine/Cursor.hpp"
 
-#include "engine/BaseSystems.hpp"
 #include "engine/Camera.hpp"
 #include "engine/components/MoveableActor.hpp"
 #include "engine/components/NavigationGridSquare.hpp"
 #include "engine/components/Renderable.hpp"
 #include "engine/components/sgTransform.hpp"
+#include "engine/EngineSystems.hpp"
 #include "engine/Settings.hpp"
 #include "engine/systems/CollisionSystem.hpp"
 #include "engine/systems/NavigationGridSystem.hpp"
@@ -466,7 +466,7 @@ namespace sage
         DrawTextureEx(*currentTex, pos, 0.0, 1.0f, WHITE);
     }
 
-    Cursor::Cursor(entt::registry* _registry, BaseSystems* _sys) : registry(_registry), sys(_sys)
+    Cursor::Cursor(entt::registry* _registry, EngineSystems* _sys) : registry(_registry), sys(_sys)
     {
         regulartex = sage::ResourceManager::GetInstance().TextureLoad("cursor_regular");
         talktex = sage::ResourceManager::GetInstance().TextureLoad("cursor_talk");

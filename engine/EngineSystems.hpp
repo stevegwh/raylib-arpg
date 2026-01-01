@@ -35,7 +35,7 @@ namespace sage
     class SpatialAudioSystem;
     class DoorSystem;
 
-    class BaseSystems
+    class EngineSystems
     {
       public:
         entt::registry* registry;
@@ -60,7 +60,7 @@ namespace sage
         std::unique_ptr<SpatialAudioSystem> spatialAudioSystem;
         std::unique_ptr<DoorSystem> doorSystem;
 
-        BaseSystems(
+        EngineSystems(
             entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager);
     };
 } // namespace sage

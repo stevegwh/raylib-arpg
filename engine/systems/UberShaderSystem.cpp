@@ -3,9 +3,9 @@
 //
 
 #include "UberShaderSystem.hpp"
-#include "BaseSystems.hpp"
 #include "components/Renderable.hpp"
 #include "components/UberShaderComponent.hpp"
+#include "EngineSystems.hpp"
 #include "LightManager.hpp"
 #include "ResourceManager.hpp"
 
@@ -48,7 +48,7 @@ namespace sage
     {
     }
 
-    UberShaderSystem::UberShaderSystem(entt::registry* _registry, sage::BaseSystems* _sys)
+    UberShaderSystem::UberShaderSystem(entt::registry* _registry, sage::EngineSystems* _sys)
         : registry(_registry), sys(_sys)
     {
         registry->on_construct<UberShaderComponent>().connect<&UberShaderSystem::onComponentAdded>(this);

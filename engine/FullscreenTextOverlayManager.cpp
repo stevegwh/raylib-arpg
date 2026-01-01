@@ -4,7 +4,7 @@
 
 #include "FullscreenTextOverlayManager.hpp"
 
-#include "BaseSystems.hpp"
+#include "EngineSystems.hpp"
 #include "ResourceManager.hpp"
 #include "Settings.hpp"
 
@@ -144,7 +144,7 @@ namespace sage
         }
     }
 
-    FullscreenTextOverlayManager::FullscreenTextOverlayManager(BaseSystems* _sys)
+    FullscreenTextOverlayManager::FullscreenTextOverlayManager(EngineSystems* _sys)
         : font(
               ResourceManager::GetInstance().FontLoad(
                   "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),

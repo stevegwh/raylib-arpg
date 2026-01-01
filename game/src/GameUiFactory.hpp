@@ -40,9 +40,9 @@ namespace lq
         static sage::TooltipWindow* CreateWorldTooltip(
             LeverUIEngine* engine, const std::string& name, Vector2 pos);
         static sage::TooltipWindow* CreateItemTooltip(
-            LeverUIEngine* engine, ItemComponent& item, sage::Window* parentWindow, Vector2 pos);
+            sage::GameUIEngine* engine, const ItemComponent& item, sage::Window* parentWindow, Vector2 pos);
         static sage::TooltipWindow* CreateAbilityToolTip(
-            LeverUIEngine* engine, const Ability& ability, Vector2 pos);
+            sage::GameUIEngine* engine, const Ability& ability, Vector2 pos);
         static sage::Window* CreateDialogWindow(LeverUIEngine* engine, entt::entity npc);
         static sage::Window* CreateGameWindowButtons(
             LeverUIEngine* engine,

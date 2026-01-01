@@ -2,7 +2,7 @@
 // Created by Steve Wheeler on 27/03/2024.
 //
 
-#include "BaseSystems.hpp"
+#include "EngineSystems.hpp"
 
 #include "Serializer.hpp"
 
@@ -24,7 +24,7 @@
 
 namespace sage
 {
-    BaseSystems::BaseSystems(
+    EngineSystems::EngineSystems(
         entt::registry* _registry, KeyMapping* _keyMapping, Settings* _settings, AudioManager* _audioManager)
         : registry(_registry),
           settings(_settings),

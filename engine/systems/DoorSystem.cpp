@@ -4,7 +4,7 @@
 
 #include "DoorSystem.hpp"
 
-#include "BaseSystems.hpp"
+#include "EngineSystems.hpp"
 
 #include "components/Collideable.hpp"
 #include "components/DoorBehaviorComponent.hpp"
@@ -54,7 +54,7 @@ namespace sage
         }
     }
 
-    DoorSystem::DoorSystem(entt::registry* _registry, sage::BaseSystems* _sys) : registry(_registry), sys(_sys)
+    DoorSystem::DoorSystem(entt::registry* _registry, sage::EngineSystems* _sys) : registry(_registry), sys(_sys)
     {
     }
 } // namespace sage

@@ -11,7 +11,7 @@
 namespace sage
 {
     // Forward declarations
-    struct BaseSystems;
+    struct EngineSystems;
     struct MoveableActor;
     class Collideable;
     struct sgTransform;
@@ -20,7 +20,7 @@ namespace sage
 
     class ActorMovementSystem
     {
-        BaseSystems* sys;
+        EngineSystems* sys;
         entt::registry* registry;
         std::vector<Ray> debugRays;
         std::vector<RayCollision> debugCollisions;
@@ -63,7 +63,7 @@ namespace sage
         void Update();
         void DrawDebug() const;
 
-        ActorMovementSystem(entt::registry* _registry, BaseSystems* _sys);
+        ActorMovementSystem(entt::registry* _registry, EngineSystems* _sys);
     };
 
 } // namespace sage

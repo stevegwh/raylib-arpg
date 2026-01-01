@@ -15,7 +15,7 @@
 
 namespace sage
 {
-    class BaseSystems;
+    class EngineSystems;
 
     class FullscreenTextOverlayManager
     {
@@ -23,7 +23,7 @@ namespace sage
         float fadeIn{};
         float fadeOut{};
         Timer timer;
-        BaseSystems* sys;
+        EngineSystems* sys;
         unsigned int currentTextIdx = 0;
         std::vector<std::pair<std::vector<std::string>, float>> overlayText;
         bool enabled = false;
@@ -38,7 +38,7 @@ namespace sage
         void SetOverlay(
             const std::vector<std::pair<std::string, float>>& _overlayText, float _fadeIn = 0, float _fadeOut = 0);
         void RemoveOverlay();
-        explicit FullscreenTextOverlayManager(BaseSystems* _sys);
+        explicit FullscreenTextOverlayManager(EngineSystems* _sys);
     };
 
 } // namespace sage

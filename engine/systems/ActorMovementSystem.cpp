@@ -1,11 +1,11 @@
 #include "ActorMovementSystem.hpp"
 
-#include "BaseSystems.hpp"
 #include "CollisionSystem.hpp"
 #include "components/MoveableActor.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
+#include "EngineSystems.hpp"
 #include "GameUiEngine.hpp"
 #include "NavigationGridSystem.hpp"
 #include "Serializer.hpp"
@@ -392,7 +392,7 @@ namespace sage
         }
     }
 
-    ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, BaseSystems* _sys)
+    ActorMovementSystem::ActorMovementSystem(entt::registry* _registry, EngineSystems* _sys)
         : registry(_registry), sys(_sys)
     {
     }

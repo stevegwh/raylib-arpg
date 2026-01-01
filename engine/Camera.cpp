@@ -4,11 +4,11 @@
 
 #include "Camera.hpp"
 
-#include "BaseSystems.hpp"
 #include "components/NavigationGridSquare.hpp"
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 #include "Cursor.hpp"
+#include "EngineSystems.hpp"
 #include "slib.hpp"
 #include "systems/CollisionSystem.hpp"
 #include "systems/NavigationGridSystem.hpp"
@@ -275,7 +275,7 @@ namespace sage
         UpdateCameraPro(&rlCamera, {0, 0, 0}, {0, 0, 0}, 0);
     }
 
-    Camera::Camera(entt::registry* _registry, UserInput* userInput, BaseSystems* _sys)
+    Camera::Camera(entt::registry* _registry, UserInput* userInput, EngineSystems* _sys)
         : registry(_registry), sys(_sys), rlCamera({0})
     {
         rlCamera.position = {-40.0f, 85.0f, 20.0f};

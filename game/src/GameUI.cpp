@@ -4,7 +4,14 @@
 
 #include "GameUI.hpp"
 
-#include "../../engine/Cursor.hpp"
+#include "engine/Camera.hpp"
+#include "engine/components/Renderable.hpp"
+#include "engine/components/sgTransform.hpp"
+#include "engine/Cursor.hpp"
+#include "engine/ResourceManager.hpp"
+#include "engine/slib.hpp"
+#include "engine/UserInput.hpp"
+
 #include "components/Ability.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/EquipmentComponent.hpp"
@@ -12,27 +19,18 @@
 #include "components/ItemComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
 #include "components/QuestComponents.hpp"
-#include "engine/Camera.hpp"
 #include "GameObjectFactory.hpp"
 #include "GameUiFactory.hpp"
 #include "QuestManager.hpp"
 #include "Systems.hpp"
+#include "systems/ControllableActorSystem.hpp"
 #include "systems/EquipmentSystem.hpp"
 #include "systems/InventorySystem.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
 
-#include "engine/components/Renderable.hpp"
-#include "engine/components/sgTransform.hpp"
-#include "engine/ResourceManager.hpp"
-#include "engine/slib.hpp"
-#include "engine/UserInput.hpp"
-#include "systems/ControllableActorSystem.hpp"
-
-#include "raylib.h"
-
-#include "engine/Cursor.hpp"
 #include "magic_enum.hpp"
+#include "raylib.h"
 
 #include <cassert>
 #include <format>
@@ -49,7 +47,7 @@ namespace lq
     void JournalEntryManager::updateQuests()
     {
         SetContent("");
-        const auto quests = engine->sys->questManager->GetActiveQuests();
+        const auto quests = sys->questManager->GetActiveQuests();
         const auto table = journalEntryRoot->CreateTable();
         for (auto i = 0; i < 12; ++i) // Adjust for spacing
         {
@@ -81,7 +79,7 @@ namespace lq
         const sage::VertAlignment _vertAlignment,
         const sage::HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
-          engine(_engine),
+          sys(_engine->sys),
           journalEntryRoot(_journalEntryRoot),
           questManager(_questManager)
     {
@@ -122,7 +120,7 @@ namespace lq
     }
 
     JournalEntry::JournalEntry(
-        LeverUIEngine* _engine,
+        sage::GameUIEngine* _engine,
         sage::TableCell* _parent,
         sage::TableCell* _descriptionCell,
         Quest* _quest,
@@ -130,7 +128,6 @@ namespace lq
         const sage::VertAlignment _vertAlignment,
         const sage::HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
-          engine(_engine),
           quest(_quest),
           descriptionCell(_descriptionCell)
     {
@@ -178,7 +175,7 @@ namespace lq
         const sage::VertAlignment _vertAlignment,
         const sage::HoriAlignment _horiAlignment)
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
-          engine(_engine),
+          sys(_engine->sys),
           option(_option),
           index(_index)
     {
@@ -187,11 +184,10 @@ namespace lq
 
     void CharacterStatText::RetrieveInfo()
     {
-        auto& combatable = engine->registry->get<CombatableActor>(engine->sys->cursor->GetSelectedActor());
+        auto& combatable = engine->registry->get<CombatableActor>(sys->cursor->GetSelectedActor());
         if (statisticType == StatisticType::NAME)
         {
-            const auto& renderable =
-                engine->registry->get<sage::Renderable>(engine->sys->cursor->GetSelectedActor());
+            const auto& renderable = engine->registry->get<sage::Renderable>(engine->cursor->GetSelectedActor());
             SetContent(std::format("{}", renderable.GetVanityName()));
         }
         else if (statisticType == StatisticType::STRENGTH)
@@ -222,10 +218,9 @@ namespace lq
 
     CharacterStatText::CharacterStatText(
         LeverUIEngine* _engine, sage::TableCell* _parent, const FontInfo& _fontInfo, StatisticType _statisticType)
-        : TextBox(_engine, _parent, _fontInfo), statisticType(_statisticType), engine(_engine)
+        : TextBox(_engine, _parent, _fontInfo), statisticType(_statisticType), sys(_engine->sys)
     {
-        _engine->sys->cursor->onSelectedActorChange.Subscribe(
-            [this](entt::entity, entt::entity) { RetrieveInfo(); });
+        _engine->cursor->onSelectedActorChange.Subscribe([this](entt::entity, entt::entity) { RetrieveInfo(); });
 
         _engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
 
@@ -270,30 +265,29 @@ namespace lq
         sage::HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment)
     {
-        _engine->sys->cursor->onSelectedActorChange.Subscribe(
-            [this](entt::entity, entt::entity) { RetrieveInfo(); });
+        _engine->cursor->onSelectedActorChange.Subscribe([this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     void EquipmentCharacterPreview::UpdateDimensions()
     {
         ImageBox::UpdateDimensions();
         auto& renderTexture =
-            engine->registry->get<EquipmentComponent>(engine->sys->cursor->GetSelectedActor()).renderTexture;
+            engine->registry->get<EquipmentComponent>(sys->cursor->GetSelectedActor()).renderTexture;
         renderTexture.texture.width = parent->GetRec().width;
         renderTexture.texture.height = parent->GetRec().height;
     }
 
     void EquipmentCharacterPreview::RetrieveInfo()
     {
-        engine->sys->equipmentSystem->GenerateRenderTexture(
-            engine->sys->cursor->GetSelectedActor(), parent->GetRec().width * 4, parent->GetRec().height * 4);
+        sys->equipmentSystem->GenerateRenderTexture(
+            sys->cursor->GetSelectedActor(), parent->GetRec().width * 4, parent->GetRec().height * 4);
         UpdateDimensions();
     }
 
     void EquipmentCharacterPreview::Draw2D()
     {
         auto renderTexture =
-            engine->registry->get<EquipmentComponent>(engine->sys->cursor->GetSelectedActor()).renderTexture;
+            engine->registry->get<EquipmentComponent>(sys->cursor->GetSelectedActor()).renderTexture;
         DrawTextureRec(
             renderTexture.texture,
             {0,
@@ -312,10 +306,9 @@ namespace lq
         sage::VertAlignment _vertAlignment,
         sage::HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_TO_FIT, _vertAlignment, _horiAlignment),
-          engine(_engine)
+          sys(_engine->sys)
     {
-        _engine->sys->cursor->onSelectedActorChange.Subscribe(
-            [this](entt::entity, entt::entity) { RetrieveInfo(); });
+        _engine->cursor->onSelectedActorChange.Subscribe([this](entt::entity, entt::entity) { RetrieveInfo(); });
 
         _engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe([this](entt::entity) { RetrieveInfo(); });
     }
@@ -326,28 +319,28 @@ namespace lq
         // The size of the columm of PartyMemberPortrait is calculated beforehand.
         // However, normally OnHover disables the cursor interacting with the environment when focused on the UI.
         // Therefore, to avoid this, if there is no party member in this slot then we reenable the cursor.
-        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
+        const auto entity = sys->partySystem->GetMember(memberNumber);
         if (entity == entt::null)
         {
-            engine->sys->cursor->EnableContextSwitching();
-            engine->sys->cursor->Enable();
+            sys->cursor->EnableContextSwitching();
+            sys->cursor->Enable();
         }
     }
 
     void PartyMemberPortrait::UpdateDimensions()
     {
         ImageBox::UpdateDimensions();
-        portraitBgTex.width = tex.width + engine->sys->settings->ScaleValueWidth(10);
-        portraitBgTex.height = tex.height + engine->sys->settings->ScaleValueHeight(10);
+        portraitBgTex.width = tex.width + sys->settings->ScaleValueWidth(10);
+        portraitBgTex.height = tex.height + sys->settings->ScaleValueHeight(10);
     }
 
     void PartyMemberPortrait::RetrieveInfo()
     {
-        if (const auto entity = engine->sys->partySystem->GetMember(memberNumber); entity != entt::null)
+        if (const auto entity = sys->partySystem->GetMember(memberNumber); entity != entt::null)
         {
             const auto& info = engine->registry->get<PartyMemberComponent>(entity);
 
-            engine->sys->equipmentSystem->GeneratePortraitRenderTexture(entity, tex.width * 4, tex.height * 4);
+            sys->equipmentSystem->GeneratePortraitRenderTexture(entity, tex.width * 4, tex.height * 4);
 
             tex.id = info.portraitImg.texture.id;
         }
@@ -356,11 +349,11 @@ namespace lq
 
     void PartyMemberPortrait::ReceiveDrop(CellElement* droppedElement)
     {
-        if (const auto entity = engine->sys->partySystem->GetMember(memberNumber); entity == entt::null) return;
+        if (const auto entity = sys->partySystem->GetMember(memberNumber); entity == entt::null) return;
         if (const auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            const auto receiver = engine->sys->partySystem->GetMember(memberNumber);
-            const auto sender = engine->sys->cursor->GetSelectedActor();
+            const auto receiver = sys->partySystem->GetMember(memberNumber);
+            const auto sender = sys->cursor->GetSelectedActor();
             if (receiver == sender) return;
             auto& receiverInv = engine->registry->get<InventoryComponent>(receiver);
             auto& senderInv = engine->registry->get<InventoryComponent>(sender);
@@ -375,14 +368,14 @@ namespace lq
         }
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
-            const auto receiver = engine->sys->partySystem->GetMember(memberNumber);
-            const auto sender = engine->sys->cursor->GetSelectedActor();
+            const auto receiver = sys->partySystem->GetMember(memberNumber);
+            const auto sender = sys->cursor->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(receiver);
 
-            if (auto droppedItemId = engine->sys->equipmentSystem->GetItem(sender, droppedE->itemType);
+            if (auto droppedItemId = sys->equipmentSystem->GetItem(sender, droppedE->itemType);
                 inventory.AddItem(droppedItemId))
             {
-                engine->sys->equipmentSystem->DestroyItem(sender, droppedE->itemType);
+                sys->equipmentSystem->DestroyItem(sender, droppedE->itemType);
                 droppedE->RetrieveInfo();
                 RetrieveInfo();
             }
@@ -395,16 +388,16 @@ namespace lq
 
     void PartyMemberPortrait::OnClick()
     {
-        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
+        const auto entity = sys->partySystem->GetMember(memberNumber);
         if (entity == entt::null) return;
-        engine->sys->cursor->SetSelectedActor(entity);
+        engine->cursor->SetSelectedActor(entity);
     }
 
     void PartyMemberPortrait::Draw2D()
     {
-        const auto entity = engine->sys->partySystem->GetMember(memberNumber);
+        const auto entity = sys->partySystem->GetMember(memberNumber);
         if (entity == entt::null) return;
-        if (engine->sys->cursor->GetSelectedActor() == entity)
+        if (engine->cursor->GetSelectedActor() == entity)
         {
             SetHoverShader();
         }
@@ -418,8 +411,8 @@ namespace lq
         }
         DrawTexture(
             portraitBgTex,
-            rec.x - engine->sys->settings->ScaleValueWidth(5),
-            rec.y - engine->sys->settings->ScaleValueHeight(5),
+            rec.x - engine->settings->ScaleValueWidth(5),
+            rec.y - engine->settings->ScaleValueHeight(5),
             WHITE);
         if (shader.has_value())
         {
@@ -439,7 +432,7 @@ namespace lq
               OverflowBehaviour::ALLOW_OVERFLOW,
               sage::VertAlignment::MIDDLE,
               sage::HoriAlignment::CENTER),
-          engine(_engine),
+          sys(_engine->sys),
           memberNumber(_memberNumber),
           width(_width),
           height(_height)
@@ -452,8 +445,7 @@ namespace lq
         tex.width = width;
         tex.height = height;
         canReceiveDragDrops = true;
-        _engine->sys->cursor->onSelectedActorChange.Subscribe(
-            [this](entt::entity, entt::entity) { RetrieveInfo(); });
+        _engine->cursor->onSelectedActorChange.Subscribe([this](entt::entity, entt::entity) { RetrieveInfo(); });
         _engine->sys->partySystem->onPartyChange.Subscribe([this]() { RetrieveInfo(); });
     }
 
@@ -471,13 +463,13 @@ namespace lq
               OverflowBehaviour::SHRINK_TO_FIT,
               sage::VertAlignment::MIDDLE,
               sage::HoriAlignment::CENTER),
-          engine(_engine)
+          sys(_engine->sys)
     {
     }
 
     void AbilitySlot::RetrieveInfo()
     {
-        if (const Ability* ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber))
+        if (const Ability* ability = sys->playerAbilitySystem->GetAbility(slotNumber))
         {
             tex = sage::ResourceManager::GetInstance().TextureLoad(ability->icon);
             stateLocked = false;
@@ -494,7 +486,7 @@ namespace lq
     {
         if (auto* dropped = dynamic_cast<AbilitySlot*>(droppedElement))
         {
-            engine->sys->playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
+            sys->playerAbilitySystem->SwapAbility(slotNumber, dropped->slotNumber);
             dropped->RetrieveInfo();
             RetrieveInfo();
         }
@@ -508,7 +500,7 @@ namespace lq
         }
         ImageBox::HoverUpdate();
         if (tooltipWindow.has_value() || GetTime() < hoverTimer + hoverTimerThreshold) return;
-        if (const auto* ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber))
+        if (const auto* ability = sys->playerAbilitySystem->GetAbility(slotNumber))
         {
             tooltipWindow = GameUiFactory::CreateAbilityToolTip(engine, *ability, {rec.x, rec.y});
             const auto _rec = tooltipWindow.value()->GetRec();
@@ -519,7 +511,7 @@ namespace lq
 
     void AbilitySlot::Draw2D()
     {
-        const auto ability = engine->sys->playerAbilitySystem->GetAbility(slotNumber);
+        const auto ability = sys->playerAbilitySystem->GetAbility(slotNumber);
         if (!ability)
         {
             ImageBox::Draw2D();
@@ -539,7 +531,7 @@ namespace lq
 
     void AbilitySlot::OnClick()
     {
-        engine->sys->playerAbilitySystem->PressAbility(slotNumber);
+        sys->playerAbilitySystem->PressAbility(slotNumber);
         CellElement::OnClick();
     }
 
@@ -550,13 +542,12 @@ namespace lq
               OverflowBehaviour::SHRINK_ROW_TO_FIT,
               sage::VertAlignment::MIDDLE,
               sage::HoriAlignment::CENTER),
-          engine(_engine),
+          sys(_engine->sys),
           slotNumber(_slotNumber)
     {
         draggable = true;
         canReceiveDragDrops = true;
-        engine->sys->cursor->onSelectedActorChange.Subscribe(
-            [this](entt::entity, entt::entity) { RetrieveInfo(); });
+        engine->cursor->onSelectedActorChange.Subscribe([this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     Texture ItemSlot::getEmptyTex()
@@ -570,14 +561,14 @@ namespace lq
         // TODO: If you're going to have it so that an item can only be picked up if you can pathfind there, you
         // should do the same for this.
         const auto itemId = getItemId();
-        const auto cursorPos = engine->sys->cursor->getFirstNaviCollision();
+        const auto cursorPos = engine->cursor->getFirstNaviCollision();
         const auto playerPos =
-            engine->registry->get<sage::sgTransform>(engine->sys->cursor->GetSelectedActor()).GetWorldPos();
+            engine->registry->get<sage::sgTransform>(engine->cursor->GetSelectedActor()).GetWorldPos();
         const auto dist = Vector3Distance(playerPos, cursorPos.point);
 
         if (const bool outOfRange = dist > ItemComponent::MAX_ITEM_DROP_RANGE; cursorPos.hit && !outOfRange)
         {
-            if (GameObjectFactory::spawnItemInWorld(engine->registry, engine->sys, itemId, cursorPos.point))
+            if (GameObjectFactory::spawnItemInWorld(engine->registry, sys, itemId, cursorPos.point))
             {
                 onItemDroppedToWorld();
                 RetrieveInfo();
@@ -664,7 +655,7 @@ namespace lq
         const sage::VertAlignment _vertAlignment,
         const sage::HoriAlignment _horiAlignment)
         : ImageBox(_engine, _parent, OverflowBehaviour::SHRINK_ROW_TO_FIT, _vertAlignment, _horiAlignment),
-          engine(_engine)
+          sys(_engine->sys)
     {
         draggable = true;
         canReceiveDragDrops = true;
@@ -723,7 +714,7 @@ namespace lq
 
     void EquipmentSlot::onItemDroppedToWorld()
     {
-        engine->sys->equipmentSystem->DestroyItem(engine->sys->cursor->GetSelectedActor(), itemType);
+        sys->equipmentSystem->DestroyItem(engine->cursor->GetSelectedActor(), itemType);
     }
 
     bool EquipmentSlot::validateDrop(const ItemComponent& item) const
@@ -762,20 +753,20 @@ namespace lq
 
     entt::entity EquipmentSlot::getItemId()
     {
-        return engine->sys->equipmentSystem->GetItem(engine->sys->cursor->GetSelectedActor(), itemType);
+        return sys->equipmentSystem->GetItem(engine->cursor->GetSelectedActor(), itemType);
     }
 
     void EquipmentSlot::ReceiveDrop(CellElement* droppedElement)
     {
         if (auto* dropped = dynamic_cast<InventorySlot*>(droppedElement))
         {
-            const auto actor = engine->sys->cursor->GetSelectedActor();
+            const auto actor = engine->cursor->GetSelectedActor();
             auto& inventory = engine->registry->get<InventoryComponent>(dropped->GetOwner());
             const auto itemId = inventory.GetItem(dropped->row, dropped->col);
             if (const auto& item = engine->registry->get<ItemComponent>(itemId); !validateDrop(item)) return;
             inventory.RemoveItem(dropped->row, dropped->col);
-            engine->sys->equipmentSystem->MoveItemToInventory(actor, itemType); // ?
-            engine->sys->equipmentSystem->EquipItem(actor, itemId, itemType);
+            sys->equipmentSystem->MoveItemToInventory(actor, itemType); // ?
+            sys->equipmentSystem->EquipItem(actor, itemId, itemType);
             dropped->RetrieveInfo();
             RetrieveInfo();
             engine->BringClickedWindowToFront(parent->GetWindow());
@@ -783,8 +774,8 @@ namespace lq
         else if (const auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
             // TODO: BUG: Can swap main hand only to offhand here
-            if (const auto actor = engine->sys->cursor->GetSelectedActor();
-                !engine->sys->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
+            if (const auto actor = engine->cursor->GetSelectedActor();
+                !sys->equipmentSystem->SwapItems(actor, itemType, droppedE->itemType))
             {
                 // handle swap fail?
             }
@@ -795,8 +786,7 @@ namespace lq
         LeverUIEngine* _engine, sage::TableCell* _parent, const EquipmentSlotName _itemType)
         : ItemSlot(_engine, _parent, sage::VertAlignment::MIDDLE, sage::HoriAlignment::CENTER), itemType(_itemType)
     {
-        engine->sys->cursor->onSelectedActorChange.Subscribe(
-            [this](entt::entity, entt::entity) { RetrieveInfo(); });
+        engine->cursor->onSelectedActorChange.Subscribe([this](entt::entity, entt::entity) { RetrieveInfo(); });
     }
 
     entt::entity InventorySlot::GetOwner() const
@@ -852,12 +842,12 @@ namespace lq
         else if (auto* droppedE = dynamic_cast<EquipmentSlot*>(droppedElement))
         {
             auto& inventory = engine->registry->get<InventoryComponent>(owner);
-            const auto droppedItemId = engine->sys->equipmentSystem->GetItem(owner, droppedE->itemType);
-            engine->sys->equipmentSystem->DestroyItem(owner, droppedE->itemType);
+            const auto droppedItemId = sys->equipmentSystem->GetItem(owner, droppedE->itemType);
+            sys->equipmentSystem->DestroyItem(owner, droppedE->itemType);
 
             if (const auto inventoryItemId = inventory.GetItem(row, col); inventoryItemId != entt::null)
             {
-                engine->sys->equipmentSystem->EquipItem(owner, inventoryItemId, droppedE->itemType);
+                sys->equipmentSystem->EquipItem(owner, inventoryItemId, droppedE->itemType);
             }
 
             inventory.AddItem(droppedItemId, row, col);
@@ -964,10 +954,7 @@ namespace lq
         auto& item = registry->get<ItemComponent>(entity);
         auto viewport = sys->settings->GetViewPort();
         Vector2 pos = GetWorldToScreenEx(
-            sys->cursor->getMouseHitInfo().rlCollision.point,
-            *sys->camera->getRaylibCam(),
-            viewport.x,
-            viewport.y);
+            cursor->getMouseHitInfo().rlCollision.point, *sys->camera->getRaylibCam(), viewport.x, viewport.y);
         pos.x += sys->settings->ScaleValueWidth(20); // TODO: magic number
         GameUiFactory::CreateWorldTooltip(this, item.localizedName, pos);
     }
@@ -978,10 +965,7 @@ namespace lq
         auto& renderable = registry->get<sage::Renderable>(entity);
         auto viewport = sys->settings->GetViewPort();
         Vector2 pos = GetWorldToScreenEx(
-            sys->cursor->getMouseHitInfo().rlCollision.point,
-            *sys->camera->getRaylibCam(),
-            viewport.x,
-            viewport.y);
+            cursor->getMouseHitInfo().rlCollision.point, *sys->camera->getRaylibCam(), viewport.x, viewport.y);
         pos.x += sys->settings->ScaleValueWidth(20); // TODO: magic number
         GameUiFactory::CreateWorldTooltip(this, renderable.GetVanityName(), pos);
     }

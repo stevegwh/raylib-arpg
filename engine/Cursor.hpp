@@ -14,7 +14,7 @@
 
 namespace sage
 {
-    class BaseSystems;
+    class EngineSystems;
 
     struct HoverInfo
     {
@@ -27,7 +27,7 @@ namespace sage
     {
         float leftClickTimer = 0;
         entt::registry* registry;
-        BaseSystems* sys;
+        EngineSystems* sys;
 
         entt::entity selectedActor = entt::null;
 
@@ -103,6 +103,6 @@ namespace sage
         [[nodiscard]] bool OutOfRange() const;
         [[nodiscard]] bool IsValidMove() const;
 
-        Cursor(entt::registry* registry, BaseSystems* _sys);
+        Cursor(entt::registry* registry, EngineSystems* _sys);
     };
 } // namespace sage

@@ -9,16 +9,16 @@
 namespace sage
 {
 
-    struct BaseSystems;
+    struct EngineSystems;
 
     class SpatialAudioSystem
     {
         entt::registry* registry;
-        BaseSystems* sys;
+        EngineSystems* sys;
 
       public:
         void Update() const;
-        SpatialAudioSystem(entt::registry* _registry, BaseSystems* _sys);
+        SpatialAudioSystem(entt::registry* _registry, EngineSystems* _sys);
     };
 
 } // namespace sage

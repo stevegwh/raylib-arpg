@@ -22,7 +22,7 @@ namespace sage
 {
     class TableGrid;
     class TooltipWindow;
-    class BaseSystems;
+    class EngineSystems;
     class GameUIEngine;
     struct Settings;
     class UserInput;
@@ -584,11 +584,13 @@ namespace sage
         void processWindows();
 
         [[nodiscard]] bool mouseInNonObscuredWindowRegion(Window* window, Vector2 mousePos) const;
-        GameUIEngine(entt::registry* _registry, BaseSystems* _sys);
+        GameUIEngine(entt::registry* _registry, const EngineSystems* _sys);
 
       public:
-        BaseSystems* sys;
         entt::registry* registry;
+        UserInput* userInput;
+        Cursor* cursor;
+        Settings* settings;
         void BringClickedWindowToFront(Window* clicked);
         void CreateErrorMessage(const std::string& msg);
         TooltipWindow* CreateTooltipWindow(std::unique_ptr<TooltipWindow> _tooltipWindow);

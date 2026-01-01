@@ -4,7 +4,7 @@
 
 #include "SpatialAudioSystem.hpp"
 
-#include "BaseSystems.hpp"
+#include "EngineSystems.hpp"
 
 #include "components/sgTransform.hpp"
 #include "components/SpatialAudioComponent.hpp"
@@ -20,7 +20,7 @@ namespace sage
         }
     }
 
-    SpatialAudioSystem::SpatialAudioSystem(entt::registry* _registry, BaseSystems* _sys)
+    SpatialAudioSystem::SpatialAudioSystem(entt::registry* _registry, EngineSystems* _sys)
         : registry(_registry), sys(_sys)
     {
     }

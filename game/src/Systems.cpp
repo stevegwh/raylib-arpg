@@ -16,7 +16,7 @@ namespace lq
         sage::KeyMapping* _keyMapping,
         sage::Settings* _settings,
         sage::AudioManager* _audioManager)
-        : BaseSystems(_registry, _keyMapping, _settings, _audioManager),
+        : EngineSystems(_registry, _keyMapping, _settings, _audioManager),
           uiEngine(std::make_unique<LeverUIEngine>(_registry, this)),
           cursorClickIndicator(std::make_unique<CursorClickIndicator>(_registry, this)),
           dialogSystem(std::make_unique<DialogSystem>(_registry, this)),
@@ -37,6 +37,6 @@ namespace lq
           lootTable(std::make_unique<LootTable>(_registry, this)),
           lootSystem(std::make_unique<LootSystem>(_registry, this))
     {
-        BaseSystems::uiEngine = this->uiEngine.get();
+        EngineSystems::uiEngine = this->uiEngine.get();
     }
 } // namespace lq

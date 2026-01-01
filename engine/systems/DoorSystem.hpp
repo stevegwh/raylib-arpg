@@ -8,18 +8,18 @@
 
 namespace sage
 {
-    class BaseSystems;
+    class EngineSystems;
     class DoorSystem
     {
         entt::registry* registry;
-        BaseSystems* sys;
+        EngineSystems* sys;
 
       public:
         void UnlockDoor(entt::entity entity) const;
         void UnlockAndOpenDoor(entt::entity entity);
         void OpenClickedDoor(entt::entity entity) const;
 
-        DoorSystem(entt::registry* _registry, BaseSystems* _sys);
+        DoorSystem(entt::registry* _registry, EngineSystems* _sys);
     };
 
 } // namespace sage

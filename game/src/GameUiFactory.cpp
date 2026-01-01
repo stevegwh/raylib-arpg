@@ -150,14 +150,14 @@ namespace lq
     }
 
     sage::TooltipWindow* GameUiFactory::CreateItemTooltip(
-        LeverUIEngine* engine, ItemComponent& item, sage::Window* parentWindow, Vector2 pos)
+        sage::GameUIEngine* engine, const ItemComponent& item, sage::Window* parentWindow, Vector2 pos)
     {
         auto nPatchTexture =
             sage::ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = sage::Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = sage::Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto tooltip = std::make_unique<sage::TooltipWindow>(
-            engine->sys->settings,
+            engine->settings,
             parentWindow,
             nPatchTexture,
             sage::TextureStretchMode::NONE,
@@ -188,14 +188,14 @@ namespace lq
     }
 
     sage::TooltipWindow* GameUiFactory::CreateAbilityToolTip(
-        LeverUIEngine* engine, const Ability& ability, Vector2 pos)
+        sage::GameUIEngine* engine, const Ability& ability, Vector2 pos)
     {
         auto nPatchTexture =
             sage::ResourceManager::GetInstance().TextureLoad("resources/textures/ninepatch_button.png");
         auto w = sage::Settings::TARGET_SCREEN_WIDTH * 0.15;
         auto h = sage::Settings::TARGET_SCREEN_HEIGHT * 0.1;
         auto tooltip = std::make_unique<sage::TooltipWindow>(
-            engine->sys->settings,
+            engine->settings,
             nullptr,
             nPatchTexture,
             sage::TextureStretchMode::NONE,
