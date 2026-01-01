@@ -388,7 +388,6 @@ namespace lq
                 engine,
                 questDescription,
                 questList,
-                engine->sys->questManager.get(),
                 _fontInfo,
                 sage::VertAlignment::TOP,
                 sage::HoriAlignment::CENTER);

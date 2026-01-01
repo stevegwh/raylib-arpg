@@ -35,7 +35,6 @@ namespace lq
     // Also displays description
     class JournalEntryManager : public sage::TextBox
     {
-        Systems* sys;
         sage::TableCell* journalEntryRoot;
         QuestManager* questManager;
 
@@ -46,7 +45,6 @@ namespace lq
             LeverUIEngine* _engine,
             sage::TableCell* _parent,
             sage::TableCell* _journalEntryRoot,
-            QuestManager* _questManager,
             const FontInfo& _fontInfo,
             sage::VertAlignment _vertAlignment = sage::VertAlignment::TOP,
             sage::HoriAlignment _horiAlignment = sage::HoriAlignment::LEFT);
@@ -76,8 +74,7 @@ namespace lq
 
     class DialogOption : public sage::TextBox
     {
-        // LeverUIEngine* engine;
-        Systems* sys;
+        // Systems* sys;
         dialog::Option* option;
         unsigned int index{};
         bool drawHighlight = false;
@@ -99,8 +96,7 @@ namespace lq
 
     class CharacterStatText final : public sage::TextBox
     {
-        // LeverUIEngine* engine;
-        Systems* sys;
+        // Systems* sys;
 
       public:
         enum class StatisticType
@@ -139,8 +135,7 @@ namespace lq
 
     class EquipmentCharacterPreview : public sage::ImageBox
     {
-        // LeverUIEngine* engine;
-        Systems* sys;
+        EquipmentSystem* equipmentSystem;
 
       public:
         void UpdateDimensions() override;
@@ -155,8 +150,8 @@ namespace lq
 
     class PartyMemberPortrait : public sage::ImageBox
     {
-        // LeverUIEngine* engine;
-        Systems* sys;
+        PartySystem* partySystem;
+        EquipmentSystem* equipmentSystem;
         unsigned int memberNumber{};
         Texture portraitBgTex{};
         int width;
@@ -176,9 +171,6 @@ namespace lq
 
     class DialogPortrait : public sage::ImageBox
     {
-        // LeverUIEngine* engine;
-        Systems* sys;
-
       public:
         void Draw2D() override;
         DialogPortrait(LeverUIEngine* _engine, sage::TableCell* _parent, const Texture& _tex);
@@ -187,8 +179,7 @@ namespace lq
 
     class AbilitySlot : public sage::ImageBox
     {
-        // LeverUIEngine* engine;
-        Systems* sys;
+        PlayerAbilitySystem* playerAbilitySystem;
         unsigned int slotNumber{};
 
       public:
@@ -204,8 +195,7 @@ namespace lq
     class ItemSlot : public sage::ImageBox
     {
       protected:
-        // LeverUIEngine* engine;
-        Systems* sys;
+        EquipmentSystem* equipmentSystem;
         Texture backgroundTex{};
         void dropItemInWorld();
         virtual void onItemDroppedToWorld() = 0;
@@ -246,7 +236,6 @@ namespace lq
 
     class InventorySlot : public ItemSlot
     {
-
       protected:
         entt::entity owner{};
         void onItemDroppedToWorld() override;

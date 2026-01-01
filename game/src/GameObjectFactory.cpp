@@ -360,8 +360,7 @@ namespace lq
         collideable.collisionLayer = sage::CollisionLayer::BUILDING;
     }
 
-    bool GameObjectFactory::spawnItemInWorld(
-        entt::registry* registry, Systems* sys, entt::entity itemId, Vector3 position)
+    bool GameObjectFactory::spawnItemInWorld(entt::registry* registry, entt::entity itemId, Vector3 position)
     {
         auto& item = registry->get<ItemComponent>(itemId);
         if (item.HasFlag(ItemFlags::QUEST)) return false;
