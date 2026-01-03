@@ -22,6 +22,8 @@
                                                // pattern 01111111011111111111111111111111
 #endif
 
+// TODO: Decouple this from LeverQuest
+
 namespace sage
 {
     void Cursor::checkMouseHover()

@@ -41,15 +41,6 @@ namespace sage
         CollisionLayer collisionLayer{};
     };
 
-    // TODO: Remove?
-    struct CollisionChecker
-    {
-        float maxDistance = 0;
-        Vector3 origin{};
-        Vector3 destination{};
-        Event<entt::entity, CollisionInfo> onHit{};
-    };
-
     class Collideable
     {
         entt::registry* registry{};

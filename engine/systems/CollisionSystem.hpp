@@ -18,11 +18,10 @@ namespace sage
     class CollisionSystem
     {
         entt::registry* registry;
-        [[nodiscard]] static CollisionMatrix CreateCollisionMatrix();
-
-      public:
         CollisionMatrix collisionMatrix;
 
+      public:
+        [[nodiscard]] static CollisionMatrix CreateCollisionMatrix();
         static void SortCollisionsByDistance(std::vector<CollisionInfo>& collisions);
         [[nodiscard]] std::vector<CollisionInfo> GetMeshCollisionsWithRay(
             const entt::entity& caster, const Ray& ray, CollisionLayer layer);
@@ -38,7 +37,6 @@ namespace sage
         static bool CheckBoxCollision(const BoundingBox& col1, const BoundingBox& col2);
         bool GetFirstCollisionBB(entt::entity caller, BoundingBox bb, CollisionLayer layer, CollisionInfo& out);
         void DrawDebug() const;
-        void Update();
         explicit CollisionSystem(entt::registry* _registry);
     };
 } // namespace sage

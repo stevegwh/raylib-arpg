@@ -8,6 +8,9 @@
 #include <Serializer.hpp>
 
 #include <algorithm>
+#include <utility>
+
+// TODO: Decouple this from LeverQuest
 
 namespace sage
 {
@@ -83,8 +86,7 @@ namespace sage
 
     bool CollisionSystem::GetFirstCollisionWithRay(const Ray& ray, CollisionInfo& info, CollisionLayer layer)
     {
-        auto view = registry->view<Collideable>();
-        for (const auto& entity : view)
+        for (auto view = registry->view<Collideable>(); const auto& entity : view)
         {
             const auto& c = registry->get<Collideable>(entity);
             if (!c.active) return false;
@@ -103,6 +105,7 @@ namespace sage
                 }
             }
         }
+        return false;
     }
 
     std::vector<CollisionInfo> CollisionSystem::GetMeshCollisionsWithRay(
@@ -123,7 +126,7 @@ namespace sage
                     auto col = renderable.GetModel()->GetRayMeshCollision(ray, 0, transform.GetMatrix());
                     if (col.hit)
                     {
-                        CollisionInfo info = {
+                        const CollisionInfo info = {
                             .collidedEntityId = entity,
                             .collidedBB = c.worldBoundingBox,
                             .rlCollision = col,
@@ -258,32 +261,8 @@ namespace sage
         return matrix;
     }
 
-    void CollisionSystem::Update()
+    CollisionSystem::CollisionSystem(entt::registry* _registry)
+        : registry(_registry), collisionMatrix(CreateCollisionMatrix())
     {
-        // TODO: Is this used ever? Does it work?
-        auto view = registry->view<Collideable, CollisionChecker>();
-        for (entt::entity entity : view)
-        {
-            const auto& col = registry->get<Collideable>(entity);
-            if (!col.active) continue;
-            CollisionInfo out;
-            auto& colChecker = registry->get<CollisionChecker>(entity);
-            if (Vector3Distance(colChecker.origin, colChecker.destination) > colChecker.maxDistance)
-            {
-                colChecker.onHit.Publish(entity, out);
-                registry->remove<CollisionChecker>(entity);
-                continue;
-            }
-            auto& bb = col.worldBoundingBox;
-            if (GetFirstCollisionBB(entity, bb, col.collisionLayer, out))
-            {
-                colChecker.onHit.Publish(entity, out);
-            }
-        }
-    }
-
-    CollisionSystem::CollisionSystem(entt::registry* _registry) : registry(_registry)
-    {
-        collisionMatrix = CreateCollisionMatrix();
     }
 } // namespace sage
