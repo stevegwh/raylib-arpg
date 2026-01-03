@@ -335,7 +335,13 @@ namespace sage
         assert(FileExists(path.c_str()));
         if (!fonts.contains(path))
         {
-            fonts[path] = LoadFont(path.c_str());
+            auto font = LoadFont(path.c_str());
+            for (size_t i = 0; i < font.glyphCount; i++)
+            {
+                assert(font.glyphs[i].image.data != nullptr);
+            }
+
+            fonts[path] = font;
         }
     }
 
@@ -367,6 +373,7 @@ namespace sage
 
     void ResourceManager::ModelLoadFromFile(const std::string& path, const std::string& key)
     {
+        assert(!key.empty());
         if (!modelCopies.contains(key))
         {
             assert(FileExists(path.c_str()));
@@ -377,7 +384,7 @@ namespace sage
             if (materialNames.empty())
             {
                 // If no materials loaded, link the default one.
-                materialNames.push_back("Default");
+                materialNames.emplace_back("Default");
                 if (!materialMap.contains("Default"))
                 {
                     materialMap.emplace("Default", LoadMaterialDefault());
@@ -527,8 +534,11 @@ namespace sage
             {
                 if (mat.maps[i].texture.id != rlGetTextureIdDefault()) rlUnloadTexture(mat.maps[i].texture.id);
             }
+            std::cout << "Material key: " << key << std::endl;
+            std::cout << "Material maps address : " << &mat.maps << std::endl;
             RL_FREE(mat.maps);
         }
+        std::cout << "Unloading models" << std::endl;
         for (auto& [path, model] : modelCopies)
         {
             sgUnloadModel(model.model);
@@ -561,13 +571,17 @@ namespace sage
         {
             UnloadFont(font);
         }
-        modelCopies.clear();
-        nonModelTextures.clear();
-        images.clear();
-        modelAnimations.clear();
+        fonts.clear();
         shaders.clear();
+        materialMap.clear();
+        images.clear();
+        nonModelTextures.clear();
+        modelCopies.clear();
+        modelAnimations.clear();
         vertShaderFileText.clear();
         fragShaderFileText.clear();
+        music.clear();
+        sfx.clear();
     }
 
     void ResourceManager::Reset()

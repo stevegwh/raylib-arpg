@@ -390,7 +390,7 @@ namespace sage
                         // gridSquares[row][col]->pathfindingCost = calculateStairsCost(stairSlope);
                     }
                 }
-                else if (collideable.collisionLayer == CollisionLayer::FLOORSIMPLE)
+                else if (collideable.collisionLayer == CollisionLayer::GEOMETRY_SIMPLE)
                 {
                     if (!gridSquares[row][col]->terrainHeight.has_value() ||
                         gridSquares[row][col]->terrainHeight < area.max.y)
@@ -401,7 +401,7 @@ namespace sage
                         // calculateTerrainCost(getFirstCollision.normal, 45.0f);
                     }
                 }
-                else if (collideable.collisionLayer == CollisionLayer::FLOORCOMPLEX)
+                else if (collideable.collisionLayer == CollisionLayer::GEOMETRY_COMPLEX)
                 {
                     Vector3 gridCenter = {
                         (gridSquares[row][col]->worldPosMin.x + gridSquares[row][col]->worldPosMax.x) * 0.5f,
@@ -469,8 +469,8 @@ namespace sage
         for (const auto& entity : view)
         {
             const auto& c = registry->get<Collideable>(entity);
-            if (c.collisionLayer != CollisionLayer::FLOORCOMPLEX &&
-                c.collisionLayer != CollisionLayer::FLOORSIMPLE)
+            if (c.collisionLayer != CollisionLayer::GEOMETRY_COMPLEX &&
+                c.collisionLayer != CollisionLayer::GEOMETRY_SIMPLE)
                 continue;
 
             // Ensure point of the bounding box is inside the defined walkable
@@ -1133,8 +1133,9 @@ namespace sage
         {
             const auto& bb = view.get<Collideable>(entity);
 
-            if (bb.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
-                bb.collisionLayer == CollisionLayer::FLOORSIMPLE || bb.collisionLayer == CollisionLayer::STAIRS)
+            if (bb.collisionLayer == CollisionLayer::GEOMETRY_COMPLEX ||
+                bb.collisionLayer == CollisionLayer::GEOMETRY_SIMPLE ||
+                bb.collisionLayer == CollisionLayer::STAIRS)
             {
                 calculateTerrainHeightAndNormals(entity);
             }
@@ -1174,7 +1175,7 @@ namespace sage
             {
                 MarkSquareAreaOccupied(bb.worldBoundingBox, true, entity);
             }
-            else if (bb.collisionLayer == CollisionLayer::FLOORCOMPLEX)
+            else if (bb.collisionLayer == CollisionLayer::GEOMETRY_COMPLEX)
             {
                 // TODO: Using normals as a way of marking terrain as occupied was too troublesome. Needs a better
                 // algorithm.

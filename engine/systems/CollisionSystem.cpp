@@ -152,8 +152,8 @@ namespace sage
             if (c.collisionLayer != CollisionLayer::BACKGROUND && c.collisionLayer != CollisionLayer::DEFAULT)
             {
                 auto col = YELLOW;
-                if (c.collisionLayer == CollisionLayer::FLOORCOMPLEX ||
-                    c.collisionLayer == CollisionLayer::FLOORSIMPLE)
+                if (c.collisionLayer == CollisionLayer::GEOMETRY_COMPLEX ||
+                    c.collisionLayer == CollisionLayer::GEOMETRY_SIMPLE)
                 {
                     col = GREEN;
                 }
@@ -237,8 +237,10 @@ namespace sage
         // matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::NAVIGATION)]
         // = true;
         matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::BUILDING)] = true;
-        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::FLOORSIMPLE)] = true;
-        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::FLOORCOMPLEX)] = true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::GEOMETRY_SIMPLE)] =
+            true;
+        matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::GEOMETRY_COMPLEX)] =
+            true;
         matrix[static_cast<int>(CollisionLayer::DEFAULT)][static_cast<int>(CollisionLayer::STAIRS)] = true;
 
         matrix[static_cast<int>(CollisionLayer::PLAYER)][static_cast<int>(CollisionLayer::ENEMY)] = true;
@@ -253,8 +255,9 @@ namespace sage
         matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::NPC)] = true;
         matrix[static_cast<int>(CollisionLayer::BOYD)][static_cast<int>(CollisionLayer::ENEMY)] = true;
 
-        matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::FLOORSIMPLE)] = true;
-        matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::FLOORCOMPLEX)] =
+        matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::GEOMETRY_SIMPLE)] =
+            true;
+        matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::GEOMETRY_COMPLEX)] =
             true;
         matrix[static_cast<int>(CollisionLayer::NAVIGATION)][static_cast<int>(CollisionLayer::STAIRS)] = true;
 

@@ -7,7 +7,6 @@
 
 namespace lq
 {
-
     template <typename E>
     struct EnableBitMaskOperators
     {
@@ -35,4 +34,4 @@ namespace lq
         lhs = lhs | rhs;
         return lhs;
     }
-} // namespace sage
+} // namespace lq

@@ -90,7 +90,7 @@ namespace sage
             onNPCClick.Publish(m_mouseHitInfo.collidedEntityId);
         }
         else if (
-            layer == sage::CollisionLayer::FLOORSIMPLE || layer == sage::CollisionLayer::FLOORCOMPLEX ||
+            layer == sage::CollisionLayer::GEOMETRY_SIMPLE || layer == sage::CollisionLayer::GEOMETRY_COMPLEX ||
             layer == sage::CollisionLayer::STAIRS)
         {
             onFloorClick.Publish(m_mouseHitInfo.collidedEntityId);
@@ -127,7 +127,7 @@ namespace sage
         leftClickTimer = 0;
 
         const auto& layer = registry->get<sage::Collideable>(m_mouseHitInfo.collidedEntityId).collisionLayer;
-        if (layer == sage::CollisionLayer::FLOORSIMPLE || layer == sage::CollisionLayer::FLOORCOMPLEX ||
+        if (layer == sage::CollisionLayer::GEOMETRY_SIMPLE || layer == sage::CollisionLayer::GEOMETRY_COMPLEX ||
             layer == sage::CollisionLayer::STAIRS)
         {
             onFloorClick.Publish(m_mouseHitInfo.collidedEntityId);
@@ -226,8 +226,9 @@ namespace sage
             return;
         }
 
-        if (collisionLayer == sage::CollisionLayer::FLOORSIMPLE ||
-            collisionLayer == sage::CollisionLayer::FLOORCOMPLEX || collisionLayer == sage::CollisionLayer::STAIRS)
+        if (collisionLayer == sage::CollisionLayer::GEOMETRY_SIMPLE ||
+            collisionLayer == sage::CollisionLayer::GEOMETRY_COMPLEX ||
+            collisionLayer == sage::CollisionLayer::STAIRS)
         {
             if (!IsValidMove())
             {
@@ -303,7 +304,7 @@ namespace sage
         // Discards hits with a BB that do not have a collision with mesh
         for (auto it = collisions.begin(); it != collisions.end();)
         {
-            if (it->collisionLayer == sage::CollisionLayer::FLOORCOMPLEX ||
+            if (it->collisionLayer == sage::CollisionLayer::GEOMETRY_COMPLEX ||
                 it->collisionLayer == sage::CollisionLayer::STAIRS)
             {
                 if (!findMeshCollision(*it))
@@ -325,8 +326,8 @@ namespace sage
 
         m_mouseHitInfo = collisions[0];
 
-        if (m_mouseHitInfo.collisionLayer == sage::CollisionLayer::FLOORSIMPLE ||
-            m_mouseHitInfo.collisionLayer == sage::CollisionLayer::FLOORCOMPLEX ||
+        if (m_mouseHitInfo.collisionLayer == sage::CollisionLayer::GEOMETRY_SIMPLE ||
+            m_mouseHitInfo.collisionLayer == sage::CollisionLayer::GEOMETRY_COMPLEX ||
             m_mouseHitInfo.collisionLayer == sage::CollisionLayer::STAIRS)
         {
             m_naviHitInfo = m_mouseHitInfo;
@@ -336,8 +337,8 @@ namespace sage
             // Find first navigation collision (if any)
             const auto navIt =
                 std::find_if(collisions.begin(), collisions.end(), [](const sage::CollisionInfo& coll) {
-                    return coll.collisionLayer == sage::CollisionLayer::FLOORSIMPLE ||
-                           coll.collisionLayer == sage::CollisionLayer::FLOORCOMPLEX ||
+                    return coll.collisionLayer == sage::CollisionLayer::GEOMETRY_SIMPLE ||
+                           coll.collisionLayer == sage::CollisionLayer::GEOMETRY_COMPLEX ||
                            coll.collisionLayer == sage::CollisionLayer::STAIRS;
                 });
 

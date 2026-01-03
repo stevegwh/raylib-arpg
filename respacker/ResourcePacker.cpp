@@ -1,22 +1,24 @@
 #include "ResourcePacker.hpp"
 
-#include "components/Collideable.hpp"
-#include "components/Renderable.hpp"
-#include "components/sgTransform.hpp"
-#include "components/Spawner.hpp"
-#include "GameObjectFactory.hpp"
-#include "ItemFactory.hpp"
-#include "Light.hpp"
-#include "LightManager.hpp"
-#include "QuestManager.hpp"
-#include "ResourceManager.hpp"
-#include "Serializer.hpp"
-#include "slib.hpp"
-#include "systems/CollisionSystem.hpp"
-#include "systems/NavigationGridSystem.hpp"
+#include "engine/components/Collideable.hpp"
+#include "engine/components/DoorBehaviorComponent.hpp"
+#include "engine/components/Renderable.hpp"
+#include "engine/components/sgTransform.hpp"
+#include "engine/components/Spawner.hpp"
+#include "engine/Light.hpp"
+#include "engine/LightManager.hpp"
+#include "engine/ResourceManager.hpp"
+#include "engine/Serializer.hpp"
+#include "engine/slib.hpp"
+#include "engine/systems/CollisionSystem.hpp"
+#include "engine/systems/NavigationGridSystem.hpp"
 
-#include "components/DoorBehaviorComponent.hpp"
-#include "components/QuestComponents.hpp"
+#include "game/src/components/QuestComponents.hpp"
+#include "game/src/GameObjectFactory.hpp"
+#include "game/src/ItemFactory.hpp"
+#include "game/src/QuestManager.hpp"
+#include "game/utils/Serializer.hpp"
+
 #include "raylib.h"
 #include "raymath.h"
 
@@ -24,6 +26,7 @@
 #include <fstream>
 #include <iostream>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -60,12 +63,12 @@ namespace sage
         if (objectName.find("_FLOORSIMPLE_") != std::string::npos)
         {
             // Uses bounding box bounds for height (flat surfaces).
-            return CollisionLayer::FLOORSIMPLE;
+            return CollisionLayer::GEOMETRY_SIMPLE;
         }
         if (objectName.find("_FLOORCOMPLEX_") != std::string::npos)
         {
             // Samples mesh for height/normal information
-            return CollisionLayer::FLOORCOMPLEX;
+            return CollisionLayer::GEOMETRY_COMPLEX;
         }
         if (objectName.find("_PROP_") != std::string::npos)
         {
@@ -270,7 +273,7 @@ namespace sage
     }
 
     void HandleItem(
-        entt::registry* registry, ItemFactory* itemFactory, std::ifstream& infile, const fs::path& meshPath)
+        entt::registry* registry, lq::ItemFactory* itemFactory, std::ifstream& infile, const fs::path& meshPath)
     {
         int x;
         auto itemEntity = HandleMesh(registry, infile, meshPath, x);
@@ -280,7 +283,7 @@ namespace sage
 
     void processTxtFile(
         entt::registry* registry,
-        ItemFactory* itemFactory,
+        lq::ItemFactory* itemFactory,
         const fs::path& meshPath,
         const fs::path& txtPath,
         int& slices)
@@ -324,8 +327,8 @@ namespace sage
     {
         registry->clear();
         ResourceManager::GetInstance().Reset();
-        ItemFactory itemFactory(registry);
-        serializer::DeserializeJsonFile<ItemFactory>("resources/items.json", itemFactory);
+        lq::ItemFactory itemFactory{registry};
+        serializer::DeserializeJsonFile<lq::ItemFactory>("resources/items.json", itemFactory);
 
         fs::path inputPath(input);
         fs::path meshPath = inputPath / "mesh";
@@ -376,7 +379,7 @@ namespace sage
         ResourceManager::GetInstance().ImageLoadFromFile("HEIGHT_MAP", heightMap.GetImage());
         ResourceManager::GetInstance().ImageLoadFromFile("NORMAL_MAP", normalMap.GetImage());
 
-        serializer::SaveMap(*registry, output);
+        lq::serializer::SaveMap(*registry, output);
         std::cout << "FINISH: Constructing map into bin file. \n";
     }
 
@@ -457,8 +460,14 @@ namespace sage
                 return;
             }
             std::cout << "START: Processing model data into resource manager. \n";
+            constexpr std::array<std::string, 3> validExtensions = {".glb", ".gltf", ".obj"};
             for (const auto& entry : fs::recursive_directory_iterator(modelPath))
             {
+                if (std::find(validExtensions.begin(), validExtensions.end(), entry.path().extension()) ==
+                    validExtensions.end())
+                {
+                    continue;
+                }
                 ResourceManager::GetInstance().ModelLoadFromFile(entry.path());
                 if (entry.path().extension() == ".glb" || entry.path().extension() == ".gltf")
                 {

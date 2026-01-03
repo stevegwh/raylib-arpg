@@ -4,10 +4,6 @@
 
 #pragma once
 
-#include "common_types.hpp"
-#include "ItemFactory.hpp"
-#include "systems/NavigationGridSystem.hpp"
-
 #include "entt/entt.hpp"
 #include <string>
 
@@ -16,7 +12,6 @@
 namespace sage
 {
     class NavigationGridSystem;
-    class ItemFactory;
 
     class ResourcePacker
     {

@@ -23,8 +23,8 @@ namespace lq
         }
 
         const auto& col = registry->get<sage::Collideable>(entity);
-        if (col.collisionLayer != sage::CollisionLayer::FLOORSIMPLE &&
-            col.collisionLayer != sage::CollisionLayer::FLOORCOMPLEX)
+        if (col.collisionLayer != sage::CollisionLayer::GEOMETRY_SIMPLE &&
+            col.collisionLayer != sage::CollisionLayer::GEOMETRY_COMPLEX)
         {
             disableIndicator();
             return;

@@ -17,15 +17,15 @@ namespace sage
     enum class CollisionLayer
     {
         DEFAULT,
-        FLOORSIMPLE, // Uses bounding box as foundation for collision
+        GEOMETRY_SIMPLE, // Uses bounding box as foundation for collision
         BUILDING,
         NAVIGATION, // Unsure.
         PLAYER,
         NPC,
         ENEMY,
         BOYD,
-        FLOORCOMPLEX, // Uses mesh as basis for collision
-        BACKGROUND,   // Collides with nothing
+        GEOMETRY_COMPLEX, // Uses mesh as basis for collision
+        BACKGROUND,       // Collides with nothing
         STAIRS,
         ITEM,
         INTERACTABLE,

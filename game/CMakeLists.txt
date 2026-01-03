@@ -1,16 +1,22 @@
-file(GLOB_RECURSE GAME_SOURCES main.cpp src/*.cpp utils/*.cpp)
+# game/CMakeLists.txt
+
+file(GLOB_RECURSE GAME_SOURCES src/*.cpp utils/*.cpp)
 file(GLOB_RECURSE GAME_HEADERS src/*.hpp utils/*.hpp)
 
-add_executable(game ${GAME_SOURCES} ${GAME_HEADERS})
+# Create a library with the game code
+add_library(gamelib STATIC ${GAME_SOURCES} ${GAME_HEADERS})
 
-# Add both src and utils as include directories
-target_include_directories(game
-        PRIVATE
+target_include_directories(gamelib
+        PUBLIC  # Changed to PUBLIC so respacker can use these
         src
         utils
 )
 
-target_link_libraries(game PRIVATE engine)
+target_link_libraries(gamelib PUBLIC engine)
+
+# Create the game executable with just main.cpp
+add_executable(game main.cpp)
+target_link_libraries(game PRIVATE gamelib)
 
 # Symbolic link for resources folder
 set(source "${CMAKE_SOURCE_DIR}/resources")

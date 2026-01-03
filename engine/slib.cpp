@@ -14,7 +14,7 @@
 namespace sage
 {
 
-    const Image& ImageSafe::GetImage()
+    const Image& ImageSafe::GetImage() const
     {
         return image;
     }
@@ -77,7 +77,7 @@ namespace sage
         }
     }
 
-    ImageSafe::ImageSafe(Image _image, bool _memorySafe) : image(_image), deepCopy(_memorySafe)
+    ImageSafe::ImageSafe(const Image& _image, bool _memorySafe) : image(_image), deepCopy(_memorySafe)
     {
     }
 
@@ -90,7 +90,7 @@ namespace sage
     {
     }
 
-    const Model& ModelSafe::GetRlModel()
+    const Model& ModelSafe::GetRlModel() const
     {
         return rlmodel;
     }

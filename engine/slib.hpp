@@ -23,7 +23,7 @@ namespace sage
         bool deepCopy = true;
 
       public:
-        [[nodiscard]] const Image& GetImage();
+        [[nodiscard]] const Image& GetImage() const;
         void SetImage(Image& _image);
         [[nodiscard]] Color GetColor(int x, int y) const;
         [[nodiscard]] bool HasLoaded() const;
@@ -36,7 +36,7 @@ namespace sage
         ImageSafe& operator=(ImageSafe&& other) noexcept;
 
         ~ImageSafe();
-        explicit ImageSafe(Image _image, bool _deepCopy = true);
+        explicit ImageSafe(const Image& _image, bool _deepCopy = true);
         explicit ImageSafe(const std::string& path, bool _deepCopy = true);
         explicit ImageSafe(bool _deepCopy = true);
 
@@ -66,7 +66,7 @@ namespace sage
         void UnloadMaterials() const;
 
       public:
-        [[nodiscard]] const Model& GetRlModel();
+        [[nodiscard]] const Model& GetRlModel() const;
         [[nodiscard]] const Mesh& GetMesh(int num) const;
         [[nodiscard]] BoundingBox CalcLocalMeshBoundingBox(const Mesh& mesh, bool& success) const;
         [[nodiscard]] BoundingBox CalcLocalBoundingBox() const;
