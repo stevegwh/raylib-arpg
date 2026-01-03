@@ -6,19 +6,10 @@
 
 #include "components/DialogComponent.hpp"
 
-#include "engine/Event.hpp"
 #include "engine/GameUiEngine.hpp"
-#include "engine/ResourceManager.hpp"
-#include "engine/Settings.hpp"
-#include "engine/Timer.hpp"
 
 #include "entt/entt.hpp"
 #include "raylib.h"
-
-// #include <memory>
-#include <optional>
-// #include <utility>
-#include <vector>
 
 namespace lq
 {
@@ -74,7 +65,6 @@ namespace lq
 
     class DialogOption : public sage::TextBox
     {
-        // Systems* sys;
         dialog::Option* option;
         unsigned int index{};
         bool drawHighlight = false;
@@ -96,7 +86,6 @@ namespace lq
 
     class CharacterStatText final : public sage::TextBox
     {
-        // Systems* sys;
 
       public:
         enum class StatisticType
@@ -264,18 +253,6 @@ namespace lq
 
       public:
         Systems* sys{};
-        static DialogOption* CreateDialogOption(
-            sage::TableCell* cell, std::unique_ptr<DialogOption> _dialogOption);
-        static CharacterStatText* CreateCharacterStatText(
-            sage::TableCell* cell, std::unique_ptr<CharacterStatText> _statText);
-        static AbilitySlot* CreateAbilitySlot(sage::TableCell* cell, std::unique_ptr<AbilitySlot> _slot);
-        static EquipmentCharacterPreview* CreateEquipmentCharacterPreview(
-            sage::TableCell* cell, std::unique_ptr<EquipmentCharacterPreview> _preview);
-        static PartyMemberPortrait* CreatePartyMemberPortrait(
-            sage::TableCell* cell, std::unique_ptr<PartyMemberPortrait> _portrait);
-        static EquipmentSlot* CreateEquipmentSlot(sage::TableCell* cell, std::unique_ptr<EquipmentSlot> _slot);
-        static InventorySlot* CreateInventorySlot(sage::TableCell* cell, std::unique_ptr<InventorySlot> _slot);
-        static ResourceOrb* CreateResourceOrb(sage::TableCell* cell, std::unique_ptr<ResourceOrb> _orb);
         LeverUIEngine(entt::registry* _registry, Systems* _sys);
     };
 

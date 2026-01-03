@@ -31,6 +31,79 @@
 
 namespace lq
 {
+    PartyMemberPortrait* CreatePartyMemberPortrait(
+        sage::TableCell* cell, std::unique_ptr<PartyMemberPortrait> _portrait)
+    {
+        cell->element = std::move(_portrait);
+
+        auto* portrait = dynamic_cast<PartyMemberPortrait*>(cell->element.value().get());
+        portrait->RetrieveInfo();
+        cell->InitLayout();
+        return portrait;
+    }
+
+    AbilitySlot* CreateAbilitySlot(sage::TableCell* cell, std::unique_ptr<AbilitySlot> _slot)
+    {
+        cell->element = std::move(_slot);
+        auto* abilitySlot = dynamic_cast<AbilitySlot*>(cell->element.value().get());
+        abilitySlot->RetrieveInfo();
+        cell->InitLayout();
+        return abilitySlot;
+    }
+
+    EquipmentSlot* CreateEquipmentSlot(sage::TableCell* cell, std::unique_ptr<EquipmentSlot> _slot)
+    {
+        cell->element = std::move(_slot);
+        auto* slot = dynamic_cast<EquipmentSlot*>(cell->element.value().get());
+        slot->RetrieveInfo();
+        cell->InitLayout();
+        return slot;
+    }
+
+    InventorySlot* CreateInventorySlot(sage::TableCell* cell, std::unique_ptr<InventorySlot> _slot)
+    {
+        cell->element = std::move(_slot);
+        auto* slot = dynamic_cast<InventorySlot*>(cell->element.value().get());
+        slot->RetrieveInfo();
+        cell->InitLayout();
+        return slot;
+    }
+
+    ResourceOrb* CreateResourceOrb(sage::TableCell* cell, std::unique_ptr<ResourceOrb> _orb)
+    {
+        cell->element = std::move(_orb);
+        auto* orb = dynamic_cast<ResourceOrb*>(cell->element.value().get());
+        orb->RetrieveInfo();
+        cell->InitLayout();
+        return orb;
+    }
+
+    CharacterStatText* CreateCharacterStatText(sage::TableCell* cell, std::unique_ptr<CharacterStatText> _statText)
+    {
+        cell->element = std::move(_statText);
+        auto* charStatText = dynamic_cast<CharacterStatText*>(cell->element.value().get());
+        cell->InitLayout();
+        return charStatText;
+    }
+
+    DialogOption* CreateDialogOption(sage::TableCell* cell, std::unique_ptr<DialogOption> _dialogOption)
+    {
+        cell->element = std::move(_dialogOption);
+        auto* textbox = dynamic_cast<DialogOption*>(cell->element.value().get());
+        cell->InitLayout();
+        return textbox;
+    }
+
+    EquipmentCharacterPreview* CreateEquipmentCharacterPreview(
+        sage::TableCell* cell, std::unique_ptr<EquipmentCharacterPreview> _preview)
+    {
+        cell->element = std::move(_preview);
+        auto* image = dynamic_cast<EquipmentCharacterPreview*>(cell->element.value().get());
+        image->draggable = false;
+        cell->InitLayout();
+        image->RetrieveInfo();
+        return image;
+    }
 
     sage::Window* GameUiFactory::CreatePartyPortraitsColumn(LeverUIEngine* engine)
     {
@@ -43,12 +116,12 @@ namespace lq
         auto* window = engine->CreateWindowDocked(std::move(_windowDocked));
         auto table = window->CreateTable();
 
-        for (int i = 0; i < PARTY_MEMBER_MAX; ++i)
+        for (size_t i = 0; i < PARTY_MEMBER_MAX; ++i)
         {
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
             auto portrait = std::make_unique<PartyMemberPortrait>(engine, cell, i, w, 166);
-            LeverUIEngine::CreatePartyMemberPortrait(cell, std::move(portrait));
+            CreatePartyMemberPortrait(cell, std::move(portrait));
         }
 
         window->FinalizeLayout();
@@ -93,7 +166,7 @@ namespace lq
         for (unsigned int i = 0; i < abilityRow->children.size(); ++i)
         {
             auto cell = dynamic_cast<sage::TableCell*>(abilityRow->children[i].get());
-            LeverUIEngine::CreateAbilitySlot(cell, std::make_unique<AbilitySlot>(engine, cell, i));
+            CreateAbilitySlot(cell, std::make_unique<AbilitySlot>(engine, cell, i));
         }
 
         // TODO: Currently, if one imagebox has SHRINK_ROW_TO_FIT all imageboxes in that row would be scaled.
@@ -269,7 +342,7 @@ namespace lq
                 {
                     auto invCell = dynamic_cast<sage::TableCell*>(table->children[row]->children[col].get());
                     auto invSlot = std::make_unique<InventorySlot>(engine, invCell, owner, row, col);
-                    LeverUIEngine::CreateInventorySlot(invCell, std::move(invSlot));
+                    CreateInventorySlot(invCell, std::move(invSlot));
                 }
             }
         }
@@ -317,7 +390,7 @@ namespace lq
                 {
                     auto invCell = dynamic_cast<sage::TableCell*>(table->children[row]->children[col].get());
                     auto invSlot = std::make_unique<InventorySlot>(engine, invCell, actor, row, col);
-                    auto ptr = LeverUIEngine::CreateInventorySlot(invCell, std::move(invSlot));
+                    auto ptr = CreateInventorySlot(invCell, std::move(invSlot));
 
                     engine->sys->cursor->onSelectedActorChange.Subscribe(
                         [ptr](entt::entity prev, entt::entity current) { ptr->SetOwner(current); });
@@ -442,7 +515,7 @@ namespace lq
             [&engine](const sage::Table* table, unsigned int row, unsigned int col, EquipmentSlotName itemType) {
                 auto cell = dynamic_cast<sage::TableCell*>(table->children[row]->children[col].get());
                 auto equipSlot = std::make_unique<EquipmentSlot>(engine, cell, itemType);
-                auto* ptr = LeverUIEngine::CreateEquipmentSlot(cell, std::move(equipSlot));
+                auto* ptr = CreateEquipmentSlot(cell, std::move(equipSlot));
                 engine->sys->equipmentSystem->onEquipmentUpdated.Subscribe(
                     [ptr](entt::entity) { ptr->RetrieveInfo(); });
             };
@@ -492,7 +565,7 @@ namespace lq
             auto row = table->CreateTableRow();
             auto cell = row->CreateTableCell();
             auto preview = std::make_unique<EquipmentCharacterPreview>(engine, cell);
-            auto img = LeverUIEngine::CreateEquipmentCharacterPreview(cell, std::move(preview));
+            auto img = CreateEquipmentCharacterPreview(cell, std::move(preview));
             img->draggable = false;
         }
 
@@ -526,7 +599,7 @@ namespace lq
                 auto cell = row->CreateTableCell();
                 auto id = magic_enum::enum_cast<CharacterStatText::StatisticType>(i).value();
                 auto stat = std::make_unique<CharacterStatText>(engine, cell, sage::TextBox::FontInfo{}, id);
-                LeverUIEngine::CreateCharacterStatText(cell, std::move(stat));
+                CreateCharacterStatText(cell, std::move(stat));
             }
         }
 
@@ -615,7 +688,7 @@ namespace lq
                 const auto optionRow = optionsTable->CreateTableRow();
                 const auto optionCell = optionRow->CreateTableCell({10, 10, 10, 10});
                 auto option = std::make_unique<DialogOption>(engine, optionCell, o.get(), ++i, _fontInfo);
-                LeverUIEngine::CreateDialogOption(optionCell, std::move(option));
+                CreateDialogOption(optionCell, std::move(option));
             }
         }
         window->FinalizeLayout();
