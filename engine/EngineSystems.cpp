@@ -49,7 +49,12 @@ namespace sage
         uiEngine = std::make_unique<GameUIEngine>(_registry, this);
     }
 
-    EngineSystems::~EngineSystems() = default;
+    EngineSystems::~EngineSystems()
+    {
+        // Windows unsubscribe from UserInput events during teardown, so destroy
+        // the UI before UserInput's events are destroyed by member cleanup.
+        uiEngine.reset();
+    }
 
     GameUIEngine& EngineSystems::UI()
     {

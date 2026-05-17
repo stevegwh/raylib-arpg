@@ -21,8 +21,6 @@ namespace lq
     {
         std::string questKey;
         bool completed = false;
-        std::unique_ptr<sage::Event<QuestTaskComponent*>>
-            onStart; // NB: nullptr (QuestTasks are not started), defined for compatibility with 'Quest'
         sage::Event<QuestTaskComponent*> onCompleted;
 
         void MarkComplete()
