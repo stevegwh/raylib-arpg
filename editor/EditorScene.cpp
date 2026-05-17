@@ -4,23 +4,24 @@
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
 #include "engine/CollisionLayers.hpp"
-#include "engine/Cursor.hpp"
-#include "engine/EngineSystems.hpp"
-#include "engine/GameUiEngine.hpp"
-#include "engine/LightManager.hpp"
-#include "engine/ResourceManager.hpp"
-#include "engine/raylib-cereal.hpp"
-#include "engine/UserInput.hpp"
 #include "engine/components/Collideable.hpp"
 #include "engine/components/Renderable.hpp"
 #include "engine/components/sgTransform.hpp"
+#include "engine/components/UberShaderComponent.hpp"
+#include "engine/Cursor.hpp"
+#include "engine/EngineSystems.hpp"
+#include "engine/GameUiEngine.hpp"
+#include "engine/Light.hpp"
+#include "engine/LightManager.hpp"
+#include "engine/raylib-cereal.hpp"
+#include "engine/ResourceManager.hpp"
 #include "engine/systems/RenderSystem.hpp"
 #include "engine/systems/TransformSystem.hpp"
+#include "engine/UserInput.hpp"
 
 #include "engine/systems/NavigationGridSystem.hpp"
 #include "raylib.h"
 #include "raymath.h"
-#include "rlgl.h"
 
 #include "cereal/archives/json.hpp"
 
@@ -166,13 +167,18 @@ namespace sage
 
     std::string EditorScene::describeEntity(const entt::entity entity) const
     {
+        if (sys->registry->valid(entity) && sys->registry->any_of<Light>(entity))
+        {
+            return std::format("light_{}", entt::to_integral(entity));
+        }
         return std::format("entity_{}", entt::to_integral(entity));
     }
 
     std::string EditorScene::describeSelectedSceneEntity() const
     {
         if (!selectedSceneEntity.has_value()) return "None";
-        if (!sys->registry->valid(*selectedSceneEntity) || !sys->registry->any_of<sgTransform>(*selectedSceneEntity))
+        if (!sys->registry->valid(*selectedSceneEntity) ||
+            !sys->registry->any_of<sgTransform>(*selectedSceneEntity))
         {
             return "None";
         }
@@ -307,7 +313,8 @@ namespace sage
         for (const auto entity : view)
         {
             const auto parent = view.get<sgTransform>(entity).GetParent();
-            if (parent == entt::null || !sys->registry->valid(parent) || !sys->registry->any_of<sgTransform>(parent))
+            if (parent == entt::null || !sys->registry->valid(parent) ||
+                !sys->registry->any_of<sgTransform>(parent))
             {
                 roots.push_back(entity);
             }
@@ -332,12 +339,37 @@ namespace sage
         const BoundingBox localBounds = {
             {-gridHalfExtent, -GRID_PICK_SURFACE_HALF_HEIGHT, -gridHalfExtent},
             {gridHalfExtent, GRID_PICK_SURFACE_HALF_HEIGHT, gridHalfExtent}};
-        auto& collideable = sys->registry->emplace<Collideable>(gridPickSurfaceEntity, localBounds, MatrixIdentity());
+        auto& collideable =
+            sys->registry->emplace<Collideable>(gridPickSurfaceEntity, localBounds, MatrixIdentity());
         collideable.worldBoundingBox = {
             {-gridHalfExtent, gridSurfaceY - GRID_PICK_SURFACE_HALF_HEIGHT, -gridHalfExtent},
             {gridHalfExtent, gridSurfaceY + GRID_PICK_SURFACE_HALF_HEIGHT, gridHalfExtent}};
         collideable.SetCollisionLayer(collision_layers::GeometrySimple);
         sys->registry->emplace<StaticCollideable>(gridPickSurfaceEntity);
+    }
+
+    void EditorScene::applyLitShaderToLoadedRenderables() const
+    {
+        for (const auto entity : sys->registry->view<Renderable>())
+        {
+            if (sys->registry->any_of<UberShaderComponent>(entity)) continue;
+            auto& renderable = sys->registry->get<Renderable>(entity);
+            if (renderable.GetModel() == nullptr) continue;
+            auto& uber =
+                sys->registry->emplace<UberShaderComponent>(entity, renderable.GetModel()->GetMaterialCount());
+            uber.SetFlagAll(UberShaderComponent::Flags::Lit);
+        }
+    }
+
+    void EditorScene::giveTransformsToLights() const
+    {
+        for (const auto entity : sys->registry->view<Light>())
+        {
+            if (sys->registry->any_of<sgTransform>(entity)) continue;
+            const auto position = sys->registry->get<Light>(entity).position;
+            sys->registry->emplace<sgTransform>(entity);
+            sys->transformSystem->SetPosition(entity, position);
+        }
     }
 
     void EditorScene::sizeGridToLoadedScene()
@@ -390,10 +422,7 @@ namespace sage
         if (!gridSquare) return;
 
         hoveredGridSquare = square;
-        snappedPlacementPosition = {
-            gridSquare->worldPosCentre.x,
-            collision.point.y,
-            gridSquare->worldPosCentre.z};
+        snappedPlacementPosition = {gridSquare->worldPosCentre.x, collision.point.y, gridSquare->worldPosCentre.z};
     }
 
     void EditorScene::refreshOverlay() const
@@ -414,11 +443,10 @@ namespace sage
 
     void EditorScene::refreshSceneWindows() const
     {
-        const auto activeEntity =
-            selectedSceneEntity.has_value() && sys->registry->valid(*selectedSceneEntity) &&
-                    sys->registry->any_of<sgTransform>(*selectedSceneEntity)
-                ? selectedSceneEntity
-                : std::nullopt;
+        const auto activeEntity = selectedSceneEntity.has_value() && sys->registry->valid(*selectedSceneEntity) &&
+                                          sys->registry->any_of<sgTransform>(*selectedSceneEntity)
+                                      ? selectedSceneEntity
+                                      : std::nullopt;
 
         gui->SetHierarchy(collectSceneObjectEntries(), activeEntity);
         gui->SetInspector(
@@ -459,8 +487,7 @@ namespace sage
     bool EditorScene::selectSceneEntityUnderCursor()
     {
         const auto& hitInfo = sys->cursor->getMouseHitInfo();
-        if (hitInfo.collidedEntityId == entt::null ||
-            !sys->registry->valid(hitInfo.collidedEntityId) ||
+        if (hitInfo.collidedEntityId == entt::null || !sys->registry->valid(hitInfo.collidedEntityId) ||
             !sys->registry->any_of<sgTransform>(hitInfo.collidedEntityId))
         {
             return false;
@@ -480,7 +507,8 @@ namespace sage
     void EditorScene::requestDeleteSelectedEntity()
     {
         if (!selectedSceneEntity.has_value()) return;
-        if (!sys->registry->valid(*selectedSceneEntity) || !sys->registry->any_of<sgTransform>(*selectedSceneEntity))
+        if (!sys->registry->valid(*selectedSceneEntity) ||
+            !sys->registry->any_of<sgTransform>(*selectedSceneEntity))
         {
             clearSceneEntitySelection();
             return;
@@ -821,9 +849,13 @@ namespace sage
             sys->registry->emplace<Renderable>(entity, std::move(model), modelDefaultTransform(placeable));
         lastPlacedLabel = makePlacedLabel(entity);
         renderable.SetName(lastPlacedLabel);
+        auto& uber =
+            sys->registry->emplace<UberShaderComponent>(entity, renderable.GetModel()->GetMaterialCount());
+        uber.SetFlagAll(UberShaderComponent::Flags::Lit);
 
         const auto localBounds = renderable.GetModel()->CalcLocalBoundingBox();
-        const auto placementMatrix = BuildPlacementMatrix(*snappedPlacementPosition, placementRotationY, placementScale);
+        const auto placementMatrix =
+            BuildPlacementMatrix(*snappedPlacementPosition, placementRotationY, placementScale);
         auto& collideable = sys->registry->emplace<Collideable>(
             entity, localBounds, sys->registry->get<sgTransform>(entity).GetMatrixNoRot());
         collideable.worldBoundingBox = TransformBoundingBoxByCorners(localBounds, placementMatrix);
@@ -844,7 +876,8 @@ namespace sage
 
         const auto& transform = sys->registry->get<sgTransform>(entity);
         auto& collideable = sys->registry->get<Collideable>(entity);
-        collideable.worldBoundingBox = TransformBoundingBoxByCorners(collideable.localBoundingBox, transform.GetMatrix());
+        collideable.worldBoundingBox =
+            TransformBoundingBoxByCorners(collideable.localBoundingBox, transform.GetMatrix());
     }
 
     void EditorScene::changeState(EditorSelectState newState)
@@ -1056,6 +1089,8 @@ namespace sage
     {
         sizeGridToLoadedScene();
         createGridPickSurface();
+        applyLitShaderToLoadedRenderables();
+        giveTransformsToLights();
         placeables = {
             PlaceableMesh{"Sphere", "vfx_sphere", "SPHERE"},
             PlaceableMesh{"Flat Torus", "vfx_flattorus", "FLAT_TORUS"},

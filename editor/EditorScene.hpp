@@ -89,6 +89,8 @@ namespace sage
 
         void createGridPickSurface();
         void sizeGridToLoadedScene();
+        void applyLitShaderToLoadedRenderables() const;
+        void giveTransformsToLights() const;
         void refreshPlacementTarget();
         void refreshOverlay() const;
         void refreshSceneWindows() const;

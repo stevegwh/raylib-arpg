@@ -182,50 +182,50 @@ namespace sage
         return *bb;
     }
 
-    RayCollision ModelView::GetRayMeshCollision(Ray ray, int meshNum, Matrix transform) const
+    RayCollision ModelView::GetRayMeshCollision(const Ray& ray, const int meshNum, const Matrix& transform) const
     {
         assert(meshNum < GetMeshCount());
         const Matrix mat = MatrixMultiply(rlmodel.transform, transform);
         return GetRayCollisionMesh(ray, rlmodel.meshes[meshNum], mat);
     }
 
-    void ModelView::UpdateAnimation(ModelAnimation anim, unsigned int frame) const
+    void ModelView::UpdateAnimation(const ModelAnimation& anim, unsigned int frame) const
     {
         UpdateModelAnimationBones(rlmodel, anim, static_cast<int>(frame));
     }
 
-    void ModelView::Draw(const Vector3 position, float scale, const Color tint) const
+    void ModelView::Draw(const Vector3& position, float scale, const Color& tint) const
     {
         Draw(position, {0, 1, 0}, 0, {scale, scale, scale}, tint);
     }
 
     void ModelView::Draw(
-        Vector3 position, Vector3 rotationAxis, float rotationAngle, Vector3 scale, Color tint) const
+        const Vector3& position,
+        const Vector3& rotationAxis,
+        const float rotationAngle,
+        const Vector3& scale,
+        const Color& tint) const
     {
         DrawModelEx(rlmodel, position, rotationAxis, rotationAngle, scale, tint);
     }
 
     void ModelView::DrawUber(
         UberShaderComponent* uber,
-        Vector3 position,
-        Vector3 rotationAxis,
-        float rotationAngle,
-        Vector3 scale,
-        Color tint) const
+        const Vector3& position,
+        const Vector3& rotationAxis,
+        const float rotationAngle,
+        const Vector3& scale,
+        const Color& tint) const
     {
-        Matrix matScale = MatrixScale(scale.x, scale.y, scale.z);
-        Matrix matRotation = MatrixRotate(rotationAxis, rotationAngle * DEG2RAD);
-        Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
-
-        Matrix matTransform = MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
-
+        const Matrix matScale = MatrixScale(scale.x, scale.y, scale.z);
+        const Matrix matRotation = MatrixRotate(rotationAxis, rotationAngle * DEG2RAD);
+        const Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
+        const Matrix matTransform = MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
         auto model = rlmodel;
         model.transform = MatrixMultiply(model.transform, matTransform);
-
         for (int i = 0; i < model.meshCount; i++)
         {
             uber->SetShaderBools(model.meshMaterial[i]);
-
             if (uber->HasFlag(model.meshMaterial[i], UberShaderComponent::EmissiveTexture))
             {
                 auto emTex = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].texture;
@@ -237,18 +237,15 @@ namespace sage
             }
             if (uber->HasFlag(model.meshMaterial[i], UberShaderComponent::EmissiveCol))
             {
-                auto emCol = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color;
-
+                auto [r, g, b, a] = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_EMISSION].color;
                 float values[4] = {
-                    static_cast<float>(emCol.r) / 255.0f,
-                    static_cast<float>(emCol.g) / 255.0f,
-                    static_cast<float>(emCol.b) / 255.0f,
-                    static_cast<float>(emCol.a) / 255.0f};
+                    static_cast<float>(r) / 255.0f,
+                    static_cast<float>(g) / 255.0f,
+                    static_cast<float>(b) / 255.0f,
+                    static_cast<float>(a) / 255.0f};
                 SetShaderValue(model.materials[i].shader, uber->colEmissiveLoc, &values, SHADER_UNIFORM_VEC4);
             }
-
-            Color color = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color;
-
+            const Color color = model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color;
             auto colorTint = WHITE;
             colorTint.r = static_cast<unsigned char>((static_cast<int>(color.r) * static_cast<int>(tint.r)) / 255);
             colorTint.g = static_cast<unsigned char>((static_cast<int>(color.g) * static_cast<int>(tint.g)) / 255);
@@ -329,7 +326,7 @@ namespace sage
     std::string TitleCase(const std::string& A)
     {
         std::string lowercased = A;
-        std::transform(lowercased.begin(), lowercased.end(), lowercased.begin(), ::tolower);
+        std::ranges::transform(lowercased, lowercased.begin(), ::tolower);
 
         std::string B;
 
@@ -411,12 +408,12 @@ namespace sage
 
     Matrix ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale)
     {
-        Matrix matTranslation = MatrixTranslate(translation.x, translation.y, translation.z);
-        Matrix matRotation = QuaternionToMatrix(rotation);
-        Matrix matScale = MatrixScale(scale.x, scale.y, scale.z);
+        const Matrix matTranslation = MatrixTranslate(translation.x, translation.y, translation.z);
+        const Matrix matRotation = QuaternionToMatrix(rotation);
+        const Matrix matScale = MatrixScale(scale.x, scale.y, scale.z);
 
         // Apply transformations in order: Scale -> Rotate -> Translate
-        Matrix matTransform = MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
+        const Matrix matTransform = MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
 
         return matTransform;
     }
