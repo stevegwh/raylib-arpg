@@ -27,16 +27,25 @@ namespace sage
         editor::LoadMap(registry.get(), "resources/dungeon-map.bin");
         systems = std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
         scene = std::make_unique<EditorScene>(systems.get());
+
+        const auto viewport = settings->GetViewPort();
+        renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
     }
 
     void EditorApplication::draw() const
     {
-        BeginDrawing();
-        ClearBackground(Color{232, 235, 238, 255});
-
+        BeginTextureMode(renderTexture);
+        ClearBackground(BLANK);
         BeginMode3D(*systems->camera->getRaylibCam());
         scene->Draw3D();
         EndMode3D();
+        EndTextureMode();
+
+        BeginDrawing();
+        ClearBackground(Color{232, 235, 238, 255});
+
+        const auto [width, height] = settings->GetViewPort();
+        DrawTextureRec(renderTexture.texture, {0, 0, width, -height}, {0, 0}, WHITE);
 
         scene->Draw2D();
         DrawFPS(12, 12);
@@ -53,7 +62,7 @@ namespace sage
         EndDrawing();
     }
 
-    void EditorApplication::handleScreenUpdate() const
+    void EditorApplication::handleScreenUpdate()
     {
         if (!settings->toggleFullScreenRequested) return;
 
@@ -94,7 +103,10 @@ namespace sage
 #endif
 
         settings->toggleFullScreenRequested = false;
-        systems->userInput->onWindowUpdate.Publish(prev, settings->GetViewPort());
+        const auto viewport = settings->GetViewPort();
+        systems->userInput->onWindowUpdate.Publish(prev, viewport);
+        UnloadRenderTexture(renderTexture);
+        renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
     }
 
     void EditorApplication::Update()
@@ -130,6 +142,7 @@ namespace sage
 
     EditorApplication::~EditorApplication()
     {
+        UnloadRenderTexture(renderTexture);
         CloseWindow();
     }
 } // namespace sage

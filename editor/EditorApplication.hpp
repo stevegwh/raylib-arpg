@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "raylib.h"
 
 #include <memory>
 
@@ -14,6 +15,8 @@ namespace sage
 
     class EditorApplication
     {
+        RenderTexture renderTexture{};
+
         std::unique_ptr<entt::registry> registry;
         std::unique_ptr<KeyMapping> keyMapping;
         std::unique_ptr<Settings> settings;
@@ -26,7 +29,7 @@ namespace sage
 
         void init();
         void draw() const;
-        void handleScreenUpdate() const;
+        void handleScreenUpdate();
 
       public:
         void Update();
