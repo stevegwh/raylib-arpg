@@ -36,16 +36,16 @@ namespace sage
 {
     namespace
     {
-        constexpr float kGridHalfExtent = 50.0f;
-        constexpr float kGridPickSurfaceHalfHeight = 0.02f;
-        constexpr float kPlacementMarkerHeight = 0.16f;
-        constexpr float kPlacementHeightStep = 0.25f;
-        constexpr float kPlacementRotationStep = 15.0f;
-        constexpr float kPlacementScaleStep = 0.1f;
-        constexpr float kPlacementMinScale = 0.1f;
-        constexpr Color kPlacementPreviewTint = {255, 255, 255, 150};
-        constexpr Color kPlacementPreviewBoundsColor = {37, 99, 235, 210};
-        const std::filesystem::path kImportedAssetsDirectory{"resources/Editor/ImportedAssets"};
+        constexpr float GRID_HALF_EXTENT = 50.0f;
+        constexpr float GRID_PICK_SURFACE_HALF_HEIGHT = 0.02f;
+        constexpr float PLACEMENT_MARKER_HEIGHT = 0.16f;
+        constexpr float PLACEMENT_HEIGHT_STEP = 0.25f;
+        constexpr float PLACEMENT_ROTATION_STEP = 15.0f;
+        constexpr float PLACEMENT_SCALE_STEP = 0.1f;
+        constexpr float PLACEMENT_MIN_SCALE = 0.1f;
+        constexpr Color PLACEMENT_PREVIEW_TINT = {255, 255, 255, 150};
+        constexpr Color PLACEMENT_PREVIEW_BOUNDS_COLOR = {37, 99, 235, 210};
+        const std::filesystem::path IMPORTED_ASSETS_DIRECTORY{"resources/Editor/ImportedAssets"};
 
         BoundingBox TransformBoundingBoxByCorners(const BoundingBox& bounds, const Matrix& transform)
         {
@@ -270,7 +270,7 @@ namespace sage
 
     std::string EditorScene::assetDefaultsPath(const PlaceableMesh& placeable) const
     {
-        return (kImportedAssetsDirectory / (SanitizeAssetFileStem(placeable.modelKey) + ".json")).string();
+        return (IMPORTED_ASSETS_DIRECTORY / (SanitizeAssetFileStem(placeable.modelKey) + ".json")).string();
     }
 
     std::string EditorScene::makePlacedLabel(const entt::entity entity) const
@@ -328,8 +328,8 @@ namespace sage
     {
         const auto entity = sys->registry->create();
         const BoundingBox gridBounds = {
-            {-kGridHalfExtent, -kGridPickSurfaceHalfHeight, -kGridHalfExtent},
-            {kGridHalfExtent, kGridPickSurfaceHalfHeight, kGridHalfExtent}};
+            {-GRID_HALF_EXTENT, -GRID_PICK_SURFACE_HALF_HEIGHT, -GRID_HALF_EXTENT},
+            {GRID_HALF_EXTENT, GRID_PICK_SURFACE_HALF_HEIGHT, GRID_HALF_EXTENT}};
         auto& collideable = sys->registry->emplace<Collideable>(entity, gridBounds, MatrixIdentity());
         collideable.SetCollisionLayer(collision_layers::GeometrySimple);
         sys->registry->emplace<StaticCollideable>(entity);
@@ -534,7 +534,7 @@ namespace sage
 
     void EditorScene::adjustPlacementScale(const float amount)
     {
-        placementScale = std::max(kPlacementMinScale, placementScale + amount);
+        placementScale = std::max(PLACEMENT_MIN_SCALE, placementScale + amount);
         refreshOverlay();
     }
 
@@ -576,15 +576,15 @@ namespace sage
             sys->transformSystem->SetRotation(entity, rotation);
             break;
         case editor::EditorGui::TransformField::ScaleX:
-            scale.x = std::max(kPlacementMinScale, scale.x + amount);
+            scale.x = std::max(PLACEMENT_MIN_SCALE, scale.x + amount);
             sys->transformSystem->SetScale(entity, scale);
             break;
         case editor::EditorGui::TransformField::ScaleY:
-            scale.y = std::max(kPlacementMinScale, scale.y + amount);
+            scale.y = std::max(PLACEMENT_MIN_SCALE, scale.y + amount);
             sys->transformSystem->SetScale(entity, scale);
             break;
         case editor::EditorGui::TransformField::ScaleZ:
-            scale.z = std::max(kPlacementMinScale, scale.z + amount);
+            scale.z = std::max(PLACEMENT_MIN_SCALE, scale.z + amount);
             sys->transformSystem->SetScale(entity, scale);
             break;
         }
@@ -631,15 +631,15 @@ namespace sage
             sys->transformSystem->SetRotation(entity, rotation);
             break;
         case editor::EditorGui::TransformField::ScaleX:
-            scale.x = std::max(kPlacementMinScale, value);
+            scale.x = std::max(PLACEMENT_MIN_SCALE, value);
             sys->transformSystem->SetScale(entity, scale);
             break;
         case editor::EditorGui::TransformField::ScaleY:
-            scale.y = std::max(kPlacementMinScale, value);
+            scale.y = std::max(PLACEMENT_MIN_SCALE, value);
             sys->transformSystem->SetScale(entity, scale);
             break;
         case editor::EditorGui::TransformField::ScaleZ:
-            scale.z = std::max(kPlacementMinScale, value);
+            scale.z = std::max(PLACEMENT_MIN_SCALE, value);
             sys->transformSystem->SetScale(entity, scale);
             break;
         }
@@ -669,7 +669,7 @@ namespace sage
     {
         if (!isPickState()) return;
         auto& scale = placeables.at(selectedPlaceableIndex).modelDefaultScale;
-        scale = std::max(kPlacementMinScale, scale + amount);
+        scale = std::max(PLACEMENT_MIN_SCALE, scale + amount);
         refreshOverlay();
     }
 
@@ -699,7 +699,7 @@ namespace sage
 
     void EditorScene::loadAssetDefaults()
     {
-        std::filesystem::create_directories(kImportedAssetsDirectory);
+        std::filesystem::create_directories(IMPORTED_ASSETS_DIRECTORY);
         for (auto& placeable : placeables)
         {
             loadAssetDefaults(placeable);
@@ -742,7 +742,7 @@ namespace sage
 
     void EditorScene::saveAssetDefaults(const PlaceableMesh& placeable) const
     {
-        std::filesystem::create_directories(kImportedAssetsDirectory);
+        std::filesystem::create_directories(IMPORTED_ASSETS_DIRECTORY);
 
         const auto path = assetDefaultsPath(placeable);
         std::ofstream outputFile(path);
@@ -869,32 +869,32 @@ namespace sage
         }
         if (IsKeyPressed(KEY_EQUAL))
         {
-            adjustPlacementHeight(kPlacementHeightStep);
+            adjustPlacementHeight(PLACEMENT_HEIGHT_STEP);
         }
         if (IsKeyPressed(KEY_MINUS))
         {
-            adjustPlacementHeight(-kPlacementHeightStep);
+            adjustPlacementHeight(-PLACEMENT_HEIGHT_STEP);
         }
         if (IsKeyPressed(KEY_LEFT_BRACKET))
         {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
             {
-                adjustPlacementScale(-kPlacementScaleStep);
+                adjustPlacementScale(-PLACEMENT_SCALE_STEP);
             }
             else
             {
-                adjustPlacementRotation(-kPlacementRotationStep);
+                adjustPlacementRotation(-PLACEMENT_ROTATION_STEP);
             }
         }
         if (IsKeyPressed(KEY_RIGHT_BRACKET))
         {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
             {
-                adjustPlacementScale(kPlacementScaleStep);
+                adjustPlacementScale(PLACEMENT_SCALE_STEP);
             }
             else
             {
-                adjustPlacementRotation(kPlacementRotationStep);
+                adjustPlacementRotation(PLACEMENT_ROTATION_STEP);
             }
         }
         if (IsKeyPressed(KEY_P))
@@ -918,9 +918,9 @@ namespace sage
 
         const Vector3 marker = {
             snappedPlacementPosition->x,
-            snappedPlacementPosition->y + kPlacementMarkerHeight,
+            snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
             snappedPlacementPosition->z};
-        DrawCubeWires(marker, 1.0f, kPlacementMarkerHeight, 1.0f, GOLD);
+        DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, GOLD);
         DrawSphere(marker, 0.08f, GOLD);
     }
 
@@ -936,12 +936,12 @@ namespace sage
             {0.0f, 1.0f, 0.0f},
             placementRotationY,
             {placementScale, placementScale, placementScale},
-            kPlacementPreviewTint);
+            PLACEMENT_PREVIEW_TINT);
 
         const auto previewBounds = TransformBoundingBoxByCorners(
             previewModel.CalcLocalBoundingBox(),
             BuildPlacementMatrix(*snappedPlacementPosition, placementRotationY, placementScale));
-        DrawBoundingBox(previewBounds, kPlacementPreviewBoundsColor);
+        DrawBoundingBox(previewBounds, PLACEMENT_PREVIEW_BOUNDS_COLOR);
     }
 
     void EditorScene::Update()
@@ -1024,12 +1024,12 @@ namespace sage
             [this](const std::size_t index) { selectPlaceable(index); },
             [this](const entt::entity entity) { selectSceneEntity(entity); },
             editor::EditorGui::ModelDefaultCallbacks{
-                .heightDown = [this]() { adjustSelectedModelDefaultHeight(-kPlacementHeightStep); },
-                .heightUp = [this]() { adjustSelectedModelDefaultHeight(kPlacementHeightStep); },
-                .rotationDown = [this]() { adjustSelectedModelDefaultRotation(-kPlacementRotationStep); },
-                .rotationUp = [this]() { adjustSelectedModelDefaultRotation(kPlacementRotationStep); },
-                .scaleDown = [this]() { adjustSelectedModelDefaultScale(-kPlacementScaleStep); },
-                .scaleUp = [this]() { adjustSelectedModelDefaultScale(kPlacementScaleStep); },
+                .heightDown = [this]() { adjustSelectedModelDefaultHeight(-PLACEMENT_HEIGHT_STEP); },
+                .heightUp = [this]() { adjustSelectedModelDefaultHeight(PLACEMENT_HEIGHT_STEP); },
+                .rotationDown = [this]() { adjustSelectedModelDefaultRotation(-PLACEMENT_ROTATION_STEP); },
+                .rotationUp = [this]() { adjustSelectedModelDefaultRotation(PLACEMENT_ROTATION_STEP); },
+                .scaleDown = [this]() { adjustSelectedModelDefaultScale(-PLACEMENT_SCALE_STEP); },
+                .scaleUp = [this]() { adjustSelectedModelDefaultScale(PLACEMENT_SCALE_STEP); },
                 .apply = [this]() { applySelectedModelDefaults(); },
                 .reset = [this]() { resetSelectedModelDefaults(); }},
             editor::EditorGui::InspectorCallbacks{

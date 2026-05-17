@@ -20,15 +20,15 @@ namespace sage::editor
 {
     namespace
     {
-        constexpr int kThumbnailSize = 128;
-        constexpr int kHierarchyMaxRows = 18;
-        constexpr Color kEditorWindowBackground = {35, 38, 43, 245};
-        constexpr Color kEditorText = {230, 234, 240, 255};
+        constexpr int THUMBNAIL_SIZE = 128;
+        constexpr int HIERARCHY_MAX_ROWS = 18;
+        constexpr Color EDITOR_WINDOW_BACKGROUND = {35, 38, 43, 245};
+        constexpr Color EDITOR_TEXT = {230, 234, 240, 255};
 
         TextBox::FontInfo EditorTextFontInfo()
         {
             auto info = TextBox::FontInfo{};
-            info.color = kEditorText;
+            info.color = EDITOR_TEXT;
             return info;
         }
 
@@ -453,7 +453,7 @@ namespace sage::editor
 
     RenderTexture2D EditorGui::createAssetThumbnail(const AssetEntry& asset) const
     {
-        auto thumbnail = LoadRenderTexture(kThumbnailSize, kThumbnailSize);
+        auto thumbnail = LoadRenderTexture(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
         auto model = ResourceManager::GetInstance().GetModelView(asset.modelKey);
         const auto bounds = model.CalcLocalBoundingBox();
         const Vector3 size = Vector3Subtract(bounds.max, bounds.min);
@@ -562,8 +562,8 @@ namespace sage::editor
             auto* scrollbarCell = contentRow->CreateTableCell(6.0f, Padding{2, 8, 0, 2});
             auto* table = listCell->CreateTable();
 
-            hierarchyRows.reserve(kHierarchyMaxRows);
-            for (int i = 0; i < kHierarchyMaxRows; ++i)
+            hierarchyRows.reserve(HIERARCHY_MAX_ROWS);
+            for (int i = 0; i < HIERARCHY_MAX_ROWS; ++i)
             {
                 auto* row = table->CreateTableRow();
                 auto* cell = row->CreateTableCell(Padding{3, 3, 6, 6});
@@ -964,7 +964,7 @@ namespace sage::editor
           inspectorCallbacks(std::move(inspectorCallbacks)),
           deleteConfirmationCallbacks(std::move(deleteConfirmationCallbacks))
     {
-        Image panelImage = GenImageColor(1, 1, kEditorWindowBackground);
+        Image panelImage = GenImageColor(1, 1, EDITOR_WINDOW_BACKGROUND);
         editorWindowBackgroundTexture = LoadTextureFromImage(panelImage);
         UnloadImage(panelImage);
 
