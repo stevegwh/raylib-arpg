@@ -1,5 +1,6 @@
 #include "EditorApplication.hpp"
 
+#include "EditorMapLoader.hpp"
 #include "EditorScene.hpp"
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
@@ -23,6 +24,7 @@ namespace sage
         EnableCursor();
 
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
+        editor::LoadMap(registry.get(), "resources/dungeon-map.bin");
         systems = std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
         scene = std::make_unique<EditorScene>(systems.get());
     }
