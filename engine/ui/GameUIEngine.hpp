@@ -57,6 +57,7 @@ namespace sage
         [[nodiscard]] bool ObjectBeingDragged() const;
         [[nodiscard]] Window* GetWindowCollision(const Window* toCheck) const;
         [[nodiscard]] CellElement* GetCellUnderCursor() const;
+        [[nodiscard]] bool IsMouseOverWindow() const;
         void DrawDebug2D() const;
         void Draw2D() const;
         void Update();

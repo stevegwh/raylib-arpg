@@ -10,7 +10,9 @@
 #include "raymath.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <exception>
 #include <memory>
 #include <utility>
 
@@ -19,10 +21,16 @@ namespace sage::editor
     namespace
     {
         constexpr int kThumbnailSize = 128;
-        constexpr int kHierarchyMaxRows = 24;
-        constexpr float kInspectorPositionStep = 0.25f;
-        constexpr float kInspectorRotationStep = 15.0f;
-        constexpr float kInspectorScaleStep = 0.1f;
+        constexpr int kHierarchyMaxRows = 18;
+        constexpr Color kEditorWindowBackground = {35, 38, 43, 245};
+        constexpr Color kEditorText = {230, 234, 240, 255};
+
+        TextBox::FontInfo EditorTextFontInfo()
+        {
+            auto info = TextBox::FontInfo{};
+            info.color = kEditorText;
+            return info;
+        }
 
         class AssetThumbnailButton final : public ImageBox
         {
@@ -114,10 +122,12 @@ namespace sage::editor
         class TextButton final : public TextBox
         {
             std::function<void()> onPressed;
+            std::function<bool()> isVisible;
 
           public:
             void OnClick() override
             {
+                if (isVisible && !isVisible()) return;
                 if (onPressed) onPressed();
             }
 
@@ -132,6 +142,7 @@ namespace sage::editor
 
             void Draw2D() override
             {
+                if (isVisible && !isVisible()) return;
                 DrawRectangleRec(rec, Color{233, 238, 246, 255});
                 DrawRectangleLinesEx(rec, 1.0f, Color{151, 164, 184, 255});
                 const int fontSize = static_cast<int>(fontInfo.fontSize);
@@ -144,9 +155,14 @@ namespace sage::editor
                     BLACK);
             }
 
-            TextButton(GameUIEngine* ui, TableCell* parent, std::function<void()> callback)
+            TextButton(
+                GameUIEngine* ui,
+                TableCell* parent,
+                std::function<void()> callback,
+                std::function<bool()> visiblePredicate = {})
                 : TextBox(ui, parent, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER),
-                  onPressed(std::move(callback))
+                  onPressed(std::move(callback)),
+                  isVisible(std::move(visiblePredicate))
             {
             }
         };
@@ -155,14 +171,17 @@ namespace sage::editor
         {
             std::size_t rowIndex = 0;
             const std::vector<EditorGui::SceneObjectEntry>* entries{};
+            const std::size_t* scrollOffset{};
             const std::optional<entt::entity>* selectedEntity{};
             std::function<void(entt::entity)> onSceneObjectSelected;
 
           public:
             void OnClick() override
             {
-                if (!entries || rowIndex >= entries->size() || !onSceneObjectSelected) return;
-                onSceneObjectSelected(entries->at(rowIndex).entity);
+                if (!entries || !scrollOffset || !onSceneObjectSelected) return;
+                const std::size_t entryIndex = *scrollOffset + rowIndex;
+                if (entryIndex >= entries->size()) return;
+                onSceneObjectSelected(entries->at(entryIndex).entity);
             }
 
             void UpdateDimensions() override
@@ -177,9 +196,10 @@ namespace sage::editor
 
             void Draw2D() override
             {
-                const bool hasEntry = entries && rowIndex < entries->size();
+                const std::size_t entryIndex = scrollOffset ? *scrollOffset + rowIndex : rowIndex;
+                const bool hasEntry = entries && entryIndex < entries->size();
                 const bool selected = hasEntry && selectedEntity && selectedEntity->has_value() &&
-                                      selectedEntity->value() == entries->at(rowIndex).entity;
+                                      selectedEntity->value() == entries->at(entryIndex).entity;
 
                 if (hasEntry)
                 {
@@ -194,15 +214,13 @@ namespace sage::editor
 
                 if (GetContent().empty()) return;
 
-                BeginShaderMode(sdfShader);
                 DrawTextEx(
                     fontInfo.font,
                     GetContent().c_str(),
-                    Vector2{rec.x + 6.0f, rec.y + (rec.height - fontInfo.fontSize) * 0.5f},
+                    Vector2{rec.x + 14.0f, rec.y + (rec.height - fontInfo.fontSize) * 0.5f},
                     fontInfo.fontSize,
                     fontInfo.fontSpacing,
-                    BLACK);
-                EndShaderMode();
+                    fontInfo.color);
             }
 
             HierarchyRowButton(
@@ -210,13 +228,70 @@ namespace sage::editor
                 TableCell* parent,
                 std::size_t index,
                 const std::vector<EditorGui::SceneObjectEntry>* sceneEntries,
+                const std::size_t* firstVisibleEntry,
                 const std::optional<entt::entity>* activeEntity,
                 std::function<void(entt::entity)> callback)
                 : TextBox(ui, parent, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::LEFT),
                   rowIndex(index),
                   entries(sceneEntries),
+                  scrollOffset(firstVisibleEntry),
                   selectedEntity(activeEntity),
                   onSceneObjectSelected(std::move(callback))
+            {
+            }
+        };
+
+        class ScrollbarTrack final : public TextBox
+        {
+            const std::vector<EditorGui::SceneObjectEntry>* entries{};
+            const std::size_t* scrollOffset{};
+            const std::vector<TextBox*>* visibleRows{};
+
+          public:
+            [[nodiscard]] bool ShouldShow() const
+            {
+                return entries && visibleRows && entries->size() > visibleRows->size();
+            }
+
+            void UpdateDimensions() override
+            {
+                rec = {
+                    parent->GetRec().x + parent->padding.left,
+                    parent->GetRec().y + parent->padding.up,
+                    parent->GetRec().width - parent->padding.left - parent->padding.right,
+                    parent->GetRec().height - parent->padding.up - parent->padding.down};
+            }
+
+            void Draw2D() override
+            {
+                if (!ShouldShow()) return;
+                DrawRectangleRec(rec, Color{24, 26, 30, 255});
+                DrawRectangleLinesEx(rec, 1.0f, Color{69, 74, 84, 255});
+
+                if (!entries || !scrollOffset || !visibleRows || entries->empty() || visibleRows->empty()) return;
+                const float visibleCount = static_cast<float>(visibleRows->size());
+                const float totalCount = static_cast<float>(entries->size());
+                const float thumbHeight = totalCount <= visibleCount
+                                              ? rec.height
+                                              : std::max(18.0f, rec.height * (visibleCount / totalCount));
+                const std::size_t maxOffset =
+                    entries->size() > visibleRows->size() ? entries->size() - visibleRows->size() : 0;
+                const float scrollRatio =
+                    maxOffset == 0 ? 0.0f : static_cast<float>(*scrollOffset) / static_cast<float>(maxOffset);
+                const float thumbY = rec.y + (rec.height - thumbHeight) * scrollRatio;
+                DrawRectangleRec({rec.x + 2.0f, thumbY + 2.0f, rec.width - 4.0f, thumbHeight - 4.0f}, Color{139, 148, 164, 255});
+            }
+
+            ScrollbarTrack(
+                GameUIEngine* ui,
+                TableCell* parent,
+                const std::vector<EditorGui::SceneObjectEntry>* sceneEntries,
+                const std::size_t* firstVisibleEntry,
+                const std::vector<TextBox*>* rowElements)
+                : TextBox(ui, parent, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER),
+                  entries(sceneEntries),
+                  scrollOffset(firstVisibleEntry),
+                  visibleRows(rowElements)
             {
             }
         };
@@ -261,6 +336,23 @@ namespace sage::editor
         }
     }
 
+    void EditorGui::scrollHierarchy(const int amount)
+    {
+        const std::size_t visibleRows = hierarchyRows.size();
+        const std::size_t maxOffset = hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
+
+        if (amount < 0)
+        {
+            const auto positiveAmount = static_cast<std::size_t>(-amount);
+            hierarchyScrollOffset =
+                positiveAmount > hierarchyScrollOffset ? 0 : hierarchyScrollOffset - positiveAmount;
+        }
+        else if (amount > 0)
+        {
+            hierarchyScrollOffset = std::min(maxOffset, hierarchyScrollOffset + static_cast<std::size_t>(amount));
+        }
+    }
+
     void EditorGui::SetHierarchy(
         const std::vector<SceneObjectEntry>& entries,
         const std::optional<entt::entity> selectedEntity)
@@ -268,15 +360,44 @@ namespace sage::editor
         hierarchyEntries = entries;
         selectedSceneEntity = selectedEntity;
 
+        const std::size_t visibleRows = hierarchyRows.size();
+        const std::size_t maxOffset = hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
+        hierarchyScrollOffset = std::min(hierarchyScrollOffset, maxOffset);
+        const bool showScrollbar = maxOffset > 0;
+        if (hierarchyScrollbarUpText)
+            hierarchyScrollbarUpText->SetContent(showScrollbar ? "^" : "");
+        if (hierarchyScrollbarTrackText)
+            hierarchyScrollbarTrackText->SetContent(showScrollbar ? " " : "");
+        if (hierarchyScrollbarDownText)
+            hierarchyScrollbarDownText->SetContent(showScrollbar ? "v" : "");
+
+        if (hierarchyWindow && !hierarchyWindow->IsHidden() && maxOffset > 0)
+        {
+            const auto mousePosition = GetMousePosition();
+            if (CheckCollisionPointRec(mousePosition, hierarchyWindow->GetRec()))
+            {
+                const float wheelMove = GetMouseWheelMove();
+                if (wheelMove > 0.0f)
+                {
+                    scrollHierarchy(-static_cast<int>(std::ceil(wheelMove)));
+                }
+                else if (wheelMove < 0.0f)
+                {
+                    scrollHierarchy(static_cast<int>(std::ceil(-wheelMove)));
+                }
+            }
+        }
+
         for (std::size_t i = 0; i < hierarchyRows.size(); ++i)
         {
-            if (i >= hierarchyEntries.size())
+            const std::size_t entryIndex = hierarchyScrollOffset + i;
+            if (entryIndex >= hierarchyEntries.size())
             {
                 hierarchyRows[i]->SetContent("");
                 continue;
             }
 
-            const auto& entry = hierarchyEntries[i];
+            const auto& entry = hierarchyEntries[entryIndex];
             hierarchyRows[i]->SetContent(std::string(static_cast<std::size_t>(entry.depth * 2), ' ') + entry.displayName);
         }
     }
@@ -358,38 +479,38 @@ namespace sage::editor
 
     void EditorGui::createOverlayWindow(GameUIEngine* ui, Settings* settings)
     {
-        const auto frame = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto window = std::make_unique<WindowDocked>(
             settings,
-            frame,
+            editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             24.0f,
             -24.0f,
             360.0f,
-            236.0f,
+            320.0f,
             VertAlignment::BOTTOM,
             HoriAlignment::LEFT,
             Padding{20, 16, 14, 14});
 
         overlayWindow = ui->CreateWindowDocked(std::move(window));
-        auto* mainTable = overlayWindow->CreateTable({0, 0, 4, 0});
+        auto* mainTable = overlayWindow->CreateTable({0, 0, 1, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(18);
+            auto* titleRow = mainTable->CreateTableRow(8);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, TextBox::FontInfo{});
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Editor");
         }
 
         {
-            auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
-            auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
+            auto* contentRow = mainTable->CreateTableRow({1, 0, 0, 0});
+            auto* contentCell = contentRow->CreateTableCell({4, 4, 8, 8});
             auto* table = contentCell->CreateTable();
 
             auto addLine = [ui, table](const char* text) {
                 auto* row = table->CreateTableRow();
-                auto* cell = row->CreateTableCell();
-                auto label = std::make_unique<TextBox>(ui, cell, TextBox::FontInfo{});
+                auto* cell = row->CreateTableCell(Padding{2, 2, 2, 2});
+                auto label = std::make_unique<TextBox>(
+                    ui, cell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
                 return cell->CreateTextbox(std::move(label), text);
             };
 
@@ -411,10 +532,9 @@ namespace sage::editor
         Settings* settings,
         const std::function<void(entt::entity)>& onSceneObjectSelected)
     {
-        const auto frame = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto window = std::make_unique<WindowDocked>(
             settings,
-            frame,
+            editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             24.0f,
             24.0f,
@@ -425,34 +545,62 @@ namespace sage::editor
             Padding{20, 16, 14, 14});
 
         hierarchyWindow = ui->CreateWindowDocked(std::move(window));
-        auto* mainTable = hierarchyWindow->CreateTable({0, 0, 4, 0});
+        auto* mainTable = hierarchyWindow->CreateTable({0, 0, 1, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(18);
+            auto* titleRow = mainTable->CreateTableRow(8);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, TextBox::FontInfo{});
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Hierarchy");
         }
 
         {
-            auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
-            auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
-            auto* table = contentCell->CreateTable();
+            auto* contentRow = mainTable->CreateTableRow({1, 0, 0, 0});
+            auto hierarchyHasOverflow = [this]() { return hierarchyEntries.size() > hierarchyRows.size(); };
+
+            auto* listCell = contentRow->CreateTableCell(94.0f, Padding{2, 8, 8, 1});
+            auto* scrollbarCell = contentRow->CreateTableCell(6.0f, Padding{2, 8, 0, 2});
+            auto* table = listCell->CreateTable();
 
             hierarchyRows.reserve(kHierarchyMaxRows);
             for (int i = 0; i < kHierarchyMaxRows; ++i)
             {
                 auto* row = table->CreateTableRow();
-                auto* cell = row->CreateTableCell(Padding{1, 1, 1, 1});
+                auto* cell = row->CreateTableCell(Padding{3, 3, 6, 6});
                 auto button = std::make_unique<HierarchyRowButton>(
                     ui,
                     cell,
                     static_cast<std::size_t>(i),
                     &hierarchyEntries,
+                    &hierarchyScrollOffset,
                     &selectedSceneEntity,
                     onSceneObjectSelected);
                 hierarchyRows.push_back(cell->CreateTextbox(std::move(button), ""));
             }
+
+            auto* scrollbarTable = scrollbarCell->CreateTable();
+
+            auto* upRow = scrollbarTable->CreateTableRow(12.0f);
+            auto* upCell = upRow->CreateTableCell(Padding{1, 1, 0, 0});
+            auto upButton =
+                std::make_unique<TextButton>(ui, upCell, [this]() { scrollHierarchy(-1); }, hierarchyHasOverflow);
+            hierarchyScrollbarUpText = upCell->CreateTextbox(std::move(upButton), "^");
+
+            auto* trackRow = scrollbarTable->CreateTableRow({0, 0, 0, 0});
+            auto* trackCell = trackRow->CreateTableCell(Padding{2, 2, 0, 0});
+            auto track = std::make_unique<ScrollbarTrack>(
+                ui,
+                trackCell,
+                &hierarchyEntries,
+                &hierarchyScrollOffset,
+                &hierarchyRows);
+            hierarchyScrollbarTrackText = trackCell->CreateTextbox(std::move(track), "");
+
+            auto* downRow = scrollbarTable->CreateTableRow(12.0f);
+            auto* downCell = downRow->CreateTableCell(Padding{1, 1, 0, 0});
+            auto downButton =
+                std::make_unique<TextButton>(ui, downCell, [this]() { scrollHierarchy(1); }, hierarchyHasOverflow);
+            hierarchyScrollbarDownText = downCell->CreateTextbox(std::move(downButton), "v");
         }
 
         hierarchyWindow->FinalizeLayout();
@@ -464,10 +612,9 @@ namespace sage::editor
         const std::vector<AssetEntry>& assets,
         const std::function<void(std::size_t)>& onAssetSelected)
     {
-        const auto frame = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto window = std::make_unique<WindowDocked>(
             settings,
-            frame,
+            editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             -24.0f,
             24.0f,
@@ -483,7 +630,7 @@ namespace sage::editor
         {
             auto* titleRow = mainTable->CreateTableRow(18);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, TextBox::FontInfo{});
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Assets");
         }
 
@@ -516,10 +663,9 @@ namespace sage::editor
 
     void EditorGui::createAssetDefaultsWindow(GameUIEngine* ui, Settings* settings)
     {
-        const auto frame = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto window = std::make_unique<WindowDocked>(
             settings,
-            frame,
+            editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             -24.0f,
             248.0f,
@@ -535,7 +681,7 @@ namespace sage::editor
         {
             auto* titleRow = mainTable->CreateTableRow(18);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, TextBox::FontInfo{});
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Asset Defaults");
         }
 
@@ -547,7 +693,7 @@ namespace sage::editor
             auto addLine = [ui, table](const char* text) {
                 auto* row = table->CreateTableRow();
                 auto* cell = row->CreateTableCell();
-                auto label = std::make_unique<TextBox>(ui, cell, TextBox::FontInfo{});
+                auto label = std::make_unique<TextBox>(ui, cell, EditorTextFontInfo());
                 return cell->CreateTextbox(std::move(label), text);
             };
 
@@ -561,7 +707,7 @@ namespace sage::editor
                 auto* row = table->CreateTableRow();
 
                 auto* labelCell = row->CreateTableCell(36.0f);
-                auto label = std::make_unique<TextBox>(ui, labelCell, TextBox::FontInfo{});
+                auto label = std::make_unique<TextBox>(ui, labelCell, EditorTextFontInfo());
                 labelCell->CreateTextbox(std::move(label), labelText);
 
                 auto* downCell = row->CreateTableCell(15.0f, Padding{1, 1, 2, 2});
@@ -570,7 +716,7 @@ namespace sage::editor
 
                 auto* valueCell = row->CreateTableCell(34.0f);
                 auto value = std::make_unique<TextBox>(
-                    ui, valueCell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::CENTER);
+                    ui, valueCell, EditorTextFontInfo(), VertAlignment::TOP, HoriAlignment::CENTER);
                 auto* valueText = valueCell->CreateTextbox(std::move(value), initialValue);
 
                 auto* upCell = row->CreateTableCell(15.0f, Padding{1, 1, 2, 2});
@@ -613,10 +759,9 @@ namespace sage::editor
 
     void EditorGui::createInspectorWindow(GameUIEngine* ui, Settings* settings)
     {
-        const auto frame = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto window = std::make_unique<WindowDocked>(
             settings,
-            frame,
+            editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             -24.0f,
             508.0f,
@@ -632,7 +777,7 @@ namespace sage::editor
         {
             auto* titleRow = mainTable->CreateTableRow(18);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, TextBox::FontInfo{});
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Inspector");
         }
 
@@ -644,60 +789,113 @@ namespace sage::editor
             auto addLine = [ui, table](const char* text) {
                 auto* row = table->CreateTableRow();
                 auto* cell = row->CreateTableCell();
-                auto label = std::make_unique<TextBox>(ui, cell, TextBox::FontInfo{});
+                auto label = std::make_unique<TextBox>(ui, cell, EditorTextFontInfo());
                 return cell->CreateTextbox(std::move(label), text);
             };
 
             inspectorSelectionText = addLine("Selected: None");
 
-            auto addControlRow = [this, ui, table](
-                                     const char* labelText,
-                                     const char* initialValue,
-                                     const TransformField field,
-                                     const float step) {
-                auto* row = table->CreateTableRow();
-
-                auto* labelCell = row->CreateTableCell(32.0f);
-                auto label = std::make_unique<TextBox>(ui, labelCell, TextBox::FontInfo{});
-                labelCell->CreateTextbox(std::move(label), labelText);
-
-                auto* downCell = row->CreateTableCell(14.0f, Padding{1, 1, 2, 2});
-                auto downButton = std::make_unique<TextButton>(
+            auto createValueInput = [this, ui](
+                                        TableCell* valueCell,
+                                        const char* initialValue,
+                                        const TransformField field) {
+                auto value = std::make_unique<TextInput>(
                     ui,
-                    downCell,
-                    [this, field, step]() {
-                        if (inspectorCallbacks.adjustTransform)
-                            inspectorCallbacks.adjustTransform(field, -step);
-                    });
-                downCell->CreateTextbox(std::move(downButton), "-");
+                    valueCell,
+                    [this, field](const std::string& submittedValue) {
+                        if (!inspectorCallbacks.setTransform) return;
 
-                auto* valueCell = row->CreateTableCell(40.0f);
-                auto value = std::make_unique<TextBox>(
-                    ui, valueCell, TextBox::FontInfo{}, VertAlignment::TOP, HoriAlignment::CENTER);
-                auto* valueText = valueCell->CreateTextbox(std::move(value), initialValue);
-
-                auto* upCell = row->CreateTableCell(14.0f, Padding{1, 1, 2, 2});
-                auto upButton = std::make_unique<TextButton>(
-                    ui,
-                    upCell,
-                    [this, field, step]() {
-                        if (inspectorCallbacks.adjustTransform)
-                            inspectorCallbacks.adjustTransform(field, step);
-                    });
-                upCell->CreateTextbox(std::move(upButton), "+");
-
-                return valueText;
+                        try
+                        {
+                            inspectorCallbacks.setTransform(field, std::stof(submittedValue));
+                        }
+                        catch (const std::exception&)
+                        {
+                        }
+                    },
+                    TextBox::FontInfo{},
+                    VertAlignment::MIDDLE,
+                    HoriAlignment::LEFT);
+                return valueCell->CreateTextbox(std::move(value), initialValue);
             };
 
-            inspectorPositionXText = addControlRow("Pos X", "0.00", TransformField::PositionX, kInspectorPositionStep);
-            inspectorPositionYText = addControlRow("Pos Y", "0.00", TransformField::PositionY, kInspectorPositionStep);
-            inspectorPositionZText = addControlRow("Pos Z", "0.00", TransformField::PositionZ, kInspectorPositionStep);
-            inspectorRotationXText = addControlRow("Rot X", "0", TransformField::RotationX, kInspectorRotationStep);
-            inspectorRotationYText = addControlRow("Rot Y", "0", TransformField::RotationY, kInspectorRotationStep);
-            inspectorRotationZText = addControlRow("Rot Z", "0", TransformField::RotationZ, kInspectorRotationStep);
-            inspectorScaleXText = addControlRow("Scale X", "1.00", TransformField::ScaleX, kInspectorScaleStep);
-            inspectorScaleYText = addControlRow("Scale Y", "1.00", TransformField::ScaleY, kInspectorScaleStep);
-            inspectorScaleZText = addControlRow("Scale Z", "1.00", TransformField::ScaleZ, kInspectorScaleStep);
+            auto addVectorRow = [createValueInput, ui, table](
+                                    const char* labelText,
+                                    const char* initialX,
+                                    const char* initialY,
+                                    const char* initialZ,
+                                    const TransformField fieldX,
+                                    const TransformField fieldY,
+                                    const TransformField fieldZ) {
+                auto* row = table->CreateTableRow();
+
+                auto* labelCell = row->CreateTableCell(16.0f);
+                auto label = std::make_unique<TextBox>(
+                    ui, labelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+                labelCell->CreateTextbox(std::move(label), labelText);
+
+                auto* xLabelCell = row->CreateTableCell(6.0f);
+                auto xLabel = std::make_unique<TextBox>(
+                    ui, xLabelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+                xLabelCell->CreateTextbox(std::move(xLabel), "X");
+
+                auto* xValueCell = row->CreateTableCell(21.0f, Padding{1, 1, 2, 2});
+                auto* xValueText = createValueInput(xValueCell, initialX, fieldX);
+
+                auto* yLabelCell = row->CreateTableCell(6.0f);
+                auto yLabel = std::make_unique<TextBox>(
+                    ui, yLabelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+                yLabelCell->CreateTextbox(std::move(yLabel), "Y");
+
+                auto* yValueCell = row->CreateTableCell(21.0f, Padding{1, 1, 2, 2});
+                auto* yValueText = createValueInput(yValueCell, initialY, fieldY);
+
+                auto* zLabelCell = row->CreateTableCell(6.0f);
+                auto zLabel = std::make_unique<TextBox>(
+                    ui, zLabelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+                zLabelCell->CreateTextbox(std::move(zLabel), "Z");
+
+                auto* zValueCell = row->CreateTableCell(24.0f, Padding{1, 1, 2, 2});
+                auto* zValueText = createValueInput(zValueCell, initialZ, fieldZ);
+
+                return std::array<TextBox*, 3>{xValueText, yValueText, zValueText};
+            };
+
+            const auto positionTexts = addVectorRow(
+                "Pos:",
+                "0.00",
+                "0.00",
+                "0.00",
+                TransformField::PositionX,
+                TransformField::PositionY,
+                TransformField::PositionZ);
+            inspectorPositionXText = positionTexts[0];
+            inspectorPositionYText = positionTexts[1];
+            inspectorPositionZText = positionTexts[2];
+
+            const auto rotationTexts = addVectorRow(
+                "Rot:",
+                "0",
+                "0",
+                "0",
+                TransformField::RotationX,
+                TransformField::RotationY,
+                TransformField::RotationZ);
+            inspectorRotationXText = rotationTexts[0];
+            inspectorRotationYText = rotationTexts[1];
+            inspectorRotationZText = rotationTexts[2];
+
+            const auto scaleTexts = addVectorRow(
+                "Scale:",
+                "1.00",
+                "1.00",
+                "1.00",
+                TransformField::ScaleX,
+                TransformField::ScaleY,
+                TransformField::ScaleZ);
+            inspectorScaleXText = scaleTexts[0];
+            inspectorScaleYText = scaleTexts[1];
+            inspectorScaleZText = scaleTexts[2];
         }
 
         inspectorWindow->FinalizeLayout();
@@ -705,10 +903,9 @@ namespace sage::editor
 
     void EditorGui::createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings)
     {
-        const auto frame = ResourceManager::GetInstance().TextureLoad("resources/textures/ui/frame.png");
         auto window = std::make_unique<WindowDocked>(
             settings,
-            frame,
+            editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             0.0f,
             0.0f,
@@ -724,7 +921,7 @@ namespace sage::editor
         {
             auto* titleRow = mainTable->CreateTableRow(18);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, TextBox::FontInfo{});
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Confirm Delete");
         }
 
@@ -732,7 +929,7 @@ namespace sage::editor
             auto* textRow = mainTable->CreateTableRow(44.0f);
             auto* textCell = textRow->CreateTableCell({8, 8, 8, 8});
             auto text = std::make_unique<TextBox>(
-                ui, textCell, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER);
+                ui, textCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
             deleteConfirmationText = textCell->CreateTextbox(std::move(text), "Delete selected entity?");
         }
 
@@ -767,6 +964,10 @@ namespace sage::editor
           inspectorCallbacks(std::move(inspectorCallbacks)),
           deleteConfirmationCallbacks(std::move(deleteConfirmationCallbacks))
     {
+        Image panelImage = GenImageColor(1, 1, kEditorWindowBackground);
+        editorWindowBackgroundTexture = LoadTextureFromImage(panelImage);
+        UnloadImage(panelImage);
+
         assetThumbnails.reserve(assets.size());
         for (const auto& asset : assets)
         {
@@ -783,6 +984,11 @@ namespace sage::editor
 
     EditorGui::~EditorGui()
     {
+        if (editorWindowBackgroundTexture.id != 0)
+        {
+            UnloadTexture(editorWindowBackgroundTexture);
+        }
+
         for (auto& thumbnail : assetThumbnails)
         {
             if (thumbnail.id != 0)

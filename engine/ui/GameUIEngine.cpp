@@ -108,6 +108,21 @@ namespace sage
         return nullptr;
     }
 
+    bool GameUIEngine::IsMouseOverWindow() const
+    {
+        const auto mousePos = GetMousePosition();
+        for (const auto& window : windows)
+        {
+            if (!window || window->IsHidden()) continue;
+            if (PointInsideRect(window->rec, mousePos) && mouseInNonObscuredWindowRegion(window.get(), mousePos))
+            {
+                return true;
+            }
+        }
+
+        return tooltipWindow && !tooltipWindow->hidden && PointInsideRect(tooltipWindow->rec, mousePos);
+    }
+
     Rectangle GameUIEngine::GetOverlap(Rectangle rec1, Rectangle rec2)
     {
         float x1 = std::max(rec1.x, rec2.x);

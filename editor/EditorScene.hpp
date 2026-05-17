@@ -104,6 +104,7 @@ namespace sage
         void adjustPlacementRotation(float amount);
         void adjustPlacementScale(float amount);
         void adjustSelectedTransform(editor::EditorGui::TransformField field, float amount);
+        void setSelectedTransform(editor::EditorGui::TransformField field, float value);
         void adjustSelectedModelDefaultHeight(float amount);
         void adjustSelectedModelDefaultRotation(float amount);
         void adjustSelectedModelDefaultScale(float amount);

@@ -593,6 +593,61 @@ namespace sage
         refreshSceneWindows();
     }
 
+    void EditorScene::setSelectedTransform(const editor::EditorGui::TransformField field, const float value)
+    {
+        if (!selectedSceneEntity.has_value()) return;
+        const auto entity = *selectedSceneEntity;
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const auto& transform = sys->registry->get<sgTransform>(entity);
+        auto position = transform.GetWorldPos();
+        auto rotation = transform.GetWorldRot();
+        auto scale = transform.GetScale();
+
+        switch (field)
+        {
+        case editor::EditorGui::TransformField::PositionX:
+            position.x = value;
+            sys->transformSystem->SetPosition(entity, position);
+            break;
+        case editor::EditorGui::TransformField::PositionY:
+            position.y = value;
+            sys->transformSystem->SetPosition(entity, position);
+            break;
+        case editor::EditorGui::TransformField::PositionZ:
+            position.z = value;
+            sys->transformSystem->SetPosition(entity, position);
+            break;
+        case editor::EditorGui::TransformField::RotationX:
+            rotation.x = value;
+            sys->transformSystem->SetRotation(entity, rotation);
+            break;
+        case editor::EditorGui::TransformField::RotationY:
+            rotation.y = value;
+            sys->transformSystem->SetRotation(entity, rotation);
+            break;
+        case editor::EditorGui::TransformField::RotationZ:
+            rotation.z = value;
+            sys->transformSystem->SetRotation(entity, rotation);
+            break;
+        case editor::EditorGui::TransformField::ScaleX:
+            scale.x = std::max(kPlacementMinScale, value);
+            sys->transformSystem->SetScale(entity, scale);
+            break;
+        case editor::EditorGui::TransformField::ScaleY:
+            scale.y = std::max(kPlacementMinScale, value);
+            sys->transformSystem->SetScale(entity, scale);
+            break;
+        case editor::EditorGui::TransformField::ScaleZ:
+            scale.z = std::max(kPlacementMinScale, value);
+            sys->transformSystem->SetScale(entity, scale);
+            break;
+        }
+
+        updateEntityCollisionBounds(entity);
+        refreshSceneWindows();
+    }
+
     void EditorScene::adjustSelectedModelDefaultHeight(const float amount)
     {
         if (!isPickState()) return;
@@ -774,6 +829,8 @@ namespace sage
 
     void EditorScene::updateState(EditorSelectState&)
     {
+        if (TextInput::AnyEditing()) return;
+
         if (IsKeyPressed(KEY_TAB))
         {
             cyclePlaceable();
@@ -804,6 +861,8 @@ namespace sage
 
     void EditorScene::updateState(EditorPickState&)
     {
+        if (TextInput::AnyEditing()) return;
+
         if (IsKeyPressed(KEY_TAB))
         {
             cyclePlaceable();
@@ -889,11 +948,19 @@ namespace sage
     {
         sys->audioManager->Update();
         sys->userInput->ListenForInput();
+        if (sys->UI().IsMouseOverWindow())
+        {
+            sys->camera->ScrollDisable();
+        }
+        else
+        {
+            sys->camera->ScrollEnable();
+        }
         sys->camera->Update();
         sys->cursor->Update();
         refreshPlacementTarget();
 
-        if (IsKeyPressed(KEY_DELETE) && !gui->IsDeleteConfirmationVisible())
+        if (!TextInput::AnyEditing() && IsKeyPressed(KEY_DELETE) && !gui->IsDeleteConfirmationVisible())
         {
             requestDeleteSelectedEntity();
         }
@@ -969,6 +1036,10 @@ namespace sage
                 .adjustTransform =
                     [this](const editor::EditorGui::TransformField field, const float amount) {
                         adjustSelectedTransform(field, amount);
+                    },
+                .setTransform =
+                    [this](const editor::EditorGui::TransformField field, const float value) {
+                        setSelectedTransform(field, value);
                     }},
             editor::EditorGui::DeleteConfirmationCallbacks{
                 .confirm = [this]() { confirmDeleteSelectedEntity(); },

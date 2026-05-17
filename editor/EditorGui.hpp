@@ -62,6 +62,7 @@ namespace sage
             struct InspectorCallbacks
             {
                 std::function<void(TransformField, float)> adjustTransform;
+                std::function<void(TransformField, float)> setTransform;
             };
 
             struct DeleteConfirmationCallbacks
@@ -77,9 +78,14 @@ namespace sage
             Window* assetDefaultsWindow{};
             Window* inspectorWindow{};
             Window* deleteConfirmationWindow{};
+            Texture2D editorWindowBackgroundTexture{};
+            TextBox* hierarchyScrollbarUpText{};
+            TextBox* hierarchyScrollbarTrackText{};
+            TextBox* hierarchyScrollbarDownText{};
             std::vector<RenderTexture2D> assetThumbnails;
             std::vector<TextBox*> hierarchyRows;
             std::vector<SceneObjectEntry> hierarchyEntries;
+            std::size_t hierarchyScrollOffset = 0;
             ModelDefaultCallbacks modelDefaultCallbacks;
             InspectorCallbacks inspectorCallbacks;
             DeleteConfirmationCallbacks deleteConfirmationCallbacks;
@@ -122,6 +128,7 @@ namespace sage
             void createAssetDefaultsWindow(GameUIEngine* ui, Settings* settings);
             void createInspectorWindow(GameUIEngine* ui, Settings* settings);
             void createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings);
+            void scrollHierarchy(int amount);
 
           public:
             void SetPlacementStatus(

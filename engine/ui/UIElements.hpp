@@ -8,6 +8,7 @@
 #include "../ResourceManager.hpp"
 #include "UIBase.hpp"
 
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -33,22 +34,22 @@ namespace sage
             float fontSize;
             float fontSpacing;
             Font font;
+            Color color;
             static constexpr float minFontSize = 16.0f;
             static constexpr float maxFontSize = 72.0f;
             OverflowBehaviour overflowBehaviour;
             FontInfo()
                 : baseFontSize(16),
                   fontSize(16),
-                  fontSpacing(1.5),
-                  font(
-                      ResourceManager::GetInstance().FontLoad(
-                          "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+                  fontSpacing(1.0f),
+                  font(GetFontDefault()),
+                  color(BLACK),
                   overflowBehaviour(OverflowBehaviour::SHRINK_TO_FIT)
             {
             }
         };
         [[nodiscard]] const std::string& GetContent() const;
-        void SetContent(const std::string& _content);
+        virtual void SetContent(const std::string& _content);
         [[nodiscard]] Font GetFont() const;
         void UpdateFontScaling();
         void UpdateDimensions() override;
@@ -73,6 +74,37 @@ namespace sage
         Shader sdfShader;
         FontInfo fontInfo;
         std::string content;
+    };
+
+    class TextInput : public TextBox
+    {
+        static TextInput* activeInput;
+        std::function<void(const std::string&)> onSubmit;
+        std::string editStartContent;
+        std::size_t caretIndex = 0;
+        bool editing = false;
+
+        void processKeyboardInput();
+        void commitEdit();
+        void cancelEdit();
+        void setCaretFromMousePosition(Vector2 mousePosition);
+
+      public:
+        void SetContent(const std::string& _content) override;
+        void OnClick() override;
+        void UpdateDimensions() override;
+        void Draw2D() override;
+        [[nodiscard]] bool IsEditing() const;
+        [[nodiscard]] static bool AnyEditing();
+        void SetOnSubmit(std::function<void(const std::string&)> callback);
+
+        TextInput(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            std::function<void(const std::string&)> callback,
+            const FontInfo& _fontInfo = FontInfo(),
+            VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
 
     class TitleBar final : public TextBox

@@ -11,9 +11,12 @@
 
 #include <algorithm>
 #include <sstream>
+#include <utility>
 
 namespace sage
 {
+    TextInput* TextInput::activeInput = nullptr;
+
     const std::string& TextBox::GetContent() const
     {
         return content;
@@ -164,10 +167,13 @@ namespace sage
 
     void TextBox::Draw2D()
     {
-        BeginShaderMode(sdfShader);
         DrawTextEx(
-            fontInfo.font, content.c_str(), Vector2{rec.x, rec.y}, fontInfo.fontSize, fontInfo.fontSpacing, BLACK);
-        EndShaderMode();
+            fontInfo.font,
+            content.c_str(),
+            Vector2{rec.x, rec.y},
+            fontInfo.fontSize,
+            fontInfo.fontSpacing,
+            fontInfo.color);
     }
 
     TextBox::TextBox(
@@ -182,6 +188,196 @@ namespace sage
     {
         UpdateFontScaling();
         SetTextureFilter(GetFont().texture, TEXTURE_FILTER_BILINEAR);
+    }
+
+    void TextInput::processKeyboardInput()
+    {
+        int key = GetCharPressed();
+        while (key > 0)
+        {
+            if (key >= 32 && key <= 126)
+            {
+                content.insert(content.begin() + static_cast<std::ptrdiff_t>(caretIndex), static_cast<char>(key));
+                ++caretIndex;
+            }
+            key = GetCharPressed();
+        }
+
+        if (IsKeyPressed(KEY_BACKSPACE) && !content.empty())
+        {
+            if (caretIndex > 0)
+            {
+                content.erase(content.begin() + static_cast<std::ptrdiff_t>(caretIndex - 1));
+                --caretIndex;
+            }
+        }
+
+        if (IsKeyPressed(KEY_DELETE) && caretIndex < content.size())
+        {
+            content.erase(content.begin() + static_cast<std::ptrdiff_t>(caretIndex));
+        }
+        if (IsKeyPressed(KEY_LEFT) && caretIndex > 0)
+        {
+            --caretIndex;
+        }
+        if (IsKeyPressed(KEY_RIGHT) && caretIndex < content.size())
+        {
+            ++caretIndex;
+        }
+        if (IsKeyPressed(KEY_HOME))
+        {
+            caretIndex = 0;
+        }
+        if (IsKeyPressed(KEY_END))
+        {
+            caretIndex = content.size();
+        }
+        if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER))
+        {
+            commitEdit();
+        }
+        else if (IsKeyPressed(KEY_ESCAPE))
+        {
+            cancelEdit();
+        }
+        else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !PointInsideRect(rec, GetMousePosition()))
+        {
+            commitEdit();
+        }
+    }
+
+    void TextInput::commitEdit()
+    {
+        if (!editing) return;
+        editing = false;
+        if (activeInput == this)
+        {
+            activeInput = nullptr;
+        }
+        if (onSubmit)
+        {
+            onSubmit(content);
+        }
+    }
+
+    void TextInput::cancelEdit()
+    {
+        if (!editing) return;
+        content = editStartContent;
+        editing = false;
+        caretIndex = content.size();
+        if (activeInput == this)
+        {
+            activeInput = nullptr;
+        }
+        UpdateDimensions();
+    }
+
+    void TextInput::SetContent(const std::string& _content)
+    {
+        if (editing) return;
+        TextBox::SetContent(_content);
+    }
+
+    void TextInput::OnClick()
+    {
+        if (activeInput && activeInput != this)
+        {
+            activeInput->commitEdit();
+        }
+        activeInput = this;
+        if (!editing)
+        {
+            editStartContent = content;
+        }
+        editing = true;
+        setCaretFromMousePosition(GetMousePosition());
+    }
+
+    void TextInput::setCaretFromMousePosition(const Vector2 mousePosition)
+    {
+        const float relativeX = std::max(0.0f, mousePosition.x - rec.x - 6.0f);
+        caretIndex = content.size();
+
+        for (std::size_t i = 0; i <= content.size(); ++i)
+        {
+            const std::string prefix = content.substr(0, i);
+            const Vector2 prefixSize = MeasureTextEx(fontInfo.font, prefix.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+            if (relativeX <= prefixSize.x)
+            {
+                caretIndex = i;
+                return;
+            }
+        }
+    }
+
+    void TextInput::UpdateDimensions()
+    {
+        UpdateFontScaling();
+        rec = {
+            parent->GetRec().x + parent->padding.left,
+            parent->GetRec().y + parent->padding.up,
+            parent->GetRec().width - parent->padding.left - parent->padding.right,
+            parent->GetRec().height - parent->padding.up - parent->padding.down};
+    }
+
+    void TextInput::Draw2D()
+    {
+        if (editing)
+        {
+            processKeyboardInput();
+        }
+
+        DrawRectangleRec(rec, editing ? Color{255, 255, 255, 255} : Color{246, 248, 251, 255});
+        DrawRectangleLinesEx(rec, editing ? 2.0f : 1.0f, editing ? Color{37, 99, 235, 255} : Color{151, 164, 184, 255});
+
+        DrawTextEx(
+            fontInfo.font,
+            content.c_str(),
+            Vector2{rec.x + 6.0f, rec.y + (rec.height - fontInfo.fontSize) * 0.5f},
+            fontInfo.fontSize,
+            fontInfo.fontSpacing,
+            fontInfo.color);
+
+        if (editing && static_cast<int>(GetTime() * 2.0) % 2 == 0)
+        {
+            const std::string caretPrefix = content.substr(0, caretIndex);
+            const Vector2 textSize =
+                MeasureTextEx(fontInfo.font, caretPrefix.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+            const float caretX = std::min(rec.x + rec.width - 6.0f, rec.x + 7.0f + textSize.x);
+            DrawLineEx(
+                Vector2{caretX, rec.y + 5.0f},
+                Vector2{caretX, rec.y + rec.height - 5.0f},
+                1.5f,
+                Color{37, 99, 235, 255});
+        }
+    }
+
+    bool TextInput::IsEditing() const
+    {
+        return editing;
+    }
+
+    bool TextInput::AnyEditing()
+    {
+        return activeInput && activeInput->editing;
+    }
+
+    void TextInput::SetOnSubmit(std::function<void(const std::string&)> callback)
+    {
+        onSubmit = std::move(callback);
+    }
+
+    TextInput::TextInput(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        std::function<void(const std::string&)> callback,
+        const FontInfo& _fontInfo,
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
+        : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
+          onSubmit(std::move(callback))
+    {
     }
 
     void TitleBar::OnDragStart()
