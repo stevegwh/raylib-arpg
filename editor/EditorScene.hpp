@@ -76,7 +76,9 @@ namespace sage
         std::vector<PlaceableMesh> placeables;
         std::size_t selectedPlaceableIndex = 0;
         unsigned int placedMeshCount = 0;
-        float placementHeightOffset = 0.0f;
+        float gridSurfaceY = 0.0f;
+        float gridHalfExtent = 50.0f;
+        entt::entity gridPickSurfaceEntity = entt::null;
         float placementRotationY = 0.0f;
         float placementScale = 1.0f;
         std::optional<GridSquare> hoveredGridSquare;
@@ -85,7 +87,8 @@ namespace sage
         std::string lastPlacedLabel = "None";
         entt::entity editorStateEntity = entt::null;
 
-        void createGridPickSurface() const;
+        void createGridPickSurface();
+        void sizeGridToLoadedScene();
         void refreshPlacementTarget();
         void refreshOverlay() const;
         void refreshSceneWindows() const;
@@ -100,7 +103,7 @@ namespace sage
         void confirmDeleteSelectedEntity();
         void deleteEntityAndChildren(entt::entity entity);
         void releaseNavigationOccupation(entt::entity entity) const;
-        void adjustPlacementHeight(float amount);
+        void adjustGridSurfaceY(float amount);
         void adjustPlacementRotation(float amount);
         void adjustPlacementScale(float amount);
         void adjustSelectedTransform(editor::EditorGui::TransformField field, float amount);
@@ -132,7 +135,7 @@ namespace sage
         [[nodiscard]] std::string describeMode() const;
         [[nodiscard]] std::string describeSelectedAsset() const;
         [[nodiscard]] std::string describeHoveredGrid() const;
-        [[nodiscard]] std::string describePlacementHeight() const;
+        [[nodiscard]] std::string describeGridSurfaceY() const;
         [[nodiscard]] std::string describePlacementRotation() const;
         [[nodiscard]] std::string describePlacementScale() const;
         [[nodiscard]] std::string describeSelectedModelDefaultHeight() const;

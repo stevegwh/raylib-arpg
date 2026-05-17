@@ -312,7 +312,7 @@ namespace sage::editor
         if (modeText) modeText->SetContent("Mode: " + mode);
         if (selectedAssetText) selectedAssetText->SetContent("Asset: " + selectedAsset);
         if (gridText) gridText->SetContent("Grid: " + hoveredGrid);
-        if (placementHeightText) placementHeightText->SetContent("Z: " + placementHeight);
+        if (placementHeightText) placementHeightText->SetContent("Grid Y: " + placementHeight);
         if (placementRotationText) placementRotationText->SetContent("Rot: " + placementRotation);
         if (placementScaleText) placementScaleText->SetContent("Scale: " + placementScale);
         if (lastPlacedText) lastPlacedText->SetContent("Last: " + lastPlaced);
@@ -518,7 +518,7 @@ namespace sage::editor
             modeText = addLine("Mode: Select");
             selectedAssetText = addLine("Asset: None");
             gridText = addLine("Grid: None");
-            placementHeightText = addLine("Z: 0.00");
+            placementHeightText = addLine("Grid Y: 0.00");
             placementRotationText = addLine("Rot: 0");
             placementScaleText = addLine("Scale: 1.00");
             lastPlacedText = addLine("Last: None");

@@ -20,6 +20,7 @@
 #include "engine/systems/NavigationGridSystem.hpp"
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 
 #include "cereal/archives/json.hpp"
 
@@ -36,9 +37,10 @@ namespace sage
 {
     namespace
     {
-        constexpr float GRID_HALF_EXTENT = 50.0f;
+        constexpr float GRID_DEFAULT_HALF_EXTENT = 50.0f;
         constexpr float GRID_PICK_SURFACE_HALF_HEIGHT = 0.02f;
         constexpr float PLACEMENT_MARKER_HEIGHT = 0.16f;
+        constexpr float GRID_SURFACE_Y_STEP = 1.0f;
         constexpr float PLACEMENT_HEIGHT_STEP = 0.25f;
         constexpr float PLACEMENT_ROTATION_STEP = 15.0f;
         constexpr float PLACEMENT_SCALE_STEP = 0.1f;
@@ -132,9 +134,9 @@ namespace sage
         return std::format("{}, {}", hoveredGridSquare->row, hoveredGridSquare->col);
     }
 
-    std::string EditorScene::describePlacementHeight() const
+    std::string EditorScene::describeGridSurfaceY() const
     {
-        return std::format("{:.2f}", placementHeightOffset);
+        return std::format("{:.2f}", gridSurfaceY);
     }
 
     std::string EditorScene::describePlacementRotation() const
@@ -324,15 +326,53 @@ namespace sage
         return entries;
     }
 
-    void EditorScene::createGridPickSurface() const
+    void EditorScene::createGridPickSurface()
     {
-        const auto entity = sys->registry->create();
-        const BoundingBox gridBounds = {
-            {-GRID_HALF_EXTENT, -GRID_PICK_SURFACE_HALF_HEIGHT, -GRID_HALF_EXTENT},
-            {GRID_HALF_EXTENT, GRID_PICK_SURFACE_HALF_HEIGHT, GRID_HALF_EXTENT}};
-        auto& collideable = sys->registry->emplace<Collideable>(entity, gridBounds, MatrixIdentity());
+        gridPickSurfaceEntity = sys->registry->create();
+        const BoundingBox localBounds = {
+            {-gridHalfExtent, -GRID_PICK_SURFACE_HALF_HEIGHT, -gridHalfExtent},
+            {gridHalfExtent, GRID_PICK_SURFACE_HALF_HEIGHT, gridHalfExtent}};
+        auto& collideable = sys->registry->emplace<Collideable>(gridPickSurfaceEntity, localBounds, MatrixIdentity());
+        collideable.worldBoundingBox = {
+            {-gridHalfExtent, gridSurfaceY - GRID_PICK_SURFACE_HALF_HEIGHT, -gridHalfExtent},
+            {gridHalfExtent, gridSurfaceY + GRID_PICK_SURFACE_HALF_HEIGHT, gridHalfExtent}};
         collideable.SetCollisionLayer(collision_layers::GeometrySimple);
-        sys->registry->emplace<StaticCollideable>(entity);
+        sys->registry->emplace<StaticCollideable>(gridPickSurfaceEntity);
+    }
+
+    void EditorScene::sizeGridToLoadedScene()
+    {
+        bool hasBounds = false;
+        BoundingBox sceneBounds{};
+        for (const auto entity : sys->registry->view<Collideable>())
+        {
+            const auto& c = sys->registry->get<Collideable>(entity);
+            if (!hasBounds)
+            {
+                sceneBounds = c.worldBoundingBox;
+                hasBounds = true;
+                continue;
+            }
+            sceneBounds.min.x = std::min(sceneBounds.min.x, c.worldBoundingBox.min.x);
+            sceneBounds.min.z = std::min(sceneBounds.min.z, c.worldBoundingBox.min.z);
+            sceneBounds.max.x = std::max(sceneBounds.max.x, c.worldBoundingBox.max.x);
+            sceneBounds.max.z = std::max(sceneBounds.max.z, c.worldBoundingBox.max.z);
+        }
+
+        float required = GRID_DEFAULT_HALF_EXTENT;
+        if (hasBounds)
+        {
+            required = std::max(
+                {std::abs(sceneBounds.min.x),
+                 std::abs(sceneBounds.max.x),
+                 std::abs(sceneBounds.min.z),
+                 std::abs(sceneBounds.max.z),
+                 GRID_DEFAULT_HALF_EXTENT});
+        }
+
+        gridHalfExtent = std::ceil(required);
+        const int slices = static_cast<int>(std::ceil(gridHalfExtent * 2.0f));
+        sys->navigationGridSystem->Init(slices, 1.0f);
     }
 
     void EditorScene::refreshPlacementTarget()
@@ -352,7 +392,7 @@ namespace sage
         hoveredGridSquare = square;
         snappedPlacementPosition = {
             gridSquare->worldPosCentre.x,
-            collision.point.y + placementHeightOffset,
+            collision.point.y,
             gridSquare->worldPosCentre.z};
     }
 
@@ -362,7 +402,7 @@ namespace sage
             describeMode(),
             describeSelectedAsset(),
             describeHoveredGrid(),
-            describePlacementHeight(),
+            describeGridSurfaceY(),
             describePlacementRotation(),
             describePlacementScale(),
             describeSelectedModelDefaultHeight(),
@@ -396,7 +436,6 @@ namespace sage
 
     void EditorScene::resetPlacementTransform()
     {
-        placementHeightOffset = 0.0f;
         placementRotationY = 0.0f;
         placementScale = 1.0f;
         refreshPlacementTarget();
@@ -517,9 +556,17 @@ namespace sage
         selectPlaceable(nextIndex);
     }
 
-    void EditorScene::adjustPlacementHeight(const float amount)
+    void EditorScene::adjustGridSurfaceY(const float amount)
     {
-        placementHeightOffset += amount;
+        gridSurfaceY += amount;
+        if (sys->registry->valid(gridPickSurfaceEntity) &&
+            sys->registry->any_of<Collideable>(gridPickSurfaceEntity))
+        {
+            auto& collideable = sys->registry->get<Collideable>(gridPickSurfaceEntity);
+            collideable.worldBoundingBox.min.y = gridSurfaceY - GRID_PICK_SURFACE_HALF_HEIGHT;
+            collideable.worldBoundingBox.max.y = gridSurfaceY + GRID_PICK_SURFACE_HALF_HEIGHT;
+        }
+        sys->camera->SetFloorYOffset(gridSurfaceY);
         refreshPlacementTarget();
         refreshOverlay();
     }
@@ -867,14 +914,6 @@ namespace sage
         {
             cyclePlaceable();
         }
-        if (IsKeyPressed(KEY_EQUAL))
-        {
-            adjustPlacementHeight(PLACEMENT_HEIGHT_STEP);
-        }
-        if (IsKeyPressed(KEY_MINUS))
-        {
-            adjustPlacementHeight(-PLACEMENT_HEIGHT_STEP);
-        }
         if (IsKeyPressed(KEY_LEFT_BRACKET))
         {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
@@ -960,9 +999,20 @@ namespace sage
         sys->cursor->Update();
         refreshPlacementTarget();
 
-        if (!TextInput::AnyEditing() && IsKeyPressed(KEY_DELETE) && !gui->IsDeleteConfirmationVisible())
+        if (!TextInput::AnyEditing())
         {
-            requestDeleteSelectedEntity();
+            if (IsKeyPressed(KEY_DELETE) && !gui->IsDeleteConfirmationVisible())
+            {
+                requestDeleteSelectedEntity();
+            }
+            if (IsKeyPressed(KEY_EQUAL))
+            {
+                adjustGridSurfaceY(GRID_SURFACE_Y_STEP);
+            }
+            if (IsKeyPressed(KEY_MINUS))
+            {
+                adjustGridSurfaceY(-GRID_SURFACE_Y_STEP);
+            }
         }
 
         auto& state = sys->registry->get<EditorState>(editorStateEntity);
@@ -976,7 +1026,13 @@ namespace sage
     void EditorScene::Draw3D() const
     {
         sys->renderSystem->Draw();
-        DrawGrid(120, 1.0f);
+
+        const int gridSlices = std::max(1, static_cast<int>(std::ceil(gridHalfExtent * 2.0f)));
+        rlPushMatrix();
+        rlTranslatef(0.0f, gridSurfaceY, 0.0f);
+        DrawGrid(gridSlices, 1.0f);
+        rlPopMatrix();
+
         DrawLine3D({0, 0.02f, 0}, {8, 0.02f, 0}, RED);
         DrawLine3D({0, 0.02f, 0}, {0, 8, 0}, GREEN);
         DrawLine3D({0, 0.02f, 0}, {0, 0.02f, 8}, BLUE);
@@ -998,7 +1054,7 @@ namespace sage
 
     EditorScene::EditorScene(EngineSystems* _sys) : sys(_sys)
     {
-        sys->navigationGridSystem->Init(100, 1.0f);
+        sizeGridToLoadedScene();
         createGridPickSurface();
         placeables = {
             PlaceableMesh{"Sphere", "vfx_sphere", "SPHERE"},

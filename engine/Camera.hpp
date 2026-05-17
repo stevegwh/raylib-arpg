@@ -35,6 +35,7 @@ namespace sage
         static constexpr float verticalEasingSpeed = 0.075;
 
         float cameraScrollVelY = 0.0;
+        float floorYOffset = 0.0f;
         static constexpr float cameraInitialVelY = 2.0f;
         static constexpr float cameraScrollDeceleration = 0.075f;
         static constexpr float cameraMaxY = 130.0f;
@@ -59,6 +60,8 @@ namespace sage
         Camera3D* getRaylibCam();
         void ScrollEnable();
         void ScrollDisable();
+        void SetFloorYOffset(float y);
+        [[nodiscard]] float GetFloorYOffset() const;
         void LockInput();
         void UnlockInput();
         [[nodiscard]] Vector3 GetForward();

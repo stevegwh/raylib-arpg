@@ -30,7 +30,7 @@ namespace sage
         float floorHeight = sys->navigationGridSystem->GetGridSquare(square.row, square.col)->heightMap.GetHeight();
         const float targetOffsetY = 8.0f; // Offset from the floor
 
-        float idealTargetY = floorHeight + targetOffsetY;
+        float idealTargetY = floorHeight + floorYOffset + targetOffsetY;
         float idealPositionY = idealTargetY + (rlCamera.position.y - rlCamera.target.y);
         verticalSmoothingTargetY = Lerp(verticalSmoothingTargetY, idealTargetY, verticalEasingSpeed);
         verticalSmoothingCurrentY = Lerp(verticalSmoothingCurrentY, idealPositionY, verticalEasingSpeed);
@@ -187,6 +187,16 @@ namespace sage
     void Camera::ScrollDisable()
     {
         scrollEnabled = false;
+    }
+
+    void Camera::SetFloorYOffset(const float y)
+    {
+        floorYOffset = y;
+    }
+
+    float Camera::GetFloorYOffset() const
+    {
+        return floorYOffset;
     }
 
     Vector3 Camera::GetForward()
