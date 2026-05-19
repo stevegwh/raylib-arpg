@@ -12,6 +12,7 @@
 #include "raylib.h"
 
 #include <memory>
+#include <vector>
 
 namespace sage
 {
@@ -71,6 +72,26 @@ namespace sage
         virtual void OnHoverStop();
         virtual ~UIElement() = default;
         UIElement() = default;
+    };
+
+    // RAII helper around raylib's BeginScissorMode / EndScissorMode. raylib's
+    // EndScissorMode disables scissoring entirely instead of restoring the
+    // previous rect, so naive nested clips would tear the parent's clip the
+    // moment an inner element finished drawing. ScissorScope keeps a per-frame
+    // stack: each push intersects with the current top and re-issues the
+    // scissor; each pop restores the previous rect (or disables scissoring if
+    // we're back at the bottom of the stack).
+    class ScissorScope
+    {
+        bool empty = false;
+
+      public:
+        explicit ScissorScope(Rectangle clip);
+        ~ScissorScope();
+        ScissorScope(const ScissorScope&) = delete;
+        ScissorScope& operator=(const ScissorScope&) = delete;
+        ScissorScope(ScissorScope&&) = delete;
+        ScissorScope& operator=(ScissorScope&&) = delete;
     };
 
     class CellElement : public UIElement

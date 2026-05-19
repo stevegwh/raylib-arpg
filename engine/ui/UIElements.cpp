@@ -73,7 +73,7 @@ namespace sage
     {
         const float scaleFactor = engine->settings->GetCurrentScaleFactor();
         fontInfo.fontSize = fontInfo.baseFontSize * scaleFactor;
-        fontInfo.fontSize = std::clamp(fontInfo.fontSize, FontInfo::minFontSize, FontInfo::maxFontSize);
+        fontInfo.fontSize = std::clamp(fontInfo.fontSize, fontInfo.minFontSize, fontInfo.maxFontSize);
     }
 
     void TextBox::UpdateDimensions()
@@ -85,7 +85,7 @@ namespace sage
         if (fontInfo.overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
         {
 
-            while (textSize.x > availableWidth && fontInfo.fontSize > FontInfo::minFontSize)
+            while (textSize.x > availableWidth && fontInfo.fontSize > fontInfo.minFontSize)
             {
                 fontInfo.fontSize -= 1;
                 textSize = MeasureTextEx(fontInfo.font, content.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
@@ -167,6 +167,12 @@ namespace sage
 
     void TextBox::Draw2D()
     {
+        const Rectangle clip = {
+            parent->GetRec().x + parent->padding.left,
+            parent->GetRec().y + parent->padding.up,
+            std::max(0.0f, parent->GetRec().width - parent->padding.left - parent->padding.right),
+            std::max(0.0f, parent->GetRec().height - parent->padding.up - parent->padding.down)};
+        const ScissorScope scissor{clip};
         DrawTextEx(
             fontInfo.font,
             content.c_str(),
@@ -331,11 +337,30 @@ namespace sage
         DrawRectangleRec(rec, editing ? Color{255, 255, 255, 255} : Color{246, 248, 251, 255});
         DrawRectangleLinesEx(rec, editing ? 2.0f : 1.0f, editing ? Color{37, 99, 235, 255} : Color{151, 164, 184, 255});
 
+        // Shrink the rendered font size to keep content inside the input box. The
+        // input rect itself is sized by UpdateDimensions to fill the cell, so
+        // measuring against rec.width is the right "available space" for text.
+        const float reservedSidePadding = 12.0f; // matches the 6.0f left/right gutter used below
+        const float availableTextWidth = std::max(0.0f, rec.width - reservedSidePadding);
+        float renderFontSize = fontInfo.fontSize;
+        if (fontInfo.overflowBehaviour == OverflowBehaviour::SHRINK_TO_FIT)
+        {
+            Vector2 textSize =
+                MeasureTextEx(fontInfo.font, content.c_str(), renderFontSize, fontInfo.fontSpacing);
+            while (textSize.x > availableTextWidth && renderFontSize > fontInfo.minFontSize)
+            {
+                renderFontSize -= 1.0f;
+                textSize = MeasureTextEx(fontInfo.font, content.c_str(), renderFontSize, fontInfo.fontSpacing);
+            }
+        }
+
+        const ScissorScope scissor{rec};
+
         DrawTextEx(
             fontInfo.font,
             content.c_str(),
-            Vector2{rec.x + 6.0f, rec.y + (rec.height - fontInfo.fontSize) * 0.5f},
-            fontInfo.fontSize,
+            Vector2{rec.x + 6.0f, rec.y + (rec.height - renderFontSize) * 0.5f},
+            renderFontSize,
             fontInfo.fontSpacing,
             fontInfo.color);
 
@@ -343,7 +368,7 @@ namespace sage
         {
             const std::string caretPrefix = content.substr(0, caretIndex);
             const Vector2 textSize =
-                MeasureTextEx(fontInfo.font, caretPrefix.c_str(), fontInfo.fontSize, fontInfo.fontSpacing);
+                MeasureTextEx(fontInfo.font, caretPrefix.c_str(), renderFontSize, fontInfo.fontSpacing);
             const float caretX = std::min(rec.x + rec.width - 6.0f, rec.x + 7.0f + textSize.x);
             DrawLineEx(
                 Vector2{caretX, rec.y + 5.0f},

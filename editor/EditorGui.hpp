@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EditorInspector.hpp"
+
 #include "raylib.h"
 
 #include "entt/entt.hpp"
@@ -7,17 +9,37 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <typeindex>
+#include <type_traits>
 #include <vector>
 
 namespace sage
 {
     class GameUIEngine;
+    class Table;
     class TextBox;
     class Window;
     struct Settings;
 
     namespace editor
     {
+        struct InspectorFieldBinding
+        {
+            std::string componentName;
+            std::string fieldName;
+            std::type_index valueType = typeid(void);
+            std::vector<TextBox*> valueTexts;
+        };
+
+        template <class T>
+        struct EditorFieldDrawer;
+
+        template <>
+        struct EditorFieldDrawer<Vector3>
+        {
+            static void Draw(const InspectorField& field, const InspectorFieldBinding& binding);
+        };
+
         class EditorGui
         {
           public:
@@ -63,8 +85,6 @@ namespace sage
             {
                 std::function<void(TransformField, float)> adjustTransform;
                 std::function<void(TransformField, float)> setTransform;
-                std::function<void()> toggleEditTransform;
-                std::function<void()> toggleEditPivot;
             };
 
             struct DeleteConfirmationCallbacks
@@ -80,14 +100,21 @@ namespace sage
             Window* assetDefaultsWindow{};
             Window* inspectorWindow{};
             Window* deleteConfirmationWindow{};
+            GameUIEngine* ui{};
             Texture2D editorWindowBackgroundTexture{};
             TextBox* hierarchyScrollbarUpText{};
             TextBox* hierarchyScrollbarTrackText{};
             TextBox* hierarchyScrollbarDownText{};
+            TextBox* inspectorScrollbarUpText{};
+            TextBox* inspectorScrollbarTrackText{};
+            TextBox* inspectorScrollbarDownText{};
             std::vector<RenderTexture2D> assetThumbnails;
             std::vector<TextBox*> hierarchyRows;
             std::vector<SceneObjectEntry> hierarchyEntries;
             std::size_t hierarchyScrollOffset = 0;
+            std::size_t inspectorFieldScrollOffset = 0;
+            std::size_t inspectorFieldVisibleRows = 0;
+            std::size_t inspectorFieldTotalRows = 0;
             ModelDefaultCallbacks modelDefaultCallbacks;
             InspectorCallbacks inspectorCallbacks;
             DeleteConfirmationCallbacks deleteConfirmationCallbacks;
@@ -114,10 +141,14 @@ namespace sage
             TextBox* inspectorScaleXText{};
             TextBox* inspectorScaleYText{};
             TextBox* inspectorScaleZText{};
-            TextBox* inspectorEditButtonText{};
-            TextBox* inspectorPivotButtonText{};
-            bool inspectorPivotButtonVisible = false;
+            Table* inspectorFieldsTable{};
             TextBox* deleteConfirmationText{};
+
+            using InspectorFieldDrawer = std::function<void(const InspectorField&, const InspectorFieldBinding&)>;
+
+            std::vector<InspectorFieldBinding> inspectorFieldBindings;
+            std::vector<std::pair<std::type_index, InspectorFieldDrawer>> inspectorFieldDrawers;
+            std::string inspectorFieldsSignature;
 
             RenderTexture2D createAssetThumbnail(const AssetEntry& asset) const;
             void createOverlayWindow(GameUIEngine* ui, Settings* settings);
@@ -134,6 +165,24 @@ namespace sage
             void createInspectorWindow(GameUIEngine* ui, Settings* settings);
             void createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings);
             void scrollHierarchy(int amount);
+            void scrollInspectorFields(int amount);
+            void registerInspectorFieldDrawers();
+            void rebuildInspectorFieldRows(const std::vector<InspectedComponent>& inspectedComponents);
+            void drawInspectedFields(const std::vector<InspectedComponent>& inspectedComponents) const;
+            [[nodiscard]] const InspectorFieldDrawer* findInspectorFieldDrawer(std::type_index valueType) const;
+            [[nodiscard]] std::string buildInspectorFieldsSignature(
+                const std::vector<InspectedComponent>& inspectedComponents) const;
+
+            template <class T>
+            void registerInspectorFieldDrawer()
+            {
+                using Value = std::remove_cvref_t<T>;
+                inspectorFieldDrawers.push_back(
+                    {typeid(Value),
+                     [](const InspectorField& field, const InspectorFieldBinding& binding) {
+                         EditorFieldDrawer<Value>::Draw(field, binding);
+                     }});
+            }
 
           public:
             void SetPlacementStatus(
@@ -160,8 +209,7 @@ namespace sage
                 const std::string& scaleX,
                 const std::string& scaleY,
                 const std::string& scaleZ,
-                const std::string& editButtonText,
-                const std::string& pivotButtonText);
+                const std::vector<InspectedComponent>& inspectedComponents);
             void ShowDeleteConfirmation(const std::string& selectedEntity) const;
             void HideDeleteConfirmation() const;
             [[nodiscard]] bool IsDeleteConfirmationVisible() const;

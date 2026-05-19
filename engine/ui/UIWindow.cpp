@@ -136,6 +136,32 @@ namespace sage
         onHide.Publish();
     }
 
+    void Window::SetOverflowContingency(OverflowContingency contingency)
+    {
+        overflowContingency = contingency;
+    }
+
+    OverflowContingency Window::GetOverflowContingency() const
+    {
+        return overflowContingency;
+    }
+
+    void Window::Draw2D()
+    {
+        if (overflowContingency == OverflowContingency::SHRINK)
+        {
+            TableElement::Draw2D();
+            return;
+        }
+
+        // TRUNCATE and SCROLLBAR both clip everything inside the window rect.
+        // SCROLLBAR additionally relies on scrollOffsetY being applied to child
+        // positions by whatever code populates the scrollable region — the
+        // window itself just guarantees that overflow doesn't escape the rect.
+        const ScissorScope clip{rec};
+        TableElement::Draw2D();
+    }
+
     void Window::FinalizeLayout()
     {
         unscaledDimensions.rec = rec;

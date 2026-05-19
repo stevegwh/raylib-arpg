@@ -35,8 +35,8 @@ namespace sage
             float fontSpacing;
             Font font;
             Color color;
-            static constexpr float minFontSize = 16.0f;
-            static constexpr float maxFontSize = 72.0f;
+            float minFontSize = 16.0f;
+            float maxFontSize = 72.0f;
             OverflowBehaviour overflowBehaviour;
             FontInfo()
                 : baseFontSize(16),

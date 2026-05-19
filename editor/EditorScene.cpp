@@ -1,6 +1,8 @@
 #include "EditorScene.hpp"
 
+#include "EditorComponents.hpp"
 #include "EditorGui.hpp"
+#include "EditorInspector.hpp"
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
 #include "engine/CollisionLayers.hpp"
@@ -241,6 +243,11 @@ namespace sage
 
     std::string EditorScene::describeEntity(const entt::entity entity) const
     {
+        if (sys->registry->valid(entity) && sys->registry->any_of<editor::EditorObjectDescriptor>(entity))
+        {
+            const auto& descriptor = sys->registry->get<editor::EditorObjectDescriptor>(entity);
+            if (!descriptor.name.empty()) return descriptor.name;
+        }
         if (sys->registry->valid(entity) && sys->registry->any_of<Light>(entity))
         {
             return std::format("light_{}", entt::to_integral(entity));
@@ -320,18 +327,6 @@ namespace sage
         if (!selectedSceneEntity.has_value()) return "1.00";
         const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
         return std::format("{:.2f}", transform.GetScale().z);
-    }
-
-    std::string EditorScene::describeEditButton() const
-    {
-        if (!selectedSceneEntity.has_value()) return "Edit Transform";
-        return isEditState() ? "Done Editing" : "Edit Transform";
-    }
-
-    std::string EditorScene::describeEditPivotButton() const
-    {
-        if (!isEditState() || !selectedSceneEntity.has_value()) return "";
-        return editPivotMode == EditPivotMode::LocalCenter ? "Pivot: Local" : "Pivot: World";
     }
 
     Vector3 EditorScene::editPivotWorldPosition(const entt::entity entity) const
@@ -719,6 +714,9 @@ namespace sage
                                           sys->registry->any_of<sgTransform>(*selectedSceneEntity)
                                       ? selectedSceneEntity
                                       : std::nullopt;
+        const auto inspectedComponents =
+            activeEntity.has_value() ? inspectorRegistry.InspectEntity(*sys->registry, *activeEntity)
+                                     : std::vector<editor::InspectedComponent>{};
 
         gui->SetHierarchy(collectSceneObjectEntries(), activeEntity);
         gui->SetInspector(
@@ -732,8 +730,7 @@ namespace sage
             describeSelectedScaleX(),
             describeSelectedScaleY(),
             describeSelectedScaleZ(),
-            describeEditButton(),
-            describeEditPivotButton());
+            inspectedComponents);
     }
 
     void EditorScene::resetPlacementTransform()
@@ -1582,6 +1579,15 @@ namespace sage
 
         const auto& placeable = selectedPlaceable();
         const auto entity = sys->registry->create();
+        sys->registry->emplace<editor::EditorObjectDescriptor>(
+            entity,
+            editor::EditorObjectDescriptor{
+                .name = makePlacedLabel(entity),
+                .category = placeable.labelStem,
+                .selectable = true,
+                .visibleInHierarchy = true,
+                .locked = false});
+        sys->registry->emplace<editor::AssetReference>(entity, editor::AssetReference{.assetKey = placeable.modelKey});
         sys->registry->emplace<sgTransform>(entity);
         sys->transformSystem->SetPosition(entity, *snappedPlacementPosition);
         sys->transformSystem->SetScale(entity, placementScale);
@@ -1590,7 +1596,7 @@ namespace sage
         auto model = ResourceManager::GetInstance().GetModelView(placeable.modelKey);
         auto& renderable =
             sys->registry->emplace<Renderable>(entity, std::move(model), modelDefaultTransform(placeable));
-        lastPlacedLabel = makePlacedLabel(entity);
+        lastPlacedLabel = sys->registry->get<editor::EditorObjectDescriptor>(entity).name;
         renderable.SetName(lastPlacedLabel);
         auto& uber =
             sys->registry->emplace<UberShaderComponent>(entity, renderable.GetModel()->GetMaterialCount());
@@ -2109,6 +2115,7 @@ namespace sage
 
     EditorScene::EditorScene(EngineSystems* _sys) : sys(_sys)
     {
+        editor::RegisterDefaultInspectorComponents(inspectorRegistry);
         sizeGridToLoadedScene();
         createGridPickSurface();
         applyLitShaderToLoadedRenderables();
@@ -2153,9 +2160,7 @@ namespace sage
                 .setTransform =
                     [this](const editor::EditorGui::TransformField field, const float value) {
                         setSelectedTransform(field, value);
-                    },
-                .toggleEditTransform = [this]() { toggleEditSelectedTransform(); },
-                .toggleEditPivot = [this]() { toggleEditPivotMode(); }},
+                    }},
             editor::EditorGui::DeleteConfirmationCallbacks{
                 .confirm = [this]() { confirmDeleteSelectedEntity(); },
                 .cancel = [this]() { cancelDeleteSelectedEntity(); }});

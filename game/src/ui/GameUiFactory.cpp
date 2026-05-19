@@ -188,9 +188,7 @@ namespace lq
         sage::TextBox::FontInfo _fontInfo{};
         _fontInfo.overflowBehaviour = sage::TextBox::OverflowBehaviour::SHRINK_TO_FIT;
         _fontInfo.fontSize = std::clamp(
-            _fontInfo.baseFontSize * scaleFactor,
-            sage::TextBox::FontInfo::minFontSize,
-            sage::TextBox::FontInfo::maxFontSize);
+            _fontInfo.baseFontSize * scaleFactor, _fontInfo.minFontSize, _fontInfo.maxFontSize);
 
         Vector2 textSize = MeasureTextEx(_fontInfo.font, name.c_str(), _fontInfo.fontSize, _fontInfo.fontSpacing);
         auto w = textSize.x + padding.left + padding.right;
@@ -250,9 +248,7 @@ namespace lq
             // Match UpdateFontScaling's clamp so the pre-measure produces the same
             // line breaks UpdateDimensions will at runtime.
             fontInfo.fontSize = std::clamp(
-                fontInfo.baseFontSize * scaleFactor,
-                sage::TextBox::FontInfo::minFontSize,
-                sage::TextBox::FontInfo::maxFontSize);
+                fontInfo.baseFontSize * scaleFactor, fontInfo.minFontSize, fontInfo.maxFontSize);
 
             // Padding/width in viewport-coord (target-coord scaled by scaleFactor).
             const sage::Padding tooltipPadding{

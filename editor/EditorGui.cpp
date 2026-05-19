@@ -13,7 +13,10 @@
 #include <array>
 #include <cmath>
 #include <exception>
+#include <format>
 #include <memory>
+#include <sstream>
+#include <string_view>
 #include <utility>
 
 namespace sage::editor
@@ -30,6 +33,47 @@ namespace sage::editor
             auto info = TextBox::FontInfo{};
             info.color = EDITOR_TEXT;
             return info;
+        }
+
+        // Inspector packs many labels/inputs into a narrow column. Allow the
+        // shrink-to-fit logic to go below the global default of 16 so long
+        // labels like "Local Bounds Min" actually fit at the typical scale.
+        TextBox::FontInfo EditorInspectorFontInfo()
+        {
+            auto info = EditorTextFontInfo();
+            info.baseFontSize = 14;
+            info.minFontSize = 11;
+            return info;
+        }
+
+        // TextInput boxes paint a light background, so the inspector's normal
+        // light text colour would be unreadable inside them.
+        TextBox::FontInfo EditorInspectorInputFontInfo()
+        {
+            auto info = EditorInspectorFontInfo();
+            info.color = Color{17, 24, 39, 255};
+            return info;
+        }
+
+        std::string FormatFloat(const float value)
+        {
+            return std::format("{:.2f}", value);
+        }
+
+        const InspectorField* FindField(
+            const std::vector<InspectedComponent>& components,
+            const std::string_view componentName,
+            const std::string_view fieldName)
+        {
+            for (const auto& component : components)
+            {
+                if (component.displayName != componentName) continue;
+                for (const auto& field : component.fields)
+                {
+                    if (field.label == fieldName) return &field;
+                }
+            }
+            return nullptr;
         }
 
         class AssetThumbnailButton final : public ImageBox
@@ -243,14 +287,14 @@ namespace sage::editor
 
         class ScrollbarTrack final : public TextBox
         {
-            const std::vector<EditorGui::SceneObjectEntry>* entries{};
+            std::function<std::size_t()> totalRows;
+            std::function<std::size_t()> visibleRows;
             const std::size_t* scrollOffset{};
-            const std::vector<TextBox*>* visibleRows{};
 
           public:
             [[nodiscard]] bool ShouldShow() const
             {
-                return entries && visibleRows && entries->size() > visibleRows->size();
+                return totalRows && visibleRows && totalRows() > visibleRows();
             }
 
             void UpdateDimensions() override
@@ -268,14 +312,14 @@ namespace sage::editor
                 DrawRectangleRec(rec, Color{24, 26, 30, 255});
                 DrawRectangleLinesEx(rec, 1.0f, Color{69, 74, 84, 255});
 
-                if (!entries || !scrollOffset || !visibleRows || entries->empty() || visibleRows->empty()) return;
-                const float visibleCount = static_cast<float>(visibleRows->size());
-                const float totalCount = static_cast<float>(entries->size());
+                if (!totalRows || !scrollOffset || !visibleRows || totalRows() == 0 || visibleRows() == 0) return;
+                const float visibleCount = static_cast<float>(visibleRows());
+                const float totalCount = static_cast<float>(totalRows());
                 const float thumbHeight = totalCount <= visibleCount
                                               ? rec.height
                                               : std::max(18.0f, rec.height * (visibleCount / totalCount));
                 const std::size_t maxOffset =
-                    entries->size() > visibleRows->size() ? entries->size() - visibleRows->size() : 0;
+                    totalRows() > visibleRows() ? totalRows() - visibleRows() : 0;
                 const float scrollRatio =
                     maxOffset == 0 ? 0.0f : static_cast<float>(*scrollOffset) / static_cast<float>(maxOffset);
                 const float thumbY = rec.y + (rec.height - thumbHeight) * scrollRatio;
@@ -285,13 +329,13 @@ namespace sage::editor
             ScrollbarTrack(
                 GameUIEngine* ui,
                 TableCell* parent,
-                const std::vector<EditorGui::SceneObjectEntry>* sceneEntries,
+                std::function<std::size_t()> totalRowProvider,
                 const std::size_t* firstVisibleEntry,
-                const std::vector<TextBox*>* rowElements)
+                std::function<std::size_t()> visibleRowProvider)
                 : TextBox(ui, parent, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER),
-                  entries(sceneEntries),
+                  totalRows(std::move(totalRowProvider)),
                   scrollOffset(firstVisibleEntry),
-                  visibleRows(rowElements)
+                  visibleRows(std::move(visibleRowProvider))
             {
             }
         };
@@ -350,6 +394,24 @@ namespace sage::editor
         else if (amount > 0)
         {
             hierarchyScrollOffset = std::min(maxOffset, hierarchyScrollOffset + static_cast<std::size_t>(amount));
+        }
+    }
+
+    void EditorGui::scrollInspectorFields(const int amount)
+    {
+        const std::size_t maxOffset = inspectorFieldTotalRows > inspectorFieldVisibleRows
+                                          ? inspectorFieldTotalRows - inspectorFieldVisibleRows
+                                          : 0;
+
+        if (amount < 0)
+        {
+            const auto positiveAmount = static_cast<std::size_t>(-amount);
+            inspectorFieldScrollOffset =
+                positiveAmount > inspectorFieldScrollOffset ? 0 : inspectorFieldScrollOffset - positiveAmount;
+        }
+        else if (amount > 0)
+        {
+            inspectorFieldScrollOffset = std::min(maxOffset, inspectorFieldScrollOffset + static_cast<std::size_t>(amount));
         }
     }
 
@@ -413,10 +475,10 @@ namespace sage::editor
         const std::string& scaleX,
         const std::string& scaleY,
         const std::string& scaleZ,
-        const std::string& editButtonText,
-        const std::string& pivotButtonText)
+        const std::vector<InspectedComponent>& inspectedComponents)
     {
         if (inspectorSelectionText) inspectorSelectionText->SetContent("Selected: " + selectedEntity);
+
         if (inspectorPositionXText) inspectorPositionXText->SetContent(positionX);
         if (inspectorPositionYText) inspectorPositionYText->SetContent(positionY);
         if (inspectorPositionZText) inspectorPositionZText->SetContent(positionZ);
@@ -426,9 +488,8 @@ namespace sage::editor
         if (inspectorScaleXText) inspectorScaleXText->SetContent(scaleX);
         if (inspectorScaleYText) inspectorScaleYText->SetContent(scaleY);
         if (inspectorScaleZText) inspectorScaleZText->SetContent(scaleZ);
-        if (inspectorEditButtonText) inspectorEditButtonText->SetContent(editButtonText);
-        inspectorPivotButtonVisible = !pivotButtonText.empty();
-        if (inspectorPivotButtonText) inspectorPivotButtonText->SetContent(pivotButtonText);
+        rebuildInspectorFieldRows(inspectedComponents);
+        drawInspectedFields(inspectedComponents);
     }
 
     void EditorGui::ShowDeleteConfirmation(const std::string& selectedEntity) const
@@ -454,6 +515,253 @@ namespace sage::editor
     bool EditorGui::IsDeleteConfirmationVisible() const
     {
         return deleteConfirmationWindow && !deleteConfirmationWindow->IsHidden();
+    }
+
+    void EditorFieldDrawer<Vector3>::Draw(const InspectorField& field, const InspectorFieldBinding& binding)
+    {
+        if (!field.value || binding.valueTexts.size() < 3) return;
+
+        const auto& value = *static_cast<const Vector3*>(field.value);
+        if (binding.valueTexts[0]) binding.valueTexts[0]->SetContent(FormatFloat(value.x));
+        if (binding.valueTexts[1]) binding.valueTexts[1]->SetContent(FormatFloat(value.y));
+        if (binding.valueTexts[2]) binding.valueTexts[2]->SetContent(FormatFloat(value.z));
+    }
+
+    const EditorGui::InspectorFieldDrawer* EditorGui::findInspectorFieldDrawer(const std::type_index valueType) const
+    {
+        const auto it = std::ranges::find_if(inspectorFieldDrawers, [valueType](const auto& entry) {
+            return entry.first == valueType;
+        });
+        return it == inspectorFieldDrawers.end() ? nullptr : &it->second;
+    }
+
+    std::string EditorGui::buildInspectorFieldsSignature(
+        const std::vector<InspectedComponent>& inspectedComponents) const
+    {
+        std::ostringstream signature;
+        std::size_t drawableRows = 0;
+        for (const auto& component : inspectedComponents)
+        {
+            signature << component.displayName << '{';
+            bool componentHeaderCounted = false;
+            for (const auto& field : component.fields)
+            {
+                if (!findInspectorFieldDrawer(field.valueType)) continue;
+                if (!componentHeaderCounted)
+                {
+                    ++drawableRows;
+                    componentHeaderCounted = true;
+                }
+                ++drawableRows;
+                signature << field.label << ':' << field.valueType.name() << ';';
+            }
+            signature << '}';
+        }
+        signature << "scroll:" << inspectorFieldScrollOffset << "rows:" << drawableRows;
+        return signature.str();
+    }
+
+    void EditorGui::rebuildInspectorFieldRows(const std::vector<InspectedComponent>& inspectedComponents)
+    {
+        if (!inspectorFieldsTable || !ui) return;
+
+        constexpr std::size_t VISIBLE_ROWS = 13;
+        inspectorFieldVisibleRows = VISIBLE_ROWS;
+
+        std::size_t totalRows = 0;
+        for (const auto& component : inspectedComponents)
+        {
+            bool componentHeaderCounted = false;
+            for (const auto& field : component.fields)
+            {
+                if (!findInspectorFieldDrawer(field.valueType)) continue;
+                if (!componentHeaderCounted)
+                {
+                    ++totalRows;
+                    componentHeaderCounted = true;
+                }
+                ++totalRows;
+            }
+        }
+        inspectorFieldTotalRows = totalRows;
+        const std::size_t maxOffset = inspectorFieldTotalRows > inspectorFieldVisibleRows
+                                          ? inspectorFieldTotalRows - inspectorFieldVisibleRows
+                                          : 0;
+        inspectorFieldScrollOffset = std::min(inspectorFieldScrollOffset, maxOffset);
+
+        const bool showScrollbar = inspectorFieldTotalRows > inspectorFieldVisibleRows;
+        if (inspectorScrollbarUpText) inspectorScrollbarUpText->SetContent(showScrollbar ? "^" : "");
+        if (inspectorScrollbarTrackText) inspectorScrollbarTrackText->SetContent(showScrollbar ? " " : "");
+        if (inspectorScrollbarDownText) inspectorScrollbarDownText->SetContent(showScrollbar ? "v" : "");
+
+        if (inspectorWindow && !inspectorWindow->IsHidden() && showScrollbar)
+        {
+            const auto mousePosition = GetMousePosition();
+            if (CheckCollisionPointRec(mousePosition, inspectorWindow->GetRec()))
+            {
+                const float wheelMove = GetMouseWheelMove();
+                if (wheelMove > 0.0f)
+                {
+                    scrollInspectorFields(-static_cast<int>(std::ceil(wheelMove)));
+                }
+                else if (wheelMove < 0.0f)
+                {
+                    scrollInspectorFields(static_cast<int>(std::ceil(-wheelMove)));
+                }
+            }
+        }
+
+        const auto signature = buildInspectorFieldsSignature(inspectedComponents);
+        if (signature == inspectorFieldsSignature) return;
+
+        inspectorFieldsSignature = signature;
+        inspectorFieldBindings.clear();
+        inspectorFieldsTable->children.clear();
+
+        std::size_t rowCursor = 0;
+        std::size_t visibleCreated = 0;
+        const auto shouldShowRow = [&]() {
+            return rowCursor >= inspectorFieldScrollOffset && visibleCreated < inspectorFieldVisibleRows;
+        };
+        const auto advanceRow = [&]() {
+            ++rowCursor;
+            if (rowCursor > inspectorFieldScrollOffset && visibleCreated < inspectorFieldVisibleRows)
+            {
+                ++visibleCreated;
+            }
+        };
+
+        for (const auto& component : inspectedComponents)
+        {
+            bool componentHeaderCreated = false;
+            for (const auto& field : component.fields)
+            {
+                if (!findInspectorFieldDrawer(field.valueType)) continue;
+
+                if (!componentHeaderCreated)
+                {
+                    if (shouldShowRow())
+                    {
+                        // autoSize so the visible slots split the field area
+                        // evenly. The previous explicit percent (22) was being
+                        // interpreted as "22% of inspectorFieldsTable height"
+                        // — which, combined with 13 row slots, caused rows to
+                        // overlap each other and the buttons below.
+                        auto* headerRow = inspectorFieldsTable->CreateTableRow(Padding{2, 2, 2, 2});
+                        auto* headerCell = headerRow->CreateTableCell(Padding{2, 2, 2, 2});
+                        auto header = std::make_unique<TextBox>(
+                            ui, headerCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+                        headerCell->CreateTextbox(std::move(header), component.displayName);
+                    }
+                    advanceRow();
+                    componentHeaderCreated = true;
+                }
+
+                if (field.valueType == typeid(Vector3))
+                {
+                    if (!shouldShowRow())
+                    {
+                        advanceRow();
+                        continue;
+                    }
+
+                    auto* row = inspectorFieldsTable->CreateTableRow(Padding{2, 2, 2, 2});
+
+                    auto* labelCell = row->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
+                    auto label = std::make_unique<TextBox>(
+                        ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+                    labelCell->CreateTextbox(std::move(label), field.label + ":");
+
+                    auto transformSetter = [this, &component, &field](const char axis) -> std::function<void(float)> {
+                        if (component.displayName != "Transform") return {};
+
+                        auto makeSetter = [this](const TransformField transformField) {
+                            return [this, transformField](const float value) {
+                                if (inspectorCallbacks.setTransform) inspectorCallbacks.setTransform(transformField, value);
+                            };
+                        };
+
+                        if (field.label == "Position")
+                        {
+                            if (axis == 'X') return makeSetter(TransformField::PositionX);
+                            if (axis == 'Y') return makeSetter(TransformField::PositionY);
+                            if (axis == 'Z') return makeSetter(TransformField::PositionZ);
+                        }
+                        if (field.label == "Rotation")
+                        {
+                            if (axis == 'X') return makeSetter(TransformField::RotationX);
+                            if (axis == 'Y') return makeSetter(TransformField::RotationY);
+                            if (axis == 'Z') return makeSetter(TransformField::RotationZ);
+                        }
+                        if (field.label == "Scale")
+                        {
+                            if (axis == 'X') return makeSetter(TransformField::ScaleX);
+                            if (axis == 'Y') return makeSetter(TransformField::ScaleY);
+                            if (axis == 'Z') return makeSetter(TransformField::ScaleZ);
+                        }
+                        return {};
+                    };
+
+                    auto addAxis = [this, row](const char* axis, std::function<void(float)> setter) {
+                        auto* axisCell = row->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
+                        auto axisLabel = std::make_unique<TextBox>(
+                            ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
+                        axisCell->CreateTextbox(std::move(axisLabel), axis);
+
+                        auto* valueCell = row->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
+                        auto valueText = std::make_unique<TextInput>(
+                            ui,
+                            valueCell,
+                            [setter = std::move(setter)](const std::string& submittedValue) {
+                                if (!setter) return;
+                                try
+                                {
+                                    setter(std::stof(submittedValue));
+                                }
+                                catch (const std::exception&)
+                                {
+                                }
+                            },
+                            EditorInspectorInputFontInfo(),
+                            VertAlignment::MIDDLE,
+                            HoriAlignment::RIGHT);
+                        return valueCell->CreateTextbox(std::move(valueText), "0.00");
+                    };
+
+                    auto* xText = addAxis("X", transformSetter('X'));
+                    auto* yText = addAxis("Y", transformSetter('Y'));
+                    auto* zText = addAxis("Z", transformSetter('Z'));
+
+                    inspectorFieldBindings.push_back(
+                        InspectorFieldBinding{
+                            .componentName = component.displayName,
+                            .fieldName = field.label,
+                            .valueType = field.valueType,
+                            .valueTexts = {xText, yText, zText}});
+                    advanceRow();
+                }
+            }
+        }
+
+        inspectorFieldsTable->InitLayout();
+    }
+
+    void EditorGui::drawInspectedFields(const std::vector<InspectedComponent>& inspectedComponents) const
+    {
+        for (const auto& binding : inspectorFieldBindings)
+        {
+            const auto* field = FindField(inspectedComponents, binding.componentName, binding.fieldName);
+            if (!field || field->valueType != binding.valueType) continue;
+
+            const auto* drawer = findInspectorFieldDrawer(field->valueType);
+            if (!drawer) continue;
+            (*drawer)(*field, binding);
+        }
+    }
+
+    void EditorGui::registerInspectorFieldDrawers()
+    {
+        registerInspectorFieldDrawer<Vector3>();
     }
 
     RenderTexture2D EditorGui::createAssetThumbnail(const AssetEntry& asset) const
@@ -596,9 +904,9 @@ namespace sage::editor
             auto track = std::make_unique<ScrollbarTrack>(
                 ui,
                 trackCell,
-                &hierarchyEntries,
+                [this]() { return hierarchyEntries.size(); },
                 &hierarchyScrollOffset,
-                &hierarchyRows);
+                [this]() { return hierarchyRows.size(); });
             hierarchyScrollbarTrackText = trackCell->CreateTextbox(std::move(track), "");
 
             auto* downRow = scrollbarTable->CreateTableRow(12.0f);
@@ -608,6 +916,7 @@ namespace sage::editor
             hierarchyScrollbarDownText = downCell->CreateTextbox(std::move(downButton), "v");
         }
 
+        hierarchyWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
         hierarchyWindow->FinalizeLayout();
     }
 
@@ -770,8 +1079,8 @@ namespace sage::editor
             TextureStretchMode::STRETCH,
             -24.0f,
             508.0f,
-            392.0f,
-            388.0f,
+            460.0f,
+            520.0f,
             VertAlignment::TOP,
             HoriAlignment::RIGHT,
             Padding{20, 16, 14, 14});
@@ -780,7 +1089,11 @@ namespace sage::editor
         auto* mainTable = inspectorWindow->CreateTable({0, 0, 4, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(18);
+            // 6% gives the title bar a compact strip (~29px in the current
+            // 520px window) — the previous 18 was being read as percent, so
+            // the title cell was ~87px tall and dropped ~70px of dead space
+            // below the WINDOW_CENTER / TOP-aligned text.
+            auto* titleRow = mainTable->CreateTableRow(6);
             auto* titleCell = titleRow->CreateTableCell();
             auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Inspector");
@@ -792,142 +1105,54 @@ namespace sage::editor
             auto* table = contentCell->CreateTable();
 
             auto addLine = [ui, table](const char* text) {
-                auto* row = table->CreateTableRow();
-                auto* cell = row->CreateTableCell();
-                auto label = std::make_unique<TextBox>(ui, cell, EditorTextFontInfo());
+                // 6% of the inspector content table leaves a single-line strip
+                // for the selection label. MIDDLE alignment keeps the text
+                // visually adjacent to the field rows below it (TOP would
+                // leave dead space underneath the text).
+                auto* row = table->CreateTableRow(6.0f);
+                auto* cell = row->CreateTableCell(Padding{2, 2, 2, 2});
+                auto label = std::make_unique<TextBox>(
+                    ui, cell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
                 return cell->CreateTextbox(std::move(label), text);
             };
 
             inspectorSelectionText = addLine("Selected: None");
 
-            auto createValueInput = [this, ui](
-                                        TableCell* valueCell,
-                                        const char* initialValue,
-                                        const TransformField field) {
-                auto value = std::make_unique<TextInput>(
-                    ui,
-                    valueCell,
-                    [this, field](const std::string& submittedValue) {
-                        if (!inspectorCallbacks.setTransform) return;
-
-                        try
-                        {
-                            inspectorCallbacks.setTransform(field, std::stof(submittedValue));
-                        }
-                        catch (const std::exception&)
-                        {
-                        }
-                    },
-                    TextBox::FontInfo{},
-                    VertAlignment::MIDDLE,
-                    HoriAlignment::LEFT);
-                return valueCell->CreateTextbox(std::move(value), initialValue);
+            auto* fieldsRow = table->CreateTableRow(Padding{2, 0, 0, 0});
+            auto inspectorHasOverflow = [this]() {
+                return inspectorFieldTotalRows > inspectorFieldVisibleRows;
             };
 
-            auto addVectorRow = [createValueInput, ui, table](
-                                    const char* labelText,
-                                    const char* initialX,
-                                    const char* initialY,
-                                    const char* initialZ,
-                                    const TransformField fieldX,
-                                    const TransformField fieldY,
-                                    const TransformField fieldZ) {
-                auto* row = table->CreateTableRow();
+            auto* fieldsCell = fieldsRow->CreateTableCell(94.0f, Padding{2, 2, 2, 2});
+            auto* scrollbarCell = fieldsRow->CreateTableCell(6.0f, Padding{2, 2, 0, 2});
+            inspectorFieldsTable = fieldsCell->CreateTable();
 
-                auto* labelCell = row->CreateTableCell(16.0f);
-                auto label = std::make_unique<TextBox>(
-                    ui, labelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-                labelCell->CreateTextbox(std::move(label), labelText);
+            auto* scrollbarTable = scrollbarCell->CreateTable();
 
-                auto* xLabelCell = row->CreateTableCell(6.0f);
-                auto xLabel = std::make_unique<TextBox>(
-                    ui, xLabelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-                xLabelCell->CreateTextbox(std::move(xLabel), "X");
+            auto* upRow = scrollbarTable->CreateTableRow(12.0f);
+            auto* upCell = upRow->CreateTableCell(Padding{1, 1, 0, 0});
+            auto upButton =
+                std::make_unique<TextButton>(ui, upCell, [this]() { scrollInspectorFields(-1); }, inspectorHasOverflow);
+            inspectorScrollbarUpText = upCell->CreateTextbox(std::move(upButton), "^");
 
-                auto* xValueCell = row->CreateTableCell(21.0f, Padding{1, 1, 2, 2});
-                auto* xValueText = createValueInput(xValueCell, initialX, fieldX);
-
-                auto* yLabelCell = row->CreateTableCell(6.0f);
-                auto yLabel = std::make_unique<TextBox>(
-                    ui, yLabelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-                yLabelCell->CreateTextbox(std::move(yLabel), "Y");
-
-                auto* yValueCell = row->CreateTableCell(21.0f, Padding{1, 1, 2, 2});
-                auto* yValueText = createValueInput(yValueCell, initialY, fieldY);
-
-                auto* zLabelCell = row->CreateTableCell(6.0f);
-                auto zLabel = std::make_unique<TextBox>(
-                    ui, zLabelCell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-                zLabelCell->CreateTextbox(std::move(zLabel), "Z");
-
-                auto* zValueCell = row->CreateTableCell(24.0f, Padding{1, 1, 2, 2});
-                auto* zValueText = createValueInput(zValueCell, initialZ, fieldZ);
-
-                return std::array<TextBox*, 3>{xValueText, yValueText, zValueText};
-            };
-
-            const auto positionTexts = addVectorRow(
-                "Pos:",
-                "0.00",
-                "0.00",
-                "0.00",
-                TransformField::PositionX,
-                TransformField::PositionY,
-                TransformField::PositionZ);
-            inspectorPositionXText = positionTexts[0];
-            inspectorPositionYText = positionTexts[1];
-            inspectorPositionZText = positionTexts[2];
-
-            const auto rotationTexts = addVectorRow(
-                "Rot:",
-                "0",
-                "0",
-                "0",
-                TransformField::RotationX,
-                TransformField::RotationY,
-                TransformField::RotationZ);
-            inspectorRotationXText = rotationTexts[0];
-            inspectorRotationYText = rotationTexts[1];
-            inspectorRotationZText = rotationTexts[2];
-
-            const auto scaleTexts = addVectorRow(
-                "Scale:",
-                "1.00",
-                "1.00",
-                "1.00",
-                TransformField::ScaleX,
-                TransformField::ScaleY,
-                TransformField::ScaleZ);
-            inspectorScaleXText = scaleTexts[0];
-            inspectorScaleYText = scaleTexts[1];
-            inspectorScaleZText = scaleTexts[2];
-
-            auto* buttonRow = table->CreateTableRow(34.0f);
-            auto* editCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
-            auto editButton = std::make_unique<TextButton>(
+            auto* trackRow = scrollbarTable->CreateTableRow({0, 0, 0, 0});
+            auto* trackCell = trackRow->CreateTableCell(Padding{2, 2, 0, 0});
+            auto track = std::make_unique<ScrollbarTrack>(
                 ui,
-                editCell,
-                [this]() {
-                    if (inspectorCallbacks.toggleEditTransform) inspectorCallbacks.toggleEditTransform();
-                },
-                [this]() {
-                    return selectedSceneEntity.has_value();
-                });
-            inspectorEditButtonText = editCell->CreateTextbox(std::move(editButton), "Edit Transform");
+                trackCell,
+                [this]() { return inspectorFieldTotalRows; },
+                &inspectorFieldScrollOffset,
+                [this]() { return inspectorFieldVisibleRows; });
+            inspectorScrollbarTrackText = trackCell->CreateTextbox(std::move(track), "");
 
-            auto* pivotCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
-            auto pivotButton = std::make_unique<TextButton>(
-                ui,
-                pivotCell,
-                [this]() {
-                    if (inspectorCallbacks.toggleEditPivot) inspectorCallbacks.toggleEditPivot();
-                },
-                [this]() {
-                    return selectedSceneEntity.has_value() && inspectorPivotButtonVisible;
-                });
-            inspectorPivotButtonText = pivotCell->CreateTextbox(std::move(pivotButton), "");
+            auto* downRow = scrollbarTable->CreateTableRow(12.0f);
+            auto* downCell = downRow->CreateTableCell(Padding{1, 1, 0, 0});
+            auto downButton =
+                std::make_unique<TextButton>(ui, downCell, [this]() { scrollInspectorFields(1); }, inspectorHasOverflow);
+            inspectorScrollbarDownText = downCell->CreateTextbox(std::move(downButton), "v");
         }
 
+        inspectorWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
         inspectorWindow->FinalizeLayout();
     }
 
@@ -992,11 +1217,14 @@ namespace sage::editor
         DeleteConfirmationCallbacks deleteConfirmationCallbacks)
         : modelDefaultCallbacks(std::move(callbacks)),
           inspectorCallbacks(std::move(inspectorCallbacks)),
-          deleteConfirmationCallbacks(std::move(deleteConfirmationCallbacks))
+          deleteConfirmationCallbacks(std::move(deleteConfirmationCallbacks)),
+          ui(ui)
     {
         Image panelImage = GenImageColor(1, 1, EDITOR_WINDOW_BACKGROUND);
         editorWindowBackgroundTexture = LoadTextureFromImage(panelImage);
         UnloadImage(panelImage);
+
+        registerInspectorFieldDrawers();
 
         assetThumbnails.reserve(assets.size());
         for (const auto& asset : assets)

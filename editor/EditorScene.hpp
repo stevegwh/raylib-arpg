@@ -1,6 +1,8 @@
 #pragma once
 
+#include "EditorComponents.hpp"
 #include "EditorGui.hpp"
+#include "EditorInspector.hpp"
 #include "engine/components/NavigationGridSquare.hpp"
 #include "cereal/cereal.hpp"
 #include "raylib.h"
@@ -116,6 +118,7 @@ namespace sage
 
         EngineSystems* sys{};
         std::unique_ptr<editor::EditorGui> gui;
+        editor::ComponentInspectorRegistry inspectorRegistry;
         std::vector<PlaceableMesh> placeables;
         std::size_t selectedPlaceableIndex = 0;
         unsigned int placedMeshCount = 0;
@@ -226,8 +229,6 @@ namespace sage
         [[nodiscard]] std::string describeSelectedScaleX() const;
         [[nodiscard]] std::string describeSelectedScaleY() const;
         [[nodiscard]] std::string describeSelectedScaleZ() const;
-        [[nodiscard]] std::string describeEditButton() const;
-        [[nodiscard]] std::string describeEditPivotButton() const;
         [[nodiscard]] Vector3 editPivotWorldPosition(entt::entity entity) const;
         [[nodiscard]] Vector3 editGizmoAxisVector(EditGizmoAxis axis) const;
         [[nodiscard]] Color editGizmoAxisColor(EditGizmoAxis axis) const;

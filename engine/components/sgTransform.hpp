@@ -39,6 +39,14 @@ namespace sage
             archive(m_positionWorld, m_rotationWorld, m_scale);
         }
 
+        template <class Inspector>
+        void inspect(Inspector& inspector)
+        {
+            inspector.field("Position", m_positionWorld);
+            inspector.field("Rotation", m_rotationWorld);
+            inspector.field("Scale", m_scale).min(0.0).step(0.1);
+        }
+
         [[nodiscard]] Matrix GetMatrixNoRot() const;
         [[nodiscard]] Matrix GetMatrix() const;
         [[nodiscard]] Vector3 forward() const;

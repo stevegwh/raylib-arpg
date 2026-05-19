@@ -34,8 +34,8 @@ add_subdirectory(game)
 
 if (BUILD_EDITOR)
     add_subdirectory(editor)
-endif()
+endif ()
 
 if (BUILD_RESPACKER)
     add_subdirectory(respacker)
-endif()
+endif ()
