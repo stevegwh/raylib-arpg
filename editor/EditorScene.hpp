@@ -1,19 +1,18 @@
 #pragma once
 
-#include "EditorComponents.hpp"
+#include "EditorAssetCatalog.hpp"
 #include "EditorGui.hpp"
+#include "EditorHierarchyModel.hpp"
 #include "EditorInspector.hpp"
 #include "EditorModeStateMachine.hpp"
+#include "EditorPlacementController.hpp"
 #include "EditorTransformEditor.hpp"
-#include "engine/components/NavigationGridSquare.hpp"
-#include "cereal/cereal.hpp"
-#include "raylib.h"
-#include "raymath.h"
+
+#include "entt/entt.hpp"
 
 #include <memory>
 #include <optional>
 #include <string>
-#include <vector>
 
 namespace sage
 {
@@ -23,58 +22,16 @@ namespace sage
     {
         friend class editor::EditorModeStateMachine;
 
-        struct PlaceableMesh
-        {
-            std::string displayName;
-            std::string modelKey;
-            std::string labelStem;
-            float modelDefaultHeightOffset = 0.0f;
-            float modelDefaultRotationY = 0.0f;
-            float modelDefaultScale = 1.0f;
-            Matrix appliedModelDefaultTransform = MatrixIdentity();
-        };
-
-        struct SerializedAssetDefaults
-        {
-            std::string displayName;
-            std::string modelKey;
-            float modelDefaultHeightOffset = 0.0f;
-            float modelDefaultRotationY = 0.0f;
-            float modelDefaultScale = 1.0f;
-            Matrix appliedModelDefaultTransform = MatrixIdentity();
-
-            template <class Archive>
-            void serialize(Archive& archive)
-            {
-                archive(
-                    CEREAL_NVP(displayName),
-                    CEREAL_NVP(modelKey),
-                    CEREAL_NVP(modelDefaultHeightOffset),
-                    CEREAL_NVP(modelDefaultRotationY),
-                    CEREAL_NVP(modelDefaultScale),
-                    CEREAL_NVP(appliedModelDefaultTransform));
-            }
-        };
-
         EngineSystems* sys{};
         std::unique_ptr<editor::EditorGui> gui;
         editor::ComponentInspectorRegistry inspectorRegistry;
-        std::vector<PlaceableMesh> placeables;
-        std::size_t selectedPlaceableIndex = 0;
-        unsigned int placedMeshCount = 0;
-        float gridSurfaceY = 0.0f;
-        float gridHalfExtent = 50.0f;
-        entt::entity gridPlacementSurfaceEntity = entt::null;
-        float placementRotationY = 0.0f;
-        float placementScale = 1.0f;
-        std::optional<GridSquare> hoveredGridSquare;
-        std::optional<Vector3> snappedPlacementPosition;
+        std::unique_ptr<editor::EditorAssetCatalog> assetCatalog;
+        std::unique_ptr<editor::EditorHierarchyModel> hierarchyModel;
+        std::unique_ptr<editor::EditorPlacementController> placementController;
         std::optional<entt::entity> selectedSceneEntity;
         std::unique_ptr<editor::EditorTransformEditor> transformEditor;
         std::unique_ptr<editor::EditorModeStateMachine> editorModes;
 
-        void createGridPlacementSurface();
-        void sizeGridToLoadedScene();
         void applyLitShaderToLoadedRenderables() const;
         void giveTransformsToLights() const;
         void refreshPlacementTarget();
@@ -104,13 +61,10 @@ namespace sage
         void adjustSelectedModelDefaultScale(float amount);
         void applySelectedModelDefaults();
         void resetSelectedModelDefaults();
-        void loadAssetDefaults();
-        void loadAssetDefaults(PlaceableMesh& placeable) const;
-        void saveAssetDefaults(const PlaceableMesh& placeable) const;
         void placeSelectedMesh();
         void drawPlacementPreview() const;
 
-        [[nodiscard]] const PlaceableMesh& selectedPlaceable() const;
+        [[nodiscard]] const editor::PlaceableAsset& selectedPlaceable() const;
         [[nodiscard]] bool isPlaceState() const;
         [[nodiscard]] bool isEditState() const;
         [[nodiscard]] std::string describeMode() const;
@@ -121,16 +75,7 @@ namespace sage
         [[nodiscard]] std::string describeSelectedModelDefaultScale() const;
         [[nodiscard]] std::string describeEntity(entt::entity entity) const;
         [[nodiscard]] std::string describeSelectedSceneEntity() const;
-        [[nodiscard]] Matrix selectedModelDefaultTransform() const;
-        [[nodiscard]] Matrix modelDefaultTransform(const PlaceableMesh& placeable) const;
-        [[nodiscard]] SerializedAssetDefaults serializeAssetDefaults(const PlaceableMesh& placeable) const;
-        [[nodiscard]] std::string assetDefaultsPath(const PlaceableMesh& placeable) const;
-        [[nodiscard]] std::string makePlacedLabel(entt::entity entity) const;
-        [[nodiscard]] std::vector<editor::EditorGui::SceneObjectEntry> collectSceneObjectEntries() const;
-        void appendSceneObjectEntry(
-            std::vector<editor::EditorGui::SceneObjectEntry>& entries,
-            entt::entity entity,
-            int depth) const;
+
       public:
         void Update();
         void Draw3D() const;

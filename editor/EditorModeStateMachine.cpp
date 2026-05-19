@@ -64,7 +64,7 @@ namespace sage::editor
 
     void EditorModeStateMachine::onEnter(EditorPlaceState& state, entt::entity)
     {
-        scene.selectedPlaceableIndex = state.placeableIndex;
+        scene.assetCatalog->Select(state.placeableIndex);
         scene.resetPlacementTransform();
         scene.refreshOverlay();
     }
@@ -114,14 +114,15 @@ namespace sage::editor
 
     void EditorModeStateMachine::draw3D(const EditorPlaceState&, entt::entity) const
     {
-        if (!scene.snappedPlacementPosition.has_value()) return;
+        const auto& snappedPlacementPosition = scene.placementController->SnappedPlacementPosition();
+        if (!snappedPlacementPosition.has_value()) return;
 
         scene.drawPlacementPreview();
 
         const Vector3 marker = {
-            scene.snappedPlacementPosition->x,
-            scene.snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
-            scene.snappedPlacementPosition->z};
+            snappedPlacementPosition->x,
+            snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
+            snappedPlacementPosition->z};
         DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, GOLD);
         DrawSphere(marker, 0.08f, GOLD);
     }
@@ -276,12 +277,13 @@ namespace sage::editor
 
     void EditorModeStateMachine::draw3D(const EditorEditState& state, entt::entity) const
     {
-        if (!scene.snappedPlacementPosition.has_value()) return;
+        const auto& snappedPlacementPosition = scene.placementController->SnappedPlacementPosition();
+        if (!snappedPlacementPosition.has_value()) return;
 
         const Vector3 marker = {
-            scene.snappedPlacementPosition->x,
-            scene.snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
-            scene.snappedPlacementPosition->z};
+            snappedPlacementPosition->x,
+            snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
+            snappedPlacementPosition->z};
         DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, ORANGE);
         DrawSphere(marker, 0.08f, ORANGE);
 
