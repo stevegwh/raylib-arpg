@@ -1,7 +1,7 @@
 //
 // The 3D translate / rotate / scale gizmo that hovers over the selected
-// scene object while EditorScene is in EditorEditState. Owns its own drag
-// state and the screen-space hit testing — EditorScene supplies the pivot
+// scene object while the editor is in edit mode. Owns its own drag
+// state and the screen-space hit testing — the editor supplies the pivot
 // point (which depends on the registry-driven pivot mode) and applies the
 // delta the gizmo reports back.
 //

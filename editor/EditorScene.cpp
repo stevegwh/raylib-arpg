@@ -45,11 +45,9 @@ namespace sage
     namespace
     {
         constexpr float GRID_DEFAULT_HALF_EXTENT = 50.0f;
-        constexpr float GRID_PICK_SURFACE_HALF_HEIGHT = 0.02f;
-        constexpr float PLACEMENT_MARKER_HEIGHT = 0.16f;
+        constexpr float GRID_PLACEMENT_SURFACE_HALF_HEIGHT = 0.02f;
         constexpr float GRID_SURFACE_Y_STEP = 1.0f;
         constexpr float PLACEMENT_HEIGHT_STEP = 0.25f;
-        constexpr float EDIT_TRANSLATION_STEP = 0.25f;
         constexpr float PLACEMENT_ROTATION_STEP = 15.0f;
         constexpr float PLACEMENT_SCALE_STEP = 0.1f;
         constexpr float PLACEMENT_MIN_SCALE = 0.1f;
@@ -116,11 +114,6 @@ namespace sage
             return Vector3Scale(Vector3Add(bounds.min, bounds.max), 0.5f);
         }
 
-        bool IsKeyPressedOrRepeated(const int key)
-        {
-            return IsKeyPressed(key) || IsKeyPressedRepeat(key);
-        }
-
         std::string SanitizeAssetFileStem(const std::string& input)
         {
             std::string result;
@@ -147,21 +140,19 @@ namespace sage
         return placeables.at(selectedPlaceableIndex);
     }
 
-    bool EditorScene::isPickState() const
+    bool EditorScene::isPlaceState() const
     {
-        const auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        return std::holds_alternative<EditorPickState>(state.current);
+        return editorModes->IsPlaceMode();
     }
 
     bool EditorScene::isEditState() const
     {
-        const auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        return std::holds_alternative<EditorEditState>(state.current);
+        return editorModes->IsEditMode();
     }
 
     std::string EditorScene::describeMode() const
     {
-        if (isPickState()) return "Pick";
+        if (isPlaceState()) return "Place";
         if (isEditState()) return "Edit: " + describeEditTransformMode();
         return "Select";
     }
@@ -182,7 +173,7 @@ namespace sage
 
     std::string EditorScene::describeSelectedAsset() const
     {
-        if (isPickState()) return selectedPlaceable().displayName;
+        if (isPlaceState()) return selectedPlaceable().displayName;
         if (selectedSceneEntity.has_value()) return describeSelectedSceneEntity();
         return "None";
     }
@@ -206,17 +197,17 @@ namespace sage
 
     std::string EditorScene::describeSelectedModelDefaultHeight() const
     {
-        return isPickState() ? std::format("{:.2f}", selectedPlaceable().modelDefaultHeightOffset) : "0.00";
+        return isPlaceState() ? std::format("{:.2f}", selectedPlaceable().modelDefaultHeightOffset) : "0.00";
     }
 
     std::string EditorScene::describeSelectedModelDefaultRotation() const
     {
-        return isPickState() ? std::format("{:.0f}", selectedPlaceable().modelDefaultRotationY) : "0";
+        return isPlaceState() ? std::format("{:.0f}", selectedPlaceable().modelDefaultRotationY) : "0";
     }
 
     std::string EditorScene::describeSelectedModelDefaultScale() const
     {
-        return isPickState() ? std::format("{:.2f}", selectedPlaceable().modelDefaultScale) : "1.00";
+        return isPlaceState() ? std::format("{:.2f}", selectedPlaceable().modelDefaultScale) : "1.00";
     }
 
     std::string EditorScene::describeEntity(const entt::entity entity) const
@@ -352,19 +343,19 @@ namespace sage
         return entries;
     }
 
-    void EditorScene::createGridPickSurface()
+    void EditorScene::createGridPlacementSurface()
     {
-        gridPickSurfaceEntity = sys->registry->create();
+        gridPlacementSurfaceEntity = sys->registry->create();
         const BoundingBox localBounds = {
-            {-gridHalfExtent, -GRID_PICK_SURFACE_HALF_HEIGHT, -gridHalfExtent},
-            {gridHalfExtent, GRID_PICK_SURFACE_HALF_HEIGHT, gridHalfExtent}};
+            {-gridHalfExtent, -GRID_PLACEMENT_SURFACE_HALF_HEIGHT, -gridHalfExtent},
+            {gridHalfExtent, GRID_PLACEMENT_SURFACE_HALF_HEIGHT, gridHalfExtent}};
         auto& collideable =
-            sys->registry->emplace<Collideable>(gridPickSurfaceEntity, localBounds, MatrixIdentity());
+            sys->registry->emplace<Collideable>(gridPlacementSurfaceEntity, localBounds, MatrixIdentity());
         collideable.worldBoundingBox = {
-            {-gridHalfExtent, gridSurfaceY - GRID_PICK_SURFACE_HALF_HEIGHT, -gridHalfExtent},
-            {gridHalfExtent, gridSurfaceY + GRID_PICK_SURFACE_HALF_HEIGHT, gridHalfExtent}};
+            {-gridHalfExtent, gridSurfaceY - GRID_PLACEMENT_SURFACE_HALF_HEIGHT, -gridHalfExtent},
+            {gridHalfExtent, gridSurfaceY + GRID_PLACEMENT_SURFACE_HALF_HEIGHT, gridHalfExtent}};
         collideable.SetCollisionLayer(collision_layers::GeometrySimple);
-        sys->registry->emplace<StaticCollideable>(gridPickSurfaceEntity);
+        sys->registry->emplace<StaticCollideable>(gridPlacementSurfaceEntity);
     }
 
     void EditorScene::applyLitShaderToLoadedRenderables() const
@@ -452,7 +443,7 @@ namespace sage
             describeSelectedModelDefaultHeight(),
             describeSelectedModelDefaultRotation(),
             describeSelectedModelDefaultScale());
-        gui->SetSelectedAsset(isPickState() ? std::optional<std::size_t>{selectedPlaceableIndex} : std::nullopt);
+        gui->SetSelectedAsset(isPlaceState() ? std::optional<std::size_t>{selectedPlaceableIndex} : std::nullopt);
     }
 
     void EditorScene::refreshSceneWindows() const
@@ -479,14 +470,14 @@ namespace sage
     void EditorScene::selectPlaceable(const std::size_t index)
     {
         if (index >= placeables.size()) return;
-        changeState(EditorPickState{.placeableIndex = index});
+        editorModes->ChangeState(editor::EditorPlaceState{.placeableIndex = index});
     }
 
     void EditorScene::selectSceneEntity(const entt::entity entity)
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
         selectedSceneEntity = entity;
-        changeState(EditorSelectState{});
+        editorModes->ChangeState(editor::EditorSelectState{});
         gui->HideDeleteConfirmation();
         refreshSceneWindows();
     }
@@ -503,7 +494,7 @@ namespace sage
         for (auto collision : collisions)
         {
             const auto entity = collision.collidedEntityId;
-            if (entity == entt::null || entity == gridPickSurfaceEntity || !sys->registry->valid(entity) ||
+            if (entity == entt::null || entity == gridPlacementSurfaceEntity || !sys->registry->valid(entity) ||
                 !sys->registry->any_of<sgTransform>(entity))
             {
                 continue;
@@ -574,7 +565,7 @@ namespace sage
         selectedSceneEntity.reset();
         if (isEditState())
         {
-            changeState(EditorSelectState{});
+            editorModes->ChangeState(editor::EditorSelectState{});
         }
         gui->HideDeleteConfirmation();
         refreshSceneWindows();
@@ -598,7 +589,7 @@ namespace sage
         {
             gui->HideDeleteConfirmation();
             const auto& transform = sys->registry->get<sgTransform>(entity);
-            EditorEditState editState{
+            editor::EditorEditState editState{
                 .entity = entity,
                 .originalPosition = transform.GetWorldPos(),
                 .originalRotation = transform.GetWorldRot(),
@@ -621,7 +612,7 @@ namespace sage
                     editState.hadRenderable = true;
                 }
             }
-            changeState(editState);
+            editorModes->ChangeState(editState);
         }
 
         refreshOverlay();
@@ -632,7 +623,7 @@ namespace sage
     {
         if (!isEditState()) return;
 
-        changeState(EditorSelectState{});
+        editorModes->ChangeState(editor::EditorSelectState{});
         refreshOverlay();
         refreshSceneWindows();
     }
@@ -641,11 +632,11 @@ namespace sage
     {
         if (!isEditState()) return;
 
-        auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        const auto& editState = std::get<EditorEditState>(state.current);
-        restoreEditSnapshot(editState);
+        const auto* editState = editorModes->CurrentEditState();
+        if (editState == nullptr) return;
+        restoreEditSnapshot(*editState);
 
-        changeState(EditorSelectState{});
+        editorModes->ChangeState(editor::EditorSelectState{});
         refreshOverlay();
         refreshSceneWindows();
     }
@@ -654,9 +645,9 @@ namespace sage
     {
         if (!isEditState()) return;
 
-        auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        auto& editState = std::get<EditorEditState>(state.current);
-        const auto entity = editState.entity;
+        const auto* editState = editorModes->CurrentEditState();
+        if (editState == nullptr) return;
+        const auto entity = editState->entity;
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity))
         {
             clearSceneEntitySelection();
@@ -676,7 +667,7 @@ namespace sage
         refreshSceneWindows();
     }
 
-    void EditorScene::restoreEditSnapshot(const EditorEditState& editState)
+    void EditorScene::restoreEditSnapshot(const editor::EditorEditState& editState)
     {
         const auto entity = editState.entity;
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
@@ -796,12 +787,12 @@ namespace sage
     void EditorScene::adjustGridSurfaceY(const float amount)
     {
         gridSurfaceY += amount;
-        if (sys->registry->valid(gridPickSurfaceEntity) &&
-            sys->registry->any_of<Collideable>(gridPickSurfaceEntity))
+        if (sys->registry->valid(gridPlacementSurfaceEntity) &&
+            sys->registry->any_of<Collideable>(gridPlacementSurfaceEntity))
         {
-            auto& collideable = sys->registry->get<Collideable>(gridPickSurfaceEntity);
-            collideable.worldBoundingBox.min.y = gridSurfaceY - GRID_PICK_SURFACE_HALF_HEIGHT;
-            collideable.worldBoundingBox.max.y = gridSurfaceY + GRID_PICK_SURFACE_HALF_HEIGHT;
+            auto& collideable = sys->registry->get<Collideable>(gridPlacementSurfaceEntity);
+            collideable.worldBoundingBox.min.y = gridSurfaceY - GRID_PLACEMENT_SURFACE_HALF_HEIGHT;
+            collideable.worldBoundingBox.max.y = gridSurfaceY + GRID_PLACEMENT_SURFACE_HALF_HEIGHT;
         }
         sys->camera->SetFloorYOffset(gridSurfaceY);
         refreshPlacementTarget();
@@ -1188,14 +1179,14 @@ namespace sage
 
     void EditorScene::adjustSelectedModelDefaultHeight(const float amount)
     {
-        if (!isPickState()) return;
+        if (!isPlaceState()) return;
         placeables.at(selectedPlaceableIndex).modelDefaultHeightOffset += amount;
         refreshOverlay();
     }
 
     void EditorScene::adjustSelectedModelDefaultRotation(const float amount)
     {
-        if (!isPickState()) return;
+        if (!isPlaceState()) return;
         auto& rotationY = placeables.at(selectedPlaceableIndex).modelDefaultRotationY;
         rotationY += amount;
         if (rotationY >= 360.0f) rotationY -= 360.0f;
@@ -1205,7 +1196,7 @@ namespace sage
 
     void EditorScene::adjustSelectedModelDefaultScale(const float amount)
     {
-        if (!isPickState()) return;
+        if (!isPlaceState()) return;
         auto& scale = placeables.at(selectedPlaceableIndex).modelDefaultScale;
         scale = std::max(PLACEMENT_MIN_SCALE, scale + amount);
         refreshOverlay();
@@ -1213,7 +1204,7 @@ namespace sage
 
     void EditorScene::applySelectedModelDefaults()
     {
-        if (!isPickState()) return;
+        if (!isPlaceState()) return;
         auto& placeable = placeables.at(selectedPlaceableIndex);
         placeable.appliedModelDefaultTransform = modelDefaultTransform(placeable);
         placeable.modelDefaultHeightOffset = 0.0f;
@@ -1225,7 +1216,7 @@ namespace sage
 
     void EditorScene::resetSelectedModelDefaults()
     {
-        if (!isPickState()) return;
+        if (!isPlaceState()) return;
         auto& placeable = placeables.at(selectedPlaceableIndex);
         placeable.appliedModelDefaultTransform = MatrixIdentity();
         placeable.modelDefaultHeightOffset = 0.0f;
@@ -1297,7 +1288,7 @@ namespace sage
 
     void EditorScene::placeSelectedMesh()
     {
-        if (!isPickState()) return;
+        if (!isPlaceState()) return;
         if (!snappedPlacementPosition.has_value()) return;
 
         const auto& placeable = selectedPlaceable();
@@ -1372,307 +1363,6 @@ namespace sage
         }
     }
 
-    void EditorScene::changeState(EditorSelectState newState)
-    {
-        auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        std::visit([this](auto& current) { exitState(current); }, state.current);
-        state.RemoveAllSubscriptions();
-        state.current = std::move(newState);
-        enterState(std::get<EditorSelectState>(state.current));
-    }
-
-    void EditorScene::changeState(EditorPickState newState)
-    {
-        auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        std::visit([this](auto& current) { exitState(current); }, state.current);
-        state.RemoveAllSubscriptions();
-        state.current = std::move(newState);
-        enterState(std::get<EditorPickState>(state.current));
-    }
-
-    void EditorScene::changeState(EditorEditState newState)
-    {
-        auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        std::visit([this](auto& current) { exitState(current); }, state.current);
-        state.RemoveAllSubscriptions();
-        state.current = std::move(newState);
-        enterState(std::get<EditorEditState>(state.current));
-    }
-
-    void EditorScene::enterState(EditorSelectState&)
-    {
-        refreshOverlay();
-    }
-
-    void EditorScene::exitState(EditorSelectState&)
-    {
-    }
-
-    void EditorScene::updateState(EditorSelectState&)
-    {
-        if (TextInput::AnyEditing()) return;
-
-        if (IsKeyPressed(KEY_TAB))
-        {
-            toggleEditSelectedTransform();
-        }
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !sys->UI().GetCellUnderCursor())
-        {
-            if (!selectSceneEntityUnderCursor())
-            {
-                clearSceneEntitySelection();
-            }
-        }
-    }
-
-    void EditorScene::drawState3D(const EditorSelectState&) const
-    {
-    }
-
-    void EditorScene::enterState(EditorPickState& state)
-    {
-        selectedPlaceableIndex = state.placeableIndex;
-        resetPlacementTransform();
-        refreshOverlay();
-    }
-
-    void EditorScene::exitState(EditorPickState&)
-    {
-    }
-
-    void EditorScene::updateState(EditorPickState&)
-    {
-        if (TextInput::AnyEditing()) return;
-
-        if (IsKeyPressed(KEY_LEFT_BRACKET))
-        {
-            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
-            {
-                adjustPlacementScale(-PLACEMENT_SCALE_STEP);
-            }
-            else
-            {
-                adjustPlacementRotation(-PLACEMENT_ROTATION_STEP);
-            }
-        }
-        if (IsKeyPressed(KEY_RIGHT_BRACKET))
-        {
-            if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
-            {
-                adjustPlacementScale(PLACEMENT_SCALE_STEP);
-            }
-            else
-            {
-                adjustPlacementRotation(PLACEMENT_ROTATION_STEP);
-            }
-        }
-        if (IsKeyPressed(KEY_P))
-        {
-            placeSelectedMesh();
-        }
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !sys->UI().GetCellUnderCursor())
-        {
-            if (!selectSceneEntityUnderCursor())
-            {
-                placeSelectedMesh();
-            }
-        }
-    }
-
-    void EditorScene::drawState3D(const EditorPickState&) const
-    {
-        if (!snappedPlacementPosition.has_value()) return;
-
-        drawPlacementPreview();
-
-        const Vector3 marker = {
-            snappedPlacementPosition->x,
-            snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
-            snappedPlacementPosition->z};
-        DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, GOLD);
-        DrawSphere(marker, 0.08f, GOLD);
-    }
-
-    void EditorScene::enterState(EditorEditState& state)
-    {
-        if (!sys->registry->valid(state.entity) || !sys->registry->any_of<sgTransform>(state.entity))
-        {
-            changeState(EditorSelectState{});
-            return;
-        }
-
-        selectedSceneEntity = state.entity;
-        const auto& transform = sys->registry->get<sgTransform>(state.entity);
-        placementRotationY = transform.GetWorldRot().y;
-        placementScale = std::max(
-            PLACEMENT_MIN_SCALE,
-            (transform.GetScale().x + transform.GetScale().y + transform.GetScale().z) / 3.0f);
-        setEditTargetFromEntity(state.entity);
-        refreshOverlay();
-        refreshSceneWindows();
-    }
-
-    void EditorScene::exitState(EditorEditState&)
-    {
-        endEditGizmoDrag();
-    }
-
-    void EditorScene::updateState(EditorEditState& state)
-    {
-        if (!sys->registry->valid(state.entity) || !sys->registry->any_of<sgTransform>(state.entity))
-        {
-            clearSceneEntitySelection();
-            return;
-        }
-
-        selectedSceneEntity = state.entity;
-        setEditTargetFromEntity(state.entity);
-
-        if (TextInput::AnyEditing()) return;
-
-        if (IsKeyPressed(KEY_TAB))
-        {
-            finishEditSelectedTransform();
-            return;
-        }
-
-        if (editGizmo.IsDragging())
-        {
-            updateEditGizmoDrag(state.entity);
-            return;
-        }
-
-        if (IsKeyPressed(KEY_T))
-        {
-            editTransformMode = EditTransformMode::Translate;
-        }
-        if (IsKeyPressed(KEY_R))
-        {
-            editTransformMode = EditTransformMode::Rotate;
-        }
-        if (IsKeyPressed(KEY_Y))
-        {
-            editTransformMode = EditTransformMode::Scale;
-        }
-
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !sys->UI().GetCellUnderCursor() &&
-            sys->registry->valid(state.entity) && sys->registry->any_of<sgTransform>(state.entity))
-        {
-            const Camera3D camera = *sys->camera->getRaylibCam();
-            const Vector2 viewport = sys->settings->GetViewPort();
-            const Vector3 origin = editPivotWorldPosition(state.entity);
-            const EditGizmoAxis hitAxis =
-                editGizmo.HitTest(camera, viewport, origin, editTransformMode, GetMousePosition());
-            if (hitAxis != EditGizmoAxis::None)
-            {
-                editGizmo.BeginDrag(hitAxis, GetMousePosition());
-                sys->camera->LockInput();
-                return;
-            }
-        }
-
-        const bool shiftDown = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
-        switch (editTransformMode)
-        {
-        case EditTransformMode::Translate:
-        {
-            Vector3 positionDelta{};
-            if (IsKeyPressedOrRepeated(KEY_LEFT))
-            {
-                positionDelta.x -= EDIT_TRANSLATION_STEP;
-            }
-            if (IsKeyPressedOrRepeated(KEY_RIGHT))
-            {
-                positionDelta.x += EDIT_TRANSLATION_STEP;
-            }
-            if (shiftDown)
-            {
-                if (IsKeyPressedOrRepeated(KEY_UP))
-                {
-                    positionDelta.y += EDIT_TRANSLATION_STEP;
-                }
-                if (IsKeyPressedOrRepeated(KEY_DOWN))
-                {
-                    positionDelta.y -= EDIT_TRANSLATION_STEP;
-                }
-            }
-            else
-            {
-                if (IsKeyPressedOrRepeated(KEY_UP))
-                {
-                    positionDelta.z += EDIT_TRANSLATION_STEP;
-                }
-                if (IsKeyPressedOrRepeated(KEY_DOWN))
-                {
-                    positionDelta.z -= EDIT_TRANSLATION_STEP;
-                }
-            }
-            if (positionDelta.x != 0.0f || positionDelta.y != 0.0f || positionDelta.z != 0.0f)
-            {
-                adjustEditPosition(positionDelta);
-            }
-            break;
-        }
-        case EditTransformMode::Rotate:
-        {
-            if (IsKeyPressedOrRepeated(KEY_LEFT))
-            {
-                adjustEditRotation(-PLACEMENT_ROTATION_STEP);
-            }
-            if (IsKeyPressedOrRepeated(KEY_RIGHT))
-            {
-                adjustEditRotation(PLACEMENT_ROTATION_STEP);
-            }
-            if (IsKeyPressedOrRepeated(KEY_UP))
-            {
-                adjustEditRotationAxis(EditGizmoAxis::X, PLACEMENT_ROTATION_STEP);
-            }
-            if (IsKeyPressedOrRepeated(KEY_DOWN))
-            {
-                adjustEditRotationAxis(EditGizmoAxis::X, -PLACEMENT_ROTATION_STEP);
-            }
-            break;
-        }
-        case EditTransformMode::Scale:
-        {
-            if (IsKeyPressedOrRepeated(KEY_LEFT))
-            {
-                adjustEditScale(-PLACEMENT_SCALE_STEP);
-            }
-            if (IsKeyPressedOrRepeated(KEY_RIGHT))
-            {
-                adjustEditScale(PLACEMENT_SCALE_STEP);
-            }
-            break;
-        }
-        }
-
-        if (IsKeyPressed(KEY_P))
-        {
-            finishEditSelectedTransform();
-        }
-    }
-
-    void EditorScene::drawState3D(const EditorEditState& state) const
-    {
-        if (!snappedPlacementPosition.has_value()) return;
-
-        const Vector3 marker = {
-            snappedPlacementPosition->x,
-            snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
-            snappedPlacementPosition->z};
-        DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, ORANGE);
-        DrawSphere(marker, 0.08f, ORANGE);
-
-        if (sys->registry->valid(state.entity) && sys->registry->any_of<sgTransform>(state.entity))
-        {
-            const Camera3D camera = *sys->camera->getRaylibCam();
-            const Vector2 viewport = sys->settings->GetViewPort();
-            const Vector3 origin = editPivotWorldPosition(state.entity);
-            editGizmo.Draw(camera, viewport, origin, editTransformMode);
-        }
-    }
-
     void EditorScene::drawPlacementPreview() const
     {
         if (!snappedPlacementPosition.has_value()) return;
@@ -1725,8 +1415,7 @@ namespace sage
             }
         }
 
-        auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        std::visit([this](auto& current) { updateState(current); }, state.current);
+        editorModes->Update();
 
         refreshOverlay();
         refreshSceneWindows();
@@ -1747,8 +1436,7 @@ namespace sage
         DrawLine3D({0, 0.02f, 0}, {0, 8, 0}, GREEN);
         DrawLine3D({0, 0.02f, 0}, {0, 0.02f, 8}, BLUE);
 
-        const auto& state = sys->registry->get<EditorState>(editorStateEntity);
-        std::visit([this](const auto& current) { drawState3D(current); }, state.current);
+        editorModes->Draw3D();
 
         if (selectedSceneEntity.has_value() && sys->registry->valid(*selectedSceneEntity) &&
             sys->registry->any_of<Collideable>(*selectedSceneEntity))
@@ -1779,7 +1467,7 @@ namespace sage
     {
         editor::RegisterDefaultInspectorComponents(inspectorRegistry);
         sizeGridToLoadedScene();
-        createGridPickSurface();
+        createGridPlacementSurface();
         applyLitShaderToLoadedRenderables();
         giveTransformsToLights();
         placeables = {
@@ -1789,8 +1477,7 @@ namespace sage
         };
         loadAssetDefaults();
 
-        editorStateEntity = sys->registry->create();
-        sys->registry->emplace<EditorState>(editorStateEntity);
+        editorModes = std::make_unique<editor::EditorModeStateMachine>(sys->registry, *this);
 
         std::vector<editor::EditorGui::AssetEntry> assetEntries;
         assetEntries.reserve(placeables.size());

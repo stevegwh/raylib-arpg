@@ -4,6 +4,7 @@
 #include "EditorComponents.hpp"
 #include "EditorGui.hpp"
 #include "EditorInspector.hpp"
+#include "EditorModeStateMachine.hpp"
 #include "engine/components/NavigationGridSquare.hpp"
 #include "cereal/cereal.hpp"
 #include "raylib.h"
@@ -12,7 +13,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <variant>
 #include <vector>
 
 namespace sage
@@ -21,39 +21,7 @@ namespace sage
 
     class EditorScene
     {
-        struct EditorSelectState
-        {
-        };
-
-        struct EditorPickState
-        {
-            std::size_t placeableIndex = 0;
-        };
-
-        struct EditorEditState
-        {
-            entt::entity entity = entt::null;
-            Vector3 originalPosition{};
-            Vector3 originalRotation{};
-            Vector3 originalScale{1.0f, 1.0f, 1.0f};
-            Matrix originalRenderableTransform = MatrixIdentity();
-            Matrix originalRenderableInitialTransform = MatrixIdentity();
-            BoundingBox originalLocalBoundingBox{};
-            BoundingBox originalWorldBoundingBox{};
-            bool hadRenderable = false;
-            bool hadCollideable = false;
-        };
-
-        struct EditorState
-        {
-            using Variant = std::variant<EditorSelectState, EditorPickState, EditorEditState>;
-
-            Variant current = EditorSelectState{};
-
-            void RemoveAllSubscriptions()
-            {
-            }
-        };
+        friend class editor::EditorModeStateMachine;
 
         struct PlaceableMesh
         {
@@ -105,18 +73,18 @@ namespace sage
         unsigned int placedMeshCount = 0;
         float gridSurfaceY = 0.0f;
         float gridHalfExtent = 50.0f;
-        entt::entity gridPickSurfaceEntity = entt::null;
+        entt::entity gridPlacementSurfaceEntity = entt::null;
         float placementRotationY = 0.0f;
         float placementScale = 1.0f;
         std::optional<GridSquare> hoveredGridSquare;
         std::optional<Vector3> snappedPlacementPosition;
         std::optional<entt::entity> selectedSceneEntity;
-        entt::entity editorStateEntity = entt::null;
+        std::unique_ptr<editor::EditorModeStateMachine> editorModes;
         EditPivotMode editPivotMode = EditPivotMode::LocalCenter;
         EditTransformMode editTransformMode = EditTransformMode::Translate;
         editor::EditGizmo editGizmo;
 
-        void createGridPickSurface();
+        void createGridPlacementSurface();
         void sizeGridToLoadedScene();
         void applyLitShaderToLoadedRenderables() const;
         void giveTransformsToLights() const;
@@ -133,7 +101,7 @@ namespace sage
         void finishEditSelectedTransform();
         void cancelEditSelectedTransform();
         void toggleEditPivotMode();
-        void restoreEditSnapshot(const EditorEditState& editState);
+        void restoreEditSnapshot(const editor::EditorEditState& editState);
         void requestDeleteSelectedEntity();
         void cancelDeleteSelectedEntity();
         void confirmDeleteSelectedEntity();
@@ -169,24 +137,9 @@ namespace sage
         void placeSelectedMesh();
         void updateEntityCollisionBounds(entt::entity entity) const;
         void drawPlacementPreview() const;
-        void enterState(EditorSelectState& state);
-        void exitState(EditorSelectState& state);
-        void updateState(EditorSelectState& state);
-        void drawState3D(const EditorSelectState& state) const;
-        void enterState(EditorPickState& state);
-        void exitState(EditorPickState& state);
-        void updateState(EditorPickState& state);
-        void drawState3D(const EditorPickState& state) const;
-        void enterState(EditorEditState& state);
-        void exitState(EditorEditState& state);
-        void updateState(EditorEditState& state);
-        void drawState3D(const EditorEditState& state) const;
-        void changeState(EditorSelectState newState);
-        void changeState(EditorPickState newState);
-        void changeState(EditorEditState newState);
 
         [[nodiscard]] const PlaceableMesh& selectedPlaceable() const;
-        [[nodiscard]] bool isPickState() const;
+        [[nodiscard]] bool isPlaceState() const;
         [[nodiscard]] bool isEditState() const;
         [[nodiscard]] std::string describeMode() const;
         [[nodiscard]] std::string describeEditTransformMode() const;

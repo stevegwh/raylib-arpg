@@ -1051,10 +1051,6 @@ namespace sage::editor
         auto* mainTable = inspectorWindow->CreateTable({0, 0, 4, 0});
 
         {
-            // 6% gives the title bar a compact strip (~29px in the current
-            // 520px window) — the previous 18 was being read as percent, so
-            // the title cell was ~87px tall and dropped ~70px of dead space
-            // below the WINDOW_CENTER / TOP-aligned text.
             auto* titleRow = mainTable->CreateTableRow(6);
             auto* titleCell = titleRow->CreateTableCell();
             auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
@@ -1067,10 +1063,6 @@ namespace sage::editor
             auto* table = contentCell->CreateTable();
 
             auto addLine = [ui, table](const char* text) {
-                // 6% of the inspector content table leaves a single-line strip
-                // for the selection label. MIDDLE alignment keeps the text
-                // visually adjacent to the field rows below it (TOP would
-                // leave dead space underneath the text).
                 auto* row = table->CreateTableRow(6.0f);
                 auto* cell = row->CreateTableCell(Padding{2, 2, 2, 2});
                 auto label = std::make_unique<TextBox>(
