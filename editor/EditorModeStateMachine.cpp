@@ -1,6 +1,7 @@
 #include "EditorModeStateMachine.hpp"
 
 #include "EditorScene.hpp"
+#include "EditorTransformEditor.hpp"
 #include "engine/Camera.hpp"
 #include "engine/components/sgTransform.hpp"
 #include "engine/EngineSystems.hpp"
@@ -20,7 +21,6 @@ namespace sage::editor
         constexpr float EDIT_TRANSLATION_STEP = 0.25f;
         constexpr float PLACEMENT_ROTATION_STEP = 15.0f;
         constexpr float PLACEMENT_SCALE_STEP = 0.1f;
-        constexpr float PLACEMENT_MIN_SCALE = 0.1f;
 
         bool IsKeyPressedOrRepeated(const int key)
         {
@@ -137,19 +137,15 @@ namespace sage::editor
         }
 
         scene.selectedSceneEntity = state.entity;
-        const auto& transform = scene.sys->registry->get<sgTransform>(state.entity);
-        scene.placementRotationY = transform.GetWorldRot().y;
-        scene.placementScale = std::max(
-            PLACEMENT_MIN_SCALE,
-            (transform.GetScale().x + transform.GetScale().y + transform.GetScale().z) / 3.0f);
-        scene.setEditTargetFromEntity(state.entity);
+        transformEditor.EnterEditMode(state.entity, state);
+        scene.syncPlacementFromEntity(state.entity);
         scene.refreshOverlay();
         scene.refreshSceneWindows();
     }
 
     void EditorModeStateMachine::onExit(EditorEditState&, entt::entity)
     {
-        scene.endEditGizmoDrag();
+        transformEditor.ExitEditMode();
     }
 
     void EditorModeStateMachine::update(EditorEditState& state, entt::entity)
@@ -161,7 +157,7 @@ namespace sage::editor
         }
 
         scene.selectedSceneEntity = state.entity;
-        scene.setEditTargetFromEntity(state.entity);
+        scene.syncPlacementFromEntity(state.entity);
 
         if (TextInput::AnyEditing()) return;
 
@@ -171,45 +167,35 @@ namespace sage::editor
             return;
         }
 
-        if (scene.editGizmo.IsDragging())
+        if (transformEditor.IsGizmoDragging())
         {
-            scene.updateEditGizmoDrag(state.entity);
+            transformEditor.Update(state.entity);
             return;
         }
 
         if (IsKeyPressed(KEY_T))
         {
-            scene.editTransformMode = EditorScene::EditTransformMode::Translate;
+            transformEditor.SetMode(EditGizmo::Mode::Translate);
         }
         if (IsKeyPressed(KEY_R))
         {
-            scene.editTransformMode = EditorScene::EditTransformMode::Rotate;
+            transformEditor.SetMode(EditGizmo::Mode::Rotate);
         }
         if (IsKeyPressed(KEY_Y))
         {
-            scene.editTransformMode = EditorScene::EditTransformMode::Scale;
+            transformEditor.SetMode(EditGizmo::Mode::Scale);
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !scene.sys->UI().GetCellUnderCursor() &&
             scene.sys->registry->valid(state.entity) && scene.sys->registry->any_of<sgTransform>(state.entity))
         {
-            const Camera3D camera = *scene.sys->camera->getRaylibCam();
-            const Vector2 viewport = scene.sys->settings->GetViewPort();
-            const Vector3 origin = scene.editPivotWorldPosition(state.entity);
-            const auto hitAxis =
-                scene.editGizmo.HitTest(camera, viewport, origin, scene.editTransformMode, GetMousePosition());
-            if (hitAxis != EditorScene::EditGizmoAxis::None)
-            {
-                scene.editGizmo.BeginDrag(hitAxis, GetMousePosition());
-                scene.sys->camera->LockInput();
-                return;
-            }
+            if (transformEditor.TryStartDrag(state.entity, GetMousePosition())) return;
         }
 
         const bool shiftDown = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
-        switch (scene.editTransformMode)
+        switch (transformEditor.Mode())
         {
-        case EditorScene::EditTransformMode::Translate:
+        case EditGizmo::Mode::Translate:
         {
             Vector3 positionDelta{};
             if (IsKeyPressedOrRepeated(KEY_LEFT))
@@ -244,39 +230,39 @@ namespace sage::editor
             }
             if (positionDelta.x != 0.0f || positionDelta.y != 0.0f || positionDelta.z != 0.0f)
             {
-                scene.adjustEditPosition(positionDelta);
+                transformEditor.AdjustPosition(state.entity, positionDelta);
             }
             break;
         }
-        case EditorScene::EditTransformMode::Rotate:
+        case EditGizmo::Mode::Rotate:
         {
             if (IsKeyPressedOrRepeated(KEY_LEFT))
             {
-                scene.adjustEditRotation(-PLACEMENT_ROTATION_STEP);
+                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::Y, -PLACEMENT_ROTATION_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_RIGHT))
             {
-                scene.adjustEditRotation(PLACEMENT_ROTATION_STEP);
+                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::Y, PLACEMENT_ROTATION_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_UP))
             {
-                scene.adjustEditRotationAxis(EditorScene::EditGizmoAxis::X, PLACEMENT_ROTATION_STEP);
+                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::X, PLACEMENT_ROTATION_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_DOWN))
             {
-                scene.adjustEditRotationAxis(EditorScene::EditGizmoAxis::X, -PLACEMENT_ROTATION_STEP);
+                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::X, -PLACEMENT_ROTATION_STEP);
             }
             break;
         }
-        case EditorScene::EditTransformMode::Scale:
+        case EditGizmo::Mode::Scale:
         {
             if (IsKeyPressedOrRepeated(KEY_LEFT))
             {
-                scene.adjustEditScale(-PLACEMENT_SCALE_STEP);
+                transformEditor.AdjustScale(state.entity, -PLACEMENT_SCALE_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_RIGHT))
             {
-                scene.adjustEditScale(PLACEMENT_SCALE_STEP);
+                transformEditor.AdjustScale(state.entity, PLACEMENT_SCALE_STEP);
             }
             break;
         }
@@ -299,13 +285,7 @@ namespace sage::editor
         DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, ORANGE);
         DrawSphere(marker, 0.08f, ORANGE);
 
-        if (scene.sys->registry->valid(state.entity) && scene.sys->registry->any_of<sgTransform>(state.entity))
-        {
-            const Camera3D camera = *scene.sys->camera->getRaylibCam();
-            const Vector2 viewport = scene.sys->settings->GetViewPort();
-            const Vector3 origin = scene.editPivotWorldPosition(state.entity);
-            scene.editGizmo.Draw(camera, viewport, origin, scene.editTransformMode);
-        }
+        transformEditor.Draw3D(state.entity);
     }
 
     // ===== Lifecycle ===============================================================
@@ -340,8 +320,11 @@ namespace sage::editor
         return std::get_if<EditorEditState>(&state.current);
     }
 
-    EditorModeStateMachine::EditorModeStateMachine(entt::registry* registry, EditorScene& scene)
-        : Base(registry), scene(scene), stateEntity(registry->create())
+    EditorModeStateMachine::EditorModeStateMachine(
+        entt::registry* registry,
+        EditorScene& scene,
+        EditorTransformEditor& transformEditor)
+        : Base(registry), scene(scene), transformEditor(transformEditor), stateEntity(registry->create())
     {
         registry->emplace<EditorModeState>(stateEntity);
     }

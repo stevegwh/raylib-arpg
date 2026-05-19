@@ -17,6 +17,8 @@ namespace sage
 
 namespace sage::editor
 {
+    class EditorTransformEditor;
+
     struct EditorSelectState
     {
     };
@@ -57,6 +59,7 @@ namespace sage::editor
         friend Base;
 
         EditorScene& scene;
+        EditorTransformEditor& transformEditor;
         entt::entity stateEntity = entt::null;
 
         void onEnter(EditorSelectState&, entt::entity);
@@ -88,6 +91,6 @@ namespace sage::editor
         [[nodiscard]] bool IsEditMode() const;
         [[nodiscard]] const EditorEditState* CurrentEditState() const;
 
-        EditorModeStateMachine(entt::registry* registry, EditorScene& scene);
+        EditorModeStateMachine(entt::registry* registry, EditorScene& scene, EditorTransformEditor& transformEditor);
     };
 } // namespace sage::editor

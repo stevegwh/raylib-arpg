@@ -1,10 +1,10 @@
 #pragma once
 
-#include "EditGizmo.hpp"
 #include "EditorComponents.hpp"
 #include "EditorGui.hpp"
 #include "EditorInspector.hpp"
 #include "EditorModeStateMachine.hpp"
+#include "EditorTransformEditor.hpp"
 #include "engine/components/NavigationGridSquare.hpp"
 #include "cereal/cereal.hpp"
 #include "raylib.h"
@@ -56,15 +56,6 @@ namespace sage
             }
         };
 
-        enum class EditPivotMode
-        {
-            World,
-            LocalCenter
-        };
-
-        using EditTransformMode = editor::EditGizmo::Mode;
-        using EditGizmoAxis = editor::EditGizmo::Axis;
-
         EngineSystems* sys{};
         std::unique_ptr<editor::EditorGui> gui;
         editor::ComponentInspectorRegistry inspectorRegistry;
@@ -79,10 +70,8 @@ namespace sage
         std::optional<GridSquare> hoveredGridSquare;
         std::optional<Vector3> snappedPlacementPosition;
         std::optional<entt::entity> selectedSceneEntity;
+        std::unique_ptr<editor::EditorTransformEditor> transformEditor;
         std::unique_ptr<editor::EditorModeStateMachine> editorModes;
-        EditPivotMode editPivotMode = EditPivotMode::LocalCenter;
-        EditTransformMode editTransformMode = EditTransformMode::Translate;
-        editor::EditGizmo editGizmo;
 
         void createGridPlacementSurface();
         void sizeGridToLoadedScene();
@@ -101,7 +90,7 @@ namespace sage
         void finishEditSelectedTransform();
         void cancelEditSelectedTransform();
         void toggleEditPivotMode();
-        void restoreEditSnapshot(const editor::EditorEditState& editState);
+        void syncPlacementFromEntity(entt::entity entity);
         void requestDeleteSelectedEntity();
         void cancelDeleteSelectedEntity();
         void confirmDeleteSelectedEntity();
@@ -110,22 +99,6 @@ namespace sage
         void adjustGridSurfaceY(float amount);
         void adjustPlacementRotation(float amount);
         void adjustPlacementScale(float amount);
-        void applyEditWorldMatrix(
-            entt::entity entity,
-            Matrix desiredWorldMatrix,
-            Vector3 position,
-            Vector3 rotation,
-            Vector3 scale);
-        void adjustEditPosition(Vector3 amount);
-        void adjustEditRotation(float amount);
-        void adjustEditRotationAxis(EditGizmoAxis axis, float amount);
-        void adjustEditScale(float amount);
-        void setEditTargetFromEntity(entt::entity entity);
-        void syncEditControlsFromEntity(entt::entity entity);
-        void updateEditGizmoDrag(entt::entity entity);
-        void endEditGizmoDrag();
-        void adjustSelectedTransform(editor::EditorGui::TransformField field, float amount);
-        void setSelectedTransform(editor::EditorGui::TransformField field, float value);
         void adjustSelectedModelDefaultHeight(float amount);
         void adjustSelectedModelDefaultRotation(float amount);
         void adjustSelectedModelDefaultScale(float amount);
@@ -135,14 +108,12 @@ namespace sage
         void loadAssetDefaults(PlaceableMesh& placeable) const;
         void saveAssetDefaults(const PlaceableMesh& placeable) const;
         void placeSelectedMesh();
-        void updateEntityCollisionBounds(entt::entity entity) const;
         void drawPlacementPreview() const;
 
         [[nodiscard]] const PlaceableMesh& selectedPlaceable() const;
         [[nodiscard]] bool isPlaceState() const;
         [[nodiscard]] bool isEditState() const;
         [[nodiscard]] std::string describeMode() const;
-        [[nodiscard]] std::string describeEditTransformMode() const;
         [[nodiscard]] std::string describeSelectedAsset() const;
         [[nodiscard]] std::string describeCursorPosition() const;
         [[nodiscard]] std::string describeSelectedModelDefaultHeight() const;
@@ -150,7 +121,6 @@ namespace sage
         [[nodiscard]] std::string describeSelectedModelDefaultScale() const;
         [[nodiscard]] std::string describeEntity(entt::entity entity) const;
         [[nodiscard]] std::string describeSelectedSceneEntity() const;
-        [[nodiscard]] Vector3 editPivotWorldPosition(entt::entity entity) const;
         [[nodiscard]] Matrix selectedModelDefaultTransform() const;
         [[nodiscard]] Matrix modelDefaultTransform(const PlaceableMesh& placeable) const;
         [[nodiscard]] SerializedAssetDefaults serializeAssetDefaults(const PlaceableMesh& placeable) const;
