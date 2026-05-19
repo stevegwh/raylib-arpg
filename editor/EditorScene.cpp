@@ -266,69 +266,6 @@ namespace sage
         return describeEntity(*selectedSceneEntity);
     }
 
-    std::string EditorScene::describeSelectedPositionX() const
-    {
-        if (!selectedSceneEntity.has_value()) return "0.00";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.2f}", transform.GetWorldPos().x);
-    }
-
-    std::string EditorScene::describeSelectedPositionY() const
-    {
-        if (!selectedSceneEntity.has_value()) return "0.00";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.2f}", transform.GetWorldPos().y);
-    }
-
-    std::string EditorScene::describeSelectedPositionZ() const
-    {
-        if (!selectedSceneEntity.has_value()) return "0.00";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.2f}", transform.GetWorldPos().z);
-    }
-
-    std::string EditorScene::describeSelectedRotationX() const
-    {
-        if (!selectedSceneEntity.has_value()) return "0";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.0f}", transform.GetWorldRot().x);
-    }
-
-    std::string EditorScene::describeSelectedRotationY() const
-    {
-        if (!selectedSceneEntity.has_value()) return "0";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.0f}", transform.GetWorldRot().y);
-    }
-
-    std::string EditorScene::describeSelectedRotationZ() const
-    {
-        if (!selectedSceneEntity.has_value()) return "0";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.0f}", transform.GetWorldRot().z);
-    }
-
-    std::string EditorScene::describeSelectedScaleX() const
-    {
-        if (!selectedSceneEntity.has_value()) return "1.00";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.2f}", transform.GetScale().x);
-    }
-
-    std::string EditorScene::describeSelectedScaleY() const
-    {
-        if (!selectedSceneEntity.has_value()) return "1.00";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.2f}", transform.GetScale().y);
-    }
-
-    std::string EditorScene::describeSelectedScaleZ() const
-    {
-        if (!selectedSceneEntity.has_value()) return "1.00";
-        const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
-        return std::format("{:.2f}", transform.GetScale().z);
-    }
-
     Vector3 EditorScene::editPivotWorldPosition(const entt::entity entity) const
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return Vector3Zero();
@@ -719,18 +656,7 @@ namespace sage
                                      : std::vector<editor::InspectedComponent>{};
 
         gui->SetHierarchy(collectSceneObjectEntries(), activeEntity);
-        gui->SetInspector(
-            describeSelectedSceneEntity(),
-            describeSelectedPositionX(),
-            describeSelectedPositionY(),
-            describeSelectedPositionZ(),
-            describeSelectedRotationX(),
-            describeSelectedRotationY(),
-            describeSelectedRotationZ(),
-            describeSelectedScaleX(),
-            describeSelectedScaleY(),
-            describeSelectedScaleZ(),
-            inspectedComponents);
+        gui->SetInspector(describeSelectedSceneEntity(), inspectedComponents);
     }
 
     void EditorScene::resetPlacementTransform()

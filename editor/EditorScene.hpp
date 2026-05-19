@@ -220,15 +220,6 @@ namespace sage
         [[nodiscard]] std::string describeSelectedModelDefaultScale() const;
         [[nodiscard]] std::string describeEntity(entt::entity entity) const;
         [[nodiscard]] std::string describeSelectedSceneEntity() const;
-        [[nodiscard]] std::string describeSelectedPositionX() const;
-        [[nodiscard]] std::string describeSelectedPositionY() const;
-        [[nodiscard]] std::string describeSelectedPositionZ() const;
-        [[nodiscard]] std::string describeSelectedRotationX() const;
-        [[nodiscard]] std::string describeSelectedRotationY() const;
-        [[nodiscard]] std::string describeSelectedRotationZ() const;
-        [[nodiscard]] std::string describeSelectedScaleX() const;
-        [[nodiscard]] std::string describeSelectedScaleY() const;
-        [[nodiscard]] std::string describeSelectedScaleZ() const;
         [[nodiscard]] Vector3 editPivotWorldPosition(entt::entity entity) const;
         [[nodiscard]] Vector3 editGizmoAxisVector(EditGizmoAxis axis) const;
         [[nodiscard]] Color editGizmoAxisColor(EditGizmoAxis axis) const;

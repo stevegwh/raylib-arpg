@@ -132,15 +132,6 @@ namespace sage
             TextBox* defaultsRotationText{};
             TextBox* defaultsScaleText{};
             TextBox* inspectorSelectionText{};
-            TextBox* inspectorPositionXText{};
-            TextBox* inspectorPositionYText{};
-            TextBox* inspectorPositionZText{};
-            TextBox* inspectorRotationXText{};
-            TextBox* inspectorRotationYText{};
-            TextBox* inspectorRotationZText{};
-            TextBox* inspectorScaleXText{};
-            TextBox* inspectorScaleYText{};
-            TextBox* inspectorScaleZText{};
             Table* inspectorFieldsTable{};
             TextBox* deleteConfirmationText{};
 
@@ -200,15 +191,6 @@ namespace sage
             void SetHierarchy(const std::vector<SceneObjectEntry>& entries, std::optional<entt::entity> selectedEntity);
             void SetInspector(
                 const std::string& selectedEntity,
-                const std::string& positionX,
-                const std::string& positionY,
-                const std::string& positionZ,
-                const std::string& rotationX,
-                const std::string& rotationY,
-                const std::string& rotationZ,
-                const std::string& scaleX,
-                const std::string& scaleY,
-                const std::string& scaleZ,
                 const std::vector<InspectedComponent>& inspectedComponents);
             void ShowDeleteConfirmation(const std::string& selectedEntity) const;
             void HideDeleteConfirmation() const;

@@ -466,28 +466,9 @@ namespace sage::editor
 
     void EditorGui::SetInspector(
         const std::string& selectedEntity,
-        const std::string& positionX,
-        const std::string& positionY,
-        const std::string& positionZ,
-        const std::string& rotationX,
-        const std::string& rotationY,
-        const std::string& rotationZ,
-        const std::string& scaleX,
-        const std::string& scaleY,
-        const std::string& scaleZ,
         const std::vector<InspectedComponent>& inspectedComponents)
     {
         if (inspectorSelectionText) inspectorSelectionText->SetContent("Selected: " + selectedEntity);
-
-        if (inspectorPositionXText) inspectorPositionXText->SetContent(positionX);
-        if (inspectorPositionYText) inspectorPositionYText->SetContent(positionY);
-        if (inspectorPositionZText) inspectorPositionZText->SetContent(positionZ);
-        if (inspectorRotationXText) inspectorRotationXText->SetContent(rotationX);
-        if (inspectorRotationYText) inspectorRotationYText->SetContent(rotationY);
-        if (inspectorRotationZText) inspectorRotationZText->SetContent(rotationZ);
-        if (inspectorScaleXText) inspectorScaleXText->SetContent(scaleX);
-        if (inspectorScaleYText) inspectorScaleYText->SetContent(scaleY);
-        if (inspectorScaleZText) inspectorScaleZText->SetContent(scaleZ);
         rebuildInspectorFieldRows(inspectedComponents);
         drawInspectedFields(inspectedComponents);
     }

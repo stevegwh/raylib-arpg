@@ -27,11 +27,14 @@ namespace sage::editor
 
     void RegisterDefaultInspectorComponents(ComponentInspectorRegistry& registry)
     {
+        // Transform is intentionally registered first so it appears at the top
+        // of the inspector — it's essential to every scene object, so users
+        // expect to find Position/Rotation/Scale above identity metadata.
+        registry.Register<sgTransform>("Transform");
+
         registry.Register<PersistentEntityId>("Persistent Entity Id");
         registry.Register<EditorObjectDescriptor>("Editor Object");
         registry.Register<AssetReference>("Asset Reference");
-
-        registry.Register<sgTransform>("Transform");
 
         registry.Register<Renderable>(
             "Renderable",
