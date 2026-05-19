@@ -17,15 +17,33 @@ namespace sage
 
 namespace sage::editor
 {
+    class EditorModeStateMachine;
     class EditorTransformEditor;
 
     struct EditorSelectState
     {
+        void OnEnter(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void OnExit(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void Update(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void Draw3D(const EditorModeStateMachine& machine, entt::entity stateEntity) const;
+        bool SelectSceneEntityUnderCursor(EditorModeStateMachine& machine);
+        void ClearSceneEntitySelection(EditorModeStateMachine& machine);
+        void SelectSceneEntity(EditorModeStateMachine& machine, entt::entity entity);
+        void RequestDeleteSelectedEntity(EditorModeStateMachine& machine);
+        void CancelDeleteSelectedEntity(EditorModeStateMachine& machine);
+        void ConfirmDeleteSelectedEntity(EditorModeStateMachine& machine);
+        void BeginEditSelectedTransform(EditorModeStateMachine& machine);
     };
 
     struct EditorPlaceState
     {
         std::size_t placeableIndex = 0;
+
+        void OnEnter(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void OnExit(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void Update(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void Draw3D(const EditorModeStateMachine& machine, entt::entity stateEntity) const;
+        bool SelectSceneEntityUnderCursor(EditorModeStateMachine& machine);
     };
 
     struct EditorEditState
@@ -40,6 +58,14 @@ namespace sage::editor
         BoundingBox originalWorldBoundingBox{};
         bool hadRenderable = false;
         bool hadCollideable = false;
+
+        void OnEnter(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void OnExit(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void Update(EditorModeStateMachine& machine, entt::entity stateEntity);
+        void Draw3D(const EditorModeStateMachine& machine, entt::entity stateEntity) const;
+        void FinishEditSelectedTransform(EditorModeStateMachine& machine);
+        [[nodiscard]] bool CancelEditSelectedTransform(EditorModeStateMachine& machine);
+        void ToggleEditPivotMode(EditorModeStateMachine& machine);
     };
 
     struct EditorModeState
@@ -57,25 +83,25 @@ namespace sage::editor
     {
         using Base = StateMachineBase<EditorModeStateMachine, EditorModeState>;
         friend Base;
+        friend struct EditorSelectState;
+        friend struct EditorPlaceState;
+        friend struct EditorEditState;
 
         EditorScene& scene;
         EditorTransformEditor& transformEditor;
         entt::entity stateEntity = entt::null;
 
-        void onEnter(EditorSelectState&, entt::entity);
-        void onExit(EditorSelectState&, entt::entity);
-        void update(EditorSelectState&, entt::entity);
-        void draw3D(const EditorSelectState&, entt::entity) const;
+        template <typename State>
+        void onEnter(State& state, const entt::entity stateEntity)
+        {
+            state.OnEnter(*this, stateEntity);
+        }
 
-        void onEnter(EditorPlaceState&, entt::entity);
-        void onExit(EditorPlaceState&, entt::entity);
-        void update(EditorPlaceState&, entt::entity);
-        void draw3D(const EditorPlaceState&, entt::entity) const;
-
-        void onEnter(EditorEditState&, entt::entity);
-        void onExit(EditorEditState&, entt::entity);
-        void update(EditorEditState&, entt::entity);
-        void draw3D(const EditorEditState&, entt::entity) const;
+        template <typename State>
+        void onExit(State& state, const entt::entity stateEntity)
+        {
+            state.OnExit(*this, stateEntity);
+        }
 
       public:
         template <typename NewState>
@@ -89,6 +115,7 @@ namespace sage::editor
 
         [[nodiscard]] bool IsPlaceMode() const;
         [[nodiscard]] bool IsEditMode() const;
+        [[nodiscard]] EditorEditState* CurrentEditState();
         [[nodiscard]] const EditorEditState* CurrentEditState() const;
 
         EditorModeStateMachine(entt::registry* registry, EditorScene& scene, EditorTransformEditor& transformEditor);

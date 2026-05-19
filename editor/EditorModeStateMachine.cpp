@@ -30,50 +30,128 @@ namespace sage::editor
 
     // ===== Select Mode =============================================================
 
-    void EditorModeStateMachine::onEnter(EditorSelectState&, entt::entity)
+    void EditorSelectState::OnEnter(EditorModeStateMachine& machine, entt::entity)
     {
-        scene.refreshOverlay();
+        machine.scene.refreshOverlay();
     }
 
-    void EditorModeStateMachine::onExit(EditorSelectState&, entt::entity)
+    void EditorSelectState::OnExit(EditorModeStateMachine&, entt::entity)
     {
     }
 
-    void EditorModeStateMachine::update(EditorSelectState&, entt::entity)
+    void EditorSelectState::Update(EditorModeStateMachine& machine, entt::entity)
     {
         if (TextInput::AnyEditing()) return;
 
         if (IsKeyPressed(KEY_TAB))
         {
-            scene.toggleEditSelectedTransform();
+            BeginEditSelectedTransform(machine);
         }
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !scene.sys->UI().GetCellUnderCursor())
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !machine.scene.sys->UI().GetCellUnderCursor())
         {
-            if (!scene.selectSceneEntityUnderCursor())
+            if (!SelectSceneEntityUnderCursor(machine))
             {
-                scene.clearSceneEntitySelection();
+                ClearSceneEntitySelection(machine);
             }
         }
     }
 
-    void EditorModeStateMachine::draw3D(const EditorSelectState&, entt::entity) const
+    void EditorSelectState::Draw3D(const EditorModeStateMachine&, entt::entity) const
     {
+    }
+
+    bool EditorSelectState::SelectSceneEntityUnderCursor(EditorModeStateMachine& machine)
+    {
+        const auto entity =
+            machine.scene.pickingService->PickSceneEntity(GetMousePosition(), machine.scene.placementController->GridSurfaceEntity());
+        if (!entity.has_value()) return false;
+
+        SelectSceneEntity(machine, *entity);
+        return true;
+    }
+
+    void EditorSelectState::ClearSceneEntitySelection(EditorModeStateMachine& machine)
+    {
+        machine.scene.selection->Clear();
+        if (machine.IsEditMode())
+        {
+            machine.ChangeState(EditorSelectState{});
+        }
+        machine.scene.gui->HideDeleteConfirmation();
+        machine.scene.refreshSceneWindows();
+    }
+
+    void EditorSelectState::SelectSceneEntity(EditorModeStateMachine& machine, const entt::entity entity)
+    {
+        if (!machine.scene.selection->Select(entity)) return;
+        machine.ChangeState(EditorSelectState{});
+        machine.scene.gui->HideDeleteConfirmation();
+        machine.scene.refreshSceneWindows();
+    }
+
+    void EditorSelectState::RequestDeleteSelectedEntity(EditorModeStateMachine& machine)
+    {
+        if (!machine.scene.selection->HasSelection()) return;
+        if (!machine.scene.selection->ActiveTransformEntity().has_value())
+        {
+            ClearSceneEntitySelection(machine);
+            return;
+        }
+
+        machine.scene.gui->ShowDeleteConfirmation(machine.scene.describeSelectedSceneEntity());
+    }
+
+    void EditorSelectState::CancelDeleteSelectedEntity(EditorModeStateMachine& machine)
+    {
+        machine.scene.gui->HideDeleteConfirmation();
+    }
+
+    void EditorSelectState::ConfirmDeleteSelectedEntity(EditorModeStateMachine& machine)
+    {
+        const auto selectedEntity = machine.scene.selection->Current();
+        if (!selectedEntity.has_value())
+        {
+            machine.scene.gui->HideDeleteConfirmation();
+            return;
+        }
+
+        const auto entity = *selectedEntity;
+        machine.scene.selection->Clear();
+        machine.scene.gui->HideDeleteConfirmation();
+        machine.scene.entityOperations->DeleteEntityAndChildren(entity);
+        machine.scene.refreshSceneWindows();
+        machine.scene.refreshOverlay();
+    }
+
+    void EditorSelectState::BeginEditSelectedTransform(EditorModeStateMachine& machine)
+    {
+        const auto selectedEntity = machine.scene.selection->ActiveTransformEntity();
+        if (!selectedEntity.has_value())
+        {
+            ClearSceneEntitySelection(machine);
+            return;
+        }
+
+        machine.scene.gui->HideDeleteConfirmation();
+        machine.ChangeState(EditorEditState{.entity = *selectedEntity});
+        machine.scene.refreshOverlay();
+        machine.scene.refreshSceneWindows();
     }
 
     // ===== Place Mode ==============================================================
 
-    void EditorModeStateMachine::onEnter(EditorPlaceState& state, entt::entity)
+    void EditorPlaceState::OnEnter(EditorModeStateMachine& machine, entt::entity)
     {
-        scene.assetCatalog->Select(state.placeableIndex);
-        scene.resetPlacementTransform();
-        scene.refreshOverlay();
+        machine.scene.assetCatalog->Select(placeableIndex);
+        machine.scene.resetPlacementTransform();
+        machine.scene.refreshOverlay();
     }
 
-    void EditorModeStateMachine::onExit(EditorPlaceState&, entt::entity)
+    void EditorPlaceState::OnExit(EditorModeStateMachine&, entt::entity)
     {
     }
 
-    void EditorModeStateMachine::update(EditorPlaceState&, entt::entity)
+    void EditorPlaceState::Update(EditorModeStateMachine& machine, entt::entity)
     {
         if (TextInput::AnyEditing()) return;
 
@@ -81,43 +159,43 @@ namespace sage::editor
         {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
             {
-                scene.adjustPlacementScale(-PLACEMENT_SCALE_STEP);
+                machine.scene.adjustPlacementScale(-PLACEMENT_SCALE_STEP);
             }
             else
             {
-                scene.adjustPlacementRotation(-PLACEMENT_ROTATION_STEP);
+                machine.scene.adjustPlacementRotation(-PLACEMENT_ROTATION_STEP);
             }
         }
         if (IsKeyPressed(KEY_RIGHT_BRACKET))
         {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
             {
-                scene.adjustPlacementScale(PLACEMENT_SCALE_STEP);
+                machine.scene.adjustPlacementScale(PLACEMENT_SCALE_STEP);
             }
             else
             {
-                scene.adjustPlacementRotation(PLACEMENT_ROTATION_STEP);
+                machine.scene.adjustPlacementRotation(PLACEMENT_ROTATION_STEP);
             }
         }
         if (IsKeyPressed(KEY_P))
         {
-            scene.placeSelectedMesh();
+            machine.scene.placeSelectedMesh();
         }
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !scene.sys->UI().GetCellUnderCursor())
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !machine.scene.sys->UI().GetCellUnderCursor())
         {
-            if (!scene.selectSceneEntityUnderCursor())
+            if (!SelectSceneEntityUnderCursor(machine))
             {
-                scene.placeSelectedMesh();
+                machine.scene.placeSelectedMesh();
             }
         }
     }
 
-    void EditorModeStateMachine::draw3D(const EditorPlaceState&, entt::entity) const
+    void EditorPlaceState::Draw3D(const EditorModeStateMachine& machine, entt::entity) const
     {
-        const auto& snappedPlacementPosition = scene.placementController->SnappedPlacementPosition();
+        const auto& snappedPlacementPosition = machine.scene.placementController->SnappedPlacementPosition();
         if (!snappedPlacementPosition.has_value()) return;
 
-        scene.drawPlacementPreview();
+        machine.scene.drawPlacementPreview();
 
         const Vector3 marker = {
             snappedPlacementPosition->x,
@@ -127,74 +205,81 @@ namespace sage::editor
         DrawSphere(marker, 0.08f, GOLD);
     }
 
+    bool EditorPlaceState::SelectSceneEntityUnderCursor(EditorModeStateMachine& machine)
+    {
+        return EditorSelectState{}.SelectSceneEntityUnderCursor(machine);
+    }
+
     // ===== Edit Mode ===============================================================
 
-    void EditorModeStateMachine::onEnter(EditorEditState& state, entt::entity)
+    void EditorEditState::OnEnter(EditorModeStateMachine& machine, entt::entity)
     {
-        if (!scene.sys->registry->valid(state.entity) || !scene.sys->registry->any_of<sgTransform>(state.entity))
+        if (!machine.scene.sys->registry->valid(entity) ||
+            !machine.scene.sys->registry->any_of<sgTransform>(entity))
         {
-            ChangeState(EditorSelectState{});
+            machine.ChangeState(EditorSelectState{});
             return;
         }
 
-        scene.selectedSceneEntity = state.entity;
-        transformEditor.EnterEditMode(state.entity, state);
-        scene.syncPlacementFromEntity(state.entity);
-        scene.refreshOverlay();
-        scene.refreshSceneWindows();
+        machine.scene.selection->Select(entity);
+        machine.transformEditor.EnterEditMode(entity, *this);
+        machine.scene.syncPlacementFromEntity(entity);
+        machine.scene.refreshOverlay();
+        machine.scene.refreshSceneWindows();
     }
 
-    void EditorModeStateMachine::onExit(EditorEditState&, entt::entity)
+    void EditorEditState::OnExit(EditorModeStateMachine& machine, entt::entity)
     {
-        transformEditor.ExitEditMode();
+        machine.transformEditor.ExitEditMode();
     }
 
-    void EditorModeStateMachine::update(EditorEditState& state, entt::entity)
+    void EditorEditState::Update(EditorModeStateMachine& machine, entt::entity)
     {
-        if (!scene.sys->registry->valid(state.entity) || !scene.sys->registry->any_of<sgTransform>(state.entity))
+        if (!machine.scene.sys->registry->valid(entity) ||
+            !machine.scene.sys->registry->any_of<sgTransform>(entity))
         {
-            scene.clearSceneEntitySelection();
+            EditorSelectState{}.ClearSceneEntitySelection(machine);
             return;
         }
 
-        scene.selectedSceneEntity = state.entity;
-        scene.syncPlacementFromEntity(state.entity);
+        machine.scene.selection->Select(entity);
+        machine.scene.syncPlacementFromEntity(entity);
 
         if (TextInput::AnyEditing()) return;
 
         if (IsKeyPressed(KEY_TAB))
         {
-            scene.finishEditSelectedTransform();
+            FinishEditSelectedTransform(machine);
             return;
         }
 
-        if (transformEditor.IsGizmoDragging())
+        if (machine.transformEditor.IsGizmoDragging())
         {
-            transformEditor.Update(state.entity);
+            machine.transformEditor.Update(entity);
             return;
         }
 
         if (IsKeyPressed(KEY_T))
         {
-            transformEditor.SetMode(EditGizmo::Mode::Translate);
+            machine.transformEditor.SetMode(EditGizmo::Mode::Translate);
         }
         if (IsKeyPressed(KEY_R))
         {
-            transformEditor.SetMode(EditGizmo::Mode::Rotate);
+            machine.transformEditor.SetMode(EditGizmo::Mode::Rotate);
         }
         if (IsKeyPressed(KEY_Y))
         {
-            transformEditor.SetMode(EditGizmo::Mode::Scale);
+            machine.transformEditor.SetMode(EditGizmo::Mode::Scale);
         }
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !scene.sys->UI().GetCellUnderCursor() &&
-            scene.sys->registry->valid(state.entity) && scene.sys->registry->any_of<sgTransform>(state.entity))
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !machine.scene.sys->UI().GetCellUnderCursor() &&
+            machine.scene.sys->registry->valid(entity) && machine.scene.sys->registry->any_of<sgTransform>(entity))
         {
-            if (transformEditor.TryStartDrag(state.entity, GetMousePosition())) return;
+            if (machine.transformEditor.TryStartDrag(entity, GetMousePosition())) return;
         }
 
         const bool shiftDown = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
-        switch (transformEditor.Mode())
+        switch (machine.transformEditor.Mode())
         {
         case EditGizmo::Mode::Translate:
         {
@@ -231,7 +316,7 @@ namespace sage::editor
             }
             if (positionDelta.x != 0.0f || positionDelta.y != 0.0f || positionDelta.z != 0.0f)
             {
-                transformEditor.AdjustPosition(state.entity, positionDelta);
+                machine.transformEditor.AdjustPosition(entity, positionDelta);
             }
             break;
         }
@@ -239,19 +324,19 @@ namespace sage::editor
         {
             if (IsKeyPressedOrRepeated(KEY_LEFT))
             {
-                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::Y, -PLACEMENT_ROTATION_STEP);
+                machine.transformEditor.AdjustRotationAxis(entity, EditGizmo::Axis::Y, -PLACEMENT_ROTATION_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_RIGHT))
             {
-                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::Y, PLACEMENT_ROTATION_STEP);
+                machine.transformEditor.AdjustRotationAxis(entity, EditGizmo::Axis::Y, PLACEMENT_ROTATION_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_UP))
             {
-                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::X, PLACEMENT_ROTATION_STEP);
+                machine.transformEditor.AdjustRotationAxis(entity, EditGizmo::Axis::X, PLACEMENT_ROTATION_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_DOWN))
             {
-                transformEditor.AdjustRotationAxis(state.entity, EditGizmo::Axis::X, -PLACEMENT_ROTATION_STEP);
+                machine.transformEditor.AdjustRotationAxis(entity, EditGizmo::Axis::X, -PLACEMENT_ROTATION_STEP);
             }
             break;
         }
@@ -259,11 +344,11 @@ namespace sage::editor
         {
             if (IsKeyPressedOrRepeated(KEY_LEFT))
             {
-                transformEditor.AdjustScale(state.entity, -PLACEMENT_SCALE_STEP);
+                machine.transformEditor.AdjustScale(entity, -PLACEMENT_SCALE_STEP);
             }
             if (IsKeyPressedOrRepeated(KEY_RIGHT))
             {
-                transformEditor.AdjustScale(state.entity, PLACEMENT_SCALE_STEP);
+                machine.transformEditor.AdjustScale(entity, PLACEMENT_SCALE_STEP);
             }
             break;
         }
@@ -271,13 +356,13 @@ namespace sage::editor
 
         if (IsKeyPressed(KEY_P))
         {
-            scene.finishEditSelectedTransform();
+            FinishEditSelectedTransform(machine);
         }
     }
 
-    void EditorModeStateMachine::draw3D(const EditorEditState& state, entt::entity) const
+    void EditorEditState::Draw3D(const EditorModeStateMachine& machine, entt::entity) const
     {
-        const auto& snappedPlacementPosition = scene.placementController->SnappedPlacementPosition();
+        const auto& snappedPlacementPosition = machine.scene.placementController->SnappedPlacementPosition();
         if (!snappedPlacementPosition.has_value()) return;
 
         const Vector3 marker = {
@@ -287,7 +372,38 @@ namespace sage::editor
         DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, ORANGE);
         DrawSphere(marker, 0.08f, ORANGE);
 
-        transformEditor.Draw3D(state.entity);
+        machine.transformEditor.Draw3D(entity);
+    }
+
+    void EditorEditState::FinishEditSelectedTransform(EditorModeStateMachine& machine)
+    {
+        machine.ChangeState(EditorSelectState{});
+        machine.scene.refreshOverlay();
+        machine.scene.refreshSceneWindows();
+    }
+
+    bool EditorEditState::CancelEditSelectedTransform(EditorModeStateMachine& machine)
+    {
+        machine.transformEditor.RestoreSnapshot(*this);
+        machine.ChangeState(EditorSelectState{});
+        machine.scene.refreshOverlay();
+        machine.scene.refreshSceneWindows();
+        return true;
+    }
+
+    void EditorEditState::ToggleEditPivotMode(EditorModeStateMachine& machine)
+    {
+        if (!machine.scene.sys->registry->valid(entity) ||
+            !machine.scene.sys->registry->any_of<sgTransform>(entity))
+        {
+            EditorSelectState{}.ClearSceneEntitySelection(machine);
+            return;
+        }
+
+        machine.transformEditor.TogglePivotMode();
+        machine.scene.syncPlacementFromEntity(entity);
+        machine.scene.refreshOverlay();
+        machine.scene.refreshSceneWindows();
     }
 
     // ===== Lifecycle ===============================================================
@@ -295,13 +411,13 @@ namespace sage::editor
     void EditorModeStateMachine::Update()
     {
         auto& state = registry->get<EditorModeState>(stateEntity);
-        std::visit([this](auto& current) { update(current, stateEntity); }, state.current);
+        std::visit([this](auto& current) { current.Update(*this, stateEntity); }, state.current);
     }
 
     void EditorModeStateMachine::Draw3D() const
     {
         const auto& state = registry->get<EditorModeState>(stateEntity);
-        std::visit([this](const auto& current) { draw3D(current, stateEntity); }, state.current);
+        std::visit([this](const auto& current) { current.Draw3D(*this, stateEntity); }, state.current);
     }
 
     bool EditorModeStateMachine::IsPlaceMode() const
@@ -314,6 +430,12 @@ namespace sage::editor
     {
         const auto& state = registry->get<EditorModeState>(stateEntity);
         return std::holds_alternative<EditorEditState>(state.current);
+    }
+
+    EditorEditState* EditorModeStateMachine::CurrentEditState()
+    {
+        auto& state = registry->get<EditorModeState>(stateEntity);
+        return std::get_if<EditorEditState>(&state.current);
     }
 
     const EditorEditState* EditorModeStateMachine::CurrentEditState() const
