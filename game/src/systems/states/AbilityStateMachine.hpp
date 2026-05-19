@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/States.hpp"
+#include "AbilityStates.hpp"
 #include "engine/systems/states/StateMachineBase.hpp"
 
 #include "entt/entt.hpp"
@@ -13,31 +13,23 @@ namespace lq
     {
         using Base = sage::StateMachineBase<AbilityStateMachine, AbilityState>;
         friend Base;
+        friend struct AbilityIdleState;
+        friend struct AbilityCursorSelectState;
+        friend struct AbilityAwaitingExecutionState;
 
         Systems* sys;
 
-        // ===== Idle =====
-        void onEnter(AbilityIdleState&, entt::entity)
+        template <typename State>
+        void onEnter(State& state, const entt::entity entity)
         {
+            state.OnEnter(*this, entity);
         }
-        void onExit(AbilityIdleState&, entt::entity)
-        {
-        }
-        void update(AbilityIdleState&, entt::entity entity);
 
-        // ===== CursorSelect =====
-        void onEnter(AbilityCursorSelectState&, entt::entity entity);
-        void onExit(AbilityCursorSelectState&, entt::entity entity);
-        void update(AbilityCursorSelectState&, entt::entity entity);
-
-        // ===== AwaitingExecution =====
-        // TODO: I think this should be split into two states depending on whether its detached or not
-        // Or maybe if it has a cast time or not...
-        void onEnter(AbilityAwaitingExecutionState&, entt::entity entity);
-        void onExit(AbilityAwaitingExecutionState&, entt::entity)
+        template <typename State>
+        void onExit(State& state, const entt::entity entity)
         {
+            state.OnExit(*this, entity);
         }
-        void update(AbilityAwaitingExecutionState&, entt::entity entity);
 
         void enableCursor(entt::entity entity);
         void disableCursor(entt::entity entity);

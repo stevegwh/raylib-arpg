@@ -1,7 +1,7 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
 
-#include "components/States.hpp"
+#include "WavemobStates.hpp"
 #include "engine/systems/states/StateMachineBase.hpp"
 
 #include "entt/entt.hpp"
@@ -17,6 +17,10 @@ namespace lq
     {
         using Base = sage::StateMachineBase<WavemobStateMachine, WavemobState>;
         friend Base;
+        friend struct WavemobDefaultState;
+        friend struct WavemobTargetOutOfRangeState;
+        friend struct WavemobCombatState;
+        friend struct WavemobDyingState;
 
         // Dying is terminal — block all further transitions away from it.
         static bool isLocked(const WavemobState& s)
@@ -26,32 +30,16 @@ namespace lq
 
         Systems* sys;
 
-        // ===== Default =====
-        void onEnter(WavemobDefaultState&, entt::entity entity);
-        void onExit(WavemobDefaultState&, entt::entity)
+        template <typename State>
+        void onEnter(State& state, const entt::entity entity)
         {
-        }
-        void update(WavemobDefaultState&, entt::entity)
-        {
+            state.OnEnter(*this, entity);
         }
 
-        // ===== TargetOutOfRange =====
-        void onEnter(WavemobTargetOutOfRangeState&, entt::entity entity);
-        void onExit(WavemobTargetOutOfRangeState&, entt::entity entity);
-        void update(WavemobTargetOutOfRangeState&, entt::entity entity);
-
-        // ===== Combat =====
-        void onEnter(WavemobCombatState&, entt::entity entity);
-        void onExit(WavemobCombatState&, entt::entity entity);
-        void update(WavemobCombatState&, entt::entity entity);
-
-        // ===== Dying =====
-        void onEnter(WavemobDyingState&, entt::entity entity);
-        void onExit(WavemobDyingState&, entt::entity)
+        template <typename State>
+        void onExit(State& state, const entt::entity entity)
         {
-        }
-        void update(WavemobDyingState&, entt::entity)
-        {
+            state.OnExit(*this, entity);
         }
 
         void onHit(AttackData attackData);

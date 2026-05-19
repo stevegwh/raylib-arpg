@@ -1,7 +1,7 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
 
-#include "components/States.hpp"
+#include "PlayerStates.hpp"
 #include "engine/systems/states/StateMachineBase.hpp"
 
 #include "entt/entt.hpp"
@@ -14,44 +14,27 @@ namespace lq
     {
         using Base = StateMachineBase<PlayerStateMachine, PlayerState>;
         friend Base;
+        friend struct PlayerDefaultState;
+        friend struct PlayerMovingToLocationState;
+        friend struct PlayerMovingToAttackEnemyState;
+        friend struct PlayerMovingToTalkState;
+        friend struct PlayerMovingToLootState;
+        friend struct PlayerInDialogState;
+        friend struct PlayerCombatState;
 
         Systems* sys;
 
-        // ===== Default =====
-        void onEnter(PlayerDefaultState&, entt::entity entity);
-        void onExit(PlayerDefaultState&, entt::entity)
+        template <typename State>
+        void onEnter(State& state, const entt::entity entity)
         {
+            state.OnEnter(*this, entity);
         }
 
-        // ===== MovingToLocation =====
-        void onEnter(PlayerMovingToLocationState&, entt::entity entity);
-        void onExit(PlayerMovingToLocationState&, entt::entity)
+        template <typename State>
+        void onExit(State& state, const entt::entity entity)
         {
+            state.OnExit(*this, entity);
         }
-
-        // ===== MovingToAttackEnemy =====
-        void onEnter(PlayerMovingToAttackEnemyState&, entt::entity entity);
-        void onExit(PlayerMovingToAttackEnemyState&, entt::entity)
-        {
-        }
-
-        // ===== MovingToTalk =====
-        void onEnter(PlayerMovingToTalkState&, entt::entity entity);
-        void onExit(PlayerMovingToTalkState&, entt::entity entity);
-
-        // ===== MovingToLoot =====
-        void onEnter(PlayerMovingToLootState&, entt::entity entity);
-        void onExit(PlayerMovingToLootState&, entt::entity)
-        {
-        }
-
-        // ===== InDialog =====
-        void onEnter(PlayerInDialogState&, entt::entity entity);
-        void onExit(PlayerInDialogState&, entt::entity entity);
-
-        // ===== Combat =====
-        void onEnter(PlayerCombatState&, entt::entity entity);
-        void onExit(PlayerCombatState&, entt::entity entity);
 
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);

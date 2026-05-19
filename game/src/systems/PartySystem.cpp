@@ -9,12 +9,12 @@
 #include "components/EquipmentComponent.hpp"
 #include "components/InventoryComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
-#include "components/States.hpp"
 #include "collision/RpgCollisionLayers.hpp"
 #include "ControllableActorSystem.hpp"
 #include "InventorySystem.hpp"
 #include "ItemFactory.hpp"
 #include "Systems.hpp"
+#include "systems/states/PartyMemberStates.hpp"
 
 #include "engine/components/Collideable.hpp"
 #include "engine/components/MoveableActor.hpp"

@@ -5,9 +5,10 @@
 #include "systems/ControllableActorSystem.hpp"
 
 #include "components/ControllableActor.hpp"
-#include "components/States.hpp"
 #include "PartySystem.hpp"
 #include "Systems.hpp"
+#include "systems/states/PartyMemberStates.hpp"
+#include "systems/states/PlayerStates.hpp"
 
 #include "engine/components/Collideable.hpp"
 #include "engine/components/sgTransform.hpp"

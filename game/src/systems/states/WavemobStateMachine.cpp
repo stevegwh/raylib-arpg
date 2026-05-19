@@ -20,49 +20,6 @@
 
 namespace lq
 {
-    // ====== WavemobDefaultState =====================================================
-
-    void WavemobStateMachine::onEnter(WavemobDefaultState&, const entt::entity entity)
-    {
-        registry->get<sage::Animation>(entity).ChangeAnimationById(lq::animation_ids::Idle);
-    }
-
-    // ====== WavemobTargetOutOfRangeState ============================================
-
-    void WavemobStateMachine::onEnter(WavemobTargetOutOfRangeState&, const entt::entity entity)
-    {
-        const auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-        registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
-
-        auto& moveable = registry->get<sage::MoveableActor>(entity);
-        const auto& combatable = registry->get<CombatableActor>(entity);
-        moveable.movementCollisionTarget = combatable.target;
-        auto& target = registry->get<sage::MoveableActor>(combatable.target);
-        auto& state = registry->get<WavemobState>(entity);
-
-        auto onTargetReached = [this](const entt::entity e) { ChangeState(e, WavemobCombatState{}); };
-
-        state.BindSubscription(target.onPathChanged.Subscribe(
-            [this, entity](const entt::entity t) { onTargetPosUpdate(entity, t); }));
-        state.BindSubscription(moveable.onDestinationReached.Subscribe(onTargetReached));
-
-        onTargetPosUpdate(entity, combatable.target);
-    }
-
-    void WavemobStateMachine::onExit(WavemobTargetOutOfRangeState&, const entt::entity entity)
-    {
-        registry->get<sage::MoveableActor>(entity).movementCollisionTarget.reset();
-    }
-
-    void WavemobStateMachine::update(WavemobTargetOutOfRangeState&, const entt::entity entity)
-    {
-        const auto& combatable = registry->get<CombatableActor>(entity);
-        if (combatable.target == entt::null || isTargetOutOfSight(entity))
-        {
-            ChangeState(entity, WavemobDefaultState{});
-        }
-    }
-
     bool WavemobStateMachine::isTargetOutOfSight(const entt::entity entity) const
     {
         auto& combatable = registry->get<CombatableActor>(entity);
@@ -102,62 +59,6 @@ namespace lq
         sys->engine.actorMovementSystem->PathfindToLocation(entity, targetPos);
     }
 
-    // ====== WavemobCombatState ======================================================
-
-    void WavemobStateMachine::onEnter(WavemobCombatState&, const entt::entity entity)
-    {
-        const auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-        registry->get<Ability>(abilityEntity).startCast.Publish(abilityEntity);
-    }
-
-    void WavemobStateMachine::onExit(WavemobCombatState&, const entt::entity entity)
-    {
-        const auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-        registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
-    }
-
-    void WavemobStateMachine::update(WavemobCombatState&, const entt::entity entity)
-    {
-        const auto& combatable = registry->get<CombatableActor>(entity);
-        if (combatable.dying || combatable.target == entt::null)
-        {
-            ChangeState(entity, WavemobDefaultState{});
-            return;
-        }
-        const auto& actorTrans = registry->get<sage::sgTransform>(entity);
-        const auto target = registry->get<sage::sgTransform>(combatable.target).GetWorldPos();
-        const float distance = Vector3Distance(actorTrans.GetWorldPos(), target);
-        // TODO: Arbitrary number. Should probably use the navigation system to
-        // find the "next best square" from current position
-        if (distance >= 8.0f)
-        {
-            ChangeState(entity, WavemobTargetOutOfRangeState{});
-        }
-    }
-
-    // ====== WavemobDyingState =======================================================
-
-    void WavemobStateMachine::onEnter(WavemobDyingState&, const entt::entity entity)
-    {
-        auto& combatable = registry->get<CombatableActor>(entity);
-        combatable.target = entt::null;
-        combatable.dying = true;
-        const auto& bb = registry->get<sage::Collideable>(entity).worldBoundingBox;
-        sys->engine.navigationGridSystem->MarkSquareAreaOccupied(bb, false);
-
-        auto& animation = registry->get<sage::Animation>(entity);
-        animation.ChangeAnimationById(lq::animation_ids::Death, true);
-
-        auto& state = registry->get<WavemobState>(entity);
-        state.BindSubscription(
-            animation.onAnimationEnd.Subscribe([this](const entt::entity e) { destroyEntity(e); }));
-
-        const auto abilityEntity = sys->abilityFactory->GetAbility(entity, AbilityEnum::ENEMY_AUTOATTACK);
-        registry->get<Ability>(abilityEntity).cancelCast.Publish(abilityEntity);
-
-        sys->engine.actorMovementSystem->CancelMovement(entity);
-    }
-
     void WavemobStateMachine::destroyEntity(const entt::entity entity)
     {
         registry->get<WavemobState>(entity).RemoveAllSubscriptions();
@@ -185,7 +86,7 @@ namespace lq
         for (const auto view = registry->view<WavemobState>(); const auto& entity : view)
         {
             auto& state = registry->get<WavemobState>(entity);
-            std::visit([this, entity](auto& cur) { update(cur, entity); }, state.current);
+            std::visit([this, entity](auto& cur) { cur.Update(*this, entity); }, state.current);
         }
     }
 
@@ -202,7 +103,7 @@ namespace lq
         combatable.onDeath.Subscribe([this](const entt::entity e) { onDeath(e); });
 
         auto& state = registry->get<WavemobState>(entity);
-        std::visit([this, entity](auto& cur) { onEnter(cur, entity); }, state.current);
+        std::visit([this, entity](auto& cur) { cur.OnEnter(*this, entity); }, state.current);
     }
 
     WavemobStateMachine::WavemobStateMachine(entt::registry* _registry, Systems* _sys)

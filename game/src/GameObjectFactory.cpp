@@ -13,12 +13,12 @@
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
-#include "components/States.hpp"
 #include "collision/RpgCollisionLayers.hpp"
 #include "ItemFactory.hpp"
 #include "Systems.hpp"
 #include "systems/PartySystem.hpp"
 #include "systems/PlayerAbilitySystem.hpp"
+#include "systems/states/WavemobStates.hpp"
 
 #include "components/ControllableActor.hpp"
 #include "engine/components/Animation.hpp"

@@ -1,7 +1,7 @@
 // Created by Steve Wheeler on 30/06/2024.
 #pragma once
 
-#include "components/States.hpp"
+#include "PartyMemberStates.hpp"
 #include "engine/systems/states/StateMachineBase.hpp"
 
 #include "entt/entt.hpp"
@@ -15,34 +15,24 @@ namespace lq
     {
         using Base = sage::StateMachineBase<PartyMemberStateMachine, PartyMemberState>;
         friend Base;
+        friend struct PartyMemberDefaultState;
+        friend struct PartyMemberFollowingLeaderState;
+        friend struct PartyMemberWaitingForLeaderState;
+        friend struct PartyMemberDestinationUnreachableState;
 
         Systems* sys;
 
-        // ===== Default =====
-        void onEnter(PartyMemberDefaultState&, entt::entity entity);
-        void onExit(PartyMemberDefaultState&, entt::entity)
+        template <typename State>
+        void onEnter(State& state, const entt::entity entity)
         {
-        }
-        void update(PartyMemberDefaultState&, entt::entity)
-        {
+            state.OnEnter(*this, entity);
         }
 
-        // ===== FollowingLeader =====
-        void onEnter(PartyMemberFollowingLeaderState&, entt::entity entity);
-        void onExit(PartyMemberFollowingLeaderState&, entt::entity entity);
-        void update(PartyMemberFollowingLeaderState&, entt::entity entity);
-
-        // ===== WaitingForLeader =====
-        void onEnter(PartyMemberWaitingForLeaderState&, entt::entity entity);
-        void onExit(PartyMemberWaitingForLeaderState&, entt::entity entity);
-        void update(PartyMemberWaitingForLeaderState&, entt::entity entity);
-
-        // ===== DestinationUnreachable =====
-        void onEnter(PartyMemberDestinationUnreachableState& s, entt::entity entity);
-        void onExit(PartyMemberDestinationUnreachableState&, entt::entity)
+        template <typename State>
+        void onExit(State& state, const entt::entity entity)
         {
+            state.OnExit(*this, entity);
         }
-        void update(PartyMemberDestinationUnreachableState& s, entt::entity entity);
 
         void onLeaderMove(entt::entity entity);
         void onFollowingTargetPathChanged(entt::entity entity, entt::entity target);

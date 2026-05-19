@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "components/States.hpp"
+#include "GameModeStates.hpp"
 #include "engine/systems/states/StateMachineBase.hpp"
 
 #include "entt/entt.hpp"
@@ -17,36 +17,22 @@ namespace lq
     {
         using Base = sage::StateMachineBase<GameModeStateMachine, GameState>;
         friend Base;
+        friend struct GameDefaultState;
+        friend struct GameWaveState;
+        friend struct GameCombatState;
 
         entt::entity gameEntity;
 
-        // ===== Default =====
-        void onEnter(GameDefaultState&, entt::entity)
+        template <typename State>
+        void onEnter(State& state, const entt::entity entity)
         {
-        }
-        void onExit(GameDefaultState&, entt::entity)
-        {
-        }
-        void update(GameDefaultState&, entt::entity)
-        {
+            state.OnEnter(*this, entity);
         }
 
-        // ===== Wave =====
-        void onEnter(GameWaveState&, entt::entity entity);
-        void onExit(GameWaveState&, entt::entity)
+        template <typename State>
+        void onExit(State& state, const entt::entity entity)
         {
-        }
-        void update(GameWaveState&, entt::entity)
-        {
-        }
-
-        // ===== Combat =====
-        void onEnter(GameCombatState&, entt::entity entity);
-        void onExit(GameCombatState&, entt::entity)
-        {
-        }
-        void update(GameCombatState&, entt::entity)
-        {
+            state.OnExit(*this, entity);
         }
 
       public:

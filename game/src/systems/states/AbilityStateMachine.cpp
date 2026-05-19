@@ -26,42 +26,6 @@
 
 namespace lq
 {
-    // ====== AbilityIdleState ========================================================
-
-    void AbilityStateMachine::update(AbilityIdleState&, const entt::entity entity)
-    {
-        auto& ab = registry->get<Ability>(entity);
-        const auto& ad = registry->get<AbilityData>(entity);
-        ab.cooldownTimer.Update(GetFrameTime());
-        if (ab.cooldownTimer.HasFinished() &&
-            ad.base.HasOptionalBehaviour(AbilityBehaviourOptional::REPEAT_AUTO))
-        {
-            startCast(entity);
-        }
-    }
-
-    // ====== AbilityCursorSelectState ================================================
-
-    void AbilityStateMachine::onEnter(AbilityCursorSelectState&, const entt::entity entity)
-    {
-        enableCursor(entity);
-    }
-
-    void AbilityStateMachine::onExit(AbilityCursorSelectState&, const entt::entity entity)
-    {
-        disableCursor(entity);
-    }
-
-    void AbilityStateMachine::update(AbilityCursorSelectState&, const entt::entity entity)
-    {
-        auto& ab = registry->get<Ability>(entity);
-        ab.abilityIndicator->Update(sys->engine.cursor->getFirstNaviCollision().point);
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            spawnAbility(entity);
-        }
-    }
-
     void AbilityStateMachine::enableCursor(const entt::entity entity)
     {
         auto& ab = registry->get<Ability>(entity);
@@ -77,39 +41,6 @@ namespace lq
         sys->engine.cursor->Enable();
         sys->engine.cursor->Show();
         ab.abilityIndicator->Enable(false);
-    }
-
-    // ====== AbilityAwaitingExecutionState ===========================================
-
-    void AbilityStateMachine::onEnter(AbilityAwaitingExecutionState&, const entt::entity entity)
-    {
-        auto& ab = registry->get<Ability>(entity);
-        ab.cooldownTimer.Start();
-        ab.castTimer.Start();
-
-        const auto& ad = registry->get<AbilityData>(entity);
-        if (ad.base.HasBehaviour(AbilityBehaviour::MOVEMENT_PROJECTILE))
-        {
-            createProjectile(registry, ab.caster, entity, sys);
-            auto& moveable = registry->get<sage::MoveableActor>(entity);
-            auto& state = registry->get<AbilityState>(entity);
-            state.BindSubscription(moveable.onDestinationReached.Subscribe(
-                [this](const entt::entity e) { executeAbility(e); }));
-        }
-    }
-
-    void AbilityStateMachine::update(AbilityAwaitingExecutionState&, const entt::entity entity)
-    {
-        auto& ab = registry->get<Ability>(entity);
-        ab.castTimer.Update(GetFrameTime());
-        const auto& ad = registry->get<AbilityData>(entity);
-
-        // "executionDelayTimer" should just be a cast timer. Therefore, below should check for cast time
-        // behaviour
-        if (ab.castTimer.HasFinished() && !ad.base.HasBehaviour(AbilityBehaviour::CAST_REGULAR))
-        {
-            executeAbility(entity);
-        }
     }
 
     // ====== Cross-state transitions =================================================
@@ -254,7 +185,7 @@ namespace lq
             const bool inCursorSelect = std::holds_alternative<AbilityCursorSelectState>(state.current);
             if (!ab.IsActive() && !inCursorSelect) continue;
 
-            std::visit([this, entity](auto& cur) { update(cur, entity); }, state.current);
+            std::visit([this, entity](auto& cur) { cur.Update(*this, entity); }, state.current);
 
             if (auto* vfx = ab.GetVfx(registry); vfx && vfx->active)
             {
@@ -289,7 +220,7 @@ namespace lq
         ab.cancelCast.Subscribe([this](const entt::entity e) { cancelCast(e); });
 
         auto& state = registry->get<AbilityState>(entity);
-        std::visit([this, entity](auto& cur) { onEnter(cur, entity); }, state.current);
+        std::visit([this, entity](auto& cur) { cur.OnEnter(*this, entity); }, state.current);
     }
 
     AbilityStateMachine::AbilityStateMachine(entt::registry* _registry, Systems* _sys)

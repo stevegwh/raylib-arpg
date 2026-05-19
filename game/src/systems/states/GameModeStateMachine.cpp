@@ -4,24 +4,8 @@
 
 #include "GameModeStateMachine.hpp"
 
-#include <iostream>
-
 namespace lq
 {
-    // ====== GameWaveState ===========================================================
-
-    void GameModeStateMachine::onEnter(GameWaveState&, entt::entity)
-    {
-        std::cout << "Wave state entered! \n";
-    }
-
-    // ====== GameCombatState =========================================================
-
-    void GameModeStateMachine::onEnter(GameCombatState&, entt::entity)
-    {
-        std::cout << "Combat state entered! \n";
-    }
-
     // ====== Lifecycle ===============================================================
 
     void GameModeStateMachine::StartCombat()
@@ -32,7 +16,7 @@ namespace lq
     void GameModeStateMachine::Update()
     {
         auto& state = registry->get<GameState>(gameEntity);
-        std::visit([this](auto& cur) { update(cur, gameEntity); }, state.current);
+        std::visit([this](auto& cur) { cur.Update(*this, gameEntity); }, state.current);
     }
 
     void GameModeStateMachine::Draw3D()

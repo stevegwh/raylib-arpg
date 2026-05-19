@@ -5,11 +5,11 @@
 #include "ExampleScene.hpp"
 #include "animation/RpgAnimationIds.hpp"
 
-#include "components/States.hpp"
 #include "MapLoader.hpp"
 #include "Systems.hpp"
 #include "systems/ControllableActorSystem.hpp"
 #include "systems/DialogSystem.hpp"
+#include "systems/states/PlayerStates.hpp"
 #include "systems/states/StateMachines.hpp"
 
 #include "engine/AudioManager.hpp"
