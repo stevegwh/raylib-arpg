@@ -37,6 +37,8 @@ namespace fs = std::filesystem;
 namespace sage
 {
 
+    // Hack to convert Blender units into Sage world scale. Later this should become
+    // an explicit import/unit conversion setting instead of a hardcoded constant.
     constexpr float WORLD_SCALE = 5.0f;
 
     Vector3 scaleFromOrigin(const Vector3& point, float scale)
@@ -257,6 +259,7 @@ namespace sage
         // By doing this, we can track where certain (static) objects are.
         registry->emplace<sgTransform>(entity);
         transformSystem->SetPosition(entity, scaledPosition);
+        transformSystem->SetScale(entity, 1.0f);
         const auto& trans = registry->get<sgTransform>(entity);
         const auto& transMatrix = trans.GetMatrix();
         const auto& localBoundingBox = renderable.GetModel()->CalcLocalBoundingBox();

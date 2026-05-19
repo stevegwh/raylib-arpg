@@ -33,12 +33,9 @@ namespace sage
 
             if (renderable.reqShaderUpdate) renderable.reqShaderUpdate(entity);
 
-            Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
-
             renderable.GetModel()->Draw(
                 transform.GetWorldPos(),
-                rotationAxis,
-                transform.GetWorldRot().y,
+                transform.GetWorldRot(),
                 transform.GetScale(),
                 renderable.hint);
         };
@@ -83,13 +80,10 @@ namespace sage
             auto& uber = registry->get<UberShaderComponent>(entity);
             if (renderable.reqShaderUpdate) renderable.reqShaderUpdate(entity);
 
-            Vector3 rotationAxis = {0.0f, 1.0f, 0.0f};
-
             renderable.GetModel()->DrawUber(
                 &uber,
                 transform.GetWorldPos(),
-                rotationAxis,
-                transform.GetWorldRot().y,
+                transform.GetWorldRot(),
                 transform.GetScale(),
                 renderable.hint);
         }

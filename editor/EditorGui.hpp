@@ -63,6 +63,8 @@ namespace sage
             {
                 std::function<void(TransformField, float)> adjustTransform;
                 std::function<void(TransformField, float)> setTransform;
+                std::function<void()> toggleEditTransform;
+                std::function<void()> toggleEditPivot;
             };
 
             struct DeleteConfirmationCallbacks
@@ -112,6 +114,9 @@ namespace sage
             TextBox* inspectorScaleXText{};
             TextBox* inspectorScaleYText{};
             TextBox* inspectorScaleZText{};
+            TextBox* inspectorEditButtonText{};
+            TextBox* inspectorPivotButtonText{};
+            bool inspectorPivotButtonVisible = false;
             TextBox* deleteConfirmationText{};
 
             RenderTexture2D createAssetThumbnail(const AssetEntry& asset) const;
@@ -154,7 +159,9 @@ namespace sage
                 const std::string& rotationZ,
                 const std::string& scaleX,
                 const std::string& scaleY,
-                const std::string& scaleZ) const;
+                const std::string& scaleZ,
+                const std::string& editButtonText,
+                const std::string& pivotButtonText);
             void ShowDeleteConfirmation(const std::string& selectedEntity) const;
             void HideDeleteConfirmation() const;
             [[nodiscard]] bool IsDeleteConfirmationVisible() const;

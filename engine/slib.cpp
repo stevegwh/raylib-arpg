@@ -13,6 +13,28 @@
 
 namespace sage
 {
+    namespace
+    {
+        Matrix BuildSrtMatrix(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+        {
+            const Matrix matScale = MatrixScale(scale.x, scale.y, scale.z);
+            const Matrix matRotation = MatrixMultiply(
+                MatrixMultiply(MatrixRotateZ(rotation.z * DEG2RAD), MatrixRotateY(rotation.y * DEG2RAD)),
+                MatrixRotateX(rotation.x * DEG2RAD));
+            const Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
+            return MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
+        }
+
+        Color TintMaterialColor(const Color color, const Color tint)
+        {
+            Color colorTint = WHITE;
+            colorTint.r = static_cast<unsigned char>((static_cast<int>(color.r) * static_cast<int>(tint.r)) / 255);
+            colorTint.g = static_cast<unsigned char>((static_cast<int>(color.g) * static_cast<int>(tint.g)) / 255);
+            colorTint.b = static_cast<unsigned char>((static_cast<int>(color.b) * static_cast<int>(tint.b)) / 255);
+            colorTint.a = static_cast<unsigned char>((static_cast<int>(color.a) * static_cast<int>(tint.a)) / 255);
+            return colorTint;
+        }
+    } // namespace
 
     const Image& ImageSafe::GetImage() const
     {
@@ -209,6 +231,24 @@ namespace sage
         DrawModelEx(rlmodel, position, rotationAxis, rotationAngle, scale, tint);
     }
 
+    void ModelView::Draw(
+        const Vector3& position,
+        const Vector3& rotation,
+        const Vector3& scale,
+        const Color& tint) const
+    {
+        auto model = rlmodel;
+        model.transform = MatrixMultiply(model.transform, BuildSrtMatrix(position, rotation, scale));
+        for (int i = 0; i < model.meshCount; i++)
+        {
+            const int materialIndex = model.meshMaterial[i];
+            const Color color = model.materials[materialIndex].maps[MATERIAL_MAP_DIFFUSE].color;
+            model.materials[materialIndex].maps[MATERIAL_MAP_DIFFUSE].color = TintMaterialColor(color, tint);
+            DrawMesh(model.meshes[i], model.materials[materialIndex], model.transform);
+            model.materials[materialIndex].maps[MATERIAL_MAP_DIFFUSE].color = color;
+        }
+    }
+
     void ModelView::DrawUber(
         UberShaderComponent* uber,
         const Vector3& position,
@@ -255,6 +295,45 @@ namespace sage
             model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color = colorTint;
             DrawMesh(model.meshes[i], model.materials[model.meshMaterial[i]], model.transform);
             model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color = color;
+        }
+    }
+
+    void ModelView::DrawUber(
+        UberShaderComponent* uber,
+        const Vector3& position,
+        const Vector3& rotation,
+        const Vector3& scale,
+        const Color& tint) const
+    {
+        auto model = rlmodel;
+        model.transform = MatrixMultiply(model.transform, BuildSrtMatrix(position, rotation, scale));
+        for (int i = 0; i < model.meshCount; i++)
+        {
+            const int materialIndex = model.meshMaterial[i];
+            uber->SetShaderBools(materialIndex);
+            if (uber->HasFlag(materialIndex, UberShaderComponent::EmissiveTexture))
+            {
+                auto emTex = model.materials[materialIndex].maps[MATERIAL_MAP_EMISSION].texture;
+                SetShaderValue(
+                    model.materials[i].shader,
+                    model.materials[materialIndex].shader.locs[SHADER_LOC_MAP_EMISSION],
+                    &emTex,
+                    SHADER_UNIFORM_SAMPLER2D);
+            }
+            if (uber->HasFlag(materialIndex, UberShaderComponent::EmissiveCol))
+            {
+                auto [r, g, b, a] = model.materials[materialIndex].maps[MATERIAL_MAP_EMISSION].color;
+                float values[4] = {
+                    static_cast<float>(r) / 255.0f,
+                    static_cast<float>(g) / 255.0f,
+                    static_cast<float>(b) / 255.0f,
+                    static_cast<float>(a) / 255.0f};
+                SetShaderValue(model.materials[i].shader, uber->colEmissiveLoc, &values, SHADER_UNIFORM_VEC4);
+            }
+            const Color color = model.materials[materialIndex].maps[MATERIAL_MAP_DIFFUSE].color;
+            model.materials[materialIndex].maps[MATERIAL_MAP_DIFFUSE].color = TintMaterialColor(color, tint);
+            DrawMesh(model.meshes[i], model.materials[materialIndex], model.transform);
+            model.materials[materialIndex].maps[MATERIAL_MAP_DIFFUSE].color = color;
         }
     }
 

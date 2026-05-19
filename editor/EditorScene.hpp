@@ -27,9 +27,23 @@ namespace sage
             std::size_t placeableIndex = 0;
         };
 
+        struct EditorEditState
+        {
+            entt::entity entity = entt::null;
+            Vector3 originalPosition{};
+            Vector3 originalRotation{};
+            Vector3 originalScale{1.0f, 1.0f, 1.0f};
+            Matrix originalRenderableTransform = MatrixIdentity();
+            Matrix originalRenderableInitialTransform = MatrixIdentity();
+            BoundingBox originalLocalBoundingBox{};
+            BoundingBox originalWorldBoundingBox{};
+            bool hadRenderable = false;
+            bool hadCollideable = false;
+        };
+
         struct EditorState
         {
-            using Variant = std::variant<EditorSelectState, EditorPickState>;
+            using Variant = std::variant<EditorSelectState, EditorPickState, EditorEditState>;
 
             Variant current = EditorSelectState{};
 
@@ -71,6 +85,35 @@ namespace sage
             }
         };
 
+        enum class EditPivotMode
+        {
+            World,
+            LocalCenter
+        };
+
+        enum class EditTransformMode
+        {
+            Translate,
+            Rotate,
+            Scale
+        };
+
+        enum class EditGizmoAxis
+        {
+            None,
+            X,
+            Y,
+            Z,
+            Uniform
+        };
+
+        struct EditGizmoDragState
+        {
+            bool active = false;
+            EditGizmoAxis axis = EditGizmoAxis::None;
+            Vector2 lastMousePosition{};
+        };
+
         EngineSystems* sys{};
         std::unique_ptr<editor::EditorGui> gui;
         std::vector<PlaceableMesh> placeables;
@@ -86,6 +129,9 @@ namespace sage
         std::optional<entt::entity> selectedSceneEntity;
         std::string lastPlacedLabel = "None";
         entt::entity editorStateEntity = entt::null;
+        EditPivotMode editPivotMode = EditPivotMode::LocalCenter;
+        EditTransformMode editTransformMode = EditTransformMode::Translate;
+        EditGizmoDragState editGizmoDrag;
 
         void createGridPickSurface();
         void sizeGridToLoadedScene();
@@ -97,9 +143,14 @@ namespace sage
         void resetPlacementTransform();
         void selectPlaceable(std::size_t index);
         void selectSceneEntity(entt::entity entity);
+        std::optional<entt::entity> findSceneEntityUnderCursor() const;
         bool selectSceneEntityUnderCursor();
         void clearSceneEntitySelection();
-        void cyclePlaceable();
+        void toggleEditSelectedTransform();
+        void finishEditSelectedTransform();
+        void cancelEditSelectedTransform();
+        void toggleEditPivotMode();
+        void restoreEditSnapshot(const EditorEditState& editState);
         void requestDeleteSelectedEntity();
         void cancelDeleteSelectedEntity();
         void confirmDeleteSelectedEntity();
@@ -108,6 +159,20 @@ namespace sage
         void adjustGridSurfaceY(float amount);
         void adjustPlacementRotation(float amount);
         void adjustPlacementScale(float amount);
+        void applyEditWorldMatrix(
+            entt::entity entity,
+            Matrix desiredWorldMatrix,
+            Vector3 position,
+            Vector3 rotation,
+            Vector3 scale);
+        void adjustEditPosition(Vector3 amount);
+        void adjustEditRotation(float amount);
+        void adjustEditRotationAxis(EditGizmoAxis axis, float amount);
+        void adjustEditScale(float amount);
+        void setEditTargetFromEntity(entt::entity entity);
+        void syncEditControlsFromEntity(entt::entity entity);
+        void updateEditGizmoDrag(entt::entity entity);
+        void endEditGizmoDrag();
         void adjustSelectedTransform(editor::EditorGui::TransformField field, float amount);
         void setSelectedTransform(editor::EditorGui::TransformField field, float value);
         void adjustSelectedModelDefaultHeight(float amount);
@@ -129,12 +194,19 @@ namespace sage
         void exitState(EditorPickState& state);
         void updateState(EditorPickState& state);
         void drawState3D(const EditorPickState& state) const;
+        void enterState(EditorEditState& state);
+        void exitState(EditorEditState& state);
+        void updateState(EditorEditState& state);
+        void drawState3D(const EditorEditState& state) const;
         void changeState(EditorSelectState newState);
         void changeState(EditorPickState newState);
+        void changeState(EditorEditState newState);
 
         [[nodiscard]] const PlaceableMesh& selectedPlaceable() const;
         [[nodiscard]] bool isPickState() const;
+        [[nodiscard]] bool isEditState() const;
         [[nodiscard]] std::string describeMode() const;
+        [[nodiscard]] std::string describeEditTransformMode() const;
         [[nodiscard]] std::string describeSelectedAsset() const;
         [[nodiscard]] std::string describeHoveredGrid() const;
         [[nodiscard]] std::string describeGridSurfaceY() const;
@@ -154,6 +226,24 @@ namespace sage
         [[nodiscard]] std::string describeSelectedScaleX() const;
         [[nodiscard]] std::string describeSelectedScaleY() const;
         [[nodiscard]] std::string describeSelectedScaleZ() const;
+        [[nodiscard]] std::string describeEditButton() const;
+        [[nodiscard]] std::string describeEditPivotButton() const;
+        [[nodiscard]] Vector3 editPivotWorldPosition(entt::entity entity) const;
+        [[nodiscard]] Vector3 editGizmoAxisVector(EditGizmoAxis axis) const;
+        [[nodiscard]] Color editGizmoAxisColor(EditGizmoAxis axis) const;
+        [[nodiscard]] Vector3 rotationGizmoPoint(Vector3 origin, float radius, EditGizmoAxis axis, float angle) const;
+        [[nodiscard]] Vector2 worldToEditScreen(Vector3 worldPosition) const;
+        [[nodiscard]] float editGizmoSize(Vector3 origin) const;
+        [[nodiscard]] float projectedMouseDeltaOnGizmoAxis(
+            Vector3 origin,
+            EditGizmoAxis axis,
+            Vector2 mouseDelta) const;
+        [[nodiscard]] EditGizmoAxis hitTestEditGizmo(entt::entity entity, Vector2 mousePosition) const;
+        [[nodiscard]] float screenDistanceToRotationGizmo(
+            Vector3 origin,
+            float radius,
+            EditGizmoAxis axis,
+            Vector2 mousePosition) const;
         [[nodiscard]] Matrix selectedModelDefaultTransform() const;
         [[nodiscard]] Matrix modelDefaultTransform(const PlaceableMesh& placeable) const;
         [[nodiscard]] SerializedAssetDefaults serializeAssetDefaults(const PlaceableMesh& placeable) const;
@@ -164,11 +254,13 @@ namespace sage
             std::vector<editor::EditorGui::SceneObjectEntry>& entries,
             entt::entity entity,
             int depth) const;
+        void drawEditGizmo(entt::entity entity) const;
 
       public:
         void Update();
         void Draw3D() const;
         void Draw2D() const;
+        [[nodiscard]] bool HandleEscapePressed();
 
         explicit EditorScene(EngineSystems* _sys);
         ~EditorScene();

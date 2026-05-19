@@ -116,7 +116,8 @@ namespace sage
 
         while (!exitWindow)
         {
-            if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) exitWindowRequested = true;
+            if (WindowShouldClose()) exitWindowRequested = true;
+            if (IsKeyPressed(KEY_ESCAPE) && !scene->HandleEscapePressed()) exitWindowRequested = true;
 
             if (exitWindowRequested)
             {

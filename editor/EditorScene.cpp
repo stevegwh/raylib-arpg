@@ -15,6 +15,8 @@
 #include "engine/LightManager.hpp"
 #include "engine/raylib-cereal.hpp"
 #include "engine/ResourceManager.hpp"
+#include "engine/Settings.hpp"
+#include "engine/systems/CollisionSystem.hpp"
 #include "engine/systems/RenderSystem.hpp"
 #include "engine/systems/TransformSystem.hpp"
 #include "engine/UserInput.hpp"
@@ -28,10 +30,12 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <utility>
 
 namespace sage
@@ -43,9 +47,14 @@ namespace sage
         constexpr float PLACEMENT_MARKER_HEIGHT = 0.16f;
         constexpr float GRID_SURFACE_Y_STEP = 1.0f;
         constexpr float PLACEMENT_HEIGHT_STEP = 0.25f;
+        constexpr float EDIT_TRANSLATION_STEP = 0.25f;
         constexpr float PLACEMENT_ROTATION_STEP = 15.0f;
         constexpr float PLACEMENT_SCALE_STEP = 0.1f;
         constexpr float PLACEMENT_MIN_SCALE = 0.1f;
+        constexpr float EDIT_GIZMO_MIN_SIZE = 1.5f;
+        constexpr float EDIT_GIZMO_MAX_SIZE = 9.0f;
+        constexpr float EDIT_GIZMO_SCREEN_HIT_RADIUS = 12.0f;
+        constexpr int EDIT_GIZMO_RING_SEGMENTS = 72;
         constexpr Color PLACEMENT_PREVIEW_TINT = {255, 255, 255, 150};
         constexpr Color PLACEMENT_PREVIEW_BOUNDS_COLOR = {37, 99, 235, 210};
         const std::filesystem::path IMPORTED_ASSETS_DIRECTORY{"resources/Editor/ImportedAssets"};
@@ -87,6 +96,47 @@ namespace sage
                 MatrixTranslate(position.x, position.y, position.z));
         }
 
+        Matrix BuildRenderableEntityMatrix(const Vector3 position, const Vector3 rotation, const Vector3 scale)
+        {
+            const Matrix rotationMatrix = MatrixMultiply(
+                MatrixMultiply(MatrixRotateZ(rotation.z * DEG2RAD), MatrixRotateY(rotation.y * DEG2RAD)),
+                MatrixRotateX(rotation.x * DEG2RAD));
+            return MatrixMultiply(
+                MatrixMultiply(MatrixScale(scale.x, scale.y, scale.z), rotationMatrix),
+                MatrixTranslate(position.x, position.y, position.z));
+        }
+
+        Matrix BuildPivotDeltaMatrix(const Vector3 pivot, const Matrix& delta)
+        {
+            return MatrixMultiply(
+                MatrixMultiply(MatrixTranslate(-pivot.x, -pivot.y, -pivot.z), delta),
+                MatrixTranslate(pivot.x, pivot.y, pivot.z));
+        }
+
+        Vector3 BoundingBoxCenter(const BoundingBox& bounds)
+        {
+            return Vector3Scale(Vector3Add(bounds.min, bounds.max), 0.5f);
+        }
+
+        bool IsKeyPressedOrRepeated(const int key)
+        {
+            return IsKeyPressed(key) || IsKeyPressedRepeat(key);
+        }
+
+        float DistancePointToSegment(const Vector2 point, const Vector2 start, const Vector2 end)
+        {
+            const Vector2 segment = Vector2Subtract(end, start);
+            const float segmentLengthSquared = Vector2DotProduct(segment, segment);
+            if (segmentLengthSquared <= 0.0001f) return Vector2Distance(point, start);
+
+            const float t = std::clamp(
+                Vector2DotProduct(Vector2Subtract(point, start), segment) / segmentLengthSquared,
+                0.0f,
+                1.0f);
+            const Vector2 closest = Vector2Add(start, Vector2Scale(segment, t));
+            return Vector2Distance(point, closest);
+        }
+
         std::string SanitizeAssetFileStem(const std::string& input)
         {
             std::string result;
@@ -119,14 +169,38 @@ namespace sage
         return std::holds_alternative<EditorPickState>(state.current);
     }
 
+    bool EditorScene::isEditState() const
+    {
+        const auto& state = sys->registry->get<EditorState>(editorStateEntity);
+        return std::holds_alternative<EditorEditState>(state.current);
+    }
+
     std::string EditorScene::describeMode() const
     {
-        return isPickState() ? "Pick" : "Select";
+        if (isPickState()) return "Pick";
+        if (isEditState()) return "Edit: " + describeEditTransformMode();
+        return "Select";
+    }
+
+    std::string EditorScene::describeEditTransformMode() const
+    {
+        switch (editTransformMode)
+        {
+        case EditTransformMode::Translate:
+            return "Translate";
+        case EditTransformMode::Rotate:
+            return "Rotate";
+        case EditTransformMode::Scale:
+            return "Scale";
+        }
+        return "Translate";
     }
 
     std::string EditorScene::describeSelectedAsset() const
     {
-        return isPickState() ? selectedPlaceable().displayName : "None";
+        if (isPickState()) return selectedPlaceable().displayName;
+        if (selectedSceneEntity.has_value()) return describeSelectedSceneEntity();
+        return "None";
     }
 
     std::string EditorScene::describeHoveredGrid() const
@@ -246,6 +320,204 @@ namespace sage
         if (!selectedSceneEntity.has_value()) return "1.00";
         const auto& transform = sys->registry->get<sgTransform>(*selectedSceneEntity);
         return std::format("{:.2f}", transform.GetScale().z);
+    }
+
+    std::string EditorScene::describeEditButton() const
+    {
+        if (!selectedSceneEntity.has_value()) return "Edit Transform";
+        return isEditState() ? "Done Editing" : "Edit Transform";
+    }
+
+    std::string EditorScene::describeEditPivotButton() const
+    {
+        if (!isEditState() || !selectedSceneEntity.has_value()) return "";
+        return editPivotMode == EditPivotMode::LocalCenter ? "Pivot: Local" : "Pivot: World";
+    }
+
+    Vector3 EditorScene::editPivotWorldPosition(const entt::entity entity) const
+    {
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return Vector3Zero();
+
+        const auto& transform = sys->registry->get<sgTransform>(entity);
+        if (editPivotMode != EditPivotMode::LocalCenter ||
+            !sys->registry->any_of<Renderable>(entity))
+        {
+            return transform.GetWorldPos();
+        }
+
+        const auto& renderable = sys->registry->get<Renderable>(entity);
+        const auto* model = renderable.GetModel();
+        if (model == nullptr) return transform.GetWorldPos();
+
+        const Matrix entityMatrix = BuildRenderableEntityMatrix(
+            transform.GetWorldPos(),
+            transform.GetWorldRot(),
+            transform.GetScale());
+        const BoundingBox worldBounds = TransformBoundingBoxByCorners(model->CalcLocalBoundingBox(), entityMatrix);
+        return BoundingBoxCenter(worldBounds);
+    }
+
+    Vector3 EditorScene::editGizmoAxisVector(const EditGizmoAxis axis) const
+    {
+        switch (axis)
+        {
+        case EditGizmoAxis::X:
+            return {1.0f, 0.0f, 0.0f};
+        case EditGizmoAxis::Y:
+            return {0.0f, 1.0f, 0.0f};
+        case EditGizmoAxis::Z:
+            return {0.0f, 0.0f, 1.0f};
+        case EditGizmoAxis::None:
+        case EditGizmoAxis::Uniform:
+            return Vector3Zero();
+        }
+        return Vector3Zero();
+    }
+
+    Color EditorScene::editGizmoAxisColor(const EditGizmoAxis axis) const
+    {
+        switch (axis)
+        {
+        case EditGizmoAxis::X:
+            return RED;
+        case EditGizmoAxis::Y:
+            return GREEN;
+        case EditGizmoAxis::Z:
+            return BLUE;
+        case EditGizmoAxis::Uniform:
+            return GOLD;
+        case EditGizmoAxis::None:
+            return ORANGE;
+        }
+        return ORANGE;
+    }
+
+    Vector3 EditorScene::rotationGizmoPoint(
+        const Vector3 origin,
+        const float radius,
+        const EditGizmoAxis axis,
+        const float angle) const
+    {
+        switch (axis)
+        {
+        case EditGizmoAxis::X:
+            return Vector3Add(origin, {0.0f, std::cos(angle) * radius, std::sin(angle) * radius});
+        case EditGizmoAxis::Y:
+            return Vector3Add(origin, {std::cos(angle) * radius, 0.0f, std::sin(angle) * radius});
+        case EditGizmoAxis::Z:
+            return Vector3Add(origin, {std::cos(angle) * radius, std::sin(angle) * radius, 0.0f});
+        case EditGizmoAxis::None:
+        case EditGizmoAxis::Uniform:
+            return origin;
+        }
+        return origin;
+    }
+
+    Vector2 EditorScene::worldToEditScreen(const Vector3 worldPosition) const
+    {
+        const auto viewport = sys->settings->GetViewPort();
+        return GetWorldToScreenEx(
+            worldPosition,
+            *sys->camera->getRaylibCam(),
+            static_cast<int>(viewport.x),
+            static_cast<int>(viewport.y));
+    }
+
+    float EditorScene::editGizmoSize(const Vector3 origin) const
+    {
+        const float distance = Vector3Distance(sys->camera->GetPosition(), origin);
+        return std::clamp(distance * 0.075f, EDIT_GIZMO_MIN_SIZE, EDIT_GIZMO_MAX_SIZE);
+    }
+
+    float EditorScene::projectedMouseDeltaOnGizmoAxis(
+        const Vector3 origin,
+        const EditGizmoAxis axis,
+        const Vector2 mouseDelta) const
+    {
+        const Vector3 axisVector = editGizmoAxisVector(axis);
+        if (Vector3Length(axisVector) <= 0.0001f) return 0.0f;
+
+        const float size = editGizmoSize(origin);
+        const Vector2 start = worldToEditScreen(origin);
+        const Vector2 end = worldToEditScreen(Vector3Add(origin, Vector3Scale(axisVector, size)));
+        const Vector2 screenAxis = Vector2Subtract(end, start);
+        const float screenLength = Vector2Length(screenAxis);
+        if (screenLength <= 0.0001f) return 0.0f;
+
+        return Vector2DotProduct(mouseDelta, Vector2Scale(screenAxis, 1.0f / screenLength));
+    }
+
+    float EditorScene::screenDistanceToRotationGizmo(
+        const Vector3 origin,
+        const float radius,
+        const EditGizmoAxis axis,
+        const Vector2 mousePosition) const
+    {
+        float closestDistance = std::numeric_limits<float>::max();
+        Vector3 previousWorld = rotationGizmoPoint(origin, radius, axis, 0.0f);
+        Vector2 previousScreen = worldToEditScreen(previousWorld);
+
+        for (int i = 1; i <= EDIT_GIZMO_RING_SEGMENTS; ++i)
+        {
+            const float angle = (2.0f * PI * static_cast<float>(i)) / static_cast<float>(EDIT_GIZMO_RING_SEGMENTS);
+            const Vector3 currentWorld = rotationGizmoPoint(origin, radius, axis, angle);
+            const Vector2 currentScreen = worldToEditScreen(currentWorld);
+            closestDistance = std::min(
+                closestDistance,
+                DistancePointToSegment(mousePosition, previousScreen, currentScreen));
+            previousScreen = currentScreen;
+        }
+
+        return closestDistance;
+    }
+
+    EditorScene::EditGizmoAxis EditorScene::hitTestEditGizmo(
+        const entt::entity entity,
+        const Vector2 mousePosition) const
+    {
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity))
+            return EditGizmoAxis::None;
+
+        const Vector3 origin = editPivotWorldPosition(entity);
+        const float size = editGizmoSize(origin);
+
+        if (editTransformMode == EditTransformMode::Rotate)
+        {
+            EditGizmoAxis closestAxis = EditGizmoAxis::None;
+            float closestDistance = std::numeric_limits<float>::max();
+            for (const auto axis : {EditGizmoAxis::X, EditGizmoAxis::Y})
+            {
+                const float distance = screenDistanceToRotationGizmo(origin, size, axis, mousePosition);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestAxis = axis;
+                }
+            }
+            return closestDistance <= EDIT_GIZMO_SCREEN_HIT_RADIUS ? closestAxis : EditGizmoAxis::None;
+        }
+
+        EditGizmoAxis closestAxis = EditGizmoAxis::None;
+        float closestDistance = std::numeric_limits<float>::max();
+
+        if (editTransformMode == EditTransformMode::Scale &&
+            Vector2Distance(mousePosition, worldToEditScreen(origin)) <= EDIT_GIZMO_SCREEN_HIT_RADIUS)
+        {
+            return EditGizmoAxis::Uniform;
+        }
+
+        for (const auto axis : {EditGizmoAxis::X, EditGizmoAxis::Y, EditGizmoAxis::Z})
+        {
+            const Vector3 end = Vector3Add(origin, Vector3Scale(editGizmoAxisVector(axis), size));
+            const float distance = DistancePointToSegment(mousePosition, worldToEditScreen(origin), worldToEditScreen(end));
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestAxis = axis;
+            }
+        }
+
+        return closestDistance <= EDIT_GIZMO_SCREEN_HIT_RADIUS ? closestAxis : EditGizmoAxis::None;
     }
 
     Matrix EditorScene::modelDefaultTransform(const PlaceableMesh& placeable) const
@@ -459,7 +731,9 @@ namespace sage
             describeSelectedRotationZ(),
             describeSelectedScaleX(),
             describeSelectedScaleY(),
-            describeSelectedScaleZ());
+            describeSelectedScaleZ(),
+            describeEditButton(),
+            describeEditPivotButton());
     }
 
     void EditorScene::resetPlacementTransform()
@@ -484,24 +758,233 @@ namespace sage
         refreshSceneWindows();
     }
 
-    bool EditorScene::selectSceneEntityUnderCursor()
+    std::optional<entt::entity> EditorScene::findSceneEntityUnderCursor() const
     {
-        const auto& hitInfo = sys->cursor->getMouseHitInfo();
-        if (hitInfo.collidedEntityId == entt::null || !sys->registry->valid(hitInfo.collidedEntityId) ||
-            !sys->registry->any_of<sgTransform>(hitInfo.collidedEntityId))
+        const auto viewport = sys->settings->GetViewPort();
+        const auto ray = GetScreenToWorldRayEx(GetMousePosition(), *sys->camera->getRaylibCam(), viewport.x, viewport.y);
+        auto collisions = sys->collisionSystem->GetCollisionsWithRay(ray, CollisionMask{~0ull});
+
+        std::vector<CollisionInfo> objectHits;
+        std::vector<CollisionInfo> fallbackHits;
+
+        for (auto collision : collisions)
         {
-            return false;
+            const auto entity = collision.collidedEntityId;
+            if (entity == entt::null || entity == gridPickSurfaceEntity || !sys->registry->valid(entity) ||
+                !sys->registry->any_of<sgTransform>(entity))
+            {
+                continue;
+            }
+
+            if (sys->registry->any_of<Renderable>(entity))
+            {
+                const auto& renderable = sys->registry->get<Renderable>(entity);
+                const auto* model = renderable.GetModel();
+                if (model == nullptr) continue;
+
+                const auto& transform = sys->registry->get<sgTransform>(entity);
+                const Matrix entityMatrix = BuildRenderableEntityMatrix(
+                    transform.GetWorldPos(),
+                    transform.GetWorldRot(),
+                    transform.GetScale());
+                bool meshHit = false;
+                RayCollision closestMeshHit{};
+                closestMeshHit.distance = std::numeric_limits<float>::max();
+
+                for (int meshIndex = 0; meshIndex < model->GetMeshCount(); ++meshIndex)
+                {
+                    const auto meshCollision = model->GetRayMeshCollision(ray, meshIndex, entityMatrix);
+                    if (meshCollision.hit && meshCollision.distance < closestMeshHit.distance)
+                    {
+                        closestMeshHit = meshCollision;
+                        meshHit = true;
+                    }
+                }
+
+                if (!meshHit) continue;
+                collision.rlCollision = closestMeshHit;
+            }
+
+            if (IsNavigationLayer(collision.collisionLayer))
+            {
+                fallbackHits.push_back(collision);
+            }
+            else
+            {
+                objectHits.push_back(collision);
+            }
         }
 
-        selectSceneEntity(hitInfo.collidedEntityId);
+        auto selectClosest = [](std::vector<CollisionInfo>& hits) -> std::optional<entt::entity> {
+            if (hits.empty()) return std::nullopt;
+            CollisionSystem::SortCollisionsByDistance(hits);
+            return hits.front().collidedEntityId;
+        };
+
+        if (auto object = selectClosest(objectHits); object.has_value()) return object;
+        return selectClosest(fallbackHits);
+    }
+
+    bool EditorScene::selectSceneEntityUnderCursor()
+    {
+        if (isEditState()) return false;
+
+        const auto entity = findSceneEntityUnderCursor();
+        if (!entity.has_value()) return false;
+
+        selectSceneEntity(*entity);
         return true;
     }
 
     void EditorScene::clearSceneEntitySelection()
     {
         selectedSceneEntity.reset();
+        if (isEditState())
+        {
+            changeState(EditorSelectState{});
+        }
         gui->HideDeleteConfirmation();
         refreshSceneWindows();
+    }
+
+    void EditorScene::toggleEditSelectedTransform()
+    {
+        if (!selectedSceneEntity.has_value()) return;
+        const auto entity = *selectedSceneEntity;
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity))
+        {
+            clearSceneEntitySelection();
+            return;
+        }
+
+        if (isEditState())
+        {
+            finishEditSelectedTransform();
+        }
+        else
+        {
+            gui->HideDeleteConfirmation();
+            const auto& transform = sys->registry->get<sgTransform>(entity);
+            EditorEditState editState{
+                .entity = entity,
+                .originalPosition = transform.GetWorldPos(),
+                .originalRotation = transform.GetWorldRot(),
+                .originalScale = transform.GetScale(),
+            };
+            if (sys->registry->any_of<Collideable>(entity))
+            {
+                const auto& collideable = sys->registry->get<Collideable>(entity);
+                editState.originalLocalBoundingBox = collideable.localBoundingBox;
+                editState.originalWorldBoundingBox = collideable.worldBoundingBox;
+                editState.hadCollideable = true;
+            }
+            if (sys->registry->any_of<Renderable>(entity))
+            {
+                const auto& renderable = sys->registry->get<Renderable>(entity);
+                if (const auto* model = renderable.GetModel(); model != nullptr)
+                {
+                    editState.originalRenderableTransform = model->GetTransform();
+                    editState.originalRenderableInitialTransform = renderable.initialTransform;
+                    editState.hadRenderable = true;
+                }
+            }
+            changeState(editState);
+        }
+
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::finishEditSelectedTransform()
+    {
+        if (!isEditState()) return;
+
+        changeState(EditorSelectState{});
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::cancelEditSelectedTransform()
+    {
+        if (!isEditState()) return;
+
+        auto& state = sys->registry->get<EditorState>(editorStateEntity);
+        const auto& editState = std::get<EditorEditState>(state.current);
+        restoreEditSnapshot(editState);
+
+        changeState(EditorSelectState{});
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::toggleEditPivotMode()
+    {
+        if (!isEditState()) return;
+
+        auto& state = sys->registry->get<EditorState>(editorStateEntity);
+        auto& editState = std::get<EditorEditState>(state.current);
+        const auto entity = editState.entity;
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity))
+        {
+            clearSceneEntitySelection();
+            return;
+        }
+
+        editPivotMode =
+            editPivotMode == EditPivotMode::LocalCenter ? EditPivotMode::World : EditPivotMode::LocalCenter;
+
+        const auto& transform = sys->registry->get<sgTransform>(entity);
+        placementRotationY = transform.GetWorldRot().y;
+        placementScale = std::max(
+            PLACEMENT_MIN_SCALE,
+            (transform.GetScale().x + transform.GetScale().y + transform.GetScale().z) / 3.0f);
+        setEditTargetFromEntity(entity);
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::restoreEditSnapshot(const EditorEditState& editState)
+    {
+        const auto entity = editState.entity;
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        if (sys->registry->any_of<Collideable>(entity))
+        {
+            auto& collideable = sys->registry->get<Collideable>(entity);
+            if (collideable.blocksNavigation)
+            {
+                sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false, entity);
+            }
+        }
+
+        sys->transformSystem->SetPosition(entity, editState.originalPosition);
+        sys->transformSystem->SetRotation(entity, editState.originalRotation);
+        sys->transformSystem->SetScale(entity, editState.originalScale);
+
+        if (editState.hadRenderable && sys->registry->any_of<Renderable>(entity))
+        {
+            auto& renderable = sys->registry->get<Renderable>(entity);
+            if (auto* model = renderable.GetModel(); model != nullptr)
+            {
+                model->SetTransform(editState.originalRenderableTransform);
+                renderable.initialTransform = editState.originalRenderableInitialTransform;
+            }
+        }
+
+        if (editState.hadCollideable && sys->registry->any_of<Collideable>(entity))
+        {
+            auto& collideable = sys->registry->get<Collideable>(entity);
+            collideable.localBoundingBox = editState.originalLocalBoundingBox;
+            collideable.worldBoundingBox = editState.originalWorldBoundingBox;
+            if (collideable.blocksNavigation)
+            {
+                sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
+            }
+        }
+        else
+        {
+            updateEntityCollisionBounds(entity);
+        }
     }
 
     void EditorScene::requestDeleteSelectedEntity()
@@ -577,13 +1060,6 @@ namespace sage
         refreshOverlay();
     }
 
-    void EditorScene::cyclePlaceable()
-    {
-        if (placeables.empty()) return;
-        const std::size_t nextIndex = isPickState() ? (selectedPlaceableIndex + 1) % placeables.size() : 0;
-        selectPlaceable(nextIndex);
-    }
-
     void EditorScene::adjustGridSurfaceY(const float amount)
     {
         gridSurfaceY += amount;
@@ -611,6 +1087,269 @@ namespace sage
     {
         placementScale = std::max(PLACEMENT_MIN_SCALE, placementScale + amount);
         refreshOverlay();
+    }
+
+    void EditorScene::applyEditWorldMatrix(
+        const entt::entity entity,
+        const Matrix desiredWorldMatrix,
+        const Vector3 position,
+        const Vector3 rotation,
+        const Vector3 scale)
+    {
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        sys->transformSystem->SetPosition(entity, position);
+        sys->transformSystem->SetRotation(entity, rotation);
+        sys->transformSystem->SetScale(entity, scale);
+
+        if (sys->registry->any_of<Renderable>(entity))
+        {
+            auto& renderable = sys->registry->get<Renderable>(entity);
+            if (auto* model = renderable.GetModel(); model != nullptr)
+            {
+                const Matrix entityMatrix = BuildRenderableEntityMatrix(position, rotation, scale);
+                const Matrix modelTransform = MatrixMultiply(desiredWorldMatrix, MatrixInvert(entityMatrix));
+                model->SetTransform(modelTransform);
+                renderable.initialTransform = modelTransform;
+            }
+        }
+
+        updateEntityCollisionBounds(entity);
+    }
+
+    void EditorScene::adjustEditPosition(const Vector3 amount)
+    {
+        if (!selectedSceneEntity.has_value()) return;
+        const auto entity = *selectedSceneEntity;
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const auto& transform = sys->registry->get<sgTransform>(entity);
+        const Vector3 position = Vector3Add(transform.GetWorldPos(), amount);
+        sys->transformSystem->SetPosition(entity, position);
+        updateEntityCollisionBounds(entity);
+        setEditTargetFromEntity(entity);
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::adjustEditRotation(const float amount)
+    {
+        adjustEditRotationAxis(EditGizmoAxis::Y, amount);
+    }
+
+    void EditorScene::adjustEditRotationAxis(const EditGizmoAxis axis, const float amount)
+    {
+        if (!selectedSceneEntity.has_value()) return;
+        const auto entity = *selectedSceneEntity;
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const auto& transform = sys->registry->get<sgTransform>(entity);
+        const Vector3 position = transform.GetWorldPos();
+        const Vector3 scale = transform.GetScale();
+        auto rotation = transform.GetWorldRot();
+        auto wrapDegrees = [](float degrees) {
+            while (degrees >= 360.0f) degrees -= 360.0f;
+            while (degrees < 0.0f) degrees += 360.0f;
+            return degrees;
+        };
+
+        if (axis == EditGizmoAxis::X)
+        {
+            rotation.x = wrapDegrees(rotation.x + amount);
+        }
+        else
+        {
+            placementRotationY = wrapDegrees(placementRotationY + amount);
+            rotation.y = placementRotationY;
+        }
+
+        if (editPivotMode == EditPivotMode::LocalCenter && sys->registry->any_of<Renderable>(entity))
+        {
+            const auto& renderable = sys->registry->get<Renderable>(entity);
+            if (const auto* model = renderable.GetModel(); model != nullptr)
+            {
+                const Matrix oldEntityMatrix = BuildRenderableEntityMatrix(position, transform.GetWorldRot(), scale);
+                const Matrix oldWorldMatrix = MatrixMultiply(model->GetTransform(), oldEntityMatrix);
+                const Vector3 pivot = editPivotWorldPosition(entity);
+                Matrix rotationDelta = MatrixIdentity();
+                if (axis == EditGizmoAxis::X)
+                {
+                    rotationDelta = MatrixRotateX(amount * DEG2RAD);
+                }
+                else if (axis == EditGizmoAxis::Z)
+                {
+                    rotationDelta = MatrixRotateZ(amount * DEG2RAD);
+                }
+                else
+                {
+                    rotationDelta = MatrixRotateY(amount * DEG2RAD);
+                }
+                const Matrix desiredWorldMatrix =
+                    MatrixMultiply(oldWorldMatrix, BuildPivotDeltaMatrix(pivot, rotationDelta));
+                applyEditWorldMatrix(entity, desiredWorldMatrix, position, rotation, scale);
+            }
+            else
+            {
+                sys->transformSystem->SetRotation(entity, rotation);
+                updateEntityCollisionBounds(entity);
+            }
+        }
+        else
+        {
+            sys->transformSystem->SetRotation(entity, rotation);
+            updateEntityCollisionBounds(entity);
+        }
+
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::adjustEditScale(const float amount)
+    {
+        if (!selectedSceneEntity.has_value()) return;
+        const auto entity = *selectedSceneEntity;
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const auto& transform = sys->registry->get<sgTransform>(entity);
+        const Vector3 position = transform.GetWorldPos();
+        const Vector3 rotation = transform.GetWorldRot();
+        const Vector3 currentScale = transform.GetScale();
+        const float currentUniformScale = std::max(
+            PLACEMENT_MIN_SCALE,
+            (currentScale.x + currentScale.y + currentScale.z) / 3.0f);
+        placementScale = std::max(PLACEMENT_MIN_SCALE, currentUniformScale + amount);
+        const Vector3 nextScale{placementScale, placementScale, placementScale};
+
+        if (editPivotMode == EditPivotMode::LocalCenter && sys->registry->any_of<Renderable>(entity))
+        {
+            const auto& renderable = sys->registry->get<Renderable>(entity);
+            if (const auto* model = renderable.GetModel(); model != nullptr)
+            {
+                const Matrix oldEntityMatrix = BuildRenderableEntityMatrix(position, rotation, currentScale);
+                const Matrix oldWorldMatrix = MatrixMultiply(model->GetTransform(), oldEntityMatrix);
+                const float scaleFactor = placementScale / currentUniformScale;
+                const Matrix scaleDelta = MatrixScale(scaleFactor, scaleFactor, scaleFactor);
+                const Matrix desiredWorldMatrix =
+                    MatrixMultiply(oldWorldMatrix, BuildPivotDeltaMatrix(editPivotWorldPosition(entity), scaleDelta));
+                applyEditWorldMatrix(entity, desiredWorldMatrix, position, rotation, nextScale);
+            }
+            else
+            {
+                sys->transformSystem->SetScale(entity, nextScale);
+                updateEntityCollisionBounds(entity);
+            }
+        }
+        else
+        {
+            sys->transformSystem->SetScale(entity, nextScale);
+            updateEntityCollisionBounds(entity);
+        }
+
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::setEditTargetFromEntity(const entt::entity entity)
+    {
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const auto position = sys->registry->get<sgTransform>(entity).GetWorldPos();
+        GridSquare square{};
+        if (sys->navigationGridSystem->WorldToGridSpace(position, square))
+        {
+            hoveredGridSquare = square;
+            const auto* gridSquare = sys->navigationGridSystem->GetGridSquare(square.row, square.col);
+            snappedPlacementPosition = gridSquare ? Vector3{gridSquare->worldPosCentre.x, position.y, gridSquare->worldPosCentre.z}
+                                                  : position;
+        }
+        else
+        {
+            hoveredGridSquare.reset();
+            snappedPlacementPosition = position;
+        }
+    }
+
+    void EditorScene::syncEditControlsFromEntity(const entt::entity entity)
+    {
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const auto& transform = sys->registry->get<sgTransform>(entity);
+        placementRotationY = transform.GetWorldRot().y;
+        placementScale = std::max(
+            PLACEMENT_MIN_SCALE,
+            (transform.GetScale().x + transform.GetScale().y + transform.GetScale().z) / 3.0f);
+        setEditTargetFromEntity(entity);
+    }
+
+    void EditorScene::updateEditGizmoDrag(const entt::entity entity)
+    {
+        if (!editGizmoDrag.active) return;
+
+        if (!IsMouseButtonDown(MOUSE_BUTTON_LEFT) || !sys->registry->valid(entity) ||
+            !sys->registry->any_of<sgTransform>(entity))
+        {
+            endEditGizmoDrag();
+            return;
+        }
+
+        const Vector2 previousMousePosition = editGizmoDrag.lastMousePosition;
+        const Vector2 mousePosition = GetMousePosition();
+        const Vector2 mouseDelta = Vector2Subtract(mousePosition, previousMousePosition);
+        editGizmoDrag.lastMousePosition = mousePosition;
+        if (Vector2Length(mouseDelta) <= 0.0001f) return;
+
+        const Vector3 origin = editPivotWorldPosition(entity);
+        switch (editTransformMode)
+        {
+        case EditTransformMode::Translate:
+        {
+            const float projectedPixels = projectedMouseDeltaOnGizmoAxis(origin, editGizmoDrag.axis, mouseDelta);
+            const Vector3 axisVector = editGizmoAxisVector(editGizmoDrag.axis);
+            const float size = editGizmoSize(origin);
+            const Vector2 screenStart = worldToEditScreen(origin);
+            const Vector2 screenEnd = worldToEditScreen(Vector3Add(origin, Vector3Scale(axisVector, size)));
+            const float screenLength = Vector2Length(Vector2Subtract(screenEnd, screenStart));
+            if (screenLength > 0.0001f)
+            {
+                adjustEditPosition(Vector3Scale(axisVector, projectedPixels * size / screenLength));
+            }
+            break;
+        }
+        case EditTransformMode::Rotate:
+        {
+            const Vector2 center = worldToEditScreen(origin);
+            const Vector2 previousVector = Vector2Subtract(previousMousePosition, center);
+            const Vector2 currentVector = Vector2Subtract(mousePosition, center);
+            if (Vector2Length(previousVector) > 0.0001f && Vector2Length(currentVector) > 0.0001f)
+            {
+                float deltaDegrees =
+                    (std::atan2(currentVector.y, currentVector.x) -
+                     std::atan2(previousVector.y, previousVector.x)) *
+                    RAD2DEG;
+                if (deltaDegrees > 180.0f) deltaDegrees -= 360.0f;
+                if (deltaDegrees < -180.0f) deltaDegrees += 360.0f;
+                adjustEditRotationAxis(editGizmoDrag.axis, deltaDegrees);
+            }
+            break;
+        }
+        case EditTransformMode::Scale:
+        {
+            const float projectedPixels = editGizmoDrag.axis == EditGizmoAxis::Uniform
+                                              ? -mouseDelta.y
+                                              : projectedMouseDeltaOnGizmoAxis(origin, editGizmoDrag.axis, mouseDelta);
+            adjustEditScale(projectedPixels * 0.01f);
+            break;
+        }
+        }
+    }
+
+    void EditorScene::endEditGizmoDrag()
+    {
+        if (editGizmoDrag.active)
+        {
+            sys->camera->UnlockInput();
+        }
+        editGizmoDrag = {};
     }
 
     void EditorScene::adjustSelectedTransform(const editor::EditorGui::TransformField field, const float amount)
@@ -665,6 +1404,8 @@ namespace sage
         }
 
         updateEntityCollisionBounds(entity);
+        if (isEditState()) syncEditControlsFromEntity(entity);
+        refreshOverlay();
         refreshSceneWindows();
     }
 
@@ -720,6 +1461,8 @@ namespace sage
         }
 
         updateEntityCollisionBounds(entity);
+        if (isEditState()) syncEditControlsFromEntity(entity);
+        refreshOverlay();
         refreshSceneWindows();
     }
 
@@ -876,8 +1619,29 @@ namespace sage
 
         const auto& transform = sys->registry->get<sgTransform>(entity);
         auto& collideable = sys->registry->get<Collideable>(entity);
-        collideable.worldBoundingBox =
-            TransformBoundingBoxByCorners(collideable.localBoundingBox, transform.GetMatrix());
+        if (collideable.blocksNavigation)
+        {
+            sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false, entity);
+        }
+
+        const Matrix entityMatrix = BuildRenderableEntityMatrix(
+            transform.GetWorldPos(),
+            transform.GetWorldRot(),
+            transform.GetScale());
+        if (sys->registry->any_of<Renderable>(entity))
+        {
+            const auto& renderable = sys->registry->get<Renderable>(entity);
+            if (const auto* model = renderable.GetModel(); model != nullptr)
+            {
+                collideable.localBoundingBox = model->CalcLocalBoundingBox();
+            }
+        }
+        collideable.worldBoundingBox = TransformBoundingBoxByCorners(collideable.localBoundingBox, entityMatrix);
+
+        if (collideable.blocksNavigation)
+        {
+            sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
+        }
     }
 
     void EditorScene::changeState(EditorSelectState newState)
@@ -898,6 +1662,15 @@ namespace sage
         enterState(std::get<EditorPickState>(state.current));
     }
 
+    void EditorScene::changeState(EditorEditState newState)
+    {
+        auto& state = sys->registry->get<EditorState>(editorStateEntity);
+        std::visit([this](auto& current) { exitState(current); }, state.current);
+        state.RemoveAllSubscriptions();
+        state.current = std::move(newState);
+        enterState(std::get<EditorEditState>(state.current));
+    }
+
     void EditorScene::enterState(EditorSelectState&)
     {
         refreshOverlay();
@@ -913,7 +1686,7 @@ namespace sage
 
         if (IsKeyPressed(KEY_TAB))
         {
-            cyclePlaceable();
+            toggleEditSelectedTransform();
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !sys->UI().GetCellUnderCursor())
         {
@@ -943,10 +1716,6 @@ namespace sage
     {
         if (TextInput::AnyEditing()) return;
 
-        if (IsKeyPressed(KEY_TAB))
-        {
-            cyclePlaceable();
-        }
         if (IsKeyPressed(KEY_LEFT_BRACKET))
         {
             if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
@@ -994,6 +1763,251 @@ namespace sage
             snappedPlacementPosition->z};
         DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, GOLD);
         DrawSphere(marker, 0.08f, GOLD);
+    }
+
+    void EditorScene::enterState(EditorEditState& state)
+    {
+        if (!sys->registry->valid(state.entity) || !sys->registry->any_of<sgTransform>(state.entity))
+        {
+            changeState(EditorSelectState{});
+            return;
+        }
+
+        selectedSceneEntity = state.entity;
+        const auto& transform = sys->registry->get<sgTransform>(state.entity);
+        placementRotationY = transform.GetWorldRot().y;
+        placementScale = std::max(
+            PLACEMENT_MIN_SCALE,
+            (transform.GetScale().x + transform.GetScale().y + transform.GetScale().z) / 3.0f);
+        setEditTargetFromEntity(state.entity);
+        refreshOverlay();
+        refreshSceneWindows();
+    }
+
+    void EditorScene::exitState(EditorEditState&)
+    {
+        endEditGizmoDrag();
+    }
+
+    void EditorScene::updateState(EditorEditState& state)
+    {
+        if (!sys->registry->valid(state.entity) || !sys->registry->any_of<sgTransform>(state.entity))
+        {
+            clearSceneEntitySelection();
+            return;
+        }
+
+        selectedSceneEntity = state.entity;
+        setEditTargetFromEntity(state.entity);
+
+        if (TextInput::AnyEditing()) return;
+
+        if (IsKeyPressed(KEY_TAB))
+        {
+            finishEditSelectedTransform();
+            return;
+        }
+
+        if (editGizmoDrag.active)
+        {
+            updateEditGizmoDrag(state.entity);
+            return;
+        }
+
+        if (IsKeyPressed(KEY_T))
+        {
+            editTransformMode = EditTransformMode::Translate;
+        }
+        if (IsKeyPressed(KEY_R))
+        {
+            editTransformMode = EditTransformMode::Rotate;
+        }
+        if (IsKeyPressed(KEY_Y))
+        {
+            editTransformMode = EditTransformMode::Scale;
+        }
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !sys->UI().GetCellUnderCursor())
+        {
+            const EditGizmoAxis hitAxis = hitTestEditGizmo(state.entity, GetMousePosition());
+            if (hitAxis != EditGizmoAxis::None)
+            {
+                editGizmoDrag = {
+                    .active = true,
+                    .axis = hitAxis,
+                    .lastMousePosition = GetMousePosition(),
+                };
+                sys->camera->LockInput();
+                return;
+            }
+        }
+
+        const bool shiftDown = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+        switch (editTransformMode)
+        {
+        case EditTransformMode::Translate:
+        {
+            Vector3 positionDelta{};
+            if (IsKeyPressedOrRepeated(KEY_LEFT))
+            {
+                positionDelta.x -= EDIT_TRANSLATION_STEP;
+            }
+            if (IsKeyPressedOrRepeated(KEY_RIGHT))
+            {
+                positionDelta.x += EDIT_TRANSLATION_STEP;
+            }
+            if (shiftDown)
+            {
+                if (IsKeyPressedOrRepeated(KEY_UP))
+                {
+                    positionDelta.y += EDIT_TRANSLATION_STEP;
+                }
+                if (IsKeyPressedOrRepeated(KEY_DOWN))
+                {
+                    positionDelta.y -= EDIT_TRANSLATION_STEP;
+                }
+            }
+            else
+            {
+                if (IsKeyPressedOrRepeated(KEY_UP))
+                {
+                    positionDelta.z += EDIT_TRANSLATION_STEP;
+                }
+                if (IsKeyPressedOrRepeated(KEY_DOWN))
+                {
+                    positionDelta.z -= EDIT_TRANSLATION_STEP;
+                }
+            }
+            if (positionDelta.x != 0.0f || positionDelta.y != 0.0f || positionDelta.z != 0.0f)
+            {
+                adjustEditPosition(positionDelta);
+            }
+            break;
+        }
+        case EditTransformMode::Rotate:
+        {
+            if (IsKeyPressedOrRepeated(KEY_LEFT))
+            {
+                adjustEditRotation(-PLACEMENT_ROTATION_STEP);
+            }
+            if (IsKeyPressedOrRepeated(KEY_RIGHT))
+            {
+                adjustEditRotation(PLACEMENT_ROTATION_STEP);
+            }
+            if (IsKeyPressedOrRepeated(KEY_UP))
+            {
+                adjustEditRotationAxis(EditGizmoAxis::X, PLACEMENT_ROTATION_STEP);
+            }
+            if (IsKeyPressedOrRepeated(KEY_DOWN))
+            {
+                adjustEditRotationAxis(EditGizmoAxis::X, -PLACEMENT_ROTATION_STEP);
+            }
+            break;
+        }
+        case EditTransformMode::Scale:
+        {
+            if (IsKeyPressedOrRepeated(KEY_LEFT))
+            {
+                adjustEditScale(-PLACEMENT_SCALE_STEP);
+            }
+            if (IsKeyPressedOrRepeated(KEY_RIGHT))
+            {
+                adjustEditScale(PLACEMENT_SCALE_STEP);
+            }
+            break;
+        }
+        }
+
+        if (IsKeyPressed(KEY_P))
+        {
+            finishEditSelectedTransform();
+        }
+    }
+
+    void EditorScene::drawEditGizmo(const entt::entity entity) const
+    {
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const Vector3 origin = editPivotWorldPosition(entity);
+        const float size = editGizmoSize(origin);
+        const float shaftRadius = size * 0.012f;
+        const float handleSize = size * 0.11f;
+
+        DrawSphere(origin, size * 0.035f, ORANGE);
+
+        auto axisColor = [this](const EditGizmoAxis axis) {
+            return editGizmoDrag.active && editGizmoDrag.axis == axis ? GOLD : editGizmoAxisColor(axis);
+        };
+
+        auto drawTranslateAxis = [&](const EditGizmoAxis axis) {
+            const Vector3 axisVector = editGizmoAxisVector(axis);
+            const Vector3 end = Vector3Add(origin, Vector3Scale(axisVector, size));
+            const Vector3 coneBase = Vector3Add(origin, Vector3Scale(axisVector, size * 0.78f));
+            const Color color = axisColor(axis);
+            DrawCylinderEx(origin, coneBase, shaftRadius, shaftRadius, 8, color);
+            DrawCylinderEx(coneBase, end, size * 0.055f, 0.0f, 12, color);
+        };
+
+        auto drawScaleAxis = [&](const EditGizmoAxis axis) {
+            const Vector3 axisVector = editGizmoAxisVector(axis);
+            const Vector3 end = Vector3Add(origin, Vector3Scale(axisVector, size));
+            const Color color = axisColor(axis);
+            DrawCylinderEx(origin, end, shaftRadius, shaftRadius, 8, color);
+            DrawCubeV(end, {handleSize, handleSize, handleSize}, color);
+        };
+
+        switch (editTransformMode)
+        {
+        case EditTransformMode::Translate:
+            drawTranslateAxis(EditGizmoAxis::X);
+            drawTranslateAxis(EditGizmoAxis::Y);
+            drawTranslateAxis(EditGizmoAxis::Z);
+            break;
+        case EditTransformMode::Rotate:
+        {
+            auto drawRotationRing = [&](const EditGizmoAxis axis) {
+                const Color ringColor =
+                    editGizmoDrag.active && editGizmoDrag.axis == axis ? GOLD : editGizmoAxisColor(axis);
+                Vector3 previous = rotationGizmoPoint(origin, size, axis, 0.0f);
+                for (int i = 1; i <= EDIT_GIZMO_RING_SEGMENTS; ++i)
+                {
+                    const float angle =
+                        (2.0f * PI * static_cast<float>(i)) / static_cast<float>(EDIT_GIZMO_RING_SEGMENTS);
+                    const Vector3 current = rotationGizmoPoint(origin, size, axis, angle);
+                    DrawLine3D(previous, current, ringColor);
+                    previous = current;
+                }
+            };
+
+            drawRotationRing(EditGizmoAxis::X);
+            drawRotationRing(EditGizmoAxis::Y);
+            break;
+        }
+        case EditTransformMode::Scale:
+            drawScaleAxis(EditGizmoAxis::X);
+            drawScaleAxis(EditGizmoAxis::Y);
+            drawScaleAxis(EditGizmoAxis::Z);
+            DrawCubeV(
+                origin,
+                {handleSize * 0.9f, handleSize * 0.9f, handleSize * 0.9f},
+                editGizmoDrag.active && editGizmoDrag.axis == EditGizmoAxis::Uniform
+                    ? GOLD
+                    : Color{245, 245, 245, 255});
+            break;
+        }
+    }
+
+    void EditorScene::drawState3D(const EditorEditState& state) const
+    {
+        if (!snappedPlacementPosition.has_value()) return;
+
+        const Vector3 marker = {
+            snappedPlacementPosition->x,
+            snappedPlacementPosition->y + PLACEMENT_MARKER_HEIGHT,
+            snappedPlacementPosition->z};
+        DrawCubeWires(marker, 1.0f, PLACEMENT_MARKER_HEIGHT, 1.0f, ORANGE);
+        DrawSphere(marker, 0.08f, ORANGE);
+        drawEditGizmo(state.entity);
     }
 
     void EditorScene::drawPlacementPreview() const
@@ -1085,6 +2099,14 @@ namespace sage
         sys->UI().Draw2D();
     }
 
+    bool EditorScene::HandleEscapePressed()
+    {
+        if (!isEditState()) return false;
+
+        cancelEditSelectedTransform();
+        return true;
+    }
+
     EditorScene::EditorScene(EngineSystems* _sys) : sys(_sys)
     {
         sizeGridToLoadedScene();
@@ -1131,7 +2153,9 @@ namespace sage
                 .setTransform =
                     [this](const editor::EditorGui::TransformField field, const float value) {
                         setSelectedTransform(field, value);
-                    }},
+                    },
+                .toggleEditTransform = [this]() { toggleEditSelectedTransform(); },
+                .toggleEditPivot = [this]() { toggleEditPivotMode(); }},
             editor::EditorGui::DeleteConfirmationCallbacks{
                 .confirm = [this]() { confirmDeleteSelectedEntity(); },
                 .cancel = [this]() { cancelDeleteSelectedEntity(); }});

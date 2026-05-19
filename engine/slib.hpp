@@ -75,11 +75,22 @@ namespace sage
             const float rotationAngle,
             const Vector3& scale,
             const Color& tint) const;
+        void Draw(
+            const Vector3& position,
+            const Vector3& rotation,
+            const Vector3& scale,
+            const Color& tint) const;
         void DrawUber(
             UberShaderComponent* uber,
             const Vector3& position,
             const Vector3& rotationAxis,
             const float rotationAngle,
+            const Vector3& scale,
+            const Color& tint) const;
+        void DrawUber(
+            UberShaderComponent* uber,
+            const Vector3& position,
+            const Vector3& rotation,
             const Vector3& scale,
             const Color& tint) const;
         [[nodiscard]] int GetMeshCount() const;

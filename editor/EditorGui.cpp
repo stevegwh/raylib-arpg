@@ -412,7 +412,9 @@ namespace sage::editor
         const std::string& rotationZ,
         const std::string& scaleX,
         const std::string& scaleY,
-        const std::string& scaleZ) const
+        const std::string& scaleZ,
+        const std::string& editButtonText,
+        const std::string& pivotButtonText)
     {
         if (inspectorSelectionText) inspectorSelectionText->SetContent("Selected: " + selectedEntity);
         if (inspectorPositionXText) inspectorPositionXText->SetContent(positionX);
@@ -424,6 +426,9 @@ namespace sage::editor
         if (inspectorScaleXText) inspectorScaleXText->SetContent(scaleX);
         if (inspectorScaleYText) inspectorScaleYText->SetContent(scaleY);
         if (inspectorScaleZText) inspectorScaleZText->SetContent(scaleZ);
+        if (inspectorEditButtonText) inspectorEditButtonText->SetContent(editButtonText);
+        inspectorPivotButtonVisible = !pivotButtonText.empty();
+        if (inspectorPivotButtonText) inspectorPivotButtonText->SetContent(pivotButtonText);
     }
 
     void EditorGui::ShowDeleteConfirmation(const std::string& selectedEntity) const
@@ -896,6 +901,31 @@ namespace sage::editor
             inspectorScaleXText = scaleTexts[0];
             inspectorScaleYText = scaleTexts[1];
             inspectorScaleZText = scaleTexts[2];
+
+            auto* buttonRow = table->CreateTableRow(34.0f);
+            auto* editCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
+            auto editButton = std::make_unique<TextButton>(
+                ui,
+                editCell,
+                [this]() {
+                    if (inspectorCallbacks.toggleEditTransform) inspectorCallbacks.toggleEditTransform();
+                },
+                [this]() {
+                    return selectedSceneEntity.has_value();
+                });
+            inspectorEditButtonText = editCell->CreateTextbox(std::move(editButton), "Edit Transform");
+
+            auto* pivotCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
+            auto pivotButton = std::make_unique<TextButton>(
+                ui,
+                pivotCell,
+                [this]() {
+                    if (inspectorCallbacks.toggleEditPivot) inspectorCallbacks.toggleEditPivot();
+                },
+                [this]() {
+                    return selectedSceneEntity.has_value() && inspectorPivotButtonVisible;
+                });
+            inspectorPivotButtonText = pivotCell->CreateTextbox(std::move(pivotButton), "");
         }
 
         inspectorWindow->FinalizeLayout();
