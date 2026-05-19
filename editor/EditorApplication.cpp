@@ -2,6 +2,8 @@
 
 #include "EditorMapLoader.hpp"
 #include "EditorScene.hpp"
+
+#include <filesystem>
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
 #include "engine/EngineSystems.hpp"
@@ -24,9 +26,11 @@ namespace sage
         EnableCursor();
 
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
-        editor::LoadMap(registry.get(), "resources/dungeon-map.bin");
+        constexpr const char* mapPath = "resources/dungeon-map.bin";
+        editor::LoadMap(registry.get(), mapPath);
         systems = std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
         scene = std::make_unique<EditorScene>(systems.get());
+        scene->SetSceneName(std::filesystem::path{mapPath}.stem().string());
 
         const auto viewport = settings->GetViewPort();
         renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));

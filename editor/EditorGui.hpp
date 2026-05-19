@@ -120,13 +120,9 @@ namespace sage
             DeleteConfirmationCallbacks deleteConfirmationCallbacks;
             std::optional<std::size_t> selectedAssetIndex;
             std::optional<entt::entity> selectedSceneEntity;
-            TextBox* selectedAssetText{};
+            TextBox* overlayTitleText{};
             TextBox* modeText{};
-            TextBox* gridText{};
-            TextBox* placementHeightText{};
-            TextBox* placementRotationText{};
-            TextBox* placementScaleText{};
-            TextBox* lastPlacedText{};
+            TextBox* cursorText{};
             TextBox* defaultsAssetText{};
             TextBox* defaultsPositionText{};
             TextBox* defaultsRotationText{};
@@ -176,17 +172,13 @@ namespace sage
             }
 
           public:
-            void SetPlacementStatus(
-                const std::string& mode,
-                const std::string& selectedAsset,
-                const std::string& hoveredGrid,
-                const std::string& placementHeight,
-                const std::string& placementRotation,
-                const std::string& placementScale,
+            void SetOverlayStatus(const std::string& mode, const std::string& cursor) const;
+            void SetAssetDefaultsStatus(
+                const std::string& assetName,
                 const std::string& modelDefaultHeight,
                 const std::string& modelDefaultRotation,
-                const std::string& modelDefaultScale,
-                const std::string& lastPlaced) const;
+                const std::string& modelDefaultScale) const;
+            void SetSceneName(const std::string& sceneName) const;
             void SetSelectedAsset(std::optional<std::size_t> index);
             void SetHierarchy(const std::vector<SceneObjectEntry>& entries, std::optional<entt::entity> selectedEntity);
             void SetInspector(

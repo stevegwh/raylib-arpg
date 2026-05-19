@@ -112,10 +112,7 @@ namespace sage::editor
                 const float labelHeight = 22.0f;
                 const float imageSize = std::max(0.0f, std::min(rec.width, rec.height - labelHeight - 6.0f));
                 const Rectangle imageDest = {
-                    rec.x + (rec.width - imageSize) * 0.5f,
-                    rec.y + 6.0f,
-                    imageSize,
-                    imageSize};
+                    rec.x + (rec.width - imageSize) * 0.5f, rec.y + 6.0f, imageSize, imageSize};
 
                 if (thumbnail && thumbnail->texture.id != 0)
                 {
@@ -247,9 +244,7 @@ namespace sage::editor
 
                 if (hasEntry)
                 {
-                    DrawRectangleRec(
-                        rec,
-                        selected ? Color{221, 235, 255, 255} : Color{246, 248, 251, 255});
+                    DrawRectangleRec(rec, selected ? Color{221, 235, 255, 255} : Color{246, 248, 251, 255});
                     DrawRectangleLinesEx(
                         rec,
                         selected ? 2.0f : 1.0f,
@@ -318,12 +313,13 @@ namespace sage::editor
                 const float thumbHeight = totalCount <= visibleCount
                                               ? rec.height
                                               : std::max(18.0f, rec.height * (visibleCount / totalCount));
-                const std::size_t maxOffset =
-                    totalRows() > visibleRows() ? totalRows() - visibleRows() : 0;
+                const std::size_t maxOffset = totalRows() > visibleRows() ? totalRows() - visibleRows() : 0;
                 const float scrollRatio =
                     maxOffset == 0 ? 0.0f : static_cast<float>(*scrollOffset) / static_cast<float>(maxOffset);
                 const float thumbY = rec.y + (rec.height - thumbHeight) * scrollRatio;
-                DrawRectangleRec({rec.x + 2.0f, thumbY + 2.0f, rec.width - 4.0f, thumbHeight - 4.0f}, Color{139, 148, 164, 255});
+                DrawRectangleRec(
+                    {rec.x + 2.0f, thumbY + 2.0f, rec.width - 4.0f, thumbHeight - 4.0f},
+                    Color{139, 148, 164, 255});
             }
 
             ScrollbarTrack(
@@ -341,29 +337,27 @@ namespace sage::editor
         };
     } // namespace
 
-    void EditorGui::SetPlacementStatus(
-        const std::string& mode,
-        const std::string& selectedAsset,
-        const std::string& hoveredGrid,
-        const std::string& placementHeight,
-        const std::string& placementRotation,
-        const std::string& placementScale,
-        const std::string& modelDefaultHeight,
-        const std::string& modelDefaultRotation,
-        const std::string& modelDefaultScale,
-        const std::string& lastPlaced) const
+    void EditorGui::SetOverlayStatus(const std::string& mode, const std::string& cursor) const
     {
         if (modeText) modeText->SetContent("Mode: " + mode);
-        if (selectedAssetText) selectedAssetText->SetContent("Asset: " + selectedAsset);
-        if (gridText) gridText->SetContent("Grid: " + hoveredGrid);
-        if (placementHeightText) placementHeightText->SetContent("Grid Y: " + placementHeight);
-        if (placementRotationText) placementRotationText->SetContent("Rot: " + placementRotation);
-        if (placementScaleText) placementScaleText->SetContent("Scale: " + placementScale);
-        if (lastPlacedText) lastPlacedText->SetContent("Last: " + lastPlaced);
-        if (defaultsAssetText) defaultsAssetText->SetContent("Asset: " + selectedAsset);
+        if (cursorText) cursorText->SetContent("Cursor: " + cursor);
+    }
+
+    void EditorGui::SetAssetDefaultsStatus(
+        const std::string& assetName,
+        const std::string& modelDefaultHeight,
+        const std::string& modelDefaultRotation,
+        const std::string& modelDefaultScale) const
+    {
+        if (defaultsAssetText) defaultsAssetText->SetContent("Asset: " + assetName);
         if (defaultsPositionText) defaultsPositionText->SetContent(modelDefaultHeight);
         if (defaultsRotationText) defaultsRotationText->SetContent(modelDefaultRotation);
         if (defaultsScaleText) defaultsScaleText->SetContent(modelDefaultScale);
+    }
+
+    void EditorGui::SetSceneName(const std::string& sceneName) const
+    {
+        if (overlayTitleText) overlayTitleText->SetContent("SAGE - " + sceneName);
     }
 
     void EditorGui::SetSelectedAsset(const std::optional<std::size_t> index)
@@ -383,7 +377,8 @@ namespace sage::editor
     void EditorGui::scrollHierarchy(const int amount)
     {
         const std::size_t visibleRows = hierarchyRows.size();
-        const std::size_t maxOffset = hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
+        const std::size_t maxOffset =
+            hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
 
         if (amount < 0)
         {
@@ -411,27 +406,25 @@ namespace sage::editor
         }
         else if (amount > 0)
         {
-            inspectorFieldScrollOffset = std::min(maxOffset, inspectorFieldScrollOffset + static_cast<std::size_t>(amount));
+            inspectorFieldScrollOffset =
+                std::min(maxOffset, inspectorFieldScrollOffset + static_cast<std::size_t>(amount));
         }
     }
 
     void EditorGui::SetHierarchy(
-        const std::vector<SceneObjectEntry>& entries,
-        const std::optional<entt::entity> selectedEntity)
+        const std::vector<SceneObjectEntry>& entries, const std::optional<entt::entity> selectedEntity)
     {
         hierarchyEntries = entries;
         selectedSceneEntity = selectedEntity;
 
         const std::size_t visibleRows = hierarchyRows.size();
-        const std::size_t maxOffset = hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
+        const std::size_t maxOffset =
+            hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
         hierarchyScrollOffset = std::min(hierarchyScrollOffset, maxOffset);
         const bool showScrollbar = maxOffset > 0;
-        if (hierarchyScrollbarUpText)
-            hierarchyScrollbarUpText->SetContent(showScrollbar ? "^" : "");
-        if (hierarchyScrollbarTrackText)
-            hierarchyScrollbarTrackText->SetContent(showScrollbar ? " " : "");
-        if (hierarchyScrollbarDownText)
-            hierarchyScrollbarDownText->SetContent(showScrollbar ? "v" : "");
+        if (hierarchyScrollbarUpText) hierarchyScrollbarUpText->SetContent(showScrollbar ? "^" : "");
+        if (hierarchyScrollbarTrackText) hierarchyScrollbarTrackText->SetContent(showScrollbar ? " " : "");
+        if (hierarchyScrollbarDownText) hierarchyScrollbarDownText->SetContent(showScrollbar ? "v" : "");
 
         if (hierarchyWindow && !hierarchyWindow->IsHidden() && maxOffset > 0)
         {
@@ -460,13 +453,13 @@ namespace sage::editor
             }
 
             const auto& entry = hierarchyEntries[entryIndex];
-            hierarchyRows[i]->SetContent(std::string(static_cast<std::size_t>(entry.depth * 2), ' ') + entry.displayName);
+            hierarchyRows[i]->SetContent(
+                std::string(static_cast<std::size_t>(entry.depth * 2), ' ') + entry.displayName);
         }
     }
 
     void EditorGui::SetInspector(
-        const std::string& selectedEntity,
-        const std::vector<InspectedComponent>& inspectedComponents)
+        const std::string& selectedEntity, const std::vector<InspectedComponent>& inspectedComponents)
     {
         if (inspectorSelectionText) inspectorSelectionText->SetContent("Selected: " + selectedEntity);
         rebuildInspectorFieldRows(inspectedComponents);
@@ -508,11 +501,11 @@ namespace sage::editor
         if (binding.valueTexts[2]) binding.valueTexts[2]->SetContent(FormatFloat(value.z));
     }
 
-    const EditorGui::InspectorFieldDrawer* EditorGui::findInspectorFieldDrawer(const std::type_index valueType) const
+    const EditorGui::InspectorFieldDrawer* EditorGui::findInspectorFieldDrawer(
+        const std::type_index valueType) const
     {
-        const auto it = std::ranges::find_if(inspectorFieldDrawers, [valueType](const auto& entry) {
-            return entry.first == valueType;
-        });
+        const auto it = std::ranges::find_if(
+            inspectorFieldDrawers, [valueType](const auto& entry) { return entry.first == valueType; });
         return it == inspectorFieldDrawers.end() ? nullptr : &it->second;
     }
 
@@ -614,6 +607,7 @@ namespace sage::editor
 
         for (const auto& component : inspectedComponents)
         {
+            // TODO: This is awful.
             bool componentHeaderCreated = false;
             for (const auto& field : component.fields)
             {
@@ -653,12 +647,14 @@ namespace sage::editor
                         ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
                     labelCell->CreateTextbox(std::move(label), field.label + ":");
 
-                    auto transformSetter = [this, &component, &field](const char axis) -> std::function<void(float)> {
+                    auto transformSetter =
+                        [this, &component, &field](const char axis) -> std::function<void(float)> {
                         if (component.displayName != "Transform") return {};
 
                         auto makeSetter = [this](const TransformField transformField) {
                             return [this, transformField](const float value) {
-                                if (inspectorCallbacks.setTransform) inspectorCallbacks.setTransform(transformField, value);
+                                if (inspectorCallbacks.setTransform)
+                                    inspectorCallbacks.setTransform(transformField, value);
                             };
                         };
 
@@ -780,7 +776,7 @@ namespace sage::editor
             24.0f,
             -24.0f,
             360.0f,
-            320.0f,
+            120.0f,
             VertAlignment::BOTTOM,
             HoriAlignment::LEFT,
             Padding{20, 16, 14, 14});
@@ -789,10 +785,12 @@ namespace sage::editor
         auto* mainTable = overlayWindow->CreateTable({0, 0, 1, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(8);
+            // The title doubles as the scene-name display, so capture the
+            // pointer for later SetSceneName updates.
+            auto* titleRow = mainTable->CreateTableRow(30);
             auto* titleCell = titleRow->CreateTableCell();
             auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
-            titleCell->CreateTitleBar(std::move(title), "Editor");
+            overlayTitleText = titleCell->CreateTitleBar(std::move(title), "");
         }
 
         {
@@ -808,23 +806,15 @@ namespace sage::editor
                 return cell->CreateTextbox(std::move(label), text);
             };
 
-            addLine("Scene: Grid workspace");
             modeText = addLine("Mode: Select");
-            selectedAssetText = addLine("Asset: None");
-            gridText = addLine("Grid: None");
-            placementHeightText = addLine("Grid Y: 0.00");
-            placementRotationText = addLine("Rot: 0");
-            placementScaleText = addLine("Scale: 1.00");
-            lastPlacedText = addLine("Last: None");
+            cursorText = addLine("Cursor: -");
         }
 
         overlayWindow->FinalizeLayout();
     }
 
     void EditorGui::createHierarchyWindow(
-        GameUIEngine* ui,
-        Settings* settings,
-        const std::function<void(entt::entity)>& onSceneObjectSelected)
+        GameUIEngine* ui, Settings* settings, const std::function<void(entt::entity)>& onSceneObjectSelected)
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -1021,21 +1011,12 @@ namespace sage::editor
                 return valueText;
             };
 
-            defaultsPositionText = addControlRow(
-                "Z",
-                "0.00",
-                modelDefaultCallbacks.heightDown,
-                modelDefaultCallbacks.heightUp);
-            defaultsRotationText = addControlRow(
-                "Rot Y",
-                "0",
-                modelDefaultCallbacks.rotationDown,
-                modelDefaultCallbacks.rotationUp);
-            defaultsScaleText = addControlRow(
-                "Scale",
-                "1.00",
-                modelDefaultCallbacks.scaleDown,
-                modelDefaultCallbacks.scaleUp);
+            defaultsPositionText =
+                addControlRow("Z", "0.00", modelDefaultCallbacks.heightDown, modelDefaultCallbacks.heightUp);
+            defaultsRotationText =
+                addControlRow("Rot Y", "0", modelDefaultCallbacks.rotationDown, modelDefaultCallbacks.rotationUp);
+            defaultsScaleText =
+                addControlRow("Scale", "1.00", modelDefaultCallbacks.scaleDown, modelDefaultCallbacks.scaleUp);
 
             auto* buttonRow = table->CreateTableRow();
 
@@ -1100,9 +1081,7 @@ namespace sage::editor
             inspectorSelectionText = addLine("Selected: None");
 
             auto* fieldsRow = table->CreateTableRow(Padding{2, 0, 0, 0});
-            auto inspectorHasOverflow = [this]() {
-                return inspectorFieldTotalRows > inspectorFieldVisibleRows;
-            };
+            auto inspectorHasOverflow = [this]() { return inspectorFieldTotalRows > inspectorFieldVisibleRows; };
 
             auto* fieldsCell = fieldsRow->CreateTableCell(94.0f, Padding{2, 2, 2, 2});
             auto* scrollbarCell = fieldsRow->CreateTableCell(6.0f, Padding{2, 2, 0, 2});
@@ -1112,8 +1091,8 @@ namespace sage::editor
 
             auto* upRow = scrollbarTable->CreateTableRow(12.0f);
             auto* upCell = upRow->CreateTableCell(Padding{1, 1, 0, 0});
-            auto upButton =
-                std::make_unique<TextButton>(ui, upCell, [this]() { scrollInspectorFields(-1); }, inspectorHasOverflow);
+            auto upButton = std::make_unique<TextButton>(
+                ui, upCell, [this]() { scrollInspectorFields(-1); }, inspectorHasOverflow);
             inspectorScrollbarUpText = upCell->CreateTextbox(std::move(upButton), "^");
 
             auto* trackRow = scrollbarTable->CreateTableRow({0, 0, 0, 0});
@@ -1128,8 +1107,8 @@ namespace sage::editor
 
             auto* downRow = scrollbarTable->CreateTableRow(12.0f);
             auto* downCell = downRow->CreateTableCell(Padding{1, 1, 0, 0});
-            auto downButton =
-                std::make_unique<TextButton>(ui, downCell, [this]() { scrollInspectorFields(1); }, inspectorHasOverflow);
+            auto downButton = std::make_unique<TextButton>(
+                ui, downCell, [this]() { scrollInspectorFields(1); }, inspectorHasOverflow);
             inspectorScrollbarDownText = downCell->CreateTextbox(std::move(downButton), "v");
         }
 
@@ -1178,8 +1157,7 @@ namespace sage::editor
             confirmCell->CreateTextbox(std::move(confirmButton), "Delete");
 
             auto* cancelCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
-            auto cancelButton =
-                std::make_unique<TextButton>(ui, cancelCell, deleteConfirmationCallbacks.cancel);
+            auto cancelButton = std::make_unique<TextButton>(ui, cancelCell, deleteConfirmationCallbacks.cancel);
             cancelCell->CreateTextbox(std::move(cancelButton), "Cancel");
         }
 

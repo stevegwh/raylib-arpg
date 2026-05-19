@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EditGizmo.hpp"
 #include "EditorComponents.hpp"
 #include "EditorGui.hpp"
 #include "EditorInspector.hpp"
@@ -93,28 +94,8 @@ namespace sage
             LocalCenter
         };
 
-        enum class EditTransformMode
-        {
-            Translate,
-            Rotate,
-            Scale
-        };
-
-        enum class EditGizmoAxis
-        {
-            None,
-            X,
-            Y,
-            Z,
-            Uniform
-        };
-
-        struct EditGizmoDragState
-        {
-            bool active = false;
-            EditGizmoAxis axis = EditGizmoAxis::None;
-            Vector2 lastMousePosition{};
-        };
+        using EditTransformMode = editor::EditGizmo::Mode;
+        using EditGizmoAxis = editor::EditGizmo::Axis;
 
         EngineSystems* sys{};
         std::unique_ptr<editor::EditorGui> gui;
@@ -130,11 +111,10 @@ namespace sage
         std::optional<GridSquare> hoveredGridSquare;
         std::optional<Vector3> snappedPlacementPosition;
         std::optional<entt::entity> selectedSceneEntity;
-        std::string lastPlacedLabel = "None";
         entt::entity editorStateEntity = entt::null;
         EditPivotMode editPivotMode = EditPivotMode::LocalCenter;
         EditTransformMode editTransformMode = EditTransformMode::Translate;
-        EditGizmoDragState editGizmoDrag;
+        editor::EditGizmo editGizmo;
 
         void createGridPickSurface();
         void sizeGridToLoadedScene();
@@ -211,31 +191,13 @@ namespace sage
         [[nodiscard]] std::string describeMode() const;
         [[nodiscard]] std::string describeEditTransformMode() const;
         [[nodiscard]] std::string describeSelectedAsset() const;
-        [[nodiscard]] std::string describeHoveredGrid() const;
-        [[nodiscard]] std::string describeGridSurfaceY() const;
-        [[nodiscard]] std::string describePlacementRotation() const;
-        [[nodiscard]] std::string describePlacementScale() const;
+        [[nodiscard]] std::string describeCursorPosition() const;
         [[nodiscard]] std::string describeSelectedModelDefaultHeight() const;
         [[nodiscard]] std::string describeSelectedModelDefaultRotation() const;
         [[nodiscard]] std::string describeSelectedModelDefaultScale() const;
         [[nodiscard]] std::string describeEntity(entt::entity entity) const;
         [[nodiscard]] std::string describeSelectedSceneEntity() const;
         [[nodiscard]] Vector3 editPivotWorldPosition(entt::entity entity) const;
-        [[nodiscard]] Vector3 editGizmoAxisVector(EditGizmoAxis axis) const;
-        [[nodiscard]] Color editGizmoAxisColor(EditGizmoAxis axis) const;
-        [[nodiscard]] Vector3 rotationGizmoPoint(Vector3 origin, float radius, EditGizmoAxis axis, float angle) const;
-        [[nodiscard]] Vector2 worldToEditScreen(Vector3 worldPosition) const;
-        [[nodiscard]] float editGizmoSize(Vector3 origin) const;
-        [[nodiscard]] float projectedMouseDeltaOnGizmoAxis(
-            Vector3 origin,
-            EditGizmoAxis axis,
-            Vector2 mouseDelta) const;
-        [[nodiscard]] EditGizmoAxis hitTestEditGizmo(entt::entity entity, Vector2 mousePosition) const;
-        [[nodiscard]] float screenDistanceToRotationGizmo(
-            Vector3 origin,
-            float radius,
-            EditGizmoAxis axis,
-            Vector2 mousePosition) const;
         [[nodiscard]] Matrix selectedModelDefaultTransform() const;
         [[nodiscard]] Matrix modelDefaultTransform(const PlaceableMesh& placeable) const;
         [[nodiscard]] SerializedAssetDefaults serializeAssetDefaults(const PlaceableMesh& placeable) const;
@@ -246,13 +208,13 @@ namespace sage
             std::vector<editor::EditorGui::SceneObjectEntry>& entries,
             entt::entity entity,
             int depth) const;
-        void drawEditGizmo(entt::entity entity) const;
-
       public:
         void Update();
         void Draw3D() const;
         void Draw2D() const;
         [[nodiscard]] bool HandleEscapePressed();
+
+        void SetSceneName(const std::string& sceneName) const;
 
         explicit EditorScene(EngineSystems* _sys);
         ~EditorScene();
