@@ -16,6 +16,8 @@
 namespace sage
 {
     class TextBox;
+    class Checkbox;
+    class DropdownList;
     class TitleBar;
     class ImageBox;
     class GameWindowButton;
@@ -50,6 +52,7 @@ namespace sage
         std::optional<NPatchInfo> nPatchInfo{};
 
         virtual CellElement* GetCellUnderCursor();
+        [[nodiscard]] virtual bool CapturesCursor(Vector2 point) const;
         void OnHoverStop() override;
         virtual void Update();
         virtual void ScaleContents(Settings* _settings);
@@ -82,6 +85,8 @@ namespace sage
       public:
         // TODO: use polymorphism for any duplicates
         TextBox* CreateTextbox(std::unique_ptr<TextBox> _textBox, const std::string& _content);
+        Checkbox* CreateCheckbox(std::unique_ptr<Checkbox> _checkbox);
+        DropdownList* CreateDropdownList(std::unique_ptr<DropdownList> _dropdown);
         TitleBar* CreateTitleBar(std::unique_ptr<TitleBar> _titleBar, const std::string& _title);
         ImageBox* CreateImagebox(std::unique_ptr<ImageBox> _imageBox);
         CloseButton* CreateCloseButton(std::unique_ptr<CloseButton> _closeButton);

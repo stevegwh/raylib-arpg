@@ -108,6 +108,11 @@ namespace sage
         if (!canReceiveDragDrops) return;
     }
 
+    bool CellElement::CapturesCursor(Vector2 point) const
+    {
+        return false;
+    }
+
     void CellElement::UpdateDimensions()
     {
         tex.width = parent->GetRec().width;

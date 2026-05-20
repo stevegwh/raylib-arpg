@@ -86,24 +86,41 @@ namespace sage
 
     CellElement* GameUIEngine::GetCellUnderCursor() const
     {
-        Window* windowUnderCursor = nullptr;
         const auto mousePos = GetMousePosition();
-        for (auto& window : windows)
+        for (auto windowIt = windows.rbegin(); windowIt != windows.rend(); ++windowIt)
         {
+            auto& window = *windowIt;
             if (window->IsHidden()) continue;
-            if (PointInsideRect(window->rec, mousePos) && mouseInNonObscuredWindowRegion(window.get(), mousePos))
+
+            if (!window->CapturesCursor(mousePos)) continue;
+
+            for (const auto& child : window->children)
             {
-                windowUnderCursor = window.get();
+                if (child->CapturesCursor(mousePos))
+                {
+                    if (auto childElement = child->GetCellUnderCursor())
+                    {
+                        return childElement;
+                    }
+                }
             }
         }
-        if (windowUnderCursor == nullptr) return nullptr;
-        for (const auto& child : windowUnderCursor->children)
-        {
 
-            if (auto childElement = child->GetCellUnderCursor())
+        for (auto windowIt = windows.rbegin(); windowIt != windows.rend(); ++windowIt)
+        {
+            auto& window = *windowIt;
+            if (window->IsHidden()) continue;
+            if (!PointInsideRect(window->rec, mousePos)) continue;
+            if (!mouseInNonObscuredWindowRegion(window.get(), mousePos)) continue;
+
+            for (const auto& child : window->children)
             {
-                return childElement;
+                if (auto childElement = child->GetCellUnderCursor())
+                {
+                    return childElement;
+                }
             }
+            return nullptr;
         }
         return nullptr;
     }
@@ -115,6 +132,10 @@ namespace sage
         {
             if (!window || window->IsHidden()) continue;
             if (PointInsideRect(window->rec, mousePos) && mouseInNonObscuredWindowRegion(window.get(), mousePos))
+            {
+                return true;
+            }
+            if (window->CapturesCursor(mousePos))
             {
                 return true;
             }
@@ -160,11 +181,19 @@ namespace sage
 
     void GameUIEngine::Draw2D() const
     {
+        overlayDrawQueue.clear();
+
         for (const auto& window : windows)
         {
             if (window->IsHidden()) continue;
             window->Draw2D();
         }
+
+        for (const auto& drawOverlay : overlayDrawQueue)
+        {
+            if (drawOverlay) drawOverlay();
+        }
+        overlayDrawQueue.clear();
 
         if (tooltipWindow && !tooltipWindow->hidden)
         {
@@ -180,6 +209,11 @@ namespace sage
         {
             errorMessage->Draw2D();
         }
+    }
+
+    void GameUIEngine::QueueOverlayDraw(std::function<void()> draw) const
+    {
+        overlayDrawQueue.push_back(std::move(draw));
     }
 
     /**
@@ -220,13 +254,16 @@ namespace sage
         {
             if (!window || window->IsMarkedForRemoval() || window->IsHidden()) continue;
 
-            if (!PointInsideRect(window->rec, mousePos) || !mouseInNonObscuredWindowRegion(window.get(), mousePos))
+            const bool insideWindow = PointInsideRect(window->rec, mousePos);
+            const bool capturesCursor = window->CapturesCursor(mousePos);
+            if ((!insideWindow && !capturesCursor) ||
+                (insideWindow && !mouseInNonObscuredWindowRegion(window.get(), mousePos)))
             {
                 window->OnHoverStop();
                 continue;
             }
 
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (insideWindow && (IsMouseButtonDown(MOUSE_BUTTON_LEFT) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)))
             {
                 BringClickedWindowToFront(window.get());
             }

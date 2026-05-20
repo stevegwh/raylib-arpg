@@ -275,11 +275,21 @@ namespace sage
         const auto& mousePos = GetMousePosition();
         if (element.has_value())
         {
-            if (PointInsideRect(rec, mousePos))
+            if (element.value()->CapturesCursor(mousePos) || PointInsideRect(rec, mousePos))
             {
                 return element.value().get();
             }
             return nullptr;
+        }
+        for (const auto& child : children)
+        {
+            if (child->CapturesCursor(mousePos))
+            {
+                if (auto childCell = child->GetCellUnderCursor())
+                {
+                    return childCell;
+                }
+            }
         }
         for (const auto& child : children)
         {
@@ -289,6 +299,23 @@ namespace sage
             }
         }
         return nullptr;
+    }
+
+    bool TableElement::CapturesCursor(Vector2 point) const
+    {
+        if (element.has_value())
+        {
+            return element.value() && element.value()->CapturesCursor(point);
+        }
+
+        for (const auto& child : children)
+        {
+            if (child->CapturesCursor(point))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void TableElement::Update()
@@ -602,6 +629,22 @@ namespace sage
         textbox->SetContent(_content);
         InitLayout();
         return textbox;
+    }
+
+    Checkbox* TableCell::CreateCheckbox(std::unique_ptr<Checkbox> _checkbox)
+    {
+        element = std::move(_checkbox);
+        auto* checkbox = dynamic_cast<Checkbox*>(element.value().get());
+        InitLayout();
+        return checkbox;
+    }
+
+    DropdownList* TableCell::CreateDropdownList(std::unique_ptr<DropdownList> _dropdown)
+    {
+        element = std::move(_dropdown);
+        auto* dropdown = dynamic_cast<DropdownList*>(element.value().get());
+        InitLayout();
+        return dropdown;
     }
 
     ImageBox* TableCell::CreateImagebox(std::unique_ptr<ImageBox> _imageBox)

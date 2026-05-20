@@ -122,6 +122,7 @@ namespace sage
         virtual void DragDraw() {};
         virtual void OnDrop(CellElement* receiver);
         virtual void ReceiveDrop(CellElement* droppedElement);
+        [[nodiscard]] virtual bool CapturesCursor(Vector2 point) const;
         virtual void UpdateDimensions();
         virtual void Draw2D() = 0;
         explicit CellElement(

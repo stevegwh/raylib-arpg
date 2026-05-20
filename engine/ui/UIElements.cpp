@@ -6,16 +6,36 @@
 
 #include "../GameUiEngine.hpp" // for Window/TableCell/TooltipWindow full defs
 #include "../Settings.hpp"
+#include "../slib.hpp"
 
 #include "raylib.h"
 
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 #include <utility>
 
 namespace sage
 {
     TextInput* TextInput::activeInput = nullptr;
+    DropdownList* DropdownList::activeDropdown = nullptr;
+
+    namespace
+    {
+        constexpr Color CONTROL_BG = {246, 248, 251, 255};
+        constexpr Color CONTROL_BG_ACTIVE = {255, 255, 255, 255};
+        constexpr Color CONTROL_BORDER = {151, 164, 184, 255};
+        constexpr Color CONTROL_BORDER_ACTIVE = {37, 99, 235, 255};
+        constexpr Color CONTROL_HOVER_BG = {236, 242, 252, 255};
+        constexpr Color CONTROL_SELECTED_BG = {219, 234, 254, 255};
+        constexpr Color CONTROL_TEXT = {17, 24, 39, 255};
+
+        const std::string& emptyDropdownText()
+        {
+            static const std::string empty;
+            return empty;
+        }
+    } // namespace
 
     const std::string& TextBox::GetContent() const
     {
@@ -403,6 +423,443 @@ namespace sage
         : TextBox(_engine, _parent, _fontInfo, _vertAlignment, _horiAlignment),
           onSubmit(std::move(callback))
     {
+    }
+
+    void Checkbox::SetChecked(const bool _checked)
+    {
+        checked = _checked;
+    }
+
+    bool Checkbox::IsChecked() const
+    {
+        return checked;
+    }
+
+    void Checkbox::OnClick()
+    {
+        CellElement::OnClick();
+        checked = !checked;
+        onValueChanged.Publish(checked);
+    }
+
+    void Checkbox::UpdateDimensions()
+    {
+        const float availableWidth = parent->GetRec().width - parent->padding.left - parent->padding.right;
+        const float availableHeight = parent->GetRec().height - parent->padding.up - parent->padding.down;
+        const float preferredSize = 18.0f * engine->settings->GetCurrentScaleFactor();
+        const float size = std::max(0.0f, std::min({availableWidth, availableHeight, preferredSize}));
+
+        float horiOffset = 0.0f;
+        float vertOffset = 0.0f;
+        if (horiAlignment == HoriAlignment::CENTER || horiAlignment == HoriAlignment::WINDOW_CENTER)
+        {
+            horiOffset = (availableWidth - size) * 0.5f;
+        }
+        else if (horiAlignment == HoriAlignment::RIGHT)
+        {
+            horiOffset = availableWidth - size;
+        }
+
+        if (vertAlignment == VertAlignment::MIDDLE)
+        {
+            vertOffset = (availableHeight - size) * 0.5f;
+        }
+        else if (vertAlignment == VertAlignment::BOTTOM)
+        {
+            vertOffset = availableHeight - size;
+        }
+
+        rec = {
+            parent->GetRec().x + parent->padding.left + horiOffset,
+            parent->GetRec().y + parent->padding.up + vertOffset,
+            size,
+            size};
+    }
+
+    void Checkbox::Draw2D()
+    {
+        const bool focused =
+            std::holds_alternative<HoverState>(state) || std::holds_alternative<DragDelayState>(state);
+        DrawRectangleRec(rec, checked ? CONTROL_BORDER_ACTIVE : CONTROL_BG);
+        DrawRectangleLinesEx(
+            rec, focused || checked ? 2.0f : 1.0f, focused ? CONTROL_BORDER_ACTIVE : CONTROL_BORDER);
+
+        if (!checked) return;
+
+        const float lineWidth = std::max(2.0f, rec.width * 0.12f);
+        const Vector2 start{rec.x + rec.width * 0.24f, rec.y + rec.height * 0.52f};
+        const Vector2 middle{rec.x + rec.width * 0.43f, rec.y + rec.height * 0.70f};
+        const Vector2 end{rec.x + rec.width * 0.78f, rec.y + rec.height * 0.30f};
+        DrawLineEx(start, middle, lineWidth, WHITE);
+        DrawLineEx(middle, end, lineWidth, WHITE);
+    }
+
+    Checkbox::Checkbox(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        const bool _checked,
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
+        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment), checked(_checked)
+    {
+    }
+
+    void DropdownList::updateFontScaling()
+    {
+        const float scaleFactor = engine->settings->GetCurrentScaleFactor();
+        fontInfo.fontSize = fontInfo.baseFontSize * scaleFactor;
+        fontInfo.fontSize = std::clamp(fontInfo.fontSize, fontInfo.minFontSize, fontInfo.maxFontSize);
+    }
+
+    float DropdownList::optionHeight() const
+    {
+        return std::max(rec.height, fontInfo.fontSize + 10.0f);
+    }
+
+    std::size_t DropdownList::visibleOptionCount() const
+    {
+        return std::min(maxVisibleOptions, options.size());
+    }
+
+    Rectangle DropdownList::expandedListRec() const
+    {
+        const float listHeight = optionHeight() * static_cast<float>(visibleOptionCount());
+        const float y = dropDirection == DropDirection::DOWN ? rec.y + rec.height : rec.y - listHeight;
+        return {rec.x, y, rec.width, listHeight};
+    }
+
+    std::optional<std::size_t> DropdownList::optionIndexAt(const Vector2 point) const
+    {
+        const Rectangle listRec = expandedListRec();
+        if (!PointInsideRect(listRec, point) || options.empty()) return std::nullopt;
+
+        const auto rowIndex =
+            static_cast<std::size_t>(std::floor((point.y - listRec.y) / std::max(1.0f, optionHeight())));
+        const std::size_t optionIndex = firstVisibleOption + rowIndex;
+        if (optionIndex >= options.size()) return std::nullopt;
+        return optionIndex;
+    }
+
+    void DropdownList::clampScrollOffset()
+    {
+        const std::size_t visibleCount = visibleOptionCount();
+        const std::size_t maxOffset = options.size() > visibleCount ? options.size() - visibleCount : 0;
+        firstVisibleOption = std::min(firstVisibleOption, maxOffset);
+    }
+
+    void DropdownList::scrollOptions(const int signedDelta)
+    {
+        const std::size_t visibleCount = visibleOptionCount();
+        const std::size_t maxOffset = options.size() > visibleCount ? options.size() - visibleCount : 0;
+
+        if (signedDelta < 0)
+        {
+            const auto positiveDelta = static_cast<std::size_t>(-signedDelta);
+            firstVisibleOption = positiveDelta > firstVisibleOption ? 0 : firstVisibleOption - positiveDelta;
+        }
+        else if (signedDelta > 0)
+        {
+            firstVisibleOption = std::min(maxOffset, firstVisibleOption + static_cast<std::size_t>(signedDelta));
+        }
+        clampScrollOffset();
+    }
+
+    void DropdownList::close()
+    {
+        expanded = false;
+        if (activeDropdown == this)
+        {
+            activeDropdown = nullptr;
+        }
+    }
+
+    void DropdownList::handleExpandedInput()
+    {
+        if (!expanded) return;
+        if (activeDropdown && activeDropdown != this)
+        {
+            close();
+            return;
+        }
+
+        const Vector2 mousePos = GetMousePosition();
+        const Rectangle listRec = expandedListRec();
+        const bool insideList = PointInsideRect(listRec, mousePos);
+        const bool insideControl = PointInsideRect(rec, mousePos);
+
+        if (insideList)
+        {
+            const float wheel = GetMouseWheelMove();
+            if (wheel > 0.0f)
+            {
+                scrollOptions(-static_cast<int>(std::ceil(wheel)));
+            }
+            else if (wheel < 0.0f)
+            {
+                scrollOptions(static_cast<int>(std::ceil(-wheel)));
+            }
+
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                if (const auto clickedIndex = optionIndexAt(mousePos))
+                {
+                    SetSelectedIndex(*clickedIndex, true);
+                }
+                close();
+            }
+            return;
+        }
+
+        if (!insideControl && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            close();
+        }
+    }
+
+    void DropdownList::drawCollapsed() const
+    {
+        const bool focused =
+            expanded || std::holds_alternative<HoverState>(state) || std::holds_alternative<DragDelayState>(state);
+        DrawRectangleRec(rec, expanded ? CONTROL_BG_ACTIVE : CONTROL_BG);
+        DrawRectangleLinesEx(rec, focused ? 2.0f : 1.0f, focused ? CONTROL_BORDER_ACTIVE : CONTROL_BORDER);
+
+        const float arrowWidth = std::min(20.0f, rec.width * 0.22f);
+        const Rectangle textClip = {
+            rec.x + 6.0f, rec.y, std::max(0.0f, rec.width - arrowWidth - 10.0f), rec.height};
+
+        {
+            const ScissorScope scissor{textClip};
+            DrawTextEx(
+                fontInfo.font,
+                GetSelectedText().c_str(),
+                Vector2{textClip.x, rec.y + (rec.height - fontInfo.fontSize) * 0.5f},
+                fontInfo.fontSize,
+                fontInfo.fontSpacing,
+                fontInfo.color);
+        }
+
+        const float scale = engine->settings->GetCurrentScaleFactor();
+        const float arrowSize = std::min(7.0f * scale, rec.height * 0.25f);
+        const float centerX = rec.x + rec.width - arrowWidth * 0.5f;
+        const float centerY = rec.y + rec.height * 0.5f;
+        if (expanded && dropDirection == DropDirection::UP)
+        {
+            DrawTriangle(
+                Vector2{centerX, centerY - arrowSize * 0.5f},
+                Vector2{centerX - arrowSize, centerY + arrowSize * 0.5f},
+                Vector2{centerX + arrowSize, centerY + arrowSize * 0.5f},
+                CONTROL_TEXT);
+        }
+        else
+        {
+            DrawTriangle(
+                Vector2{centerX - arrowSize, centerY - arrowSize * 0.5f},
+                Vector2{centerX + arrowSize, centerY - arrowSize * 0.5f},
+                Vector2{centerX, centerY + arrowSize * 0.5f},
+                CONTROL_TEXT);
+        }
+    }
+
+    void DropdownList::drawExpandedList() const
+    {
+        if (!expanded || options.empty()) return;
+
+        const Rectangle listRec = expandedListRec();
+        DrawRectangleRec(listRec, CONTROL_BG_ACTIVE);
+        DrawRectangleLinesEx(listRec, 1.0f, CONTROL_BORDER_ACTIVE);
+
+        const ScissorScope scissor{listRec};
+        const float rowHeight = optionHeight();
+        const Vector2 mousePos = GetMousePosition();
+        const auto highlightedIndex = optionIndexAt(mousePos);
+        const std::size_t visibleCount = visibleOptionCount();
+
+        for (std::size_t row = 0; row < visibleCount; ++row)
+        {
+            const std::size_t optionIndex = firstVisibleOption + row;
+            if (optionIndex >= options.size()) break;
+
+            const Rectangle optionRec = {
+                listRec.x, listRec.y + static_cast<float>(row) * rowHeight, listRec.width, rowHeight};
+            const bool selected = selectedIndex && *selectedIndex == optionIndex;
+            const bool highlighted = highlightedIndex && *highlightedIndex == optionIndex;
+
+            DrawRectangleRec(
+                optionRec,
+                selected      ? CONTROL_SELECTED_BG
+                : highlighted ? CONTROL_HOVER_BG
+                              : CONTROL_BG_ACTIVE);
+            if (row > 0)
+            {
+                DrawLineEx(
+                    Vector2{optionRec.x, optionRec.y},
+                    Vector2{optionRec.x + optionRec.width, optionRec.y},
+                    1.0f,
+                    Color{226, 232, 240, 255});
+            }
+
+            const Rectangle textClip = {
+                optionRec.x + 6.0f, optionRec.y, std::max(0.0f, optionRec.width - 12.0f), optionRec.height};
+            const ScissorScope optionScissor{textClip};
+            DrawTextEx(
+                fontInfo.font,
+                options[optionIndex].c_str(),
+                Vector2{textClip.x, optionRec.y + (optionRec.height - fontInfo.fontSize) * 0.5f},
+                fontInfo.fontSize,
+                fontInfo.fontSpacing,
+                fontInfo.color);
+        }
+    }
+
+    DropdownList::~DropdownList()
+    {
+        if (activeDropdown == this)
+        {
+            activeDropdown = nullptr;
+        }
+    }
+
+    void DropdownList::SetOptions(std::vector<std::string> _options)
+    {
+        options = std::move(_options);
+        if (options.empty())
+        {
+            selectedIndex.reset();
+            firstVisibleOption = 0;
+            close();
+            return;
+        }
+
+        if (!selectedIndex || *selectedIndex >= options.size())
+        {
+            selectedIndex = 0;
+        }
+        clampScrollOffset();
+    }
+
+    void DropdownList::SetSelectedIndex(const std::size_t index, const bool publish)
+    {
+        if (index >= options.size()) return;
+
+        const bool changed = !selectedIndex || *selectedIndex != index;
+        selectedIndex = index;
+        const std::size_t visibleCount = visibleOptionCount();
+        if (visibleCount > 0)
+        {
+            if (index < firstVisibleOption)
+            {
+                firstVisibleOption = index;
+            }
+            else if (index >= firstVisibleOption + visibleCount)
+            {
+                firstVisibleOption = index - visibleCount + 1;
+            }
+        }
+        clampScrollOffset();
+
+        if (publish && changed)
+        {
+            onSelectionChanged.Publish(index, options[index]);
+        }
+    }
+
+    void DropdownList::SetMaxVisibleOptions(const std::size_t count)
+    {
+        maxVisibleOptions = std::max<std::size_t>(1, count);
+        clampScrollOffset();
+    }
+
+    void DropdownList::SetDropDirection(const DropDirection direction)
+    {
+        dropDirection = direction;
+    }
+
+    const std::vector<std::string>& DropdownList::GetOptions() const
+    {
+        return options;
+    }
+
+    std::optional<std::size_t> DropdownList::GetSelectedIndex() const
+    {
+        return selectedIndex;
+    }
+
+    const std::string& DropdownList::GetSelectedText() const
+    {
+        if (!selectedIndex || *selectedIndex >= options.size()) return emptyDropdownText();
+        return options[*selectedIndex];
+    }
+
+    bool DropdownList::IsExpanded() const
+    {
+        return expanded;
+    }
+
+    bool DropdownList::CapturesCursor(const Vector2 point) const
+    {
+        return expanded && PointInsideRect(expandedListRec(), point);
+    }
+
+    void DropdownList::OnClick()
+    {
+        CellElement::OnClick();
+        if (options.empty()) return;
+
+        if (activeDropdown && activeDropdown != this)
+        {
+            activeDropdown->close();
+        }
+
+        expanded = !expanded;
+        activeDropdown = expanded ? this : nullptr;
+        if (!expanded) return;
+
+        if (selectedIndex)
+        {
+            SetSelectedIndex(*selectedIndex);
+        }
+        clampScrollOffset();
+    }
+
+    void DropdownList::UpdateDimensions()
+    {
+        updateFontScaling();
+        rec = {
+            parent->GetRec().x + parent->padding.left,
+            parent->GetRec().y + parent->padding.up,
+            parent->GetRec().width - parent->padding.left - parent->padding.right,
+            parent->GetRec().height - parent->padding.up - parent->padding.down};
+    }
+
+    void DropdownList::Draw2D()
+    {
+        handleExpandedInput();
+        drawCollapsed();
+        if (expanded)
+        {
+            engine->QueueOverlayDraw([this]() { drawExpandedList(); });
+        }
+    }
+
+    DropdownList::DropdownList(
+        GameUIEngine* _engine,
+        TableCell* _parent,
+        std::vector<std::string> _options,
+        const std::size_t _selectedIndex,
+        const TextBox::FontInfo& _fontInfo,
+        const VertAlignment _vertAlignment,
+        const HoriAlignment _horiAlignment)
+        : CellElement(_engine, _parent, _vertAlignment, _horiAlignment),
+          options(std::move(_options)),
+          fontInfo(_fontInfo)
+    {
+        fontInfo.color = fontInfo.color.a == 0 ? CONTROL_TEXT : fontInfo.color;
+        if (!options.empty())
+        {
+            selectedIndex = std::min(_selectedIndex, options.size() - 1);
+        }
+        updateFontScaling();
+        SetTextureFilter(fontInfo.font.texture, TEXTURE_FILTER_BILINEAR);
     }
 
     void TitleBar::OnDragStart()

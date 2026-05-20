@@ -1,6 +1,6 @@
 //
-// Concrete CellElement subclasses: TextBox, TitleBar, ImageBox, GameWindowButton,
-// CloseButton.
+// Concrete CellElement subclasses: TextBox, TextInput, Checkbox, DropdownList,
+// TitleBar, ImageBox, GameWindowButton, CloseButton.
 //
 
 #pragma once
@@ -11,6 +11,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace sage
 {
@@ -104,6 +105,86 @@ namespace sage
             std::function<void(const std::string&)> callback,
             const FontInfo& _fontInfo = FontInfo(),
             VertAlignment _vertAlignment = VertAlignment::TOP,
+            HoriAlignment _horiAlignment = HoriAlignment::LEFT);
+    };
+
+    class Checkbox final : public CellElement
+    {
+        bool checked = false;
+
+      public:
+        Event<bool> onValueChanged;
+
+        void SetChecked(bool _checked);
+        [[nodiscard]] bool IsChecked() const;
+        void OnClick() override;
+        void UpdateDimensions() override;
+        void Draw2D() override;
+
+        Checkbox(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            bool _checked = false,
+            VertAlignment _vertAlignment = VertAlignment::MIDDLE,
+            HoriAlignment _horiAlignment = HoriAlignment::CENTER);
+    };
+
+    class DropdownList final : public CellElement
+    {
+      public:
+        enum class DropDirection
+        {
+            DOWN,
+            UP
+        };
+
+      private:
+        static DropdownList* activeDropdown;
+
+        std::vector<std::string> options;
+        std::optional<std::size_t> selectedIndex;
+        TextBox::FontInfo fontInfo;
+        bool expanded = false;
+        std::size_t maxVisibleOptions = 6;
+        std::size_t firstVisibleOption = 0;
+        DropDirection dropDirection = DropDirection::DOWN;
+
+        void updateFontScaling();
+        [[nodiscard]] float optionHeight() const;
+        [[nodiscard]] std::size_t visibleOptionCount() const;
+        [[nodiscard]] Rectangle expandedListRec() const;
+        [[nodiscard]] std::optional<std::size_t> optionIndexAt(Vector2 point) const;
+        void clampScrollOffset();
+        void scrollOptions(int signedDelta);
+        void close();
+        void handleExpandedInput();
+        void drawCollapsed() const;
+        void drawExpandedList() const;
+
+      public:
+        Event<std::size_t, const std::string&> onSelectionChanged;
+
+        ~DropdownList() override;
+        void SetOptions(std::vector<std::string> _options);
+        void SetSelectedIndex(std::size_t index, bool publish = false);
+        void SetMaxVisibleOptions(std::size_t count);
+        void SetDropDirection(DropDirection direction);
+        [[nodiscard]] const std::vector<std::string>& GetOptions() const;
+        [[nodiscard]] std::optional<std::size_t> GetSelectedIndex() const;
+        [[nodiscard]] const std::string& GetSelectedText() const;
+        [[nodiscard]] bool IsExpanded() const;
+        [[nodiscard]] bool CapturesCursor(Vector2 point) const override;
+        void OnClick() override;
+        void UpdateDimensions() override;
+        void Draw2D() override;
+
+        DropdownList(
+            GameUIEngine* _engine,
+            TableCell* _parent,
+            std::vector<std::string> _options = {},
+            std::size_t _selectedIndex = 0,
+            const TextBox::FontInfo& _fontInfo = TextBox::FontInfo{},
+            VertAlignment _vertAlignment = VertAlignment::MIDDLE,
             HoriAlignment _horiAlignment = HoriAlignment::LEFT);
     };
 

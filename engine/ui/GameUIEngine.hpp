@@ -11,6 +11,7 @@
 #include "entt/entt.hpp"
 #include "raylib.h"
 
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -33,6 +34,7 @@ namespace sage
         std::optional<CellElement*> draggedObject;
         std::optional<CellElement*> hoveredDraggableCellElement;
         InputSnapshot currentInput;
+        mutable std::vector<std::function<void()>> overlayDrawQueue;
 
         void pruneWindows();
         void processWindows();
@@ -60,6 +62,7 @@ namespace sage
         [[nodiscard]] bool IsMouseOverWindow() const;
         void DrawDebug2D() const;
         void Draw2D() const;
+        void QueueOverlayDraw(std::function<void()> draw) const;
         void Update();
 
         // The current frame's input snapshot. Captured at the top of Update().
