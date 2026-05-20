@@ -43,6 +43,18 @@ namespace sage
             const Vector3 halfSize = Vector3Scale(Vector3Subtract(bounds.max, bounds.min), 0.5f);
             return {.position = center, .radius = std::max(1.0f, Vector3Length(halfSize))};
         }
+
+        void applyInspectorEditMode(
+            std::vector<editor::InspectedComponent>& inspectedComponents, const bool editMode)
+        {
+            for (auto& component : inspectedComponents)
+            {
+                for (auto& field : component.fields)
+                {
+                    field.editable = field.editable && editMode;
+                }
+            }
+        }
     } // namespace
 
     const editor::PlaceableAsset& EditorScene::selectedPlaceable() const
@@ -135,9 +147,10 @@ namespace sage
     void EditorScene::refreshSceneWindows() const
     {
         const auto activeEntity = selection->ActiveTransformEntity();
-        const auto inspectedComponents = activeEntity.has_value()
-                                             ? inspectorRegistry.Inspect(*sys->registry, *activeEntity)
-                                             : std::vector<editor::InspectedComponent>{};
+        auto inspectedComponents = activeEntity.has_value()
+                                       ? inspectorRegistry.Inspect(*sys->registry, *activeEntity)
+                                       : std::vector<editor::InspectedComponent>{};
+        applyInspectorEditMode(inspectedComponents, isEditState());
 
         gui->SetHierarchy(hierarchyTree->CollectSceneObjectEntries(), activeEntity);
         gui->SetInspector(describeSelectedSceneEntity(), inspectedComponents);

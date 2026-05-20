@@ -121,6 +121,8 @@ namespace sage::editor
         [[nodiscard]] bool hasTransform(entt::entity entity) const;
         [[nodiscard]] EditorPlacementController& placement();
         [[nodiscard]] const EditorPlacementController& placement() const;
+        void enableCollideableStaticOverride(entt::entity entity) const;
+        void disableCollideableStaticOverride(entt::entity entity) const;
 
       public:
         template <typename NewState>

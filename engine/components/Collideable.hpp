@@ -56,6 +56,12 @@ namespace sage
         }
     };
 
+    // Transient ECS tag: when present, CollisionSystem ignores Collideable::isStatic
+    // for bounds refreshes without changing the authored static flag.
+    struct CollideableStaticOverride
+    {
+    };
+
     // Transforms a bounding box by a world matrix.
     BoundingBox TransformBoundingBox(const BoundingBox& local, const Matrix& worldMat);
 } // namespace sage

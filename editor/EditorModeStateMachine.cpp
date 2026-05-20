@@ -4,6 +4,7 @@
 #include "EditorScene.hpp"
 #include "EditorTransformEditor.hpp"
 #include "engine/Camera.hpp"
+#include "engine/components/Collideable.hpp"
 #include "engine/components/sgTransform.hpp"
 #include "engine/EngineSystems.hpp"
 #include "engine/GameUiEngine.hpp"
@@ -26,6 +27,24 @@ namespace sage::editor
         bool IsKeyPressedOrRepeated(const int key)
         {
             return IsKeyPressed(key) || IsKeyPressedRepeat(key);
+        }
+
+        void EnableCollideableStaticOverride(entt::registry& registry, const entt::entity entity)
+        {
+            if (!registry.valid(entity) || !registry.any_of<Collideable>(entity) ||
+                registry.any_of<CollideableStaticOverride>(entity))
+            {
+                return;
+            }
+
+            registry.emplace<CollideableStaticOverride>(entity);
+        }
+
+        void DisableCollideableStaticOverride(entt::registry& registry, const entt::entity entity)
+        {
+            if (!registry.valid(entity) || !registry.any_of<CollideableStaticOverride>(entity)) return;
+
+            registry.remove<CollideableStaticOverride>(entity);
         }
     } // namespace
 
@@ -323,6 +342,7 @@ namespace sage::editor
         }
 
         (void)machine.selectSelection(entity);
+        machine.enableCollideableStaticOverride(entity);
         machine.transformEditor.EnterEditMode(entity, *this);
         SyncPlacementFromEntity(machine, entity);
         machine.refreshOverlay();
@@ -331,6 +351,7 @@ namespace sage::editor
 
     void EditorEditState::OnExit(EditorModeStateMachine& machine)
     {
+        machine.disableCollideableStaticOverride(entity);
         machine.transformEditor.ExitEditMode();
     }
 
@@ -654,6 +675,16 @@ namespace sage::editor
     const EditorPlacementController& EditorModeStateMachine::placement() const
     {
         return *scene.placementController;
+    }
+
+    void EditorModeStateMachine::enableCollideableStaticOverride(const entt::entity entity) const
+    {
+        EnableCollideableStaticOverride(*scene.sys->registry, entity);
+    }
+
+    void EditorModeStateMachine::disableCollideableStaticOverride(const entt::entity entity) const
+    {
+        DisableCollideableStaticOverride(*scene.sys->registry, entity);
     }
 
     void EditorModeStateMachine::SelectPlaceable(const std::size_t index)

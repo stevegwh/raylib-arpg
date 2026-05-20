@@ -23,10 +23,11 @@ namespace sage
     void CollisionSystem::Update() const
     {
         // Static collideables opt out via the static bool — their worldBoundingBox
-        // was baked at construction and never needs recomputing.
+        // was baked at construction and never needs recomputing unless a
+        // transient static override asks us to refresh it anyway.
         auto view = registry->view<sgTransform, Collideable>();
-        view.each([](const sgTransform& t, Collideable& c) {
-            if (c.isStatic) return;
+        view.each([this](const entt::entity entity, const sgTransform& t, Collideable& c) {
+            if (c.isStatic && !registry->any_of<CollideableStaticOverride>(entity)) return;
             c.worldBoundingBox = TransformBoundingBox(c.localBoundingBox, t.GetMatrixNoRot());
         });
     }
