@@ -38,6 +38,7 @@ namespace sage
         void load(Archive& archive)
         {
             archive(localBoundingBox, worldBoundingBox, collisionLayer);
+            collisionLayer.layerName = GetCollisionLayerName(collisionLayer.bit);
             collidesWith = GetDefaultCollisionMask(collisionLayer);
         }
     };

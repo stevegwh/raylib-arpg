@@ -28,6 +28,10 @@ option(BUILD_EDITOR "Build the editor" OFF)
 option(BUILD_RESPACKER "Build the resource packer" ON)
 option(BUILD_GAME "Build the game" ON)
 
+# Tell the engine where to find project-specific extension headers
+# (e.g. project/CustomCollisionLayers.hpp). Must be set before add_subdirectory(engine).
+set(SAGE_PROJECT_INCLUDE_DIR ${CMAKE_SOURCE_DIR})
+
 # Add subdirectories
 add_subdirectory(engine)
 add_subdirectory(game)

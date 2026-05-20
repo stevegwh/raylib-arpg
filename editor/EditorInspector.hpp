@@ -4,6 +4,8 @@
 #include "magic_enum.hpp"
 #include "raylib.h"
 
+#include "engine/CollisionLayers.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <concepts>
@@ -115,6 +117,10 @@ namespace sage::editor
                 return InspectorFieldKind::Color;
             }
             else if constexpr (std::is_enum_v<Value>)
+            {
+                return InspectorFieldKind::Enum;
+            }
+            else if constexpr (std::is_same_v<Value, CollisionLayer>)
             {
                 return InspectorFieldKind::Enum;
             }
@@ -345,6 +351,30 @@ namespace sage::editor
                     field.setEnumIndexValue = [mutableValue](const std::size_t index) {
                         constexpr auto values = magic_enum::enum_values<Value>();
                         if (index < values.size()) *mutableValue = values[index];
+                    };
+                }
+            }
+            else if constexpr (std::is_same_v<Value, CollisionLayer>)
+            {
+                const auto& entries = GetCollisionLayers();
+                field.enumOptions.reserve(entries.size());
+                for (const auto& layer : entries)
+                {
+                    field.enumOptions.emplace_back(layer.layerName);
+                }
+                field.enumIndexValue = [value]() -> std::optional<std::size_t> {
+                    const auto& layers = GetCollisionLayers();
+                    for (std::size_t i = 0; i < layers.size(); ++i)
+                    {
+                        if (layers[i].bit == value->bit) return i;
+                    }
+                    return std::nullopt;
+                };
+                if (mutableValue)
+                {
+                    field.setEnumIndexValue = [mutableValue](const std::size_t index) {
+                        const auto& layers = GetCollisionLayers();
+                        if (index < layers.size()) *mutableValue = layers[index];
                     };
                 }
             }
