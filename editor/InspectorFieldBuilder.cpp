@@ -1,4 +1,4 @@
-#include "InspectorFieldBlueprint.hpp"
+#include "InspectorFieldBuilder.hpp"
 
 #include "engine/GameUiEngine.hpp"
 #include "engine/ui/UIElements.hpp"
@@ -60,7 +60,7 @@ namespace sage::editor
 
     } // namespace
 
-    struct InspectorFieldBlueprint::FieldRow
+    struct InspectorFieldBuilder::FieldRow
     {
         enum class Type
         {
@@ -76,24 +76,24 @@ namespace sage::editor
         bool isMutable = false;
     };
 
-    struct InspectorFieldBlueprint::FieldBinding
+    struct InspectorFieldBuilder::FieldBinding
     {
         FieldRow inspectorRow;
         std::vector<TextBox*> valueTexts;
         Vector3* mutableVector = nullptr;
     };
 
-    InspectorFieldBlueprint::InspectorFieldBlueprint() = default;
+    InspectorFieldBuilder::InspectorFieldBuilder() = default;
 
-    InspectorFieldBlueprint::~InspectorFieldBlueprint() = default;
+    InspectorFieldBuilder::~InspectorFieldBuilder() = default;
 
-    void InspectorFieldBlueprint::Attach(GameUIEngine* ui, Table* fieldTable)
+    void InspectorFieldBuilder::Attach(GameUIEngine* ui, Table* fieldTable)
     {
         this->ui = ui;
         this->fieldTable = fieldTable;
     }
 
-    void InspectorFieldBlueprint::SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText)
+    void InspectorFieldBuilder::SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText)
     {
         scrollbarUpText = upText;
         scrollbarTrackText = trackText;
@@ -101,7 +101,7 @@ namespace sage::editor
         updateScrollbarText();
     }
 
-    void InspectorFieldBlueprint::Rebuild(
+    void InspectorFieldBuilder::Rebuild(
         const std::vector<InspectedComponent>& inspectedComponents, const Rectangle* mouseWheelBounds)
     {
         if (!fieldTable || !ui) return;
@@ -142,7 +142,7 @@ namespace sage::editor
         fieldTable->InitLayout();
     }
 
-    void InspectorFieldBlueprint::Draw(const std::vector<InspectedComponent>& inspectedComponents)
+    void InspectorFieldBuilder::Draw(const std::vector<InspectedComponent>& inspectedComponents)
     {
         for (auto& binding : bindings)
         {
@@ -175,7 +175,7 @@ namespace sage::editor
         }
     }
 
-    void InspectorFieldBlueprint::Scroll(const int amount)
+    void InspectorFieldBuilder::Scroll(const int amount)
     {
         const std::size_t maxOffset = totalRows > visibleRows ? totalRows - visibleRows : 0;
 
@@ -190,27 +190,27 @@ namespace sage::editor
         }
     }
 
-    bool InspectorFieldBlueprint::HasOverflow() const
+    bool InspectorFieldBuilder::HasOverflow() const
     {
         return totalRows > visibleRows;
     }
 
-    std::size_t InspectorFieldBlueprint::TotalRows() const
+    std::size_t InspectorFieldBuilder::TotalRows() const
     {
         return totalRows;
     }
 
-    std::size_t InspectorFieldBlueprint::VisibleRows() const
+    std::size_t InspectorFieldBuilder::VisibleRows() const
     {
         return visibleRows;
     }
 
-    std::size_t InspectorFieldBlueprint::ScrollOffset() const
+    std::size_t InspectorFieldBuilder::ScrollOffset() const
     {
         return scrollOffset;
     }
 
-    void InspectorFieldBlueprint::rebuildRows(const std::vector<InspectedComponent>& inspectedComponents)
+    void InspectorFieldBuilder::rebuildRows(const std::vector<InspectedComponent>& inspectedComponents)
     {
         rows.clear();
         rowSignature.clear();
@@ -252,7 +252,7 @@ namespace sage::editor
         }
     }
 
-    void InspectorFieldBlueprint::createHeaderRow(const std::string& label) const
+    void InspectorFieldBuilder::createHeaderRow(const std::string& label) const
     {
         auto* headerRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
         auto* headerCell = headerRow->CreateTableCell(Padding{2, 2, 2, 2});
@@ -261,7 +261,7 @@ namespace sage::editor
         headerCell->CreateTextbox(std::move(header), label);
     }
 
-    void InspectorFieldBlueprint::createFieldRow(const FieldRow& inspectorRow)
+    void InspectorFieldBuilder::createFieldRow(const FieldRow& inspectorRow)
     {
         switch (inspectorRow.fieldKind)
         {
@@ -273,7 +273,7 @@ namespace sage::editor
         }
     }
 
-    void InspectorFieldBlueprint::createVector3Row(const FieldRow& vectorRow)
+    void InspectorFieldBuilder::createVector3Row(const FieldRow& vectorRow)
     {
         auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
         const std::size_t bindingIndex = bindings.size();
@@ -317,7 +317,7 @@ namespace sage::editor
         bindings.push_back(FieldBinding{.inspectorRow = vectorRow, .valueTexts = {xText, yText, zText}});
     }
 
-    void InspectorFieldBlueprint::updateRowMetrics()
+    void InspectorFieldBuilder::updateRowMetrics()
     {
         visibleRows = INSPECTOR_VISIBLE_ROWS;
         totalRows = rows.size();
@@ -326,7 +326,7 @@ namespace sage::editor
         scrollOffset = std::min(scrollOffset, maxOffset);
     }
 
-    void InspectorFieldBlueprint::updateScrollbarText() const
+    void InspectorFieldBuilder::updateScrollbarText() const
     {
         const bool showScrollbar = HasOverflow();
         if (scrollbarUpText) scrollbarUpText->SetContent(showScrollbar ? "^" : "");
@@ -334,7 +334,7 @@ namespace sage::editor
         if (scrollbarDownText) scrollbarDownText->SetContent(showScrollbar ? "v" : "");
     }
 
-    void InspectorFieldBlueprint::scrollFromMouseWheel(const Rectangle& bounds)
+    void InspectorFieldBuilder::scrollFromMouseWheel(const Rectangle& bounds)
     {
         const auto mousePosition = GetMousePosition();
         if (!CheckCollisionPointRec(mousePosition, bounds)) return;
@@ -350,7 +350,7 @@ namespace sage::editor
         }
     }
 
-    void InspectorFieldBlueprint::setVector3Axis(
+    void InspectorFieldBuilder::setVector3Axis(
         const std::size_t bindingIndex, const std::size_t axisIndex, const std::string& submittedValue)
     {
         if (bindingIndex >= bindings.size() || axisIndex >= 3) return;
@@ -369,12 +369,12 @@ namespace sage::editor
         }
     }
 
-    void InspectorFieldBlueprint::RenderUI(Vector3& value, const FieldBinding& binding)
+    void InspectorFieldBuilder::RenderUI(Vector3& value, const FieldBinding& binding)
     {
         RenderUI(static_cast<const Vector3&>(value), binding);
     }
 
-    void InspectorFieldBlueprint::RenderUI(const Vector3& value, const FieldBinding& binding)
+    void InspectorFieldBuilder::RenderUI(const Vector3& value, const FieldBinding& binding)
     {
         if (binding.valueTexts.size() < 3) return;
 
@@ -383,7 +383,7 @@ namespace sage::editor
         if (binding.valueTexts[2]) binding.valueTexts[2]->SetContent(FormatFloat(value.z));
     }
 
-    std::string InspectorFieldBlueprint::buildBlueprintSignature(
+    std::string InspectorFieldBuilder::buildBlueprintSignature(
         const std::vector<InspectedComponent>& inspectedComponents)
     {
         std::ostringstream signature;
@@ -407,7 +407,7 @@ namespace sage::editor
         return signature.str();
     }
 
-    std::string InspectorFieldBlueprint::buildRowSignature() const
+    std::string InspectorFieldBuilder::buildRowSignature() const
     {
         std::ostringstream signature;
         signature << blueprintSignature << "scroll:" << scrollOffset << "rows:" << totalRows;

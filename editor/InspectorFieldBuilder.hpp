@@ -16,25 +16,8 @@ namespace sage
 
 namespace sage::editor
 {
-    class InspectorFieldBlueprint
+    class InspectorFieldBuilder
     {
-      public:
-        InspectorFieldBlueprint();
-        ~InspectorFieldBlueprint();
-
-        void Attach(GameUIEngine* ui, Table* fieldTable);
-        void SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText);
-        void Rebuild(
-            const std::vector<InspectedComponent>& inspectedComponents, const Rectangle* mouseWheelBounds);
-        void Draw(const std::vector<InspectedComponent>& inspectedComponents);
-        void Scroll(int amount);
-
-        [[nodiscard]] bool HasOverflow() const;
-        [[nodiscard]] std::size_t TotalRows() const;
-        [[nodiscard]] std::size_t VisibleRows() const;
-        [[nodiscard]] std::size_t ScrollOffset() const;
-
-      private:
         struct FieldRow;
         struct FieldBinding;
 
@@ -64,5 +47,21 @@ namespace sage::editor
         [[nodiscard]] static std::string buildBlueprintSignature(
             const std::vector<InspectedComponent>& inspectedComponents);
         [[nodiscard]] std::string buildRowSignature() const;
+
+      public:
+        InspectorFieldBuilder();
+        ~InspectorFieldBuilder();
+
+        void Attach(GameUIEngine* ui, Table* fieldTable);
+        void SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText);
+        void Rebuild(
+            const std::vector<InspectedComponent>& inspectedComponents, const Rectangle* mouseWheelBounds);
+        void Draw(const std::vector<InspectedComponent>& inspectedComponents);
+        void Scroll(int amount);
+
+        [[nodiscard]] bool HasOverflow() const;
+        [[nodiscard]] std::size_t TotalRows() const;
+        [[nodiscard]] std::size_t VisibleRows() const;
+        [[nodiscard]] std::size_t ScrollOffset() const;
     };
 } // namespace sage::editor

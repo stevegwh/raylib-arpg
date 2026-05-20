@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InspectorFieldBlueprint.hpp"
+#include "InspectorFieldBuilder.hpp"
 
 #include "raylib.h"
 
@@ -71,7 +71,7 @@ namespace sage
             std::vector<TextBox*> hierarchyRows;
             std::vector<SceneObjectEntry> hierarchyEntries;
             std::size_t hierarchyScrollOffset = 0;
-            InspectorFieldBlueprint inspectorFieldBlueprints;
+            InspectorFieldBuilder inspectorFieldBlueprints;
             ModelDefaultCallbacks modelDefaultCallbacks;
             DeleteConfirmationCallbacks deleteConfirmationCallbacks;
             std::optional<std::size_t> selectedAssetIndex;
