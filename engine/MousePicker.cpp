@@ -16,7 +16,6 @@ namespace sage
     {
         resetHitInfo(mouseHitInfo);
         resetHitInfo(navigationHitInfo);
-        hitObjectName = "None";
 
         const auto viewport = sys->settings->GetViewPort();
         ray = GetScreenToWorldRayEx(GetMousePosition(), *sys->camera->getRaylibCam(), viewport.x, viewport.y);

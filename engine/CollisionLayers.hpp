@@ -36,7 +36,10 @@ namespace sage
             archive(bit);
         }
 
-        friend constexpr bool operator==(CollisionLayer, CollisionLayer) = default;
+        friend constexpr bool operator==(const CollisionLayer a, const CollisionLayer b)
+        {
+            return a.bit == b.bit;
+        }
     };
 
     [[nodiscard]] constexpr CollisionLayer MakeCollisionLayer(

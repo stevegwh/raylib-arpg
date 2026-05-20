@@ -154,9 +154,8 @@ namespace sage
     void Cursor::changeCursors(CollisionLayer collisionLayer)
     {
         if (contextLocked) return;
-        if (OutOfRange() ||
-            (IsNavigationLayer(collisionLayer) && navigationValidityProvider &&
-             !navigationValidityProvider(getFirstNaviCollision().point)))
+        if (OutOfRange() || (IsNavigationLayer(collisionLayer) && navigationValidityProvider &&
+                             !navigationValidityProvider(getFirstNaviCollision().point)))
         {
             currentTex = ResourceManager::GetInstance().TextureLoad("cursor_denied");
             currentColor = invalidColor;
@@ -195,13 +194,13 @@ namespace sage
     void Cursor::Update()
     {
         sys->picker->Update();
-        hitObjectName = sys->picker->hitObjectName;
         currentTex = ResourceManager::GetInstance().TextureLoad("cursor_regular");
         currentColor = defaultColor;
 
         const auto& hitInfo = getMouseHitInfo();
         if (hitInfo.rlCollision.hit)
         {
+            std::cout << "Hit an object on layer: " + std::string(hitInfo.collisionLayer.layerName);
             onCollisionHit.Publish(hitInfo.collidedEntityId, hitInfo.collisionLayer);
             changeCursors(hitInfo.collisionLayer);
         }

@@ -26,7 +26,6 @@ namespace sage
         [[nodiscard]] bool findMeshCollision(CollisionInfo& hitInfo) const;
 
       public:
-        std::string hitObjectName{};
         Event<entt::entity> onCollisionHit{};
 
         void Update();
