@@ -886,19 +886,14 @@ namespace sage::editor
         std::function<void(std::size_t)> onAssetSelected,
         std::function<void(entt::entity)> onSceneObjectSelected,
         ModelDefaultCallbacks callbacks,
-        InspectorCallbacks inspectorCallbacks,
         DeleteConfirmationCallbacks deleteConfirmationCallbacks)
         : modelDefaultCallbacks(std::move(callbacks)),
-          inspectorCallbacks(std::move(inspectorCallbacks)),
           deleteConfirmationCallbacks(std::move(deleteConfirmationCallbacks)),
           ui(ui)
     {
         Image panelImage = GenImageColor(1, 1, EDITOR_WINDOW_BACKGROUND);
         editorWindowBackgroundTexture = LoadTextureFromImage(panelImage);
         UnloadImage(panelImage);
-
-        inspectorFieldBlueprints.SetCallbacks(
-            InspectorFieldBlueprint::Callbacks{.setTransform = this->inspectorCallbacks.setTransform});
 
         assetThumbnails.reserve(assets.size());
         for (const auto& asset : assets)

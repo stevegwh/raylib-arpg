@@ -351,21 +351,6 @@ namespace sage
                 .scaleUp = [this]() { adjustSelectedModelDefaultScale(PLACEMENT_SCALE_STEP); },
                 .apply = [this]() { applySelectedModelDefaults(); },
                 .reset = [this]() { resetSelectedModelDefaults(); }},
-            editor::EditorGui::InspectorCallbacks{
-                .adjustTransform =
-                    [this](const editor::EditorGui::TransformField field, const float amount) {
-                        if (const auto selectedEntity = selection->ActiveTransformEntity(); selectedEntity.has_value())
-                        {
-                            transformEditor->ApplyFromInspector(*selectedEntity, field, amount, false);
-                        }
-                    },
-                .setTransform =
-                    [this](const editor::EditorGui::TransformField field, const float value) {
-                        if (const auto selectedEntity = selection->ActiveTransformEntity(); selectedEntity.has_value())
-                        {
-                            transformEditor->ApplyFromInspector(*selectedEntity, field, value, true);
-                        }
-                    }},
             editor::EditorGui::DeleteConfirmationCallbacks{
                 .confirm = [this]() { editor::EditorSelectState{}.ConfirmDeleteSelectedEntity(*editorModes); },
                 .cancel = [this]() { editor::EditorSelectState{}.CancelDeleteSelectedEntity(*editorModes); }});

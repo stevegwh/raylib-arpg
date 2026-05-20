@@ -37,8 +37,6 @@ namespace sage
                 int depth = 0;
             };
 
-            using TransformField = InspectorTransformField;
-
             struct ModelDefaultCallbacks
             {
                 std::function<void()> heightDown;
@@ -49,12 +47,6 @@ namespace sage
                 std::function<void()> scaleUp;
                 std::function<void()> apply;
                 std::function<void()> reset;
-            };
-
-            struct InspectorCallbacks
-            {
-                std::function<void(TransformField, float)> adjustTransform;
-                std::function<void(TransformField, float)> setTransform;
             };
 
             struct DeleteConfirmationCallbacks
@@ -81,7 +73,6 @@ namespace sage
             std::size_t hierarchyScrollOffset = 0;
             InspectorFieldBlueprint inspectorFieldBlueprints;
             ModelDefaultCallbacks modelDefaultCallbacks;
-            InspectorCallbacks inspectorCallbacks;
             DeleteConfirmationCallbacks deleteConfirmationCallbacks;
             std::optional<std::size_t> selectedAssetIndex;
             std::optional<entt::entity> selectedSceneEntity;
@@ -135,7 +126,6 @@ namespace sage
                 std::function<void(std::size_t)> onAssetSelected,
                 std::function<void(entt::entity)> onSceneObjectSelected,
                 ModelDefaultCallbacks callbacks,
-                InspectorCallbacks inspectorCallbacks,
                 DeleteConfirmationCallbacks deleteConfirmationCallbacks);
             ~EditorGui();
         };

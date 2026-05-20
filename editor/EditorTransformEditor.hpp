@@ -7,7 +7,6 @@
 #pragma once
 
 #include "EditGizmo.hpp"
-#include "EditorGui.hpp"
 #include "EditorModeStateMachine.hpp"
 
 #include "entt/entt.hpp"
@@ -32,7 +31,6 @@ namespace sage::editor
             LocalCenter
         };
 
-        using TransformField = EditorGui::TransformField;
         // Invoked after every mutation that touches the selected entity. The
         // scene uses it to keep the placement overlay (snap markers,
         // placement rotation/scale cache) and GUI windows in sync with the
@@ -75,12 +73,6 @@ namespace sage::editor
         void AdjustPosition(entt::entity entity, Vector3 worldDelta);
         void AdjustRotationAxis(entt::entity entity, EditGizmo::Axis axis, float degrees);
         void AdjustScale(entt::entity entity, float delta);
-
-        // Inspector field commit. `absolute == true` sets the value directly
-        // (setSelectedTransform behaviour); `absolute == false` adds to it
-        // (adjustSelectedTransform behaviour). Safe to call outside edit mode
-        // — only requires `entity` to have an sgTransform.
-        void ApplyFromInspector(entt::entity entity, TransformField field, float amount, bool absolute);
 
       private:
         EngineSystems* sys;

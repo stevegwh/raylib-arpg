@@ -4,8 +4,6 @@
 
 #include "raylib.h"
 
-#include <functional>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,36 +16,17 @@ namespace sage
 
 namespace sage::editor
 {
-    enum class InspectorTransformField
-    {
-        PositionX,
-        PositionY,
-        PositionZ,
-        RotationX,
-        RotationY,
-        RotationZ,
-        ScaleX,
-        ScaleY,
-        ScaleZ
-    };
-
     class InspectorFieldBlueprint
     {
       public:
-        struct Callbacks
-        {
-            std::function<void(InspectorTransformField, float)> setTransform;
-        };
-
         InspectorFieldBlueprint();
         ~InspectorFieldBlueprint();
 
         void Attach(GameUIEngine* ui, Table* fieldTable);
-        void SetCallbacks(Callbacks callbacks);
         void SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText);
         void Rebuild(
             const std::vector<InspectedComponent>& inspectedComponents, const Rectangle* mouseWheelBounds);
-        void Draw(const std::vector<InspectedComponent>& inspectedComponents) const;
+        void Draw(const std::vector<InspectedComponent>& inspectedComponents);
         void Scroll(int amount);
 
         [[nodiscard]] bool HasOverflow() const;
@@ -56,31 +35,34 @@ namespace sage::editor
         [[nodiscard]] std::size_t ScrollOffset() const;
 
       private:
+        struct FieldRow;
         struct FieldBinding;
-        class FieldRowBlueprint;
-        class Vector3FieldRowBlueprint;
-        class ComponentBlueprint;
 
         GameUIEngine* ui{};
         Table* fieldTable{};
         TextBox* scrollbarUpText{};
         TextBox* scrollbarTrackText{};
         TextBox* scrollbarDownText{};
-        Callbacks callbacks;
         std::size_t scrollOffset = 0;
         std::size_t visibleRows = 0;
         std::size_t totalRows = 0;
         std::string blueprintSignature;
         std::string rowSignature;
-        std::vector<ComponentBlueprint> components;
+        std::vector<FieldRow> rows;
         std::vector<FieldBinding> bindings;
 
-        void rebuildBlueprints(const std::vector<InspectedComponent>& inspectedComponents);
+        void rebuildRows(const std::vector<InspectedComponent>& inspectedComponents);
+        void createHeaderRow(const std::string& label) const;
+        void createFieldRow(const FieldRow& row);
+        void createVector3Row(const FieldRow& row);
         void updateRowMetrics();
         void updateScrollbarText() const;
         void scrollFromMouseWheel(const Rectangle& bounds);
-        [[nodiscard]] std::string buildBlueprintSignature(
-            const std::vector<InspectedComponent>& inspectedComponents) const;
+        void setVector3Axis(std::size_t bindingIndex, std::size_t axisIndex, const std::string& submittedValue);
+        static void RenderUI(Vector3& value, const FieldBinding& binding);
+        static void RenderUI(const Vector3& value, const FieldBinding& binding);
+        [[nodiscard]] static std::string buildBlueprintSignature(
+            const std::vector<InspectedComponent>& inspectedComponents);
         [[nodiscard]] std::string buildRowSignature() const;
     };
 } // namespace sage::editor

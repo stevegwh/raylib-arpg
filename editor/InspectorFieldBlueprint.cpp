@@ -4,11 +4,11 @@
 #include "engine/ui/UIElements.hpp"
 #include "engine/ui/UILayout.hpp"
 
+#include <array>
 #include <cmath>
 #include <exception>
 #include <format>
 #include <memory>
-#include <optional>
 #include <sstream>
 #include <string_view>
 #include <typeindex>
@@ -47,228 +47,40 @@ namespace sage::editor
             const std::string_view componentName,
             const std::string_view fieldName)
         {
-            for (const auto& component : components)
+            for (const auto& inspectedComponent : components)
             {
-                if (component.displayName != componentName) continue;
-                for (const auto& field : component.fields)
+                if (inspectedComponent.displayName != componentName) continue;
+                for (const auto& candidateField : inspectedComponent.fields)
                 {
-                    if (field.label == fieldName) return &field;
+                    if (candidateField.label == fieldName) return &candidateField;
                 }
             }
             return nullptr;
         }
 
-        [[nodiscard]] std::optional<InspectorTransformField> TransformFieldFor(
-            const std::string& componentName, const std::string& fieldName, const char axis)
-        {
-            if (componentName != "Transform") return std::nullopt;
-
-            if (fieldName == "Position")
-            {
-                if (axis == 'X') return InspectorTransformField::PositionX;
-                if (axis == 'Y') return InspectorTransformField::PositionY;
-                if (axis == 'Z') return InspectorTransformField::PositionZ;
-            }
-            if (fieldName == "Rotation")
-            {
-                if (axis == 'X') return InspectorTransformField::RotationX;
-                if (axis == 'Y') return InspectorTransformField::RotationY;
-                if (axis == 'Z') return InspectorTransformField::RotationZ;
-            }
-            if (fieldName == "Scale")
-            {
-                if (axis == 'X') return InspectorTransformField::ScaleX;
-                if (axis == 'Y') return InspectorTransformField::ScaleY;
-                if (axis == 'Z') return InspectorTransformField::ScaleZ;
-            }
-            return std::nullopt;
-        }
     } // namespace
+
+    struct InspectorFieldBlueprint::FieldRow
+    {
+        enum class Type
+        {
+            ComponentHeader,
+            Field
+        };
+
+        Type type = Type::Field;
+        std::string componentName;
+        std::string fieldName;
+        InspectorFieldKind fieldKind = InspectorFieldKind::Unsupported;
+        std::type_index valueType = typeid(void);
+        bool isMutable = false;
+    };
 
     struct InspectorFieldBlueprint::FieldBinding
     {
-        const FieldRowBlueprint* blueprint = nullptr;
+        FieldRow inspectorRow;
         std::vector<TextBox*> valueTexts;
-    };
-
-    class InspectorFieldBlueprint::FieldRowBlueprint
-    {
-      public:
-        FieldRowBlueprint(std::string componentName, std::string fieldName, std::type_index valueType)
-            : componentName(std::move(componentName)), fieldName(std::move(fieldName)), valueType(valueType)
-        {
-        }
-
-        virtual ~FieldRowBlueprint() = default;
-
-        [[nodiscard]] const std::string& ComponentName() const
-        {
-            return componentName;
-        }
-
-        [[nodiscard]] const std::string& FieldName() const
-        {
-            return fieldName;
-        }
-
-        [[nodiscard]] std::type_index ValueType() const
-        {
-            return valueType;
-        }
-
-        virtual void CreateRow(
-            GameUIEngine* ui,
-            Table* table,
-            const Callbacks& callbacks,
-            std::vector<FieldBinding>& bindings) const = 0;
-        virtual void Draw(const InspectorField& field, const FieldBinding& binding) const = 0;
-
-      private:
-        std::string componentName;
-        std::string fieldName;
-        std::type_index valueType;
-    };
-
-    class InspectorFieldBlueprint::Vector3FieldRowBlueprint final : public FieldRowBlueprint
-    {
-      public:
-        Vector3FieldRowBlueprint(std::string componentName, std::string fieldName)
-            : FieldRowBlueprint(std::move(componentName), std::move(fieldName), typeid(Vector3))
-        {
-        }
-
-        void CreateRow(
-            GameUIEngine* ui,
-            Table* table,
-            const Callbacks& callbacks,
-            std::vector<FieldBinding>& bindings) const override
-        {
-            auto* row = table->CreateTableRow(Padding{2, 2, 2, 2});
-
-            auto* labelCell = row->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
-            auto label = std::make_unique<TextBox>(
-                ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-            labelCell->CreateTextbox(std::move(label), FieldName() + ":");
-
-            const auto transformSetter = [this, &callbacks](const char axis) -> std::function<void(float)> {
-                const auto transformField = TransformFieldFor(ComponentName(), FieldName(), axis);
-                if (!transformField.has_value()) return {};
-
-                return [&callbacks, field = *transformField](const float value) {
-                    if (callbacks.setTransform) callbacks.setTransform(field, value);
-                };
-            };
-
-            const auto addAxis = [ui, row](const char* axis, std::function<void(float)> setter) {
-                auto* axisCell = row->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
-                auto axisLabel = std::make_unique<TextBox>(
-                    ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
-                axisCell->CreateTextbox(std::move(axisLabel), axis);
-
-                auto* valueCell = row->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
-                auto valueText = std::make_unique<TextInput>(
-                    ui,
-                    valueCell,
-                    [setter = std::move(setter)](const std::string& submittedValue) {
-                        if (!setter) return;
-                        try
-                        {
-                            setter(std::stof(submittedValue));
-                        }
-                        catch (const std::exception&)
-                        {
-                        }
-                    },
-                    EditorInspectorInputFontInfo(),
-                    VertAlignment::MIDDLE,
-                    HoriAlignment::RIGHT);
-                return valueCell->CreateTextbox(std::move(valueText), "0.00");
-            };
-
-            auto* xText = addAxis("X", transformSetter('X'));
-            auto* yText = addAxis("Y", transformSetter('Y'));
-            auto* zText = addAxis("Z", transformSetter('Z'));
-
-            bindings.push_back(FieldBinding{.blueprint = this, .valueTexts = {xText, yText, zText}});
-        }
-
-        void Draw(const InspectorField& field, const FieldBinding& binding) const override
-        {
-            if (!field.value || binding.valueTexts.size() < 3) return;
-
-            const auto& value = *static_cast<const Vector3*>(field.value);
-            if (binding.valueTexts[0]) binding.valueTexts[0]->SetContent(FormatFloat(value.x));
-            if (binding.valueTexts[1]) binding.valueTexts[1]->SetContent(FormatFloat(value.y));
-            if (binding.valueTexts[2]) binding.valueTexts[2]->SetContent(FormatFloat(value.z));
-        }
-    };
-
-    class InspectorFieldBlueprint::ComponentBlueprint
-    {
-      public:
-        explicit ComponentBlueprint(std::string displayName) : displayName(std::move(displayName))
-        {
-        }
-
-        void AddField(std::unique_ptr<FieldRowBlueprint> field)
-        {
-            fields.push_back(std::move(field));
-        }
-
-        [[nodiscard]] bool Empty() const
-        {
-            return fields.empty();
-        }
-
-        [[nodiscard]] std::size_t RowCount() const
-        {
-            return fields.empty() ? 0 : fields.size() + 1;
-        }
-
-        void CreateRows(
-            GameUIEngine* ui,
-            Table* table,
-            const Callbacks& callbacks,
-            std::size_t& rowCursor,
-            std::size_t& visibleCreated,
-            const std::size_t scrollOffset,
-            const std::size_t visibleRows,
-            std::vector<FieldBinding>& bindings) const
-        {
-            const auto shouldShowRow = [&]() { return rowCursor >= scrollOffset && visibleCreated < visibleRows; };
-            const auto advanceRow = [&]() {
-                ++rowCursor;
-                if (rowCursor > scrollOffset && visibleCreated < visibleRows)
-                {
-                    ++visibleCreated;
-                }
-            };
-
-            if (fields.empty()) return;
-
-            if (shouldShowRow())
-            {
-                auto* headerRow = table->CreateTableRow(Padding{2, 2, 2, 2});
-                auto* headerCell = headerRow->CreateTableCell(Padding{2, 2, 2, 2});
-                auto header = std::make_unique<TextBox>(
-                    ui, headerCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-                headerCell->CreateTextbox(std::move(header), displayName);
-            }
-            advanceRow();
-
-            for (const auto& field : fields)
-            {
-                if (shouldShowRow())
-                {
-                    field->CreateRow(ui, table, callbacks, bindings);
-                }
-                advanceRow();
-            }
-        }
-
-      private:
-        std::string displayName;
-        std::vector<std::unique_ptr<FieldRowBlueprint>> fields;
+        Vector3* mutableVector = nullptr;
     };
 
     InspectorFieldBlueprint::InspectorFieldBlueprint() = default;
@@ -279,11 +91,6 @@ namespace sage::editor
     {
         this->ui = ui;
         this->fieldTable = fieldTable;
-    }
-
-    void InspectorFieldBlueprint::SetCallbacks(Callbacks callbacks)
-    {
-        this->callbacks = std::move(callbacks);
     }
 
     void InspectorFieldBlueprint::SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText)
@@ -303,7 +110,7 @@ namespace sage::editor
         if (signature != blueprintSignature)
         {
             blueprintSignature = signature;
-            rebuildBlueprints(inspectedComponents);
+            rebuildRows(inspectedComponents);
         }
 
         updateRowMetrics();
@@ -317,28 +124,54 @@ namespace sage::editor
         bindings.clear();
         fieldTable->children.clear();
 
-        std::size_t rowCursor = 0;
-        std::size_t visibleCreated = 0;
-        for (const auto& component : components)
+        const std::size_t lastVisibleRow = std::min(rows.size(), scrollOffset + visibleRows);
+        for (std::size_t i = scrollOffset; i < lastVisibleRow; ++i)
         {
-            component.CreateRows(
-                ui, fieldTable, callbacks, rowCursor, visibleCreated, scrollOffset, visibleRows, bindings);
+            const auto& inspectorRow = rows[i];
+            switch (inspectorRow.type)
+            {
+            case FieldRow::Type::ComponentHeader:
+                createHeaderRow(inspectorRow.componentName);
+                break;
+            case FieldRow::Type::Field:
+                createFieldRow(inspectorRow);
+                break;
+            }
         }
 
         fieldTable->InitLayout();
     }
 
-    void InspectorFieldBlueprint::Draw(const std::vector<InspectedComponent>& inspectedComponents) const
+    void InspectorFieldBlueprint::Draw(const std::vector<InspectedComponent>& inspectedComponents)
     {
-        for (const auto& binding : bindings)
+        for (auto& binding : bindings)
         {
-            if (!binding.blueprint) continue;
+            const auto* inspectedField =
+                FindField(inspectedComponents, binding.inspectorRow.componentName, binding.inspectorRow.fieldName);
+            if (!inspectedField || inspectedField->valueType != binding.inspectorRow.valueType ||
+                !inspectedField->value)
+            {
+                continue;
+            }
 
-            const auto* field =
-                FindField(inspectedComponents, binding.blueprint->ComponentName(), binding.blueprint->FieldName());
-            if (!field || field->valueType != binding.blueprint->ValueType()) continue;
-
-            binding.blueprint->Draw(*field, binding);
+            switch (binding.inspectorRow.fieldKind)
+            {
+            case InspectorFieldKind::Vector3:
+                if (inspectedField->mutableValue)
+                {
+                    auto& vectorValue = *static_cast<Vector3*>(inspectedField->mutableValue);
+                    binding.mutableVector = &vectorValue;
+                    RenderUI(vectorValue, binding);
+                }
+                else
+                {
+                    binding.mutableVector = nullptr;
+                    RenderUI(*static_cast<const Vector3*>(inspectedField->value), binding);
+                }
+                break;
+            default:
+                break;
+            }
         }
     }
 
@@ -377,35 +210,117 @@ namespace sage::editor
         return scrollOffset;
     }
 
-    void InspectorFieldBlueprint::rebuildBlueprints(const std::vector<InspectedComponent>& inspectedComponents)
+    void InspectorFieldBlueprint::rebuildRows(const std::vector<InspectedComponent>& inspectedComponents)
     {
-        components.clear();
+        rows.clear();
         rowSignature.clear();
 
         for (const auto& inspectedComponent : inspectedComponents)
         {
-            auto component = ComponentBlueprint{inspectedComponent.displayName};
-            for (const auto& field : inspectedComponent.fields)
+            const auto headerIndex = rows.size();
+            rows.push_back(
+                FieldRow{
+                    .type = FieldRow::Type::ComponentHeader, .componentName = inspectedComponent.displayName});
+
+            std::size_t supportedFields = 0;
+            for (const auto& inspectedField : inspectedComponent.fields)
             {
-                if (field.valueType == typeid(Vector3))
+                switch (inspectedField.kind)
                 {
-                    component.AddField(
-                        std::make_unique<Vector3FieldRowBlueprint>(inspectedComponent.displayName, field.label));
+                case InspectorFieldKind::Vector3: {
+                    auto inspectorRow = FieldRow{
+                        .type = FieldRow::Type::Field,
+                        .componentName = inspectedComponent.displayName,
+                        .fieldName = inspectedField.label,
+                        .fieldKind = inspectedField.kind,
+                        .valueType = inspectedField.valueType,
+                        .isMutable = inspectedField.IsMutable()};
+
+                    rows.push_back(std::move(inspectorRow));
+                    ++supportedFields;
+                    break;
+                }
+                default:
+                    break;
                 }
             }
 
-            if (!component.Empty()) components.push_back(std::move(component));
+            if (supportedFields == 0)
+            {
+                rows.resize(headerIndex);
+            }
         }
+    }
+
+    void InspectorFieldBlueprint::createHeaderRow(const std::string& label) const
+    {
+        auto* headerRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+        auto* headerCell = headerRow->CreateTableCell(Padding{2, 2, 2, 2});
+        auto header = std::make_unique<TextBox>(
+            ui, headerCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+        headerCell->CreateTextbox(std::move(header), label);
+    }
+
+    void InspectorFieldBlueprint::createFieldRow(const FieldRow& inspectorRow)
+    {
+        switch (inspectorRow.fieldKind)
+        {
+        case InspectorFieldKind::Vector3:
+            createVector3Row(inspectorRow);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void InspectorFieldBlueprint::createVector3Row(const FieldRow& vectorRow)
+    {
+        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+        const std::size_t bindingIndex = bindings.size();
+
+        auto* labelCell = uiRow->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
+        auto label = std::make_unique<TextBox>(
+            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+        labelCell->CreateTextbox(std::move(label), vectorRow.fieldName + ":");
+
+        const auto addAxis = [this, uiRow, bindingIndex, &vectorRow](
+                                 const char* axis, const std::size_t axisIndex) {
+            auto* axisCell = uiRow->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
+            auto axisLabel = std::make_unique<TextBox>(
+                ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
+            axisCell->CreateTextbox(std::move(axisLabel), axis);
+
+            auto* valueCell = uiRow->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
+            if (!vectorRow.isMutable)
+            {
+                auto valueText = std::make_unique<TextBox>(
+                    ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::RIGHT);
+                return valueCell->CreateTextbox(std::move(valueText), "0.00");
+            }
+
+            auto valueText = std::make_unique<TextInput>(
+                ui,
+                valueCell,
+                [this, bindingIndex, axisIndex](const std::string& submittedValue) {
+                    setVector3Axis(bindingIndex, axisIndex, submittedValue);
+                },
+                EditorInspectorInputFontInfo(),
+                VertAlignment::MIDDLE,
+                HoriAlignment::RIGHT);
+            return valueCell->CreateTextbox(std::move(valueText), "0.00");
+        };
+
+        auto* xText = addAxis("X", 0);
+        auto* yText = addAxis("Y", 1);
+        auto* zText = addAxis("Z", 2);
+
+        bindings.push_back(FieldBinding{.inspectorRow = vectorRow, .valueTexts = {xText, yText, zText}});
     }
 
     void InspectorFieldBlueprint::updateRowMetrics()
     {
         visibleRows = INSPECTOR_VISIBLE_ROWS;
-        totalRows = 0;
-        for (const auto& component : components)
-        {
-            totalRows += component.RowCount();
-        }
+        totalRows = rows.size();
 
         const std::size_t maxOffset = totalRows > visibleRows ? totalRows - visibleRows : 0;
         scrollOffset = std::min(scrollOffset, maxOffset);
@@ -435,17 +350,57 @@ namespace sage::editor
         }
     }
 
+    void InspectorFieldBlueprint::setVector3Axis(
+        const std::size_t bindingIndex, const std::size_t axisIndex, const std::string& submittedValue)
+    {
+        if (bindingIndex >= bindings.size() || axisIndex >= 3) return;
+
+        auto* value = bindings[bindingIndex].mutableVector;
+        if (!value) return;
+
+        try
+        {
+            const float submittedFloat = std::stof(submittedValue);
+            const auto axes = std::array<float*, 3>{&value->x, &value->y, &value->z};
+            *axes[axisIndex] = submittedFloat;
+        }
+        catch (const std::exception&)
+        {
+        }
+    }
+
+    void InspectorFieldBlueprint::RenderUI(Vector3& value, const FieldBinding& binding)
+    {
+        RenderUI(static_cast<const Vector3&>(value), binding);
+    }
+
+    void InspectorFieldBlueprint::RenderUI(const Vector3& value, const FieldBinding& binding)
+    {
+        if (binding.valueTexts.size() < 3) return;
+
+        if (binding.valueTexts[0]) binding.valueTexts[0]->SetContent(FormatFloat(value.x));
+        if (binding.valueTexts[1]) binding.valueTexts[1]->SetContent(FormatFloat(value.y));
+        if (binding.valueTexts[2]) binding.valueTexts[2]->SetContent(FormatFloat(value.z));
+    }
+
     std::string InspectorFieldBlueprint::buildBlueprintSignature(
-        const std::vector<InspectedComponent>& inspectedComponents) const
+        const std::vector<InspectedComponent>& inspectedComponents)
     {
         std::ostringstream signature;
-        for (const auto& component : inspectedComponents)
+        for (const auto& inspectedComponent : inspectedComponents)
         {
-            signature << component.displayName << '{';
-            for (const auto& field : component.fields)
+            signature << inspectedComponent.displayName << '{';
+            for (const auto& inspectedField : inspectedComponent.fields)
             {
-                if (field.valueType != typeid(Vector3)) continue;
-                signature << field.label << ':' << field.valueType.name() << ';';
+                switch (inspectedField.kind)
+                {
+                case InspectorFieldKind::Vector3:
+                    signature << inspectedField.label << ':' << inspectedField.valueType.name() << ':'
+                              << (inspectedField.IsMutable() ? "rw" : "ro") << ';';
+                    break;
+                default:
+                    break;
+                }
             }
             signature << '}';
         }

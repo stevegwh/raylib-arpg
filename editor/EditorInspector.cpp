@@ -56,8 +56,8 @@ namespace sage::editor
                 inspector.field("Debug Draw", collideable.debugDraw);
                 inspector.field("Blocks Navigation", collideable.blocksNavigation);
                 inspector.field("Collision Layer Bit", collideable.collisionLayer.bit);
-                inspector.readOnlyField("Local Bounds Min", collideable.localBoundingBox.min);
-                inspector.readOnlyField("Local Bounds Max", collideable.localBoundingBox.max);
+                inspector.field("Local Bounds Min", collideable.localBoundingBox.min);
+                inspector.field("Local Bounds Max", collideable.localBoundingBox.max);
                 inspector.readOnlyField("World Bounds Min", collideable.worldBoundingBox.min);
                 inspector.readOnlyField("World Bounds Max", collideable.worldBoundingBox.max);
             });
