@@ -32,6 +32,7 @@ namespace sage
             std::function<std::size_t()> totalRows, std::function<std::size_t()> visibleRows);
 
         void Scroll(int signedDelta);
+        void SetScrollOffset(std::size_t offset);
         void ClampOffset();
 
         [[nodiscard]] std::size_t ScrollOffset() const;

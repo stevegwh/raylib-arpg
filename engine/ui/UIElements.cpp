@@ -795,9 +795,14 @@ namespace sage
         return expanded;
     }
 
+    bool DropdownList::ActiveDropdownCapturesCursor(const Vector2 point)
+    {
+        return activeDropdown && activeDropdown->CapturesCursor(point);
+    }
+
     bool DropdownList::CapturesCursor(const Vector2 point) const
     {
-        return expanded && PointInsideRect(expandedListRec(), point);
+        return expanded && (PointInsideRect(rec, point) || PointInsideRect(expandedListRec(), point));
     }
 
     void DropdownList::OnClick()

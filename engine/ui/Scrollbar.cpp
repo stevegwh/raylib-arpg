@@ -53,6 +53,17 @@ namespace sage
         if (scrollOffset != previous) onScrollChanged.Publish();
     }
 
+    void Scrollbar::SetScrollOffset(const std::size_t offset)
+    {
+        const std::size_t total = TotalRows();
+        const std::size_t visible = VisibleRows();
+        const std::size_t maxOffset = total > visible ? total - visible : 0;
+
+        const std::size_t previous = scrollOffset;
+        scrollOffset = std::min(offset, maxOffset);
+        if (scrollOffset != previous) onScrollChanged.Publish();
+    }
+
     void Scrollbar::ClampOffset()
     {
         const std::size_t total = TotalRows();

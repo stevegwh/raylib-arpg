@@ -200,7 +200,6 @@ namespace sage
         const auto& hitInfo = getMouseHitInfo();
         if (hitInfo.rlCollision.hit)
         {
-            std::cout << "Hit an object on layer: " + std::string(hitInfo.collisionLayer.layerName);
             onCollisionHit.Publish(hitInfo.collidedEntityId, hitInfo.collisionLayer);
             changeCursors(hitInfo.collisionLayer);
         }

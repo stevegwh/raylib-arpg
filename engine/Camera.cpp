@@ -252,13 +252,28 @@ namespace sage
         rlCamera.target = _target;
     }
 
-    void Camera::FocusEntity(const entt::entity entity)
+    void Camera::FocusPoint(const Vector3 target, const float distance)
+    {
+        auto diff = Vector3Subtract(rlCamera.position, rlCamera.target);
+        if (distance > 0.0f)
+        {
+            const float currentDistance = Vector3Length(diff);
+            diff = currentDistance > 0.0001f ? Vector3Scale(Vector3Normalize(diff), distance)
+                                             : Vector3{0.0f, distance, distance};
+        }
+
+        SetCamera(Vector3Add(target, diff), target);
+        snapFocusToNavigationHeight();
+    }
+
+    void Camera::FocusEntity(const entt::entity entity, const float distance)
     {
         auto& transform = registry->get<sgTransform>(entity);
+        FocusPoint(transform.GetWorldPos(), distance);
+    }
 
-        auto diff = Vector3Subtract(rlCamera.position, rlCamera.target);
-        SetCamera(Vector3Add(transform.GetWorldPos(), diff), transform.GetWorldPos());
-
+    void Camera::snapFocusToNavigationHeight()
+    {
         GridSquare square{};
         if (!sys->navigationGridSystem->WorldToGridSpace(rlCamera.target, square)) return;
         const float floorHeight =

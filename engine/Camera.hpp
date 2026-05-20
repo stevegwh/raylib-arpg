@@ -55,6 +55,7 @@ namespace sage
         void cameraHeightSmoothing();
         void handleInput();
         void handleMouseScroll();
+        void snapFocusToNavigationHeight();
 
       public:
         Camera3D* getRaylibCam();
@@ -72,7 +73,8 @@ namespace sage
         void CutscenePose(const sgTransform& location, const Vector3& localOffset);
         void CutsceneEnd();
         void SetCamera(Vector3 _pos, Vector3 _target);
-        void FocusEntity(entt::entity entity);
+        void FocusPoint(Vector3 target, float distance = 0.0f);
+        void FocusEntity(entt::entity entity, float distance = 0.0f);
         void DrawDebug();
         void Update();
         explicit Camera(entt::registry* _registry, UserInput* userInput, EngineSystems* _sys);

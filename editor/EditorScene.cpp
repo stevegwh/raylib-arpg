@@ -1,6 +1,7 @@
 #include "EditorScene.hpp"
 
 #include "EditorComponents.hpp"
+#include "EditorTransformMath.hpp"
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
 #include "engine/components/Collideable.hpp"
@@ -16,7 +17,9 @@
 #include "engine/UserInput.hpp"
 
 #include "raylib.h"
+#include "raymath.h"
 
+#include <algorithm>
 #include <format>
 #include <vector>
 
@@ -25,6 +28,21 @@ namespace sage
     namespace
     {
         constexpr float GRID_SURFACE_Y_STEP = 1.0f;
+        constexpr float EDITOR_FOCUS_CAMERA_DISTANCE = 38.0f;
+        constexpr float EDITOR_FOCUS_RADIUS_PADDING = 2.4f;
+
+        struct FocusTarget
+        {
+            Vector3 position{};
+            float radius = 1.0f;
+        };
+
+        FocusTarget focusTargetFromBounds(const BoundingBox& bounds)
+        {
+            const Vector3 center = editor::BoundingBoxCenter(bounds);
+            const Vector3 halfSize = Vector3Scale(Vector3Subtract(bounds.max, bounds.min), 0.5f);
+            return {.position = center, .radius = std::max(1.0f, Vector3Length(halfSize))};
+        }
     } // namespace
 
     const editor::PlaceableAsset& EditorScene::selectedPlaceable() const
@@ -123,7 +141,7 @@ namespace sage
     {
         const auto activeEntity = selection->ActiveTransformEntity();
         const auto inspectedComponents = activeEntity.has_value()
-                                             ? inspectorRegistry.InspectEntity(*sys->registry, *activeEntity)
+                                             ? inspectorRegistry.Inspect(*sys->registry, *activeEntity)
                                              : std::vector<editor::InspectedComponent>{};
 
         gui->SetHierarchy(hierarchyTree->CollectSceneObjectEntries(), activeEntity);
@@ -164,20 +182,61 @@ namespace sage
         placementController->SyncFromEntity(entity);
     }
 
-    void EditorScene::placeSelectedMesh()
+    bool EditorScene::placeSelectedMesh()
     {
-        if (!isPlaceState()) return;
+        if (!isPlaceState()) return false;
         const auto entity = placementController->PlaceSelectedMesh();
-        if (!entity.has_value()) return;
+        if (!entity.has_value()) return false;
 
         selection->Select(*entity);
         refreshSceneWindows();
+        gui->FocusHierarchyOnEntity(*entity);
+        editorModes->ChangeState(editor::EditorSelectState{});
         refreshOverlay();
+        return true;
     }
 
     void EditorScene::drawPlacementPreview() const
     {
         placementController->DrawPreview();
+    }
+
+    void EditorScene::focusSelectedObject() const
+    {
+        const auto selectedEntity = selection->ActiveTransformEntity();
+        if (!selectedEntity.has_value()) return;
+
+        const auto entity = *selectedEntity;
+        FocusTarget target{.position = sys->registry->get<sgTransform>(entity).GetWorldPos()};
+
+        if (sys->registry->any_of<Collideable>(entity))
+        {
+            target = focusTargetFromBounds(sys->registry->get<Collideable>(entity).worldBoundingBox);
+        }
+        else if (sys->registry->any_of<Renderable>(entity))
+        {
+            const auto& transform = sys->registry->get<sgTransform>(entity);
+            const auto& renderable = sys->registry->get<Renderable>(entity);
+            if (const auto* model = renderable.GetModel(); model != nullptr)
+            {
+                const Matrix entityMatrix = editor::BuildRenderableEntityMatrix(
+                    transform.GetWorldPos(), transform.GetWorldRot(), transform.GetScale());
+                const Matrix worldMatrix = MatrixMultiply(model->GetTransform(), entityMatrix);
+                target = focusTargetFromBounds(
+                    editor::TransformBoundingBoxByCorners(model->CalcLocalBoundingBox(), worldMatrix));
+            }
+        }
+
+        const float focusDistance =
+            std::max(EDITOR_FOCUS_CAMERA_DISTANCE, target.radius * EDITOR_FOCUS_RADIUS_PADDING);
+        sys->camera->FocusPoint(target.position, focusDistance);
+    }
+
+    void EditorScene::focusSelectedObjectInHierarchy() const
+    {
+        const auto selectedEntity = selection->ActiveTransformEntity();
+        if (!selectedEntity.has_value()) return;
+        gui->FocusHierarchyOnEntity(*selectedEntity);
     }
 
     void EditorScene::Update()
@@ -210,6 +269,15 @@ namespace sage
             {
                 adjustGridSurfaceY(-GRID_SURFACE_Y_STEP);
             }
+            const bool isSelectMode = !isPlaceState() && !isEditState();
+            if (isSelectMode && IsKeyPressed(KEY_F) && (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)))
+            {
+                focusSelectedObjectInHierarchy();
+            }
+            else if (isSelectMode && IsKeyPressed(KEY_F))
+            {
+                focusSelectedObject();
+            }
         }
 
         editorModes->Update();
@@ -239,6 +307,15 @@ namespace sage
 
     bool EditorScene::HandleEscapePressed()
     {
+        if (isPlaceState())
+        {
+            resetPlacementTransform();
+            editorModes->ChangeState(editor::EditorSelectState{});
+            refreshOverlay();
+            refreshSceneWindows();
+            return true;
+        }
+
         auto* editState = editorModes->CurrentEditState();
         return editState != nullptr && editState->CancelEditSelectedTransform(*editorModes);
     }

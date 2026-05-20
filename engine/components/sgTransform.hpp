@@ -42,9 +42,9 @@ namespace sage
         template <class Inspector>
         void inspect(Inspector& inspector)
         {
-            inspector.field("Position", m_positionWorld);
-            inspector.field("Rotation", m_rotationWorld);
-            inspector.field("Scale", m_scale).min(0.0).step(0.1);
+            inspector.Vec3("Position", m_positionWorld);
+            inspector.Vec3("Rotation", m_rotationWorld);
+            inspector.Vec3("Scale", m_scale);
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;

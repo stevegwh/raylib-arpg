@@ -41,6 +41,19 @@ namespace sage
             collisionLayer.layerName = GetCollisionLayerName(collisionLayer.bit);
             collidesWith = GetDefaultCollisionMask(collisionLayer);
         }
+
+        template <class Inspector>
+        void inspect(Inspector& inspector)
+        {
+            inspector.Bool("Active", active);
+            inspector.Bool("Debug Draw", debugDraw);
+            inspector.Bool("Blocks Navigation", blocksNavigation);
+            inspector.CollisionLayer("Collision Layer", collisionLayer);
+            inspector.Vec3("Local Bounds Min", localBoundingBox.min);
+            inspector.Vec3("Local Bounds Max", localBoundingBox.max);
+            inspector.Vec3("World Bounds Min", worldBoundingBox.min, false);
+            inspector.Vec3("World Bounds Max", worldBoundingBox.max, false);
+        }
     };
 
     // Empty tag. Attach alongside Collideable to opt out of CollisionSystem::Update —

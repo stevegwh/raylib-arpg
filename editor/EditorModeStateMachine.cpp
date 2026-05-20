@@ -179,13 +179,13 @@ namespace sage::editor
         }
         if (IsKeyPressed(KEY_P))
         {
-            machine.scene.placeSelectedMesh();
+            (void)machine.scene.placeSelectedMesh();
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !machine.scene.sys->UI().GetCellUnderCursor())
         {
-            if (!SelectSceneEntityUnderCursor(machine))
+            if (!machine.scene.placeSelectedMesh())
             {
-                machine.scene.placeSelectedMesh();
+                SelectSceneEntityUnderCursor(machine);
             }
         }
     }

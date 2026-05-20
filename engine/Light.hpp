@@ -59,5 +59,19 @@ namespace sage
         {
             archive(type, position, target, color, brightness);
         }
+
+        template <class Inspector>
+        void inspect(Inspector& inspector)
+        {
+            inspector.Bool("Enabled", enabled);
+            inspector.Int("Type", type);
+            inspector.Vec3("Position", position);
+            inspector.Vec3("Target", target);
+            inspector.Color("Color", color);
+            inspector.Float("Brightness", brightness);
+            inspector.Float("Constant", constant);
+            inspector.Float("Linear", linear);
+            inspector.Float("Quadratic", quadratic);
+        }
     };
 } // namespace sage

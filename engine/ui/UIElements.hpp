@@ -173,6 +173,7 @@ namespace sage
         [[nodiscard]] std::optional<std::size_t> GetSelectedIndex() const;
         [[nodiscard]] const std::string& GetSelectedText() const;
         [[nodiscard]] bool IsExpanded() const;
+        [[nodiscard]] static bool ActiveDropdownCapturesCursor(Vector2 point);
         [[nodiscard]] bool CapturesCursor(Vector2 point) const override;
         void OnClick() override;
         void UpdateDimensions() override;

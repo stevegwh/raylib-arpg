@@ -114,5 +114,14 @@ namespace sage
                 model = std::monostate{};
             }
         }
+
+        template <class Inspector>
+        void inspect(Inspector& inspector)
+        {
+            inspector.Bool("Active", active);
+            inspector.Bool("Serializable", serializable);
+            inspector.String("Name", name, false);
+            inspector.Color("Hint", hint);
+        }
     };
 } // namespace sage

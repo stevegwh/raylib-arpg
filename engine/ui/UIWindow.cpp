@@ -8,6 +8,7 @@
 #include "../ResourceManager.hpp"
 #include "../Settings.hpp"
 #include "Scrollbar.hpp"
+#include "UIElements.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -190,12 +191,16 @@ namespace sage
     {
         if (overflowContingency == OverflowContingency::SCROLLBAR && scrollbar)
         {
-            const Rectangle gutter = {
-                rec.x + rec.width - Scrollbar::GUTTER_WIDTH,
-                rec.y,
-                Scrollbar::GUTTER_WIDTH,
-                rec.height};
-            scrollbar->HandleInput(rec, gutter);
+            const Vector2 mousePos = GetMousePosition();
+            if (!DropdownList::ActiveDropdownCapturesCursor(mousePos))
+            {
+                const Rectangle gutter = {
+                    rec.x + rec.width - Scrollbar::GUTTER_WIDTH,
+                    rec.y,
+                    Scrollbar::GUTTER_WIDTH,
+                    rec.height};
+                scrollbar->HandleInput(rec, gutter);
+            }
         }
         TableElement::Update();
     }

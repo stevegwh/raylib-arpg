@@ -1,6 +1,7 @@
 #include "EditorInspector.hpp"
 
 #include "EditorComponents.hpp"
+#include "engine/CollisionLayers.hpp"
 #include "engine/components/Collideable.hpp"
 #include "engine/components/Renderable.hpp"
 #include "engine/components/sgTransform.hpp"
@@ -9,71 +10,113 @@
 
 namespace sage::editor
 {
-    std::vector<InspectedComponent> ComponentInspectorRegistry::InspectEntity(
-        entt::registry& registry, const entt::entity entity) const
+    void ComponentInspector::Bool(std::string label, bool& v, const bool editable)
     {
-        std::vector<InspectedComponent> inspected;
-        for (const auto& entry : entries)
-        {
-            if (!entry.hasComponent || !entry.inspect || !entry.hasComponent(registry, entity)) continue;
-
-            auto component = entry.inspect(registry, entity);
-            component.displayName = entry.displayName;
-            inspected.push_back(std::move(component));
-        }
-        return inspected;
+        fields_.push_back(
+            {.label = std::move(label), .kind = InspectorField::Kind::Bool, .data = &v, .editable = editable});
     }
 
-    void RegisterDefaultInspectorComponents(ComponentInspectorRegistry& registry)
+    void ComponentInspector::Int(std::string label, int& v, const bool editable)
     {
-        // Transform is intentionally registered first so it appears at the top
-        // of the inspector — it's essential to every scene object, so users
-        // expect to find Position/Rotation/Scale above identity metadata.
-        registry.Register<sgTransform>("Transform");
+        fields_.push_back(
+            {.label = std::move(label), .kind = InspectorField::Kind::Int, .data = &v, .editable = editable});
+    }
 
+    void ComponentInspector::UInt(std::string label, unsigned int& v, const bool editable)
+    {
+        fields_.push_back(
+            {.label = std::move(label), .kind = InspectorField::Kind::UInt, .data = &v, .editable = editable});
+    }
+
+    void ComponentInspector::UInt64(std::string label, std::uint64_t& v, const bool editable)
+    {
+        fields_.push_back(
+            {.label = std::move(label),
+             .kind = InspectorField::Kind::UInt64,
+             .data = &v,
+             .editable = editable});
+    }
+
+    void ComponentInspector::Float(std::string label, float& v, const bool editable)
+    {
+        fields_.push_back(
+            {.label = std::move(label), .kind = InspectorField::Kind::Float, .data = &v, .editable = editable});
+    }
+
+    void ComponentInspector::String(std::string label, std::string& v, const bool editable)
+    {
+        fields_.push_back(
+            {.label = std::move(label),
+             .kind = InspectorField::Kind::String,
+             .data = &v,
+             .editable = editable});
+    }
+
+    void ComponentInspector::Vec2(std::string label, Vector2& v, const bool editable)
+    {
+        fields_.push_back(
+            {.label = std::move(label), .kind = InspectorField::Kind::Vec2, .data = &v, .editable = editable});
+    }
+
+    void ComponentInspector::Vec3(std::string label, Vector3& v, const bool editable)
+    {
+        fields_.push_back(
+            {.label = std::move(label), .kind = InspectorField::Kind::Vec3, .data = &v, .editable = editable});
+    }
+
+    void ComponentInspector::Color(std::string label, ::Color& v, const bool editable)
+    {
+        fields_.push_back(
+            {.label = std::move(label), .kind = InspectorField::Kind::Color, .data = &v, .editable = editable});
+    }
+
+    void ComponentInspector::CollisionLayer(std::string label, sage::CollisionLayer& v, const bool editable)
+    {
+        InspectorField f{
+            .label = std::move(label),
+            .kind = InspectorField::Kind::Enum,
+            .data = &v,
+            .editable = editable};
+        const auto& layers = GetCollisionLayers();
+        f.enumOptions.reserve(layers.size());
+        for (const auto& layer : layers) f.enumOptions.emplace_back(layer.layerName);
+        f.getEnumIndex = [p = &v]() -> std::size_t {
+            const auto& list = GetCollisionLayers();
+            for (std::size_t i = 0; i < list.size(); ++i)
+            {
+                if (list[i].bit == p->bit) return i;
+            }
+            return 0;
+        };
+        f.setEnumIndex = [p = &v](const std::size_t idx) {
+            const auto& list = GetCollisionLayers();
+            if (idx < list.size()) *p = list[idx];
+        };
+        fields_.push_back(std::move(f));
+    }
+
+    std::vector<InspectedComponent> InspectorRegistry::Inspect(
+        entt::registry& registry, const entt::entity entity) const
+    {
+        std::vector<InspectedComponent> result;
+        for (const auto& entry : entries_)
+        {
+            if (!entry.has(registry, entity)) continue;
+            result.push_back({entry.displayName, entry.describe(registry, entity)});
+        }
+        return result;
+    }
+
+    void RegisterDefaultInspectorComponents(InspectorRegistry& registry)
+    {
+        // Transform first so Position/Rotation/Scale sit at the top of the inspector.
+        registry.Register<sgTransform>("Transform");
         registry.Register<PersistentEntityId>("Persistent Entity Id");
         registry.Register<EditorObjectDescriptor>("Editor Object");
         registry.Register<AssetReference>("Asset Reference");
-
-        registry.Register<Renderable>("Renderable", [](Renderable& renderable, Inspector& inspector) {
-            inspector.field("Active", renderable.active);
-            inspector.field("Serializable", renderable.serializable);
-            inspector.readOnlyField("Name", renderable.GetName());
-            inspector.readOnlyField("Vanity Name", renderable.GetVanityName());
-            if (const auto* model = renderable.GetModel(); model != nullptr)
-            {
-                inspector.readOnlyField("Model Key", model->GetKey());
-            }
-        });
-
-        registry.Register<Collideable>("Collideable", [](Collideable& collideable, Inspector& inspector) {
-            inspector.field("Active", collideable.active);
-            inspector.field("Debug Draw", collideable.debugDraw);
-            inspector.field("Blocks Navigation", collideable.blocksNavigation);
-            inspector.field("Collision Layer Bit", collideable.collisionLayer);
-            inspector.field("Local Bounds Min", collideable.localBoundingBox.min);
-            inspector.field("Local Bounds Max", collideable.localBoundingBox.max);
-            inspector.readOnlyField("World Bounds Min", collideable.worldBoundingBox.min);
-            inspector.readOnlyField("World Bounds Max", collideable.worldBoundingBox.max);
-        });
-
-        registry.Register<Light>("Light", [](Light& light, Inspector& inspector) {
-            inspector.field("Enabled", light.enabled);
-            inspector.field("Type", light.type);
-            inspector.field("Position", light.position);
-            inspector.field("Target", light.target);
-            inspector.field("Color", light.color);
-            inspector.field("Brightness", light.brightness).range(0.0, 20.0).step(0.1);
-            inspector.field("Constant", light.constant).min(0.0).step(0.1);
-            inspector.field("Linear", light.linear).min(0.0).step(0.1);
-            inspector.field("Quadratic", light.quadratic).min(0.0).step(0.1);
-        });
-
-        registry.Register<Spawner>("Spawner", [](Spawner& spawner, Inspector& inspector) {
-            inspector.field("Name", spawner.name);
-            inspector.field("Type", spawner.type);
-            inspector.field("Position", spawner.pos);
-            inspector.field("Rotation", spawner.rot);
-        });
+        registry.Register<Renderable>("Renderable");
+        registry.Register<Collideable>("Collideable");
+        registry.Register<Light>("Light");
+        registry.Register<Spawner>("Spawner");
     }
 } // namespace sage::editor

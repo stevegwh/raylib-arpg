@@ -10,6 +10,8 @@
 
 namespace sage
 {
+    class Checkbox;
+    class DropdownList;
     class GameUIEngine;
     class Scrollbar;
     class Table;
@@ -35,16 +37,11 @@ namespace sage::editor
 
         void rebuildRows(const std::vector<InspectedComponent>& inspectedComponents);
         void createHeaderRow(const std::string& label) const;
-        void executeFieldRowBuilder(const FieldRow& row);
-        void createBoolRow(const FieldRow& row);
-        void createScalarRow(const FieldRow& row);
-        void createComponentRow(const FieldRow& row);
-        void createEnumRow(const FieldRow& row);
-        void setBoolValue(std::size_t bindingIndex, bool submittedValue);
-        void setScalarValue(std::size_t bindingIndex, const std::string& submittedValue);
-        void setComponentValue(
-            std::size_t bindingIndex, std::size_t componentIndex, const std::string& submittedValue);
-        void setEnumValue(std::size_t bindingIndex, std::size_t optionIndex);
+        void createFieldRow(FieldBinding& binding, const InspectorField& field);
+        void createBoolRow(FieldBinding& binding, const InspectorField& field);
+        void createScalarRow(FieldBinding& binding, const InspectorField& field);
+        void createComponentRow(FieldBinding& binding, const InspectorField& field);
+        void createEnumRow(FieldBinding& binding, const InspectorField& field);
         [[nodiscard]] static std::string buildBlueprintSignature(
             const std::vector<InspectedComponent>& inspectedComponents);
         [[nodiscard]] std::string buildRowSignature() const;
@@ -56,7 +53,7 @@ namespace sage::editor
         void Attach(GameUIEngine* ui, Table* fieldTable);
         void AttachScrollbar(Scrollbar* sb);
         void Rebuild(const std::vector<InspectedComponent>& inspectedComponents);
-        void Draw(const std::vector<InspectedComponent>& inspectedComponents);
+        void Draw(const std::vector<InspectedComponent>& inspectedComponents) const;
 
         [[nodiscard]] std::size_t TotalRows() const;
         [[nodiscard]] std::size_t VisibleRows() const;

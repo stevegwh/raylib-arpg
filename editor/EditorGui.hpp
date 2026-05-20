@@ -111,6 +111,7 @@ namespace sage
             void SetSelectedAsset(std::optional<std::size_t> index);
             void SetHierarchy(
                 const std::vector<SceneObjectEntry>& entries, std::optional<entt::entity> selectedEntity);
+            void FocusHierarchyOnEntity(entt::entity entity);
             void SetInspector(
                 const std::string& selectedEntity, const std::vector<InspectedComponent>& inspectedComponents);
             void ShowDeleteConfirmation(const std::string& selectedEntity) const;

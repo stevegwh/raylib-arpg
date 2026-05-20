@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -321,6 +322,23 @@ namespace sage::editor
         hierarchyEntries = entries;
         selectedSceneEntity = selectedEntity;
         if (auto* sb = hierarchyWindow ? hierarchyWindow->GetScrollbar() : nullptr) sb->ClampOffset();
+        refreshHierarchyRowContent();
+    }
+
+    void EditorGui::FocusHierarchyOnEntity(const entt::entity entity)
+    {
+        auto* sb = hierarchyWindow ? hierarchyWindow->GetScrollbar() : nullptr;
+        if (sb == nullptr) return;
+
+        const auto it = std::ranges::find_if(hierarchyEntries, [entity](const SceneObjectEntry& entry) {
+            return entry.entity == entity;
+        });
+        if (it == hierarchyEntries.end()) return;
+
+        const auto entryIndex = static_cast<std::size_t>(std::distance(hierarchyEntries.begin(), it));
+        const std::size_t visibleRows = sb->VisibleRows();
+        const std::size_t centeredOffset = entryIndex > visibleRows / 2 ? entryIndex - visibleRows / 2 : 0;
+        sb->SetScrollOffset(centeredOffset);
         refreshHierarchyRowContent();
     }
 

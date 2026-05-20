@@ -18,7 +18,7 @@ namespace sage::editor
         template <class Inspector>
         void inspect(Inspector& inspector)
         {
-            inspector.readOnlyField("Id", id);
+            inspector.UInt64("Id", id, false);
         }
     };
 
@@ -39,11 +39,11 @@ namespace sage::editor
         template <class Inspector>
         void inspect(Inspector& inspector)
         {
-            inspector.field("Name", name);
-            inspector.field("Category", category);
-            inspector.field("Selectable", selectable);
-            inspector.field("Visible In Hierarchy", visibleInHierarchy);
-            inspector.field("Locked", locked);
+            inspector.String("Name", name);
+            inspector.String("Category", category);
+            inspector.Bool("Selectable", selectable);
+            inspector.Bool("Visible In Hierarchy", visibleInHierarchy);
+            inspector.Bool("Locked", locked);
         }
     };
 
@@ -60,7 +60,7 @@ namespace sage::editor
         template <class Inspector>
         void inspect(Inspector& inspector)
         {
-            inspector.readOnlyField("Asset Key", assetKey);
+            inspector.String("Asset Key", assetKey, false);
         }
     };
 } // namespace sage::editor
