@@ -375,6 +375,13 @@ namespace sage::editor
         return deleteConfirmationWindow && !deleteConfirmationWindow->IsHidden();
     }
 
+    EditorGui::DeleteConfirmationAction EditorGui::ConsumeDeleteConfirmationAction()
+    {
+        const auto action = pendingDeleteConfirmationAction;
+        pendingDeleteConfirmationAction = DeleteConfirmationAction::None;
+        return action;
+    }
+
     RenderTexture2D EditorGui::createAssetThumbnail(const AssetEntry& asset) const
     {
         auto thumbnail = LoadRenderTexture(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
@@ -747,12 +754,15 @@ namespace sage::editor
             auto* buttonRow = mainTable->CreateTableRow(34.0f);
 
             auto* confirmCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
-            auto confirmButton =
-                std::make_unique<TextButton>(ui, confirmCell, deleteConfirmationCallbacks.confirm);
+            auto confirmButton = std::make_unique<TextButton>(ui, confirmCell, [this]() {
+                pendingDeleteConfirmationAction = DeleteConfirmationAction::Confirm;
+            });
             confirmCell->CreateTextbox(std::move(confirmButton), "Delete");
 
             auto* cancelCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
-            auto cancelButton = std::make_unique<TextButton>(ui, cancelCell, deleteConfirmationCallbacks.cancel);
+            auto cancelButton = std::make_unique<TextButton>(ui, cancelCell, [this]() {
+                pendingDeleteConfirmationAction = DeleteConfirmationAction::Cancel;
+            });
             cancelCell->CreateTextbox(std::move(cancelButton), "Cancel");
         }
 
@@ -766,10 +776,8 @@ namespace sage::editor
         const std::vector<AssetEntry>& assets,
         std::function<void(std::size_t)> onAssetSelected,
         std::function<void(entt::entity)> onSceneObjectSelected,
-        ModelDefaultCallbacks callbacks,
-        DeleteConfirmationCallbacks deleteConfirmationCallbacks)
+        ModelDefaultCallbacks callbacks)
         : modelDefaultCallbacks(std::move(callbacks)),
-          deleteConfirmationCallbacks(std::move(deleteConfirmationCallbacks)),
           ui(ui)
     {
         Image panelImage = GenImageColor(1, 1, EDITOR_WINDOW_BACKGROUND);

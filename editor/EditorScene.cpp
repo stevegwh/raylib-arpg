@@ -183,6 +183,7 @@ namespace sage
 
     void EditorScene::Update()
     {
+        sys->collisionSystem->Update();
         sys->audioManager->Update();
         sys->userInput->ListenForInput();
         if (sys->UI().IsMouseOverWindow())
@@ -197,12 +198,9 @@ namespace sage
         sys->cursor->Update();
         editorModes->RefreshPlacementTarget();
 
+        // TODO: Should be part of some mode
         if (!TextInput::AnyEditing())
         {
-            if (IsKeyPressed(KEY_DELETE) && !gui->IsDeleteConfirmationVisible())
-            {
-                editorModes->RequestDeleteSelectedEntity();
-            }
             if (IsKeyPressed(KEY_EQUAL))
             {
                 editorModes->AdjustGridSurfaceY(GRID_SURFACE_Y_STEP);
@@ -210,15 +208,6 @@ namespace sage
             if (IsKeyPressed(KEY_MINUS))
             {
                 editorModes->AdjustGridSurfaceY(-GRID_SURFACE_Y_STEP);
-            }
-            if (editorModes->IsSelectMode() && IsKeyPressed(KEY_F) &&
-                (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)))
-            {
-                focusSelectedObjectInHierarchy();
-            }
-            else if (editorModes->IsSelectMode() && IsKeyPressed(KEY_F))
-            {
-                focusSelectedObject();
             }
         }
 
@@ -284,7 +273,7 @@ namespace sage
                 editorModes->OnTransformApplied(entity);
             }
         });
-        editorModes = std::make_unique<editor::EditorModeStateMachine>(sys->registry, *this, *transformEditor);
+        editorModes = std::make_unique<editor::EditorModeStateMachine>(*this, *transformEditor);
 
         gui = std::make_unique<editor::EditorGui>(
             &sys->UI(),
@@ -292,10 +281,7 @@ namespace sage
             assetCatalog->AssetEntries(),
             [this](const std::size_t index) { editorModes->SelectPlaceable(index); },
             [this](const entt::entity entity) { editorModes->SelectSceneEntity(entity); },
-            modelDefaults->Callbacks(),
-            editor::EditorGui::DeleteConfirmationCallbacks{
-                .confirm = [this]() { editorModes->ConfirmDeleteSelectedEntity(); },
-                .cancel = [this]() { editorModes->CancelDeleteSelectedEntity(); }});
+            modelDefaults->Callbacks());
         refreshOverlay();
         refreshSceneWindows();
     }

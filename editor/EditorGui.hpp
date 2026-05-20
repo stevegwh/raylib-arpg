@@ -50,10 +50,11 @@ namespace sage
                 std::function<void()> reset;
             };
 
-            struct DeleteConfirmationCallbacks
+            enum class DeleteConfirmationAction
             {
-                std::function<void()> confirm;
-                std::function<void()> cancel;
+                None,
+                Confirm,
+                Cancel
             };
 
           private:
@@ -71,7 +72,7 @@ namespace sage
             Subscription hierarchyScrollSub{};
             InspectorFieldBuilder inspectorFieldBlueprints;
             ModelDefaultCallbacks modelDefaultCallbacks;
-            DeleteConfirmationCallbacks deleteConfirmationCallbacks;
+            DeleteConfirmationAction pendingDeleteConfirmationAction = DeleteConfirmationAction::None;
             std::optional<std::size_t> selectedAssetIndex;
             std::optional<entt::entity> selectedSceneEntity;
             TextBox* overlayTitleText{};
@@ -117,14 +118,14 @@ namespace sage
             void ShowDeleteConfirmation(const std::string& selectedEntity) const;
             void HideDeleteConfirmation() const;
             [[nodiscard]] bool IsDeleteConfirmationVisible() const;
+            [[nodiscard]] DeleteConfirmationAction ConsumeDeleteConfirmationAction();
             EditorGui(
                 GameUIEngine* ui,
                 Settings* settings,
                 const std::vector<AssetEntry>& assets,
                 std::function<void(std::size_t)> onAssetSelected,
                 std::function<void(entt::entity)> onSceneObjectSelected,
-                ModelDefaultCallbacks callbacks,
-                DeleteConfirmationCallbacks deleteConfirmationCallbacks);
+                ModelDefaultCallbacks callbacks);
             ~EditorGui();
         };
     } // namespace editor

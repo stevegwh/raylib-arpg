@@ -1,5 +1,6 @@
 #include "EditorModeStateMachine.hpp"
 
+#include "EditorGui.hpp"
 #include "EditorScene.hpp"
 #include "EditorTransformEditor.hpp"
 #include "engine/Camera.hpp"
@@ -30,23 +31,68 @@ namespace sage::editor
 
     // ===== Select Mode =============================================================
 
-    void EditorSelectState::OnEnter(EditorModeStateMachine& machine, entt::entity)
+    void EditorSelectState::OnEnter(EditorModeStateMachine& machine)
     {
         machine.refreshOverlay();
     }
 
-    void EditorSelectState::OnExit(EditorModeStateMachine&, entt::entity)
+    void EditorSelectState::OnExit(EditorModeStateMachine&)
     {
     }
 
-    void EditorSelectState::Update(EditorModeStateMachine& machine, entt::entity)
+    void EditorSelectState::Update(EditorModeStateMachine& machine)
     {
+        HandleDeleteConfirmationInput(machine);
+
         if (TextInput::AnyEditing()) return;
+
+        HandleKeyboardInput(machine);
+        HandleMouseInput(machine);
+    }
+
+    void EditorSelectState::Draw3D(const EditorModeStateMachine&) const
+    {
+    }
+
+    void EditorSelectState::HandleDeleteConfirmationInput(EditorModeStateMachine& machine)
+    {
+        const auto action = machine.consumeDeleteConfirmationAction();
+        if (action == EditorGui::DeleteConfirmationAction::None) return;
+
+        if (action == EditorGui::DeleteConfirmationAction::Confirm)
+        {
+            ConfirmDeleteSelectedEntity(machine);
+        }
+        else
+        {
+            CancelDeleteSelectedEntity(machine);
+        }
+    }
+
+    void EditorSelectState::HandleKeyboardInput(EditorModeStateMachine& machine)
+    {
+        if (IsKeyPressed(KEY_DELETE) && !machine.isDeleteConfirmationVisible())
+        {
+            RequestDeleteSelectedEntity(machine);
+        }
+
+        if (IsKeyPressed(KEY_F) && (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)))
+        {
+            machine.focusSelectedObjectInHierarchy();
+        }
+        else if (IsKeyPressed(KEY_F))
+        {
+            machine.focusSelectedObject();
+        }
 
         if (IsKeyPressed(KEY_TAB))
         {
             BeginEditSelectedTransform(machine);
         }
+    }
+
+    void EditorSelectState::HandleMouseInput(EditorModeStateMachine& machine)
+    {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !machine.isMouseOverUiCell())
         {
             if (!SelectSceneEntityUnderCursor(machine))
@@ -54,10 +100,6 @@ namespace sage::editor
                 ClearSceneEntitySelection(machine);
             }
         }
-    }
-
-    void EditorSelectState::Draw3D(const EditorModeStateMachine&, entt::entity) const
-    {
     }
 
     bool EditorSelectState::SelectSceneEntityUnderCursor(EditorModeStateMachine& machine)
@@ -148,18 +190,18 @@ namespace sage::editor
 
     // ===== Place Mode ==============================================================
 
-    void EditorPlaceState::OnEnter(EditorModeStateMachine& machine, entt::entity)
+    void EditorPlaceState::OnEnter(EditorModeStateMachine& machine)
     {
         machine.selectPlaceableAsset(placeableIndex);
         ResetPlacementTransform(machine);
         machine.refreshOverlay();
     }
 
-    void EditorPlaceState::OnExit(EditorModeStateMachine&, entt::entity)
+    void EditorPlaceState::OnExit(EditorModeStateMachine&)
     {
     }
 
-    void EditorPlaceState::Update(EditorModeStateMachine& machine, entt::entity)
+    void EditorPlaceState::Update(EditorModeStateMachine& machine)
     {
         if (TextInput::AnyEditing()) return;
 
@@ -198,7 +240,7 @@ namespace sage::editor
         }
     }
 
-    void EditorPlaceState::Draw3D(const EditorModeStateMachine& machine, entt::entity) const
+    void EditorPlaceState::Draw3D(const EditorModeStateMachine& machine) const
     {
         const auto& snappedPlacementPosition = machine.snappedPlacementPosition();
         if (!snappedPlacementPosition.has_value()) return;
@@ -215,7 +257,11 @@ namespace sage::editor
 
     bool EditorPlaceState::SelectSceneEntityUnderCursor(EditorModeStateMachine& machine)
     {
-        return EditorSelectState{}.SelectSceneEntityUnderCursor(machine);
+        const auto entity = machine.pickSceneEntityUnderCursor();
+        if (!entity.has_value()) return false;
+
+        machine.SelectSceneEntity(*entity);
+        return true;
     }
 
     void EditorPlaceState::ResetPlacementTransform(EditorModeStateMachine& machine)
@@ -268,7 +314,7 @@ namespace sage::editor
 
     // ===== Edit Mode ===============================================================
 
-    void EditorEditState::OnEnter(EditorModeStateMachine& machine, entt::entity)
+    void EditorEditState::OnEnter(EditorModeStateMachine& machine)
     {
         if (!machine.hasTransform(entity))
         {
@@ -283,16 +329,16 @@ namespace sage::editor
         machine.refreshSceneWindows();
     }
 
-    void EditorEditState::OnExit(EditorModeStateMachine& machine, entt::entity)
+    void EditorEditState::OnExit(EditorModeStateMachine& machine)
     {
         machine.transformEditor.ExitEditMode();
     }
 
-    void EditorEditState::Update(EditorModeStateMachine& machine, entt::entity)
+    void EditorEditState::Update(EditorModeStateMachine& machine)
     {
         if (!machine.hasTransform(entity))
         {
-            EditorSelectState{}.ClearSceneEntitySelection(machine);
+            ClearSceneEntitySelection(machine);
             return;
         }
 
@@ -326,7 +372,8 @@ namespace sage::editor
             machine.transformEditor.SetMode(EditGizmo::Mode::Scale);
         }
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !machine.isMouseOverUiCell() && machine.hasTransform(entity))
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !machine.isMouseOverUiCell() &&
+            machine.hasTransform(entity))
         {
             if (machine.transformEditor.TryStartDrag(entity, GetMousePosition())) return;
         }
@@ -334,8 +381,7 @@ namespace sage::editor
         const bool shiftDown = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
         switch (machine.transformEditor.Mode())
         {
-        case EditGizmo::Mode::Translate:
-        {
+        case EditGizmo::Mode::Translate: {
             Vector3 positionDelta{};
             if (IsKeyPressedOrRepeated(KEY_LEFT))
             {
@@ -373,8 +419,7 @@ namespace sage::editor
             }
             break;
         }
-        case EditGizmo::Mode::Rotate:
-        {
+        case EditGizmo::Mode::Rotate: {
             if (IsKeyPressedOrRepeated(KEY_LEFT))
             {
                 machine.transformEditor.AdjustRotationAxis(entity, EditGizmo::Axis::Y, -PLACEMENT_ROTATION_STEP);
@@ -393,8 +438,7 @@ namespace sage::editor
             }
             break;
         }
-        case EditGizmo::Mode::Scale:
-        {
+        case EditGizmo::Mode::Scale: {
             if (IsKeyPressedOrRepeated(KEY_LEFT))
             {
                 machine.transformEditor.AdjustScale(entity, -PLACEMENT_SCALE_STEP);
@@ -413,7 +457,7 @@ namespace sage::editor
         }
     }
 
-    void EditorEditState::Draw3D(const EditorModeStateMachine& machine, entt::entity) const
+    void EditorEditState::Draw3D(const EditorModeStateMachine& machine) const
     {
         const auto& snappedPlacementPosition = machine.snappedPlacementPosition();
         if (!snappedPlacementPosition.has_value()) return;
@@ -448,13 +492,21 @@ namespace sage::editor
     {
         if (!machine.hasTransform(entity))
         {
-            EditorSelectState{}.ClearSceneEntitySelection(machine);
+            ClearSceneEntitySelection(machine);
             return;
         }
 
         machine.transformEditor.TogglePivotMode();
         SyncPlacementFromEntity(machine, entity);
         machine.refreshOverlay();
+        machine.refreshSceneWindows();
+    }
+
+    void EditorEditState::ClearSceneEntitySelection(EditorModeStateMachine& machine)
+    {
+        machine.clearSelection();
+        machine.ChangeState(EditorSelectState{});
+        machine.hideDeleteConfirmation();
         machine.refreshSceneWindows();
     }
 
@@ -501,6 +553,16 @@ namespace sage::editor
     bool EditorModeStateMachine::isMouseOverUiCell() const
     {
         return scene.sys->UI().GetCellUnderCursor() != nullptr;
+    }
+
+    bool EditorModeStateMachine::isDeleteConfirmationVisible() const
+    {
+        return scene.gui->IsDeleteConfirmationVisible();
+    }
+
+    EditorGui::DeleteConfirmationAction EditorModeStateMachine::consumeDeleteConfirmationAction()
+    {
+        return scene.gui->ConsumeDeleteConfirmationAction();
     }
 
     std::optional<entt::entity> EditorModeStateMachine::pickSceneEntityUnderCursor() const
@@ -554,6 +616,16 @@ namespace sage::editor
         scene.gui->FocusHierarchyOnEntity(entity);
     }
 
+    void EditorModeStateMachine::focusSelectedObject() const
+    {
+        scene.focusSelectedObject();
+    }
+
+    void EditorModeStateMachine::focusSelectedObjectInHierarchy() const
+    {
+        scene.focusSelectedObjectInHierarchy();
+    }
+
     bool EditorModeStateMachine::canSelectPlaceable(const std::size_t index) const
     {
         return index < scene.assetCatalog->Size();
@@ -592,86 +664,54 @@ namespace sage::editor
 
     void EditorModeStateMachine::SelectSceneEntity(const entt::entity entity)
     {
-        EditorSelectState{}.SelectSceneEntity(*this, entity);
-    }
-
-    void EditorModeStateMachine::RequestDeleteSelectedEntity()
-    {
-        EditorSelectState{}.RequestDeleteSelectedEntity(*this);
-    }
-
-    void EditorModeStateMachine::CancelDeleteSelectedEntity()
-    {
-        EditorSelectState{}.CancelDeleteSelectedEntity(*this);
-    }
-
-    void EditorModeStateMachine::ConfirmDeleteSelectedEntity()
-    {
-        EditorSelectState{}.ConfirmDeleteSelectedEntity(*this);
+        ChangeState(EditorSelectState{});
+        std::get<EditorSelectState>(currentState).SelectSceneEntity(*this, entity);
     }
 
     bool EditorModeStateMachine::HandleEscapePressed()
     {
-        auto& state = registry->get<EditorModeState>(stateEntity);
-        return std::visit([this](auto& current) { return current.HandleEscape(*this); }, state.current);
+        return std::visit([this](auto& current) { return current.HandleEscape(*this); }, currentState);
     }
 
     void EditorModeStateMachine::OnTransformApplied(const entt::entity entity)
     {
-        auto& state = registry->get<EditorModeState>(stateEntity);
-        std::visit([this, entity](auto& current) { current.OnTransformApplied(*this, entity); }, state.current);
+        std::visit([this, entity](auto& current) { current.OnTransformApplied(*this, entity); }, currentState);
     }
 
     // ===== Lifecycle ===============================================================
 
     void EditorModeStateMachine::Update()
     {
-        auto& state = registry->get<EditorModeState>(stateEntity);
-        std::visit([this](auto& current) { current.Update(*this, stateEntity); }, state.current);
+        std::visit([this](auto& current) { current.Update(*this); }, currentState);
     }
 
     void EditorModeStateMachine::Draw3D() const
     {
-        const auto& state = registry->get<EditorModeState>(stateEntity);
-        std::visit([this](const auto& current) { current.Draw3D(*this, stateEntity); }, state.current);
+        std::visit([this](const auto& current) { current.Draw3D(*this); }, currentState);
     }
 
     bool EditorModeStateMachine::IsPlaceMode() const
     {
-        const auto& state = registry->get<EditorModeState>(stateEntity);
-        return std::holds_alternative<EditorPlaceState>(state.current);
+        return std::holds_alternative<EditorPlaceState>(currentState);
     }
 
     bool EditorModeStateMachine::IsEditMode() const
     {
-        const auto& state = registry->get<EditorModeState>(stateEntity);
-        return std::holds_alternative<EditorEditState>(state.current);
-    }
-
-    bool EditorModeStateMachine::IsSelectMode() const
-    {
-        const auto& state = registry->get<EditorModeState>(stateEntity);
-        return std::holds_alternative<EditorSelectState>(state.current);
+        return std::holds_alternative<EditorEditState>(currentState);
     }
 
     EditorEditState* EditorModeStateMachine::CurrentEditState()
     {
-        auto& state = registry->get<EditorModeState>(stateEntity);
-        return std::get_if<EditorEditState>(&state.current);
+        return std::get_if<EditorEditState>(&currentState);
     }
 
     const EditorEditState* EditorModeStateMachine::CurrentEditState() const
     {
-        const auto& state = registry->get<EditorModeState>(stateEntity);
-        return std::get_if<EditorEditState>(&state.current);
+        return std::get_if<EditorEditState>(&currentState);
     }
 
-    EditorModeStateMachine::EditorModeStateMachine(
-        entt::registry* registry,
-        EditorScene& scene,
-        EditorTransformEditor& transformEditor)
-        : Base(registry), scene(scene), transformEditor(transformEditor), stateEntity(registry->create())
+    EditorModeStateMachine::EditorModeStateMachine(EditorScene& scene, EditorTransformEditor& transformEditor)
+        : scene(scene), transformEditor(transformEditor)
     {
-        registry->emplace<EditorModeState>(stateEntity);
     }
 } // namespace sage::editor
