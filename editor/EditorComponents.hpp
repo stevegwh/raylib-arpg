@@ -16,9 +16,9 @@ namespace sage::editor
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.UInt64("Id", id, false);
+            i.field("Id", id, false);
         }
     };
 
@@ -37,13 +37,13 @@ namespace sage::editor
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.String("Name", name);
-            inspector.String("Category", category);
-            inspector.Bool("Selectable", selectable);
-            inspector.Bool("Visible In Hierarchy", visibleInHierarchy);
-            inspector.Bool("Locked", locked);
+            i.field("Name", name);
+            i.field("Category", category);
+            i.field("Selectable", selectable);
+            i.field("Visible In Hierarchy", visibleInHierarchy);
+            i.field("Locked", locked);
         }
     };
 
@@ -58,9 +58,9 @@ namespace sage::editor
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.String("Asset Key", assetKey, false);
+            i.field("Asset Key", assetKey, false);
         }
     };
 } // namespace sage::editor

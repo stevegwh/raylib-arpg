@@ -31,12 +31,12 @@ namespace sage
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.String("Name", name);
-            inspector.Enum("Type", type);
-            inspector.Vec3("Position", pos);
-            inspector.Vec3("Rotation", rot);
+            i.field("Name", name);
+            i.field("Type", type);
+            i.field("Position", pos);
+            i.field("Rotation", rot);
         }
     };
 } // namespace sage

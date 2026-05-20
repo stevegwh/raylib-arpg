@@ -40,11 +40,11 @@ namespace sage
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.Vec3("Position", m_positionWorld);
-            inspector.Vec3("Rotation", m_rotationWorld);
-            inspector.Vec3("Scale", m_scale);
+            i.field("Position", m_positionWorld);
+            i.field("Rotation", m_rotationWorld);
+            i.field("Scale", m_scale);
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;

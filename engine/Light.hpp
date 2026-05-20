@@ -61,17 +61,17 @@ namespace sage
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.Bool("Enabled", enabled);
-            inspector.Int("Type", type);
-            inspector.Vec3("Position", position);
-            inspector.Vec3("Target", target);
-            inspector.Color("Color", color);
-            inspector.Float("Brightness", brightness);
-            inspector.Float("Constant", constant);
-            inspector.Float("Linear", linear);
-            inspector.Float("Quadratic", quadratic);
+            i.field("Enabled", enabled);
+            i.field("Type", type);
+            i.field("Position", position);
+            i.field("Target", target);
+            i.field("Color", color);
+            i.field("Brightness", brightness);
+            i.field("Constant", constant);
+            i.field("Linear", linear);
+            i.field("Quadratic", quadratic);
         }
     };
 } // namespace sage

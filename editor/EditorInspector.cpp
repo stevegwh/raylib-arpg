@@ -10,73 +10,13 @@
 
 namespace sage::editor
 {
-    void ComponentInspector::Bool(std::string label, bool& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label), .kind = InspectorField::Kind::Bool, .data = &v, .editable = editable});
-    }
-
-    void ComponentInspector::Int(std::string label, int& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label), .kind = InspectorField::Kind::Int, .data = &v, .editable = editable});
-    }
-
-    void ComponentInspector::UInt(std::string label, unsigned int& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label), .kind = InspectorField::Kind::UInt, .data = &v, .editable = editable});
-    }
-
-    void ComponentInspector::UInt64(std::string label, std::uint64_t& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label),
-             .kind = InspectorField::Kind::UInt64,
-             .data = &v,
-             .editable = editable});
-    }
-
-    void ComponentInspector::Float(std::string label, float& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label), .kind = InspectorField::Kind::Float, .data = &v, .editable = editable});
-    }
-
-    void ComponentInspector::String(std::string label, std::string& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label),
-             .kind = InspectorField::Kind::String,
-             .data = &v,
-             .editable = editable});
-    }
-
-    void ComponentInspector::Vec2(std::string label, Vector2& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label), .kind = InspectorField::Kind::Vec2, .data = &v, .editable = editable});
-    }
-
-    void ComponentInspector::Vec3(std::string label, Vector3& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label), .kind = InspectorField::Kind::Vec3, .data = &v, .editable = editable});
-    }
-
-    void ComponentInspector::Color(std::string label, ::Color& v, const bool editable)
-    {
-        fields_.push_back(
-            {.label = std::move(label), .kind = InspectorField::Kind::Color, .data = &v, .editable = editable});
-    }
-
-    void ComponentInspector::CollisionLayer(std::string label, sage::CollisionLayer& v, const bool editable)
+    void ComponentInspector::field(std::string label, sage::CollisionLayer& v, const bool ed)
     {
         InspectorField f{
-            .label = std::move(label),
+            .label = qualified(label),
             .kind = InspectorField::Kind::Enum,
             .data = &v,
-            .editable = editable};
+            .editable = ed && editableScope_};
         const auto& layers = GetCollisionLayers();
         f.enumOptions.reserve(layers.size());
         for (const auto& layer : layers) f.enumOptions.emplace_back(layer.layerName);

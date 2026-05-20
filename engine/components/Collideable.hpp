@@ -43,16 +43,14 @@ namespace sage
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.Bool("Active", active);
-            inspector.Bool("Debug Draw", debugDraw);
-            inspector.Bool("Blocks Navigation", blocksNavigation);
-            inspector.CollisionLayer("Collision Layer", collisionLayer);
-            inspector.Vec3("Local Bounds Min", localBoundingBox.min);
-            inspector.Vec3("Local Bounds Max", localBoundingBox.max);
-            inspector.Vec3("World Bounds Min", worldBoundingBox.min, false);
-            inspector.Vec3("World Bounds Max", worldBoundingBox.max, false);
+            i.field("Active", active);
+            i.field("Debug Draw", debugDraw);
+            i.field("Blocks Navigation", blocksNavigation);
+            i.field("Collision Layer", collisionLayer);
+            i.field("Local Bounds", localBoundingBox);
+            i.field("World Bounds", worldBoundingBox, false);
         }
     };
 

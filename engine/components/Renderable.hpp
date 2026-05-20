@@ -116,12 +116,12 @@ namespace sage
         }
 
         template <class Inspector>
-        void inspect(Inspector& inspector)
+        void inspect(Inspector& i)
         {
-            inspector.Bool("Active", active);
-            inspector.Bool("Serializable", serializable);
-            inspector.String("Name", name, false);
-            inspector.Color("Hint", hint);
+            i.field("Active", active);
+            i.field("Serializable", serializable);
+            i.field("Name", name, false);
+            i.field("Hint", hint);
         }
     };
 } // namespace sage
