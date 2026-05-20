@@ -13,6 +13,7 @@
 #include <sstream>
 #include <string_view>
 #include <utility>
+#include <variant>
 
 namespace sage::editor
 {
@@ -171,9 +172,11 @@ namespace sage::editor
         std::string componentName;
         std::string fieldName;
         InspectorField::Kind kind = InspectorField::Kind::Bool;
-        Checkbox* checkbox = nullptr;
-        DropdownList* dropdown = nullptr;
-        std::vector<TextBox*> valueTexts;
+        // Exactly one alternative is populated, chosen by `kind`:
+        //   Bool                                       → Checkbox*
+        //   Enum                                       → DropdownList*
+        //   Int/UInt/UInt64/Float/String/Vec2/Vec3/Color → std::vector<TextBox*>
+        std::variant<Checkbox*, DropdownList*, std::vector<TextBox*>> widget;
     };
 
     InspectorFieldBuilder::InspectorFieldBuilder() = default;
@@ -241,76 +244,93 @@ namespace sage::editor
 
     void InspectorFieldBuilder::Draw(const std::vector<InspectedComponent>& inspectedComponents) const
     {
-        for (auto& binding : bindings)
+        for (const auto& binding : bindings)
         {
-            const auto* field = FindField(inspectedComponents, n, binding.fieldName);
+            const auto* field = FindField(inspectedComponents, binding.componentName, binding.fieldName);
             if (!field || field->kind != binding.kind || !field->data) continue;
 
             switch (binding.kind)
             {
             case InspectorField::Kind::Bool:
-                if (binding.checkbox) binding.checkbox->SetChecked(*static_cast<bool*>(field->data));
+                if (auto* cb = std::get<Checkbox*>(binding.widget))
+                    cb->SetChecked(*static_cast<bool*>(field->data));
                 break;
             case InspectorField::Kind::Int:
-                if (!binding.valueTexts.empty() && binding.valueTexts[0])
-                    binding.valueTexts[0]->SetContent(std::to_string(*static_cast<int*>(field->data)));
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
+                if (!texts.empty() && texts[0])
+                    texts[0]->SetContent(std::to_string(*static_cast<int*>(field->data)));
                 break;
+            }
             case InspectorField::Kind::UInt:
-                if (!binding.valueTexts.empty() && binding.valueTexts[0])
-                    binding.valueTexts[0]->SetContent(std::to_string(*static_cast<unsigned int*>(field->data)));
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
+                if (!texts.empty() && texts[0])
+                    texts[0]->SetContent(std::to_string(*static_cast<unsigned int*>(field->data)));
                 break;
+            }
             case InspectorField::Kind::UInt64:
-                if (!binding.valueTexts.empty() && binding.valueTexts[0])
-                    binding.valueTexts[0]->SetContent(std::to_string(*static_cast<std::uint64_t*>(field->data)));
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
+                if (!texts.empty() && texts[0])
+                    texts[0]->SetContent(std::to_string(*static_cast<std::uint64_t*>(field->data)));
                 break;
+            }
             case InspectorField::Kind::Float:
-                if (!binding.valueTexts.empty() && binding.valueTexts[0])
-                    binding.valueTexts[0]->SetContent(formatFloat(*static_cast<float*>(field->data)));
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
+                if (!texts.empty() && texts[0])
+                    texts[0]->SetContent(formatFloat(*static_cast<float*>(field->data)));
                 break;
+            }
             case InspectorField::Kind::String:
-                if (!binding.valueTexts.empty() && binding.valueTexts[0])
-                    binding.valueTexts[0]->SetContent(*static_cast<std::string*>(field->data));
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
+                if (!texts.empty() && texts[0])
+                    texts[0]->SetContent(*static_cast<std::string*>(field->data));
                 break;
-            case InspectorField::Kind::Vec2: {
+            }
+            case InspectorField::Kind::Vec2:
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
                 const auto* v = static_cast<Vector2*>(field->data);
-                if (binding.valueTexts.size() >= 2)
+                if (texts.size() >= 2)
                 {
-                    if (binding.valueTexts[0]) binding.valueTexts[0]->SetContent(formatFloat(v->x));
-                    if (binding.valueTexts[1]) binding.valueTexts[1]->SetContent(formatFloat(v->y));
+                    if (texts[0]) texts[0]->SetContent(formatFloat(v->x));
+                    if (texts[1]) texts[1]->SetContent(formatFloat(v->y));
                 }
                 break;
             }
-            case InspectorField::Kind::Vec3: {
+            case InspectorField::Kind::Vec3:
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
                 const auto* v = static_cast<Vector3*>(field->data);
-                if (binding.valueTexts.size() >= 3)
+                if (texts.size() >= 3)
                 {
-                    if (binding.valueTexts[0]) binding.valueTexts[0]->SetContent(formatFloat(v->x));
-                    if (binding.valueTexts[1]) binding.valueTexts[1]->SetContent(formatFloat(v->y));
-                    if (binding.valueTexts[2]) binding.valueTexts[2]->SetContent(formatFloat(v->z));
+                    if (texts[0]) texts[0]->SetContent(formatFloat(v->x));
+                    if (texts[1]) texts[1]->SetContent(formatFloat(v->y));
+                    if (texts[2]) texts[2]->SetContent(formatFloat(v->z));
                 }
                 break;
             }
-            case InspectorField::Kind::Color: {
+            case InspectorField::Kind::Color:
+            {
+                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
                 const auto* c = static_cast<Color*>(field->data);
-                if (binding.valueTexts.size() >= 4)
+                if (texts.size() >= 4)
                 {
-                    if (binding.valueTexts[0])
-                        binding.valueTexts[0]->SetContent(std::to_string(static_cast<int>(c->r)));
-                    if (binding.valueTexts[1])
-                        binding.valueTexts[1]->SetContent(std::to_string(static_cast<int>(c->g)));
-                    if (binding.valueTexts[2])
-                        binding.valueTexts[2]->SetContent(std::to_string(static_cast<int>(c->b)));
-                    if (binding.valueTexts[3])
-                        binding.valueTexts[3]->SetContent(std::to_string(static_cast<int>(c->a)));
+                    if (texts[0]) texts[0]->SetContent(std::to_string(static_cast<int>(c->r)));
+                    if (texts[1]) texts[1]->SetContent(std::to_string(static_cast<int>(c->g)));
+                    if (texts[2]) texts[2]->SetContent(std::to_string(static_cast<int>(c->b)));
+                    if (texts[3]) texts[3]->SetContent(std::to_string(static_cast<int>(c->a)));
                 }
                 break;
             }
             case InspectorField::Kind::Enum:
-                if (binding.dropdown)
+                if (auto* dd = std::get<DropdownList*>(binding.widget))
                 {
-                    if (binding.dropdown->GetOptions() != field->enumOptions)
-                        binding.dropdown->SetOptions(field->enumOptions);
-                    if (field->getEnumIndex) binding.dropdown->SetSelectedIndex(field->getEnumIndex());
+                    if (dd->GetOptions() != field->enumOptions) dd->SetOptions(field->enumOptions);
+                    if (field->getEnumIndex) dd->SetSelectedIndex(field->getEnumIndex());
                 }
                 break;
             }
@@ -408,7 +428,7 @@ namespace sage::editor
             auto* p = static_cast<bool*>(field.data);
             cb->onValueChanged.Subscribe([p](const bool v) { *p = v; });
         }
-        binding.checkbox = cb;
+        binding.widget = cb;
     }
 
     void InspectorFieldBuilder::createScalarRow(FieldBinding& binding, const InspectorField& field)
@@ -474,7 +494,7 @@ namespace sage::editor
             valueText = valueCell->CreateTextbox(std::move(text), "");
         }
 
-        binding.valueTexts = {valueText};
+        binding.widget = std::vector<TextBox*>{valueText};
     }
 
     void InspectorFieldBuilder::createComponentRow(FieldBinding& binding, const InspectorField& field)
@@ -561,7 +581,7 @@ namespace sage::editor
             valueTexts.push_back(valueCell->CreateTextbox(std::move(input), ""));
         }
 
-        binding.valueTexts = std::move(valueTexts);
+        binding.widget = std::move(valueTexts);
     }
 
     void InspectorFieldBuilder::createEnumRow(FieldBinding& binding, const InspectorField& field)
@@ -595,7 +615,7 @@ namespace sage::editor
                 if (setter) setter(idx);
             });
         }
-        binding.dropdown = dd;
+        binding.widget = dd;
     }
 
     std::string InspectorFieldBuilder::buildBlueprintSignature(
