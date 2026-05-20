@@ -15,14 +15,14 @@
 
 namespace sage::editor
 {
-    using BoolBinding = InspectorFieldBuilder::BoolBinding;
+    using BoolFieldView = InspectorFieldBuilder::BoolFieldView;
     template <class T>
-    using ScalarBinding = InspectorFieldBuilder::ScalarBinding<T>;
-    using Vec2Binding = InspectorFieldBuilder::Vec2Binding;
-    using Vec3Binding = InspectorFieldBuilder::Vec3Binding;
-    using ColorBinding = InspectorFieldBuilder::ColorBinding;
-    using EnumBinding = InspectorFieldBuilder::EnumBinding;
-    using BindingV = InspectorFieldBuilder::BindingV;
+    using ScalarFieldView = InspectorFieldBuilder::ScalarFieldView<T>;
+    using Vec2FieldView = InspectorFieldBuilder::Vec2FieldView;
+    using Vec3FieldView = InspectorFieldBuilder::Vec3FieldView;
+    using ColorFieldView = InspectorFieldBuilder::ColorFieldView;
+    using EnumFieldView = InspectorFieldBuilder::EnumFieldView;
+    using FieldView = InspectorFieldBuilder::FieldView;
 
     namespace
     {
@@ -135,7 +135,7 @@ namespace sage::editor
         }
 
         // --- Layout helpers --------------------------------------------------------
-        void addLabel(GameUIEngine* ui, TableRow* row, const std::string& label, float widthPct)
+        void createLabel(GameUIEngine* ui, TableRow* row, const std::string& label, float widthPct)
         {
             auto* cell = row->CreateTableCell(widthPct, Padding{1, 1, 2, 4});
             auto t = std::make_unique<TextBox>(
@@ -146,18 +146,18 @@ namespace sage::editor
         // X/Y/Z (or R/G/B/A) label + TextInput<T> on a single component slot of a Vec/Color row.
         // The onValue callback receives the parsed T and writes it into the underlying member.
         template <class T, class OnValue>
-        TextBox* addAxis(
+        TextBox* createTextInputCell(
             GameUIEngine* ui,
             TableRow* row,
-            const std::string& axisLabel,
+            const std::string& inputLabel,
             float valueWidth,
             bool editable,
             OnValue&& onValue)
         {
-            auto* axisCell = row->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
-            auto axisLabelText = std::make_unique<TextBox>(
-                ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
-            axisCell->CreateTextbox(std::move(axisLabelText), axisLabel);
+            auto* labelCell = row->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
+            auto labelText = std::make_unique<TextBox>(
+                ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
+            labelCell->CreateTextbox(std::move(labelText), inputLabel);
 
             auto* valueCell = row->CreateTableCell(valueWidth, Padding{1, 1, 2, 2});
             if (!editable)
@@ -179,13 +179,13 @@ namespace sage::editor
             return valueCell->CreateTextbox(std::move(input), "");
         }
 
-        // --- makeBinding overloads — one per variant alternative -------------------
+        // --- createFieldView overloads — one per variant alternative ----------------
 
-        BoolBinding makeBinding(
-            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, bool* data)
+        BoolFieldView createFieldView(
+            bool* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-            addLabel(ui, row, label, 82.0f);
+            createLabel(ui, row, label, 82.0f);
             auto* valueCell = row->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
             auto cb =
                 std::make_unique<Checkbox>(ui, valueCell, false, VertAlignment::MIDDLE, HoriAlignment::CENTER);
@@ -198,11 +198,11 @@ namespace sage::editor
         }
 
         template <class T>
-        ScalarBinding<T> makeBinding(
-            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, T* data)
+        ScalarFieldView<T> createFieldView(
+            T* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-            addLabel(ui, row, label, 34.0f);
+            createLabel(ui, row, label, 34.0f);
             auto* valueCell = row->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
 
             constexpr auto valueAlignment =
@@ -232,56 +232,60 @@ namespace sage::editor
             return {text, data};
         }
 
-        Vec2Binding makeBinding(
-            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, Vector2* data)
+        Vec2FieldView createFieldView(
+            Vector2* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-            addLabel(ui, row, label, 34.0f);
-            constexpr float axisCount = 2.0f;
-            constexpr float axisLabelWidth = 4.0f;
-            const float vw = (66.0f - axisLabelWidth * axisCount) / axisCount;
-            auto* x = addAxis<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
-            auto* y = addAxis<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
+            createLabel(ui, row, label, 34.0f);
+            constexpr float inputCount = 2.0f;
+            constexpr float inputLabelWidth = 4.0f;
+            const float vw = (66.0f - inputLabelWidth * inputCount) / inputCount;
+            auto* x = createTextInputCell<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
+            auto* y = createTextInputCell<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
             return {{x, y}, data};
         }
 
-        Vec3Binding makeBinding(
-            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, Vector3* data)
+        Vec3FieldView createFieldView(
+            Vector3* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-            addLabel(ui, row, label, 34.0f);
-            constexpr float axisCount = 3.0f;
-            constexpr float axisLabelWidth = 4.0f;
-            const float vw = (66.0f - axisLabelWidth * axisCount) / axisCount;
-            auto* x = addAxis<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
-            auto* y = addAxis<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
-            auto* z = addAxis<float>(ui, row, "Z", vw, editable, [data](float v) { data->z = v; });
+            createLabel(ui, row, label, 34.0f);
+            constexpr float inputCount = 3.0f;
+            constexpr float inputLabelWidth = 4.0f;
+            const float vw = (66.0f - inputLabelWidth * inputCount) / inputCount;
+            auto* x = createTextInputCell<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
+            auto* y = createTextInputCell<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
+            auto* z = createTextInputCell<float>(ui, row, "Z", vw, editable, [data](float v) { data->z = v; });
             return {{x, y, z}, data};
         }
 
-        ColorBinding makeBinding(
-            GameUIEngine* ui, Table* fieldTable, const std::string& label, const bool editable, ::Color* data)
+        ColorFieldView createFieldView(
+            ::Color* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, const bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-            addLabel(ui, row, label, 34.0f);
-            constexpr float axisCount = 4.0f;
-            constexpr float axisLabelWidth = 4.0f;
-            constexpr float vw = (66.0f - axisLabelWidth * axisCount) / axisCount;
+            createLabel(ui, row, label, 34.0f);
+            constexpr float inputCount = 4.0f;
+            constexpr float inputLabelWidth = 4.0f;
+            constexpr float vw = (66.0f - inputLabelWidth * inputCount) / inputCount;
             const auto clamp = [](const int v) -> unsigned char {
                 return static_cast<unsigned char>(std::clamp(v, 0, 255));
             };
-            auto* r = addAxis<int>(ui, row, "R", vw, editable, [data, clamp](int v) { data->r = clamp(v); });
-            auto* g = addAxis<int>(ui, row, "G", vw, editable, [data, clamp](int v) { data->g = clamp(v); });
-            auto* b = addAxis<int>(ui, row, "B", vw, editable, [data, clamp](int v) { data->b = clamp(v); });
-            auto* a = addAxis<int>(ui, row, "A", vw, editable, [data, clamp](int v) { data->a = clamp(v); });
+            auto* r =
+                createTextInputCell<int>(ui, row, "R", vw, editable, [data, clamp](int v) { data->r = clamp(v); });
+            auto* g =
+                createTextInputCell<int>(ui, row, "G", vw, editable, [data, clamp](int v) { data->g = clamp(v); });
+            auto* b =
+                createTextInputCell<int>(ui, row, "B", vw, editable, [data, clamp](int v) { data->b = clamp(v); });
+            auto* a =
+                createTextInputCell<int>(ui, row, "A", vw, editable, [data, clamp](int v) { data->a = clamp(v); });
             return {{r, g, b, a}, data};
         }
 
-        EnumBinding makeBinding(
-            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, const EnumField& src)
+        EnumFieldView createFieldView(
+            const EnumField& src, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-            addLabel(ui, row, label, 34.0f);
+            createLabel(ui, row, label, 34.0f);
             auto* valueCell = row->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
             auto dropdown = std::make_unique<DropdownList>(
                 ui,
@@ -309,31 +313,31 @@ namespace sage::editor
 
         // --- Update overloads — refresh widget contents from cached data ----------
 
-        void Update(const BoolBinding& b)
+        void Update(const BoolFieldView& b)
         {
             if (b.checkbox) b.checkbox->SetChecked(*b.data);
         }
 
         template <class T>
-        void Update(const ScalarBinding<T>& b)
+        void Update(const ScalarFieldView<T>& b)
         {
             if (b.text) b.text->SetContent(formatScalar(*b.data));
         }
 
-        void Update(const Vec2Binding& b)
+        void Update(const Vec2FieldView& b)
         {
             if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.data->x));
             if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.data->y));
         }
 
-        void Update(const Vec3Binding& b)
+        void Update(const Vec3FieldView& b)
         {
             if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.data->x));
             if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.data->y));
             if (b.texts[2]) b.texts[2]->SetContent(formatScalar(b.data->z));
         }
 
-        void Update(const ColorBinding& b)
+        void Update(const ColorFieldView& b)
         {
             if (b.texts[0]) b.texts[0]->SetContent(std::to_string(static_cast<int>(b.data->r)));
             if (b.texts[1]) b.texts[1]->SetContent(std::to_string(static_cast<int>(b.data->g)));
@@ -341,7 +345,7 @@ namespace sage::editor
             if (b.texts[3]) b.texts[3]->SetContent(std::to_string(static_cast<int>(b.data->a)));
         }
 
-        void Update(const EnumBinding& b)
+        void Update(const EnumFieldView& b)
         {
             if (!b.dropdown) return;
             if (b.dropdown->GetOptions() != b.options) b.dropdown->SetOptions(b.options);
@@ -408,7 +412,7 @@ namespace sage::editor
         if (rows == builtRows && scrollOffset == builtScrollOffset) return;
         builtRows = rows;
         builtScrollOffset = scrollOffset;
-        bindings.clear();
+        fieldViews.clear();
         fieldTable->children.clear();
 
         const std::size_t visibleRows = scrollbar ? scrollbar->VisibleRows() : rows.size();
@@ -425,10 +429,10 @@ namespace sage::editor
             const auto* field = FindField(inspectedComponents, row.componentName, row.fieldName);
             if (!field) continue;
 
-            bindings.push_back(
+            fieldViews.push_back(
                 std::visit(
-                    [&](auto&& v) -> BindingV {
-                        return makeBinding(ui, fieldTable, field->label, field->editable, v);
+                    [&](auto&& v) -> FieldView {
+                        return createFieldView(v, ui, fieldTable, field->label, field->editable);
                     },
                     field->value));
         }
@@ -438,7 +442,7 @@ namespace sage::editor
 
     void InspectorFieldBuilder::Draw() const
     {
-        for (const auto& b : bindings)
+        for (const auto& b : fieldViews)
             std::visit([](const auto& x) { Update(x); }, b);
     }
 

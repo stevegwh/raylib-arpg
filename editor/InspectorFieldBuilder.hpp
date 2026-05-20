@@ -26,32 +26,32 @@ namespace sage::editor
         struct FieldRow;
 
       public:
-        // Per-kind widget+data bindings. The variant alternative encodes the field type
-        // implicitly; std::visit + overloaded makeBinding/Update functions handle dispatch.
-        struct BoolBinding   { Checkbox*                 checkbox = nullptr; bool* data = nullptr; };
+        // Per-kind live UI views. The variant alternative encodes the field type
+        // implicitly; std::visit + overloaded createFieldView/Update functions handle dispatch.
+        struct BoolFieldView   { Checkbox*                 checkbox = nullptr; bool* data = nullptr; };
         template <class T>
-        struct ScalarBinding { TextBox*                  text     = nullptr; T*    data = nullptr; };
-        struct Vec2Binding   { std::array<TextBox*, 2>   texts{};            Vector2* data = nullptr; };
-        struct Vec3Binding   { std::array<TextBox*, 3>   texts{};            Vector3* data = nullptr; };
-        struct ColorBinding  { std::array<TextBox*, 4>   texts{};            ::Color* data = nullptr; };
-        struct EnumBinding
+        struct ScalarFieldView { TextBox*                  text     = nullptr; T*    data = nullptr; };
+        struct Vec2FieldView   { std::array<TextBox*, 2>   texts{};            Vector2* data = nullptr; };
+        struct Vec3FieldView   { std::array<TextBox*, 3>   texts{};            Vector3* data = nullptr; };
+        struct ColorFieldView  { std::array<TextBox*, 4>   texts{};            ::Color* data = nullptr; };
+        struct EnumFieldView
         {
             DropdownList* dropdown = nullptr;
             std::vector<std::string> options;
             std::function<std::size_t()> getIndex;
         };
 
-        using BindingV = std::variant<
-            BoolBinding,
-            ScalarBinding<int>,
-            ScalarBinding<unsigned int>,
-            ScalarBinding<std::uint64_t>,
-            ScalarBinding<float>,
-            ScalarBinding<std::string>,
-            Vec2Binding,
-            Vec3Binding,
-            ColorBinding,
-            EnumBinding>;
+        using FieldView = std::variant<
+            BoolFieldView,
+            ScalarFieldView<int>,
+            ScalarFieldView<unsigned int>,
+            ScalarFieldView<std::uint64_t>,
+            ScalarFieldView<float>,
+            ScalarFieldView<std::string>,
+            Vec2FieldView,
+            Vec3FieldView,
+            ColorFieldView,
+            EnumFieldView>;
 
       private:
         GameUIEngine* ui{};
@@ -60,7 +60,7 @@ namespace sage::editor
         std::vector<FieldRow> rows;      // current plan, recomputed every Rebuild()
         std::vector<FieldRow> builtRows; // plan in effect for the live widget tree
         std::size_t builtScrollOffset = 0;
-        std::vector<BindingV> bindings;
+        std::vector<FieldView> fieldViews;
 
         void rebuildRows(const std::vector<InspectedComponent>& inspectedComponents);
         void createHeaderRow(const std::string& label) const;

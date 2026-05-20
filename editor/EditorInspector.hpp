@@ -29,7 +29,7 @@ namespace sage::editor
 
     // The variant alternative *is* the kind. Leaf overloads on ComponentInspector
     // construct one alternative each; the renderer dispatches via std::visit into
-    // overloaded makeBinding/Update functions.
+    // overloaded createFieldView/Update functions.
     using FieldValue = std::variant<
         bool*,
         int*,
