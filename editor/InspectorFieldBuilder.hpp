@@ -2,6 +2,7 @@
 
 #include "EditorInspector.hpp"
 
+#include "engine/Event.hpp"
 #include "raylib.h"
 
 #include <string>
@@ -10,6 +11,7 @@
 namespace sage
 {
     class GameUIEngine;
+    class Scrollbar;
     class Table;
     class TextBox;
 } // namespace sage
@@ -23,12 +25,9 @@ namespace sage::editor
 
         GameUIEngine* ui{};
         Table* fieldTable{};
-        TextBox* scrollbarUpText{};
-        TextBox* scrollbarTrackText{};
-        TextBox* scrollbarDownText{};
-        std::size_t scrollOffset = 0;
-        std::size_t visibleRows = 0;
-        std::size_t totalRows = 0;
+        Scrollbar* scrollbar{};
+        Subscription scrollSub{};
+        bool pendingRebuild = false;
         std::string blueprintSignature;
         std::string rowSignature;
         std::vector<FieldRow> rows;
@@ -38,9 +37,6 @@ namespace sage::editor
         void createHeaderRow(const std::string& label) const;
         void executeFieldRowBuilder(const FieldRow& row);
         void createVector3Row(const FieldRow& row);
-        void updateRowMetrics();
-        void updateScrollbarText() const;
-        void scrollFromMouseWheel(const Rectangle& bounds);
         void setVector3Axis(std::size_t bindingIndex, std::size_t axisIndex, const std::string& submittedValue);
         static void RenderUI(Vector3& value, const FieldBinding& binding);
         static void RenderUI(const Vector3& value, const FieldBinding& binding);
@@ -53,15 +49,11 @@ namespace sage::editor
         ~InspectorFieldBuilder();
 
         void Attach(GameUIEngine* ui, Table* fieldTable);
-        void SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText);
-        void Rebuild(
-            const std::vector<InspectedComponent>& inspectedComponents, const Rectangle* mouseWheelBounds);
+        void AttachScrollbar(Scrollbar* sb);
+        void Rebuild(const std::vector<InspectedComponent>& inspectedComponents);
         void Draw(const std::vector<InspectedComponent>& inspectedComponents);
-        void Scroll(int amount);
 
-        [[nodiscard]] bool HasOverflow() const;
         [[nodiscard]] std::size_t TotalRows() const;
         [[nodiscard]] std::size_t VisibleRows() const;
-        [[nodiscard]] std::size_t ScrollOffset() const;
     };
 } // namespace sage::editor

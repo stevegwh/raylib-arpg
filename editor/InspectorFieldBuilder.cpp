@@ -1,11 +1,11 @@
 #include "InspectorFieldBuilder.hpp"
 
 #include "engine/GameUiEngine.hpp"
+#include "engine/ui/Scrollbar.hpp"
 #include "engine/ui/UIElements.hpp"
 #include "engine/ui/UILayout.hpp"
 
 #include <array>
-#include <cmath>
 #include <exception>
 #include <format>
 #include <memory>
@@ -93,16 +93,16 @@ namespace sage::editor
         this->fieldTable = fieldTable;
     }
 
-    void InspectorFieldBuilder::SetScrollbarControls(TextBox* upText, TextBox* trackText, TextBox* downText)
+    void InspectorFieldBuilder::AttachScrollbar(Scrollbar* sb)
     {
-        scrollbarUpText = upText;
-        scrollbarTrackText = trackText;
-        scrollbarDownText = downText;
-        updateScrollbarText();
+        scrollbar = sb;
+        if (scrollbar)
+        {
+            scrollSub = scrollbar->onScrollChanged.Subscribe([this]() { pendingRebuild = true; });
+        }
     }
 
-    void InspectorFieldBuilder::Rebuild(
-        const std::vector<InspectedComponent>& inspectedComponents, const Rectangle* mouseWheelBounds)
+    void InspectorFieldBuilder::Rebuild(const std::vector<InspectedComponent>& inspectedComponents)
     {
         if (!fieldTable || !ui) return;
 
@@ -113,17 +113,18 @@ namespace sage::editor
             rebuildRows(inspectedComponents);
         }
 
-        updateRowMetrics();
-        if (mouseWheelBounds && HasOverflow()) scrollFromMouseWheel(*mouseWheelBounds);
-        updateScrollbarText();
+        if (scrollbar) scrollbar->ClampOffset();
 
         const auto newRowSignature = buildRowSignature();
-        if (newRowSignature == rowSignature) return;
+        if (newRowSignature == rowSignature && !pendingRebuild) return;
 
         rowSignature = newRowSignature;
+        pendingRebuild = false;
         bindings.clear();
         fieldTable->children.clear();
 
+        const std::size_t scrollOffset = scrollbar ? scrollbar->ScrollOffset() : 0;
+        const std::size_t visibleRows = scrollbar ? scrollbar->VisibleRows() : rows.size();
         const std::size_t lastVisibleRow = std::min(rows.size(), scrollOffset + visibleRows);
         for (std::size_t i = scrollOffset; i < lastVisibleRow; ++i)
         {
@@ -175,39 +176,14 @@ namespace sage::editor
         }
     }
 
-    void InspectorFieldBuilder::Scroll(const int amount)
-    {
-        const std::size_t maxOffset = totalRows > visibleRows ? totalRows - visibleRows : 0;
-
-        if (amount < 0)
-        {
-            const auto positiveAmount = static_cast<std::size_t>(-amount);
-            scrollOffset = positiveAmount > scrollOffset ? 0 : scrollOffset - positiveAmount;
-        }
-        else if (amount > 0)
-        {
-            scrollOffset = std::min(maxOffset, scrollOffset + static_cast<std::size_t>(amount));
-        }
-    }
-
-    bool InspectorFieldBuilder::HasOverflow() const
-    {
-        return totalRows > visibleRows;
-    }
-
     std::size_t InspectorFieldBuilder::TotalRows() const
     {
-        return totalRows;
+        return rows.size();
     }
 
     std::size_t InspectorFieldBuilder::VisibleRows() const
     {
-        return visibleRows;
-    }
-
-    std::size_t InspectorFieldBuilder::ScrollOffset() const
-    {
-        return scrollOffset;
+        return INSPECTOR_VISIBLE_ROWS;
     }
 
     void InspectorFieldBuilder::rebuildRows(const std::vector<InspectedComponent>& inspectedComponents)
@@ -317,39 +293,6 @@ namespace sage::editor
         bindings.push_back(FieldBinding{.inspectorRow = vectorRow, .valueTexts = {xText, yText, zText}});
     }
 
-    void InspectorFieldBuilder::updateRowMetrics()
-    {
-        visibleRows = INSPECTOR_VISIBLE_ROWS;
-        totalRows = rows.size();
-
-        const std::size_t maxOffset = totalRows > visibleRows ? totalRows - visibleRows : 0;
-        scrollOffset = std::min(scrollOffset, maxOffset);
-    }
-
-    void InspectorFieldBuilder::updateScrollbarText() const
-    {
-        const bool showScrollbar = HasOverflow();
-        if (scrollbarUpText) scrollbarUpText->SetContent(showScrollbar ? "^" : "");
-        if (scrollbarTrackText) scrollbarTrackText->SetContent(showScrollbar ? " " : "");
-        if (scrollbarDownText) scrollbarDownText->SetContent(showScrollbar ? "v" : "");
-    }
-
-    void InspectorFieldBuilder::scrollFromMouseWheel(const Rectangle& bounds)
-    {
-        const auto mousePosition = GetMousePosition();
-        if (!CheckCollisionPointRec(mousePosition, bounds)) return;
-
-        const float wheelMove = GetMouseWheelMove();
-        if (wheelMove > 0.0f)
-        {
-            Scroll(-static_cast<int>(std::ceil(wheelMove)));
-        }
-        else if (wheelMove < 0.0f)
-        {
-            Scroll(static_cast<int>(std::ceil(-wheelMove)));
-        }
-    }
-
     void InspectorFieldBuilder::setVector3Axis(
         const std::size_t bindingIndex, const std::size_t axisIndex, const std::string& submittedValue)
     {
@@ -410,7 +353,8 @@ namespace sage::editor
     std::string InspectorFieldBuilder::buildRowSignature() const
     {
         std::ostringstream signature;
-        signature << blueprintSignature << "scroll:" << scrollOffset << "rows:" << totalRows;
+        const std::size_t scrollOffset = scrollbar ? scrollbar->ScrollOffset() : 0;
+        signature << blueprintSignature << "scroll:" << scrollOffset << "rows:" << rows.size();
         return signature.str();
     }
 } // namespace sage::editor

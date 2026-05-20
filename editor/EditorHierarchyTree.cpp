@@ -56,9 +56,7 @@ namespace sage::editor
     }
 
     void EditorHierarchyTree::appendSceneObjectEntry(
-        std::vector<EditorGui::SceneObjectEntry>& entries,
-        const entt::entity entity,
-        const int depth) const
+        std::vector<EditorGui::SceneObjectEntry>& entries, const entt::entity entity, const int depth) const
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
 

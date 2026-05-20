@@ -2,6 +2,7 @@
 
 #include "InspectorFieldBuilder.hpp"
 
+#include "engine/Event.hpp"
 #include "raylib.h"
 
 #include "entt/entt.hpp"
@@ -64,13 +65,10 @@ namespace sage
             Window* deleteConfirmationWindow{};
             GameUIEngine* ui{};
             Texture2D editorWindowBackgroundTexture{};
-            TextBox* hierarchyScrollbarUpText{};
-            TextBox* hierarchyScrollbarTrackText{};
-            TextBox* hierarchyScrollbarDownText{};
             std::vector<RenderTexture2D> assetThumbnails;
             std::vector<TextBox*> hierarchyRows;
             std::vector<SceneObjectEntry> hierarchyEntries;
-            std::size_t hierarchyScrollOffset = 0;
+            Subscription hierarchyScrollSub{};
             InspectorFieldBuilder inspectorFieldBlueprints;
             ModelDefaultCallbacks modelDefaultCallbacks;
             DeleteConfirmationCallbacks deleteConfirmationCallbacks;
@@ -100,8 +98,7 @@ namespace sage
             void createAssetDefaultsWindow(GameUIEngine* ui, Settings* settings);
             void createInspectorWindow(GameUIEngine* ui, Settings* settings);
             void createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings);
-            void scrollHierarchy(int amount);
-            void scrollInspectorFields(int amount);
+            void refreshHierarchyRowContent();
 
           public:
             void SetOverlayStatus(const std::string& mode, const std::string& cursor) const;

@@ -7,6 +7,7 @@
 #include "../GameUiEngine.hpp"
 #include "../ResourceManager.hpp"
 #include "../Settings.hpp"
+#include "Scrollbar.hpp"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -21,7 +22,9 @@ namespace sage
     void Window::InitLayout()
     {
         if (children.empty()) return;
-        const float availableWidth = rec.width - (padding.left + padding.right);
+        float availableWidth = rec.width - (padding.left + padding.right);
+        if (overflowContingency == OverflowContingency::SCROLLBAR)
+            availableWidth -= Scrollbar::GUTTER_WIDTH;
         const float availableHeight = rec.height - (padding.up + padding.down);
         const float startX = rec.x + padding.left;
         const float startY = rec.y + padding.up;
@@ -136,14 +139,24 @@ namespace sage
         onHide.Publish();
     }
 
-    void Window::SetOverflowContingency(OverflowContingency contingency)
+    void Window::SetOverflowContingency(const OverflowContingency contingency)
     {
+        const bool widthChanged = (overflowContingency == OverflowContingency::SCROLLBAR) !=
+                                  (contingency == OverflowContingency::SCROLLBAR);
         overflowContingency = contingency;
+        if (contingency == OverflowContingency::SCROLLBAR && !scrollbar)
+            scrollbar = std::make_unique<Scrollbar>();
+        if (widthChanged && !children.empty()) InitLayout();
     }
 
     OverflowContingency Window::GetOverflowContingency() const
     {
         return overflowContingency;
+    }
+
+    Scrollbar* Window::GetScrollbar() const
+    {
+        return scrollbar.get();
     }
 
     void Window::Draw2D()
@@ -154,12 +167,37 @@ namespace sage
             return;
         }
 
-        // TRUNCATE and SCROLLBAR both clip everything inside the window rect.
-        // SCROLLBAR additionally relies on scrollOffsetY being applied to child
-        // positions by whatever code populates the scrollable region — the
-        // window itself just guarantees that overflow doesn't escape the rect.
-        const ScissorScope clip{rec};
-        TableElement::Draw2D();
+        Rectangle content = rec;
+        Rectangle gutter{};
+        const bool hasScrollbar =
+            overflowContingency == OverflowContingency::SCROLLBAR && scrollbar;
+        if (hasScrollbar)
+        {
+            content.width -= Scrollbar::GUTTER_WIDTH;
+            gutter = {
+                rec.x + content.width, rec.y, Scrollbar::GUTTER_WIDTH, rec.height};
+        }
+
+        {
+            const ScissorScope clip{content};
+            TableElement::Draw2D();
+        }
+
+        if (hasScrollbar) scrollbar->DrawChrome(gutter);
+    }
+
+    void Window::Update()
+    {
+        if (overflowContingency == OverflowContingency::SCROLLBAR && scrollbar)
+        {
+            const Rectangle gutter = {
+                rec.x + rec.width - Scrollbar::GUTTER_WIDTH,
+                rec.y,
+                Scrollbar::GUTTER_WIDTH,
+                rec.height};
+            scrollbar->HandleInput(rec, gutter);
+        }
+        TableElement::Update();
     }
 
     void Window::FinalizeLayout()

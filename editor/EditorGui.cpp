@@ -3,6 +3,7 @@
 #include "engine/GameUiEngine.hpp"
 #include "engine/ResourceManager.hpp"
 #include "engine/Settings.hpp"
+#include "engine/ui/Scrollbar.hpp"
 #include "engine/ui/UIElements.hpp"
 #include "engine/ui/UILayout.hpp"
 #include "engine/ui/UIWindow.hpp"
@@ -188,7 +189,7 @@ namespace sage::editor
         {
             std::size_t rowIndex = 0;
             const std::vector<EditorGui::SceneObjectEntry>* entries{};
-            const std::size_t* scrollOffset{};
+            std::function<std::size_t()> scrollOffset;
             const std::optional<entt::entity>* selectedEntity{};
             std::function<void(entt::entity)> onSceneObjectSelected;
 
@@ -196,7 +197,7 @@ namespace sage::editor
             void OnClick() override
             {
                 if (!entries || !scrollOffset || !onSceneObjectSelected) return;
-                const std::size_t entryIndex = *scrollOffset + rowIndex;
+                const std::size_t entryIndex = scrollOffset() + rowIndex;
                 if (entryIndex >= entries->size()) return;
                 onSceneObjectSelected(entries->at(entryIndex).entity);
             }
@@ -213,7 +214,7 @@ namespace sage::editor
 
             void Draw2D() override
             {
-                const std::size_t entryIndex = scrollOffset ? *scrollOffset + rowIndex : rowIndex;
+                const std::size_t entryIndex = scrollOffset ? scrollOffset() + rowIndex : rowIndex;
                 const bool hasEntry = entries && entryIndex < entries->size();
                 const bool selected = hasEntry && selectedEntity && selectedEntity->has_value() &&
                                       selectedEntity->value() == entries->at(entryIndex).entity;
@@ -243,74 +244,19 @@ namespace sage::editor
                 TableCell* parent,
                 std::size_t index,
                 const std::vector<EditorGui::SceneObjectEntry>* sceneEntries,
-                const std::size_t* firstVisibleEntry,
+                std::function<std::size_t()> firstVisibleEntry,
                 const std::optional<entt::entity>* activeEntity,
                 std::function<void(entt::entity)> callback)
                 : TextBox(ui, parent, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::LEFT),
                   rowIndex(index),
                   entries(sceneEntries),
-                  scrollOffset(firstVisibleEntry),
+                  scrollOffset(std::move(firstVisibleEntry)),
                   selectedEntity(activeEntity),
                   onSceneObjectSelected(std::move(callback))
             {
             }
         };
 
-        class ScrollbarTrack final : public TextBox
-        {
-            std::function<std::size_t()> totalRows;
-            std::function<std::size_t()> visibleRows;
-            std::function<std::size_t()> scrollOffset;
-
-          public:
-            [[nodiscard]] bool ShouldShow() const
-            {
-                return totalRows && visibleRows && totalRows() > visibleRows();
-            }
-
-            void UpdateDimensions() override
-            {
-                rec = {
-                    parent->GetRec().x + parent->padding.left,
-                    parent->GetRec().y + parent->padding.up,
-                    parent->GetRec().width - parent->padding.left - parent->padding.right,
-                    parent->GetRec().height - parent->padding.up - parent->padding.down};
-            }
-
-            void Draw2D() override
-            {
-                if (!ShouldShow()) return;
-                DrawRectangleRec(rec, Color{24, 26, 30, 255});
-                DrawRectangleLinesEx(rec, 1.0f, Color{69, 74, 84, 255});
-
-                if (!totalRows || !scrollOffset || !visibleRows || totalRows() == 0 || visibleRows() == 0) return;
-                const float visibleCount = static_cast<float>(visibleRows());
-                const float totalCount = static_cast<float>(totalRows());
-                const float thumbHeight = totalCount <= visibleCount
-                                              ? rec.height
-                                              : std::max(18.0f, rec.height * (visibleCount / totalCount));
-                const std::size_t maxOffset = totalRows() > visibleRows() ? totalRows() - visibleRows() : 0;
-                const float scrollRatio =
-                    maxOffset == 0 ? 0.0f : static_cast<float>(scrollOffset()) / static_cast<float>(maxOffset);
-                const float thumbY = rec.y + (rec.height - thumbHeight) * scrollRatio;
-                DrawRectangleRec(
-                    {rec.x + 2.0f, thumbY + 2.0f, rec.width - 4.0f, thumbHeight - 4.0f},
-                    Color{139, 148, 164, 255});
-            }
-
-            ScrollbarTrack(
-                GameUIEngine* ui,
-                TableCell* parent,
-                std::function<std::size_t()> totalRowProvider,
-                std::function<std::size_t()> firstVisibleEntryProvider,
-                std::function<std::size_t()> visibleRowProvider)
-                : TextBox(ui, parent, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::CENTER),
-                  totalRows(std::move(totalRowProvider)),
-                  scrollOffset(std::move(firstVisibleEntryProvider)),
-                  visibleRows(std::move(visibleRowProvider))
-            {
-            }
-        };
     } // namespace
 
     void EditorGui::SetOverlayStatus(const std::string& mode, const std::string& cursor) const
@@ -333,7 +279,7 @@ namespace sage::editor
 
     void EditorGui::SetSceneName(const std::string& sceneName) const
     {
-        if (overlayTitleText) overlayTitleText->SetContent("SAGE - " + sceneName);
+        if (overlayTitleText) overlayTitleText->SetContent(sceneName);
     }
 
     void EditorGui::SetSelectedAsset(const std::optional<std::size_t> index)
@@ -350,64 +296,13 @@ namespace sage::editor
         }
     }
 
-    void EditorGui::scrollHierarchy(const int amount)
+    void EditorGui::refreshHierarchyRowContent()
     {
-        const std::size_t visibleRows = hierarchyRows.size();
-        const std::size_t maxOffset =
-            hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
-
-        if (amount < 0)
-        {
-            const auto positiveAmount = static_cast<std::size_t>(-amount);
-            hierarchyScrollOffset =
-                positiveAmount > hierarchyScrollOffset ? 0 : hierarchyScrollOffset - positiveAmount;
-        }
-        else if (amount > 0)
-        {
-            hierarchyScrollOffset = std::min(maxOffset, hierarchyScrollOffset + static_cast<std::size_t>(amount));
-        }
-    }
-
-    void EditorGui::scrollInspectorFields(const int amount)
-    {
-        inspectorFieldBlueprints.Scroll(amount);
-    }
-
-    void EditorGui::SetHierarchy(
-        const std::vector<SceneObjectEntry>& entries, const std::optional<entt::entity> selectedEntity)
-    {
-        hierarchyEntries = entries;
-        selectedSceneEntity = selectedEntity;
-
-        const std::size_t visibleRows = hierarchyRows.size();
-        const std::size_t maxOffset =
-            hierarchyEntries.size() > visibleRows ? hierarchyEntries.size() - visibleRows : 0;
-        hierarchyScrollOffset = std::min(hierarchyScrollOffset, maxOffset);
-        const bool showScrollbar = maxOffset > 0;
-        if (hierarchyScrollbarUpText) hierarchyScrollbarUpText->SetContent(showScrollbar ? "^" : "");
-        if (hierarchyScrollbarTrackText) hierarchyScrollbarTrackText->SetContent(showScrollbar ? " " : "");
-        if (hierarchyScrollbarDownText) hierarchyScrollbarDownText->SetContent(showScrollbar ? "v" : "");
-
-        if (hierarchyWindow && !hierarchyWindow->IsHidden() && maxOffset > 0)
-        {
-            const auto mousePosition = GetMousePosition();
-            if (CheckCollisionPointRec(mousePosition, hierarchyWindow->GetRec()))
-            {
-                const float wheelMove = GetMouseWheelMove();
-                if (wheelMove > 0.0f)
-                {
-                    scrollHierarchy(-static_cast<int>(std::ceil(wheelMove)));
-                }
-                else if (wheelMove < 0.0f)
-                {
-                    scrollHierarchy(static_cast<int>(std::ceil(-wheelMove)));
-                }
-            }
-        }
-
+        const std::size_t scrollOffset =
+            hierarchyWindow && hierarchyWindow->GetScrollbar() ? hierarchyWindow->GetScrollbar()->ScrollOffset() : 0;
         for (std::size_t i = 0; i < hierarchyRows.size(); ++i)
         {
-            const std::size_t entryIndex = hierarchyScrollOffset + i;
+            const std::size_t entryIndex = scrollOffset + i;
             if (entryIndex >= hierarchyEntries.size())
             {
                 hierarchyRows[i]->SetContent("");
@@ -420,17 +315,20 @@ namespace sage::editor
         }
     }
 
+    void EditorGui::SetHierarchy(
+        const std::vector<SceneObjectEntry>& entries, const std::optional<entt::entity> selectedEntity)
+    {
+        hierarchyEntries = entries;
+        selectedSceneEntity = selectedEntity;
+        if (auto* sb = hierarchyWindow ? hierarchyWindow->GetScrollbar() : nullptr) sb->ClampOffset();
+        refreshHierarchyRowContent();
+    }
+
     void EditorGui::SetInspector(
         const std::string& selectedEntity, const std::vector<InspectedComponent>& inspectedComponents)
     {
         if (inspectorSelectionText) inspectorSelectionText->SetContent("Selected: " + selectedEntity);
-        std::optional<Rectangle> mouseWheelBounds;
-        if (inspectorWindow && !inspectorWindow->IsHidden())
-        {
-            mouseWheelBounds = inspectorWindow->GetRec();
-        }
-        inspectorFieldBlueprints.Rebuild(
-            inspectedComponents, mouseWheelBounds.has_value() ? &mouseWheelBounds.value() : nullptr);
+        inspectorFieldBlueprints.Rebuild(inspectedComponents);
         inspectorFieldBlueprints.Draw(inspectedComponents);
     }
 
@@ -556,12 +454,11 @@ namespace sage::editor
             titleCell->CreateTitleBar(std::move(title), "Hierarchy");
         }
 
+        hierarchyWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
+
         {
             auto* contentRow = mainTable->CreateTableRow({1, 0, 0, 0});
-            auto hierarchyHasOverflow = [this]() { return hierarchyEntries.size() > hierarchyRows.size(); };
-
-            auto* listCell = contentRow->CreateTableCell(94.0f, Padding{2, 8, 8, 1});
-            auto* scrollbarCell = contentRow->CreateTableCell(6.0f, Padding{2, 8, 0, 2});
+            auto* listCell = contentRow->CreateTableCell(Padding{2, 8, 8, 2});
             auto* table = listCell->CreateTable();
 
             hierarchyRows.reserve(HIERARCHY_MAX_ROWS);
@@ -574,38 +471,25 @@ namespace sage::editor
                     cell,
                     static_cast<std::size_t>(i),
                     &hierarchyEntries,
-                    &hierarchyScrollOffset,
+                    [this]() {
+                        auto* sb = hierarchyWindow ? hierarchyWindow->GetScrollbar() : nullptr;
+                        return sb ? sb->ScrollOffset() : std::size_t{0};
+                    },
                     &selectedSceneEntity,
                     onSceneObjectSelected);
                 hierarchyRows.push_back(cell->CreateTextbox(std::move(button), ""));
             }
-
-            auto* scrollbarTable = scrollbarCell->CreateTable();
-
-            auto* upRow = scrollbarTable->CreateTableRow(12.0f);
-            auto* upCell = upRow->CreateTableCell(Padding{1, 1, 0, 0});
-            auto upButton =
-                std::make_unique<TextButton>(ui, upCell, [this]() { scrollHierarchy(-1); }, hierarchyHasOverflow);
-            hierarchyScrollbarUpText = upCell->CreateTextbox(std::move(upButton), "^");
-
-            auto* trackRow = scrollbarTable->CreateTableRow({0, 0, 0, 0});
-            auto* trackCell = trackRow->CreateTableCell(Padding{2, 2, 0, 0});
-            auto track = std::make_unique<ScrollbarTrack>(
-                ui,
-                trackCell,
-                [this]() { return hierarchyEntries.size(); },
-                [this]() { return hierarchyScrollOffset; },
-                [this]() { return hierarchyRows.size(); });
-            hierarchyScrollbarTrackText = trackCell->CreateTextbox(std::move(track), "");
-
-            auto* downRow = scrollbarTable->CreateTableRow(12.0f);
-            auto* downCell = downRow->CreateTableCell(Padding{1, 1, 0, 0});
-            auto downButton =
-                std::make_unique<TextButton>(ui, downCell, [this]() { scrollHierarchy(1); }, hierarchyHasOverflow);
-            hierarchyScrollbarDownText = downCell->CreateTextbox(std::move(downButton), "v");
         }
 
-        hierarchyWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
+        if (auto* sb = hierarchyWindow->GetScrollbar())
+        {
+            sb->SetProviders(
+                [this]() { return hierarchyEntries.size(); },
+                [this]() { return hierarchyRows.size(); });
+            hierarchyScrollSub =
+                sb->onScrollChanged.Subscribe([this]() { refreshHierarchyRowContent(); });
+        }
+
         hierarchyWindow->FinalizeLayout();
     }
 
@@ -775,6 +659,8 @@ namespace sage::editor
             titleCell->CreateTitleBar(std::move(title), "Inspector");
         }
 
+        inspectorWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
+
         {
             auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
             auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
@@ -791,42 +677,19 @@ namespace sage::editor
             inspectorSelectionText = addLine("Selected: None");
 
             auto* fieldsRow = table->CreateTableRow(Padding{2, 0, 0, 0});
-            auto inspectorHasOverflow = [this]() { return inspectorFieldBlueprints.HasOverflow(); };
-
-            auto* fieldsCell = fieldsRow->CreateTableCell(94.0f, Padding{2, 2, 2, 2});
-            auto* scrollbarCell = fieldsRow->CreateTableCell(6.0f, Padding{2, 2, 0, 2});
+            auto* fieldsCell = fieldsRow->CreateTableCell(Padding{2, 2, 2, 2});
             auto* inspectorFieldsTable = fieldsCell->CreateTable();
             inspectorFieldBlueprints.Attach(ui, inspectorFieldsTable);
-
-            auto* scrollbarTable = scrollbarCell->CreateTable();
-
-            auto* upRow = scrollbarTable->CreateTableRow(12.0f);
-            auto* upCell = upRow->CreateTableCell(Padding{1, 1, 0, 0});
-            auto upButton = std::make_unique<TextButton>(
-                ui, upCell, [this]() { scrollInspectorFields(-1); }, inspectorHasOverflow);
-            auto* inspectorScrollbarUpText = upCell->CreateTextbox(std::move(upButton), "^");
-
-            auto* trackRow = scrollbarTable->CreateTableRow({0, 0, 0, 0});
-            auto* trackCell = trackRow->CreateTableCell(Padding{2, 2, 0, 0});
-            auto track = std::make_unique<ScrollbarTrack>(
-                ui,
-                trackCell,
-                [this]() { return inspectorFieldBlueprints.TotalRows(); },
-                [this]() { return inspectorFieldBlueprints.ScrollOffset(); },
-                [this]() { return inspectorFieldBlueprints.VisibleRows(); });
-            auto* inspectorScrollbarTrackText = trackCell->CreateTextbox(std::move(track), "");
-
-            auto* downRow = scrollbarTable->CreateTableRow(12.0f);
-            auto* downCell = downRow->CreateTableCell(Padding{1, 1, 0, 0});
-            auto downButton = std::make_unique<TextButton>(
-                ui, downCell, [this]() { scrollInspectorFields(1); }, inspectorHasOverflow);
-            auto* inspectorScrollbarDownText = downCell->CreateTextbox(std::move(downButton), "v");
-
-            inspectorFieldBlueprints.SetScrollbarControls(
-                inspectorScrollbarUpText, inspectorScrollbarTrackText, inspectorScrollbarDownText);
         }
 
-        inspectorWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
+        if (auto* sb = inspectorWindow->GetScrollbar())
+        {
+            sb->SetProviders(
+                [this]() { return inspectorFieldBlueprints.TotalRows(); },
+                [this]() { return inspectorFieldBlueprints.VisibleRows(); });
+            inspectorFieldBlueprints.AttachScrollbar(sb);
+        }
+
         inspectorWindow->FinalizeLayout();
     }
 

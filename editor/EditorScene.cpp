@@ -3,17 +3,17 @@
 #include "EditorComponents.hpp"
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
+#include "engine/components/Collideable.hpp"
+#include "engine/components/Renderable.hpp"
+#include "engine/components/sgTransform.hpp"
+#include "engine/components/UberShaderComponent.hpp"
 #include "engine/Cursor.hpp"
 #include "engine/EngineSystems.hpp"
 #include "engine/GameUiEngine.hpp"
 #include "engine/Light.hpp"
-#include "engine/UserInput.hpp"
-#include "engine/components/Collideable.hpp"
-#include "engine/components/Renderable.hpp"
-#include "engine/components/UberShaderComponent.hpp"
-#include "engine/components/sgTransform.hpp"
 #include "engine/systems/RenderSystem.hpp"
 #include "engine/systems/TransformSystem.hpp"
+#include "engine/UserInput.hpp"
 
 #include "raylib.h"
 
@@ -115,15 +115,16 @@ namespace sage
         gui->SetOverlayStatus(describeMode(), describeCursorPosition());
         gui->SetAssetDefaultsStatus(
             defaultsStatus.assetName, defaultsStatus.height, defaultsStatus.rotation, defaultsStatus.scale);
-        gui->SetSelectedAsset(isPlaceState() ? std::optional<std::size_t>{assetCatalog->SelectedIndex()} : std::nullopt);
+        gui->SetSelectedAsset(
+            isPlaceState() ? std::optional<std::size_t>{assetCatalog->SelectedIndex()} : std::nullopt);
     }
 
     void EditorScene::refreshSceneWindows() const
     {
         const auto activeEntity = selection->ActiveTransformEntity();
-        const auto inspectedComponents =
-            activeEntity.has_value() ? inspectorRegistry.InspectEntity(*sys->registry, *activeEntity)
-                                     : std::vector<editor::InspectedComponent>{};
+        const auto inspectedComponents = activeEntity.has_value()
+                                             ? inspectorRegistry.InspectEntity(*sys->registry, *activeEntity)
+                                             : std::vector<editor::InspectedComponent>{};
 
         gui->SetHierarchy(hierarchyTree->CollectSceneObjectEntries(), activeEntity);
         gui->SetInspector(describeSelectedSceneEntity(), inspectedComponents);
@@ -250,12 +251,11 @@ namespace sage
     EditorScene::EditorScene(EngineSystems* _sys) : sys(_sys)
     {
         editor::RegisterDefaultInspectorComponents(inspectorRegistry);
-        assetCatalog = std::make_unique<editor::EditorAssetCatalog>(
-            std::vector<editor::PlaceableAsset>{
-                editor::PlaceableAsset{"Sphere", "vfx_sphere", "SPHERE"},
-                editor::PlaceableAsset{"Flat Torus", "vfx_flattorus", "FLAT_TORUS"},
-                editor::PlaceableAsset{"Sword", "mdl_sword", "SWORD"},
-            });
+        assetCatalog = std::make_unique<editor::EditorAssetCatalog>(std::vector<editor::PlaceableAsset>{
+            editor::PlaceableAsset{"Sphere", "vfx_sphere", "SPHERE"},
+            editor::PlaceableAsset{"Flat Torus", "vfx_flattorus", "FLAT_TORUS"},
+            editor::PlaceableAsset{"Sword", "mdl_sword", "SWORD"},
+        });
         assetCatalog->LoadDefaults();
         modelDefaults = std::make_unique<editor::EditorModelDefaultsController>(
             *assetCatalog, [this]() { return isPlaceState(); }, [this]() { refreshOverlay(); });
@@ -269,16 +269,14 @@ namespace sage
         giveTransformsToLights();
         placementController->Initialize();
 
-        transformEditor = std::make_unique<editor::EditorTransformEditor>(
-            sys,
-            [this](const entt::entity entity) {
-                if (isEditState())
-                {
-                    syncPlacementFromEntity(entity);
-                }
-                refreshOverlay();
-                refreshSceneWindows();
-            });
+        transformEditor = std::make_unique<editor::EditorTransformEditor>(sys, [this](const entt::entity entity) {
+            if (isEditState())
+            {
+                syncPlacementFromEntity(entity);
+            }
+            refreshOverlay();
+            refreshSceneWindows();
+        });
         editorModes = std::make_unique<editor::EditorModeStateMachine>(sys->registry, *this, *transformEditor);
 
         gui = std::make_unique<editor::EditorGui>(

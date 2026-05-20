@@ -12,21 +12,22 @@
 
 #include "raylib.h"
 
+#include <memory>
 #include <string>
 
 namespace sage
 {
+    class Scrollbar;
     struct Settings;
 
     // How a Window handles content that overflows its rect (vertically or
     // horizontally). Apply via Window::SetOverflowContingency.
     //  - TRUNCATE: clip the window rect with BeginScissorMode so out-of-bounds
     //    children/elements visually stop at the window edge.
-    //  - SCROLLBAR: also clip, but the window opts into being scrollable; the
-    //    caller is responsible for wiring a scrollbar widget and updating
-    //    Window::scrollOffsetY (used today by the hierarchy/inspector). The
-    //    enum value also documents intent so future framework work can promote
-    //    the manual plumbing into something automatic.
+    //  - SCROLLBAR: clip, plus the window owns a Scrollbar (see GetScrollbar())
+    //    that reserves a gutter on the right and draws chrome. Consumers
+    //    configure it with SetProviders(totalRows, visibleRows) and subscribe
+    //    to onScrollChanged.
     //  - SHRINK: no clipping — assumes the contained elements will shrink to
     //    fit (this is the default behaviour today for TextBox shrinking).
     enum class OverflowContingency
@@ -44,6 +45,7 @@ namespace sage
         bool hidden = false;
         bool markForRemoval = false;
         OverflowContingency overflowContingency = OverflowContingency::TRUNCATE;
+        std::unique_ptr<Scrollbar> scrollbar;
 
       public:
         Event<> onHide;
@@ -51,10 +53,6 @@ namespace sage
         Subscription windowUpdateSub{};
         bool mouseHover = false;
         Settings* settings{}; // for screen width/height
-        // Vertical scroll offset used when overflowContingency == SCROLLBAR.
-        // The caller updates this (e.g. from a mouse-wheel handler) and the
-        // window applies it as a scissor clamp during Draw2D.
-        float scrollOffsetY = 0.0f;
 
         void SetPos(float x, float y) override;
         void FinalizeLayout() override;
@@ -62,6 +60,7 @@ namespace sage
         void ClampToScreen();
         void OnHoverStart() override;
         void Draw2D() override;
+        void Update() override;
         TableGrid* CreateTableGrid(int rows, int cols, float cellSpacing = 0, Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(Padding _padding = {0, 0, 0, 0});
         Table* CreateTable(float _requestedHeight, Padding _padding = {0, 0, 0, 0});
@@ -72,6 +71,7 @@ namespace sage
         [[nodiscard]] bool IsMarkedForRemoval() const;
         void SetOverflowContingency(OverflowContingency contingency);
         [[nodiscard]] OverflowContingency GetOverflowContingency() const;
+        [[nodiscard]] Scrollbar* GetScrollbar() const;
         virtual void Remove();
         void InitLayout() override;
         ~Window() override;

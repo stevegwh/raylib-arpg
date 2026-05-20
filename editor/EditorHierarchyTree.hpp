@@ -19,9 +19,7 @@ namespace sage::editor
         EngineSystems* sys;
 
         void appendSceneObjectEntry(
-            std::vector<EditorGui::SceneObjectEntry>& entries,
-            entt::entity entity,
-            int depth) const;
+            std::vector<EditorGui::SceneObjectEntry>& entries, entt::entity entity, int depth) const;
 
       public:
         explicit EditorHierarchyTree(EngineSystems* sys);
