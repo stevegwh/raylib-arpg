@@ -2,9 +2,7 @@
 
 #include "EditorInspector.hpp"
 
-#include "engine/Event.hpp"
-#include "raylib.h"
-
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -28,11 +26,9 @@ namespace sage::editor
         GameUIEngine* ui{};
         Table* fieldTable{};
         Scrollbar* scrollbar{};
-        Subscription scrollSub{};
-        bool pendingRebuild = false;
-        std::string blueprintSignature;
-        std::string rowSignature;
-        std::vector<FieldRow> rows;
+        std::vector<FieldRow> rows;       // current plan, recomputed every Rebuild()
+        std::vector<FieldRow> builtRows;  // plan in effect for the live widget tree
+        std::size_t builtScrollOffset = 0;
         std::vector<FieldBinding> bindings;
 
         void rebuildRows(const std::vector<InspectedComponent>& inspectedComponents);
@@ -42,9 +38,6 @@ namespace sage::editor
         void createScalarRow(FieldBinding& binding, const InspectorField& field);
         void createComponentRow(FieldBinding& binding, const InspectorField& field);
         void createEnumRow(FieldBinding& binding, const InspectorField& field);
-        [[nodiscard]] static std::string buildBlueprintSignature(
-            const std::vector<InspectedComponent>& inspectedComponents);
-        [[nodiscard]] std::string buildRowSignature() const;
 
       public:
         InspectorFieldBuilder();

@@ -6,11 +6,8 @@
 #include "engine/ui/UILayout.hpp"
 
 #include <algorithm>
-#include <cstdlib>
-#include <cstring>
 #include <format>
 #include <memory>
-#include <sstream>
 #include <string_view>
 #include <utility>
 #include <variant>
@@ -165,6 +162,8 @@ namespace sage::editor
         std::string fieldName;
         InspectorField::Kind fieldKind = InspectorField::Kind::Bool;
         bool editable = false;
+
+        friend bool operator==(const FieldRow&, const FieldRow&) = default;
     };
 
     struct InspectorFieldBuilder::FieldBinding
@@ -191,34 +190,22 @@ namespace sage::editor
     void InspectorFieldBuilder::AttachScrollbar(Scrollbar* sb)
     {
         scrollbar = sb;
-        if (scrollbar)
-        {
-            scrollSub = scrollbar->onScrollChanged.Subscribe([this]() { pendingRebuild = true; });
-        }
     }
 
     void InspectorFieldBuilder::Rebuild(const std::vector<InspectedComponent>& inspectedComponents)
     {
         if (!fieldTable || !ui) return;
 
-        const auto signature = buildBlueprintSignature(inspectedComponents);
-        if (signature != blueprintSignature)
-        {
-            blueprintSignature = signature;
-            rebuildRows(inspectedComponents);
-        }
-
+        rebuildRows(inspectedComponents);
         if (scrollbar) scrollbar->ClampOffset();
+        const std::size_t scrollOffset = scrollbar ? scrollbar->ScrollOffset() : 0;
 
-        const auto newRowSignature = buildRowSignature();
-        if (newRowSignature == rowSignature && !pendingRebuild) return;
-
-        rowSignature = newRowSignature;
-        pendingRebuild = false;
+        if (rows == builtRows && scrollOffset == builtScrollOffset) return;
+        builtRows = rows;
+        builtScrollOffset = scrollOffset;
         bindings.clear();
         fieldTable->children.clear();
 
-        const std::size_t scrollOffset = scrollbar ? scrollbar->ScrollOffset() : 0;
         const std::size_t visibleRows = scrollbar ? scrollbar->VisibleRows() : rows.size();
         const std::size_t lastVisibleRow = std::min(rows.size(), scrollOffset + visibleRows);
         for (std::size_t i = scrollOffset; i < lastVisibleRow; ++i)
@@ -350,7 +337,6 @@ namespace sage::editor
     void InspectorFieldBuilder::rebuildRows(const std::vector<InspectedComponent>& inspectedComponents)
     {
         rows.clear();
-        rowSignature.clear();
 
         for (const auto& component : inspectedComponents)
         {
@@ -618,27 +604,4 @@ namespace sage::editor
         binding.widget = dd;
     }
 
-    std::string InspectorFieldBuilder::buildBlueprintSignature(
-        const std::vector<InspectedComponent>& inspectedComponents)
-    {
-        std::ostringstream s;
-        for (const auto& c : inspectedComponents)
-        {
-            s << c.displayName << '{';
-            for (const auto& f : c.fields)
-            {
-                s << f.label << ':' << static_cast<int>(f.kind) << ':' << (f.editable ? "rw" : "ro") << ';';
-            }
-            s << '}';
-        }
-        return s.str();
-    }
-
-    std::string InspectorFieldBuilder::buildRowSignature() const
-    {
-        std::ostringstream s;
-        const std::size_t scrollOffset = scrollbar ? scrollbar->ScrollOffset() : 0;
-        s << blueprintSignature << "scroll:" << scrollOffset << "rows:" << rows.size();
-        return s.str();
-    }
 } // namespace sage::editor
