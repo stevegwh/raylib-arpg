@@ -5,10 +5,10 @@
 #include "engine/ui/UIElements.hpp"
 #include "engine/ui/UILayout.hpp"
 
-#include <array>
-#include <exception>
-#include <format>
+#include <algorithm>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <string_view>
 #include <typeindex>
@@ -37,9 +37,21 @@ namespace sage::editor
             return info;
         }
 
-        std::string FormatFloat(const float value)
+        bool IsSupportedFieldKind(const InspectorFieldKind kind)
         {
-            return std::format("{:.2f}", value);
+            return kind != InspectorFieldKind::Unsupported;
+        }
+
+        bool IsScalarFieldKind(const InspectorFieldKind kind)
+        {
+            return kind == InspectorFieldKind::SignedInteger || kind == InspectorFieldKind::UnsignedInteger ||
+                   kind == InspectorFieldKind::FloatingPoint || kind == InspectorFieldKind::String;
+        }
+
+        bool IsComponentFieldKind(const InspectorFieldKind kind)
+        {
+            return kind == InspectorFieldKind::Vector2 || kind == InspectorFieldKind::Vector3 ||
+                   kind == InspectorFieldKind::Color;
         }
 
         const InspectorField* FindField(
@@ -73,6 +85,8 @@ namespace sage::editor
         std::string fieldName;
         InspectorFieldKind fieldKind = InspectorFieldKind::Unsupported;
         std::type_index valueType = typeid(void);
+        std::vector<std::string> componentLabels;
+        std::vector<std::string> enumOptions;
         bool isMutable = false;
     };
 
@@ -80,7 +94,12 @@ namespace sage::editor
     {
         FieldRow inspectorRow;
         std::vector<TextBox*> valueTexts;
-        Vector3* mutableVector = nullptr;
+        Checkbox* checkbox = nullptr;
+        DropdownList* dropdown = nullptr;
+        std::function<void(bool)> currentBoolSetter;
+        std::function<bool(const std::string&)> currentScalarSetter;
+        std::function<bool(std::size_t, const std::string&)> currentComponentSetter;
+        std::function<void(std::size_t)> currentEnumSetter;
     };
 
     InspectorFieldBuilder::InspectorFieldBuilder() = default;
@@ -147,6 +166,11 @@ namespace sage::editor
     {
         for (auto& binding : bindings)
         {
+            binding.currentBoolSetter = {};
+            binding.currentScalarSetter = {};
+            binding.currentComponentSetter = {};
+            binding.currentEnumSetter = {};
+
             const auto* inspectedField =
                 FindField(inspectedComponents, binding.inspectorRow.componentName, binding.inspectorRow.fieldName);
             if (!inspectedField || inspectedField->valueType != binding.inspectorRow.valueType ||
@@ -157,17 +181,71 @@ namespace sage::editor
 
             switch (binding.inspectorRow.fieldKind)
             {
-            case InspectorFieldKind::Vector3:
-                if (inspectedField->mutableValue)
+            case InspectorFieldKind::Bool:
+                if (binding.checkbox && inspectedField->boolValue)
                 {
-                    auto& vectorValue = *static_cast<Vector3*>(inspectedField->mutableValue);
-                    binding.mutableVector = &vectorValue;
-                    RenderUI(vectorValue, binding);
+                    binding.checkbox->SetChecked(inspectedField->boolValue());
                 }
-                else
+                if (inspectedField->IsMutable())
                 {
-                    binding.mutableVector = nullptr;
-                    RenderUI(*static_cast<const Vector3*>(inspectedField->value), binding);
+                    binding.currentBoolSetter = inspectedField->setBoolValue;
+                }
+                break;
+            case InspectorFieldKind::SignedInteger:
+            case InspectorFieldKind::UnsignedInteger:
+            case InspectorFieldKind::FloatingPoint:
+            case InspectorFieldKind::String:
+                if (!binding.valueTexts.empty() && binding.valueTexts[0] && inspectedField->textValue)
+                {
+                    binding.valueTexts[0]->SetContent(inspectedField->textValue());
+                }
+                if (inspectedField->IsMutable() && inspectedField->setTextValue)
+                {
+                    binding.currentScalarSetter =
+                        [setter = inspectedField->setTextValue, options = inspectedField->options](
+                            const std::string& submittedValue) { return setter(submittedValue, options); };
+                }
+                break;
+            case InspectorFieldKind::Vector2:
+            case InspectorFieldKind::Vector3:
+            case InspectorFieldKind::Color:
+                if (inspectedField->componentTextValue)
+                {
+                    const std::size_t componentCount =
+                        std::min(binding.valueTexts.size(), binding.inspectorRow.componentLabels.size());
+                    for (std::size_t i = 0; i < componentCount; ++i)
+                    {
+                        if (binding.valueTexts[i])
+                            binding.valueTexts[i]->SetContent(inspectedField->componentTextValue(i));
+                    }
+                }
+                if (inspectedField->IsMutable() && inspectedField->setComponentTextValue)
+                {
+                    binding.currentComponentSetter =
+                        [setter = inspectedField->setComponentTextValue, options = inspectedField->options](
+                            const std::size_t componentIndex, const std::string& submittedValue) {
+                            return setter(componentIndex, submittedValue, options);
+                        };
+                }
+                break;
+            case InspectorFieldKind::Enum:
+                if (binding.dropdown)
+                {
+                    if (binding.dropdown->GetOptions() != inspectedField->enumOptions)
+                    {
+                        binding.dropdown->SetOptions(inspectedField->enumOptions);
+                    }
+                    if (inspectedField->enumIndexValue)
+                    {
+                        if (const auto selected = inspectedField->enumIndexValue())
+                        {
+                            binding.dropdown->SetSelectedIndex(*selected);
+                        }
+                    }
+                }
+                if (inspectedField->IsMutable())
+                {
+                    binding.currentEnumSetter = inspectedField->setEnumIndexValue;
                 }
                 break;
             default:
@@ -201,24 +279,20 @@ namespace sage::editor
             std::size_t supportedFields = 0;
             for (const auto& inspectedField : inspectedComponent.fields)
             {
-                switch (inspectedField.kind)
-                {
-                case InspectorFieldKind::Vector3: {
-                    auto inspectorRow = FieldRow{
-                        .type = FieldRow::Type::Field,
-                        .componentName = inspectedComponent.displayName,
-                        .fieldName = inspectedField.label,
-                        .fieldKind = inspectedField.kind,
-                        .valueType = inspectedField.valueType,
-                        .isMutable = inspectedField.IsMutable()};
+                if (!IsSupportedFieldKind(inspectedField.kind)) continue;
 
-                    rows.push_back(std::move(inspectorRow));
-                    ++supportedFields;
-                    break;
-                }
-                default:
-                    break;
-                }
+                auto inspectorRow = FieldRow{
+                    .type = FieldRow::Type::Field,
+                    .componentName = inspectedComponent.displayName,
+                    .fieldName = inspectedField.label,
+                    .fieldKind = inspectedField.kind,
+                    .valueType = inspectedField.valueType,
+                    .componentLabels = inspectedField.componentLabels,
+                    .enumOptions = inspectedField.enumOptions,
+                    .isMutable = inspectedField.IsMutable()};
+
+                rows.push_back(std::move(inspectorRow));
+                ++supportedFields;
             }
 
             if (supportedFields == 0)
@@ -239,17 +313,52 @@ namespace sage::editor
 
     void InspectorFieldBuilder::executeFieldRowBuilder(const FieldRow& inspectorRow)
     {
-        switch (inspectorRow.fieldKind)
+        if (inspectorRow.fieldKind == InspectorFieldKind::Bool)
         {
-        case InspectorFieldKind::Vector3:
-            createVector3Row(inspectorRow);
-            break;
-        default:
-            break;
+            createBoolRow(inspectorRow);
+        }
+        else if (IsScalarFieldKind(inspectorRow.fieldKind))
+        {
+            createScalarRow(inspectorRow);
+        }
+        else if (IsComponentFieldKind(inspectorRow.fieldKind))
+        {
+            createComponentRow(inspectorRow);
+        }
+        else if (inspectorRow.fieldKind == InspectorFieldKind::Enum)
+        {
+            createEnumRow(inspectorRow);
         }
     }
 
-    void InspectorFieldBuilder::createVector3Row(const FieldRow& vectorRow)
+    void InspectorFieldBuilder::createBoolRow(const FieldRow& boolRow)
+    {
+        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+        const std::size_t bindingIndex = bindings.size();
+
+        auto* labelCell = uiRow->CreateTableCell(82.0f, Padding{1, 1, 2, 4});
+        auto label = std::make_unique<TextBox>(
+            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+        labelCell->CreateTextbox(std::move(label), boolRow.fieldName + ":");
+
+        auto* valueCell = uiRow->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
+        auto checkbox =
+            std::make_unique<Checkbox>(ui, valueCell, false, VertAlignment::MIDDLE, HoriAlignment::CENTER);
+        auto* checkboxPtr = valueCell->CreateCheckbox(std::move(checkbox));
+        if (!boolRow.isMutable)
+        {
+            checkboxPtr->stateLocked = true;
+        }
+        else
+        {
+            checkboxPtr->onValueChanged.Subscribe(
+                [this, bindingIndex](const bool checked) { setBoolValue(bindingIndex, checked); });
+        }
+
+        bindings.push_back(FieldBinding{.inspectorRow = boolRow, .checkbox = checkboxPtr});
+    }
+
+    void InspectorFieldBuilder::createScalarRow(const FieldRow& scalarRow)
     {
         auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
         const std::size_t bindingIndex = bindings.size();
@@ -257,73 +366,158 @@ namespace sage::editor
         auto* labelCell = uiRow->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
         auto label = std::make_unique<TextBox>(
             ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        labelCell->CreateTextbox(std::move(label), vectorRow.fieldName + ":");
+        labelCell->CreateTextbox(std::move(label), scalarRow.fieldName + ":");
 
-        const auto addAxis =
-            [this, uiRow, bindingIndex, &vectorRow](const char* axis, const std::size_t axisIndex) {
-                auto* axisCell = uiRow->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
-                auto axisLabel = std::make_unique<TextBox>(
-                    ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
-                axisCell->CreateTextbox(std::move(axisLabel), axis);
-
-                auto* valueCell = uiRow->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
-                if (!vectorRow.isMutable)
-                {
-                    auto valueText = std::make_unique<TextBox>(
-                        ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::RIGHT);
-                    return valueCell->CreateTextbox(std::move(valueText), "0.00");
-                }
-
-                auto valueText = std::make_unique<TextInput>(
-                    ui,
-                    valueCell,
-                    [this, bindingIndex, axisIndex](const std::string& submittedValue) {
-                        setVector3Axis(bindingIndex, axisIndex, submittedValue);
-                    },
-                    EditorInspectorInputFontInfo(),
-                    VertAlignment::MIDDLE,
-                    HoriAlignment::RIGHT);
-                return valueCell->CreateTextbox(std::move(valueText), "0.00");
-            };
-
-        auto* xText = addAxis("X", 0);
-        auto* yText = addAxis("Y", 1);
-        auto* zText = addAxis("Z", 2);
-
-        bindings.push_back(FieldBinding{.inspectorRow = vectorRow, .valueTexts = {xText, yText, zText}});
-    }
-
-    void InspectorFieldBuilder::setVector3Axis(
-        const std::size_t bindingIndex, const std::size_t axisIndex, const std::string& submittedValue)
-    {
-        if (bindingIndex >= bindings.size() || axisIndex >= 3) return;
-
-        auto* value = bindings[bindingIndex].mutableVector;
-        if (!value) return;
-
-        try
+        auto* valueCell = uiRow->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
+        const auto valueAlignment =
+            scalarRow.fieldKind == InspectorFieldKind::String ? HoriAlignment::LEFT : HoriAlignment::RIGHT;
+        TextBox* valueText = nullptr;
+        if (scalarRow.isMutable)
         {
-            const float submittedFloat = std::stof(submittedValue);
-            const auto axes = std::array<float*, 3>{&value->x, &value->y, &value->z};
-            *axes[axisIndex] = submittedFloat;
+            auto input = std::make_unique<TextInput>(
+                ui,
+                valueCell,
+                [this, bindingIndex](const std::string& submittedValue) {
+                    setScalarValue(bindingIndex, submittedValue);
+                },
+                EditorInspectorInputFontInfo(),
+                VertAlignment::MIDDLE,
+                valueAlignment);
+            valueText = valueCell->CreateTextbox(std::move(input), "");
         }
-        catch (const std::exception&)
+        else
         {
+            auto text = std::make_unique<TextBox>(
+                ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, valueAlignment);
+            valueText = valueCell->CreateTextbox(std::move(text), "");
+        }
+
+        bindings.push_back(FieldBinding{.inspectorRow = scalarRow, .valueTexts = {valueText}});
+    }
+
+    void InspectorFieldBuilder::createComponentRow(const FieldRow& componentRow)
+    {
+        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+        const std::size_t bindingIndex = bindings.size();
+
+        auto* labelCell = uiRow->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
+        auto label = std::make_unique<TextBox>(
+            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+        labelCell->CreateTextbox(std::move(label), componentRow.fieldName + ":");
+
+        const std::size_t componentCount = std::max<std::size_t>(1, componentRow.componentLabels.size());
+        const float axisLabelWidth = 4.0f;
+        const float valueWidth =
+            (66.0f - axisLabelWidth * static_cast<float>(componentCount)) / static_cast<float>(componentCount);
+        std::vector<TextBox*> valueTexts;
+        valueTexts.reserve(componentCount);
+
+        const auto addAxis = [this, uiRow, bindingIndex, &componentRow, valueWidth](
+                                 const std::string& axis, const std::size_t axisIndex) {
+            auto* axisCell = uiRow->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
+            auto axisLabel = std::make_unique<TextBox>(
+                ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
+            axisCell->CreateTextbox(std::move(axisLabel), axis);
+
+            auto* valueCell = uiRow->CreateTableCell(valueWidth, Padding{1, 1, 2, 2});
+            if (!componentRow.isMutable)
+            {
+                auto valueText = std::make_unique<TextBox>(
+                    ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::RIGHT);
+                return valueCell->CreateTextbox(std::move(valueText), "");
+            }
+
+            auto valueText = std::make_unique<TextInput>(
+                ui,
+                valueCell,
+                [this, bindingIndex, axisIndex](const std::string& submittedValue) {
+                    setComponentValue(bindingIndex, axisIndex, submittedValue);
+                },
+                EditorInspectorInputFontInfo(),
+                VertAlignment::MIDDLE,
+                HoriAlignment::RIGHT);
+            return valueCell->CreateTextbox(std::move(valueText), "");
+        };
+
+        for (std::size_t i = 0; i < componentRow.componentLabels.size(); ++i)
+        {
+            valueTexts.push_back(addAxis(componentRow.componentLabels[i], i));
+        }
+
+        bindings.push_back(FieldBinding{.inspectorRow = componentRow, .valueTexts = std::move(valueTexts)});
+    }
+
+    void InspectorFieldBuilder::createEnumRow(const FieldRow& enumRow)
+    {
+        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+        const std::size_t bindingIndex = bindings.size();
+
+        auto* labelCell = uiRow->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
+        auto label = std::make_unique<TextBox>(
+            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+        labelCell->CreateTextbox(std::move(label), enumRow.fieldName + ":");
+
+        auto* valueCell = uiRow->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
+        auto dropdown = std::make_unique<DropdownList>(
+            ui,
+            valueCell,
+            enumRow.enumOptions,
+            0,
+            EditorInspectorInputFontInfo(),
+            VertAlignment::MIDDLE,
+            HoriAlignment::LEFT);
+        dropdown->SetMaxVisibleOptions(5);
+        auto* dropdownPtr = valueCell->CreateDropdownList(std::move(dropdown));
+        if (!enumRow.isMutable)
+        {
+            dropdownPtr->stateLocked = true;
+        }
+        else
+        {
+            dropdownPtr->onSelectionChanged.Subscribe(
+                [this, bindingIndex](const std::size_t optionIndex, const std::string&) {
+                    setEnumValue(bindingIndex, optionIndex);
+                });
+        }
+
+        bindings.push_back(FieldBinding{.inspectorRow = enumRow, .dropdown = dropdownPtr});
+    }
+
+    void InspectorFieldBuilder::setBoolValue(const std::size_t bindingIndex, const bool submittedValue)
+    {
+        if (bindingIndex >= bindings.size()) return;
+        if (bindings[bindingIndex].currentBoolSetter)
+        {
+            bindings[bindingIndex].currentBoolSetter(submittedValue);
         }
     }
 
-    void InspectorFieldBuilder::RenderUI(Vector3& value, const FieldBinding& binding)
+    void InspectorFieldBuilder::setScalarValue(const std::size_t bindingIndex, const std::string& submittedValue)
     {
-        RenderUI(static_cast<const Vector3&>(value), binding);
+        if (bindingIndex >= bindings.size()) return;
+        if (bindings[bindingIndex].currentScalarSetter)
+        {
+            bindings[bindingIndex].currentScalarSetter(submittedValue);
+        }
     }
 
-    void InspectorFieldBuilder::RenderUI(const Vector3& value, const FieldBinding& binding)
+    void InspectorFieldBuilder::setComponentValue(
+        const std::size_t bindingIndex, const std::size_t componentIndex, const std::string& submittedValue)
     {
-        if (binding.valueTexts.size() < 3) return;
+        if (bindingIndex >= bindings.size()) return;
+        if (bindings[bindingIndex].currentComponentSetter)
+        {
+            bindings[bindingIndex].currentComponentSetter(componentIndex, submittedValue);
+        }
+    }
 
-        if (binding.valueTexts[0]) binding.valueTexts[0]->SetContent(FormatFloat(value.x));
-        if (binding.valueTexts[1]) binding.valueTexts[1]->SetContent(FormatFloat(value.y));
-        if (binding.valueTexts[2]) binding.valueTexts[2]->SetContent(FormatFloat(value.z));
+    void InspectorFieldBuilder::setEnumValue(const std::size_t bindingIndex, const std::size_t optionIndex)
+    {
+        if (bindingIndex >= bindings.size()) return;
+        if (bindings[bindingIndex].currentEnumSetter)
+        {
+            bindings[bindingIndex].currentEnumSetter(optionIndex);
+        }
     }
 
     std::string InspectorFieldBuilder::buildBlueprintSignature(
@@ -335,14 +529,21 @@ namespace sage::editor
             signature << inspectedComponent.displayName << '{';
             for (const auto& inspectedField : inspectedComponent.fields)
             {
-                switch (inspectedField.kind)
+                if (IsSupportedFieldKind(inspectedField.kind))
                 {
-                case InspectorFieldKind::Vector3:
                     signature << inspectedField.label << ':' << inspectedField.valueType.name() << ':'
-                              << (inspectedField.IsMutable() ? "rw" : "ro") << ';';
-                    break;
-                default:
-                    break;
+                              << static_cast<int>(inspectedField.kind) << ':'
+                              << (inspectedField.IsMutable() ? "rw" : "ro") << ':';
+                    for (const auto& label : inspectedField.componentLabels)
+                    {
+                        signature << label << ',';
+                    }
+                    signature << ':';
+                    for (const auto& option : inspectedField.enumOptions)
+                    {
+                        signature << option << ',';
+                    }
+                    signature << ';';
                 }
             }
             signature << '}';

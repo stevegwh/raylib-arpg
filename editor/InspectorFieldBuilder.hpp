@@ -36,10 +36,15 @@ namespace sage::editor
         void rebuildRows(const std::vector<InspectedComponent>& inspectedComponents);
         void createHeaderRow(const std::string& label) const;
         void executeFieldRowBuilder(const FieldRow& row);
-        void createVector3Row(const FieldRow& row);
-        void setVector3Axis(std::size_t bindingIndex, std::size_t axisIndex, const std::string& submittedValue);
-        static void RenderUI(Vector3& value, const FieldBinding& binding);
-        static void RenderUI(const Vector3& value, const FieldBinding& binding);
+        void createBoolRow(const FieldRow& row);
+        void createScalarRow(const FieldRow& row);
+        void createComponentRow(const FieldRow& row);
+        void createEnumRow(const FieldRow& row);
+        void setBoolValue(std::size_t bindingIndex, bool submittedValue);
+        void setScalarValue(std::size_t bindingIndex, const std::string& submittedValue);
+        void setComponentValue(
+            std::size_t bindingIndex, std::size_t componentIndex, const std::string& submittedValue);
+        void setEnumValue(std::size_t bindingIndex, std::size_t optionIndex);
         [[nodiscard]] static std::string buildBlueprintSignature(
             const std::vector<InspectedComponent>& inspectedComponents);
         [[nodiscard]] std::string buildRowSignature() const;
