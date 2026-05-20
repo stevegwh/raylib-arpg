@@ -122,11 +122,6 @@ namespace sage
         }
     }
 
-    void EditorScene::refreshPlacementTarget()
-    {
-        placementController->RefreshTarget();
-    }
-
     void EditorScene::refreshOverlay() const
     {
         const auto defaultsStatus = modelDefaults->Status(describeSelectedAsset());
@@ -146,59 +141,6 @@ namespace sage
 
         gui->SetHierarchy(hierarchyTree->CollectSceneObjectEntries(), activeEntity);
         gui->SetInspector(describeSelectedSceneEntity(), inspectedComponents);
-    }
-
-    void EditorScene::resetPlacementTransform()
-    {
-        placementController->ResetTransform();
-    }
-
-    void EditorScene::selectPlaceable(const std::size_t index)
-    {
-        if (index >= assetCatalog->Size()) return;
-        editorModes->ChangeState(editor::EditorPlaceState{.placeableIndex = index});
-    }
-
-    void EditorScene::adjustGridSurfaceY(const float amount)
-    {
-        placementController->AdjustGridSurfaceY(amount);
-        refreshOverlay();
-    }
-
-    void EditorScene::adjustPlacementRotation(const float amount)
-    {
-        placementController->AdjustRotation(amount);
-        refreshOverlay();
-    }
-
-    void EditorScene::adjustPlacementScale(const float amount)
-    {
-        placementController->AdjustScale(amount);
-        refreshOverlay();
-    }
-
-    void EditorScene::syncPlacementFromEntity(const entt::entity entity)
-    {
-        placementController->SyncFromEntity(entity);
-    }
-
-    bool EditorScene::placeSelectedMesh()
-    {
-        if (!isPlaceState()) return false;
-        const auto entity = placementController->PlaceSelectedMesh();
-        if (!entity.has_value()) return false;
-
-        selection->Select(*entity);
-        refreshSceneWindows();
-        gui->FocusHierarchyOnEntity(*entity);
-        editorModes->ChangeState(editor::EditorSelectState{});
-        refreshOverlay();
-        return true;
-    }
-
-    void EditorScene::drawPlacementPreview() const
-    {
-        placementController->DrawPreview();
     }
 
     void EditorScene::focusSelectedObject() const
@@ -253,28 +195,28 @@ namespace sage
         }
         sys->camera->Update();
         sys->cursor->Update();
-        refreshPlacementTarget();
+        editorModes->RefreshPlacementTarget();
 
         if (!TextInput::AnyEditing())
         {
             if (IsKeyPressed(KEY_DELETE) && !gui->IsDeleteConfirmationVisible())
             {
-                editor::EditorSelectState{}.RequestDeleteSelectedEntity(*editorModes);
+                editorModes->RequestDeleteSelectedEntity();
             }
             if (IsKeyPressed(KEY_EQUAL))
             {
-                adjustGridSurfaceY(GRID_SURFACE_Y_STEP);
+                editorModes->AdjustGridSurfaceY(GRID_SURFACE_Y_STEP);
             }
             if (IsKeyPressed(KEY_MINUS))
             {
-                adjustGridSurfaceY(-GRID_SURFACE_Y_STEP);
+                editorModes->AdjustGridSurfaceY(-GRID_SURFACE_Y_STEP);
             }
-            const bool isSelectMode = !isPlaceState() && !isEditState();
-            if (isSelectMode && IsKeyPressed(KEY_F) && (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)))
+            if (editorModes->IsSelectMode() && IsKeyPressed(KEY_F) &&
+                (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)))
             {
                 focusSelectedObjectInHierarchy();
             }
-            else if (isSelectMode && IsKeyPressed(KEY_F))
+            else if (editorModes->IsSelectMode() && IsKeyPressed(KEY_F))
             {
                 focusSelectedObject();
             }
@@ -307,17 +249,7 @@ namespace sage
 
     bool EditorScene::HandleEscapePressed()
     {
-        if (isPlaceState())
-        {
-            resetPlacementTransform();
-            editorModes->ChangeState(editor::EditorSelectState{});
-            refreshOverlay();
-            refreshSceneWindows();
-            return true;
-        }
-
-        auto* editState = editorModes->CurrentEditState();
-        return editState != nullptr && editState->CancelEditSelectedTransform(*editorModes);
+        return editorModes->HandleEscapePressed();
     }
 
     void EditorScene::SetSceneName(const std::string& sceneName) const
@@ -347,12 +279,10 @@ namespace sage
         placementController->Initialize();
 
         transformEditor = std::make_unique<editor::EditorTransformEditor>(sys, [this](const entt::entity entity) {
-            if (isEditState())
+            if (editorModes)
             {
-                syncPlacementFromEntity(entity);
+                editorModes->OnTransformApplied(entity);
             }
-            refreshOverlay();
-            refreshSceneWindows();
         });
         editorModes = std::make_unique<editor::EditorModeStateMachine>(sys->registry, *this, *transformEditor);
 
@@ -360,14 +290,12 @@ namespace sage
             &sys->UI(),
             sys->settings,
             assetCatalog->AssetEntries(),
-            [this](const std::size_t index) { selectPlaceable(index); },
-            [this](const entt::entity entity) {
-                editor::EditorSelectState{}.SelectSceneEntity(*editorModes, entity);
-            },
+            [this](const std::size_t index) { editorModes->SelectPlaceable(index); },
+            [this](const entt::entity entity) { editorModes->SelectSceneEntity(entity); },
             modelDefaults->Callbacks(),
             editor::EditorGui::DeleteConfirmationCallbacks{
-                .confirm = [this]() { editor::EditorSelectState{}.ConfirmDeleteSelectedEntity(*editorModes); },
-                .cancel = [this]() { editor::EditorSelectState{}.CancelDeleteSelectedEntity(*editorModes); }});
+                .confirm = [this]() { editorModes->ConfirmDeleteSelectedEntity(); },
+                .cancel = [this]() { editorModes->CancelDeleteSelectedEntity(); }});
         refreshOverlay();
         refreshSceneWindows();
     }

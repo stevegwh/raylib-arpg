@@ -24,9 +24,6 @@ namespace sage
     class EditorScene
     {
         friend class editor::EditorModeStateMachine;
-        friend struct editor::EditorSelectState;
-        friend struct editor::EditorPlaceState;
-        friend struct editor::EditorEditState;
 
         EngineSystems* sys{};
         std::unique_ptr<editor::EditorGui> gui;
@@ -43,24 +40,8 @@ namespace sage
 
         void applyLitShaderToLoadedRenderables() const;
         void giveTransformsToLights() const;
-        // TODO: This should be in place mode
-        void refreshPlacementTarget();
         void refreshOverlay() const;
         void refreshSceneWindows() const;
-        // TODO: This should be in place mode
-        void resetPlacementTransform();
-        // TODO: This should be in asset browser?
-        void selectPlaceable(std::size_t index);
-        void syncPlacementFromEntity(entt::entity entity);
-        void adjustGridSurfaceY(float amount);
-        // TODO: This should be in place mode
-        void adjustPlacementRotation(float amount);
-        // TODO: This should be in place mode
-        void adjustPlacementScale(float amount);
-        // TODO: This should be in place mode
-        [[nodiscard]] bool placeSelectedMesh();
-        // TODO: This should be in place mode
-        void drawPlacementPreview() const;
 
         void focusSelectedObject() const;
         void focusSelectedObjectInHierarchy() const;
