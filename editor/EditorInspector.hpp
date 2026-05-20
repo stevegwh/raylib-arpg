@@ -11,35 +11,42 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace sage::editor
 {
+    // Holds the data + options + index getter/setter for a dropdown-rendered field.
+    // Used by both std::is_enum_v<E> values (options derived from magic_enum) and the
+    // bespoke CollisionLayer overload (options derived from GetCollisionLayers()).
+    struct EnumField
+    {
+        void* data = nullptr;
+        std::vector<std::string> options;
+        std::function<std::size_t()> getIndex;
+        std::function<void(std::size_t)> setIndex;
+    };
+
+    // The variant alternative *is* the kind. Leaf overloads on ComponentInspector
+    // construct one alternative each; the renderer dispatches via std::visit into
+    // overloaded makeBinding/Update functions.
+    using FieldValue = std::variant<
+        bool*,
+        int*,
+        unsigned int*,
+        std::uint64_t*,
+        float*,
+        std::string*,
+        Vector2*,
+        Vector3*,
+        ::Color*,
+        EnumField>;
+
     struct InspectorField
     {
-        enum class Kind
-        {
-            Bool,
-            Int,
-            UInt,
-            UInt64,
-            Float,
-            String,
-            Vec2,
-            Vec3,
-            Color,
-            Enum, // also used for CollisionLayer (dropdown sourced from a runtime list)
-        };
-
         std::string label;
-        Kind kind = Kind::Bool;
-        void* data = nullptr;
         bool editable = true;
-
-        // Populated only when kind == Enum.
-        std::vector<std::string> enumOptions;
-        std::function<std::size_t()> getEnumIndex;
-        std::function<void(std::size_t)> setEnumIndex;
+        FieldValue value;
     };
 
     namespace detail
@@ -73,55 +80,28 @@ namespace sage::editor
             return labelPrefix_ + " " + label;
         }
 
-        void addLeaf(const InspectorField::Kind kind, std::string label, void* data, const bool editable)
+        template <class T>
+        void addLeaf(std::string label, T* data, const bool editable)
         {
             fields_.push_back(
                 {.label = qualified(label),
-                 .kind = kind,
-                 .data = data,
-                 .editable = editable && editableScope_});
+                 .editable = editable && editableScope_,
+                 .value = data});
         }
 
       public:
         // --- Leaf overloads ------------------------------------------------------------
-        void field(std::string label, bool& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::Bool, std::move(label), &v, ed);
-        }
-        void field(std::string label, int& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::Int, std::move(label), &v, ed);
-        }
-        void field(std::string label, unsigned int& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::UInt, std::move(label), &v, ed);
-        }
-        void field(std::string label, std::uint64_t& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::UInt64, std::move(label), &v, ed);
-        }
-        void field(std::string label, float& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::Float, std::move(label), &v, ed);
-        }
-        void field(std::string label, std::string& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::String, std::move(label), &v, ed);
-        }
-        void field(std::string label, Vector2& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::Vec2, std::move(label), &v, ed);
-        }
-        void field(std::string label, Vector3& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::Vec3, std::move(label), &v, ed);
-        }
-        void field(std::string label, ::Color& v, bool ed = true)
-        {
-            addLeaf(InspectorField::Kind::Color, std::move(label), &v, ed);
-        }
+        void field(std::string label, bool& v, bool ed = true)         { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, int& v, bool ed = true)          { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, unsigned int& v, bool ed = true) { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, std::uint64_t& v, bool ed = true){ addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, float& v, bool ed = true)        { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, std::string& v, bool ed = true)  { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, Vector2& v, bool ed = true)      { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, Vector3& v, bool ed = true)      { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, ::Color& v, bool ed = true)      { addLeaf(std::move(label), &v, ed); }
 
-        // Bespoke: dropdown sourced from GetCollisionLayers(). Reuses Enum rendering.
+        // Bespoke: dropdown sourced from GetCollisionLayers(). Stored as EnumField.
         void field(std::string label, sage::CollisionLayer& v, bool ed = true);
 
         // --- Enum template -------------------------------------------------------------
@@ -129,20 +109,17 @@ namespace sage::editor
             requires std::is_enum_v<E>
         void field(std::string label, E& v, bool ed = true)
         {
-            InspectorField f{
-                .label = qualified(label),
-                .kind = InspectorField::Kind::Enum,
-                .data = &v,
-                .editable = ed && editableScope_};
+            EnumField e{.data = &v};
             constexpr auto entries = magic_enum::enum_entries<E>();
-            f.enumOptions.reserve(entries.size());
-            for (const auto& [val, name] : entries) f.enumOptions.emplace_back(name);
-            f.getEnumIndex = [p = &v]() -> std::size_t { return magic_enum::enum_index(*p).value_or(0); };
-            f.setEnumIndex = [p = &v](const std::size_t idx) {
+            e.options.reserve(entries.size());
+            for (const auto& [val, name] : entries) e.options.emplace_back(name);
+            e.getIndex = [p = &v]() -> std::size_t { return magic_enum::enum_index(*p).value_or(0); };
+            e.setIndex = [p = &v](const std::size_t idx) {
                 constexpr auto vals = magic_enum::enum_values<E>();
                 if (idx < vals.size()) *p = vals[idx];
             };
-            fields_.push_back(std::move(f));
+            fields_.push_back(
+                {.label = qualified(label), .editable = ed && editableScope_, .value = std::move(e)});
         }
 
         // --- Composite template --------------------------------------------------------

@@ -347,7 +347,7 @@ namespace sage::editor
     {
         if (inspectorSelectionText) inspectorSelectionText->SetContent("Selected: " + selectedEntity);
         inspectorFieldBlueprints.Rebuild(inspectedComponents);
-        inspectorFieldBlueprints.Draw(inspectedComponents);
+        inspectorFieldBlueprints.Draw();
     }
 
     void EditorGui::ShowDeleteConfirmation(const std::string& selectedEntity) const

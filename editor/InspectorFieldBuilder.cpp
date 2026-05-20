@@ -6,6 +6,7 @@
 #include "engine/ui/UILayout.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <format>
 #include <memory>
 #include <string_view>
@@ -14,6 +15,15 @@
 
 namespace sage::editor
 {
+    using BoolBinding = InspectorFieldBuilder::BoolBinding;
+    template <class T>
+    using ScalarBinding = InspectorFieldBuilder::ScalarBinding<T>;
+    using Vec2Binding = InspectorFieldBuilder::Vec2Binding;
+    using Vec3Binding = InspectorFieldBuilder::Vec3Binding;
+    using ColorBinding = InspectorFieldBuilder::ColorBinding;
+    using EnumBinding = InspectorFieldBuilder::EnumBinding;
+    using BindingV = InspectorFieldBuilder::BindingV;
+
     namespace
     {
         constexpr std::size_t INSPECTOR_VISIBLE_ROWS = 13;
@@ -35,34 +45,36 @@ namespace sage::editor
             return info;
         }
 
-        std::string formatFloat(float v)
+        // --- Per-type formatters (display) -----------------------------------------
+        std::string formatScalar(int v)
+        {
+            return std::to_string(v);
+        }
+        std::string formatScalar(unsigned int v)
+        {
+            return std::to_string(v);
+        }
+        std::string formatScalar(std::uint64_t v)
+        {
+            return std::to_string(v);
+        }
+        std::string formatScalar(float v)
         {
             return std::format("{:.2f}", v);
         }
-
-        bool parseFloat(const std::string& s, float& out)
+        std::string formatScalar(const std::string& v)
         {
-            try
-            {
-                std::size_t consumed = 0;
-                const float v = std::stof(s, &consumed);
-                if (consumed == 0) return false;
-                out = v;
-                return true;
-            }
-            catch (...)
-            {
-                return false;
-            }
+            return v;
         }
 
-        bool parseInt(const std::string& s, int& out)
+        // --- Per-type parsers (TextInput → value) ----------------------------------
+        bool parseScalar(const std::string& s, int& out)
         {
             try
             {
-                std::size_t consumed = 0;
-                const long v = std::stol(s, &consumed);
-                if (consumed == 0) return false;
+                std::size_t n = 0;
+                const long v = std::stol(s, &n);
+                if (n == 0) return false;
                 out = static_cast<int>(v);
                 return true;
             }
@@ -71,14 +83,13 @@ namespace sage::editor
                 return false;
             }
         }
-
-        bool parseUInt(const std::string& s, unsigned int& out)
+        bool parseScalar(const std::string& s, unsigned int& out)
         {
             try
             {
-                std::size_t consumed = 0;
-                const long v = std::stol(s, &consumed);
-                if (consumed == 0) return false;
+                std::size_t n = 0;
+                const long v = std::stol(s, &n);
+                if (n == 0) return false;
                 out = static_cast<unsigned int>(std::max<long>(0, v));
                 return true;
             }
@@ -87,14 +98,13 @@ namespace sage::editor
                 return false;
             }
         }
-
-        bool parseUInt64(const std::string& s, std::uint64_t& out)
+        bool parseScalar(const std::string& s, std::uint64_t& out)
         {
             try
             {
-                std::size_t consumed = 0;
-                const unsigned long long v = std::stoull(s, &consumed);
-                if (consumed == 0) return false;
+                std::size_t n = 0;
+                const unsigned long long v = std::stoull(s, &n);
+                if (n == 0) return false;
                 out = static_cast<std::uint64_t>(v);
                 return true;
             }
@@ -103,35 +113,242 @@ namespace sage::editor
                 return false;
             }
         }
-
-        std::vector<std::string> ComponentLabelsFor(const InspectorField::Kind kind)
+        bool parseScalar(const std::string& s, float& out)
         {
-            switch (kind)
+            try
             {
-            case InspectorField::Kind::Vec2:
-                return {"X", "Y"};
-            case InspectorField::Kind::Vec3:
-                return {"X", "Y", "Z"};
-            case InspectorField::Kind::Color:
-                return {"R", "G", "B", "A"};
-            default:
-                return {};
+                std::size_t n = 0;
+                const float v = std::stof(s, &n);
+                if (n == 0) return false;
+                out = v;
+                return true;
+            }
+            catch (...)
+            {
+                return false;
             }
         }
-
-        bool IsComponentKind(const InspectorField::Kind kind)
+        bool parseScalar(const std::string& s, std::string& out)
         {
-            return kind == InspectorField::Kind::Vec2 || kind == InspectorField::Kind::Vec3 ||
-                   kind == InspectorField::Kind::Color;
+            out = s;
+            return true;
         }
 
-        bool IsSingleScalarKind(const InspectorField::Kind kind)
+        // --- Layout helpers --------------------------------------------------------
+        void addLabel(GameUIEngine* ui, TableRow* row, const std::string& label, float widthPct)
         {
-            return kind == InspectorField::Kind::Int || kind == InspectorField::Kind::UInt ||
-                   kind == InspectorField::Kind::UInt64 || kind == InspectorField::Kind::Float ||
-                   kind == InspectorField::Kind::String;
+            auto* cell = row->CreateTableCell(widthPct, Padding{1, 1, 2, 4});
+            auto t = std::make_unique<TextBox>(
+                ui, cell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
+            cell->CreateTextbox(std::move(t), label + ":");
         }
 
+        // X/Y/Z (or R/G/B/A) label + TextInput<T> on a single component slot of a Vec/Color row.
+        // The onValue callback receives the parsed T and writes it into the underlying member.
+        template <class T, class OnValue>
+        TextBox* addAxis(
+            GameUIEngine* ui,
+            TableRow* row,
+            const std::string& axisLabel,
+            float valueWidth,
+            bool editable,
+            OnValue&& onValue)
+        {
+            auto* axisCell = row->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
+            auto axisLabelText = std::make_unique<TextBox>(
+                ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
+            axisCell->CreateTextbox(std::move(axisLabelText), axisLabel);
+
+            auto* valueCell = row->CreateTableCell(valueWidth, Padding{1, 1, 2, 2});
+            if (!editable)
+            {
+                auto tb = std::make_unique<TextBox>(
+                    ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::RIGHT);
+                return valueCell->CreateTextbox(std::move(tb), "");
+            }
+            auto input = std::make_unique<TextInput>(
+                ui,
+                valueCell,
+                [fn = std::forward<OnValue>(onValue)](const std::string& s) {
+                    T parsed{};
+                    if (parseScalar(s, parsed)) fn(parsed);
+                },
+                EditorInspectorInputFontInfo(),
+                VertAlignment::MIDDLE,
+                HoriAlignment::RIGHT);
+            return valueCell->CreateTextbox(std::move(input), "");
+        }
+
+        // --- makeBinding overloads — one per variant alternative -------------------
+
+        BoolBinding makeBinding(
+            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, bool* data)
+        {
+            auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+            addLabel(ui, row, label, 82.0f);
+            auto* valueCell = row->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
+            auto cb =
+                std::make_unique<Checkbox>(ui, valueCell, false, VertAlignment::MIDDLE, HoriAlignment::CENTER);
+            auto* checkbox = valueCell->CreateCheckbox(std::move(cb));
+            if (editable)
+                checkbox->onValueChanged.Subscribe([data](const bool v) { *data = v; });
+            else
+                checkbox->stateLocked = true;
+            return {checkbox, data};
+        }
+
+        template <class T>
+        ScalarBinding<T> makeBinding(
+            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, T* data)
+        {
+            auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+            addLabel(ui, row, label, 34.0f);
+            auto* valueCell = row->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
+
+            constexpr auto valueAlignment =
+                std::is_same_v<T, std::string> ? HoriAlignment::LEFT : HoriAlignment::RIGHT;
+
+            TextBox* text = nullptr;
+            if (editable)
+            {
+                auto input = std::make_unique<TextInput>(
+                    ui,
+                    valueCell,
+                    [data](const std::string& s) {
+                        T parsed{};
+                        if (parseScalar(s, parsed)) *data = parsed;
+                    },
+                    EditorInspectorInputFontInfo(),
+                    VertAlignment::MIDDLE,
+                    valueAlignment);
+                text = valueCell->CreateTextbox(std::move(input), "");
+            }
+            else
+            {
+                auto tb = std::make_unique<TextBox>(
+                    ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, valueAlignment);
+                text = valueCell->CreateTextbox(std::move(tb), "");
+            }
+            return {text, data};
+        }
+
+        Vec2Binding makeBinding(
+            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, Vector2* data)
+        {
+            auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+            addLabel(ui, row, label, 34.0f);
+            constexpr float axisCount = 2.0f;
+            constexpr float axisLabelWidth = 4.0f;
+            const float vw = (66.0f - axisLabelWidth * axisCount) / axisCount;
+            auto* x = addAxis<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
+            auto* y = addAxis<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
+            return {{x, y}, data};
+        }
+
+        Vec3Binding makeBinding(
+            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, Vector3* data)
+        {
+            auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+            addLabel(ui, row, label, 34.0f);
+            constexpr float axisCount = 3.0f;
+            constexpr float axisLabelWidth = 4.0f;
+            const float vw = (66.0f - axisLabelWidth * axisCount) / axisCount;
+            auto* x = addAxis<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
+            auto* y = addAxis<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
+            auto* z = addAxis<float>(ui, row, "Z", vw, editable, [data](float v) { data->z = v; });
+            return {{x, y, z}, data};
+        }
+
+        ColorBinding makeBinding(
+            GameUIEngine* ui, Table* fieldTable, const std::string& label, const bool editable, ::Color* data)
+        {
+            auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+            addLabel(ui, row, label, 34.0f);
+            constexpr float axisCount = 4.0f;
+            constexpr float axisLabelWidth = 4.0f;
+            constexpr float vw = (66.0f - axisLabelWidth * axisCount) / axisCount;
+            const auto clamp = [](const int v) -> unsigned char {
+                return static_cast<unsigned char>(std::clamp(v, 0, 255));
+            };
+            auto* r = addAxis<int>(ui, row, "R", vw, editable, [data, clamp](int v) { data->r = clamp(v); });
+            auto* g = addAxis<int>(ui, row, "G", vw, editable, [data, clamp](int v) { data->g = clamp(v); });
+            auto* b = addAxis<int>(ui, row, "B", vw, editable, [data, clamp](int v) { data->b = clamp(v); });
+            auto* a = addAxis<int>(ui, row, "A", vw, editable, [data, clamp](int v) { data->a = clamp(v); });
+            return {{r, g, b, a}, data};
+        }
+
+        EnumBinding makeBinding(
+            GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable, const EnumField& src)
+        {
+            auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
+            addLabel(ui, row, label, 34.0f);
+            auto* valueCell = row->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
+            auto dropdown = std::make_unique<DropdownList>(
+                ui,
+                valueCell,
+                src.options,
+                0,
+                EditorInspectorInputFontInfo(),
+                VertAlignment::MIDDLE,
+                HoriAlignment::LEFT);
+            dropdown->SetMaxVisibleOptions(5);
+            auto* dd = valueCell->CreateDropdownList(std::move(dropdown));
+            if (editable)
+            {
+                auto setter = src.setIndex;
+                dd->onSelectionChanged.Subscribe([setter](const std::size_t idx, const std::string&) {
+                    if (setter) setter(idx);
+                });
+            }
+            else
+            {
+                dd->stateLocked = true;
+            }
+            return {dd, src.options, src.getIndex};
+        }
+
+        // --- Update overloads — refresh widget contents from cached data ----------
+
+        void Update(const BoolBinding& b)
+        {
+            if (b.checkbox) b.checkbox->SetChecked(*b.data);
+        }
+
+        template <class T>
+        void Update(const ScalarBinding<T>& b)
+        {
+            if (b.text) b.text->SetContent(formatScalar(*b.data));
+        }
+
+        void Update(const Vec2Binding& b)
+        {
+            if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.data->x));
+            if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.data->y));
+        }
+
+        void Update(const Vec3Binding& b)
+        {
+            if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.data->x));
+            if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.data->y));
+            if (b.texts[2]) b.texts[2]->SetContent(formatScalar(b.data->z));
+        }
+
+        void Update(const ColorBinding& b)
+        {
+            if (b.texts[0]) b.texts[0]->SetContent(std::to_string(static_cast<int>(b.data->r)));
+            if (b.texts[1]) b.texts[1]->SetContent(std::to_string(static_cast<int>(b.data->g)));
+            if (b.texts[2]) b.texts[2]->SetContent(std::to_string(static_cast<int>(b.data->b)));
+            if (b.texts[3]) b.texts[3]->SetContent(std::to_string(static_cast<int>(b.data->a)));
+        }
+
+        void Update(const EnumBinding& b)
+        {
+            if (!b.dropdown) return;
+            if (b.dropdown->GetOptions() != b.options) b.dropdown->SetOptions(b.options);
+            if (b.getIndex) b.dropdown->SetSelectedIndex(b.getIndex());
+        }
+
+        // --- Field lookup (for the row plan diff) ---------------------------------
         const InspectorField* FindField(
             const std::vector<InspectedComponent>& components,
             const std::string_view componentName,
@@ -160,22 +377,10 @@ namespace sage::editor
         Type type = Type::Field;
         std::string componentName;
         std::string fieldName;
-        InspectorField::Kind fieldKind = InspectorField::Kind::Bool;
+        std::size_t valueIndex = 0; // matches InspectorField::value.index() when type == Field
         bool editable = false;
 
         friend bool operator==(const FieldRow&, const FieldRow&) = default;
-    };
-
-    struct InspectorFieldBuilder::FieldBinding
-    {
-        std::string componentName;
-        std::string fieldName;
-        InspectorField::Kind kind = InspectorField::Kind::Bool;
-        // Exactly one alternative is populated, chosen by `kind`:
-        //   Bool                                       → Checkbox*
-        //   Enum                                       → DropdownList*
-        //   Int/UInt/UInt64/Float/String/Vec2/Vec3/Color → std::vector<TextBox*>
-        std::variant<Checkbox*, DropdownList*, std::vector<TextBox*>> widget;
     };
 
     InspectorFieldBuilder::InspectorFieldBuilder() = default;
@@ -220,108 +425,21 @@ namespace sage::editor
             const auto* field = FindField(inspectedComponents, row.componentName, row.fieldName);
             if (!field) continue;
 
-            FieldBinding binding{
-                .componentName = row.componentName, .fieldName = row.fieldName, .kind = field->kind};
-            createFieldRow(binding, *field);
-            bindings.push_back(std::move(binding));
+            bindings.push_back(
+                std::visit(
+                    [&](auto&& v) -> BindingV {
+                        return makeBinding(ui, fieldTable, field->label, field->editable, v);
+                    },
+                    field->value));
         }
 
         fieldTable->InitLayout();
     }
 
-    void InspectorFieldBuilder::Draw(const std::vector<InspectedComponent>& inspectedComponents) const
+    void InspectorFieldBuilder::Draw() const
     {
-        for (const auto& binding : bindings)
-        {
-            const auto* field = FindField(inspectedComponents, binding.componentName, binding.fieldName);
-            if (!field || field->kind != binding.kind || !field->data) continue;
-
-            switch (binding.kind)
-            {
-            case InspectorField::Kind::Bool:
-                if (auto* cb = std::get<Checkbox*>(binding.widget))
-                    cb->SetChecked(*static_cast<bool*>(field->data));
-                break;
-            case InspectorField::Kind::Int:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                if (!texts.empty() && texts[0])
-                    texts[0]->SetContent(std::to_string(*static_cast<int*>(field->data)));
-                break;
-            }
-            case InspectorField::Kind::UInt:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                if (!texts.empty() && texts[0])
-                    texts[0]->SetContent(std::to_string(*static_cast<unsigned int*>(field->data)));
-                break;
-            }
-            case InspectorField::Kind::UInt64:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                if (!texts.empty() && texts[0])
-                    texts[0]->SetContent(std::to_string(*static_cast<std::uint64_t*>(field->data)));
-                break;
-            }
-            case InspectorField::Kind::Float:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                if (!texts.empty() && texts[0])
-                    texts[0]->SetContent(formatFloat(*static_cast<float*>(field->data)));
-                break;
-            }
-            case InspectorField::Kind::String:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                if (!texts.empty() && texts[0])
-                    texts[0]->SetContent(*static_cast<std::string*>(field->data));
-                break;
-            }
-            case InspectorField::Kind::Vec2:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                const auto* v = static_cast<Vector2*>(field->data);
-                if (texts.size() >= 2)
-                {
-                    if (texts[0]) texts[0]->SetContent(formatFloat(v->x));
-                    if (texts[1]) texts[1]->SetContent(formatFloat(v->y));
-                }
-                break;
-            }
-            case InspectorField::Kind::Vec3:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                const auto* v = static_cast<Vector3*>(field->data);
-                if (texts.size() >= 3)
-                {
-                    if (texts[0]) texts[0]->SetContent(formatFloat(v->x));
-                    if (texts[1]) texts[1]->SetContent(formatFloat(v->y));
-                    if (texts[2]) texts[2]->SetContent(formatFloat(v->z));
-                }
-                break;
-            }
-            case InspectorField::Kind::Color:
-            {
-                const auto& texts = std::get<std::vector<TextBox*>>(binding.widget);
-                const auto* c = static_cast<Color*>(field->data);
-                if (texts.size() >= 4)
-                {
-                    if (texts[0]) texts[0]->SetContent(std::to_string(static_cast<int>(c->r)));
-                    if (texts[1]) texts[1]->SetContent(std::to_string(static_cast<int>(c->g)));
-                    if (texts[2]) texts[2]->SetContent(std::to_string(static_cast<int>(c->b)));
-                    if (texts[3]) texts[3]->SetContent(std::to_string(static_cast<int>(c->a)));
-                }
-                break;
-            }
-            case InspectorField::Kind::Enum:
-                if (auto* dd = std::get<DropdownList*>(binding.widget))
-                {
-                    if (dd->GetOptions() != field->enumOptions) dd->SetOptions(field->enumOptions);
-                    if (field->getEnumIndex) dd->SetSelectedIndex(field->getEnumIndex());
-                }
-                break;
-            }
-        }
+        for (const auto& b : bindings)
+            std::visit([](const auto& x) { Update(x); }, b);
     }
 
     std::size_t InspectorFieldBuilder::TotalRows() const
@@ -351,13 +469,13 @@ namespace sage::editor
                         .type = FieldRow::Type::Field,
                         .componentName = component.displayName,
                         .fieldName = field.label,
-                        .fieldKind = field.kind,
+                        .valueIndex = field.value.index(),
                         .editable = field.editable});
             }
 
             if (rows.size() == headerIndex + 1)
             {
-                // No fields under this header — drop the header to avoid an empty section.
+                // No fields under this header — drop it to avoid an empty section.
                 rows.pop_back();
             }
         }
@@ -371,237 +489,4 @@ namespace sage::editor
             ui, headerCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
         headerCell->CreateTextbox(std::move(header), label);
     }
-
-    void InspectorFieldBuilder::createFieldRow(FieldBinding& binding, const InspectorField& field)
-    {
-        if (field.kind == InspectorField::Kind::Bool)
-        {
-            createBoolRow(binding, field);
-        }
-        else if (IsSingleScalarKind(field.kind))
-        {
-            createScalarRow(binding, field);
-        }
-        else if (IsComponentKind(field.kind))
-        {
-            createComponentRow(binding, field);
-        }
-        else if (field.kind == InspectorField::Kind::Enum)
-        {
-            createEnumRow(binding, field);
-        }
-    }
-
-    void InspectorFieldBuilder::createBoolRow(FieldBinding& binding, const InspectorField& field)
-    {
-        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-
-        auto* labelCell = uiRow->CreateTableCell(82.0f, Padding{1, 1, 2, 4});
-        auto label = std::make_unique<TextBox>(
-            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        labelCell->CreateTextbox(std::move(label), field.label + ":");
-
-        auto* valueCell = uiRow->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
-        auto checkbox =
-            std::make_unique<Checkbox>(ui, valueCell, false, VertAlignment::MIDDLE, HoriAlignment::CENTER);
-        auto* cb = valueCell->CreateCheckbox(std::move(checkbox));
-        if (!field.editable)
-        {
-            cb->stateLocked = true;
-        }
-        else
-        {
-            auto* p = static_cast<bool*>(field.data);
-            cb->onValueChanged.Subscribe([p](const bool v) { *p = v; });
-        }
-        binding.widget = cb;
-    }
-
-    void InspectorFieldBuilder::createScalarRow(FieldBinding& binding, const InspectorField& field)
-    {
-        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-
-        auto* labelCell = uiRow->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
-        auto label = std::make_unique<TextBox>(
-            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        labelCell->CreateTextbox(std::move(label), field.label + ":");
-
-        auto* valueCell = uiRow->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
-        const auto valueAlignment =
-            field.kind == InspectorField::Kind::String ? HoriAlignment::LEFT : HoriAlignment::RIGHT;
-
-        TextBox* valueText = nullptr;
-        if (field.editable)
-        {
-            const auto kind = field.kind;
-            void* data = field.data;
-            auto input = std::make_unique<TextInput>(
-                ui,
-                valueCell,
-                [kind, data](const std::string& s) {
-                    switch (kind)
-                    {
-                    case InspectorField::Kind::Int: {
-                        int v = 0;
-                        if (parseInt(s, v)) *static_cast<int*>(data) = v;
-                        break;
-                    }
-                    case InspectorField::Kind::UInt: {
-                        unsigned int v = 0;
-                        if (parseUInt(s, v)) *static_cast<unsigned int*>(data) = v;
-                        break;
-                    }
-                    case InspectorField::Kind::UInt64: {
-                        std::uint64_t v = 0;
-                        if (parseUInt64(s, v)) *static_cast<std::uint64_t*>(data) = v;
-                        break;
-                    }
-                    case InspectorField::Kind::Float: {
-                        float v = 0;
-                        if (parseFloat(s, v)) *static_cast<float*>(data) = v;
-                        break;
-                    }
-                    case InspectorField::Kind::String:
-                        *static_cast<std::string*>(data) = s;
-                        break;
-                    default:
-                        break;
-                    }
-                },
-                EditorInspectorInputFontInfo(),
-                VertAlignment::MIDDLE,
-                valueAlignment);
-            valueText = valueCell->CreateTextbox(std::move(input), "");
-        }
-        else
-        {
-            auto text = std::make_unique<TextBox>(
-                ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, valueAlignment);
-            valueText = valueCell->CreateTextbox(std::move(text), "");
-        }
-
-        binding.widget = std::vector<TextBox*>{valueText};
-    }
-
-    void InspectorFieldBuilder::createComponentRow(FieldBinding& binding, const InspectorField& field)
-    {
-        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-
-        auto* labelCell = uiRow->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
-        auto label = std::make_unique<TextBox>(
-            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        labelCell->CreateTextbox(std::move(label), field.label + ":");
-
-        const auto axisLabels = ComponentLabelsFor(field.kind);
-        const std::size_t componentCount = std::max<std::size_t>(1, axisLabels.size());
-        const float axisLabelWidth = 4.0f;
-        const float valueWidth =
-            (66.0f - axisLabelWidth * static_cast<float>(componentCount)) / static_cast<float>(componentCount);
-        std::vector<TextBox*> valueTexts;
-        valueTexts.reserve(componentCount);
-
-        for (std::size_t i = 0; i < axisLabels.size(); ++i)
-        {
-            auto* axisCell = uiRow->CreateTableCell(axisLabelWidth, Padding{1, 1, 1, 1});
-            auto axisLabel = std::make_unique<TextBox>(
-                ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
-            axisCell->CreateTextbox(std::move(axisLabel), axisLabels[i]);
-
-            auto* valueCell = uiRow->CreateTableCell(valueWidth, Padding{1, 1, 2, 2});
-            if (!field.editable)
-            {
-                auto text = std::make_unique<TextBox>(
-                    ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::RIGHT);
-                valueTexts.push_back(valueCell->CreateTextbox(std::move(text), ""));
-                continue;
-            }
-
-            const auto kind = field.kind;
-            void* data = field.data;
-            const std::size_t axisIndex = i;
-            auto input = std::make_unique<TextInput>(
-                ui,
-                valueCell,
-                [kind, data, axisIndex](const std::string& s) {
-                    if (kind == InspectorField::Kind::Vec2)
-                    {
-                        auto* v = static_cast<Vector2*>(data);
-                        float parsed = 0;
-                        if (!parseFloat(s, parsed)) return;
-                        if (axisIndex == 0)
-                            v->x = parsed;
-                        else if (axisIndex == 1)
-                            v->y = parsed;
-                    }
-                    else if (kind == InspectorField::Kind::Vec3)
-                    {
-                        auto* v = static_cast<Vector3*>(data);
-                        float parsed = 0;
-                        if (!parseFloat(s, parsed)) return;
-                        if (axisIndex == 0)
-                            v->x = parsed;
-                        else if (axisIndex == 1)
-                            v->y = parsed;
-                        else if (axisIndex == 2)
-                            v->z = parsed;
-                    }
-                    else if (kind == InspectorField::Kind::Color)
-                    {
-                        auto* c = static_cast<Color*>(data);
-                        int parsed = 0;
-                        if (!parseInt(s, parsed)) return;
-                        const auto clamped = static_cast<unsigned char>(std::clamp(parsed, 0, 255));
-                        if (axisIndex == 0)
-                            c->r = clamped;
-                        else if (axisIndex == 1)
-                            c->g = clamped;
-                        else if (axisIndex == 2)
-                            c->b = clamped;
-                        else if (axisIndex == 3)
-                            c->a = clamped;
-                    }
-                },
-                EditorInspectorInputFontInfo(),
-                VertAlignment::MIDDLE,
-                HoriAlignment::RIGHT);
-            valueTexts.push_back(valueCell->CreateTextbox(std::move(input), ""));
-        }
-
-        binding.widget = std::move(valueTexts);
-    }
-
-    void InspectorFieldBuilder::createEnumRow(FieldBinding& binding, const InspectorField& field)
-    {
-        auto* uiRow = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
-
-        auto* labelCell = uiRow->CreateTableCell(34.0f, Padding{1, 1, 2, 4});
-        auto label = std::make_unique<TextBox>(
-            ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-        labelCell->CreateTextbox(std::move(label), field.label + ":");
-
-        auto* valueCell = uiRow->CreateTableCell(66.0f, Padding{1, 1, 2, 2});
-        auto dropdown = std::make_unique<DropdownList>(
-            ui,
-            valueCell,
-            field.enumOptions,
-            0,
-            EditorInspectorInputFontInfo(),
-            VertAlignment::MIDDLE,
-            HoriAlignment::LEFT);
-        dropdown->SetMaxVisibleOptions(5);
-        auto* dd = valueCell->CreateDropdownList(std::move(dropdown));
-        if (!field.editable)
-        {
-            dd->stateLocked = true;
-        }
-        else
-        {
-            auto setter = field.setEnumIndex;
-            dd->onSelectionChanged.Subscribe([setter](const std::size_t idx, const std::string&) {
-                if (setter) setter(idx);
-            });
-        }
-        binding.widget = dd;
-    }
-
 } // namespace sage::editor

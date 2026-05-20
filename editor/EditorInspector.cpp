@@ -12,15 +12,11 @@ namespace sage::editor
 {
     void ComponentInspector::field(std::string label, sage::CollisionLayer& v, const bool ed)
     {
-        InspectorField f{
-            .label = qualified(label),
-            .kind = InspectorField::Kind::Enum,
-            .data = &v,
-            .editable = ed && editableScope_};
+        EnumField e{.data = &v};
         const auto& layers = GetCollisionLayers();
-        f.enumOptions.reserve(layers.size());
-        for (const auto& layer : layers) f.enumOptions.emplace_back(layer.layerName);
-        f.getEnumIndex = [p = &v]() -> std::size_t {
+        e.options.reserve(layers.size());
+        for (const auto& layer : layers) e.options.emplace_back(layer.layerName);
+        e.getIndex = [p = &v]() -> std::size_t {
             const auto& list = GetCollisionLayers();
             for (std::size_t i = 0; i < list.size(); ++i)
             {
@@ -28,11 +24,12 @@ namespace sage::editor
             }
             return 0;
         };
-        f.setEnumIndex = [p = &v](const std::size_t idx) {
+        e.setIndex = [p = &v](const std::size_t idx) {
             const auto& list = GetCollisionLayers();
             if (idx < list.size()) *p = list[idx];
         };
-        fields_.push_back(std::move(f));
+        fields_.push_back(
+            {.label = qualified(label), .editable = ed && editableScope_, .value = std::move(e)});
     }
 
     std::vector<InspectedComponent> InspectorRegistry::Inspect(
