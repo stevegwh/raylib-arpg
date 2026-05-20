@@ -25,9 +25,6 @@ namespace sage
     namespace
     {
         constexpr float GRID_SURFACE_Y_STEP = 1.0f;
-        constexpr float PLACEMENT_HEIGHT_STEP = 0.25f;
-        constexpr float PLACEMENT_ROTATION_STEP = 15.0f;
-        constexpr float PLACEMENT_SCALE_STEP = 0.1f;
     } // namespace
 
     const editor::PlaceableAsset& EditorScene::selectedPlaceable() const
@@ -72,24 +69,9 @@ namespace sage
         return "-";
     }
 
-    std::string EditorScene::describeSelectedModelDefaultHeight() const
-    {
-        return isPlaceState() ? std::format("{:.2f}", selectedPlaceable().modelDefaultHeightOffset) : "0.00";
-    }
-
-    std::string EditorScene::describeSelectedModelDefaultRotation() const
-    {
-        return isPlaceState() ? std::format("{:.0f}", selectedPlaceable().modelDefaultRotationY) : "0";
-    }
-
-    std::string EditorScene::describeSelectedModelDefaultScale() const
-    {
-        return isPlaceState() ? std::format("{:.2f}", selectedPlaceable().modelDefaultScale) : "1.00";
-    }
-
     std::string EditorScene::describeEntity(const entt::entity entity) const
     {
-        return hierarchyModel->DescribeEntity(entity);
+        return hierarchyTree->DescribeEntity(entity);
     }
 
     std::string EditorScene::describeSelectedSceneEntity() const
@@ -129,12 +111,10 @@ namespace sage
 
     void EditorScene::refreshOverlay() const
     {
+        const auto defaultsStatus = modelDefaults->Status(describeSelectedAsset());
         gui->SetOverlayStatus(describeMode(), describeCursorPosition());
         gui->SetAssetDefaultsStatus(
-            describeSelectedAsset(),
-            describeSelectedModelDefaultHeight(),
-            describeSelectedModelDefaultRotation(),
-            describeSelectedModelDefaultScale());
+            defaultsStatus.assetName, defaultsStatus.height, defaultsStatus.rotation, defaultsStatus.scale);
         gui->SetSelectedAsset(isPlaceState() ? std::optional<std::size_t>{assetCatalog->SelectedIndex()} : std::nullopt);
     }
 
@@ -145,7 +125,7 @@ namespace sage
             activeEntity.has_value() ? inspectorRegistry.InspectEntity(*sys->registry, *activeEntity)
                                      : std::vector<editor::InspectedComponent>{};
 
-        gui->SetHierarchy(hierarchyModel->CollectSceneObjectEntries(), activeEntity);
+        gui->SetHierarchy(hierarchyTree->CollectSceneObjectEntries(), activeEntity);
         gui->SetInspector(describeSelectedSceneEntity(), inspectedComponents);
     }
 
@@ -181,41 +161,6 @@ namespace sage
     void EditorScene::syncPlacementFromEntity(const entt::entity entity)
     {
         placementController->SyncFromEntity(entity);
-    }
-
-    void EditorScene::adjustSelectedModelDefaultHeight(const float amount)
-    {
-        if (!isPlaceState()) return;
-        assetCatalog->AdjustSelectedDefaultHeight(amount);
-        refreshOverlay();
-    }
-
-    void EditorScene::adjustSelectedModelDefaultRotation(const float amount)
-    {
-        if (!isPlaceState()) return;
-        assetCatalog->AdjustSelectedDefaultRotation(amount);
-        refreshOverlay();
-    }
-
-    void EditorScene::adjustSelectedModelDefaultScale(const float amount)
-    {
-        if (!isPlaceState()) return;
-        assetCatalog->AdjustSelectedDefaultScale(amount);
-        refreshOverlay();
-    }
-
-    void EditorScene::applySelectedModelDefaults()
-    {
-        if (!isPlaceState()) return;
-        assetCatalog->ApplySelectedDefaults();
-        refreshOverlay();
-    }
-
-    void EditorScene::resetSelectedModelDefaults()
-    {
-        if (!isPlaceState()) return;
-        assetCatalog->ResetSelectedDefaults();
-        refreshOverlay();
     }
 
     void EditorScene::placeSelectedMesh()
@@ -312,10 +257,12 @@ namespace sage
                 editor::PlaceableAsset{"Sword", "mdl_sword", "SWORD"},
             });
         assetCatalog->LoadDefaults();
+        modelDefaults = std::make_unique<editor::EditorModelDefaultsController>(
+            *assetCatalog, [this]() { return isPlaceState(); }, [this]() { refreshOverlay(); });
         selection = std::make_unique<editor::EditorSelection>(sys);
         pickingService = std::make_unique<editor::EditorPickingService>(sys);
         entityOperations = std::make_unique<editor::EditorEntityOperations>(sys);
-        hierarchyModel = std::make_unique<editor::EditorHierarchyModel>(sys);
+        hierarchyTree = std::make_unique<editor::EditorHierarchyTree>(sys);
         placementController = std::make_unique<editor::EditorPlacementController>(sys, *assetCatalog);
 
         applyLitShaderToLoadedRenderables();
@@ -342,15 +289,7 @@ namespace sage
             [this](const entt::entity entity) {
                 editor::EditorSelectState{}.SelectSceneEntity(*editorModes, entity);
             },
-            editor::EditorGui::ModelDefaultCallbacks{
-                .heightDown = [this]() { adjustSelectedModelDefaultHeight(-PLACEMENT_HEIGHT_STEP); },
-                .heightUp = [this]() { adjustSelectedModelDefaultHeight(PLACEMENT_HEIGHT_STEP); },
-                .rotationDown = [this]() { adjustSelectedModelDefaultRotation(-PLACEMENT_ROTATION_STEP); },
-                .rotationUp = [this]() { adjustSelectedModelDefaultRotation(PLACEMENT_ROTATION_STEP); },
-                .scaleDown = [this]() { adjustSelectedModelDefaultScale(-PLACEMENT_SCALE_STEP); },
-                .scaleUp = [this]() { adjustSelectedModelDefaultScale(PLACEMENT_SCALE_STEP); },
-                .apply = [this]() { applySelectedModelDefaults(); },
-                .reset = [this]() { resetSelectedModelDefaults(); }},
+            modelDefaults->Callbacks(),
             editor::EditorGui::DeleteConfirmationCallbacks{
                 .confirm = [this]() { editor::EditorSelectState{}.ConfirmDeleteSelectedEntity(*editorModes); },
                 .cancel = [this]() { editor::EditorSelectState{}.CancelDeleteSelectedEntity(*editorModes); }});

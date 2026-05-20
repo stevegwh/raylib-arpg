@@ -14,7 +14,7 @@ namespace sage
 
 namespace sage::editor
 {
-    class EditorHierarchyModel
+    class EditorHierarchyTree
     {
         EngineSystems* sys;
 
@@ -24,7 +24,7 @@ namespace sage::editor
             int depth) const;
 
       public:
-        explicit EditorHierarchyModel(EngineSystems* sys);
+        explicit EditorHierarchyTree(EngineSystems* sys);
 
         [[nodiscard]] std::string DescribeEntity(entt::entity entity) const;
         [[nodiscard]] std::vector<EditorGui::SceneObjectEntry> CollectSceneObjectEntries() const;

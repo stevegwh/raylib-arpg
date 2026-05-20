@@ -134,7 +134,7 @@ namespace sage::editor
                 createHeaderRow(inspectorRow.componentName);
                 break;
             case FieldRow::Type::Field:
-                createFieldRow(inspectorRow);
+                executeFieldRowBuilder(inspectorRow);
                 break;
             }
         }
@@ -261,7 +261,7 @@ namespace sage::editor
         headerCell->CreateTextbox(std::move(header), label);
     }
 
-    void InspectorFieldBuilder::createFieldRow(const FieldRow& inspectorRow)
+    void InspectorFieldBuilder::executeFieldRowBuilder(const FieldRow& inspectorRow)
     {
         switch (inspectorRow.fieldKind)
         {
@@ -283,32 +283,32 @@ namespace sage::editor
             ui, labelCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
         labelCell->CreateTextbox(std::move(label), vectorRow.fieldName + ":");
 
-        const auto addAxis = [this, uiRow, bindingIndex, &vectorRow](
-                                 const char* axis, const std::size_t axisIndex) {
-            auto* axisCell = uiRow->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
-            auto axisLabel = std::make_unique<TextBox>(
-                ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
-            axisCell->CreateTextbox(std::move(axisLabel), axis);
+        const auto addAxis =
+            [this, uiRow, bindingIndex, &vectorRow](const char* axis, const std::size_t axisIndex) {
+                auto* axisCell = uiRow->CreateTableCell(4.0f, Padding{1, 1, 1, 1});
+                auto axisLabel = std::make_unique<TextBox>(
+                    ui, axisCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER);
+                axisCell->CreateTextbox(std::move(axisLabel), axis);
 
-            auto* valueCell = uiRow->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
-            if (!vectorRow.isMutable)
-            {
-                auto valueText = std::make_unique<TextBox>(
-                    ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::RIGHT);
+                auto* valueCell = uiRow->CreateTableCell(18.0f, Padding{1, 1, 2, 2});
+                if (!vectorRow.isMutable)
+                {
+                    auto valueText = std::make_unique<TextBox>(
+                        ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, HoriAlignment::RIGHT);
+                    return valueCell->CreateTextbox(std::move(valueText), "0.00");
+                }
+
+                auto valueText = std::make_unique<TextInput>(
+                    ui,
+                    valueCell,
+                    [this, bindingIndex, axisIndex](const std::string& submittedValue) {
+                        setVector3Axis(bindingIndex, axisIndex, submittedValue);
+                    },
+                    EditorInspectorInputFontInfo(),
+                    VertAlignment::MIDDLE,
+                    HoriAlignment::RIGHT);
                 return valueCell->CreateTextbox(std::move(valueText), "0.00");
-            }
-
-            auto valueText = std::make_unique<TextInput>(
-                ui,
-                valueCell,
-                [this, bindingIndex, axisIndex](const std::string& submittedValue) {
-                    setVector3Axis(bindingIndex, axisIndex, submittedValue);
-                },
-                EditorInspectorInputFontInfo(),
-                VertAlignment::MIDDLE,
-                HoriAlignment::RIGHT);
-            return valueCell->CreateTextbox(std::move(valueText), "0.00");
-        };
+            };
 
         auto* xText = addAxis("X", 0);
         auto* yText = addAxis("Y", 1);

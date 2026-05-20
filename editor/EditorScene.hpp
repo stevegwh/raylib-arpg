@@ -3,8 +3,9 @@
 #include "EditorAssetCatalog.hpp"
 #include "EditorEntityOperations.hpp"
 #include "EditorGui.hpp"
-#include "EditorHierarchyModel.hpp"
+#include "EditorHierarchyTree.hpp"
 #include "EditorInspector.hpp"
+#include "EditorModelDefaultsController.hpp"
 #include "EditorModeStateMachine.hpp"
 #include "EditorPickingService.hpp"
 #include "EditorPlacementController.hpp"
@@ -31,10 +32,11 @@ namespace sage
         std::unique_ptr<editor::EditorGui> gui;
         editor::ComponentInspectorRegistry inspectorRegistry;
         std::unique_ptr<editor::EditorAssetCatalog> assetCatalog;
+        std::unique_ptr<editor::EditorModelDefaultsController> modelDefaults;
         std::unique_ptr<editor::EditorSelection> selection;
         std::unique_ptr<editor::EditorPickingService> pickingService;
         std::unique_ptr<editor::EditorEntityOperations> entityOperations;
-        std::unique_ptr<editor::EditorHierarchyModel> hierarchyModel;
+        std::unique_ptr<editor::EditorHierarchyTree> hierarchyTree;
         std::unique_ptr<editor::EditorPlacementController> placementController;
         std::unique_ptr<editor::EditorTransformEditor> transformEditor;
         std::unique_ptr<editor::EditorModeStateMachine> editorModes;
@@ -50,11 +52,6 @@ namespace sage
         void adjustGridSurfaceY(float amount);
         void adjustPlacementRotation(float amount);
         void adjustPlacementScale(float amount);
-        void adjustSelectedModelDefaultHeight(float amount);
-        void adjustSelectedModelDefaultRotation(float amount);
-        void adjustSelectedModelDefaultScale(float amount);
-        void applySelectedModelDefaults();
-        void resetSelectedModelDefaults();
         void placeSelectedMesh();
         void drawPlacementPreview() const;
 
@@ -64,9 +61,6 @@ namespace sage
         [[nodiscard]] std::string describeMode() const;
         [[nodiscard]] std::string describeSelectedAsset() const;
         [[nodiscard]] std::string describeCursorPosition() const;
-        [[nodiscard]] std::string describeSelectedModelDefaultHeight() const;
-        [[nodiscard]] std::string describeSelectedModelDefaultRotation() const;
-        [[nodiscard]] std::string describeSelectedModelDefaultScale() const;
         [[nodiscard]] std::string describeEntity(entt::entity entity) const;
         [[nodiscard]] std::string describeSelectedSceneEntity() const;
 

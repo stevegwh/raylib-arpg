@@ -36,7 +36,7 @@ namespace sage::editor
 
         void rebuildRows(const std::vector<InspectedComponent>& inspectedComponents);
         void createHeaderRow(const std::string& label) const;
-        void createFieldRow(const FieldRow& row);
+        void executeFieldRowBuilder(const FieldRow& row);
         void createVector3Row(const FieldRow& row);
         void updateRowMetrics();
         void updateScrollbarText() const;

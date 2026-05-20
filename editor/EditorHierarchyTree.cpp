@@ -1,20 +1,20 @@
-#include "EditorHierarchyModel.hpp"
+#include "EditorHierarchyTree.hpp"
 
 #include "EditorComponents.hpp"
+#include "engine/components/sgTransform.hpp"
 #include "engine/EngineSystems.hpp"
 #include "engine/Light.hpp"
-#include "engine/components/sgTransform.hpp"
 
 #include <algorithm>
 #include <format>
 
 namespace sage::editor
 {
-    EditorHierarchyModel::EditorHierarchyModel(EngineSystems* _sys) : sys(_sys)
+    EditorHierarchyTree::EditorHierarchyTree(EngineSystems* _sys) : sys(_sys)
     {
     }
 
-    std::string EditorHierarchyModel::DescribeEntity(const entt::entity entity) const
+    std::string EditorHierarchyTree::DescribeEntity(const entt::entity entity) const
     {
         if (sys->registry->valid(entity) && sys->registry->any_of<EditorObjectDescriptor>(entity))
         {
@@ -28,7 +28,7 @@ namespace sage::editor
         return std::format("entity_{}", entt::to_integral(entity));
     }
 
-    std::vector<EditorGui::SceneObjectEntry> EditorHierarchyModel::CollectSceneObjectEntries() const
+    std::vector<EditorGui::SceneObjectEntry> EditorHierarchyTree::CollectSceneObjectEntries() const
     {
         std::vector<entt::entity> roots;
         auto view = sys->registry->view<sgTransform>();
@@ -55,7 +55,7 @@ namespace sage::editor
         return entries;
     }
 
-    void EditorHierarchyModel::appendSceneObjectEntry(
+    void EditorHierarchyTree::appendSceneObjectEntry(
         std::vector<EditorGui::SceneObjectEntry>& entries,
         const entt::entity entity,
         const int depth) const
