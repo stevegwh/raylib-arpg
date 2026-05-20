@@ -16,7 +16,7 @@ namespace sage::editor
         }
 
         template <class Inspector>
-        void inspect(Inspector& i)
+        void define_editor_fields(Inspector& i)
         {
             i.field("Id", id, false);
         }
@@ -37,7 +37,7 @@ namespace sage::editor
         }
 
         template <class Inspector>
-        void inspect(Inspector& i)
+        void define_editor_fields(Inspector& i)
         {
             i.field("Name", name);
             i.field("Category", category);
@@ -58,7 +58,7 @@ namespace sage::editor
         }
 
         template <class Inspector>
-        void inspect(Inspector& i)
+        void define_editor_fields(Inspector& i)
         {
             i.field("Asset Key", assetKey, false);
         }

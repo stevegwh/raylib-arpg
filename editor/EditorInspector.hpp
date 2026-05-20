@@ -55,16 +55,16 @@ namespace sage::editor
         inline constexpr bool always_false_v = false;
     }
 
-    // Component-side authors declare a templated `inspect(Inspector&)` method (or a free
-    // `inspect(Inspector&, T&)` for foreign types) and inside it call `i.field(label, value)`
-    // for each member. Dispatch mirrors cereal's archive overloads:
+    // Component-side authors declare a templated `define_editor_fields(Inspector&)` method
+    // (or a free `define_editor_fields(Inspector&, T&)` for foreign types) and inside it
+    // call `i.field(label, value)` for each member. Dispatch mirrors cereal's archive overloads:
     //
     //   - Concrete overloads handle "leaf" types (primitives, raylib Vec2/3/Color, …) and
     //     record one InspectorField row per call.
     //   - The enum template handles any `std::is_enum_v<E>` as an Enum-kind row.
-    //   - The composite template recurses into the value's own `inspect()` (member or ADL
-    //     free function), pushing a label prefix and propagating editability. Labels of
-    //     sub-fields become "<parent> <child>" (e.g. "Local Bounds Min").
+    //   - The composite template recurses into the value's own `define_editor_fields()`
+    //     (member or ADL free function), pushing a label prefix and propagating editability.
+    //     Labels of sub-fields become "<parent> <child>" (e.g. "Local Bounds Min").
     //
     // Concrete overloads always win over the templates via overload resolution.
     class ComponentInspector
@@ -83,68 +83,97 @@ namespace sage::editor
         template <class T>
         void addLeaf(std::string label, T* data, const bool editable)
         {
-            fields_.push_back(
-                {.label = qualified(label),
-                 .editable = editable && editableScope_,
-                 .value = data});
+            fields_.push_back({.label = qualified(label), .editable = editable && editableScope_, .value = data});
         }
 
       public:
         // --- Leaf overloads ------------------------------------------------------------
-        void field(std::string label, bool& v, bool ed = true)         { addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, int& v, bool ed = true)          { addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, unsigned int& v, bool ed = true) { addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, std::uint64_t& v, bool ed = true){ addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, float& v, bool ed = true)        { addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, std::string& v, bool ed = true)  { addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, Vector2& v, bool ed = true)      { addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, Vector3& v, bool ed = true)      { addLeaf(std::move(label), &v, ed); }
-        void field(std::string label, ::Color& v, bool ed = true)      { addLeaf(std::move(label), &v, ed); }
+        void field(std::string label, bool& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, int& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, unsigned int& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, std::uint64_t& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, float& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, std::string& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, Vector2& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, Vector3& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, ::Color& v, bool rw = true)
+        {
+            addLeaf(std::move(label), &v, rw);
+        }
 
         // Bespoke: dropdown sourced from GetCollisionLayers(). Stored as EnumField.
-        void field(std::string label, sage::CollisionLayer& v, bool ed = true);
+        void field(std::string label, sage::CollisionLayer& v, bool rw = true);
 
         // --- Enum template -------------------------------------------------------------
         template <class E>
             requires std::is_enum_v<E>
-        void field(std::string label, E& v, bool ed = true)
+        void field(std::string label, E& v, bool rw = true)
         {
             EnumField e{.data = &v};
             constexpr auto entries = magic_enum::enum_entries<E>();
             e.options.reserve(entries.size());
-            for (const auto& [val, name] : entries) e.options.emplace_back(name);
+            for (const auto& [val, name] : entries)
+                e.options.emplace_back(name);
             e.getIndex = [p = &v]() -> std::size_t { return magic_enum::enum_index(*p).value_or(0); };
             e.setIndex = [p = &v](const std::size_t idx) {
                 constexpr auto vals = magic_enum::enum_values<E>();
                 if (idx < vals.size()) *p = vals[idx];
             };
             fields_.push_back(
-                {.label = qualified(label), .editable = ed && editableScope_, .value = std::move(e)});
+                {.label = qualified(label), .editable = rw && editableScope_, .value = std::move(e)});
         }
 
         // --- Composite template --------------------------------------------------------
         template <class T>
-        void field(std::string label, T& v, bool ed = true)
+        void field(std::string label, T& v, bool rw = true)
         {
             const auto savedPrefix = labelPrefix_;
             const bool savedScope = editableScope_;
             labelPrefix_ = qualified(label);
-            editableScope_ = editableScope_ && ed;
+            editableScope_ = editableScope_ && rw;
 
-            if constexpr (requires { v.inspect(*this); })
-                v.inspect(*this);
-            else if constexpr (requires { inspect(*this, v); })
-                inspect(*this, v);
+            if constexpr (requires { v.define_editor_fields(*this); })
+                v.define_editor_fields(*this);
+            else if constexpr (requires { define_editor_fields(*this, v); })
+                define_editor_fields(*this, v);
             else
                 static_assert(
                     detail::always_false_v<T>,
-                    "ComponentInspector::field: type has no leaf overload, member inspect(), or ADL inspect()");
+                    "ComponentInspector::field: type has no leaf overload, member define_editor_fields(), or ADL "
+                    "define_editor_fields()");
 
             labelPrefix_ = savedPrefix;
             editableScope_ = savedScope;
         }
 
-        [[nodiscard]] std::vector<InspectorField> Take() && { return std::move(fields_); }
+        [[nodiscard]] std::vector<InspectorField> Take() &&
+        {
+            return std::move(fields_);
+        }
     };
 
     struct InspectedComponent
@@ -175,25 +204,24 @@ namespace sage::editor
                  },
                  [](entt::registry& r, const entt::entity e) {
                      ComponentInspector ci;
-                     r.template get<T>(e).inspect(ci);
+                     r.template get<T>(e).define_editor_fields(ci);
                      return std::move(ci).Take();
                  }});
         }
 
-        [[nodiscard]] std::vector<InspectedComponent> Inspect(
-            entt::registry& registry, entt::entity entity) const;
+        [[nodiscard]] std::vector<InspectedComponent> Inspect(entt::registry& registry, entt::entity entity) const;
     };
 
     void RegisterDefaultInspectorComponents(InspectorRegistry& registry);
 } // namespace sage::editor
 
-// --- ADL-discoverable inspect overloads for raylib types ---------------------
+// --- ADL-discoverable define_editor_fields overloads for raylib types --------
 // Pattern mirrors engine/raylib-cereal.hpp: free functions in global namespace
-// so unqualified `inspect(i, value)` finds them via ADL when the user composes a
-// raylib type inside their component's inspect().
+// so unqualified `define_editor_fields(i, value)` finds them via ADL when the user
+// composes a raylib type inside their component's define_editor_fields().
 
 template <class Inspector>
-void inspect(Inspector& i, BoundingBox& bb)
+void define_editor_fields(Inspector& i, BoundingBox& bb)
 {
     i.field("Min", bb.min);
     i.field("Max", bb.max);

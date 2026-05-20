@@ -61,7 +61,7 @@ namespace sage
         }
 
         template <class Inspector>
-        void inspect(Inspector& i)
+        void define_editor_fields(Inspector& i)
         {
             i.field("Enabled", enabled);
             i.field("Type", type);

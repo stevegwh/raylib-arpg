@@ -40,7 +40,7 @@ namespace sage
         }
 
         template <class Inspector>
-        void inspect(Inspector& i)
+        void define_editor_fields(Inspector& i)
         {
             i.field("Position", m_positionWorld);
             i.field("Rotation", m_rotationWorld);
