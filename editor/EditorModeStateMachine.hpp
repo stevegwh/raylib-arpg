@@ -19,6 +19,7 @@ namespace sage
 namespace sage::editor
 {
     class EditorModeStateMachine;
+    class EditorPlacementController;
     class EditorTransformEditor;
 
     struct EditorSelectState
@@ -34,6 +35,8 @@ namespace sage::editor
         void CancelDeleteSelectedEntity(EditorModeStateMachine& machine);
         void ConfirmDeleteSelectedEntity(EditorModeStateMachine& machine);
         void BeginEditSelectedTransform(EditorModeStateMachine& machine);
+        [[nodiscard]] bool HandleEscape(EditorModeStateMachine& machine);
+        void OnTransformApplied(EditorModeStateMachine& machine, entt::entity entity);
     };
 
     struct EditorPlaceState
@@ -45,6 +48,13 @@ namespace sage::editor
         void Update(EditorModeStateMachine& machine, entt::entity stateEntity);
         void Draw3D(const EditorModeStateMachine& machine, entt::entity stateEntity) const;
         bool SelectSceneEntityUnderCursor(EditorModeStateMachine& machine);
+        void ResetPlacementTransform(EditorModeStateMachine& machine);
+        void AdjustPlacementRotation(EditorModeStateMachine& machine, float amount);
+        void AdjustPlacementScale(EditorModeStateMachine& machine, float amount);
+        [[nodiscard]] bool PlaceSelectedMesh(EditorModeStateMachine& machine);
+        void DrawPlacementPreview(const EditorModeStateMachine& machine) const;
+        [[nodiscard]] bool HandleEscape(EditorModeStateMachine& machine);
+        void OnTransformApplied(EditorModeStateMachine& machine, entt::entity entity);
     };
 
     struct EditorEditState
@@ -67,6 +77,9 @@ namespace sage::editor
         void FinishEditSelectedTransform(EditorModeStateMachine& machine);
         [[nodiscard]] bool CancelEditSelectedTransform(EditorModeStateMachine& machine);
         void ToggleEditPivotMode(EditorModeStateMachine& machine);
+        void SyncPlacementFromEntity(EditorModeStateMachine& machine, entt::entity entity);
+        [[nodiscard]] bool HandleEscape(EditorModeStateMachine& machine);
+        void OnTransformApplied(EditorModeStateMachine& machine, entt::entity entity);
     };
 
     struct EditorModeState
@@ -94,12 +107,6 @@ namespace sage::editor
 
         void refreshOverlay() const;
         void refreshSceneWindows() const;
-        void resetPlacementTransform();
-        void adjustPlacementRotation(float amount);
-        void adjustPlacementScale(float amount);
-        void syncPlacementFromEntity(entt::entity entity);
-        [[nodiscard]] bool placeSelectedMesh();
-        void drawPlacementPreview() const;
         [[nodiscard]] bool isMouseOverUiCell() const;
         [[nodiscard]] std::optional<entt::entity> pickSceneEntityUnderCursor() const;
         void clearSelection();
@@ -110,9 +117,13 @@ namespace sage::editor
         void hideDeleteConfirmation() const;
         void showDeleteConfirmationForSelection() const;
         void deleteEntityAndChildren(entt::entity entity) const;
+        void focusHierarchyOnEntity(entt::entity entity) const;
+        [[nodiscard]] bool canSelectPlaceable(std::size_t index) const;
         void selectPlaceableAsset(std::size_t index);
         [[nodiscard]] const std::optional<Vector3>& snappedPlacementPosition() const;
         [[nodiscard]] bool hasTransform(entt::entity entity) const;
+        [[nodiscard]] EditorPlacementController& placement();
+        [[nodiscard]] const EditorPlacementController& placement() const;
 
         template <typename State>
         void onEnter(State& state, const entt::entity stateEntity)
