@@ -6,6 +6,7 @@
 #include "animation/RpgAnimationIds.hpp"
 
 #include "AbilityFactory.hpp"
+#include "collision/RpgCollisionLayers.hpp"
 #include "components/CombatableActor.hpp"
 #include "components/DialogComponent.hpp"
 #include "components/EquipmentComponent.hpp"
@@ -13,7 +14,6 @@
 #include "components/InventoryComponent.hpp"
 #include "components/ItemComponent.hpp"
 #include "components/PartyMemberComponent.hpp"
-#include "collision/RpgCollisionLayers.hpp"
 #include "ItemFactory.hpp"
 #include "Systems.hpp"
 #include "systems/PartySystem.hpp"
@@ -175,9 +175,7 @@ namespace lq
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<sage::Renderable>(
-            id,
-            sage::ResourceManager::GetInstance().CreateModelMutable("mdl_player_default"),
-            modelTransform);
+            id, sage::ResourceManager::GetInstance().CreateModelMutable("mdl_player_default"), modelTransform);
         renderable.SetName("Arissa");
         auto& uber = registry->emplace<sage::UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(sage::UberShaderComponent::Flags::Lit);
@@ -222,9 +220,7 @@ namespace lq
 
         Matrix modelTransform = MatrixScale(0.035f, 0.035f, 0.035f);
         auto& renderable = registry->emplace<sage::Renderable>(
-            id,
-            sage::ResourceManager::GetInstance().CreateModelMutable("mdl_player_default"),
-            modelTransform);
+            id, sage::ResourceManager::GetInstance().CreateModelMutable("mdl_player_default"), modelTransform);
         renderable.SetName(name);
         auto& uber = registry->emplace<sage::UberShaderComponent>(id, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(sage::UberShaderComponent::Flags::Lit);
@@ -327,10 +323,9 @@ namespace lq
             auto& collideable = registry->emplace<sage::Collideable>(
                 id, bb, registry->get<sage::sgTransform>(id).GetMatrixNoRot());
             collideable.SetCollisionLayer(
-                lq::collision_layers::Building,
-                lq::collision_masks::ForLayer(lq::collision_layers::Building));
+                lq::collision_layers::Building, lq::collision_masks::ForLayer(lq::collision_layers::Building));
             collideable.blocksNavigation = true;
-            registry->emplace<sage::StaticCollideable>(id);
+            collideable.isStatic = true;
         }
 
         entt::entity id = registry->create();
@@ -338,7 +333,8 @@ namespace lq
         registry->emplace<sage::sgTransform>(id);
         sage::GridSquare actorIdx{};
         sys->engine.navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->heightMap.GetHeight();
+        float height =
+            sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->heightMap.GetHeight();
         sys->engine.transformSystem->SetPosition(id, {position.x, height, position.z});
         sys->engine.transformSystem->SetScale(id, 10.0f);
         sys->engine.transformSystem->SetRotation(id, {0, 0, 0});
@@ -356,7 +352,7 @@ namespace lq
         collideable.SetCollisionLayer(
             lq::collision_layers::Building, lq::collision_masks::ForLayer(lq::collision_layers::Building));
         collideable.blocksNavigation = true;
-        registry->emplace<sage::StaticCollideable>(id);
+        collideable.isStatic = true;
     }
 
     void GameObjectFactory::createWizardTower(entt::registry* registry, Systems* sys, Vector3 position)
@@ -366,7 +362,8 @@ namespace lq
         auto& transform = registry->emplace<sage::sgTransform>(id);
         sage::GridSquare actorIdx{};
         sys->engine.navigationGridSystem->WorldToGridSpace(position, actorIdx);
-        float height = sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->heightMap.GetHeight();
+        float height =
+            sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->heightMap.GetHeight();
         sys->engine.transformSystem->SetPosition(id, {position.x, height, position.z});
         sys->engine.transformSystem->SetScale(id, 1.0f);
         sys->engine.transformSystem->SetRotation(id, {0, 0, 0});
@@ -383,7 +380,7 @@ namespace lq
         collideable.SetCollisionLayer(
             lq::collision_layers::Building, lq::collision_masks::ForLayer(lq::collision_layers::Building));
         collideable.blocksNavigation = true;
-        registry->emplace<sage::StaticCollideable>(id);
+        collideable.isStatic = true;
     }
 
     bool GameObjectFactory::spawnItemInWorld(
@@ -403,7 +400,7 @@ namespace lq
             itemId, createRectangularBoundingBox(2.0, 2.0), transform.GetMatrixNoRot());
         collideable.SetCollisionLayer(
             lq::collision_layers::Item, lq::collision_masks::ForLayer(lq::collision_layers::Item));
-        registry->emplace<sage::StaticCollideable>(itemId);
+        collideable.isStatic = true;
         return true;
     }
 

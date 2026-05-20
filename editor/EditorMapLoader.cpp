@@ -1,12 +1,12 @@
 #include "EditorMapLoader.hpp"
 
+#include "engine/components/Collideable.hpp"
+#include "engine/components/Renderable.hpp"
+#include "engine/components/sgTransform.hpp"
+#include "engine/components/Spawner.hpp"
 #include "engine/Light.hpp"
 #include "engine/ResourceManager.hpp"
 #include "engine/Serializer.hpp"
-#include "engine/components/Collideable.hpp"
-#include "engine/components/Renderable.hpp"
-#include "engine/components/Spawner.hpp"
-#include "engine/components/sgTransform.hpp"
 
 #include "cereal/types/string.hpp"
 #include "cereal/types/vector.hpp"
@@ -73,7 +73,7 @@ namespace sage::editor
                     sage::serializer::entity entityId{};
                     auto& transform = destination->emplace<sgTransform>(entity);
                     auto& collideable = destination->emplace<Collideable>(entity);
-                    destination->emplace<StaticCollideable>(entity);
+                    collideable.isStatic = true;
                     auto& renderable = destination->emplace<Renderable>(entity);
                     ItemComponentSkip skip{};
 
@@ -94,7 +94,7 @@ namespace sage::editor
                     sage::serializer::entity entityId{};
                     auto& transform = destination->emplace<sgTransform>(entity);
                     auto& collideable = destination->emplace<Collideable>(entity);
-                    destination->emplace<StaticCollideable>(entity);
+                    collideable.isStatic = true;
                     auto& renderable = destination->emplace<Renderable>(entity);
 
                     try

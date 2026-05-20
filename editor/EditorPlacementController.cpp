@@ -4,13 +4,13 @@
 #include "EditorTransformMath.hpp"
 #include "engine/Camera.hpp"
 #include "engine/CollisionLayers.hpp"
+#include "engine/components/Collideable.hpp"
+#include "engine/components/Renderable.hpp"
+#include "engine/components/sgTransform.hpp"
+#include "engine/components/UberShaderComponent.hpp"
 #include "engine/Cursor.hpp"
 #include "engine/EngineSystems.hpp"
 #include "engine/ResourceManager.hpp"
-#include "engine/components/Collideable.hpp"
-#include "engine/components/Renderable.hpp"
-#include "engine/components/UberShaderComponent.hpp"
-#include "engine/components/sgTransform.hpp"
 #include "engine/systems/NavigationGridSystem.hpp"
 #include "engine/systems/TransformSystem.hpp"
 
@@ -118,9 +118,9 @@ namespace sage::editor
         {
             hoveredGridSquare = square;
             const auto* gridSquare = sys->navigationGridSystem->GetGridSquare(square.row, square.col);
-            snappedPlacementPosition = gridSquare
-                                           ? Vector3{gridSquare->worldPosCentre.x, position.y, gridSquare->worldPosCentre.z}
-                                           : position;
+            snappedPlacementPosition =
+                gridSquare ? Vector3{gridSquare->worldPosCentre.x, position.y, gridSquare->worldPosCentre.z}
+                           : position;
         }
         else
         {
@@ -165,7 +165,7 @@ namespace sage::editor
         collideable.worldBoundingBox = TransformBoundingBoxByCorners(localBounds, placementMatrix);
         collideable.SetCollisionLayer(collision_layers::Obstacle);
         collideable.blocksNavigation = true;
-        sys->registry->emplace<StaticCollideable>(entity);
+        collideable.isStatic = true;
         sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
 
         return entity;
@@ -196,7 +196,7 @@ namespace sage::editor
         const int gridSlices = std::max(1, static_cast<int>(std::ceil(gridHalfExtent * 2.0f)));
         rlPushMatrix();
         rlTranslatef(0.0f, gridSurfaceY, 0.0f);
-        DrawGrid(gridSlices, 1.0f);
+        DrawGrid(gridSlices, 10.0f);
         rlPopMatrix();
 
         DrawLine3D({0, 0.02f, 0}, {8, 0.02f, 0}, RED);
@@ -241,7 +241,7 @@ namespace sage::editor
             {-gridHalfExtent, gridSurfaceY - GRID_PLACEMENT_SURFACE_HALF_HEIGHT, -gridHalfExtent},
             {gridHalfExtent, gridSurfaceY + GRID_PLACEMENT_SURFACE_HALF_HEIGHT, gridHalfExtent}};
         collideable.SetCollisionLayer(collision_layers::GeometrySimple);
-        sys->registry->emplace<StaticCollideable>(gridPlacementSurfaceEntity);
+        collideable.isStatic = true;
     }
 
     void EditorPlacementController::sizeGridToLoadedScene()

@@ -10,6 +10,7 @@
 #include <format>
 #include <memory>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -353,6 +354,19 @@ namespace sage::editor
         }
 
         // --- Field lookup (for the row plan diff) ---------------------------------
+        const void* FieldDataAddress(const FieldValue& value)
+        {
+            return std::visit(
+                [](const auto& v) -> const void* {
+                    using T = std::decay_t<decltype(v)>;
+                    if constexpr (std::is_same_v<T, EnumField>)
+                        return v.data;
+                    else
+                        return v;
+                },
+                value);
+        }
+
         const InspectorField* FindField(
             const std::vector<InspectedComponent>& components,
             const std::string_view componentName,
@@ -382,6 +396,7 @@ namespace sage::editor
         std::string componentName;
         std::string fieldName;
         std::size_t valueIndex = 0; // matches InspectorField::value.index() when type == Field
+        const void* data = nullptr;
         bool editable = false;
 
         friend bool operator==(const FieldRow&, const FieldRow&) = default;
@@ -474,6 +489,7 @@ namespace sage::editor
                         .componentName = component.displayName,
                         .fieldName = field.label,
                         .valueIndex = field.value.index(),
+                        .data = FieldDataAddress(field.value),
                         .editable = field.editable});
             }
 

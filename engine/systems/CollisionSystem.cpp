@@ -20,12 +20,13 @@ namespace sage
         return GetDefaultCollisionMask(layer);
     }
 
-    void CollisionSystem::Update()
+    void CollisionSystem::Update() const
     {
-        // Static collideables opt out via the StaticCollideable tag — their worldBoundingBox
+        // Static collideables opt out via the static bool — their worldBoundingBox
         // was baked at construction and never needs recomputing.
-        auto view = registry->view<sgTransform, Collideable>(entt::exclude<StaticCollideable>);
+        auto view = registry->view<sgTransform, Collideable>();
         view.each([](const sgTransform& t, Collideable& c) {
+            if (c.isStatic) return;
             c.worldBoundingBox = TransformBoundingBox(c.localBoundingBox, t.GetMatrixNoRot());
         });
     }

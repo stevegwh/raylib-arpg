@@ -17,31 +17,29 @@ namespace sage::serializer
         assert(destination != nullptr);
         std::cout << "START: Loading asset bin." << std::endl;
 
-        ReadCompressedBinary(
-            path, kAssetBinMagic, [&](cereal::BinaryInputArchive& input, std::istream& stream) {
-                input(ResourceManager::GetInstance());
+        ReadCompressedBinary(path, kAssetBinMagic, [&](cereal::BinaryInputArchive& input, std::istream& stream) {
+            input(ResourceManager::GetInstance());
 
-                // Not necessary for asset bin?
-                while (stream.peek() != EOF)
+            // Not necessary for asset bin?
+            while (stream.peek() != EOF)
+            {
+                entity entityId{};
+                auto entt = destination->create();
+                auto& transform = destination->emplace<sgTransform>(entt);
+                auto& collideable = destination->emplace<Collideable>(entt);
+                auto& renderable = destination->emplace<Renderable>(entt);
+
+                try
                 {
-                    entity entityId{};
-                    auto entt = destination->create();
-                    auto& transform = destination->emplace<sgTransform>(entt);
-                    auto& collideable = destination->emplace<Collideable>(entt);
-                    destination->emplace<StaticCollideable>(entt);
-                    auto& renderable = destination->emplace<Renderable>(entt);
-
-                    try
-                    {
-                        input(entityId, transform, collideable, renderable);
-                    }
-                    catch (const cereal::Exception& e)
-                    {
-                        std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
-                        break;
-                    }
+                    input(entityId, transform, collideable, renderable);
                 }
-            });
+                catch (const cereal::Exception& e)
+                {
+                    std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
+                    break;
+                }
+            }
+        });
 
         std::cout << "FINISH: Loading asset bin." << std::endl;
     }

@@ -21,6 +21,7 @@ namespace sage
         CollisionLayer collisionLayer = sage::collision_layers::Default;
         CollisionMask collidesWith = GetDefaultCollisionMask(sage::collision_layers::Default);
         bool active = true;
+        bool isStatic = false;
         bool debugDraw = false;
         bool blocksNavigation = false;
 
@@ -46,19 +47,13 @@ namespace sage
         void define_editor_fields(Inspector& i)
         {
             i.field("Active", active);
+            i.field("IsStatic", isStatic);
             i.field("Debug Draw", debugDraw);
             i.field("Blocks Navigation", blocksNavigation);
             i.field("Collision Layer", collisionLayer);
             i.field("Local Bounds", localBoundingBox);
             i.field("World Bounds", worldBoundingBox, false);
         }
-    };
-
-    // Empty tag. Attach alongside Collideable to opt out of CollisionSystem::Update —
-    // the entity's worldBoundingBox is baked at construction (or load) and never
-    // recomputed. Matches the RenderableDeferred convention.
-    struct StaticCollideable
-    {
     };
 
     // Transforms a bounding box by a world matrix.
