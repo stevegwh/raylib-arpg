@@ -32,21 +32,23 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            archive(m_positionWorld, m_rotationWorld, m_scaleWorld);
+            archive(
+                m_positionWorld, m_rotationWorld, m_scaleWorld, m_positionLocal, m_rotationLocal, m_scaleLocal);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            archive(m_positionWorld, m_rotationWorld, m_scaleWorld);
+            archive(
+                m_positionWorld, m_rotationWorld, m_scaleWorld, m_positionLocal, m_rotationLocal, m_scaleLocal);
         }
 
         template <class Inspector>
         void define_editor_fields(Inspector& i)
         {
-            i.field("Position", m_positionWorld, [this](const Vector3& position) { SetLocalPos(position); });
-            i.field("Rotation", m_rotationWorld, [this](const Vector3& rotation) { SetLocalRot(rotation); });
-            i.field("Scale", m_scaleWorld, [this](const Vector3& scale) { SetLocalScale(scale); });
+            i.field("Position", m_positionLocal, [this](const Vector3& position) { SetLocalPos(position); });
+            i.field("Rotation", m_rotationLocal, [this](const Vector3& rotation) { SetLocalRot(rotation); });
+            i.field("Scale", m_scaleLocal, [this](const Vector3& scale) { SetLocalScale(scale); });
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;
