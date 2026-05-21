@@ -28,12 +28,32 @@ namespace sage::editor
       public:
         // Per-kind live UI views. The variant alternative encodes the field type
         // implicitly; std::visit + overloaded createFieldView/Update functions handle dispatch.
-        struct BoolFieldView   { Checkbox*                 checkbox = nullptr; bool* data = nullptr; };
+        struct BoolFieldView
+        {
+            Checkbox* checkbox = nullptr;
+            LeafField<bool> field;
+        };
         template <class T>
-        struct ScalarFieldView { TextBox*                  text     = nullptr; T*    data = nullptr; };
-        struct Vec2FieldView   { std::array<TextBox*, 2>   texts{};            Vector2* data = nullptr; };
-        struct Vec3FieldView   { std::array<TextBox*, 3>   texts{};            Vector3* data = nullptr; };
-        struct ColorFieldView  { std::array<TextBox*, 4>   texts{};            ::Color* data = nullptr; };
+        struct ScalarFieldView
+        {
+            TextBox* text = nullptr;
+            LeafField<T> field;
+        };
+        struct Vec2FieldView
+        {
+            std::array<TextBox*, 2> texts{};
+            LeafField<Vector2> field;
+        };
+        struct Vec3FieldView
+        {
+            std::array<TextBox*, 3> texts{};
+            LeafField<Vector3> field;
+        };
+        struct ColorFieldView
+        {
+            std::array<TextBox*, 4> texts{};
+            LeafField<::Color> field;
+        };
         struct EnumFieldView
         {
             DropdownList* dropdown = nullptr;
@@ -57,8 +77,8 @@ namespace sage::editor
         GameUIEngine* ui{};
         Table* fieldTable{};
         Scrollbar* scrollbar{};
-        std::vector<FieldRow> rows;      // current plan, recomputed every Rebuild()
-        std::vector<FieldRow> builtRows; // plan in effect for the live widget tree
+        std::vector<FieldRow> rows;
+        std::vector<FieldRow> builtRows;
         std::size_t builtScrollOffset = 0;
         std::vector<FieldView> fieldViews;
 

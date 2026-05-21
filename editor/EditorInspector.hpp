@@ -16,6 +16,13 @@
 
 namespace sage::editor
 {
+    template <class T>
+    struct LeafField
+    {
+        T* data = nullptr;
+        std::function<void(const T&)> setter;
+    };
+
     // Holds the data + options + index getter/setter for a dropdown-rendered field.
     // Used by both std::is_enum_v<E> values (options derived from magic_enum) and the
     // bespoke CollisionLayer overload (options derived from GetCollisionLayers()).
@@ -31,15 +38,15 @@ namespace sage::editor
     // construct one alternative each; the renderer dispatches via std::visit into
     // overloaded createFieldView/Update functions.
     using FieldValue = std::variant<
-        bool*,
-        int*,
-        unsigned int*,
-        std::uint64_t*,
-        float*,
-        std::string*,
-        Vector2*,
-        Vector3*,
-        ::Color*,
+        LeafField<bool>,
+        LeafField<int>,
+        LeafField<unsigned int>,
+        LeafField<std::uint64_t>,
+        LeafField<float>,
+        LeafField<std::string>,
+        LeafField<Vector2>,
+        LeafField<Vector3>,
+        LeafField<::Color>,
         EnumField>;
 
     struct InspectorField
@@ -83,7 +90,17 @@ namespace sage::editor
         template <class T>
         void addLeaf(std::string label, T* data, const bool editable)
         {
-            fields_.push_back({.label = qualified(label), .editable = editable && editableScope_, .value = data});
+            fields_.push_back(
+                {.label = qualified(label), .editable = editable && editableScope_, .value = LeafField<T>{data}});
+        }
+
+        template <class T>
+        void addLeaf(std::string label, T* data, std::function<void(const T&)> setter)
+        {
+            fields_.push_back(
+                {.label = qualified(label),
+                 .editable = editableScope_,
+                 .value = LeafField<T>{.data = data, .setter = std::move(setter)}});
         }
 
       public:
@@ -92,37 +109,73 @@ namespace sage::editor
         {
             addLeaf(std::move(label), &v, rw);
         }
+        void field(std::string label, bool& v, std::function<void(const bool&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
+        }
         void field(std::string label, int& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, int& v, std::function<void(const int&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
         }
         void field(std::string label, unsigned int& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
         }
+        void field(std::string label, unsigned int& v, std::function<void(const unsigned int&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
+        }
         void field(std::string label, std::uint64_t& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, std::uint64_t& v, std::function<void(const std::uint64_t&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
         }
         void field(std::string label, float& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
         }
+        void field(std::string label, float& v, std::function<void(const float&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
+        }
         void field(std::string label, std::string& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, std::string& v, std::function<void(const std::string&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
         }
         void field(std::string label, Vector2& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
         }
+        void field(std::string label, Vector2& v, std::function<void(const Vector2&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
+        }
         void field(std::string label, Vector3& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
         }
+        void field(std::string label, Vector3& v, std::function<void(const Vector3&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
+        }
         void field(std::string label, ::Color& v, bool rw = true)
         {
             addLeaf(std::move(label), &v, rw);
+        }
+        void field(std::string label, ::Color& v, std::function<void(const ::Color&)> setter)
+        {
+            addLeaf(std::move(label), &v, std::move(setter));
         }
 
         // Bespoke: dropdown sourced from GetCollisionLayers(). Stored as EnumField.

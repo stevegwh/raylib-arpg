@@ -135,6 +135,15 @@ namespace sage::editor
             return true;
         }
 
+        template <class T>
+        void commitField(const LeafField<T>& field, const T& value)
+        {
+            if (field.setter)
+                field.setter(value);
+            else if (field.data)
+                *field.data = value;
+        }
+
         // --- Layout helpers --------------------------------------------------------
         void createLabel(GameUIEngine* ui, TableRow* row, const std::string& label, float widthPct)
         {
@@ -183,7 +192,7 @@ namespace sage::editor
         // --- createFieldView overloads — one per variant alternative ----------------
 
         BoolFieldView createFieldView(
-            bool* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
+            const LeafField<bool>& field, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
             createLabel(ui, row, label, 82.0f);
@@ -192,15 +201,15 @@ namespace sage::editor
                 std::make_unique<Checkbox>(ui, valueCell, false, VertAlignment::MIDDLE, HoriAlignment::CENTER);
             auto* checkbox = valueCell->CreateCheckbox(std::move(cb));
             if (editable)
-                checkbox->onValueChanged.Subscribe([data](const bool v) { *data = v; });
+                checkbox->onValueChanged.Subscribe([field](const bool v) { commitField(field, v); });
             else
                 checkbox->stateLocked = true;
-            return {checkbox, data};
+            return {checkbox, field};
         }
 
         template <class T>
         ScalarFieldView<T> createFieldView(
-            T* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
+            const LeafField<T>& field, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
             createLabel(ui, row, label, 34.0f);
@@ -215,9 +224,9 @@ namespace sage::editor
                 auto input = std::make_unique<TextInput>(
                     ui,
                     valueCell,
-                    [data](const std::string& s) {
+                    [field](const std::string& s) {
                         T parsed{};
-                        if (parseScalar(s, parsed)) *data = parsed;
+                        if (parseScalar(s, parsed)) commitField(field, parsed);
                     },
                     EditorInspectorInputFontInfo(),
                     VertAlignment::MIDDLE,
@@ -230,38 +239,70 @@ namespace sage::editor
                     ui, valueCell, EditorInspectorFontInfo(), VertAlignment::MIDDLE, valueAlignment);
                 text = valueCell->CreateTextbox(std::move(tb), "");
             }
-            return {text, data};
+            return {text, field};
         }
 
         Vec2FieldView createFieldView(
-            Vector2* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
+            const LeafField<Vector2>& field,
+            GameUIEngine* ui,
+            Table* fieldTable,
+            const std::string& label,
+            bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
             createLabel(ui, row, label, 34.0f);
             constexpr float inputCount = 2.0f;
             constexpr float inputLabelWidth = 4.0f;
             const float vw = (66.0f - inputLabelWidth * inputCount) / inputCount;
-            auto* x = createTextInputCell<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
-            auto* y = createTextInputCell<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
-            return {{x, y}, data};
+            auto* x = createTextInputCell<float>(ui, row, "X", vw, editable, [field](float v) {
+                Vector2 next = *field.data;
+                next.x = v;
+                commitField(field, next);
+            });
+            auto* y = createTextInputCell<float>(ui, row, "Y", vw, editable, [field](float v) {
+                Vector2 next = *field.data;
+                next.y = v;
+                commitField(field, next);
+            });
+            return {{x, y}, field};
         }
 
         Vec3FieldView createFieldView(
-            Vector3* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, bool editable)
+            const LeafField<Vector3>& field,
+            GameUIEngine* ui,
+            Table* fieldTable,
+            const std::string& label,
+            bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
             createLabel(ui, row, label, 34.0f);
             constexpr float inputCount = 3.0f;
             constexpr float inputLabelWidth = 4.0f;
             const float vw = (66.0f - inputLabelWidth * inputCount) / inputCount;
-            auto* x = createTextInputCell<float>(ui, row, "X", vw, editable, [data](float v) { data->x = v; });
-            auto* y = createTextInputCell<float>(ui, row, "Y", vw, editable, [data](float v) { data->y = v; });
-            auto* z = createTextInputCell<float>(ui, row, "Z", vw, editable, [data](float v) { data->z = v; });
-            return {{x, y, z}, data};
+            auto* x = createTextInputCell<float>(ui, row, "X", vw, editable, [field](float v) {
+                Vector3 next = *field.data;
+                next.x = v;
+                commitField(field, next);
+            });
+            auto* y = createTextInputCell<float>(ui, row, "Y", vw, editable, [field](float v) {
+                Vector3 next = *field.data;
+                next.y = v;
+                commitField(field, next);
+            });
+            auto* z = createTextInputCell<float>(ui, row, "Z", vw, editable, [field](float v) {
+                Vector3 next = *field.data;
+                next.z = v;
+                commitField(field, next);
+            });
+            return {{x, y, z}, field};
         }
 
         ColorFieldView createFieldView(
-            ::Color* data, GameUIEngine* ui, Table* fieldTable, const std::string& label, const bool editable)
+            const LeafField<::Color>& field,
+            GameUIEngine* ui,
+            Table* fieldTable,
+            const std::string& label,
+            const bool editable)
         {
             auto* row = fieldTable->CreateTableRow(Padding{2, 2, 2, 2});
             createLabel(ui, row, label, 34.0f);
@@ -271,15 +312,27 @@ namespace sage::editor
             const auto clamp = [](const int v) -> unsigned char {
                 return static_cast<unsigned char>(std::clamp(v, 0, 255));
             };
-            auto* r =
-                createTextInputCell<int>(ui, row, "R", vw, editable, [data, clamp](int v) { data->r = clamp(v); });
-            auto* g =
-                createTextInputCell<int>(ui, row, "G", vw, editable, [data, clamp](int v) { data->g = clamp(v); });
-            auto* b =
-                createTextInputCell<int>(ui, row, "B", vw, editable, [data, clamp](int v) { data->b = clamp(v); });
-            auto* a =
-                createTextInputCell<int>(ui, row, "A", vw, editable, [data, clamp](int v) { data->a = clamp(v); });
-            return {{r, g, b, a}, data};
+            auto* r = createTextInputCell<int>(ui, row, "R", vw, editable, [field, clamp](int v) {
+                Color next = *field.data;
+                next.r = clamp(v);
+                commitField(field, next);
+            });
+            auto* g = createTextInputCell<int>(ui, row, "G", vw, editable, [field, clamp](int v) {
+                Color next = *field.data;
+                next.g = clamp(v);
+                commitField(field, next);
+            });
+            auto* b = createTextInputCell<int>(ui, row, "B", vw, editable, [field, clamp](int v) {
+                Color next = *field.data;
+                next.b = clamp(v);
+                commitField(field, next);
+            });
+            auto* a = createTextInputCell<int>(ui, row, "A", vw, editable, [field, clamp](int v) {
+                Color next = *field.data;
+                next.a = clamp(v);
+                commitField(field, next);
+            });
+            return {{r, g, b, a}, field};
         }
 
         EnumFieldView createFieldView(
@@ -316,34 +369,37 @@ namespace sage::editor
 
         void Update(const BoolFieldView& b)
         {
-            if (b.checkbox) b.checkbox->SetChecked(*b.data);
+            if (b.checkbox && b.field.data) b.checkbox->SetChecked(*b.field.data);
         }
 
         template <class T>
         void Update(const ScalarFieldView<T>& b)
         {
-            if (b.text) b.text->SetContent(formatScalar(*b.data));
+            if (b.text && b.field.data) b.text->SetContent(formatScalar(*b.field.data));
         }
 
         void Update(const Vec2FieldView& b)
         {
-            if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.data->x));
-            if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.data->y));
+            if (!b.field.data) return;
+            if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.field.data->x));
+            if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.field.data->y));
         }
 
         void Update(const Vec3FieldView& b)
         {
-            if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.data->x));
-            if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.data->y));
-            if (b.texts[2]) b.texts[2]->SetContent(formatScalar(b.data->z));
+            if (!b.field.data) return;
+            if (b.texts[0]) b.texts[0]->SetContent(formatScalar(b.field.data->x));
+            if (b.texts[1]) b.texts[1]->SetContent(formatScalar(b.field.data->y));
+            if (b.texts[2]) b.texts[2]->SetContent(formatScalar(b.field.data->z));
         }
 
         void Update(const ColorFieldView& b)
         {
-            if (b.texts[0]) b.texts[0]->SetContent(std::to_string(static_cast<int>(b.data->r)));
-            if (b.texts[1]) b.texts[1]->SetContent(std::to_string(static_cast<int>(b.data->g)));
-            if (b.texts[2]) b.texts[2]->SetContent(std::to_string(static_cast<int>(b.data->b)));
-            if (b.texts[3]) b.texts[3]->SetContent(std::to_string(static_cast<int>(b.data->a)));
+            if (!b.field.data) return;
+            if (b.texts[0]) b.texts[0]->SetContent(std::to_string(static_cast<int>(b.field.data->r)));
+            if (b.texts[1]) b.texts[1]->SetContent(std::to_string(static_cast<int>(b.field.data->g)));
+            if (b.texts[2]) b.texts[2]->SetContent(std::to_string(static_cast<int>(b.field.data->b)));
+            if (b.texts[3]) b.texts[3]->SetContent(std::to_string(static_cast<int>(b.field.data->a)));
         }
 
         void Update(const EnumFieldView& b)
@@ -362,7 +418,7 @@ namespace sage::editor
                     if constexpr (std::is_same_v<T, EnumField>)
                         return v.data;
                     else
-                        return v;
+                        return v.data;
                 },
                 value);
         }

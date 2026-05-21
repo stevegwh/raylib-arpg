@@ -57,6 +57,23 @@ namespace sage
         return m_scale;
     }
 
+    void sgTransform::SetWorldPos(const Vector3& position)
+    {
+        m_positionWorld = position;
+        if (m_parent == entt::null) m_positionLocal = position;
+    }
+
+    void sgTransform::SetWorldRot(const Vector3& rotation)
+    {
+        m_rotationWorld = rotation;
+        if (m_parent == entt::null) m_rotationLocal = rotation;
+    }
+
+    void sgTransform::SetWorldScale(const Vector3& scale)
+    {
+        m_scale = scale;
+    }
+
     entt::entity sgTransform::GetParent() const
     {
         return m_parent;

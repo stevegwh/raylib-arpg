@@ -103,13 +103,13 @@ namespace lq::maploader
                     sage::serializer::entity entityId{}; // ignore this (old serialized entity)
                     auto& transform = destination->emplace<sage::sgTransform>(entt);
                     auto& collideable = destination->emplace<sage::Collideable>(entt);
-                    destination->emplace<sage::StaticCollideable>(entt);
                     auto& renderable = destination->emplace<sage::Renderable>(entt);
                     auto& item = destination->emplace<ItemComponent>(entt);
 
                     try
                     {
                         input(entityId, transform, collideable, renderable, item);
+                        collideable.isStatic = true;
                     }
                     catch (const cereal::Exception& e)
                     {
@@ -124,12 +124,12 @@ namespace lq::maploader
                     auto entt = destination->create();
                     auto& transform = destination->emplace<sage::sgTransform>(entt);
                     auto& collideable = destination->emplace<sage::Collideable>(entt);
-                    destination->emplace<sage::StaticCollideable>(entt);
                     auto& renderable = destination->emplace<sage::Renderable>(entt);
 
                     try
                     {
                         input(entityId, transform, collideable, renderable);
+                        collideable.isStatic = true;
                     }
                     catch (const cereal::Exception& e)
                     {

@@ -86,11 +86,7 @@ namespace lq
             {
                 registry->remove<sage::sgTransform>(entity);
             }
-            if (registry->any_of<sage::StaticCollideable>(entity))
-            {
-                registry->remove<sage::StaticCollideable>(entity);
-            }
-            else if (registry->any_of<sage::Collideable>(entity))
+            if (registry->any_of<sage::Collideable>(entity))
             {
                 registry->remove<sage::Collideable>(entity);
             }

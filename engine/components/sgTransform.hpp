@@ -42,9 +42,9 @@ namespace sage
         template <class Inspector>
         void define_editor_fields(Inspector& i)
         {
-            i.field("Position", m_positionWorld);
-            i.field("Rotation", m_rotationWorld);
-            i.field("Scale", m_scale);
+            i.field("Position", m_positionWorld, [this](const Vector3& position) { SetWorldPos(position); });
+            i.field("Rotation", m_rotationWorld, [this](const Vector3& rotation) { SetWorldRot(rotation); });
+            i.field("Scale", m_scale, [this](const Vector3& scale) { SetWorldScale(scale); });
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;
@@ -55,6 +55,9 @@ namespace sage
         [[nodiscard]] const Vector3& GetWorldRot() const;
         [[nodiscard]] const Vector3& GetLocalRot() const;
         [[nodiscard]] const Vector3& GetScale() const;
+        void SetWorldPos(const Vector3& position);
+        void SetWorldRot(const Vector3& rotation);
+        void SetWorldScale(const Vector3& scale);
         entt::entity GetParent() const;
         const std::vector<entt::entity>& GetChildren() const;
 

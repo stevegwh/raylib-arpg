@@ -265,7 +265,7 @@ namespace sage
         const auto& localBoundingBox = renderable.GetModel()->CalcLocalBoundingBox();
 
         auto& collideable = registry->emplace<Collideable>(entity, localBoundingBox, transMatrix);
-        registry->emplace<StaticCollideable>(entity);
+        collideable.isStatic = true;
 
         collideable.collisionLayer = getCollisionLayer(objectName);
 
