@@ -20,6 +20,7 @@ namespace sage::editor
         float modelDefaultRotationY = 0.0f;
         float modelDefaultScale = 1.0f;
         Matrix appliedModelDefaultTransform = MatrixIdentity();
+        Matrix modelSpaceDefaultTransform = MatrixIdentity();
     };
 
     class EditorAssetCatalog

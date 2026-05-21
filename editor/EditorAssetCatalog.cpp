@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -106,6 +107,32 @@ namespace sage::editor
             return result.empty() ? "ASSET" : result;
         }
 
+        bool MatrixAlmostEqual(const Matrix& lhs, const Matrix& rhs)
+        {
+            constexpr float epsilon = 0.0001f;
+            return std::fabs(lhs.m0 - rhs.m0) < epsilon && std::fabs(lhs.m1 - rhs.m1) < epsilon &&
+                   std::fabs(lhs.m2 - rhs.m2) < epsilon && std::fabs(lhs.m3 - rhs.m3) < epsilon &&
+                   std::fabs(lhs.m4 - rhs.m4) < epsilon && std::fabs(lhs.m5 - rhs.m5) < epsilon &&
+                   std::fabs(lhs.m6 - rhs.m6) < epsilon && std::fabs(lhs.m7 - rhs.m7) < epsilon &&
+                   std::fabs(lhs.m8 - rhs.m8) < epsilon && std::fabs(lhs.m9 - rhs.m9) < epsilon &&
+                   std::fabs(lhs.m10 - rhs.m10) < epsilon && std::fabs(lhs.m11 - rhs.m11) < epsilon &&
+                   std::fabs(lhs.m12 - rhs.m12) < epsilon && std::fabs(lhs.m13 - rhs.m13) < epsilon &&
+                   std::fabs(lhs.m14 - rhs.m14) < epsilon && std::fabs(lhs.m15 - rhs.m15) < epsilon;
+        }
+
+        bool IsIdentityMatrix(const Matrix& matrix)
+        {
+            return MatrixAlmostEqual(matrix, MatrixIdentity());
+        }
+
+        Matrix ModelSpaceDefaultTransform(const std::string& modelKey)
+        {
+            auto model = ResourceManager::GetInstance().GetModelView(modelKey);
+            const auto bounds = model.CalcLocalBoundingBox();
+            const Vector3 center = Vector3Scale(Vector3Add(bounds.min, bounds.max), 0.5f);
+            return MatrixTranslate(-center.x, -bounds.min.y, -center.z);
+        }
+
         void WrapDegrees(float& degrees)
         {
             if (degrees >= 360.0f) degrees -= 360.0f;
@@ -126,10 +153,13 @@ namespace sage::editor
 
         for (const auto& key : modelKeys)
         {
+            const auto modelSpaceDefaultTransform = ModelSpaceDefaultTransform(key);
             placeables.push_back(PlaceableAsset{
                 .displayName = DisplayNameFromModelKey(key),
                 .modelKey = key,
                 .labelStem = LabelStemFromModelKey(key),
+                .appliedModelDefaultTransform = modelSpaceDefaultTransform,
+                .modelSpaceDefaultTransform = modelSpaceDefaultTransform,
             });
         }
 
@@ -182,7 +212,7 @@ namespace sage::editor
     void EditorAssetCatalog::ResetSelectedDefaults()
     {
         auto& placeable = SelectedMutable();
-        placeable.appliedModelDefaultTransform = MatrixIdentity();
+        placeable.appliedModelDefaultTransform = placeable.modelSpaceDefaultTransform;
         placeable.modelDefaultHeightOffset = 0.0f;
         placeable.modelDefaultRotationY = 0.0f;
         placeable.modelDefaultScale = 1.0f;
@@ -259,15 +289,21 @@ namespace sage::editor
         const auto path = assetDefaultsPath(placeable);
         if (!std::filesystem::exists(path))
         {
+            if (!IsIdentityMatrix(placeable.modelSpaceDefaultTransform))
+            {
+                saveAssetDefaults(placeable);
+            }
             return;
         }
 
         try
         {
-            std::ifstream inputFile(path);
-            cereal::JSONInputArchive input(inputFile);
             SerializedAssetDefaults defaults{};
-            input(cereal::make_nvp("assetDefaults", defaults));
+            {
+                std::ifstream inputFile(path);
+                cereal::JSONInputArchive input(inputFile);
+                input(cereal::make_nvp("assetDefaults", defaults));
+            }
 
             if (!defaults.modelKey.empty() && defaults.modelKey != placeable.modelKey)
             {
@@ -279,7 +315,16 @@ namespace sage::editor
             placeable.modelDefaultHeightOffset = defaults.modelDefaultHeightOffset;
             placeable.modelDefaultRotationY = defaults.modelDefaultRotationY;
             placeable.modelDefaultScale = defaults.modelDefaultScale;
-            placeable.appliedModelDefaultTransform = defaults.appliedModelDefaultTransform;
+            if (IsIdentityMatrix(defaults.appliedModelDefaultTransform) &&
+                !IsIdentityMatrix(placeable.modelSpaceDefaultTransform))
+            {
+                placeable.appliedModelDefaultTransform = placeable.modelSpaceDefaultTransform;
+                saveAssetDefaults(placeable);
+            }
+            else
+            {
+                placeable.appliedModelDefaultTransform = defaults.appliedModelDefaultTransform;
+            }
         }
         catch (const cereal::Exception& e)
         {
