@@ -58,6 +58,8 @@ namespace sage::editor
       public:
         explicit EditorAssetCatalog(std::vector<PlaceableAsset> placeables);
 
+        [[nodiscard]] static EditorAssetCatalog FromLoadedModels(bool includeGenerated = false);
+
         void LoadDefaults();
         void Select(std::size_t index);
         void AdjustSelectedDefaultHeight(float amount);

@@ -21,6 +21,7 @@ extern "C"
 }
 #include <stb_include.h>
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -522,6 +523,22 @@ namespace sage
     /* Non-owning view onto the shared model entry stored under viewKey. Read-only API.
     The returned ModelView's lifetime is independent of RM: it just borrows; the
     underlying entry stays alive until UnloadAll (i.e. scene tear-down). */
+    std::vector<std::string> ResourceManager::GetModelKeys(const bool includeGenerated) const
+    {
+        std::vector<std::string> keys;
+        keys.reserve(modelCopies.size());
+
+        for (const auto& [key, info] : modelCopies)
+        {
+            if (key.find("#mut_") != std::string::npos) continue;
+            if (!includeGenerated && info.sourcePath.empty()) continue;
+            keys.push_back(key);
+        }
+
+        std::sort(keys.begin(), keys.end());
+        return keys;
+    }
+
     ModelView ResourceManager::GetModelView(const std::string& viewKey) const
     {
         assert(modelCopies.contains(viewKey));

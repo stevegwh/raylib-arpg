@@ -262,11 +262,8 @@ namespace sage
     EditorScene::EditorScene(EngineSystems* _sys) : sys(_sys)
     {
         editor::RegisterDefaultInspectorComponents(inspectorRegistry);
-        assetCatalog = std::make_unique<editor::EditorAssetCatalog>(std::vector<editor::PlaceableAsset>{
-            editor::PlaceableAsset{"Sphere", "vfx_sphere", "SPHERE"},
-            editor::PlaceableAsset{"Flat Torus", "vfx_flattorus", "FLAT_TORUS"},
-            editor::PlaceableAsset{"Sword", "mdl_sword", "SWORD"},
-        });
+        assetCatalog = std::make_unique<editor::EditorAssetCatalog>(
+            editor::EditorAssetCatalog::FromLoadedModels());
         assetCatalog->LoadDefaults();
         modelDefaults = std::make_unique<editor::EditorModelDefaultsController>(
             *assetCatalog, [this]() { return isPlaceState(); }, [this]() { refreshOverlay(); });

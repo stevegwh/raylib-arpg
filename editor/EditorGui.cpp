@@ -23,6 +23,8 @@ namespace sage::editor
     namespace
     {
         constexpr int THUMBNAIL_SIZE = 128;
+        constexpr int ASSET_GRID_COLUMNS = 3;
+        constexpr int ASSET_VISIBLE_ROWS = 2;
         constexpr int HIERARCHY_MAX_ROWS = 18;
         constexpr Color EDITOR_WINDOW_BACKGROUND = {35, 38, 43, 245};
         constexpr Color EDITOR_TEXT = {230, 234, 240, 255};
@@ -56,7 +58,7 @@ namespace sage::editor
 
         class AssetThumbnailButton final : public ImageBox
         {
-            std::size_t assetIndex = 0;
+            std::optional<std::size_t> assetIndex;
             std::string label;
             RenderTexture2D* thumbnail{};
             std::optional<std::size_t>* selectedAssetIndex{};
@@ -65,7 +67,17 @@ namespace sage::editor
           public:
             void OnClick() override
             {
-                if (onAssetSelected) onAssetSelected(assetIndex);
+                if (assetIndex.has_value() && onAssetSelected) onAssetSelected(*assetIndex);
+            }
+
+            void SetAsset(
+                const std::optional<std::size_t> index,
+                std::string displayName = "",
+                RenderTexture2D* assetThumbnail = nullptr)
+            {
+                assetIndex = index;
+                label = std::move(displayName);
+                thumbnail = assetThumbnail;
             }
 
             void UpdateDimensions() override
@@ -79,8 +91,15 @@ namespace sage::editor
 
             void Draw2D() override
             {
+                if (!assetIndex.has_value())
+                {
+                    DrawRectangleRec(rec, Color{39, 42, 47, 180});
+                    DrawRectangleLinesEx(rec, 1.0f, Color{75, 82, 94, 180});
+                    return;
+                }
+
                 const bool selected =
-                    selectedAssetIndex && selectedAssetIndex->has_value() && **selectedAssetIndex == assetIndex;
+                    selectedAssetIndex && selectedAssetIndex->has_value() && **selectedAssetIndex == *assetIndex;
                 const Color background = selected ? Color{221, 235, 255, 255} : Color{245, 247, 250, 255};
                 const Color border = selected ? Color{37, 99, 235, 255} : Color{171, 181, 196, 255};
 
@@ -106,7 +125,12 @@ namespace sage::editor
                         WHITE);
                 }
 
-                constexpr int fontSize = 14;
+                int fontSize = 14;
+                const int maxTextWidth = static_cast<int>(std::max(0.0f, rec.width - 12.0f));
+                while (fontSize > 10 && MeasureText(label.c_str(), fontSize) > maxTextWidth)
+                {
+                    --fontSize;
+                }
                 const int textWidth = MeasureText(label.c_str(), fontSize);
                 DrawText(
                     label.c_str(),
@@ -119,9 +143,6 @@ namespace sage::editor
             AssetThumbnailButton(
                 GameUIEngine* ui,
                 TableCell* parent,
-                std::size_t index,
-                std::string displayName,
-                RenderTexture2D* assetThumbnail,
                 std::optional<std::size_t>* selectedIndex,
                 std::function<void(std::size_t)> callback)
                 : ImageBox(
@@ -129,9 +150,6 @@ namespace sage::editor
                       parent,
                       ResourceManager::GetInstance().TextureLoad("resources/transpixel.png"),
                       ImageBox::OverflowBehaviour::ALLOW_OVERFLOW),
-                  assetIndex(index),
-                  label(std::move(displayName)),
-                  thumbnail(assetThumbnail),
                   selectedAssetIndex(selectedIndex),
                   onAssetSelected(std::move(callback))
             {
@@ -382,6 +400,28 @@ namespace sage::editor
         return action;
     }
 
+    void EditorGui::refreshAssetButtonContent()
+    {
+        const std::size_t scrollRow =
+            assetWindow && assetWindow->GetScrollbar() ? assetWindow->GetScrollbar()->ScrollOffset() : 0;
+        const std::size_t firstAssetIndex = scrollRow * ASSET_GRID_COLUMNS;
+
+        for (std::size_t slot = 0; slot < assetButtons.size(); ++slot)
+        {
+            auto* button = dynamic_cast<AssetThumbnailButton*>(assetButtons[slot]);
+            if (!button) continue;
+
+            const std::size_t assetIndex = firstAssetIndex + slot;
+            if (assetIndex >= assetEntries.size())
+            {
+                button->SetAsset(std::nullopt);
+                continue;
+            }
+
+            button->SetAsset(assetIndex, assetEntries[assetIndex].displayName, &assetThumbnails.at(assetIndex));
+        }
+    }
+
     RenderTexture2D EditorGui::createAssetThumbnail(const AssetEntry& asset) const
     {
         auto thumbnail = LoadRenderTexture(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
@@ -530,13 +570,14 @@ namespace sage::editor
             TextureStretchMode::STRETCH,
             -24.0f,
             24.0f,
-            392.0f,
-            212.0f,
+            424.0f,
+            356.0f,
             VertAlignment::TOP,
             HoriAlignment::RIGHT,
             Padding{20, 16, 14, 14});
 
         assetWindow = ui->CreateWindowDocked(std::move(window));
+        assetWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
         auto* mainTable = assetWindow->CreateTable({0, 0, 4, 0});
 
         {
@@ -549,28 +590,42 @@ namespace sage::editor
         {
             auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
             auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
-            auto* grid = contentCell->CreateTableGrid(1, static_cast<int>(assets.size()), 8.0f);
+            auto* grid = contentCell->CreateTableGrid(ASSET_VISIBLE_ROWS, ASSET_GRID_COLUMNS, 10.0f);
 
+            assetButtons.clear();
+            assetButtons.reserve(ASSET_VISIBLE_ROWS * ASSET_GRID_COLUMNS);
             if (!grid->children.empty())
             {
-                auto* row = dynamic_cast<TableRow*>(grid->children.front().get());
-                for (std::size_t i = 0; i < assets.size(); ++i)
+                for (std::size_t rowIndex = 0; rowIndex < grid->children.size(); ++rowIndex)
                 {
-                    auto* cell = dynamic_cast<TableCell*>(row->children.at(i).get());
-                    auto thumbnail = std::make_unique<AssetThumbnailButton>(
-                        ui,
-                        cell,
-                        i,
-                        assets[i].displayName,
-                        &assetThumbnails.at(i),
-                        &selectedAssetIndex,
-                        onAssetSelected);
-                    cell->CreateImagebox(std::move(thumbnail));
+                    auto* row = dynamic_cast<TableRow*>(grid->children.at(rowIndex).get());
+                    if (!row) continue;
+                    for (std::size_t colIndex = 0; colIndex < row->children.size(); ++colIndex)
+                    {
+                        auto* cell = dynamic_cast<TableCell*>(row->children.at(colIndex).get());
+                        auto thumbnail = std::make_unique<AssetThumbnailButton>(
+                            ui,
+                            cell,
+                            &selectedAssetIndex,
+                            onAssetSelected);
+                        assetButtons.push_back(cell->CreateImagebox(std::move(thumbnail)));
+                    }
                 }
             }
         }
 
+        if (auto* sb = assetWindow->GetScrollbar())
+        {
+            sb->SetProviders(
+                [this]() {
+                    return (assetEntries.size() + ASSET_GRID_COLUMNS - 1) / ASSET_GRID_COLUMNS;
+                },
+                []() { return static_cast<std::size_t>(ASSET_VISIBLE_ROWS); });
+            assetScrollSub = sb->onScrollChanged.Subscribe([this]() { refreshAssetButtonContent(); });
+        }
+
         assetWindow->FinalizeLayout();
+        refreshAssetButtonContent();
     }
 
     void EditorGui::createAssetDefaultsWindow(GameUIEngine* ui, Settings* settings)
@@ -580,7 +635,7 @@ namespace sage::editor
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             -24.0f,
-            248.0f,
+            392.0f,
             392.0f,
             248.0f,
             VertAlignment::TOP,
@@ -667,7 +722,7 @@ namespace sage::editor
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
             -24.0f,
-            508.0f,
+            652.0f,
             460.0f,
             520.0f,
             VertAlignment::TOP,
@@ -784,8 +839,9 @@ namespace sage::editor
         editorWindowBackgroundTexture = LoadTextureFromImage(panelImage);
         UnloadImage(panelImage);
 
-        assetThumbnails.reserve(assets.size());
-        for (const auto& asset : assets)
+        assetEntries = assets;
+        assetThumbnails.reserve(assetEntries.size());
+        for (const auto& asset : assetEntries)
         {
             assetThumbnails.push_back(createAssetThumbnail(asset));
         }

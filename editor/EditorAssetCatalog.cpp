@@ -1,14 +1,17 @@
 #include "EditorAssetCatalog.hpp"
 
+#include "engine/ResourceManager.hpp"
 #include "engine/raylib-cereal.hpp"
 
 #include "cereal/archives/json.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <string_view>
 #include <utility>
 
 namespace sage::editor
@@ -38,6 +41,71 @@ namespace sage::editor
             return result.empty() ? "asset" : result;
         }
 
+        std::string AssetStemFromKey(const std::string& key)
+        {
+            constexpr std::array<std::string_view, 5> prefixes{"mdl_", "vfx_", "env_", "prop_", "item_"};
+            for (const auto prefix : prefixes)
+            {
+                if (key.starts_with(prefix))
+                {
+                    return key.substr(prefix.size());
+                }
+            }
+            return key;
+        }
+
+        std::string DisplayNameFromModelKey(const std::string& key)
+        {
+            auto stem = AssetStemFromKey(key);
+            std::string result;
+            result.reserve(stem.size());
+
+            bool wordStart = true;
+            for (const unsigned char ch : stem)
+            {
+                if (ch == '_' || ch == '-')
+                {
+                    result.push_back(' ');
+                    wordStart = true;
+                    continue;
+                }
+
+                result.push_back(static_cast<char>(wordStart ? std::toupper(ch) : std::tolower(ch)));
+                wordStart = false;
+            }
+
+            return result.empty() ? key : result;
+        }
+
+        std::string LabelStemFromModelKey(const std::string& key)
+        {
+            auto stem = AssetStemFromKey(key);
+            std::string result;
+            result.reserve(stem.size());
+
+            bool lastWasSeparator = false;
+            for (const unsigned char ch : stem)
+            {
+                if (std::isalnum(ch))
+                {
+                    result.push_back(static_cast<char>(std::toupper(ch)));
+                    lastWasSeparator = false;
+                }
+                else if (!lastWasSeparator)
+                {
+                    result.push_back('_');
+                    lastWasSeparator = true;
+                }
+            }
+
+            while (!result.empty() && result.back() == '_')
+            {
+                result.pop_back();
+            }
+
+            return result.empty() ? "ASSET" : result;
+        }
+
         void WrapDegrees(float& degrees)
         {
             if (degrees >= 360.0f) degrees -= 360.0f;
@@ -48,6 +116,24 @@ namespace sage::editor
     EditorAssetCatalog::EditorAssetCatalog(std::vector<PlaceableAsset> placeables)
         : assets(std::move(placeables))
     {
+    }
+
+    EditorAssetCatalog EditorAssetCatalog::FromLoadedModels(const bool includeGenerated)
+    {
+        auto modelKeys = ResourceManager::GetInstance().GetModelKeys(includeGenerated);
+        std::vector<PlaceableAsset> placeables;
+        placeables.reserve(modelKeys.size());
+
+        for (const auto& key : modelKeys)
+        {
+            placeables.push_back(PlaceableAsset{
+                .displayName = DisplayNameFromModelKey(key),
+                .modelKey = key,
+                .labelStem = LabelStemFromModelKey(key),
+            });
+        }
+
+        return EditorAssetCatalog{std::move(placeables)};
     }
 
     void EditorAssetCatalog::LoadDefaults()
@@ -173,7 +259,6 @@ namespace sage::editor
         const auto path = assetDefaultsPath(placeable);
         if (!std::filesystem::exists(path))
         {
-            saveAssetDefaults(placeable);
             return;
         }
 

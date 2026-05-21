@@ -15,6 +15,7 @@
 namespace sage
 {
     class GameUIEngine;
+    class ImageBox;
     class Table;
     class TextBox;
     class Window;
@@ -66,9 +67,12 @@ namespace sage
             Window* deleteConfirmationWindow{};
             GameUIEngine* ui{};
             Texture2D editorWindowBackgroundTexture{};
+            std::vector<AssetEntry> assetEntries;
             std::vector<RenderTexture2D> assetThumbnails;
+            std::vector<ImageBox*> assetButtons;
             std::vector<TextBox*> hierarchyRows;
             std::vector<SceneObjectEntry> hierarchyEntries;
+            Subscription assetScrollSub{};
             Subscription hierarchyScrollSub{};
             InspectorFieldBuilder inspectorFieldBlueprints;
             ModelDefaultCallbacks modelDefaultCallbacks;
@@ -99,6 +103,7 @@ namespace sage
             void createAssetDefaultsWindow(GameUIEngine* ui, Settings* settings);
             void createInspectorWindow(GameUIEngine* ui, Settings* settings);
             void createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings);
+            void refreshAssetButtonContent();
             void refreshHierarchyRowContent();
 
           public:
