@@ -7,112 +7,50 @@
 namespace sage
 {
 
-    void TransformSystem::updateChildrenPos(entt::entity entity)
-    {
-        const auto& transform = registry->get<sgTransform>(entity);
-        for (auto childEntity : transform.m_children)
-        {
-            const auto& child = registry->get<sgTransform>(childEntity);
-            SetPosition(childEntity, Vector3Add(transform.m_positionWorld, child.GetLocalPos()));
-        }
-    }
-
-    void TransformSystem::updateChildrenRot(entt::entity entity)
-    {
-        const auto& transform = registry->get<sgTransform>(entity);
-        for (auto childEntity : transform.m_children)
-        {
-            const auto& child = registry->get<sgTransform>(childEntity);
-            SetRotation(childEntity, Vector3Add(transform.m_rotationWorld, child.GetLocalRot()));
-            // TODO: Scale
-        }
-    }
-
     void TransformSystem::SetLocalPos(entt::entity entity, const Vector3& position)
     {
-        auto& transform = registry->get<sgTransform>(entity);
-        transform.m_positionLocal = position;
-        if (transform.m_parent == entt::null) return;
-        const auto& parent = registry->get<sgTransform>(transform.m_parent);
-        SetPosition(entity, Vector3Add(parent.m_positionWorld, transform.m_positionLocal));
+        registry->get<sgTransform>(entity).SetLocalPos(position);
     }
 
     void TransformSystem::SetLocalRot(entt::entity entity, const Quaternion& rotation)
     {
         Vector3 rot = QuaternionToEuler(rotation);
-        rot = Vector3MultiplyByValue(rot, RAD2DEG); // raylib gives this back in rad
+        rot = Vector3MultiplyByValue(rot, RAD2DEG);
         SetLocalRot(entity, rot);
     }
 
     void TransformSystem::SetLocalRot(entt::entity entity, const Vector3& rotation)
     {
-        auto& transform = registry->get<sgTransform>(entity);
-        transform.m_rotationLocal = rotation;
-        if (transform.m_parent == entt::null)
-        {
-            SetRotation(entity, transform.m_rotationLocal);
-        }
-        else
-        {
-            const auto& parent = registry->get<sgTransform>(transform.m_parent);
-            SetRotation(entity, Vector3Add(parent.m_rotationWorld, transform.m_rotationLocal));
-        }
+        registry->get<sgTransform>(entity).SetLocalRot(rotation);
     }
 
     void TransformSystem::SetPosition(entt::entity entity, const Vector3& position)
     {
-        auto& transform = registry->get<sgTransform>(entity);
-
-        if (transform.m_parent != entt::null)
-        {
-            transform.m_positionWorld = position;
-        }
-        else
-        {
-            transform.m_positionLocal = position;
-            transform.m_positionWorld = position;
-        }
-        updateChildrenPos(entity);
+        registry->get<sgTransform>(entity).SetWorldPos(position);
     }
 
     void TransformSystem::SetRotation(entt::entity entity, const Vector3& rotation)
     {
-        auto& transform = registry->get<sgTransform>(entity);
-
-        if (transform.m_parent != entt::null)
-        {
-            transform.m_rotationWorld = rotation;
-        }
-        else
-        {
-            transform.m_rotationLocal = rotation;
-            transform.m_rotationWorld = rotation;
-        }
-        updateChildrenRot(entity);
+        registry->get<sgTransform>(entity).SetWorldRot(rotation);
     }
 
     void TransformSystem::SetScale(entt::entity entity, const Vector3& scale)
     {
-        auto& transform = registry->get<sgTransform>(entity);
-
-        transform.m_scale = scale;
+        registry->get<sgTransform>(entity).SetWorldScale(scale);
     }
 
     void TransformSystem::SetScale(entt::entity entity, float scale)
     {
-        auto& transform = registry->get<sgTransform>(entity);
-
-        transform.m_scale = {scale, scale, scale};
+        registry->get<sgTransform>(entity).SetWorldScale({scale, scale, scale});
     }
 
-    void TransformSystem::SetParent(entt::entity entity, entt::entity newParent)
+    void TransformSystem::SetParent(entt::entity entity, entt::entity newParent) const
     {
         auto& transform = registry->get<sgTransform>(entity);
 
         if (transform.m_parent != entt::null)
         {
             auto& parentChildren = registry->get<sgTransform>(transform.m_parent).m_children;
-            // Remove this from old parent's children list
             auto it = std::find(parentChildren.begin(), parentChildren.end(), entity);
             if (it != parentChildren.end()) parentChildren.erase(it);
         }
@@ -123,19 +61,18 @@ namespace sage
         {
             auto& parent = registry->get<sgTransform>(transform.m_parent);
             parent.m_children.push_back(entity);
-            // Recalculate local position based on current world position and new parent
             transform.m_positionLocal = Vector3Subtract(transform.m_positionWorld, parent.GetWorldPos());
             transform.m_rotationLocal = Vector3Subtract(transform.m_rotationWorld, parent.GetWorldRot());
         }
         else
         {
-            // If no parent, local = world
             transform.m_positionLocal = transform.m_positionWorld;
             transform.m_rotationLocal = transform.m_rotationWorld;
         }
+        transform.m_dirty = true;
     }
 
-    void TransformSystem::AddChild(entt::entity entity, entt::entity newChild)
+    void TransformSystem::AddChild(entt::entity entity, entt::entity newChild) const
     {
         SetParent(newChild, entity);
     }
@@ -148,9 +85,43 @@ namespace sage
         Vector3 scale{};
         MatrixDecompose(newMat, &trans, &rotQ, &scale);
         Vector3 rot = QuaternionToEuler(rotQ);
-        SetScale(entity, scale);
-        SetRotation(entity, rot);
-        SetPosition(entity, trans);
+        auto& transform = registry->get<sgTransform>(entity);
+        transform.SetWorldScale(scale);
+        transform.SetWorldRot(rot);
+        transform.SetWorldPos(trans);
+    }
+
+    void TransformSystem::propagate(entt::entity entity, bool ancestorDirty)
+    {
+        auto& transform = registry->get<sgTransform>(entity);
+        const bool effectivelyDirty = transform.m_dirty || ancestorDirty;
+
+        if (effectivelyDirty && transform.m_parent != entt::null)
+        {
+            const auto& parent = registry->get<sgTransform>(transform.m_parent);
+            transform.m_positionWorld = Vector3Add(parent.m_positionWorld, transform.m_positionLocal);
+            transform.m_rotationWorld = Vector3Add(parent.m_rotationWorld, transform.m_rotationLocal);
+        }
+
+        transform.m_dirty = false;
+
+        for (auto child : transform.m_children)
+        {
+            propagate(child, effectivelyDirty);
+        }
+    }
+
+    void TransformSystem::Update()
+    {
+        auto view = registry->view<sgTransform>();
+        for (auto entity : view)
+        {
+            const auto& transform = view.get<sgTransform>(entity);
+            if (transform.m_parent == entt::null)
+            {
+                propagate(entity, false);
+            }
+        }
     }
 
     void TransformSystem::onComponentRemoved(entt::entity entity)

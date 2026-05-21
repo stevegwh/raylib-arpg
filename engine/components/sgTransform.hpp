@@ -21,6 +21,7 @@ namespace sage
         Vector3 m_scale{1, 1, 1};
         entt::entity m_parent = entt::null;
         std::vector<entt::entity> m_children;
+        bool m_dirty = true;
 
       public:
         Vector3 direction{};
@@ -58,6 +59,9 @@ namespace sage
         void SetWorldPos(const Vector3& position);
         void SetWorldRot(const Vector3& rotation);
         void SetWorldScale(const Vector3& scale);
+        void SetLocalPos(const Vector3& position);
+        void SetLocalRot(const Vector3& rotation);
+        [[nodiscard]] bool IsDirty() const;
         entt::entity GetParent() const;
         const std::vector<entt::entity>& GetChildren() const;
 

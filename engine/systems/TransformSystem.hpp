@@ -9,8 +9,7 @@ namespace sage
     {
         entt::registry* registry;
 
-        void updateChildrenPos(entt::entity entity);
-        void updateChildrenRot(entt::entity entity);
+        void propagate(entt::entity entity, bool ancestorDirty);
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
 
@@ -23,8 +22,9 @@ namespace sage
         void SetScale(entt::entity entity, const Vector3& scale);
         void SetScale(entt::entity entity, float scale);
         void SetViaMatrix(entt::entity entity, Matrix mat);
-        void SetParent(entt::entity entity, entt::entity newParent);
-        void AddChild(entt::entity entity, entt::entity newChild);
+        void SetParent(entt::entity entity, entt::entity newParent) const;
+        void AddChild(entt::entity entity, entt::entity newChild) const;
+        void Update();
 
         explicit TransformSystem(entt::registry* _registry);
     };
