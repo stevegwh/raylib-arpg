@@ -67,7 +67,7 @@ namespace lq
         auto gs = sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col);
         assert(gs);
         float height = gs->heightMap.GetHeight();
-        sys->engine.transformSystem->SetPosition(entity, {position.x, height, position.z});
+        sys->engine.registry->get<sage::sgTransform>(entity).SetWorldPos({position.x, height, position.z});
     }
 
     entt::entity GameObjectFactory::createDialogCutscene(
@@ -75,7 +75,7 @@ namespace lq
     {
         entt::entity id = registry->create();
         registry->emplace<sage::sgTransform>(id);
-        sys->engine.transformSystem->SetPosition(id, position);
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldPos(position);
 
         auto& renderable = registry->emplace<sage::Renderable>(id);
         renderable.SetName(name);
@@ -121,8 +121,7 @@ namespace lq
             registry->emplace<sage::Collideable>(id, bb, registry->get<sage::sgTransform>(id).GetMatrixNoRot());
         collideable.SetCollisionLayer(
             lq::collision_layers::Enemy, lq::collision_masks::ForLayer(lq::collision_layers::Enemy));
-        sys->engine.transformSystem->SetRotation(
-            id, rotation); // TODO: Find out why this must be called after bounding box from collideable is created
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldRot(rotation); // TODO: Find out why this must be called after bounding box from collideable is created
 
         registry->emplace<WavemobState>(id);
         return id;
@@ -157,7 +156,7 @@ namespace lq
             registry->emplace<sage::Collideable>(id, bb, registry->get<sage::sgTransform>(id).GetMatrixNoRot());
         collideable.SetCollisionLayer(
             lq::collision_layers::Npc, lq::collision_masks::ForLayer(lq::collision_layers::Npc));
-        sys->engine.transformSystem->SetRotation(id, rotation);
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldRot(rotation);
         sys->engine.navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
@@ -202,7 +201,7 @@ namespace lq
             registry->emplace<sage::Collideable>(id, bb, registry->get<sage::sgTransform>(id).GetMatrixNoRot());
         collideable.SetCollisionLayer(
             lq::collision_layers::Npc, lq::collision_masks::ForLayer(lq::collision_layers::Npc));
-        sys->engine.transformSystem->SetRotation(id, rotation);
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldRot(rotation);
         sys->engine.navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, id);
 
         registry->emplace<DialogComponent>(id);
@@ -235,7 +234,7 @@ namespace lq
             registry->emplace<sage::Collideable>(id, bb, registry->get<sage::sgTransform>(id).GetMatrixNoRot());
         collideable.SetCollisionLayer(
             lq::collision_layers::Player, lq::collision_masks::ForLayer(lq::collision_layers::Player));
-        sys->engine.transformSystem->SetRotation(id, rotation);
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldRot(rotation);
 
         // Set animation hooks
         auto& animation = registry->emplace<sage::Animation>(id, "mdl_player_default");
@@ -285,9 +284,9 @@ namespace lq
             sys->engine.navigationGridSystem->WorldToGridSpace(position, actorIdx);
             float height =
                 sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->heightMap.GetHeight();
-            sys->engine.transformSystem->SetPosition(id, {position.x, 12, position.z});
-            sys->engine.transformSystem->SetScale(id, 1.0f);
-            sys->engine.transformSystem->SetRotation(id, {0, 0, 0});
+            sys->engine.registry->get<sage::sgTransform>(id).SetWorldPos({position.x, 12, position.z});
+            sys->engine.registry->get<sage::sgTransform>(id).SetWorldScale(1.0f);
+            sys->engine.registry->get<sage::sgTransform>(id).SetWorldRot({0, 0, 0});
 
             auto& timer = registry->emplace<Timer>(id);
             timer.SetMaxTime(1000000);
@@ -335,9 +334,9 @@ namespace lq
         sys->engine.navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height =
             sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->heightMap.GetHeight();
-        sys->engine.transformSystem->SetPosition(id, {position.x, height, position.z});
-        sys->engine.transformSystem->SetScale(id, 10.0f);
-        sys->engine.transformSystem->SetRotation(id, {0, 0, 0});
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldPos({position.x, height, position.z});
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldScale(10.0f);
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldRot({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
 
@@ -364,9 +363,9 @@ namespace lq
         sys->engine.navigationGridSystem->WorldToGridSpace(position, actorIdx);
         float height =
             sys->engine.navigationGridSystem->GetGridSquare(actorIdx.row, actorIdx.col)->heightMap.GetHeight();
-        sys->engine.transformSystem->SetPosition(id, {position.x, height, position.z});
-        sys->engine.transformSystem->SetScale(id, 1.0f);
-        sys->engine.transformSystem->SetRotation(id, {0, 0, 0});
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldPos({position.x, height, position.z});
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldScale(1.0f);
+        sys->engine.registry->get<sage::sgTransform>(id).SetWorldRot({0, 0, 0});
 
         Matrix modelTransform = MatrixIdentity();
         auto& renderable = registry->emplace<sage::Renderable>(
@@ -392,7 +391,7 @@ namespace lq
         // TODO: Need a way to store the matrix scale? Maybe in the resource packer we should store the transform
         registry->emplace<sage::Renderable>(itemId, std::move(model), MatrixScale(0.035, 0.035, 0.035));
         const auto& transform = registry->emplace<sage::sgTransform>(itemId);
-        sys->engine.transformSystem->SetPosition(itemId, position);
+        sys->engine.registry->get<sage::sgTransform>(itemId).SetWorldPos(position);
 
         // TODO: Uber shader? Lit?
 

@@ -18,7 +18,8 @@ namespace sage
         Vector3 m_positionLocal{};
         Vector3 m_rotationWorld{};
         Vector3 m_rotationLocal{};
-        Vector3 m_scale{1, 1, 1};
+        Vector3 m_scaleWorld{1, 1, 1};
+        Vector3 m_scaleLocal{1, 1, 1};
         entt::entity m_parent = entt::null;
         std::vector<entt::entity> m_children;
         bool m_dirty = true;
@@ -31,21 +32,21 @@ namespace sage
         template <class Archive>
         void save(Archive& archive) const
         {
-            archive(m_positionWorld, m_rotationWorld, m_scale);
+            archive(m_positionWorld, m_rotationWorld, m_scaleWorld);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
-            archive(m_positionWorld, m_rotationWorld, m_scale);
+            archive(m_positionWorld, m_rotationWorld, m_scaleWorld);
         }
 
         template <class Inspector>
         void define_editor_fields(Inspector& i)
         {
-            i.field("Position", m_positionWorld, [this](const Vector3& position) { SetWorldPos(position); });
-            i.field("Rotation", m_rotationWorld, [this](const Vector3& rotation) { SetWorldRot(rotation); });
-            i.field("Scale", m_scale, [this](const Vector3& scale) { SetWorldScale(scale); });
+            i.field("Position", m_positionWorld, [this](const Vector3& position) { SetLocalPos(position); });
+            i.field("Rotation", m_rotationWorld, [this](const Vector3& rotation) { SetLocalRot(rotation); });
+            i.field("Scale", m_scaleWorld, [this](const Vector3& scale) { SetLocalScale(scale); });
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;
@@ -59,8 +60,14 @@ namespace sage
         void SetWorldPos(const Vector3& position);
         void SetWorldRot(const Vector3& rotation);
         void SetWorldScale(const Vector3& scale);
+        void SetWorldScale(float scale);
         void SetLocalPos(const Vector3& position);
         void SetLocalRot(const Vector3& rotation);
+        void SetLocalRot(const Quaternion& rotation);
+        void SetLocalScale(const Vector3& scale);
+        void SetLocalScale(float scale);
+        [[nodiscard]] const Vector3& GetLocalScale() const;
+        void SetParent(entt::entity newParent, const sgTransform* parentTransform);
         [[nodiscard]] bool IsDirty() const;
         entt::entity GetParent() const;
         const std::vector<entt::entity>& GetChildren() const;

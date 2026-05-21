@@ -127,24 +127,24 @@ namespace lq
                     // Then we can just say "if ability doesn't follow caster, then set its position"
                     if (trans.GetParent() != ab.caster)
                     {
-                        sys->engine.transformSystem->SetParent(entity, ab.caster);
-                        sys->engine.transformSystem->SetLocalPos(entity, {0, heightOffset, 0});
-                        sys->engine.transformSystem->SetLocalRot(entity, Vector3Zero());
+                        sys->engine.registry->get<sage::sgTransform>(entity)
+                            .SetParent(ab.caster, &sys->engine.registry->get<sage::sgTransform>(ab.caster));
+                        sys->engine.registry->get<sage::sgTransform>(entity).SetLocalPos({0, heightOffset, 0});
+                        sys->engine.registry->get<sage::sgTransform>(entity).SetLocalRot(Vector3Zero());
                     }
                 }
                 else
                 {
                     const Vector3 pos{casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
-                    sys->engine.transformSystem->SetPosition(entity, pos);
-                    sys->engine.transformSystem->SetRotation(entity, casterTrans.GetWorldRot());
+                    sys->engine.registry->get<sage::sgTransform>(entity).SetWorldPos(pos);
+                    sys->engine.registry->get<sage::sgTransform>(entity).SetWorldRot(casterTrans.GetWorldRot());
                 }
 
                 vfx->InitSystem();
             }
             else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
             {
-                sys->engine.transformSystem->SetPosition(
-                    entity, sys->engine.cursor->getFirstNaviCollision().point);
+                sys->engine.registry->get<sage::sgTransform>(entity).SetWorldPos(sys->engine.cursor->getFirstNaviCollision().point);
                 vfx->InitSystem();
             }
         }

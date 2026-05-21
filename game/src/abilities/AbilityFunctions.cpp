@@ -61,7 +61,7 @@ namespace lq
         auto& enemyPos = registry->get<sage::sgTransform>(target).GetWorldPos();
         Vector3 direction = Vector3Subtract(enemyPos, t.GetWorldPos());
         float angle = atan2f(direction.x, direction.z) * RAD2DEG;
-        sys->transformSystem->SetRotation(caster, {0, angle, 0});
+        sys->registry->get<sage::sgTransform>(caster).SetWorldRot({0, angle, 0});
 
         if (registry->any_of<CombatableActor>(target))
         {

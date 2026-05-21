@@ -146,12 +146,12 @@ namespace lq
 
         if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
         {
-            sys->engine.transformSystem->SetPosition(abilityEntity, casterPos);
+            sys->engine.registry->get<sage::sgTransform>(abilityEntity).SetWorldPos(casterPos);
         }
         else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
         {
             auto cursorPos = sys->engine.cursor->getFirstNaviCollision().point;
-            sys->engine.transformSystem->SetPosition(abilityEntity, cursorPos);
+            sys->engine.registry->get<sage::sgTransform>(abilityEntity).SetWorldPos(cursorPos);
         }
 
         sys->engine.actorMovementSystem->MoveToLocation(abilityEntity, point);

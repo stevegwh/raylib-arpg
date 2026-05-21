@@ -43,12 +43,12 @@ namespace lq
             col.blocksNavigation = false;
             sys->navigationGridSystem->MarkSquareAreaOccupied(col.worldBoundingBox, false);
             float targetRotation = (transform.forward().z > 0) ? door.openYRotation : -door.openYRotation;
-            sys->transformSystem->SetLocalRot(entity, Vector3{rotx, targetRotation, rotz});
+            sys->registry->get<sage::sgTransform>(entity).SetLocalRot(Vector3{rotx, targetRotation, rotz});
             door.open = true;
         }
         else
         {
-            sys->transformSystem->SetLocalRot(entity, Vector3{rotx, closedRotation, rotz});
+            sys->registry->get<sage::sgTransform>(entity).SetLocalRot(Vector3{rotx, closedRotation, rotz});
             door.open = false;
             auto& col = registry->get<sage::Collideable>(entity);
             col.SetCollisionLayer(sage::collision_layers::Obstacle);

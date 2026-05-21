@@ -211,8 +211,7 @@ namespace sage
         GridSquare targetGridPos{};
         sys->navigationGridSystem->WorldToGridSpace(moveableActor.path.front(), targetGridPos);
         const auto square = sys->navigationGridSystem->GetGridSquare(targetGridPos.row, targetGridPos.col);
-        sys->transformSystem->SetPosition(
-            entity, {square->worldPosMin.x, square->heightMap.GetHeight(), square->worldPosMin.z});
+        sys->registry->get<sage::sgTransform>(entity).SetWorldPos({square->worldPosMin.x, square->heightMap.GetHeight(), square->worldPosMin.z});
     }
 
     void ActorMovementSystem::handleDestinationReached(const entt::entity entity, MoveableActor& moveableActor)
@@ -288,7 +287,7 @@ namespace sage
     {
         // Calculate rotation angle based on direction
         float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
-        sys->transformSystem->SetRotation(entity, {transform.GetWorldRot().x, angle, transform.GetWorldRot().z});
+        sys->registry->get<sage::sgTransform>(entity).SetWorldRot({transform.GetWorldRot().x, angle, transform.GetWorldRot().z});
     }
 
     void ActorMovementSystem::updateActorWorldPosition(entt::entity entity) const
@@ -302,7 +301,7 @@ namespace sage
             transform.GetWorldPos().x + transform.direction.x * moveable.movementSpeed,
             gridSquare->heightMap.GetHeight(),
             transform.GetWorldPos().z + transform.direction.z * moveable.movementSpeed};
-        sys->transformSystem->SetPosition(entity, newPos);
+        sys->registry->get<sage::sgTransform>(entity).SetWorldPos(newPos);
     }
 
     void ActorMovementSystem::updateActorTransform(

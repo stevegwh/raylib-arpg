@@ -11,14 +11,14 @@ namespace sage
     Matrix sgTransform::GetMatrixNoRot() const
     {
         Matrix trans = MatrixTranslate(m_positionWorld.x, m_positionWorld.y, m_positionWorld.z);
-        Matrix _scale = MatrixScale(m_scale.x, m_scale.y, m_scale.z);
+        Matrix _scale = MatrixScale(m_scaleWorld.x, m_scaleWorld.y, m_scaleWorld.z);
         return MatrixMultiply(trans, _scale);
     }
 
     Matrix sgTransform::GetMatrix() const
     {
         Matrix trans = MatrixTranslate(m_positionWorld.x, m_positionWorld.y, m_positionWorld.z);
-        Matrix _scale = MatrixScale(m_scale.x, m_scale.y, m_scale.z);
+        Matrix _scale = MatrixScale(m_scaleWorld.x, m_scaleWorld.y, m_scaleWorld.z);
         Matrix rot = MatrixMultiply(
             MatrixMultiply(MatrixRotateZ(DEG2RAD * m_rotationWorld.z), MatrixRotateY(DEG2RAD * m_rotationWorld.y)),
             MatrixRotateX(DEG2RAD * m_rotationWorld.x));
@@ -54,7 +54,12 @@ namespace sage
 
     const Vector3& sgTransform::GetScale() const
     {
-        return m_scale;
+        return m_scaleWorld;
+    }
+
+    const Vector3& sgTransform::GetLocalScale() const
+    {
+        return m_scaleLocal;
     }
 
     void sgTransform::SetWorldPos(const Vector3& position)
@@ -73,8 +78,33 @@ namespace sage
 
     void sgTransform::SetWorldScale(const Vector3& scale)
     {
-        m_scale = scale;
+        m_scaleWorld = scale;
+        if (m_parent == entt::null) m_scaleLocal = scale;
         m_dirty = true;
+    }
+
+    void sgTransform::SetWorldScale(float scale)
+    {
+        SetWorldScale(Vector3{scale, scale, scale});
+    }
+
+    void sgTransform::SetLocalScale(const Vector3& scale)
+    {
+        m_scaleLocal = scale;
+        if (m_parent == entt::null) m_scaleWorld = scale;
+        m_dirty = true;
+    }
+
+    void sgTransform::SetLocalScale(float scale)
+    {
+        SetLocalScale(Vector3{scale, scale, scale});
+    }
+
+    void sgTransform::SetLocalRot(const Quaternion& rotation)
+    {
+        Vector3 rot = QuaternionToEuler(rotation);
+        rot = Vector3MultiplyByValue(rot, RAD2DEG);
+        SetLocalRot(rot);
     }
 
     void sgTransform::SetLocalPos(const Vector3& position)
@@ -96,6 +126,28 @@ namespace sage
         return m_dirty;
     }
 
+    void sgTransform::SetParent(entt::entity newParent, const sgTransform* parentTransform)
+    {
+        m_parent = newParent;
+        if (parentTransform != nullptr)
+        {
+            m_positionLocal = Vector3Subtract(m_positionWorld, parentTransform->m_positionWorld);
+            m_rotationLocal = Vector3Subtract(m_rotationWorld, parentTransform->m_rotationWorld);
+            const auto& ps = parentTransform->m_scaleWorld;
+            m_scaleLocal = {
+                ps.x != 0.0f ? m_scaleWorld.x / ps.x : m_scaleWorld.x,
+                ps.y != 0.0f ? m_scaleWorld.y / ps.y : m_scaleWorld.y,
+                ps.z != 0.0f ? m_scaleWorld.z / ps.z : m_scaleWorld.z};
+        }
+        else
+        {
+            m_positionLocal = m_positionWorld;
+            m_rotationLocal = m_rotationWorld;
+            m_scaleLocal = m_scaleWorld;
+        }
+        m_dirty = true;
+    }
+
     entt::entity sgTransform::GetParent() const
     {
         return m_parent;
@@ -112,7 +164,8 @@ namespace sage
         m_rotationLocal = rhs.m_rotationLocal;
         m_positionWorld = rhs.m_positionWorld;
         m_rotationWorld = rhs.m_rotationWorld; // FIXED: was rhs.m_positionWorld
-        m_scale = rhs.m_scale;
+        m_scaleWorld = rhs.m_scaleWorld;
+        m_scaleLocal = rhs.m_scaleLocal;
         m_parent = rhs.m_parent;
         m_children = rhs.m_children;
     }
@@ -123,7 +176,8 @@ namespace sage
         m_rotationLocal = rhs.m_rotationLocal;
         m_positionWorld = rhs.m_positionWorld;
         m_rotationWorld = rhs.m_rotationWorld;
-        m_scale = rhs.m_scale;
+        m_scaleWorld = rhs.m_scaleWorld;
+        m_scaleLocal = rhs.m_scaleLocal;
         m_parent = rhs.m_parent;
         m_children = rhs.m_children;
         return *this; // ADDED: missing return statement
@@ -135,7 +189,8 @@ namespace sage
         m_rotationLocal = rhs.m_rotationLocal;
         m_positionWorld = rhs.m_positionWorld;
         m_rotationWorld = rhs.m_rotationWorld;
-        m_scale = rhs.m_scale;
+        m_scaleWorld = rhs.m_scaleWorld;
+        m_scaleLocal = rhs.m_scaleLocal;
         m_parent = rhs.m_parent;
         m_children = std::move(rhs.m_children);
     }
@@ -147,7 +202,8 @@ namespace sage
         m_rotationLocal = rhs.m_rotationLocal;
         m_positionWorld = rhs.m_positionWorld;
         m_rotationWorld = rhs.m_rotationWorld;
-        m_scale = rhs.m_scale;
+        m_scaleWorld = rhs.m_scaleWorld;
+        m_scaleLocal = rhs.m_scaleLocal;
         m_parent = rhs.m_parent;
         m_children = std::move(rhs.m_children);
         return *this;
