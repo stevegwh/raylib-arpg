@@ -419,6 +419,17 @@ namespace sage
         }
     }
 
+    void WindowDocked::SetDockOffset(const float xOffset, const float yOffset)
+    {
+        baseXOffset = xOffset;
+        baseYOffset = yOffset;
+
+        Reset();
+        setAlignment();
+        InitLayout();
+        FinalizeLayout();
+    }
+
     void WindowDocked::setAlignment()
     {
         float xOffset = 0;

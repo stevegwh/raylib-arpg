@@ -246,6 +246,7 @@ namespace sage
 
     void EditorScene::Draw2D() const
     {
+        gui->DrawSceneViewInfo();
         sys->UI().Draw2D();
     }
 

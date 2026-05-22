@@ -27,7 +27,7 @@ namespace sage::editor
 
     namespace
     {
-        constexpr std::size_t INSPECTOR_VISIBLE_ROWS = 13;
+        constexpr std::size_t INSPECTOR_VISIBLE_ROWS = 28;
         constexpr Color EDITOR_TEXT = {230, 234, 240, 255};
 
         TextBox::FontInfo EditorInspectorFontInfo()

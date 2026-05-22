@@ -59,7 +59,6 @@ namespace sage
             };
 
           private:
-            Window* overlayWindow{};
             Window* hierarchyWindow{};
             Window* assetWindow{};
             Window* assetDefaultsWindow{};
@@ -79,9 +78,10 @@ namespace sage
             DeleteConfirmationAction pendingDeleteConfirmationAction = DeleteConfirmationAction::None;
             std::optional<std::size_t> selectedAssetIndex;
             std::optional<entt::entity> selectedSceneEntity;
-            TextBox* overlayTitleText{};
-            TextBox* modeText{};
-            TextBox* cursorText{};
+            bool assetDrawerOpen = false;
+            mutable std::string sceneNameStatus = "Scene";
+            mutable std::string modeStatus = "Select";
+            mutable std::string cursorStatus = "-";
             TextBox* defaultsAssetText{};
             TextBox* defaultsPositionText{};
             TextBox* defaultsRotationText{};
@@ -90,7 +90,6 @@ namespace sage
             TextBox* deleteConfirmationText{};
 
             RenderTexture2D createAssetThumbnail(const AssetEntry& asset) const;
-            void createOverlayWindow(GameUIEngine* ui, Settings* settings);
             void createHierarchyWindow(
                 GameUIEngine* ui,
                 Settings* settings,
@@ -105,6 +104,7 @@ namespace sage
             void createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings);
             void refreshAssetButtonContent();
             void refreshHierarchyRowContent();
+            void setAssetDrawerOpen(bool open);
 
           public:
             void SetOverlayStatus(const std::string& mode, const std::string& cursor) const;
@@ -120,6 +120,7 @@ namespace sage
             void FocusHierarchyOnEntity(entt::entity entity);
             void SetInspector(
                 const std::string& selectedEntity, const std::vector<InspectedComponent>& inspectedComponents);
+            void DrawSceneViewInfo() const;
             void ShowDeleteConfirmation(const std::string& selectedEntity) const;
             void HideDeleteConfirmation() const;
             [[nodiscard]] bool IsDeleteConfirmationVisible() const;

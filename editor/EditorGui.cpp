@@ -23,9 +23,20 @@ namespace sage::editor
     namespace
     {
         constexpr int THUMBNAIL_SIZE = 128;
-        constexpr int ASSET_GRID_COLUMNS = 3;
+        constexpr int ASSET_GRID_COLUMNS = 5;
         constexpr int ASSET_VISIBLE_ROWS = 2;
-        constexpr int HIERARCHY_MAX_ROWS = 18;
+        constexpr int HIERARCHY_MAX_ROWS = 32;
+        constexpr float LEFT_DOCK_WIDTH = 340.0f;
+        constexpr float RIGHT_DOCK_WIDTH = 440.0f;
+        constexpr float DOCK_HEIGHT = 1080.0f;
+        constexpr float ASSET_DRAWER_MARGIN = 18.0f;
+        constexpr float ASSET_DRAWER_HEIGHT = 344.0f;
+        constexpr float ASSET_DRAWER_COLLAPSED_HEIGHT = 66.0f;
+        constexpr float ASSET_DRAWER_WIDTH =
+            1920.0f - LEFT_DOCK_WIDTH - RIGHT_DOCK_WIDTH - ASSET_DRAWER_MARGIN * 2.0f;
+        constexpr float ASSET_DRAWER_OPEN_Y_OFFSET = -ASSET_DRAWER_MARGIN;
+        constexpr float ASSET_DRAWER_CLOSED_Y_OFFSET =
+            ASSET_DRAWER_HEIGHT - ASSET_DRAWER_COLLAPSED_HEIGHT - ASSET_DRAWER_MARGIN;
         constexpr Color EDITOR_WINDOW_BACKGROUND = {35, 38, 43, 245};
         constexpr Color EDITOR_TEXT = {230, 234, 240, 255};
 
@@ -204,6 +215,49 @@ namespace sage::editor
             }
         };
 
+        class AssetDrawerTitleBar final : public TextBox
+        {
+            std::function<void()> onPressed;
+
+          public:
+            void OnClick() override
+            {
+                if (onPressed) onPressed();
+            }
+
+            void UpdateDimensions() override
+            {
+                UpdateFontScaling();
+                rec = {
+                    parent->GetRec().x + parent->padding.left,
+                    parent->GetRec().y + parent->padding.up,
+                    parent->GetRec().width - parent->padding.left - parent->padding.right,
+                    parent->GetRec().height - parent->padding.up - parent->padding.down};
+            }
+
+            void Draw2D() override
+            {
+                DrawRectangleRec(rec, Color{45, 49, 56, 255});
+                DrawRectangleLinesEx(rec, 1.0f, Color{84, 94, 110, 255});
+
+                const auto& text = GetContent();
+                const int fontSize = static_cast<int>(fontInfo.fontSize);
+                const int textWidth = MeasureText(text.c_str(), fontSize);
+                DrawText(
+                    text.c_str(),
+                    static_cast<int>(rec.x + (rec.width - static_cast<float>(textWidth)) * 0.5f),
+                    static_cast<int>(rec.y + (rec.height - static_cast<float>(fontSize)) * 0.5f),
+                    fontSize,
+                    fontInfo.color);
+            }
+
+            AssetDrawerTitleBar(GameUIEngine* ui, TableCell* parent, std::function<void()> callback)
+                : TextBox(ui, parent, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER),
+                  onPressed(std::move(callback))
+            {
+            }
+        };
+
         class HierarchyRowButton final : public TextBox
         {
             std::size_t rowIndex = 0;
@@ -276,12 +330,33 @@ namespace sage::editor
             }
         };
 
+        void DrawTextFit(
+            const std::string& text,
+            const Vector2 position,
+            const float maxWidth,
+            int fontSize,
+            const Color color)
+        {
+            while (fontSize > 12 && MeasureText(text.c_str(), fontSize) > maxWidth)
+            {
+                --fontSize;
+            }
+
+            DrawText(
+                text.c_str(),
+                static_cast<int>(position.x + 1.0f),
+                static_cast<int>(position.y + 1.0f),
+                fontSize,
+                BLACK);
+            DrawText(text.c_str(), static_cast<int>(position.x), static_cast<int>(position.y), fontSize, color);
+        }
+
     } // namespace
 
     void EditorGui::SetOverlayStatus(const std::string& mode, const std::string& cursor) const
     {
-        if (modeText) modeText->SetContent("Mode: " + mode);
-        if (cursorText) cursorText->SetContent("Cursor: " + cursor);
+        modeStatus = mode;
+        cursorStatus = cursor;
     }
 
     void EditorGui::SetAssetDefaultsStatus(
@@ -298,14 +373,14 @@ namespace sage::editor
 
     void EditorGui::SetSceneName(const std::string& sceneName) const
     {
-        if (overlayTitleText) overlayTitleText->SetContent(sceneName);
+        sceneNameStatus = sceneName;
     }
 
     void EditorGui::SetSelectedAsset(const std::optional<std::size_t> index)
     {
         selectedAssetIndex = index;
         if (!assetDefaultsWindow) return;
-        if (selectedAssetIndex.has_value())
+        if (assetDrawerOpen && selectedAssetIndex.has_value())
         {
             if (assetDefaultsWindow->IsHidden()) assetDefaultsWindow->Show();
         }
@@ -368,6 +443,26 @@ namespace sage::editor
         inspectorFieldBlueprints.Draw();
     }
 
+    void EditorGui::DrawSceneViewInfo() const
+    {
+        if (!ui || !ui->settings) return;
+
+        const float x = ui->settings->ScaleValueWidth(LEFT_DOCK_WIDTH + 22.0f);
+        const float y = ui->settings->ScaleValueHeight(16.0f);
+        const float maxWidth =
+            ui->settings->ScaleValueWidth(1920.0f - LEFT_DOCK_WIDTH - RIGHT_DOCK_WIDTH - 44.0f);
+        const int titleSize = static_cast<int>(ui->settings->ScaleValueMaintainRatio(22.0f));
+        const int metaSize = static_cast<int>(ui->settings->ScaleValueMaintainRatio(16.0f));
+
+        DrawTextFit(sceneNameStatus, {x, y}, maxWidth, titleSize, EDITOR_TEXT);
+        DrawTextFit(
+            "Mode: " + modeStatus + "  |  Cursor: " + cursorStatus,
+            {x, y + ui->settings->ScaleValueHeight(28.0f)},
+            maxWidth,
+            metaSize,
+            Color{202, 211, 224, 255});
+    }
+
     void EditorGui::ShowDeleteConfirmation(const std::string& selectedEntity) const
     {
         if (deleteConfirmationText)
@@ -398,6 +493,26 @@ namespace sage::editor
         const auto action = pendingDeleteConfirmationAction;
         pendingDeleteConfirmationAction = DeleteConfirmationAction::None;
         return action;
+    }
+
+    void EditorGui::setAssetDrawerOpen(const bool open)
+    {
+        assetDrawerOpen = open;
+
+        if (auto* dockedAssetWindow = dynamic_cast<WindowDocked*>(assetWindow))
+        {
+            dockedAssetWindow->SetDockOffset(
+                LEFT_DOCK_WIDTH + ASSET_DRAWER_MARGIN,
+                assetDrawerOpen ? ASSET_DRAWER_OPEN_Y_OFFSET : ASSET_DRAWER_CLOSED_Y_OFFSET);
+        }
+
+        if (assetDefaultsWindow)
+        {
+            if (assetDrawerOpen && selectedAssetIndex.has_value())
+                assetDefaultsWindow->Show();
+            else
+                assetDefaultsWindow->Hide();
+        }
     }
 
     void EditorGui::refreshAssetButtonContent()
@@ -448,52 +563,6 @@ namespace sage::editor
         return thumbnail;
     }
 
-    void EditorGui::createOverlayWindow(GameUIEngine* ui, Settings* settings)
-    {
-        auto window = std::make_unique<WindowDocked>(
-            settings,
-            editorWindowBackgroundTexture,
-            TextureStretchMode::STRETCH,
-            24.0f,
-            -24.0f,
-            360.0f,
-            120.0f,
-            VertAlignment::BOTTOM,
-            HoriAlignment::LEFT,
-            Padding{20, 16, 14, 14});
-
-        overlayWindow = ui->CreateWindowDocked(std::move(window));
-        auto* mainTable = overlayWindow->CreateTable({0, 0, 1, 0});
-
-        {
-            // The title doubles as the scene-name display, so capture the
-            // pointer for later SetSceneName updates.
-            auto* titleRow = mainTable->CreateTableRow(30);
-            auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
-            overlayTitleText = titleCell->CreateTitleBar(std::move(title), "");
-        }
-
-        {
-            auto* contentRow = mainTable->CreateTableRow({1, 0, 0, 0});
-            auto* contentCell = contentRow->CreateTableCell({4, 4, 8, 8});
-            auto* table = contentCell->CreateTable();
-
-            auto addLine = [ui, table](const char* text) {
-                auto* row = table->CreateTableRow();
-                auto* cell = row->CreateTableCell(Padding{2, 2, 2, 2});
-                auto label = std::make_unique<TextBox>(
-                    ui, cell, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::LEFT);
-                return cell->CreateTextbox(std::move(label), text);
-            };
-
-            modeText = addLine("Mode: Select");
-            cursorText = addLine("Cursor: -");
-        }
-
-        overlayWindow->FinalizeLayout();
-    }
-
     void EditorGui::createHierarchyWindow(
         GameUIEngine* ui, Settings* settings, const std::function<void(entt::entity)>& onSceneObjectSelected)
     {
@@ -501,13 +570,13 @@ namespace sage::editor
             settings,
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
-            24.0f,
-            24.0f,
-            360.0f,
-            560.0f,
+            0.0f,
+            0.0f,
+            LEFT_DOCK_WIDTH,
+            DOCK_HEIGHT,
             VertAlignment::TOP,
             HoriAlignment::LEFT,
-            Padding{20, 16, 14, 14});
+            Padding{18, 16, 14, 14});
 
         hierarchyWindow = ui->CreateWindowDocked(std::move(window));
         auto* mainTable = hierarchyWindow->CreateTable({0, 0, 1, 0});
@@ -568,12 +637,12 @@ namespace sage::editor
             settings,
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
-            -24.0f,
-            24.0f,
-            424.0f,
-            356.0f,
-            VertAlignment::TOP,
-            HoriAlignment::RIGHT,
+            LEFT_DOCK_WIDTH + ASSET_DRAWER_MARGIN,
+            ASSET_DRAWER_CLOSED_Y_OFFSET,
+            ASSET_DRAWER_WIDTH,
+            ASSET_DRAWER_HEIGHT,
+            VertAlignment::BOTTOM,
+            HoriAlignment::LEFT,
             Padding{20, 16, 14, 14});
 
         assetWindow = ui->CreateWindowDocked(std::move(window));
@@ -581,35 +650,33 @@ namespace sage::editor
         auto* mainTable = assetWindow->CreateTable({0, 0, 4, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(18);
-            auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
-            titleCell->CreateTitleBar(std::move(title), "Assets");
+            auto* titleRow = mainTable->CreateTableRow(14);
+            auto* titleCell = titleRow->CreateTableCell(Padding{2, 2, 2, 2});
+            auto title =
+                std::make_unique<AssetDrawerTitleBar>(
+                    ui, titleCell, [this]() { setAssetDrawerOpen(!assetDrawerOpen); });
+            titleCell->CreateTextbox(std::move(title), "Assets");
         }
 
         {
             auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
             auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
-            auto* grid = contentCell->CreateTableGrid(ASSET_VISIBLE_ROWS, ASSET_GRID_COLUMNS, 10.0f);
+            auto* table = contentCell->CreateTable();
 
             assetButtons.clear();
             assetButtons.reserve(ASSET_VISIBLE_ROWS * ASSET_GRID_COLUMNS);
-            if (!grid->children.empty())
+            for (int rowIndex = 0; rowIndex < ASSET_VISIBLE_ROWS; ++rowIndex)
             {
-                for (std::size_t rowIndex = 0; rowIndex < grid->children.size(); ++rowIndex)
+                auto* row = table->CreateTableRow(Padding{0, 0, 0, 0});
+                for (int colIndex = 0; colIndex < ASSET_GRID_COLUMNS; ++colIndex)
                 {
-                    auto* row = dynamic_cast<TableRow*>(grid->children.at(rowIndex).get());
-                    if (!row) continue;
-                    for (std::size_t colIndex = 0; colIndex < row->children.size(); ++colIndex)
-                    {
-                        auto* cell = dynamic_cast<TableCell*>(row->children.at(colIndex).get());
-                        auto thumbnail = std::make_unique<AssetThumbnailButton>(
-                            ui,
-                            cell,
-                            &selectedAssetIndex,
-                            onAssetSelected);
-                        assetButtons.push_back(cell->CreateImagebox(std::move(thumbnail)));
-                    }
+                    auto* cell = row->CreateTableCell(Padding{5, 5, 5, 5});
+                    auto thumbnail = std::make_unique<AssetThumbnailButton>(
+                        ui,
+                        cell,
+                        &selectedAssetIndex,
+                        onAssetSelected);
+                    assetButtons.push_back(cell->CreateImagebox(std::move(thumbnail)));
                 }
             }
         }
@@ -634,12 +701,12 @@ namespace sage::editor
             settings,
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
-            -24.0f,
+            LEFT_DOCK_WIDTH + ASSET_DRAWER_MARGIN,
+            -(ASSET_DRAWER_MARGIN + ASSET_DRAWER_HEIGHT + 12.0f),
             392.0f,
-            392.0f,
-            248.0f,
-            VertAlignment::TOP,
-            HoriAlignment::RIGHT,
+            232.0f,
+            VertAlignment::BOTTOM,
+            HoriAlignment::LEFT,
             Padding{20, 16, 14, 14});
 
         assetDefaultsWindow = ui->CreateWindowDocked(std::move(window));
@@ -721,10 +788,10 @@ namespace sage::editor
             settings,
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
-            -24.0f,
-            652.0f,
-            460.0f,
-            520.0f,
+            0.0f,
+            0.0f,
+            RIGHT_DOCK_WIDTH,
+            DOCK_HEIGHT,
             VertAlignment::TOP,
             HoriAlignment::RIGHT,
             Padding{20, 16, 14, 14});
@@ -846,7 +913,6 @@ namespace sage::editor
             assetThumbnails.push_back(createAssetThumbnail(asset));
         }
 
-        createOverlayWindow(ui, settings);
         createHierarchyWindow(ui, settings, onSceneObjectSelected);
         createAssetWindow(ui, settings, assets, onAssetSelected);
         createAssetDefaultsWindow(ui, settings);
