@@ -60,6 +60,13 @@ namespace sage
                 static_cast<int>(viewport.height),
                 {viewport.x, viewport.y});
         }
+
+        RenderTexture LoadFilteredRenderTexture(const int width, const int height)
+        {
+            auto texture = LoadRenderTexture(std::max(1, width), std::max(1, height));
+            SetTextureFilter(texture.texture, TEXTURE_FILTER_BILINEAR);
+            return texture;
+        }
     } // namespace
 
     void EditorApplication::init()
@@ -80,9 +87,11 @@ namespace sage
         scene->SetSceneName(std::filesystem::path{mapPath}.stem().string());
 
         const auto renderViewport = settings->GetRenderViewPort();
-        renderTexture = LoadRenderTexture(static_cast<int>(renderViewport.x), static_cast<int>(renderViewport.y));
+        renderTexture =
+            LoadFilteredRenderTexture(static_cast<int>(renderViewport.x), static_cast<int>(renderViewport.y));
         const auto appViewport = settings->GetViewPort();
-        renderTexture2d = LoadRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
+        renderTexture2d =
+            LoadFilteredRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
     }
 
     void EditorApplication::draw() const
@@ -195,10 +204,12 @@ namespace sage
 
         UnloadRenderTexture(renderTexture);
         const auto renderViewport = settings->GetRenderViewPort();
-        renderTexture = LoadRenderTexture(static_cast<int>(renderViewport.x), static_cast<int>(renderViewport.y));
+        renderTexture =
+            LoadFilteredRenderTexture(static_cast<int>(renderViewport.x), static_cast<int>(renderViewport.y));
 
         UnloadRenderTexture(renderTexture2d);
-        renderTexture2d = LoadRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
+        renderTexture2d =
+            LoadFilteredRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
     }
 
     void EditorApplication::handleWindowResize()

@@ -22,8 +22,19 @@
 #include "MapLoader.hpp"
 #include "sage-cereal.hpp"
 
+#include <algorithm>
+
 namespace lq
 {
+    namespace
+    {
+        RenderTexture LoadFilteredRenderTexture(const int width, const int height)
+        {
+            auto texture = LoadRenderTexture(std::max(1, width), std::max(1, height));
+            SetTextureFilter(texture.texture, TEXTURE_FILTER_BILINEAR);
+            return texture;
+        }
+    } // namespace
 
     void Application::init()
     {
@@ -50,8 +61,8 @@ namespace lq
         scene =
             std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
         const auto viewport = settings->GetViewPort();
-        renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
-        renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+        renderTexture = LoadFilteredRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+        renderTexture2d = LoadFilteredRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
 
         sage::serializer::SaveViewJson<AbilityData>(*registry, "resources/ability-data.json");
     }
@@ -102,8 +113,8 @@ namespace lq
             scene->sys->engine.userInput->onWindowUpdate.Publish(prev, viewport);
             UnloadRenderTexture(renderTexture);
             UnloadRenderTexture(renderTexture2d);
-            renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
-            renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+            renderTexture = LoadFilteredRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+            renderTexture2d = LoadFilteredRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
         }
     }
 

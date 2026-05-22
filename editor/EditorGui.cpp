@@ -35,6 +35,11 @@ namespace sage::editor
             1920.0f - LEFT_DOCK_WIDTH - RIGHT_DOCK_WIDTH - ASSET_BROWSER_MARGIN * 2.0f;
         constexpr Color EDITOR_WINDOW_BACKGROUND = {35, 38, 43, 245};
         constexpr Color EDITOR_TEXT = {230, 234, 240, 255};
+        constexpr float SIDE_DOCK_TITLE_ROW_HEIGHT = 4.0f;
+        constexpr float BOTTOM_DOCK_TITLE_ROW_HEIGHT = 10.0f;
+        constexpr float FLOATING_PANEL_TITLE_ROW_HEIGHT = 15.0f;
+        constexpr Padding CONTENT_ROW_PADDING = {2, 0, 0, 0};
+        constexpr Padding CONTENT_CELL_PADDING = {2, 6, 8, 8};
 
         TextBox::FontInfo EditorTextFontInfo()
         {
@@ -43,14 +48,21 @@ namespace sage::editor
             return info;
         }
 
-        // Inspector packs many labels/inputs into a narrow column. Allow the
-        // shrink-to-fit logic to go below the global default of 16 so long
-        // labels like "Local Bounds Min" actually fit at the typical scale.
+        TextBox::FontInfo EditorTitleFontInfo()
+        {
+            auto info = EditorTextFontInfo();
+            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-Bold.ttf");
+            info.baseFontSize = 22;
+            info.minFontSize = 18;
+            return info;
+        }
+
         TextBox::FontInfo EditorInspectorFontInfo()
         {
             auto info = EditorTextFontInfo();
-            info.baseFontSize = 14;
-            info.minFontSize = 11;
+            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-SemiBold.ttf");
+            info.baseFontSize = 18;
+            info.minFontSize = 15;
             return info;
         }
 
@@ -113,7 +125,7 @@ namespace sage::editor
                 DrawRectangleRec(rec, background);
                 DrawRectangleLinesEx(rec, selected ? 3.0f : 1.0f, border);
 
-                const float labelHeight = 22.0f;
+                const float labelHeight = 28.0f;
                 const float imageSize = std::max(0.0f, std::min(rec.width, rec.height - labelHeight - 6.0f));
                 const Rectangle imageDest = {
                     rec.x + (rec.width - imageSize) * 0.5f, rec.y + 6.0f, imageSize, imageSize};
@@ -132,18 +144,22 @@ namespace sage::editor
                         WHITE);
                 }
 
-                int fontSize = 14;
+                int fontSize = 16;
+                const Font font =
+                    ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-SemiBold.ttf");
                 const int maxTextWidth = static_cast<int>(std::max(0.0f, rec.width - 12.0f));
-                while (fontSize > 10 && MeasureText(label.c_str(), fontSize) > maxTextWidth)
+                while (fontSize > 12 && MeasureTextEx(font, label.c_str(), fontSize, 1.0f).x > maxTextWidth)
                 {
                     --fontSize;
                 }
-                const int textWidth = MeasureText(label.c_str(), fontSize);
-                DrawText(
+                const Vector2 textSize = MeasureTextEx(font, label.c_str(), fontSize, 1.0f);
+                DrawTextEx(
+                    font,
                     label.c_str(),
-                    static_cast<int>(rec.x + (rec.width - static_cast<float>(textWidth)) * 0.5f),
-                    static_cast<int>(rec.y + rec.height - labelHeight),
+                    {rec.x + (rec.width - textSize.x) * 0.5f,
+                     rec.y + rec.height - labelHeight + (labelHeight - textSize.y) * 0.5f},
                     fontSize,
+                    1.0f,
                     BLACK);
             }
 
@@ -190,12 +206,14 @@ namespace sage::editor
                 DrawRectangleRec(rec, Color{233, 238, 246, 255});
                 DrawRectangleLinesEx(rec, 1.0f, Color{151, 164, 184, 255});
                 const int fontSize = static_cast<int>(fontInfo.fontSize);
-                const int textWidth = MeasureText(GetContent().c_str(), fontSize);
-                DrawText(
+                const Vector2 textSize =
+                    MeasureTextEx(fontInfo.font, GetContent().c_str(), fontSize, fontInfo.fontSpacing);
+                DrawTextEx(
+                    fontInfo.font,
                     GetContent().c_str(),
-                    static_cast<int>(rec.x + (rec.width - static_cast<float>(textWidth)) * 0.5f),
-                    static_cast<int>(rec.y + (rec.height - static_cast<float>(fontSize)) * 0.5f),
+                    {rec.x + (rec.width - textSize.x) * 0.5f, rec.y + (rec.height - textSize.y) * 0.5f},
                     fontSize,
+                    fontInfo.fontSpacing,
                     BLACK);
             }
 
@@ -290,18 +308,20 @@ namespace sage::editor
             int fontSize,
             const Color color)
         {
-            while (fontSize > 12 && MeasureText(text.c_str(), fontSize) > maxWidth)
+            const Font font = TextBox::DefaultFont();
+            while (fontSize > 12 && MeasureTextEx(font, text.c_str(), fontSize, 1.0f).x > maxWidth)
             {
                 --fontSize;
             }
 
-            DrawText(
+            DrawTextEx(
+                font,
                 text.c_str(),
-                static_cast<int>(position.x + 1.0f),
-                static_cast<int>(position.y + 1.0f),
+                {position.x + 1.0f, position.y + 1.0f},
                 fontSize,
+                1.0f,
                 BLACK);
-            DrawText(text.c_str(), static_cast<int>(position.x), static_cast<int>(position.y), fontSize, color);
+            DrawTextEx(font, text.c_str(), position, fontSize, 1.0f, color);
         }
 
     } // namespace
@@ -516,16 +536,16 @@ namespace sage::editor
         auto* mainTable = hierarchyWindow->CreateTable({0, 0, 1, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(8);
+            auto* titleRow = mainTable->CreateTableRow(SIDE_DOCK_TITLE_ROW_HEIGHT);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTitleFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Hierarchy");
         }
 
         hierarchyWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
 
         {
-            auto* contentRow = mainTable->CreateTableRow({1, 0, 0, 0});
+            auto* contentRow = mainTable->CreateTableRow(CONTENT_ROW_PADDING);
             auto* listCell = contentRow->CreateTableCell(Padding{2, 8, 8, 2});
             auto* table = listCell->CreateTable();
 
@@ -584,15 +604,15 @@ namespace sage::editor
         auto* mainTable = assetWindow->CreateTable({0, 0, 4, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(14);
+            auto* titleRow = mainTable->CreateTableRow(BOTTOM_DOCK_TITLE_ROW_HEIGHT);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTitleFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Assets");
         }
 
         {
-            auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
-            auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
+            auto* contentRow = mainTable->CreateTableRow(CONTENT_ROW_PADDING);
+            auto* contentCell = contentRow->CreateTableCell(CONTENT_CELL_PADDING);
             auto* table = contentCell->CreateTable();
 
             assetButtons.clear();
@@ -645,15 +665,15 @@ namespace sage::editor
         auto* mainTable = assetDefaultsWindow->CreateTable({0, 0, 4, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(18);
+            auto* titleRow = mainTable->CreateTableRow(FLOATING_PANEL_TITLE_ROW_HEIGHT);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTitleFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Asset Defaults");
         }
 
         {
-            auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
-            auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
+            auto* contentRow = mainTable->CreateTableRow(CONTENT_ROW_PADDING);
+            auto* contentCell = contentRow->CreateTableCell(CONTENT_CELL_PADDING);
             auto* table = contentCell->CreateTable();
 
             auto addLine = [ui, table](const char* text) {
@@ -732,17 +752,17 @@ namespace sage::editor
         auto* mainTable = inspectorWindow->CreateTable({0, 0, 4, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(6);
+            auto* titleRow = mainTable->CreateTableRow(SIDE_DOCK_TITLE_ROW_HEIGHT);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTitleFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Inspector");
         }
 
         inspectorWindow->SetOverflowContingency(OverflowContingency::SCROLLBAR);
 
         {
-            auto* contentRow = mainTable->CreateTableRow({10, 0, 0, 0});
-            auto* contentCell = contentRow->CreateTableCell({8, 8, 8, 8});
+            auto* contentRow = mainTable->CreateTableRow(CONTENT_ROW_PADDING);
+            auto* contentCell = contentRow->CreateTableCell(CONTENT_CELL_PADDING);
             auto* table = contentCell->CreateTable();
 
             auto addLine = [ui, table](const char* text) {
@@ -790,9 +810,9 @@ namespace sage::editor
         auto* mainTable = deleteConfirmationWindow->CreateTable({0, 0, 4, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(18);
+            auto* titleRow = mainTable->CreateTableRow(FLOATING_PANEL_TITLE_ROW_HEIGHT);
             auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTitleFontInfo());
             titleCell->CreateTitleBar(std::move(title), "Confirm Delete");
         }
 

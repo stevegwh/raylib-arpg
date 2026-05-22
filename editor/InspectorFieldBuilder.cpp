@@ -1,6 +1,7 @@
 #include "InspectorFieldBuilder.hpp"
 
 #include "engine/GameUiEngine.hpp"
+#include "engine/ResourceManager.hpp"
 #include "engine/ui/Scrollbar.hpp"
 #include "engine/ui/UIElements.hpp"
 #include "engine/ui/UILayout.hpp"
@@ -27,15 +28,16 @@ namespace sage::editor
 
     namespace
     {
-        constexpr std::size_t INSPECTOR_VISIBLE_ROWS = 28;
+        constexpr std::size_t INSPECTOR_VISIBLE_ROWS = 24;
         constexpr Color EDITOR_TEXT = {230, 234, 240, 255};
 
         TextBox::FontInfo EditorInspectorFontInfo()
         {
             auto info = TextBox::FontInfo{};
             info.color = EDITOR_TEXT;
-            info.baseFontSize = 14;
-            info.minFontSize = 11;
+            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-SemiBold.ttf");
+            info.baseFontSize = 18;
+            info.minFontSize = 15;
             return info;
         }
 

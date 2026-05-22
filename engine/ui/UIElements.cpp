@@ -42,6 +42,11 @@ namespace sage
         return content;
     }
 
+    Font TextBox::DefaultFont()
+    {
+        return ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-Regular.ttf");
+    }
+
     void TextBox::SetContent(const std::string& _content)
     {
         content = _content;

@@ -29,6 +29,8 @@ namespace sage
             // SHRINK_THEN_EXTEND ?
         };
 
+        static Font DefaultFont();
+
         struct FontInfo
         {
             float baseFontSize;
@@ -43,7 +45,7 @@ namespace sage
                 : baseFontSize(16),
                   fontSize(16),
                   fontSpacing(1.0f),
-                  font(GetFontDefault()),
+                  font(DefaultFont()),
                   color(BLACK),
                   overflowBehaviour(OverflowBehaviour::SHRINK_TO_FIT)
             {

@@ -15,6 +15,7 @@
 #include "engine/Settings.hpp"
 #include "engine/slib.hpp"
 #include "engine/systems/RenderSystem.hpp"
+#include "engine/ui/UIElements.hpp"
 
 #include "components/ContextualDialogTriggerComponent.hpp"
 #include "ParsingHelpers.hpp"
@@ -214,11 +215,15 @@ namespace lq
 
             auto scaledFontSize = sys->engine.settings->ScaleValueMaintainRatio(fontSize);
             const auto text = contextualDiag.GetText();
-            DrawText(
+            const Font font = sage::TextBox::DefaultFont();
+            const Vector2 textSize = MeasureTextEx(font, text.c_str(), scaledFontSize, 1.0f);
+            DrawTextEx(
+                font,
                 text.c_str(),
-                static_cast<float>(static_cast<int>(screenPos.x) - MeasureText(text.c_str(), scaledFontSize) / 2),
-                static_cast<float>(static_cast<int>(screenPos.y)),
+                {static_cast<float>(static_cast<int>(screenPos.x)) - textSize.x / 2.0f,
+                 static_cast<float>(static_cast<int>(screenPos.y))},
                 scaledFontSize,
+                1.0f,
                 WHITE);
         }
     }

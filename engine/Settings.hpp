@@ -10,6 +10,7 @@
 #include "raylib.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace sage
 {
@@ -108,8 +109,8 @@ namespace sage
         [[nodiscard]] Vector2 GetViewportOffset() const
         {
             return {
-                (static_cast<float>(screenWidth) - static_cast<float>(viewportWidth)) * 0.5f,
-                (static_cast<float>(screenHeight) - static_cast<float>(viewportHeight)) * 0.5f};
+                std::floor((static_cast<float>(screenWidth) - static_cast<float>(viewportWidth)) * 0.5f),
+                std::floor((static_cast<float>(screenHeight) - static_cast<float>(viewportHeight)) * 0.5f)};
         }
 
         [[nodiscard]] Vector2 GetRenderViewportOffset() const

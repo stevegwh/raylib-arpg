@@ -147,7 +147,7 @@ namespace sage
     FullscreenTextOverlayManager::FullscreenTextOverlayManager(EngineSystems* _sys)
         : font(
               ResourceManager::GetInstance().FontLoad(
-                  "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+                  "resources/fonts/FiraCode/FiraCode-Bold.ttf")),
           timer({}),
           sys(_sys)
     {

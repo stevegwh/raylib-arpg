@@ -544,7 +544,7 @@ namespace sage
         : settings(_settings),
           font(
               ResourceManager::GetInstance().FontLoad(
-                  "resources/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf")),
+                  "resources/fonts/FiraCode/FiraCode-Bold.ttf")),
           fontSpacing(1.5),
           msg(std::move(_msg)),
           initialTime(GetTime())

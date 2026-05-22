@@ -405,7 +405,8 @@ namespace sage
         assert(FileExists(path.c_str()));
         if (!fonts.contains(path))
         {
-            auto font = LoadFont(path.c_str());
+            auto font = LoadFontEx(path.c_str(), 96, nullptr, 0);
+            SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
             for (size_t i = 0; i < font.glyphCount; i++)
             {
                 assert(font.glyphs[i].image.data != nullptr);
