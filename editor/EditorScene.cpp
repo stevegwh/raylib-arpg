@@ -246,8 +246,12 @@ namespace sage
 
     void EditorScene::Draw2D() const
     {
-        gui->DrawSceneViewInfo();
         sys->UI().Draw2D();
+    }
+
+    void EditorScene::DrawOverlay2D() const
+    {
+        gui->DrawSceneViewInfo();
     }
 
     bool EditorScene::HandleEscapePressed()

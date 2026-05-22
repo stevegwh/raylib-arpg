@@ -128,6 +128,7 @@ namespace sage
             appViewportOffset,
             WHITE);
 
+        scene->DrawOverlay2D();
         DrawFPS(12, 12);
 
         if (exitWindowRequested)

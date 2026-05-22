@@ -302,13 +302,13 @@ namespace sage::editor
         };
 
         void DrawTextFit(
+            const Font font,
             const std::string& text,
             const Vector2 position,
             const float maxWidth,
             int fontSize,
             const Color color)
         {
-            const Font font = TextBox::DefaultFont();
             while (fontSize > 12 && MeasureTextEx(font, text.c_str(), fontSize, 1.0f).x > maxWidth)
             {
                 --fontSize;
@@ -420,16 +420,20 @@ namespace sage::editor
     {
         if (!ui || !ui->settings) return;
 
-        const auto renderOffset = ui->settings->GetRenderViewportOffset();
-        const auto renderViewport = ui->settings->GetRenderViewPort();
-        const float x = renderOffset.x + ui->settings->ScaleValueWidth(16.0f);
-        const float y = renderOffset.y + ui->settings->ScaleValueHeight(14.0f);
-        const float maxWidth = std::max(1.0f, renderViewport.x - ui->settings->ScaleValueWidth(32.0f));
-        const int titleSize = static_cast<int>(ui->settings->ScaleValueMaintainRatio(22.0f));
-        const int metaSize = static_cast<int>(ui->settings->ScaleValueMaintainRatio(16.0f));
+        const auto renderViewport = ui->settings->GetRenderViewportScreenRect();
+        const float x = renderViewport.x + ui->settings->ScaleValueWidth(16.0f);
+        const float y = renderViewport.y + ui->settings->ScaleValueHeight(14.0f);
+        const float maxWidth = std::max(1.0f, renderViewport.width - ui->settings->ScaleValueWidth(32.0f));
+        const int titleSize = std::max(22, static_cast<int>(ui->settings->ScaleValueMaintainRatio(22.0f)));
+        const int metaSize = std::max(16, static_cast<int>(ui->settings->ScaleValueMaintainRatio(16.0f)));
+        const Font titleFont =
+            ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-Bold.ttf");
+        const Font metaFont =
+            ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-SemiBold.ttf");
 
-        DrawTextFit(sceneNameStatus, {x, y}, maxWidth, titleSize, EDITOR_TEXT);
+        DrawTextFit(titleFont, sceneNameStatus, {x, y}, maxWidth, titleSize, EDITOR_TEXT);
         DrawTextFit(
+            metaFont,
             "Mode: " + modeStatus + "  |  Cursor: " + cursorStatus,
             {x, y + ui->settings->ScaleValueHeight(28.0f)},
             maxWidth,
