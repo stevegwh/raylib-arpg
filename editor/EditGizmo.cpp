@@ -200,12 +200,15 @@ namespace sage::editor
     }
 
     EditGizmo::DragSample EditGizmo::SampleDrag(
-        const Camera3D& camera, const Vector2 viewport, const Vector3 origin, const Mode mode)
+        const Camera3D& camera,
+        const Vector2 viewport,
+        const Vector3 origin,
+        const Mode mode,
+        const Vector2 mousePosition)
     {
         if (!drag.active) return {};
 
         const Vector2 previousMousePosition = drag.lastMousePosition;
-        const Vector2 mousePosition = GetMousePosition();
         const Vector2 mouseDelta = Vector2Subtract(mousePosition, previousMousePosition);
         drag.lastMousePosition = mousePosition;
         if (Vector2Length(mouseDelta) <= 0.0001f) return {};

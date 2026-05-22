@@ -131,10 +131,11 @@ namespace sage::editor
         }
 
         const Camera3D camera = *sys->camera->getRaylibCam();
-        const Vector2 viewport = sys->settings->GetViewPort();
+        const Vector2 viewport = sys->settings->GetRenderViewPort();
+        const Vector2 mousePosition = sys->settings->ScreenToRenderViewportPosition(GetMousePosition());
         const Vector3 origin = PivotWorldPosition(entity);
 
-        const auto sample = gizmo.SampleDrag(camera, viewport, origin, mode);
+        const auto sample = gizmo.SampleDrag(camera, viewport, origin, mode, mousePosition);
         if (sample.axis == EditGizmo::Axis::None) return;
 
         switch (mode)
@@ -171,15 +172,17 @@ namespace sage::editor
     bool EditorTransformEditor::TryStartDrag(const entt::entity entity, const Vector2 mousePosition)
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return false;
+        if (!sys->settings->IsPointInRenderViewport(mousePosition)) return false;
 
         const Camera3D camera = *sys->camera->getRaylibCam();
-        const Vector2 viewport = sys->settings->GetViewPort();
+        const Vector2 viewport = sys->settings->GetRenderViewPort();
+        const Vector2 renderMousePosition = sys->settings->ScreenToRenderViewportPosition(mousePosition);
         const Vector3 origin = PivotWorldPosition(entity);
 
-        const auto axis = gizmo.HitTest(camera, viewport, origin, mode, mousePosition);
+        const auto axis = gizmo.HitTest(camera, viewport, origin, mode, renderMousePosition);
         if (axis == EditGizmo::Axis::None) return false;
 
-        gizmo.BeginDrag(axis, mousePosition);
+        gizmo.BeginDrag(axis, renderMousePosition);
         sys->camera->LockInput();
         return true;
     }
@@ -189,7 +192,7 @@ namespace sage::editor
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
 
         const Camera3D camera = *sys->camera->getRaylibCam();
-        const Vector2 viewport = sys->settings->GetViewPort();
+        const Vector2 viewport = sys->settings->GetRenderViewPort();
         const Vector3 origin = PivotWorldPosition(entity);
         gizmo.Draw(camera, viewport, origin, mode);
     }

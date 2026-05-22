@@ -14,14 +14,61 @@
 
 #include "raylib.h"
 
+#include <algorithm>
+
 namespace sage
 {
+    namespace
+    {
+        constexpr float EDITOR_LEFT_DOCK_WIDTH = 340.0f;
+        constexpr float EDITOR_RIGHT_DOCK_WIDTH = 440.0f;
+        constexpr float EDITOR_ASSET_BROWSER_HEIGHT = 344.0f;
+        constexpr float EDITOR_SCENE_VIEW_PADDING = 18.0f;
+        constexpr float EDITOR_SCENE_ASPECT = 16.0f / 9.0f;
+
+        Rectangle CalculateSceneViewport(Settings& settings)
+        {
+            const auto appViewport = settings.GetViewPort();
+            const float left = settings.ScaleValueWidth(EDITOR_LEFT_DOCK_WIDTH + EDITOR_SCENE_VIEW_PADDING);
+            const float right = settings.ScaleValueWidth(EDITOR_RIGHT_DOCK_WIDTH + EDITOR_SCENE_VIEW_PADDING);
+            const float bottom =
+                settings.ScaleValueHeight(EDITOR_ASSET_BROWSER_HEIGHT + EDITOR_SCENE_VIEW_PADDING * 2.0f);
+            const float top = settings.ScaleValueHeight(EDITOR_SCENE_VIEW_PADDING);
+
+            const float availableWidth = std::max(1.0f, appViewport.x - left - right);
+            const float availableHeight = std::max(1.0f, appViewport.y - top - bottom);
+            float viewportWidth = availableWidth;
+            float viewportHeight = viewportWidth / EDITOR_SCENE_ASPECT;
+            if (viewportHeight > availableHeight)
+            {
+                viewportHeight = availableHeight;
+                viewportWidth = viewportHeight * EDITOR_SCENE_ASPECT;
+            }
+
+            return {
+                left + (availableWidth - viewportWidth) * 0.5f,
+                top + (availableHeight - viewportHeight) * 0.5f,
+                viewportWidth,
+                viewportHeight};
+        }
+
+        void ConfigureEditorSceneViewport(Settings& settings)
+        {
+            const Rectangle viewport = CalculateSceneViewport(settings);
+            settings.SetRenderViewport(
+                static_cast<int>(viewport.width),
+                static_cast<int>(viewport.height),
+                {viewport.x, viewport.y});
+        }
+    } // namespace
+
     void EditorApplication::init()
     {
-        SetConfigFlags(FLAG_MSAA_4X_HINT);
+        SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
         const auto screenSize = settings->GetScreenSize();
         InitWindow(static_cast<int>(screenSize.x), static_cast<int>(screenSize.y), "BG Raylib Editor");
         settings->UpdateViewport();
+        ConfigureEditorSceneViewport(*settings);
         SetExitKey(KEY_NULL);
         EnableCursor();
 
@@ -32,8 +79,10 @@ namespace sage
         scene = std::make_unique<EditorScene>(systems.get());
         scene->SetSceneName(std::filesystem::path{mapPath}.stem().string());
 
-        const auto viewport = settings->GetViewPort();
-        renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+        const auto renderViewport = settings->GetRenderViewPort();
+        renderTexture = LoadRenderTexture(static_cast<int>(renderViewport.x), static_cast<int>(renderViewport.y));
+        const auto appViewport = settings->GetViewPort();
+        renderTexture2d = LoadRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
     }
 
     void EditorApplication::draw() const
@@ -45,22 +94,49 @@ namespace sage
         EndMode3D();
         EndTextureMode();
 
-        BeginDrawing();
-        ClearBackground(Color{232, 235, 238, 255});
-
-        const auto [width, height] = settings->GetViewPort();
-        DrawTextureRec(renderTexture.texture, {0, 0, width, -height}, {0, 0}, WHITE);
-
+        BeginTextureMode(renderTexture2d);
+        ClearBackground(BLANK);
         scene->Draw2D();
+        EndTextureMode();
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        const auto appViewport = settings->GetViewPort();
+        const auto appViewportOffset = settings->GetViewportOffset();
+        const auto renderViewport = settings->GetRenderViewPort();
+        const auto renderViewportOffset = settings->GetRenderViewportOffset();
+
+        DrawTextureRec(
+            renderTexture.texture,
+            {0, 0, renderViewport.x, -renderViewport.y},
+            {appViewportOffset.x + renderViewportOffset.x, appViewportOffset.y + renderViewportOffset.y},
+            WHITE);
+
+        DrawTextureRec(
+            renderTexture2d.texture,
+            {0, 0, appViewport.x, -appViewport.y},
+            appViewportOffset,
+            WHITE);
+
         DrawFPS(12, 12);
 
         if (exitWindowRequested)
         {
-            const auto viewport = settings->GetViewPort();
-            DrawRectangle(0, 100, static_cast<int>(viewport.x), 200, BLACK);
+            DrawRectangle(
+                static_cast<int>(appViewportOffset.x),
+                static_cast<int>(appViewportOffset.y + 100.0f),
+                static_cast<int>(appViewport.x),
+                200,
+                BLACK);
             const auto text = "Are you sure you want to exit program? [Y/N]";
             const auto textSize = MeasureText(text, 30);
-            DrawText(text, static_cast<int>((viewport.x - textSize) / 2), 180, 30, WHITE);
+            DrawText(
+                text,
+                static_cast<int>(appViewportOffset.x + (appViewport.x - textSize) / 2.0f),
+                static_cast<int>(appViewportOffset.y + 180.0f),
+                30,
+                WHITE);
         }
 
         EndDrawing();
@@ -107,10 +183,33 @@ namespace sage
 #endif
 
         settings->toggleFullScreenRequested = false;
-        const auto viewport = settings->GetViewPort();
-        systems->userInput->onWindowUpdate.Publish(prev, viewport);
+        refreshViewportLayout(prev);
+    }
+
+    void EditorApplication::refreshViewportLayout(const Vector2 previousViewport)
+    {
+        settings->SetScreenSize(GetScreenWidth(), GetScreenHeight());
+        ConfigureEditorSceneViewport(*settings);
+        const auto appViewport = settings->GetViewPort();
+        systems->userInput->onWindowUpdate.Publish(previousViewport, appViewport);
+
         UnloadRenderTexture(renderTexture);
-        renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
+        const auto renderViewport = settings->GetRenderViewPort();
+        renderTexture = LoadRenderTexture(static_cast<int>(renderViewport.x), static_cast<int>(renderViewport.y));
+
+        UnloadRenderTexture(renderTexture2d);
+        renderTexture2d = LoadRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
+    }
+
+    void EditorApplication::handleWindowResize()
+    {
+        const auto screen = settings->GetScreenSize();
+        if (static_cast<int>(screen.x) == GetScreenWidth() && static_cast<int>(screen.y) == GetScreenHeight())
+        {
+            return;
+        }
+
+        refreshViewportLayout(settings->GetViewPort());
     }
 
     void EditorApplication::Update()
@@ -131,6 +230,7 @@ namespace sage
                     exitWindowRequested = false;
             }
 
+            handleWindowResize();
             scene->Update();
             draw();
             handleScreenUpdate();
@@ -148,6 +248,7 @@ namespace sage
     EditorApplication::~EditorApplication()
     {
         UnloadRenderTexture(renderTexture);
+        UnloadRenderTexture(renderTexture2d);
         CloseWindow();
     }
 } // namespace sage

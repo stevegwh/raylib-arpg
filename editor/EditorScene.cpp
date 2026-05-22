@@ -199,7 +199,7 @@ namespace sage
         sys->collisionSystem->Update();
         sys->audioManager->Update();
         sys->userInput->ListenForInput();
-        if (sys->UI().IsMouseOverWindow())
+        if (sys->UI().IsMouseOverWindow() || !sys->settings->IsPointInRenderViewport(GetMousePosition()))
         {
             sys->camera->ScrollDisable();
         }

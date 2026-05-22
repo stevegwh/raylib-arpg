@@ -17,8 +17,12 @@ namespace sage
         resetHitInfo(mouseHitInfo);
         resetHitInfo(navigationHitInfo);
 
-        const auto viewport = sys->settings->GetViewPort();
-        ray = GetScreenToWorldRayEx(GetMousePosition(), *sys->camera->getRaylibCam(), viewport.x, viewport.y);
+        const Vector2 mousePosition = GetMousePosition();
+        if (!sys->settings->IsPointInRenderViewport(mousePosition)) return;
+
+        const auto viewport = sys->settings->GetRenderViewPort();
+        const auto renderMousePosition = sys->settings->ScreenToRenderViewportPosition(mousePosition);
+        ray = GetScreenToWorldRayEx(renderMousePosition, *sys->camera->getRaylibCam(), viewport.x, viewport.y);
         auto collisions = sys->collisionSystem->GetCollisionsWithRay(ray);
 
         for (auto it = collisions.begin(); it != collisions.end();)

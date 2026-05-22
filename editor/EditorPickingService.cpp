@@ -22,8 +22,11 @@ namespace sage::editor
         const Vector2 screenPosition,
         const entt::entity ignoredEntity) const
     {
-        const auto viewport = sys->settings->GetViewPort();
-        const auto ray = GetScreenToWorldRayEx(screenPosition, *sys->camera->getRaylibCam(), viewport.x, viewport.y);
+        if (!sys->settings->IsPointInRenderViewport(screenPosition)) return std::nullopt;
+
+        const auto viewport = sys->settings->GetRenderViewPort();
+        const auto renderPosition = sys->settings->ScreenToRenderViewportPosition(screenPosition);
+        const auto ray = GetScreenToWorldRayEx(renderPosition, *sys->camera->getRaylibCam(), viewport.x, viewport.y);
         auto collisions = sys->collisionSystem->GetCollisionsWithRay(ray, CollisionMask{~0ull});
 
         std::vector<CollisionInfo> objectHits;

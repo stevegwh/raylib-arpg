@@ -16,6 +16,7 @@ namespace sage
     class EditorApplication
     {
         RenderTexture renderTexture{};
+        RenderTexture renderTexture2d{};
 
         std::unique_ptr<entt::registry> registry;
         std::unique_ptr<KeyMapping> keyMapping;
@@ -30,6 +31,8 @@ namespace sage
         void init();
         void draw() const;
         void handleScreenUpdate();
+        void handleWindowResize();
+        void refreshViewportLayout(Vector2 previousViewport);
 
       public:
         void Update();

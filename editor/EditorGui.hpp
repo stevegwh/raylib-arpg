@@ -78,7 +78,6 @@ namespace sage
             DeleteConfirmationAction pendingDeleteConfirmationAction = DeleteConfirmationAction::None;
             std::optional<std::size_t> selectedAssetIndex;
             std::optional<entt::entity> selectedSceneEntity;
-            bool assetDrawerOpen = false;
             mutable std::string sceneNameStatus = "Scene";
             mutable std::string modeStatus = "Select";
             mutable std::string cursorStatus = "-";
@@ -104,7 +103,6 @@ namespace sage
             void createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings);
             void refreshAssetButtonContent();
             void refreshHierarchyRowContent();
-            void setAssetDrawerOpen(bool open);
 
           public:
             void SetOverlayStatus(const std::string& mode, const std::string& cursor) const;

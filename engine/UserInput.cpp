@@ -9,16 +9,6 @@ namespace sage
     void UserInput::toggleFullScreen() const
     {
         settings->toggleFullScreenRequested = true;
-
-        if (!IsWindowFullscreen())
-        {
-            const int current_screen = GetCurrentMonitor();
-            settings->SetScreenSize(GetMonitorWidth(current_screen), GetMonitorHeight(current_screen));
-        }
-        else if (IsWindowFullscreen())
-        {
-            settings->ResetToUserDefined();
-        }
     }
 
     void UserInput::ListenForInput() const

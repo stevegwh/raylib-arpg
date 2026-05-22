@@ -573,7 +573,8 @@ namespace sage::editor
 
     bool EditorModeStateMachine::isMouseOverUiCell() const
     {
-        return scene.sys->UI().GetCellUnderCursor() != nullptr;
+        return scene.sys->UI().GetCellUnderCursor() != nullptr ||
+               !scene.sys->settings->IsPointInRenderViewport(GetMousePosition());
     }
 
     bool EditorModeStateMachine::isDeleteConfirmationVisible() const

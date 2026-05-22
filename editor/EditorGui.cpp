@@ -29,14 +29,10 @@ namespace sage::editor
         constexpr float LEFT_DOCK_WIDTH = 340.0f;
         constexpr float RIGHT_DOCK_WIDTH = 440.0f;
         constexpr float DOCK_HEIGHT = 1080.0f;
-        constexpr float ASSET_DRAWER_MARGIN = 18.0f;
-        constexpr float ASSET_DRAWER_HEIGHT = 344.0f;
-        constexpr float ASSET_DRAWER_COLLAPSED_HEIGHT = 66.0f;
-        constexpr float ASSET_DRAWER_WIDTH =
-            1920.0f - LEFT_DOCK_WIDTH - RIGHT_DOCK_WIDTH - ASSET_DRAWER_MARGIN * 2.0f;
-        constexpr float ASSET_DRAWER_OPEN_Y_OFFSET = -ASSET_DRAWER_MARGIN;
-        constexpr float ASSET_DRAWER_CLOSED_Y_OFFSET =
-            ASSET_DRAWER_HEIGHT - ASSET_DRAWER_COLLAPSED_HEIGHT - ASSET_DRAWER_MARGIN;
+        constexpr float ASSET_BROWSER_MARGIN = 18.0f;
+        constexpr float ASSET_BROWSER_HEIGHT = 344.0f;
+        constexpr float ASSET_BROWSER_WIDTH =
+            1920.0f - LEFT_DOCK_WIDTH - RIGHT_DOCK_WIDTH - ASSET_BROWSER_MARGIN * 2.0f;
         constexpr Color EDITOR_WINDOW_BACKGROUND = {35, 38, 43, 245};
         constexpr Color EDITOR_TEXT = {230, 234, 240, 255};
 
@@ -215,49 +211,6 @@ namespace sage::editor
             }
         };
 
-        class AssetDrawerTitleBar final : public TextBox
-        {
-            std::function<void()> onPressed;
-
-          public:
-            void OnClick() override
-            {
-                if (onPressed) onPressed();
-            }
-
-            void UpdateDimensions() override
-            {
-                UpdateFontScaling();
-                rec = {
-                    parent->GetRec().x + parent->padding.left,
-                    parent->GetRec().y + parent->padding.up,
-                    parent->GetRec().width - parent->padding.left - parent->padding.right,
-                    parent->GetRec().height - parent->padding.up - parent->padding.down};
-            }
-
-            void Draw2D() override
-            {
-                DrawRectangleRec(rec, Color{45, 49, 56, 255});
-                DrawRectangleLinesEx(rec, 1.0f, Color{84, 94, 110, 255});
-
-                const auto& text = GetContent();
-                const int fontSize = static_cast<int>(fontInfo.fontSize);
-                const int textWidth = MeasureText(text.c_str(), fontSize);
-                DrawText(
-                    text.c_str(),
-                    static_cast<int>(rec.x + (rec.width - static_cast<float>(textWidth)) * 0.5f),
-                    static_cast<int>(rec.y + (rec.height - static_cast<float>(fontSize)) * 0.5f),
-                    fontSize,
-                    fontInfo.color);
-            }
-
-            AssetDrawerTitleBar(GameUIEngine* ui, TableCell* parent, std::function<void()> callback)
-                : TextBox(ui, parent, EditorTextFontInfo(), VertAlignment::MIDDLE, HoriAlignment::CENTER),
-                  onPressed(std::move(callback))
-            {
-            }
-        };
-
         class HierarchyRowButton final : public TextBox
         {
             std::size_t rowIndex = 0;
@@ -380,7 +333,7 @@ namespace sage::editor
     {
         selectedAssetIndex = index;
         if (!assetDefaultsWindow) return;
-        if (assetDrawerOpen && selectedAssetIndex.has_value())
+        if (selectedAssetIndex.has_value())
         {
             if (assetDefaultsWindow->IsHidden()) assetDefaultsWindow->Show();
         }
@@ -447,10 +400,11 @@ namespace sage::editor
     {
         if (!ui || !ui->settings) return;
 
-        const float x = ui->settings->ScaleValueWidth(LEFT_DOCK_WIDTH + 22.0f);
-        const float y = ui->settings->ScaleValueHeight(16.0f);
-        const float maxWidth =
-            ui->settings->ScaleValueWidth(1920.0f - LEFT_DOCK_WIDTH - RIGHT_DOCK_WIDTH - 44.0f);
+        const auto renderOffset = ui->settings->GetRenderViewportOffset();
+        const auto renderViewport = ui->settings->GetRenderViewPort();
+        const float x = renderOffset.x + ui->settings->ScaleValueWidth(16.0f);
+        const float y = renderOffset.y + ui->settings->ScaleValueHeight(14.0f);
+        const float maxWidth = std::max(1.0f, renderViewport.x - ui->settings->ScaleValueWidth(32.0f));
         const int titleSize = static_cast<int>(ui->settings->ScaleValueMaintainRatio(22.0f));
         const int metaSize = static_cast<int>(ui->settings->ScaleValueMaintainRatio(16.0f));
 
@@ -493,26 +447,6 @@ namespace sage::editor
         const auto action = pendingDeleteConfirmationAction;
         pendingDeleteConfirmationAction = DeleteConfirmationAction::None;
         return action;
-    }
-
-    void EditorGui::setAssetDrawerOpen(const bool open)
-    {
-        assetDrawerOpen = open;
-
-        if (auto* dockedAssetWindow = dynamic_cast<WindowDocked*>(assetWindow))
-        {
-            dockedAssetWindow->SetDockOffset(
-                LEFT_DOCK_WIDTH + ASSET_DRAWER_MARGIN,
-                assetDrawerOpen ? ASSET_DRAWER_OPEN_Y_OFFSET : ASSET_DRAWER_CLOSED_Y_OFFSET);
-        }
-
-        if (assetDefaultsWindow)
-        {
-            if (assetDrawerOpen && selectedAssetIndex.has_value())
-                assetDefaultsWindow->Show();
-            else
-                assetDefaultsWindow->Hide();
-        }
     }
 
     void EditorGui::refreshAssetButtonContent()
@@ -637,10 +571,10 @@ namespace sage::editor
             settings,
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
-            LEFT_DOCK_WIDTH + ASSET_DRAWER_MARGIN,
-            ASSET_DRAWER_CLOSED_Y_OFFSET,
-            ASSET_DRAWER_WIDTH,
-            ASSET_DRAWER_HEIGHT,
+            LEFT_DOCK_WIDTH + ASSET_BROWSER_MARGIN,
+            -ASSET_BROWSER_MARGIN,
+            ASSET_BROWSER_WIDTH,
+            ASSET_BROWSER_HEIGHT,
             VertAlignment::BOTTOM,
             HoriAlignment::LEFT,
             Padding{20, 16, 14, 14});
@@ -651,11 +585,9 @@ namespace sage::editor
 
         {
             auto* titleRow = mainTable->CreateTableRow(14);
-            auto* titleCell = titleRow->CreateTableCell(Padding{2, 2, 2, 2});
-            auto title =
-                std::make_unique<AssetDrawerTitleBar>(
-                    ui, titleCell, [this]() { setAssetDrawerOpen(!assetDrawerOpen); });
-            titleCell->CreateTextbox(std::move(title), "Assets");
+            auto* titleCell = titleRow->CreateTableCell();
+            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTextFontInfo());
+            titleCell->CreateTitleBar(std::move(title), "Assets");
         }
 
         {
@@ -701,8 +633,8 @@ namespace sage::editor
             settings,
             editorWindowBackgroundTexture,
             TextureStretchMode::STRETCH,
-            LEFT_DOCK_WIDTH + ASSET_DRAWER_MARGIN,
-            -(ASSET_DRAWER_MARGIN + ASSET_DRAWER_HEIGHT + 12.0f),
+            LEFT_DOCK_WIDTH + ASSET_BROWSER_MARGIN,
+            -(ASSET_BROWSER_MARGIN + ASSET_BROWSER_HEIGHT + 12.0f),
             392.0f,
             232.0f,
             VertAlignment::BOTTOM,

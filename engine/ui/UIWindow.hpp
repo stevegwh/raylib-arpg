@@ -122,7 +122,6 @@ namespace sage
 
       public:
         void ScaleContents(Settings* _settings) override;
-        void SetDockOffset(float xOffset, float yOffset);
         WindowDocked(
             Settings* _settings,
             float _xOffset,

@@ -9,6 +9,8 @@
 #include "cereal/cereal.hpp"
 #include "raylib.h"
 
+#include <algorithm>
+
 namespace sage
 {
     struct Settings
@@ -21,6 +23,11 @@ namespace sage
         int screenHeight = 720;
         int viewportWidth = 1920;
         int viewportHeight = 1080;
+        int renderViewportWidth = 1920;
+        int renderViewportHeight = 1080;
+        int renderViewportOffsetX = 0;
+        int renderViewportOffsetY = 0;
+        bool preserveAspectRatio = true;
 
         // Serialized settings (loaded from settings.xml)
         int screenWidthUser{};
@@ -48,6 +55,12 @@ namespace sage
             UpdateViewport();
         }
 
+        void SetPreserveAspectRatio(const bool preserve)
+        {
+            preserveAspectRatio = preserve;
+            UpdateViewport();
+        }
+
         [[nodiscard]] Vector2 GetScreenSize() const
         {
             return {static_cast<float>(screenWidth), static_cast<float>(screenHeight)};
@@ -58,8 +71,21 @@ namespace sage
             return {static_cast<float>(viewportWidth), static_cast<float>(viewportHeight)};
         }
 
+        [[nodiscard]] Vector2 GetRenderViewPort() const
+        {
+            return {static_cast<float>(renderViewportWidth), static_cast<float>(renderViewportHeight)};
+        }
+
         void UpdateViewport()
         {
+            if (!preserveAspectRatio)
+            {
+                viewportWidth = screenWidth;
+                viewportHeight = screenHeight;
+                ResetRenderViewportToAppViewport();
+                return;
+            }
+
             float aspectRatio = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
             static constexpr float targetAspectRatio = 16.0f / 9.0f;
 
@@ -76,6 +102,67 @@ namespace sage
                 viewportWidth = screenWidth;
                 viewportHeight = static_cast<int>(screenWidth / targetAspectRatio);
             }
+            ResetRenderViewportToAppViewport();
+        }
+
+        [[nodiscard]] Vector2 GetViewportOffset() const
+        {
+            return {
+                (static_cast<float>(screenWidth) - static_cast<float>(viewportWidth)) * 0.5f,
+                (static_cast<float>(screenHeight) - static_cast<float>(viewportHeight)) * 0.5f};
+        }
+
+        [[nodiscard]] Vector2 GetRenderViewportOffset() const
+        {
+            return {static_cast<float>(renderViewportOffsetX), static_cast<float>(renderViewportOffsetY)};
+        }
+
+        [[nodiscard]] Rectangle GetRenderViewportRect() const
+        {
+            return {
+                static_cast<float>(renderViewportOffsetX),
+                static_cast<float>(renderViewportOffsetY),
+                static_cast<float>(renderViewportWidth),
+                static_cast<float>(renderViewportHeight)};
+        }
+
+        [[nodiscard]] Rectangle GetRenderViewportScreenRect() const
+        {
+            const auto viewportOffset = GetViewportOffset();
+            return {
+                viewportOffset.x + static_cast<float>(renderViewportOffsetX),
+                viewportOffset.y + static_cast<float>(renderViewportOffsetY),
+                static_cast<float>(renderViewportWidth),
+                static_cast<float>(renderViewportHeight)};
+        }
+
+        [[nodiscard]] bool IsPointInRenderViewport(const Vector2 point) const
+        {
+            return CheckCollisionPointRec(point, GetRenderViewportScreenRect());
+        }
+
+        [[nodiscard]] Vector2 ScreenToRenderViewportPosition(const Vector2 point) const
+        {
+            const auto viewportOffset = GetViewportOffset();
+            return {
+                point.x - viewportOffset.x - static_cast<float>(renderViewportOffsetX),
+                point.y - viewportOffset.y - static_cast<float>(renderViewportOffsetY)};
+        }
+
+        void SetRenderViewport(const int width, const int height, const Vector2 offset)
+        {
+            renderViewportWidth = std::max(1, width);
+            renderViewportHeight = std::max(1, height);
+            renderViewportOffsetX = static_cast<int>(offset.x);
+            renderViewportOffsetY = static_cast<int>(offset.y);
+        }
+
+        void ResetRenderViewportToAppViewport()
+        {
+            renderViewportWidth = viewportWidth;
+            renderViewportHeight = viewportHeight;
+            renderViewportOffsetX = 0;
+            renderViewportOffsetY = 0;
         }
 
         static float GetScreenScaleFactor(float width, float height)

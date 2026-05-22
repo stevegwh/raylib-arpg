@@ -97,10 +97,11 @@ namespace lq
             }
 #endif
             settings->toggleFullScreenRequested = false;
+            settings->SetScreenSize(GetScreenWidth(), GetScreenHeight());
             const auto viewport = settings->GetViewPort();
             scene->sys->engine.userInput->onWindowUpdate.Publish(prev, viewport);
-            UnloadTexture(renderTexture.texture);
-            UnloadTexture(renderTexture2d.texture);
+            UnloadRenderTexture(renderTexture);
+            UnloadRenderTexture(renderTexture2d);
             renderTexture = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
             renderTexture2d = LoadRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
         }
@@ -159,20 +160,30 @@ namespace lq
         BeginDrawing();
 
         ClearBackground(BLACK);
-        auto letterbox = Vector2Subtract(settings->GetScreenSize(), settings->GetViewPort());
+        const auto viewportOffset = settings->GetViewportOffset();
 
         // BeginShaderMode(ResourceManager::GetInstance().ShaderLoad(nullptr, nullptr));
         const auto [width, height] = settings->GetViewPort();
-        DrawTextureRec(renderTexture.texture, {0, 0, width, -height}, {0, letterbox.y / 2}, WHITE);
+        DrawTextureRec(renderTexture.texture, {0, 0, width, -height}, viewportOffset, WHITE);
         // EndShaderMode();
 
-        DrawTextureRec(renderTexture2d.texture, {0, 0, width, -height}, {0, letterbox.y / 2}, WHITE);
+        DrawTextureRec(renderTexture2d.texture, {0, 0, width, -height}, viewportOffset, WHITE);
 
         if (exitWindowRequested)
         {
-            DrawRectangle(0, letterbox.y / 2 + 100, width, 200, BLACK);
+            DrawRectangle(
+                static_cast<int>(viewportOffset.x),
+                static_cast<int>(viewportOffset.y + 100.0f),
+                static_cast<int>(width),
+                200,
+                BLACK);
             auto textSize = MeasureText("Are you sure you want to exit program? [Y/N]", 30);
-            DrawText("Are you sure you want to exit program? [Y/N]", (width - textSize) / 2, 180, 30, WHITE);
+            DrawText(
+                "Are you sure you want to exit program? [Y/N]",
+                static_cast<int>(viewportOffset.x + (width - textSize) / 2.0f),
+                static_cast<int>(viewportOffset.y + 180.0f),
+                30,
+                WHITE);
         }
         DrawFPS(settings->GetScreenSize().x - settings->ScaleValueWidth(120), 10);
         EndDrawing();

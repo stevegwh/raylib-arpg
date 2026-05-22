@@ -78,7 +78,7 @@ namespace sage::editor
         // mouse hasn't moved, or when the projected screen vector is degenerate
         // (camera looking straight down the dragged axis). Otherwise updates
         // lastMousePosition so the next call samples the next delta.
-        DragSample SampleDrag(const Camera3D& camera, Vector2 viewport, Vector3 origin, Mode mode);
+        DragSample SampleDrag(const Camera3D& camera, Vector2 viewport, Vector3 origin, Mode mode, Vector2 mousePosition);
 
         void Draw(const Camera3D& camera, Vector2 viewport, Vector3 origin, Mode mode) const;
 
