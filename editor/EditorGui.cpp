@@ -51,7 +51,7 @@ namespace sage::editor
         TextBox::FontInfo EditorTitleFontInfo()
         {
             auto info = EditorTextFontInfo();
-            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-Bold.ttf");
+            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/NotoSans/NotoSans-ExtraBold.ttf");
             info.baseFontSize = 22;
             info.minFontSize = 18;
             return info;
@@ -60,7 +60,7 @@ namespace sage::editor
         TextBox::FontInfo EditorInspectorFontInfo()
         {
             auto info = EditorTextFontInfo();
-            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-SemiBold.ttf");
+            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/NotoSans/NotoSans-SemiBold.ttf");
             info.baseFontSize = 18;
             info.minFontSize = 15;
             return info;
@@ -72,6 +72,7 @@ namespace sage::editor
         {
             auto info = EditorInspectorFontInfo();
             info.color = Color{17, 24, 39, 255};
+            info.font = ResourceManager::GetInstance().FontLoad("resources/fonts/FiraCode/FiraCode-SemiBold.ttf");
             return info;
         }
 
@@ -314,13 +315,7 @@ namespace sage::editor
                 --fontSize;
             }
 
-            DrawTextEx(
-                font,
-                text.c_str(),
-                {position.x + 1.0f, position.y + 1.0f},
-                fontSize,
-                1.0f,
-                BLACK);
+            DrawTextEx(font, text.c_str(), {position.x + 1.0f, position.y + 1.0f}, fontSize, 1.0f, BLACK);
             DrawTextEx(font, text.c_str(), position, fontSize, 1.0f, color);
         }
 
@@ -365,8 +360,9 @@ namespace sage::editor
 
     void EditorGui::refreshHierarchyRowContent()
     {
-        const std::size_t scrollOffset =
-            hierarchyWindow && hierarchyWindow->GetScrollbar() ? hierarchyWindow->GetScrollbar()->ScrollOffset() : 0;
+        const std::size_t scrollOffset = hierarchyWindow && hierarchyWindow->GetScrollbar()
+                                             ? hierarchyWindow->GetScrollbar()->ScrollOffset()
+                                             : 0;
         for (std::size_t i = 0; i < hierarchyRows.size(); ++i)
         {
             const std::size_t entryIndex = scrollOffset + i;
@@ -396,9 +392,8 @@ namespace sage::editor
         auto* sb = hierarchyWindow ? hierarchyWindow->GetScrollbar() : nullptr;
         if (sb == nullptr) return;
 
-        const auto it = std::ranges::find_if(hierarchyEntries, [entity](const SceneObjectEntry& entry) {
-            return entry.entity == entity;
-        });
+        const auto it = std::ranges::find_if(
+            hierarchyEntries, [entity](const SceneObjectEntry& entry) { return entry.entity == entity; });
         if (it == hierarchyEntries.end()) return;
 
         const auto entryIndex = static_cast<std::size_t>(std::distance(hierarchyEntries.begin(), it));
@@ -521,8 +516,7 @@ namespace sage::editor
         return thumbnail;
     }
 
-    void EditorGui::createHierarchyWindow(
-        GameUIEngine* ui, Settings* settings, const std::function<void(entt::entity)>& onSceneObjectSelected)
+    void EditorGui::createHierarchyWindow(const std::function<void(entt::entity)>& onSceneObjectSelected)
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -576,20 +570,15 @@ namespace sage::editor
         if (auto* sb = hierarchyWindow->GetScrollbar())
         {
             sb->SetProviders(
-                [this]() { return hierarchyEntries.size(); },
-                [this]() { return hierarchyRows.size(); });
-            hierarchyScrollSub =
-                sb->onScrollChanged.Subscribe([this]() { refreshHierarchyRowContent(); });
+                [this]() { return hierarchyEntries.size(); }, [this]() { return hierarchyRows.size(); });
+            hierarchyScrollSub = sb->onScrollChanged.Subscribe([this]() { refreshHierarchyRowContent(); });
         }
 
         hierarchyWindow->FinalizeLayout();
     }
 
     void EditorGui::createAssetWindow(
-        GameUIEngine* ui,
-        Settings* settings,
-        const std::vector<AssetEntry>& assets,
-        const std::function<void(std::size_t)>& onAssetSelected)
+        const std::vector<AssetEntry>& assets, const std::function<void(std::size_t)>& onAssetSelected)
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -627,11 +616,8 @@ namespace sage::editor
                 for (int colIndex = 0; colIndex < ASSET_GRID_COLUMNS; ++colIndex)
                 {
                     auto* cell = row->CreateTableCell(Padding{5, 5, 5, 5});
-                    auto thumbnail = std::make_unique<AssetThumbnailButton>(
-                        ui,
-                        cell,
-                        &selectedAssetIndex,
-                        onAssetSelected);
+                    auto thumbnail =
+                        std::make_unique<AssetThumbnailButton>(ui, cell, &selectedAssetIndex, onAssetSelected);
                     assetButtons.push_back(cell->CreateImagebox(std::move(thumbnail)));
                 }
             }
@@ -640,9 +626,7 @@ namespace sage::editor
         if (auto* sb = assetWindow->GetScrollbar())
         {
             sb->SetProviders(
-                [this]() {
-                    return (assetEntries.size() + ASSET_GRID_COLUMNS - 1) / ASSET_GRID_COLUMNS;
-                },
+                [this]() { return (assetEntries.size() + ASSET_GRID_COLUMNS - 1) / ASSET_GRID_COLUMNS; },
                 []() { return static_cast<std::size_t>(ASSET_VISIBLE_ROWS); });
             assetScrollSub = sb->onScrollChanged.Subscribe([this]() { refreshAssetButtonContent(); });
         }
@@ -651,7 +635,7 @@ namespace sage::editor
         refreshAssetButtonContent();
     }
 
-    void EditorGui::createAssetDefaultsWindow(GameUIEngine* ui, Settings* settings)
+    void EditorGui::createAssetDefaultsWindow()
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -680,7 +664,7 @@ namespace sage::editor
             auto* contentCell = contentRow->CreateTableCell(CONTENT_CELL_PADDING);
             auto* table = contentCell->CreateTable();
 
-            auto addLine = [ui, table](const char* text) {
+            auto addLine = [this, table](const char* text) {
                 auto* row = table->CreateTableRow();
                 auto* cell = row->CreateTableCell();
                 auto label = std::make_unique<TextBox>(ui, cell, EditorTextFontInfo());
@@ -689,7 +673,7 @@ namespace sage::editor
 
             defaultsAssetText = addLine("Asset: None");
 
-            auto addControlRow = [ui, table](
+            auto addControlRow = [this, table](
                                      const char* labelText,
                                      const char* initialValue,
                                      const std::function<void()>& onDown,
@@ -738,7 +722,7 @@ namespace sage::editor
         assetDefaultsWindow->Hide();
     }
 
-    void EditorGui::createInspectorWindow(GameUIEngine* ui, Settings* settings)
+    void EditorGui::createInspectorWindow()
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -769,7 +753,7 @@ namespace sage::editor
             auto* contentCell = contentRow->CreateTableCell(CONTENT_CELL_PADDING);
             auto* table = contentCell->CreateTable();
 
-            auto addLine = [ui, table](const char* text) {
+            auto addLine = [this, table](const char* text) {
                 auto* row = table->CreateTableRow(6.0f);
                 auto* cell = row->CreateTableCell(Padding{2, 2, 2, 2});
                 auto label = std::make_unique<TextBox>(
@@ -796,7 +780,7 @@ namespace sage::editor
         inspectorWindow->FinalizeLayout();
     }
 
-    void EditorGui::createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings)
+    void EditorGui::createDeleteConfirmationWindow()
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -838,9 +822,8 @@ namespace sage::editor
             confirmCell->CreateTextbox(std::move(confirmButton), "Delete");
 
             auto* cancelCell = buttonRow->CreateTableCell(50.0f, Padding{3, 3, 4, 4});
-            auto cancelButton = std::make_unique<TextButton>(ui, cancelCell, [this]() {
-                pendingDeleteConfirmationAction = DeleteConfirmationAction::Cancel;
-            });
+            auto cancelButton = std::make_unique<TextButton>(
+                ui, cancelCell, [this]() { pendingDeleteConfirmationAction = DeleteConfirmationAction::Cancel; });
             cancelCell->CreateTextbox(std::move(cancelButton), "Cancel");
         }
 
@@ -849,14 +832,13 @@ namespace sage::editor
     }
 
     EditorGui::EditorGui(
-        GameUIEngine* ui,
-        Settings* settings,
+        GameUIEngine* _ui,
+        Settings* _settings,
         const std::vector<AssetEntry>& assets,
-        std::function<void(std::size_t)> onAssetSelected,
-        std::function<void(entt::entity)> onSceneObjectSelected,
+        const std::function<void(std::size_t)>& onAssetSelected,
+        const std::function<void(entt::entity)>& onSceneObjectSelected,
         ModelDefaultCallbacks callbacks)
-        : modelDefaultCallbacks(std::move(callbacks)),
-          ui(ui)
+        : ui(_ui), settings(_settings), modelDefaultCallbacks(std::move(callbacks))
     {
         Image panelImage = GenImageColor(1, 1, EDITOR_WINDOW_BACKGROUND);
         editorWindowBackgroundTexture = LoadTextureFromImage(panelImage);
@@ -869,11 +851,11 @@ namespace sage::editor
             assetThumbnails.push_back(createAssetThumbnail(asset));
         }
 
-        createHierarchyWindow(ui, settings, onSceneObjectSelected);
-        createAssetWindow(ui, settings, assets, onAssetSelected);
-        createAssetDefaultsWindow(ui, settings);
-        createInspectorWindow(ui, settings);
-        createDeleteConfirmationWindow(ui, settings);
+        createHierarchyWindow(onSceneObjectSelected);
+        createAssetWindow(assets, onAssetSelected);
+        createAssetDefaultsWindow();
+        createInspectorWindow();
+        createDeleteConfirmationWindow();
     }
 
     EditorGui::~EditorGui()

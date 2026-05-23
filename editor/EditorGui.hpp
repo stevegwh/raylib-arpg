@@ -65,6 +65,7 @@ namespace sage
             Window* inspectorWindow{};
             Window* deleteConfirmationWindow{};
             GameUIEngine* ui{};
+            Settings* settings{};
             Texture2D editorWindowBackgroundTexture{};
             std::vector<AssetEntry> assetEntries;
             std::vector<RenderTexture2D> assetThumbnails;
@@ -89,18 +90,12 @@ namespace sage
             TextBox* deleteConfirmationText{};
 
             RenderTexture2D createAssetThumbnail(const AssetEntry& asset) const;
-            void createHierarchyWindow(
-                GameUIEngine* ui,
-                Settings* settings,
-                const std::function<void(entt::entity)>& onSceneObjectSelected);
+            void createHierarchyWindow(const std::function<void(entt::entity)>& onSceneObjectSelected);
             void createAssetWindow(
-                GameUIEngine* ui,
-                Settings* settings,
-                const std::vector<AssetEntry>& assets,
-                const std::function<void(std::size_t)>& onAssetSelected);
-            void createAssetDefaultsWindow(GameUIEngine* ui, Settings* settings);
-            void createInspectorWindow(GameUIEngine* ui, Settings* settings);
-            void createDeleteConfirmationWindow(GameUIEngine* ui, Settings* settings);
+                const std::vector<AssetEntry>& assets, const std::function<void(std::size_t)>& onAssetSelected);
+            void createAssetDefaultsWindow();
+            void createInspectorWindow();
+            void createDeleteConfirmationWindow();
             void refreshAssetButtonContent();
             void refreshHierarchyRowContent();
 
@@ -124,11 +119,11 @@ namespace sage
             [[nodiscard]] bool IsDeleteConfirmationVisible() const;
             [[nodiscard]] DeleteConfirmationAction ConsumeDeleteConfirmationAction();
             EditorGui(
-                GameUIEngine* ui,
-                Settings* settings,
+                GameUIEngine* _ui,
+                Settings* _settings,
                 const std::vector<AssetEntry>& assets,
-                std::function<void(std::size_t)> onAssetSelected,
-                std::function<void(entt::entity)> onSceneObjectSelected,
+                const std::function<void(std::size_t)>& onAssetSelected,
+                const std::function<void(entt::entity)>& onSceneObjectSelected,
                 ModelDefaultCallbacks callbacks);
             ~EditorGui();
         };

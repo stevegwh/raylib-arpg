@@ -72,13 +72,6 @@ namespace sage
         return editorModes->IsEditMode();
     }
 
-    std::string EditorScene::describeMode() const
-    {
-        if (isPlaceState()) return "Place";
-        if (isEditState()) return "Edit: " + transformEditor->DescribeMode();
-        return "Select";
-    }
-
     std::string EditorScene::describeSelectedAsset() const
     {
         if (isPlaceState()) return selectedPlaceable().displayName;
@@ -137,7 +130,7 @@ namespace sage
     void EditorScene::refreshOverlay() const
     {
         const auto defaultsStatus = modelDefaults->Status(describeSelectedAsset());
-        gui->SetOverlayStatus(describeMode(), describeCursorPosition());
+        gui->SetOverlayStatus(editorModes->GetStateName(), describeCursorPosition());
         gui->SetAssetDefaultsStatus(
             defaultsStatus.assetName, defaultsStatus.height, defaultsStatus.rotation, defaultsStatus.scale);
         gui->SetSelectedAsset(
@@ -194,7 +187,7 @@ namespace sage
         gui->FocusHierarchyOnEntity(*selectedEntity);
     }
 
-    void EditorScene::Update()
+    void EditorScene::Update() const
     {
         sys->collisionSystem->Update();
         sys->audioManager->Update();
@@ -254,7 +247,7 @@ namespace sage
         gui->DrawSceneViewInfo();
     }
 
-    bool EditorScene::HandleEscapePressed()
+    bool EditorScene::HandleEscapePressed() const
     {
         return editorModes->HandleEscapePressed();
     }
@@ -267,8 +260,8 @@ namespace sage
     EditorScene::EditorScene(EngineSystems* _sys) : sys(_sys)
     {
         editor::RegisterDefaultInspectorComponents(inspectorRegistry);
-        assetCatalog = std::make_unique<editor::EditorAssetCatalog>(
-            editor::EditorAssetCatalog::FromLoadedModels());
+        assetCatalog =
+            std::make_unique<editor::EditorAssetCatalog>(editor::EditorAssetCatalog::FromLoadedModels());
         assetCatalog->LoadDefaults();
         modelDefaults = std::make_unique<editor::EditorModelDefaultsController>(
             *assetCatalog, [this]() { return isPlaceState(); }, [this]() { refreshOverlay(); });

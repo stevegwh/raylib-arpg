@@ -49,18 +49,17 @@ namespace sage
         [[nodiscard]] const editor::PlaceableAsset& selectedPlaceable() const;
         [[nodiscard]] bool isPlaceState() const;
         [[nodiscard]] bool isEditState() const;
-        [[nodiscard]] std::string describeMode() const;
         [[nodiscard]] std::string describeSelectedAsset() const;
         [[nodiscard]] std::string describeCursorPosition() const;
         [[nodiscard]] std::string describeEntity(entt::entity entity) const;
         [[nodiscard]] std::string describeSelectedSceneEntity() const;
 
       public:
-        void Update();
+        void Update() const;
         void Draw3D() const;
         void Draw2D() const;
         void DrawOverlay2D() const;
-        [[nodiscard]] bool HandleEscapePressed();
+        [[nodiscard]] bool HandleEscapePressed() const;
 
         void SetSceneName(const std::string& sceneName) const;
 

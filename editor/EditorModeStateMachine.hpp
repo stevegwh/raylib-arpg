@@ -24,6 +24,7 @@ namespace sage::editor
 
     struct EditorSelectState
     {
+        static std::string GetName(const EditorModeStateMachine& machine);
         void OnEnter(EditorModeStateMachine& machine);
         void OnExit(EditorModeStateMachine& machine);
         void Update(EditorModeStateMachine& machine);
@@ -44,8 +45,8 @@ namespace sage::editor
 
     struct EditorPlaceState
     {
+        static std::string GetName(const EditorModeStateMachine& machine);
         std::size_t placeableIndex = 0;
-
         void OnEnter(EditorModeStateMachine& machine);
         void OnExit(EditorModeStateMachine& machine);
         void Update(EditorModeStateMachine& machine);
@@ -62,6 +63,7 @@ namespace sage::editor
 
     struct EditorEditState
     {
+        static std::string GetName(const EditorModeStateMachine& machine);
         entt::entity entity = entt::null;
         Vector3 originalPosition{};
         Vector3 originalRotation{};
@@ -144,6 +146,7 @@ namespace sage::editor
 
         [[nodiscard]] bool IsPlaceMode() const;
         [[nodiscard]] bool IsEditMode() const;
+        [[nodiscard]] std::string GetStateName() const;
         [[nodiscard]] EditorEditState* CurrentEditState();
         [[nodiscard]] const EditorEditState* CurrentEditState() const;
 

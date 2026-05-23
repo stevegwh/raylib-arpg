@@ -50,6 +50,11 @@ namespace sage::editor
 
     // ===== Select Mode =============================================================
 
+    std::string EditorSelectState::GetName(const EditorModeStateMachine& machine)
+    {
+        return "Select";
+    }
+
     void EditorSelectState::OnEnter(EditorModeStateMachine& machine)
     {
         machine.refreshOverlay();
@@ -208,6 +213,10 @@ namespace sage::editor
     }
 
     // ===== Place Mode ==============================================================
+    std::string EditorPlaceState::GetName(const EditorModeStateMachine& machine)
+    {
+        return "Place";
+    }
 
     void EditorPlaceState::OnEnter(EditorModeStateMachine& machine)
     {
@@ -332,6 +341,11 @@ namespace sage::editor
     }
 
     // ===== Edit Mode ===============================================================
+
+    std::string EditorEditState::GetName(const EditorModeStateMachine& machine)
+    {
+        return "Edit: " + machine.transformEditor.DescribeMode();
+    }
 
     void EditorEditState::OnEnter(EditorModeStateMachine& machine)
     {
@@ -730,6 +744,11 @@ namespace sage::editor
     bool EditorModeStateMachine::IsEditMode() const
     {
         return std::holds_alternative<EditorEditState>(currentState);
+    }
+
+    std::string EditorModeStateMachine::GetStateName() const
+    {
+        return std::visit([this](auto& current) { return current.GetName(*this); }, currentState);
     }
 
     EditorEditState* EditorModeStateMachine::CurrentEditState()
