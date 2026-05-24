@@ -51,7 +51,6 @@ namespace sage
         [[nodiscard]] bool isEditState() const;
         [[nodiscard]] std::string describeSelectedAsset() const;
         [[nodiscard]] std::string describeCursorPosition() const;
-        [[nodiscard]] std::string describeEntity(entt::entity entity) const;
         [[nodiscard]] std::string describeSelectedSceneEntity() const;
 
       public:

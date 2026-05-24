@@ -5,6 +5,8 @@
 #pragma once
 
 #include "cereal/cereal.hpp"
+#include "Component.hpp"
+#include "ComponentField.hpp"
 #include "entt/entt.hpp"
 #include "raylib.h"
 
@@ -12,17 +14,16 @@
 
 namespace sage
 {
-    class sgTransform
+    class sgTransform : public Component<sgTransform>
     {
-        Vector3 m_positionWorld{};
-        Vector3 m_positionLocal{};
-        Vector3 m_rotationWorld{};
-        Vector3 m_rotationLocal{};
-        Vector3 m_scaleWorld{1, 1, 1};
-        Vector3 m_scaleLocal{1, 1, 1};
+        ComponentField<Vector3, sgTransform> m_positionWorld;
+        ComponentField<Vector3, sgTransform> m_positionLocal;
+        ComponentField<Vector3, sgTransform> m_rotationWorld;
+        ComponentField<Vector3, sgTransform> m_rotationLocal;
+        ComponentField<Vector3, sgTransform> m_scaleWorld;
+        ComponentField<Vector3, sgTransform> m_scaleLocal;
         entt::entity m_parent = entt::null;
         std::vector<entt::entity> m_children;
-        bool m_dirty = true;
 
       public:
         Vector3 direction{};
@@ -33,14 +34,24 @@ namespace sage
         void save(Archive& archive) const
         {
             archive(
-                m_positionWorld, m_rotationWorld, m_scaleWorld, m_positionLocal, m_rotationLocal, m_scaleLocal);
+                m_positionWorld.value,
+                m_rotationWorld.value,
+                m_scaleWorld.value,
+                m_positionLocal.value,
+                m_rotationLocal.value,
+                m_scaleLocal.value);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
             archive(
-                m_positionWorld, m_rotationWorld, m_scaleWorld, m_positionLocal, m_rotationLocal, m_scaleLocal);
+                m_positionWorld.value,
+                m_rotationWorld.value,
+                m_scaleWorld.value,
+                m_positionLocal.value,
+                m_rotationLocal.value,
+                m_scaleLocal.value);
         }
 
         template <class Inspector>
@@ -78,7 +89,7 @@ namespace sage
         sgTransform& operator=(const sgTransform& rhs);
         sgTransform(sgTransform&& rhs) noexcept;
         sgTransform& operator=(sgTransform&& rhs) noexcept;
-        sgTransform() = default;
+        sgTransform();
 
         friend class TransformSystem;
     };

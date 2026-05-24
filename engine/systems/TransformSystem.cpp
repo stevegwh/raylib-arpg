@@ -10,7 +10,7 @@ namespace sage
     void TransformSystem::propagate(entt::entity entity, bool ancestorDirty)
     {
         auto& transform = registry->get<sgTransform>(entity);
-        const bool effectivelyDirty = transform.m_dirty || ancestorDirty;
+        const bool effectivelyDirty = transform.dirty || ancestorDirty;
 
         if (effectivelyDirty && transform.m_parent != entt::null)
         {
@@ -20,7 +20,7 @@ namespace sage
             transform.m_scaleWorld = Vector3Multiply(parent.m_scaleWorld, transform.m_scaleLocal);
         }
 
-        transform.m_dirty = false;
+        transform.dirty = false;
 
         for (auto child : transform.m_children)
         {

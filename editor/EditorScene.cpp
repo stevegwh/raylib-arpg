@@ -92,15 +92,10 @@ namespace sage
         return "-";
     }
 
-    std::string EditorScene::describeEntity(const entt::entity entity) const
-    {
-        return hierarchyTree->DescribeEntity(entity);
-    }
-
     std::string EditorScene::describeSelectedSceneEntity() const
     {
         const auto entity = selection->ActiveTransformEntity();
-        return entity.has_value() ? describeEntity(*entity) : "None";
+        return entity.has_value() ? hierarchyTree->DescribeEntity(*entity) : "None";
     }
 
     void EditorScene::applyLitShaderToLoadedRenderables() const

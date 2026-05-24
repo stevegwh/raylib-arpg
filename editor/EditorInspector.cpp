@@ -10,12 +10,13 @@
 
 namespace sage::editor
 {
-    void ComponentInspector::field(std::string label, sage::CollisionLayer& v, const bool ed)
+    void ComponentInspector::field(const std::string& label, sage::CollisionLayer& v, const bool ed)
     {
         EnumField e{.data = &v};
         const auto& layers = GetCollisionLayers();
         e.options.reserve(layers.size());
-        for (const auto& layer : layers) e.options.emplace_back(layer.layerName);
+        for (const auto& layer : layers)
+            e.options.emplace_back(layer.layerName);
         e.getIndex = [p = &v]() -> std::size_t {
             const auto& list = GetCollisionLayers();
             for (std::size_t i = 0; i < list.size(); ++i)
@@ -28,8 +29,7 @@ namespace sage::editor
             const auto& list = GetCollisionLayers();
             if (idx < list.size()) *p = list[idx];
         };
-        fields_.push_back(
-            {.label = qualified(label), .editable = ed && editableScope_, .value = std::move(e)});
+        fields_.push_back({.label = qualified(label), .editable = ed && editableScope_, .value = std::move(e)});
     }
 
     std::vector<InspectedComponent> InspectorRegistry::Inspect(

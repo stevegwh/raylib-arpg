@@ -1,0 +1,27 @@
+{
+    "assetDefaults": {
+        "displayName": "Arissa",
+        "modelKey": "mdl_arissa",
+        "modelDefaultHeightOffset": 0.0,
+        "modelDefaultRotationY": 0.0,
+        "modelDefaultScale": 1.0,
+        "appliedModelDefaultTransform": {
+            "value0": 0.10000000149011612,
+            "value1": 0.0,
+            "value2": 0.0,
+            "value3": 0.0,
+            "value4": 0.0,
+            "value5": 0.10000000149011612,
+            "value6": 0.0,
+            "value7": 0.0,
+            "value8": 0.0,
+            "value9": 0.0,
+            "value10": 0.10000000149011612,
+            "value11": 0.0,
+            "value12": -0.000003814697265625,
+            "value13": 0.8913864493370056,
+            "value14": -0.8414545059204102,
+            "value15": 1.0
+        }
+    }
+}
