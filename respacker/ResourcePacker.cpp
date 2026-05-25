@@ -258,8 +258,8 @@ namespace sage
         // We set the transform component's position instead of setting the model's transform.
         // By doing this, we can track where certain (static) objects are.
         registry->emplace<sgTransform>(entity);
-        registry->get<sage::sgTransform>(entity).SetWorldPos(scaledPosition);
-        registry->get<sage::sgTransform>(entity).SetWorldScale(1.0f);
+        transformSystem->SetWorldPos(entity, scaledPosition);
+        transformSystem->SetWorldScale(entity, 1.0f);
         const auto& trans = registry->get<sgTransform>(entity);
         const auto& transMatrix = trans.GetMatrix();
         const auto& localBoundingBox = renderable.GetModel()->CalcLocalBoundingBox();

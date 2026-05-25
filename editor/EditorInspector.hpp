@@ -5,7 +5,6 @@
 #include "raylib.h"
 
 #include "engine/CollisionLayers.hpp"
-#include "engine/components/ComponentField.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -14,6 +13,11 @@
 #include <utility>
 #include <variant>
 #include <vector>
+
+namespace sage
+{
+    class TransformSystem;
+}
 
 namespace sage::editor
 {
@@ -179,30 +183,6 @@ namespace sage::editor
             addLeaf(std::move(label), &v, std::move(setter));
         }
 
-        template <class T, class Owner>
-        void field(std::string label, sage::ComponentField<T, Owner>& v, bool rw = true)
-        {
-            if (rw)
-            {
-                addLeaf(
-                    std::move(label),
-                    &v.value,
-                    std::function<void(const T&)>{[p = &v](const T& value) { *p = value; }});
-                return;
-            }
-            addLeaf(std::move(label), &v.value, false);
-        }
-
-        template <class T, class Owner, class Setter>
-            requires std::is_invocable_v<Setter, const T&>
-        void field(std::string label, sage::ComponentField<T, Owner>& v, Setter&& setter)
-        {
-            addLeaf(
-                std::move(label),
-                &v.value,
-                std::function<void(const T&)>{std::forward<Setter>(setter)});
-        }
-
         // Bespoke: dropdown sourced from GetCollisionLayers(). Stored as EnumField.
         void field(const std::string& label, sage::CollisionLayer& v, bool rw = true);
 
@@ -266,7 +246,8 @@ namespace sage::editor
         {
             std::string displayName;
             std::function<bool(const entt::registry&, entt::entity)> has;
-            std::function<std::vector<InspectorField>(entt::registry&, entt::entity)> describe;
+            std::function<std::vector<InspectorField>(entt::registry&, entt::entity, ::sage::TransformSystem*)>
+                describe;
         };
 
         std::vector<Entry> entries_;
@@ -280,14 +261,19 @@ namespace sage::editor
                  [](const entt::registry& r, const entt::entity e) {
                      return r.valid(e) && r.template any_of<T>(e);
                  },
-                 [](entt::registry& r, const entt::entity e) {
+                 [](entt::registry& r, const entt::entity e, ::sage::TransformSystem*) {
                      ComponentInspector ci;
                      r.template get<T>(e).define_editor_fields(ci);
                      return std::move(ci).Take();
                  }});
         }
 
-        [[nodiscard]] std::vector<InspectedComponent> Inspect(entt::registry& registry, entt::entity entity) const;
+        void RegisterTransform(std::string displayName);
+
+        [[nodiscard]] std::vector<InspectedComponent> Inspect(
+            entt::registry& registry,
+            entt::entity entity,
+            ::sage::TransformSystem* transformSystem = nullptr) const;
     };
 
     void RegisterDefaultInspectorComponents(InspectorRegistry& registry);

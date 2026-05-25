@@ -31,7 +31,7 @@ namespace sage::editor
 
         if (sys->registry->valid(entity) && sys->registry->any_of<sgTransform>(entity))
         {
-            sys->registry->get<sgTransform>(entity).SetParent(entt::null, nullptr);
+            sys->transformSystem->SetParent(entity, entt::null);
         }
 
         releaseNavigationOccupation(entity);

@@ -23,7 +23,7 @@ namespace lq
     {
         if (scale >= maxScale) return;
         scale += increment * GetFrameTime();
-        sys->registry->get<sage::sgTransform>(entity).SetWorldScale(scale);
+        sys->transformSystem->SetWorldScale(entity, scale);
         if (scale >= maxScale)
         {
             auto& r = registry->get<sage::Renderable>(entity);
@@ -33,7 +33,7 @@ namespace lq
 
     void Explosion::SetOrigin(Vector3 origin)
     {
-        sys->registry->get<sage::sgTransform>(entity).SetWorldPos(origin);
+        sys->transformSystem->SetWorldPos(entity, origin);
     }
 
     Explosion::Explosion(entt::registry* _registry, sage::EngineSystems* _sys) : sys(_sys)

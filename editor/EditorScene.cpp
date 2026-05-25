@@ -118,7 +118,7 @@ namespace sage
             if (sys->registry->any_of<sgTransform>(entity)) continue;
             const auto position = sys->registry->get<Light>(entity).position;
             sys->registry->emplace<sgTransform>(entity);
-            sys->registry->get<sage::sgTransform>(entity).SetWorldPos(position);
+            sys->transformSystem->SetWorldPos(entity, position);
         }
     }
 
@@ -136,7 +136,8 @@ namespace sage
     {
         const auto activeEntity = selection->ActiveTransformEntity();
         auto inspectedComponents = activeEntity.has_value()
-                                       ? inspectorRegistry.Inspect(*sys->registry, *activeEntity)
+                                       ? inspectorRegistry.Inspect(
+                                             *sys->registry, *activeEntity, sys->transformSystem.get())
                                        : std::vector<editor::InspectedComponent>{};
         applyInspectorEditMode(inspectedComponents, isEditState());
 
