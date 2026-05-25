@@ -39,26 +39,6 @@ namespace sage
         children.erase(std::remove(children.begin(), children.end(), child), children.end());
     }
 
-    void TransformSystem::rebuildChildren()
-    {
-        auto view = registry->view<sgTransform>();
-
-        for (auto entity : view)
-        {
-            view.get<sgTransform>(entity).m_children.clear();
-        }
-
-        for (auto entity : view)
-        {
-            const auto& transform = view.get<sgTransform>(entity);
-            if (transform.m_parent != entt::null && registry->valid(transform.m_parent) &&
-                registry->all_of<sgTransform>(transform.m_parent))
-            {
-                registry->get<sgTransform>(transform.m_parent).m_children.push_back(entity);
-            }
-        }
-    }
-
     void TransformSystem::syncWorldFromLocal(entt::entity entity)
     {
         auto& transform = registry->get<sgTransform>(entity);
@@ -103,21 +83,8 @@ namespace sage
         for (auto child : transform.m_children)
         {
             if (!registry->valid(child) || !registry->all_of<sgTransform>(child)) continue;
-            auto& childTransform = registry->get<sgTransform>(child);
             syncWorldFromLocal(child);
             propagateChildren(child);
-        }
-    }
-
-    void TransformSystem::propagate(entt::entity entity)
-    {
-        auto& transform = registry->get<sgTransform>(entity);
-        syncWorldFromLocal(entity);
-
-        for (auto child : transform.m_children)
-        {
-            if (!registry->valid(child) || !registry->all_of<sgTransform>(child)) continue;
-            propagate(child);
         }
     }
 
@@ -221,23 +188,6 @@ namespace sage
         propagateChildren(entity);
     }
 
-    void TransformSystem::Update()
-    {
-        rebuildChildren();
-
-        auto view = registry->view<sgTransform>();
-        for (auto entity : view)
-        {
-            const auto& transform = view.get<sgTransform>(entity);
-            const bool hasValidParent = transform.m_parent != entt::null && registry->valid(transform.m_parent) &&
-                                        registry->all_of<sgTransform>(transform.m_parent);
-            if (!hasValidParent)
-            {
-                propagate(entity);
-            }
-        }
-    }
-
     void TransformSystem::onComponentRemoved(entt::entity entity)
     {
         auto& transform = registry->get<sgTransform>(entity);
@@ -268,6 +218,5 @@ namespace sage
         assert(registry != nullptr);
         registry->on_construct<sgTransform>().connect<&TransformSystem::onComponentAdded>(this);
         registry->on_destroy<sgTransform>().connect<&TransformSystem::onComponentRemoved>(this);
-        rebuildChildren();
     }
 } // namespace sage

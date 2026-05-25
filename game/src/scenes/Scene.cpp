@@ -120,7 +120,6 @@ namespace lq
         sys->cursorClickIndicator->Update();
         sys->engine.fullscreenTextOverlayFactory->Update();
         sys->engine.actorMovementSystem->Update();
-        sys->engine.transformSystem->Update();
         sys->engine.collisionSystem->Update();
         sys->controllableActorSystem->Update();
         sys->healthBarSystem->Update();
