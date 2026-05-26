@@ -48,7 +48,8 @@ namespace sage
             TransformWriter write = nullptr;
             VectorAxis axis = nullptr;
 
-            TransformAxisAccessor(sgTransform* owner, TransformReader read, TransformWriter write, VectorAxis axis);
+            TransformAxisAccessor(
+                sgTransform* owner, TransformReader read, TransformWriter write, VectorAxis axis);
             void BindOwner(sgTransform* newOwner);
 
             friend class sgTransform;
@@ -126,6 +127,14 @@ namespace sage
         {
             archive(
                 m_positionWorld, m_rotationWorld, m_scaleWorld, m_positionLocal, m_rotationLocal, m_scaleLocal);
+        }
+
+        template <class Inspector>
+        void define_editor_fields(Inspector& i)
+        {
+            i.field("Position", m_positionLocal);
+            i.field("Rotation", m_rotationLocal);
+            i.field("Scale", m_scaleLocal);
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;
