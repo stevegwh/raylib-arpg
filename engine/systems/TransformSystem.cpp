@@ -206,7 +206,8 @@ namespace sage
 
     void TransformSystem::onComponentAdded(entt::entity entity)
     {
-        const auto& transform = registry->get<sgTransform>(entity);
+        auto& transform = registry->get<sgTransform>(entity);
+        transform.Bind(this, entity);
         if (transform.m_parent != entt::null)
         {
             addChild(transform.m_parent, entity);
