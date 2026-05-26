@@ -5,6 +5,7 @@
 #include "raylib.h"
 
 #include "engine/CollisionLayers.hpp"
+#include "engine/components/sgTransform.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -13,11 +14,6 @@
 #include <utility>
 #include <variant>
 #include <vector>
-
-namespace sage
-{
-    class TransformSystem;
-}
 
 namespace sage::editor
 {
@@ -186,6 +182,28 @@ namespace sage::editor
         // Bespoke: dropdown sourced from GetCollisionLayers(). Stored as EnumField.
         void field(const std::string& label, sage::CollisionLayer& v, bool rw = true);
 
+        // sgTransform proxy. Reads come from the cached Vector3 inside the proxy;
+        // writes route through the proxy's operator=, which dispatches to TransformSystem
+        // so the hierarchy stays in sync. The component author just passes the field,
+        // no setter lambda required.
+        template <auto Write>
+        void field(std::string label, ::sage::sgTransform::VectorField<Write>& proxy, bool rw = true)
+        {
+            // `data` points at the cached Vector3 inside the proxy (used for display only).
+            // The const_cast is safe because the setter is always provided for proxy fields;
+            // commitField uses the setter, not the data pointer, for writes.
+            auto* data = const_cast<Vector3*>(&proxy.Get());
+            if (!rw || !editableScope_)
+            {
+                addLeaf(std::move(label), data, false);
+                return;
+            }
+            addLeaf(
+                std::move(label),
+                data,
+                std::function<void(const Vector3&)>([&proxy](const Vector3& v) { proxy = v; }));
+        }
+
         // --- Enum template -------------------------------------------------------------
         template <class E>
             requires std::is_enum_v<E>
@@ -246,8 +264,7 @@ namespace sage::editor
         {
             std::string displayName;
             std::function<bool(const entt::registry&, entt::entity)> has;
-            std::function<std::vector<InspectorField>(entt::registry&, entt::entity, ::sage::TransformSystem*)>
-                describe;
+            std::function<std::vector<InspectorField>(entt::registry&, entt::entity)> describe;
         };
 
         std::vector<Entry> entries_;
@@ -261,19 +278,15 @@ namespace sage::editor
                  [](const entt::registry& r, const entt::entity e) {
                      return r.valid(e) && r.template any_of<T>(e);
                  },
-                 [](entt::registry& r, const entt::entity e, ::sage::TransformSystem*) {
+                 [](entt::registry& r, const entt::entity e) {
                      ComponentInspector ci;
                      r.template get<T>(e).define_editor_fields(ci);
                      return std::move(ci).Take();
                  }});
         }
 
-        void RegisterTransform(std::string displayName);
-
         [[nodiscard]] std::vector<InspectedComponent> Inspect(
-            entt::registry& registry,
-            entt::entity entity,
-            ::sage::TransformSystem* transformSystem = nullptr) const;
+            entt::registry& registry, entt::entity entity) const;
     };
 
     void RegisterDefaultInspectorComponents(InspectorRegistry& registry);

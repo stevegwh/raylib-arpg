@@ -163,6 +163,16 @@ namespace sage
                 m_savedParentId);
         }
 
+        // Inspector authors get the proxy fields straight — assignment in the inspector
+        // routes through TransformSystem via the VectorField overload of `field()`.
+        template <class Inspector>
+        void define_editor_fields(Inspector& i)
+        {
+            i.field("Position", position.local);
+            i.field("Rotation", rotation.local);
+            i.field("Scale", scale.local);
+        }
+
         [[nodiscard]] Matrix GetMatrixNoRot() const;
         [[nodiscard]] Matrix GetMatrix() const;
         [[nodiscard]] Vector3 forward() const;

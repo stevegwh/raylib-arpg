@@ -135,8 +135,7 @@ namespace sage
     {
         const auto activeEntity = selection->ActiveTransformEntity();
         auto inspectedComponents = activeEntity.has_value()
-                                       ? inspectorRegistry.Inspect(
-                                             *sys->registry, *activeEntity, sys->transformSystem.get())
+                                       ? inspectorRegistry.Inspect(*sys->registry, *activeEntity)
                                        : std::vector<editor::InspectedComponent>{};
         applyInspectorEditMode(inspectedComponents, isEditState());
 
