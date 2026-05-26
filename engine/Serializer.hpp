@@ -156,8 +156,8 @@ namespace sage::serializer
     }
 
     // Per-file-type magic prefixes for compressed binaries. Bumped if on-disk layout changes.
-    inline constexpr char kAssetBinMagic[4] = {'L', 'Q', 'B', '1'};
-    inline constexpr char kMapBinMagic[4] = {'L', 'Q', 'M', '1'};
+    inline constexpr char kAssetBinMagic[4] = {'L', 'Q', 'B', '2'};
+    inline constexpr char kMapBinMagic[4] = {'L', 'Q', 'M', '2'};
 
     // Writes a 20-byte header (magic + uncompressed size + compressed size) followed by a
     // DEFLATE-compressed cereal binary payload. The lambda receives a BinaryOutputArchive and

@@ -11,8 +11,10 @@
 #include "cereal/types/string.hpp"
 #include "cereal/types/vector.hpp"
 
+#include <cstdint>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace sage::editor
@@ -43,6 +45,8 @@ namespace sage::editor
     {
         assert(destination != nullptr);
         std::cout << "START: Loading map data from file (editor)." << std::endl;
+
+        std::unordered_map<std::uint32_t, entt::entity> idMap;
 
         sage::serializer::ReadCompressedBinary(
             path, sage::serializer::kMapBinMagic, [&](cereal::BinaryInputArchive& input, std::istream& stream) {
@@ -86,6 +90,7 @@ namespace sage::editor
                         std::cerr << "ERROR: Serialization error (item): " << e.what() << std::endl;
                         return;
                     }
+                    idMap[entityId.id] = entity;
                 }
 
                 while (stream.peek() != EOF)
@@ -106,8 +111,14 @@ namespace sage::editor
                         std::cerr << "ERROR: Serialization error (entity): " << e.what() << std::endl;
                         return;
                     }
+                    idMap[entityId.id] = entity;
                 }
             });
+
+        for (auto [e, t] : destination->view<sgTransform>().each())
+        {
+            t.ResolveSerializedParent(idMap);
+        }
 
         std::cout << "FINISH: Loading map data from file (editor)." << std::endl;
     }

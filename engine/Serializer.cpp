@@ -8,6 +8,8 @@
 #include "components/Renderable.hpp"
 #include "components/sgTransform.hpp"
 
+#include <unordered_map>
+
 namespace sage::serializer
 {
     // ----------------------------------------------
@@ -16,6 +18,8 @@ namespace sage::serializer
     {
         assert(destination != nullptr);
         std::cout << "START: Loading asset bin." << std::endl;
+
+        std::unordered_map<std::uint32_t, entt::entity> idMap;
 
         ReadCompressedBinary(path, kAssetBinMagic, [&](cereal::BinaryInputArchive& input, std::istream& stream) {
             input(ResourceManager::GetInstance());
@@ -38,8 +42,14 @@ namespace sage::serializer
                     std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
                     break;
                 }
+                idMap[entityId.id] = entt;
             }
         });
+
+        for (auto [e, t] : destination->view<sgTransform>().each())
+        {
+            t.ResolveSerializedParent(idMap);
+        }
 
         std::cout << "FINISH: Loading asset bin." << std::endl;
     }

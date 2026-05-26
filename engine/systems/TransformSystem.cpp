@@ -42,7 +42,7 @@ namespace sage
     void TransformSystem::syncWorldFromLocal(entt::entity entity)
     {
         auto& transform = registry->get<sgTransform>(entity);
-        if (transform.parent.value_ == entt::null)
+        if (transform.m_parent == entt::null)
         {
             transform.position.world.value = transform.position.local.value;
             transform.rotation.world.value = transform.rotation.local.value;
@@ -50,9 +50,9 @@ namespace sage
             return;
         }
 
-        assert(registry->valid(transform.parent.value_));
-        assert(registry->all_of<sgTransform>(transform.parent.value_));
-        const auto& parentTransform = registry->get<sgTransform>(transform.parent.value_);
+        assert(registry->valid(transform.m_parent));
+        assert(registry->all_of<sgTransform>(transform.m_parent));
+        const auto& parentTransform = registry->get<sgTransform>(transform.m_parent);
         transform.position.world.value =
             Vector3Add(parentTransform.position.world.value, transform.position.local.value);
         transform.rotation.world.value =
@@ -64,7 +64,7 @@ namespace sage
     void TransformSystem::syncLocalFromWorld(entt::entity entity)
     {
         auto& transform = registry->get<sgTransform>(entity);
-        if (transform.parent.value_ == entt::null)
+        if (transform.m_parent == entt::null)
         {
             transform.position.local.value = transform.position.world.value;
             transform.rotation.local.value = transform.rotation.world.value;
@@ -72,9 +72,9 @@ namespace sage
             return;
         }
 
-        assert(registry->valid(transform.parent.value_));
-        assert(registry->all_of<sgTransform>(transform.parent.value_));
-        const auto& parentTransform = registry->get<sgTransform>(transform.parent.value_);
+        assert(registry->valid(transform.m_parent));
+        assert(registry->all_of<sgTransform>(transform.m_parent));
+        const auto& parentTransform = registry->get<sgTransform>(transform.m_parent);
         transform.position.local.value =
             Vector3Subtract(transform.position.world.value, parentTransform.position.world.value);
         transform.rotation.local.value =
@@ -183,10 +183,10 @@ namespace sage
         }
 
         auto& transform = registry->get<sgTransform>(entity);
-        if (transform.parent.value_ == newParent) return;
+        if (transform.m_parent == newParent) return;
 
-        removeChild(transform.parent.value_, entity);
-        transform.parent.value_ = newParent;
+        removeChild(transform.m_parent, entity);
+        transform.m_parent = newParent;
         addChild(newParent, entity);
 
         syncLocalFromWorld(entity);
@@ -196,7 +196,7 @@ namespace sage
     void TransformSystem::onComponentRemoved(entt::entity entity)
     {
         auto& transform = registry->get<sgTransform>(entity);
-        removeChild(transform.parent.value_, entity);
+        removeChild(transform.m_parent, entity);
 
         const auto children = transform.m_children;
         for (auto child : children)
@@ -213,9 +213,9 @@ namespace sage
     {
         auto& transform = registry->get<sgTransform>(entity);
         transform.Bind(this, entity);
-        if (transform.parent.value_ != entt::null)
+        if (transform.m_parent != entt::null)
         {
-            addChild(transform.parent.value_, entity);
+            addChild(transform.m_parent, entity);
         }
     }
 

@@ -8,6 +8,8 @@
 #include "entt/entt.hpp"
 #include "raylib.h"
 
+#include <cstdint>
+#include <unordered_map>
 #include <vector>
 
 namespace sage
@@ -18,7 +20,18 @@ namespace sage
     {
         entt::entity m_entity = entt::null;
         TransformSystem* m_transformSystem = nullptr;
+        entt::entity m_parent = entt::null;
         std::vector<entt::entity> m_children{};
+
+        // Transient: the saving registry's entity-index for our parent, populated by cereal load().
+        // ResolveSerializedParent() consumes it and clears back to the null sentinel.
+        std::uint32_t m_savedParentId = serializedNullId();
+
+        static constexpr std::uint32_t serializedNullId()
+        {
+            return static_cast<std::uint32_t>(
+                entt::entt_traits<entt::entity>::to_entity(entt::entity{entt::null}));
+        }
 
         // One-line forwarders to TransformSystem. Defined in the .cpp so
         // TransformSystem can stay forward-declared in this header.
@@ -37,7 +50,7 @@ namespace sage
       public:
         // Proxy field with its cached Vector3 living inside.
         // Assignment routes through TransformSystem (via `Write`) so dirty propagation
-        // happens automatically; reads return the cached value_ directly.
+        // happens automatically; reads return the cached value directly.
         template <Writer Write>
         class VectorField
         {
@@ -50,16 +63,16 @@ namespace sage
             struct Axis
             {
                 VectorField* parent = nullptr;
-                float Vector3::* axis = nullptr;
+                float Vector3::*axis = nullptr;
 
                 operator float() const
                 {
                     return parent->value.*axis;
                 }
-                Axis& operator=(float value)
+                Axis& operator=(float v)
                 {
                     Vector3 next = parent->value;
-                    next.*axis = value;
+                    next.*axis = v;
                     (parent->owner_->*Write)(next);
                     return *this;
                 }
@@ -86,9 +99,9 @@ namespace sage
             {
                 return value;
             }
-            VectorField& operator=(const Vector3& value)
+            VectorField& operator=(const Vector3& v)
             {
-                (owner_->*Write)(value);
+                (owner_->*Write)(v);
                 return *this;
             }
             VectorField& operator=(const VectorField& rhs)
@@ -105,60 +118,36 @@ namespace sage
             VectorField<WorldWrite> world{};
         };
 
-        // Parent is an entity reference; assigning routes through TransformSystem::SetParent
-        // so child lists and the local/world sync happen automatically.
-        class ParentField
-        {
-            entt::entity value_ = entt::null;
-            sgTransform* owner_ = nullptr;
-            friend class sgTransform;
-            friend class TransformSystem;
-
-          public:
-            ParentField() = default;
-            ParentField(const ParentField&) = delete;
-            ParentField(ParentField&&) = delete;
-            ParentField& operator=(ParentField&&) = delete;
-
-            operator entt::entity() const
-            {
-                return value_;
-            }
-            [[nodiscard]] entt::entity Get() const
-            {
-                return value_;
-            }
-            ParentField& operator=(entt::entity newParent);
-            ParentField& operator=(entt::null_t)
-            {
-                return *this = entt::entity{entt::null};
-            }
-            ParentField& operator=(const ParentField& rhs)
-            {
-                if (this == &rhs) return *this;
-                return *this = rhs.value_;
-            }
-        };
-
         LocalWorldPair<&sgTransform::writeLocalPos, &sgTransform::writeWorldPos> position;
         LocalWorldPair<&sgTransform::writeLocalRot, &sgTransform::writeWorldRot> rotation;
         LocalWorldPair<&sgTransform::writeLocalScale, &sgTransform::writeWorldScale> scale;
-        ParentField parent;
 
         Vector3 direction{};
 
         Ray movementDirectionDebugLine{};
 
+        // Forwards to TransformSystem::SetParent so child lists and the
+        // local/world sync run automatically.
+        void SetParent(entt::entity newParent);
+
+        // Bin loaders call this after all entities are restored. The map keys are
+        // entity indices from the source registry (saved via sage::serializer::entity)
+        // and the values are the corresponding live entities in this registry.
+        void ResolveSerializedParent(const std::unordered_map<std::uint32_t, entt::entity>& idMap);
+
         template <class Archive>
         void save(Archive& archive) const
         {
+            using traits = entt::entt_traits<entt::entity>;
+            const std::uint32_t parentId = static_cast<std::uint32_t>(traits::to_entity(m_parent));
             archive(
                 position.world.value,
                 rotation.world.value,
                 scale.world.value,
                 position.local.value,
                 rotation.local.value,
-                scale.local.value);
+                scale.local.value,
+                parentId);
         }
 
         template <class Archive>
@@ -170,15 +159,8 @@ namespace sage
                 scale.world.value,
                 position.local.value,
                 rotation.local.value,
-                scale.local.value);
-        }
-
-        template <class Inspector>
-        void define_editor_fields(Inspector& i)
-        {
-            i.field("Position", position.local.value);
-            i.field("Rotation", rotation.local.value);
-            i.field("Scale", scale.local.value);
+                scale.local.value,
+                m_savedParentId);
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;

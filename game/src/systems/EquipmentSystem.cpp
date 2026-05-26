@@ -230,7 +230,7 @@ namespace lq
         uber.SetFlagAll(sage::UberShaderComponent::Flags::Lit);
 
         auto& weaponTransform = registry->emplace<sage::sgTransform>(weaponEntity);
-        weaponTransform.parent = owner;
+        weaponTransform.SetParent(owner);
         weaponTransform.position.local = Vector3Zero();
         weaponTransform.rotation.local = {0, 0, 0};
         auto& animation = registry->get<sage::Animation>(owner);
@@ -313,7 +313,7 @@ namespace lq
         {
             if (equipment.worldModels.contains(itemType) && equipment.worldModels[itemType] != entt::null)
             {
-                registry->get<sage::sgTransform>(equipment.worldModels[itemType]).parent = entt::null;
+                registry->get<sage::sgTransform>(equipment.worldModels[itemType]).SetParent(entt::null);
                 registry->emplace<sage::DeleteEntityComponent>(equipment.worldModels[itemType]);
                 auto& weapon = registry->get<WeaponComponent>(equipment.worldModels[itemType]);
                 weapon.animationFollowSub.UnSubscribe();

@@ -125,9 +125,9 @@ namespace lq
                 {
                     // TODO: Can this be set in the ability's constructor?
                     // Then we can just say "if ability doesn't follow caster, then set its position"
-                    if (trans.parent != ab.caster)
+                    if (trans.GetParent() != ab.caster)
                     {
-                        trans.parent = ab.caster;
+                        trans.SetParent(ab.caster);
                         trans.position.local = {0, heightOffset, 0};
                         trans.rotation.local = Vector3Zero();
                     }

@@ -12,13 +12,24 @@
 
 namespace sage
 {
-    sgTransform::ParentField& sgTransform::ParentField::operator=(const entt::entity newParent)
+    void sgTransform::SetParent(const entt::entity newParent)
     {
-        assert(owner_ != nullptr);
-        assert(owner_->m_transformSystem != nullptr);
-        assert(owner_->m_entity != entt::null);
-        owner_->m_transformSystem->SetParent(owner_->m_entity, newParent);
-        return *this;
+        assert(m_transformSystem != nullptr);
+        assert(m_entity != entt::null);
+        m_transformSystem->SetParent(m_entity, newParent);
+    }
+
+    void sgTransform::ResolveSerializedParent(
+        const std::unordered_map<std::uint32_t, entt::entity>& idMap)
+    {
+        if (m_savedParentId == serializedNullId()) return;
+        if (m_transformSystem == nullptr) return;
+        const auto it = idMap.find(m_savedParentId);
+        if (it != idMap.end())
+        {
+            m_transformSystem->SetParent(m_entity, it->second);
+        }
+        m_savedParentId = serializedNullId();
     }
 
     void sgTransform::writeLocalPos(const Vector3& v)
@@ -86,7 +97,6 @@ namespace sage
         bindVec(rotation.world);
         bindVec(scale.local);
         bindVec(scale.world);
-        parent.owner_ = this;
     }
 
     Matrix sgTransform::GetMatrixNoRot() const
@@ -145,7 +155,7 @@ namespace sage
 
     entt::entity sgTransform::GetParent() const
     {
-        return parent.value_;
+        return m_parent;
     }
 
     const std::vector<entt::entity>& sgTransform::GetChildren() const
@@ -168,6 +178,7 @@ namespace sage
     sgTransform::sgTransform(const sgTransform& rhs)
         : m_entity(rhs.m_entity),
           m_transformSystem(rhs.m_transformSystem),
+          m_parent(rhs.m_parent),
           m_children(rhs.m_children),
           direction(rhs.direction),
           movementDirectionDebugLine(rhs.movementDirectionDebugLine)
@@ -178,7 +189,7 @@ namespace sage
         rotation.local.value = rhs.rotation.local.value;
         scale.world.value = rhs.scale.world.value;
         scale.local.value = rhs.scale.local.value;
-        parent.value_ = rhs.parent.value_;
+        m_savedParentId = rhs.m_savedParentId;
         rebindProxies();
     }
 
@@ -187,6 +198,7 @@ namespace sage
         if (this == &rhs) return *this;
         m_entity = rhs.m_entity;
         m_transformSystem = rhs.m_transformSystem;
+        m_parent = rhs.m_parent;
         m_children = rhs.m_children;
         direction = rhs.direction;
         movementDirectionDebugLine = rhs.movementDirectionDebugLine;
@@ -196,13 +208,14 @@ namespace sage
         rotation.local.value = rhs.rotation.local.value;
         scale.world.value = rhs.scale.world.value;
         scale.local.value = rhs.scale.local.value;
-        parent.value_ = rhs.parent.value_;
+        m_savedParentId = rhs.m_savedParentId;
         return *this;
     }
 
     sgTransform::sgTransform(sgTransform&& rhs) noexcept
         : m_entity(rhs.m_entity),
           m_transformSystem(rhs.m_transformSystem),
+          m_parent(rhs.m_parent),
           m_children(std::move(rhs.m_children)),
           direction(rhs.direction),
           movementDirectionDebugLine(rhs.movementDirectionDebugLine)
@@ -213,7 +226,6 @@ namespace sage
         rotation.local.value = rhs.rotation.local.value;
         scale.world.value = rhs.scale.world.value;
         scale.local.value = rhs.scale.local.value;
-        parent.value_ = rhs.parent.value_;
         rhs.m_transformSystem = nullptr;
         rhs.m_entity = entt::null;
         rebindProxies();
@@ -224,6 +236,7 @@ namespace sage
         if (this == &rhs) return *this;
         m_entity = rhs.m_entity;
         m_transformSystem = rhs.m_transformSystem;
+        m_parent = rhs.m_parent;
         m_children = std::move(rhs.m_children);
         direction = rhs.direction;
         movementDirectionDebugLine = rhs.movementDirectionDebugLine;
@@ -233,7 +246,6 @@ namespace sage
         rotation.local.value = rhs.rotation.local.value;
         scale.world.value = rhs.scale.world.value;
         scale.local.value = rhs.scale.local.value;
-        parent.value_ = rhs.parent.value_;
         rhs.m_transformSystem = nullptr;
         rhs.m_entity = entt::null;
         return *this;

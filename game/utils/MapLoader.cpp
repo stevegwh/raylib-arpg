@@ -23,6 +23,7 @@
 #include "entt/core/type_traits.hpp"
 #include <cereal/archives/json.hpp>
 #include <fstream>
+#include <unordered_map>
 
 namespace lq::maploader
 {
@@ -84,6 +85,8 @@ namespace lq::maploader
         assert(destination != nullptr);
         std::cout << "START: Loading map data from file." << std::endl;
 
+        std::unordered_map<std::uint32_t, entt::entity> idMap;
+
         sage::serializer::ReadCompressedBinary(
             path, sage::serializer::kMapBinMagic, [&](cereal::BinaryInputArchive& input, std::istream& stream) {
                 sage::ViewSerializer<sage::Spawner> spawnerLoader(destination);
@@ -100,7 +103,7 @@ namespace lq::maploader
                 for (unsigned int i = 0; i < itemCount; ++i)
                 {
                     auto entt = destination->create();
-                    sage::serializer::entity entityId{}; // ignore this (old serialized entity)
+                    sage::serializer::entity entityId{};
                     auto& transform = destination->emplace<sage::sgTransform>(entt);
                     auto& collideable = destination->emplace<sage::Collideable>(entt);
                     auto& renderable = destination->emplace<sage::Renderable>(entt);
@@ -116,11 +119,12 @@ namespace lq::maploader
                         std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
                         break;
                     }
+                    idMap[entityId.id] = entt;
                 }
 
                 while (stream.peek() != EOF)
                 {
-                    sage::serializer::entity entityId{}; // ignore this (old serialized entity)
+                    sage::serializer::entity entityId{};
                     auto entt = destination->create();
                     auto& transform = destination->emplace<sage::sgTransform>(entt);
                     auto& collideable = destination->emplace<sage::Collideable>(entt);
@@ -136,6 +140,7 @@ namespace lq::maploader
                         std::cerr << "ERROR: Serialization error: " << e.what() << std::endl;
                         break;
                     }
+                    idMap[entityId.id] = entt;
 
                     if (renderable.GetName().find("_DOOR_") != std::string::npos)
                     {
@@ -151,6 +156,11 @@ namespace lq::maploader
                     }
                 }
             });
+
+        for (auto [e, t] : destination->view<sage::sgTransform>().each())
+        {
+            t.ResolveSerializedParent(idMap);
+        }
 
         std::cout << "FINISH: Loading map data from file." << std::endl;
     }
