@@ -191,7 +191,7 @@ namespace sage
     {
         if (overflowContingency == OverflowContingency::SCROLLBAR && scrollbar)
         {
-            const Vector2 mousePos = GetMousePosition();
+            const Vector2 mousePos = settings->ScreenToViewportPosition(GetMousePosition());
             if (!DropdownList::ActiveDropdownCapturesCursor(mousePos))
             {
                 const Rectangle gutter = {
@@ -199,7 +199,7 @@ namespace sage
                     rec.y,
                     Scrollbar::GUTTER_WIDTH,
                     rec.height};
-                scrollbar->HandleInput(rec, gutter);
+                scrollbar->HandleInput(rec, gutter, mousePos);
             }
         }
         TableElement::Update();

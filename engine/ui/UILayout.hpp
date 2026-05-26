@@ -51,7 +51,7 @@ namespace sage
         std::optional<Texture> tex{};
         std::optional<NPatchInfo> nPatchInfo{};
 
-        virtual CellElement* GetCellUnderCursor();
+        virtual CellElement* GetCellUnderCursor(Vector2 mousePos);
         [[nodiscard]] virtual bool CapturesCursor(Vector2 point) const;
         void OnHoverStop() override;
         virtual void Update();

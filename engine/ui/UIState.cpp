@@ -6,6 +6,7 @@
 
 #include "../Cursor.hpp"
 #include "../GameUiEngine.hpp"
+#include "../Settings.hpp"
 #include "../slib.hpp"
 
 #include "raylib.h"
@@ -64,10 +65,10 @@ namespace sage
         }
     } // namespace
 
-    InputSnapshot InputSnapshot::Capture()
+    InputSnapshot InputSnapshot::Capture(const Settings& settings)
     {
         return InputSnapshot{
-            GetMousePosition(),
+            settings.ScreenToViewportPosition(GetMousePosition()),
             IsMouseButtonDown(MOUSE_BUTTON_LEFT),
             IsMouseButtonReleased(MOUSE_BUTTON_LEFT),
             GetFrameTime()};

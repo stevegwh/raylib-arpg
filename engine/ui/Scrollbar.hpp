@@ -40,7 +40,7 @@ namespace sage
         [[nodiscard]] std::size_t VisibleRows() const;
         [[nodiscard]] bool HasOverflow() const;
 
-        void HandleInput(const Rectangle& windowRect, const Rectangle& gutterRect);
+        void HandleInput(const Rectangle& windowRect, const Rectangle& gutterRect, Vector2 mousePos);
         void DrawChrome(const Rectangle& gutterRect) const;
     };
 } // namespace sage

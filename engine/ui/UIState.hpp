@@ -21,6 +21,7 @@ namespace sage
 {
     class CellElement;
     class GameUIEngine;
+    struct Settings;
 
     struct IdleState
     {
@@ -52,9 +53,9 @@ namespace sage
         bool leftReleased = false;
         float frameTime = 0.0f;
 
-        // Captures the current frame from raylib's globals. The only place that
-        // touches raylib input directly.
-        static InputSnapshot Capture();
+        // Captures the current frame from raylib's globals and normalizes mouse
+        // coordinates into the app viewport used by UI layout/drawing.
+        static InputSnapshot Capture(const Settings& settings);
     };
 
     // Drives the state machine for one CellElement. Handles transitions and

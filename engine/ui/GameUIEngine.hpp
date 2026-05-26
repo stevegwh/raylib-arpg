@@ -60,6 +60,7 @@ namespace sage
         [[nodiscard]] Window* GetWindowCollision(const Window* toCheck) const;
         [[nodiscard]] CellElement* GetCellUnderCursor() const;
         [[nodiscard]] bool IsMouseOverWindow() const;
+        [[nodiscard]] Vector2 ViewportMousePosition() const;
         void DrawDebug2D() const;
         void Draw2D() const;
         void QueueOverlayDraw(std::function<void()> draw) const;

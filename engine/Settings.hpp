@@ -113,6 +113,33 @@ namespace sage
                 std::floor((static_cast<float>(screenHeight) - static_cast<float>(viewportHeight)) * 0.5f)};
         }
 
+        [[nodiscard]] Rectangle GetViewportScreenRect() const
+        {
+            const auto viewportOffset = GetViewportOffset();
+            return {
+                viewportOffset.x,
+                viewportOffset.y,
+                static_cast<float>(viewportWidth),
+                static_cast<float>(viewportHeight)};
+        }
+
+        [[nodiscard]] bool IsPointInViewport(const Vector2 point) const
+        {
+            return CheckCollisionPointRec(point, GetViewportScreenRect());
+        }
+
+        [[nodiscard]] Vector2 ScreenToViewportPosition(const Vector2 point) const
+        {
+            const auto viewportOffset = GetViewportOffset();
+            return {point.x - viewportOffset.x, point.y - viewportOffset.y};
+        }
+
+        [[nodiscard]] Vector2 ViewportToScreenPosition(const Vector2 point) const
+        {
+            const auto viewportOffset = GetViewportOffset();
+            return {point.x + viewportOffset.x, point.y + viewportOffset.y};
+        }
+
         [[nodiscard]] Vector2 GetRenderViewportOffset() const
         {
             return {static_cast<float>(renderViewportOffsetX), static_cast<float>(renderViewportOffsetY)};

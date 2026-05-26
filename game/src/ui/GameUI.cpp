@@ -535,7 +535,7 @@ namespace lq
         else
         {
             if (const auto* characterWindow = parent->GetWindow();
-                !sage::PointInsideRect(characterWindow->GetRec(), GetMousePosition()))
+                !sage::PointInsideRect(characterWindow->GetRec(), engine->ViewportMousePosition()))
             {
                 dropItemInWorld();
             }

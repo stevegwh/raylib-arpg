@@ -271,7 +271,7 @@ namespace sage
         {
             cancelEdit();
         }
-        else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !PointInsideRect(rec, GetMousePosition()))
+        else if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !PointInsideRect(rec, engine->ViewportMousePosition()))
         {
             commitEdit();
         }
@@ -322,7 +322,7 @@ namespace sage
             editStartContent = content;
         }
         editing = true;
-        setCaretFromMousePosition(GetMousePosition());
+        setCaretFromMousePosition(engine->ViewportMousePosition());
     }
 
     void TextInput::setCaretFromMousePosition(const Vector2 mousePosition)
@@ -587,7 +587,7 @@ namespace sage
             return;
         }
 
-        const Vector2 mousePos = GetMousePosition();
+        const Vector2 mousePos = engine->ViewportMousePosition();
         const Rectangle listRec = expandedListRec();
         const bool insideList = PointInsideRect(listRec, mousePos);
         const bool insideControl = PointInsideRect(rec, mousePos);
@@ -675,7 +675,7 @@ namespace sage
 
         const ScissorScope scissor{listRec};
         const float rowHeight = optionHeight();
-        const Vector2 mousePos = GetMousePosition();
+        const Vector2 mousePos = engine->ViewportMousePosition();
         const auto highlightedIndex = optionIndexAt(mousePos);
         const std::size_t visibleCount = visibleOptionCount();
 
@@ -875,13 +875,13 @@ namespace sage
     void TitleBar::OnDragStart()
     {
         draggedWindow = parent->GetWindow();
-        const auto [x, y] = GetMousePosition();
+        const auto [x, y] = engine->ViewportMousePosition();
         dragOffset = {x - draggedWindow.value()->GetRec().x, y - draggedWindow.value()->GetRec().y};
     }
 
     void TitleBar::DragUpdate()
     {
-        const auto mousePos = GetMousePosition();
+        const auto mousePos = engine->ViewportMousePosition();
         const auto& window = draggedWindow.value();
         const auto newPos = Vector2Subtract(mousePos, dragOffset);
 
@@ -950,7 +950,7 @@ namespace sage
 
     void ImageBox::DragDraw()
     {
-        auto mousePos = GetMousePosition();
+        auto mousePos = engine->ViewportMousePosition();
         DrawTexture(tex, mousePos.x - rec.width / 2, mousePos.y - rec.height / 2, WHITE);
     }
 

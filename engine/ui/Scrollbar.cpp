@@ -75,10 +75,9 @@ namespace sage
         if (scrollOffset != previous) onScrollChanged.Publish();
     }
 
-    void Scrollbar::HandleInput(const Rectangle& windowRect, const Rectangle& gutterRect)
+    void Scrollbar::HandleInput(const Rectangle& windowRect, const Rectangle& gutterRect, const Vector2 mousePos)
     {
         if (!HasOverflow()) return;
-        const Vector2 mousePos = GetMousePosition();
 
         if (CheckCollisionPointRec(mousePos, windowRect))
         {

@@ -270,9 +270,8 @@ namespace sage
         }
     }
 
-    CellElement* TableElement::GetCellUnderCursor()
+    CellElement* TableElement::GetCellUnderCursor(const Vector2 mousePos)
     {
-        const auto& mousePos = GetMousePosition();
         if (element.has_value())
         {
             if (element.value()->CapturesCursor(mousePos) || PointInsideRect(rec, mousePos))
@@ -285,7 +284,7 @@ namespace sage
         {
             if (child->CapturesCursor(mousePos))
             {
-                if (auto childCell = child->GetCellUnderCursor())
+                if (auto childCell = child->GetCellUnderCursor(mousePos))
                 {
                     return childCell;
                 }
@@ -293,7 +292,7 @@ namespace sage
         }
         for (const auto& child : children)
         {
-            if (auto childCell = child->GetCellUnderCursor())
+            if (auto childCell = child->GetCellUnderCursor(mousePos))
             {
                 return childCell;
             }

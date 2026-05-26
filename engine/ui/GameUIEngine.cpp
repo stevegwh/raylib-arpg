@@ -86,7 +86,7 @@ namespace sage
 
     CellElement* GameUIEngine::GetCellUnderCursor() const
     {
-        const auto mousePos = GetMousePosition();
+        const auto mousePos = ViewportMousePosition();
         for (auto windowIt = windows.rbegin(); windowIt != windows.rend(); ++windowIt)
         {
             auto& window = *windowIt;
@@ -98,7 +98,7 @@ namespace sage
             {
                 if (child->CapturesCursor(mousePos))
                 {
-                    if (auto childElement = child->GetCellUnderCursor())
+                    if (auto childElement = child->GetCellUnderCursor(mousePos))
                     {
                         return childElement;
                     }
@@ -115,7 +115,7 @@ namespace sage
 
             for (const auto& child : window->children)
             {
-                if (auto childElement = child->GetCellUnderCursor())
+                if (auto childElement = child->GetCellUnderCursor(mousePos))
                 {
                     return childElement;
                 }
@@ -127,7 +127,7 @@ namespace sage
 
     bool GameUIEngine::IsMouseOverWindow() const
     {
-        const auto mousePos = GetMousePosition();
+        const auto mousePos = ViewportMousePosition();
         for (const auto& window : windows)
         {
             if (!window || window->IsHidden()) continue;
@@ -142,6 +142,11 @@ namespace sage
         }
 
         return tooltipWindow && !tooltipWindow->hidden && PointInsideRect(tooltipWindow->rec, mousePos);
+    }
+
+    Vector2 GameUIEngine::ViewportMousePosition() const
+    {
+        return settings->ScreenToViewportPosition(GetMousePosition());
     }
 
     Rectangle GameUIEngine::GetOverlap(Rectangle rec1, Rectangle rec2)
@@ -248,7 +253,7 @@ namespace sage
 
     void GameUIEngine::processWindows()
     {
-        const auto mousePos = GetMousePosition();
+        const auto mousePos = currentInput.mousePos;
 
         for (auto& window : windows)
         {
@@ -280,7 +285,7 @@ namespace sage
     {
         // Snapshot raylib input once per frame so the state machine doesn't pull
         // from globals; everyone reads via Input() for the rest of the pass.
-        currentInput = InputSnapshot::Capture();
+        currentInput = InputSnapshot::Capture(*settings);
 
         if (draggedObject.has_value())
         {
