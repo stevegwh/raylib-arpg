@@ -20,8 +20,6 @@ add_subdirectory(vendor/raylib)
 target_compile_definitions(raylib PRIVATE MAX_DECOMPRESSION_SIZE=512)
 include_directories(vendor)
 include_directories(vendor/magic_enum)
-include_directories(vendor/imgui)
-include_directories(vendor/imgui/backends)
 
 # Options
 option(BUILD_EDITOR "Build the editor" OFF)

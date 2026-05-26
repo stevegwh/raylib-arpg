@@ -14,17 +14,7 @@ file(GLOB_RECURSE CORE_SOURCES *.cpp)
 # project header at compile time only via the include path.
 list(FILTER CORE_HEADERS EXCLUDE REGEX "/defaults/")
 
-set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/vendor/imgui)
-set(IMGUI_SOURCES
-        ${IMGUI_DIR}/imgui.cpp
-        ${IMGUI_DIR}/imgui_demo.cpp
-        ${IMGUI_DIR}/imgui_draw.cpp
-        ${IMGUI_DIR}/imgui_tables.cpp
-        ${IMGUI_DIR}/imgui_widgets.cpp
-        ${IMGUI_DIR}/backends/rlImGui.cpp
-)
-
-add_library(engine STATIC ${CORE_SOURCES} ${CORE_HEADERS} ${IMGUI_SOURCES})
+add_library(engine STATIC ${CORE_SOURCES} ${CORE_HEADERS})
 
 target_link_libraries(engine
         PUBLIC
@@ -40,8 +30,6 @@ target_include_directories(engine
         # For external consumers (game) - they use "components/..."
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/vendor
-        ${CMAKE_SOURCE_DIR}/vendor/imgui
-        ${CMAKE_SOURCE_DIR}/vendor/imgui/backends
         # Resolves project/CustomCollisionLayers.hpp (and any future project
         # extension headers). Defaults to engine/defaults/ for standalone builds.
         ${SAGE_PROJECT_INCLUDE_DIR}
