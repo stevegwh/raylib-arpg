@@ -174,7 +174,7 @@ namespace sage
 
         // Calculate the offset to center the mesh on the mouse position
         meshOffset = {startPos.x - meshCenter.x, 0, startPos.z - meshCenter.z};
-        sys->transformSystem->SetWorldPos(entity, meshOffset);
+        registry->get<sgTransform>(entity).position.world = meshOffset;
         renderable.SetTransform(MatrixIdentity());
     }
 
@@ -195,7 +195,7 @@ namespace sage
         sys->navigationGridSystem->GetGridRange(pos, static_cast<int>(radius), minRange, maxRange);
 
         updateTerrainPolygon(minRange, maxRange);
-        sys->transformSystem->SetWorldPos(entity, meshOffset);
+        registry->get<sgTransform>(entity).position.world = meshOffset;
     }
 
     TextureTerrainOverlay::~TextureTerrainOverlay()

@@ -16,100 +16,134 @@ namespace sage
 
     class sgTransform
     {
-        Vector3 m_positionWorld{};
-        Vector3 m_positionLocal{};
-        Vector3 m_rotationWorld{};
-        Vector3 m_rotationLocal{};
-        Vector3 m_scaleWorld{1, 1, 1};
-        Vector3 m_scaleLocal{1, 1, 1};
-        entt::entity m_parent = entt::null;
-        std::vector<entt::entity> m_children{};
         entt::entity m_entity = entt::null;
         TransformSystem* m_transformSystem = nullptr;
+        std::vector<entt::entity> m_children{};
 
-        using TransformReader = const Vector3& (sgTransform::*)() const;
-        using TransformWriter = void (sgTransform::*)(const Vector3&);
-        using VectorAxis = float Vector3::*;
+        // One-line forwarders to TransformSystem. Defined in the .cpp so
+        // TransformSystem can stay forward-declared in this header.
+        void writeLocalPos(const Vector3& v);
+        void writeWorldPos(const Vector3& v);
+        void writeLocalRot(const Vector3& v);
+        void writeWorldRot(const Vector3& v);
+        void writeLocalScale(const Vector3& v);
+        void writeWorldScale(const Vector3& v);
 
-        void AssertBound() const;
-        void SetLocalPosViaSystem(const Vector3& position);
-        void SetWorldPosViaSystem(const Vector3& position);
-        void SetLocalRotViaSystem(const Vector3& rotation);
-        void SetWorldRotViaSystem(const Vector3& rotation);
-        void SetLocalScaleViaSystem(const Vector3& scale);
-        void SetWorldScaleViaSystem(const Vector3& scale);
+        using Writer = void (sgTransform::*)(const Vector3&);
+
         void Bind(TransformSystem* transformSystem, entt::entity entity);
+        void rebindProxies();
 
       public:
-        class TransformAxisAccessor
+        // Proxy field with its cached Vector3 living inside.
+        // Assignment routes through TransformSystem (via `Write`) so dirty propagation
+        // happens automatically; reads return the cached value_ directly.
+        template <Writer Write>
+        class VectorField
         {
-            sgTransform* owner = nullptr;
-            TransformReader read = nullptr;
-            TransformWriter write = nullptr;
-            VectorAxis axis = nullptr;
-
-            TransformAxisAccessor(
-                sgTransform* owner, TransformReader read, TransformWriter write, VectorAxis axis);
-            void BindOwner(sgTransform* newOwner);
-
+            Vector3 value{};
+            sgTransform* owner_ = nullptr;
             friend class sgTransform;
-            friend class TransformVectorAccessor;
+            friend class TransformSystem;
 
           public:
-            TransformAxisAccessor() = default;
-            TransformAxisAccessor& operator=(float value);
-            TransformAxisAccessor& operator=(const TransformAxisAccessor& rhs);
-            [[nodiscard]] operator float() const;
+            struct Axis
+            {
+                VectorField* parent = nullptr;
+                float Vector3::* axis = nullptr;
+
+                operator float() const
+                {
+                    return parent->value.*axis;
+                }
+                Axis& operator=(float value)
+                {
+                    Vector3 next = parent->value;
+                    next.*axis = value;
+                    (parent->owner_->*Write)(next);
+                    return *this;
+                }
+                Axis& operator=(const Axis& rhs)
+                {
+                    return *this = static_cast<float>(rhs);
+                }
+            };
+
+            Axis x{this, &Vector3::x};
+            Axis y{this, &Vector3::y};
+            Axis z{this, &Vector3::z};
+
+            VectorField() = default;
+            VectorField(const VectorField&) = delete;
+            VectorField(VectorField&&) = delete;
+            VectorField& operator=(VectorField&&) = delete;
+
+            operator const Vector3&() const
+            {
+                return value;
+            }
+            [[nodiscard]] const Vector3& Get() const
+            {
+                return value;
+            }
+            VectorField& operator=(const Vector3& value)
+            {
+                (owner_->*Write)(value);
+                return *this;
+            }
+            VectorField& operator=(const VectorField& rhs)
+            {
+                if (this == &rhs) return *this;
+                return *this = rhs.Get();
+            }
         };
 
-        class TransformVectorAccessor
+        template <Writer LocalWrite, Writer WorldWrite>
+        struct LocalWorldPair
         {
-            sgTransform* owner = nullptr;
-            TransformReader read = nullptr;
-            TransformWriter write = nullptr;
+            VectorField<LocalWrite> local{};
+            VectorField<WorldWrite> world{};
+        };
 
-            TransformVectorAccessor(sgTransform* owner, TransformReader read, TransformWriter write);
-            void BindOwner(sgTransform* newOwner);
-
+        // Parent is an entity reference; assigning routes through TransformSystem::SetParent
+        // so child lists and the local/world sync happen automatically.
+        class ParentField
+        {
+            entt::entity value_ = entt::null;
+            sgTransform* owner_ = nullptr;
             friend class sgTransform;
-            friend class TransformAccessorGroup;
+            friend class TransformSystem;
 
           public:
-            TransformAxisAccessor x;
-            TransformAxisAccessor y;
-            TransformAxisAccessor z;
+            ParentField() = default;
+            ParentField(const ParentField&) = delete;
+            ParentField(ParentField&&) = delete;
+            ParentField& operator=(ParentField&&) = delete;
 
-            TransformVectorAccessor() = default;
-            TransformVectorAccessor& operator=(const Vector3& value);
-            TransformVectorAccessor& operator=(const TransformVectorAccessor& rhs);
-            [[nodiscard]] operator Vector3() const;
-            [[nodiscard]] const Vector3& Get() const;
+            operator entt::entity() const
+            {
+                return value_;
+            }
+            [[nodiscard]] entt::entity Get() const
+            {
+                return value_;
+            }
+            ParentField& operator=(entt::entity newParent);
+            ParentField& operator=(entt::null_t)
+            {
+                return *this = entt::entity{entt::null};
+            }
+            ParentField& operator=(const ParentField& rhs)
+            {
+                if (this == &rhs) return *this;
+                return *this = rhs.value_;
+            }
         };
 
-        class TransformAccessorGroup
-        {
-            TransformAccessorGroup(
-                sgTransform* owner,
-                TransformReader localRead,
-                TransformWriter localWrite,
-                TransformReader worldRead,
-                TransformWriter worldWrite);
-            void BindOwner(sgTransform* newOwner);
-
-            friend class sgTransform;
-
-          public:
-            TransformVectorAccessor local;
-            TransformVectorAccessor world;
-
-            TransformAccessorGroup() = default;
-            TransformAccessorGroup(const TransformAccessorGroup&) = delete;
-            TransformAccessorGroup& operator=(const TransformAccessorGroup&) = delete;
-        };
-
-        TransformAccessorGroup position;
-        TransformAccessorGroup rotation;
-        TransformAccessorGroup scale;
+        LocalWorldPair<&sgTransform::writeLocalPos, &sgTransform::writeWorldPos> position;
+        LocalWorldPair<&sgTransform::writeLocalRot, &sgTransform::writeWorldRot> rotation;
+        LocalWorldPair<&sgTransform::writeLocalScale, &sgTransform::writeWorldScale> scale;
+        ParentField parent;
 
         Vector3 direction{};
 
@@ -119,22 +153,32 @@ namespace sage
         void save(Archive& archive) const
         {
             archive(
-                m_positionWorld, m_rotationWorld, m_scaleWorld, m_positionLocal, m_rotationLocal, m_scaleLocal);
+                position.world.value,
+                rotation.world.value,
+                scale.world.value,
+                position.local.value,
+                rotation.local.value,
+                scale.local.value);
         }
 
         template <class Archive>
         void load(Archive& archive)
         {
             archive(
-                m_positionWorld, m_rotationWorld, m_scaleWorld, m_positionLocal, m_rotationLocal, m_scaleLocal);
+                position.world.value,
+                rotation.world.value,
+                scale.world.value,
+                position.local.value,
+                rotation.local.value,
+                scale.local.value);
         }
 
         template <class Inspector>
         void define_editor_fields(Inspector& i)
         {
-            i.field("Position", m_positionLocal);
-            i.field("Rotation", m_rotationLocal);
-            i.field("Scale", m_scaleLocal);
+            i.field("Position", position.local.value);
+            i.field("Rotation", rotation.local.value);
+            i.field("Scale", scale.local.value);
         }
 
         [[nodiscard]] Matrix GetMatrixNoRot() const;
@@ -149,11 +193,11 @@ namespace sage
         entt::entity GetParent() const;
         const std::vector<entt::entity>& GetChildren() const;
 
+        sgTransform();
         sgTransform(const sgTransform& rhs);
         sgTransform& operator=(const sgTransform& rhs);
         sgTransform(sgTransform&& rhs) noexcept;
         sgTransform& operator=(sgTransform&& rhs) noexcept;
-        sgTransform();
 
         friend class TransformSystem;
     };

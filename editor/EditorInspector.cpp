@@ -42,27 +42,27 @@ namespace sage::editor
              [](const entt::registry& r, const entt::entity e) {
                  return r.valid(e) && r.any_of<sgTransform>(e);
              },
-             [](entt::registry& r, const entt::entity e, TransformSystem* transformSystem) {
-                 assert(transformSystem != nullptr);
+             [](entt::registry& r, const entt::entity e, TransformSystem*) {
                  ComponentInspector ci;
                  auto& transform = r.get<sgTransform>(e);
+                 auto* reg = &r;
                  ci.field(
                      "Position",
                      const_cast<Vector3&>(transform.GetLocalPos()),
-                     [transformSystem, e](const Vector3& position) {
-                         transformSystem->SetLocalPos(e, position);
+                     [reg, e](const Vector3& position) {
+                         reg->get<sgTransform>(e).position.local = position;
                      });
                  ci.field(
                      "Rotation",
                      const_cast<Vector3&>(transform.GetLocalRot()),
-                     [transformSystem, e](const Vector3& rotation) {
-                         transformSystem->SetLocalRot(e, rotation);
+                     [reg, e](const Vector3& rotation) {
+                         reg->get<sgTransform>(e).rotation.local = rotation;
                      });
                  ci.field(
                      "Scale",
                      const_cast<Vector3&>(transform.GetLocalScale()),
-                     [transformSystem, e](const Vector3& scale) {
-                         transformSystem->SetLocalScale(e, scale);
+                     [reg, e](const Vector3& scale) {
+                         reg->get<sgTransform>(e).scale.local = scale;
                      });
                  return std::move(ci).Take();
              }});

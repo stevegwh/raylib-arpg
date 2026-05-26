@@ -41,7 +41,7 @@ namespace lq
 
         auto& renderable = registry->get<sage::Renderable>(self);
         renderable.active = true;
-        sys->engine.transformSystem->SetWorldPos(self, moveable.GetDestination());
+        registry->get<sage::sgTransform>(self).position.world = moveable.GetDestination();
     }
 
     void CursorClickIndicator::OnSelectedActorChanged(entt::entity, entt::entity current)
@@ -80,7 +80,7 @@ namespace lq
         const float normalizedScale = (sin(k) + 1.0f) * 0.5f;
         const float scale = minScale + normalizedScale * (maxScale - minScale);
 
-        sys->engine.transformSystem->SetWorldScale(self, scale);
+        registry->get<sage::sgTransform>(self).scale.world = {scale, scale, scale};
     }
 
     CursorClickIndicator::CursorClickIndicator(entt::registry* _registry, Systems* _sys)

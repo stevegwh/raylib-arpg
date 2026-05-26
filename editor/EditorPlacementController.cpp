@@ -144,10 +144,10 @@ namespace sage::editor
                 .visibleInHierarchy = true,
                 .locked = false});
         sys->registry->emplace<AssetReference>(entity, AssetReference{.assetKey = placeable.modelKey});
-        sys->registry->emplace<sgTransform>(entity);
-        sys->transformSystem->SetWorldPos(entity, *snappedPlacementPosition);
-        sys->transformSystem->SetWorldScale(entity, placementScale);
-        sys->transformSystem->SetWorldRot(entity, {0.0f, placementRotationY, 0.0f});
+        auto& transform = sys->registry->emplace<sgTransform>(entity);
+        transform.position.world = *snappedPlacementPosition;
+        transform.scale.world = {placementScale, placementScale, placementScale};
+        transform.rotation.world = {0.0f, placementRotationY, 0.0f};
 
         auto model = ResourceManager::GetInstance().GetModelView(placeable.modelKey);
         auto& renderable =

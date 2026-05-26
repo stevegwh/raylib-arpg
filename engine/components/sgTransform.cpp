@@ -12,147 +12,55 @@
 
 namespace sage
 {
-    sgTransform::TransformAxisAccessor::TransformAxisAccessor(
-        sgTransform* owner, const TransformReader read, const TransformWriter write, const VectorAxis axis)
-        : owner(owner), read(read), write(write), axis(axis)
+    sgTransform::ParentField& sgTransform::ParentField::operator=(const entt::entity newParent)
     {
-    }
-
-    void sgTransform::TransformAxisAccessor::BindOwner(sgTransform* newOwner)
-    {
-        owner = newOwner;
-    }
-
-    sgTransform::TransformAxisAccessor& sgTransform::TransformAxisAccessor::operator=(const float value)
-    {
-        assert(owner != nullptr);
-        assert(read != nullptr);
-        assert(write != nullptr);
-        assert(axis != nullptr);
-
-        auto vector = (owner->*read)();
-        vector.*axis = value;
-        (owner->*write)(vector);
+        assert(owner_ != nullptr);
+        assert(owner_->m_transformSystem != nullptr);
+        assert(owner_->m_entity != entt::null);
+        owner_->m_transformSystem->SetParent(owner_->m_entity, newParent);
         return *this;
     }
 
-    sgTransform::TransformAxisAccessor& sgTransform::TransformAxisAccessor::operator=(
-        const TransformAxisAccessor& rhs)
-    {
-        return *this = static_cast<float>(rhs);
-    }
-
-    sgTransform::TransformAxisAccessor::operator float() const
-    {
-        assert(owner != nullptr);
-        assert(read != nullptr);
-        assert(axis != nullptr);
-
-        const auto& value = (owner->*read)();
-        return value.*axis;
-    }
-
-    sgTransform::TransformVectorAccessor::TransformVectorAccessor(
-        sgTransform* owner, const TransformReader read, const TransformWriter write)
-        : owner(owner),
-          read(read),
-          write(write),
-          x(owner, read, write, &Vector3::x),
-          y(owner, read, write, &Vector3::y),
-          z(owner, read, write, &Vector3::z)
-    {
-    }
-
-    void sgTransform::TransformVectorAccessor::BindOwner(sgTransform* newOwner)
-    {
-        owner = newOwner;
-        x.BindOwner(newOwner);
-        y.BindOwner(newOwner);
-        z.BindOwner(newOwner);
-    }
-
-    sgTransform::TransformVectorAccessor& sgTransform::TransformVectorAccessor::operator=(const Vector3& value)
-    {
-        assert(owner != nullptr);
-        assert(write != nullptr);
-        (owner->*write)(value);
-        return *this;
-    }
-
-    sgTransform::TransformVectorAccessor& sgTransform::TransformVectorAccessor::operator=(
-        const TransformVectorAccessor& rhs)
-    {
-        return *this = rhs.Get();
-    }
-
-    sgTransform::TransformVectorAccessor::operator Vector3() const
-    {
-        return Get();
-    }
-
-    const Vector3& sgTransform::TransformVectorAccessor::Get() const
-    {
-        assert(owner != nullptr);
-        assert(read != nullptr);
-        return (owner->*read)();
-    }
-
-    sgTransform::TransformAccessorGroup::TransformAccessorGroup(
-        sgTransform* owner,
-        const TransformReader localRead,
-        const TransformWriter localWrite,
-        const TransformReader worldRead,
-        const TransformWriter worldWrite)
-        : local(owner, localRead, localWrite), world(owner, worldRead, worldWrite)
-    {
-    }
-
-    void sgTransform::TransformAccessorGroup::BindOwner(sgTransform* newOwner)
-    {
-        local.BindOwner(newOwner);
-        world.BindOwner(newOwner);
-    }
-
-    void sgTransform::AssertBound() const
+    void sgTransform::writeLocalPos(const Vector3& v)
     {
         assert(m_transformSystem != nullptr);
         assert(m_entity != entt::null);
+        m_transformSystem->SetLocalPos(m_entity, v);
     }
 
-    void sgTransform::SetLocalPosViaSystem(const Vector3& position)
+    void sgTransform::writeWorldPos(const Vector3& v)
     {
-        AssertBound();
-        m_transformSystem->SetLocalPos(m_entity, position);
+        assert(m_transformSystem != nullptr);
+        assert(m_entity != entt::null);
+        m_transformSystem->SetWorldPos(m_entity, v);
     }
 
-    void sgTransform::SetWorldPosViaSystem(const Vector3& position)
+    void sgTransform::writeLocalRot(const Vector3& v)
     {
-        AssertBound();
-        m_transformSystem->SetWorldPos(m_entity, position);
+        assert(m_transformSystem != nullptr);
+        assert(m_entity != entt::null);
+        m_transformSystem->SetLocalRot(m_entity, v);
     }
 
-    void sgTransform::SetLocalRotViaSystem(const Vector3& rotation)
+    void sgTransform::writeWorldRot(const Vector3& v)
     {
-        AssertBound();
-        m_transformSystem->SetLocalRot(m_entity, rotation);
+        assert(m_transformSystem != nullptr);
+        assert(m_entity != entt::null);
+        m_transformSystem->SetWorldRot(m_entity, v);
     }
 
-    void sgTransform::SetWorldRotViaSystem(const Vector3& rotation)
+    void sgTransform::writeLocalScale(const Vector3& v)
     {
-        AssertBound();
-        m_transformSystem->SetWorldRot(m_entity, rotation);
+        assert(m_transformSystem != nullptr);
+        assert(m_entity != entt::null);
+        m_transformSystem->SetLocalScale(m_entity, v);
     }
 
-    void sgTransform::SetLocalScaleViaSystem(const Vector3& scale)
+    void sgTransform::writeWorldScale(const Vector3& v)
     {
-        AssertBound();
-        m_transformSystem->SetLocalScale(m_entity, scale);
-    }
-
-    void sgTransform::SetWorldScaleViaSystem(const Vector3& scale)
-    {
-        AssertBound();
-        m_transformSystem->SetWorldScale(m_entity, scale);
+        assert(m_transformSystem != nullptr);
+        assert(m_entity != entt::null);
+        m_transformSystem->SetWorldScale(m_entity, v);
     }
 
     void sgTransform::Bind(TransformSystem* transformSystem, const entt::entity entity)
@@ -161,9 +69,24 @@ namespace sage
         assert(entity != entt::null);
         m_transformSystem = transformSystem;
         m_entity = entity;
-        position.BindOwner(this);
-        rotation.BindOwner(this);
-        scale.BindOwner(this);
+        rebindProxies();
+    }
+
+    void sgTransform::rebindProxies()
+    {
+        auto bindVec = [this](auto& field) {
+            field.owner_ = this;
+            field.x.parent = &field;
+            field.y.parent = &field;
+            field.z.parent = &field;
+        };
+        bindVec(position.local);
+        bindVec(position.world);
+        bindVec(rotation.local);
+        bindVec(rotation.world);
+        bindVec(scale.local);
+        bindVec(scale.world);
+        parent.owner_ = this;
     }
 
     Matrix sgTransform::GetMatrixNoRot() const
@@ -192,37 +115,37 @@ namespace sage
 
     const Vector3& sgTransform::GetLocalPos() const
     {
-        return m_positionLocal;
+        return position.local.value;
     }
 
     const Vector3& sgTransform::GetWorldPos() const
     {
-        return m_positionWorld;
+        return position.world.value;
     }
 
     const Vector3& sgTransform::GetWorldRot() const
     {
-        return m_rotationWorld;
+        return rotation.world.value;
     }
 
     const Vector3& sgTransform::GetLocalRot() const
     {
-        return m_rotationLocal;
+        return rotation.local.value;
     }
 
     const Vector3& sgTransform::GetScale() const
     {
-        return m_scaleWorld;
+        return scale.world.value;
     }
 
     const Vector3& sgTransform::GetLocalScale() const
     {
-        return m_scaleLocal;
+        return scale.local.value;
     }
 
     entt::entity sgTransform::GetParent() const
     {
-        return m_parent;
+        return parent.value_;
     }
 
     const std::vector<entt::entity>& sgTransform::GetChildren() const
@@ -230,126 +153,89 @@ namespace sage
         return m_children;
     }
 
-    sgTransform::sgTransform(const sgTransform& rhs)
-        : m_positionWorld(rhs.m_positionWorld),
-          m_positionLocal(rhs.m_positionLocal),
-          m_rotationWorld(rhs.m_rotationWorld),
-          m_rotationLocal(rhs.m_rotationLocal),
-          m_scaleWorld(rhs.m_scaleWorld),
-          m_scaleLocal(rhs.m_scaleLocal),
-          position(
-              this,
-              &sgTransform::GetLocalPos,
-              &sgTransform::SetLocalPosViaSystem,
-              &sgTransform::GetWorldPos,
-              &sgTransform::SetWorldPosViaSystem),
-          rotation(
-              this,
-              &sgTransform::GetLocalRot,
-              &sgTransform::SetLocalRotViaSystem,
-              &sgTransform::GetWorldRot,
-              &sgTransform::SetWorldRotViaSystem),
-          scale(
-              this,
-              &sgTransform::GetLocalScale,
-              &sgTransform::SetLocalScaleViaSystem,
-              &sgTransform::GetScale,
-              &sgTransform::SetWorldScaleViaSystem)
+    sgTransform::sgTransform()
     {
-        m_parent = rhs.m_parent;
-        m_children = rhs.m_children;
+        scale.local.value = {1, 1, 1};
+        scale.world.value = {1, 1, 1};
+        rebindProxies();
+    }
+
+    // Copy/move ctors and assignment operators transfer the full state
+    // (proxy values + parent/children + binding + free fields) and rebind the
+    // proxies' back-pointers to `this`. The on_construct signal in TransformSystem
+    // will re-call Bind() when a copy is inserted into the registry via emplace,
+    // overwriting the copied entity/system pointers with the correct values.
+    sgTransform::sgTransform(const sgTransform& rhs)
+        : m_entity(rhs.m_entity),
+          m_transformSystem(rhs.m_transformSystem),
+          m_children(rhs.m_children),
+          direction(rhs.direction),
+          movementDirectionDebugLine(rhs.movementDirectionDebugLine)
+    {
+        position.world.value = rhs.position.world.value;
+        position.local.value = rhs.position.local.value;
+        rotation.world.value = rhs.rotation.world.value;
+        rotation.local.value = rhs.rotation.local.value;
+        scale.world.value = rhs.scale.world.value;
+        scale.local.value = rhs.scale.local.value;
+        parent.value_ = rhs.parent.value_;
+        rebindProxies();
     }
 
     sgTransform& sgTransform::operator=(const sgTransform& rhs)
     {
         if (this == &rhs) return *this;
-        m_positionLocal = rhs.m_positionLocal;
-        m_rotationLocal = rhs.m_rotationLocal;
-        m_positionWorld = rhs.m_positionWorld;
-        m_rotationWorld = rhs.m_rotationWorld;
-        m_scaleWorld = rhs.m_scaleWorld;
-        m_scaleLocal = rhs.m_scaleLocal;
-        m_parent = rhs.m_parent;
+        m_entity = rhs.m_entity;
+        m_transformSystem = rhs.m_transformSystem;
         m_children = rhs.m_children;
-        position.BindOwner(this);
-        rotation.BindOwner(this);
-        scale.BindOwner(this);
+        direction = rhs.direction;
+        movementDirectionDebugLine = rhs.movementDirectionDebugLine;
+        position.world.value = rhs.position.world.value;
+        position.local.value = rhs.position.local.value;
+        rotation.world.value = rhs.rotation.world.value;
+        rotation.local.value = rhs.rotation.local.value;
+        scale.world.value = rhs.scale.world.value;
+        scale.local.value = rhs.scale.local.value;
+        parent.value_ = rhs.parent.value_;
         return *this;
     }
 
     sgTransform::sgTransform(sgTransform&& rhs) noexcept
-        : m_positionWorld(rhs.m_positionWorld),
-          m_positionLocal(rhs.m_positionLocal),
-          m_rotationWorld(rhs.m_rotationWorld),
-          m_rotationLocal(rhs.m_rotationLocal),
-          m_scaleWorld(rhs.m_scaleWorld),
-          m_scaleLocal(rhs.m_scaleLocal),
-          m_entity(rhs.m_entity),
+        : m_entity(rhs.m_entity),
           m_transformSystem(rhs.m_transformSystem),
-          position(
-              this,
-              &sgTransform::GetLocalPos,
-              &sgTransform::SetLocalPosViaSystem,
-              &sgTransform::GetWorldPos,
-              &sgTransform::SetWorldPosViaSystem),
-          rotation(
-              this,
-              &sgTransform::GetLocalRot,
-              &sgTransform::SetLocalRotViaSystem,
-              &sgTransform::GetWorldRot,
-              &sgTransform::SetWorldRotViaSystem),
-          scale(
-              this,
-              &sgTransform::GetLocalScale,
-              &sgTransform::SetLocalScaleViaSystem,
-              &sgTransform::GetScale,
-              &sgTransform::SetWorldScaleViaSystem)
+          m_children(std::move(rhs.m_children)),
+          direction(rhs.direction),
+          movementDirectionDebugLine(rhs.movementDirectionDebugLine)
     {
-        m_parent = rhs.m_parent;
-        m_children = std::move(rhs.m_children);
+        position.world.value = rhs.position.world.value;
+        position.local.value = rhs.position.local.value;
+        rotation.world.value = rhs.rotation.world.value;
+        rotation.local.value = rhs.rotation.local.value;
+        scale.world.value = rhs.scale.world.value;
+        scale.local.value = rhs.scale.local.value;
+        parent.value_ = rhs.parent.value_;
+        rhs.m_transformSystem = nullptr;
+        rhs.m_entity = entt::null;
+        rebindProxies();
     }
 
     sgTransform& sgTransform::operator=(sgTransform&& rhs) noexcept
     {
         if (this == &rhs) return *this;
-        m_positionLocal = rhs.m_positionLocal;
-        m_rotationLocal = rhs.m_rotationLocal;
-        m_positionWorld = rhs.m_positionWorld;
-        m_rotationWorld = rhs.m_rotationWorld;
-        m_scaleWorld = rhs.m_scaleWorld;
-        m_scaleLocal = rhs.m_scaleLocal;
-        m_parent = rhs.m_parent;
+        m_entity = rhs.m_entity;
+        m_transformSystem = rhs.m_transformSystem;
         m_children = std::move(rhs.m_children);
-        if (m_transformSystem == nullptr && m_entity == entt::null)
-        {
-            m_transformSystem = rhs.m_transformSystem;
-            m_entity = rhs.m_entity;
-        }
-        position.BindOwner(this);
-        rotation.BindOwner(this);
-        scale.BindOwner(this);
+        direction = rhs.direction;
+        movementDirectionDebugLine = rhs.movementDirectionDebugLine;
+        position.world.value = rhs.position.world.value;
+        position.local.value = rhs.position.local.value;
+        rotation.world.value = rhs.rotation.world.value;
+        rotation.local.value = rhs.rotation.local.value;
+        scale.world.value = rhs.scale.world.value;
+        scale.local.value = rhs.scale.local.value;
+        parent.value_ = rhs.parent.value_;
+        rhs.m_transformSystem = nullptr;
+        rhs.m_entity = entt::null;
         return *this;
-    }
-
-    sgTransform::sgTransform()
-        : position(
-              this,
-              &sgTransform::GetLocalPos,
-              &sgTransform::SetLocalPosViaSystem,
-              &sgTransform::GetWorldPos,
-              &sgTransform::SetWorldPosViaSystem),
-          rotation(
-              this,
-              &sgTransform::GetLocalRot,
-              &sgTransform::SetLocalRotViaSystem,
-              &sgTransform::GetWorldRot,
-              &sgTransform::SetWorldRotViaSystem),
-          scale(
-              this,
-              &sgTransform::GetLocalScale,
-              &sgTransform::SetLocalScaleViaSystem,
-              &sgTransform::GetScale,
-              &sgTransform::SetWorldScaleViaSystem)
-    {
     }
 } // namespace sage

@@ -211,7 +211,8 @@ namespace sage
         GridSquare targetGridPos{};
         sys->navigationGridSystem->WorldToGridSpace(moveableActor.path.front(), targetGridPos);
         const auto square = sys->navigationGridSystem->GetGridSquare(targetGridPos.row, targetGridPos.col);
-        sys->transformSystem->SetWorldPos(entity, {square->worldPosMin.x, square->heightMap.GetHeight(), square->worldPosMin.z});
+        registry->get<sgTransform>(entity).position.world =
+            {square->worldPosMin.x, square->heightMap.GetHeight(), square->worldPosMin.z};
     }
 
     void ActorMovementSystem::handleDestinationReached(const entt::entity entity, MoveableActor& moveableActor)
@@ -283,17 +284,17 @@ namespace sage
             Vector3Normalize(Vector3Subtract(moveableActor.path.front(), transform.GetWorldPos()));
     }
 
-    void ActorMovementSystem::updateActorRotation(entt::entity entity, const sgTransform& transform) const
+    void ActorMovementSystem::updateActorRotation(entt::entity entity, sgTransform& transform) const
     {
         // Calculate rotation angle based on direction
         float angle = atan2f(transform.direction.x, transform.direction.z) * RAD2DEG;
-        sys->transformSystem->SetWorldRot(entity, {transform.GetWorldRot().x, angle, transform.GetWorldRot().z});
+        transform.rotation.world = {transform.GetWorldRot().x, angle, transform.GetWorldRot().z};
     }
 
     void ActorMovementSystem::updateActorWorldPosition(entt::entity entity) const
     {
         GridSquare actorIndex{};
-        const auto& transform = registry->get<sgTransform>(entity);
+        auto& transform = registry->get<sgTransform>(entity);
         sys->navigationGridSystem->WorldToGridSpace(transform.GetWorldPos(), actorIndex);
         auto gridSquare = sys->navigationGridSystem->GetGridSquare(actorIndex.row, actorIndex.col);
         auto& moveable = registry->get<MoveableActor>(entity);
@@ -301,7 +302,7 @@ namespace sage
             transform.GetWorldPos().x + transform.direction.x * moveable.movementSpeed,
             gridSquare->heightMap.GetHeight(),
             transform.GetWorldPos().z + transform.direction.z * moveable.movementSpeed};
-        sys->transformSystem->SetWorldPos(entity, newPos);
+        transform.position.world = newPos;
     }
 
     void ActorMovementSystem::updateActorTransform(

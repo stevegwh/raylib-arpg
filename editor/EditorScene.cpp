@@ -117,8 +117,7 @@ namespace sage
         {
             if (sys->registry->any_of<sgTransform>(entity)) continue;
             const auto position = sys->registry->get<Light>(entity).position;
-            sys->registry->emplace<sgTransform>(entity);
-            sys->transformSystem->SetWorldPos(entity, position);
+            sys->registry->emplace<sgTransform>(entity).position.world = position;
         }
     }
 

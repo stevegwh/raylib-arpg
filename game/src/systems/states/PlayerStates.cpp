@@ -181,7 +181,7 @@ namespace lq
         const Vector3 direction =
             Vector3Normalize(Vector3Subtract(npcTrans.GetWorldPos(), actorTrans.GetWorldPos()));
         const float angle = atan2f(direction.x, direction.z);
-        sys->engine.transformSystem->SetWorldRot(entity, {actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z});
+        actorTrans.rotation.world = {actorTrans.GetWorldRot().x, RAD2DEG * angle, actorTrans.GetWorldRot().z};
 
         sys->dialogSystem->StartConversation(npcTrans, target);
         sys->playerAbilitySystem->UnsubscribeFromUserInput();

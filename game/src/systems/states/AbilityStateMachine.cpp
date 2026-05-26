@@ -114,7 +114,7 @@ namespace lq
         animation.ChangeAnimationByParams(ad.animationParams);
         if (auto* vfx = ab.GetVfx(registry))
         {
-            const auto& trans = registry->get<sage::sgTransform>(entity);
+            auto& trans = registry->get<sage::sgTransform>(entity);
             if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CASTER))
             {
                 const auto& casterTrans = registry->get<sage::sgTransform>(ab.caster);
@@ -125,25 +125,25 @@ namespace lq
                 {
                     // TODO: Can this be set in the ability's constructor?
                     // Then we can just say "if ability doesn't follow caster, then set its position"
-                    if (trans.GetParent() != ab.caster)
+                    if (trans.parent != ab.caster)
                     {
-                        sys->engine.transformSystem->SetParent(entity, ab.caster);
-                        sys->engine.transformSystem->SetLocalPos(entity, {0, heightOffset, 0});
-                        sys->engine.transformSystem->SetLocalRot(entity, Vector3Zero());
+                        trans.parent = ab.caster;
+                        trans.position.local = {0, heightOffset, 0};
+                        trans.rotation.local = Vector3Zero();
                     }
                 }
                 else
                 {
                     const Vector3 pos{casterTrans.GetWorldPos().x, heightOffset, casterTrans.GetWorldPos().z};
-                    sys->engine.transformSystem->SetWorldPos(entity, pos);
-                    sys->engine.transformSystem->SetWorldRot(entity, casterTrans.GetWorldRot());
+                    trans.position.world = pos;
+                    trans.rotation.world = casterTrans.GetWorldRot();
                 }
 
                 vfx->InitSystem();
             }
             else if (ad.base.HasBehaviour(AbilityBehaviour::SPAWN_AT_CURSOR))
             {
-                sys->engine.transformSystem->SetWorldPos(entity, sys->engine.cursor->getFirstNaviCollision().point);
+                trans.position.world = sys->engine.cursor->getFirstNaviCollision().point;
                 vfx->InitSystem();
             }
         }

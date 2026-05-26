@@ -87,9 +87,10 @@ namespace sage::editor
             }
         }
 
-        sys->transformSystem->SetWorldPos(entity, snapshot.originalPosition);
-        sys->transformSystem->SetWorldRot(entity, snapshot.originalRotation);
-        sys->transformSystem->SetWorldScale(entity, snapshot.originalScale);
+        auto& restoreTransform = sys->registry->get<sgTransform>(entity);
+        restoreTransform.position.world = snapshot.originalPosition;
+        restoreTransform.rotation.world = snapshot.originalRotation;
+        restoreTransform.scale.world = snapshot.originalScale;
 
         if (snapshot.hadRenderable && sys->registry->any_of<Renderable>(entity))
         {
@@ -245,9 +246,9 @@ namespace sage::editor
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
 
-        const auto& transform = sys->registry->get<sgTransform>(entity);
+        auto& transform = sys->registry->get<sgTransform>(entity);
         const Vector3 position = Vector3Add(transform.GetWorldPos(), worldDelta);
-        sys->transformSystem->SetWorldPos(entity, position);
+        transform.position.world = position;
         updateEntityCollisionBounds(entity);
         notify(entity);
     }
@@ -257,7 +258,7 @@ namespace sage::editor
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
 
-        const auto& transform = sys->registry->get<sgTransform>(entity);
+        auto& transform = sys->registry->get<sgTransform>(entity);
         const Vector3 position = transform.GetWorldPos();
         const Vector3 scale = transform.GetScale();
         Vector3 rotation = transform.GetWorldRot();
@@ -308,13 +309,13 @@ namespace sage::editor
             }
             else
             {
-                sys->transformSystem->SetWorldRot(entity, rotation);
+                transform.rotation.world = rotation;
                 updateEntityCollisionBounds(entity);
             }
         }
         else
         {
-            sys->transformSystem->SetWorldRot(entity, rotation);
+            transform.rotation.world = rotation;
             updateEntityCollisionBounds(entity);
         }
 
@@ -325,7 +326,7 @@ namespace sage::editor
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
 
-        const auto& transform = sys->registry->get<sgTransform>(entity);
+        auto& transform = sys->registry->get<sgTransform>(entity);
         const Vector3 position = transform.GetWorldPos();
         const Vector3 rotation = transform.GetWorldRot();
         const Vector3 currentScale = transform.GetScale();
@@ -349,13 +350,13 @@ namespace sage::editor
             }
             else
             {
-                sys->transformSystem->SetWorldScale(entity, nextScale);
+                transform.scale.world = nextScale;
                 updateEntityCollisionBounds(entity);
             }
         }
         else
         {
-            sys->transformSystem->SetWorldScale(entity, nextScale);
+            transform.scale.world = nextScale;
             updateEntityCollisionBounds(entity);
         }
 
@@ -371,9 +372,10 @@ namespace sage::editor
     {
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
 
-        sys->transformSystem->SetWorldPos(entity, position);
-        sys->transformSystem->SetWorldRot(entity, rotation);
-        sys->transformSystem->SetWorldScale(entity, scale);
+        auto& transform = sys->registry->get<sgTransform>(entity);
+        transform.position.world = position;
+        transform.rotation.world = rotation;
+        transform.scale.world = scale;
 
         if (sys->registry->any_of<Renderable>(entity))
         {

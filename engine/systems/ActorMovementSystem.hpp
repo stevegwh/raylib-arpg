@@ -54,7 +54,7 @@ namespace sage
             MoveableActor& moveableActor) const;
         void updateActorTransform(entt::entity entity, sgTransform& transform, MoveableActor& moveableActor) const;
         static void updateActorDirection(sgTransform& transform, const MoveableActor& moveableActor);
-        void updateActorRotation(entt::entity entity, const sgTransform& transform) const;
+        void updateActorRotation(entt::entity entity, sgTransform& transform) const;
         void updateActorWorldPosition(entt::entity entity) const;
 
       public:

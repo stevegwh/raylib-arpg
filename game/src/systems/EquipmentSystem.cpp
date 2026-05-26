@@ -229,10 +229,10 @@ namespace lq
             registry->emplace<sage::UberShaderComponent>(weaponEntity, renderable.GetModel()->GetMaterialCount());
         uber.SetFlagAll(sage::UberShaderComponent::Flags::Lit);
 
-        registry->emplace<sage::sgTransform>(weaponEntity);
-        sys->engine.transformSystem->SetParent(weaponEntity, owner);
-        sys->engine.transformSystem->SetLocalPos(weaponEntity, Vector3Zero());
-        sys->engine.transformSystem->SetLocalRot(weaponEntity, {0, 0, 0, 0});
+        auto& weaponTransform = registry->emplace<sage::sgTransform>(weaponEntity);
+        weaponTransform.parent = owner;
+        weaponTransform.position.local = Vector3Zero();
+        weaponTransform.rotation.local = {0, 0, 0};
         auto& animation = registry->get<sage::Animation>(owner);
         weapon.animationFollowSub = animation.onAnimationUpdated.Subscribe(
             [this](entt::entity _entity) { updateCharacterWeaponPosition(_entity); });
@@ -313,7 +313,7 @@ namespace lq
         {
             if (equipment.worldModels.contains(itemType) && equipment.worldModels[itemType] != entt::null)
             {
-                sys->engine.transformSystem->SetParent(equipment.worldModels[itemType], entt::null);
+                registry->get<sage::sgTransform>(equipment.worldModels[itemType]).parent = entt::null;
                 registry->emplace<sage::DeleteEntityComponent>(equipment.worldModels[itemType]);
                 auto& weapon = registry->get<WeaponComponent>(equipment.worldModels[itemType]);
                 weapon.animationFollowSub.UnSubscribe();
