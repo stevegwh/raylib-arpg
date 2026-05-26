@@ -15,9 +15,11 @@
 #include "engine/systems/RenderSystem.hpp"
 #include "engine/systems/TransformSystem.hpp"
 #include "engine/UserInput.hpp"
+#include "imgui.h"
 
 #include "raylib.h"
 #include "raymath.h"
+#include "rlImGui.h"
 
 #include <algorithm>
 #include <format>
@@ -239,6 +241,13 @@ namespace sage
     void EditorScene::DrawOverlay2D() const
     {
         gui->DrawSceneViewInfo();
+    }
+
+    void EditorScene::DrawImGui() const
+    {
+        gui->StartImGui();
+        // ImGui::ShowDemoWindow();
+        gui->EndImGui();
     }
 
     bool EditorScene::HandleEscapePressed() const

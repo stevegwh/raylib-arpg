@@ -88,6 +88,7 @@ namespace sage
             TextBox* defaultsScaleText{};
             TextBox* inspectorSelectionText{};
             TextBox* deleteConfirmationText{};
+            bool imGuiEnabled = false;
 
             RenderTexture2D createAssetThumbnail(const AssetEntry& asset) const;
             void createHierarchyWindow(const std::function<void(entt::entity)>& onSceneObjectSelected);
@@ -100,6 +101,8 @@ namespace sage
             void refreshHierarchyRowContent();
 
           public:
+            void StartImGui();
+            void EndImGui();
             void SetOverlayStatus(const std::string& mode, const std::string& cursor) const;
             void SetAssetDefaultsStatus(
                 const std::string& assetName,

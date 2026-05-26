@@ -7,8 +7,10 @@
 #include "engine/ui/UIElements.hpp"
 #include "engine/ui/UILayout.hpp"
 #include "engine/ui/UIWindow.hpp"
+#include "imgui.h"
 
 #include "raymath.h"
+#include "rlImGui.h"
 
 #include <algorithm>
 #include <array>
@@ -321,6 +323,17 @@ namespace sage::editor
 
     } // namespace
 
+    void EditorGui::StartImGui()
+    {
+        rlImGuiBegin();
+        imGuiEnabled = true;
+    }
+
+    void EditorGui::EndImGui()
+    {
+        rlImGuiEnd();
+        imGuiEnabled = false;
+    }
     void EditorGui::SetOverlayStatus(const std::string& mode, const std::string& cursor) const
     {
         modeStatus = mode;

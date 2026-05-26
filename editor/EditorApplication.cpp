@@ -2,8 +2,8 @@
 
 #include "EditorMapLoader.hpp"
 #include "EditorScene.hpp"
+#include "imgui.h"
 
-#include <filesystem>
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
 #include "engine/EngineSystems.hpp"
@@ -11,8 +11,10 @@
 #include "engine/Serializer.hpp"
 #include "engine/Settings.hpp"
 #include "engine/UserInput.hpp"
+#include <filesystem>
 
 #include "raylib.h"
+#include "rlImGui.h"
 
 #include <algorithm>
 
@@ -56,9 +58,7 @@ namespace sage
         {
             const Rectangle viewport = CalculateSceneViewport(settings);
             settings.SetRenderViewport(
-                static_cast<int>(viewport.width),
-                static_cast<int>(viewport.height),
-                {viewport.x, viewport.y});
+                static_cast<int>(viewport.width), static_cast<int>(viewport.height), {viewport.x, viewport.y});
         }
 
         RenderTexture LoadFilteredRenderTexture(const int width, const int height)
@@ -79,7 +79,8 @@ namespace sage
         SetExitKey(KEY_NULL);
         EnableCursor();
 
-        systems = std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
+        systems =
+            std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
 
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
         constexpr const char* mapPath = "resources/dungeon-map.bin";
@@ -123,13 +124,10 @@ namespace sage
             {appViewportOffset.x + renderViewportOffset.x, appViewportOffset.y + renderViewportOffset.y},
             WHITE);
 
-        DrawTextureRec(
-            renderTexture2d.texture,
-            {0, 0, appViewport.x, -appViewport.y},
-            appViewportOffset,
-            WHITE);
+        DrawTextureRec(renderTexture2d.texture, {0, 0, appViewport.x, -appViewport.y}, appViewportOffset, WHITE);
 
         scene->DrawOverlay2D();
+        scene->DrawImGui();
         DrawFPS(12, 12);
 
         if (exitWindowRequested)
@@ -229,7 +227,7 @@ namespace sage
     {
         init();
         SetTargetFPS(60);
-
+        rlImGuiSetup(true);
         while (!exitWindow)
         {
             if (WindowShouldClose()) exitWindowRequested = true;
@@ -248,6 +246,7 @@ namespace sage
             draw();
             handleScreenUpdate();
         }
+        rlImGuiShutdown();
     }
 
     EditorApplication::EditorApplication()

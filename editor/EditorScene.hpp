@@ -58,6 +58,7 @@ namespace sage
         void Draw3D() const;
         void Draw2D() const;
         void DrawOverlay2D() const;
+        void DrawImGui() const;
         [[nodiscard]] bool HandleEscapePressed() const;
 
         void SetSceneName(const std::string& sceneName) const;
