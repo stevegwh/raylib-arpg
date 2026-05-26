@@ -27,6 +27,7 @@ namespace sage
         std::array<float, 4> ambient{};
         void updateShaderLights(Shader& _shader);
         void updateAmbientLight(Shader& _shader) const;
+        void onLightAdded(entt::entity entity);
 
       public:
         void RemoveLight(entt::entity light);

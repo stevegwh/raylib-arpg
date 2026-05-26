@@ -167,14 +167,8 @@ namespace lq
         // ResourceManager::GetInstance().UnloadAll();
     }
 
-    Scene::Scene(
-        entt::registry* _registry,
-        sage::KeyMapping* _keyMapping,
-        sage::Settings* _settings,
-        sage::AudioManager* _audioManager)
-        : registry(_registry), sys(std::make_unique<Systems>(_registry, _keyMapping, _settings, _audioManager))
+    void Scene::LoadContent()
     {
-
         initAssets();
         initUI();
 
@@ -190,6 +184,15 @@ namespace lq
         //        spatial.audioKey = "";
 
         // -----------------------------------------
+    }
+
+    Scene::Scene(
+        entt::registry* _registry,
+        sage::KeyMapping* _keyMapping,
+        sage::Settings* _settings,
+        sage::AudioManager* _audioManager)
+        : registry(_registry), sys(std::make_unique<Systems>(_registry, _keyMapping, _settings, _audioManager))
+    {
     };
 
 } // namespace lq

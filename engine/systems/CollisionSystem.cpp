@@ -27,8 +27,10 @@ namespace sage
         // transient static override asks us to refresh it anyway.
         auto view = registry->view<sgTransform, Collideable>();
         view.each([this](const entt::entity entity, const sgTransform& t, Collideable& c) {
-            if (c.isStatic && !registry->any_of<CollideableStaticOverride>(entity)) return;
-            c.worldBoundingBox = TransformBoundingBox(c.localBoundingBox, t.GetMatrixNoRot());
+            const bool forceRefresh = registry->any_of<CollideableStaticOverride>(entity);
+            if (c.isStatic && !forceRefresh) return;
+            c.worldBoundingBox = forceRefresh ? TransformBoundingBoxByCorners(c.localBoundingBox, t.GetMatrix())
+                                              : TransformBoundingBox(c.localBoundingBox, t.GetMatrixNoRot());
         });
     }
 

@@ -93,6 +93,14 @@ namespace sage
         }
     }
 
+    void TransformSystem::bindExistingTransforms()
+    {
+        for (const auto entity : registry->view<sgTransform>())
+        {
+            onComponentAdded(entity);
+        }
+    }
+
     void TransformSystem::SetWorldPos(entt::entity entity, const Vector3& position)
     {
         assert(registry->valid(entity));
@@ -224,5 +232,6 @@ namespace sage
         assert(registry != nullptr);
         registry->on_construct<sgTransform>().connect<&TransformSystem::onComponentAdded>(this);
         registry->on_destroy<sgTransform>().connect<&TransformSystem::onComponentRemoved>(this);
+        bindExistingTransforms();
     }
 } // namespace sage

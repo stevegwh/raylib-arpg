@@ -64,4 +64,5 @@ namespace sage
 
     // Transforms a bounding box by a world matrix.
     BoundingBox TransformBoundingBox(const BoundingBox& local, const Matrix& worldMat);
+    BoundingBox TransformBoundingBoxByCorners(const BoundingBox& local, const Matrix& worldMat);
 } // namespace sage

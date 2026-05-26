@@ -68,12 +68,6 @@ namespace sage::editor
         Vector3 originalPosition{};
         Vector3 originalRotation{};
         Vector3 originalScale{1.0f, 1.0f, 1.0f};
-        Matrix originalRenderableTransform = MatrixIdentity();
-        Matrix originalRenderableInitialTransform = MatrixIdentity();
-        BoundingBox originalLocalBoundingBox{};
-        BoundingBox originalWorldBoundingBox{};
-        bool hadRenderable = false;
-        bool hadCollideable = false;
 
         void OnEnter(EditorModeStateMachine& machine);
         void OnExit(EditorModeStateMachine& machine);

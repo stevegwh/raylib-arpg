@@ -23,7 +23,9 @@ namespace sage
         const std::unordered_map<std::uint32_t, entt::entity>& idMap)
     {
         if (m_savedParentId == serializedNullId()) return;
-        if (m_transformSystem == nullptr) return;
+        assert(m_transformSystem != nullptr);
+        assert(m_entity != entt::null);
+
         const auto it = idMap.find(m_savedParentId);
         if (it != idMap.end())
         {
@@ -103,7 +105,7 @@ namespace sage
     {
         Matrix trans = MatrixTranslate(GetWorldPos().x, GetWorldPos().y, GetWorldPos().z);
         Matrix _scale = MatrixScale(GetScale().x, GetScale().y, GetScale().z);
-        return MatrixMultiply(trans, _scale);
+        return MatrixMultiply(_scale, trans);
     }
 
     Matrix sgTransform::GetMatrix() const
@@ -113,7 +115,7 @@ namespace sage
         Matrix rot = MatrixMultiply(
             MatrixMultiply(MatrixRotateZ(DEG2RAD * GetWorldRot().z), MatrixRotateY(DEG2RAD * GetWorldRot().y)),
             MatrixRotateX(DEG2RAD * GetWorldRot().x));
-        return MatrixMultiply(MatrixMultiply(trans, rot), _scale);
+        return MatrixMultiply(MatrixMultiply(_scale, rot), trans);
     }
 
     Vector3 sgTransform::forward() const

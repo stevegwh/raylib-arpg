@@ -102,6 +102,11 @@ namespace sage
         }
     }
 
+    void LightManager::onLightAdded(entt::entity)
+    {
+        RefreshLights();
+    }
+
     void LightManager::LinkRenderableToLight(entt::entity entity) const
     {
         auto& renderable = registry->get<Renderable>(entity);
@@ -135,6 +140,7 @@ namespace sage
 
     LightManager::LightManager(entt::registry* _registry, Camera* _camera) : registry(_registry), camera(_camera)
     {
+        registry->on_construct<Light>().connect<&LightManager::onLightAdded>(this);
         defaultShader = ResourceManager::GetInstance().ShaderLoad(
             "resources/shaders/custom/lighting.vs", "resources/shaders/custom/lighting.fs");
 

@@ -20,8 +20,9 @@ namespace lq
         sage::Subscription destinationReachedSub{};
         sage::Subscription cursorClickSub{};
 
-        void onCursorClick(entt::entity entity, sage::CollisionLayer layer) const;
-        void disableIndicator() const;
+        void ensureInitialized();
+        void onCursorClick(entt::entity entity, sage::CollisionLayer layer);
+        void disableIndicator();
 
       public:
         void Update();

@@ -48,6 +48,9 @@ namespace lq
 
         audioManager = std::make_unique<sage::AudioManager>();
 
+        scene =
+            std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
+
         sage::serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
         maploader::LoadMap(registry.get(), "resources/dungeon-map.bin");
         // serializer::LoadMap(registry.get(), "resources/cave.bin");
@@ -58,8 +61,7 @@ namespace lq
         HideCursor();
         SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
 
-        scene =
-            std::make_unique<ExampleScene>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
+        scene->LoadContent();
         const auto viewport = settings->GetViewPort();
         renderTexture = LoadFilteredRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));
         renderTexture2d = LoadFilteredRenderTexture(static_cast<int>(viewport.x), static_cast<int>(viewport.y));

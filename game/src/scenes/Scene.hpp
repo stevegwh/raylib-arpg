@@ -42,6 +42,7 @@ namespace lq
         virtual void DrawDebug3D();
         virtual void Draw2D();
         virtual void DrawDebug2D();
+        void LoadContent();
         virtual ~Scene();
 
         explicit Scene(

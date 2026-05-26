@@ -263,6 +263,7 @@ namespace sage
     void Cursor::Draw2D() const
     {
         if (hideCursor) return;
+        if (currentTex.id == 0) return;
         Vector2 pos = GetMousePosition();
         // TODO: Awful hack below
         if (currentTex.id != ResourceManager::GetInstance().TextureLoad("cursor_regular").id)
@@ -275,7 +276,6 @@ namespace sage
 
     Cursor::Cursor(entt::registry* _registry, EngineSystems* _sys) : registry(_registry), sys(_sys)
     {
-        currentTex = ResourceManager::GetInstance().TextureLoad("cursor_regular");
         SetCursorTexture(collision_layers::Default, "cursor_regular");
         SetCursorTexture(collision_layers::GeometrySimple, "cursor_move");
         SetCursorTexture(collision_layers::GeometryComplex, "cursor_move");

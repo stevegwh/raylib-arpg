@@ -81,8 +81,6 @@ namespace sage::editor
         EditGizmo::Mode mode = EditGizmo::Mode::Translate;
         PivotMode pivotMode = PivotMode::LocalCenter;
 
-        void applyWorldMatrix(
-            entt::entity entity, Matrix desiredWorldMatrix, Vector3 position, Vector3 rotation, Vector3 scale);
         void updateEntityCollisionBounds(entt::entity entity) const;
         void notify(entt::entity entity) const;
     };

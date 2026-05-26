@@ -17,6 +17,7 @@ namespace sage
         void syncWorldFromLocal(entt::entity entity);
         void syncLocalFromWorld(entt::entity entity);
         void propagateChildren(entt::entity entity);
+        void bindExistingTransforms();
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
 

@@ -15,8 +15,24 @@
 
 namespace lq
 {
-    void CursorClickIndicator::onCursorClick(entt::entity entity, sage::CollisionLayer layer) const
+    void CursorClickIndicator::ensureInitialized()
     {
+        if (registry->all_of<sage::Renderable>(self)) return;
+
+        if (!registry->all_of<sage::sgTransform>(self))
+        {
+            registry->emplace<sage::sgTransform>(self);
+        }
+
+        auto sphere = sage::ResourceManager::GetInstance().CreateModelMutable("primitive_sphere");
+        auto& renderable = registry->emplace<sage::Renderable>(self, std::move(sphere), MatrixIdentity());
+        renderable.hint = GREEN;
+        renderable.active = false;
+    }
+
+    void CursorClickIndicator::onCursorClick(entt::entity entity, sage::CollisionLayer layer)
+    {
+        ensureInitialized();
         const auto& navHitInfo = sys->engine.cursor->getNavigationHitInfo();
         if (selectedActor == entt::null || !registry->valid(selectedActor) ||
             !registry->all_of<sage::MoveableActor>(selectedActor) || !navHitInfo.rlCollision.hit ||
@@ -46,6 +62,7 @@ namespace lq
 
     void CursorClickIndicator::OnSelectedActorChanged(entt::entity, entt::entity current)
     {
+        ensureInitialized();
         selectedActor = current;
         if (destinationReachedSub.IsActive())
         {
@@ -63,14 +80,16 @@ namespace lq
         destinationReachedSub = moveable.onDestinationReached.Subscribe([this](entt::entity) { disableIndicator(); });
     }
 
-    void CursorClickIndicator::disableIndicator() const
+    void CursorClickIndicator::disableIndicator()
     {
+        ensureInitialized();
         auto& renderable = registry->get<sage::Renderable>(self);
         renderable.active = false;
     }
 
     void CursorClickIndicator::Update()
     {
+        ensureInitialized();
         auto& renderable = registry->get<sage::Renderable>(self);
         if (!renderable.active) return;
 
@@ -90,9 +109,5 @@ namespace lq
             [this](entt::entity entity, sage::CollisionLayer layer) { onCursorClick(entity, layer); });
 
         _registry->emplace<sage::sgTransform>(self);
-        auto sphere = sage::ResourceManager::GetInstance().CreateModelMutable("primitive_sphere");
-        auto& renderable = _registry->emplace<sage::Renderable>(self, std::move(sphere), MatrixIdentity());
-        renderable.hint = GREEN;
-        renderable.active = false;
     }
 } // namespace lq

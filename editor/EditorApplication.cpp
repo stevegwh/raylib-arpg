@@ -79,10 +79,11 @@ namespace sage
         SetExitKey(KEY_NULL);
         EnableCursor();
 
+        systems = std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
+
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
         constexpr const char* mapPath = "resources/dungeon-map.bin";
         editor::LoadMap(registry.get(), mapPath);
-        systems = std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
         scene = std::make_unique<EditorScene>(systems.get());
         scene->SetSceneName(std::filesystem::path{mapPath}.stem().string());
 
