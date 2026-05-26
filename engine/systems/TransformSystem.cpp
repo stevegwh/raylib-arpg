@@ -25,7 +25,7 @@ namespace sage
         assert(registry->all_of<sgTransform>(parent));
 
         auto& children = registry->get<sgTransform>(parent).m_children;
-        if (std::find(children.begin(), children.end(), child) == children.end())
+        if (std::ranges::find(children, child) == children.end())
         {
             children.push_back(child);
         }
@@ -36,10 +36,10 @@ namespace sage
         if (parent == entt::null || !registry->valid(parent) || !registry->all_of<sgTransform>(parent)) return;
 
         auto& children = registry->get<sgTransform>(parent).m_children;
-        children.erase(std::remove(children.begin(), children.end(), child), children.end());
+        std::erase(children, child);
     }
 
-    void TransformSystem::syncWorldFromLocal(entt::entity entity)
+    void TransformSystem::syncWorldFromLocal(entt::entity entity) const
     {
         auto& transform = registry->get<sgTransform>(entity);
         if (transform.m_parent == entt::null)
@@ -49,7 +49,6 @@ namespace sage
             transform.scale.world.value = transform.scale.local.value;
             return;
         }
-
         assert(registry->valid(transform.m_parent));
         assert(registry->all_of<sgTransform>(transform.m_parent));
         const auto& parentTransform = registry->get<sgTransform>(transform.m_parent);
@@ -61,7 +60,7 @@ namespace sage
             Vector3Multiply(parentTransform.scale.world.value, transform.scale.local.value);
     }
 
-    void TransformSystem::syncLocalFromWorld(entt::entity entity)
+    void TransformSystem::syncLocalFromWorld(entt::entity entity) const
     {
         auto& transform = registry->get<sgTransform>(entity);
         if (transform.m_parent == entt::null)
@@ -71,7 +70,6 @@ namespace sage
             transform.scale.local.value = transform.scale.world.value;
             return;
         }
-
         assert(registry->valid(transform.m_parent));
         assert(registry->all_of<sgTransform>(transform.m_parent));
         const auto& parentTransform = registry->get<sgTransform>(transform.m_parent);
@@ -85,19 +83,11 @@ namespace sage
     void TransformSystem::propagateChildren(entt::entity entity)
     {
         auto& transform = registry->get<sgTransform>(entity);
-        for (auto child : transform.m_children)
+        for (const auto child : transform.m_children)
         {
             if (!registry->valid(child) || !registry->all_of<sgTransform>(child)) continue;
             syncWorldFromLocal(child);
             propagateChildren(child);
-        }
-    }
-
-    void TransformSystem::bindExistingTransforms()
-    {
-        for (const auto entity : registry->view<sgTransform>())
-        {
-            onComponentAdded(entity);
         }
     }
 
@@ -205,7 +195,6 @@ namespace sage
     {
         auto& transform = registry->get<sgTransform>(entity);
         removeChild(transform.m_parent, entity);
-
         const auto children = transform.m_children;
         for (auto child : children)
         {
@@ -232,6 +221,11 @@ namespace sage
         assert(registry != nullptr);
         registry->on_construct<sgTransform>().connect<&TransformSystem::onComponentAdded>(this);
         registry->on_destroy<sgTransform>().connect<&TransformSystem::onComponentRemoved>(this);
-        bindExistingTransforms();
+        // If, for whatever reason, transform system is initiated after some transforms are created, then bind
+        // those to this system
+        for (const auto entity : registry->view<sgTransform>())
+        {
+            onComponentAdded(entity);
+        }
     }
 } // namespace sage

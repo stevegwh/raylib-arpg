@@ -63,7 +63,7 @@ namespace sage
             struct Axis
             {
                 VectorField* parent = nullptr;
-                float Vector3::*axis = nullptr;
+                float Vector3::* axis = nullptr;
 
                 operator float() const
                 {
@@ -118,9 +118,9 @@ namespace sage
             VectorField<WorldWrite> world{};
         };
 
-        LocalWorldPair<&sgTransform::writeLocalPos, &sgTransform::writeWorldPos> position;
-        LocalWorldPair<&sgTransform::writeLocalRot, &sgTransform::writeWorldRot> rotation;
-        LocalWorldPair<&sgTransform::writeLocalScale, &sgTransform::writeWorldScale> scale;
+        LocalWorldPair<&sgTransform::writeLocalPos, &sgTransform::writeWorldPos> position{};
+        LocalWorldPair<&sgTransform::writeLocalRot, &sgTransform::writeWorldRot> rotation{};
+        LocalWorldPair<&sgTransform::writeLocalScale, &sgTransform::writeWorldScale> scale{};
 
         Vector3 direction{};
 
@@ -139,7 +139,7 @@ namespace sage
         void save(Archive& archive) const
         {
             using traits = entt::entt_traits<entt::entity>;
-            const std::uint32_t parentId = static_cast<std::uint32_t>(traits::to_entity(m_parent));
+            const auto parentId = traits::to_entity(m_parent);
             archive(
                 position.world.value,
                 rotation.world.value,
@@ -182,8 +182,8 @@ namespace sage
         [[nodiscard]] const Vector3& GetLocalRot() const;
         [[nodiscard]] const Vector3& GetScale() const;
         [[nodiscard]] const Vector3& GetLocalScale() const;
-        entt::entity GetParent() const;
-        const std::vector<entt::entity>& GetChildren() const;
+        [[nodiscard]] entt::entity GetParent() const;
+        [[nodiscard]] const std::vector<entt::entity>& GetChildren() const;
 
         sgTransform();
         sgTransform(const sgTransform& rhs);

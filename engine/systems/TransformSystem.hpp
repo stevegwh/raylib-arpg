@@ -14,10 +14,9 @@ namespace sage
         static Vector3 divideScale(const Vector3& worldScale, const Vector3& parentWorldScale);
         void addChild(entt::entity parent, entt::entity child) const;
         void removeChild(entt::entity parent, entt::entity child) const;
-        void syncWorldFromLocal(entt::entity entity);
-        void syncLocalFromWorld(entt::entity entity);
+        void syncWorldFromLocal(entt::entity entity) const;
+        void syncLocalFromWorld(entt::entity entity) const;
         void propagateChildren(entt::entity entity);
-        void bindExistingTransforms();
         void onComponentAdded(entt::entity entity);
         void onComponentRemoved(entt::entity entity);
 
