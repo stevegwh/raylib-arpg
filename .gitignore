@@ -10,12 +10,8 @@ out
 .claude
 resources/*
 !resources/dialog/
-!resources/Editor/
-!resources/Editor/ImportedAssets/
-!resources/Editor/ImportedAssets/*.json
 !resources/quests/
 !resources/shaders/
-!resources/asset-path-aliases.json
 !resources/items.json
 !resources/loot-table.json
 CLAUDE.md
