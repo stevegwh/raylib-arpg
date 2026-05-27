@@ -43,7 +43,7 @@ namespace sage
         constexpr const char* DEFAULT_MAP_BASE_NAME = "_MAPBASE_EDITOR_BASE";
         constexpr const char* DEFAULT_MAP_BASE_MODEL_KEY = "primitive_plane";
         constexpr const char* DEFAULT_MAP_BASE_CATEGORY = "Map";
-        constexpr float DEFAULT_MAP_BASE_SIZE = 100.0f;
+        constexpr float DEFAULT_MAP_BASE_SIZE = 1000.0f;
         constexpr float DEFAULT_MAP_BASE_HALF_HEIGHT = 0.02f;
         constexpr float DEFAULT_LIGHT_HEIGHT_OFFSET = 6.0f;
         constexpr float DEFAULT_LIGHT_BRIGHTNESS = 3.0f;
@@ -545,8 +545,8 @@ namespace sage
             collideable.SetCollisionLayer(collision_layers::Background);
             collideable.isStatic = true;
             collideable.blocksNavigation = false;
-            collideable.active = false;
-            renderable.active = false;
+            collideable.active = true;
+            renderable.active = true;
         }
 
         if (hasMapBase) return;
@@ -578,7 +578,7 @@ namespace sage
         auto model = ResourceManager::GetInstance().GetModelView(DEFAULT_MAP_BASE_MODEL_KEY);
         auto& renderable = sys->registry->emplace<Renderable>(entity, std::move(model), MatrixIdentity());
         renderable.SetName(DEFAULT_MAP_BASE_NAME);
-        renderable.active = false;
+        renderable.active = true;
 
         const BoundingBox localBounds = {
             {-0.5f, -DEFAULT_MAP_BASE_HALF_HEIGHT, -0.5f},
@@ -587,7 +587,7 @@ namespace sage
         collideable.SetCollisionLayer(collision_layers::Background);
         collideable.isStatic = true;
         collideable.blocksNavigation = false;
-        collideable.active = false;
+        collideable.active = true;
     }
 
     void EditorScene::syncLightTransforms() const

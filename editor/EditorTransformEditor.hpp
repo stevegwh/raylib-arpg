@@ -83,5 +83,8 @@ namespace sage::editor
 
         void updateEntityCollisionBounds(entt::entity entity) const;
         void notify(entt::entity entity) const;
+        [[nodiscard]] Vector3 snapToGridXZ(Vector3 worldPos) const;
+
+        Vector3 dragUnsnappedPosition{};
     };
 } // namespace sage::editor

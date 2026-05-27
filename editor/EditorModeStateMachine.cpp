@@ -20,7 +20,7 @@ namespace sage::editor
     namespace
     {
         constexpr float PLACEMENT_MARKER_HEIGHT = 0.16f;
-        constexpr float EDIT_TRANSLATION_STEP = 0.25f;
+        constexpr float EDIT_TRANSLATION_STEP = 1.0f;
         constexpr float PLACEMENT_ROTATION_STEP = 15.0f;
         constexpr float PLACEMENT_SCALE_STEP = 0.1f;
 

@@ -16,6 +16,7 @@
 #include "raymath.h"
 
 #include <algorithm>
+#include <cmath>
 #include <utility>
 
 namespace sage::editor
@@ -104,7 +105,19 @@ namespace sage::editor
             const float screenLength = Vector2Length(Vector2Subtract(screenEnd, screenStart));
             if (screenLength > 0.0001f)
             {
-                AdjustPosition(entity, Vector3Scale(axisVector, sample.projectedAxisPixels * size / screenLength));
+                // Accumulate sub-grid drag motion in dragUnsnappedPosition so we don't lose
+                // precision to per-frame snap rounding, then commit the snapped result.
+                const Vector3 worldDelta =
+                    Vector3Scale(axisVector, sample.projectedAxisPixels * size / screenLength);
+                dragUnsnappedPosition = Vector3Add(dragUnsnappedPosition, worldDelta);
+                auto& transform = sys->registry->get<sgTransform>(entity);
+                const Vector3 snapped = snapToGridXZ(dragUnsnappedPosition);
+                if (!Vector3Equals(transform.GetWorldPos(), snapped))
+                {
+                    transform.position.world = snapped;
+                    updateEntityCollisionBounds(entity);
+                    notify(entity);
+                }
             }
             break;
         }
@@ -131,6 +144,7 @@ namespace sage::editor
         if (axis == EditGizmo::Axis::None) return false;
 
         gizmo.BeginDrag(axis, renderMousePosition);
+        dragUnsnappedPosition = sys->registry->get<sgTransform>(entity).GetWorldPos();
         sys->camera->LockInput();
         return true;
     }
@@ -194,9 +208,19 @@ namespace sage::editor
         if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
 
         auto& transform = sys->registry->get<sgTransform>(entity);
-        transform.position.world = Vector3Add(transform.GetWorldPos(), worldDelta);
+        transform.position.world = snapToGridXZ(Vector3Add(transform.GetWorldPos(), worldDelta));
         updateEntityCollisionBounds(entity);
         notify(entity);
+    }
+
+    Vector3 EditorTransformEditor::snapToGridXZ(const Vector3 worldPos) const
+    {
+        const float spacing = sys->navigationGridSystem->spacing;
+        if (spacing <= 0.0f) return worldPos;
+        return {
+            (std::floor(worldPos.x / spacing) + 0.5f) * spacing,
+            worldPos.y,
+            (std::floor(worldPos.z / spacing) + 0.5f) * spacing};
     }
 
     void EditorTransformEditor::AdjustRotationAxis(
