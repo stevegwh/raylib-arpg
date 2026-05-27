@@ -25,6 +25,12 @@ namespace sage
             const char* output);
 
         static void PackAssets(entt::registry* registry, const std::string& output);
+
+        static void ExportEditorAssetsFromMapBin(
+            entt::registry* registry,
+            TransformSystem* transformSystem,
+            const char* inputMapBin,
+            const char* outputAssetBin);
     };
 
 } // namespace sage

@@ -14,6 +14,9 @@
 #include "engine/systems/NavigationGridSystem.hpp"
 
 #include "game/src/collision/RpgCollisionLayers.hpp"
+#include "game/src/components/DialogComponent.hpp"
+#include "game/src/components/InventoryComponent.hpp"
+#include "game/src/components/ItemComponent.hpp"
 #include "game/src/components/QuestComponents.hpp"
 #include "game/src/GameObjectFactory.hpp"
 #include "game/src/ItemFactory.hpp"
@@ -24,13 +27,17 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include <algorithm>
+#include <cassert>
 #include <filesystem>
 #include <fstream>
+#include <initializer_list>
 #include <iostream>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace fs = std::filesystem;
 
@@ -104,6 +111,35 @@ namespace sage
         }
 
         return collision_layers::Background; // by default, objects are ignored
+    }
+
+    bool containsAnyToken(const std::string& value, const std::initializer_list<const char*> tokens)
+    {
+        return std::ranges::any_of(tokens, [&value](const char* token) {
+            return value.find(token) != std::string::npos;
+        });
+    }
+
+    bool isEditorPlaceableMapAssetName(const std::string& objectName)
+    {
+        return containsAnyToken(
+            objectName,
+            {"_BG_", "_FLOORSIMPLE_", "_FLOORCOMPLEX_", "_PROP_", "_BLD_", "_WALL_", "_HOLE_", "_STAIRS_"});
+    }
+
+    bool hasGameplayComponent(entt::registry& registry, const entt::entity entity)
+    {
+        return registry.any_of<
+            Spawner,
+            DoorBehaviorComponent,
+            lq::DialogComponent,
+            lq::InventoryComponent,
+            lq::ItemComponent>(entity);
+    }
+
+    std::string editorAssetMaterialName(const std::string& sourceMaterialName)
+    {
+        return "editor_map/material/" + sourceMaterialName;
     }
 
     std::string readLine(std::ifstream& infile, const std::string& key)
@@ -402,6 +438,68 @@ namespace sage
 
         lq::maploader::SaveMap(*registry, output);
         std::cout << "FINISH: Constructing map into bin file. \n";
+    }
+
+    void ResourcePacker::ExportEditorAssetsFromMapBin(
+        entt::registry* registry,
+        TransformSystem*,
+        const char* inputMapBin,
+        const char* outputAssetBin)
+    {
+        assert(registry != nullptr);
+
+        std::cout << "START: Exporting editor assets from runtime map bin. \n";
+
+        registry->clear();
+        ResourceManager::GetInstance().Reset();
+        lq::maploader::LoadMap(registry, inputMapBin);
+
+        std::unordered_set<std::string> keepModelKeys;
+        const auto view = registry->view<sgTransform, Renderable, Collideable>();
+        for (const auto entity : view)
+        {
+            if (hasGameplayComponent(*registry, entity)) continue;
+
+            const auto& renderable = view.get<Renderable>(entity);
+            if (!isEditorPlaceableMapAssetName(renderable.GetName())) continue;
+
+            const auto* model = renderable.GetModel();
+            if (model == nullptr || model->GetKey().empty()) continue;
+            keepModelKeys.insert(model->GetKey());
+        }
+
+        auto& resourceManager = ResourceManager::GetInstance();
+        std::unordered_map<std::string, ModelInfo> filteredModels;
+        std::unordered_map<std::string, Material> filteredMaterials;
+
+        for (const auto& modelKey : keepModelKeys)
+        {
+            const auto modelIt = resourceManager.modelCopies.find(modelKey);
+            if (modelIt == resourceManager.modelCopies.end()) continue;
+
+            auto modelInfo = modelIt->second;
+            for (int materialIndex = 0; materialIndex < static_cast<int>(modelInfo.materialNames.size());
+                 ++materialIndex)
+            {
+                const auto sourceMaterialName = modelInfo.materialNames[materialIndex];
+                const auto materialIt = resourceManager.materialMap.find(sourceMaterialName);
+                if (materialIt == resourceManager.materialMap.end()) continue;
+
+                const auto exportedMaterialName = editorAssetMaterialName(sourceMaterialName);
+                filteredMaterials.emplace(exportedMaterialName, materialIt->second);
+                modelInfo.materialNames[materialIndex] = exportedMaterialName;
+            }
+
+            filteredModels.emplace(modelKey, std::move(modelInfo));
+        }
+
+        resourceManager.UnloadImages();
+        resourceManager.modelCopies = std::move(filteredModels);
+        resourceManager.materialMap = std::move(filteredMaterials);
+
+        serializer::SaveClassBinary(outputAssetBin, resourceManager);
+        std::cout << "FINISH: Exported " << resourceManager.modelCopies.size()
+                  << " editor-placeable model assets to " << outputAssetBin << ". \n";
     }
 
     /**
