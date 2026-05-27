@@ -40,7 +40,7 @@ namespace sage
         constexpr float EDITOR_FOCUS_CAMERA_DISTANCE = 38.0f;
         constexpr float EDITOR_FOCUS_RADIUS_PADDING = 2.4f;
         constexpr const char* UNTITLED_SCENE_NAME = "Untitled";
-        constexpr const char* DEFAULT_SAVE_FILENAME = "untitled.bin";
+        constexpr const char* DEFAULT_SAVE_FILENAME = "untitled.map";
         constexpr const char* DEFAULT_MAP_BASE_NAME = "_MAPBASE_EDITOR_BASE";
         constexpr const char* DEFAULT_MAP_BASE_MODEL_KEY = "primitive_plane";
         constexpr const char* DEFAULT_MAP_BASE_CATEGORY = "Map";
@@ -79,11 +79,11 @@ namespace sage
             }
         }
 
-        std::filesystem::path ensureBinExtension(std::filesystem::path path)
+        std::filesystem::path ensureMapExtension(std::filesystem::path path)
         {
-            if (path.extension() != ".bin")
+            if (path.extension() != ".map")
             {
-                path.replace_extension(".bin");
+                path.replace_extension(".map");
             }
             return path;
         }
@@ -378,7 +378,7 @@ namespace sage
         const auto safeName = hierarchyTree ? hierarchyTree->DescribeEntity(entity)
                                             : std::format("entity_{}", entt::to_integral(entity));
         const std::filesystem::path flatpacksDir{"resources/flatpacks"};
-        const auto outputPath = flatpacksDir / (safeName + ".bin");
+        const auto outputPath = flatpacksDir / (safeName + ".flatpack");
         if (editor::SaveFlatpack(*sys->registry, entity, outputPath.string().c_str()))
         {
             std::cout << "Flatpack saved: " << outputPath << std::endl;
@@ -524,7 +524,7 @@ namespace sage
 
     void EditorScene::loadMap(const std::filesystem::path& path) const
     {
-        const auto selectedPath = ensureBinExtension(path);
+        const auto selectedPath = ensureMapExtension(path);
         const auto pathString = selectedPath.string();
         if (!editor::IsEditorLayoutMap(pathString.c_str()))
         {
@@ -552,7 +552,7 @@ namespace sage
     void EditorScene::saveMapAs(const std::filesystem::path& path) const
     {
         ensureDefaultMapBase();
-        currentMapPath = ensureBinExtension(path);
+        currentMapPath = ensureMapExtension(path);
         const auto pathString = currentMapPath.string();
         editor::SaveMap(*sys->registry, pathString.c_str());
         SetSceneName(sceneNameFromPath(currentMapPath));
@@ -771,12 +771,12 @@ namespace sage
         refreshFlatpackCatalog();
         loadMapBrowser = std::make_unique<ImGui::FileBrowser>(LOAD_BROWSER_FLAGS);
         loadMapBrowser->SetTitle("Load map");
-        loadMapBrowser->SetTypeFilters({".bin"});
+        loadMapBrowser->SetTypeFilters({".map"});
         loadMapBrowser->SetDirectory(defaultBrowserDirectory(currentMapPath));
 
         saveMapBrowser = std::make_unique<ImGui::FileBrowser>(SAVE_BROWSER_FLAGS);
         saveMapBrowser->SetTitle("Save map as");
-        saveMapBrowser->SetTypeFilters({".bin"});
+        saveMapBrowser->SetTypeFilters({".map"});
         saveMapBrowser->SetDirectory(defaultBrowserDirectory(currentMapPath));
         saveMapBrowser->SetInputName(DEFAULT_SAVE_FILENAME);
     }

@@ -233,7 +233,7 @@ namespace sage::editor
         {
             if (!dirEntry.is_regular_file()) continue;
             const auto& path = dirEntry.path();
-            if (path.extension() != ".bin") continue;
+            if (path.extension() != ".flatpack") continue;
             if (!IsFlatpackFile(path.string().c_str())) continue;
             entries.push_back({.displayName = path.stem().string(), .path = path});
         }
