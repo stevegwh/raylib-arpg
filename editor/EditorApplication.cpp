@@ -1,6 +1,5 @@
 #include "EditorApplication.hpp"
 
-#include "EditorMapLoader.hpp"
 #include "EditorScene.hpp"
 
 #include "engine/AudioManager.hpp"
@@ -10,7 +9,6 @@
 #include "engine/Serializer.hpp"
 #include "engine/Settings.hpp"
 #include "engine/UserInput.hpp"
-#include <filesystem>
 
 #include "imgui.h"
 #include "raylib.h"
@@ -87,10 +85,7 @@ namespace sage
             std::make_unique<EngineSystems>(registry.get(), keyMapping.get(), settings.get(), audioManager.get());
 
         serializer::LoadAssetBinFile(registry.get(), "resources/assets.bin");
-        constexpr const char* mapPath = "resources/dungeon-map.bin";
-        editor::LoadMap(registry.get(), mapPath);
         scene = std::make_unique<EditorScene>(systems.get());
-        scene->SetSceneName(std::filesystem::path{mapPath}.stem().string());
 
         const auto renderViewport = settings->GetRenderViewPort();
         renderTexture =
@@ -133,7 +128,7 @@ namespace sage
 
         scene->DrawOverlay2D();
         scene->DrawImGui();
-        DrawFPS(12, 12);
+        DrawFPS(12, 32);
 
         if (exitWindowRequested)
         {

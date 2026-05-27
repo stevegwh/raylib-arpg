@@ -1,9 +1,11 @@
 #include "EditorScene.hpp"
 
 #include "EditorComponents.hpp"
+#include "EditorMapLoader.hpp"
 #include "EditorTransformMath.hpp"
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
+#include "engine/CollisionLayers.hpp"
 #include "engine/components/Collideable.hpp"
 #include "engine/components/Renderable.hpp"
 #include "engine/components/sgTransform.hpp"
@@ -12,6 +14,8 @@
 #include "engine/EngineSystems.hpp"
 #include "engine/GameUiEngine.hpp"
 #include "engine/Light.hpp"
+#include "engine/LightManager.hpp"
+#include "engine/ResourceManager.hpp"
 #include "engine/systems/RenderSystem.hpp"
 #include "engine/systems/TransformSystem.hpp"
 #include "engine/UserInput.hpp"
@@ -34,8 +38,20 @@ namespace sage
         constexpr float GRID_SURFACE_Y_STEP = 1.0f;
         constexpr float EDITOR_FOCUS_CAMERA_DISTANCE = 38.0f;
         constexpr float EDITOR_FOCUS_RADIUS_PADDING = 2.4f;
-        constexpr ImGuiFileBrowserFlags FILE_BROWSER_FLAGS =
+        constexpr const char* UNTITLED_SCENE_NAME = "Untitled";
+        constexpr const char* DEFAULT_SAVE_FILENAME = "untitled.bin";
+        constexpr const char* DEFAULT_MAP_BASE_NAME = "_MAPBASE_EDITOR_BASE";
+        constexpr const char* DEFAULT_MAP_BASE_MODEL_KEY = "primitive_plane";
+        constexpr const char* DEFAULT_MAP_BASE_CATEGORY = "Map";
+        constexpr float DEFAULT_MAP_BASE_SIZE = 100.0f;
+        constexpr float DEFAULT_MAP_BASE_HALF_HEIGHT = 0.02f;
+        constexpr float DEFAULT_LIGHT_HEIGHT_OFFSET = 6.0f;
+        constexpr float DEFAULT_LIGHT_BRIGHTNESS = 3.0f;
+        constexpr Color DEFAULT_LIGHT_COLOR = {255, 244, 214, 255};
+        constexpr ImGuiFileBrowserFlags LOAD_BROWSER_FLAGS =
             ImGuiFileBrowserFlags_CloseOnEsc | ImGuiFileBrowserFlags_SkipItemsCausingError;
+        constexpr ImGuiFileBrowserFlags SAVE_BROWSER_FLAGS =
+            LOAD_BROWSER_FLAGS | ImGuiFileBrowserFlags_EnterNewFilename;
 
         struct FocusTarget
         {
@@ -60,6 +76,53 @@ namespace sage
                     field.editable = field.editable && editMode;
                 }
             }
+        }
+
+        std::filesystem::path ensureBinExtension(std::filesystem::path path)
+        {
+            if (path.extension() != ".bin")
+            {
+                path.replace_extension(".bin");
+            }
+            return path;
+        }
+
+        std::filesystem::path defaultBrowserDirectory(const std::filesystem::path& currentMapPath)
+        {
+            if (!currentMapPath.empty() && !currentMapPath.parent_path().empty())
+            {
+                return currentMapPath.parent_path();
+            }
+
+            const std::filesystem::path resources{"resources"};
+            if (std::filesystem::is_directory(resources))
+            {
+                return resources;
+            }
+
+            return std::filesystem::current_path();
+        }
+
+        std::string sceneNameFromPath(const std::filesystem::path& path)
+        {
+            const auto stem = path.stem().string();
+            return stem.empty() ? UNTITLED_SCENE_NAME : stem;
+        }
+
+        bool isMapBaseRenderable(const Renderable& renderable)
+        {
+            return renderable.GetName().find("_MAPBASE_") != std::string::npos;
+        }
+
+        bool modelKeyAvailable(const std::string& key)
+        {
+            const auto keys = ResourceManager::GetInstance().GetModelKeys(true);
+            return std::ranges::find(keys, key) != keys.end();
+        }
+
+        std::string lightLabel(const entt::entity entity)
+        {
+            return std::format("light_{}", entt::to_integral(entity));
         }
     } // namespace
 
@@ -121,9 +184,22 @@ namespace sage
     {
         for (const auto entity : sys->registry->view<Light>())
         {
-            if (sys->registry->any_of<sgTransform>(entity)) continue;
-            const auto position = sys->registry->get<Light>(entity).position;
-            sys->registry->emplace<sgTransform>(entity).position.world = position;
+            if (!sys->registry->any_of<sgTransform>(entity))
+            {
+                const auto position = sys->registry->get<Light>(entity).position;
+                sys->registry->emplace<sgTransform>(entity).position.world = position;
+            }
+            if (!sys->registry->any_of<editor::EditorObjectDescriptor>(entity))
+            {
+                sys->registry->emplace<editor::EditorObjectDescriptor>(
+                    entity,
+                    editor::EditorObjectDescriptor{
+                        .name = lightLabel(entity),
+                        .category = "Light",
+                        .selectable = true,
+                        .visibleInHierarchy = true,
+                        .locked = false});
+            }
         }
     }
 
@@ -218,6 +294,9 @@ namespace sage
             }
         }
         editorModes->Update();
+        syncLightTransforms();
+        sys->lightSubSystem->Update();
+        sys->lightSubSystem->RefreshLights();
         refreshOverlay();
         refreshSceneWindows();
         if (!viewportFullscreen) sys->UI().Update();
@@ -226,6 +305,7 @@ namespace sage
     void EditorScene::Draw3D() const
     {
         sys->renderSystem->Draw();
+        sys->lightSubSystem->DrawDebugLights();
         placementController->DrawGridAndAxes();
         editorModes->Draw3D();
         const auto selectedEntity = selection->ActiveTransformEntity();
@@ -251,42 +331,285 @@ namespace sage
     {
         if (viewportFullscreen) return;
         gui->StartImGui();
-        drawFileBrowser();
+        drawMainMenuBar();
+        drawFileBrowsers();
         gui->EndImGui();
     }
 
-    void EditorScene::drawFileBrowser() const
+    void EditorScene::drawMainMenuBar() const
     {
-        if (fileBrowser == nullptr) return;
-
-        ImGui::SetNextWindowSize(ImVec2{360.0f, 96.0f}, ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Files"))
+        if (!ImGui::BeginMainMenuBar()) return;
+        if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::Button("Select map file"))
+            if (ImGui::MenuItem("Load Map"))
             {
-                fileBrowser->Open();
+                openLoadMapBrowser();
             }
-
-            if (!selectedBrowserPath.empty())
+            if (ImGui::MenuItem("Save Map"))
             {
-                ImGui::TextUnformatted(selectedBrowserPath.filename().string().c_str());
+                saveMap();
+            }
+            if (ImGui::MenuItem("Save Map As..."))
+            {
+                openSaveMapBrowser();
+            }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Add"))
+        {
+            if (ImGui::MenuItem("Light"))
+            {
+                addLight();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
+    void EditorScene::drawFileBrowsers() const
+    {
+        if (loadMapBrowser)
+        {
+            loadMapBrowser->Display();
+            if (loadMapBrowser->HasSelected())
+            {
+                loadMap(loadMapBrowser->GetSelected());
+                loadMapBrowser->ClearSelected();
             }
         }
-        ImGui::End();
 
-        fileBrowser->Display();
-
-        if (fileBrowser->HasSelected())
+        if (saveMapBrowser)
         {
-            handleFileBrowserSelection(fileBrowser->GetSelected());
-            fileBrowser->ClearSelected();
+            saveMapBrowser->Display();
+            if (saveMapBrowser->HasSelected())
+            {
+                saveMapAs(saveMapBrowser->GetSelected());
+                saveMapBrowser->ClearSelected();
+            }
         }
     }
 
-    void EditorScene::handleFileBrowserSelection(const std::filesystem::path& path) const
+    void EditorScene::openLoadMapBrowser() const
     {
-        selectedBrowserPath = path;
-        std::cout << "Selected filename: " << selectedBrowserPath.string() << std::endl;
+        if (!loadMapBrowser) return;
+        loadMapBrowser->SetDirectory(defaultBrowserDirectory(currentMapPath));
+        loadMapBrowser->Open();
+    }
+
+    void EditorScene::openSaveMapBrowser() const
+    {
+        if (!saveMapBrowser) return;
+        saveMapBrowser->SetDirectory(defaultBrowserDirectory(currentMapPath));
+        saveMapBrowser->SetInputName(
+            currentMapPath.empty() ? DEFAULT_SAVE_FILENAME : currentMapPath.filename().string());
+        saveMapBrowser->Open();
+    }
+
+    void EditorScene::addLight() const
+    {
+        Vector3 position = Vector3Add(sys->camera->getRaylibCam()->target, {0.0f, DEFAULT_LIGHT_HEIGHT_OFFSET, 0.0f});
+        if (const auto snappedPosition = placementController->SnappedPlacementPosition(); snappedPosition.has_value())
+        {
+            position = Vector3Add(*snappedPosition, {0.0f, DEFAULT_LIGHT_HEIGHT_OFFSET, 0.0f});
+        }
+
+        const auto entity = sys->registry->create();
+        sys->registry->emplace<editor::EditorMapEntity>(entity);
+        sys->registry->emplace<editor::EditorObjectDescriptor>(
+            entity,
+            editor::EditorObjectDescriptor{
+                .name = lightLabel(entity),
+                .category = "Light",
+                .selectable = true,
+                .visibleInHierarchy = true,
+                .locked = false});
+
+        auto& transform = sys->registry->emplace<sgTransform>(entity);
+        transform.position.world = position;
+
+        sys->registry->emplace<Light>(
+            entity,
+            Light{
+                .type = LIGHT_POINT,
+                .enabled = true,
+                .position = position,
+                .target = Vector3Zero(),
+                .color = DEFAULT_LIGHT_COLOR,
+                .brightness = DEFAULT_LIGHT_BRIGHTNESS});
+
+        sys->lightSubSystem->RefreshLights();
+        editorModes->SelectSceneEntity(entity);
+    }
+
+    void EditorScene::loadMap(const std::filesystem::path& path) const
+    {
+        const auto selectedPath = ensureBinExtension(path);
+        const auto pathString = selectedPath.string();
+        if (!editor::IsEditorLayoutMap(pathString.c_str()))
+        {
+            std::cerr << "ERROR: Not an editor layout map: " << pathString << std::endl;
+            return;
+        }
+
+        clearCurrentMap();
+        if (!editor::LoadMap(sys->registry, pathString.c_str())) return;
+        currentMapPath = selectedPath;
+        SetSceneName(sceneNameFromPath(currentMapPath));
+        refreshAfterMapLoad();
+    }
+
+    void EditorScene::saveMap() const
+    {
+        if (currentMapPath.empty())
+        {
+            openSaveMapBrowser();
+            return;
+        }
+        saveMapAs(currentMapPath);
+    }
+
+    void EditorScene::saveMapAs(const std::filesystem::path& path) const
+    {
+        ensureDefaultMapBase();
+        currentMapPath = ensureBinExtension(path);
+        const auto pathString = currentMapPath.string();
+        editor::SaveMap(*sys->registry, pathString.c_str());
+        SetSceneName(sceneNameFromPath(currentMapPath));
+    }
+
+    void EditorScene::clearCurrentMap() const
+    {
+        if (editorModes)
+        {
+            editorModes->ChangeState<editor::EditorSelectState>();
+        }
+        if (selection)
+        {
+            selection->Clear();
+        }
+        if (gui)
+        {
+            gui->HideDeleteConfirmation();
+        }
+
+        std::vector<entt::entity> mapEntities;
+        for (const auto entity : sys->registry->view<editor::EditorMapEntity>())
+        {
+            mapEntities.push_back(entity);
+        }
+
+        for (const auto entity : mapEntities)
+        {
+            if (sys->registry->valid(entity))
+            {
+                sys->registry->destroy(entity);
+            }
+        }
+    }
+
+    void EditorScene::ensureDefaultMapBase() const
+    {
+        bool hasMapBase = false;
+        const auto existingBaseView = sys->registry->view<editor::EditorMapEntity, Renderable, Collideable>();
+        for (const auto entity : existingBaseView)
+        {
+            auto& renderable = existingBaseView.get<Renderable>(entity);
+            if (!isMapBaseRenderable(renderable)) continue;
+
+            hasMapBase = true;
+            if (!sys->registry->any_of<editor::EditorMapBase>(entity))
+            {
+                sys->registry->emplace<editor::EditorMapBase>(entity);
+            }
+            if (!sys->registry->any_of<editor::EditorObjectDescriptor>(entity))
+            {
+                sys->registry->emplace<editor::EditorObjectDescriptor>(
+                    entity,
+                    editor::EditorObjectDescriptor{
+                        .name = renderable.GetName(),
+                        .category = DEFAULT_MAP_BASE_CATEGORY,
+                        .selectable = false,
+                        .visibleInHierarchy = true,
+                        .locked = true});
+            }
+            if (!sys->registry->any_of<editor::AssetReference>(entity))
+            {
+                if (const auto* model = renderable.GetModel(); model != nullptr)
+                {
+                    sys->registry->emplace<editor::AssetReference>(
+                        entity, editor::AssetReference{.assetKey = model->GetKey()});
+                }
+            }
+
+            auto& collideable = existingBaseView.get<Collideable>(entity);
+            collideable.SetCollisionLayer(collision_layers::Background);
+            collideable.isStatic = true;
+            collideable.blocksNavigation = false;
+            collideable.active = false;
+            renderable.active = false;
+        }
+
+        if (hasMapBase) return;
+
+        if (!modelKeyAvailable(DEFAULT_MAP_BASE_MODEL_KEY))
+        {
+            std::cerr << "ERROR: Cannot create default map base. Missing model key: "
+                      << DEFAULT_MAP_BASE_MODEL_KEY << std::endl;
+            return;
+        }
+
+        const auto entity = sys->registry->create();
+        sys->registry->emplace<editor::EditorMapEntity>(entity);
+        sys->registry->emplace<editor::EditorMapBase>(entity);
+        sys->registry->emplace<editor::EditorObjectDescriptor>(
+            entity,
+            editor::EditorObjectDescriptor{
+                .name = DEFAULT_MAP_BASE_NAME,
+                .category = DEFAULT_MAP_BASE_CATEGORY,
+                .selectable = false,
+                .visibleInHierarchy = true,
+                .locked = true});
+        sys->registry->emplace<editor::AssetReference>(
+            entity, editor::AssetReference{.assetKey = DEFAULT_MAP_BASE_MODEL_KEY});
+
+        auto& transform = sys->registry->emplace<sgTransform>(entity);
+        transform.scale.world = {DEFAULT_MAP_BASE_SIZE, 1.0f, DEFAULT_MAP_BASE_SIZE};
+
+        auto model = ResourceManager::GetInstance().GetModelView(DEFAULT_MAP_BASE_MODEL_KEY);
+        auto& renderable = sys->registry->emplace<Renderable>(entity, std::move(model), MatrixIdentity());
+        renderable.SetName(DEFAULT_MAP_BASE_NAME);
+        renderable.active = false;
+
+        const BoundingBox localBounds = {
+            {-0.5f, -DEFAULT_MAP_BASE_HALF_HEIGHT, -0.5f},
+            {0.5f, DEFAULT_MAP_BASE_HALF_HEIGHT, 0.5f}};
+        auto& collideable = sys->registry->emplace<Collideable>(entity, localBounds, transform.GetMatrixNoRot());
+        collideable.SetCollisionLayer(collision_layers::Background);
+        collideable.isStatic = true;
+        collideable.blocksNavigation = false;
+        collideable.active = false;
+    }
+
+    void EditorScene::syncLightTransforms() const
+    {
+        const auto view = sys->registry->view<Light, sgTransform>();
+        for (const auto entity : view)
+        {
+            auto& light = view.get<Light>(entity);
+            light.position = view.get<sgTransform>(entity).GetWorldPos();
+        }
+    }
+
+    void EditorScene::refreshAfterMapLoad() const
+    {
+        ensureDefaultMapBase();
+        applyLitShaderToLoadedRenderables();
+        giveTransformsToLights();
+        placementController->Initialize();
+        selection->Clear();
+        editorModes->ChangeState<editor::EditorSelectState>();
+        refreshOverlay();
+        refreshSceneWindows();
     }
 
     bool EditorScene::HandleEscapePressed() const
@@ -318,6 +641,7 @@ namespace sage
         hierarchyTree = std::make_unique<editor::EditorHierarchyTree>(sys);
         placementController = std::make_unique<editor::EditorPlacementController>(sys, *assetCatalog);
 
+        ensureDefaultMapBase();
         applyLitShaderToLoadedRenderables();
         giveTransformsToLights();
         placementController->Initialize();
@@ -337,16 +661,19 @@ namespace sage
             [this](const std::size_t index) { editorModes->SelectPlaceable(index); },
             [this](const entt::entity entity) { editorModes->SelectSceneEntity(entity); },
             modelDefaults->Callbacks());
+        SetSceneName(UNTITLED_SCENE_NAME);
         refreshOverlay();
         refreshSceneWindows();
-        fileBrowser = std::make_unique<ImGui::FileBrowser>(FILE_BROWSER_FLAGS);
-        fileBrowser->SetTitle("Select map file");
-        fileBrowser->SetTypeFilters({".bin"});
-        if (const std::filesystem::path resourceDirectory{"resources"};
-            std::filesystem::is_directory(resourceDirectory))
-        {
-            fileBrowser->SetDirectory(resourceDirectory);
-        }
+        loadMapBrowser = std::make_unique<ImGui::FileBrowser>(LOAD_BROWSER_FLAGS);
+        loadMapBrowser->SetTitle("Load map");
+        loadMapBrowser->SetTypeFilters({".bin"});
+        loadMapBrowser->SetDirectory(defaultBrowserDirectory(currentMapPath));
+
+        saveMapBrowser = std::make_unique<ImGui::FileBrowser>(SAVE_BROWSER_FLAGS);
+        saveMapBrowser->SetTitle("Save map as");
+        saveMapBrowser->SetTypeFilters({".bin"});
+        saveMapBrowser->SetDirectory(defaultBrowserDirectory(currentMapPath));
+        saveMapBrowser->SetInputName(DEFAULT_SAVE_FILENAME);
     }
 
     EditorScene::~EditorScene() = default;

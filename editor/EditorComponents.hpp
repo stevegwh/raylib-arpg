@@ -5,6 +5,14 @@
 
 namespace sage::editor
 {
+    struct EditorMapEntity
+    {
+    };
+
+    struct EditorMapBase
+    {
+    };
+
     struct PersistentEntityId
     {
         std::uint64_t id = 0;

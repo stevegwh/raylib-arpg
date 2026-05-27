@@ -47,6 +47,11 @@ namespace sage::editor
 
     void EditorPlacementController::Initialize()
     {
+        if (sys->registry->valid(gridPlacementSurfaceEntity))
+        {
+            sys->registry->destroy(gridPlacementSurfaceEntity);
+            gridPlacementSurfaceEntity = entt::null;
+        }
         sizeGridToLoadedScene();
         createGridPlacementSurface();
     }
@@ -135,6 +140,7 @@ namespace sage::editor
 
         const auto& placeable = assets.Selected();
         const auto entity = sys->registry->create();
+        sys->registry->emplace<EditorMapEntity>(entity);
         sys->registry->emplace<EditorObjectDescriptor>(
             entity,
             EditorObjectDescriptor{
@@ -248,7 +254,7 @@ namespace sage::editor
     {
         bool hasBounds = false;
         BoundingBox sceneBounds{};
-        for (const auto entity : sys->registry->view<Collideable>())
+        for (const auto entity : sys->registry->view<EditorMapEntity, Collideable>())
         {
             const auto& c = sys->registry->get<Collideable>(entity);
             if (!hasBounds)

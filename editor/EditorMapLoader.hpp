@@ -4,9 +4,9 @@
 
 namespace sage::editor
 {
-    // Loads an engine-only subset of a map .bin file: Renderable, sgTransform, Collideable
-    // (plus the ResourceManager payload required to resolve renderables). Spawners and Lights
-    // are read from the stream and emplaced to keep wire-format compatibility with the game's
-    // MapLoader, but no game-specific components (Item/Dialog/Inventory/Door) are attached.
-    void LoadMap(entt::registry* destination, const char* path);
+    // Loads/saves the editor-only layout map format. This is intentionally
+    // separate from the game/respacker map .bin format.
+    [[nodiscard]] bool IsEditorLayoutMap(const char* path);
+    bool LoadMap(entt::registry* destination, const char* path);
+    void SaveMap(entt::registry& source, const char* path);
 } // namespace sage::editor

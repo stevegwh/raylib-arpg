@@ -1,17 +1,18 @@
 #include "EditorMapLoader.hpp"
 
+#include "EditorComponents.hpp"
 #include "engine/components/Collideable.hpp"
 #include "engine/components/Renderable.hpp"
 #include "engine/components/sgTransform.hpp"
-#include "engine/components/Spawner.hpp"
 #include "engine/Light.hpp"
-#include "engine/ResourceManager.hpp"
 #include "engine/Serializer.hpp"
 
-#include "cereal/types/string.hpp"
 #include "cereal/types/vector.hpp"
 
 #include <cstdint>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -21,105 +22,120 @@ namespace sage::editor
 {
     namespace
     {
-        // Matches the wire layout of lq::ItemComponent::load (4 strings, vector<string>, 2 strings).
-        // Used to advance the binary stream past item payloads without depending on the game module.
-        struct ItemComponentSkip
+        constexpr char kEditorLayoutMapMagic[4] = {'L', 'Q', 'E', '1'};
+
+        struct LayoutEntityRecord
         {
-            std::string name;
-            std::string localizedName;
-            std::string description;
-            std::string rarity;
-            std::vector<std::string> flagNames;
-            std::string icon;
-            std::string model;
+            sage::serializer::entity entity{};
+            sgTransform transform{};
+            Collideable collideable{};
+            Renderable renderable{};
 
             template <class Archive>
             void serialize(Archive& archive)
             {
-                archive(name, localizedName, description, rarity, flagNames, icon, model);
+                archive(entity, transform, collideable, renderable);
             }
         };
     } // namespace
 
-    void LoadMap(entt::registry* destination, const char* path)
+    bool IsEditorLayoutMap(const char* path)
+    {
+        std::ifstream storage(path, std::ios::binary);
+        if (!storage.is_open()) return false;
+
+        char fileMagic[4]{};
+        storage.read(fileMagic, sizeof(fileMagic));
+        return storage.gcount() == sizeof(fileMagic) &&
+               std::memcmp(fileMagic, kEditorLayoutMapMagic, sizeof(fileMagic)) == 0;
+    }
+
+    bool LoadMap(entt::registry* destination, const char* path)
     {
         assert(destination != nullptr);
-        std::cout << "START: Loading map data from file (editor)." << std::endl;
+        if (!IsEditorLayoutMap(path))
+        {
+            std::cerr << "ERROR: Not an editor layout map: " << path << std::endl;
+            return false;
+        }
+
+        std::cout << "START: Loading layout map data from file (editor)." << std::endl;
 
         std::unordered_map<std::uint32_t, entt::entity> idMap;
 
         sage::serializer::ReadCompressedBinary(
-            path, sage::serializer::kMapBinMagic, [&](cereal::BinaryInputArchive& input, std::istream& stream) {
-                std::vector<Spawner> spawners;
-                input(spawners);
-                for (const auto& spawner : spawners)
-                {
-                    const auto entity = destination->create();
-                    destination->emplace<Spawner>(entity, spawner);
-                }
-
+            path, kEditorLayoutMapMagic, [&](cereal::BinaryInputArchive& input, std::istream&) {
                 std::vector<Light> lights;
                 input(lights);
                 for (const auto& light : lights)
                 {
                     const auto entity = destination->create();
-                    destination->emplace<Light>(entity, light);
+                    auto loadedLight = light;
+                    loadedLight.enabled = true;
+                    destination->emplace<EditorMapEntity>(entity);
+                    destination->emplace<Light>(entity, loadedLight);
                 }
 
-                input(ResourceManager::GetInstance());
-
-                unsigned int itemCount = 0;
-                input(itemCount);
-
-                for (unsigned int i = 0; i < itemCount; ++i)
+                std::vector<LayoutEntityRecord> layoutEntities;
+                input(layoutEntities);
+                for (const auto& record : layoutEntities)
                 {
                     const auto entity = destination->create();
-                    sage::serializer::entity entityId{};
-                    auto& transform = destination->emplace<sgTransform>(entity);
-                    auto& collideable = destination->emplace<Collideable>(entity);
-                    collideable.isStatic = true;
-                    auto& renderable = destination->emplace<Renderable>(entity);
-                    ItemComponentSkip skip{};
-
-                    try
-                    {
-                        input(entityId, transform, collideable, renderable, skip);
-                    }
-                    catch (const cereal::Exception& e)
-                    {
-                        std::cerr << "ERROR: Serialization error (item): " << e.what() << std::endl;
-                        return;
-                    }
-                    idMap[entityId.id] = entity;
-                }
-
-                while (stream.peek() != EOF)
-                {
-                    const auto entity = destination->create();
-                    sage::serializer::entity entityId{};
-                    auto& transform = destination->emplace<sgTransform>(entity);
-                    auto& collideable = destination->emplace<Collideable>(entity);
-                    collideable.isStatic = true;
-                    auto& renderable = destination->emplace<Renderable>(entity);
-
-                    try
-                    {
-                        input(entityId, transform, collideable, renderable);
-                    }
-                    catch (const cereal::Exception& e)
-                    {
-                        std::cerr << "ERROR: Serialization error (entity): " << e.what() << std::endl;
-                        return;
-                    }
-                    idMap[entityId.id] = entity;
+                    destination->emplace<EditorMapEntity>(entity);
+                    destination->emplace<sgTransform>(entity, record.transform);
+                    destination->emplace<Collideable>(entity, record.collideable);
+                    destination->get<Collideable>(entity).isStatic = true;
+                    destination->emplace<Renderable>(entity, record.renderable);
+                    idMap[record.entity.id] = entity;
                 }
             });
 
-        for (auto [e, t] : destination->view<sgTransform>().each())
+        for (auto view = destination->view<EditorMapEntity, sgTransform>(); const auto entity : view)
         {
-            t.ResolveSerializedParent(idMap);
+            view.get<sgTransform>(entity).ResolveSerializedParent(idMap);
         }
 
-        std::cout << "FINISH: Loading map data from file (editor)." << std::endl;
+        std::cout << "FINISH: Loading layout map data from file (editor)." << std::endl;
+        return true;
+    }
+
+    void SaveMap(entt::registry& source, const char* path)
+    {
+        std::cout << "START: Saving layout map data to file (editor)." << std::endl;
+
+        const std::filesystem::path outputPath{path};
+        if (const auto parent = outputPath.parent_path(); !parent.empty())
+        {
+            std::filesystem::create_directories(parent);
+        }
+
+        sage::serializer::WriteCompressedBinary(
+            path, kEditorLayoutMapMagic, [&](cereal::BinaryOutputArchive& output) {
+                std::vector<Light> lights;
+                for (const auto entity : source.view<EditorMapEntity, Light>())
+                {
+                    auto light = source.get<Light>(entity);
+                    if (source.any_of<sgTransform>(entity))
+                    {
+                        light.position = source.get<sgTransform>(entity).GetWorldPos();
+                    }
+                    lights.push_back(light);
+                }
+                output(lights);
+
+                std::vector<LayoutEntityRecord> layoutEntities;
+                const auto view = source.view<EditorMapEntity, sgTransform, Renderable, Collideable>();
+                for (const auto entityHandle : view)
+                {
+                    auto& record = layoutEntities.emplace_back();
+                    record.entity.id = entt::entt_traits<entt::entity>::to_entity(entityHandle);
+                    record.transform = view.get<sgTransform>(entityHandle);
+                    record.collideable = view.get<Collideable>(entityHandle);
+                    record.renderable = view.get<Renderable>(entityHandle);
+                }
+                output(layoutEntities);
+            });
+
+        std::cout << "FINISH: Saving layout map data to file (editor)." << std::endl;
     }
 } // namespace sage::editor
