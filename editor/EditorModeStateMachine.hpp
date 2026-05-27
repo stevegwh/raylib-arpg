@@ -7,6 +7,7 @@
 #include "raymath.h"
 
 #include <cstddef>
+#include <filesystem>
 #include <optional>
 #include <utility>
 #include <variant>
@@ -47,6 +48,9 @@ namespace sage::editor
     {
         static std::string GetName(const EditorModeStateMachine& machine);
         std::size_t placeableIndex = 0;
+        // When set, this place state instantiates a flatpack instead of a
+        // single asset on each click.
+        std::optional<std::filesystem::path> flatpackPath;
         void OnEnter(EditorModeStateMachine& machine);
         void OnExit(EditorModeStateMachine& machine);
         void Update(EditorModeStateMachine& machine);
@@ -134,6 +138,7 @@ namespace sage::editor
         void RefreshPlacementTarget();
         void AdjustGridSurfaceY(float amount);
         void SelectPlaceable(std::size_t index);
+        void SelectFlatpack(std::filesystem::path path);
         void SelectSceneEntity(entt::entity entity);
         bool HandleEscapePressed();
         void OnTransformApplied(entt::entity entity);

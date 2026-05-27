@@ -221,7 +221,13 @@ namespace sage::editor
 
     void EditorPlaceState::OnEnter(EditorModeStateMachine& machine)
     {
-        machine.selectPlaceableAsset(placeableIndex);
+        // For flatpack placement we just need the cursor snap target. Skip the
+        // single-asset selection path so the placement controller doesn't try to
+        // build a preview from a non-existent placeable.
+        if (!flatpackPath.has_value())
+        {
+            machine.selectPlaceableAsset(placeableIndex);
+        }
         ResetPlacementTransform(machine);
         machine.refreshOverlay();
     }
@@ -312,7 +318,17 @@ namespace sage::editor
 
     bool EditorPlaceState::PlaceSelectedMesh(EditorModeStateMachine& machine)
     {
-        const auto entity = machine.placement().PlaceSelectedMesh();
+        std::optional<entt::entity> entity;
+        if (flatpackPath.has_value())
+        {
+            const auto& snap = machine.snappedPlacementPosition();
+            if (!snap.has_value()) return false;
+            entity = machine.scene.PlaceFlatpackAt(*flatpackPath, *snap);
+        }
+        else
+        {
+            entity = machine.placement().PlaceSelectedMesh();
+        }
         if (!entity.has_value()) return false;
 
         (void)machine.selectSelection(*entity);
@@ -325,6 +341,9 @@ namespace sage::editor
 
     void EditorPlaceState::DrawPlacementPreview(const EditorModeStateMachine& machine) const
     {
+        // Flatpacks don't yet have a hierarchy ghost preview, so just rely on
+        // the cursor marker that EditorPlaceState::Draw3D already renders.
+        if (flatpackPath.has_value()) return;
         machine.placement().DrawPreview();
     }
 
@@ -707,6 +726,11 @@ namespace sage::editor
     {
         if (!canSelectPlaceable(index)) return;
         ChangeState(EditorPlaceState{.placeableIndex = index});
+    }
+
+    void EditorModeStateMachine::SelectFlatpack(std::filesystem::path path)
+    {
+        ChangeState(EditorPlaceState{.flatpackPath = std::move(path)});
     }
 
     void EditorModeStateMachine::SelectSceneEntity(const entt::entity entity)

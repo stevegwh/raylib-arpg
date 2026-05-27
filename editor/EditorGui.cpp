@@ -7,6 +7,7 @@
 #include "engine/ui/UIElements.hpp"
 #include "engine/ui/UILayout.hpp"
 #include "engine/ui/UIWindow.hpp"
+#include "engine/slib.hpp"
 #include "imgui.h"
 
 #include "raymath.h"
@@ -441,6 +442,26 @@ namespace sage::editor
         refreshHierarchyRowContent();
     }
 
+    std::optional<entt::entity> EditorGui::HierarchyEntityAtViewportPos(const Vector2 viewportPos) const
+    {
+        if (!hierarchyWindow || hierarchyWindow->IsHidden()) return std::nullopt;
+        if (!PointInsideRect(hierarchyWindow->GetRec(), viewportPos)) return std::nullopt;
+
+        const std::size_t scrollOffset = hierarchyWindow->GetScrollbar()
+                                             ? hierarchyWindow->GetScrollbar()->ScrollOffset()
+                                             : 0;
+        for (std::size_t i = 0; i < hierarchyRows.size(); ++i)
+        {
+            const auto* row = hierarchyRows[i];
+            if (!row || !row->parent) continue;
+            if (!PointInsideRect(row->parent->GetRec(), viewportPos)) continue;
+            const std::size_t entryIndex = scrollOffset + i;
+            if (entryIndex >= hierarchyEntries.size()) return std::nullopt;
+            return hierarchyEntries[entryIndex].entity;
+        }
+        return std::nullopt;
+    }
+
     void EditorGui::FocusHierarchyOnEntity(const entt::entity entity)
     {
         auto* sb = hierarchyWindow ? hierarchyWindow->GetScrollbar() : nullptr;
@@ -526,22 +547,42 @@ namespace sage::editor
     {
         const std::size_t scrollRow =
             assetWindow && assetWindow->GetScrollbar() ? assetWindow->GetScrollbar()->ScrollOffset() : 0;
-        const std::size_t firstAssetIndex = scrollRow * ASSET_GRID_COLUMNS;
+        const std::size_t firstItemIndex = scrollRow * ASSET_GRID_COLUMNS;
+
+        const std::size_t itemCount =
+            (currentTab == BrowserTab::Assets) ? assetEntries.size() : flatpackEntries.size();
 
         for (std::size_t slot = 0; slot < assetButtons.size(); ++slot)
         {
             auto* button = dynamic_cast<AssetThumbnailButton*>(assetButtons[slot]);
             if (!button) continue;
 
-            const std::size_t assetIndex = firstAssetIndex + slot;
-            if (assetIndex >= assetEntries.size())
+            const std::size_t itemIndex = firstItemIndex + slot;
+            if (itemIndex >= itemCount)
             {
                 button->SetAsset(std::nullopt);
                 continue;
             }
 
-            button->SetAsset(assetIndex, assetEntries[assetIndex].displayName, &assetThumbnails.at(assetIndex));
+            if (currentTab == BrowserTab::Assets)
+            {
+                button->SetAsset(
+                    itemIndex, assetEntries[itemIndex].displayName, &assetThumbnails.at(itemIndex));
+            }
+            else
+            {
+                // Flatpacks have no rendered thumbnail yet — just show the label
+                // on a blank tile so the click target stays consistent.
+                button->SetAsset(itemIndex, flatpackEntries[itemIndex].displayName, nullptr);
+            }
         }
+    }
+
+    void EditorGui::SetFlatpacks(std::vector<FlatpackEntry> entries)
+    {
+        flatpackEntries = std::move(entries);
+        if (auto* sb = assetWindow ? assetWindow->GetScrollbar() : nullptr) sb->ClampOffset();
+        refreshAssetButtonContent();
     }
 
     RenderTexture2D EditorGui::createAssetThumbnail(const AssetEntry& asset) const
@@ -635,7 +676,7 @@ namespace sage::editor
     }
 
     void EditorGui::createAssetWindow(
-        const std::vector<AssetEntry>& assets, const std::function<void(std::size_t)>& onAssetSelected)
+        const std::vector<AssetEntry>& assets, const std::function<void(std::size_t)>& /*unused*/)
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -654,16 +695,42 @@ namespace sage::editor
         auto* mainTable = assetWindow->CreateTable({0, 0, 4, 0});
 
         {
-            auto* titleRow = mainTable->CreateTableRow(BOTTOM_DOCK_TITLE_ROW_HEIGHT);
-            auto* titleCell = titleRow->CreateTableCell();
-            auto title = std::make_unique<TitleBar>(ui, titleCell, EditorTitleFontInfo());
-            titleCell->CreateTitleBar(std::move(title), "Assets");
+            auto* tabRow = mainTable->CreateTableRow(BOTTOM_DOCK_TITLE_ROW_HEIGHT);
+            auto makeTab = [&](const char* label, BrowserTab tab) {
+                auto* cell = tabRow->CreateTableCell(Padding{2, 2, 4, 4});
+                auto button = std::make_unique<TextButton>(ui, cell, [this, tab]() {
+                    if (currentTab == tab) return;
+                    currentTab = tab;
+                    if (auto* sb = assetWindow ? assetWindow->GetScrollbar() : nullptr)
+                    {
+                        sb->ClampOffset();
+                    }
+                    refreshAssetButtonContent();
+                });
+                browserTabButtons.push_back(cell->CreateTextbox(std::move(button), label));
+            };
+            makeTab("Assets", BrowserTab::Assets);
+            makeTab("Flatpacks", BrowserTab::Flatpacks);
         }
 
         {
             auto* contentRow = mainTable->CreateTableRow(CONTENT_ROW_PADDING);
             auto* contentCell = contentRow->CreateTableCell(CONTENT_CELL_PADDING);
             auto* table = contentCell->CreateTable();
+
+            // Dispatch click to either the asset or flatpack callback depending
+            // on which tab is active when the click arrives.
+            auto onBrowserItemSelected = [this](std::size_t index) {
+                if (currentTab == BrowserTab::Assets)
+                {
+                    if (onAssetSelectedCb) onAssetSelectedCb(index);
+                }
+                else
+                {
+                    if (index >= flatpackEntries.size() || !onFlatpackSelectedCb) return;
+                    onFlatpackSelectedCb(flatpackEntries[index].path);
+                }
+            };
 
             assetButtons.clear();
             assetButtons.reserve(ASSET_VISIBLE_ROWS * ASSET_GRID_COLUMNS);
@@ -673,8 +740,8 @@ namespace sage::editor
                 for (int colIndex = 0; colIndex < ASSET_GRID_COLUMNS; ++colIndex)
                 {
                     auto* cell = row->CreateTableCell(Padding{5, 5, 5, 5});
-                    auto thumbnail =
-                        std::make_unique<AssetThumbnailButton>(ui, cell, &selectedAssetIndex, onAssetSelected);
+                    auto thumbnail = std::make_unique<AssetThumbnailButton>(
+                        ui, cell, &selectedAssetIndex, onBrowserItemSelected);
                     assetButtons.push_back(cell->CreateImagebox(std::move(thumbnail)));
                 }
             }
@@ -683,7 +750,11 @@ namespace sage::editor
         if (auto* sb = assetWindow->GetScrollbar())
         {
             sb->SetProviders(
-                [this]() { return (assetEntries.size() + ASSET_GRID_COLUMNS - 1) / ASSET_GRID_COLUMNS; },
+                [this]() {
+                    const std::size_t count = (currentTab == BrowserTab::Assets) ? assetEntries.size()
+                                                                                 : flatpackEntries.size();
+                    return (count + ASSET_GRID_COLUMNS - 1) / ASSET_GRID_COLUMNS;
+                },
                 []() { return static_cast<std::size_t>(ASSET_VISIBLE_ROWS); });
             assetScrollSub = sb->onScrollChanged.Subscribe([this]() { refreshAssetButtonContent(); });
         }
@@ -893,10 +964,15 @@ namespace sage::editor
         Settings* _settings,
         const std::vector<AssetEntry>& assets,
         const std::function<void(std::size_t)>& onAssetSelected,
+        const std::function<void(std::filesystem::path)>& onFlatpackSelected,
         const std::function<void(entt::entity)>& onSceneObjectSelected,
         const std::function<void(entt::entity, entt::entity)>& onHierarchyReparent,
         ModelDefaultCallbacks callbacks)
-        : ui(_ui), settings(_settings), modelDefaultCallbacks(std::move(callbacks))
+        : ui(_ui),
+          settings(_settings),
+          onAssetSelectedCb(onAssetSelected),
+          onFlatpackSelectedCb(onFlatpackSelected),
+          modelDefaultCallbacks(std::move(callbacks))
     {
         Image panelImage = GenImageColor(1, 1, EDITOR_WINDOW_BACKGROUND);
         editorWindowBackgroundTexture = LoadTextureFromImage(panelImage);

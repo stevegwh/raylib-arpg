@@ -7,6 +7,7 @@
 
 #include "entt/entt.hpp"
 
+#include <filesystem>
 #include <functional>
 #include <optional>
 #include <string>
@@ -37,6 +38,18 @@ namespace sage
                 entt::entity entity = entt::null;
                 std::string displayName;
                 int depth = 0;
+            };
+
+            struct FlatpackEntry
+            {
+                std::string displayName;
+                std::filesystem::path path;
+            };
+
+            enum class BrowserTab
+            {
+                Assets,
+                Flatpacks
             };
 
             struct ModelDefaultCallbacks
@@ -72,6 +85,11 @@ namespace sage
             std::vector<ImageBox*> assetButtons;
             std::vector<TextBox*> hierarchyRows;
             std::vector<SceneObjectEntry> hierarchyEntries;
+            std::vector<FlatpackEntry> flatpackEntries;
+            std::vector<TextBox*> browserTabButtons;
+            std::function<void(std::size_t)> onAssetSelectedCb;
+            std::function<void(std::filesystem::path)> onFlatpackSelectedCb;
+            BrowserTab currentTab = BrowserTab::Assets;
             Subscription assetScrollSub{};
             Subscription hierarchyScrollSub{};
             InspectorFieldBuilder inspectorFieldBlueprints;
@@ -113,9 +131,14 @@ namespace sage
                 const std::string& modelDefaultScale) const;
             void SetSceneName(const std::string& sceneName) const;
             void SetSelectedAsset(std::optional<std::size_t> index);
+            void SetFlatpacks(std::vector<FlatpackEntry> entries);
+            [[nodiscard]] BrowserTab CurrentBrowserTab() const { return currentTab; }
             void SetHierarchy(
                 const std::vector<SceneObjectEntry>& entries, std::optional<entt::entity> selectedEntity);
             void FocusHierarchyOnEntity(entt::entity entity);
+            // Maps a viewport-space cursor position to the hierarchy entity at
+            // that row, if any. Used to drive the right-click context menu.
+            [[nodiscard]] std::optional<entt::entity> HierarchyEntityAtViewportPos(Vector2 viewportPos) const;
             void SetInspector(
                 const std::string& selectedEntity, const std::vector<InspectedComponent>& inspectedComponents);
             void DrawSceneViewInfo() const;
@@ -128,6 +151,7 @@ namespace sage
                 Settings* _settings,
                 const std::vector<AssetEntry>& assets,
                 const std::function<void(std::size_t)>& onAssetSelected,
+                const std::function<void(std::filesystem::path)>& onFlatpackSelected,
                 const std::function<void(entt::entity)>& onSceneObjectSelected,
                 const std::function<void(entt::entity, entt::entity)>& onHierarchyReparent,
                 ModelDefaultCallbacks callbacks);

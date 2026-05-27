@@ -1,6 +1,7 @@
 #include "EditorScene.hpp"
 
 #include "EditorComponents.hpp"
+#include "EditorFlatpack.hpp"
 #include "EditorMapLoader.hpp"
 #include "EditorTransformMath.hpp"
 #include "engine/AudioManager.hpp"
@@ -333,7 +334,87 @@ namespace sage
         gui->StartImGui();
         drawMainMenuBar();
         drawFileBrowsers();
+        drawHierarchyContextMenu();
         gui->EndImGui();
+    }
+
+    void EditorScene::drawHierarchyContextMenu() const
+    {
+        constexpr const char* kPopupId = "hierarchy_context_menu";
+
+        // Right-click outside any ImGui window: capture the cursor over the
+        // hierarchy and arm the popup.
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !ImGui::GetIO().WantCaptureMouse)
+        {
+            const auto viewportMouse = sys->settings->ScreenToViewportPosition(GetMousePosition());
+            if (const auto entity = gui->HierarchyEntityAtViewportPos(viewportMouse); entity.has_value())
+            {
+                hierarchyContextEntity = *entity;
+                ImGui::OpenPopup(kPopupId);
+            }
+        }
+
+        if (ImGui::BeginPopup(kPopupId))
+        {
+            if (!sys->registry->valid(hierarchyContextEntity))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            else
+            {
+                if (ImGui::MenuItem("Create Flatpack"))
+                {
+                    createFlatpackFromEntity(hierarchyContextEntity);
+                }
+            }
+            ImGui::EndPopup();
+        }
+    }
+
+    void EditorScene::createFlatpackFromEntity(const entt::entity entity) const
+    {
+        if (!sys->registry->valid(entity) || !sys->registry->any_of<sgTransform>(entity)) return;
+
+        const auto safeName = hierarchyTree ? hierarchyTree->DescribeEntity(entity)
+                                            : std::format("entity_{}", entt::to_integral(entity));
+        const std::filesystem::path flatpacksDir{"resources/flatpacks"};
+        const auto outputPath = flatpacksDir / (safeName + ".bin");
+        if (editor::SaveFlatpack(*sys->registry, entity, outputPath.string().c_str()))
+        {
+            std::cout << "Flatpack saved: " << outputPath << std::endl;
+            refreshFlatpackCatalog();
+        }
+        else
+        {
+            std::cerr << "ERROR: Failed to save flatpack: " << outputPath << std::endl;
+        }
+    }
+
+    void EditorScene::refreshFlatpackCatalog() const
+    {
+        auto catalog = editor::ListFlatpacks(std::filesystem::path{"resources/flatpacks"});
+        std::vector<editor::EditorGui::FlatpackEntry> entries;
+        entries.reserve(catalog.size());
+        for (auto& item : catalog)
+        {
+            entries.push_back({.displayName = std::move(item.displayName), .path = std::move(item.path)});
+        }
+        if (gui) gui->SetFlatpacks(std::move(entries));
+    }
+
+    std::optional<entt::entity> EditorScene::PlaceFlatpackAt(
+        const std::filesystem::path& path, const Vector3 anchor) const
+    {
+        const auto root = editor::LoadFlatpack(*sys->registry, path.string().c_str(), anchor);
+        if (root == entt::null) return std::nullopt;
+
+        // The loaded subtree has Renderables without an UberShaderComponent;
+        // applyLitShaderToLoadedRenderables attaches one with Lit set, matching
+        // the shader hookup the rest of the editor relies on. Bounds need to be
+        // re-derived from the new world transforms (the saved boxes are stale).
+        applyLitShaderToLoadedRenderables();
+        if (transformEditor) transformEditor->RefreshCollisionBoundsRecursive(root);
+        return root;
     }
 
     void EditorScene::drawMainMenuBar() const
@@ -678,6 +759,7 @@ namespace sage
             sys->settings,
             assetCatalog->AssetEntries(),
             [this](const std::size_t index) { editorModes->SelectPlaceable(index); },
+            [this](std::filesystem::path path) { editorModes->SelectFlatpack(std::move(path)); },
             [this](const entt::entity entity) { editorModes->SelectSceneEntity(entity); },
             [this](const entt::entity dragged, const entt::entity newParent) {
                 reparentEntity(dragged, newParent);
@@ -686,6 +768,7 @@ namespace sage
         SetSceneName(UNTITLED_SCENE_NAME);
         refreshOverlay();
         refreshSceneWindows();
+        refreshFlatpackCatalog();
         loadMapBrowser = std::make_unique<ImGui::FileBrowser>(LOAD_BROWSER_FLAGS);
         loadMapBrowser->SetTitle("Load map");
         loadMapBrowser->SetTypeFilters({".bin"});

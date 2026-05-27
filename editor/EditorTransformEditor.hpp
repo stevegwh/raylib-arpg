@@ -74,6 +74,14 @@ namespace sage::editor
         void AdjustRotationAxis(entt::entity entity, EditGizmo::Axis axis, float degrees);
         void AdjustScale(entt::entity entity, float delta);
 
+        // Rebuilds collision bounds for `entity` and all its descendants.
+        // Used after bulk-instantiating entities (e.g. flatpacks) so each new
+        // Collideable.worldBoundingBox reflects the actual world transform.
+        void RefreshCollisionBoundsRecursive(entt::entity entity) const
+        {
+            updateEntityCollisionBounds(entity);
+        }
+
       private:
         EngineSystems* sys;
         OnApplied onApplied;

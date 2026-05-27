@@ -46,6 +46,7 @@ namespace sage
         std::unique_ptr<ImGui::FileBrowser> loadMapBrowser{};
         std::unique_ptr<ImGui::FileBrowser> saveMapBrowser{};
         mutable std::filesystem::path currentMapPath{};
+        mutable entt::entity hierarchyContextEntity = entt::null;
         bool viewportFullscreen = false;
         void applyLitShaderToLoadedRenderables() const;
         void giveTransformsToLights() const;
@@ -64,6 +65,9 @@ namespace sage
         void syncLightTransforms() const;
         void refreshAfterMapLoad() const;
         void reparentEntity(entt::entity dragged, entt::entity newParent) const;
+        void drawHierarchyContextMenu() const;
+        void createFlatpackFromEntity(entt::entity entity) const;
+        void refreshFlatpackCatalog() const;
 
         void focusSelectedObject() const;
         void focusSelectedObjectInHierarchy() const;
@@ -82,6 +86,12 @@ namespace sage
         void DrawOverlay2D() const;
         void DrawImGui() const;
         [[nodiscard]] bool HandleEscapePressed() const;
+
+        // Instantiates a flatpack at the given world anchor. Returns the root
+        // entity on success. Called from the editor state machine when the
+        // user clicks in-scene while a flatpack is armed.
+        [[nodiscard]] std::optional<entt::entity> PlaceFlatpackAt(
+            const std::filesystem::path& path, Vector3 anchor) const;
 
         void SetViewportFullscreen(bool fullscreen);
         void SetSceneName(const std::string& sceneName) const;
