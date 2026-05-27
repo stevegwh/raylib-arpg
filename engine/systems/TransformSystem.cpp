@@ -18,6 +18,16 @@ namespace sage
             parentWorldScale.z != 0.0f ? worldScale.z / parentWorldScale.z : worldScale.z};
     }
 
+    // Mirror the Rz * Ry * Rx convention used in sgTransform::GetMatrix so the
+    // hierarchy and the rendering matrix agree on rotation order.
+    static Matrix EulerToMatrix(const Vector3& eulerDegrees)
+    {
+        return MatrixMultiply(
+            MatrixMultiply(
+                MatrixRotateZ(DEG2RAD * eulerDegrees.z), MatrixRotateY(DEG2RAD * eulerDegrees.y)),
+            MatrixRotateX(DEG2RAD * eulerDegrees.x));
+    }
+
     void TransformSystem::addChild(entt::entity parent, entt::entity child) const
     {
         if (parent == entt::null) return;
@@ -52,8 +62,13 @@ namespace sage
         assert(registry->valid(transform.m_parent));
         assert(registry->all_of<sgTransform>(transform.m_parent));
         const auto& parentTransform = registry->get<sgTransform>(transform.m_parent);
-        transform.position.world.value =
-            Vector3Add(parentTransform.position.world.value, transform.position.local.value);
+        const Matrix parentRot = EulerToMatrix(parentTransform.rotation.world.value);
+        // Apply parent scale and rotation to the child's local offset so children
+        // orbit the parent rather than just inheriting its rotation in place.
+        const Vector3 scaledLocal =
+            Vector3Multiply(transform.position.local.value, parentTransform.scale.world.value);
+        const Vector3 rotatedOffset = Vector3Transform(scaledLocal, parentRot);
+        transform.position.world.value = Vector3Add(parentTransform.position.world.value, rotatedOffset);
         transform.rotation.world.value =
             Vector3Add(parentTransform.rotation.world.value, transform.rotation.local.value);
         transform.scale.world.value =
@@ -73,8 +88,12 @@ namespace sage
         assert(registry->valid(transform.m_parent));
         assert(registry->all_of<sgTransform>(transform.m_parent));
         const auto& parentTransform = registry->get<sgTransform>(transform.m_parent);
-        transform.position.local.value =
+        const Matrix parentRot = EulerToMatrix(parentTransform.rotation.world.value);
+        const Matrix parentRotInv = MatrixInvert(parentRot);
+        const Vector3 worldOffset =
             Vector3Subtract(transform.position.world.value, parentTransform.position.world.value);
+        const Vector3 unrotated = Vector3Transform(worldOffset, parentRotInv);
+        transform.position.local.value = divideScale(unrotated, parentTransform.scale.world.value);
         transform.rotation.local.value =
             Vector3Subtract(transform.rotation.world.value, parentTransform.rotation.world.value);
         transform.scale.local.value = divideScale(transform.scale.world.value, parentTransform.scale.world.value);

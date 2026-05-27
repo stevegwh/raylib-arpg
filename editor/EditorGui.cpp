@@ -239,6 +239,7 @@ namespace sage::editor
             std::function<std::size_t()> scrollOffset;
             const std::optional<entt::entity>* selectedEntity{};
             std::function<void(entt::entity)> onSceneObjectSelected;
+            std::function<void(entt::entity, entt::entity)> onHierarchyReparent;
 
           public:
             void OnClick() override
@@ -247,6 +248,42 @@ namespace sage::editor
                 const std::size_t entryIndex = scrollOffset() + rowIndex;
                 if (entryIndex >= entries->size()) return;
                 onSceneObjectSelected(entries->at(entryIndex).entity);
+            }
+
+            [[nodiscard]] entt::entity ResolveEntity() const
+            {
+                if (!entries || !scrollOffset) return entt::null;
+                const std::size_t entryIndex = scrollOffset() + rowIndex;
+                if (entryIndex >= entries->size()) return entt::null;
+                return entries->at(entryIndex).entity;
+            }
+
+            void ReceiveDrop(CellElement* droppedElement) override
+            {
+                if (!canReceiveDragDrops || !onHierarchyReparent) return;
+                auto* sourceRow = dynamic_cast<HierarchyRowButton*>(droppedElement);
+                if (!sourceRow) return;
+                const auto dragged = sourceRow->ResolveEntity();
+                const auto target = ResolveEntity();
+                if (dragged == entt::null || target == entt::null) return;
+                if (dragged == target) return;
+                onHierarchyReparent(dragged, target);
+            }
+
+            void DragDraw() override
+            {
+                const auto mousePos = engine->ViewportMousePosition();
+                const auto& content = GetContent();
+                if (content.empty()) return;
+                DrawRectangle(
+                    mousePos.x + 12.0f, mousePos.y + 4.0f, rec.width * 0.6f, rec.height, {37, 99, 235, 200});
+                DrawTextEx(
+                    fontInfo.font,
+                    content.c_str(),
+                    Vector2{mousePos.x + 18.0f, mousePos.y + 4.0f + (rec.height - fontInfo.fontSize) * 0.5f},
+                    fontInfo.fontSize,
+                    fontInfo.fontSpacing,
+                    WHITE);
             }
 
             void UpdateDimensions() override
@@ -293,14 +330,18 @@ namespace sage::editor
                 const std::vector<EditorGui::SceneObjectEntry>* sceneEntries,
                 std::function<std::size_t()> firstVisibleEntry,
                 const std::optional<entt::entity>* activeEntity,
-                std::function<void(entt::entity)> callback)
+                std::function<void(entt::entity)> callback,
+                std::function<void(entt::entity, entt::entity)> reparentCallback)
                 : TextBox(ui, parent, TextBox::FontInfo{}, VertAlignment::MIDDLE, HoriAlignment::LEFT),
                   rowIndex(index),
                   entries(sceneEntries),
                   scrollOffset(std::move(firstVisibleEntry)),
                   selectedEntity(activeEntity),
-                  onSceneObjectSelected(std::move(callback))
+                  onSceneObjectSelected(std::move(callback)),
+                  onHierarchyReparent(std::move(reparentCallback))
             {
+                draggable = true;
+                canReceiveDragDrops = true;
             }
         };
 
@@ -529,7 +570,9 @@ namespace sage::editor
         return thumbnail;
     }
 
-    void EditorGui::createHierarchyWindow(const std::function<void(entt::entity)>& onSceneObjectSelected)
+    void EditorGui::createHierarchyWindow(
+        const std::function<void(entt::entity)>& onSceneObjectSelected,
+        const std::function<void(entt::entity, entt::entity)>& onHierarchyReparent)
     {
         auto window = std::make_unique<WindowDocked>(
             settings,
@@ -575,7 +618,8 @@ namespace sage::editor
                         return sb ? sb->ScrollOffset() : std::size_t{0};
                     },
                     &selectedSceneEntity,
-                    onSceneObjectSelected);
+                    onSceneObjectSelected,
+                    onHierarchyReparent);
                 hierarchyRows.push_back(cell->CreateTextbox(std::move(button), ""));
             }
         }
@@ -850,6 +894,7 @@ namespace sage::editor
         const std::vector<AssetEntry>& assets,
         const std::function<void(std::size_t)>& onAssetSelected,
         const std::function<void(entt::entity)>& onSceneObjectSelected,
+        const std::function<void(entt::entity, entt::entity)>& onHierarchyReparent,
         ModelDefaultCallbacks callbacks)
         : ui(_ui), settings(_settings), modelDefaultCallbacks(std::move(callbacks))
     {
@@ -864,7 +909,7 @@ namespace sage::editor
             assetThumbnails.push_back(createAssetThumbnail(asset));
         }
 
-        createHierarchyWindow(onSceneObjectSelected);
+        createHierarchyWindow(onSceneObjectSelected, onHierarchyReparent);
         createAssetWindow(assets, onAssetSelected);
         createAssetDefaultsWindow();
         createInspectorWindow();

@@ -298,30 +298,45 @@ namespace sage::editor
 
     void EditorTransformEditor::updateEntityCollisionBounds(const entt::entity entity) const
     {
-        if (!sys->registry->valid(entity) || !sys->registry->all_of<sgTransform, Collideable>(entity)) return;
+        if (!sys->registry->valid(entity)) return;
 
-        const auto& transform = sys->registry->get<sgTransform>(entity);
-        auto& collideable = sys->registry->get<Collideable>(entity);
-        if (collideable.blocksNavigation)
+        if (sys->registry->all_of<sgTransform, Collideable>(entity))
         {
-            sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false, entity);
-        }
-
-        const Matrix entityMatrix = BuildRenderableEntityMatrix(
-            transform.GetWorldPos(), transform.GetWorldRot(), transform.GetScale());
-        if (sys->registry->any_of<Renderable>(entity))
-        {
-            const auto& renderable = sys->registry->get<Renderable>(entity);
-            if (const auto* model = renderable.GetModel(); model != nullptr)
+            const auto& transform = sys->registry->get<sgTransform>(entity);
+            auto& collideable = sys->registry->get<Collideable>(entity);
+            if (collideable.blocksNavigation)
             {
-                collideable.localBoundingBox = model->CalcLocalBoundingBox();
+                sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, false, entity);
+            }
+
+            const Matrix entityMatrix = BuildRenderableEntityMatrix(
+                transform.GetWorldPos(), transform.GetWorldRot(), transform.GetScale());
+            if (sys->registry->any_of<Renderable>(entity))
+            {
+                const auto& renderable = sys->registry->get<Renderable>(entity);
+                if (const auto* model = renderable.GetModel(); model != nullptr)
+                {
+                    collideable.localBoundingBox = model->CalcLocalBoundingBox();
+                }
+            }
+            collideable.worldBoundingBox =
+                TransformBoundingBoxByCorners(collideable.localBoundingBox, entityMatrix);
+
+            if (collideable.blocksNavigation)
+            {
+                sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
             }
         }
-        collideable.worldBoundingBox = TransformBoundingBoxByCorners(collideable.localBoundingBox, entityMatrix);
 
-        if (collideable.blocksNavigation)
+        // Descendant transforms get propagated by TransformSystem::propagateChildren,
+        // but their collideables don't refresh themselves — recurse so child bounds
+        // track the new parent rotation/position/scale.
+        if (sys->registry->any_of<sgTransform>(entity))
         {
-            sys->navigationGridSystem->MarkSquareAreaOccupied(collideable.worldBoundingBox, true, entity);
+            for (const auto child : sys->registry->get<sgTransform>(entity).GetChildren())
+            {
+                updateEntityCollisionBounds(child);
+            }
         }
     }
 

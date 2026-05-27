@@ -612,6 +612,25 @@ namespace sage
         refreshSceneWindows();
     }
 
+    void EditorScene::reparentEntity(const entt::entity dragged, const entt::entity newParent) const
+    {
+        if (!sys->registry->valid(dragged) || !sys->registry->any_of<sgTransform>(dragged)) return;
+        if (!sys->registry->valid(newParent) || !sys->registry->any_of<sgTransform>(newParent)) return;
+        if (dragged == newParent) return;
+
+        // Refuse cycles: walk newParent's ancestor chain. If dragged appears, the
+        // requested parenting would put dragged below itself.
+        for (auto cur = newParent; cur != entt::null;)
+        {
+            if (!sys->registry->any_of<sgTransform>(cur)) break;
+            if (cur == dragged) return;
+            cur = sys->registry->get<sgTransform>(cur).GetParent();
+        }
+
+        sys->transformSystem->SetParent(dragged, newParent);
+        refreshSceneWindows();
+    }
+
     bool EditorScene::HandleEscapePressed() const
     {
         return editorModes->HandleEscapePressed();
@@ -660,6 +679,9 @@ namespace sage
             assetCatalog->AssetEntries(),
             [this](const std::size_t index) { editorModes->SelectPlaceable(index); },
             [this](const entt::entity entity) { editorModes->SelectSceneEntity(entity); },
+            [this](const entt::entity dragged, const entt::entity newParent) {
+                reparentEntity(dragged, newParent);
+            },
             modelDefaults->Callbacks());
         SetSceneName(UNTITLED_SCENE_NAME);
         refreshOverlay();

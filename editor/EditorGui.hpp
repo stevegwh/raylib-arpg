@@ -91,7 +91,9 @@ namespace sage
             bool imGuiEnabled = false;
 
             RenderTexture2D createAssetThumbnail(const AssetEntry& asset) const;
-            void createHierarchyWindow(const std::function<void(entt::entity)>& onSceneObjectSelected);
+            void createHierarchyWindow(
+                const std::function<void(entt::entity)>& onSceneObjectSelected,
+                const std::function<void(entt::entity, entt::entity)>& onHierarchyReparent);
             void createAssetWindow(
                 const std::vector<AssetEntry>& assets, const std::function<void(std::size_t)>& onAssetSelected);
             void createAssetDefaultsWindow();
@@ -127,6 +129,7 @@ namespace sage
                 const std::vector<AssetEntry>& assets,
                 const std::function<void(std::size_t)>& onAssetSelected,
                 const std::function<void(entt::entity)>& onSceneObjectSelected,
+                const std::function<void(entt::entity, entt::entity)>& onHierarchyReparent,
                 ModelDefaultCallbacks callbacks);
             ~EditorGui();
         };

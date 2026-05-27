@@ -63,6 +63,7 @@ namespace sage
         void ensureDefaultMapBase() const;
         void syncLightTransforms() const;
         void refreshAfterMapLoad() const;
+        void reparentEntity(entt::entity dragged, entt::entity newParent) const;
 
         void focusSelectedObject() const;
         void focusSelectedObjectInHierarchy() const;
