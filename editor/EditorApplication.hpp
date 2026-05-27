@@ -27,11 +27,13 @@ namespace sage
 
         bool exitWindowRequested = false;
         bool exitWindow = false;
+        bool viewportFullscreen = false;
 
         void init();
         void draw() const;
         void handleScreenUpdate();
         void handleWindowResize();
+        void handleViewportFullscreenToggle();
         void refreshViewportLayout(Vector2 previousViewport);
 
       public:

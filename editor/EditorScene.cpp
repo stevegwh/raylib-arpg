@@ -15,14 +15,16 @@
 #include "engine/systems/RenderSystem.hpp"
 #include "engine/systems/TransformSystem.hpp"
 #include "engine/UserInput.hpp"
-#include "imgui.h"
 
+#include "imgui.h"
+#include "imfilebrowser.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "rlImGui.h"
 
 #include <algorithm>
 #include <format>
+#include <iostream>
 #include <vector>
 
 namespace sage
@@ -32,6 +34,8 @@ namespace sage
         constexpr float GRID_SURFACE_Y_STEP = 1.0f;
         constexpr float EDITOR_FOCUS_CAMERA_DISTANCE = 38.0f;
         constexpr float EDITOR_FOCUS_RADIUS_PADDING = 2.4f;
+        constexpr ImGuiFileBrowserFlags FILE_BROWSER_FLAGS =
+            ImGuiFileBrowserFlags_CloseOnEsc | ImGuiFileBrowserFlags_SkipItemsCausingError;
 
         struct FocusTarget
         {
@@ -185,10 +189,12 @@ namespace sage
 
     void EditorScene::Update() const
     {
+        // TODO: Fullscreen game viewport (switch state)
         sys->collisionSystem->Update();
         sys->audioManager->Update();
         sys->userInput->ListenForInput();
-        if (sys->UI().IsMouseOverWindow() || !sys->settings->IsPointInRenderViewport(GetMousePosition()))
+        const bool uiBlocksScroll = !viewportFullscreen && sys->UI().IsMouseOverWindow();
+        if (uiBlocksScroll || !sys->settings->IsPointInRenderViewport(GetMousePosition()))
         {
             sys->camera->ScrollDisable();
         }
@@ -199,7 +205,6 @@ namespace sage
         sys->camera->Update();
         sys->cursor->Update();
         editorModes->RefreshPlacementTarget();
-
         // TODO: Should be part of some mode
         if (!TextInput::AnyEditing())
         {
@@ -212,12 +217,10 @@ namespace sage
                 editorModes->AdjustGridSurfaceY(-GRID_SURFACE_Y_STEP);
             }
         }
-
         editorModes->Update();
-
         refreshOverlay();
         refreshSceneWindows();
-        sys->UI().Update();
+        if (!viewportFullscreen) sys->UI().Update();
     }
 
     void EditorScene::Draw3D() const
@@ -225,7 +228,6 @@ namespace sage
         sys->renderSystem->Draw();
         placementController->DrawGridAndAxes();
         editorModes->Draw3D();
-
         const auto selectedEntity = selection->ActiveTransformEntity();
         if (selectedEntity.has_value() && sys->registry->any_of<Collideable>(*selectedEntity))
         {
@@ -235,24 +237,66 @@ namespace sage
 
     void EditorScene::Draw2D() const
     {
+        if (viewportFullscreen) return;
         sys->UI().Draw2D();
     }
 
     void EditorScene::DrawOverlay2D() const
     {
+        if (viewportFullscreen) return;
         gui->DrawSceneViewInfo();
     }
 
     void EditorScene::DrawImGui() const
     {
+        if (viewportFullscreen) return;
         gui->StartImGui();
-        // ImGui::ShowDemoWindow();
+        drawFileBrowser();
         gui->EndImGui();
+    }
+
+    void EditorScene::drawFileBrowser() const
+    {
+        if (fileBrowser == nullptr) return;
+
+        ImGui::SetNextWindowSize(ImVec2{360.0f, 96.0f}, ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Files"))
+        {
+            if (ImGui::Button("Select map file"))
+            {
+                fileBrowser->Open();
+            }
+
+            if (!selectedBrowserPath.empty())
+            {
+                ImGui::TextUnformatted(selectedBrowserPath.filename().string().c_str());
+            }
+        }
+        ImGui::End();
+
+        fileBrowser->Display();
+
+        if (fileBrowser->HasSelected())
+        {
+            handleFileBrowserSelection(fileBrowser->GetSelected());
+            fileBrowser->ClearSelected();
+        }
+    }
+
+    void EditorScene::handleFileBrowserSelection(const std::filesystem::path& path) const
+    {
+        selectedBrowserPath = path;
+        std::cout << "Selected filename: " << selectedBrowserPath.string() << std::endl;
     }
 
     bool EditorScene::HandleEscapePressed() const
     {
         return editorModes->HandleEscapePressed();
+    }
+
+    void EditorScene::SetViewportFullscreen(const bool fullscreen)
+    {
+        viewportFullscreen = fullscreen;
     }
 
     void EditorScene::SetSceneName(const std::string& sceneName) const
@@ -295,6 +339,14 @@ namespace sage
             modelDefaults->Callbacks());
         refreshOverlay();
         refreshSceneWindows();
+        fileBrowser = std::make_unique<ImGui::FileBrowser>(FILE_BROWSER_FLAGS);
+        fileBrowser->SetTitle("Select map file");
+        fileBrowser->SetTypeFilters({".bin"});
+        if (const std::filesystem::path resourceDirectory{"resources"};
+            std::filesystem::is_directory(resourceDirectory))
+        {
+            fileBrowser->SetDirectory(resourceDirectory);
+        }
     }
 
     EditorScene::~EditorScene() = default;

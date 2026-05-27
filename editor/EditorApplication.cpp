@@ -2,7 +2,6 @@
 
 #include "EditorMapLoader.hpp"
 #include "EditorScene.hpp"
-#include "imgui.h"
 
 #include "engine/AudioManager.hpp"
 #include "engine/Camera.hpp"
@@ -13,6 +12,7 @@
 #include "engine/UserInput.hpp"
 #include <filesystem>
 
+#include "imgui.h"
 #include "raylib.h"
 #include "rlImGui.h"
 
@@ -28,9 +28,13 @@ namespace sage
         constexpr float EDITOR_SCENE_VIEW_PADDING = 18.0f;
         constexpr float EDITOR_SCENE_ASPECT = 16.0f / 9.0f;
 
-        Rectangle CalculateSceneViewport(Settings& settings)
+        Rectangle CalculateSceneViewport(Settings& settings, const bool fullscreen)
         {
             const auto appViewport = settings.GetViewPort();
+            if (fullscreen)
+            {
+                return {0.0f, 0.0f, appViewport.x, appViewport.y};
+            }
             const float left = settings.ScaleValueWidth(EDITOR_LEFT_DOCK_WIDTH + EDITOR_SCENE_VIEW_PADDING);
             const float right = settings.ScaleValueWidth(EDITOR_RIGHT_DOCK_WIDTH + EDITOR_SCENE_VIEW_PADDING);
             const float bottom =
@@ -54,9 +58,9 @@ namespace sage
                 viewportHeight};
         }
 
-        void ConfigureEditorSceneViewport(Settings& settings)
+        void ConfigureEditorSceneViewport(Settings& settings, const bool fullscreen)
         {
-            const Rectangle viewport = CalculateSceneViewport(settings);
+            const Rectangle viewport = CalculateSceneViewport(settings, fullscreen);
             settings.SetRenderViewport(
                 static_cast<int>(viewport.width), static_cast<int>(viewport.height), {viewport.x, viewport.y});
         }
@@ -75,7 +79,7 @@ namespace sage
         const auto screenSize = settings->GetScreenSize();
         InitWindow(static_cast<int>(screenSize.x), static_cast<int>(screenSize.y), "BG Raylib Editor");
         settings->UpdateViewport();
-        ConfigureEditorSceneViewport(*settings);
+        ConfigureEditorSceneViewport(*settings, viewportFullscreen);
         SetExitKey(KEY_NULL);
         EnableCursor();
 
@@ -94,6 +98,7 @@ namespace sage
         const auto appViewport = settings->GetViewPort();
         renderTexture2d =
             LoadFilteredRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
+        rlImGuiSetup(true);
     }
 
     void EditorApplication::draw() const
@@ -198,7 +203,7 @@ namespace sage
     void EditorApplication::refreshViewportLayout(const Vector2 previousViewport)
     {
         settings->SetScreenSize(GetScreenWidth(), GetScreenHeight());
-        ConfigureEditorSceneViewport(*settings);
+        ConfigureEditorSceneViewport(*settings, viewportFullscreen);
         const auto appViewport = settings->GetViewPort();
         systems->userInput->onWindowUpdate.Publish(previousViewport, appViewport);
 
@@ -210,6 +215,14 @@ namespace sage
         UnloadRenderTexture(renderTexture2d);
         renderTexture2d =
             LoadFilteredRenderTexture(static_cast<int>(appViewport.x), static_cast<int>(appViewport.y));
+    }
+
+    void EditorApplication::handleViewportFullscreenToggle()
+    {
+        if (!(IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)) || !IsKeyPressed(KEY_F)) return;
+        viewportFullscreen = !viewportFullscreen;
+        scene->SetViewportFullscreen(viewportFullscreen);
+        refreshViewportLayout(settings->GetViewPort());
     }
 
     void EditorApplication::handleWindowResize()
@@ -227,7 +240,7 @@ namespace sage
     {
         init();
         SetTargetFPS(60);
-        rlImGuiSetup(true);
+
         while (!exitWindow)
         {
             if (WindowShouldClose()) exitWindowRequested = true;
@@ -242,11 +255,11 @@ namespace sage
             }
 
             handleWindowResize();
+            handleViewportFullscreenToggle();
             scene->Update();
             draw();
             handleScreenUpdate();
         }
-        rlImGuiShutdown();
     }
 
     EditorApplication::EditorApplication()
@@ -259,6 +272,7 @@ namespace sage
 
     EditorApplication::~EditorApplication()
     {
+        rlImGuiShutdown();
         UnloadRenderTexture(renderTexture);
         UnloadRenderTexture(renderTexture2d);
         CloseWindow();

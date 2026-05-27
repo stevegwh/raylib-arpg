@@ -100,11 +100,12 @@ namespace sage::editor
             RequestDeleteSelectedEntity(machine);
         }
 
-        if (IsKeyPressed(KEY_F) && (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)))
+        const bool altHeld = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
+        if (IsKeyPressed(KEY_F) && !altHeld && (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)))
         {
             machine.focusSelectedObjectInHierarchy();
         }
-        else if (IsKeyPressed(KEY_F))
+        else if (IsKeyPressed(KEY_F) && !altHeld)
         {
             machine.focusSelectedObject();
         }

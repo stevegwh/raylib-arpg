@@ -9,6 +9,7 @@ namespace sage
 
 namespace sage::editor
 {
+    // TODO: This should be part of the engine, I believe
     class EditorEntityOperations
     {
         EngineSystems* sys;

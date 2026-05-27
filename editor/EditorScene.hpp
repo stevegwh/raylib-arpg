@@ -14,8 +14,14 @@
 
 #include "entt/entt.hpp"
 
+#include <filesystem>
 #include <memory>
 #include <string>
+
+namespace ImGui
+{
+    class FileBrowser;
+}
 
 namespace sage
 {
@@ -37,11 +43,15 @@ namespace sage
         std::unique_ptr<editor::EditorPlacementController> placementController;
         std::unique_ptr<editor::EditorTransformEditor> transformEditor;
         std::unique_ptr<editor::EditorModeStateMachine> editorModes;
-
+        std::unique_ptr<ImGui::FileBrowser> fileBrowser{};
+        mutable std::filesystem::path selectedBrowserPath{};
+        bool viewportFullscreen = false;
         void applyLitShaderToLoadedRenderables() const;
         void giveTransformsToLights() const;
         void refreshOverlay() const;
         void refreshSceneWindows() const;
+        void drawFileBrowser() const;
+        void handleFileBrowserSelection(const std::filesystem::path& path) const;
 
         void focusSelectedObject() const;
         void focusSelectedObjectInHierarchy() const;
@@ -61,6 +71,7 @@ namespace sage
         void DrawImGui() const;
         [[nodiscard]] bool HandleEscapePressed() const;
 
+        void SetViewportFullscreen(bool fullscreen);
         void SetSceneName(const std::string& sceneName) const;
 
         explicit EditorScene(EngineSystems* _sys);
