@@ -2,7 +2,7 @@
 
 [Click here for a video demonstration](https://www.youtube.com/watch?v=CgDjyCZQcbo)
 
-The engine side of this project, [`SAGE`](https://github.com/stevegwh/sage), has now been split off from the game project and is included here as a submodule.
+The engine side of this project, [`SAGE`](https://github.com/stevegwh/sage), has now been split off from the game and is included as a submodule.
 
 The objective of this project was to create a vertical slice of a Baldur's Gate 3/Divinity: Original Sin 2-inspired CRPG
 without using a game engine, such as Unity or Unreal. Instead, I built the engine on top of the low-level 'raylib'
