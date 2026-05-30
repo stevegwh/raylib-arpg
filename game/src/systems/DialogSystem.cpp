@@ -8,7 +8,6 @@
 #include "engine/Camera.hpp"
 #include "engine/GameUiEngine.hpp"
 
-#include "../../../engine/Cursor.hpp"
 #include "engine/Cursor.hpp"
 #include "Systems.hpp"
 #include "ui/GameUiFactory.hpp"

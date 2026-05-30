@@ -2,24 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 project(BG_Raylib)
 
 set(CMAKE_CXX_STANDARD 20)
-
-# Dependencies
-include(FetchContent)
-FetchContent_Declare(
-        entt
-        GIT_REPOSITORY "https://github.com/skypjack/entt.git"
-        GIT_TAG "v3.13.2"
-)
-FetchContent_MakeAvailable(entt)
-
-set(PLATFORM "Desktop" CACHE STRING "" FORCE)
-add_subdirectory(vendor/raylib)
-# raylib's DecompressData() default-caps output at 64 MiB (rcore.c). Our packed assets
-# (LoadAssetBinFile) decompress well above that. Bumping the cap; the buffer is
-# transient — raylib realloc()s it down to the actual size right after sinflate returns.
-target_compile_definitions(raylib PRIVATE MAX_DECOMPRESSION_SIZE=512)
-include_directories(vendor)
-include_directories(vendor/magic_enum)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Options
 option(BUILD_EDITOR "Build the editor" OFF)
@@ -27,16 +10,26 @@ option(BUILD_RESPACKER "Build the resource packer" ON)
 option(BUILD_GAME "Build the game" ON)
 
 # Tell the engine where to find project-specific extension headers
-# (e.g. project/CustomCollisionLayers.hpp). Must be set before add_subdirectory(engine).
+# (e.g. project/CustomCollisionLayers.hpp). Must be set before loading Sage.
 set(SAGE_PROJECT_INCLUDE_DIR ${CMAKE_SOURCE_DIR})
+set(SAGE_BUILD_EDITOR ${BUILD_EDITOR} CACHE BOOL "Build the Sage editor" FORCE)
+
+set(SAGE_SOURCE_DIR "" CACHE PATH "Override path to a local Sage checkout")
+set(SAGE_SUBMODULE_DIR "${CMAKE_SOURCE_DIR}/external/sage")
+if (SAGE_SOURCE_DIR)
+    add_subdirectory("${SAGE_SOURCE_DIR}" ${CMAKE_BINARY_DIR}/_deps/sage-build)
+elseif (EXISTS "${SAGE_SUBMODULE_DIR}/CMakeLists.txt")
+    add_subdirectory("${SAGE_SUBMODULE_DIR}" ${CMAKE_BINARY_DIR}/_deps/sage-build)
+else ()
+    message(FATAL_ERROR
+            "Sage submodule is missing. Run "
+            "`git submodule update --init --recursive`, or configure with "
+            "`-DSAGE_SOURCE_DIR=/path/to/sage`."
+    )
+endif ()
 
 # Add subdirectories
-add_subdirectory(engine)
 add_subdirectory(game)
-
-if (BUILD_EDITOR)
-    add_subdirectory(editor)
-endif ()
 
 if (BUILD_RESPACKER)
     add_subdirectory(respacker)

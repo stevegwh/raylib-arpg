@@ -1,0 +1,4 @@
+[submodule "external/sage"]
+	path = external/sage
+	url = git@github.com:stevegwh/sage.git
+	branch = main

@@ -1,7 +1,7 @@
 // FountainEffect.hpp
 #pragma once
 
-#include "../../../../engine/ParticleSystem.hpp"
+#include "engine/ParticleSystem.hpp"
 #include "raylib.h"
 #include <memory>
 
